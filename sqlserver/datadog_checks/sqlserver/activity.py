@@ -10,6 +10,8 @@ from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_e
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 
+from .utils import get_stmt_is_proc
+
 try:
     import datadog_agent
 except ImportError:
@@ -56,9 +58,6 @@ SELECT
     c.client_tcp_port as client_port,
     c.client_net_address as client_address,
     sess.host_name as host_name,
-    (SELECT IIF (EXISTS
-        (SELECT 1 FROM sys.dm_exec_procedure_stats proc_stats
-            WHERE proc_stats.plan_handle = req.plan_handle), 1, 0)) as is_proc,
     {exec_request_columns}
 FROM sys.dm_exec_sessions sess
     INNER JOIN sys.dm_exec_connections c
@@ -214,7 +213,7 @@ class SqlserverActivity(DBMAsyncJob):
             statement = obfuscate_sql_with_metadata(row['statement_text'], self.check.obfuscator_options)
             procedure_statement = None
             # sqlserver doesn't have a boolean data type so convert integer to boolean
-            row['is_proc'] = row['is_proc'] == 1
+            row['is_proc'] = get_stmt_is_proc(row['text'])
             if row['is_proc'] and 'text' in row:
                 procedure_statement = obfuscate_sql_with_metadata(row['text'], self.check.obfuscator_options)
             obfuscated_statement = statement['query']
