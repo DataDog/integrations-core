@@ -14,7 +14,7 @@ import pymysql
 from six import PY3, iteritems, itervalues
 
 from datadog_checks.base import AgentCheck, is_affirmative
-from datadog_checks.base.utils.db import QueryManager
+from datadog_checks.base.utils.db import QueryExecutor, QueryManager
 from datadog_checks.base.utils.db.utils import resolve_db_host as agent_host_resolver
 
 from .activity import MySQLActivity
@@ -43,6 +43,7 @@ from .const import (
 )
 from .innodb_metrics import InnoDBMetrics
 from .queries import (
+    QUERY_USER_CONNECTIONS,
     SQL_95TH_PERCENTILE,
     SQL_AVG_QUERY_RUN_TIME,
     SQL_GROUP_REPLICATION_MEMBER,
@@ -112,6 +113,8 @@ class MySql(AgentCheck):
         self._statement_metrics = MySQLStatementMetrics(self, self._config, self._get_connection_args())
         self._statement_samples = MySQLStatementSamples(self, self._config, self._get_connection_args())
         self._query_activity = MySQLActivity(self, self._config, self._get_connection_args())
+
+        self._runtime_queries = None
 
     def execute_query_raw(self, query):
         with closing(self._conn.cursor(pymysql.cursors.SSCursor)) as cursor:
@@ -222,6 +225,8 @@ class MySql(AgentCheck):
                 if not self._config.only_custom_queries:
                     self._collect_metrics(db, tags=tags)
                     self._collect_system_metrics(self._config.host, db, tags)
+                    if self.runtime_queries:
+                        self.runtime_queries.execute(extra_tags=tags)
 
                 if self._config.dbm_enabled:
                     dbm_tags = list(set(self.service_check_tags) | set(tags))
@@ -246,6 +251,32 @@ class MySql(AgentCheck):
         self._statement_samples.cancel()
         self._statement_metrics.cancel()
         self._query_activity.cancel()
+
+    def _new_query_executor(self, queries):
+        return QueryExecutor(
+            self.execute_query_raw,
+            self,
+            queries=queries,
+            hostname=self.resolved_hostname,
+        )
+
+    @property
+    def runtime_queries(self):
+        """
+        Initializes runtime queries which depend on outside factors (e.g. permission checks) to load first.
+        """
+        if self._runtime_queries:
+            return self._runtime_queries
+
+        queries = []
+
+        if self.performance_schema_enabled:
+            queries.extend([QUERY_USER_CONNECTIONS])
+
+        self._runtime_queries = self._new_query_executor(queries)
+        self._runtime_queries.compile_queries()
+        self.log.debug("initialized runtime queries")
+        return self._runtime_queries
 
     def _set_qcache_stats(self):
         host_key = self._get_host_key()
