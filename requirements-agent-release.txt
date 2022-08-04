@@ -154,7 +154,7 @@ datadog-twemproxy==1.13.0
 datadog-twistlock==3.1.0
 datadog-varnish==1.14.1
 datadog-vault==3.3.0
-datadog-vertica==3.3.2
+datadog-vertica==3.4.0
 datadog-voltdb==2.1.2
 datadog-vsphere==6.1.2
 datadog-weblogic==1.1.1

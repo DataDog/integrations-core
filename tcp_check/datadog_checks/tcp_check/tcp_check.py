@@ -32,6 +32,7 @@ class TCPCheck(AgentCheck):
         self.ip_cache_last_ts = 0
         self.ip_cache_duration = self.DEFAULT_IP_CACHE_DURATION
         self.multiple_ips = instance.get('multiple_ips', False)
+        self.ipv4_only = instance.get('ipv4_only', False)
 
         ip_cache_duration = instance.get('ip_cache_duration', None)
         if ip_cache_duration is not None:
@@ -76,10 +77,16 @@ class TCPCheck(AgentCheck):
 
     def resolve_ips(self):
         # type: () -> None
-        self._addrs = [
-            AddrTuple(sockaddr[0], socket_type)
-            for (socket_type, _, _, _, sockaddr) in socket.getaddrinfo(self.host, self.port, 0, 0, socket.IPPROTO_TCP)
-        ]
+        if self.ipv4_only:
+            _, _, ipv4_list = socket.gethostbyname_ex(self.host)
+            self._addrs = [AddrTuple(ipv4_addr, socket.AF_INET) for ipv4_addr in ipv4_list]
+        else:
+            self._addrs = [
+                AddrTuple(sockaddr[0], socket_type)
+                for (socket_type, _, _, _, sockaddr) in socket.getaddrinfo(
+                    self.host, self.port, 0, 0, socket.IPPROTO_TCP
+                )
+            ]
         if not self.multiple_ips:
             self._addrs = self._addrs[:1]
 

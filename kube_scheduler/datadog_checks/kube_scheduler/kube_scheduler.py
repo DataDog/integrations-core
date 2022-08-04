@@ -25,6 +25,11 @@ DEFAULT_COUNTERS = {
     'scheduler_total_preemption_attempts': 'pod_preemption.attempts',
 }
 
+NEW_1_17_COUNTERS = {
+    # (from 1.17) Number of pods added to scheduling queues by event and queue type
+    'scheduler_queue_incoming_pods_total': 'queue.incoming_pods'
+}
+
 NEW_1_19_COUNTERS = {
     # Total preemption attempts in the cluster till now (new name)
     'scheduler_preemption_attempts_total': 'pod_preemption.attempts',
@@ -147,6 +152,7 @@ class KubeSchedulerCheck(KubeLeaderElectionMixin, OpenMetricsBaseCheck):
                     'metrics': [
                         DEFAULT_COUNTERS,
                         DEFAULT_HISTOGRAMS,
+                        NEW_1_17_COUNTERS,
                         NEW_1_19_COUNTERS,
                         NEW_1_14_HISTOGRAMS,
                         NEW_1_19_HISTOGRAMS,

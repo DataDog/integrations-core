@@ -23,7 +23,7 @@
                 "requests": [
                     {
                         "display_type": "area",
-                        "q": "per_second(avg:couchdb.httpd.requests{$couchdb,$scope})",
+                        "q": "per_second(avg:couchdb.couchdb.httpd.requests{$couchdb,$scope})",
                         "style": {
                             "palette": "blue"
                         }
@@ -33,7 +33,7 @@
                 "time": {
                     "live_span": "4h"
                 },
-                "title": "HTTP Request Rate",
+                "title": "HTTP request rate",
                 "title_align": "left",
                 "title_size": "16",
                 "type": "timeseries"
@@ -86,7 +86,7 @@
                 "requests": [
                     {
                         "display_type": "area",
-                        "q": "per_minute(avg:couchdb.httpd_request_methods.GET{$couchdb,$scope}), per_minute(avg:couchdb.httpd_request_methods.PUT{$couchdb,$scope}), per_minute(avg:couchdb.httpd_request_methods.POST{$couchdb,$scope}), per_minute(avg:couchdb.httpd_request_methods.DELETE{$couchdb,$scope})"
+                        "q": "per_minute(avg:couchdb.couchdb.httpd_request_methods.GET{$couchdb,$scope}), per_minute(avg:couchdb.couchdb.httpd_request_methods.PUT{$couchdb,$scope}), per_minute(avg:couchdb.couchdb.httpd_request_methods.POST{$couchdb,$scope}), per_minute(avg:couchdb.couchdb.httpd_request_methods.DELETE{$couchdb,$scope})"
                     }
                 ],
                 "show_legend": false,
@@ -109,7 +109,6 @@
         {
             "definition": {
                 "check": "couchdb.can_connect",
-                "group": "instance:http://localhost:5984,host:marshal-couchdb-1",
                 "grouping": "cluster",
                 "tags": [
                     "*"
@@ -205,7 +204,7 @@
                 "requests": [
                     {
                         "display_type": "area",
-                        "q": "per_second(avg:couchdb.couchdb.request_time{$couchdb,$scope})",
+                        "q": "per_second(avg:couchdb.couchdb.request_time.n{$couchdb,$scope})",
                         "style": {
                             "palette": "warm"
                         }
@@ -310,7 +309,7 @@
                 "requests": [
                     {
                         "display_type": "area",
-                        "q": "per_minute(avg:couchdb.httpd_status_codes.409{$couchdb}), per_minute(avg:couchdb.httpd_status_codes.412{$couchdb}), per_minute(avg:couchdb.httpd_status_codes.405{$couchdb}), per_minute(avg:couchdb.httpd_status_codes.404{$couchdb}), per_minute(avg:couchdb.httpd_status_codes.403{$couchdb}), per_minute(avg:couchdb.httpd_status_codes.401{$couchdb}), per_minute(avg:couchdb.httpd_status_codes.400{$couchdb})",
+                        "q": "per_minute(avg:couchdb.couchdb.httpd_status_codes.409{$couchdb}), per_minute(avg:couchdb.couchdb.httpd_status_codes.412{$couchdb}), per_minute(avg:couchdb.couchdb.httpd_status_codes.405{$couchdb}), per_minute(avg:couchdb.couchdb.httpd_status_codes.404{$couchdb}), per_minute(avg:couchdb.couchdb.httpd_status_codes.403{$couchdb}), per_minute(avg:couchdb.couchdb.httpd_status_codes.401{$couchdb}), per_minute(avg:couchdb.couchdb.httpd_status_codes.400{$couchdb})",
                         "style": {
                             "palette": "warm"
                         }
@@ -353,7 +352,7 @@
                                 "value": 4500000
                             }
                         ],
-                        "q": "avg:couchdb.by_db.disk_size{$couchdb}"
+                        "q": "avg:couchdb.by_db.file_size{$couchdb}"
                     }
                 ],
                 "time": {
@@ -379,7 +378,7 @@
                 "requests": [
                     {
                         "display_type": "area",
-                        "q": "per_second(avg:couchdb.httpd.bulk_requests{$couchdb,$scope})",
+                        "q": "per_second(avg:couchdb.couchdb.httpd.bulk_requests{$couchdb,$scope})",
                         "style": {
                             "palette": "cool"
                         }
@@ -409,7 +408,7 @@
                 "requests": [
                     {
                         "display_type": "area",
-                        "q": "per_minute(avg:couchdb.httpd_status_codes.201{$couchdb}), per_minute(avg:couchdb.httpd_status_codes.200{$couchdb})",
+                        "q": "per_minute(avg:couchdb.couchdb.httpd_status_codes.201{$couchdb}), per_minute(avg:couchdb.couchdb.httpd_status_codes.200{$couchdb})",
                         "style": {
                             "palette": "green"
                         }
@@ -544,7 +543,7 @@
                 "requests": [
                     {
                         "display_type": "line",
-                        "q": "avg:couchdb.httpd_status_codes.401{$couchdb,$couchdb,$scope}",
+                        "q": "avg:couchdb.couchdb.httpd_status_codes.401{$couchdb,$couchdb,$scope}",
                         "style": {
                             "palette": "red"
                         }
@@ -561,7 +560,7 @@
                 "time": {
                     "live_span": "4h"
                 },
-                "title": "Unauthorized login attempt",
+                "title": "Unauthorized login attempts",
                 "title_align": "left",
                 "title_size": "16",
                 "type": "timeseries"
@@ -582,7 +581,7 @@
                 "requests": [
                     {
                         "aggregator": "avg",
-                        "q": "avg:couchdb.by_db.doc_count{$couchdb} * 1024"
+                        "q": "avg:couchdb.by_db.doc_count{$couchdb}"
                     }
                 ],
                 "time": {
@@ -747,7 +746,7 @@
                 "requests": [
                     {
                         "aggregator": "avg",
-                        "q": "avg:couchdb.couchdb.database_writes{$couchdb}*1024"
+                        "q": "avg:couchdb.couchdb.database_writes{$couchdb}"
                     }
                 ],
                 "time": {
@@ -773,7 +772,7 @@
                 "requests": [
                     {
                         "aggregator": "avg",
-                        "q": "avg:couchdb.couchdb.database_reads{$couchdb}*1024"
+                        "q": "avg:couchdb.couchdb.database_reads{$couchdb}"
                     }
                 ],
                 "time": {
