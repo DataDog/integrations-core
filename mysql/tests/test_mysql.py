@@ -14,7 +14,6 @@ from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.mysql import MySql
 from datadog_checks.mysql.const import (
     BINLOG_VARS,
-    COMMON_PERFORMANCE_VARS,
     GALERA_VARS,
     GROUP_REPLICATION_VARS,
     INNODB_VARS,
@@ -373,7 +372,7 @@ def test_only_custom_queries(aggregator, dd_run_check, instance_custom_queries):
         SYNTHETIC_VARS,
         REPLICA_VARS,
         GROUP_REPLICATION_VARS,
-        COMMON_PERFORMANCE_VARS,
+        variables.QUERY_EXECUTOR_METRIC_SETS,
     ]
     for metric_set in standard_metric_sets:
         for metric_def in metric_set.values():
