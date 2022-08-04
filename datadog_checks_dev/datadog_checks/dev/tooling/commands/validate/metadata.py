@@ -346,7 +346,7 @@ def metadata(check, check_duplicates, show_warnings):
                 missing_headers = ALL_HEADERS.difference(all_keys)
                 if missing_headers:
                     errors = True
-                    display_queue.append(echo_failure(f'{current_check}:{line} Missing columns {missing_headers}'))
+                    display_queue.append((echo_failure, f'{current_check}:{line} Missing columns {missing_headers}'))
                 continue
 
             errors = errors or check_duplicate_values(
