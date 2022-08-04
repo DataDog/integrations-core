@@ -1,23 +1,48 @@
 ---
-title: Create an Integration
+title: Getting started with integrations
 kind: documentation
+further_reading:
+- link: "logs/processing/pipelines"
+  tag: "Documentation"
+  text: "Log processing pipelines"
 aliases:
   - /developers/integrations/integration_sdk/
   - /developers/integrations/testing/
   - /integrations/datadog_checks_dev/
   - /guides/new_integration/
+  - /developers/integrations/new_check_howto/
 ---
 
-If you need to send data to Datadog that isn't supported by the Agent or an existing agent integration, creating your own Datadog integration is a possible solution. To find out if it's the right solution for your use case, see [Creating your own solution][89].
-
-For a complete guide on creating a new integration, check out the Datadog Learning Center course, [Introduction to Integrations][90].
-
-<!-- TODO: Add information on the three different integration repos. From the learning lab:
-  The various Datadog Agent integrations fall into one of three categories: "core", "extras", or "marketplace". Core integrations  are generally developed and maintained by Datadog directly. Extras integrations are developed and maintained by the community (this includes you). Marketplace integrations are developed and maintained by marketplace partners. The marketplace integrations repo is private, which is why you don't see a link to it here. The development process is similar to the one for "extras", but to release on the marketplace, you will need to become a marketplace partner. -->
+This guide provides instructions for creating a Datadog integration called Awesome that searches for a string on a web page. After completing this guide, you'll know how to:
+- one
+- two
+- three
+- etc
 
 ## Prerequisites
 
-- Python 3.8+ needs to be available on your system; Python 2.7 is optional but recommended.
+### Install Python
+
+Python 3.8+ needs to be available on your system; Python 2.7 is optional but recommended.
+
+#### macOS
+
+Any recent version of macOS comes with Python pre-installed, however, it may be older than the version used in the Agent, and might also lack required tools and dependencies. You must install a fresh, dedicated Python interpreter that you can manage _without_ the App Store.
+
+Some options include:
+- [Homebrew][2]: Follow the "[Doing it Right][3]" instructions.
+- [Miniconda][4]: Follow the "[Conda installation][5]" instructions.
+
+#### Linux
+
+All mainstream distributions of Linux come with Python pre-installed—likely one of an acceptable version level. It is recommended to install an [environment manager](#virtual-environment-manager) in order to preserve a clean system Python. See your distribution's package management documentation for more information.
+
+#### Windows
+
+Windows does not normally have a Python environment present. See [Using Python on Windows][6] for detailed installation instructions and links to further documentation and tooling.
+
+### Install Docker
+
 - [Docker][91] to run the full test suite.
 
 ## Set up your development environment
@@ -70,7 +95,7 @@ You're ready to create your integration!
 
 ## Scaffolding
 
-One of the developer toolkit features is the `create` command, which creates the basic file and path structure (or "scaffolding") necessary for a new integration.
+The `ddev create` command creates the basic file and path structure (or "scaffolding") necessary for a new integration.
 
 ### Dry-run
 
@@ -94,11 +119,11 @@ After answering the questions, the output matches that of the dry-run above, exc
 
 ## Write a Check
 
-At the core of each integration is a a Check that periodically collects information and sends it to Datadog. Checks inherit their logic from the `AgentCheck` base class and have the the following requirements:
+At the core of each integration is a Check that periodically collects information and sends it to Datadog. Checks inherit their logic from the `AgentCheck` base class and have the the following requirements:
 
 - Integrations run on Agent v7+ must be Python 3 compatible; however, Agents v5 and v6 still use Python 2.7.
-- It must derive from `AgentCheck`
-- It must provide a method with this signature: `check(self, instance)`
+- Checks must derive from `AgentCheck`
+- Checks must provide a method with this signature: `check(self, instance)`
 
 Checks are organized in regular Python packages under the `datadog_checks` namespace, so your code should live under `awesome/datadog_checks/awesome`. The only requirement is that the name of the package has to be the same as the check name. There are no particular restrictions on the name of the Python modules within that package, nor on the name of the class implementing the check.
 
@@ -456,10 +481,12 @@ To consider an Agent-based integration complete, and thus ready to be included i
 - A complete `manifest.json` file
 - If the integration collects Service Checks, the `service_checks.json` must be complete as well
 
-These requirements are used during the code review process as a checklist. This documentation covers the requirements and implementation details for a brand new integration.
-
-
-[89]: https://docs.datadoghq.com/developers/#creating-your-own-solution
+[2]: https://brew.sh/#install
+[3]: https://docs.python-guide.org/en/latest/starting/install/osx/#doing-it-right
+[4]: https://repo.continuum.io/miniconda/Miniconda2-latest-MacOSX-x86_64.sh
+[5]: https://docs.conda.io/projects/continuumio-conda/en/latest/user-guide/install/macos.html
+[6]: https://docs.python.org/2.7/using/windows.html
+[91]: https://docs.docker.com/get-docker/
 [1]: https://virtualenv.pypa.io/en/stable
 [2]: https://github.com/DataDog/integrations-core/blob/master/docs/dev/python.md
 [3]: https://github.com/DataDog/integrations-extras
@@ -476,5 +503,3 @@ These requirements are used during the code review process as a checklist. This 
 [14]: https://packaging.python.org/en/latest/tutorials/packaging-projects/
 [15]: https://docs.datadoghq.com/agent/
 [16]: https://datadoghq.dev/integrations-core/meta/config-specs/
-[90]: https://learn.datadoghq.com/course/view.php?id=38
-[91]: https://docs.docker.com/get-docker/
