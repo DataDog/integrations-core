@@ -36,16 +36,16 @@ IGNORED_DEPS = {
     'cryptography',
     'dnspython',
     'pymysql',  # https://github.com/DataDog/integrations-core/pull/12612
-    'protobuf',  # https://github.com/DataDog/integrations-core/pull/12653
-    'foundationdb',  # https://github.com/DataDog/integrations-core/pull/12653
-    'openstacksdk',  # https://github.com/DataDog/integrations-core/pull/12653
-    'pyasn1',  # https://github.com/DataDog/integrations-core/pull/12653
-    'pycryptodomex',  # https://github.com/DataDog/integrations-core/pull/12653
-    'pysnmp',  # https://github.com/DataDog/integrations-core/pull/12653
-    'clickhouse-driver',  # https://github.com/DataDog/integrations-core/pull/12653
-    'lz4',  # https://github.com/DataDog/integrations-core/pull/12653
-    'pyodbc',  # https://github.com/DataDog/integrations-core/pull/12653
-    'psutil',  # https://github.com/DataDog/integrations-core/pull/12653
+    'protobuf',  # Breaking datadog_checks_base
+    'foundationdb',  # Breaking datadog_checks_base tests
+    'openstacksdk',  # Breaking openstack_controller tests
+    'pyasn1',  # Breaking snmp tests
+    'pycryptodomex',  # Breaking snmp tests
+    'pysnmp',  # Breaking snmp tests
+    'clickhouse-driver',  # Breaking clickhouse tests
+    'lz4',  # Breaking clickhouse tests
+    'pyodbc',  # Breaking sqlserver tests
+    'psutil',  # Breaking disk tests
 }
 
 # Dependencies for the downloader that are security-related and should be updated separately from the others
