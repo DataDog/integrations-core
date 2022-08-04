@@ -81,11 +81,10 @@ select
             - statement_start_offset) / 2) + 1) AS statement_text,
     qt.text,
     encrypted as is_encrypted,
-    (SELECT IIF (EXISTS
-        (SELECT 1 FROM sys.dm_exec_procedure_stats proc_stats
-            WHERE proc_stats.plan_handle = qstats_aggr_split.plan_handle), 1, 0)) as is_proc,
+    IIF(o.type in ('P', 'PC'), 0, 1)                  as is_proc,
     * from qstats_aggr_split
-    cross apply sys.dm_exec_sql_text(plan_handle) qt
+               cross apply sys.dm_exec_sql_text(qstats_aggr_split.plan_handle) qt
+               left join sys.objects o on qt.objectid = o.object_id;
 """
 
 # This query is an optimized version of the statement metrics query
@@ -116,11 +115,10 @@ select
     END - statement_start_offset) / 2) + 1) AS statement_text,
     qt.text,
     encrypted as is_encrypted,
-    (SELECT IIF (EXISTS
-        (SELECT 1 FROM sys.dm_exec_procedure_stats proc_stats
-            WHERE proc_stats.plan_handle = qstats_aggr_split.plan_handle), 1, 0)) as is_proc,
+    IIF(o.type in ('P', 'PC'), 0, 1)                  as is_proc,
     * from qstats_aggr_split
-    cross apply sys.dm_exec_sql_text(plan_handle) qt
+               cross apply sys.dm_exec_sql_text(qstats_aggr_split.plan_handle) qt
+               left join sys.objects o on qt.objectid = o.object_id;
 """
 
 PLAN_LOOKUP_QUERY = """\
