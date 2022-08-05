@@ -3,9 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.mcache import Memcache
 
-from datadog_checks.dev.utils import get_metadata_metrics
 from .common import HOST, PORT, SERVICE_CHECK, requires_socket_support, requires_unix_utils
 from .metrics import GAUGES, ITEMS_GAUGES, ITEMS_RATES, RATES, SLABS_AGGREGATES, SLABS_GAUGES, SLABS_RATES
 from .utils import count_connections, get_host_socket_path
