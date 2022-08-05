@@ -4038,7 +4038,6 @@
                     {
                         "definition": {
                             "query": "source:kubernetes $scope $cluster",
-                            "tags_execution": "and",
                             "time": {
                                 "live_span": "1d"
                             },
@@ -4058,8 +4057,7 @@
                     {
                         "definition": {
                             "event_size": "s",
-                            "query": "sources:kubernetes $scope $cluster",
-                            "tags_execution": "and",
+                            "query": "source:kubernetes $scope $cluster",
                             "time": {
                                 "live_span": "1w"
                             },
