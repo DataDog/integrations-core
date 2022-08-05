@@ -2,10 +2,10 @@
 
 ## 4.0.0 / 2022-08-05
 
-* [Added] [mongo] Support for ssl allow invalid hostnames. See [#12541](https://github.com/DataDog/integrations-core/pull/12541).
-* [Added] [mongo] Added new metrics for oplatencies. See [#12479](https://github.com/DataDog/integrations-core/pull/12479).
-* [Added] [Mongo] Added new metric "mongodb.metrics.queryexecutor.scannedobjectsps". See [#12467](https://github.com/DataDog/integrations-core/pull/12467).
-* [Added] [Mongo] Add list of databases to collect metrics from. See [#12450](https://github.com/DataDog/integrations-core/pull/12450).
+* [Added] Support for ssl allow invalid hostnames. See [#12541](https://github.com/DataDog/integrations-core/pull/12541).
+* [Added] Added new metrics for oplatencies. See [#12479](https://github.com/DataDog/integrations-core/pull/12479).
+* [Added] Added new metric "mongodb.metrics.queryexecutor.scannedobjectsps". See [#12467](https://github.com/DataDog/integrations-core/pull/12467).
+* [Added] Add list of databases to collect metrics from. See [#12450](https://github.com/DataDog/integrations-core/pull/12450).
 * [Added] Ship `pymongo-srv` to support DNS seed connection schemas. See [#12442](https://github.com/DataDog/integrations-core/pull/12442).
 * [Fixed] Dependency updates. See [#12653](https://github.com/DataDog/integrations-core/pull/12653).
 * [Changed] Upgrade pymongo to 4.2. See [#12594](https://github.com/DataDog/integrations-core/pull/12594).
