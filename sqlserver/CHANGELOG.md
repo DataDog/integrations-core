@@ -6,7 +6,7 @@
 * [Fixed] Dependency updates. See [#12653](https://github.com/DataDog/integrations-core/pull/12653).
 * [Fixed] Check for port provided in config. See [#12610](https://github.com/DataDog/integrations-core/pull/12610).
 * [Fixed] Improve failed connection error messages. See [#12533](https://github.com/DataDog/integrations-core/pull/12533).
-* [Fixed] Fix documentation leftovers from DBM Support for SQL Server going GA. See [#12512](https://github.com/DataDog/integrations-core/pull/12512).
+* [Fixed] Fix documentation for GA DBM support. See [#12512](https://github.com/DataDog/integrations-core/pull/12512).
 * [Fixed] Support version specific AlwaysOn metrics. See [#12424](https://github.com/DataDog/integrations-core/pull/12424).
 * [Security] Bump `lxml` package. See [#12663](https://github.com/DataDog/integrations-core/pull/12663).
 
