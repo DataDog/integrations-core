@@ -31,8 +31,8 @@ class PerfCountersBaseCheck(AgentCheck):
         super().__init__(name, init_config, instances)
 
         self.interval = 60
-        if datadog_agent and datadog_agent.get_config('window_counter_refresh_interval'):
-            self.interval = datadog_agent.get_config('window_counter_refresh_interval')
+        if datadog_agent and datadog_agent.get_config('windows_counter_refresh_interval'):
+            self.interval = datadog_agent.get_config('windows_counter_refresh_interval')
 
         self.enable_health_service_check = is_affirmative(self.instance.get('enable_health_service_check', True))
 

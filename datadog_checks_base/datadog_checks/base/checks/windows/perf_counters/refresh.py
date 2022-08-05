@@ -69,4 +69,4 @@ class WindowsPerformanceObjectRefresher(threading.Thread):
 
     def add_interval(self, interval):
         self.interval = interval
-        self.logger.info('Refresh interval set to %d seconds', interval)
+        self.logger.info('Windows Counters refresh interval set to %d seconds', interval)
