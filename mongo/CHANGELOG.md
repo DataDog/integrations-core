@@ -2,7 +2,7 @@
 
 ## 4.0.0 / 2022-08-05
 
-* [Added] Support for ssl allow invalid hostnames. See [#12541](https://github.com/DataDog/integrations-core/pull/12541).
+* [Added] Support allow invalid hostnames in SSL connections. See [#12541](https://github.com/DataDog/integrations-core/pull/12541).
 * [Added] Added new metrics for oplatencies. See [#12479](https://github.com/DataDog/integrations-core/pull/12479).
 * [Added] Added new metric "mongodb.metrics.queryexecutor.scannedobjectsps". See [#12467](https://github.com/DataDog/integrations-core/pull/12467).
 * [Added] Add list of databases to collect metrics from. See [#12450](https://github.com/DataDog/integrations-core/pull/12450).
