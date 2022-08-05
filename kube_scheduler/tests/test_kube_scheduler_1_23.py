@@ -116,6 +116,10 @@ def test_check_metrics_1_23(aggregator, mock_metrics, mock_leader):
         tags=[],
     )
 
+    assert_metric('.pending_pods', value=1.0, tags=['queue:active'])
+    assert_metric('.pending_pods', value=2.0, tags=['queue:backoff'])
+    assert_metric('.pending_pods', value=3.0, tags=['queue:unschedulable'])
+
     assert_metric('.queue.incoming_pods', value=7.0, tags=['event:PodAdd', 'queue:active'])
     assert_metric('.queue.incoming_pods', value=3.0, tags=['event:NodeTaintChange', 'queue:active'])
     assert_metric('.queue.incoming_pods', value=3.0, tags=['event:ScheduleAttemptFailure', 'queue:unschedulable'])
