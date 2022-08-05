@@ -1,5 +1,9 @@
 # CHANGELOG - Datadog-Cluster-Agent
 
+## 2.3.0 / 2022-08-05
+
+* [Added] Collect lib injection metrics. See [#12536](https://github.com/DataDog/integrations-core/pull/12536).
+
 ## 2.2.0 / 2022-05-15 / Agent 7.37.0
 
 * [Added] Support dynamic bearer tokens (Bound Service Account Token Volume). See [#11915](https://github.com/DataDog/integrations-core/pull/11915).
