@@ -9,7 +9,6 @@ build-backend = "hatchling.build"
 name = "datadog-rethinkdb"
 description = "The RethinkDB check"
 readme = "README.md"
-license = {text = "BSD-3-Clause"}
 keywords = [
     "datadog",
     "datadog agent",
@@ -35,9 +34,12 @@ dynamic = [
     "version",
 ]
 
+[project.license]
+text = "BSD-3-Clause"
+
 [project.optional-dependencies]
 deps = [
-    "rethinkdb==2.4.8",
+    "rethinkdb==2.4.9",
 ]
 
 [project.urls]

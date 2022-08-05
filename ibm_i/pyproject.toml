@@ -9,7 +9,6 @@ build-backend = "hatchling.build"
 name = "datadog-ibm-i"
 description = "The IBM i check"
 readme = "README.md"
-license = {text = "BSD-3-Clause"}
 requires-python = ">=3.8"
 keywords = [
     "datadog",
@@ -34,6 +33,9 @@ dependencies = [
 dynamic = [
     "version",
 ]
+
+[project.license]
+text = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [

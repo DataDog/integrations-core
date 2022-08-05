@@ -62,7 +62,9 @@ class PerfCountersBaseCheck(AgentCheck):
                 # Counters are lazily configured and any errors should prevent check execution
                 exception_class = type(e)
                 message = str(e)
-                self.check_initializations.append(lambda: raise_exception(exception_class, message))
+                self.check_initializations.append(
+                    lambda exception_class=exception_class, message=message: raise_exception(exception_class, message)
+                )
                 return
             except Exception as e:
                 self.log.error('Error refreshing counters for performance object `%s`: %s', perf_object.name, e)

@@ -58,7 +58,7 @@ pycryptodomex,PyPI,BSD-2-Clause,Helder Eijs
 pycryptodomex,PyPI,Unlicense,Helder Eijs
 pydantic,PyPI,MIT,Samuel Colvin
 pymongo,PyPI,Apache-2.0,The MongoDB Python Team
-pymqi,PyPI,PSF,Dariusz Suchojad
+pymqi,PyPI,PSF,Zato Source s.r.o.
 pyodbc,PyPI,MIT,Michael Kleehammer
 pysmi,PyPI,BSD-3-Clause,Ilya Etingof
 pysnmp,PyPI,BSD-3-Clause,Ilya Etingof
