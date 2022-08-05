@@ -2,7 +2,7 @@
 
 ## 7.4.1 / 2022-08-05
 
-* [Fixed] Fix probe metrics not reported when creds required. See [#12642](https://github.com/DataDog/integrations-core/pull/12642).
+* [Fixed] Fix probe metrics collection when credentials are required. See [#12642](https://github.com/DataDog/integrations-core/pull/12642).
 
 ## 7.4.0 / 2022-05-15 / Agent 7.37.0
 
