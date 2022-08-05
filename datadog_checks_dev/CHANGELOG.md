@@ -1,5 +1,12 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 16.7.0 / 2022-08-05
+
+* [Added] Make ddev a standalone package. See [#12565](https://github.com/DataDog/integrations-core/pull/12565).
+* [Fixed] Dependency updates. See [#12653](https://github.com/DataDog/integrations-core/pull/12653).
+* [Fixed] Prevent metadata validation from crashing on missing columns. See [#12680](https://github.com/DataDog/integrations-core/pull/12680).
+* [Fixed] Update exclude list in metadata validation. See [#12658](https://github.com/DataDog/integrations-core/pull/12658).
+
 ## 16.6.0 / 2022-08-02
 
 * [Added] [SNMP Traps] Include BITS enums in traps DB. See [#12581](https://github.com/DataDog/integrations-core/pull/12581).
