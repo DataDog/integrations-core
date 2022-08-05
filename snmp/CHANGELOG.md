@@ -2,7 +2,7 @@
 
 ## 5.9.0 / 2022-08-05
 
-* [Added] Fortinet Fortigate: Add metrics for VPN Tunnels. See [#11977](https://github.com/DataDog/integrations-core/pull/11977). Thanks [jalmeroth](https://github.com/jalmeroth).
+* [Added] Add metrics for VPN Tunnels. See [#11977](https://github.com/DataDog/integrations-core/pull/11977). Thanks [jalmeroth](https://github.com/jalmeroth).
 * [Fixed] Dependency updates. See [#12653](https://github.com/DataDog/integrations-core/pull/12653).
 
 ## 5.8.0 / 2022-05-15 / Agent 7.37.0
