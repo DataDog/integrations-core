@@ -4,7 +4,7 @@
 
 * [Added] Add AlwaysOn Availability Group replica status metric. See [#12494](https://github.com/DataDog/integrations-core/pull/12494).
 * [Fixed] Dependency updates. See [#12653](https://github.com/DataDog/integrations-core/pull/12653).
-* [Fixed] sqlserver...connection: check for port provided in config. See [#12610](https://github.com/DataDog/integrations-core/pull/12610).
+* [Fixed] Check for port provided in config. See [#12610](https://github.com/DataDog/integrations-core/pull/12610).
 * [Fixed] improve failed connection error messages. See [#12533](https://github.com/DataDog/integrations-core/pull/12533).
 * [Fixed] Fix documentation leftovers from DBM Support for SQL Server going GA. See [#12512](https://github.com/DataDog/integrations-core/pull/12512).
 * [Fixed] Support version specific AlwaysOn metrics. See [#12424](https://github.com/DataDog/integrations-core/pull/12424).
