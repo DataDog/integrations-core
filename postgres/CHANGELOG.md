@@ -4,7 +4,7 @@
 
 * [Fixed] Dependency updates. See [#12653](https://github.com/DataDog/integrations-core/pull/12653).
 * [Fixed] Escape underscore in LOCK_METRICS query. See [#12652](https://github.com/DataDog/integrations-core/pull/12652).
-* [Fixed] [postgres] Fix operator precedence in relation filter. See [#12645](https://github.com/DataDog/integrations-core/pull/12645). Thanks [jonremy](https://github.com/jonremy).
+* [Fixed] Fix operator precedence in relation filter. See [#12645](https://github.com/DataDog/integrations-core/pull/12645). Thanks [jonremy](https://github.com/jonremy).
 * [Fixed] postgres: use readonly connections. See [#12608](https://github.com/DataDog/integrations-core/pull/12608).
 * [Fixed] add missing arguments to log statement. See [#12499](https://github.com/DataDog/integrations-core/pull/12499). Thanks [carobme](https://github.com/carobme).
 
