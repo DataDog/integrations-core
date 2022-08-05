@@ -1,5 +1,9 @@
 # CHANGELOG - pgbouncer
 
+## 4.3.0 / 2022-08-05
+
+* [Added] Add per-client/server metrics. See [#12350](https://github.com/DataDog/integrations-core/pull/12350). Thanks [jcoleman](https://github.com/jcoleman).
+
 ## 4.2.1 / 2022-05-15 / Agent 7.37.0
 
 * [Fixed] Handle errors for individual rows. See [#11993](https://github.com/DataDog/integrations-core/pull/11993).
