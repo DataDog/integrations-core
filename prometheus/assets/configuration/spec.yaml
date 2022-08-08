@@ -1,0 +1,29 @@
+name: Prometheus
+files:
+  - name: prometheus.yaml
+    options:
+    - template: init_config
+      options:
+        - template: init_config/openmetrics_legacy
+    - template: instances
+      options:
+        - template: instances/openmetrics_legacy_base
+          overrides:
+            prometheus_url.value.example: http://localhost:10055/metrics
+            namespace.hidden: false
+            namespace.required: true
+            namespace.value.example: <SERVICE_NAME>
+            metrics.hidden: false
+            metrics.required: true
+            metrics.value.example:
+              - <METRIC_TO_FETCH>: <NEW_METRIC_NAME>
+        - name: max_returned_metrics
+          description: |
+            The check limits itself to 2000 metrics by default, increase this limit if needed.
+          value:
+            default: 2000
+            type: integer
+        - template: instances/http
+          overrides:
+            request_size.value.example: 10
+        - template: instances/default
