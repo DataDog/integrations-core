@@ -499,8 +499,9 @@ class PrometheusScraperMixin(object):
         # If targeted metric, store labels
         self.store_labels(message)
 
-        if message.name in self.ignore_metrics:
-            return  # Ignore the metric
+        for im in self.ignore_metrics:
+            if search(im, message.name):
+                return
 
         # Filter metric to see if we can enrich with joined labels
         self.join_labels(message)
