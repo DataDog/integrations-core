@@ -83,7 +83,6 @@ instances:
 
     ## @param exclude_labels - list of strings - optional
     ## A list of labels to be excluded. May be used in conjunction with `include_labels`.
-    ## Labels defined in `excluded labels` will take precedence in case of overlap.
     #
     # exclude_labels:
     #   - timestamp
