@@ -34,7 +34,7 @@ mkdir $HOME/dd && cd $HOME/dd       # optional
 git clone https://github.com/DataDog/integrations-extras.git
 ```
 
-**Note** A Fork is required if you intend on publishing the check to the [integrations-extras repository][3].
+**Note** A Fork is required if you intend on publishing the check or contributing to [integrations-extras repository][3].
 
 ### Developer toolkit
 
