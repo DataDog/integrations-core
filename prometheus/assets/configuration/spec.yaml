@@ -28,11 +28,13 @@ files:
         value:
           type: array
           items:
-            type: string
+            type: object
+            additionalProperties:
+              type: string
           example:
             - <METRIC_TO_FETCH>: <NEW_METRIC_NAME>
       - name: prometheus_metrics_prefix
-        description: Removes a given <PREFIX> from exposed Prometheus metrics.
+        description: Prefix for exposed Prometheus metrics.
         value:
           type: string
           example: <PREFIX>_
@@ -81,7 +83,6 @@ files:
         description: |
           Override a type in the Prometheus payload or type an untyped metric (ignored by default).
           Supported <METRIC_TYPE> are `gauge`, `counter`, `histogram`, and `summary`.
-          The "*" wildcard can be used to match multiple metric names.
         value:
           example:
             <METRIC_NAME>: <METRIC_TYPE>
@@ -112,21 +113,21 @@ files:
           Can either be only the path to the certificate and thus you should specify the private key
           or it can be the path to a file containing both the certificate & the private key
         value:
-          example: "<CERT_PATH>"
+          example: <CERT_PATH>
           type: string
       - name: ssl_private_key
         description: |
           Needed if the certificate does not include the private key
           WARNING: The private key to your local certificate must be unencrypted.
         value:
-          example: "<KEY_PATH>"
+          example: <KEY_PATH>
           type: string
       - name: ssl_ca_cert
         description: |
           The path to the trusted CA used for generating custom certificates. Set this to false to disable SSL
           certificate verification.
         value:
-          example: "<CA_CERT_PATH>"
+          example: <CA_CERT_PATH>
           type: string
       - name: prometheus_timeout
         description: Set a timeout in second for the prometheus query.

@@ -44,7 +44,7 @@ class InstanceConfig(BaseModel):
     label_to_hostname: Optional[str]
     labels_mapper: Optional[Mapping[str, Any]]
     max_returned_metrics: Optional[int]
-    metrics: Sequence[str]
+    metrics: Sequence[Mapping[str, str]]
     namespace: str
     prometheus_metrics_prefix: Optional[str]
     prometheus_timeout: Optional[int]
