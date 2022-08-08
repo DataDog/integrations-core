@@ -132,12 +132,12 @@ files:
       - name: prometheus_timeout
         description: Set a timeout in second for the prometheus query.
         value:
-          default: 10
+          example: 10
           type: integer
       - name: max_returned_metrics
         description: |
           The check limits itself to 2000 metrics by default, increase this limit if needed.
         value:
-          default: 2000
+          example: 2000
           type: integer
     - template: instances/default

@@ -107,15 +107,15 @@ instances:
     #
     # ssl_ca_cert: <CA_CERT_PATH>
 
-    ## @param prometheus_timeout - integer - optional
+    ## @param prometheus_timeout - integer - optional - default: 10
     ## Set a timeout in second for the prometheus query.
     #
-    # prometheus_timeout: <PROMETHEUS_TIMEOUT>
+    # prometheus_timeout: 10
 
-    ## @param max_returned_metrics - integer - optional
+    ## @param max_returned_metrics - integer - optional - default: 2000
     ## The check limits itself to 2000 metrics by default, increase this limit if needed.
     #
-    # max_returned_metrics: <MAX_RETURNED_METRICS>
+    # max_returned_metrics: 2000
 
 ## @param tags - list of strings - optional
 ## A list of tags to attach to every metric and service check emitted by this instance.
