@@ -55,7 +55,7 @@ See [service_checks.json][10] for a list of service checks provided by this inte
 
 Need help? Contact [Datadog support][11].
 
-[1]: images/kube_scheduler_screenshot.jpeg
+[1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/kube_scheduler/images/kube_scheduler_screenshot.jpeg
 [2]: https://kubernetes.io/docs/reference/command-line-tools-reference/kube-scheduler
 [3]: https://app.datadoghq.com/account/settings#agent
 [4]: https://docs.datadoghq.com/agent/kubernetes/integrations/
