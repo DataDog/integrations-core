@@ -197,18 +197,6 @@ jmx_metrics:
       attribute:
         - Value
   - include:
-      domain: org.apache.cassandra.db
-      type: Tables
-      attribute:
-        DroppableTombstoneRatio:
-          alias: cassandra.db.droppable_tombstone_ratio
-  - include:
-      domain: org.apache.cassandra.net
-      type: FailureDetector
-      attribute:
-        - DownEndpointCount
-        - UpEndpointCount
-  - include:
       domain: org.apache.cassandra.metrics
       type: ThreadPools
       path: request
@@ -225,6 +213,18 @@ jmx_metrics:
       attribute:
         - Count
         - OneMinuteRate
+  - include:
+      domain: org.apache.cassandra.db
+      type: Tables
+      attribute:
+        DroppableTombstoneRatio:
+          alias: cassandra.db.droppable_tombstone_ratio
+  - include:
+      domain: org.apache.cassandra.net
+      type: FailureDetector
+      attribute:
+        - DownEndpointCount
+        - UpEndpointCount
   # Young Gen Collectors (Minor Collections)
   - include:
       domain: java.lang
