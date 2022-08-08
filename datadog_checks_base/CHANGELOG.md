@@ -1,5 +1,9 @@
 # CHANGELOG - datadog_checks_base
 
+## 25.5.1 / 2022-08-08
+
+* [Security] Bump `lxml` package. See [#12663](https://github.com/DataDog/integrations-core/pull/12663).
+
 ## 25.5.0 / 2022-07-08
 
 * [Security] Upgrade pyjwt to 2.4.0. See [#12481](https://github.com/DataDog/integrations-core/pull/12481).
