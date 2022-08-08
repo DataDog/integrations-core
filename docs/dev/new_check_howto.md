@@ -27,12 +27,14 @@ Creating and activating [Python virtual environments][1] to isolate the developm
 
 ## Setup
 
-Clone the [integrations-extras repository][3]. By default, that tooling expects you to be working in the `$HOME/dd/` directory—this is optional and can be adjusted with configuration later.
+Fork* and Clone the [integrations-extras repository][3]. By default, that tooling expects you to be working in the `$HOME/dd/` directory—this is optional and can be adjusted with configuration later.
 
 ```shell
 mkdir $HOME/dd && cd $HOME/dd       # optional
 git clone https://github.com/DataDog/integrations-extras.git
 ```
+
+**Note** A Fork is required if you intend on publishing the check to the [integrations-extras repository][3].
 
 ### Developer toolkit
 
