@@ -9,7 +9,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Mapping, Optional, Sequence, Union
+from typing import Any, Mapping, Optional, Sequence
 
 from pydantic import BaseModel, root_validator, validator
 
@@ -17,22 +17,6 @@ from datadog_checks.base.utils.functions import identity
 from datadog_checks.base.utils.models import validation
 
 from . import defaults, validators
-
-
-class AuthToken(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    reader: Optional[Mapping[str, Any]]
-    writer: Optional[Mapping[str, Any]]
-
-
-class IgnoreMetricsByLabels(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    target_label_key: Optional[str]
-    target_label_value_list: Optional[Sequence[str]]
 
 
 class TargetMetric(BaseModel):
@@ -50,92 +34,27 @@ class LabelJoins(BaseModel):
     target_metric: Optional[TargetMetric]
 
 
-class MetricPatterns(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    exclude: Optional[Sequence[str]]
-    include: Optional[Sequence[str]]
-
-
-class Proxy(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    http: Optional[str]
-    https: Optional[str]
-    no_proxy: Optional[Sequence[str]]
-
-
 class InstanceConfig(BaseModel):
     class Config:
         allow_mutation = False
 
-    allow_redirects: Optional[bool]
-    auth_token: Optional[AuthToken]
-    auth_type: Optional[str]
-    aws_host: Optional[str]
-    aws_region: Optional[str]
-    aws_service: Optional[str]
-    bearer_token_auth: Optional[Union[bool, str]]
-    bearer_token_path: Optional[str]
-    bearer_token_refresh_interval: Optional[int]
-    connect_timeout: Optional[float]
-    disable_generic_tags: Optional[bool]
-    empty_default_hostname: Optional[bool]
     exclude_labels: Optional[Sequence[str]]
-    extra_headers: Optional[Mapping[str, Any]]
-    headers: Optional[Mapping[str, Any]]
     health_service_check: Optional[bool]
-    ignore_metrics: Optional[Sequence[str]]
-    ignore_metrics_by_labels: Optional[IgnoreMetricsByLabels]
-    ignore_tags: Optional[Sequence[str]]
-    include_labels: Optional[Sequence[str]]
-    kerberos_auth: Optional[str]
-    kerberos_cache: Optional[str]
-    kerberos_delegate: Optional[bool]
-    kerberos_force_initiate: Optional[bool]
-    kerberos_hostname: Optional[str]
-    kerberos_keytab: Optional[str]
-    kerberos_principal: Optional[str]
     label_joins: Optional[LabelJoins]
     label_to_hostname: Optional[str]
     labels_mapper: Optional[Mapping[str, Any]]
-    log_requests: Optional[bool]
     max_returned_metrics: Optional[int]
-    metric_patterns: Optional[MetricPatterns]
-    metrics: Sequence[Union[str, Mapping[str, str]]]
-    min_collection_interval: Optional[float]
+    metrics: Sequence[str]
     namespace: str
-    ntlm_domain: Optional[str]
-    password: Optional[str]
-    persist_connections: Optional[bool]
     prometheus_metrics_prefix: Optional[str]
+    prometheus_timeout: Optional[int]
     prometheus_url: str
-    proxy: Optional[Proxy]
-    read_timeout: Optional[float]
-    request_size: Optional[float]
-    send_distribution_buckets: Optional[bool]
-    send_distribution_counts_as_monotonic: Optional[bool]
-    send_distribution_sums_as_monotonic: Optional[bool]
     send_histograms_buckets: Optional[bool]
     send_monotonic_counter: Optional[bool]
-    send_monotonic_with_gauge: Optional[bool]
-    service: Optional[str]
-    skip_proxy: Optional[bool]
-    tags: Optional[Sequence[str]]
-    timeout: Optional[float]
-    tls_ca_cert: Optional[str]
-    tls_cert: Optional[str]
-    tls_ignore_warning: Optional[bool]
-    tls_private_key: Optional[str]
-    tls_protocols_allowed: Optional[Sequence[str]]
-    tls_use_host_header: Optional[bool]
-    tls_verify: Optional[bool]
+    ssl_ca_cert: Optional[str]
+    ssl_cert: Optional[str]
+    ssl_private_key: Optional[str]
     type_overrides: Optional[Mapping[str, Any]]
-    use_legacy_auth_encoding: Optional[bool]
-    use_process_start_time: Optional[bool]
-    username: Optional[str]
 
     @root_validator(pre=True)
     def _initial_validation(cls, values):

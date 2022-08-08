@@ -4,26 +4,139 @@ files:
     options:
     - template: init_config
       options:
-        - template: init_config/openmetrics_legacy
+        - template: init_config/default
     - template: instances
       options:
-        - template: instances/openmetrics_legacy_base
-          overrides:
-            prometheus_url.value.example: http://localhost:10055/metrics
-            namespace.hidden: false
-            namespace.required: true
-            namespace.value.example: <SERVICE_NAME>
-            metrics.hidden: false
-            metrics.required: true
-            metrics.value.example:
-              - <METRIC_TO_FETCH>: <NEW_METRIC_NAME>
-        - name: max_returned_metrics
-          description: |
-            The check limits itself to 2000 metrics by default, increase this limit if needed.
-          value:
-            default: 2000
-            type: integer
-        - template: instances/http
-          overrides:
-            request_size.value.example: 10
-        - template: instances/default
+      - name: prometheus_url
+        required: true
+        description: The URL where your application metrics are exposed by Prometheus.
+        value:
+          type: string
+          example: http://localhost:10055/metrics
+      - name: namespace
+        required: true
+        description: The namespace to be prepended to all metrics.
+        value:
+          type: string
+          example: <SERVICE_NAME>
+      - name: metrics
+        required: true
+        description: |
+          List of `<METRIC_TO_FETCH>: <NEW_METRIC_NAME>` for metrics to be fetched from the prometheus endpoint.
+          <NEW_METRIC_NAME> is optional. It transforms the name in Datadog if set.
+          This list should contain at least one metric
+        value:
+          type: array
+          items:
+            type: string
+          example:
+            - <METRIC_TO_FETCH>: <NEW_METRIC_NAME>
+      - name: prometheus_metrics_prefix
+        description: Removes a given <PREFIX> from exposed Prometheus metrics.
+        value:
+          type: string
+          example: <PREFIX>_
+          display_default: null
+      - name: health_service_check
+        description: |
+          Send a service check reporting about the health of the Prometheus endpoint.
+          The service check is named <NAMESPACE>.prometheus.health
+        value:
+          type: boolean
+          example: true
+      - name: label_to_hostname
+        description: Override the hostname with the value of one label.
+        value:
+          type: string
+          example: <LABEL>
+      - name: label_joins
+        description: Allows targeting a metric to retrieve its label with a 1:1 mapping.
+        value:
+          example:
+            target_metric:
+              label_to_match: <MATCHED_LABEL>
+              labels_to_get:
+                - <EXTRA_LABEL_1>
+                - <EXTRA_LABEL_2>
+          type: object
+          properties:
+            - name: target_metric
+              type: object
+              properties:
+                - name: label_to_match
+                  type: string
+                - name: labels_to_get
+                  type: array
+                  items:
+                    type: string
+      - name: labels_mapper
+        description: |
+          The label mapper allows you to rename labels.
+          Format is <LABEL_TO_RENAME>: <NEW_LABEL_NAME>
+        value:
+          example:
+            flavor: origin
+          type: object
+      - name: type_overrides
+        description: |
+          Override a type in the Prometheus payload or type an untyped metric (ignored by default).
+          Supported <METRIC_TYPE> are `gauge`, `counter`, `histogram`, and `summary`.
+          The "*" wildcard can be used to match multiple metric names.
+        value:
+          example:
+            <METRIC_NAME>: <METRIC_TYPE>
+          type: object
+      - name: send_histograms_buckets
+        description: Set send_histograms_buckets to true to send the histograms bucket.
+        value:
+          example: true
+          type: boolean
+      - name: send_monotonic_counter
+        description: Set send_monotonic_counter to true to send counters as monotonic counter.
+        value:
+          example: true
+          type: boolean
+      - name: exclude_labels
+        description: |
+          A list of labels to be excluded. May be used in conjunction with `include_labels`.
+          Labels defined in `excluded labels` will take precedence in case of overlap.
+        value:
+          example:
+            - timestamp
+          type: array
+          items:
+            type: string
+      - name: ssl_cert
+        description: |
+          If your prometheus endpoint is secured, here are the settings to configure it
+          Can either be only the path to the certificate and thus you should specify the private key
+          or it can be the path to a file containing both the certificate & the private key
+        value:
+          example: "<CERT_PATH>"
+          type: string
+      - name: ssl_private_key
+        description: |
+          Needed if the certificate does not include the private key
+          WARNING: The private key to your local certificate must be unencrypted.
+        value:
+          example: "<KEY_PATH>"
+          type: string
+      - name: ssl_ca_cert
+        description: |
+          The path to the trusted CA used for generating custom certificates. Set this to false to disable SSL
+          certificate verification.
+        value:
+          example: "<CA_CERT_PATH>"
+          type: string
+      - name: prometheus_timeout
+        description: Set a timeout in second for the prometheus query.
+        value:
+          default: 10
+          type: integer
+      - name: max_returned_metrics
+        description: |
+          The check limits itself to 2000 metrics by default, increase this limit if needed.
+        value:
+          default: 2000
+          type: integer
+    - template: instances/default
