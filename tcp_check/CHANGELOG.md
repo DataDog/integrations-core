@@ -1,5 +1,9 @@
 # CHANGELOG - tcp_check
 
+## 4.6.0 / 2022-08-05
+
+* [Added] Add IPv4-only configuration option. See [#12632](https://github.com/DataDog/integrations-core/pull/12632).
+
 ## 4.5.1 / 2022-07-25
 
 * [Fixed] Fix IPv4/IPv6 address resolution. See [#12526](https://github.com/DataDog/integrations-core/pull/12526).

@@ -1,5 +1,9 @@
 # CHANGELOG - kafka_consumer
 
+## 2.15.3 / 2022-08-05
+
+* [Fixed] Handle errors getting producer offset. See [#12648](https://github.com/DataDog/integrations-core/pull/12648).
+
 ## 2.15.2 / 2022-06-27 / Agent 7.38.0
 
 * [Fixed] Fix failed reading and writing to cache when file is too long. See [#12109](https://github.com/DataDog/integrations-core/pull/12109).

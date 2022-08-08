@@ -1,5 +1,13 @@
 # CHANGELOG - datadog_checks_base
 
+## 27.0.0 / 2022-08-05
+
+* [Fixed] Dependency updates. See [#12653](https://github.com/DataDog/integrations-core/pull/12653).
+* [Fixed] Pin `pymysql` to `0.10.1`. See [#12612](https://github.com/DataDog/integrations-core/pull/12612).
+* [Fixed] Better failed assertion message, print return code. See [#12615](https://github.com/DataDog/integrations-core/pull/12615).
+* [Security] Bump `lxml` package. See [#12663](https://github.com/DataDog/integrations-core/pull/12663).
+* [Changed] Upgrade pymongo to 4.2. See [#12594](https://github.com/DataDog/integrations-core/pull/12594).
+
 ## 26.0.0 / 2022-07-22
 
 * [Added] Support custom messages in `QueryManager` queries of type `'service_check'`. See [#12537](https://github.com/DataDog/integrations-core/pull/12537).
