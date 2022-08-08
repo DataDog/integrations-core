@@ -82,7 +82,7 @@ instances:
     # send_monotonic_counter: true
 
     ## @param exclude_labels - list of strings - optional
-    ## A list of labels to be excluded. May be used in conjunction with `include_labels`.
+    ## A list of labels to be excluded.
     #
     # exclude_labels:
     #   - timestamp
