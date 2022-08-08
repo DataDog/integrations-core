@@ -55,7 +55,7 @@ steps:
     displayName: 'Install ddev from local folder'
 
 - ${{ if not(eq(parameters.repo, 'core')) }}:
-  - script: pip install ddev
+  - script: pip install datadog-checks-dev[cli]
     displayName: 'Install ddev from PyPI'
 
 - script: |
