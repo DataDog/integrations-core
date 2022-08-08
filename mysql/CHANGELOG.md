@@ -1,5 +1,11 @@
 # CHANGELOG - mysql
 
+## 8.5.0 / 2022-08-05
+
+* [Added] Add MySQL user connections metric. See [#12657](https://github.com/DataDog/integrations-core/pull/12657).
+* [Fixed] Dependency updates. See [#12653](https://github.com/DataDog/integrations-core/pull/12653).
+* [Fixed] Pin `pymysql` to `0.10.1`. See [#12612](https://github.com/DataDog/integrations-core/pull/12612).
+
 ## 8.4.1 / 2022-07-08 / Agent 7.38.0
 
 * [Fixed] Fix bug where mysql table row stats were not being collected. See [#12472](https://github.com/DataDog/integrations-core/pull/12472).
