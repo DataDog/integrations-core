@@ -52,6 +52,13 @@ instances:
     # labels_mapper:
     #   flavor: origin
 
+    ## @param ignore_metrics - list of metrics to ignore - optional
+    ## List of metrics to ignore.
+    ## Format is <METRIC_TO_IGNORE> like `default*`, `^default`. Library re https://docs.python.org/3/library/re.html
+    #
+    # ignore_metrics:
+    #   - <METRIC_TO_IGNORE>
+
     ## @param type_overrides - list of key:value element - optional
     ## Type override allows you to override a type in the prometheus payload
     ## or type an untyped metrics (they're ignored by default)
