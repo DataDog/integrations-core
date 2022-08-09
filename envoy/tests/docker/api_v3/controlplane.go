@@ -3,6 +3,9 @@ package main
 import (
 	"context"
 	"flag"
+	"net"
+	"time"
+
 	clusterconfig "github.com/envoyproxy/go-control-plane/envoy/config/cluster/v3"
 	core "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
 	endpointconfig "github.com/envoyproxy/go-control-plane/envoy/config/endpoint/v3"
@@ -16,8 +19,6 @@ import (
 	xds "github.com/envoyproxy/go-control-plane/pkg/server/v3"
 	"github.com/golang/protobuf/ptypes"
 	"google.golang.org/grpc"
-	"net"
-	"time"
 )
 
 func main() {
