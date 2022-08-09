@@ -163,7 +163,7 @@
 					{
 						"id": 5608027259222025,
 						"definition": {
-							"title": "Kube Scheduler CPU usage vs requests",
+							"title": "Kube Scheduler memory usage vs requests",
 							"title_size": "16",
 							"title_align": "left",
 							"show_legend": true,
@@ -175,6 +175,7 @@
 								"value",
 								"sum"
 							],
+							"time": {},
 							"type": "timeseries",
 							"requests": [
 								{
@@ -254,7 +255,14 @@
 							"type": "timeseries",
 							"requests": [
 								{
-									"q": "avg:kube_scheduler.pod_preemption.attempts{$cluster,$scope}.as_count()",
+									"response_format": "timeseries",
+									"queries": [
+										{
+											"data_source": "metrics",
+											"name": "query1",
+											"query": "avg:kube_scheduler.pod_preemption.attempts{$cluster,$scope}.as_count()"
+										}
+									],
 									"style": {
 										"palette": "dog_classic",
 										"line_type": "solid",
@@ -287,7 +295,6 @@
 								"value",
 								"sum"
 							],
-							"time": {},
 							"type": "timeseries",
 							"requests": [
 								{
@@ -296,14 +303,14 @@
 											"formula": "query1"
 										}
 									],
+									"response_format": "timeseries",
 									"queries": [
 										{
+											"query": "avg:kube_scheduler.pod_preemption.victims.sum{$cluster,$scope}",
 											"data_source": "metrics",
-											"name": "query1",
-											"query": "avg:kube_scheduler.pod_preemption.victims.sum{$cluster,$scope}"
+											"name": "query1"
 										}
 									],
-									"response_format": "timeseries",
 									"style": {
 										"palette": "dog_classic",
 										"line_type": "solid",
@@ -350,11 +357,12 @@
 							"type": "timeseries",
 							"requests": [
 								{
-									"q": "avg:kube_scheduler.client.http.requests{$cluster,$scope} by {method,code}.as_count()",
-									"metadata": [
+									"response_format": "timeseries",
+									"queries": [
 										{
-											"expression": "avg:kube_scheduler.client.http.requests{$cluster_name,$scope} by {method,code}.as_count()",
-											"alias_name": "sum"
+											"data_source": "metrics",
+											"name": "query1",
+											"query": "avg:kube_scheduler.client.http.requests{$cluster,$scope} by {method,code}.as_count()"
 										}
 									],
 									"style": {
@@ -385,11 +393,22 @@
 							"type": "timeseries",
 							"requests": [
 								{
-									"q": "derivative(avg:kube_scheduler.client.http.requests_duration.sum{$cluster,$scope} by {verb,url}) / derivative(avg:kube_scheduler.client.http.requests_duration.count{$cluster,$scope} by {verb,url})",
-									"metadata": [
+									"response_format": "timeseries",
+									"queries": [
 										{
-											"expression": "derivative(avg:kube_scheduler.client.http.requests_duration.sum{$cluster_name,$scope} by {verb,url})/derivative(avg:kube_scheduler.client.http.requests_duration.count{$cluster_name,$scope} by {verb,url})",
-											"alias_name": "duration"
+											"data_source": "metrics",
+											"name": "query1",
+											"query": "avg:kube_scheduler.client.http.requests_duration.sum{$cluster,$scope} by {verb,url}"
+										},
+										{
+											"data_source": "metrics",
+											"name": "query2",
+											"query": "avg:kube_scheduler.client.http.requests_duration.count{$cluster,$scope} by {verb,url}"
+										}
+									],
+									"formulas": [
+										{
+											"formula": "derivative(query1) / derivative(query2)"
 										}
 									],
 									"style": {
@@ -488,7 +507,6 @@
 								"value",
 								"sum"
 							],
-							"time": {},
 							"type": "timeseries",
 							"requests": [
 								{
@@ -526,7 +544,7 @@
 			},
 			"layout": {
 				"x": 0,
-				"y": 0,
+				"y": 20,
 				"width": 12,
 				"height": 5,
 				"is_column_break": true
@@ -651,7 +669,7 @@
 			},
 			"layout": {
 				"x": 0,
-				"y": 5,
+				"y": 25,
 				"width": 12,
 				"height": 5
 			}
@@ -680,7 +698,6 @@
 								"value",
 								"sum"
 							],
-							"time": {},
 							"type": "timeseries",
 							"requests": [
 								{
@@ -689,14 +706,14 @@
 											"formula": "query1"
 										}
 									],
+									"response_format": "timeseries",
 									"queries": [
 										{
+											"query": "avg:kube_scheduler.pending_pods{$cluster,$scope} by {queue}",
 											"data_source": "metrics",
-											"name": "query1",
-											"query": "avg:kube_scheduler.pending_pods{$cluster,$scope} by {queue}"
+											"name": "query1"
 										}
 									],
-									"response_format": "timeseries",
 									"style": {
 										"palette": "dog_classic",
 										"line_type": "solid",
@@ -729,7 +746,6 @@
 								"value",
 								"sum"
 							],
-							"time": {},
 							"type": "timeseries",
 							"requests": [
 								{
@@ -738,14 +754,14 @@
 											"formula": "query1"
 										}
 									],
+									"response_format": "timeseries",
 									"queries": [
 										{
+											"query": "sum:kube_scheduler.queue.incoming_pods{$cluster,$scope} by {event,queue}.as_count()",
 											"data_source": "metrics",
-											"name": "query1",
-											"query": "sum:kube_scheduler.queue.incoming_pods{$cluster,$scope} by {event,queue}.as_count()"
+											"name": "query1"
 										}
 									],
-									"response_format": "timeseries",
 									"style": {
 										"palette": "dog_classic",
 										"line_type": "solid",
@@ -767,7 +783,7 @@
 			},
 			"layout": {
 				"x": 0,
-				"y": 10,
+				"y": 30,
 				"width": 12,
 				"height": 5
 			}
@@ -792,11 +808,12 @@
 							"type": "timeseries",
 							"requests": [
 								{
-									"q": "avg:kube_scheduler.threads{$cluster,$scope}",
-									"metadata": [
+									"response_format": "timeseries",
+									"queries": [
 										{
-											"expression": "avg:kube_scheduler.threads{$cluster_name,$scope}",
-											"alias_name": "threads"
+											"data_source": "metrics",
+											"name": "query1",
+											"query": "avg:kube_scheduler.threads{$cluster,$scope}"
 										}
 									],
 									"style": {
@@ -827,15 +844,17 @@
 							"type": "timeseries",
 							"requests": [
 								{
-									"q": "avg:kube_scheduler.max_fds{$cluster,$scope}, avg:kube_scheduler.open_fds{$cluster,$scope}",
-									"metadata": [
+									"response_format": "timeseries",
+									"queries": [
 										{
-											"expression": "avg:kube_scheduler.open_fds{$cluster_name,$scope}",
-											"alias_name": "open"
+											"data_source": "metrics",
+											"name": "query1",
+											"query": "avg:kube_scheduler.max_fds{$cluster,$scope}"
 										},
 										{
-											"expression": "avg:kube_scheduler.max_fds{$cluster_name,$scope}",
-											"alias_name": "max"
+											"data_source": "metrics",
+											"name": "query2",
+											"query": "avg:kube_scheduler.open_fds{$cluster,$scope}"
 										}
 									],
 									"style": {
@@ -866,11 +885,12 @@
 							"type": "timeseries",
 							"requests": [
 								{
-									"q": "avg:kube_scheduler.goroutines{$cluster,$scope}",
-									"metadata": [
+									"response_format": "timeseries",
+									"queries": [
 										{
-											"expression": "avg:kube_scheduler.goroutines{$cluster_name,$scope}",
-											"alias_name": "goroutines"
+											"data_source": "metrics",
+											"name": "query1",
+											"query": "avg:kube_scheduler.goroutines{$cluster,$scope}"
 										}
 									],
 									"style": {
@@ -901,7 +921,24 @@
 							"type": "timeseries",
 							"requests": [
 								{
-									"q": "derivative(avg:kube_scheduler.gc_duration_seconds.sum{$cluster,$scope}) / derivative(avg:kube_scheduler.gc_duration_seconds.count{$cluster,$scope})",
+									"response_format": "timeseries",
+									"queries": [
+										{
+											"data_source": "metrics",
+											"name": "query1",
+											"query": "avg:kube_scheduler.gc_duration_seconds.sum{$cluster,$scope}"
+										},
+										{
+											"data_source": "metrics",
+											"name": "query2",
+											"query": "avg:kube_scheduler.gc_duration_seconds.count{$cluster,$scope}"
+										}
+									],
+									"formulas": [
+										{
+											"formula": "derivative(query1) / derivative(query2)"
+										}
+									],
 									"style": {
 										"palette": "dog_classic",
 										"line_type": "solid",
@@ -923,7 +960,7 @@
 			},
 			"layout": {
 				"x": 0,
-				"y": 15,
+				"y": 35,
 				"width": 12,
 				"height": 5
 			}
