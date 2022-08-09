@@ -10,7 +10,7 @@ import requests
 from datadog_checks.dev import run_command
 from datadog_checks.etcd import Etcd
 
-from .common import COMPOSE_FILE, ETCD_VERSION, HOST, REMAPED_DEBUGGING_METRICS,STORE_METRICS, URL
+from .common import COMPOSE_FILE, ETCD_VERSION, HOST, REMAPED_DEBUGGING_METRICS, STORE_METRICS, URL
 from .utils import is_leader, legacy, preview
 
 CHECK_NAME = 'etcd'
