@@ -9,7 +9,7 @@ from datadog_checks.clickhouse import ClickhouseCheck
 from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import CLICKHOUSE_VERSION
-from .metrics import get_metrics
+from .metrics import OPTIONAL_METRICS, get_metrics
 
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
 
@@ -34,9 +34,12 @@ def test_check(aggregator, instance, dd_run_check):
         at_least=1,
     )
 
+    for metric in OPTIONAL_METRICS:
+        aggregator.assert_metric(metric, at_least=0)
+
     aggregator.assert_service_check("clickhouse.can_connect", count=1)
     aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 def test_can_connect(aggregator, instance, dd_run_check):
