@@ -2,6 +2,8 @@ concurrent = 1
 check_interval = 0
 log_format="json"
 
+# https://docs.gitlab.com/runner/monitoring/#configuration-of-the-metrics-http-server
+listen_address = ":9292"
 
 [session_server]
   session_timeout = 1800
