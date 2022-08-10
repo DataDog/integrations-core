@@ -86,7 +86,7 @@ def assert_check(aggregator):
     )
     for metric in ALLOWED_METRICS:
         metric_name = "gitlab_runner.{}".format(metric)
-        if metric.startswith('ci_runner') or metric.startswith('gitlab_runner'):
+        if metric.startswith('gitlab_runner'):
             aggregator.assert_metric(metric_name)
         else:
             aggregator.assert_metric(metric_name, tags=CUSTOM_TAGS, count=2)
