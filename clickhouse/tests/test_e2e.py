@@ -28,3 +28,5 @@ def test_check(dd_agent_check, instance):
         tags=[server_tag, port_tag, 'db:default', 'foo:bar', 'dictionary:test'],
         at_least=1,
     )
+    aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
