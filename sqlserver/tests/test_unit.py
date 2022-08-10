@@ -11,6 +11,12 @@ import pytest
 from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.dev import EnvVars
 from datadog_checks.sqlserver import SQLServer
+from datadog_checks.sqlserver.connection import split_sqlserver_host_port
+from datadog_checks.sqlserver.const import (
+    ENGINE_EDITION_SQL_DATABASE,
+    ENGINE_EDITION_STANDARD,
+    STATIC_INFO_ENGINE_EDITION,
+)
 from datadog_checks.sqlserver.metrics import SqlMasterDatabaseFileStats
 from datadog_checks.sqlserver.sqlserver import SQLConnectionError
 from datadog_checks.sqlserver.utils import parse_sqlserver_major_version, set_default_driver_conf
@@ -255,3 +261,59 @@ Microsoft SQL Server 2019 (RTM-CU12) (KB5004524) - 15.0.4153.1 (X64)
 )
 def test_parse_sqlserver_major_version(version, expected_major_version):
     assert parse_sqlserver_major_version(version) == expected_major_version
+
+
+@pytest.mark.parametrize(
+    "instance_host,split_host,split_port",
+    [
+        ("localhost,1433,some-typo", "localhost", "1433"),
+        ("localhost, 1433,some-typo", "localhost", "1433"),
+        ("localhost,1433", "localhost", "1433"),
+        ("localhost", "localhost", None),
+    ],
+)
+def test_split_sqlserver_host(instance_host, split_host, split_port):
+    s_host, s_port = split_sqlserver_host_port(instance_host)
+    assert (s_host, s_port) == (split_host, split_port)
+
+
+@pytest.mark.parametrize(
+    "dbm_enabled, instance_host, database, reported_hostname, engine_edition, expected_hostname",
+    [
+        (False, 'localhost,1433,some-typo', None, '', ENGINE_EDITION_STANDARD, 'stubbed.hostname'),
+        (True, 'localhost,1433', None, '', ENGINE_EDITION_STANDARD, 'stubbed.hostname'),
+        (False, 'localhost', None, '', ENGINE_EDITION_STANDARD, 'stubbed.hostname'),
+        (False, '8.8.8.8', None, '', ENGINE_EDITION_STANDARD, 'stubbed.hostname'),
+        (True, 'localhost', None, 'forced_hostname', ENGINE_EDITION_STANDARD, 'forced_hostname'),
+        (True, 'datadoghq.com,1433', None, '', ENGINE_EDITION_STANDARD, 'datadoghq.com'),
+        (True, 'datadoghq.com', None, '', ENGINE_EDITION_STANDARD, 'datadoghq.com'),
+        (True, 'datadoghq.com', None, 'forced_hostname', ENGINE_EDITION_STANDARD, 'forced_hostname'),
+        (True, '8.8.8.8,1433', None, '', ENGINE_EDITION_STANDARD, '8.8.8.8'),
+        (False, '8.8.8.8', None, 'forced_hostname', ENGINE_EDITION_STANDARD, 'forced_hostname'),
+        (True, 'foo.database.windows.net', None, None, ENGINE_EDITION_SQL_DATABASE, 'foo/master'),
+        (True, 'foo.database.windows.net', 'master', None, ENGINE_EDITION_SQL_DATABASE, 'foo/master'),
+        (True, 'foo.database.windows.net', 'bar', None, ENGINE_EDITION_SQL_DATABASE, 'foo/bar'),
+        (
+            True,
+            'foo.database.windows.net',
+            'bar',
+            'override-reported',
+            ENGINE_EDITION_SQL_DATABASE,
+            'override-reported',
+        ),
+        (True, 'foo-custom-dns', 'bar', None, ENGINE_EDITION_SQL_DATABASE, 'foo-custom-dns/bar'),
+    ],
+)
+def test_resolved_hostname(dbm_enabled, instance_host, database, reported_hostname, engine_edition, expected_hostname):
+    instance = {
+        'host': instance_host,
+        'dbm': dbm_enabled,
+    }
+    if database:
+        instance['database'] = database
+    if reported_hostname:
+        instance['reported_hostname'] = reported_hostname
+    sqlserver_check = SQLServer(CHECK_NAME, {}, [instance])
+    sqlserver_check.static_info_cache[STATIC_INFO_ENGINE_EDITION] = engine_edition
+    sqlserver_check._resolved_hostname = None
+    assert sqlserver_check.resolved_hostname == expected_hostname

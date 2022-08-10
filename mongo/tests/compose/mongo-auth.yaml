@@ -1,0 +1,12 @@
+version: '3'
+
+# This was heavily based upon: https://github.com/chefsplate/mongo-shard-docker-compose
+services:
+  standalone-auth:
+    image: mongo:$MONGO_VERSION
+    command: mongod --auth --port 27017 --bind_ip=0.0.0.0
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: rootPass

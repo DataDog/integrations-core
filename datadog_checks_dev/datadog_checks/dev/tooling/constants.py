@@ -56,7 +56,7 @@ AGENT_V5_ONLY = {'agent_metrics', 'docker_daemon', 'go-metro', 'kubernetes', 'nt
 
 BETA_PACKAGES = {}
 
-NOT_CHECKS = {'datadog_checks_dev', 'datadog_checks_tests_helper'}
+NOT_CHECKS = {'datadog_checks_dev', 'datadog_checks_tests_helper', 'ddev'}
 
 # Some integrations do not have an associated tile, mostly system integrations
 NOT_TILES = [

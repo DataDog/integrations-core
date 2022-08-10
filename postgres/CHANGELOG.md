@@ -1,6 +1,19 @@
 # CHANGELOG - postgres
 
-## 12.4.0 / 2022-05-15
+## 12.5.1 / 2022-08-05
+
+* [Fixed] Dependency updates. See [#12653](https://github.com/DataDog/integrations-core/pull/12653).
+* [Fixed] Escape underscore in LOCK_METRICS query. See [#12652](https://github.com/DataDog/integrations-core/pull/12652).
+* [Fixed] Fix operator precedence in relation filter. See [#12645](https://github.com/DataDog/integrations-core/pull/12645). Thanks [jonremy](https://github.com/jonremy).
+* [Fixed] Use readonly connections. See [#12608](https://github.com/DataDog/integrations-core/pull/12608).
+* [Fixed] Add missing arguments to log statement. See [#12499](https://github.com/DataDog/integrations-core/pull/12499). Thanks [carobme](https://github.com/carobme).
+
+## 12.5.0 / 2022-06-27 / Agent 7.38.0
+
+* [Added] Track blk_read_time and blk_write_time for Postgres databases if track_io_timing is enabled. See [#12380](https://github.com/DataDog/integrations-core/pull/12380).
+* [Fixed] Fix Postgres calculation of blk_read_time and blk_write_time metrics. See [#12399](https://github.com/DataDog/integrations-core/pull/12399).
+
+## 12.4.0 / 2022-05-15 / Agent 7.37.0
 
 * [Added] Add option to keep alias and dollar quote functions in postgres (`keep_sql_alias` and `keep_dollar_quoted_func`). See [#12019](https://github.com/DataDog/integrations-core/pull/12019).
 * [Added] Add support to ingest cloud_metadata for DBM host linking. See [#11987](https://github.com/DataDog/integrations-core/pull/11987).

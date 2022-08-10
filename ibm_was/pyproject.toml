@@ -9,7 +9,6 @@ build-backend = "hatchling.build"
 name = "datadog-ibm-was"
 description = "The IBM WAS check"
 readme = "README.md"
-license = {text = "BSD-3-Clause"}
 keywords = [
     "datadog",
     "datadog agent",
@@ -35,9 +34,12 @@ dynamic = [
     "version",
 ]
 
+[project.license]
+text = "BSD-3-Clause"
+
 [project.optional-dependencies]
 deps = [
-    "lxml==4.8.0",
+    "lxml==4.9.1",
 ]
 
 [project.urls]

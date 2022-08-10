@@ -1,6 +1,10 @@
 # CHANGELOG - CockroachDB
 
-## 2.2.1 / 2022-05-18
+## 2.3.0 / 2022-08-05
+
+* [Added] [CockroachDB] Add additional metrics for CockroachDB integration. See [#12382](https://github.com/DataDog/integrations-core/pull/12382). Thanks [tomellis91](https://github.com/tomellis91).
+
+## 2.2.1 / 2022-05-18 / Agent 7.37.0
 
 * [Fixed] Fix extra metrics description example. See [#12043](https://github.com/DataDog/integrations-core/pull/12043).
 

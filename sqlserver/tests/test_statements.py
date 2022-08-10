@@ -17,6 +17,12 @@ from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.sqlserver import SQLServer
+from datadog_checks.sqlserver.const import (
+    ENGINE_EDITION_ENTERPRISE,
+    ENGINE_EDITION_EXPRESS,
+    ENGINE_EDITION_PERSONAL,
+    ENGINE_EDITION_STANDARD,
+)
 from datadog_checks.sqlserver.statements import SQL_SERVER_QUERY_METRICS_COLUMNS, obfuscate_xml_plan
 
 from .common import CHECK_NAME
@@ -25,6 +31,13 @@ try:
     import pyodbc
 except ImportError:
     pyodbc = None
+
+SELF_HOSTED_ENGINE_EDITIONS = {
+    ENGINE_EDITION_PERSONAL,
+    ENGINE_EDITION_STANDARD,
+    ENGINE_EDITION_ENTERPRISE,
+    ENGINE_EDITION_EXPRESS,
+}
 
 
 @pytest.fixture(autouse=True)
@@ -425,6 +438,9 @@ def test_statement_cloud_metadata(aggregator, dd_run_check, dbm_instance, bob_co
     assert payload['ddagenthostname'] == datadog_agent.get_hostname()
     # cloud metadata
     assert payload['cloud_metadata'] == cloud_metadata, "wrong cloud_metadata"
+    # test that we're reading the edition out of the db instance. Note that this edition is what
+    # is running in our test docker containers so it's not expected to match the test cloud metadata
+    assert payload['sqlserver_engine_edition'] in SELF_HOSTED_ENGINE_EDITIONS, "wrong edition"
 
 
 @pytest.mark.integration

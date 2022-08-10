@@ -74,12 +74,14 @@ class Subscription(ABC):
 
         tags = [f'subscription:{self.TYPE}', *self.tags]
         if unknown_errors:
-            self._submit_health_status(ServiceCheck.CRITICAL, tags)
+            status_message = 'Subscription error for topic string: {}'.format(self.TOPIC_STRING)
+            self._submit_health_status(ServiceCheck.CRITICAL, tags, status_message)
             for error in unknown_errors.values():
-                self.check.log.error('Subscription error for topic string: %s\n%s', self.TOPIC_STRING, error)
+                self.check.log.error('%s\n%s', status_message, error)
         elif not message_cache:
-            self._submit_health_status(ServiceCheck.WARNING, tags)
-            self.check.log.warning('Subscription found nothing for topic string: %s', self.TOPIC_STRING)
+            status_message = 'Subscription found nothing for topic string: {}'.format(self.TOPIC_STRING)
+            self._submit_health_status(ServiceCheck.WARNING, tags, status_message)
+            self.check.log.warning(status_message)
         else:
             self._submit_health_status(ServiceCheck.OK, tags)
 
@@ -115,8 +117,8 @@ class Subscription(ABC):
             self._sub.close(sub_close_options=pymqi.CMQC.MQCO_KEEP_SUB, close_sub_queue=True)
             self._sub = None
 
-    def _submit_health_status(self, status, tags):
-        self.check.service_check('mq.subscription', status, tags=tags)
+    def _submit_health_status(self, status, tags, message=None):
+        self.check.service_check('mq.subscription', status, tags=tags, message=message)
 
     def _get_elapsed_time(self):
         return get_timestamp() - self._last_execution_time

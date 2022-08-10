@@ -27,7 +27,7 @@ except ImportError:
     from ..stubs import datadog_agent
 
 from datadog_checks.sqlserver import metrics
-from datadog_checks.sqlserver.connection import Connection, SQLConnectionError
+from datadog_checks.sqlserver.connection import Connection, SQLConnectionError, split_sqlserver_host_port
 from datadog_checks.sqlserver.const import (
     AO_METRICS,
     AO_METRICS_PRIMARY,
@@ -58,11 +58,11 @@ from datadog_checks.sqlserver.const import (
 )
 from datadog_checks.sqlserver.metrics import DEFAULT_PERFORMANCE_TABLE, VALID_TABLES
 from datadog_checks.sqlserver.queries import (
-    QUERY_AO_AVAILABILITY_GROUPS,
     QUERY_AO_FAILOVER_CLUSTER,
     QUERY_AO_FAILOVER_CLUSTER_MEMBER,
     QUERY_FAILOVER_CLUSTER_INSTANCE,
     QUERY_SERVER_STATIC_INFO,
+    get_query_ao_availability_groups,
     get_query_file_stats,
 )
 from datadog_checks.sqlserver.utils import set_default_driver_conf
@@ -158,20 +158,6 @@ class SQLServer(AgentCheck):
         )
 
         # Query declarations
-        check_queries = []
-        if is_affirmative(self.instance.get('include_ao_metrics', False)):
-            check_queries.extend(
-                [
-                    QUERY_AO_AVAILABILITY_GROUPS,
-                    QUERY_AO_FAILOVER_CLUSTER,
-                    QUERY_AO_FAILOVER_CLUSTER_MEMBER,
-                ]
-            )
-        if is_affirmative(self.instance.get('include_fci_metrics', False)):
-            check_queries.extend([QUERY_FAILOVER_CLUSTER_INSTANCE])
-        self._check_queries = self._new_query_executor(check_queries)
-        self.check_initializations.append(self._check_queries.compile_queries)
-
         self.server_state_queries = self._new_query_executor([QUERY_SERVER_STATIC_INFO])
         self.check_initializations.append(self.server_state_queries.compile_queries)
 
@@ -201,27 +187,6 @@ class SQLServer(AgentCheck):
                 "Autodiscovery is disabled, autodiscovery_include and autodiscovery_exclude will be ignored"
             )
 
-    def split_sqlserver_host_port(self, host):
-        """
-        Splits the host & port out of the provided SQL Server host connection string, returning (host, port).
-        """
-        if not host:
-            return host, None
-        host_split = [s.strip() for s in host.split(',')]
-        if len(host_split) == 1:
-            return host_split[0], None
-        if len(host_split) == 2:
-            return host_split
-        # else len > 2
-        s_host, s_port = host_split[0:2]
-        self.log.warning(
-            "invalid sqlserver host string has more than one comma: %s. using only 1st two items: host:%s, port:%s",
-            host,
-            s_host,
-            s_port,
-        )
-        return s_host, s_port
-
     def _new_query_executor(self, queries):
         return QueryExecutor(
             self.execute_query_raw,
@@ -237,8 +202,29 @@ class SQLServer(AgentCheck):
             if self.reported_hostname:
                 self._resolved_hostname = self.reported_hostname
             elif self.dbm_enabled:
-                host, port = self.split_sqlserver_host_port(self.instance.get('host'))
+                host, port = split_sqlserver_host_port(self.instance.get('host'))
                 self._resolved_hostname = resolve_db_host(host)
+                engine_edition = self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION)
+                if engine_edition == ENGINE_EDITION_SQL_DATABASE:
+                    configured_database = self.instance.get('database', None)
+                    if not configured_database:
+                        configured_database = 'master'
+                        self.warning(
+                            "Missing 'database' in instance configuration."
+                            "For Azure SQL Database a non-master application database must be specified."
+                        )
+                    elif configured_database == 'master':
+                        self.warning(
+                            "Wrong 'database' configured."
+                            "For Azure SQL Database a non-master application database must be specified."
+                        )
+                    azure_server_suffix = ".database.windows.net"
+                    if host.endswith(azure_server_suffix):
+                        host = host[: -len(azure_server_suffix)]
+                    # for Azure SQL Database, each database on a given "server" has isolated compute resources,
+                    # meaning that the agent is only able to see query activity for the specific database it's
+                    # connected to. For this reason, each Azure SQL database is modeled as an independent host.
+                    self._resolved_hostname = "{}/{}".format(host, configured_database)
             else:
                 self._resolved_hostname = self.agent_hostname
         return self._resolved_hostname
@@ -264,9 +250,13 @@ class SQLServer(AgentCheck):
                         cursor.execute("SELECT CAST(ServerProperty('EngineEdition') AS INT) AS Edition")
                         result = cursor.fetchone()
                         if result:
-                            self.static_info_cache[STATIC_INFO_ENGINE_EDITION] = result
+                            self.static_info_cache[STATIC_INFO_ENGINE_EDITION] = result[0]
                         else:
                             self.log.warning("failed to load version static information due to empty results")
+
+            # re-initialize resolved_hostname to ensure we take into consideration the static information
+            # after it's loaded
+            self._resolved_hostname = None
 
     def debug_tags(self):
         return self.tags + ['agent_hostname:{}'.format(self.agent_hostname)]
@@ -666,6 +656,24 @@ class SQLServer(AgentCheck):
             return None
 
         queries = [get_query_file_stats(major_version)]
+
+        if is_affirmative(self.instance.get('include_ao_metrics', False)):
+            if major_version > 2012:
+                queries.extend(
+                    [
+                        get_query_ao_availability_groups(major_version),
+                        QUERY_AO_FAILOVER_CLUSTER,
+                        QUERY_AO_FAILOVER_CLUSTER_MEMBER,
+                    ]
+                )
+            else:
+                self.log.warning('AlwaysOn metrics are not supported on version 2012')
+        if is_affirmative(self.instance.get('include_fci_metrics', False)):
+            if major_version > 2012:
+                queries.extend([QUERY_FAILOVER_CLUSTER_INSTANCE])
+            else:
+                self.log.warning('Failover Cluster Instance metrics are not supported on version 2012')
+
         self._dynamic_queries = self._new_query_executor(queries)
         self._dynamic_queries.compile_queries()
         self.log.debug("initialized dynamic queries")
@@ -729,7 +737,6 @@ class SQLServer(AgentCheck):
                 ]:
                     self.server_state_queries.execute()
 
-                self._check_queries.execute()
                 if self.dynamic_queries:
                     self.dynamic_queries.execute()
                 # reuse connection for any custom queries

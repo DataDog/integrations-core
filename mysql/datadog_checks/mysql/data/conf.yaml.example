@@ -178,7 +178,7 @@ instances:
     ## @param queries - list of mappings - optional
     ## Define custom queries to collect custom metrics from your MySQL database.
     ##
-    ## See https://docs.datadoghq.com/integrations/faq/how-to-collect-metrics-from-custom-mysql-queries to learn more.
+    ## See https://docs.datadoghq.com/integrations/guide/mysql-custom-queries to learn more.
     ##
     ## WARNING: This option is deprecated and will be removed in a future release.
     ## Use the `custom_queries` option instead.
@@ -248,6 +248,7 @@ instances:
         ## Note that this runs a heavy query against your database to compute the relevant metrics
         ## for all your existing schemas. Due to the nature of these calls, if you have a
         ## high number of tables and schemas, this may have a negative impact on your database performance.
+        ## Only tables and schemas for which the user has been granted SELECT privileges are collected. 
         ##
         ## See also the MySQL metrics listing: https://docs.datadoghq.com/integrations/mysql/#metrics
         #
@@ -272,6 +273,19 @@ instances:
         ## See also the MySQL metrics listing: https://docs.datadoghq.com/integrations/mysql/#metrics
         #
         # system_table_size_metrics: false
+
+        ## @param table_rows_stats_metrics - boolean - optional - default: false
+        ## These metrics are reported if you have a Percona MySQL instance with `userstat` enabled
+        ## Set to `true` to collect table stats metrics.
+        ## Metrics provided by the options:
+        ##   - mysql.info.table.rows.read (total per table)
+        ##   - mysql.info.table.rows.changed (total per table)
+        ## Note that this runs a heavy query against your database to compute the relevant metrics
+        ## for all your existing tables. Due to the nature of these calls, if you have a
+        ## high number of tables and schemas, this may have a negative impact on your database performance.
+        ## See also the MySQL metrics listing: https://docs.datadoghq.com/integrations/mysql/#metrics
+        #
+        # table_rows_stats_metrics: false
 
         ## @param extra_performance_metrics - boolean - optional - default: false
         ## These metrics are reported if `performance_schema` is enabled in the MySQL instance

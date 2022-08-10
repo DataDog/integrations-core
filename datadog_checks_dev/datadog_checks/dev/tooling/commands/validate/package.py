@@ -23,7 +23,7 @@ from ...utils import (
 from ..console import CONTEXT_SETTINGS, abort, annotate_display_queue, echo_failure, echo_info, echo_success
 
 # Some integrations aren't installable via the integration install command, so exclude them from the name requirements
-EXCLUDE_CHECKS = ["datadog_checks_downloader", "datadog_checks_dev", "datadog_checks_base"]
+EXCLUDE_CHECKS = ["datadog_checks_downloader", "datadog_checks_dev", "datadog_checks_base", "ddev"]
 
 
 def read_project_name(check_name):

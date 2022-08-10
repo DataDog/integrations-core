@@ -77,7 +77,7 @@ CATEGORIES_TO_CLASSIFIER_TAGS = {
     "cloud": "Category::Cloud",
     "collaboration": "Category::Collaboration",
     "compliance": "Category::Compliance",
-    "configuration & deployment": "Category::Configuration Deployment",
+    "configuration & deployment": "Category::Configuration & Deployment",
     "containers": "Category::Containers",
     "cost management": "Category::Cost Management",
     "data store": "Category::Data Store",

@@ -1,39 +1,52 @@
 {
-  "display_name": "pulsar",
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "name": "pulsar",
-  "metric_prefix": "pulsar.",
-  "metric_to_check": "pulsar.active_connections",
-  "creates_events": false,
-  "short_description": "Monitor your Pulsar clusters.",
-  "guid": "799b35dd-d481-4d71-825e-83c92a5227c4",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "public_title": "Pulsar",
-  "categories": [
-    "processing",
-    "messaging",
-    "log collection"
-  ],
-  "type": "check",
-  "is_public": true,
-  "integration_id": "pulsar",
+  "manifest_version": "2.0.0",
+  "app_uuid": "2a3a1555-3c19-42a9-b954-ce16c4aa6308",
+  "app_id": "pulsar",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor your Pulsar clusters.",
+    "title": "Pulsar",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Processing",
+      "Category::Messaging",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "pulsar",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "pulsar.",
+        "check": "pulsar.active_connections",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
     },
-    "dashboards": {},
-    "monitors": {},
-    "saved_views": {},
-    "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "pulsar"
-    },
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

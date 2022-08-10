@@ -49,6 +49,11 @@ instances:
     #
     password: <PASSWORD>
 
+    ## @param schema - string - optional - default: SYS_DATABASES
+    ## The schema containing the tenant databases views.
+    #
+    # schema: SYS_DATABASES
+
     ## @param connection_properties - mapping - optional
     ## When `hdbcli` is installed, this defines the properties of the database connections. Any property
     ## defined here overrides any default value set by the check. For more information, see:

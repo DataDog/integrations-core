@@ -1,6 +1,18 @@
 # CHANGELOG - Envoy
 
-## 2.1.1 / 2022-05-18
+## 2.3.1 / 2022-08-05
+
+* [Fixed] Dependency updates. See [#12653](https://github.com/DataDog/integrations-core/pull/12653).
+
+## 2.3.0 / 2022-07-05 / Agent 7.38.0
+
+* [Added] Add ext_authz and ratelimiter metrics to OpenMetrics implementation. See [#12451](https://github.com/DataDog/integrations-core/pull/12451).
+
+## 2.2.0 / 2022-06-27
+
+* [Added] Add ext_authz metrics to envoy integration. See [#12374](https://github.com/DataDog/integrations-core/pull/12374). Thanks [Kaycell](https://github.com/Kaycell).
+
+## 2.1.1 / 2022-05-18 / Agent 7.37.0
 
 * [Fixed] Fix extra metrics description example. See [#12043](https://github.com/DataDog/integrations-core/pull/12043).
 

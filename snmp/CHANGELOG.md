@@ -1,6 +1,11 @@
 # CHANGELOG - snmp
 
-## 5.8.0 / 2022-05-15
+## 5.9.0 / 2022-08-05
+
+* [Added] Add metrics for VPN Tunnels. See [#11977](https://github.com/DataDog/integrations-core/pull/11977). Thanks [jalmeroth](https://github.com/jalmeroth).
+* [Fixed] Dependency updates. See [#12653](https://github.com/DataDog/integrations-core/pull/12653).
+
+## 5.8.0 / 2022-05-15 / Agent 7.37.0
 
 * [Added] Add memory and cpu abstract metrics. See [#11781](https://github.com/DataDog/integrations-core/pull/11781).
 * [Fixed] Fix meraki profile mac address. See [#11871](https://github.com/DataDog/integrations-core/pull/11871).

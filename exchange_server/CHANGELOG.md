@@ -1,6 +1,10 @@
 # CHANGELOG - exchange_server
 
-## 1.13.1 / 2022-05-15
+## 1.14.0 / 2022-07-18
+
+* [Added] Add functionality to load the legacy version of the integration. See [#12396](https://github.com/DataDog/integrations-core/pull/12396).
+
+## 1.13.1 / 2022-05-15 / Agent 7.37.0
 
 * [Fixed] Upgrade dependencies. See [#11958](https://github.com/DataDog/integrations-core/pull/11958).
 

@@ -302,8 +302,6 @@ See [service_checks.json][24] for a list of service checks provided by this inte
 
 ## Troubleshooting
 
-- [Redis Integration Error: "unknown command 'CONFIG'"][25]
-
 ### Agent cannot connect
 
 ```shell
@@ -356,5 +354,4 @@ Additional helpful documentation, links, and articles:
 [22]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [23]: https://github.com/DataDog/integrations-core/blob/master/redisdb/metadata.csv
 [24]: https://github.com/DataDog/integrations-core/blob/master/redisdb/assets/service_checks.json
-[25]: https://docs.datadoghq.com/integrations/faq/redis-integration-error-unknown-command-config/
 [26]: https://www.datadoghq.com/blog/how-to-monitor-redis-performance-metrics

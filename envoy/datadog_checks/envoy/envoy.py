@@ -136,8 +136,8 @@ class Envoy(AgentCheck):
 
             # If the value isn't an integer assume it's pre-computed histogram data.
             except (ValueError, TypeError):
-                for metric, value in parse_histogram(metric, value):
-                    self.gauge(metric, value, tags=tags)
+                for histo_metric, histo_value in parse_histogram(metric, value):
+                    self.gauge(histo_metric, histo_value, tags=tags)
 
         self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=self.custom_tags)
 

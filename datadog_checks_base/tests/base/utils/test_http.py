@@ -314,6 +314,14 @@ class TestAuth:
 
         assert http.options['auth'] is None
 
+    @pytest.mark.parametrize('username,password', [('user', ''), ('', 'pass'), ('', '')])
+    def test_config_basic_allows_empty_strings(self, username, password):
+        instance = {'username': username, 'password': password}
+        init_config = {}
+        http = RequestsWrapper(instance, init_config)
+
+        assert http.options['auth'] == (username, password)
+
     def test_config_kerberos_legacy(self):
         instance = {'kerberos_auth': 'required'}
         init_config = {}
@@ -484,7 +492,7 @@ class TestAuth:
                 principal=None,
             )
 
-    @pytest.mark.skipif(running_on_windows_ci(), reason='Test cannot be run on Windows CI')
+    @pytest.mark.skipif(ON_WINDOWS, reason='Test cannot be run on Windows')
     def test_kerberos_auth_noconf(self, kerberos):
         instance = {}
         init_config = {}
@@ -493,7 +501,7 @@ class TestAuth:
 
         assert response.status_code == 401
 
-    @pytest.mark.skipif(running_on_windows_ci(), reason='Test cannot be run on Windows CI')
+    @pytest.mark.skipif(ON_WINDOWS, reason='Test cannot be run on Windows')
     def test_kerberos_auth_principal_inexistent(self, kerberos):
         instance = {
             'url': kerberos["url"],
@@ -510,7 +518,7 @@ class TestAuth:
         response = http.get(instance["url"])
         assert response.status_code == 401
 
-    @pytest.mark.skipif(running_on_windows_ci(), reason='Test cannot be run on Windows CI')
+    @pytest.mark.skipif(ON_WINDOWS, reason='Test cannot be run on Windows')
     def test_kerberos_auth_principal_incache_nokeytab(self, kerberos):
         instance = {
             'url': kerberos["url"],
@@ -526,7 +534,7 @@ class TestAuth:
         response = http.get(instance["url"])
         assert response.status_code == 200
 
-    @pytest.mark.skipif(running_on_windows_ci(), reason='Test cannot be run on Windows CI')
+    @pytest.mark.skipif(ON_WINDOWS, reason='Test cannot be run on Windows')
     def test_kerberos_auth_principal_inkeytab_nocache(self, kerberos):
         instance = {
             'url': kerberos["url"],
@@ -2039,6 +2047,7 @@ class TestIntegration:
 
 
 class TestAIAChasing:
+    @pytest.mark.skip(reason="expired certified, reactivate test when certified valid again")
     def test_incomplete_chain(self):
         # Protocol 1.2 is allowed by default
         http = RequestsWrapper({}, {})
@@ -2050,6 +2059,7 @@ class TestAIAChasing:
             assert "Unknown protocol `unknown` configured, ignoring it." in caplog.text
         caplog.clear()
 
+    @pytest.mark.skip(reason="expired certified, reactivate test when certified valid again")
     def test_protocol_allowed(self):
         http = RequestsWrapper({'tls_protocols_allowed': ['TLSv1.2']}, {})
         http.get("https://incomplete-chain.badssl.com/")

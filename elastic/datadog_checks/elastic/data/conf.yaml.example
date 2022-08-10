@@ -93,7 +93,7 @@ instances:
 
     ## @param slm_stats - boolean - optional - default: false
     ## Set "slm_stats" to true to collect statistics about Snapshot Lifcycle Management.
-    ## The user must have `manage_slm` cluster privilege to get these metrics.
+    ## The user must have the `read_slm` cluster privilege to get these metrics.
     #
     # slm_stats: false
 

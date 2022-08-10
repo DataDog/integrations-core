@@ -1,32 +1,50 @@
 {
-  "display_name": "GlusterFS",
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "name": "GlusterFS",
-  "metric_prefix": "glusterfs.",
-  "metric_to_check": "glusterfs.cluster.nodes.count",
-  "creates_events": false,
-  "short_description": "Monitor GlusterFS cluster node, volume, and brick status metrics.",
-  "guid": "1cb9a21c-8cc4-4727-a4b1-ab7015c7ae24",
-  "support": "core",
-  "supported_os": [
-    "linux"
-  ],
-  "public_title": "Red Hat Gluster Storage",
-  "process_signatures": [
-    "glusterd",
-    "gluster"
-  ],
-  "categories": [
-    "data store",
-    "log collection"
-  ],
-  "type": "check",
-  "is_public": true,
-  "integration_id": "glusterfs",
+  "manifest_version": "2.0.0",
+  "app_uuid": "3c3562fb-8dce-4265-a8de-eacaa30974e1",
+  "app_id": "glusterfs",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor GlusterFS cluster node, volume, and brick status metrics.",
+    "title": "Red Hat Gluster Storage",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Category::Data Store",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "GlusterFS",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "glusterfs.",
+        "check": "glusterfs.cluster.nodes.count",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      },
+      "process_signatures": [
+        "glusterd",
+        "gluster"
+      ]
     },
     "dashboards": {
       "Red Hat Gluster Storage": "assets/dashboards/red_hat_gluster_storage.json"
@@ -37,10 +55,8 @@
     "saved_views": {
       "glusterfs_processes": "assets/saved_views/glusterfs_processes.json"
     },
-    "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "glusterfs"
-    },
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

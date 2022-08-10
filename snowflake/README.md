@@ -31,7 +31,7 @@ datadog-agent integration install datadog-snowflake==2.0.1
 
 1. Create a Datadog specific role and user to monitor Snowflake. In Snowflake, run the following to create a custom role with access to the ACCOUNT_USAGE schema.
 
-    Note: By default, this integration monitors the `SNOWFLAKE` database and `ACCOUNT_USAGE` schema.
+    Note: By default, this integration monitors the `SNOWFLAKE` database and `ACCOUNT_USAGE` schema. See "Collecting Organization Data" for information on how to monitor the `ORGANIZATION_USAGE` schema.
     This database is available by default and only viewable by users in the `ACCOUNTADMIN` role or [any role granted by the ACCOUNTADMIN][4].
     
 
@@ -116,6 +116,41 @@ datadog-agent integration install datadog-snowflake==2.0.1
     <bold>Note</bold>: Snowflake ACCOUNT_USAGE views have a <a href="https://docs.snowflake.com/en/sql-reference/account-usage.html#data-latency">known latency</a> of 45 minutes to 3 hours.</div>
 
 3. [Restart the Agent][6].
+
+#### Collecting Organization Data
+
+By default, this integration monitors the `ACCOUNT_USAGE` schema, but it can be set to monitor organization-level metrics instead.
+
+To collect organization metrics, change the schema field to `ORGANIZATION_USAGE` and increase the `min_collection_interval` to 43200 in the integration's configuration. This reduces the number of queries to Snowflake, as most organization queries have a latency of up to 24 hours.
+
+Note: To monitor organization metrics, your `user` must have the `ORGADMIN` role.
+
+  ```yaml
+      - schema: ORGANIZATION_USAGE
+        min_collection_interval: 43200
+  ```
+
+
+Additionally, you can monitor both account and organization metrics at the same time:
+
+  ```yaml
+      instances:
+      - account: example-inc
+        username: DATADOG_ORG_ADMIN
+        password: '<PASSWORD>'
+        role: SYSADMIN
+        schema: ORGANIZATION_USAGE
+        database: SNOWFLAKE
+        min_collection_interval: 43200
+
+      - account: example-inc
+        username: DATADOG_ACCOUNT_ADMIN
+        password: '<PASSWORD>'
+        role: DATADOG_ADMIN
+        schema: ACCOUNT_USAGE
+        database: SNOWFLAKE
+        min_collection_interval: 3600
+  ```
 
 #### Collecting data for multiple environments
 
