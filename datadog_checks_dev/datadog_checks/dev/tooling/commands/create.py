@@ -16,6 +16,8 @@ HYPHEN = b'\xe2\x94\x80\xe2\x94\x80'.decode('utf-8')
 PIPE = b'\xe2\x94\x82'.decode('utf-8')
 PIPE_MIDDLE = b'\xe2\x94\x9c'.decode('utf-8')
 PIPE_END = b'\xe2\x94\x94'.decode('utf-8')
+# Static text to let users know these values need updating by hand
+TODO_FILL_IN = "TODO Please Fill In"
 
 
 def tree():
@@ -129,15 +131,15 @@ def create(ctx, name, integration_type, location, non_interactive, quiet, dry_ru
             author_name = click.prompt('Your Company Name')
             homepage = click.prompt('The product or company homepage')
             template_fields['author'] = author_name
-            template_fields[
-                'author_info'
-            ] = f'\n  "author": {{\n    "name": "{author_name}",\n    "homepage": "{homepage}"\n  }},'
 
             eula = 'assets/eula.pdf'
             legal_email = click.prompt('The Legal email used to receive subscription notifications')
             template_fields[
                 'terms'
             ] = f'\n  "terms": {{\n    "eula": "{eula}",\n    "legal_email": "{legal_email}"\n  }},'
+            template_fields[
+                'author_info'
+            ] = f'\n  "author": {{\n    "name": "{author_name}",\n    "homepage": "{homepage}",\n    "vendor_id": "{TODO_FILL_IN}",\n    "sales_email": "{legal_email}"\n  }},'  # noqa
 
             template_fields['pricing_plan'] = '\n  "pricing": [],'
 
