@@ -70,7 +70,7 @@ clickhouse.file.write.count,count,,write,,The number of writes (write/pwrite) to
 clickhouse.file.write.total,gauge,,write,,The total number of writes (write/pwrite) to a file descriptor. Does not include sockets.,0,clickhouse,,
 clickhouse.file.write.size.count,count,,byte,,"The number of bytes written to file descriptors during the last interval. If the file is compressed, this will show compressed data size.",0,clickhouse,,
 clickhouse.file.write.size.total,gauge,,byte,,"The total number of bytes written to file descriptors during the last interval. If the file is compressed, this will show compressed data size.",0,clickhouse,,
-clickhouse.mmapped.file.current,gauge,,,,"Total number of mmapped files."0,clickhouse,,
+clickhouse.mmapped.file.current,gauge,,file,,"Total number of mmapped files.",0,clickhouse,,
 clickhouse.mmapped.file.size,gauge,,byte,,"Sum size of mmapped file regions.",0,clickhouse,,
 clickhouse.network.receive.elapsed.time,gauge,,microsecond,,"Total time spent waiting for data to receive or receiving data from the network.",0,clickhouse,,
 clickhouse.network.receive.size.count,count,,byte,second,"The number of bytes received from network.",0,clickhouse,,
