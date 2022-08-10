@@ -74,8 +74,9 @@ class GitlabRunnerCheck(OpenMetricsBaseCheck):
 
         # Users may want to only report the version
         # OpenMetricsCheck doesn't allow the metadata_metric_name to be one of the metrics
-        if 'ci_runner_version_info' in allowed_metrics:
-            allowed_metrics.remove('ci_runner_version_info')
+        for version_info_name in ["gitlab_runner_version_info", "ci_runner_version_info"]:
+            if version_info_name in allowed_metrics:
+                allowed_metrics.remove(version_info_name)
 
         gitlab_runner_instance = deepcopy(instance)
 
@@ -89,7 +90,7 @@ class GitlabRunnerCheck(OpenMetricsBaseCheck):
                 # Defaults that were set when gitlab_runner was based on PrometheusCheck
                 'send_monotonic_counter': instance.get('send_monotonic_counter', False),
                 'health_service_check': instance.get('health_service_check', False),
-                'metadata_metric_name': 'ci_runner_version_info',
+                'metadata_metric_name': 'gitlab_runner_version_info',
                 'metadata_label_map': {'version': 'version'},
             }
         )
