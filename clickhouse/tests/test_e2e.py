@@ -12,7 +12,6 @@ pytestmark = pytest.mark.e2e
 
 
 def test_check(dd_agent_check, instance):
-    # We do not do aggregator.assert_all_metrics_covered() because depending on timing, some other metrics may appear
     aggregator = dd_agent_check(instance, rate=True)
     server_tag = 'server:{}'.format(instance['server'])
     port_tag = 'port:{}'.format(instance['port'])
