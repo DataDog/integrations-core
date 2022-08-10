@@ -1,0 +1,48 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "baa14f81-c988-4262-9a9f-e268e9476689",
+  "app_id": "fastly",
+  "display_on_public_website": true,
+  "tile": {
+    "description": "Fastly is a content delivery network which caches small files to load web pages more quickly.",
+    "title": "Fastly",
+    "classifier_tags": [
+      "Category::Web",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
+  "assets": {
+    "dashboards": {
+      "fastly": "assets/dashboards/fastly_overview.json"
+    },
+    "monitors": {
+      "[Fastly] Abnormal bandwidth being sent for service: {{service.name}}": "assets/monitors/rec_monitor_bandwidth.json",
+      "[Fastly] Low Hit Ratio for service: {{service.name}}": "assets/monitors/rec_monitor_hit_ratio.json",
+      "[Fastly] 5xx Errors higher than usual for service: {{service.name}}": "assets/monitors/rec_monitor_5xx_errors.json",
+      "[Fastly] High volume of requests triggering a Web Application Firewall rule on service: {{service.name}}": "assets/monitors/waf_rules.json"
+    },
+    "integration": {
+      "auto_install": false,
+      "source_type_name": "fastly",
+      "configuration": {},
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "fastly.",
+        "check": "fastly.requests",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    }
+  }
+}

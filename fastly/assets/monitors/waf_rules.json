@@ -1,0 +1,30 @@
+{
+  "name": "[Fastly] High volume of requests triggering a Web Application Firewall rule on service: {{service.name}}",
+  "type": "query alert",
+  "query": "avg(last_4h):anomalies(avg:fastly.waf_logged{*} by {service}, 'agile', 2, direction='above', interval=60, alert_window='last_15m', count_default_zero='true', seasonality='hourly') >= 1",
+  "message": "There is a high volume of requests triggering a Web Application Firewall rule on {{service.name}}. The value of {{value}} is higher than normal and may be a result of a DDOS attack.\n\nTo help troubleshoot:\n\n- Ensure that <https://status.fastly.com/> is all green\n- Check the Fastly Dashboard: https://app.datadoghq.com/dash/integration/43/fastly---overview",
+  "tags": [
+    "integration:fastly"
+  ],
+  "options": {
+    "thresholds": {
+	  "critical": 1,
+      "critical_recovery": 0
+	},
+    "notify_audit": false,
+    "require_full_window": false,
+	"notify_no_data": false,
+	"no_data_timeframe": 10,
+	"renotify_interval": 0,
+	"threshold_windows": {
+	  "trigger_window": "last_15m",
+	  "recovery_window": "last_15m"
+	},
+	"locked": false,
+	"silenced": {},
+	"include_tags": true,
+	"avalanche_window": 20,
+	"escalation_message": "",
+	"new_group_delay": 60
+  }
+}

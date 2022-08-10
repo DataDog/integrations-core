@@ -1,0 +1,1607 @@
+{
+    "title": "Fastly Overview",
+    "description": "This dashboard provides a high-level overview of your Fastly services, so you can view aggregated throughput and latency metrics as well as the cache hit ratio of your CDN. \n\n#### Further reading on Fastly monitoring:\n\n- [Monitor Fastly performance with Datadog](https://www.datadoghq.com/blog/monitor-fastly-performance-metrics/)\n\n- [Integration Docs](https://docs.datadoghq.com/integrations/fastly/#overview)\n\n- [Glossary](https://developer.fastly.com/reference/glossary)\n\nClone this template dashboard to make changes and add your own graph widgets.",
+    "widgets": [
+        {
+            "id": 4480043932884880,
+            "definition": {
+                "title": "New group",
+                "type": "group",
+                "banner_img": "/static/images/integration_dashboard/fastly_hero_1.png",
+                "show_title": false,
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 5796046741370540,
+                        "definition": {
+                            "type": "note",
+                            "content": "A high level dashboard to monitor key Fastly metrics such as: hit ratio, error rates, bandwidth usage, cache coverage, and many more. \n\nAll Fastly metrics are auto-tagged by service, allowing you to view metrics in aggregate or slice and dice them across your Fastly services.\n",
+                            "background_color": "transparent",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "vertical_align": "center",
+                            "show_tick": false,
+                            "tick_pos": "50%",
+                            "tick_edge": "left",
+                            "has_padding": true
+                        },
+                        "layout": { "x": 0, "y": 0, "width": 4, "height": 2 }
+                    },
+                    {
+                        "id": 2470472844655756,
+                        "definition": {
+                            "type": "note",
+                            "content": "### Fastly Monitoring Guide\n\n[Monitor Fastly performance with Datadog&nbsp;↗](https://www.datadoghq.com/blog/monitor-fastly-performance-metrics/)\n\n[Integration Docs&nbsp;↗](https://docs.datadoghq.com/integrations/fastly/#overview)",
+                            "background_color": "transparent",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "vertical_align": "center",
+                            "show_tick": false,
+                            "tick_pos": "50%",
+                            "tick_edge": "left",
+                            "has_padding": true
+                        },
+                        "layout": { "x": 4, "y": 0, "width": 2, "height": 2 }
+                    }
+                ]
+            },
+            "layout": { "x": 0, "y": 0, "width": 6, "height": 5 }
+        },
+        {
+            "id": 1291241338030388,
+            "definition": {
+                "title": "Overview",
+                "type": "group",
+                "background_color": "white",
+                "show_title": true,
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 352611549897328,
+                        "definition": {
+                            "title": "Cache Hit Ratio",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [{ "formula": "query1 * 100" }],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">=",
+                                            "palette": "white_on_green",
+                                            "value": 95
+                                        },
+                                        {
+                                            "comparator": ">=",
+                                            "palette": "black_on_light_green",
+                                            "value": 85
+                                        },
+                                        {
+                                            "comparator": ">=",
+                                            "palette": "black_on_light_yellow",
+                                            "value": 75
+                                        },
+                                        {
+                                            "comparator": ">=",
+                                            "palette": "white_on_yellow",
+                                            "value": 65
+                                        },
+                                        {
+                                            "comparator": "<",
+                                            "palette": "white_on_red",
+                                            "value": 65
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "query": "avg:fastly.hit_ratio{$service}",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "aggregator": "avg"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "custom_unit": "%",
+                            "precision": 2
+                        },
+                        "layout": { "x": 0, "y": 0, "width": 2, "height": 1 }
+                    },
+                    {
+                        "id": 6476534050591056,
+                        "definition": {
+                            "title": "Success Rate (2xx %)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1 / (query2 + query1 + query3 + query4 + query5) * 100"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": "<=",
+                                            "palette": "white_on_red",
+                                            "value": 0.7
+                                        },
+                                        {
+                                            "comparator": "<=",
+                                            "palette": "white_on_yellow",
+                                            "value": 0.8
+                                        },
+                                        {
+                                            "comparator": ">=",
+                                            "palette": "white_on_green",
+                                            "value": 0.9
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "query": "avg:fastly.status_2xx{$service}",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "aggregator": "avg"
+                                        },
+                                        {
+                                            "query": "avg:fastly.status_1xx{$service}",
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "aggregator": "avg"
+                                        },
+                                        {
+                                            "query": "avg:fastly.status_3xx{$service}",
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "aggregator": "avg"
+                                        },
+                                        {
+                                            "query": "avg:fastly.status_4xx{$service}",
+                                            "data_source": "metrics",
+                                            "name": "query4",
+                                            "aggregator": "avg"
+                                        },
+                                        {
+                                            "query": "avg:fastly.status_5xx{$service}",
+                                            "data_source": "metrics",
+                                            "name": "query5",
+                                            "aggregator": "avg"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": false,
+                            "custom_unit": "%",
+                            "precision": 2
+                        },
+                        "layout": { "x": 2, "y": 0, "width": 2, "height": 1 }
+                    },
+                    {
+                        "id": 2738634926246120,
+                        "definition": {
+                            "title": "Error Rate (4xx + 5xx %)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "(query1 + query5) / (query2 + query3 + query4 + query5 + query1) * 100"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">=",
+                                            "palette": "white_on_red",
+                                            "value": 10
+                                        },
+                                        {
+                                            "comparator": ">=",
+                                            "palette": "white_on_yellow",
+                                            "value": 5
+                                        },
+                                        {
+                                            "comparator": "<",
+                                            "palette": "white_on_green",
+                                            "value": 5
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "query": "avg:fastly.status_5xx{$service}",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "aggregator": "avg"
+                                        },
+                                        {
+                                            "query": "avg:fastly.status_4xx{$service}",
+                                            "data_source": "metrics",
+                                            "name": "query5",
+                                            "aggregator": "avg"
+                                        },
+                                        {
+                                            "query": "avg:fastly.status_1xx{$service}",
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "aggregator": "avg"
+                                        },
+                                        {
+                                            "query": "avg:fastly.status_2xx{$service}",
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "aggregator": "avg"
+                                        },
+                                        {
+                                            "query": "avg:fastly.status_3xx{$service}",
+                                            "data_source": "metrics",
+                                            "name": "query4",
+                                            "aggregator": "avg"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": false,
+                            "custom_unit": "%",
+                            "precision": 2
+                        },
+                        "layout": { "x": 4, "y": 0, "width": 2, "height": 1 }
+                    },
+                    {
+                        "id": 7861036132046654,
+                        "definition": {
+                            "type": "note",
+                            "content": "The Cache Hit Ratio is the percentage of incoming requests that are read from cache.",
+                            "background_color": "white",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "vertical_align": "center",
+                            "show_tick": true,
+                            "tick_pos": "25%",
+                            "tick_edge": "top",
+                            "has_padding": true
+                        },
+                        "layout": { "x": 0, "y": 1, "width": 2, "height": 1 }
+                    },
+                    {
+                        "id": 530558535748238,
+                        "definition": {
+                            "title": "Total Requests",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "formulas": [{ "formula": "query1" }],
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "query": "avg:fastly.requests{$service} by {service}",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "aggregator": "last"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "type": "sunburst",
+                            "legend": { "type": "inline" }
+                        },
+                        "layout": { "x": 2, "y": 1, "width": 4, "height": 2 }
+                    },
+                    {
+                        "id": 402050376013404,
+                        "definition": {
+                            "title": "Total Bandwidth Sent",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [{ "formula": "query1" }],
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "query": "sum:fastly.bandwidth{$service}",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "aggregator": "avg"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": { "x": 0, "y": 2, "width": 2, "height": 1 }
+                    },
+                    {
+                        "id": 7740164180675564,
+                        "definition": {
+                            "title": "Weekly Bandwidth Change",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "change",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        { "formula": "week_before(query1)" },
+                                        { "formula": "query1" }
+                                    ],
+                                    "order_by": "change",
+                                    "order_dir": "desc",
+                                    "compare_to": "hour_before",
+                                    "response_format": "scalar",
+                                    "increase_good": true,
+                                    "queries": [
+                                        {
+                                            "query": "avg:fastly.bandwidth{*} by {service}",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "change_type": "absolute"
+                                }
+                            ]
+                        },
+                        "layout": { "x": 0, "y": 3, "width": 6, "height": 2 }
+                    },
+                    {
+                        "id": 151843201320390,
+                        "definition": {
+                            "title": "Monitor Summary",
+                            "title_size": "13",
+                            "title_align": "left",
+                            "type": "manage_status",
+                            "summary_type": "monitors",
+                            "display_format": "countsAndList",
+                            "color_preference": "background",
+                            "hide_zero_counts": true,
+                            "show_last_triggered": false,
+                            "show_priority": false,
+                            "query": "fastly OR metric:fastly.*",
+                            "sort": "status,asc",
+                            "count": 50,
+                            "start": 0
+                        },
+                        "layout": { "x": 0, "y": 5, "width": 6, "height": 4 }
+                    }
+                ]
+            },
+            "layout": { "x": 6, "y": 0, "width": 6, "height": 10 }
+        },
+        {
+            "id": 700446093961524,
+            "definition": {
+                "title": "Latency",
+                "type": "group",
+                "background_color": "vivid_orange",
+                "show_title": true,
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 5911075775334430,
+                        "definition": {
+                            "title": "Total Request Latency (Hits and Misses)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Pass Processing Time",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "on_right_yaxis": false,
+                                    "queries": [
+                                        {
+                                            "query": "avg:fastly.pass_time{$service}",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "green",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                },
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Miss Processing Time",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "on_right_yaxis": false,
+                                    "queries": [
+                                        {
+                                            "query": "avg:fastly.miss_time{$service}",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "red",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "yaxis": {
+                                "include_zero": true,
+                                "scale": "linear",
+                                "label": "",
+                                "min": "auto",
+                                "max": "auto"
+                            },
+                            "markers": []
+                        },
+                        "layout": { "x": 0, "y": 0, "width": 6, "height": 2 }
+                    },
+                    {
+                        "id": 4123594427498218,
+                        "definition": {
+                            "type": "note",
+                            "content": "The average time spent waiting to be served at the origin by a request that bypasses a cache",
+                            "background_color": "orange",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "vertical_align": "center",
+                            "show_tick": true,
+                            "tick_pos": "50%",
+                            "tick_edge": "right",
+                            "has_padding": true
+                        },
+                        "layout": { "x": 0, "y": 2, "width": 2, "height": 2 }
+                    },
+                    {
+                        "id": 1642415146700750,
+                        "definition": {
+                            "title": "Average Origin Latency (ms)",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Origin Latency (ms)",
+                                            "formula": "query1 / query2"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "sum:fastly.miss_time{$service}",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        },
+                                        {
+                                            "query": "sum:fastly.miss{$service}",
+                                            "data_source": "metrics",
+                                            "name": "query2"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "warm",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": { "x": 2, "y": 2, "width": 4, "height": 2 }
+                    }
+                ]
+            },
+            "layout": { "x": 0, "y": 5, "width": 6, "height": 5 }
+        },
+        {
+            "id": 7231766875730122,
+            "definition": {
+                "title": "Logs",
+                "type": "group",
+                "background_color": "vivid_green",
+                "show_title": true,
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 877045850803096,
+                        "definition": {
+                            "title": "Logs Stream",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "log_stream",
+                            "indexes": [],
+                            "query": "source:fastly $service",
+                            "sort": { "column": "time", "order": "desc" },
+                            "columns": ["host", "service"],
+                            "show_date_column": true,
+                            "show_message_column": true,
+                            "message_display": "expanded-md"
+                        },
+                        "layout": { "x": 0, "y": 0, "width": 6, "height": 5 }
+                    },
+                    {
+                        "id": 55530002738184,
+                        "definition": {
+                            "title": "Count by Region",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "geomap",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "search": {
+                                                "query": "source:fastly $service"
+                                            },
+                                            "data_source": "logs",
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "name": "query1",
+                                            "indexes": ["*"],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@network.client.geoip.country.iso_code",
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc"
+                                                    },
+                                                    "limit": 10
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ],
+                            "style": {
+                                "palette": "hostmap_blues",
+                                "palette_flip": false
+                            },
+                            "view": { "focus": "WORLD" }
+                        },
+                        "layout": { "x": 6, "y": 0, "width": 6, "height": 3 }
+                    },
+                    {
+                        "id": 3659880229860148,
+                        "definition": {
+                            "title": "Count by Browser",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "a",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "search": {
+                                                "query": "source:fastly $service"
+                                            },
+                                            "data_source": "logs",
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "name": "a",
+                                            "indexes": ["*"],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@http.useragent_details.browser.family",
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc"
+                                                    },
+                                                    "limit": 10
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        "layout": { "x": 6, "y": 3, "width": 3, "height": 2 }
+                    },
+                    {
+                        "id": 6407447987762140,
+                        "definition": {
+                            "title": "Count by OS",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "a",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "search": {
+                                                "query": "source:fastly $service"
+                                            },
+                                            "data_source": "logs",
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "name": "a",
+                                            "indexes": ["*"],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@http.useragent_details.os.family",
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc"
+                                                    },
+                                                    "limit": 10
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        "layout": { "x": 9, "y": 3, "width": 3, "height": 2 }
+                    }
+                ]
+            },
+            "layout": { "x": 0, "y": 10, "width": 12, "height": 6 }
+        },
+        {
+            "id": 4763242894510612,
+            "definition": {
+                "title": "Caching",
+                "type": "group",
+                "background_color": "vivid_purple",
+                "show_title": true,
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 5027914578628966,
+                        "definition": {
+                            "title": "Cache Coverage (%)",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "100 * (1 - query1 / query2)",
+                                            "alias": "Cache Coverage"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "query": "sum:fastly.pass{$service}",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "aggregator": "avg"
+                                        },
+                                        {
+                                            "query": "sum:fastly.requests{$service}",
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "aggregator": "avg"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "custom_unit": "%",
+                            "precision": 2
+                        },
+                        "layout": { "x": 0, "y": 0, "width": 2, "height": 2 }
+                    },
+                    {
+                        "id": 1808000711372998,
+                        "definition": {
+                            "type": "note",
+                            "content": "Cache Hit Ratio (CHR) should generally be high for static content (such as website images), and is expected to be lower for dynamic content. \n\nSudden changes in CHR over time could be a precursor for issues, as it increases overall system load to the origin. CHR can be influenced by tweaking your cache control policy. \n\nCHR can be significantly impacted by shielding and segmented caching.",
+                            "background_color": "purple",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "vertical_align": "center",
+                            "show_tick": true,
+                            "tick_pos": "50%",
+                            "tick_edge": "right",
+                            "has_padding": true
+                        },
+                        "layout": { "x": 2, "y": 0, "width": 2, "height": 4 }
+                    },
+                    {
+                        "id": 6451195514289402,
+                        "definition": {
+                            "title": "Cache Hit Ratio",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "time": {},
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "on_right_yaxis": false,
+                                    "formulas": [
+                                        {
+                                            "alias": "% of Requests Satisfied from Cache",
+                                            "formula": "query1 * 100"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "query": "avg:fastly.hit_ratio{$service}",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "purple",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "area"
+                                }
+                            ],
+                            "yaxis": {
+                                "include_zero": true,
+                                "scale": "linear",
+                                "label": "",
+                                "min": "auto",
+                                "max": "auto"
+                            },
+                            "markers": []
+                        },
+                        "layout": { "x": 4, "y": 0, "width": 4, "height": 2 }
+                    },
+                    {
+                        "id": 5089877014660932,
+                        "definition": {
+                            "title": "Uncacheable Requests",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Uncacheable Requests",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "sum:fastly.uncacheable{$service} by {service}",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "purple",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": { "x": 8, "y": 0, "width": 4, "height": 2 }
+                    },
+                    {
+                        "id": 4227428186912198,
+                        "definition": {
+                            "type": "note",
+                            "content": "Cache coverage is the percentage of total objects that never had to be retrieved from the origin.\n\nA low cache coverage could be indicator of cache policy flaws and that objects stored in cache are being cleared out too quickly.\n",
+                            "background_color": "purple",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "vertical_align": "center",
+                            "show_tick": true,
+                            "tick_pos": "50%",
+                            "tick_edge": "top",
+                            "has_padding": true
+                        },
+                        "layout": { "x": 0, "y": 2, "width": 2, "height": 2 }
+                    },
+                    {
+                        "id": 394348168209158,
+                        "definition": {
+                            "title": "Weekly Cache Hit Ratio Change",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "change",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        { "formula": "week_before(query1)" },
+                                        { "formula": "query1" }
+                                    ],
+                                    "order_by": "change",
+                                    "order_dir": "desc",
+                                    "compare_to": "hour_before",
+                                    "response_format": "scalar",
+                                    "increase_good": true,
+                                    "queries": [
+                                        {
+                                            "query": "avg:fastly.hit_ratio{$service} by {service}",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "change_type": "absolute"
+                                }
+                            ]
+                        },
+                        "layout": { "x": 4, "y": 2, "width": 4, "height": 2 }
+                    },
+                    {
+                        "id": 1344577662213546,
+                        "definition": {
+                            "title": "Caching Overview",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Cache Passes",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Cache Misses",
+                                            "formula": "query3"
+                                        },
+                                        {
+                                            "alias": "Cache Hits",
+                                            "formula": "query4"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "sum:fastly.pass{$service}",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        },
+                                        {
+                                            "query": "sum:fastly.miss{$service}",
+                                            "data_source": "metrics",
+                                            "name": "query3"
+                                        },
+                                        {
+                                            "query": "sum:fastly.hits{$service}",
+                                            "data_source": "metrics",
+                                            "name": "query4"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "area"
+                                }
+                            ]
+                        },
+                        "layout": { "x": 8, "y": 2, "width": 4, "height": 2 }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 16,
+                "width": 12,
+                "height": 5,
+                "is_column_break": true
+            }
+        },
+        {
+            "id": 6253045991840248,
+            "definition": {
+                "title": "Traffic",
+                "type": "group",
+                "background_color": "vivid_blue",
+                "show_title": true,
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 7452172931890926,
+                        "definition": {
+                            "type": "note",
+                            "content": "Bandwidth usage should generally be steady, and correlate with request rate. \n\nCDN cost is generally a function of bandwidth. \n\nSudden spikes in bandwidth could either be good (organic traffic increase), or bad (malicious actors trying to increase your system load with a high number of Get requests).\n\n",
+                            "background_color": "blue",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "vertical_align": "center",
+                            "show_tick": true,
+                            "tick_pos": "25%",
+                            "tick_edge": "right",
+                            "has_padding": true
+                        },
+                        "layout": { "x": 0, "y": 0, "width": 2, "height": 4 }
+                    },
+                    {
+                        "id": 21246170256338,
+                        "definition": {
+                            "title": "Average Bandwidth Sent",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Bandwidth",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "avg:fastly.bandwidth{$service}",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "blue",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "area"
+                                }
+                            ]
+                        },
+                        "layout": { "x": 2, "y": 0, "width": 5, "height": 2 }
+                    },
+                    {
+                        "id": 2128043613814784,
+                        "definition": {
+                            "title": "Objects by size",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "< 1 kB",
+                                            "formula": "query2"
+                                        },
+                                        {
+                                            "alias": "1 - 10 kB",
+                                            "formula": "query3"
+                                        },
+                                        {
+                                            "alias": "10 - 100 kB",
+                                            "formula": "query4"
+                                        },
+                                        {
+                                            "alias": "100 kB - 1 MB",
+                                            "formula": "query5"
+                                        },
+                                        {
+                                            "alias": "1 - 10 MB",
+                                            "formula": "query6"
+                                        },
+                                        {
+                                            "alias": "10 - 100 MB",
+                                            "formula": "query7"
+                                        },
+                                        {
+                                            "alias": "100 MB - 1 GB",
+                                            "formula": "query8"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "sum:fastly.object_size_1k{$service}",
+                                            "data_source": "metrics",
+                                            "name": "query2"
+                                        },
+                                        {
+                                            "query": "sum:fastly.object_size_10k{$service}",
+                                            "data_source": "metrics",
+                                            "name": "query3"
+                                        },
+                                        {
+                                            "query": "sum:fastly.object_size_100k{$service}",
+                                            "data_source": "metrics",
+                                            "name": "query4"
+                                        },
+                                        {
+                                            "query": "sum:fastly.object_size_1m{$service}",
+                                            "data_source": "metrics",
+                                            "name": "query5"
+                                        },
+                                        {
+                                            "query": "sum:fastly.object_size_10m{$service}",
+                                            "data_source": "metrics",
+                                            "name": "query6"
+                                        },
+                                        {
+                                            "query": "sum:fastly.object_size_100m{$service}",
+                                            "data_source": "metrics",
+                                            "name": "query7"
+                                        },
+                                        {
+                                            "query": "sum:fastly.object_size_1g{$service}",
+                                            "data_source": "metrics",
+                                            "name": "query8"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "area"
+                                }
+                            ]
+                        },
+                        "layout": { "x": 7, "y": 0, "width": 5, "height": 2 }
+                    },
+                    {
+                        "id": 45187831740568,
+                        "definition": {
+                            "title": "Requests by Type",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Success (2xx)",
+                                            "formula": "query3"
+                                        },
+                                        {
+                                            "alias": "Redirection (3xx)",
+                                            "formula": "query4"
+                                        },
+                                        {
+                                            "alias": "Client Error (4xx)",
+                                            "formula": "query2"
+                                        },
+                                        {
+                                            "alias": "Server Error (5xx)",
+                                            "formula": "query5"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "sum:fastly.status_2xx{$service}",
+                                            "data_source": "metrics",
+                                            "name": "query3"
+                                        },
+                                        {
+                                            "query": "sum:fastly.status_3xx{$service}",
+                                            "data_source": "metrics",
+                                            "name": "query4"
+                                        },
+                                        {
+                                            "query": "sum:fastly.status_4xx{$service}",
+                                            "data_source": "metrics",
+                                            "name": "query2"
+                                        },
+                                        {
+                                            "query": "sum:fastly.status_5xx{$service}",
+                                            "data_source": "metrics",
+                                            "name": "query5"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "cool",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "area"
+                                }
+                            ],
+                            "markers": [
+                                {
+                                    "value": "y = 0",
+                                    "display_type": "error dashed"
+                                }
+                            ]
+                        },
+                        "layout": { "x": 2, "y": 2, "width": 5, "height": 2 }
+                    },
+                    {
+                        "id": 5931340453150762,
+                        "definition": {
+                            "title": "Average Object Size (Bandwidth / Requests)",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Bytes",
+                                            "formula": "query4 / query2"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "on_right_yaxis": false,
+                                    "queries": [
+                                        {
+                                            "query": "avg:fastly.bandwidth{$service}",
+                                            "data_source": "metrics",
+                                            "name": "query4"
+                                        },
+                                        {
+                                            "query": "avg:fastly.requests{$service}",
+                                            "data_source": "metrics",
+                                            "name": "query2"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "blue",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "yaxis": {
+                                "include_zero": true,
+                                "scale": "linear",
+                                "label": "",
+                                "min": "auto",
+                                "max": "auto"
+                            },
+                            "markers": []
+                        },
+                        "layout": { "x": 7, "y": 2, "width": 5, "height": 2 }
+                    },
+                    {
+                        "id": 4472940623020722,
+                        "definition": {
+                            "type": "note",
+                            "content": "If enabled, shielding reduces origin traffic by forcing all origin requests to go through a specified Fastly point of presence (POP). \n\nRequests that are not initially handled by the specified POP will therefore be processed by two POPs and the request will have a second chance to be satisfied within the Fastly Edge cloud (thus avoiding an origin request).\n",
+                            "background_color": "blue",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "vertical_align": "center",
+                            "show_tick": true,
+                            "tick_pos": "50%",
+                            "tick_edge": "right",
+                            "has_padding": true
+                        },
+                        "layout": { "x": 0, "y": 4, "width": 5, "height": 2 }
+                    },
+                    {
+                        "id": 8366573137048658,
+                        "definition": {
+                            "title": "Requests From Shield",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [{ "formula": "query1" }],
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "query": "avg:fastly.shield{$service}",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "aggregator": "avg"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": { "x": 5, "y": 4, "width": 2, "height": 2 }
+                    },
+                    {
+                        "id": 7961194716005102,
+                        "definition": {
+                            "title": "Requests by TLS version",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "time": {},
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "TLS 1.0",
+                                            "formula": "query2"
+                                        },
+                                        {
+                                            "alias": "TLS 1.1",
+                                            "formula": "query3"
+                                        },
+                                        {
+                                            "alias": "TLS 1.2",
+                                            "formula": "query4"
+                                        },
+                                        {
+                                            "alias": "TLS 1.3",
+                                            "formula": "query5"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "max:fastly.tls_v10{$service}",
+                                            "data_source": "metrics",
+                                            "name": "query2"
+                                        },
+                                        {
+                                            "query": "max:fastly.tls_v11{$service}",
+                                            "data_source": "metrics",
+                                            "name": "query3"
+                                        },
+                                        {
+                                            "query": "max:fastly.tls_v12{$service}",
+                                            "data_source": "metrics",
+                                            "name": "query4"
+                                        },
+                                        {
+                                            "query": "max:fastly.tls_v13{$service}",
+                                            "data_source": "metrics",
+                                            "name": "query5"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "blue",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": { "x": 7, "y": 4, "width": 5, "height": 2 }
+                    }
+                ]
+            },
+            "layout": { "x": 0, "y": 21, "width": 12, "height": 7 }
+        },
+        {
+            "id": 8819372688546080,
+            "definition": {
+                "title": "On-the-Fly Packager",
+                "type": "group",
+                "background_color": "vivid_pink",
+                "show_title": true,
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 1537777212353964,
+                        "definition": {
+                            "type": "note",
+                            "content": "If enabled, monitor the performance of Fastly's \"on-the-fly\" video-on-demand content packaging add-on.",
+                            "background_color": "pink",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "vertical_align": "center",
+                            "show_tick": true,
+                            "tick_pos": "50%",
+                            "tick_edge": "right",
+                            "has_padding": true
+                        },
+                        "layout": { "x": 0, "y": 0, "width": 2, "height": 4 }
+                    },
+                    {
+                        "id": 2451731453801228,
+                        "definition": {
+                            "title": "Total Responses",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Total Responses",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "sum:fastly.otfp{$service}",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "orange",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": { "x": 2, "y": 0, "width": 4, "height": 2 }
+                    },
+                    {
+                        "id": 573550649327514,
+                        "definition": {
+                            "title": "Response Delivery Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        { "alias": "Time", "formula": "query1" }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "avg:fastly.otfp_deliver_time{$service}",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "orange",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": { "x": 2, "y": 2, "width": 4, "height": 2 }
+                    }
+                ]
+            },
+            "layout": { "x": 0, "y": 0, "width": 6, "height": 5 }
+        },
+        {
+            "id": 4389459507527890,
+            "definition": {
+                "title": "Threats",
+                "type": "group",
+                "background_color": "vivid_orange",
+                "show_title": true,
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 4531420586621214,
+                        "definition": {
+                            "type": "note",
+                            "content": "Web Application Firewalls (WAFs) monitor for malicious and anomalous web traffic directed at your web servers.\n\nWhen a potentially malicious request is received by the Fastly WAF product, it will either log it and allow it or log and block that traffic before it reaches your web application.",
+                            "background_color": "orange",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "vertical_align": "center",
+                            "show_tick": true,
+                            "tick_pos": "50%",
+                            "tick_edge": "right",
+                            "has_padding": true
+                        },
+                        "layout": { "x": 0, "y": 0, "width": 2, "height": 4 }
+                    },
+                    {
+                        "id": 4048069765067732,
+                        "definition": {
+                            "title": "WAF Triggering Requests",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Total Requests Triggering Firewall Rule",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Requests Passed",
+                                            "formula": "query2"
+                                        },
+                                        {
+                                            "alias": "Requests Blocked",
+                                            "formula": "query3"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "avg:fastly.waf_logged{$service}",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        },
+                                        {
+                                            "query": "avg:fastly.waf_passed{$service}",
+                                            "data_source": "metrics",
+                                            "name": "query2"
+                                        },
+                                        {
+                                            "query": "avg:fastly.waf_blocked{$service}",
+                                            "data_source": "metrics",
+                                            "name": "query3"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "red",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "area"
+                                }
+                            ]
+                        },
+                        "layout": { "x": 2, "y": 0, "width": 4, "height": 4 }
+                    }
+                ]
+            },
+            "layout": { "x": 6, "y": 0, "width": 6, "height": 5 }
+        }
+    ],
+    "template_variables": [
+        {
+            "name": "service",
+            "default": "*",
+            "prefix": "service",
+            "available_values": []
+        }
+    ],
+    "layout_type": "ordered",
+    "is_read_only": false,
+    "notify_list": [],
+    "reflow_type": "fixed",
+    "id": "icu-y92-27e"
+}

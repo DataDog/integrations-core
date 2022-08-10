@@ -1,0 +1,31 @@
+{
+	"name": "[Fastly] Low Hit Ratio for service: {{service.name}}",
+	"type": "query alert",
+	"query": "avg(last_4h):anomalies(avg:fastly.hit_ratio{*} by {service}, 'basic', 2, direction='below', interval=60, alert_window='last_15m', count_default_zero='true') >= 1",
+	"message": "The average Fastly hit ratio is at {{value}}, which is lower than usual.\n\nTo help troubleshoot:\n\n- Ensure that <https://status.fastly.com/> is all green\n- Check the Fastly Dashboard: https://app.datadoghq.com/dash/integration/43/fastly---overview",
+	"tags": [
+		"integration:fastly"
+	],
+	"options": {
+		"notify_audit": false,
+		"locked": false,
+		"silenced": {},
+		"include_tags": true,
+		"thresholds": {
+			"critical": 1,
+			"critical_recovery": 0
+		},
+		"require_full_window": false,
+		"notify_no_data": false,
+		"renotify_interval": 0,
+		"avalanche_window": 20,
+		"escalation_message": "",
+		"threshold_windows": {
+			"recovery_window": "last_15m",
+			"trigger_window": "last_15m"
+		},
+		"new_group_delay": 60
+	},
+	"priority": null,
+	"restricted_roles": null
+}

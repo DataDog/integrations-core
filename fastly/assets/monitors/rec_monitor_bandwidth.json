@@ -1,0 +1,31 @@
+{
+	"name": "[Fastly] Abnormal bandwidth being sent for service: {{service.name}}",
+	"type": "query alert",
+	"query": "avg(last_4h):anomalies(avg:fastly.bandwidth{*} by {service}, 'agile', 2, direction='both', interval=60, alert_window='last_15m', seasonality='weekly', timezone='utc', count_default_zero='true') >= 1",
+	"message": "The average bandwidth being sent from all Fastly caches is at {{value}}, which is out of its usual range. Sudden spikes in bandwidth could either be good (organic traffic increase), or bad (malicious actors trying to increase your system load with a high number of Get requests).\n\nTo help troubleshoot:\n\n- Ensure that <https://status.fastly.com/> is all green\n- Check the Fastly Dashboard: https://app.datadoghq.com/dash/integration/43/fastly---overview",
+	"tags": [
+		"integration:fastly"
+	],
+	"options": {
+		"notify_audit": false,
+		"locked": false,
+		"silenced": {},
+		"include_tags": true,
+		"thresholds": {
+			"critical": 1,
+			"critical_recovery": 0
+		},
+		"require_full_window": false,
+		"notify_no_data": false,
+		"renotify_interval": 0,
+		"avalanche_window": 20,
+		"escalation_message": "",
+		"threshold_windows": {
+			"recovery_window": "last_15m",
+			"trigger_window": "last_15m"
+		},
+		"new_group_delay": 60
+	},
+	"priority": null,
+	"restricted_roles": null
+}
