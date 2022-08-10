@@ -8,9 +8,11 @@ import pytest
 import vertica_python as vertica
 
 from datadog_checks.dev import LazyFunction, docker_run
+from datadog_checks.vertica.queries import QueryBuilder
+from datadog_checks.vertica.vertica import VerticaClient
 
 from . import common
-from .db import setup_db_tables  # noqa: F401
+from .db import BASE_DB_OPTIONS, setup_db_tables  # noqa: F401
 
 
 class InitializeDB(LazyFunction):
@@ -51,3 +53,19 @@ def tls_instance():
 @pytest.fixture
 def tls_instance_legacy():
     return deepcopy(common.TLS_CONFIG_LEGACY)
+
+
+@pytest.fixture
+def client():
+    client = VerticaClient(BASE_DB_OPTIONS)
+    with client.connect():
+        yield client
+
+
+@pytest.fixture
+def builder():
+    yield QueryBuilder(
+        common.VERTICA_MAJOR_VERSION,
+        catalog_schema='fake_v_catalog',
+        monitor_schema='fake_v_monitor',
+    )

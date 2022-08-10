@@ -7,10 +7,8 @@ from decimal import Decimal
 import pytest
 
 from datadog_checks.vertica.queries import QueryBuilder
-from datadog_checks.vertica.vertica import VerticaClient
 
 from . import common
-from .db import BASE_DB_OPTIONS
 
 
 @pytest.mark.parametrize(
@@ -95,22 +93,6 @@ def test_build_storage_containers_queries(version, expected_per_projection_query
     assert queries[0]['name'] == 'storage_containers_per_projection'
     assert queries[0]['query'] == expected_per_projection_query
     assert queries[0]['columns'][-1] == {'name': 'projection.delete_vectors', 'type': 'gauge'}
-
-
-@pytest.fixture
-def client():
-    client = VerticaClient(BASE_DB_OPTIONS)
-    with client.connect():
-        yield client
-
-
-@pytest.fixture
-def builder():
-    yield QueryBuilder(
-        common.VERTICA_MAJOR_VERSION,
-        catalog_schema='fake_v_catalog',
-        monitor_schema='fake_v_monitor',
-    )
 
 
 def one_day_from_now():
