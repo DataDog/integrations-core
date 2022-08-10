@@ -30,7 +30,7 @@ CUSTOM_TAGS = ['optional:tag1']
 # When we stand up a clean test infrastructure some of those metrics might not
 # be available yet, hence we validate a stable subset
 ALLOWED_METRICS = [
-    'ci_runner_version_info',
+    'gitlab_runner_version_info',
     'process_max_fds',
     'process_open_fds',
     'process_resident_memory_bytes',
