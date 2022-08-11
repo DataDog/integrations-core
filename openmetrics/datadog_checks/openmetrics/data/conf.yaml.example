@@ -79,7 +79,7 @@ instances:
     ##           metrics:
     ##           - <EXPOSED_METRIC_1>: <SENT_METRIC_1>
     ##           - <EXPOSED_METRIC_2>: <SENT_METRIC_2>
-    ##      b. If a value is a mapping, then it must have a `name` and/or `type` key.
+    ##      b. If a value is a mapping, then it must have a `name` and `type` key.
     ##         The `name` represents the sent metric name, and the `type` represents how
     ##         the metric should be handled, overriding any type information the endpoint
     ##         may provide. For example:
