@@ -561,6 +561,7 @@ class IbmDb2Check(AgentCheck):
         connection_options = {ibm_db.ATTR_CASE: ibm_db.CASE_LOWER}
 
         try:
+            self.log.debug("Attempting to connect to Db2 with `%s`...", scrub_connection_string(target))
             connection = ibm_db.connect(target, username, password, connection_options)
         except Exception as e:
             if self._host:
