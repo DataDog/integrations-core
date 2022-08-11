@@ -63,18 +63,17 @@ class IbmDb2Check(AgentCheck):
         )
 
     def check(self, instance):
-        if self._conn is None:
-            connection = self.get_connection()
-            if connection is None:
-                self.service_check(
-                    self.SERVICE_CHECK_CONNECT,
-                    self.CRITICAL,
-                    tags=self._tags,
-                    message="Unable to create new connection to database: {}".format(self._db),
-                )
-                return
+        connection = self.get_connection()
+        if connection is None:
+            self.service_check(
+                self.SERVICE_CHECK_CONNECT,
+                self.CRITICAL,
+                tags=self._tags,
+                message="Unable to create new connection to database: {}".format(self._db),
+            )
+            return
 
-            self._conn = connection
+        self._conn = connection
 
         self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, tags=self._tags)
         self.collect_metadata()
