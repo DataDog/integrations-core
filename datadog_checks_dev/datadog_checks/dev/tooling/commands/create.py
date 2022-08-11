@@ -122,7 +122,8 @@ def create(ctx, name, integration_type, location, non_interactive, quiet, dry_ru
 
     if not non_interactive and not dry_run:
         if repo_choice != 'core':
-            template_fields['email'] = click.prompt('Email used for support requests')
+            support_email = click.prompt('Email used for support requests')
+            template_fields['email'] = support_email
             template_fields['email_packages'] = template_fields['email']
         if repo_choice == 'extras':
             template_fields['author'] = click.prompt('Your name')
@@ -130,16 +131,18 @@ def create(ctx, name, integration_type, location, non_interactive, quiet, dry_ru
         if repo_choice == 'marketplace':
             author_name = click.prompt('Your Company Name')
             homepage = click.prompt('The product or company homepage')
+            sales_email = click.prompt('Email used for subscription notifications')
+            legal_email = click.prompt('The Legal email used to receive subscription notifications')
+
             template_fields['author'] = author_name
 
             eula = 'assets/eula.pdf'
-            legal_email = click.prompt('The Legal email used to receive subscription notifications')
             template_fields[
                 'terms'
             ] = f'\n  "terms": {{\n    "eula": "{eula}",\n    "legal_email": "{legal_email}"\n  }},'
             template_fields[
                 'author_info'
-            ] = f'\n  "author": {{\n    "name": "{author_name}",\n    "homepage": "{homepage}",\n    "vendor_id": "{TODO_FILL_IN}",\n    "sales_email": "{legal_email}"\n  }},'  # noqa
+            ] = f'\n  "author": {{\n    "name": "{author_name}",\n    "homepage": "{homepage}",\n    "vendor_id": "{TODO_FILL_IN}",\n    "sales_email": "{sales_email}",\n    "support_email": "{support_email}"\n  }},'  # noqa
 
             template_fields['pricing_plan'] = '\n  "pricing": [],'
 
