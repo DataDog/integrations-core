@@ -40,6 +40,9 @@ For containerized environments, see the [Autodiscovery Integration Templates][5]
 | `<INIT_CONFIG>`      | blank or `{}`                                                                       |
 | `<INSTANCE_CONFIG>`  | `{"url":"http://%%host%%:8083", "username":"<USERNAME>", "password": "<PASSWORD>"}` |
 
+<!-- xxz tab xxx -->
+<!-- xxx tab "Kubernetes" xxx -->
+
 ###### Kubernetes
 
 If you're using Kubernetes, add the config to replication controller section of twistlock_console.yaml before deploying:
