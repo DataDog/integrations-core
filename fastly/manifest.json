@@ -4,7 +4,7 @@
   "app_id": "fastly",
   "display_on_public_website": true,
   "tile": {
-    "description": "A content delivery network that caches files so web pages load quickly.",
+    "description": "A content delivery network that caches files so web pages load fastly.",
     "title": "Fastly",
     "classifier_tags": [
       "Category::Web",
