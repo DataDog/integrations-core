@@ -68,7 +68,7 @@ To install the {integration_name} check on your host:
         support_type = 'core'
         test_dev_dep = '-e ../datadog_checks_dev'
         tox_base_dep = '-e../datadog_checks_base[deps]'
-        integration_links = integration_type_links.get(integration_type)
+        integration_links = integration_type_links.get(integration_type).format(name=normalized_integration_name)
     elif repo_choice == 'marketplace':
         check_name = normalize_package_name(f"{kwargs.get('author')}_{normalized_integration_name}")
         # Updated by the kwargs passed in
