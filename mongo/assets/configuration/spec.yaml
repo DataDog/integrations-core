@@ -262,5 +262,3 @@ files:
       path: /var/log/mongodb/mongodb.log
       source: mongo
       service: <SERVICE>
-
-      tlsAllowInvalidCertificates
