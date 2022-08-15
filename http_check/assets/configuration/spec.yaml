@@ -11,7 +11,7 @@ files:
     - name: name
       required: true
       description: |
-        Name of your Http check instance.
+        Name of your HTTP check instance.
 
         Note: The `instance` tag takes the value of this parameter and normalizes all `,+*-/()[]{}` into `_`.
       value:
