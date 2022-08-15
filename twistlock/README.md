@@ -45,7 +45,6 @@ For containerized environments, see the [Autodiscovery Integration Templates][5]
 If you're using Kubernetes, add the config to replication controller section of twistlock_console.yaml before deploying:
 
 ```yaml
----
 apiVersion: v1
 kind: ReplicationController
 metadata:
