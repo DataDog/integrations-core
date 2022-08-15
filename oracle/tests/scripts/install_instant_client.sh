@@ -1,4 +1,4 @@
-# This script makes the necessary setup to be able to compile pymqi on the agent machine
+# This script makes the necessary setup to install the instant client on the agent machine
 
 set -x
 
