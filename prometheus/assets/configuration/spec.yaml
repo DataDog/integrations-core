@@ -23,8 +23,8 @@ files:
         required: true
         description: |
           List of `<METRIC_TO_FETCH>: <NEW_METRIC_NAME>` for metrics to be fetched from the prometheus endpoint.
-          <NEW_METRIC_NAME> is optional. It transforms the name in Datadog if set.
-          This list should contain at least one metric
+          `<NEW_METRIC_NAME>` is optional. If set, it transforms the name in Datadog.
+          This list should contain at least one metric.
         value:
           type: array
           items:
@@ -42,7 +42,7 @@ files:
       - name: health_service_check
         description: |
           Send a service check reporting about the health of the Prometheus endpoint.
-          The service check is named <NAMESPACE>.prometheus.health
+          The service check is named `<NAMESPACE>.prometheus.health`.
         value:
           type: boolean
           example: true
@@ -52,7 +52,7 @@ files:
           type: string
           example: <LABEL>
       - name: label_joins
-        description: Allows targeting a metric to retrieve its label with a 1:1 mapping.
+        description: Allows the targeting of a metric to retrieve its label with a 1:1 mapping.
         value:
           example:
             target_metric:
@@ -74,7 +74,7 @@ files:
       - name: labels_mapper
         description: |
           The label mapper allows you to rename labels.
-          Format is <LABEL_TO_RENAME>: <NEW_LABEL_NAME>
+          Format is `<LABEL_TO_RENAME>: <NEW_LABEL_NAME>`.
         value:
           example:
             flavor: origin
@@ -108,15 +108,15 @@ files:
             type: string
       - name: ssl_cert
         description: |
-          If your prometheus endpoint is secured, here are the settings to configure it
-          Can either be only the path to the certificate and thus you should specify the private key
-          or it can be the path to a file containing both the certificate & the private key
+          If your Prometheus endpoint is secured, here are the settings to configure it:
+          Can either be only the path to the certificate where you specify the private key
+          or it can be the path to a file containing both the certificate and the private key.
         value:
           example: <CERT_PATH>
           type: string
       - name: ssl_private_key
         description: |
-          Needed if the certificate does not include the private key
+          Needed if the certificate does not include the private key.
           WARNING: The private key to your local certificate must be unencrypted.
         value:
           example: <KEY_PATH>
@@ -129,7 +129,7 @@ files:
           example: <CA_CERT_PATH>
           type: string
       - name: prometheus_timeout
-        description: Set a timeout in second for the prometheus query.
+        description: Set a timeout in seconds for the Prometheus query.
         value:
           example: 10
           type: integer
