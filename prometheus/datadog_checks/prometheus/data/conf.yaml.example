@@ -25,8 +25,8 @@ instances:
 
     ## @param metrics - list of mappings - required
     ## List of `<METRIC_TO_FETCH>: <NEW_METRIC_NAME>` for metrics to be fetched from the prometheus endpoint.
-    ## <NEW_METRIC_NAME> is optional. It transforms the name in Datadog if set.
-    ## This list should contain at least one metric
+    ## `<NEW_METRIC_NAME>` is optional. If set, it transforms the name in Datadog.
+    ## This list should contain at least one metric.
     #
     metrics:
       - <METRIC_TO_FETCH>: <NEW_METRIC_NAME>
@@ -38,7 +38,7 @@ instances:
 
     ## @param health_service_check - boolean - optional - default: true
     ## Send a service check reporting about the health of the Prometheus endpoint.
-    ## The service check is named <NAMESPACE>.prometheus.health
+    ## The service check is named `<NAMESPACE>.prometheus.health`.
     #
     # health_service_check: true
 
@@ -48,7 +48,7 @@ instances:
     # label_to_hostname: <LABEL>
 
     ## @param label_joins - mapping - optional
-    ## Allows targeting a metric to retrieve its label with a 1:1 mapping.
+    ## Allows the targeting of a metric to retrieve its label with a 1:1 mapping.
     #
     # label_joins:
     #   target_metric:
@@ -59,7 +59,7 @@ instances:
 
     ## @param labels_mapper - mapping - optional
     ## The label mapper allows you to rename labels.
-    ## Format is <LABEL_TO_RENAME>: <NEW_LABEL_NAME>
+    ## Format is `<LABEL_TO_RENAME>: <NEW_LABEL_NAME>`.
     #
     # labels_mapper:
     #   flavor: origin
@@ -88,14 +88,14 @@ instances:
     #   - timestamp
 
     ## @param ssl_cert - string - optional
-    ## If your prometheus endpoint is secured, here are the settings to configure it
-    ## Can either be only the path to the certificate and thus you should specify the private key
-    ## or it can be the path to a file containing both the certificate & the private key
+    ## If your Prometheus endpoint is secured, here are the settings to configure it:
+    ## Can either be only the path to the certificate where you specify the private key
+    ## or it can be the path to a file containing both the certificate and the private key.
     #
     # ssl_cert: <CERT_PATH>
 
     ## @param ssl_private_key - string - optional
-    ## Needed if the certificate does not include the private key
+    ## Needed if the certificate does not include the private key.
     ## WARNING: The private key to your local certificate must be unencrypted.
     #
     # ssl_private_key: <KEY_PATH>
@@ -107,7 +107,7 @@ instances:
     # ssl_ca_cert: <CA_CERT_PATH>
 
     ## @param prometheus_timeout - integer - optional - default: 10
-    ## Set a timeout in second for the prometheus query.
+    ## Set a timeout in seconds for the Prometheus query.
     #
     # prometheus_timeout: 10
 
