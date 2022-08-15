@@ -48,7 +48,7 @@ instances:
     ## @param name - string - required
     ## Name of your HTTP check instance.
     ##
-    ## Note: The `instance` tag takes the value of this parameter and normalizes all `,+*-/()[]{}` into `_`.
+    ## Note: The `instance` tag takes the value of this parameter and normalizes all `,+*-/()[]{}` characters into `_`.
     #
   - name: My first service
 

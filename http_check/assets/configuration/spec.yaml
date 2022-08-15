@@ -13,7 +13,7 @@ files:
       description: |
         Name of your HTTP check instance.
 
-        Note: The `instance` tag takes the value of this parameter and normalizes all `,+*-/()[]{}` into `_`.
+        Note: The `instance` tag takes the value of this parameter and normalizes all `,+*-/()[]{}` characters into `_`.
       value:
         example: My first service
         type: string
