@@ -132,31 +132,31 @@ instances:
     #
     # tls: false
 
-    ## @param tlsCertificateKeyFile - string - optional
+    ## @param tls_certificate_key_file - string - optional
     ## A file containing the client certificate and private key. Implies tls=True.
     #
-    # tlsCertificateKeyFile: <TLSCERTIFICATEKEYFILE>
+    # tls_certificate_key_file: <TLS_CERTIFICATE_KEY_FILE>
 
-    ## @param tlsCAFile - string - optional
+    ## @param tls_ca_file - string - optional
     ## A file containing one or a bundle of “certification authority” certificates, 
     ## which are used to validate certificates passed from the other end of the connection. 
     ## Implies tls=True.
     #
-    # tlsCAFile: <TLSCAFILE>
+    # tls_ca_file: <TLS_CA_FILE>
 
-    ## @param tlsAllowInvalidHostnames - boolean - optional - default: false
-    ## If `True`, disables TLS hostname verification. tlsAllowInvalidHostnames=False implies tls=True. 
+    ## @param tls_allow_invalid_hostnames - boolean - optional - default: false
+    ## If `True`, disables TLS hostname verification. tls_allow_invalid_hostnames=False implies tls=True. 
     ## Think very carefully before setting this to True as that could make your application 
     ## vulnerable to on-path attackers.
     #
-    # tlsAllowInvalidHostnames: false
+    # tls_allow_invalid_hostnames: false
 
-    ## @param tlsAllowInvalidCertificates - boolean - optional - default: false
+    ## @param tls_allow_invalid_certificates - boolean - optional - default: false
     ## If `True`, continues the TLS handshake regardless of the outcome of the certificate verification process. 
     ## Think very carefully before setting this to True as that could make your application 
     ## vulnerable to on-path attackers.
     #
-    # tlsAllowInvalidCertificates: false
+    # tls_allow_invalid_certificates: false
 
     ## @param additional_metrics - list of strings - optional
     ## By default, the check collects a sample of metrics from MongoDB.
