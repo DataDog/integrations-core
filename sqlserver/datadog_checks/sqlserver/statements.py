@@ -81,9 +81,6 @@ select
             - statement_start_offset) / 2) + 1) AS statement_text,
     qt.text,
     encrypted as is_encrypted,
-    (SELECT IIF (EXISTS
-        (SELECT 1 FROM sys.dm_exec_procedure_stats proc_stats
-            WHERE proc_stats.plan_handle = qstats_aggr_split.plan_handle), 1, 0)) as is_proc,
     * from qstats_aggr_split
     cross apply sys.dm_exec_sql_text(plan_handle) qt
 """
@@ -116,11 +113,14 @@ select
     END - statement_start_offset) / 2) + 1) AS statement_text,
     qt.text,
     encrypted as is_encrypted,
-    (SELECT IIF (EXISTS
-        (SELECT 1 FROM sys.dm_exec_procedure_stats proc_stats
-            WHERE proc_stats.plan_handle = qstats_aggr_split.plan_handle), 1, 0)) as is_proc,
     * from qstats_aggr_split
     cross apply sys.dm_exec_sql_text(plan_handle) qt
+"""
+
+PROC_STATS_QUERY = """\
+select TOP {limit} plan_handle
+    from sys.dm_exec_procedure_stats
+    where last_execution_time > dateadd(second, -?, getdate())
 """
 
 PLAN_LOOKUP_QUERY = """\
@@ -216,6 +216,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         self._conn_key_prefix = "dbm-"
         self._statement_metrics_query = None
         self._last_stats_query_time = None
+        self._last_proc_stats_query_time = None
 
     def _init_caches(self):
         # full_statement_text_cache: limit the ingestion rate of full statement text events per query_signature
@@ -231,6 +232,14 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             # total size: 10k * 100 = 1 Mb
             maxsize=int(self.check.instance.get('seen_samples_cache_maxsize', 10000)),
             ttl=60 * 60 / int(self.check.instance.get('samples_per_hour_per_query', 4)),
+        )
+
+        # internal cache used to keep track of whether a query
+        # is a procedure or not. It gets updated each time we query
+        # the proc stats table
+        self.active_procedures_cache = TTLCache(
+            maxsize=self.dm_exec_query_stats_row_limit * 2,
+            ttl=60 * 5,
         )
 
     def _close_db_conn(self):
@@ -282,12 +291,36 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         self.log.debug("loaded sql server statement metrics len(rows)=%s", len(rows))
         return rows
 
+    @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
+    def _load_stored_procedure_plan_handles(self, cursor):
+        self.log.debug("collecting list active stored procedures")
+        now = time.time()
+        query_interval = self.collection_interval
+        if self._last_proc_stats_query_time:
+            query_interval = now - self._last_proc_stats_query_time
+        self._last_proc_stats_query_time = now
+        params = (math.ceil(query_interval),)
+        query = PROC_STATS_QUERY.format(limit=self.dm_exec_query_stats_row_limit)
+        self.log.debug("Running query [%s] %s", query, params)
+        cursor.execute(query, params)
+        # updates cache of known procedure plans with the first 16 bytes of each plan_handle
+        # which will allow us to uniquely identify each stored procedure
+        rows = [self._update_procedure_cache(key=row[0][0:16]) for row in cursor.fetchall()]
+        self.log.debug("loaded sql server stored proc list len(rows)=%s", len(rows))
+        return rows
+
+    def _update_procedure_cache(self, key):
+        if key in self.active_procedures_cache:
+            return
+        self.active_procedures_cache[key] = True
+
     def _normalize_queries(self, rows):
         normalized_rows = []
         for row in rows:
             try:
                 statement = obfuscate_sql_with_metadata(row['statement_text'], self.check.obfuscator_options)
                 procedure_statement = None
+                row['is_proc'] = self._get_is_proc(row['plan_handle'][0:16])
                 if row['is_proc'] and 'text' in row:
                     procedure_statement = obfuscate_sql_with_metadata(row['text'], self.check.obfuscator_options)
             except Exception as e:
@@ -316,8 +349,14 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             normalized_rows.append(row)
         return normalized_rows
 
+    def _get_is_proc(self, plan_handle):
+        if plan_handle in self.active_procedures_cache:
+            return True
+        return False
+
     def _collect_metrics_rows(self, cursor):
         rows = self._load_raw_query_metrics_rows(cursor)
+        self._load_stored_procedure_plan_handles(cursor)
         rows = self._normalize_queries(rows)
         if not rows:
             return []
@@ -445,10 +484,10 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                 return
             plan_key = (row['query_signature'], row['query_hash'], row['query_plan_hash'])
             # for stored procedures, we only want to look up plans for the entire procedure
-            # not every query that is executed within the proc. In order to accomplish this,
-            # we use the procedure_signature as the plan key
+            # not every query that is executed within the proc. In order to accomplish this, we use the
+            # first 16 bytes of the plan handle, which should be unique enough to properly identify the plan.
             if row['is_proc']:
-                plan_key = row['procedure_signature']
+                plan_key = row['plan_handle'][0:16]
             if self._seen_plans_ratelimiter.acquire(plan_key):
                 raw_plan, is_plan_encrypted = self._load_plan(row['plan_handle'], cursor)
                 obfuscated_plan, collection_errors = None, None
