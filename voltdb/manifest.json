@@ -1,33 +1,51 @@
 {
-  "display_name": "VoltDB",
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "name": "voltdb",
-  "metric_prefix": "voltdb.",
-  "metric_to_check": "voltdb.cpu.percent_used",
-  "creates_events": false,
-  "short_description": "Collect status, performance and other metrics from a VoltDB cluster.",
-  "guid": "15abd7c6-1845-405a-8627-f83be1e48b11",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "public_title": "VoltDB",
-  "categories": [
-    "data store",
-    "log collection"
-  ],
-  "process_signatures": [
-    "voltdb"
-  ],
-  "type": "check",
-  "is_public": true,
-  "integration_id": "voltdb",
+  "manifest_version": "2.0.0",
+  "app_uuid": "4ea56824-28da-4beb-8937-c45ef32fdb7f",
+  "app_id": "voltdb",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Collect status, performance and other metrics from a VoltDB cluster.",
+    "title": "VoltDB",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Data Store",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "VoltDB",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "voltdb.",
+        "check": "voltdb.cpu.percent_used",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      },
+      "process_signatures": [
+        "voltdb"
+      ]
     },
     "dashboards": {
       "VoltDB - Overview": "assets/dashboards/voltdb_overview.json"
@@ -38,16 +56,8 @@
     "saved_views": {
       "voltdb_processes": "assets/saved_views/voltdb_processes.json"
     },
-    "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "voltdb"
-    },
-    "metrics_metadata": "metadata.csv"
-  },
-  "further_reading": [
-    {"link": "https://www.datadoghq.com/blog/monitor-voltdb-with-datadog/",
-      "tag": "Blog",
-      "text": "Monitor VoltDB with Datadog"
     }
-  ]
+  }
 }

@@ -95,9 +95,9 @@ def test_e2e_mongo_tls(dd_agent_check):
     instance = {
         'hosts': ['{}:{}'.format(HOST, PORT1)],
         'tls': True,
-        'tlsAllowInvalidCertificates': True,
-        'tlsCertificateKeyFile': '/certs/client1.pem',
-        'tlsCAFile': '/certs/ca.pem',
+        'tls_allow_invalid_certificates': True,
+        'tls_certificate_key_file': '/certs/client1.pem',
+        'tls_ca_file': '/certs/ca.pem',
     }
     aggregator = dd_agent_check(instance, rate=True)
     for metric in MONGOD_METRICS:

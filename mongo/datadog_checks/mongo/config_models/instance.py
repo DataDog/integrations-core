@@ -77,10 +77,10 @@ class InstanceConfig(BaseModel):
     tags: Optional[Sequence[str]]
     timeout: Optional[int]
     tls: Optional[bool]
-    tlsAllowInvalidCertificates: Optional[bool]
-    tlsAllowInvalidHostnames: Optional[bool]
-    tlsCAFile: Optional[str]
-    tlsCertificateKeyFile: Optional[str]
+    tls_allow_invalid_certificates: Optional[bool]
+    tls_allow_invalid_hostnames: Optional[bool]
+    tls_ca_file: Optional[str]
+    tls_certificate_key_file: Optional[str]
     username: Optional[str]
 
     @root_validator(pre=True)

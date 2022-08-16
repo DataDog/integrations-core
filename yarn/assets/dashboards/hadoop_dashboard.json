@@ -1366,7 +1366,6 @@
             "definition": {
                 "type": "event_stream",
                 "query": "spark has status",
-                "tags_execution": "and",
                 "event_size": "s",
                 "title": "",
                 "title_size": "16",

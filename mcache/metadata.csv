@@ -11,6 +11,7 @@ memcache.cmd_get_rate,gauge,,command,second,"Rate of ""get"" commands.",0,memcac
 memcache.cmd_set_rate,gauge,,command,second,"Rate of ""set"" commands.",0,memcached,cmd set rate,
 memcache.connection_structures,gauge,,,,Number of connection structures allocated by the server.,0,memcached,conn structs,
 memcache.curr_connections,gauge,,connection,,Number of open connections to this server.,0,memcached,curr conns,
+memcache.max_connections,gauge,,connection,,Maximum number of connections to this server.,0,memcached,max conns,
 memcache.curr_items,gauge,,item,,Current number of items stored by the server.,0,memcached,curr items,
 memcache.delete_hits_rate,gauge,,hit,second,Rate at which delete commands result in items being removed.,0,memcached,del hit rate,
 memcache.delete_misses_rate,gauge,,miss,second,Rate at which delete commands result in no items being removed.,0,memcached,del miss rate,

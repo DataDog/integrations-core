@@ -1,41 +1,55 @@
 {
-  "display_name": "Silk",
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "name": "silk",
-  "metric_prefix": "silk.",
-  "metric_to_check": "silk.system.capacity.free",
-  "creates_events": true,
-  "short_description": "Monitor Silk performance and system stats.",
-  "guid": "75648ebe-8ce3-4b08-bba2-2f957a7e94fa",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "public_title": "Silk",
-  "categories": [
-    "cloud",
-    "data store",
-    "provisioning"
-  ],
-  "type": "check",
-  "is_public": true,
-  "integration_id": "silk",
+  "manifest_version": "2.0.0",
+  "app_uuid": "1f436ae6-e063-408f-ad35-37ee37fa2183",
+  "app_id": "silk",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor Silk performance and system stats.",
+    "title": "Silk",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Cloud",
+      "Category::Data Store",
+      "Category::Provisioning"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "Silk",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": true
+      },
+      "metrics": {
+        "prefix": "silk.",
+        "check": "silk.system.capacity.free",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
     },
     "dashboards": {
       "Silk - Overview": "assets/dashboards/silk_overview.json"
     },
     "monitors": {
       "Latency high": "assets/recommended_monitors/latency_high.json"
-    },
-    "saved_views": {},
-    "service_checks": "assets/service_checks.json",
-    "logs": {},
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

@@ -372,6 +372,8 @@ class ConsulCheck(OpenMetricsBaseCheck):
                             tags.append('service:{}'.format(check['ServiceName']))
                     if check["ServiceID"]:
                         tags.append("consul_service_id:{}".format(check["ServiceID"]))
+                    if check["Node"]:
+                        tags.append("consul_node:{}".format(check["Node"]))
                     sc[sc_id] = {'status': status, 'tags': tags}
 
                 elif STATUS_SEVERITY[status] > STATUS_SEVERITY[sc[sc_id]['status']]:
