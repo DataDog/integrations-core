@@ -239,7 +239,7 @@ class Network(AgentCheck):
     def _submit_devicemetrics(self, iface, vals_by_metric, tags):
         if iface in self._excluded_ifaces or (self._exclude_iface_re and self._exclude_iface_re.match(iface)):
             # Skip this network interface.
-            return False
+            return
 
         # adding the device to the tags as device_name is deprecated
         metric_tags = [] if tags is None else tags[:]
@@ -1060,6 +1060,9 @@ class Network(AgentCheck):
     def _handle_ethtool_stats(self, iface, custom_tags):
         # read Ethtool metrics, if configured and available
         if not self._collect_ethtool_stats:
+            return
+        if iface in self._excluded_ifaces or (self._exclude_iface_re and self._exclude_iface_re.match(iface)):
+            # Skip this network interface.
             return
         driver_name, driver_version, ethtool_stats_names, ethtool_stats = self._fetch_ethtool_stats(iface)
         tags = [] if custom_tags is None else custom_tags[:]
