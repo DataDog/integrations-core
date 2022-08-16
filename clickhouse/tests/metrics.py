@@ -77,6 +77,8 @@ OPTIONAL_METRICS = [
     'clickhouse.background_pool.move.task.active',
     'clickhouse.cache_dictionary.update_queue.batches',
     'clickhouse.cache_dictionary.update_queue.keys',
+    'clickhouse.compilation.llvm.attempt.total',
+    'clickhouse.compilation.size.total',
     'clickhouse.CompiledExpressionCacheCount',
     'clickhouse.connection.http.create.count',
     'clickhouse.connection.http.create.total',
