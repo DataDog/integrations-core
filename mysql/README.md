@@ -29,12 +29,14 @@ On each MySQL server, create a database user for the Datadog Agent.
 
 The following instructions grant the Agent permission to login from any host using `datadog@'%'`. You can restrict the `datadog` user to be allowed to login only from localhost by using `datadog@'localhost'`. See [MySQL Adding Accounts, Assigning Privileges, and Dropping Accounts][5] for more info.
 
+For MySQL up to version 7.x create the `datadog` user this way:
+
 ```shell
 mysql> CREATE USER 'datadog'@'%' IDENTIFIED BY '<UNIQUEPASSWORD>';
 Query OK, 0 rows affected (0.00 sec)
 ```
 
-For mySQL 8.0+ create the `datadog` user with the native password hashing method:
+For MySQL 8.0+ create the `datadog` user with the native password hashing method:
 
 ```shell
 mysql> CREATE USER 'datadog'@'%' IDENTIFIED WITH mysql_native_password by '<UNIQUEPASSWORD>';
@@ -49,27 +51,35 @@ grep Uptime && echo -e "\033[0;32mMySQL user - OK\033[0m" || \
 echo -e "\033[0;31mCannot connect to MySQL\033[0m"
 ```
 
-```shell
-mysql -u datadog --password=<UNIQUEPASSWORD> -e "show slave status" && \
-echo -e "\033[0;32mMySQL grant - OK\033[0m" || \
-echo -e "\033[0;31mMissing REPLICATION CLIENT grant\033[0m"
-```
+The Agent needs a few privileges to collect metrics. Grant the `datadog` user the following limited privileges ONLY.
 
-The Agent needs a few privileges to collect metrics. Grant the user the following limited privileges ONLY:
+For MySQL up to version 7.x set `max_user_connections` this way:
 
 ```shell
 mysql> GRANT REPLICATION CLIENT ON *.* TO 'datadog'@'%' WITH MAX_USER_CONNECTIONS 5;
 Query OK, 0 rows affected, 1 warning (0.00 sec)
-
-mysql> GRANT PROCESS ON *.* TO 'datadog'@'%';
-Query OK, 0 rows affected (0.00 sec)
 ```
 
-For MySQL 8.0+ set `max_user_connections` with:
+For MySQL 8.0+ set `max_user_connections` this way:
 
 ```shell
 mysql> ALTER USER 'datadog'@'%' WITH MAX_USER_CONNECTIONS 5;
 Query OK, 0 rows affected (0.00 sec)
+```
+
+Grant the `datadog` user the process privilege:
+
+```shell
+mysql> GRANT PROCESS ON *.* TO 'datadog'@'%';
+Query OK, 0 rows affected (0.00 sec)
+```
+
+Verify the replication client. Replace `<UNIQUEPASSWORD>` with the password you created above:
+
+```shell
+mysql -u datadog --password=<UNIQUEPASSWORD> -e "show slave status" && \
+echo -e "\033[0;32mMySQL grant - OK\033[0m" || \
+echo -e "\033[0;31mMissing REPLICATION CLIENT grant\033[0m"
 ```
 
 If enabled, metrics can be collected from the `performance_schema` database by granting an additional privilege:
