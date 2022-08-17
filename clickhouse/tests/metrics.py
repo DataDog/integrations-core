@@ -87,6 +87,8 @@ OPTIONAL_METRICS = [
     'clickhouse.cpu.time',
     'clickhouse.database.total',
     'clickhouse.ddl.max_processed',
+    'clickhouse.disk.read.size.count',
+    'clickhouse.disk.read.size.total',
     'clickhouse.disk.write.size.count',
     'clickhouse.disk.write.size.total',
     'clickhouse.drained_connections.async',
