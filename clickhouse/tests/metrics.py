@@ -95,6 +95,8 @@ OPTIONAL_METRICS = [
     'clickhouse.drained_connections.async.active',
     'clickhouse.drained_connections.sync',
     'clickhouse.drained_connections.sync.active',
+    'clickhouse.error.dns.count',
+    'clickhouse.error.dns.total',
     'clickhouse.file.open.count',
     'clickhouse.file.read.count',
     'clickhouse.file.read.size.count',
