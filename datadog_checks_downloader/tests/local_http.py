@@ -22,7 +22,7 @@ else:
     from SocketServer import TCPServer
 
 _LOGGER = logging.getLogger(__name__)
-_E2E_TESTS_DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
+E2E_TESTS_DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
 _DEFAULT_PORT = int(os.getenv("DATADOG_CHECKS_DOWNLOADER_E2E_TEST_HTTP_PORT", 8080))
 
 
@@ -48,7 +48,7 @@ def _do_local_http_server(q, directory, port):
 @contextlib.contextmanager
 def local_http_server(distribution_dir_name, port=_DEFAULT_PORT):
     """Start a local HTTP server for E2E tests."""
-    directory = os.path.join(_E2E_TESTS_DATA_DIR, distribution_dir_name)
+    directory = os.path.join(E2E_TESTS_DATA_DIR, distribution_dir_name)
     server_url = "http://localhost:{}".format(port)
 
     if not os.path.isdir(directory):
