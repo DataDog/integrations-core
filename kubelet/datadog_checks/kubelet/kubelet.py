@@ -61,7 +61,14 @@ FACTORS = {
 
 
 WHITELISTED_CONTAINER_STATE_REASONS = {
-    'waiting': ['errimagepull', 'imagepullbackoff', 'crashloopbackoff', 'containercreating', 'createcontainererror', 'invalidimagename'],
+    'waiting': [
+        'errimagepull',
+        'imagepullbackoff',
+        'crashloopbackoff',
+        'containercreating',
+        'createcontainererror',
+        'invalidimagename',
+    ],
     'terminated': ['oomkilled', 'containercannotrun', 'error'],
 }
 
