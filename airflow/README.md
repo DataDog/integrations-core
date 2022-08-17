@@ -52,8 +52,10 @@ Connect Airflow to DogStatsD (included in the Datadog Agent) by using the Airflo
    ```conf
    [scheduler]
    statsd_on = True
-   statsd_host = localhost  # Hostname or IP of server running the Datadog Agent
-   statsd_port = 8125       # DogStatsD port configured in the Datadog Agent
+   # Hostname or IP of server running the Datadog Agent
+   statsd_host = localhost  
+   # DogStatsD port configured in the Datadog Agent
+   statsd_port = 8125
    statsd_prefix = airflow
    ```
 
