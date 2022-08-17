@@ -11,6 +11,7 @@ from .common import COMPOSE_FILE, CONFIG
 
 USE_OPENMETRICS = os.getenv('USE_OPENMETRICS')
 
+
 @pytest.fixture(scope='session')
 def dd_environment():
     with docker_run(COMPOSE_FILE, sleep=10):

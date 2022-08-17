@@ -37,6 +37,11 @@
       "configuration": {
         "spec": "assets/configuration/spec.yaml"
       },
+      "metrics": {
+        "prefix": "teamcity.",
+        "check": [],
+        "metadata_path": "metadata.csv"
+      },
       "events": {
         "creates_events": true
       },

@@ -587,6 +587,11 @@ instances:
     #   exclude:
     #   - <EXCLUDE_REGEX>
 
+    ## @param bearer_token - string - optional
+    ## Bearer token for HTTP Token Authentication to the TeamCity Server's REST API.
+    #
+    # bearer_token: <BEARER_TOKEN>
+
     ## @param name - string - optional
     ## A custom unique name per build configuration that is shown
     ## in the events.

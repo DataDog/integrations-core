@@ -25,6 +25,6 @@ CONFIG = {
         },
         {
             'openmetrics_endpoint': 'http://localhost:8111/app/metrics',
-        }
+        },
     ]
 }

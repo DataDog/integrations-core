@@ -7,7 +7,7 @@ import time
 import requests
 from six import PY2
 
-from datadog_checks.base import AgentCheck
+from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.config import _is_affirmative
 
 

@@ -81,6 +81,7 @@ class InstanceConfig(BaseModel):
     aws_region: Optional[str]
     aws_service: Optional[str]
     basic_http_authentication: Optional[bool]
+    bearer_token: Optional[str]
     build_configuration: Optional[str]
     cache_metric_wildcards: Optional[bool]
     cache_shared_labels: Optional[bool]
