@@ -4,15 +4,19 @@ files:
   options:
   - template: init_config
     options:
-    - template: init_config/http
     - template: init_config/default
   - template: instances
     options:
+    - template: instances/openmetrics
+      overrides:
+        openmetrics_endpoint.value.example: http://localhost:8111/app/metrics
+        openmetrics_endpoint.display_priority: 2
+        openmetrics_endpoint.required: false
+        openmetrics_endpoint.enabled: true
     - name: name
       description: |
         A custom unique name per build configuration that is shown
         in the events.
-      required: true
       value:
         type: string
         example: <BUILD_NAME>
@@ -23,7 +27,6 @@ files:
         When using the optional `basic_http_authentication` use:
 
          server: http://<USER>:<PASSWORD>@teamcity.<ACCOUNT_NAME>.com
-      required: true
       value:
         type: string
         example: http://teamcity.<ACCOUNT_NAME>.com
@@ -31,7 +34,6 @@ files:
       description: |
         This is the internal build ID of the build configuration you wish to track.
         You can find it labelled as "Build configuration ID" when editing the configuration in question.
-      required: true
       value:
         type: string
     - name: basic_http_authentication
@@ -53,8 +55,6 @@ files:
       value:
         type: boolean
         example: false
-    - template: instances/http
-    - template: instances/default
   - template: logs
     example:
     - type: file

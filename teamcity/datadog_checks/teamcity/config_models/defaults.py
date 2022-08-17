@@ -10,20 +10,8 @@
 from datadog_checks.base.utils.models.fields import get_default_field_value
 
 
-def shared_proxy(field, value):
-    return get_default_field_value(field, value)
-
-
 def shared_service(field, value):
     return get_default_field_value(field, value)
-
-
-def shared_skip_proxy(field, value):
-    return False
-
-
-def shared_timeout(field, value):
-    return 10
 
 
 def instance_allow_redirects(field, value):
@@ -54,6 +42,26 @@ def instance_basic_http_authentication(field, value):
     return False
 
 
+def instance_build_configuration(field, value):
+    return get_default_field_value(field, value)
+
+
+def instance_cache_metric_wildcards(field, value):
+    return True
+
+
+def instance_cache_shared_labels(field, value):
+    return True
+
+
+def instance_collect_counters_with_distributions(field, value):
+    return False
+
+
+def instance_collect_histogram_buckets(field, value):
+    return True
+
+
 def instance_connect_timeout(field, value):
     return get_default_field_value(field, value)
 
@@ -66,7 +74,27 @@ def instance_empty_default_hostname(field, value):
     return False
 
 
+def instance_enable_health_service_check(field, value):
+    return True
+
+
+def instance_exclude_labels(field, value):
+    return get_default_field_value(field, value)
+
+
+def instance_exclude_metrics(field, value):
+    return get_default_field_value(field, value)
+
+
+def instance_exclude_metrics_by_labels(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_extra_headers(field, value):
+    return get_default_field_value(field, value)
+
+
+def instance_extra_metrics(field, value):
     return get_default_field_value(field, value)
 
 
@@ -74,7 +102,27 @@ def instance_headers(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_histogram_buckets_as_distributions(field, value):
+    return False
+
+
 def instance_host_affected(field, value):
+    return get_default_field_value(field, value)
+
+
+def instance_hostname_format(field, value):
+    return get_default_field_value(field, value)
+
+
+def instance_hostname_label(field, value):
+    return get_default_field_value(field, value)
+
+
+def instance_ignore_tags(field, value):
+    return get_default_field_value(field, value)
+
+
+def instance_include_labels(field, value):
     return get_default_field_value(field, value)
 
 
@@ -118,12 +166,32 @@ def instance_metric_patterns(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_metrics(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_min_collection_interval(field, value):
     return 15
 
 
+def instance_name(field, value):
+    return get_default_field_value(field, value)
+
+
+def instance_namespace(field, value):
+    return get_default_field_value(field, value)
+
+
+def instance_non_cumulative_histogram_buckets(field, value):
+    return False
+
+
 def instance_ntlm_domain(field, value):
     return get_default_field_value(field, value)
+
+
+def instance_openmetrics_endpoint(field, value):
+    return 'http://localhost:8111/app/metrics'
 
 
 def instance_password(field, value):
@@ -138,7 +206,19 @@ def instance_proxy(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_raw_line_filters(field, value):
+    return get_default_field_value(field, value)
+
+
+def instance_raw_metric_prefix(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_read_timeout(field, value):
+    return get_default_field_value(field, value)
+
+
+def instance_rename_labels(field, value):
     return get_default_field_value(field, value)
 
 
@@ -146,7 +226,15 @@ def instance_request_size(field, value):
     return 16
 
 
+def instance_server(field, value):
+    return 'http://teamcity.<ACCOUNT_NAME>.com'
+
+
 def instance_service(field, value):
+    return get_default_field_value(field, value)
+
+
+def instance_share_labels(field, value):
     return get_default_field_value(field, value)
 
 
@@ -154,8 +242,16 @@ def instance_skip_proxy(field, value):
     return False
 
 
+def instance_tag_by_endpoint(field, value):
+    return True
+
+
 def instance_tags(field, value):
     return get_default_field_value(field, value)
+
+
+def instance_telemetry(field, value):
+    return False
 
 
 def instance_timeout(field, value):
@@ -190,8 +286,16 @@ def instance_tls_verify(field, value):
     return True
 
 
+def instance_use_latest_spec(field, value):
+    return False
+
+
 def instance_use_legacy_auth_encoding(field, value):
     return True
+
+
+def instance_use_process_start_time(field, value):
+    return False
 
 
 def instance_username(field, value):

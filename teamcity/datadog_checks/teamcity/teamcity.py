@@ -5,6 +5,7 @@
 import time
 
 import requests
+from six import PY2
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.config import _is_affirmative
@@ -26,6 +27,23 @@ class TeamCityCheck(AgentCheck):
         'ssl_validation': {'name': 'tls_verify'},
         'headers': {'name': 'headers', 'default': {"Accept": "application/json"}},
     }
+
+    def __new__(cls, name, init_config, instances):
+        instance = instances[0]
+
+        if 'openmetrics_endpoint' in instance:
+            if PY2:
+                raise ConfigurationError(
+                    "This version of the integration is only available when using py3. "
+                    "Check https://docs.datadoghq.com/agent/guide/agent-v6-python-3 "
+                    "for more information or use the older style config."
+                )
+            # TODO: when we drop Python 2 move this import up top
+            from .check import TeamCityCheckV2
+
+            return TeamCityCheckV2(name, init_config, instances)
+        else:
+            return super(TeamCityCheck, cls).__new__(cls)
 
     def __init__(self, name, init_config, instances):
         super(TeamCityCheck, self).__init__(name, init_config, instances)

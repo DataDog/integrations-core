@@ -22,6 +22,9 @@ CONFIG = {
             'basic_http_authentication': False,
             'is_deployment': False,
             'tags': ['one:tag', 'one:test'],
+        },
+        {
+            'openmetrics_endpoint': 'http://localhost:8111/app/metrics',
         }
     ]
 }
