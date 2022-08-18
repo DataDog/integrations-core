@@ -50,8 +50,7 @@
     },
     "dashboards": {
       "Kong Overview OpenMetrics": "assets/dashboards/kong_overview.json",
-      "Kong Overview": "assets/dashboards/kong_overview_legacy.json",
-      "kong": "assets/dashboards/kong_dashboard.json"
+      "Kong Overview": "assets/dashboards/kong_overview_legacy.json"
     },
     "saved_views": {
       "4xx_errors": "assets/saved_views/4xx_errors.json",
