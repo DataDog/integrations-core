@@ -23,6 +23,7 @@ REPOS = {
     'core': {
         'jobs_definition_relative_path': '.azure-pipelines/templates/test-all-checks.yml',
         'codecov_config_relative_path': '.codecov.yml',
+        'pr_labels_config_relative_path': '.github/workflows/config/labeler.yml',
         'display_name_overrides': {
             'datadog_checks_base': 'Datadog Checks Base',
             'datadog_checks_dev': 'Datadog Checks Dev',
@@ -76,6 +77,14 @@ def sort_jobs(jobs):
 def sort_projects(projects):
     return sorted(projects.items(), key=lambda item: (item[0] != 'default', item[0]))
 
+
+# def sort_pr_labels(labels):
+#     return sorted(
+#         labels,
+#         key=lamda label: (
+#             not label.get('')
+#     )
+#     )
 
 def get_coverage_sources(check_name):
     package_dir, tests_dir = coverage_sources(check_name)
@@ -391,6 +400,73 @@ def validate_coverage_flags(fix, repo_data, testable_checks, cached_display_name
         echo_success(f'Successfully fixed {codecov_config_relative_path}')
 
 
+def validate_integration_pr_labels(fix, repo_data, testable_checks, cached_display_names):
+    pr_labels_config_relative_path = repo_data['pr_labels_config_relative_path']
+    if not pr_labels_config_relative_path:
+        echo_info("Skipping since PR Labels config path isn't defined")
+        return
+
+    pr_labels_config_path = path_join(get_root(), *pr_labels_config_relative_path.split('/'))
+    if not file_exists(pr_labels_config_path):
+        abort('Unable to find the PR Labels config file')
+
+    pr_labels_config = yaml.safe_load(read_file(pr_labels_config_path))
+
+
+    defined_checks = set()
+    success = True
+    fixed = False
+    display_queue = []
+
+    for label in pr_labels_config:
+        if label.startswith('integration'):
+            check_name = label[12:]
+            defined_checks.add(check_name)
+
+    # check if testable check has a label
+    for check_name in testable_checks:
+        integration_label = "integration/{}".format(check_name)
+        if integration_label not in pr_labels_config:
+            success = False
+            message = 'Check `{}` does not have an integration PR label'.format(check_name)
+            annotate_error(pr_labels_config_path, message)
+            display_queue.append((echo_failure, message))
+
+        if check_name in cached_display_names:
+            display_name = cached_display_names[check_name]
+        else:
+            display_name = repo_data['display_name_overrides'].get(check_name, get_display_name(check_name))
+            cached_display_names[check_name] = display_name
+
+    missing_checks = testable_checks - defined_checks
+
+    if missing_checks:
+        num_missing_checks = len(missing_checks)
+        message = 'PR labels config has {} missing label{}'.format(num_missing_checks, 's' if num_missing_checks > 1 else '')
+        if fix:
+            fixed = True
+            success = True
+            echo_warning(message)
+            for check in missing_checks:
+                integration_label = 'integration/{}'.format(check)
+                integration_label_config = {integration_label: [{'any': ['{}/**'.format(check)]}]}
+                pr_labels_config.update(integration_label_config)
+            echo_success('Set `integration {} PR label` to `{}`'.format(check, integration_label))
+
+    if not success:
+        message = 'Try running `ddev validate ci --fix'
+        echo_info(message)
+        display_queue.append((echo_failure, message))
+        for func, message in display_queue:
+            func(message)
+        annotate_display_queue(pr_labels_config_path, display_queue)
+        abort()
+    elif fixed:
+        output = yaml.safe_dump(pr_labels_config, default_flow_style=False, sort_keys=False)
+        write_file(pr_labels_config_path, output)
+        echo_success('Successfully fixed {}'.format(pr_labels_config_relative_path))
+
+
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate CI infrastructure configuration')
 @click.option('--fix', is_flag=True, help='Attempt to fix errors')
 @click.pass_context
@@ -410,4 +486,8 @@ def ci(ctx, fix):
 
     echo_info("Validating Code Coverage Configuration...")
     validate_coverage_flags(fix, repo_data, testable_checks, cached_display_names)
+    echo_success("Success", nl=True)
+
+    echo_info("Validating Integration PR Labels Configuration...")
+    validate_integration_pr_labels(fix, repo_data, testable_checks, cached_display_names)
     echo_success("Success", nl=True)
