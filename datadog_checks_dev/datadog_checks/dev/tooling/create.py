@@ -148,12 +148,10 @@ def create_template_files(template_name, new_root, config, read=False):
                     image_guidelines = 'IMAGES_README.md'
                     template_path = path_join(TEMPLATES_DIR, 'marketplace/', image_guidelines)
                     file_path = path_join(config.get('check_name'), "images", image_guidelines)
-
                 else:
                     template_path = path_join(root, template_file)
-                    file_path = template_path.replace(template_root, '')
-
-                file_path = f'{new_root}{file_path.format(**config)}'
+                    file_path = os.path.relpath(template_path, template_root)
+                file_path = os.path.join(new_root, file_path.format(**config))
                 files.append(File(file_path, template_path, config, read=read))
 
     return files
