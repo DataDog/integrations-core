@@ -284,8 +284,8 @@ class NewKafkaConsumerCheck(object):
                 if reported_contexts >= contexts_limit:
                     continue
                 timestamps = self._broker_timestamps["{}_{}".format(topic, partition)]
-                # producer_timestamp is set in the same check, so it should never be None
-                producer_timestamp = timestamps[producer_offset]
+                # The producer timestamp can be not set if there was an error fetching broker offsets.
+                producer_timestamp = timestamps.get(producer_offset, None)
                 consumer_timestamp = self._get_interpolated_timestamp(timestamps, consumer_offset)
                 if consumer_timestamp is None or producer_timestamp is None:
                     continue

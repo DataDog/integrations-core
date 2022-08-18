@@ -36,7 +36,6 @@
         "title_align": "left",
         "type": "event_stream",
         "query": "source:helm kube_cluster_name:$kube_cluster_name.value helm_release:$helm_release.value helm_status:$helm_status.value helm_namespace:$helm_namespace.value",
-        "tags_execution": "and",
         "event_size": "l"
       },
       "layout": {

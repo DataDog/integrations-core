@@ -398,7 +398,6 @@
             "definition": {
                 "type": "event_stream",
                 "query": "spark has status",
-                "tags_execution": "and",
                 "event_size": "s",
                 "title": "Spark Application Events",
                 "title_size": "16",
@@ -419,7 +418,6 @@
             "definition": {
                 "type": "event_timeline",
                 "query": "spark has status",
-                "tags_execution": "and",
                 "title": "Spark Application Event Counts",
                 "title_size": "16",
                 "title_align": "left",

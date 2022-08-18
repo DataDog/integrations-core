@@ -1,5 +1,4 @@
 from pymongo import MongoClient, ReadPreference
-from pymongo.errors import PyMongoError
 
 from datadog_checks.mongo.common import MongosDeployment, ReplicaSetDeployment, StandaloneDeployment
 
@@ -9,36 +8,42 @@ DD_APP_NAME = 'datadog-agent'
 
 
 class MongoApi(object):
-    def __init__(self, config, log, replicaset=None):
+    """Mongodb connection through pymongo.MongoClient
+
+    :params config: MongoConfig object.
+    :params log: Check log.
+    :params replicaset: If replication is enabled, this parameter specifies the name of the replicaset.
+        Valid for ReplicaSetDeployment deployments
+    """
+
+    def __init__(self, config, log, replicaset: str = None):
         self._config = config
         self._log = log
-        self.deployment_type = None
-        if self._config.server:
-            # Deprecated option
-            self._cli = MongoClient(
-                self._config.server,
-                socketTimeoutMS=self._config.timeout,
-                connectTimeoutMS=self._config.timeout,
-                serverSelectionTimeoutMS=self._config.timeout,
-                read_preference=ReadPreference.PRIMARY_PREFERRED,
-                replicaSet=replicaset,
-                **self._config.ssl_params
-            )
-        else:
-            merged_options_dict = {}
-            merged_options_dict.update(self._config.additional_options)
-            merged_options_dict.update(self._config.ssl_params)
-            self._cli = MongoClient(
-                host=self._config.hosts,
-                socketTimeoutMS=self._config.timeout,
-                connectTimeoutMS=self._config.timeout,
-                serverSelectionTimeoutMS=self._config.timeout,
-                read_preference=ReadPreference.PRIMARY_PREFERRED,
-                replicaSet=replicaset,
-                appname=DD_APP_NAME,
-                **merged_options_dict
-            )
-        self._initialize()
+        self._log.debug("Connecting to '%s'", self._config.hosts)
+        options = {
+            'host': self._config.server if self._config.server else self._config.hosts,
+            'socketTimeoutMS': self._config.timeout,
+            'connectTimeoutMS': self._config.timeout,
+            'serverSelectionTimeoutMS': self._config.timeout,
+            'directConnection': True,
+            'read_preference': ReadPreference.PRIMARY_PREFERRED,
+            'appname': DD_APP_NAME,
+        }
+        if self._config.do_auth and not self._is_arbiter():
+            self._log.info("Using '%s' as the authentication database", self._config.auth_source)
+            if self._config.username:
+                options['username'] = self._config.username
+            if self._config.password:
+                options['password'] = self._config.password
+            if self._config.auth_source:
+                options['authSource'] = self._config.auth_source
+        if replicaset:
+            options['replicaSet'] = replicaset
+        options.update(self._config.additional_options)
+        options.update(self._config.ssl_params)
+        self._log.debug("options: %s", options)
+        self._cli = MongoClient(**options)
+        self.deployment_type = self.get_deployment_type()
 
     def __getitem__(self, item):
         return self._cli[item]
@@ -49,48 +54,10 @@ class MongoApi(object):
     def list_database_names(self, session=None):
         return self._cli.list_database_names(session)
 
-    def _initialize(self):
-        self._log.debug("Connecting to '%s'", self._config.hosts)
-
-        is_master_payload = self['admin'].command('isMaster')
-        is_arbiter = is_master_payload.get('arbiterOnly', False)
-
-        if not is_arbiter and self._config.do_auth:
-            self._log.info("Using '%s' as the authentication database", self._config.auth_source)
-            self._authenticate()
-
-        self.deployment_type = self.get_deployment_type()
-
-    def _authenticate(self):
-        """
-        Authenticate to the database.
-
-        Available mechanisms:
-        * Username & password
-        * X.509
-
-        More information:
-        https://api.mongodb.com/python/current/examples/authentication.html
-        """
-        authenticated = False
-        database = self[self._config.auth_source]
-        username = self._config.username
-        try:
-            # X.509
-            if self._config.use_x509 and username:
-                self._log.debug(u"Authenticate `%s` to `%s` using `MONGODB-X509` mechanism", username, database)
-                authenticated = database.authenticate(username, mechanism='MONGODB-X509')
-            elif self._config.use_x509:
-                self._log.debug(u"Authenticate to `%s` using `MONGODB-X509` mechanism", database)
-                authenticated = database.authenticate(mechanism='MONGODB-X509')
-            # Username & password
-            else:
-                authenticated = database.authenticate(username, self._config.password)
-
-        except PyMongoError as e:
-            self._log.error(u"Authentication failed due to invalid credentials or configuration issues. %s", e)
-
-        return authenticated
+    def _is_arbiter(self):
+        cli = MongoClient(host=self._config.server if self._config.server else self._config.hosts)
+        is_master_payload = cli['admin'].command('isMaster')
+        return is_master_payload.get('arbiterOnly', False)
 
     @staticmethod
     def _get_rs_deployment_from_status_payload(repl_set_payload, cluster_role):
@@ -144,5 +111,4 @@ class MongoApi(object):
             cluster_role = 'shardsvr'
         else:
             cluster_role = None
-
         return self._get_rs_deployment_from_status_payload(repl_set_payload, cluster_role)

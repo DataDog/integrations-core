@@ -394,8 +394,8 @@ class OpenStackProjectScope(OpenStackScope):
 
             assert (
                 t_id and t_id not in service_catalog.nova_endpoint
-            ), """Incorrect use of append_tenant_id, please inspect the service catalog response of your Identity server.
-                   You may need to disable this flag if your Nova service url contains the tenant_id already"""
+            ), """Incorrect use of append_tenant_id, please inspect the service catalog response of your Identity \
+            server. You may need to disable this flag if your Nova service url contains the tenant_id already """
 
             service_catalog.nova_endpoint = urljoin(service_catalog.nova_endpoint, t_id)
 

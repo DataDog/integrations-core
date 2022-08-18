@@ -34,7 +34,7 @@ def get_valid_templates():
     return sorted(templates)
 
 
-def construct_template_fields(integration_name, repo_choice, manifest_v2, integration_type, **kwargs):
+def construct_template_fields(integration_name, repo_choice, integration_type, **kwargs):
     normalized_integration_name = normalize_package_name(integration_name)
     check_name_kebab = kebab_case_name(integration_name)
 
@@ -68,7 +68,7 @@ To install the {integration_name} check on your host:
         support_type = 'core'
         test_dev_dep = '-e ../datadog_checks_dev'
         tox_base_dep = '-e../datadog_checks_base[deps]'
-        integration_links = integration_type_links.get(integration_type)
+        integration_links = integration_type_links.get(integration_type).format(name=normalized_integration_name)
     elif repo_choice == 'marketplace':
         check_name = normalize_package_name(f"{kwargs.get('author')}_{normalized_integration_name}")
         # Updated by the kwargs passed in
@@ -103,12 +103,11 @@ To install the {integration_name} check on your host:
         'check_name_kebab': check_name_kebab,
         'email': email,
         'email_packages': email_packages,
-        'guid': uuid4(),
+        'app_uuid': uuid4(),
         'license_header': license_header,
         'install_info': install_info,
         'repo_choice': repo_choice,
         'repo_name': REPO_CHOICES[repo_choice],
-        'manifest_v2': manifest_v2,
         'support_type': support_type,
         'test_dev_dep': test_dev_dep,
         'tox_base_dep': tox_base_dep,
@@ -136,7 +135,7 @@ def create_template_files(template_name, new_root, config, read=False):
                         file_path = path_join(config.get('check_name'), "README.md")
 
                     # Custom README for tile apps
-                    elif config.get('support_type') == 'contrib' and config.get('manifest_v2'):
+                    elif config.get('support_type') == 'contrib':
                         template_path = path_join(TEMPLATES_DIR, 'tile_v2/', 'README.md')
                         file_path = path_join(config.get('check_name'), "README.md")
                     else:
@@ -145,16 +144,14 @@ def create_template_files(template_name, new_root, config, read=False):
 
                 # Use a special readme file for media carousel information
                 # .gitkeep currently only used for images, but double check anyway
-                elif template_file == '.gitkeep' and 'images' in root and config.get('manifest_v2'):
+                elif template_file == '.gitkeep' and 'images' in root:
                     image_guidelines = 'IMAGES_README.md'
                     template_path = path_join(TEMPLATES_DIR, 'marketplace/', image_guidelines)
                     file_path = path_join(config.get('check_name'), "images", image_guidelines)
-
                 else:
                     template_path = path_join(root, template_file)
-                    file_path = template_path.replace(template_root, '')
-
-                file_path = f'{new_root}{file_path.format(**config)}'
+                    file_path = os.path.relpath(template_path, template_root)
+                file_path = os.path.join(new_root, file_path.format(**config))
                 files.append(File(file_path, template_path, config, read=read))
 
     return files

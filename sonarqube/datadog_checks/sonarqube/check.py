@@ -133,11 +133,11 @@ class SonarqubeCheck(AgentCheck):
             if not isinstance(config, dict):
                 raise ConfigurationError('Component `{}` must refer to a mapping'.format(component))
 
-            should_include_metric = self.create_metric_matcher(
+            include_metric = self.create_metric_matcher(
                 self.compile_metric_patterns(config, 'include') or default_metric_inclusion_pattern,
                 default=True,
             )
-            should_exclude_metric = self.create_metric_matcher(
+            exclude_metric = self.create_metric_matcher(
                 self.compile_metric_patterns(config, 'exclude') or default_metric_exclusion_pattern,
                 default=False,
             )
@@ -148,7 +148,8 @@ class SonarqubeCheck(AgentCheck):
 
             component_data[component] = (
                 tag_name,
-                lambda metric: should_include_metric(metric) and not should_exclude_metric(metric),
+                lambda metric, include_metric=include_metric, exclude_metric=exclude_metric: include_metric(metric)
+                and not exclude_metric(metric),
             )
 
         self._components = component_data

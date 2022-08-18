@@ -4,8 +4,9 @@ import os
 import pytest
 
 from datadog_checks.dev.utils import get_metadata_metrics
+from datadog_checks.mongo import MongoDb
 
-from .common import HERE
+from .common import HERE, HOST, PORT1, TLS_CERTS_FOLDER, auth, tls
 from .conftest import mock_pymongo
 
 
@@ -583,3 +584,69 @@ def test_db_names_missing_existent_database(check, instance_integration, aggrega
         check_submission_type=True,
     )
     assert len(aggregator._events) == 0
+
+
+@auth
+@pytest.mark.usefixtures('dd_environment')
+def test_mongod_auth_ok(check, dd_run_check, aggregator):
+    instance = {
+        'hosts': ['{}:{}'.format(HOST, PORT1)],
+        'username': 'testUser',
+        'password': 'testPass',
+        'options': {'authSource': 'authDB'},
+    }
+    mongo_check = check(instance)
+    dd_run_check(mongo_check)
+    aggregator.assert_service_check('mongodb.can_connect', status=MongoDb.OK)
+
+
+@auth
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize(
+    'username, password',
+    [
+        pytest.param('badUser', 'testPass', id='bad_user'),
+        pytest.param('testUser', 'badPass', id='bad_password'),
+    ],
+)
+def test_mongod_bad_auth(check, dd_run_check, aggregator, username, password):
+    instance = {
+        'hosts': ['{}:{}'.format(HOST, PORT1)],
+        'username': username,
+        'password': password,
+        'options': {'authSource': 'authDB'},
+    }
+    with pytest.raises(Exception, match="Authentication failed"):
+        mongo_check = check(instance)
+        dd_run_check(mongo_check)
+
+
+@tls
+@pytest.mark.usefixtures('dd_environment')
+def test_mongod_tls_ok(check, dd_run_check, aggregator):
+    instance = {
+        'hosts': ['{}:{}'.format(HOST, PORT1)],
+        'tls': True,
+        'tls_allow_invalid_certificates': True,
+        'tls_certificate_key_file': '{}/client1.pem'.format(TLS_CERTS_FOLDER),
+        'tls_ca_file': '{}/ca.pem'.format(TLS_CERTS_FOLDER),
+    }
+    mongo_check = check(instance)
+    dd_run_check(mongo_check)
+    aggregator.assert_service_check('mongodb.can_connect', status=MongoDb.OK)
+
+
+@tls
+@pytest.mark.usefixtures('dd_environment')
+def test_mongod_tls_fail(check, dd_run_check, aggregator):
+    instance = {
+        'hosts': ['{}:{}'.format(HOST, PORT1)],
+        'tls': True,
+        'tls_allow_invalid_certificates': True,
+        'tls_certificate_key_file': '{}/fail.pem'.format(TLS_CERTS_FOLDER),
+        'tls_ca_file': '{}/ca.pem'.format(TLS_CERTS_FOLDER),
+    }
+    with pytest.raises(Exception, match="Private key doesn't match certificate"):
+        mongo_check = check(instance)
+        dd_run_check(mongo_check)
+    aggregator.assert_service_check('mongodb.can_connect', status=MongoDb.CRITICAL)

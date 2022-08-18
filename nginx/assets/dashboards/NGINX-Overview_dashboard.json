@@ -231,7 +231,6 @@
               "title_align": "left",
               "type": "event_stream",
               "query": "source:watchdog story_type:nginx",
-              "tags_execution": "and",
               "event_size": "s"
             },
             "layout": {

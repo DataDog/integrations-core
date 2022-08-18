@@ -1,6 +1,6 @@
 # CHANGELOG - Airflow
 
-## 3.1.1 / 2022-06-27
+## 3.1.1 / 2022-06-27 / Agent 7.38.0
 
 * [Fixed] Update mapping and tags in README.md. See [#11967](https://github.com/DataDog/integrations-core/pull/11967). Thanks [moshederri](https://github.com/moshederri).
 * [Fixed] Update airflow integration dogstatsd_mapper_profiles example. See [#12101](https://github.com/DataDog/integrations-core/pull/12101). Thanks [jessezhang91](https://github.com/jessezhang91).
