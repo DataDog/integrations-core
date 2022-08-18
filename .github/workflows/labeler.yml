@@ -1,7 +1,12 @@
 # https://github.com/actions/labeler
 
 name: PR Labels
-on: pull_request_target
+on:
+  pull_request_target:
+    types:
+      - opened
+    branches:
+      - master
 
 jobs:
   apply:
