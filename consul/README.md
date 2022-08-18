@@ -9,7 +9,7 @@ The Datadog Agent collects many metrics from Consul nodes, including those for:
 - Total Consul peers
 - Service health - for a given service, how many of its nodes are up, passing, warning, critical?
 - Node health - for a given node, how many of its services are up, passing, warning, critical?
-- Network coordinates - inter- and intra-datacenter latencies
+- Network coordinates - inter- and intra-datacenter latencies 
 
 The _Consul_ Agent can provide further metrics with DogStatsD. These metrics are more related to the internal health of Consul itself, not to services which depend on Consul. There are metrics for:
 
