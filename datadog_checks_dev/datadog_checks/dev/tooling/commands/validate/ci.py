@@ -449,7 +449,7 @@ def validate_integration_pr_labels(fix, repo_data, testable_checks, cached_displ
             echo_warning(message)
             for check in missing_checks:
                 integration_label = 'integration/{}'.format(check)
-                integration_label_config = {integration_label: [{'any': ['{}/**'.format(check)]}]}
+                integration_label_config = {integration_label: ['{}/**/*'.format(check)]}
                 pr_labels_config.update(integration_label_config)
             echo_success('Set `integration {} PR label` to `{}`'.format(check, integration_label))
 

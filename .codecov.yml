@@ -526,6 +526,10 @@ coverage:
         target: 75
         flags:
         - teradata
+      Test_Check:
+        target: 75
+        flags:
+        - test_check
       TokuMX:
         target: 50
         flags:
@@ -1264,6 +1268,11 @@ flags:
     paths:
     - teradata/datadog_checks/teradata
     - teradata/tests
+  test_check:
+    carryforward: true
+    paths:
+    - test_check/datadog_checks/test_check
+    - test_check/tests
   tls:
     carryforward: true
     paths:

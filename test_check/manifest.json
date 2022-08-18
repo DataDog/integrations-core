@@ -1,0 +1,35 @@
+{
+  "display_name": "Test Check",
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "name": "test_check",
+  "metric_prefix": "test_check.",
+  "metric_to_check": "",
+  "creates_events": false,
+  "short_description": "something",
+  "guid": "d4a15727-e102-4946-afb2-cf4973234029",
+  "support": "core",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "public_title": "Test Check",
+  "categories": [
+    ""
+  ],
+  "type": "check",
+  "is_public": false,
+  "integration_id": "test-check",
+  "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
+    "dashboards": {},
+    "monitors": {},
+    "saved_views": {},
+    "service_checks": "assets/service_checks.json",
+    "logs": {},
+    "metrics_metadata": "metadata.csv"
+  }
+}

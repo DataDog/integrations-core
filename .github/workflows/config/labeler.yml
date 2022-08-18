@@ -21,609 +21,327 @@ changelog/no-changelog:
 - requirements-agent-release.txt
 - datadog_checks_dev/datadog_checks/dev/__about__.py
 - all:^(?![^/]+/datadog_checks/.*|[^/]+/pyproject\.toml).*
-integration/active_directory:
-- any:
-  - active_directory/**
-integration/activemq:
-- any:
-  - activemq/**
-integration/activemq_xml:
-- any:
-  - activemq_xml/**
-integration/aerospike:
-- any:
-  - aerospike/**
-integration/agent_metrics:
-- any:
-  - agent_metrics/**
-integration/airflow:
-- any:
-  - airflow/**
-integration/amazon_eks:
-- any:
-  - amazon_eks/**
-integration/amazon_eks_blueprints:
-- any:
-  - amazon_eks_blueprints/**
-integration/amazon_msk:
-- any:
-  - amazon_msk/**
-integration/ambari:
-- any:
-  - ambari/**
-integration/apache:
-- any:
-  - apache/**
-integration/arangodb:
-- any:
-  - arangodb/**
-integration/aspdotnet:
-- any:
-  - aspdotnet/**
-integration/avi_vantage:
-- any:
-  - avi_vantage/**
-integration/azure_active_directory:
-- any:
-  - azure_active_directory/**
-integration/azure_iot_edge:
-- any:
-  - azure_iot_edge/**
-integration/boundary:
-- any:
-  - boundary/**
-integration/btrfs:
-- any:
-  - btrfs/**
-integration/cacti:
-- any:
-  - cacti/**
-integration/calico:
-- any:
-  - calico/**
-integration/cassandra:
-- any:
-  - cassandra/**
-integration/cassandra_nodetool:
-- any:
-  - cassandra_nodetool/**
-integration/ceph:
-- any:
-  - ceph/**
-integration/cilium:
-- any:
-  - cilium/**
-integration/cisco_aci:
-- any:
-  - cisco_aci/**
-integration/citrix_hypervisor:
-- any:
-  - citrix_hypervisor/**
-integration/clickhouse:
-- any:
-  - clickhouse/**
-integration/cloud_foundry_api:
-- any:
-  - cloud_foundry_api/**
-integration/cockroachdb:
-- any:
-  - cockroachdb/**
-integration/confluent_platform:
-- any:
-  - confluent_platform/**
-integration/consul:
-- any:
-  - consul/**
-integration/consul_connect:
-- any:
-  - consul_connect/**
-integration/container:
-- any:
-  - container/**
-integration/containerd:
-- any:
-  - containerd/**
-integration/coredns:
-- any:
-  - coredns/**
-integration/couch:
-- any:
-  - couch/**
-integration/couchbase:
-- any:
-  - couchbase/**
-integration/cri:
-- any:
-  - cri/**
-integration/crio:
-- any:
-  - crio/**
-integration/databricks:
-- any:
-  - databricks/**
-integration/datadog_checks_base:
-- any:
-  - datadog_checks_base/**
-integration/datadog_checks_dependency_provider:
-- any:
-  - datadog_checks_dependency_provider/**
-integration/datadog_checks_dev:
-- any:
-  - datadog_checks_dev/**
-integration/datadog_checks_downloader:
-- any:
-  - datadog_checks_downloader/**
-integration/datadog_checks_tests_helper:
-- any:
-  - datadog_checks_tests_helper/**
-integration/datadog_cluster_agent:
-- any:
-  - datadog_cluster_agent/**
-integration/ddev:
-- any:
-  - ddev/**
-integration/directory:
-- any:
-  - directory/**
-integration/disk:
-- any:
-  - disk/**
-integration/dns_check:
-- any:
-  - dns_check/**
-integration/docker_daemon:
-- any:
-  - docker_daemon/**
-integration/dotnetclr:
-- any:
-  - dotnetclr/**
-integration/druid:
-- any:
-  - druid/**
-integration/ecs_fargate:
-- any:
-  - ecs_fargate/**
-integration/eks_anywhere:
-- any:
-  - eks_anywhere/**
-integration/eks_fargate:
-- any:
-  - eks_fargate/**
-integration/elastic:
-- any:
-  - elastic/**
-integration/envoy:
-- any:
-  - envoy/**
-integration/etcd:
-- any:
-  - etcd/**
-integration/exchange_server:
-- any:
-  - exchange_server/**
-integration/external_dns:
-- any:
-  - external_dns/**
-integration/flink:
-- any:
-  - flink/**
-integration/fluentd:
-- any:
-  - fluentd/**
-integration/foundationdb:
-- any:
-  - foundationdb/**
-integration/gearmand:
-- any:
-  - gearmand/**
-integration/gitlab:
-- any:
-  - gitlab/**
-integration/gitlab_runner:
-- any:
-  - gitlab_runner/**
-integration/gke:
-- any:
-  - gke/**
-integration/glusterfs:
-- any:
-  - glusterfs/**
-integration/go-metro:
-- any:
-  - go-metro/**
-integration/go_expvar:
-- any:
-  - go_expvar/**
-integration/gunicorn:
-- any:
-  - gunicorn/**
-integration/haproxy:
-- any:
-  - haproxy/**
-integration/harbor:
-- any:
-  - harbor/**
-integration/hazelcast:
-- any:
-  - hazelcast/**
-integration/hdfs_datanode:
-- any:
-  - hdfs_datanode/**
-integration/hdfs_namenode:
-- any:
-  - hdfs_namenode/**
-integration/helm:
-- any:
-  - helm/**
-integration/hive:
-- any:
-  - hive/**
-integration/hivemq:
-- any:
-  - hivemq/**
-integration/http_check:
-- any:
-  - http_check/**
 integration/hudi:
-- any:
-  - hudi/**
-integration/hyperv:
-- any:
-  - hyperv/**
-integration/ibm_ace:
-- any:
-  - ibm_ace/**
-integration/ibm_db2:
-- any:
-  - ibm_db2/**
-integration/ibm_i:
-- any:
-  - ibm_i/**
-integration/ibm_mq:
-- any:
-  - ibm_mq/**
-integration/ibm_was:
-- any:
-  - ibm_was/**
-integration/ignite:
-- any:
-  - ignite/**
-integration/iis:
-- any:
-  - iis/**
-integration/istio:
-- any:
-  - istio/**
-integration/jboss_wildfly:
-- any:
-  - jboss_wildfly/**
-integration/jmeter:
-- any:
-  - jmeter/**
-integration/journald:
-- any:
-  - journald/**
-integration/kafka:
-- any:
-  - kafka/**
-integration/kafka_consumer:
-- any:
-  - kafka_consumer/**
-integration/kong:
-- any:
-  - kong/**
-integration/kube_apiserver_metrics:
-- any:
-  - kube_apiserver_metrics/**
-integration/kube_controller_manager:
-- any:
-  - kube_controller_manager/**
-integration/kube_dns:
-- any:
-  - kube_dns/**
-integration/kube_metrics_server:
-- any:
-  - kube_metrics_server/**
-integration/kube_proxy:
-- any:
-  - kube_proxy/**
-integration/kube_scheduler:
-- any:
-  - kube_scheduler/**
-integration/kubelet:
-- any:
-  - kubelet/**
-integration/kubernetes:
-- any:
-  - kubernetes/**
-integration/kubernetes_state:
-- any:
-  - kubernetes_state/**
-integration/kyototycoon:
-- any:
-  - kyototycoon/**
-integration/lighttpd:
-- any:
-  - lighttpd/**
-integration/linkerd:
-- any:
-  - linkerd/**
-integration/linux_proc_extras:
-- any:
-  - linux_proc_extras/**
-integration/mapr:
-- any:
-  - mapr/**
-integration/mapreduce:
-- any:
-  - mapreduce/**
-integration/marathon:
-- any:
-  - marathon/**
-integration/marklogic:
-- any:
-  - marklogic/**
-integration/mcache:
-- any:
-  - mcache/**
-integration/mesos_master:
-- any:
-  - mesos_master/**
-integration/mesos_slave:
-- any:
-  - mesos_slave/**
+- hudi/**/*
 integration/mongo:
-- any:
-  - mongo/**
-integration/mysql:
-- any:
-  - mysql/**
-integration/nagios:
-- any:
-  - nagios/**
-integration/network:
-- any:
-  - network/**
-integration/nfsstat:
-- any:
-  - nfsstat/**
-integration/nginx:
-- any:
-  - nginx/**
-integration/nginx_ingress_controller:
-- any:
-  - nginx_ingress_controller/**
-integration/ntp:
-- any:
-  - ntp/**
-integration/nvidia_jetson:
-- any:
-  - nvidia_jetson/**
-integration/oke:
-- any:
-  - oke/**
-integration/oom_kill:
-- any:
-  - oom_kill/**
-integration/openldap:
-- any:
-  - openldap/**
-integration/openmetrics:
-- any:
-  - openmetrics/**
-integration/openshift:
-- any:
-  - openshift/**
-integration/openstack:
-- any:
-  - openstack/**
-integration/openstack_controller:
-- any:
-  - openstack_controller/**
-integration/oracle:
-- any:
-  - oracle/**
-integration/otel:
-- any:
-  - otel/**
-integration/pan_firewall:
-- any:
-  - pan_firewall/**
-integration/pdh_check:
-- any:
-  - pdh_check/**
-integration/pgbouncer:
-- any:
-  - pgbouncer/**
-integration/php_fpm:
-- any:
-  - php_fpm/**
-integration/pivotal_pks:
-- any:
-  - pivotal_pks/**
-integration/podman:
-- any:
-  - podman/**
-integration/postfix:
-- any:
-  - postfix/**
-integration/postgres:
-- any:
-  - postgres/**
-integration/powerdns_recursor:
-- any:
-  - powerdns_recursor/**
-integration/presto:
-- any:
-  - presto/**
+- mongo/**/*
+integration/activemq_xml:
+- activemq_xml/**/*
+integration/couchbase:
+- couchbase/**/*
+integration/crio:
+- crio/**/*
 integration/process:
-- any:
-  - process/**
-integration/prometheus:
-- any:
-  - prometheus/**
-integration/proxysql:
-- any:
-  - proxysql/**
-integration/pulsar:
-- any:
-  - pulsar/**
-integration/rabbitmq:
-- any:
-  - rabbitmq/**
-integration/redisdb:
-- any:
-  - redisdb/**
-integration/rethinkdb:
-- any:
-  - rethinkdb/**
-integration/riak:
-- any:
-  - riak/**
-integration/riakcs:
-- any:
-  - riakcs/**
-integration/sap_hana:
-- any:
-  - sap_hana/**
-integration/scylla:
-- any:
-  - scylla/**
-integration/sidekiq:
-- any:
-  - sidekiq/**
-integration/silk:
-- any:
-  - silk/**
-integration/singlestore:
-- any:
-  - singlestore/**
-integration/snmp:
-- any:
-  - snmp/**
-integration/snmp_cisco:
-- any:
-  - snmp_cisco/**
-integration/snmp_dell:
-- any:
-  - snmp_dell/**
-integration/snmp_f5:
-- any:
-  - snmp_f5/**
-integration/snmp_juniper:
-- any:
-  - snmp_juniper/**
-integration/snowflake:
-- any:
-  - snowflake/**
-integration/solr:
-- any:
-  - solr/**
-integration/sonarqube:
-- any:
-  - sonarqube/**
-integration/spark:
-- any:
-  - spark/**
-integration/sqlserver:
-- any:
-  - sqlserver/**
-integration/squid:
-- any:
-  - squid/**
-integration/ssh_check:
-- any:
-  - ssh_check/**
-integration/statsd:
-- any:
-  - statsd/**
-integration/supervisord:
-- any:
-  - supervisord/**
-integration/system_core:
-- any:
-  - system_core/**
-integration/system_swap:
-- any:
-  - system_swap/**
-integration/systemd:
-- any:
-  - systemd/**
-integration/tcp_check:
-- any:
-  - tcp_check/**
-integration/tcp_queue_length:
-- any:
-  - tcp_queue_length/**
-integration/teamcity:
-- any:
-  - teamcity/**
-integration/tenable:
-- any:
-  - tenable/**
-integration/teradata:
-- any:
-  - teradata/**
-integration/terraform:
-- any:
-  - terraform/**
-integration/tls:
-- any:
-  - tls/**
-integration/tokumx:
-- any:
-  - tokumx/**
-integration/tomcat:
-- any:
-  - tomcat/**
-integration/traffic_server:
-- any:
-  - traffic_server/**
-integration/twemproxy:
-- any:
-  - twemproxy/**
-integration/twistlock:
-- any:
-  - twistlock/**
-integration/varnish:
-- any:
-  - varnish/**
-integration/vault:
-- any:
-  - vault/**
-integration/venv:
-- any:
-  - venv/**
-integration/vertica:
-- any:
-  - vertica/**
-integration/voltdb:
-- any:
-  - voltdb/**
-integration/vsphere:
-- any:
-  - vsphere/**
-integration/weblogic:
-- any:
-  - weblogic/**
-integration/win32_event_log:
-- any:
-  - win32_event_log/**
-integration/windows_performance_counters:
-- any:
-  - windows_performance_counters/**
+- process/**/*
+integration/kube_apiserver_metrics:
+- kube_apiserver_metrics/**/*
 integration/windows_service:
-- any:
-  - windows_service/**
-integration/winkmem:
-- any:
-  - winkmem/**
-integration/wmi_check:
-- any:
-  - wmi_check/**
-integration/yarn:
-- any:
-  - yarn/**
+- windows_service/**/*
+integration/openstack:
+- openstack/**/*
+integration/kube_scheduler:
+- kube_scheduler/**/*
+integration/system_core:
+- system_core/**/*
+integration/cassandra:
+- cassandra/**/*
+integration/mesos_slave:
+- mesos_slave/**/*
+integration/sap_hana:
+- sap_hana/**/*
+integration/marklogic:
+- marklogic/**/*
+integration/cisco_aci:
+- cisco_aci/**/*
+integration/ibm_db2:
+- ibm_db2/**/*
+integration/nfsstat:
+- nfsstat/**/*
+integration/clickhouse:
+- clickhouse/**/*
+integration/cassandra_nodetool:
+- cassandra_nodetool/**/*
+integration/arangodb:
+- arangodb/**/*
+integration/ignite:
+- ignite/**/*
+integration/exchange_server:
+- exchange_server/**/*
+integration/envoy:
+- envoy/**/*
+integration/consul:
+- consul/**/*
+integration/openstack_controller:
+- openstack_controller/**/*
+integration/kubelet:
+- kubelet/**/*
+integration/istio:
+- istio/**/*
+integration/php_fpm:
+- php_fpm/**/*
+integration/vault:
+- vault/**/*
+integration/postfix:
+- postfix/**/*
+integration/gitlab_runner:
+- gitlab_runner/**/*
+integration/gunicorn:
+- gunicorn/**/*
+integration/etcd:
+- etcd/**/*
+integration/squid:
+- squid/**/*
+integration/sqlserver:
+- sqlserver/**/*
+integration/boundary:
+- boundary/**/*
+integration/ambari:
+- ambari/**/*
+integration/hdfs_namenode:
+- hdfs_namenode/**/*
+integration/datadog_checks_downloader:
+- datadog_checks_downloader/**/*
+integration/harbor:
+- harbor/**/*
+integration/nginx_ingress_controller:
+- nginx_ingress_controller/**/*
+integration/amazon_msk:
+- amazon_msk/**/*
+integration/ibm_was:
+- ibm_was/**/*
+integration/linkerd:
+- linkerd/**/*
+integration/hazelcast:
+- hazelcast/**/*
+integration/calico:
+- calico/**/*
+integration/twistlock:
+- twistlock/**/*
+integration/kube_metrics_server:
+- kube_metrics_server/**/*
+integration/datadog_cluster_agent:
+- datadog_cluster_agent/**/*
+integration/http_check:
+- http_check/**/*
+integration/ecs_fargate:
+- ecs_fargate/**/*
+integration/presto:
+- presto/**/*
+integration/kafka_consumer:
+- kafka_consumer/**/*
+integration/datadog_checks_base:
+- datadog_checks_base/**/*
+integration/traffic_server:
+- traffic_server/**/*
+integration/confluent_platform:
+- confluent_platform/**/*
+integration/btrfs:
+- btrfs/**/*
+integration/mapr:
+- mapr/**/*
+integration/marathon:
+- marathon/**/*
+integration/openmetrics:
+- openmetrics/**/*
+integration/external_dns:
+- external_dns/**/*
+integration/hyperv:
+- hyperv/**/*
+integration/tcp_check:
+- tcp_check/**/*
+integration/rabbitmq:
+- rabbitmq/**/*
+integration/snowflake:
+- snowflake/**/*
+integration/active_directory:
+- active_directory/**/*
+integration/ssh_check:
+- ssh_check/**/*
+integration/proxysql:
+- proxysql/**/*
+integration/linux_proc_extras:
+- linux_proc_extras/**/*
+integration/aspdotnet:
+- aspdotnet/**/*
+integration/tomcat:
+- tomcat/**/*
+integration/spark:
+- spark/**/*
+integration/glusterfs:
+- glusterfs/**/*
+integration/iis:
+- iis/**/*
+integration/voltdb:
+- voltdb/**/*
+integration/prometheus:
+- prometheus/**/*
+integration/pdh_check:
+- pdh_check/**/*
+integration/kube_controller_manager:
+- kube_controller_manager/**/*
+integration/hivemq:
+- hivemq/**/*
+integration/system_swap:
+- system_swap/**/*
+integration/varnish:
+- varnish/**/*
+integration/win32_event_log:
+- win32_event_log/**/*
+integration/jboss_wildfly:
+- jboss_wildfly/**/*
+integration/directory:
+- directory/**/*
+integration/cloud_foundry_api:
+- cloud_foundry_api/**/*
+integration/tls:
+- tls/**/*
+integration/powerdns_recursor:
+- powerdns_recursor/**/*
+integration/druid:
+- druid/**/*
+integration/redisdb:
+- redisdb/**/*
+integration/sonarqube:
+- sonarqube/**/*
+integration/gearmand:
+- gearmand/**/*
+integration/aerospike:
+- aerospike/**/*
+integration/citrix_hypervisor:
+- citrix_hypervisor/**/*
+integration/haproxy:
+- haproxy/**/*
 integration/zk:
-- any:
-  - zk/**
+- zk/**/*
+integration/pgbouncer:
+- pgbouncer/**/*
+integration/couch:
+- couch/**/*
+integration/kong:
+- kong/**/*
+integration/yarn:
+- yarn/**/*
+integration/nagios:
+- nagios/**/*
+integration/kafka:
+- kafka/**/*
+integration/ibm_ace:
+- ibm_ace/**/*
+integration/fluentd:
+- fluentd/**/*
+integration/elastic:
+- elastic/**/*
+integration/datadog_checks_dev:
+- datadog_checks_dev/**/*
+integration/cockroachdb:
+- cockroachdb/**/*
+integration/pulsar:
+- pulsar/**/*
+integration/kube_dns:
+- kube_dns/**/*
+integration/coredns:
+- coredns/**/*
+integration/nginx:
+- nginx/**/*
+integration/windows_performance_counters:
+- windows_performance_counters/**/*
+integration/apache:
+- apache/**/*
+integration/lighttpd:
+- lighttpd/**/*
+integration/weblogic:
+- weblogic/**/*
+integration/scylla:
+- scylla/**/*
+integration/oracle:
+- oracle/**/*
+integration/cacti:
+- cacti/**/*
+integration/kubernetes_state:
+- kubernetes_state/**/*
+integration/vsphere:
+- vsphere/**/*
+integration/disk:
+- disk/**/*
+integration/ibm_mq:
+- ibm_mq/**/*
+integration/mcache:
+- mcache/**/*
+integration/go_expvar:
+- go_expvar/**/*
+integration/activemq:
+- activemq/**/*
+integration/ibm_i:
+- ibm_i/**/*
+integration/dotnetclr:
+- dotnetclr/**/*
+integration/ceph:
+- ceph/**/*
+integration/hive:
+- hive/**/*
+integration/dns_check:
+- dns_check/**/*
+integration/wmi_check:
+- wmi_check/**/*
+integration/hdfs_datanode:
+- hdfs_datanode/**/*
+integration/rethinkdb:
+- rethinkdb/**/*
+integration/foundationdb:
+- foundationdb/**/*
+integration/snmp:
+- snmp/**/*
+integration/azure_iot_edge:
+- azure_iot_edge/**/*
+integration/statsd:
+- statsd/**/*
+integration/kyototycoon:
+- kyototycoon/**/*
+integration/riakcs:
+- riakcs/**/*
+integration/eks_fargate:
+- eks_fargate/**/*
+integration/gitlab:
+- gitlab/**/*
+integration/silk:
+- silk/**/*
+integration/mapreduce:
+- mapreduce/**/*
+integration/riak:
+- riak/**/*
+integration/solr:
+- solr/**/*
+integration/mysql:
+- mysql/**/*
+integration/kube_proxy:
+- kube_proxy/**/*
+integration/twemproxy:
+- twemproxy/**/*
+integration/network:
+- network/**/*
+integration/teradata:
+- teradata/**/*
+integration/airflow:
+- airflow/**/*
+integration/tokumx:
+- tokumx/**/*
+integration/singlestore:
+- singlestore/**/*
+integration/vertica:
+- vertica/**/*
+integration/avi_vantage:
+- avi_vantage/**/*
+integration/supervisord:
+- supervisord/**/*
+integration/teamcity:
+- teamcity/**/*
+integration/mesos_master:
+- mesos_master/**/*
+integration/openldap:
+- openldap/**/*
+integration/cilium:
+- cilium/**/*
+integration/postgres:
+- postgres/**/*
+integration/test_check:
+- test_check/**/*
