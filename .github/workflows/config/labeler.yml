@@ -627,3 +627,6 @@ integration/yarn:
 integration/zk:
 - any:
   - zk/**
+integration/test:
+- any:
+  - test/**
