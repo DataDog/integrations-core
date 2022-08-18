@@ -119,11 +119,11 @@ Need help? Contact [Datadog support][9].
 [1]: https://www.teradata.com/
 [2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://docs.datadoghq.com/agent/kubernetes/integrations/
-[4]: https://github.com/DataDog/integrations-core/blob/master/check/datadog_checks/teradata/data/conf.yaml.example
+[4]: https://github.com/DataDog/integrations-core/blob/master/teradata/datadog_checks/teradata/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[7]: https://github.com/DataDog/integrations-core/blob/master/check/metadata.csv
-[8]: https://github.com/DataDog/integrations-core/blob/master/check/assets/service_checks.json
+[7]: https://github.com/DataDog/integrations-core/blob/master/teradata/metadata.csv
+[8]: https://github.com/DataDog/integrations-core/blob/master/teradata/assets/service_checks.json
 [9]: https://docs.datadoghq.com/help/
 [10]: https://github.com/Teradata/python-driver#Installation
 [11]: https://docs.datadoghq.com/developers/guide/custom-python-package/?tab=linux#pagetitle 

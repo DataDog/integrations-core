@@ -6,9 +6,9 @@ files:
     options:
     - name: gitlab_url
       description: |
-        The master URL to probe for service health status
-        If you are using gitlab CE and not EE, use this URL with
-        the authorization token: http://localhost/?token=<TOKEN>
+        The GitLab external URL to probe for service health status
+        If authentication is required, use this URL with
+        the authorization token: http://localhost/?access_token=<TOKEN>
       value:
         type: string
     - name: api_token

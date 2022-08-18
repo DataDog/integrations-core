@@ -71,11 +71,11 @@ class CheckDefinition(object):
         with open(os.path.join(INTEGRATIONS_CORE, dir_name, "manifest.json"), 'r') as manifest:
             content = json.load(manifest)
             # name of the integration
-            self.name: str = content['name']
+            self.name: str = content['app_id']
             # boolean: whether or not the integration supports log collection
-            self.log_collection: bool = 'log collection' in content['categories']
+            self.log_collection: bool = 'Category::Log Collection' in content.get('tile', {}).get('classifier_tags', [])
             # boolean: whether or not the integration has public facing docs
-            self.is_public: bool = content['is_public']
+            self.is_public: bool = content['display_on_public_website']
             # Log source defined in the manifest.json of the integration
             self.log_source: Optional[str] = content.get("assets", {}).get("logs", {}).get("source")
 

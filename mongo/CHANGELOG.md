@@ -1,5 +1,9 @@
 # CHANGELOG - mongo
 
+## 4.0.1 / 2022-08-15
+
+* [Fixed] Rename SSL parameters. See [#12743](https://github.com/DataDog/integrations-core/pull/12743).
+
 ## 4.0.0 / 2022-08-05
 
 * [Added] Support allow invalid hostnames in SSL connections. See [#12541](https://github.com/DataDog/integrations-core/pull/12541).

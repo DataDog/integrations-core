@@ -434,7 +434,7 @@ def prepare_hatch_test_commands(
 
         commands.insert(0, command)
 
-    base_or_dev = check.startswith('datadog_checks_')
+    base_or_dev = check.startswith('datadog_checks_') or check == 'ddev'
     if force_base_min and not base_or_dev:
         check_base_dependencies, errors = read_check_base_dependencies(check)
         if errors:
