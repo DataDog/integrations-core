@@ -1,5 +1,5 @@
 import os
-from functools import cached_property, lru_cache
+from functools import cached_property
 
 from hatch.env.collectors.plugin.interface import EnvironmentCollectorInterface
 
@@ -42,7 +42,6 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
         elif not (self.is_test_package or self.is_dev_package):
             return self.pip_install_command('-e', '../datadog_checks_dev')
 
-    @lru_cache(maxsize=None)
     def base_package_install_command(self, features):
         if not self.in_core_repo or os.environ.get('BASE_PACKAGE_FORCE_UNPINNED'):
             return self.pip_install_command(self.format_base_package(features))
@@ -79,7 +78,9 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
                 env_config.setdefault('features', ['deps'])
 
             install_commands = []
-            if install_command := self.base_package_install_command(config.get('base-package-features')):
+            if install_command := self.base_package_install_command(
+                config.get('base-package-features', self.config.get('base-package-features'))
+            ):
                 install_commands.append(install_command)
             if self.test_package_install_command:
                 install_commands.append(self.test_package_install_command)
