@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
-import shutil
 import sys
 import time
 
@@ -10,7 +9,7 @@ import pytest
 
 from datadog_checks.dev import EnvVars, run_command
 from datadog_checks.dev._env import E2E_PREFIX, TESTING_PLUGIN
-from datadog_checks.dev.fs import chdir
+from datadog_checks.dev.fs import chdir, remove_path
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 CORE_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(HERE))))
@@ -19,7 +18,7 @@ CORE_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(HERE
 @pytest.mark.parametrize(
     'integration_type, installable', [('check', True), ('jmx', True), ('tile', False), ('logs', False)]
 )
-def test_new_check_test(integration_type, installable, tmp_path):
+def test_new_check_test(integration_type, installable):
     check_path = os.path.join(CORE_ROOT, 'my_check')
 
     try:
@@ -67,5 +66,6 @@ def test_new_check_test(integration_type, installable, tmp_path):
             # See: https://github.com/pypa/pip/issues/3016
             assert 'WARNING: Skipping' not in result.stdout
     finally:
-        shutil.move(check_path, tmp_path / 'datadog-my-check')
-        time.sleep(5)
+        for _ in range(5):
+            time.sleep(5)
+            remove_path(check_path)
