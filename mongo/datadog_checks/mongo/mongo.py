@@ -7,7 +7,7 @@ from copy import deepcopy
 from distutils.version import LooseVersion
 
 import pymongo
-from six import PY3, itervalues
+from six import itervalues
 
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.mongo.api import MongoApi
@@ -30,8 +30,7 @@ from datadog_checks.mongo.config import MongoConfig
 
 from . import metrics
 
-if PY3:
-    long = int
+long = int
 
 
 class MongoDb(AgentCheck):
@@ -78,24 +77,17 @@ class MongoDb(AgentCheck):
         self.last_states_by_server = {}
 
         self._api_client = None
+        self._mongo_version = None
 
     @property
     def api_client(self):
-        if self._api_client is None:
-            try:
-                self._api_client = MongoApi(self._config, self.log)
-                self.log.debug("Connected!")
-            except Exception:
-                self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self._config.service_check_tags)
-                raise
-
         return self._api_client
 
     @classmethod
     def get_library_versions(cls):
         return {'pymongo': pymongo.version}
 
-    def refresh_collectors(self, deployment_type, mongo_version, all_dbs, tags):
+    def refresh_collectors(self, deployment_type, all_dbs, tags):
         collect_tcmalloc_metrics = 'tcmalloc' in self._config.additional_metrics
         potential_collectors = [
             ConnPoolStatsCollector(self, tags),
@@ -110,10 +102,10 @@ class MongoDb(AgentCheck):
             potential_collectors.append(JumboStatsCollector(self, tags))
         if 'top' in self._config.additional_metrics:
             potential_collectors.append(TopCollector(self, tags))
-        if LooseVersion(mongo_version) >= LooseVersion("3.6"):
+        if LooseVersion(self._mongo_version) >= LooseVersion("3.6"):
             potential_collectors.append(SessionStatsCollector(self, tags))
         if self._config.collections_indexes_stats:
-            if LooseVersion(mongo_version) >= LooseVersion("3.2"):
+            if LooseVersion(self._mongo_version) >= LooseVersion("3.2"):
                 potential_collectors.append(
                     IndexStatsCollector(self, self._config.db_name, tags, self._config.coll_names)
                 )
@@ -121,7 +113,7 @@ class MongoDb(AgentCheck):
                 self.log.debug(
                     "'collections_indexes_stats' is only available starting from mongo 3.2: "
                     "your mongo version is %s",
-                    mongo_version,
+                    self._mongo_version,
                 )
         for db_name in all_dbs:
             potential_collectors.append(DbStatCollector(self, db_name, tags))
@@ -181,34 +173,31 @@ class MongoDb(AgentCheck):
             self._api_client.deployment_type = self._api_client.get_deployment_type()
 
     def check(self, _):
-        try:
+        if self._connect():
             self._check()
-        except (pymongo.errors.ConnectionFailure, Exception):
-            self._api_client = None
-            raise
+
+    def _connect(self) -> bool:
+        if self._api_client is None:
+            try:
+                self._api_client = MongoApi(self._config, self.log)
+                self.log.debug("Connecting to '%s'", self._config.hosts)
+                self._api_client.connect()
+                self.log.debug("Connected!")
+                self._mongo_version = self.api_client.server_info().get('version', '0.0')
+                self.set_metadata('version', self._mongo_version)
+            except Exception as e:
+                self._api_client = None
+                self.log.debug('Exception: %s', e)
+                self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self._config.service_check_tags)
+                return False
+            else:
+                self.service_check(SERVICE_CHECK_NAME, AgentCheck.OK, tags=self._config.service_check_tags)
+        return True
 
     def _check(self):
-        try:
-            api = self.api_client
-        except Exception as e:
-            self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self._config.service_check_tags)
-            self.log.exception("Error when creating the api client: %s.", str(e))
-            raise
-
         self._refresh_replica_role()
-
-        try:
-            mongo_version = api.server_info().get('version', '0.0')
-            self.set_metadata('version', mongo_version)
-        except Exception:
-            self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self._config.service_check_tags)
-            self.log.exception("Error when collecting the version from the mongo server.")
-            raise
-        else:
-            self.service_check(SERVICE_CHECK_NAME, AgentCheck.OK, tags=self._config.service_check_tags)
-
         tags = deepcopy(self._config.metric_tags)
-        deployment = api.deployment_type
+        deployment = self.api_client.deployment_type
         if isinstance(deployment, ReplicaSetDeployment):
             tags.extend(
                 [
@@ -221,11 +210,11 @@ class MongoDb(AgentCheck):
         elif isinstance(deployment, MongosDeployment):
             tags.append('sharding_cluster_role:mongos')
 
-        dbnames = self._get_db_names(api, deployment, tags)
-        self.refresh_collectors(deployment, mongo_version, dbnames, tags)
+        dbnames = self._get_db_names(self.api_client, deployment, tags)
+        self.refresh_collectors(deployment, dbnames, tags)
         for collector in self.collectors:
             try:
-                collector.collect(api)
+                collector.collect(self.api_client)
             except Exception:
                 self.log.info(
                     "Unable to collect logs from collector %s. Some metrics will be missing.", collector, exc_info=True

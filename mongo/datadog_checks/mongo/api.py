@@ -1,4 +1,5 @@
 from pymongo import MongoClient, ReadPreference
+from pymongo.errors import ConnectionFailure
 
 from datadog_checks.mongo.common import MongosDeployment, ReplicaSetDeployment, StandaloneDeployment
 
@@ -19,7 +20,6 @@ class MongoApi(object):
     def __init__(self, config, log, replicaset: str = None):
         self._config = config
         self._log = log
-        self._log.debug("Connecting to '%s'", self._config.hosts)
         options = {
             'host': self._config.server if self._config.server else self._config.hosts,
             'socketTimeoutMS': self._config.timeout,
@@ -43,10 +43,19 @@ class MongoApi(object):
         options.update(self._config.ssl_params)
         self._log.debug("options: %s", options)
         self._cli = MongoClient(**options)
-        self.deployment_type = self.get_deployment_type()
+        self.deployment_type = None
 
     def __getitem__(self, item):
         return self._cli[item]
+
+    def connect(self):
+        try:
+            # The ping command is cheap and does not require auth.
+            self['admin'].command('ping')
+            self.deployment_type = self.get_deployment_type()
+        except ConnectionFailure as e:
+            self._log.debug('ConnectionFailure: %s', e)
+            raise
 
     def server_info(self, session=None):
         return self._cli.server_info(session)
