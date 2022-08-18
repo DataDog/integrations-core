@@ -17,6 +17,7 @@ from datadog_checks.mongo.config import MongoConfig
 from datadog_checks.mongo.utils import parse_mongo_uri
 
 from . import common
+from .conftest import mock_pymongo
 
 try:
     from contextlib import nullcontext  # type: ignore
@@ -36,6 +37,10 @@ DEFAULT_METRICS_LEN = len(
         for m_name, m_type in iteritems(d)
     }
 )
+
+
+def test_get_library_versions():
+    assert MongoDb.get_library_versions() == {'pymongo': '4.2.0'}
 
 
 @pytest.mark.parametrize(
@@ -400,3 +405,74 @@ def test_api_alibaba_mongod(aggregator):
         assert deployment_type.is_arbiter is False
         assert deployment_type.replset_state == 1
         assert deployment_type.replset_name == 'foo'
+
+
+def test_when_replica_check_flag_to_false_then_no_replset_metrics_reported(aggregator, check, instance, dd_run_check):
+    # Given
+    instance['replica_check'] = False
+    check = check(instance)
+    # When
+    with mock_pymongo("replica-primary-in-shard"):
+        dd_run_check(check)
+    # Then
+    reported_metrics = aggregator.metric_names
+    for metric in [
+        'mongodb.replset.health',
+        'mongodb.replset.replicationlag',
+        'mongodb.replset.optime_lag',
+        'mongodb.replset.state',
+        'mongodb.replset.votefraction',
+        'mongodb.replset.votes',
+    ]:
+        assert metric not in reported_metrics
+
+
+def test_when_collections_indexes_stats_to_true_then_index_stats_metrics_reported(
+    aggregator, check, instance, dd_run_check
+):
+    # Given
+    instance["collections_indexes_stats"] = True
+    instance["collections"] = ['bar', 'foo']
+    check = check(instance)
+    # When
+    with mock_pymongo("standalone"):
+        dd_run_check(check)
+    # Then
+    reported_metrics = aggregator.metric_names
+    for metric in [
+        'mongodb.collection.indexes.accesses.ops',
+    ]:
+        assert metric in reported_metrics
+
+
+def test_when_version_lower_than_3_2_then_no_index_stats_metrics_reported(aggregator, check, instance, dd_run_check):
+    # Given
+    instance["collections_indexes_stats"] = True
+    instance["collections"] = ['bar', 'foo']
+    check = check(instance)
+    # When
+    with mock_pymongo("standalone") as mocked_api:
+        mocked_api.server_info = mock.MagicMock(return_value={'version': '3.0'})
+        dd_run_check(check)
+    # Then
+    reported_metrics = aggregator.metric_names
+    for metric in [
+        'mongodb.collection.indexes.accesses.ops',
+    ]:
+        assert metric not in reported_metrics
+
+
+def test_when_version_lower_than_3_6_then_no_session_metrics_reported(aggregator, check, instance, dd_run_check):
+    # Given
+    check = check(instance)
+    # When
+    mocked_client = mock.MagicMock()
+    mocked_client.server_info = mock.MagicMock(return_value={'version': '3.0'})
+    with mock.patch('datadog_checks.mongo.api.MongoClient', mock.MagicMock(return_value=mocked_client)):
+        dd_run_check(check)
+    # Then
+    reported_metrics = aggregator.metric_names
+    for metric in [
+        'mongodb.sessions.count',
+    ]:
+        assert metric not in reported_metrics
