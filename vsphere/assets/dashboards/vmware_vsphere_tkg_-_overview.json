@@ -207,7 +207,6 @@
                                 }
                             ],
                             "show_legend": false,
-                            "time": {},
                             "title": "Pods Running",
                             "title_align": "left",
                             "title_size": "16",
@@ -262,7 +261,6 @@
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "vSphere Host CPU Usage",
                             "title_align": "left",
                             "title_size": "16",
@@ -310,7 +308,6 @@
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "Pods Running by Namespace",
                             "title_align": "left",
                             "title_size": "16",
@@ -365,7 +362,6 @@
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "vSphere Host Memory Usage",
                             "title_align": "left",
                             "title_size": "16",
@@ -498,7 +494,6 @@
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "Pods Status by Phase",
                             "title_align": "left",
                             "title_size": "16",
@@ -539,7 +534,6 @@
                                     "response_format": "scalar"
                                 }
                             ],
-                            "time": {},
                             "title": "Pods Status by Phase",
                             "title_align": "left",
                             "title_size": "16",
@@ -785,7 +779,6 @@
                                     "response_format": "scalar"
                                 }
                             ],
-                            "time": {},
                             "title": "Pods Running By Namespace",
                             "title_align": "left",
                             "title_size": "16",
@@ -841,7 +834,6 @@
                                     "response_format": "scalar"
                                 }
                             ],
-                            "time": {},
                             "title": "Pods in Ready State By Node",
                             "title_align": "left",
                             "title_size": "16",
@@ -892,7 +884,6 @@
                                     "response_format": "scalar"
                                 }
                             ],
-                            "time": {},
                             "title": "Pods in Bad State (Not Ready) by Namespace",
                             "title_align": "left",
                             "title_size": "16",
@@ -1371,7 +1362,6 @@
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "Network Rate by Pod",
                             "title_align": "left",
                             "title_size": "16",
@@ -1435,7 +1425,6 @@
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "Network Errors by Pod",
                             "title_align": "left",
                             "title_size": "16",
@@ -1499,7 +1488,8 @@
                     {
                         "definition": {
                             "event_size": "l",
-                            "query": "source:vsphere $vsphere_vcenter $kube_container_name",
+                            "query": "source:vsphere $vsphere_vcenter $vsphere_host",
+                            "time": {},
                             "title": "vSphere Events",
                             "title_align": "left",
                             "title_size": "16",
@@ -1547,7 +1537,6 @@
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "ESXi Host CPU Usage",
                             "title_align": "left",
                             "title_size": "16",
@@ -1653,7 +1642,6 @@
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "ESXi Host Memory Usage",
                             "title_align": "left",
                             "title_size": "16",
@@ -1759,7 +1747,6 @@
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "VM CPU Usage",
                             "title_align": "left",
                             "title_size": "16",
@@ -1865,7 +1852,6 @@
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "VM Memory Usage",
                             "title_align": "left",
                             "title_size": "16",
@@ -1975,7 +1961,6 @@
                                     "response_format": "scalar"
                                 }
                             ],
-                            "time": {},
                             "title": "Bytes Free by Datastore",
                             "title_align": "left",
                             "title_size": "16",
@@ -2016,7 +2001,6 @@
                                     "response_format": "scalar"
                                 }
                             ],
-                            "time": {},
                             "title": "Percent Disk Utilization by Datastore",
                             "type": "treemap"
                         },
