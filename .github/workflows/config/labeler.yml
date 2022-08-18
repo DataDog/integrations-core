@@ -345,3 +345,5 @@ integration/postgres:
 - postgres/**/*
 integration/test_check:
 - test_check/**/*
+integration/ddev:
+- ddev/**/*
