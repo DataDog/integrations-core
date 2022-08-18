@@ -17,9 +17,11 @@ from .metrics import KNOWN_COUNTERS, METRICS, METRICS_OPTIONAL
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
 @pytest.mark.parametrize('use_openmetrics', [False, True], indirect=True)
-def test_integration(aggregator, dd_run_check, check, instance, global_tags, use_openmetrics):
-    instance = dict(instance())
+@pytest.mark.parametrize('use_auth_file', [False, True])
+def test_integration(aggregator, dd_run_check, check, instance, global_tags, use_openmetrics, use_auth_file):
+    instance = dict(instance(use_auth_file))
     instance['use_openmetrics'] = use_openmetrics
+
     check = check(instance)
     dd_run_check(check)
 
@@ -42,8 +44,9 @@ def test_integration_noauth(aggregator, dd_run_check, check, no_token_instance, 
 @auth_required
 @pytest.mark.e2e
 @pytest.mark.parametrize('use_openmetrics', [False, True], indirect=True)
-def test_e2e(dd_agent_check, e2e_instance, global_tags, use_openmetrics):
-    instance = dict(e2e_instance)
+@pytest.mark.parametrize('use_auth_file', [False, True])
+def test_e2e(dd_agent_check, e2e_instance, global_tags, use_openmetrics, use_auth_file):
+    instance = dict(e2e_instance(use_auth_file))
     instance['use_openmetrics'] = use_openmetrics
     aggregator = dd_agent_check(instance, rate=True)
 

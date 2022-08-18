@@ -220,29 +220,29 @@ class VaultCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
             config['openmetrics_endpoint'] = self._metrics_url
             config['tags'] = list(self._tags)
 
-            if not self.config.no_token:
-                if self.config.client_token_path:
-                    self.HTTP_CONFIG_REMAPPER = {
-                        'auth_token': {
-                            'name': 'auth_token',
-                            'default': {
-                                'reader': {'type': 'file', 'path': self.config.client_token_path},
-                                'writer': {'type': 'header', 'name': 'X-Vault-Token'},
-                            },
-                        }
+            if not self.config.no_token and self.config.client_token_path:
+                self.HTTP_CONFIG_REMAPPER = {
+                    'auth_token': {
+                        'name': 'auth_token',
+                        'default': {
+                            'reader': {'type': 'file', 'path': self.config.client_token_path},
+                            'writer': {'type': 'header', 'name': 'X-Vault-Token'},
+                        },
                     }
-                else:
-                    self.http.options['headers']['X-Vault-Token'] = self.config.client_token
+                }
 
             self.scraper_configs.clear()
             self.scraper_configs.append(config)
 
-        # https://www.vaultproject.io/api/overview#the-x-vault-request-header
-        #
-        # Do this here so any HTTP_CONFIG_REMAPPER changes come first
-        self.http.options['headers']['X-Vault-Request'] = 'true'
-
         super().configure_scrapers()
+
+        # TODO How could we move this in the configure_scrapers method?
+        for _, scraper in self.scrapers.items():
+            if not self.config.no_token and self.config.client_token:
+                scraper.http.options['headers']['X-Vault-Token'] = self.config.client_token
+
+            # https://www.vaultproject.io/api-docs#the-x-vault-request-header
+            scraper.http.options['headers']['X-Vault-Request'] = 'true'
 
     def get_default_config(self):
         return {'metrics': construct_metrics_config(METRIC_MAP, {})}
