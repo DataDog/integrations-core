@@ -29,7 +29,7 @@ On each MySQL server, create a database user for the Datadog Agent.
 
 The following instructions grant the Agent permission to login from any host using `datadog@'%'`. You can restrict the `datadog` user to be allowed to login only from localhost by using `datadog@'localhost'`. See [MySQL Adding Accounts, Assigning Privileges, and Dropping Accounts][5] for more info.
 
-For MySQL up to version 7.x create the `datadog` user this way:
+For MySQL up to version 7.x, create the `datadog` user with the following command:
 
 ```shell
 mysql> CREATE USER 'datadog'@'%' IDENTIFIED BY '<UNIQUEPASSWORD>';
