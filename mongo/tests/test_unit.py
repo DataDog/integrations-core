@@ -6,6 +6,7 @@ from urllib.parse import quote_plus
 
 import mock
 import pytest
+from pymongo.errors import ConnectionFailure
 from six import iteritems
 
 from datadog_checks.base import ConfigurationError
@@ -41,6 +42,19 @@ DEFAULT_METRICS_LEN = len(
 
 def test_get_library_versions():
     assert MongoDb.get_library_versions() == {'pymongo': '4.2.0'}
+
+
+def test_emits_critical_service_check_when_service_is_not_available(dd_run_check, aggregator):
+    # Given
+    check = MongoDb('mongo', {}, [{'hosts': ['localhost']}])
+    # When
+    with mock.patch(
+        'pymongo.database.Database.command', side_effect=ConnectionFailure('Service not available')
+    ) as mocked_database_command:
+        dd_run_check(check)
+        mocked_database_command.assert_called_with('ping')
+    # Then
+    aggregator.assert_service_check('mongodb.can_connect', MongoDb.CRITICAL)
 
 
 @pytest.mark.parametrize(
