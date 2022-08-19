@@ -698,8 +698,11 @@ class TestVault:
 
     @auth_required
     @pytest.mark.parametrize('use_openmetrics', [False, True], indirect=True)
-    def test_auth_needed_but_no_token(self, aggregator, dd_run_check, instance, global_tags, use_openmetrics):
-        instance = instance()
+    @pytest.mark.parametrize('use_auth_file', [False, True])
+    def test_auth_needed_but_no_token(
+        self, aggregator, dd_run_check, instance, global_tags, use_openmetrics, use_auth_file
+    ):
+        instance = instance(use_auth_file)
         instance['no_token'] = True
         instance['use_openmetrics'] = use_openmetrics
         c = Vault(Vault.CHECK_NAME, {}, [instance])
