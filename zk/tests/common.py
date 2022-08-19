@@ -130,7 +130,6 @@ METRICS_36 = METRICS_34 + [
     'zookeeper.jvm_memory_bytes_init',
     'zookeeper.jvm_memory_bytes_max',
     'zookeeper.jvm_memory_bytes_used',
-    'zookeeper.jvm_memory_pool_allocated_bytes_total',
     'zookeeper.jvm_memory_pool_bytes_committed',
     'zookeeper.jvm_memory_pool_bytes_init',
     'zookeeper.jvm_memory_pool_bytes_max',
@@ -312,6 +311,8 @@ METRICS_36 = METRICS_34 + [
     'zookeeper.write_final_proc_time_ms_sum',
 ]
 
+METRICS_36_OPTIONAL = ['zookeeper.jvm_memory_pool_allocated_bytes_total']
+
 
 # these metrics will report with `NaN` values, so we skip them
 METRICS_36_E2E_SKIPS = [
@@ -389,8 +390,10 @@ def assert_mntr_metrics_by_version(aggregator, skip=None):
 
     zk_version = os.environ.get("ZK_VERSION") or "3.4.10"
     metrics_to_check = METRICS_34
+    optional_metrics = []
     if zk_version and LooseVersion(zk_version) >= LooseVersion("3.6"):
         metrics_to_check = METRICS_36
+        optional_metrics = METRICS_36_OPTIONAL
 
     for metric in metrics_to_check:
         if metric in skip:
@@ -398,3 +401,6 @@ def assert_mntr_metrics_by_version(aggregator, skip=None):
         aggregator.assert_metric(metric)
         aggregator.assert_metric_has_tag_prefix(metric, tag_prefix='mode')
         aggregator.assert_metric_has_tag_prefix(metric, tag_prefix='mytag')
+
+    for metric in optional_metrics:
+        aggregator.assert_metric(metric, at_least=0)
