@@ -198,6 +198,7 @@ OPTIONAL_METRICS = [
     'clickhouse.thread.cpu.wait',
     'clickhouse.thread.global.active',
     'clickhouse.thread.global.total',
+    'clickhouse.thread.io.wait',
     'clickhouse.thread.local.active',
     'clickhouse.thread.local.total',
     'clickhouse.thread.process_time',
