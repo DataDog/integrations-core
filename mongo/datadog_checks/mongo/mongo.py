@@ -194,8 +194,7 @@ class MongoDb(AgentCheck):
                 self.log.error('Exception: %s', e)
                 self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self._config.service_check_tags)
                 return False
-            else:
-                self.service_check(SERVICE_CHECK_NAME, AgentCheck.OK, tags=self._config.service_check_tags)
+        self.service_check(SERVICE_CHECK_NAME, AgentCheck.OK, tags=self._config.service_check_tags)
         return True
 
     def _check(self):

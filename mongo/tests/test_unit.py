@@ -72,6 +72,22 @@ def test_emits_ok_service_check_when_service_is_available(
 @mock.patch('pymongo.database.Database.command', side_effect=[{'ok': 1}, {'parsed': {}}])
 @mock.patch('pymongo.mongo_client.MongoClient.server_info', return_value={'version': '5.0.0'})
 @mock.patch('pymongo.mongo_client.MongoClient.list_database_names', return_value=[])
+def test_emits_ok_service_check_each_run_when_service_is_available(
+    mock_list_database_names, mock_server_info, mock_command, dd_run_check, aggregator, datadog_agent
+):
+    # Given
+    check = MongoDb('mongo', {}, [{'hosts': ['localhost']}])
+    check.refresh_collectors = mock.MagicMock()
+    # When
+    dd_run_check(check)
+    dd_run_check(check)
+    # Then
+    aggregator.assert_service_check('mongodb.can_connect', MongoDb.OK, count=2)
+
+
+@mock.patch('pymongo.database.Database.command', side_effect=[{'ok': 1}, {'parsed': {}}])
+@mock.patch('pymongo.mongo_client.MongoClient.server_info', return_value={'version': '5.0.0'})
+@mock.patch('pymongo.mongo_client.MongoClient.list_database_names', return_value=[])
 def test_version_metadata(
     mock_list_database_names, mock_server_info, mock_command, dd_run_check, aggregator, datadog_agent
 ):
