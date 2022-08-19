@@ -52,7 +52,6 @@ class MongoApi(object):
         try:
             # The ping command is cheap and does not require auth.
             self['admin'].command('ping')
-            self.deployment_type = self.get_deployment_type()
         except ConnectionFailure as e:
             self._log.debug('ConnectionFailure: %s', e)
             raise
