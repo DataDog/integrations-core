@@ -621,7 +621,7 @@ class SQLServer(AgentCheck):
         return cls(cfg_inst, base_name, metric_type, column, self.log)
 
     def check(self, _):
-        prof = Profiler()
+        prof = Profiler(service='{}_check'.format(self.name))
         prof.start()
 
         if self.do_check:
