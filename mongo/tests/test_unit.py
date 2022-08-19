@@ -44,17 +44,33 @@ def test_get_library_versions():
     assert MongoDb.get_library_versions() == {'pymongo': '4.2.0'}
 
 
-def test_emits_critical_service_check_when_service_is_not_available(dd_run_check, aggregator):
+@mock.patch('pymongo.database.Database.command', side_effect=ConnectionFailure('Service not available'))
+def test_emits_critical_service_check_when_service_is_not_available(mock_command, dd_run_check, aggregator):
     # Given
     check = MongoDb('mongo', {}, [{'hosts': ['localhost']}])
     # When
-    with mock.patch(
-        'pymongo.database.Database.command', side_effect=ConnectionFailure('Service not available')
-    ) as mocked_database_command:
-        dd_run_check(check)
-        mocked_database_command.assert_called_with('ping')
+    dd_run_check(check)
     # Then
     aggregator.assert_service_check('mongodb.can_connect', MongoDb.CRITICAL)
+    mock_command.assert_has_calls([mock.call('ping')])
+
+
+@mock.patch('pymongo.database.Database.command', side_effect=[{'ok': 1}, {'parsed': {}}])
+@mock.patch('pymongo.mongo_client.MongoClient.server_info', return_value={'version': '5.0.0'})
+@mock.patch('pymongo.mongo_client.MongoClient.list_database_names', return_value=[])
+def test_emits_ok_service_check_when_service_is_available(
+    mock_list_database_names, mock_server_info, mock_command, dd_run_check, aggregator
+):
+    # Given
+    check = MongoDb('mongo', {}, [{'hosts': ['localhost']}])
+    check.refresh_collectors = mock.MagicMock()
+    # When
+    dd_run_check(check)
+    # Then
+    aggregator.assert_service_check('mongodb.can_connect', MongoDb.OK)
+    mock_command.assert_has_calls([mock.call('ping'), mock.call('getCmdLineOpts')])
+    mock_server_info.assert_called_once()
+    mock_list_database_names.assert_called_once()
 
 
 @pytest.mark.parametrize(
