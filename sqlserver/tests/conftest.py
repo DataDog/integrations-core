@@ -273,6 +273,19 @@ def full_e2e_config(instance_session_default):
 
 @pytest.fixture(scope='session')
 def dd_environment(full_e2e_config):
+    raise Exception(
+        ' | '.join(
+            [
+                str(os.environ['ODBCSYSINI']),
+                str(os.environ['COMPOSE_FOLDER']),
+                str(os.environ['SQLSERVER_MAJOR_VERSION']),
+                str(os.environ.get('WINDOWS_SQLSERVER_DRIVER')),
+                str(os.environ.get('SQLSERVER_IMAGE_TAG')),
+                str(os.environ.get('SQLSERVER_BASE_IMAGE')),
+                str(os.environ.get('SETUPTOOLS_USE_DISTUTILS')),
+            ]
+        )
+    )
     if pyodbc is None:
         raise Exception("pyodbc is not installed!")
 
