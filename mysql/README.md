@@ -51,7 +51,7 @@ grep Uptime && echo -e "\033[0;32mMySQL user - OK\033[0m" || \
 echo -e "\033[0;31mCannot connect to MySQL\033[0m"
 ```
 
-The Agent needs a few privileges to collect metrics. Grant the `datadog` user the following limited privileges ONLY.
+The Agent needs a few privileges to collect metrics. Grant the `datadog` user only the following limited privileges.
 
 For MySQL up to version 7.x set `max_user_connections` this way:
 
