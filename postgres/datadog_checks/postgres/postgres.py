@@ -7,6 +7,8 @@ import threading
 from contextlib import closing
 from time import time
 
+from ddtrace.profiling import Profiler
+
 import psycopg2
 from six import iteritems
 
@@ -576,6 +578,9 @@ class PostgreSql(AgentCheck):
 
     def check(self, _):
         tags = copy.copy(self._config.tags)
+        # start profiler
+        prof = Profiler()
+        prof.start()
         # Collect metrics
         try:
             # Check version
