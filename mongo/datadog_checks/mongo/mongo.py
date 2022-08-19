@@ -7,7 +7,6 @@ from copy import deepcopy
 from distutils.version import LooseVersion
 
 import pymongo
-from six import itervalues
 
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.mongo.api import MongoApi
@@ -146,7 +145,7 @@ class MongoDb(AgentCheck):
         metrics_to_collect = {}
 
         # Default metrics
-        for default_metrics in itervalues(metrics.DEFAULT_METRICS):
+        for default_metrics in metrics.DEFAULT_METRICS.values():
             metrics_to_collect.update(default_metrics)
 
         # Additional metrics metrics
