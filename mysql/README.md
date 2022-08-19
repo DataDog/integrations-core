@@ -60,7 +60,7 @@ mysql> GRANT REPLICATION CLIENT ON *.* TO 'datadog'@'%' WITH MAX_USER_CONNECTION
 Query OK, 0 rows affected, 1 warning (0.00 sec)
 ```
 
-For MySQL 8.0+ set `max_user_connections` this way:
+For MySQL 8.0 or greater, set `max_user_connections` with the following command:
 
 ```shell
 mysql> ALTER USER 'datadog'@'%' WITH MAX_USER_CONNECTIONS 5;
