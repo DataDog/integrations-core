@@ -10,8 +10,8 @@ from itertools import chain
 
 import six
 from cachetools import TTLCache
+from ddtrace.profiling import Profiler
 
-from ddtrace.profiling import Profiler  # this import supports code profiling, if enabled
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.utils.common import to_native_string
@@ -621,6 +621,9 @@ class SQLServer(AgentCheck):
         return cls(cfg_inst, base_name, metric_type, column, self.log)
 
     def check(self, _):
+        prof = Profiler()
+        prof.start()
+
         if self.do_check:
             self.load_static_information()
             if self.proc:
