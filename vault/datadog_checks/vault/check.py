@@ -237,7 +237,7 @@ class VaultCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
         super().configure_scrapers()
 
         # TODO How could we move this in the configure_scrapers method?
-        for _, scraper in self.scrapers.items():
+        for scraper in self.scrapers.values():
             if not self.config.no_token and self.config.client_token:
                 scraper.http.options['headers']['X-Vault-Token'] = self.config.client_token
 
