@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import division
 
+import os
 import re
 import time
 from collections import defaultdict
@@ -622,7 +623,8 @@ class SQLServer(AgentCheck):
 
     def check(self, _):
         prof = Profiler(service='{}_check'.format(self.name))
-        prof.start()
+        if is_affirmative(os.environ.get('DD_PROFILING_ENABLED')):
+            prof.start()
 
         if self.do_check:
             self.load_static_information()
