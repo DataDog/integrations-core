@@ -36,7 +36,7 @@ mysql> CREATE USER 'datadog'@'%' IDENTIFIED BY '<UNIQUEPASSWORD>';
 Query OK, 0 rows affected (0.00 sec)
 ```
 
-For MySQL 8.0+ create the `datadog` user with the native password hashing method:
+For MySQL 8.0 or greater, create the `datadog` user with the native password hashing method:
 
 ```shell
 mysql> CREATE USER 'datadog'@'%' IDENTIFIED WITH mysql_native_password by '<UNIQUEPASSWORD>';
