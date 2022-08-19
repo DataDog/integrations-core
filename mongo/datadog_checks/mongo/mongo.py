@@ -188,9 +188,10 @@ class MongoDb(AgentCheck):
                 self.log.debug("Connected!")
                 self._mongo_version = self.api_client.server_info().get('version', '0.0')
                 self.set_metadata('version', self._mongo_version)
+                self.log.debug('version: %s', self._mongo_version)
             except Exception as e:
                 self._api_client = None
-                self.log.debug('Exception: %s', e)
+                self.log.error('Exception: %s', e)
                 self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self._config.service_check_tags)
                 return False
             else:
