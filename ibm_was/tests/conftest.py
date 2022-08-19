@@ -32,6 +32,7 @@ def dd_environment():
             StartPerfServlet(),
             CheckEndpoints(common.INSTANCE['servlet_url']),
         ],
+        attempts=2,
     ):
         yield common.INSTANCE
 
