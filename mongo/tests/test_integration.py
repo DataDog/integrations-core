@@ -620,6 +620,7 @@ def test_mongod_bad_auth(check, dd_run_check, aggregator, username, password):
     dd_run_check(mongo_check)
     aggregator.assert_service_check('mongodb.can_connect', status=MongoDb.CRITICAL)
 
+
 @tls
 @pytest.mark.usefixtures('dd_environment')
 def test_mongod_tls_ok(check, dd_run_check, aggregator):
