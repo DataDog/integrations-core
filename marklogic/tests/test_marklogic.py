@@ -6,13 +6,20 @@ from typing import Any
 import mock
 import pytest
 from packaging import version
-from tests.assertions import assert_service_checks
 
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.marklogic import MarklogicCheck
 
-from .common import COMMON_TAGS, INSTANCE, INSTANCE_FILTERS, INSTANCE_SIMPLE_USER, MARKLOGIC_VERSION, assert_metrics
+from .common import (
+    COMMON_TAGS,
+    INSTANCE,
+    INSTANCE_FILTERS,
+    INSTANCE_SIMPLE_USER,
+    MARKLOGIC_VERSION,
+    assert_metrics,
+    assert_service_checks,
+)
 from .metrics import RESOURCE_STATUS_DATABASE_METRICS, RESOURCE_STORAGE_FOREST_METRICS, STORAGE_HOST_METRICS
 
 
