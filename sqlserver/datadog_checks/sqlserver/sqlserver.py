@@ -11,6 +11,7 @@ from itertools import chain
 import six
 from cachetools import TTLCache
 
+from ddtrace.profiling import Profiler  # this import supports code profiling, if enabled
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.utils.common import to_native_string
