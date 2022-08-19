@@ -52,14 +52,13 @@ def test_emits_critical_service_check_when_service_is_not_available(mock_command
     dd_run_check(check)
     # Then
     aggregator.assert_service_check('mongodb.can_connect', MongoDb.CRITICAL)
-    mock_command.assert_has_calls([mock.call('ping')])
 
 
 @mock.patch('pymongo.database.Database.command', side_effect=[{'ok': 1}, {'parsed': {}}])
 @mock.patch('pymongo.mongo_client.MongoClient.server_info', return_value={'version': '5.0.0'})
 @mock.patch('pymongo.mongo_client.MongoClient.list_database_names', return_value=[])
 def test_emits_ok_service_check_when_service_is_available(
-    mock_list_database_names, mock_server_info, mock_command, dd_run_check, aggregator
+    mock_list_database_names, mock_server_info, mock_command, dd_run_check, aggregator, datadog_agent
 ):
     # Given
     check = MongoDb('mongo', {}, [{'hosts': ['localhost']}])
@@ -68,9 +67,31 @@ def test_emits_ok_service_check_when_service_is_available(
     dd_run_check(check)
     # Then
     aggregator.assert_service_check('mongodb.can_connect', MongoDb.OK)
-    mock_command.assert_has_calls([mock.call('ping'), mock.call('getCmdLineOpts')])
-    mock_server_info.assert_called_once()
-    mock_list_database_names.assert_called_once()
+
+
+@mock.patch('pymongo.database.Database.command', side_effect=[{'ok': 1}, {'parsed': {}}])
+@mock.patch('pymongo.mongo_client.MongoClient.server_info', return_value={'version': '5.0.0'})
+@mock.patch('pymongo.mongo_client.MongoClient.list_database_names', return_value=[])
+def test_version_metadata(
+    mock_list_database_names, mock_server_info, mock_command, dd_run_check, aggregator, datadog_agent
+):
+    # Given
+    check = MongoDb('mongo', {}, [{'hosts': ['localhost:27017']}])
+    check.check_id = 'test:123'
+    check.refresh_collectors = mock.MagicMock()
+    # When
+    dd_run_check(check)
+    # Then
+    datadog_agent.assert_metadata(
+        'test:123',
+        {
+            'version.scheme': 'semver',
+            'version.major': '5',
+            'version.minor': '0',
+            'version.patch': '0',
+            'version.raw': '5.0.0',
+        },
+    )
 
 
 @mock.patch(
