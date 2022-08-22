@@ -27,15 +27,15 @@ def tree():
 def construct_output_info(path, depth, last, is_dir=False):
     if depth == 0:
         return '', path, is_dir
-    else:
-        if depth == 1:
-            return (f'{PIPE_END if last else PIPE_MIDDLE}{HYPHEN} ', path, is_dir)
-        else:
-            return (
-                f"{PIPE}   {' ' * 4 * (depth - 2)}{PIPE_END if last or is_dir else PIPE_MIDDLE}{HYPHEN} ",
-                path,
-                is_dir,
-            )
+
+    if depth == 1:
+        return f'{PIPE_END if last else PIPE_MIDDLE}{HYPHEN} ', path, is_dir
+
+    return (
+        f"{PIPE}   {' ' * 4 * (depth - 2)}{PIPE_END if last or is_dir else PIPE_MIDDLE}{HYPHEN} ",
+        path,
+        is_dir,
+    )
 
 
 def path_tree_output(path_tree, depth=0):
