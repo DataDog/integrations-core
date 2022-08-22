@@ -30,15 +30,13 @@ class VersionUtils(object):
 
     def is_aurora(self, db):
         cursor = db.cursor()
-        try:
-            # This query will pollute PG logs in non aurora versions but is the only reliable way of detecting aurora
-            cursor.execute('select AURORA_VERSION();')
-            return True
-        except Exception as e:
-            self.log.debug("Captured exception %s while determining if the DB is aurora. Assuming is not", str(e))
-            db.rollback()
-            return False
+        # This query will pollute PG logs in non aurora versions but is the only reliable way of detecting aurora
+        cursor.execute("select exists (select * from pg_proc where proname ilike 'aurora_version');")
 
+        aurora_function_exists = cursor.fetchone()[0]
+
+        return aurora_function_exists
+            
     @staticmethod
     def parse_version(raw_version):
         try:
