@@ -42,3 +42,8 @@ def distribution_name(request):
 def distribution_version(request):
     """Provide distribution_version fixture."""
     return request.config.getoption("--distribution-version")
+
+
+def pytest_configure(config):
+    config.addinivalue_line("markers", "online: a test uses S3 to obtain targets, intoto and tuf metadata")
+    config.addinivalue_line("markers", "offline: a test uses local targets, intoto and tuf metadata")
