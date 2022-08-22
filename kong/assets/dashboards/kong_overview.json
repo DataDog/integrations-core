@@ -259,7 +259,13 @@
             }
         }
     ],
-    "template_variables": [],
+    "template_variables": [
+        {
+            "default": "*",
+            "prefix": null,
+            "name": "scope"
+        }
+    ],
     "layout_type": "free",
     "is_read_only": true,
     "notify_list": [],
