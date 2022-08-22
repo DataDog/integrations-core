@@ -129,7 +129,7 @@ def mock_pymongo(deployment):
         'pymongo.collection.Collection'
     ), mock.patch('pymongo.command_cursor') as cur:
         cur.CommandCursor = lambda *args, **kwargs: args[1]['firstBatch']
-        yield
+        yield mocked_client
 
 
 @pytest.fixture
