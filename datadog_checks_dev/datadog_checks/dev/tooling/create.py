@@ -38,7 +38,6 @@ def construct_template_fields(integration_name, repo_choice, integration_type, *
     normalized_integration_name = normalize_package_name(integration_name)
     check_name_kebab = kebab_case_name(integration_name)
 
-    datadog_checks_base_req = 'datadog-checks-base[deps]>=6.6.0'
     third_party_install_info = f"""\
 To install the {integration_name} check on your host:
 
