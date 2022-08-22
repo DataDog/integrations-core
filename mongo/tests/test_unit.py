@@ -531,16 +531,11 @@ def test_when_replica_check_flag_to_false_then_no_replset_metrics_reported(aggre
     with mock_pymongo("replica-primary-in-shard"):
         dd_run_check(check)
     # Then
-    reported_metrics = aggregator.metric_names
-    for metric in [
-        'mongodb.replset.health',
-        'mongodb.replset.replicationlag',
-        'mongodb.replset.optime_lag',
-        'mongodb.replset.state',
-        'mongodb.replset.votefraction',
-        'mongodb.replset.votes',
-    ]:
-        assert metric not in reported_metrics
+    aggregator.assert_metric('mongodb.replset.health', count=0)
+    aggregator.assert_metric('mongodb.replset.optime_lag', count=0)
+    aggregator.assert_metric('mongodb.replset.state', count=0)
+    aggregator.assert_metric('mongodb.replset.votefraction', count=0)
+    aggregator.assert_metric('mongodb.replset.votes', count=0)
 
 
 def test_when_collections_indexes_stats_to_true_then_index_stats_metrics_reported(
@@ -554,11 +549,7 @@ def test_when_collections_indexes_stats_to_true_then_index_stats_metrics_reporte
     with mock_pymongo("standalone"):
         dd_run_check(check)
     # Then
-    reported_metrics = aggregator.metric_names
-    for metric in [
-        'mongodb.collection.indexes.accesses.ops',
-    ]:
-        assert metric in reported_metrics
+    aggregator.assert_metric('mongodb.collection.indexes.accesses.ops', at_least=1)
 
 
 def test_when_version_lower_than_3_2_then_no_index_stats_metrics_reported(aggregator, check, instance, dd_run_check):
@@ -571,11 +562,7 @@ def test_when_version_lower_than_3_2_then_no_index_stats_metrics_reported(aggreg
         mocked_api.server_info = mock.MagicMock(return_value={'version': '3.0'})
         dd_run_check(check)
     # Then
-    reported_metrics = aggregator.metric_names
-    for metric in [
-        'mongodb.collection.indexes.accesses.ops',
-    ]:
-        assert metric not in reported_metrics
+    aggregator.assert_metric('mongodb.collection.indexes.accesses.ops', count=0)
 
 
 def test_when_version_lower_than_3_6_then_no_session_metrics_reported(aggregator, check, instance, dd_run_check):
@@ -587,8 +574,4 @@ def test_when_version_lower_than_3_6_then_no_session_metrics_reported(aggregator
     with mock.patch('datadog_checks.mongo.api.MongoClient', mock.MagicMock(return_value=mocked_client)):
         dd_run_check(check)
     # Then
-    reported_metrics = aggregator.metric_names
-    for metric in [
-        'mongodb.sessions.count',
-    ]:
-        assert metric not in reported_metrics
+    aggregator.assert_metric('mongodb.sessions.count', count=0)
