@@ -32,15 +32,15 @@ class _CustomTCPServer(TCPServer):
     allow_reuse_address = True
 
 
-def _do_local_http_server(q, directory, port):
+def _do_local_http_server(queue, directory, port):
     """Serve requests in a separate thread."""
     curr_dir = os.getcwd()
     os.chdir(directory)
     try:
         httpd = _CustomTCPServer(("", port), partial(SimpleHTTPRequestHandler))
-        q.put(httpd)
+        queue.put(httpd)
         httpd.serve_forever()
-        q.task_done()
+        queue.task_done()
     finally:
         os.chdir(curr_dir)
 
@@ -54,11 +54,11 @@ def local_http_server(distribution_dir_name, port=_DEFAULT_PORT):
     if not os.path.isdir(directory):
         raise RuntimeError("Cannot start HTTP server: {!r} does not exist".format(directory))
 
-    q = Queue()  # Pass httpd to handle proper shutdown on exit.
-    http_server_thread = Thread(target=_do_local_http_server, args=(q, directory, port))
+    queue = Queue()  # Pass httpd to handle proper shutdown on exit.
+    http_server_thread = Thread(target=_do_local_http_server, args=(queue, directory, port))
     http_server_thread.start()
 
-    httpd = q.get()
+    httpd = queue.get()
     try:
         for _ in range(5):  # Provide some time to have the HTTP server ready.
             response = requests.head(server_url)
@@ -77,5 +77,5 @@ def local_http_server(distribution_dir_name, port=_DEFAULT_PORT):
         yield server_url
     finally:
         httpd.shutdown()
-        q.join()
+        queue.join()
         http_server_thread.join()
