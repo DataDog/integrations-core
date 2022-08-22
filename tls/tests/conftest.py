@@ -32,7 +32,7 @@ HOSTNAME_TO_PORT_MAPPING = {
 
 @pytest.fixture(scope='session', autouse=True)
 def dd_environment(instance_e2e, mock_local_tls_dns):
-    with docker_run(os.path.join(HERE, 'compose', 'docker-compose.yml'), build=True, sleep=5):
+    with docker_run(os.path.join(HERE, 'compose', 'docker-compose.yml'), build=True, sleep=15):
         e2e_metadata = {'docker_volumes': ['{}:{}'.format(CA_CERT, CA_CERT_MOUNT_PATH)]}
         yield instance_e2e, e2e_metadata
 
