@@ -518,6 +518,10 @@ coverage:
         target: 75
         flags:
         - tls
+      Tdd:
+        target: 75
+        flags:
+        - tdd
       TeamCity:
         target: 75
         flags:
@@ -1254,6 +1258,11 @@ flags:
     paths:
     - tcp_check/datadog_checks/tcp_check
     - tcp_check/tests
+  tdd:
+    carryforward: true
+    paths:
+    - tdd/datadog_checks/tdd
+    - tdd/tests
   teamcity:
     carryforward: true
     paths:

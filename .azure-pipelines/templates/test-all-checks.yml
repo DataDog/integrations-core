@@ -474,6 +474,9 @@ jobs:
     - checkName: tcp_check
       displayName: TCP (Windows)
       os: windows
+    - checkName: tdd
+      displayName: Tdd
+      os: linux
     - checkName: teamcity
       displayName: TeamCity
       os: linux
