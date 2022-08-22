@@ -257,7 +257,7 @@ def test_local_unreachable_repository():
 @pytest.mark.offline
 @pytest.mark.skipif(PY2, reason="tuf builds for Python 2 do not provide required information in exception")
 def test_local_repository_unreachable_error():
-    """Test expiration of metadata raises an exception."""
+    """Test unreachable repository raises an exception."""
     with local_http_server("") as http_url:
         argv = [
             "datadog-active-directory",
