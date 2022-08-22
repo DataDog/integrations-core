@@ -12,7 +12,7 @@ parameters:
 
 steps:
 - ${{ if and(eq(parameters.test, 'true'), eq(parameters.coverage, 'true'), eq(parameters.force_base_package, 'false')) }}:
-  - script: ddev test --cov --junit ${{ parameters.ddtrace_flag }} ${{ parameters.check }}
+  - script: ddev test -d --cov --junit ${{ parameters.ddtrace_flag }} ${{ parameters.check }}
     displayName: 'Run Unit/Integration tests'
     env:
       CODECOV_TOKEN: $(CODECOV_TOKEN)
