@@ -23,7 +23,7 @@ else:
 
 _LOGGER = logging.getLogger(__name__)
 E2E_TESTS_DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
-_DEFAULT_PORT = int(os.getenv("DATADOG_CHECKS_DOWNLOADER_E2E_TEST_HTTP_PORT", 8080))
+_DEFAULT_PORT = 8080
 
 
 class _CustomTCPServer(TCPServer):
