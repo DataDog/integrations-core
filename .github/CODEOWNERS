@@ -138,6 +138,44 @@ datadog_checks_base/tests/**/test_db_statements.py  @DataDog/database-monitoring
 /oracle/*.md                                        @DataDog/agent-integrations @DataDog/database-monitoring @DataDog/documentation
 /oracle/manifest.json                               @DataDog/agent-integrations @DataDog/database-monitoring @DataDog/documentation
 
+
+# Windows agent
+datadog_checks_base/datadog_checks/base/checks/win/                  @DataDog/agent-integrations @DataDog/windows-agent
+datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/agent-integrations @DataDog/windows-agent
+/active_directory/                                                   @DataDog/agent-integrations @DataDog/windows-agent
+/active_directory/*.md                                               @DataDog/agent-integrations @DataDog/windows-agent @DataDog/documentation
+/active_directory/manifest.json                                      @DataDog/agent-integrations @DataDog/windows-agent @DataDog/documentation
+/aspdotnet/                                                          @DataDog/agent-integrations @DataDog/windows-agent
+/aspdotnet/*.md                                                      @DataDog/agent-integrations @DataDog/windows-agent @DataDog/documentation
+/aspdotnet/manifest.json                                             @DataDog/agent-integrations @DataDog/windows-agent @DataDog/documentation
+/dotnetclr/                                                          @DataDog/agent-integrations @DataDog/windows-agent
+/dotnetclr/*.md                                                      @DataDog/agent-integrations @DataDog/windows-agent @DataDog/documentation
+/dotnetclr/manifest.json                                             @DataDog/agent-integrations @DataDog/windows-agent @DataDog/documentation
+/exchange_server/                                                    @DataDog/agent-integrations @DataDog/windows-agent
+/exchange_server/*.md                                                @DataDog/agent-integrations @DataDog/windows-agent @DataDog/documentation
+/exchange_server/manifest.json                                       @DataDog/agent-integrations @DataDog/windows-agent @DataDog/documentation
+/hyperv/                                                             @DataDog/agent-integrations @DataDog/windows-agent
+/hyperv/*.md                                                         @DataDog/agent-integrations @DataDog/windows-agent @DataDog/documentation
+/hyperv/manifest.json                                                @DataDog/agent-integrations @DataDog/windows-agent @DataDog/documentation
+/iis/                                                                @DataDog/agent-integrations @DataDog/windows-agent
+/iis/*.md                                                            @DataDog/agent-integrations @DataDog/windows-agent @DataDog/documentation
+/iis/manifest.json                                                   @DataDog/agent-integrations @DataDog/windows-agent @DataDog/documentation
+/pdh_check/                                                          @DataDog/agent-integrations @DataDog/windows-agent
+/pdh_check/*.md                                                      @DataDog/agent-integrations @DataDog/windows-agent @DataDog/documentation
+/pdh_check/manifest.json                                             @DataDog/agent-integrations @DataDog/windows-agent @DataDog/documentation
+/win32_event_log/                                                    @DataDog/agent-integrations @DataDog/windows-agent
+/win32_event_log/*.md                                                @DataDog/agent-integrations @DataDog/windows-agent @DataDog/documentation
+/win32_event_log/manifest.json                                       @DataDog/agent-integrations @DataDog/windows-agent @DataDog/documentation
+/windows_performance_counters/                                       @DataDog/agent-integrations @DataDog/windows-agent
+/windows_performance_counters/*.md                                   @DataDog/agent-integrations @DataDog/windows-agent @DataDog/documentation
+/windows_performance_counters/manifest.json                          @DataDog/agent-integrations @DataDog/windows-agent @DataDog/documentation
+/windows_service/                                                    @DataDog/agent-integrations @DataDog/windows-agent
+/windows_service/*.md                                                @DataDog/agent-integrations @DataDog/windows-agent @DataDog/documentation
+/windows_service/manifest.json                                       @DataDog/agent-integrations @DataDog/windows-agent @DataDog/documentation
+/wmi_check/                                                          @DataDog/agent-integrations @DataDog/windows-agent
+/wmi_check/*.md                                                      @DataDog/agent-integrations @DataDog/windows-agent @DataDog/documentation
+/wmi_check/manifest.json                                             @DataDog/agent-integrations @DataDog/windows-agent @DataDog/documentation
+
 # To keep Security up-to-date with changes to the signing tool.
 /datadog_checks_dev/datadog_checks/dev/tooling/signing.py             @DataDog/software-integrity-and-trust
 # As well as the secure downloader.
