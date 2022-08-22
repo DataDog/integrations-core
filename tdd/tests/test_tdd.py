@@ -24,3 +24,10 @@ def test_emits_critical_service_check_when_service_is_down(dd_run_check, aggrega
     check = TddCheck('tdd', {}, [instance])
     dd_run_check(check)
     aggregator.assert_service_check('tdd.can_connect', TddCheck.CRITICAL)
+
+
+def test_emits_ok_service_check_when_service_is_up(dd_run_check, aggregator, instance):
+    # type: (Callable[[AgentCheck, bool], None], AggregatorStub, Dict[str, Any]) -> None
+    check = TddCheck('tdd', {}, [instance])
+    dd_run_check(check)
+    aggregator.assert_service_check('tdd.can_connect', TddCheck.OK)
