@@ -184,6 +184,8 @@ integration/hudi:
 - hudi/**/*
 integration/hyperv:
 - hyperv/**/*
+integration/iam_access_analyzer:
+- iam_access_analyzer/**/*
 integration/ibm_ace:
 - ibm_ace/**/*
 integration/ibm_db2:

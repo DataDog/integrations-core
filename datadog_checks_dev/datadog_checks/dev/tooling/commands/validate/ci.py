@@ -447,7 +447,8 @@ def validate_integration_pr_labels(fix, repo_data, valid_integrations):
                 fixed = True
                 success = True
                 echo_warning(message)
-                defined_checks.remove(check_name)
+                if check_name in defined_checks:
+                    defined_checks.remove(check_name)
 
     # Check for any unknown checks that may have been defined manually
     unknown_checks = defined_checks - valid_integrations
