@@ -29,7 +29,7 @@ def dd_environment(instance_no_subscriptions):
             'IBM_ACE_IMAGE': common.DOCKER_IMAGE_VERSIONS[os.environ['IBM_ACE_VERSION']],
             'ACE_SERVER_NAME': common.ACE_SERVER_NAME,
         },
-        attempts=2,
+        attempts=3,
     ):
         yield instance_no_subscriptions, common.E2E_METADATA
 
