@@ -481,7 +481,7 @@ def validate_integration_pr_labels(fix, repo_data, valid_integrations):
                 integration_label_config = {integration_label: ['{}/**/*'.format(check)]}
                 pr_labels_config.update(integration_label_config)
                 echo_success(
-                    'Set integration {} PR label to `{}` with configuration: `{}`'.format(
+                    'Set integration `{}` PR label to `{}` with configuration: `{}`'.format(
                         check, integration_label, integration_label_config[integration_label]
                     )
                 )
@@ -513,8 +513,7 @@ def ci(ctx, fix):
     testable_checks = get_testable_checks()
     cached_display_names = {}
 
-    valid_integrations = set()
-    valid_integrations.update(get_valid_integrations())
+    valid_integrations = set(get_valid_integrations())
     valid_integrations.update(get_valid_checks())
     valid_integrations.add('datadog_checks_tests_helper')
 
