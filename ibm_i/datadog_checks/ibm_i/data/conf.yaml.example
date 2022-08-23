@@ -87,6 +87,13 @@ instances:
     #   - <KEY_1>:<VALUE_1>
     #   - <KEY_2>:<VALUE_2>
 
+    ## @param selected_message_queues - list of strings - optional
+    ## Filters the message queues you're watching to make your queries less computer-intensive. By default no filter is applied.
+    #
+    # selected_message_queues:
+    #   - <MESSAGE_QUEUE_NAME_1>
+    #   - <MESSAGE_QUEUE_NAME_2>
+
     ## @param service - string - optional
     ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
     ##

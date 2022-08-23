@@ -257,13 +257,14 @@ def get_job_queue_info(timeout):
     }
 
 
-def get_message_queue_info(timeout, sev):
+def get_message_queue_info(timeout, sev, selected_message_queues):
+    message_queues_filter = f"WHERE MESSAGE_QUEUE_NAME IN ({', '.join(selected_message_queues)})" if selected_message_queues else ""
     return {
         'name': 'message_queue_info',
         'query': {
             'text': (
                 f'SELECT MESSAGE_QUEUE_NAME, MESSAGE_QUEUE_LIBRARY, COUNT(*), SUM(CASE WHEN SEVERITY >= {sev} THEN 1 ELSE 0 END) '  # noqa:E501
-                'FROM QSYS2.MESSAGE_QUEUE_INFO GROUP BY MESSAGE_QUEUE_NAME, MESSAGE_QUEUE_LIBRARY'
+                f'FROM QSYS2.MESSAGE_QUEUE_INFO {message_queues_filter} GROUP BY MESSAGE_QUEUE_NAME, MESSAGE_QUEUE_LIBRARY'
             ),
             'timeout': timeout,
         },
@@ -287,5 +288,5 @@ def query_map(config: InstanceConfig):
         "job_memory_usage": get_job_memory_usage(config.job_query_timeout),
         "memory_info": get_memory_info(config.query_timeout),
         "job_queue": get_job_queue_info(config.query_timeout),
-        "message_queue_info": get_message_queue_info(config.system_mq_query_timeout, config.severity_threshold),
+        "message_queue_info": get_message_queue_info(config.system_mq_query_timeout, config.severity_threshold, config.selected_message_queues),
     }

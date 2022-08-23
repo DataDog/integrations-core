@@ -49,6 +49,7 @@ class InstanceConfig(BaseModel):
     password: Optional[str]
     queries: Optional[Sequence[Query]]
     query_timeout: Optional[int] = Field(None, gt=0)
+    selected_message_queues: Optional[Sequence[str]]
     service: Optional[str]
     severity_threshold: Optional[int] = Field(None, ge=0, le=99)
     system: Optional[str]

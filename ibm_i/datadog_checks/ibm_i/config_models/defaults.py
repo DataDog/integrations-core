@@ -67,6 +67,8 @@ def instance_queries(field, value):
 def instance_query_timeout(field, value):
     return 30
 
+def instance_selected_message_queues(field, value):
+    return get_default_field_value(field, value)
 
 def instance_service(field, value):
     return get_default_field_value(field, value)
