@@ -10,6 +10,7 @@ from datadog_checks.dev import get_docker_hostname, get_here
 HERE = get_here()
 HOST = get_docker_hostname()
 PORT = 27017
+PORT_ERROR = 33333
 
 COMPOSE_FILE = os.getenv('COMPOSE_FILE')
 IS_STANDALONE = COMPOSE_FILE == 'mongo-standalone.yaml'
