@@ -65,16 +65,15 @@ class InitializeDB(LazyFunction):
 @pytest.fixture(scope='session')
 def dd_environment():
     compose_file = os.path.join(common.HERE, 'compose', common.COMPOSE_FILE)
-    if common.IS_STANDALONE:
-        conditions = [
-            WaitForPortListening(common.HOST, common.PORT),
-            InitializeDB(),
-        ]
-        with docker_run(
-            compose_file,
-            conditions=conditions,
-        ):
-            yield common.INSTANCE_BASIC, {}
+    conditions = [
+        WaitForPortListening(common.HOST, common.PORT),
+        InitializeDB(),
+    ]
+    with docker_run(
+        compose_file,
+        conditions=conditions,
+    ):
+        yield common.INSTANCE_BASIC, {}
 
 
 @pytest.fixture
