@@ -11,14 +11,14 @@ import pyodbc
 import pytest
 
 from datadog_checks.base import ConfigurationError
+from datadog_checks.dev.utils import running_on_windows_ci
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.connection import Connection, SQLConnectionError, parse_connection_string_properties
 
-from .common import CHECK_NAME
-
-pytestmark = pytest.mark.unit
+from .common import CHECK_NAME, SQLSERVER_MAJOR_VERSION
 
 
+@pytest.mark.unit
 @pytest.mark.parametrize(
     'cs,parsed',
     [
@@ -53,6 +53,7 @@ def test_parse_connection_string_properties(cs, parsed):
         parse_connection_string_properties(cs)
 
 
+@pytest.mark.unit
 @pytest.mark.parametrize(
     'cs,username,password,expect_warning',
     [
@@ -76,6 +77,7 @@ def test_warn_trusted_connection_username_pass(instance_minimal_defaults, cs, us
         connection.log.warning.assert_not_called()
 
 
+@pytest.mark.unit
 @pytest.mark.parametrize(
     'connector, param',
     [
@@ -94,6 +96,7 @@ def test_will_warn_parameters_for_the_wrong_connection(instance_minimal_defaults
     )
 
 
+@pytest.mark.unit
 @pytest.mark.parametrize(
     'connector, cs, param, should_fail',
     [
@@ -130,6 +133,7 @@ def test_will_fail_for_duplicate_parameters(instance_minimal_defaults, connector
         connection._connection_options_validation('somekey', 'somedb')
 
 
+@pytest.mark.unit
 @pytest.mark.parametrize(
     'connector, cs',
     [
@@ -158,6 +162,7 @@ def test_will_fail_for_wrong_parameters_in_the_connection_string(instance_minima
         connection._connection_options_validation('somekey', 'somedb')
 
 
+@pytest.mark.unit
 @pytest.mark.parametrize(
     'host, port, expected_host',
     [
@@ -194,6 +199,7 @@ def test_config_with_and_without_port(instance_minimal_defaults, host, port, exp
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
+@pytest.mark.skipif(running_on_windows_ci() and SQLSERVER_MAJOR_VERSION == 2019, reason='Test flakes on this set up')
 def test_query_timeout(instance_docker):
     instance_docker['command_timeout'] = 1
     check = SQLServer(CHECK_NAME, {}, [instance_docker])
@@ -282,6 +288,7 @@ def test_connection_failure(aggregator, dd_run_check, instance_docker):
     )
 
 
+@pytest.mark.unit
 @pytest.mark.parametrize(
     "test_case_name, instance_overrides, expected_error_patterns",
     [
