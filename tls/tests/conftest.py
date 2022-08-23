@@ -185,11 +185,6 @@ def instance_remote_no_connect_port_in_host():
 
 
 @pytest.fixture
-def instance_remote_version_default_1_1():
-    return {'server': 'https://tls-v1-1.valid.mock', 'tls_ca_cert': CA_CERT}
-
-
-@pytest.fixture
 def instance_remote_version_default_1_2():
     return {'server': 'https://tls-v1-2.valid.mock', 'tls_ca_cert': CA_CERT}
 

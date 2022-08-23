@@ -134,20 +134,6 @@ def test_no_connect_ipv6(aggregator, instance_remote_no_connect):
     aggregator.assert_all_metrics_covered()
 
 
-def test_version_default_1_1(aggregator, instance_remote_version_default_1_1):
-    c = TLSCheck('tls', {}, [instance_remote_version_default_1_1])
-    c.check(None)
-
-    aggregator.assert_service_check(SERVICE_CHECK_CAN_CONNECT, status=c.OK, tags=c._tags, count=1)
-    aggregator.assert_service_check(SERVICE_CHECK_VERSION, status=c.CRITICAL, tags=c._tags, count=1)
-    aggregator.assert_service_check(SERVICE_CHECK_VALIDATION, status=c.OK, tags=c._tags, count=1)
-    aggregator.assert_service_check(SERVICE_CHECK_EXPIRATION, status=c.OK, tags=c._tags, count=1)
-
-    aggregator.assert_metric('tls.days_left', count=1)
-    aggregator.assert_metric('tls.seconds_left', count=1)
-    aggregator.assert_all_metrics_covered()
-
-
 def test_version_default_1_2(aggregator, instance_remote_version_default_1_2):
     c = TLSCheck('tls', {}, [instance_remote_version_default_1_2])
     c.check(None)
@@ -176,8 +162,8 @@ def test_version_default_1_3(aggregator, instance_remote_version_default_1_3):
     aggregator.assert_all_metrics_covered()
 
 
-def test_version_init_config_default(aggregator, instance_remote_version_default_1_1):
-    c = TLSCheck('tls', {'allowed_versions': ['1.1']}, [instance_remote_version_default_1_1])
+def test_version_init_config_default(aggregator, instance_remote_version_default_1_2):
+    c = TLSCheck('tls', {'allowed_versions': ['1.2']}, [instance_remote_version_default_1_2])
     c.check(None)
 
     aggregator.assert_service_check(SERVICE_CHECK_CAN_CONNECT, status=c.OK, tags=c._tags, count=1)
