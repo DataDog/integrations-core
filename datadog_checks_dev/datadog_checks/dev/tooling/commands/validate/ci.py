@@ -449,6 +449,21 @@ def validate_integration_pr_labels(fix, repo_data, valid_integrations):
                 echo_warning(message)
                 defined_checks.remove(check_name)
 
+    # Check for any unknown checks that may have been defined manually
+    unknown_checks = defined_checks - valid_integrations
+
+    if unknown_checks:
+        num_unknown_checks = len(unknown_checks)
+        message = 'PR labels config has {} unknown label{}'.format(
+            num_unknown_checks, 's' if num_unknown_checks > 1 else ''
+        )
+        if fix:
+            fixed = True
+            success = True
+            echo_warning(message)
+            for unknown_check in unknown_checks:
+                pr_labels_config.pop('integration/{}'.format(unknown_check))
+
     missing_checks = valid_integrations - defined_checks
 
     if missing_checks:
@@ -469,21 +484,6 @@ def validate_integration_pr_labels(fix, repo_data, valid_integrations):
                         check, integration_label, integration_label_config[integration_label]
                     )
                 )
-
-    unknown_checks = defined_checks - valid_integrations
-
-    if unknown_checks:
-        num_unknown_checks = len(unknown_checks)
-        message = 'PR labels config has {} unknown labels{}'.format(
-            num_unknown_checks, 's' if num_unknown_checks > 1 else ''
-        )
-
-        if fix:
-            fixed = True
-            success = True
-            echo_warning(message)
-            for unknown_check in unknown_checks:
-                pr_labels_config.pop('integration/{}'.format(unknown_check))
 
     if not success:
         message = 'Try running `ddev validate ci --fix'
