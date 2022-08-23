@@ -32,7 +32,7 @@ HOSTNAME_TO_PORT_MAPPING = {
 
 @pytest.fixture(scope='session', autouse=True)
 def dd_environment(instance_e2e, mock_local_tls_dns):
-    with docker_run(os.path.join(HERE, 'compose', 'docker-compose.yml'), build=True, sleep=15):
+    with docker_run(os.path.join(HERE, 'compose', 'docker-compose.yml'), build=True, sleep=5):
         e2e_metadata = {'docker_volumes': ['{}:{}'.format(CA_CERT, CA_CERT_MOUNT_PATH)]}
         yield instance_e2e, e2e_metadata
 
@@ -182,11 +182,6 @@ def instance_remote_no_connect():
 @pytest.fixture
 def instance_remote_no_connect_port_in_host():
     return {'server': 'localhost:56789'}
-
-
-@pytest.fixture
-def instance_remote_version_default_1_1():
-    return {'server': 'https://tls-v1-1.valid.mock', 'tls_ca_cert': CA_CERT}
 
 
 @pytest.fixture
