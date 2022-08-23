@@ -8,7 +8,7 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Troubleshooting",
     "changelog": "",
-    "description": "A content delivery network that caches files so web pages load fastly.",
+    "description": "A content delivery network that caches files so web pages load quickly.",
     "title": "Fastly",
     "classifier_tags": [
       "Category::Web",
