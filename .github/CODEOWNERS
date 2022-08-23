@@ -35,8 +35,8 @@ assets/               @DataDog/agent-integrations
 /datadog_cluster_agent/                   @DataDog/container-integrations @DataDog/agent-integrations
 /datadog_cluster_agent/*.md               @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 /docker_daemon/                           @DataDog/container-integrations @DataDog/agent-integrations
-/docker_daemon/*.md                       @DataDog/container-integrations @DataDog/agent-integrations @DataDog/baklava
-/docker_daemon/manifest.json              @DataDog/container-integrations @DataDog/agent-integrations @DataDog/baklava
+/docker_daemon/*.md                       @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
+/docker_daemon/manifest.json              @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 /ecs_fargate/                             @DataDog/container-integrations @DataDog/agent-integrations
 /ecs_fargate/*.md                         @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 /ecs_fargate/manifest.json                @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
@@ -177,10 +177,10 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/ag
 /wmi_check/manifest.json                                             @DataDog/agent-integrations @DataDog/windows-agent @DataDog/documentation
 
 # To keep Security up-to-date with changes to the signing tool.
-/datadog_checks_dev/datadog_checks/dev/tooling/signing.py             @DataDog/software-integrity-and-trust
+/datadog_checks_dev/datadog_checks/dev/tooling/signing.py             @DataDog/software-integrity-and-trust @DataDog/agent-integrations
 # As well as the secure downloader.
-/datadog_checks_downloader/                                           @DataDog/software-integrity-and-trust
-docs/developer/process/integration-release.md                         @DataDog/software-integrity-and-trust
+/datadog_checks_downloader/                                           @DataDog/software-integrity-and-trust @DataDog/agent-integrations
+docs/developer/process/integration-release.md                         @DataDog/software-integrity-and-trust @DataDog/agent-integrations
 # As well as the pipelines.
-/.github/workflows/                                                   @DataDog/software-integrity-and-trust
-/.gitlab-ci.yml                                                       @DataDog/software-integrity-and-trust
+/.github/workflows/                                                   @DataDog/software-integrity-and-trust @DataDog/agent-integrations
+/.gitlab-ci.yml                                                       @DataDog/software-integrity-and-trust @DataDog/agent-integrations
