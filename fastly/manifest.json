@@ -4,6 +4,10 @@
   "app_id": "fastly",
   "display_on_public_website": true,
   "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Troubleshooting",
+    "changelog": "",
     "description": "A content delivery network that caches files so web pages load fastly.",
     "title": "Fastly",
     "classifier_tags": [
