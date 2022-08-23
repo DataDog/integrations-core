@@ -1,0 +1,2 @@
+metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
+tdd.uptime,gauge,,second,,Number of seconds that the mongos or mongod process has been active.,0,tdd,uptime,
