@@ -2,7 +2,14 @@
 
 ## Overview
 
-This check monitors [Teradata][1] through the Datadog Agent.
+Teradata is an enterprise-level relational database management system that allows you to unify all your data sources within a single multi-cloud data platform. 
+
+With Datadog and Teradata’s out-of-the-box integration, you can easily monitor the performance of Teradata and oversee resource consumption, resolve resource bottlenecks, and receive alerts on which databases are experiencing high disk consumption. 
+
+The integration also comes with preset dashboards and recommended monitors to help you:
+- Analyze application usage trends, skewed work, and root causes for heavy resource consumption using AMP metrics. 
+- Identify bottlenecks and capacity issues based on resource usage metrics 
+- Optimize disk space utilization with detailed breakdowns of disk space usage, peak usage, and assigned capacity by table
 
 ## Setup
 
