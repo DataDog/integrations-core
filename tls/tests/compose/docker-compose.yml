@@ -20,18 +20,6 @@ services:
     depends_on:
       - cert-builder
 
-  # Serves tls-v1-1.valid.mock
-  nginx-tls1-1:
-    container_name: nginx-tls1-1
-    image: nginx:alpine
-    volumes:
-      - ./nginx-tls1-1.conf:/etc/nginx/conf.d/default.conf
-      - certs:/etc/nginx/certs/:ro
-    ports:
-      - "4444:443"
-    depends_on:
-      - cert-builder
-
   # Serves tls-v1-2.valid.mock
   nginx-tls1-2:
     container_name: nginx-tls1-2

@@ -38,7 +38,6 @@ def construct_template_fields(integration_name, repo_choice, integration_type, *
     normalized_integration_name = normalize_package_name(integration_name)
     check_name_kebab = kebab_case_name(integration_name)
 
-    datadog_checks_base_req = 'datadog-checks-base[deps]>=6.6.0'
     third_party_install_info = f"""\
 To install the {integration_name} check on your host:
 
@@ -67,7 +66,6 @@ To install the {integration_name} check on your host:
         license_header = get_license_header()
         support_type = 'core'
         test_dev_dep = '-e ../datadog_checks_dev'
-        tox_base_dep = '-e../datadog_checks_base[deps]'
         integration_links = integration_type_links.get(integration_type).format(name=normalized_integration_name)
     elif repo_choice == 'marketplace':
         check_name = normalize_package_name(f"{kwargs.get('author')}_{normalized_integration_name}")
@@ -80,7 +78,6 @@ To install the {integration_name} check on your host:
         license_header = ''
         support_type = 'partner'
         test_dev_dep = 'datadog-checks-dev'
-        tox_base_dep = datadog_checks_base_req
         integration_links = ''
     else:
         check_name = normalized_integration_name
@@ -90,7 +87,6 @@ To install the {integration_name} check on your host:
         license_header = ''
         support_type = 'contrib'
         test_dev_dep = 'datadog-checks-dev'
-        tox_base_dep = datadog_checks_base_req
         integration_links = integration_type_links.get(integration_type)
 
     config = {
@@ -110,7 +106,6 @@ To install the {integration_name} check on your host:
         'repo_name': REPO_CHOICES[repo_choice],
         'support_type': support_type,
         'test_dev_dep': test_dev_dep,
-        'tox_base_dep': tox_base_dep,
         'integration_links': integration_links,
     }
     config.update(kwargs)
