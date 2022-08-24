@@ -2,16 +2,29 @@
 
 ## Overview
 
-Collect AWS IAM Access Analyzer Logs.
+Use AWS Identity and Access Management (IAM) Access Analyzer across your Amazon account to continuously analyze IAM permissions granted with any of your account policies. Datadog integrates with Amazon IAM Access Analyzer using a Lambda function that ships its logs to Datadog.
 
 ## Setup
 
-Datadog uses Datadog lambda log collector to forward AWS IAM Access Analyzer logs from cloudwatch events.
-Find details on how to set it up in [documentation][1]
+### Log collection
 
-### Installation
+1. If you haven't already, set up the [Datadog log collection AWS Lambda function][1].
 
-No installation is needed on your server.
+2. Create a new rule in AWS EventBridge.
+
+3. Define a custom event pattern with the following:
+
+    ```json
+    {
+        "source": ["aws.access-analyzer"]
+    }
+    ```
+
+4. Select an event bus and define the Datadog Lambda function as the target.
+
+5. Save your rule.
+
+6. See the [Log Explorer][2] to start exploring your logs.
 
 ## Data Collected
 
@@ -33,7 +46,8 @@ This integration does not send events
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][7].
+Need help? Contact [Datadog support][3].
 
-[1]: https://docs.datadoghq.com/integrations/iam_access_analyzer/
-[7]: https://docs.datadoghq.com/help
+[1]: /integrations/amazon_web_services/?tab=allpermissions#set-up-the-datadog-lambda-function
+[2]: https://app.datadoghq.com/logs
+[3]: https://docs.datadoghq.com/help
