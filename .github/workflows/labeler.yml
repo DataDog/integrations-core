@@ -2,17 +2,9 @@
 
 name: PR Labels
 on:
-- pull_request_target
+- pull_request
 
 jobs:
-  apply:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pull-requests: write
-    steps:
-    - name: Add labels
-      uses: actions/labeler@v4
-      with:
-        repo-token: "${{ secrets.DD_CHANGELOG_CHECK_TOKEN }}"
-        configuration-path: .github/workflows/config/labeler.yml
+  labeler:
+    if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
+    uses: .github/workflows/labeler-reusable.yml

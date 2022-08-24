@@ -1,0 +1,10 @@
+# https://github.com/actions/labeler
+
+name: Community PR Labels
+on:
+- pull_request_target
+
+jobs:
+  labeler:
+    if: ${{ github.event.pull_request.head.repo.full_name != github.repository }}
+    uses: .github/workflows/labeler-reusable.yml
