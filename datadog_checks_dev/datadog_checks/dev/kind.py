@@ -58,6 +58,7 @@ def kind_run(
     check_name = check_name.replace("_", "-")
     cluster_name = 'cluster-{}-{}'.format(check_name, get_active_env())
 
+
     with TempDir(cluster_name) as temp_dir:
         kubeconfig_path = path_join(temp_dir, 'config')
 
