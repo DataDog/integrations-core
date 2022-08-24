@@ -419,7 +419,7 @@ def validate_integration_pr_labels(fix, repo_data, valid_integrations):
                 annotate_error(pr_labels_config_path, message)
                 display_queue.append((echo_failure, message))
 
-    # Check if valid check has a label
+    # Check if valid integration has a label
     for check_name in valid_integrations:
         integration_label = "integration/{}".format(check_name)
         if integration_label not in pr_labels_config:
@@ -509,6 +509,8 @@ def ci(ctx, fix):
     cached_display_names = {}
 
     valid_integrations = get_valid_integrations()
+    # Remove this when we remove the `datadog_checks_tests_helper` package
+    valid_integrations.add('datadog_checks_tests_helper')
 
     echo_info("Validating CI Configuration...")
     validate_master_jobs(fix, repo_data, testable_checks, cached_display_names)
