@@ -2,10 +2,23 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import re
+
 from pymongo import MongoClient
 from pymongo.errors import ConnectionFailure
 
 from datadog_checks.base import AgentCheck
+
+METRICS = {
+    "uptime": AgentCheck.gauge,
+}
+
+CASE_SENSITIVE_METRIC_NAME_SUFFIXES = {
+    r'\.R\b': ".shared",
+    r'\.r\b': ".intent_shared",
+    r'\.W\b': ".exclusive",
+    r'\.w\b': ".intent_exclusive",
+}
 
 
 class TddCheck(AgentCheck):
@@ -24,9 +37,52 @@ class TddCheck(AgentCheck):
     def check(self, _):
         try:
             # The ping command is cheap and does not require auth.
-            self._mongo_client['admin'].command('ping')
-            self.log.debug('Connected')
-            self.service_check("can_connect", AgentCheck.OK)
+            ping_output = self._mongo_client['admin'].command('ping')
+            self.log.debug('ping_output: %s', ping_output)
+            if ping_output['ok'] == 1:
+                self.log.debug('Connected')
+                self.service_check("can_connect", AgentCheck.OK)
+                server_status_output = self._mongo_client['admin'].command('serverStatus')
+                self.log.debug('server_status_output: %s', server_status_output)
+                for metric_name in METRICS:
+                    value = server_status_output
+                    try:
+                        for c in metric_name.split("."):
+                            value = value[c]
+                    except KeyError:
+                        continue
+                    submit_method = (
+                        METRICS[metric_name][0] if isinstance(METRICS[metric_name], tuple) else METRICS[metric_name]
+                    )
+                    metric_name_alias = (
+                        METRICS[metric_name][1] if isinstance(METRICS[metric_name], tuple) else metric_name
+                    )
+                    metric_name_alias = self._normalize(metric_name_alias, submit_method, "")
+                    self.log.debug(
+                        '%s: %s [alias: %s, method: %s]', metric_name, value, metric_name_alias, submit_method
+                    )
+                    submit_method(self, metric_name_alias, value)
+            else:
+                self.log.error('ping returned no valid value')
+                self.service_check("can_connect", AgentCheck.CRITICAL)
         except (ConnectionFailure, Exception) as e:
             self.log.error('Exception: %s', e)
             self.service_check("can_connect", AgentCheck.CRITICAL)
+
+    def _normalize(self, metric_name, submit_method, prefix=None):
+        """Replace case-sensitive metric name characters, normalize the metric name,
+        prefix and suffix according to its type.
+        """
+        metric_prefix = "" if not prefix else prefix
+        metric_suffix = "ps" if submit_method == AgentCheck.rate else ""
+
+        # Replace case-sensitive metric name characters
+        for pattern, repl in CASE_SENSITIVE_METRIC_NAME_SUFFIXES.items():
+            metric_name = re.compile(pattern).sub(repl, metric_name)
+
+        # Normalize, and wrap
+        return u"{metric_prefix}{normalized_metric_name}{metric_suffix}".format(
+            normalized_metric_name=self.normalize(metric_name.lower()),
+            metric_prefix=metric_prefix,
+            metric_suffix=metric_suffix,
+        )
