@@ -1,5 +1,5 @@
 ---
-title: Getting started with integrations
+title: Developing an integration for integrations-extras
 kind: documentation
 further_reading:
 - link: "logs/processing/pipelines"
@@ -13,11 +13,9 @@ aliases:
   - /developers/integrations/new_check_howto/
 ---
 
-This guide provides instructions for creating a Datadog integration called Awesome that searches for a string on a web page. After completing this guide, you'll know how to:
-- one
-- two
-- three
-- etc
+This guide provides instructions for creating a Datadog Agent integration in the integrations-extras repo.
+
+TODO: Expand on intro
 
 ## Prerequisites
 
