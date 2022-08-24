@@ -384,6 +384,8 @@ integration/teradata:
 - teradata/**/*
 integration/terraform:
 - terraform/**/*
+integration/test:
+- test/**/*
 integration/tls:
 - tls/**/*
 integration/tokumx:

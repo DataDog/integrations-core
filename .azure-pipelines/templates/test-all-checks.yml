@@ -480,6 +480,9 @@ jobs:
     - checkName: teradata
       displayName: Teradata
       os: linux
+    - checkName: test
+      displayName: Test
+      os: linux
     - checkName: tls
       displayName: TLS
       os: linux
