@@ -7,6 +7,10 @@ METRICS = {
     "asserts.rollovers": AgentCheck.rate,
     "asserts.user": AgentCheck.rate,
     "asserts.warning": AgentCheck.rate,
+    "backgroundFlushing.average_ms": AgentCheck.gauge,
+    "backgroundFlushing.flushes": AgentCheck.rate,
+    "backgroundFlushing.last_ms": AgentCheck.gauge,
+    "backgroundFlushing.total_ms": AgentCheck.gauge,
 }
 
 CASE_SENSITIVE_METRIC_NAME_SUFFIXES = {

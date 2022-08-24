@@ -69,6 +69,7 @@ def test_version_metadata(mock_server_info, mock_command, dd_run_check, datadog_
         },
     )
     mock_command.assert_has_calls([mock.call('ping'), mock.call('serverStatus')])
+    mock_server_info.assert_called_once()
 
 
 @pytest.mark.unit
@@ -76,7 +77,17 @@ def test_version_metadata(mock_server_info, mock_command, dd_run_check, datadog_
     'pymongo.database.Database.command',
     side_effect=[
         {'ok': 1},
-        {'uptime': 3600, 'asserts': {'regular': 0, 'warning': 0, 'msg': 0, 'user': 27, 'rollovers': 0}},
+        {
+            'uptime': 3600,
+            'asserts': {'regular': 0, 'warning': 0, 'msg': 0, 'user': 27, 'rollovers': 0},
+            'backgroundFlushing': {
+                'flushes': 10,
+                'total_ms': 123456789,
+                'average_ms': 123,
+                'last_ms': 123,
+                'last_finished': {'$date': 1600245226383},
+            },
+        },
     ],
 )
 @mock.patch('pymongo.mongo_client.MongoClient.server_info', return_value={'version': '5.0.0'})
@@ -91,6 +102,10 @@ def test_emits_server_status_metrics_when_service_is_up(
         "tdd.asserts.rolloversps",
         "tdd.asserts.userps",
         "tdd.asserts.warningps",
+        "tdd.backgroundflushing.average_ms",
+        "tdd.backgroundflushing.flushesps",
+        "tdd.backgroundflushing.last_ms",
+        "tdd.backgroundflushing.total_ms",
     }
     check = TddCheck('tdd', {}, [instance])
     # When
@@ -101,3 +116,4 @@ def test_emits_server_status_metrics_when_service_is_up(
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
     mock_command.assert_has_calls([mock.call('ping'), mock.call('serverStatus')])
+    mock_server_info.assert_called_once()

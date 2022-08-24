@@ -5,3 +5,7 @@ tdd.asserts.regularps,gauge,,assertion,second,Number of regular assertions raise
 tdd.asserts.rolloversps,gauge,,assertion,second,Number of times that the rollover counters roll over per second. The counters rollover to zero every 2^30 assertions.,0,tdd,asserts rollovers ps,
 tdd.asserts.userps,gauge,,assertion,second,Number of user assertions raised per second.,0,tdd,asserts user ps,
 tdd.asserts.warningps,gauge,,assertion,second,Number of warnings raised per second.,0,tdd,asserts warning ps,
+tdd.backgroundflushing.average_ms,gauge,,millisecond,,Average time for each flush to disk.,-1,tdd,background flushing average ms,
+tdd.backgroundflushing.flushesps,gauge,,flush,second,Number of times the database has flushed all writes to disk.,0,tdd,background flushing flushes ps,
+tdd.backgroundflushing.last_ms,gauge,,millisecond,,Amount of time that the last flush operation took to complete.,-1,tdd,background flushing last ms,
+tdd.backgroundflushing.total_ms,gauge,,millisecond,,Total number of time that the `mongod` processes have spent writing (i.e. flushing) data to disk.,0,tdd,background flushing total ms,
