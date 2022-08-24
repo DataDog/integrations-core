@@ -10,6 +10,7 @@
     "changelog": "",
     "description": "A content delivery network that caches files so web pages load quickly.",
     "title": "Fastly",
+    "media": [],
     "classifier_tags": [
       "Category::Web",
       "Category::Log Collection"

@@ -89,7 +89,6 @@ The Fastly integration does not include any events.
 
 The Fastly integration does not include any service checks.
 
-
 ## Troubleshooting
 
 Need help? Contact [Datadog support][7].
