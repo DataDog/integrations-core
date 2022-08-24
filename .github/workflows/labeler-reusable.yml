@@ -1,7 +1,10 @@
 name: Reusable Labeler Workflow
 
 on:
-  - workflow_call
+  workflow_call:
+    secrets:
+      DD_CHANGELOG_CHECK_TOKEN:
+        required: true
 
 jobs:
   apply:
@@ -13,5 +16,4 @@ jobs:
       - name: Add labels
         uses: actions/labeler@v4
         with:
-          repo-token: "${{ secrets.DD_CHANGELOG_CHECK_TOKEN }}"
           configuration-path: .github/workflows/config/labeler.yml
