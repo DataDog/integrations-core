@@ -10,7 +10,7 @@ from ....fs import file_exists, read_file, write_file
 from ...constants import get_root
 from ...datastructures import JSONDict
 from ...manifest_validator import get_all_validators
-from ...manifest_validator.constants import V1_STRING, V2_STRING
+from ...manifest_validator.constants import V2_STRING
 from ...testing import process_checks_option
 from ...utils import complete_valid_checks
 from ..console import (
