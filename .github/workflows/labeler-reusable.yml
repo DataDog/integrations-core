@@ -1,10 +1,7 @@
 name: Reusable Labeler Workflow
 
 on:
-  workflow_call:
-    secrets:
-      DD_CHANGELOG_CHECK_TOKEN:
-        required: true
+- workflow_call
 
 jobs:
   apply:
