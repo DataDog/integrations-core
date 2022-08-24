@@ -7,13 +7,7 @@ import yaml
 from ....fs import file_exists, path_join, read_file, write_file
 from ...constants import get_root
 from ...testing import coverage_sources
-from ...utils import (
-    code_coverage_enabled,
-    get_display_name,
-    get_testable_checks,
-    get_valid_checks,
-    get_valid_integrations,
-)
+from ...utils import code_coverage_enabled, get_display_name, get_testable_checks, get_valid_integrations
 from ..console import (
     CONTEXT_SETTINGS,
     abort,
@@ -434,7 +428,7 @@ def validate_integration_pr_labels(fix, repo_data, valid_integrations):
             annotate_error(pr_labels_config_path, message)
             display_queue.append((echo_failure, message))
 
-        # Check if PR label config is properly configured
+        # Check if label config is properly configured
         integration_label_config = pr_labels_config.get(integration_label)
         if integration_label_config != ['{}/**/*'.format(check_name)]:
             success = False
@@ -450,7 +444,7 @@ def validate_integration_pr_labels(fix, repo_data, valid_integrations):
                 if check_name in defined_checks:
                     defined_checks.remove(check_name)
 
-    # Check for any unknown checks that may have been defined manually
+    # Check for any unknown integrations that may have been defined manually
     unknown_checks = defined_checks - valid_integrations
 
     if unknown_checks:
@@ -465,6 +459,7 @@ def validate_integration_pr_labels(fix, repo_data, valid_integrations):
             for unknown_check in unknown_checks:
                 pr_labels_config.pop('integration/{}'.format(unknown_check))
 
+    # Check for any integrations that are missing a label
     missing_checks = valid_integrations - defined_checks
 
     if missing_checks:
@@ -513,9 +508,7 @@ def ci(ctx, fix):
     testable_checks = get_testable_checks()
     cached_display_names = {}
 
-    valid_integrations = set(get_valid_integrations())
-    valid_integrations.update(get_valid_checks())
-    valid_integrations.add('datadog_checks_tests_helper')
+    valid_integrations = get_valid_integrations()
 
     echo_info("Validating CI Configuration...")
     validate_master_jobs(fix, repo_data, testable_checks, cached_display_names)
