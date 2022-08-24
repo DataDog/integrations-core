@@ -11,6 +11,17 @@ METRICS = {
     "backgroundFlushing.flushes": AgentCheck.rate,
     "backgroundFlushing.last_ms": AgentCheck.gauge,
     "backgroundFlushing.total_ms": AgentCheck.gauge,
+    "tcmalloc.generic.current_allocated_bytes": AgentCheck.gauge,
+    "tcmalloc.generic.heap_size": AgentCheck.gauge,
+    "tcmalloc.tcmalloc.aggressive_memory_decommit": AgentCheck.gauge,
+    "tcmalloc.tcmalloc.central_cache_free_bytes": AgentCheck.gauge,
+    "tcmalloc.tcmalloc.current_total_thread_cache_bytes": AgentCheck.gauge,
+    "tcmalloc.tcmalloc.max_total_thread_cache_bytes": AgentCheck.gauge,
+    "tcmalloc.tcmalloc.pageheap_free_bytes": AgentCheck.gauge,
+    "tcmalloc.tcmalloc.pageheap_unmapped_bytes": AgentCheck.gauge,
+    "tcmalloc.tcmalloc.thread_cache_free_bytes": AgentCheck.gauge,
+    "tcmalloc.tcmalloc.transfer_cache_free_bytes": AgentCheck.gauge,
+    "tcmalloc.tcmalloc.spinlock_total_delay_ns": AgentCheck.gauge,
 }
 
 CASE_SENSITIVE_METRIC_NAME_SUFFIXES = {

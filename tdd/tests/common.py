@@ -22,3 +22,30 @@ MONGODB_VERSION = os.environ['MONGO_VERSION']
 ROOT = os.path.dirname(os.path.dirname(HERE))
 
 INSTANCE_BASIC = {'hosts': ['{}:{}'.format(HOST, PORT)]}
+
+SERVER_STATUS_METRICS = {
+    "tdd.uptime",
+    "tdd.asserts.msgps",
+    "tdd.asserts.regularps",
+    "tdd.asserts.rolloversps",
+    "tdd.asserts.userps",
+    "tdd.asserts.warningps",
+    "tdd.backgroundflushing.average_ms",
+    "tdd.backgroundflushing.flushesps",
+    "tdd.backgroundflushing.last_ms",
+    "tdd.backgroundflushing.total_ms",
+}
+
+TCMALLOC_METRICS = {
+    "tdd.tcmalloc.generic.current_allocated_bytes",
+    "tdd.tcmalloc.generic.heap_size",
+    "tdd.tcmalloc.tcmalloc.aggressive_memory_decommit",
+    "tdd.tcmalloc.tcmalloc.central_cache_free_bytes",
+    "tdd.tcmalloc.tcmalloc.current_total_thread_cache_bytes",
+    "tdd.tcmalloc.tcmalloc.max_total_thread_cache_bytes",
+    "tdd.tcmalloc.tcmalloc.pageheap_free_bytes",
+    "tdd.tcmalloc.tcmalloc.pageheap_unmapped_bytes",
+    "tdd.tcmalloc.tcmalloc.thread_cache_free_bytes",
+    "tdd.tcmalloc.tcmalloc.transfer_cache_free_bytes",
+    "tdd.tcmalloc.tcmalloc.spinlock_total_delay_ns",
+}

@@ -36,7 +36,8 @@ class TddCheck(AgentCheck):
                 self._mongo_version = self._mongo_client.server_info().get('version', '0.0.0')
                 self.set_metadata('version', self._mongo_version)
                 self.log.debug('mongo_version: %s', self._mongo_version)
-                server_status_output = self._mongo_client['admin'].command('serverStatus')
+                tcmalloc = 'tcmalloc' in self.instance.get('additional_metrics', [])
+                server_status_output = self._mongo_client['admin'].command('serverStatus', tcmalloc=tcmalloc)
                 self.log.debug('server_status_output: %s', server_status_output)
                 for metric_name in METRICS:
                     value = server_status_output
