@@ -204,6 +204,8 @@ integration/ignite:
 - ignite/**/*
 integration/iis:
 - iis/**/*
+integration/impala:
+- impala/**/*
 integration/istio:
 - istio/**/*
 integration/jboss_wildfly:
