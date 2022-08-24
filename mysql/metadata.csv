@@ -80,6 +80,8 @@ mysql.innodb.ibuf_merged_inserts,gauge,,operation,,"Insert buffer and adaptative
 mysql.innodb.ibuf_merged,gauge,,operation,,"Insert buffer and adaptative hash index merged",0,mysql,mysql innodb merged,
 mysql.innodb.ibuf_merges,gauge,,operation,,"Insert buffer and adaptative hash index merges",0,mysql,mysql innodb merges,
 mysql.innodb.lock_structs,gauge,,operation,,"Lock structs",0,mysql,mysql innodb lock structs,
+mysql.innodb.locked_tables,gauge,,operation,,"Locked tables",0,mysql,mysql innodb locked tables,
+mysql.innodb.tables_in_use,gauge,,operation,,"Tables in use",0,mysql,mysql innodb used tables,
 mysql.innodb.os_file_fsyncs,gauge,,operation,,"(Delta) The total number of fsync() operations performed by InnoDB.",0,mysql,mysql innodb os file fsyncs,
 mysql.innodb.os_file_reads,gauge,,operation,,"(Delta) The total number of files reads performed by read threads within InnoDB.",0,mysql,mysql innodb os file reads,
 mysql.innodb.os_file_writes,gauge,,operation,,"(Delta) The total number of file writes performed by write threads within InnoDB.",0,mysql,mysql innodb os file writes,
