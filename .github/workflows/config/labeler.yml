@@ -26,7 +26,7 @@ documentation:
 - '*/assets/configuration/**'
 - (?<!CHANGELOG)\.md$
 - docs/**
-downloader_package:
+downloader:
 - datadog_checks_downloader/**/*
 integration/active_directory:
 - active_directory/**/*
