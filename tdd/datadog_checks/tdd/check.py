@@ -8,17 +8,7 @@ from pymongo import MongoClient
 from pymongo.errors import ConnectionFailure
 
 from datadog_checks.base import AgentCheck
-
-METRICS = {
-    "uptime": AgentCheck.gauge,
-}
-
-CASE_SENSITIVE_METRIC_NAME_SUFFIXES = {
-    r'\.R\b': ".shared",
-    r'\.r\b': ".intent_shared",
-    r'\.W\b': ".exclusive",
-    r'\.w\b': ".intent_exclusive",
-}
+from datadog_checks.tdd.metrics import CASE_SENSITIVE_METRIC_NAME_SUFFIXES, METRICS
 
 
 class TddCheck(AgentCheck):

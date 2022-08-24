@@ -72,15 +72,32 @@ def test_version_metadata(mock_server_info, mock_command, dd_run_check, datadog_
 
 
 @pytest.mark.unit
-@mock.patch('pymongo.database.Database.command', side_effect=[{'ok': 1}, {'uptime': 3600}])
+@mock.patch(
+    'pymongo.database.Database.command',
+    side_effect=[
+        {'ok': 1},
+        {'uptime': 3600, 'asserts': {'regular': 0, 'warning': 0, 'msg': 0, 'user': 27, 'rollovers': 0}},
+    ],
+)
 @mock.patch('pymongo.mongo_client.MongoClient.server_info', return_value={'version': '5.0.0'})
-def test_emits_metrics_when_service_is_up(mock_server_info, mock_command, dd_run_check, aggregator, instance):
+def test_emits_server_status_metrics_when_service_is_up(
+    mock_server_info, mock_command, dd_run_check, aggregator, instance
+):
     # Given
+    expected_metrics = {
+        "tdd.uptime",
+        "tdd.asserts.msgps",
+        "tdd.asserts.regularps",
+        "tdd.asserts.rolloversps",
+        "tdd.asserts.userps",
+        "tdd.asserts.warningps",
+    }
     check = TddCheck('tdd', {}, [instance])
     # When
     dd_run_check(check)
     # Then
-    aggregator.assert_metric('tdd.uptime')
+    for metric in expected_metrics:
+        aggregator.assert_metric(metric)
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
     mock_command.assert_has_calls([mock.call('ping'), mock.call('serverStatus')])

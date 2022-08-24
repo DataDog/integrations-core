@@ -1,2 +1,7 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
 tdd.uptime,gauge,,second,,Number of seconds that the mongos or mongod process has been active.,0,tdd,uptime,
+tdd.asserts.msgps,gauge,,assertion,second,Number of message assertions raised per second.,0,tdd,asserts msg ps,
+tdd.asserts.regularps,gauge,,assertion,second,Number of regular assertions raised per second.,0,tdd,asserts regular ps,
+tdd.asserts.rolloversps,gauge,,assertion,second,Number of times that the rollover counters roll over per second. The counters rollover to zero every 2^30 assertions.,0,tdd,asserts rollovers ps,
+tdd.asserts.userps,gauge,,assertion,second,Number of user assertions raised per second.,0,tdd,asserts user ps,
+tdd.asserts.warningps,gauge,,assertion,second,Number of warnings raised per second.,0,tdd,asserts warning ps,
