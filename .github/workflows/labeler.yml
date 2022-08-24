@@ -2,14 +2,17 @@
 
 name: PR Labels
 on:
-- pull_request
+- pull_request_target
 
 jobs:
   apply:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
     - name: Add labels
-      uses: DataDog/labeler@glob-all
+      uses: actions/labeler@v4
       with:
         repo-token: "${{ secrets.DD_CHANGELOG_CHECK_TOKEN }}"
         configuration-path: .github/workflows/config/labeler.yml
