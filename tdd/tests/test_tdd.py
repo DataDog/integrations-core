@@ -49,8 +49,32 @@ def test_emits_ok_service_check_when_service_is_up_and_ping_returns_1(mock_comma
 
 
 @pytest.mark.unit
+@mock.patch('pymongo.database.Database.command', side_effect=[{'ok': 1}, {'parsed': {}}])
+@mock.patch('pymongo.mongo_client.MongoClient.server_info', return_value={'version': '5.0.0'})
+def test_version_metadata(mock_server_info, mock_command, dd_run_check, datadog_agent, instance):
+    # Given
+    check = TddCheck('tdd', {}, [instance])
+    check.check_id = 'test:123'
+    # When
+    dd_run_check(check)
+    # Then
+    datadog_agent.assert_metadata(
+        'test:123',
+        {
+            'version.scheme': 'semver',
+            'version.major': '5',
+            'version.minor': '0',
+            'version.patch': '0',
+            'version.raw': '5.0.0',
+        },
+    )
+    mock_command.assert_has_calls([mock.call('ping'), mock.call('serverStatus')])
+
+
+@pytest.mark.unit
 @mock.patch('pymongo.database.Database.command', side_effect=[{'ok': 1}, {'uptime': 3600}])
-def test_emits_metrics_when_service_is_up(mock_command, dd_run_check, aggregator, instance):
+@mock.patch('pymongo.mongo_client.MongoClient.server_info', return_value={'version': '5.0.0'})
+def test_emits_metrics_when_service_is_up(mock_server_info, mock_command, dd_run_check, aggregator, instance):
     # Given
     check = TddCheck('tdd', {}, [instance])
     # When

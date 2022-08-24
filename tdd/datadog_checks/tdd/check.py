@@ -33,6 +33,7 @@ class TddCheck(AgentCheck):
             'serverSelectionTimeoutMS': self.instance.get('timeout', 5) * 1000,
         }
         self._mongo_client = MongoClient(**options)
+        self._mongo_version = None
 
     def check(self, _):
         try:
@@ -42,6 +43,9 @@ class TddCheck(AgentCheck):
             if ping_output['ok'] == 1:
                 self.log.debug('Connected')
                 self.service_check("can_connect", AgentCheck.OK)
+                self._mongo_version = self._mongo_client.server_info().get('version', '0.0.0')
+                self.set_metadata('version', self._mongo_version)
+                self.log.debug('mongo_version: %s', self._mongo_version)
                 server_status_output = self._mongo_client['admin'].command('serverStatus')
                 self.log.debug('server_status_output: %s', server_status_output)
                 for metric_name in METRICS:
