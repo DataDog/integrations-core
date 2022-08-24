@@ -2,6 +2,18 @@ changelog/no-changelog:
 - requirements-agent-release.txt
 - datadog_checks_dev/datadog_checks/dev/__about__.py
 - all:^(?![^/]+/datadog_checks/.*|[^/]+/pyproject\.toml).*
+datadog_checks_base:
+- datadog_checks_base/**/*
+datadog_checks_dependency_provider:
+- datadog_checks_dependency_provider/**/*
+datadog_checks_dev:
+- datadog_checks_dev/**/*
+datadog_checks_downloader:
+- datadog_checks_downloader/**/*
+datadog_checks_tests_helper:
+- datadog_checks_tests_helper/**/*
+ddev:
+- ddev/**/*
 dependencies:
 - datadog_checks_base/datadog_checks/base/data/agent_requirements.in
 dev/testing:
@@ -98,20 +110,8 @@ integration/crio:
 - crio/**/*
 integration/databricks:
 - databricks/**/*
-integration/datadog_checks_base:
-- datadog_checks_base/**/*
-integration/datadog_checks_dependency_provider:
-- datadog_checks_dependency_provider/**/*
-integration/datadog_checks_dev:
-- datadog_checks_dev/**/*
-integration/datadog_checks_downloader:
-- datadog_checks_downloader/**/*
-integration/datadog_checks_tests_helper:
-- datadog_checks_tests_helper/**/*
 integration/datadog_cluster_agent:
 - datadog_cluster_agent/**/*
-integration/ddev:
-- ddev/**/*
 integration/directory:
 - directory/**/*
 integration/disk:
