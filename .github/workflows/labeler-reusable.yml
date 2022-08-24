@@ -16,4 +16,5 @@ jobs:
       - name: Add labels
         uses: actions/labeler@v4
         with:
+          repo-token: "${{ secrets.DD_CHANGELOG_CHECK_TOKEN }}"
           configuration-path: .github/workflows/config/labeler.yml
