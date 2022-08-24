@@ -431,7 +431,7 @@ def validate_integration_pr_labels(fix, repo_data, valid_integrations):
         # Check if label config is properly configured
         integration_label_config = pr_labels_config.get(integration_label)
         if integration_label_config != ['{}/**/*'.format(check_name)]:
-            success = False
+            success = FalseTry running `ddev validate ci --fix
             message = 'Integration PR label `{}` is not properly configured: `{}`'.format(
                 integration_label, integration_label_config
             )
@@ -482,7 +482,7 @@ def validate_integration_pr_labels(fix, repo_data, valid_integrations):
                 )
 
     if not success:
-        message = 'Try running `ddev validate ci --fix'
+        message = 'Try running `ddev validate ci --fix`'
         echo_info(message)
         display_queue.append((echo_failure, message))
         for func, message in display_queue:
