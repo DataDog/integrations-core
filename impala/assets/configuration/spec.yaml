@@ -1,0 +1,24 @@
+name: Impala
+files:
+  - name: impala.yaml
+    options:
+      - template: init_config
+        options:
+          - template: init_config/openmetrics
+      - template: instances
+        options:
+          - name: service_type
+            required: true
+            description: |
+              The Impala service you want to monitor. Possible values are `daemon`, `statestore`, and `catalog`.
+            value:
+              type: string
+              display_default: daemon
+              example: daemon
+              enum:
+                - 'daemon'
+                - 'statestore'
+                - 'catalog'
+          - template: instances/openmetrics
+            overrides:
+              openmetrics_endpoint.value.example: http://%%host%%:25000/metrics_prometheus

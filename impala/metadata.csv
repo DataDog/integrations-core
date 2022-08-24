@@ -1,0 +1,4 @@
+metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
+impala.daemon.jvm.gc.count,count,,,,[Daemon] JVM Garbage Collection Count.,1,impala,daemon gc count,
+impala.catalog.jvm.gc.count,count,,,,[Catalog] JVM Garbage Collection Count.,1,impala,catalog gc count,
+impala.statestore.live_backends,gauge,,,,[Statestore] The number of registered Statestore subscribers.,1,impala,statestore live backends,

@@ -258,6 +258,10 @@ coverage:
         target: 75
         flags:
         - iis
+      Impala:
+        target: 75
+        flags:
+          - impala
       Istio:
         target: 75
         flags:
@@ -929,6 +933,11 @@ flags:
     paths:
     - iis/datadog_checks/iis
     - iis/tests
+  impala:
+    carryforward: true
+    paths:
+    - impala/datadog_checks/impala
+    - impala/tests
   istio:
     carryforward: true
     paths:
