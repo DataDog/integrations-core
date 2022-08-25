@@ -5,6 +5,7 @@
 import glob
 import logging
 import os
+import random
 import re
 import shutil
 import string
@@ -40,6 +41,12 @@ _LOCAL_TESTS_DATA_TIMESTAMP = time.mktime(datetime(year=2022, month=7, day=25).t
 
 # Used to test local metadata expiration.
 _LOCAL_TESTS_DATA_TIMESTAMP_EXPIRED = time.mktime(datetime(year=2522, month=1, day=1).timetuple())
+
+# The regex corresponding to package names in a global simple index.
+_HTML_PATTERN_RE = re.compile(r"<a href='(datadog-[\w-]+?)/'>\w+?</a><br />")
+
+# Number of integrations to test. This eliminates timeouts in CI.
+_TEST_DOWNLOADER_SAMPLE_SIZE = 10
 
 IntegrationMetadata = namedtuple("IntegrationMetadata", ["version", "root_layout_type"])
 
@@ -306,7 +313,7 @@ def delete_files(files):
         os.remove(f)
 
 
-def cleanup():
+def _cleanup():
     REPO_DIR = "datadog_checks/downloader/data/repo/"
 
     METADATA_DIR = os.path.join(REPO_DIR, "metadata")
@@ -316,9 +323,9 @@ def cleanup():
     SIMPLE_DIR = os.path.join(TARGETS_DIR, "simple")
 
     # First, nuke all known targets. but not the directory for targets itself.
-    shutil.rmtree(IN_TOTO_METADATA_DIR)
-    shutil.rmtree(IN_TOTO_PUBKEYS_DIR)
-    shutil.rmtree(SIMPLE_DIR)
+    shutil.rmtree(IN_TOTO_METADATA_DIR, ignore_errors=True)
+    shutil.rmtree(IN_TOTO_PUBKEYS_DIR, ignore_errors=True)
+    shutil.rmtree(SIMPLE_DIR, ignore_errors=True)
 
     # Then, nuke all previous TUF metadata.
     previous_jsons = os.path.join(METADATA_DIR, "previous/*.json")
@@ -414,33 +421,33 @@ def get_all_integrations_metadata():
 
 
 @pytest.mark.online
-def test_downloader(verify_all_integrations):
-    if not verify_all_integrations:
-        pytest.skip("Checking all Datadog integrations not requested")
-
+def test_downloader():
     integrations_metadata = get_all_integrations_metadata()
-    # The regex corresponding to package names in a global simple index.
-    HTML_PATTERN = r"<a href='(datadog-[\w-]+?)/'>\w+?</a><br />"
-
     # Download the global simple index, which contains all known package names.
     index = urljoin(REPOSITORY_URL_PREFIX, "targets/simple/index.html")
     r = requests.get(index)
     r.raise_for_status()
 
+    integrations_to_test = []
+    for line in r.text.split("\n"):
+        match = _HTML_PATTERN_RE.match(line)
+        if not match:
+            continue
+        integration_name = match.group(1)
+        if integration_name in EXCLUDED_INTEGRATIONS:
+            continue
+        if integration_name not in integrations_metadata:
+            raise Exception(
+                "Integration '{}' is in the simple index but does not have tuf metadata.".format(integration_name)
+            )
+
+        version, root_layout_type = integrations_metadata[integration_name]
+        if match:
+            integrations_to_test.append((match.group(1), version, root_layout_type))
+
+    sample = random.sample(integrations_to_test, _TEST_DOWNLOADER_SAMPLE_SIZE)
     try:
-        for line in r.text.split("\n"):
-            match = re.match(HTML_PATTERN, line)
-            if not match:
-                continue
-            integration_name = match.group(1)
-            if integration_name in EXCLUDED_INTEGRATIONS:
-                continue
-            if integration_name not in integrations_metadata:
-                raise Exception(
-                    "Integration '{}' is in the simple index but does not have tuf metadata.".format(integration_name)
-                )
-            version, root_layout_type = integrations_metadata[integration_name]
-            if match:
-                _do_download(match.group(1), version, root_layout_type)
+        for integration_name, integration_version, root_layout_type in sample:
+            _do_download(integration_name, integration_version, root_layout_type)
     finally:
-        cleanup()
+        _cleanup()

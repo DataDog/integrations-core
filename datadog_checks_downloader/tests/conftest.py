@@ -19,17 +19,6 @@ def pytest_addoption(parser):
         default="1.10.0",
         help="The version number of the desired Datadog check.",
     )
-    parser.addoption(
-        "--verify-all-integrations",
-        action="store_true",
-        help="Verify all Datadog integrations.",
-    )
-
-
-@pytest.fixture
-def verify_all_integrations(request):
-    """Provide verify_all fixture."""
-    return request.config.getoption("--verify-all-integrations")
 
 
 @pytest.fixture
