@@ -66,7 +66,7 @@ def test_check_invalid_schema(aggregator, instance, dd_run_check):
         pytest.param(False, id='Test collect custom and default metrics'),
     ],
 )
-def test_only_custom_queries(aggregator, dd_run_check, instance_custom_queries, custom_only):
+def test_custom_queries(aggregator, dd_run_check, instance_custom_queries, custom_only):
     instance_custom_queries['only_custom_queries'] = custom_only
     check = SapHanaCheck('sap_hana', {}, [instance_custom_queries])
     dd_run_check(check)
