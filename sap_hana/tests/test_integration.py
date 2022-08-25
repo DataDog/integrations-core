@@ -11,8 +11,7 @@ from . import metrics
 from .common import CAN_CONNECT_SERVICE_CHECK, connection_flaked
 
 
-# Skipping because SAP has removed their docker images from dockerhub
-pytestmark = [pytest.mark.integration, pytest.mark.skip, pytest.mark.usefixtures('dd_environment')]
+pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
 
 
 def test_check(aggregator, instance, dd_run_check):

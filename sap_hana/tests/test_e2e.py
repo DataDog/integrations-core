@@ -8,10 +8,8 @@ from datadog_checks.sap_hana import SapHanaCheck
 from . import metrics
 from .common import CAN_CONNECT_SERVICE_CHECK, connection_flaked
 
-# Skipping because SAP has removed their docker images from dockerhub
-pytestmark = [pytest.mark.e2e, pytest.mark.skip]
 
-
+@pytest.mark.e2e
 def test_check(dd_agent_check, instance):
     attempts = 3
     aggregator = dd_agent_check(instance, rate=True)
