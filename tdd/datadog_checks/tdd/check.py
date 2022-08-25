@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import re
+from distutils.version import LooseVersion
 
 from pymongo import MongoClient
 from pymongo.errors import ConnectionFailure
@@ -76,11 +77,17 @@ class TddCheck(AgentCheck):
 
     def _report_collections_indexes_stats(self):
         if is_affirmative(self.instance.get('collections_indexes_stats')):
-            indexstats_output = {
-                'collection': {'indexes': self._mongo_client['admin'].aggregate([{"$indexStats": {}}])}
-            }
-            self.log.debug('indexstats_output: %s', indexstats_output)
-            self._report_json(indexstats_output)
+            if LooseVersion(self._mongo_version) >= LooseVersion("3.2"):
+                indexstats_output = {
+                    'collection': {'indexes': self._mongo_client['admin'].aggregate([{"$indexStats": {}}])}
+                }
+                self.log.debug('indexstats_output: %s', indexstats_output)
+                self._report_json(indexstats_output)
+            else:
+                self.log.warning(
+                    "'collections_indexes_stats' is only available starting from mongo 3.2, your mongo version is %s",
+                    self._mongo_version,
+                )
 
     def _report_json(self, json):
         for metric_name in METRICS:
