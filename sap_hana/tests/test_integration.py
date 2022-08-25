@@ -16,12 +16,8 @@ pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')
 def test_check(aggregator, instance, dd_run_check):
     check = SapHanaCheck('sap_hana', {}, [instance])
     _run_until_stable(dd_run_check, check, aggregator)
-
     aggregator.assert_service_check(CAN_CONNECT_SERVICE_CHECK, SapHanaCheck.OK)
-    for metric in metrics.STANDARD:
-        aggregator.assert_metric_has_tag(metric, 'server:{}'.format(instance['server']))
-        aggregator.assert_metric_has_tag(metric, 'port:{}'.format(instance['port']))
-
+    _assert_standard_metrics(aggregator, instance)
     aggregator.assert_all_metrics_covered()
 
 
@@ -61,6 +57,21 @@ def _run_until_stable(dd_run_check, check, aggregator):
         retries -= 1
 
 
+def _assert_standard_metrics(aggregator, instance):
+    # Not all metrics are present in every check run
+    missing_metrics = []
+    for metric in metrics.STANDARD:
+        if metric in aggregator.metric_names:
+            aggregator.assert_metric_has_tag(metric, 'server:{}'.format(instance['server']))
+            aggregator.assert_metric_has_tag(metric, 'port:{}'.format(instance['port']))
+        else:
+            missing_metrics.append(metric)
+    assert len(missing_metrics) / len(metrics.STANDARD) < 0.1, 'Missing metrics: %s\nPresent metrics: %s' % (
+        missing_metrics,
+        aggregator.metric_names,
+    )
+
+
 @pytest.mark.parametrize(
     'custom_only',
     [
@@ -73,12 +84,11 @@ def test_custom_queries(aggregator, dd_run_check, instance_custom_queries, custo
     check = SapHanaCheck('sap_hana', {}, [instance_custom_queries])
     _run_until_stable(dd_run_check, check, aggregator)
 
-    for metric in metrics.STANDARD:
-        if custom_only:
+    if custom_only:
+        for metric in metrics.STANDARD:
             aggregator.assert_metric(metric, count=0)
-        else:
-            # Some metrics are emitted twice, once per database
-            aggregator.assert_metric(metric, at_least=1)
+    else:
+        _assert_standard_metrics(aggregator, instance_custom_queries)
 
     for _db in ('SYSTEMDB', 'HXE'):
         aggregator.assert_metric(
