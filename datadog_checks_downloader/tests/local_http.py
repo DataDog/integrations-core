@@ -5,7 +5,10 @@
 import contextlib
 import logging
 import os
+import shutil
+import tempfile
 import time
+import zipfile
 from functools import partial
 from threading import Thread
 
@@ -16,13 +19,14 @@ if six.PY3:
     from http.server import SimpleHTTPRequestHandler
     from queue import Queue
     from socketserver import TCPServer
+
 else:
     from Queue import Queue
     from SimpleHTTPServer import SimpleHTTPRequestHandler
     from SocketServer import TCPServer
 
 _LOGGER = logging.getLogger(__name__)
-E2E_TESTS_DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
+_E2E_TESTS_DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
 _DEFAULT_PORT = 8080
 
 
@@ -46,36 +50,41 @@ def _do_local_http_server(queue, directory, port):
 
 
 @contextlib.contextmanager
-def local_http_server(distribution_dir_name, port=_DEFAULT_PORT):
+def local_http_server(test_file_case, port=_DEFAULT_PORT):
     """Start a local HTTP server for E2E tests."""
-    directory = os.path.join(E2E_TESTS_DATA_DIR, distribution_dir_name)
-    server_url = "http://localhost:{}".format(port)
+    zip_file_path = os.path.join(_E2E_TESTS_DATA_DIR, test_file_case + ".zip")
+    served_dir = tempfile.mkdtemp(prefix=test_file_case, dir=_E2E_TESTS_DATA_DIR)
 
-    if not os.path.isdir(directory):
-        raise RuntimeError("Cannot start HTTP server: {!r} does not exist".format(directory))
-
-    queue = Queue()  # Pass httpd to handle proper shutdown on exit.
-    http_server_thread = Thread(target=_do_local_http_server, args=(queue, directory, port))
-    http_server_thread.start()
-
-    httpd = queue.get()
     try:
-        for _ in range(5):  # Provide some time to have the HTTP server ready.
-            response = requests.head(server_url)
-            if response.status_code != 200:
-                _LOGGER.warning(
-                    "HTTP server not ready yet (HTTP status code %d)...",
-                    response.status_code,
-                )
-                time.sleep(1)
-                continue
+        with zipfile.ZipFile(zip_file_path) as tests_zip_file:
+            tests_zip_file.extractall(path=served_dir)
 
-            break
-        else:
-            raise RuntimeError("Failed to start HTTP server")
+        server_url = "http://localhost:{}".format(port)
 
-        yield server_url
+        queue = Queue()  # Pass httpd to handle proper shutdown on exit.
+        http_server_thread = Thread(target=_do_local_http_server, args=(queue, served_dir, port))
+        http_server_thread.start()
+
+        httpd = queue.get()
+        try:
+            for _ in range(5):  # Provide some time to have the HTTP server ready.
+                response = requests.head(server_url)
+                if response.status_code != 200:
+                    _LOGGER.warning(
+                        "HTTP server not ready yet (HTTP status code %d)...",
+                        response.status_code,
+                    )
+                    time.sleep(1)
+                    continue
+
+                break
+            else:
+                raise RuntimeError("Failed to start HTTP server")
+
+            yield server_url
+        finally:
+            httpd.shutdown()
+            queue.join()
+            http_server_thread.join()
     finally:
-        httpd.shutdown()
-        queue.join()
-        http_server_thread.join()
+        shutil.rmtree(served_dir)

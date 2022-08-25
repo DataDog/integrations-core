@@ -2,9 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import contextlib
 import glob
-import json
 import logging
 import os
 import re
@@ -22,7 +20,7 @@ from packaging.version import parse as parse_version
 from six import PY2, PY3, iteritems
 from six.moves.urllib_parse import urljoin
 from tenacity import retry, stop_after_attempt, wait_exponential
-from tests.local_http import E2E_TESTS_DATA_DIR, local_http_server
+from tests.local_http import local_http_server
 from tuf.exceptions import NoWorkingMirrorError
 
 import datadog_checks.downloader
@@ -258,7 +256,7 @@ def test_local_unreachable_repository():
 @pytest.mark.skipif(PY2, reason="tuf builds for Python 2 do not provide required information in exception")
 def test_local_repository_unreachable_error():
     """Test unreachable repository raises an exception."""
-    with local_http_server("") as http_url:
+    with local_http_server("empty") as http_url:
         argv = [
             "datadog-active-directory",
             "--version",
@@ -271,25 +269,6 @@ def test_local_repository_unreachable_error():
             _do_run_downloader(argv)
 
         assert "HTTPError('404 Client Error: File not found for url" in str(exc)
-
-
-@contextlib.contextmanager
-def _adjust_signature(test_file):
-    """Adjust signature for a test."""
-    with open(test_file) as f:
-        content_raw = f.read()
-
-    content = json.loads(content_raw)
-    content["signatures"][0]["sig"] = len(content["signatures"][0]["sig"]) * "f"
-
-    with open(test_file, "w") as f:
-        json.dump(content, f)
-
-    try:
-        yield
-    finally:
-        with open(test_file, "w") as f:
-            f.write(content_raw)
 
 
 @pytest.mark.offline
@@ -306,7 +285,7 @@ def test_local_wheels_signer_signature_leaf_error(distribution_name, distributio
 
     The wheel-signer-{a-z} metadata has to have wrong signature.
     """
-    test_data = "{}-{}".format(distribution_name, distribution_version)
+    test_data = "{}-{}-signature-wheels-signer-a".format(distribution_name, distribution_version)
     with local_http_server(test_data) as http_url:
         argv = [
             distribution_name,
@@ -316,10 +295,7 @@ def test_local_wheels_signer_signature_leaf_error(distribution_name, distributio
             http_url,
         ]
 
-        wheels_signer_a_file = os.path.join(
-            E2E_TESTS_DATA_DIR, test_data, "metadata.staged", "2833.wheels-signer-a.json"
-        )
-        with _adjust_signature(wheels_signer_a_file), pytest.raises(NoWorkingMirrorError) as exc:
+        with pytest.raises(NoWorkingMirrorError) as exc:
             _do_run_downloader(argv)
 
     assert "BadSignatureError('wheels-signer-" in str(exc)
