@@ -56,6 +56,7 @@ def redis_auth():
     with docker_run(
         os.path.join(HERE, 'compose', 'standalone.compose'),
         env_vars={'REDIS_CONFIG': os.path.join(HERE, 'config', 'auth.conf')},
+        sleep=10,
     ):
         yield
 

@@ -176,7 +176,7 @@ class Redis(AgentCheck):
                 connection_params = dict((k, instance_config[k]) for k in list_params if k in instance_config)
                 # If caching is disabled, we overwrite the dictionary value so the old connection
                 # will be closed as soon as the corresponding Python object gets garbage collected
-                self.connections[key] = redis.Redis(health_check_interval=5, **connection_params)
+                self.connections[key] = redis.Redis(**connection_params)
 
             except TypeError:
                 msg = "You need a redis library that supports authenticated connections. Try `pip install redis`."
