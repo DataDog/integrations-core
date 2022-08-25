@@ -185,7 +185,7 @@ class SapHanaCheck(AgentCheck):
             db_status = self.OK if status['status'].lower() == 'yes' else self.CRITICAL
             message = None
             if db_status != self.OK and status.get('details'):
-                message = status['details'] or None
+                message = status['details']
             self.service_check(
                 self.SERVICE_CHECK_STATUS, db_status, message=message, tags=tags, hostname=self.get_hana_hostname()
             )
