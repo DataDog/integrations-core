@@ -10,10 +10,11 @@ from datadog_checks.sap_hana import SapHanaCheck
 from . import metrics
 from .common import CAN_CONNECT_SERVICE_CHECK, connection_flaked
 
-pytestmark = pytest.mark.integration
+
+# Skipping because SAP has removed their docker images from dockerhub
+pytestmark = [pytest.mark.integration, pytest.mark.skip, pytest.mark.usefixtures('dd_environment')]
 
 
-@pytest.mark.usefixtures('dd_environment')
 def test_check(aggregator, instance, dd_run_check):
     check = SapHanaCheck('sap_hana', {}, [instance])
 
@@ -32,7 +33,6 @@ def test_check(aggregator, instance, dd_run_check):
     aggregator.assert_all_metrics_covered()
 
 
-@pytest.mark.usefixtures('dd_environment')
 def test_check_invalid_schema(aggregator, instance, dd_run_check):
     instance["schema"] = "UNKNOWN_SCHEMA"
     check = SapHanaCheck('sap_hana', {}, [instance])
@@ -60,7 +60,6 @@ def test_check_invalid_schema(aggregator, instance, dd_run_check):
         assert "invalid schema name: UNKNOWN_SCHEMA" in call_args[0][2]
 
 
-@pytest.mark.usefixtures('dd_environment')
 def test_custom_queries(aggregator, instance_custom_queries, dd_run_check):
     check = SapHanaCheck('sap_hana', {}, [instance_custom_queries])
     dd_run_check(check)
@@ -78,7 +77,6 @@ def test_custom_queries(aggregator, instance_custom_queries, dd_run_check):
         )
 
 
-@pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize(
     'custom_only',
     [
