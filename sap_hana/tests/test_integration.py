@@ -15,13 +15,7 @@ pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')
 
 def test_check(aggregator, instance, dd_run_check):
     check = SapHanaCheck('sap_hana', {}, [instance])
-
-    attempts = 3
-    dd_run_check(check)
-    while attempts and connection_flaked(aggregator):
-        aggregator.reset()
-        dd_run_check(check)
-        attempts -= 1
+    _run_until_stable(dd_run_check, check, aggregator)
 
     aggregator.assert_service_check(CAN_CONNECT_SERVICE_CHECK, SapHanaCheck.OK)
     for metric in metrics.STANDARD:
@@ -58,6 +52,15 @@ def test_check_invalid_schema(aggregator, instance, dd_run_check):
         assert "invalid schema name: UNKNOWN_SCHEMA" in call_args[0][2]
 
 
+def _run_until_stable(dd_run_check, check, aggregator):
+    attempts = 3
+    dd_run_check(check)
+    while attempts and connection_flaked(aggregator):
+        aggregator.reset()
+        dd_run_check(check)
+        attempts -= 1
+
+
 @pytest.mark.parametrize(
     'custom_only',
     [
@@ -68,13 +71,11 @@ def test_check_invalid_schema(aggregator, instance, dd_run_check):
 def test_custom_queries(aggregator, dd_run_check, instance_custom_queries, custom_only):
     instance_custom_queries['only_custom_queries'] = custom_only
     check = SapHanaCheck('sap_hana', {}, [instance_custom_queries])
-    dd_run_check(check)
+    _run_until_stable(dd_run_check, check, aggregator)
 
+    count = 0 if custom_only else 1
     for metric in metrics.STANDARD:
-        if custom_only:
-            aggregator.assert_metric(metric, count=0)
-        else:
-            aggregator.assert_metric(metric, at_least=1)
+        aggregator.assert_metric(metric, count=count)
 
     for _db in ('SYSTEMDB', 'HXE'):
         aggregator.assert_metric(
