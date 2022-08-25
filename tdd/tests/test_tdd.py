@@ -51,7 +51,7 @@ def test_emits_ok_service_check_when_service_is_up_and_ping_returns_1(mock_comma
 
 
 @pytest.mark.unit
-@mock.patch('pymongo.database.Database.command', side_effect=[{'ok': 1}, {}])
+@mock.patch('pymongo.database.Database.command', side_effect=[{'ok': 1}, {}, {}])
 @mock.patch('pymongo.mongo_client.MongoClient.server_info', return_value={'version': '5.0.0'})
 def test_version_metadata(mock_server_info, mock_command, dd_run_check, datadog_agent, instance):
     # Given
@@ -70,7 +70,7 @@ def test_version_metadata(mock_server_info, mock_command, dd_run_check, datadog_
             'version.raw': '5.0.0',
         },
     )
-    mock_command.assert_has_calls([mock.call('ping'), mock.call('serverStatus', tcmalloc=0)])
+    mock_command.assert_has_calls([mock.call('ping')])
     mock_server_info.assert_called_once()
 
 
@@ -90,6 +90,7 @@ def test_version_metadata(mock_server_info, mock_command, dd_run_check, datadog_
                 'last_finished': {'$date': 1600245226383},
             },
         },
+        {},
     ],
 )
 @mock.patch('pymongo.mongo_client.MongoClient.server_info', return_value={'version': '5.0.0'})
@@ -153,6 +154,7 @@ def test_emits_serverstatus_without_tcmalloc_metrics_when_service_is_up(
                 },
             },
         },
+        {},
     ],
 )
 @mock.patch('pymongo.mongo_client.MongoClient.server_info', return_value={'version': '5.0.0'})
@@ -210,7 +212,9 @@ def test_emits_collstats_metrics_without_indexstats_when_service_is_up(
         aggregator.assert_metric(metric, count=0)
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
-    mock_command.assert_has_calls([mock.call('ping'), mock.call('serverStatus', tcmalloc=0), mock.call('collStats')])
+    mock_command.assert_has_calls(
+        [mock.call('ping'), mock.call('serverStatus', tcmalloc=0), mock.call('collStats', mock.ANY)]
+    )
     mock_server_info.assert_called_once()
 
 
@@ -245,6 +249,8 @@ def test_emits_collstats_metrics_with_indexstats_when_service_is_up(
         aggregator.assert_metric(metric)
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
-    mock_command.assert_has_calls([mock.call('ping'), mock.call('serverStatus', tcmalloc=0), mock.call('collStats')])
+    mock_command.assert_has_calls(
+        [mock.call('ping'), mock.call('serverStatus', tcmalloc=0), mock.call('collStats', mock.ANY)]
+    )
     mock_aggregate.assert_has_calls([mock.call([{'$indexStats': {}}])])
     mock_server_info.assert_called_once()

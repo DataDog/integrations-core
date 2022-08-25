@@ -26,92 +26,90 @@ class TddCheck(AgentCheck):
         self._mongo_version = None
 
     def check(self, _):
+        service_check = self._get_service_check()
+        self.service_check("can_connect", service_check)
+        if service_check == AgentCheck.OK:
+            self.log.debug('Connected')
+            self._mongo_version = self._mongo_client.server_info().get('version', '0.0.0')
+            self.set_metadata('version', self._mongo_version)
+            self.log.debug('mongo_version: %s', self._mongo_version)
+            tcmalloc = 'tcmalloc' in self.instance.get('additional_metrics', [])
+            server_status_output = self._mongo_client['admin'].command('serverStatus', tcmalloc=tcmalloc)
+            self.log.debug('server_status_output: %s', server_status_output)
+            for metric_name in METRICS:
+                value = server_status_output
+                try:
+                    for c in metric_name.split("."):
+                        value = value[c]
+                except KeyError:
+                    continue
+                submit_method = (
+                    METRICS[metric_name][0] if isinstance(METRICS[metric_name], tuple) else METRICS[metric_name]
+                )
+                metric_name_alias = METRICS[metric_name][1] if isinstance(METRICS[metric_name], tuple) else metric_name
+                metric_name_alias = self._normalize(metric_name_alias, submit_method, "")
+                self.log.debug('%s: %s [alias: %s, method: %s]', metric_name, value, metric_name_alias, submit_method)
+                submit_method(self, metric_name_alias, value)
+            self.log.debug('collections: %s', self._mongo_client['admin'].list_collection_names())
+            collstats_output = {'collection': self._mongo_client['admin'].command('collStats', 'foo')}
+            self.log.debug('collstats_output: %s', collstats_output)
+            for metric_name in METRICS:
+                value = collstats_output
+                try:
+                    for c in metric_name.split("."):
+                        value = value[c]
+                except KeyError:
+                    continue
+                submit_method = (
+                    METRICS[metric_name][0] if isinstance(METRICS[metric_name], tuple) else METRICS[metric_name]
+                )
+                metric_name_alias = METRICS[metric_name][1] if isinstance(METRICS[metric_name], tuple) else metric_name
+                metric_name_alias = self._normalize(metric_name_alias, submit_method, "")
+                self.log.debug('%s: %s [alias: %s, method: %s]', metric_name, value, metric_name_alias, submit_method)
+                submit_method(self, metric_name_alias, value)
+            # Submit the indexSizes metrics manually
+            index_sizes = collstats_output['collection'].get('indexSizes', {})
+            metric_name_alias = self._normalize("collection.indexSizes", AgentCheck.gauge)
+            for name, value in index_sizes.items():
+                self.log.debug('index %s: %s', name, value)
+                self.gauge(metric_name_alias, value)
+            if is_affirmative(self.instance.get('collections_indexes_stats')):
+                indexstats_output = {
+                    'collection': {'indexes': self._mongo_client['admin'].aggregate([{"$indexStats": {}}])}
+                }
+                self.log.debug('indexstats_output: %s', indexstats_output)
+                for metric_name in METRICS:
+                    value = indexstats_output
+                    try:
+                        for c in metric_name.split("."):
+                            value = value[c]
+                    except KeyError:
+                        continue
+                    submit_method = (
+                        METRICS[metric_name][0] if isinstance(METRICS[metric_name], tuple) else METRICS[metric_name]
+                    )
+                    metric_name_alias = (
+                        METRICS[metric_name][1] if isinstance(METRICS[metric_name], tuple) else metric_name
+                    )
+                    metric_name_alias = self._normalize(metric_name_alias, submit_method, "")
+                    self.log.debug(
+                        '%s: %s [alias: %s, method: %s]', metric_name, value, metric_name_alias, submit_method
+                    )
+                    submit_method(self, metric_name_alias, value)
+
+    def _get_service_check(self):
         try:
             # The ping command is cheap and does not require auth.
             ping_output = self._mongo_client['admin'].command('ping')
             self.log.debug('ping_output: %s', ping_output)
             if ping_output['ok'] == 1:
-                self.log.debug('Connected')
-                self.service_check("can_connect", AgentCheck.OK)
-                self._mongo_version = self._mongo_client.server_info().get('version', '0.0.0')
-                self.set_metadata('version', self._mongo_version)
-                self.log.debug('mongo_version: %s', self._mongo_version)
-                tcmalloc = 'tcmalloc' in self.instance.get('additional_metrics', [])
-                server_status_output = self._mongo_client['admin'].command('serverStatus', tcmalloc=tcmalloc)
-                self.log.debug('server_status_output: %s', server_status_output)
-                for metric_name in METRICS:
-                    value = server_status_output
-                    try:
-                        for c in metric_name.split("."):
-                            value = value[c]
-                    except KeyError:
-                        continue
-                    submit_method = (
-                        METRICS[metric_name][0] if isinstance(METRICS[metric_name], tuple) else METRICS[metric_name]
-                    )
-                    metric_name_alias = (
-                        METRICS[metric_name][1] if isinstance(METRICS[metric_name], tuple) else metric_name
-                    )
-                    metric_name_alias = self._normalize(metric_name_alias, submit_method, "")
-                    self.log.debug(
-                        '%s: %s [alias: %s, method: %s]', metric_name, value, metric_name_alias, submit_method
-                    )
-                    submit_method(self, metric_name_alias, value)
-                collstats_output = {'collection': self._mongo_client['admin'].command('collStats')}
-                self.log.debug('collstats_output: %s', collstats_output)
-                for metric_name in METRICS:
-                    value = collstats_output
-                    try:
-                        for c in metric_name.split("."):
-                            value = value[c]
-                    except KeyError:
-                        continue
-                    submit_method = (
-                        METRICS[metric_name][0] if isinstance(METRICS[metric_name], tuple) else METRICS[metric_name]
-                    )
-                    metric_name_alias = (
-                        METRICS[metric_name][1] if isinstance(METRICS[metric_name], tuple) else metric_name
-                    )
-                    metric_name_alias = self._normalize(metric_name_alias, submit_method, "")
-                    self.log.debug(
-                        '%s: %s [alias: %s, method: %s]', metric_name, value, metric_name_alias, submit_method
-                    )
-                    submit_method(self, metric_name_alias, value)
-                # Submit the indexSizes metrics manually
-                index_sizes = collstats_output['collection'].get('indexSizes', {})
-                metric_name_alias = self._normalize("collection.indexSizes", AgentCheck.gauge)
-                for name, value in index_sizes.items():
-                    self.log.debug('index %s: %s', name, value)
-                    self.gauge(metric_name_alias, value)
-                if is_affirmative(self.instance.get('collections_indexes_stats')):
-                    indexstats_output = {
-                        'collection': {'indexes': self._mongo_client['admin'].aggregate([{"$indexStats": {}}])}
-                    }
-                    self.log.debug('indexstats_output: %s', indexstats_output)
-                    for metric_name in METRICS:
-                        value = indexstats_output
-                        try:
-                            for c in metric_name.split("."):
-                                value = value[c]
-                        except KeyError:
-                            continue
-                        submit_method = (
-                            METRICS[metric_name][0] if isinstance(METRICS[metric_name], tuple) else METRICS[metric_name]
-                        )
-                        metric_name_alias = (
-                            METRICS[metric_name][1] if isinstance(METRICS[metric_name], tuple) else metric_name
-                        )
-                        metric_name_alias = self._normalize(metric_name_alias, submit_method, "")
-                        self.log.debug(
-                            '%s: %s [alias: %s, method: %s]', metric_name, value, metric_name_alias, submit_method
-                        )
-                        submit_method(self, metric_name_alias, value)
+                return AgentCheck.OK
             else:
                 self.log.error('ping returned no valid value')
-                self.service_check("can_connect", AgentCheck.CRITICAL)
-        except (ConnectionFailure, Exception) as e:
+                return AgentCheck.CRITICAL
+        except ConnectionFailure as e:
             self.log.error('Exception: %s', e)
-            self.service_check("can_connect", AgentCheck.CRITICAL)
+            return AgentCheck.CRITICAL
 
     def _normalize(self, metric_name, submit_method, prefix=None):
         """Replace case-sensitive metric name characters, normalize the metric name,
