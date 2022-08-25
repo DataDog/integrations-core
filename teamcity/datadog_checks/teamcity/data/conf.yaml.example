@@ -18,6 +18,49 @@ instances:
     #
   - openmetrics_endpoint: http://localhost:8111/app/metrics
 
+    ## @param bearer_token - string - optional
+    ## Bearer token for HTTP Token Authentication to the TeamCity Server's REST API.
+    #
+    # bearer_token: <BEARER_TOKEN>
+
+    ## @param name - string - optional
+    ## A custom unique name per build configuration that is shown
+    ## in the events.
+    #
+    # name: <BUILD_NAME>
+
+    ## @param server - string - optional - default: http://teamcity.<ACCOUNT_NAME>.com
+    ## Specify the server name of your teamcity instance
+    ## Guest authentication must be on if you want the check to be able to get data
+    ## When using the optional `basic_http_authentication` use:
+    ##
+    ##  server: http://<USER>:<PASSWORD>@teamcity.<ACCOUNT_NAME>.com
+    #
+    # server: http://teamcity.<ACCOUNT_NAME>.com
+
+    ## @param build_configuration - string - optional
+    ## This is the internal build ID of the build configuration you wish to track.
+    ## You can find it labelled as "Build configuration ID" when editing the configuration in question.
+    #
+    # build_configuration: <BUILD_CONFIGURATION>
+
+    ## @param basic_http_authentication - boolean - optional - default: false
+    ## Set to true to turn on basic http authentication.
+    #
+    # basic_http_authentication: false
+
+    ## @param host_affected - string - optional
+    ## Use this parameter to override the host that is affected by this build configuration.
+    ## Defaults to the host that the agent is running on.
+    #
+    # host_affected: <HOST_AFFECTED>
+
+    ## @param is_deployment - boolean - optional - default: false
+    ## Set to true to change the event message slightly to specify that TeamCity was used to deploy something
+    ## rather than just that a successful build happened
+    #
+    # is_deployment: false
+
     ## @param raw_metric_prefix - string - optional
     ## A prefix that will be removed from all exposed metric names, if present.
     ## All configuration options will use the prefix-less name.
@@ -586,49 +629,6 @@ instances:
     #   - <INCLUDE_REGEX>
     #   exclude:
     #   - <EXCLUDE_REGEX>
-
-    ## @param bearer_token - string - optional
-    ## Bearer token for HTTP Token Authentication to the TeamCity Server's REST API.
-    #
-    # bearer_token: <BEARER_TOKEN>
-
-    ## @param name - string - optional
-    ## A custom unique name per build configuration that is shown
-    ## in the events.
-    #
-    # name: <BUILD_NAME>
-
-    ## @param server - string - optional - default: http://teamcity.<ACCOUNT_NAME>.com
-    ## Specify the server name of your teamcity instance
-    ## Guest authentication must be on if you want the check to be able to get data
-    ## When using the optional `basic_http_authentication` use:
-    ##
-    ##  server: http://<USER>:<PASSWORD>@teamcity.<ACCOUNT_NAME>.com
-    #
-    # server: http://teamcity.<ACCOUNT_NAME>.com
-
-    ## @param build_configuration - string - optional
-    ## This is the internal build ID of the build configuration you wish to track.
-    ## You can find it labelled as "Build configuration ID" when editing the configuration in question.
-    #
-    # build_configuration: <BUILD_CONFIGURATION>
-
-    ## @param basic_http_authentication - boolean - optional - default: false
-    ## Set to true to turn on basic http authentication.
-    #
-    # basic_http_authentication: false
-
-    ## @param host_affected - string - optional
-    ## Use this parameter to override the host that is affected by this build configuration.
-    ## Defaults to the host that the agent is running on.
-    #
-    # host_affected: <HOST_AFFECTED>
-
-    ## @param is_deployment - boolean - optional - default: false
-    ## Set to true to change the event message slightly to specify that TeamCity was used to deploy something
-    ## rather than just that a successful build happened
-    #
-    # is_deployment: false
 
 ## Log Section
 ##
