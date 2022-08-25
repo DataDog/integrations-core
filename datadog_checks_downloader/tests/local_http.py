@@ -53,7 +53,7 @@ def _do_local_http_server(queue, directory, port):
 def local_http_server(test_file_case, port=_DEFAULT_PORT):
     """Start a local HTTP server for E2E tests."""
     zip_file_path = os.path.join(_E2E_TESTS_DATA_DIR, test_file_case + ".zip")
-    served_dir = tempfile.mkdtemp(prefix=test_file_case, dir=_E2E_TESTS_DATA_DIR)
+    served_dir = tempfile.mkdtemp(prefix=test_file_case)
 
     try:
         with zipfile.ZipFile(zip_file_path) as tests_zip_file:
