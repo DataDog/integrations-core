@@ -53,12 +53,12 @@ def test_check_invalid_schema(aggregator, instance, dd_run_check):
 
 
 def _run_until_stable(dd_run_check, check, aggregator):
-    attempts = 3
+    retries = 3
     dd_run_check(check)
-    while attempts and connection_flaked(aggregator):
+    while retries and connection_flaked(aggregator):
         aggregator.reset()
         dd_run_check(check)
-        attempts -= 1
+        retries -= 1
 
 
 @pytest.mark.parametrize(
@@ -73,9 +73,12 @@ def test_custom_queries(aggregator, dd_run_check, instance_custom_queries, custo
     check = SapHanaCheck('sap_hana', {}, [instance_custom_queries])
     _run_until_stable(dd_run_check, check, aggregator)
 
-    count = 0 if custom_only else 1
     for metric in metrics.STANDARD:
-        aggregator.assert_metric(metric, count=count)
+        if custom_only:
+            aggregator.assert_metric(metric, count=0)
+        else:
+            # Some metrics are emitted twice, once per database
+            aggregator.assert_metric(metric, at_least=1)
 
     for _db in ('SYSTEMDB', 'HXE'):
         aggregator.assert_metric(
