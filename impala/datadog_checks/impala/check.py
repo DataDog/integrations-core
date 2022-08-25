@@ -6,7 +6,7 @@ import re
 from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheckV2
 from datadog_checks.impala.config_models import ConfigMixin
 from datadog_checks.impala.metrics_catalog import CATALOG_METRIC_MAP, CATALOG_METRICS_WITH_LABEL_IN_NAME
-from datadog_checks.impala.metrics_daemon import DAEMON_METRIC_MAP
+from datadog_checks.impala.metrics_daemon import DAEMON_METRIC_MAP, DAEMON_METRICS_WITH_LABEL_IN_NAME
 from datadog_checks.impala.metrics_statestore import STATESTORE_METRIC_MAP
 
 TO_SNAKE_CASE_PATTERN = re.compile('(?!^)([A-Z]+)')
@@ -64,8 +64,13 @@ class ImpalaCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         return transform
 
     def configure_additional_transformers(self):
-        if self.instance["service_type"] == "catalog":
-            for metric_pattern, metric in CATALOG_METRICS_WITH_LABEL_IN_NAME.items():
+        if self.instance["service_type"] in ["catalog", "daemon"]:
+            if self.instance["service_type"] == "catalog":
+                metrics_with_label_in_name = CATALOG_METRICS_WITH_LABEL_IN_NAME
+            else:
+                metrics_with_label_in_name = DAEMON_METRICS_WITH_LABEL_IN_NAME
+
+            for metric_pattern, metric in metrics_with_label_in_name.items():
                 self.scrapers[self.instance['openmetrics_endpoint']].metric_transformer.add_custom_transformer(
                     metric_pattern,
                     self.configure_transformer_with_label_in_name(metric_pattern, metric),
