@@ -68,7 +68,7 @@
             "layout": {
                 "x": 15,
                 "y": 1,
-                "width": 12,
+                "width": 24,
                 "height": 8
             }
         },
@@ -233,29 +233,6 @@
                 "y": 26,
                 "width": 71,
                 "height": 15
-            }
-        },
-        {
-            "id": 8,
-            "definition": {
-                "type": "query_value",
-                "requests": [
-                    {
-                        "q": "avg:kong.table.count{$scope}",
-                        "aggregator": "avg"
-                    }
-                ],
-                "custom_links": [],
-                "title": "Number of Tables",
-                "title_size": "16",
-                "title_align": "left",
-                "precision": 0
-            },
-            "layout": {
-                "x": 28,
-                "y": 1,
-                "width": 12,
-                "height": 8
             }
         }
     ],
