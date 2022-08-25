@@ -1,5 +1,5 @@
 {
-    "title": "Kong Overview",
+    "title": "Kong Overview [Legacy]",
     "description": "## Kong\n\nThis dashboard provides a high-level overview of your Kong instances so you can monitor metrics related to connections, table counts, and total requests.\n\nFor further reading on monitoring Kong, see:\n[Official Kong integration docs](https://docs.datadoghq.com/integrations/kong/)\n\nClone this template to make changes and add your own graphs and widgets.",
     "widgets": [
         {
@@ -22,7 +22,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "per_minute(avg:kong.total_requests{*} by {host})",
+                        "q": "per_minute(avg:kong.total_requests{$scope} by {host})",
                         "display_type": "bars",
                         "style": {
                             "palette": "dog_classic",
@@ -97,7 +97,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "avg:kong.table.items{*} by {table}",
+                        "q": "avg:kong.table.items{$scope} by {table}",
                         "display_type": "bars",
                         "style": {
                             "palette": "dog_classic",
@@ -133,7 +133,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "avg:kong.connections_active{*} by {host}",
+                        "q": "avg:kong.connections_active{$scope} by {host}",
                         "display_type": "bars",
                         "style": {
                             "palette": "dog_classic",
@@ -169,7 +169,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "avg:kong.connections_waiting{*} by {host}",
+                        "q": "avg:kong.connections_waiting{$scope} by {host}",
                         "display_type": "bars",
                         "style": {
                             "palette": "dog_classic",
@@ -205,7 +205,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "per_minute(avg:kong.connections_handled{*} by {host}), per_minute(avg:kong.connections_accepted{*} by {host})",
+                        "q": "per_minute(avg:kong.connections_handled{$scope} by {host}), per_minute(avg:kong.connections_accepted{$scope} by {host})",
                         "display_type": "bars",
                         "style": {
                             "palette": "cool",
@@ -241,7 +241,7 @@
                 "type": "query_value",
                 "requests": [
                     {
-                        "q": "avg:kong.table.count{*}",
+                        "q": "avg:kong.table.count{$scope}",
                         "aggregator": "avg"
                     }
                 ],
@@ -259,7 +259,13 @@
             }
         }
     ],
-    "template_variables": [],
+    "template_variables": [
+        {
+            "default": "*",
+            "prefix": null,
+            "name": "scope"
+        }
+    ],
     "layout_type": "free",
     "is_read_only": true,
     "notify_list": [],

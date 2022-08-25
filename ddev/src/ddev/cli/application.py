@@ -78,7 +78,7 @@ class Application(Terminal):
         self.__config['dd_api_key'] = self.config.orgs.get('default', {}).get('api_key', '')
         self.__config['dd_app_key'] = self.config.orgs.get('default', {}).get('app_key', '')
 
-        kwargs = {'here' if self.config.repo.name == 'local' else self.repo.name: True}
+        kwargs = {'here' if self.repo.name == 'local' else self.repo.name: True}
         initialize_root(self.__config, **kwargs)
 
     def copy(self):

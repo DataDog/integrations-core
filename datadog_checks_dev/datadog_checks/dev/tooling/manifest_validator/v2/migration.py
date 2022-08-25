@@ -54,6 +54,7 @@ V2_TO_V1_MAP = JSONDict(
         "/assets/integration/metrics/metadata_path": "/assets/metrics_metadata",
         "/assets/integration/service_checks": {},
         "/assets/integration/service_checks/metadata_path": "/assets/service_checks",
+        "/assets/integration/process_signatures": "/process_signatures",
         "/assets/dashboards": "/assets/dashboards",
         "/assets/monitors": "/assets/monitors",
         "/assets/saved_views": "/assets/saved_views",

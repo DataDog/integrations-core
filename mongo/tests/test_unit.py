@@ -6,6 +6,7 @@ from urllib.parse import quote_plus
 
 import mock
 import pytest
+from pymongo.errors import ConnectionFailure
 from six import iteritems
 
 from datadog_checks.base import ConfigurationError
@@ -17,6 +18,7 @@ from datadog_checks.mongo.config import MongoConfig
 from datadog_checks.mongo.utils import parse_mongo_uri
 
 from . import common
+from .conftest import mock_pymongo
 
 try:
     from contextlib import nullcontext  # type: ignore
@@ -36,6 +38,125 @@ DEFAULT_METRICS_LEN = len(
         for m_name, m_type in iteritems(d)
     }
 )
+
+
+def test_get_library_versions():
+    assert MongoDb.get_library_versions() == {'pymongo': '4.2.0'}
+
+
+@mock.patch('pymongo.database.Database.command', side_effect=ConnectionFailure('Service not available'))
+def test_emits_critical_service_check_when_service_is_not_available(mock_command, dd_run_check, aggregator):
+    # Given
+    check = MongoDb('mongo', {}, [{'hosts': ['localhost']}])
+    # When
+    dd_run_check(check)
+    # Then
+    aggregator.assert_service_check('mongodb.can_connect', MongoDb.CRITICAL)
+
+
+@mock.patch('pymongo.database.Database.command', side_effect=[{'ok': 1}, {'parsed': {}}])
+@mock.patch('pymongo.mongo_client.MongoClient.server_info', return_value={'version': '5.0.0'})
+@mock.patch('pymongo.mongo_client.MongoClient.list_database_names', return_value=[])
+def test_emits_ok_service_check_when_service_is_available(
+    mock_list_database_names, mock_server_info, mock_command, dd_run_check, aggregator, datadog_agent
+):
+    # Given
+    check = MongoDb('mongo', {}, [{'hosts': ['localhost']}])
+    check.refresh_collectors = mock.MagicMock()
+    # When
+    dd_run_check(check)
+    # Then
+    aggregator.assert_service_check('mongodb.can_connect', MongoDb.OK)
+
+
+@mock.patch('pymongo.database.Database.command', side_effect=[{'ok': 1}, {'parsed': {}}])
+@mock.patch('pymongo.mongo_client.MongoClient.server_info', return_value={'version': '5.0.0'})
+@mock.patch('pymongo.mongo_client.MongoClient.list_database_names', return_value=[])
+def test_emits_ok_service_check_each_run_when_service_is_available(
+    mock_list_database_names, mock_server_info, mock_command, dd_run_check, aggregator, datadog_agent
+):
+    # Given
+    check = MongoDb('mongo', {}, [{'hosts': ['localhost']}])
+    check.refresh_collectors = mock.MagicMock()
+    # When
+    dd_run_check(check)
+    dd_run_check(check)
+    # Then
+    aggregator.assert_service_check('mongodb.can_connect', MongoDb.OK, count=2)
+
+
+@mock.patch('pymongo.database.Database.command', side_effect=[{'ok': 1}, {'parsed': {}}])
+@mock.patch('pymongo.mongo_client.MongoClient.server_info', return_value={'version': '5.0.0'})
+@mock.patch('pymongo.mongo_client.MongoClient.list_database_names', return_value=[])
+def test_version_metadata(
+    mock_list_database_names, mock_server_info, mock_command, dd_run_check, aggregator, datadog_agent
+):
+    # Given
+    check = MongoDb('mongo', {}, [{'hosts': ['localhost:27017']}])
+    check.check_id = 'test:123'
+    check.refresh_collectors = mock.MagicMock()
+    # When
+    dd_run_check(check)
+    # Then
+    datadog_agent.assert_metadata(
+        'test:123',
+        {
+            'version.scheme': 'semver',
+            'version.major': '5',
+            'version.minor': '0',
+            'version.patch': '0',
+            'version.raw': '5.0.0',
+        },
+    )
+
+
+@mock.patch(
+    'pymongo.database.Database.command',
+    side_effect=[{'ok': 1}, Exception('getCmdLineOpts exception'), {'msg': 'isdbgrid'}],
+)
+@mock.patch('pymongo.mongo_client.MongoClient.server_info', return_value={'version': '5.0.0'})
+@mock.patch('pymongo.mongo_client.MongoClient.list_database_names', return_value=[])
+def test_emits_ok_service_check_when_alibaba_mongos_deployment(
+    mock_list_database_names, mock_server_info, mock_command, dd_run_check, aggregator
+):
+    # Given
+    check = MongoDb('mongo', {}, [{'hosts': ['localhost']}])
+    check.refresh_collectors = mock.MagicMock()
+    # When
+    dd_run_check(check)
+    # Then
+    aggregator.assert_service_check('mongodb.can_connect', MongoDb.OK)
+    mock_command.assert_has_calls([mock.call('ping'), mock.call('getCmdLineOpts'), mock.call('isMaster')])
+    mock_server_info.assert_called_once()
+    mock_list_database_names.assert_called_once()
+
+
+@mock.patch(
+    'pymongo.database.Database.command',
+    side_effect=[
+        {'ok': 1},
+        Exception('getCmdLineOpts exception'),
+        {},
+        {'configsvr': True, 'set': 'replset', "myState": 1},
+    ],
+)
+@mock.patch('pymongo.mongo_client.MongoClient.server_info', return_value={'version': '5.0.0'})
+@mock.patch('pymongo.mongo_client.MongoClient.list_database_names', return_value=[])
+def test_emits_ok_service_check_when_alibaba_replicaset_role_configsvr_deployment(
+    mock_list_database_names, mock_server_info, mock_command, dd_run_check, aggregator
+):
+    # Given
+    check = MongoDb('mongo', {}, [{'hosts': ['localhost']}])
+    check.refresh_collectors = mock.MagicMock()
+    # When
+    dd_run_check(check)
+    # Then
+    aggregator.assert_service_check('mongodb.can_connect', MongoDb.OK)
+    mock_command.assert_has_calls(
+        [mock.call('ping'), mock.call('getCmdLineOpts'), mock.call('isMaster'), mock.call('replSetGetStatus')]
+    )
+    mock_server_info.assert_called_once()
+    mock_list_database_names.assert_called_once()
 
 
 @pytest.mark.parametrize(
@@ -400,3 +521,57 @@ def test_api_alibaba_mongod(aggregator):
         assert deployment_type.is_arbiter is False
         assert deployment_type.replset_state == 1
         assert deployment_type.replset_name == 'foo'
+
+
+def test_when_replica_check_flag_to_false_then_no_replset_metrics_reported(aggregator, check, instance, dd_run_check):
+    # Given
+    instance['replica_check'] = False
+    check = check(instance)
+    # When
+    with mock_pymongo("replica-primary-in-shard"):
+        dd_run_check(check)
+    # Then
+    aggregator.assert_metric('mongodb.replset.health', count=0)
+    aggregator.assert_metric('mongodb.replset.optime_lag', count=0)
+    aggregator.assert_metric('mongodb.replset.state', count=0)
+    aggregator.assert_metric('mongodb.replset.votefraction', count=0)
+    aggregator.assert_metric('mongodb.replset.votes', count=0)
+
+
+def test_when_collections_indexes_stats_to_true_then_index_stats_metrics_reported(
+    aggregator, check, instance, dd_run_check
+):
+    # Given
+    instance["collections_indexes_stats"] = True
+    instance["collections"] = ['bar', 'foo']
+    check = check(instance)
+    # When
+    with mock_pymongo("standalone"):
+        dd_run_check(check)
+    # Then
+    aggregator.assert_metric('mongodb.collection.indexes.accesses.ops', at_least=1)
+
+
+def test_when_version_lower_than_3_2_then_no_index_stats_metrics_reported(aggregator, check, instance, dd_run_check):
+    # Given
+    instance["collections_indexes_stats"] = True
+    instance["collections"] = ['bar', 'foo']
+    check = check(instance)
+    # When
+    with mock_pymongo("standalone") as mocked_api:
+        mocked_api.server_info = mock.MagicMock(return_value={'version': '3.0'})
+        dd_run_check(check)
+    # Then
+    aggregator.assert_metric('mongodb.collection.indexes.accesses.ops', count=0)
+
+
+def test_when_version_lower_than_3_6_then_no_session_metrics_reported(aggregator, check, instance, dd_run_check):
+    # Given
+    check = check(instance)
+    # When
+    mocked_client = mock.MagicMock()
+    mocked_client.server_info = mock.MagicMock(return_value={'version': '3.0'})
+    with mock.patch('datadog_checks.mongo.api.MongoClient', mock.MagicMock(return_value=mocked_client)):
+        dd_run_check(check)
+    # Then
+    aggregator.assert_metric('mongodb.sessions.count', count=0)
