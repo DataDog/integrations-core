@@ -7,7 +7,7 @@ import re
 from pymongo import MongoClient
 from pymongo.errors import ConnectionFailure
 
-from datadog_checks.base import AgentCheck
+from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.tdd.metrics import CASE_SENSITIVE_METRIC_NAME_SUFFIXES, METRICS
 
 
@@ -57,6 +57,55 @@ class TddCheck(AgentCheck):
                         '%s: %s [alias: %s, method: %s]', metric_name, value, metric_name_alias, submit_method
                     )
                     submit_method(self, metric_name_alias, value)
+                collstats_output = {'collection': self._mongo_client['admin'].command('collStats')}
+                self.log.debug('collstats_output: %s', collstats_output)
+                for metric_name in METRICS:
+                    value = collstats_output
+                    try:
+                        for c in metric_name.split("."):
+                            value = value[c]
+                    except KeyError:
+                        continue
+                    submit_method = (
+                        METRICS[metric_name][0] if isinstance(METRICS[metric_name], tuple) else METRICS[metric_name]
+                    )
+                    metric_name_alias = (
+                        METRICS[metric_name][1] if isinstance(METRICS[metric_name], tuple) else metric_name
+                    )
+                    metric_name_alias = self._normalize(metric_name_alias, submit_method, "")
+                    self.log.debug(
+                        '%s: %s [alias: %s, method: %s]', metric_name, value, metric_name_alias, submit_method
+                    )
+                    submit_method(self, metric_name_alias, value)
+                # Submit the indexSizes metrics manually
+                index_sizes = collstats_output['collection'].get('indexSizes', {})
+                metric_name_alias = self._normalize("collection.indexSizes", AgentCheck.gauge)
+                for name, value in index_sizes.items():
+                    self.log.debug('index %s: %s', name, value)
+                    self.gauge(metric_name_alias, value)
+                if is_affirmative(self.instance.get('collections_indexes_stats')):
+                    indexstats_output = {
+                        'collection': {'indexes': self._mongo_client['admin'].aggregate([{"$indexStats": {}}])}
+                    }
+                    self.log.debug('indexstats_output: %s', indexstats_output)
+                    for metric_name in METRICS:
+                        value = indexstats_output
+                        try:
+                            for c in metric_name.split("."):
+                                value = value[c]
+                        except KeyError:
+                            continue
+                        submit_method = (
+                            METRICS[metric_name][0] if isinstance(METRICS[metric_name], tuple) else METRICS[metric_name]
+                        )
+                        metric_name_alias = (
+                            METRICS[metric_name][1] if isinstance(METRICS[metric_name], tuple) else metric_name
+                        )
+                        metric_name_alias = self._normalize(metric_name_alias, submit_method, "")
+                        self.log.debug(
+                            '%s: %s [alias: %s, method: %s]', metric_name, value, metric_name_alias, submit_method
+                        )
+                        submit_method(self, metric_name_alias, value)
             else:
                 self.log.error('ping returned no valid value')
                 self.service_check("can_connect", AgentCheck.CRITICAL)

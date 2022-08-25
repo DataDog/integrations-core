@@ -93,11 +93,11 @@ def test_version_metadata(mock_server_info, mock_command, dd_run_check, datadog_
     ],
 )
 @mock.patch('pymongo.mongo_client.MongoClient.server_info', return_value={'version': '5.0.0'})
-def test_emits_server_status_without_tcmalloc_metrics_when_service_is_up(
+def test_emits_serverstatus_without_tcmalloc_metrics_when_service_is_up(
     mock_server_info, mock_command, dd_run_check, aggregator, instance
 ):
     # Given
-    expected_metrics = common.SERVER_STATUS_METRICS
+    expected_metrics = common.SERVERSTATUS_METRICS
     not_expected_metrics = common.TCMALLOC_METRICS
     check = TddCheck('tdd', {}, [instance])
     # When
@@ -156,11 +156,11 @@ def test_emits_server_status_without_tcmalloc_metrics_when_service_is_up(
     ],
 )
 @mock.patch('pymongo.mongo_client.MongoClient.server_info', return_value={'version': '5.0.0'})
-def test_emits_server_status_with_tcmalloc_metrics_when_service_is_up(
+def test_emits_serverstatus_with_tcmalloc_metrics_when_service_is_up(
     mock_server_info, mock_command, dd_run_check, aggregator, instance
 ):
     # Given
-    expected_metrics = common.SERVER_STATUS_METRICS.union(common.TCMALLOC_METRICS)
+    expected_metrics = common.SERVERSTATUS_METRICS.union(common.TCMALLOC_METRICS)
     instance['additional_metrics'] = ['tcmalloc']
     check = TddCheck('tdd', {}, [instance])
     # When
@@ -171,4 +171,80 @@ def test_emits_server_status_with_tcmalloc_metrics_when_service_is_up(
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
     mock_command.assert_has_calls([mock.call('ping'), mock.call('serverStatus', tcmalloc=1)])
+    mock_server_info.assert_called_once()
+
+
+@pytest.mark.unit
+@mock.patch(
+    'pymongo.database.Database.command',
+    side_effect=[
+        {'ok': 1},
+        {},
+        {
+            "capped": False,
+            "count": 210,
+            "size": 5670,
+            "avgObjSize": 27.0,
+            "indexSizes": {"_id_": 16384},
+            "storageSize": 16384,
+            "max": 10,
+            "maxSize": 10,
+            "nindexes": 1,
+        },
+    ],
+)
+@mock.patch('pymongo.mongo_client.MongoClient.server_info', return_value={'version': '5.0.0'})
+def test_emits_collstats_metrics_without_indexstats_when_service_is_up(
+    mock_server_info, mock_command, dd_run_check, aggregator, instance
+):
+    # Given
+    expected_metrics = common.COLLSTATS_METRICS
+    not_expected_metrics = common.INDEX_STATS
+    check = TddCheck('tdd', {}, [instance])
+    # When
+    dd_run_check(check)
+    # Then
+    for metric in expected_metrics:
+        aggregator.assert_metric(metric)
+    for metric in not_expected_metrics:
+        aggregator.assert_metric(metric, count=0)
+    aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+    mock_command.assert_has_calls([mock.call('ping'), mock.call('serverStatus', tcmalloc=0), mock.call('collStats')])
+    mock_server_info.assert_called_once()
+
+
+@pytest.mark.unit
+@mock.patch(
+    'pymongo.database.Database.command',
+    side_effect=[{'ok': 1}, {}, {}],
+)
+@mock.patch(
+    'pymongo.database.Database.aggregate',
+    side_effect=[
+        {
+            "name": "_id_",
+            "key": {"_id": 1},
+            "host": "07611b1ad97a:27018",
+            "accesses": {"ops": 1243, "since": {"$date": 1600262044923}},
+        },
+    ],
+)
+@mock.patch('pymongo.mongo_client.MongoClient.server_info', return_value={'version': '5.0.0'})
+def test_emits_collstats_metrics_with_indexstats_when_service_is_up(
+    mock_server_info, mock_aggregate, mock_command, dd_run_check, aggregator, instance
+):
+    # Given
+    instance['collections_indexes_stats'] = True
+    expected_metrics = common.INDEX_STATS
+    check = TddCheck('tdd', {}, [instance])
+    # When
+    dd_run_check(check)
+    # Then
+    for metric in expected_metrics:
+        aggregator.assert_metric(metric)
+    aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+    mock_command.assert_has_calls([mock.call('ping'), mock.call('serverStatus', tcmalloc=0), mock.call('collStats')])
+    mock_aggregate.assert_has_calls([mock.call([{'$indexStats': {}}])])
     mock_server_info.assert_called_once()

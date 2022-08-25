@@ -23,7 +23,7 @@ ROOT = os.path.dirname(os.path.dirname(HERE))
 
 INSTANCE_BASIC = {'hosts': ['{}:{}'.format(HOST, PORT)]}
 
-SERVER_STATUS_METRICS = {
+SERVERSTATUS_METRICS = {
     "tdd.uptime",
     "tdd.asserts.msgps",
     "tdd.asserts.regularps",
@@ -48,4 +48,20 @@ TCMALLOC_METRICS = {
     "tdd.tcmalloc.tcmalloc.thread_cache_free_bytes",
     "tdd.tcmalloc.tcmalloc.transfer_cache_free_bytes",
     "tdd.tcmalloc.tcmalloc.spinlock_total_delay_ns",
+}
+
+COLLSTATS_METRICS = {
+    "tdd.collection.size",
+    "tdd.collection.avgobjsize",
+    "tdd.collection.count",
+    "tdd.collection.capped",
+    "tdd.collection.max",
+    "tdd.collection.maxsize",
+    "tdd.collection.storagesize",
+    "tdd.collection.nindexes",
+    "tdd.collection.indexsizes",
+}
+
+INDEX_STATS = {
+    "tdd.collection.indexes.accesses.ops",
 }

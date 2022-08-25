@@ -22,6 +22,16 @@ METRICS = {
     "tcmalloc.tcmalloc.thread_cache_free_bytes": AgentCheck.gauge,
     "tcmalloc.tcmalloc.transfer_cache_free_bytes": AgentCheck.gauge,
     "tcmalloc.tcmalloc.spinlock_total_delay_ns": AgentCheck.gauge,
+    "collection.size": AgentCheck.gauge,
+    "collection.avgObjSize": AgentCheck.gauge,
+    "collection.count": AgentCheck.gauge,
+    "collection.capped": AgentCheck.gauge,
+    "collection.max": AgentCheck.gauge,
+    "collection.maxSize": AgentCheck.gauge,
+    "collection.storageSize": AgentCheck.gauge,
+    "collection.nindexes": AgentCheck.gauge,
+    "collection.indexsizes": AgentCheck.gauge,
+    "collection.indexes.accesses.ops": AgentCheck.gauge,
 }
 
 CASE_SENSITIVE_METRIC_NAME_SUFFIXES = {
