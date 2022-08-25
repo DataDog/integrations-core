@@ -65,7 +65,7 @@ def dd_environment(e2e_instance):
     up = e2e_utils.IoTEdgeUp(compose_file, network_name=common.E2E_NETWORK)
     down = e2e_utils.IoTEdgeDown(compose_file, stop_extra_containers=common.E2E_EXTRA_SPAWNED_CONTAINERS)
 
-    with docker_run(conditions=conditions, env_vars=env_vars, up=up, down=down):
+    with docker_run(conditions=conditions, env_vars=env_vars, up=up, down=down, sleep=10):
         yield e2e_instance, common.E2E_METADATA
 
 
