@@ -40,3 +40,5 @@ services:
       - REDIS_SERVERS=redis1:6379:1,redis2:6379:1
     depends_on:
       - etcd0
+    volumes:
+      - ${DD_LOG_1}:/var/log/twemproxy/stderr.log

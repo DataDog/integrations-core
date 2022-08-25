@@ -19,8 +19,13 @@ def setup_post_data():
 
 @pytest.fixture(scope="session")
 def dd_environment():
-    with docker_run(common.COMPOSE_FILE, conditions=[setup_post_data], build=True):
-        yield common.INSTANCE
+    with docker_run(common.COMPOSE_FILE, service_name="etcd0", conditions=[setup_post_data], mount_logs=True):
+        with docker_run(
+            common.COMPOSE_FILE,
+            log_patterns="listening on stats server",
+            build=True,
+        ):
+            yield common.INSTANCE
 
 
 @pytest.fixture
