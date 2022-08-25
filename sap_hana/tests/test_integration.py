@@ -10,7 +10,6 @@ from datadog_checks.sap_hana import SapHanaCheck
 from . import metrics
 from .common import CAN_CONNECT_SERVICE_CHECK, connection_flaked
 
-
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
 
 
@@ -86,6 +85,7 @@ def test_custom_queries(aggregator, dd_run_check, instance_custom_queries, custo
                 'port:{}'.format(instance_custom_queries['port']),
                 'db:{}'.format(_db),
                 'test:sap_hana',
-            ],)
+            ],
+        )
 
     aggregator.assert_all_metrics_covered()
