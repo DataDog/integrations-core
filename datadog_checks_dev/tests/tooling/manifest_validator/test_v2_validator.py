@@ -8,7 +8,6 @@ from pathlib import Path
 
 import mock
 import pytest
-from click.testing import CliRunner
 import tests.tooling.manifest_validator.input_constants as input_constants
 
 import datadog_checks.dev.tooling.manifest_validator.common.validator as common
