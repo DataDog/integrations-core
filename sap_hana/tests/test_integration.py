@@ -59,23 +59,6 @@ def test_check_invalid_schema(aggregator, instance, dd_run_check):
         assert "invalid schema name: UNKNOWN_SCHEMA" in call_args[0][2]
 
 
-def test_custom_queries(aggregator, instance_custom_queries, dd_run_check):
-    check = SapHanaCheck('sap_hana', {}, [instance_custom_queries])
-    dd_run_check(check)
-
-    for db in ('SYSTEMDB', 'HXE'):
-        aggregator.assert_metric(
-            'sap_hana.data_volume.total',
-            metric_type=0,
-            tags=[
-                'server:{}'.format(instance_custom_queries['server']),
-                'port:{}'.format(instance_custom_queries['port']),
-                'db:{}'.format(db),
-                'test:sap_hana',
-            ],
-        )
-
-
 @pytest.mark.parametrize(
     'custom_only',
     [
@@ -95,6 +78,14 @@ def test_only_custom_queries(aggregator, dd_run_check, instance_custom_queries, 
             aggregator.assert_metric(metric, at_least=1)
 
     for _db in ('SYSTEMDB', 'HXE'):
-        aggregator.assert_metric('sap_hana.data_volume.total', count=2)
+        aggregator.assert_metric(
+            'sap_hana.data_volume.total',
+            metric_type=0,
+            tags=[
+                'server:{}'.format(instance_custom_queries['server']),
+                'port:{}'.format(instance_custom_queries['port']),
+                'db:{}'.format(_db),
+                'test:sap_hana',
+            ],)
 
     aggregator.assert_all_metrics_covered()
