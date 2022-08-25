@@ -1,34 +1,46 @@
 {
-  "display_name": "My Check",
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "name": "my_check",
-  "metric_prefix": "my_check.",
-  "metric_to_check": "",
-  "creates_events": false,
-  "short_description": "",
-  "guid": "f84d2d4e-03c5-44d7-aa9e-53efc08346a7",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "public_title": "My Check",
-  "categories": [
-    ""
-  ],
-  "type": "check",
-  "is_public": false,
-  "integration_id": "my-check",
+  "manifest_version": "2.0.0",
+  "app_uuid": "f84d2d4e-03c5-44d7-aa9e-53efc08346a7",
+  "app_id": "my-check",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "",
+    "title": "My Check",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS"
+    ]
+  },
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
-    },
-    "dashboards": {},
-    "monitors": {},
-    "saved_views": {},
-    "logs": {},
-    "metrics_metadata": "metadata.csv"
-  }
+    "integration": {
+      "source_type_name": "My_Check",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "my_check.",
+        "check": "",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {}
 }
