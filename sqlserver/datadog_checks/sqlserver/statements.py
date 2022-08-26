@@ -18,7 +18,7 @@ from datadog_checks.base.utils.db.utils import (
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 
-from .utils import get_stmt_is_proc
+from datadog_checks.sqlserver.utils import is_statement_proc
 
 try:
     import datadog_agent
@@ -284,7 +284,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             try:
                 statement = obfuscate_sql_with_metadata(row['statement_text'], self.check.obfuscator_options)
                 procedure_statement = None
-                row['is_proc'] = get_stmt_is_proc(row['text'])
+                row['is_proc'] = is_statement_proc(row['text'])
                 if row['is_proc']:
                     procedure_statement = obfuscate_sql_with_metadata(row['text'], self.check.obfuscator_options)
             except Exception as e:

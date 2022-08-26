@@ -25,10 +25,16 @@ def construct_use_statement(database):
     return 'use [{}]'.format(database)
 
 
-def get_stmt_is_proc(text):
+def is_statement_proc(text):
     if text:
-        t = text.upper()
-        return ("CREATE" in t) and (("PROC" or "PROCEDURE") in t)
+        t = text.upper().split()
+        idx_create = t.index('CREATE') if 'CREATE' in t else -1
+        procedure = t.index('PROCEDURE') if 'PROCEDURE' in t else -1
+        proc = t.index('PROC') if 'PROC' in t else -1
+        idx_proc = procedure if procedure > 0 else proc
+
+        # ensure either PROC or PROCEDURE are found and CREATE occurs before PROCEDURE
+        return 0 <= idx_create < idx_proc and idx_proc >= 0
     return False
 
 

@@ -17,7 +17,7 @@ from dateutil import parser
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.activity import DM_EXEC_REQUESTS_COLS
-from datadog_checks.sqlserver.utils import get_stmt_is_proc
+from datadog_checks.sqlserver.utils import is_statement_proc
 
 from .common import CHECK_NAME
 from .conftest import DEFAULT_TIMEOUT
@@ -494,21 +494,25 @@ def test_get_estimated_row_size_bytes(dbm_instance, file):
             True,
         ],
         [
-            """\
-            CREATE TABLE bob_table
-            """,
+            "CREATE TABLE bob_table",
             False,
         ],
         [
-            """\
-            Exec procedure
-            """,
+            "Exec procedure",
+            False,
+        ],
+        [
+            "CREATEprocedure",
+            False,
+        ],
+        [
+            "procedure create",
             False,
         ],
     ],
 )
-def test_get_stmt_is_procedure(query, is_proc):
-    assert get_stmt_is_proc(query) == is_proc
+def test_is_statement_procedure(query, is_proc):
+    assert is_statement_proc(query) == is_proc
 
 
 def test_activity_collection_rate_limit(aggregator, dd_run_check, dbm_instance):
