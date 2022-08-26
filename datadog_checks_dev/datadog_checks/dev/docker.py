@@ -233,7 +233,16 @@ class ComposeFileUp(LazyFunction):
         if using_legacy_docker_compose():
             self.command = ['docker-compose', '-f', self.compose_file, 'up', '-d']
         else:
-            self.command = ['docker', 'compose', '--compatibility', '-f', self.compose_file, 'up', '-d']
+            self.command = [
+                'docker',
+                'compose',
+                '--compatibility',
+                '-f',
+                self.compose_file,
+                'up',
+                '-d',
+                '--remove-orphans',
+            ]
 
         if self.build:
             self.command.append('--build')
