@@ -17,7 +17,6 @@ from datadog_checks.base.utils.db.utils import (
 )
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
-
 from datadog_checks.sqlserver.utils import is_statement_proc
 
 try:
