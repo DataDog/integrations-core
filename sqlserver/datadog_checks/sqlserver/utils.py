@@ -27,7 +27,9 @@ def construct_use_statement(database):
 
 def is_statement_proc(text):
     if text:
-        t = text.upper().split()
+        # take first 500 chars, upper case and split into string
+        # to get individual keywords
+        t = text[0:500].upper().split()
         idx_create = _get_index_for_keyword(t, 'CREATE')
         idx_proc = _get_index_for_keyword(t, 'PROCEDURE')
         if idx_proc < 0:
