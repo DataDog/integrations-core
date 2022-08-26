@@ -28,14 +28,20 @@ def construct_use_statement(database):
 def is_statement_proc(text):
     if text:
         t = text.upper().split()
-        idx_create = t.index('CREATE') if 'CREATE' in t else -1
-        procedure = t.index('PROCEDURE') if 'PROCEDURE' in t else -1
-        proc = t.index('PROC') if 'PROC' in t else -1
-        idx_proc = procedure if procedure > 0 else proc
-
+        idx_create = _get_index_for_keyword(t, 'CREATE')
+        idx_proc = _get_index_for_keyword(t, 'PROCEDURE')
+        if idx_proc < 0:
+            idx_proc = _get_index_for_keyword(t, 'PROC')
         # ensure either PROC or PROCEDURE are found and CREATE occurs before PROCEDURE
         return 0 <= idx_create < idx_proc and idx_proc >= 0
     return False
+
+
+def _get_index_for_keyword(text, keyword):
+    try:
+        return text.index(keyword)
+    except ValueError:
+        return -1
 
 
 def parse_sqlserver_major_version(version):
