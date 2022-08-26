@@ -443,7 +443,8 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             plan_key = (row['query_signature'], row['query_hash'], row['query_plan_hash'])
             # for stored procedures, we only want to look up plans for the entire procedure
             # not every query that is executed within the proc. In order to accomplish this,
-            # we use the procedure_signature as the plan key
+            # we use the first 16 bytes of the plan handle, which is unique enough to differentiate
+            # between plans and saves us space (plan handles are ~64 bytes total)
             if row['is_proc'] or row['is_encrypted']:
                 plan_key = row['plan_handle'][0:16]
             if self._seen_plans_ratelimiter.acquire(plan_key):
