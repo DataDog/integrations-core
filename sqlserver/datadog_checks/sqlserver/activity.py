@@ -10,7 +10,7 @@ from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_e
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 
-from .utils import get_stmt_is_proc
+from .utils import is_statement_proc
 
 try:
     import datadog_agent
@@ -213,7 +213,7 @@ class SqlserverActivity(DBMAsyncJob):
             statement = obfuscate_sql_with_metadata(row['statement_text'], self.check.obfuscator_options)
             procedure_statement = None
             # sqlserver doesn't have a boolean data type so convert integer to boolean
-            row['is_proc'] = get_stmt_is_proc(row['text'])
+            row['is_proc'] = is_statement_proc(row['text'])
             if row['is_proc'] and 'text' in row:
                 procedure_statement = obfuscate_sql_with_metadata(row['text'], self.check.obfuscator_options)
             obfuscated_statement = statement['query']
