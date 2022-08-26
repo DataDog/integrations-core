@@ -1,4 +1,4 @@
-name: GitLab Runner
+name: Gitlab Runner
 files:
 - name: gitlab_runner.yaml
   options:

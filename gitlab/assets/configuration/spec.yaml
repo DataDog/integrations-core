@@ -1,4 +1,4 @@
-name: GitLab
+name: Gitlab
 files:
 - name: gitlab.yaml
   options:

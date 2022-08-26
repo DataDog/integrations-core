@@ -11,8 +11,8 @@ instances:
     # gitlab_url: <GITLAB_URL>
 
     ## @param api_token - string - optional
-    ## The Gitlab API token for this instance
-    ## used to collect the Gitlab version.
+    ## The GitLab API token for this instance
+    ## used to collect the GitLab version.
     #
     # api_token: <API_TOKEN>
 
