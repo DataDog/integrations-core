@@ -8,7 +8,6 @@ import pytest
 import requests
 import requests_unixsocket
 from flaky import flaky
-from requests.exceptions import ConnectTimeout
 from six import PY2, iteritems
 
 from datadog_checks.base import AgentCheck

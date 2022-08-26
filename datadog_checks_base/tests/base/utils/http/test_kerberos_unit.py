@@ -130,9 +130,7 @@ def test_config_kerberos_cache():
 
     assert os.environ.get('KRB5CCNAME') is None
 
-    with mock.patch(
-        'requests.get', side_effect=lambda *args, **kwargs: MockResponse(os.environ.get('KRB5CCNAME', ''))
-    ):
+    with mock.patch('requests.get', side_effect=lambda *args, **kwargs: MockResponse(os.environ.get('KRB5CCNAME', ''))):
         response = http.get('https://www.google.com')
         assert response.text == '/test/file'
 

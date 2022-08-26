@@ -7,9 +7,9 @@ import mock
 import pytest
 from six import iteritems
 
-
 from datadog_checks.base.utils.headers import headers as agent_headers
 from datadog_checks.base.utils.http import RequestsWrapper
+
 from .common import DEFAULT_OPTIONS
 
 pytestmark = [pytest.mark.unit]

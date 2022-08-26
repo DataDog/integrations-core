@@ -1,19 +1,7 @@
 # (C) Datadog, Inc. 2022-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import logging
-
-import mock
-import pytest
-import requests
-import requests_unixsocket
-from flaky import flaky
-from requests.exceptions import ConnectTimeout
-from six import PY2, iteritems
-
-from datadog_checks.base import AgentCheck
-from datadog_checks.base.utils.http import STANDARD_FIELDS, RequestsWrapper, is_uds_url, quote_uds_url
-from datadog_checks.dev.utils import ON_WINDOWS
+from datadog_checks.base.utils.http import STANDARD_FIELDS, RequestsWrapper
 
 
 class TestTimeout:

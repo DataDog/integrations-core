@@ -5,7 +5,6 @@
 import os
 from collections import OrderedDict
 
-
 DEFAULT_OPTIONS = {
     'auth': None,
     'cert': None,

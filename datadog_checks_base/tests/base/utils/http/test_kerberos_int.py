@@ -7,7 +7,6 @@ import pytest
 from datadog_checks.base.utils.http import RequestsWrapper
 from datadog_checks.dev.utils import ON_WINDOWS
 
-
 pytestmark = [pytest.mark.integration]
 
 

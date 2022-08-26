@@ -6,6 +6,7 @@ import mock
 import requests
 
 from datadog_checks.base.utils.http import RequestsWrapper
+
 from .common import DEFAULT_OPTIONS
 
 

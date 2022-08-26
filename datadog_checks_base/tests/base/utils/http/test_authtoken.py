@@ -14,6 +14,7 @@ from datadog_checks.base.utils.time import get_timestamp
 from datadog_checks.dev import TempDir
 from datadog_checks.dev.fs import read_file, write_file
 from datadog_checks.dev.http import MockResponse
+
 from .common import DEFAULT_OPTIONS, FIXTURE_PATH
 
 pytestmark = [pytest.mark.unit]
@@ -102,6 +103,7 @@ class TestAuthTokenHandlerCreation:
 
         with pytest.raises(ConfigurationError, match='^Unknown `auth_token` writer type, must be one of: header$'):
             RequestsWrapper(instance, init_config)
+
 
 class TestAuthTokenFileReaderCreation:
     def test_path_missing(self):
@@ -239,6 +241,7 @@ class TestAuthTokenDCOSReaderCreation:
         ):
             RequestsWrapper(instance, init_config)
 
+
 class TestAuthTokenHeaderWriterCreation:
     def test_name_missing(self):
         instance = {'auth_token': {'reader': {'type': 'file', 'path': '/foo'}, 'writer': {'type': 'header'}}}
@@ -308,6 +311,7 @@ class TestAuthTokenHeaderWriterCreation:
             match='^The `value` setting of `auth_token` writer does not contain the placeholder string `<TOKEN>`$',
         ):
             RequestsWrapper(instance, init_config)
+
 
 class TestAuthTokenReadFile:
     def test_pattern_no_match(self):

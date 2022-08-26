@@ -7,7 +7,10 @@ from requests.exceptions import ConnectTimeout, ProxyError
 from datadog_checks.base.utils.http import RequestsWrapper
 from datadog_checks.dev.ci import running_on_windows_ci
 
-pytestmark = [pytest.mark.integration, pytest.mark.skipif(running_on_windows_ci(), reason='Test cannot be run on Windows CI')]
+pytestmark = [
+    pytest.mark.integration,
+    pytest.mark.skipif(running_on_windows_ci(), reason='Test cannot be run on Windows CI'),
+]
 
 
 def test_socks5_proxy(socks5_proxy):

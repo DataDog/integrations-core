@@ -74,7 +74,7 @@ def test_config_basic_only_password():
 
 
 @pytest.mark.parametrize('username,password', [('user', ''), ('', 'pass'), ('', '')])
-def test_config_basic_allows_empty_strings( username, password):
+def test_config_basic_allows_empty_strings(username, password):
     instance = {'username': username, 'password': password}
     init_config = {}
     http = RequestsWrapper(instance, init_config)

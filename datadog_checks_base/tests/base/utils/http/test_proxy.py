@@ -8,7 +8,6 @@ from requests.exceptions import ConnectTimeout, ProxyError
 from datadog_checks.base.utils.http import RequestsWrapper
 from datadog_checks.dev import EnvVars
 
-
 pytestmark = [pytest.mark.unit]
 
 
