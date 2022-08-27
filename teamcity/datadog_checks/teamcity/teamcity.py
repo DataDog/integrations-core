@@ -2,26 +2,25 @@
 # (C) Paul Kirby <pkirby@matrix-solutions.com> 2014
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import time
+from copy import deepcopy
+from urllib.parse import urlparse
 
-import requests
 from six import PY2
 
-from datadog_checks.base import AgentCheck, ConfigurationError
+from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheckV2
 from datadog_checks.base.config import _is_affirmative
 
+from .config_models import ConfigMixin
+from .events import collect_events
+from .metrics import METRIC_MAP
 
-class TeamCityCheck(AgentCheck):
 
-    NEW_BUILD_URL = (
-        "{server}/guestAuth/app/rest/builds/?locator=buildType:{build_conf},sinceBuild:id:{since_build},status:SUCCESS"
-    )
-    LAST_BUILD_URL = "{server}/guestAuth/app/rest/builds/?locator=buildType:{build_conf},count:1"
+class TeamCityCheck(OpenMetricsBaseCheckV2, ConfigMixin):
+    __NAMESPACE__ = 'teamcity'
+    DEFAULT_METRIC_LIMIT = 0
 
-    NEW_BUILD_URL_AUTHENTICATED = (
-        "{server}/httpAuth/app/rest/builds/?locator=buildType:{build_conf},sinceBuild:id:{since_build},status:SUCCESS"
-    )
-    LAST_BUILD_URL_AUTHENTICATED = "{server}/httpAuth/app/rest/builds/?locator=buildType:{build_conf},count:1"
+    DEFAULT_METRICS_URL = "/{}/app/metrics"
+    EXPERIMENTAL_METRICS_URL = "/{}/app/metrics?experimental=true"
 
     HTTP_CONFIG_REMAPPER = {
         'ssl_validation': {'name': 'tls_verify'},
@@ -31,7 +30,7 @@ class TeamCityCheck(AgentCheck):
     def __new__(cls, name, init_config, instances):
         instance = instances[0]
 
-        if 'openmetrics_endpoint' in instance:
+        if _is_affirmative(instance['use_openmetrics']):
             if PY2:
                 raise ConfigurationError(
                     "This version of the integration is only available when using py3. "
@@ -39,127 +38,49 @@ class TeamCityCheck(AgentCheck):
                     "for more information or use the older style config."
                 )
             # TODO: when we drop Python 2 move this import up top
-            from .check import TeamCityCheckV2
 
-            return TeamCityCheckV2(name, init_config, instances)
-        else:
-            return super(TeamCityCheck, cls).__new__(cls)
+        return super(TeamCityCheck, cls).__new__(cls)
 
     def __init__(self, name, init_config, instances):
         super(TeamCityCheck, self).__init__(name, init_config, instances)
-        # Keep track of last build IDs per instance
+        # # Keep track of last build IDs per instance
         self.last_build_ids = {}
+        self.name = self.instance.get('name')
+        self.server = self.instance.get('server')
+        self.host = self.instance.get('host_affected') or self.hostname
+        self.build_config = self.instance.get('build_configuration')
+        self.is_deployment = _is_affirmative(self.instance.get("is_deployment", False))
+        self.basic_auth = self.instance.get('basic_http_authentication', False)
+        self.auth_type = 'httpAuth' if self.basic_auth else 'guestAuth'
+        self.metrics_endpoint = ''
+        self.collect_events = self.instance.get('collect_events', True)
+        self.use_openmetrics = self.instance.get('use_openmetrics', False)
 
-    def _initialize_if_required(self, instance_name, server, build_conf, basic_http_authentication):
-        # Already initialized
-        if instance_name in self.last_build_ids:
-            return
+        experimental_metrics = self.instance.get('experimental_metrics', True)
+        parsed_endpoint = urlparse(self.server)
 
-        self.log.debug("Initializing %s", instance_name)
+        self.base_url = "{}://{}".format(parsed_endpoint.scheme, parsed_endpoint.netloc)
 
-        if basic_http_authentication:
-            build_url = self.LAST_BUILD_URL_AUTHENTICATED.format(server=server, build_conf=build_conf)
+        if experimental_metrics:
+            self.metrics_endpoint = self.EXPERIMENTAL_METRICS_URL.format(self.auth_type)
         else:
-            build_url = self.LAST_BUILD_URL.format(server=server, build_conf=build_conf)
-        try:
-            resp = self.http.get(build_url)
-            resp.raise_for_status()
-
-            last_build_id = resp.json().get("build")[0].get("id")
-        except requests.exceptions.HTTPError:
-            if resp.status_code == 401:
-                self.log.error("Access denied. You must enable guest authentication")
-            self.log.error(
-                "Failed to retrieve last build ID with code %s for instance '%s'", resp.status_code, instance_name
-            )
-            raise
-        except Exception:
-            self.log.exception("Unhandled exception to get last build ID for instance '%s'", instance_name)
-            raise
-
-        self.log.debug("Last build id for instance %s is %s.", instance_name, last_build_id)
-        self.last_build_ids[instance_name] = last_build_id
-
-    def _build_and_send_event(self, new_build, instance_name, is_deployment, host, tags):
-        self.log.debug("Found new build with id %s, saving and alerting.", new_build["id"])
-        self.last_build_ids[instance_name] = new_build["id"]
-
-        event_dict = {"timestamp": int(time.time()), "source_type_name": "teamcity", "host": host, "tags": []}
-        if is_deployment:
-            event_dict["event_type"] = "teamcity_deployment"
-            event_dict["msg_title"] = "{} deployed to {}".format(instance_name, host)
-            event_dict["msg_text"] = "Build Number: {}\n\nMore Info: {}".format(
-                new_build["number"], new_build["webUrl"]
-            )
-            event_dict["tags"].append("deployment")
-        else:
-            event_dict["event_type"] = "build"
-            event_dict["msg_title"] = "Build for {} successful".format(instance_name)
-
-            event_dict["msg_text"] = "Build Number: {}\nDeployed To: {}\n\nMore Info: {}".format(
-                new_build["number"], host, new_build["webUrl"]
-            )
-            event_dict["tags"].append("build")
-
-        if tags:
-            event_dict["tags"].extend(tags)
-
-        self.event(event_dict)
-
-    def _normalize_server_url(self, server):
-        """
-        Check if the server URL starts with a HTTP or HTTPS scheme, fall back to http if not present
-        """
-        server = server if server.startswith(("http://", "https://")) else "http://{}".format(server)
-        return server
+            self.metrics_endpoint = self.DEFAULT_METRICS_URL.format(self.auth_type)
 
     def check(self, instance):
-        instance_name = instance.get("name")
-        if instance_name is None:
-            raise Exception("Each instance must have a unique name")
+        if self.collect_events:
+            collect_events(self, instance)
 
-        server = instance.get("server")
-        if server is None:
-            raise Exception("Each instance must have a server")
+        if self.use_openmetrics:
+            super().check(instance)
 
-        # Check the server URL for HTTP or HTTPS designation,
-        #   fall back to http:// if no scheme present (allows for backwards compatibility).
-        server = self._normalize_server_url(server)
+    def configure_scrapers(self):
+        config = deepcopy(self.instance)
+        config['openmetrics_endpoint'] = "{}{}".format(self.base_url, self.metrics_endpoint)
 
-        build_conf = instance.get("build_configuration")
-        if build_conf is None:
-            raise Exception("Each instance must have a build configuration")
+        self.scraper_configs.clear()
+        self.scraper_configs.append(config)
 
-        host = instance.get("host_affected") or self.hostname
-        tags = instance.get("tags")
-        is_deployment = _is_affirmative(instance.get("is_deployment", False))
-        basic_http_authentication = _is_affirmative(instance.get("basic_http_authentication", False))
+        super().configure_scrapers()
 
-        self._initialize_if_required(instance_name, server, build_conf, basic_http_authentication)
-
-        # Look for new successful builds
-        if basic_http_authentication:
-            new_build_url = self.NEW_BUILD_URL_AUTHENTICATED.format(
-                server=server, build_conf=build_conf, since_build=self.last_build_ids[instance_name]
-            )
-        else:
-            new_build_url = self.NEW_BUILD_URL.format(
-                server=server, build_conf=build_conf, since_build=self.last_build_ids[instance_name]
-            )
-
-        try:
-            resp = self.http.get(new_build_url)
-            resp.raise_for_status()
-
-            new_builds = resp.json()
-
-            if new_builds["count"] == 0:
-                self.log.debug("No new builds found.")
-            else:
-                self._build_and_send_event(new_builds["build"][0], instance_name, is_deployment, host, tags)
-        except requests.exceptions.HTTPError:
-            self.log.exception("Couldn't fetch last build, got code %s", resp.status_code)
-            raise
-        except Exception:
-            self.log.exception("Couldn't fetch last build, unhandled exception")
-            raise
+    def get_default_config(self):
+        return {'metrics': [METRIC_MAP]}

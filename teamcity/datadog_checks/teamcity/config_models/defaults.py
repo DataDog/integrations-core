@@ -42,10 +42,6 @@ def instance_basic_http_authentication(field, value):
     return False
 
 
-def instance_bearer_token(field, value):
-    return get_default_field_value(field, value)
-
-
 def instance_build_configuration(field, value):
     return get_default_field_value(field, value)
 
@@ -60,6 +56,10 @@ def instance_cache_shared_labels(field, value):
 
 def instance_collect_counters_with_distributions(field, value):
     return False
+
+
+def instance_collect_events(field, value):
+    return True
 
 
 def instance_collect_histogram_buckets(field, value):
@@ -92,6 +92,10 @@ def instance_exclude_metrics(field, value):
 
 def instance_exclude_metrics_by_labels(field, value):
     return get_default_field_value(field, value)
+
+
+def instance_experimental_metrics(field, value):
+    return True
 
 
 def instance_extra_headers(field, value):
@@ -195,7 +199,7 @@ def instance_ntlm_domain(field, value):
 
 
 def instance_openmetrics_endpoint(field, value):
-    return 'http://localhost:8111/app/metrics'
+    return get_default_field_value(field, value)
 
 
 def instance_password(field, value):
@@ -296,6 +300,10 @@ def instance_use_latest_spec(field, value):
 
 def instance_use_legacy_auth_encoding(field, value):
     return True
+
+
+def instance_use_openmetrics(field, value):
+    return False
 
 
 def instance_use_process_start_time(field, value):

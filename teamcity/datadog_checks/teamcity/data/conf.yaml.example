@@ -13,22 +13,7 @@ init_config:
 #
 instances:
 
-    ## @param openmetrics_endpoint - string - optional - default: http://localhost:8111/app/metrics
-    ## The URL exposing metrics in the OpenMetrics format.
-    #
-  - openmetrics_endpoint: http://localhost:8111/app/metrics
-
-    ## @param bearer_token - string - optional
-    ## Bearer token for HTTP Token Authentication to the TeamCity Server's REST API.
-    #
-    # bearer_token: <BEARER_TOKEN>
-
-    ## @param name - string - optional
-    ## A custom unique name per build configuration that is shown
-    ## in the events.
-    #
-    # name: <BUILD_NAME>
-
+  -
     ## @param server - string - optional - default: http://teamcity.<ACCOUNT_NAME>.com
     ## Specify the server name of your teamcity instance
     ## Guest authentication must be on if you want the check to be able to get data
@@ -37,6 +22,27 @@ instances:
     ##  server: http://<USER>:<PASSWORD>@teamcity.<ACCOUNT_NAME>.com
     #
     # server: http://teamcity.<ACCOUNT_NAME>.com
+
+    ## @param use_openmetrics - boolean - optional - default: false
+    ## Set to true to enable OpenMetric collection from the TeamCity server's metrics endpoint.
+    #
+    # use_openmetrics: false
+
+    ## @param experimental_metrics - boolean - optional - default: true
+    ## Set to true to enable collection of experimental metrics.
+    #
+    # experimental_metrics: true
+
+    ## @param collect_events - boolean - optional - default: true
+    ## Set to true to enable collection of TeamCity build and deployment success and failure events
+    #
+    # collect_events: true
+
+    ## @param name - string - optional
+    ## A custom unique name per build configuration that is shown
+    ## in the events.
+    #
+    # name: <BUILD_NAME>
 
     ## @param build_configuration - string - optional
     ## This is the internal build ID of the build configuration you wish to track.
