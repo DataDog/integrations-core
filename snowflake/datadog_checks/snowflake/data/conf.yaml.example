@@ -254,7 +254,7 @@ instances:
     ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
     ##
     ## NOTE: Most Snowflake ACCOUNT_USAGE views are populated on an hourly basis,
-    ## so to minimize unnecessary queries the `min_collection_interval` defaults to 1 hour.
+    ## so to minimize unnecessary queries, set the `min_collection_interval` to 1 hour.
     ##
     ## Most metrics are aggregated by day, you can increase the interval to reduce the number of queries.
     #
