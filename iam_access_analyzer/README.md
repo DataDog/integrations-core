@@ -8,7 +8,7 @@ Use AWS Identity and Access Management (IAM) Access Analyzer across your Amazon 
 
 ### Log collection
 
-1. If you haven't already, set up the [Datadog log collection AWS Lambda function][1].
+1. If you haven't already, set up the [Datadog Forwarder][1] Lambda function.
 
 2. Create a new rule in AWS EventBridge.
 
@@ -48,6 +48,6 @@ This integration does not send events
 
 Need help? Contact [Datadog support][3].
 
-[1]: /integrations/amazon_web_services/?tab=allpermissions#set-up-the-datadog-lambda-function
+[1]: /logs/guide/forwarder/
 [2]: https://app.datadoghq.com/logs
 [3]: https://docs.datadoghq.com/help
