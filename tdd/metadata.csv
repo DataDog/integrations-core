@@ -30,3 +30,4 @@ tdd.collection.storagesize,gauge,,byte,,Total storage space allocated to this co
 tdd.collection.nindexes,gauge,,index,,Total number of indices on the collection.,0,tdd,number of indices on collection,
 tdd.collection.indexsizes,gauge,,byte,,Size of index in bytes.,0,tdd,index size,
 tdd.collection.indexes.accesses.ops,gauge,,event,,Number of time the index was used.,0,tdd,index usage,
+tdd.usage.commands.countps,gauge,,command,second,Number of commands per second,0,tdd,,

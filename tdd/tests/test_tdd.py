@@ -274,3 +274,32 @@ def test_not_emits_indexstats_metrics_when_service_is_up_but_version_lower_than_
         [mock.call('ping'), mock.call('serverStatus', tcmalloc=0), mock.call('collStats', mock.ANY)]
     )
     mock_server_info.assert_called_once()
+
+
+@pytest.mark.unit
+@mock.patch(
+    'pymongo.database.Database.command',
+    side_effect=[
+        {'ok': 1},
+        {},
+        {},
+        {"totals": {"fake": {}, "admin.$cmd.aggregate": {"commands": {"time": 139460, "count": 328}}}},
+    ],
+)
+@mock.patch('pymongo.mongo_client.MongoClient.server_info', return_value={'version': '5.0.0'})
+def test_emits_top_metrics_when_service_is_up(mock_server_info, mock_command, dd_run_check, aggregator, instance):
+    # Given
+    expected_metrics = common.TOP_STATS
+    instance['additional_metrics'] = ['top']
+    check = TddCheck('tdd', {}, [instance])
+    # When
+    dd_run_check(check)
+    # Then
+    for metric in expected_metrics:
+        aggregator.assert_metric(metric)
+    aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+    mock_command.assert_has_calls(
+        [mock.call('ping'), mock.call('serverStatus', tcmalloc=0), mock.call('collStats', mock.ANY)]
+    )
+    mock_server_info.assert_called_once()

@@ -32,6 +32,7 @@ METRICS = {
     "collection.nindexes": AgentCheck.gauge,
     "collection.indexsizes": AgentCheck.gauge,
     "collection.indexes.accesses.ops": AgentCheck.gauge,
+    "commands.count": AgentCheck.rate,
 }
 
 CASE_SENSITIVE_METRIC_NAME_SUFFIXES = {

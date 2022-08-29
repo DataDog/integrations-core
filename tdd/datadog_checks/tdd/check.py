@@ -56,7 +56,8 @@ class TddCheck(AgentCheck):
     def _report_metrics(self):
         self._report_server_status_metrics()
         self._report_coll_stats_metrics()
-        self._report_collections_indexes_stats()
+        self._report_collections_indexes_stats_metrics()
+        self._report_top_metrics()
 
     def _report_server_status_metrics(self):
         tcmalloc = 'tcmalloc' in self.instance.get('additional_metrics', [])
@@ -75,7 +76,7 @@ class TddCheck(AgentCheck):
             self.log.debug('index %s: %s', name, value)
             self.gauge(metric_name_alias, value)
 
-    def _report_collections_indexes_stats(self):
+    def _report_collections_indexes_stats_metrics(self):
         if is_affirmative(self.instance.get('collections_indexes_stats')):
             if LooseVersion(self._mongo_version) >= LooseVersion("3.2"):
                 indexstats_output = {
@@ -89,7 +90,17 @@ class TddCheck(AgentCheck):
                     self._mongo_version,
                 )
 
-    def _report_json(self, json):
+    def _report_top_metrics(self):
+        if 'top' in self.instance.get('additional_metrics', []):
+            top_output = {'usage': self._mongo_client['admin'].command('top')}
+            self.log.debug('top_output: %s', top_output)
+            for ns, ns_metrics in top_output['usage']['totals'].items():
+                if "." not in ns:
+                    continue
+                self.log.debug('ns: %s, ns_metrics: %s', ns, ns_metrics)
+                self._report_json(ns_metrics, 'usage.')
+
+    def _report_json(self, json, prefix=None):
         for metric_name in METRICS:
             value = json
             try:
@@ -99,7 +110,7 @@ class TddCheck(AgentCheck):
                 continue
             submit_method = METRICS[metric_name][0] if isinstance(METRICS[metric_name], tuple) else METRICS[metric_name]
             metric_name_alias = METRICS[metric_name][1] if isinstance(METRICS[metric_name], tuple) else metric_name
-            metric_name_alias = self._normalize(metric_name_alias, submit_method, "")
+            metric_name_alias = self._normalize(metric_name_alias, submit_method, prefix)
             self.log.debug('%s: %s [alias: %s, method: %s]', metric_name, value, metric_name_alias, submit_method)
             submit_method(self, metric_name_alias, value)
 

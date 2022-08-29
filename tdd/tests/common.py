@@ -65,3 +65,7 @@ COLLSTATS_METRICS = {
 INDEX_STATS = {
     "tdd.collection.indexes.accesses.ops",
 }
+
+TOP_STATS = {
+    "tdd.usage.commands.countps",
+}
