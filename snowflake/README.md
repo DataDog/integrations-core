@@ -100,7 +100,7 @@ datadog-agent integration install datadog-snowflake==2.0.1
         ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
         ##
         ## NOTE: Most Snowflake ACCOUNT_USAGE views are populated on an hourly basis,
-        ## so to minimize unnecessary queries the `min_collection_interval` defaults to 1 hour.
+        ## so to minimize unnecessary queries, set the `min_collection_interval` to 1 hour.
         #
         min_collection_interval: 3600
    
