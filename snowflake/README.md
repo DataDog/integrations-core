@@ -95,7 +95,7 @@ datadog-agent integration install datadog-snowflake==2.0.1
         #
         role: <ROLE>
    
-        ## @param min_collection_interval - number - optional - default: 3600
+        ## @param min_collection_interval - number - optional - default: 15
         ## This changes the collection interval of the check. For more information, see:
         ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
         ##
