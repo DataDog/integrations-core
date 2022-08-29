@@ -210,8 +210,9 @@ files:
             so to minimize unnecessary queries, set the `min_collection_interval` to 1 hour.
 
             Most metrics are aggregated by day, you can increase the interval to reduce the number of queries.
-          min_collection_interval.display_default: 15
+          min_collection_interval.value.display_default: 15
+          min_collection_interval.value.default: 3600
           min_collection_interval.value.example: 3600
-          min_collection_interval.enabled: 3600
+          min_collection_interval.enabled: true
           disable_generic_tags.hidden: False
           disable_generic_tags.enabled: True
