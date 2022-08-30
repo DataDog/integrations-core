@@ -15,7 +15,8 @@
       "Supported OS::Linux",
       "Supported OS::Windows",
       "Supported OS::macOS",
-      "Category::Configuration & Deployment"
+      "Category::Configuration & Deployment",
+      "Category::Log Collection"
     ]
   },
   "author": {
