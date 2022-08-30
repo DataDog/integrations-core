@@ -1,9 +1,10 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import time
+
 import mock
 import pytest
-import time
 from mock.mock import ANY, call
 
 from datadog_checks.sap_hana import SapHanaCheck
