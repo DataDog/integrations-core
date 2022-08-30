@@ -9,11 +9,6 @@ from contextlib import contextmanager, suppress
 import pywintypes
 import win32pdh
 
-try:
-    import datadog_agent
-except ImportError:
-    datadog_agent = None
-
 from ....config import is_affirmative
 from ....errors import ConfigTypeError, ConfigurationError
 from ....utils.functions import raise_exception
@@ -30,9 +25,7 @@ class PerfCountersBaseCheck(AgentCheck):
     def __init__(self, name, init_config, instances):
         super().__init__(name, init_config, instances)
 
-        self.interval = 60
-        if datadog_agent and datadog_agent.get_config('windows_counter_refresh_interval'):
-            self.interval = datadog_agent.get_config('windows_counter_refresh_interval')
+        self.interval = self.OBJECT_REFRESHER.interval
 
         self.enable_health_service_check = is_affirmative(self.instance.get('enable_health_service_check', True))
 
@@ -135,7 +128,6 @@ class PerfCountersBaseCheck(AgentCheck):
 
     def setup_refresher(self):
         self.OBJECT_REFRESHER.add_server(self._connection.server)
-        self.OBJECT_REFRESHER.add_interval(self.interval)
 
         # Expected for multiple calls
         with suppress(RuntimeError):
