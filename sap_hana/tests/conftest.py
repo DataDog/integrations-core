@@ -5,6 +5,7 @@ from contextlib import closing
 from copy import deepcopy
 
 import pytest
+from common import TIMEOUT
 from hdbcli.dbapi import Connection as HanaConnection
 
 from datadog_checks.dev import WaitFor, docker_run
@@ -89,7 +90,6 @@ def dd_environment(schema="SYS_DATABASES"):
             CheckDockerLogs(COMPOSE_FILE, ['Startup finished!'], wait=5, attempts=120),
             WaitFor(db.connect),
             db.initialize,
-            #CheckDockerLogs()
         ],
         env_vars={'PASSWORD': ADMIN_CONFIG['password']},
     ):
@@ -109,7 +109,7 @@ def instance_custom_queries():
             'tags': ['test:sap_hana'],
             'query': 'SELECT DATABASE_NAME, COUNT(*) FROM SYS_DATABASES.M_DATA_VOLUMES GROUP BY DATABASE_NAME',
             'columns': [{'name': 'db', 'type': 'tag'}, {'name': 'data_volume.total', 'type': 'gauge'}],
-            'timeout': 20,
+            'timeout': TIMEOUT,
         }
     ]
     return instance

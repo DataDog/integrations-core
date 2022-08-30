@@ -8,6 +8,8 @@ import pytest
 
 from datadog_checks.sap_hana import SapHanaCheck
 
+from .common import TIMEOUT
+
 pytestmark = pytest.mark.unit
 
 
@@ -248,8 +250,8 @@ class TestConnectionProperties:
                 port=instance['port'],
                 user=instance['username'],
                 password=instance['password'],
-                communicationTimeout=20000,
-                nodeConnectTimeout=20000,
+                communicationTimeout=TIMEOUT * 1000,
+                nodeConnectTimeout=TIMEOUT * 1000,
                 encrypt=True,
                 sslHostNameInCertificate=instance['server'],
                 sslSNIHostname=instance['server'],
