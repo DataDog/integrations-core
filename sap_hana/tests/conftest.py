@@ -86,7 +86,7 @@ def dd_environment(schema="SYS_DATABASES"):
     with docker_run(
         COMPOSE_FILE,
         conditions=[
-            CheckDockerLogs(COMPOSE_FILE, ['Startup finished!datadog_checks_base/tests/base/utils/test_http.py'], wait=5, attempts=120),
+            CheckDockerLogs(COMPOSE_FILE, ['Startup finished!'], wait=5, attempts=120),
             WaitFor(db.connect),
             db.initialize,
         ],
