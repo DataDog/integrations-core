@@ -5,7 +5,6 @@ from contextlib import closing
 from copy import deepcopy
 
 import pytest
-from common import TIMEOUT
 from hdbcli.dbapi import Connection as HanaConnection
 
 from datadog_checks.dev import WaitFor, docker_run
@@ -24,7 +23,7 @@ from datadog_checks.sap_hana.queries import (
     SystemDatabases,
 )
 
-from .common import ADMIN_CONFIG, COMPOSE_FILE, CONFIG, E2E_METADATA
+from .common import ADMIN_CONFIG, COMPOSE_FILE, CONFIG, E2E_METADATA, TIMEOUT
 
 
 class DbManager(object):
