@@ -41,9 +41,9 @@ In addition, Windows, Container-Optimized OS, and CentOS/RHEL versions earlier t
 
 ### Configuration with Docker
 
-Mount `system-probe.yaml` and `oom_kill.d/conf.yaml` as described above. Additionally,
+In addition to mounting `system-probe.yaml` and `oom_kill.d/conf.yaml` as described above, do the following configuration:
 
-1. Mount these volumes to the agent container.
+1. Mount the following volumes to the Agent container:
 
     ```
     -v /sys/kernel/debug:/sys/kernel/debug 
@@ -51,15 +51,15 @@ Mount `system-probe.yaml` and `oom_kill.d/conf.yaml` as described above. Additio
     -v /usr/src:/usr/src
     ```
 
-2. Add permission to enable BPF operations
+2. Add the following permission to enable BPF operations:
 
     ```
     --privilege
     ```
     
-    In kernel version 5.8+, `CAP_BPF` can work with `--cap-add` feature.
+    In kernel version 5.8 and greater, `CAP_BPF` works with the `--cap-add` feature.
 
-**Note**: `privilege` mode is not yet supported in Docker swarm.
+**Note**: `privilege` mode is not supported in Docker swarm.
 
 
 ### Configuration with Helm
