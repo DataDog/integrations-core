@@ -191,6 +191,7 @@ def test_custom_query_configuration(instance):
 
 class TestConnectionProperties:
     def test_default(self, instance):
+        del instance['timeout']  # to check default value
         check = SapHanaCheck('sap_hana', {}, [instance])
 
         with mock.patch('datadog_checks.sap_hana.sap_hana.HanaConnection') as m:
@@ -247,8 +248,8 @@ class TestConnectionProperties:
                 port=instance['port'],
                 user=instance['username'],
                 password=instance['password'],
-                communicationTimeout=10000,
-                nodeConnectTimeout=10000,
+                communicationTimeout=15000,
+                nodeConnectTimeout=15000,
                 encrypt=True,
                 sslHostNameInCertificate=instance['server'],
                 sslSNIHostname=instance['server'],
