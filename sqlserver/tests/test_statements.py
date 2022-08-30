@@ -361,7 +361,8 @@ def test_statement_metrics_and_plans(
             assert row['query_signature'], "missing query signature"
         assert 'statement_text' not in row, "statement_text field should not be forwarded"
         assert row['is_encrypted'] == is_encrypted
-        assert row['is_proc'] == is_proc
+        if not is_encrypted:
+            assert row['is_proc'] == is_proc
         if is_proc and not is_encrypted:
             assert row['procedure_signature'], "missing proc signature"
         if disable_secondary_tags:
@@ -371,9 +372,10 @@ def test_statement_metrics_and_plans(
         for column in available_query_metrics_columns:
             assert column in row, "missing required metrics column {}".format(column)
             assert type(row[column]) in (float, int), "wrong type for metrics column {}".format(column)
+    # all the plan handles / proc sigs should be the same for the same procedure execution
     if is_proc:
-        # all the plan handles / proc sigs should be the same for the same procedure execution
         assert all(row['plan_handle'] == matching_rows[0]['plan_handle'] for row in matching_rows)
+    if is_proc and not is_encrypted:
         assert all(row['procedure_signature'] == matching_rows[0]['procedure_signature'] for row in matching_rows)
 
     dbm_samples = aggregator.get_event_platform_events("dbm-samples")

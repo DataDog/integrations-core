@@ -17,6 +17,7 @@ from dateutil import parser
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.activity import DM_EXEC_REQUESTS_COLS
+from datadog_checks.sqlserver.utils import is_statement_proc
 
 from .common import CHECK_NAME
 from .conftest import DEFAULT_TIMEOUT
@@ -429,6 +430,89 @@ def test_get_estimated_row_size_bytes(dbm_instance, file):
         computed_size += check.activity._get_estimated_row_size_bytes(a)
 
     assert abs((actual_size - computed_size) / float(actual_size)) <= 0.10
+
+
+@pytest.mark.parametrize(
+    "query,is_proc",
+    [
+        [
+            """\
+            CREATE PROCEDURE bobProcedure
+            BEGIN
+                SELECT name FROM bob
+            END;
+            """,
+            True,
+        ],
+        [
+            """\
+            CREATE PROC bobProcedure
+            BEGIN
+                SELECT name FROM bob
+            END;
+            """,
+            True,
+        ],
+        [
+            """\
+            create procedure bobProcedureLowercase
+            begin
+                select name from bob
+            end;
+            """,
+            True,
+        ],
+        [
+            """\
+            /* my sql is very fun */
+            CREATE PROCEDURE bobProcedure
+            BEGIN
+                SELECT name FROM bob
+            END;
+            """,
+            True,
+        ],
+        [
+            """\
+            CREATE /* this is fun! */ PROC bobProcedure
+            BEGIN
+                SELECT name FROM bob
+            END;
+            """,
+            True,
+        ],
+        [
+            """\
+            -- this is a comment!
+            CREATE
+            -- additional comment here!
+            PROCEDURE bobProcedure
+            BEGIN
+                SELECT name FROM bob
+            END;
+            """,
+            True,
+        ],
+        [
+            "CREATE TABLE bob_table",
+            False,
+        ],
+        [
+            "Exec procedure",
+            False,
+        ],
+        [
+            "CREATEprocedure",
+            False,
+        ],
+        [
+            "procedure create",
+            False,
+        ],
+    ],
+)
+def test_is_statement_procedure(query, is_proc):
+    assert is_statement_proc(query) == is_proc
 
 
 def test_activity_collection_rate_limit(aggregator, dd_run_check, dbm_instance):
