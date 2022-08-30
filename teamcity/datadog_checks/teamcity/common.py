@@ -26,7 +26,7 @@ BUILD_EVENT = {
     "timestamp": int(time.time()),
     "event_type": "build",
     "msg_title": "Build for {instance_name} successful",
-    "msg_text": "Build Number: {build_number}\nDeployed To: {}\n\nMore Info: {build_webUrl}",
+    "msg_text": "Build Number: {build_number}\nDeployed To: {host}\n\nMore Info: {build_webUrl}",
     "source_type_name": "teamcity",
     "host": None,
     "tags": ['build'],
@@ -44,7 +44,7 @@ def construct_event(is_deployment, instance_name, host, new_build, event_tags):
     else:
         teamcity_event = BUILD_EVENT
         teamcity_event['msg_title'] = teamcity_event['msg_title'].format(instance_name=instance_name)
-        teamcity_event['msg_text'] = teamcity_event['msg_text'].format(new_build["number"], host, new_build["webUrl"])
+        teamcity_event['msg_text'] = teamcity_event['msg_text'].format(build_number=new_build['number'], host=host, build_webUrl=new_build["webUrl"])
         teamcity_event['host'] = host
 
     if event_tags:

@@ -21,12 +21,12 @@ class TeamCityEvents(object):
         self.auth_type = auth_type
         self.log = get_check_logger()
 
-    def _build_and_send_event(self, new_build, event_tags):
+    def _build_and_send_event(self, check, new_build, event_tags):
         self.log.debug("Found new build with id %s, saving and alerting.", new_build["id"])
         self._last_build_ids[self.instance_name] = new_build["id"]
 
         teamcity_event = construct_event(self.is_deployment, self.instance_name, self.host, new_build, event_tags)
-        self.event(teamcity_event)
+        check.event(teamcity_event)
 
     def _construct_event_urls(self):
         event_urls = []
@@ -57,7 +57,7 @@ class TeamCityEvents(object):
                 if new_builds["count"] == 0:
                     self.log.debug("No new builds found.")
                 else:
-                    self._build_and_send_event(new_builds["build"][0], self.event_tags)
+                    self._build_and_send_event(check, new_builds["build"][0], self.event_tags)
             except requests.exceptions.HTTPError:
                 self.log.exception("Couldn't fetch last build, got code %s", resp.status_code)
                 raise
