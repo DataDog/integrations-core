@@ -44,10 +44,10 @@ def test_check_invalid_schema(aggregator, instance, dd_run_check):
         any_order=False,
     )
 
-    assert check.log.error.call_count == 9
-
     for call_args in check.log.error.call_args_list:
         assert "invalid schema name: UNKNOWN_SCHEMA" in call_args[0][2]
+
+    assert check.log.error.call_count == 9
 
 
 def _run_until_stable(dd_run_check, check, aggregator):
