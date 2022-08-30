@@ -23,6 +23,7 @@ def dd_environment():
         with docker_run(
             common.COMPOSE_FILE,
             log_patterns="listening on stats server",
+            attempts=2
         ):
             yield common.INSTANCE
 
