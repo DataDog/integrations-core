@@ -24,7 +24,9 @@ CONFIG = {
             'tags': ['one:tag', 'one:test'],
         },
         {
-            'openmetrics_endpoint': 'http://localhost:8111/app/metrics',
+            'server': 'http://localhost:8111',
+            'use_openmetrics': True,
+            'basic_http_authentication': False,
         },
     ]
 }

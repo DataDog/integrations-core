@@ -1,124 +1,66 @@
 # (C) Datadog, Inc. 2022-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import time
-
 import requests
 
 from datadog_checks.base import is_affirmative
+from datadog_checks.base.log import get_check_logger
 
-NEW_BUILD_URL_SUCCESS = (
-    "{server}/guestAuth/app/rest/builds/?locator=buildType:{build_conf},sinceBuild:id:{since_build},status:SUCCESS"
-)
-LAST_BUILD_URL = "{server}/guestAuth/app/rest/builds/?locator=buildType:{build_conf},count:1"
-
-NEW_BUILD_URL_AUTHENTICATED_SUCCESS = (
-    "{server}/httpAuth/app/rest/builds/?locator=buildType:{build_conf},sinceBuild:id:{since_build},status:SUCCESS"
-)
-LAST_BUILD_URL_AUTHENTICATED = "{server}/httpAuth/app/rest/builds/?locator=buildType:{build_conf},count:1"
+from .common import EVENT_STATUSES, LAST_BUILD_URL, NEW_BUILD_URL, construct_event
 
 
-def _initialize_if_required(self, instance_name, server, build_conf, basic_http_authentication):
-    # Already initialized
-    if instance_name in self.last_build_ids:
-        return
+class TeamCityEvents(object):
+    def __init__(self, instance, server_url, hostname, auth_type):
+        self._last_build_ids = {}
+        self.instance_name = instance.get('name')
+        self.server_url = server_url
+        self.host = hostname
+        self.build_config = instance.get('build_configuration')
+        self.event_tags = instance.get('tags')
+        self.is_deployment = is_affirmative(instance.get("is_deployment", False))
+        self.auth_type = auth_type
+        self.log = get_check_logger()
 
-    self.log.debug("Initializing %s", instance_name)
+    def _build_and_send_event(self, new_build, event_tags):
+        self.log.debug("Found new build with id %s, saving and alerting.", new_build["id"])
+        self._last_build_ids[self.instance_name] = new_build["id"]
 
-    if basic_http_authentication:
-        build_url = LAST_BUILD_URL_AUTHENTICATED.format(server=server, build_conf=build_conf)
-    else:
-        build_url = LAST_BUILD_URL.format(server=server, build_conf=build_conf)
-    try:
-        resp = self.http.get(build_url)
-        resp.raise_for_status()
+        teamcity_event = construct_event(self.is_deployment, self.instance_name, self.host, new_build, event_tags)
+        self.event(teamcity_event)
 
-        self.last_build_id = resp.json().get("build")[0].get("id")
-    except requests.exceptions.HTTPError:
-        if resp.status_code == 401:
-            self.log.error("Access denied. You must enable guest authentication")
-        self.log.error(
-            "Failed to retrieve last build ID with code %s for instance '%s'", resp.status_code, instance_name
-        )
-        raise
-    except Exception:
-        self.log.exception("Unhandled exception to get last build ID for instance '%s'", instance_name)
-        raise
+    def _construct_event_urls(self):
+        event_urls = []
 
-    self.log.debug("Last build id for instance %s is %s.", instance_name, self.last_build_id)
-    self.last_build_ids[instance_name] = self.last_build_id
+        for status in EVENT_STATUSES:
+            event_urls.append(
+                NEW_BUILD_URL.format(
+                    server=self.server_url,
+                    auth_type=self.auth_type,
+                    build_conf=self.build_config,
+                    since_build=self._last_build_ids[self.instance_name],
+                    event_status=status,
+                )
+            )
 
+        return event_urls
 
-def _build_and_send_event(self, new_build, instance_name, is_deployment, host, tags):
-    self.log.debug("Found new build with id %s, saving and alerting.", new_build["id"])
-    self.last_build_ids[instance_name] = new_build["id"]
+    def collect_events(self, check, last_build_ids):
+        self._last_build_ids = last_build_ids
+        new_build_urls = self._construct_event_urls()
 
-    event_dict = {"timestamp": int(time.time()), "source_type_name": "teamcity", "host": host, "tags": []}
-    if is_deployment:
-        event_dict["event_type"] = "teamcity_deployment"
-        event_dict["msg_title"] = "{} deployed to {}".format(instance_name, host)
-        event_dict["msg_text"] = "Build Number: {}\n\nMore Info: {}".format(new_build["number"], new_build["webUrl"])
-        event_dict["tags"].append("deployment")
-    else:
-        event_dict["event_type"] = "build"
-        event_dict["msg_title"] = "Build for {} successful".format(instance_name)
+        for url in new_build_urls:
+            try:
+                resp = check.http.get(url)
+                resp.raise_for_status()
+                new_builds = resp.json()
 
-        event_dict["msg_text"] = "Build Number: {}\nDeployed To: {}\n\nMore Info: {}".format(
-            new_build["number"], host, new_build["webUrl"]
-        )
-        event_dict["tags"].append("build")
-
-    if tags:
-        event_dict["tags"].extend(tags)
-
-    self.event(event_dict)
-
-
-def collect_events(self, instance):
-    instance_name = instance.get("name")
-    if instance_name is None:
-        raise Exception("Each instance must have a unique name")
-
-    server = instance.get("server")
-    if server is None:
-        raise Exception("Each instance must have a server")
-
-    server = self.base_url
-
-    build_conf = instance.get("build_configuration")
-    if build_conf is None:
-        raise Exception("Each instance must have a build configuration")
-
-    host = instance.get("host_affected") or self.hostname
-    tags = instance.get("tags")
-    is_deployment = is_affirmative(instance.get("is_deployment", False))
-    basic_http_authentication = is_affirmative(instance.get("basic_http_authentication", False))
-
-    _initialize_if_required(self, instance_name, server, build_conf, basic_http_authentication)
-
-    # Look for new successful builds
-    if basic_http_authentication:
-        new_build_url = NEW_BUILD_URL_AUTHENTICATED_SUCCESS.format(
-            server=server, build_conf=build_conf, since_build=self.last_build_ids[instance_name]
-        )
-    else:
-        new_build_url = NEW_BUILD_URL_SUCCESS.format(
-            server=server, build_conf=build_conf, since_build=self.last_build_ids[instance_name]
-        )
-
-    try:
-        resp = self.http.get(new_build_url)
-        resp.raise_for_status()
-
-        new_builds = resp.json()
-
-        if new_builds["count"] == 0:
-            self.log.debug("No new builds found.")
-        else:
-            _build_and_send_event(new_builds["build"][0], instance_name, is_deployment, host, tags)
-    except requests.exceptions.HTTPError:
-        self.log.exception("Couldn't fetch last build, got code %s", resp.status_code)
-        raise
-    except Exception:
-        self.log.exception("Couldn't fetch last build, unhandled exception")
-        raise
+                if new_builds["count"] == 0:
+                    self.log.debug("No new builds found.")
+                else:
+                    self._build_and_send_event(new_builds["build"][0], self.event_tags)
+            except requests.exceptions.HTTPError:
+                self.log.exception("Couldn't fetch last build, got code %s", resp.status_code)
+                raise
+            except Exception:
+                self.log.exception("Couldn't fetch last build, unhandled exception")
+                raise
