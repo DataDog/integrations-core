@@ -74,4 +74,3 @@ class WindowsPerformanceObjectRefresher(threading.Thread):
 
     def log_server_count(self, server):
         self.logger.info('Refresh counter set to %d for server: %s', self.servers[server], server)
-
