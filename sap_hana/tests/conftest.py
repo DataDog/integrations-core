@@ -89,6 +89,7 @@ def dd_environment(schema="SYS_DATABASES"):
             CheckDockerLogs(COMPOSE_FILE, ['Startup finished!'], wait=5, attempts=120),
             WaitFor(db.connect),
             db.initialize,
+            #CheckDockerLogs()
         ],
         env_vars={'PASSWORD': ADMIN_CONFIG['password']},
     ):

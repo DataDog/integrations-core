@@ -26,8 +26,7 @@ def test_check(aggregator, instance, dd_run_check):
 def test_check_invalid_schema(aggregator, instance, dd_run_check):
     instance["schema"] = "UNKNOWN_SCHEMA"
     check = SapHanaCheck('sap_hana', {}, [instance])
-    check.log = mock.MagicMock()
-    dd_run_check(check)
+    _run_until_stable(dd_run_check, check, aggregator, mock_log=True)
 
     check.log.error.assert_has_calls(
         calls=[
@@ -50,10 +49,14 @@ def test_check_invalid_schema(aggregator, instance, dd_run_check):
     assert check.log.error.call_count == 9
 
 
-def _run_until_stable(dd_run_check, check, aggregator):
+def _run_until_stable(dd_run_check, check, aggregator, mock_log=False):
     retries = 3
+    if mock_log:
+        check.log = mock.MagicMock()
     dd_run_check(check)
     while retries and connection_flaked(aggregator):
+        if mock_log:
+            check.log.reset_mock()
         aggregator.reset()
         dd_run_check(check)
         time.sleep(4 - retries)
