@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import mock
 import pytest
+import time
 from mock.mock import ANY, call
 
 from datadog_checks.sap_hana import SapHanaCheck
@@ -54,6 +55,7 @@ def _run_until_stable(dd_run_check, check, aggregator):
     while retries and connection_flaked(aggregator):
         aggregator.reset()
         dd_run_check(check)
+        time.sleep(4 - retries)
         retries -= 1
 
 

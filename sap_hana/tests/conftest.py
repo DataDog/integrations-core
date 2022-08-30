@@ -108,6 +108,7 @@ def instance_custom_queries():
             'tags': ['test:sap_hana'],
             'query': 'SELECT DATABASE_NAME, COUNT(*) FROM SYS_DATABASES.M_DATA_VOLUMES GROUP BY DATABASE_NAME',
             'columns': [{'name': 'db', 'type': 'tag'}, {'name': 'data_volume.total', 'type': 'gauge'}],
+            'timeout': 15,
         }
     ]
     return instance
