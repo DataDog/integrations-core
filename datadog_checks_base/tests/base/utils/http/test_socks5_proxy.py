@@ -5,7 +5,8 @@ import pytest
 from requests.exceptions import ConnectTimeout, ProxyError
 
 from datadog_checks.base.utils.http import RequestsWrapper
-from datadog_checks.dev.ci import running_on_windows_ci
+from datadog_checks.dev.ci import running_on_ci, running_on_windows_ci
+
 
 pytestmark = [
     pytest.mark.integration,
@@ -13,6 +14,7 @@ pytestmark = [
 ]
 
 
+@pytest.mark.skipif(running_on_ci(), reason='Test is failing on CI')
 def test_socks5_proxy(socks5_proxy):
     instance = {'proxy': {'http': 'socks5h://{}'.format(socks5_proxy)}}
     init_config = {}

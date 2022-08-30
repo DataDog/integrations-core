@@ -19,7 +19,22 @@
       "Supported OS::macOS"
     ]
   },
-  "assets": {},
+  "assets": {
+    "integration": {
+      "source_type_name": "AWS IAM Access Analyzer",
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "iam_access_analyzer.",
+        "check": [],
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    }
+  },
   "author": {
     "support_email": "help@datadoghq.com",
     "name": "Datadog",
