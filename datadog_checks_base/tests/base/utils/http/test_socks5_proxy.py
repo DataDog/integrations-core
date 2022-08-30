@@ -7,7 +7,6 @@ from requests.exceptions import ConnectTimeout, ProxyError
 from datadog_checks.base.utils.http import RequestsWrapper
 from datadog_checks.dev.ci import running_on_ci, running_on_windows_ci
 
-
 pytestmark = [
     pytest.mark.integration,
     pytest.mark.skipif(running_on_windows_ci(), reason='Test cannot be run on Windows CI'),
