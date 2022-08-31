@@ -71,11 +71,10 @@ run tests against:
 pytest -vvvv -m online --distribution-name datadog-active-directory --distribution-version 1.10.0
 ```
 
-To check all Datadog integrations, you can privde
-```--verify-all-integrations``` option:
+To run checks against content served from own local directory where TUF, in-toto and wheel files are present:
 
 ```shell
-pytest -vvvv --verify-all-integrations
+pytest -vvvv --local-dir=/path/to/dir --distribution-name datadog-active-directory --distribution-version 1.10.0
 ```
 
 ## Troubleshooting

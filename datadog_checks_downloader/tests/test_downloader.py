@@ -21,7 +21,7 @@ from packaging.version import parse as parse_version
 from six import PY2, PY3, iteritems
 from six.moves.urllib_parse import urljoin
 from tenacity import retry, stop_after_attempt, wait_exponential
-from tests.local_http import local_http_server
+from tests.local_http import local_http_server, local_http_server_local_dir
 from tuf.exceptions import NoWorkingMirrorError
 
 import datadog_checks.downloader
@@ -208,6 +208,31 @@ def test_local_download(capfd, distribution_name, distribution_version, target):
     output = [line for line in stdout.splitlines() if line]
     assert len(output) == 1, "Only one output line expected, got {}:\n\t{}".format(len(output), stdout)
     assert output[0].endswith(target)
+
+
+@pytest.mark.local_dir
+def test_local_dir_download(capfd, local_dir, distribution_name, distribution_version):
+    """Test local verification of a wheel file."""
+    if local_dir is None:
+        pytest.skip("no local directory explicitly passed")
+
+    with local_http_server_local_dir(local_dir) as http_url:
+        argv = [
+            distribution_name,
+            "--version",
+            distribution_version,
+            "--repository",
+            http_url,
+        ]
+        _do_run_downloader(argv)
+
+    stdout, _ = capfd.readouterr()
+
+    output = [line for line in stdout.splitlines() if line]
+    assert len(output) == 1, "Only one output line expected, got {}:\n\t{}".format(len(output), stdout)
+    assert distribution_name in output[0]
+    assert distribution_version in output[0]
+    assert output[0].endswith(".whl")
 
 
 @pytest.mark.offline

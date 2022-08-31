@@ -50,41 +50,51 @@ def _do_local_http_server(queue, directory, port):
 
 
 @contextlib.contextmanager
-def local_http_server(test_file_case, port=_DEFAULT_PORT):
-    """Start a local HTTP server for E2E tests."""
-    zip_file_path = os.path.join(_E2E_TESTS_DATA_DIR, test_file_case + ".zip")
-    served_dir = tempfile.mkdtemp(prefix=test_file_case)
+def local_http_server(test_case, port=_DEFAULT_PORT):
+    """Use a zip file with tests and start a local HTTP server for E2E tests."""
+    zip_file_path = os.path.join(_E2E_TESTS_DATA_DIR, test_case + ".zip")
+    served_dir = tempfile.mkdtemp(prefix=test_case)
 
     try:
         with zipfile.ZipFile(zip_file_path) as tests_zip_file:
             tests_zip_file.extractall(path=served_dir)
 
-        server_url = "http://localhost:{}".format(port)
-
-        queue = Queue()  # Pass httpd to handle proper shutdown on exit.
-        http_server_thread = Thread(target=_do_local_http_server, args=(queue, served_dir, port))
-        http_server_thread.start()
-
-        httpd = queue.get()
-        try:
-            for _ in range(5):  # Provide some time to have the HTTP server ready.
-                response = requests.head(server_url)
-                if response.status_code != 200:
-                    _LOGGER.warning(
-                        "HTTP server not ready yet (HTTP status code %d)...",
-                        response.status_code,
-                    )
-                    time.sleep(1)
-                    continue
-
-                break
-            else:
-                raise RuntimeError("Failed to start HTTP server")
-
+        with local_http_server_local_dir(served_dir, port=port) as server_url:
             yield server_url
-        finally:
-            httpd.shutdown()
-            queue.join()
-            http_server_thread.join()
     finally:
         shutil.rmtree(served_dir)
+
+
+@contextlib.contextmanager
+def local_http_server_local_dir(local_dir, port=_DEFAULT_PORT):
+    """Start a local HTTP server for E2E tests serving content from a local directory."""
+    if not os.path.isdir(local_dir):
+        raise Exception("directory {!r} does not exist or {!r} is not a directory".format(local_dir, local_dir))
+
+    server_url = "http://localhost:{}".format(port)
+
+    queue = Queue()  # Pass httpd to handle proper shutdown on exit.
+    http_server_thread = Thread(target=_do_local_http_server, args=(queue, local_dir, port))
+    http_server_thread.start()
+
+    httpd = queue.get()
+    try:
+        for _ in range(5):  # Provide some time to have the HTTP server ready.
+            response = requests.head(server_url)
+            if response.status_code != 200:
+                _LOGGER.warning(
+                    "HTTP server not ready yet (HTTP status code %d)...",
+                    response.status_code,
+                )
+                time.sleep(1)
+                continue
+
+            break
+        else:
+            raise RuntimeError("Failed to start HTTP server")
+
+        yield server_url
+    finally:
+        httpd.shutdown()
+        queue.join()
+        http_server_thread.join()
