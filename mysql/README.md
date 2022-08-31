@@ -53,7 +53,7 @@ echo -e "\033[0;31mCannot connect to MySQL\033[0m"
 
 The Agent needs a few privileges to collect metrics. Grant the `datadog` user only the following limited privileges.
 
-For MySQL up to version 7.x, set `max_user_connections` with the following command:
+For MySQL versions 5.6 and 5.7, set `max_user_connections` with the following command:
 
 ```shell
 mysql> GRANT REPLICATION CLIENT ON *.* TO 'datadog'@'%' WITH MAX_USER_CONNECTIONS 5;
