@@ -149,6 +149,8 @@ def create(ctx, name, integration_type, location, non_interactive, quiet, dry_ru
             template_fields['integration_id'] = f'{kebab_case_name(author_name)}-{kebab_case_name(name)}'
 
             template_fields['package_url'] = ''
+
+            template_fields['auto_install'] = "false"
         else:
             # Fill in all common non Marketplace fields
             template_fields['pricing_plan'] = ''
@@ -178,6 +180,7 @@ def create(ctx, name, integration_type, location, non_interactive, quiet, dry_ru
                 f"\n    # The project's main homepage."
                 f"\n    url='https://github.com/DataDog/integrations-{repo_choice}',"
             )
+            template_fields['auto_install'] = "true"
     config = construct_template_fields(name, repo_choice, integration_type, **template_fields)
 
     files = create_template_files(integration_type, root, config, read=not dry_run)
