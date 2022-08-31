@@ -163,6 +163,8 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 Then, set [Log Integrations][9] as pod annotations. This can also be configured with [a file, a configmap, or a key-value store][13].
 
+**Annotations v1/v2**
+
 ```yaml
 apiVersion: v1
 kind: Pod

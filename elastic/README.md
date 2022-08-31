@@ -236,6 +236,8 @@ To configure this check for an Agent running on Kubernetes:
 
 Set [Autodiscovery Integrations Templates][17] as pod annotations on your application container. Aside from this, templates can also be configured with [a file, a configmap, or a key-value store][18].
 
+**Annotations v1** (for Datadog Agent < v7.36)
+
 ```yaml
 apiVersion: v1
 kind: Pod
@@ -255,12 +257,38 @@ spec:
     - name: elasticsearch
 ```
 
+**Annotations v2** (for Datadog Agent v7.36+)
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: elasticsearch
+  annotations:
+    ad.datadoghq.com/elasticsearch.checks: |
+      {
+        "elastic": {
+          "init_config": {},
+          "instances": [
+            {
+              "url": "http://%%host%%:9200"
+            }
+          ]
+        }
+      }
+spec:
+  containers:
+    - name: elasticsearch
+```
+
 ##### Log collection
 
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Kubernetes Log Collection][19].
 
 Then, set [Log Integrations][14] as pod annotations. This can also be configured with [a file, a configmap, or a key-value store][20].
+
+**Annotations v1/v2**
 
 ```yaml
 apiVersion: v1
