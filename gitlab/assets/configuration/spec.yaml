@@ -13,8 +13,8 @@ files:
         type: string
     - name: api_token
       description: |
-        The Gitlab API token for this instance
-        used to collect the Gitlab version.
+        The GitLab API token for this instance
+        used to collect the GitLab version.
       value:
         type: string
     - template: instances/openmetrics_legacy
