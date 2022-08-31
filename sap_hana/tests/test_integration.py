@@ -57,7 +57,6 @@ def _run_until_stable(dd_run_check, check, aggregator, mock_log=False):
     while retries and connection_flaked(aggregator):
         if mock_log:
             check.log.reset_mock()
-        aggregator.reset()
         dd_run_check(check)
         time.sleep(4 - retries)
         retries -= 1
