@@ -18,7 +18,7 @@ need to install anything else on your server.
 ### Configuration
 
 This integration requires access to the controller manager's metric endpoint. It is usually not
-exposed in container-as-a-service clusters.
+exposed in managed Kubernetes clusters.
 
 1. Edit the `kube_controller_manager.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your kube_controller_manager performance data. See the [sample kube_controller_manager.d/conf.yaml][4] for all available configuration options.
 
