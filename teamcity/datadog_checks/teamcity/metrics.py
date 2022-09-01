@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2022-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import re
+
 METRIC_MAP = {
     'agents_connected_authorized_number': 'agents.connected.authorized',
     'agents_running_builds_number': 'agents.running.builds',
@@ -108,3 +110,56 @@ METRIC_MAP = {
     'vcsRootInstances_active_number': 'vcsRootInstances.active',
     'vcsRoots_number': 'vcsRoots',
 }
+
+SIMPLE_BUILD_STATS_METRICS = {
+    'ArtifactsSize': {'name': 'artifacts_size', 'method': 'gauge'},
+    'BuildDuration': {'name': 'build_duration', 'method': 'gauge'},
+    'BuildDurationNetTime': {'name': 'build_duration.net_time', 'method': 'gauge'},
+    'BuildTestStatus': {'name': 'build_test_status', 'method': 'gauge'},
+    'InspectionStatsE': {'name': 'inspection_stats_e', 'method': 'gauge'},
+    'InspectionStatsW': {'name': 'inspection_stats_w', 'method': 'gauge'},
+    'PassedTestCount': {'name': 'passed_test_count', 'method': 'gauge'},
+    'serverSideBuildFinishing': {'name': 'server_side_build_finishing', 'method': 'gauge'},
+    'SuccessRate': {'name': 'success_rate', 'method': 'gauge'},
+    'TimeSpentInQueue': {'name': 'time_spent_in_queue', 'method': 'gauge'},
+    'TotalTestCount': {'name': 'total_test_count', 'method': 'gauge'},
+}
+
+REGEX_BUILD_STATS_METRICS = [
+    {
+        'regex': r'buildStageDuration\:([\s\S]*)',
+        'name': 'build_stage_duration',
+        'tags': ('build_stage',),
+        'method': 'gauge',
+    },
+    {'regex': r'queueWaitReason\:([\s\S]*)', 'name': 'queue_wait_reason', 'tags': ('reason',), 'method': 'gauge'},
+]
+
+
+def build_metric(metric_name):
+    additional_tags = []
+
+    if metric_name in SIMPLE_BUILD_STATS_METRICS:
+        metric_mapping = SIMPLE_BUILD_STATS_METRICS[metric_name]
+        name = metric_mapping['name']
+        method = metric_mapping['method']
+
+    else:
+        for regex in REGEX_BUILD_STATS_METRICS:
+            results = re.findall(str(regex['regex']), metric_name)
+
+            if len(results) > 0 and isinstance(results[0], tuple):
+                tags_values = list(results[0])
+            else:
+                tags_values = results
+
+            if len(tags_values) == len(regex['tags']):
+                method = regex['method']
+                name = str(regex['name'])
+                for i in range(len(regex['tags'])):
+                    additional_tags.append('{}:{}'.format(regex['tags'][i], tags_values[i]))
+                break
+        else:
+            return None, [], method
+
+    return name, additional_tags, method
