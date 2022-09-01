@@ -62,7 +62,7 @@ class WindowsPerformanceObjectRefresher(threading.Thread):
 
                 self.last_refresh[server] = now
 
-            time.sleep(2)
+            time.sleep(1)
 
     def add_server(self, server):
         self.servers[server] += 1
