@@ -63,10 +63,23 @@ The instructions below show you how to configure the task using the [Amazon Web 
 <!-- xxx tab "AWS CLI" xxx -->
 ##### AWS CLI Task Definition
 
-1. Download [datadog-agent-ecs-fargate][42]. **Note**: If you are using Internet Explorer, this may download as gzip file, which contains the JSON file mentioned below.**
-2. Update the JSON with a `TASK_NAME`, your [Datadog API Key][41], and the appropriate `DD_SITE` ({{< region-param key="dd_site" code="true" >}}). **Note**: The environment variable `ECS_FARGATE` is already set to `"true"`.
-3. Add your other application containers to the task definition. For details on collecting integration metrics, see [Integration Setup for ECS Fargate][12].
-4. Execute the following command to register the ECS task definition:
+1. Download [datadog-agent-ecs-fargate][1]. **Note**: If you are using Internet Explorer, this may download as gzip file, which contains the JSON file mentioned below.**
+2. Update the JSON with a `TASK_NAME`, your [Datadog API Key][2], and the appropriate `DD_SITE` ({{< region-param key="dd_site" code="true" >}}). **Note**: The environment variable `ECS_FARGATE` is already set to `"true"`.
+3. Add your other application containers to the task definition. For details on collecting integration metrics, see [Integration Setup for ECS Fargate][3].
+4. Optionally - Add an Agent health check.
+
+    Add the following to your ECS task definition to create an Agent health check:
+
+    ```json
+    "healthCheck": {
+      "retries": 3,
+      "command": ["CMD-SHELL","agent health"],
+      "timeout": 5,
+      "interval": 30,
+      "startPeriod": 15
+    }
+    ```
+5. Execute the following command to register the ECS task definition:
 
 ```bash
 aws ecs register-task-definition --cli-input-json file://<PATH_TO_FILE>/datadog-agent-ecs-fargate.json
