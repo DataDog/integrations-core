@@ -1,13 +1,12 @@
 # (C) Datadog, Inc. 2022-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from typing import Any
+# from typing import Any
 
-from datadog_checks.base import AgentCheck
-from datadog_checks.base import OpenMetricsBaseCheckV2
+from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheckV2
 
 from .config_models import ConfigMixin
-from .metrics import APPLICATION_CONTROLLER_METRICS, REPO_SERVER, REPO_SERVER_METRICS, API_SERVER_METRICS
+from .metrics import API_SERVER_METRICS, APPLICATION_CONTROLLER_METRICS, REPO_SERVER_METRICS
 
 # from datadog_checks.base.utils.db import QueryManager
 # from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
@@ -29,7 +28,7 @@ class ArgocdCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         repo_server_endpoint = self.instance.get("repo_server_endpoint")
         if not app_controller_endpoint and not repo_server_endpoint and not api_server_endpoint:
             raise ConfigurationError(
-                "Must specify at least one of the following endpoints: `app_controller_endpoint`, `repo_server_endpoint` or `api_server_endpoint`."
+                "Must specify at least one of the following: `app_controller_endpoint`, `repo_server_endpoint` or `api_server_endpoint`."
             )
 
         if app_controller_endpoint:
@@ -64,6 +63,7 @@ class ArgocdCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         #         self.submit_controller_health(self.OK)
 
         super().check(_)
+
 
 # class ArgocdCheck(AgentCheck):
 

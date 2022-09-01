@@ -21,7 +21,7 @@ GENERAL_METRICS = {
     'go_memstats_heap_released_bytes': 'go.memstats.heap.released_bytes',
     'go_memstats_heap_sys_bytes': 'go.memstats.heap.sys_bytes',
     'go_memstats_last_gc_time_seconds': 'go.memstats.last_gc_time.seconds',
-    'go_memstats_lookups' : 'go.memstats.lookups',
+    'go_memstats_lookups': 'go.memstats.lookups',
     'go_memstats_mallocs': 'go.memstats.mallocs',
     'go_memstats_mcache_inuse_bytes': 'go.memstats.mcache.inuse_bytes',
     'go_memstats_mcache_sys_bytes': 'go.memstats.mcache.sys_bytes',
@@ -49,9 +49,9 @@ APPLICATION_CONTROLLER = {
     'argocd_app_reconcile': 'app.reconcile',
     'argocd_app_sync': 'app.sync',
     'argocd_cluster_api_resource_objects': 'cluster.api.resource_objects',
-    'argocd_cluster_api_resources':	'cluster.api.resources',
-    'argocd_cluster_cache_age_seconds':	'cluster.cache.age.seconds',
-    'argocd_cluster_connection_status':	'cluster.connection.status',
+    'argocd_cluster_api_resources': 'cluster.api.resources',
+    'argocd_cluster_cache_age_seconds': 'cluster.cache.age.seconds',
+    'argocd_cluster_connection_status': 'cluster.connection.status',
     'argocd_cluster_events': 'cluster.events',
     'argocd_cluster_info': 'cluster.info',
     'argocd_kubectl_exec_pending': 'kubectl.exec.pending',
@@ -81,6 +81,6 @@ REPO_SERVER = {
     'argocd_repo_pending_request': 'repo.pending.request',
 }
 
-APPLICATION_CONTROLLER_METRICS = APPLICATION_CONTROLLER.update(GENERAL_METRICS) 
-API_SERVER_METRICS = API_SERVER.update(GENERAL_METRICS) 
-REPO_SERVER_METRICS = REPO_SERVER.update(GENERAL_METRICS) 
+APPLICATION_CONTROLLER_METRICS = APPLICATION_CONTROLLER.update(GENERAL_METRICS)
+API_SERVER_METRICS = API_SERVER.update(GENERAL_METRICS)
+REPO_SERVER_METRICS = REPO_SERVER.update(GENERAL_METRICS)
