@@ -17,12 +17,14 @@ need to install anything else on your server.
 
 ### Configuration
 
-This integration requires access to the controller manager's metric endpoint. It is usually not
-exposed in managed Kubernetes clusters.
-
 1. Edit the `kube_controller_manager.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your kube_controller_manager performance data. See the [sample kube_controller_manager.d/conf.yaml][4] for all available configuration options.
 
 2. [Restart the Agent][5]
+
+This integration requires access to the controller manager's metric endpoint. To have access to the metric endpoint you should:
+
+* have access to the IP/Port of the controller-manager process
+* have `get` RBAC permissions to the /metrics endpoint (the default Datadog Helm chart already adds the right RBAC roles and bindings for this)
 
 ### Validation
 
