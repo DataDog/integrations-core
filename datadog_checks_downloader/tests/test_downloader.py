@@ -268,7 +268,7 @@ def test_local_expired_metadata_error(distribution_name, distribution_version):
 @pytest.mark.offline
 @pytest.mark.skipif(PY2, reason="tuf builds for Python 2 do not provide required information in exception")
 def test_local_unreachable_repository():
-    """Test expiration of metadata raises an exception."""
+    """Test unreachable repository raises an exception."""
     argv = [
         "datadog-some-distribution",
         "--version",
@@ -286,7 +286,7 @@ def test_local_unreachable_repository():
 
 @pytest.mark.offline
 @pytest.mark.skipif(PY2, reason="tuf builds for Python 2 do not provide required information in exception")
-def test_local_repository_unreachable_error():
+def test_local_repository_empty():
     """Test unreachable repository raises an exception."""
     with local_http_server("empty") as http_url:
         argv = [
