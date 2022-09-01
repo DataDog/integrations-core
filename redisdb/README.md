@@ -147,6 +147,8 @@ To configure this check for an Agent running on Kubernetes:
 
 Set [Autodiscovery Integrations Templates][14] as pod annotations on your application container. Aside from this, templates can also be configured using a [file, configmap, or key-value store][15].
 
+**Annotations v1** (for Datadog Agent < v7.36)
+
 ```yaml
 apiVersion: v1
 kind: Pod
@@ -173,6 +175,37 @@ spec:
         - containerPort: 6379
 ```
 
+**Annotations v2** (for Datadog Agent v7.36+)
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: redis
+  annotations:
+    ad.datadoghq.com/redis.checks: |
+      {
+        "redisdb": {
+          "init_config": {},
+          "instances": [
+            {
+              "host": "%%host%%",
+              "port":"6379",
+              "password":"%%env_REDIS_PASSWORD%%"
+            }
+          ]
+        }
+      }
+  labels:
+    name: redis
+spec:
+  containers:
+    - name: redis
+      image: redis:latest
+      ports:
+        - containerPort: 6379
+```
+
 **Note**: The `"%%env_<ENV_VAR>%%"` template variable logic is used to avoid storing the password in plain text, hence the `REDIS_PASSWORD` environment variable must be set on the Agent container. See the [Autodiscovery Template Variable][9] documentation. Alternatively, the Agent can leverage the `secrets` package to work with any [secrets management][10] backend (such as HashiCorp Vault or AWS Secrets Manager).
 
 ##### Log collection
@@ -182,6 +215,8 @@ _Available for Agent versions >6.0_
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][16].
 
 Then, set [Log Integrations][12] as pod annotations. This can also be configure using a [file, configmap, or key-value store][17].
+
+**Annotations v1/v2**
 
 ```yaml
 apiVersion: v1
