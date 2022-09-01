@@ -46,6 +46,7 @@ An up-to-date list of all developers authorized to sign releases can be found [h
 
 
 
+
 [1]: https://dev.azure.com/datadoghq/integrations-core/_apis/build/status/Master%20All?branchName=master
 [2]: https://dev.azure.com/datadoghq/integrations-core/_build/latest?definitionId=29&branchName=master
 [3]: https://datadoghq.dev/integrations-core/
