@@ -6,6 +6,8 @@ from copy import deepcopy
 
 from datadog_checks.base import AgentCheck
 
+# BASE_URL = "{server}/{auth_type}/app/rest/"
+
 NEW_BUILD_URL = (
     "{server}/{auth_type}/app/rest/builds/?locator=buildType:{build_conf}," "sinceBuild:id:{since_build},state:finished"
 )
@@ -13,6 +15,10 @@ NEW_BUILD_URL = (
 LAST_BUILD_URL = "{server}/{auth_type}/app/rest/builds/?locator=buildType:{build_conf},count:1"
 
 BUILD_STATS_URL = "{server}/{auth_type}/app/rest/builds/buildType:{build_conf},buildId:{build_id}/statistics/"
+
+TEST_OCCURRENCES_URL = "{server}/{auth_type}/app/rest/testOccurrences?locator=build:{build_id}"
+
+BUILD_PROBLEM_OCCURRENCES_URL = "{server}/{auth_type}/app/rest/problemOccurrences?locator=build:(id:{build_id})"
 
 EVENT_STATUS_MAP = {"SUCCESS": "successful", "FAILURE": "failed"}
 
@@ -40,6 +46,10 @@ BUILD_EVENT = {
 
 
 def construct_event(is_deployment, instance_name, host, new_build, tags):
+    build_id = new_build['id']
+    build_number = new_build['number']
+    build_tags = [f'build_id:{build_id}', f'build_number:{build_number}']
+    tags.append(build_tags)
     if is_deployment:
         build_status = EVENT_STATUS_MAP.get(new_build["status"])
         teamcity_event = deepcopy(DEPLOYMENT_EVENT)
@@ -63,7 +73,6 @@ def construct_event(is_deployment, instance_name, host, new_build, tags):
         )
         teamcity_event['host'] = host
 
-    if tags:
-        teamcity_event['tags'].append(tags)
+    teamcity_event['tags'].extend(tags)
 
     return teamcity_event

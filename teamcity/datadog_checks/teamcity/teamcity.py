@@ -9,12 +9,20 @@ from six import PY2
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 
-from .common import BUILD_STATS_URL, LAST_BUILD_URL, NEW_BUILD_URL, SERVICE_CHECK_STATUS_MAP, construct_event
+from .common import (
+    BUILD_PROBLEM_OCCURRENCES_URL,
+    BUILD_STATS_URL,
+    LAST_BUILD_URL,
+    NEW_BUILD_URL,
+    SERVICE_CHECK_STATUS_MAP,
+    TEST_OCCURRENCES_URL,
+    construct_event,
+)
 from .metrics import build_metric
 
 
 class TeamCityCheck(AgentCheck):
-    NAMESPACE = 'teamcity.'
+    __NAMESPACE__ = 'teamcity'
 
     HTTP_CONFIG_REMAPPER = {
         'ssl_validation': {'name': 'tls_verify'},
@@ -56,7 +64,7 @@ class TeamCityCheck(AgentCheck):
             'build_config:{}'.format(self.build_config),
             'server:{}'.format(self.server_url),
             'instance_name:{}'.format(self.instance_name),
-            'deployment' if self.is_deployment else 'build',
+            'type:deployment' if self.is_deployment else 'type:build',
         ]
         self.tags.update(instance_tags)
 
@@ -67,23 +75,24 @@ class TeamCityCheck(AgentCheck):
         teamcity_event = construct_event(self.is_deployment, self.instance_name, self.host, new_build, list(self.tags))
 
         self.event(teamcity_event)
-        self.service_check(
-            'teamcity.build.success', SERVICE_CHECK_STATUS_MAP.get(new_build['status']), tags=list(self.tags)
-        )
+        self.service_check('build.status', SERVICE_CHECK_STATUS_MAP.get(new_build['status']), tags=list(self.tags))
 
-    def _initialize_if_required(self):
-        if self.instance_name in self.last_build_ids:
-            return
-
-        self.log.debug("Initializing %s", self.instance_name)
+    def _initialize(self):
+        last_build_id = None
         last_build_url = LAST_BUILD_URL.format(
             server=self.server_url, auth_type=self.auth_type, build_conf=self.build_config
         )
+        self.log.debug("Initializing %s", self.instance_name)
 
         try:
             resp = self.http.get(last_build_url)
             resp.raise_for_status()
-            last_build_id = resp.json().get("build")[0].get("number")
+
+            if resp.json()['count'] == 0:
+                self.log.debug('No builds found during initialization.')
+                return
+            else:
+                last_build_id = resp.json().get("build")[0].get("number")
 
         except requests.exceptions.HTTPError:
             if resp.status_code == 401:
@@ -116,8 +125,58 @@ class TeamCityCheck(AgentCheck):
             method = getattr(self, method)
             method(metric_name, metric_value, tags=list(self.tags) + additional_tags)
 
+    def _collect_test_results(self, new_build):
+        build_id = new_build['id']
+        build_number = new_build['number']
+        test_occurrences_url = TEST_OCCURRENCES_URL.format(
+            server=self.server_url, auth_type=self.auth_type, build_id=build_id
+        )
+
+        resp = self.http.get(test_occurrences_url)
+        resp.raise_for_status()
+        test_results = resp.json()
+        self.log.trace('Test occurrences response payload: {}'.format(test_results))
+        self.log.debug('Test occurrences response payload: {}'.format(test_results))
+        if test_results.get('count') and test_results['count'] > 0:
+            for test in test_results['testOccurrence']:
+                test_status = test['status']
+                value = 1 if test_status == 'SUCCESS' else 0
+                tags = [
+                    'result:{}'.format(test_status.lower()),
+                    'build_number:{}'.format(build_number),
+                    'build_id:{}'.format(build_number),
+                    'test_name:{}'.format(test['name']),
+                ]
+                self.gauge('test_result', value, tags=list(self.tags) + tags)
+
+    def _collect_build_problems(self, new_build):
+        build_id = new_build['id']
+        build_number = new_build['number']
+        problem_occurrences_url = BUILD_PROBLEM_OCCURRENCES_URL.format(
+            server=self.server_url, auth_type=self.auth_type, build_id=build_id
+        )
+
+        resp = self.http.get(problem_occurrences_url)
+        resp.raise_for_status()
+        problem_results = resp.json()
+        self.log.trace('Problem occurrences response payload: {}'.format(problem_results))
+        self.log.debug('Problem occurrences response payload: {}'.format(problem_results))
+        if problem_results.get('count') and problem_results['count'] > 0:
+            for problem in problem_results['problemOccurrence']:
+                problem_type = problem['type']
+                problem_identity = problem['identity']
+                tags = [
+                    f'problem_type:{problem_type}',
+                    f'problem_identity:{problem_identity}',
+                    f'build_id:{build_id}',
+                    f'build_number:{build_number}',
+                ]
+                self.service_check('build_problem', AgentCheck.WARNING, tags=list(self.tags) + tags)
+
     def check(self, _):
-        self._initialize_if_required()
+        if not self.last_build_ids.get(self.instance_name):
+            self._initialize()
+
         new_build_url = NEW_BUILD_URL.format(
             server=self.server_url,
             auth_type=self.auth_type,
@@ -136,6 +195,8 @@ class TeamCityCheck(AgentCheck):
                 for build in new_builds['build']:
                     self._build_and_send_event(build)
                     self._collect_build_stats(build)
+                    self._collect_test_results(build)
+                    self._collect_build_problems(build)
         except requests.exceptions.HTTPError:
             self.log.exception("Couldn't fetch last build, got code %s", resp.status_code)
             raise
