@@ -1,6 +1,6 @@
 # CHANGELOG - kafka
 
-## 2.13.0 / 2022-06-27
+## 2.13.0 / 2022-06-27 / Agent 7.38.0
 
 * [Added] Add under min ISR partition count metric. See [#12108](https://github.com/DataDog/integrations-core/pull/12108). Thanks [OuesFa](https://github.com/OuesFa).
 

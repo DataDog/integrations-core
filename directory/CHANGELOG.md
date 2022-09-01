@@ -1,5 +1,9 @@
 # CHANGELOG - directory
 
+## 1.13.1 / 2022-08-05
+
+* [Fixed] Add debug logging to directory check. See [#12534](https://github.com/DataDog/integrations-core/pull/12534).
+
 ## 1.13.0 / 2022-04-05 / Agent 7.36.0
 
 * [Added] Upgrade dependencies. See [#11726](https://github.com/DataDog/integrations-core/pull/11726).

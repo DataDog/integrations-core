@@ -73,8 +73,14 @@ class InstanceConfig(BaseModel):
     ssl_cert_reqs: Optional[int]
     ssl_certfile: Optional[str]
     ssl_keyfile: Optional[str]
+    ssl_match_hostname: Optional[bool]
     tags: Optional[Sequence[str]]
     timeout: Optional[int]
+    tls: Optional[bool]
+    tls_allow_invalid_certificates: Optional[bool]
+    tls_allow_invalid_hostnames: Optional[bool]
+    tls_ca_file: Optional[str]
+    tls_certificate_key_file: Optional[str]
     username: Optional[str]
 
     @root_validator(pre=True)

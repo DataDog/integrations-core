@@ -157,9 +157,11 @@ class CheckCommandOutput(LazyFunction):
                 log_output = result.stderr
 
             matches = 0
+            missing_patterns = set(self.patterns)
             for pattern in self.patterns:
                 if pattern.search(log_output):
                     matches += 1
+                    missing_patterns.remove(pattern)
 
             if matches >= self.matches:
                 return matches
@@ -167,10 +169,14 @@ class CheckCommandOutput(LazyFunction):
             time.sleep(self.wait)
         else:
             patterns = '\t- '.join([''] + [str(p) for p in self.patterns])
+            missing_patterns = '\t- '.join([''] + [str(p) for p in missing_patterns])
             raise RetryError(
-                u'Command: {}\nFailed to match `{}` of following patterns:\n{}\n'
-                u'Exit code: {}\nCaptured Output: {}'.format(
-                    self.command, self.matches, patterns, exit_code, log_output
+                u'Command: {}\nFailed to match `{}` of the patterns.\n'
+                u'Provided patterns: {}\n'
+                u'Missing patterns: {}\n'
+                u'Exit code: {}\n'
+                u'Captured Output: {}'.format(
+                    self.command, self.matches, patterns, missing_patterns, exit_code, log_output
                 )
             )
 

@@ -149,7 +149,7 @@ def docker_run(
       `CheckEndpoints(endpoints)` to the `conditions` argument.
     - **log_patterns** (_List[str|re.Pattern]_) - Regular expression patterns to find in Docker logs before yielding.
       This is only available when `compose_file` is provided. Shorthand for adding
-      `CheckDockerLogs(compose_file, log_patterns)` to the `conditions` argument.
+      `CheckDockerLogs(compose_file, log_patterns, 'all')` to the `conditions` argument.
     - **mount_logs** (_bool_) - Whether or not to mount log files in Agent containers based on example logs
       configuration
     - **conditions** (_callable_) - A list of callable objects that will be executed before yielding to
@@ -185,7 +185,7 @@ def docker_run(
                 'The `log_patterns` convenience is unavailable when using '
                 'a custom setup. Please use a custom condition instead.'
             )
-        docker_conditions.append(CheckDockerLogs(compose_file, log_patterns))
+        docker_conditions.append(CheckDockerLogs(compose_file, log_patterns, 'all'))
 
     if conditions is not None:
         docker_conditions.extend(conditions)

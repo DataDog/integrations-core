@@ -8,6 +8,7 @@ import pytest
 import redis
 
 from datadog_checks.dev import LazyFunction, RetryError, docker_run
+from datadog_checks.dev.conditions import CheckDockerLogs
 from datadog_checks.redisdb import Redis
 
 from .common import DOCKER_COMPOSE_PATH, HERE, HOST, MASTER_PORT, PASSWORD, PORT, REPLICA_PORT
@@ -53,9 +54,11 @@ def redis_auth():
     If there's any problem executing `docker compose`, let the exception bubble
     up.
     """
+    compose_file = os.path.join(HERE, 'compose', 'standalone.compose')
     with docker_run(
-        os.path.join(HERE, 'compose', 'standalone.compose'),
+        compose_file,
         env_vars={'REDIS_CONFIG': os.path.join(HERE, 'config', 'auth.conf')},
+        conditions=[CheckDockerLogs(compose_file, 'Ready to accept connections', wait=5)],
     ):
         yield
 

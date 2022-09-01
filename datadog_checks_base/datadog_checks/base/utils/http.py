@@ -212,7 +212,7 @@ class RequestsWrapper(object):
 
             config[field] = value
 
-        # http://docs.python-requests.org/en/master/user/advanced/#timeouts
+        # https://requests.readthedocs.io/en/latest/user/advanced/#timeouts
         connect_timeout = read_timeout = float(config['timeout'])
         if config['connect_timeout'] is not None:
             connect_timeout = float(config['connect_timeout'])
@@ -220,8 +220,8 @@ class RequestsWrapper(object):
         if config['read_timeout'] is not None:
             read_timeout = float(config['read_timeout'])
 
-        # http://docs.python-requests.org/en/master/user/quickstart/#custom-headers
-        # http://docs.python-requests.org/en/master/user/advanced/#header-ordering
+        # https://requests.readthedocs.io/en/latest/user/quickstart/#custom-headers
+        # https://requests.readthedocs.io/en/latest/user/advanced/#header-ordering
         headers = get_default_headers()
         if config['headers']:
             headers.clear()
@@ -233,7 +233,7 @@ class RequestsWrapper(object):
         # https://toolbelt.readthedocs.io/en/latest/adapters.html#hostheaderssladapter
         self.tls_use_host_header = is_affirmative(config['tls_use_host_header']) and 'Host' in headers
 
-        # http://docs.python-requests.org/en/master/user/authentication/
+        # https://requests.readthedocs.io/en/latest/user/authentication/
         auth_type = config['auth_type'].lower()
         if auth_type not in AUTH_TYPES:
             self.logger.warning('auth_type %s is not supported, defaulting to basic', auth_type)
@@ -257,14 +257,14 @@ class RequestsWrapper(object):
 
         allow_redirects = is_affirmative(config['allow_redirects'])
 
-        # http://docs.python-requests.org/en/master/user/advanced/#ssl-cert-verification
+        # https://requests.readthedocs.io/en/latest/user/advanced/#ssl-cert-verification
         verify = True
         if isinstance(config['tls_ca_cert'], string_types):
             verify = config['tls_ca_cert']
         elif not is_affirmative(config['tls_verify']):
             verify = False
 
-        # http://docs.python-requests.org/en/master/user/advanced/#client-side-certificates
+        # https://requests.readthedocs.io/en/latest/user/advanced/#client-side-certificates
         cert = None
         if isinstance(config['tls_cert'], string_types):
             if isinstance(config['tls_private_key'], string_types):
@@ -272,7 +272,7 @@ class RequestsWrapper(object):
             else:
                 cert = config['tls_cert']
 
-        # http://docs.python-requests.org/en/master/user/advanced/#proxies
+        # https://requests.readthedocs.io/en/latest/user/advanced/#proxies
         no_proxy_uris = None
         if is_affirmative(config['skip_proxy']):
             proxies = PROXY_SETTINGS_DISABLED.copy()
@@ -291,7 +291,7 @@ class RequestsWrapper(object):
                 proxies = proxies.copy()
 
                 # TODO: Pass `no_proxy` directly to `requests` once this issue is fixed:
-                # https://github.com/kennethreitz/requests/issues/5000
+                # https://github.com/psf/requests/issues/5000
                 if 'no_proxy' in proxies:
                     no_proxy_uris = proxies.pop('no_proxy')
 
@@ -328,8 +328,8 @@ class RequestsWrapper(object):
 
         # For connection and cookie persistence, if desired. See:
         # https://en.wikipedia.org/wiki/HTTP_persistent_connection#Advantages
-        # http://docs.python-requests.org/en/master/user/advanced/#session-objects
-        # http://docs.python-requests.org/en/master/user/advanced/#keep-alive
+        # https://requests.readthedocs.io/en/latest/user/advanced/#session-objects
+        # https://requests.readthedocs.io/en/latest/user/advanced/#keep-alive
         self.persist_connections = self.tls_use_host_header or is_affirmative(config['persist_connections'])
         self._session = None
 

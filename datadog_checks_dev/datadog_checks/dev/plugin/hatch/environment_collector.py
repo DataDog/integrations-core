@@ -1,5 +1,5 @@
 import os
-from functools import cached_property, lru_cache
+from functools import cached_property
 
 from hatch.env.collectors.plugin.interface import EnvironmentCollectorInterface
 
@@ -39,16 +39,15 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
     def test_package_install_command(self):
         if not self.in_core_repo:
             return self.pip_install_command('datadog-checks-dev')
-        elif not self.is_test_package:
+        elif not (self.is_test_package or self.is_dev_package):
             return self.pip_install_command('-e', '../datadog_checks_dev')
 
-    @lru_cache(maxsize=None)
     def base_package_install_command(self, features):
         if not self.in_core_repo or os.environ.get('BASE_PACKAGE_FORCE_UNPINNED'):
             return self.pip_install_command(self.format_base_package(features))
         elif base_package_version := os.environ.get('BASE_PACKAGE_FORCE_VERSION'):
             return self.pip_install_command(self.format_base_package(features, version=base_package_version))
-        elif not self.is_base_package:
+        elif not (self.is_base_package or self.is_dev_package):
             return self.pip_install_command('-e', f'../{self.format_base_package(features, local=True)}')
 
     @staticmethod
@@ -79,7 +78,9 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
                 env_config.setdefault('features', ['deps'])
 
             install_commands = []
-            if install_command := self.base_package_install_command(config.get('base-package-features')):
+            if install_command := self.base_package_install_command(
+                config.get('base-package-features', self.config.get('base-package-features'))
+            ):
                 install_commands.append(install_command)
             if self.test_package_install_command:
                 install_commands.append(self.test_package_install_command)
@@ -97,17 +98,18 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
             scripts.setdefault('benchmark', '_dd-benchmark')
 
     def get_initial_config(self):
+        settings_dir = '.' if self.is_dev_package else '..'
         lint_env = {
             'detached': True,
             'scripts': {
                 'style': [
-                    'flake8 --config=../.flake8 .',
-                    'black --config ../pyproject.toml --check --diff .',
-                    'isort --settings-path ../pyproject.toml --check-only --diff .',
+                    f'flake8 --config={settings_dir}/.flake8 .',
+                    f'black --config {settings_dir}/pyproject.toml --check --diff .',
+                    f'isort --settings-path {settings_dir}/pyproject.toml --check-only --diff .',
                 ],
                 'fmt': [
-                    'isort . --settings-path ../pyproject.toml ',
-                    'black . --config ../pyproject.toml',
+                    f'isort . --settings-path {settings_dir}/pyproject.toml',
+                    f'black . --config {settings_dir}/pyproject.toml',
                     'python -c "print(\'\\n[NOTE] flake8 may still report style errors for things '
                     'black cannot fix, these will need to be fixed manually.\')"',
                     'style',
@@ -141,5 +143,8 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
                 ]
             )
             lint_env['dependencies'].extend(self.mypy_deps)
+
+        if self.is_dev_package:
+            lint_env['dependencies'].append('flake8-tidy-imports==4.8.0')
 
         return config

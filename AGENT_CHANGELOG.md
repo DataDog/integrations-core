@@ -1,3 +1,30 @@
+## Datadog Agent version [7.38.2](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7382)
+
+* datadog_checks_base [25.5.1](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/CHANGELOG.md)
+
+## Datadog Agent version [7.38.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7380)
+
+* Airflow [3.1.1](https://github.com/DataDog/integrations-core/blob/master/airflow/CHANGELOG.md)
+* ArangoDB [1.2.0](https://github.com/DataDog/integrations-core/blob/master/arangodb/CHANGELOG.md)
+* Boundary [1.0.0](https://github.com/DataDog/integrations-core/blob/master/boundary/CHANGELOG.md)
+* datadog_checks_base [25.5.0](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/CHANGELOG.md)
+* Elasticsearch [5.2.0](https://github.com/DataDog/integrations-core/blob/master/elastic/CHANGELOG.md)
+* Envoy [2.3.0](https://github.com/DataDog/integrations-core/blob/master/envoy/CHANGELOG.md)
+* Gitlab [5.2.2](https://github.com/DataDog/integrations-core/blob/master/gitlab/CHANGELOG.md)
+* Kafka Consumer [2.15.2](https://github.com/DataDog/integrations-core/blob/master/kafka_consumer/CHANGELOG.md)
+* Kafka [2.13.0](https://github.com/DataDog/integrations-core/blob/master/kafka/CHANGELOG.md)
+* Kube_scheduler [4.3.0](https://github.com/DataDog/integrations-core/blob/master/kube_scheduler/CHANGELOG.md)
+* MongoDB [3.2.3](https://github.com/DataDog/integrations-core/blob/master/mongo/CHANGELOG.md)
+* MySQL [8.4.1](https://github.com/DataDog/integrations-core/blob/master/mysql/CHANGELOG.md)
+* Openstack_controller [2.1.1](https://github.com/DataDog/integrations-core/blob/master/openstack_controller/CHANGELOG.md)
+* PHP-FPM [2.1.1](https://github.com/DataDog/integrations-core/blob/master/php_fpm/CHANGELOG.md)
+* Postgres [12.5.0](https://github.com/DataDog/integrations-core/blob/master/postgres/CHANGELOG.md)
+* Snowflake [4.4.2](https://github.com/DataDog/integrations-core/blob/master/snowflake/CHANGELOG.md)
+* SQL Server [8.0.1](https://github.com/DataDog/integrations-core/blob/master/sqlserver/CHANGELOG.md)
+* Teradata [1.0.1](https://github.com/DataDog/integrations-core/blob/master/teradata/CHANGELOG.md)
+* Vault [3.3.0](https://github.com/DataDog/integrations-core/blob/master/vault/CHANGELOG.md)
+* VoltDB [2.1.2](https://github.com/DataDog/integrations-core/blob/master/voltdb/CHANGELOG.md)
+
 ## Datadog Agent version [7.37.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7370)
 
 * Active Directory [1.15.1](https://github.com/DataDog/integrations-core/blob/master/active_directory/CHANGELOG.md)
@@ -451,7 +478,6 @@
 * HDFS Namenode [2.2.1](https://github.com/DataDog/integrations-core/blob/master/hdfs_namenode/CHANGELOG.md)
 * Hive [1.7.2](https://github.com/DataDog/integrations-core/blob/master/hive/CHANGELOG.md)
 * HiveMQ [1.5.2](https://github.com/DataDog/integrations-core/blob/master/hivemq/CHANGELOG.md)
-* HTTP [6.1.2](https://github.com/DataDog/integrations-core/blob/master/http_check/CHANGELOG.md)
 * Hudi [2.0.1](https://github.com/DataDog/integrations-core/blob/master/hudi/CHANGELOG.md)
 * HyperV [1.5.0](https://github.com/DataDog/integrations-core/blob/master/hyperv/CHANGELOG.md)
 * IBM Db2 [1.9.1](https://github.com/DataDog/integrations-core/blob/master/ibm_db2/CHANGELOG.md)
@@ -582,7 +608,7 @@
 * HDFS Namenode [2.2.0](https://github.com/DataDog/integrations-core/blob/master/hdfs_namenode/CHANGELOG.md)
 * Hive [1.7.1](https://github.com/DataDog/integrations-core/blob/master/hive/CHANGELOG.md)
 * HiveMQ [1.5.1](https://github.com/DataDog/integrations-core/blob/master/hivemq/CHANGELOG.md)
-* HTTP [6.1.2-rc.1](https://github.com/DataDog/integrations-core/blob/master/http_check/CHANGELOG.md)
+* HTTP [6.1.2](https://github.com/DataDog/integrations-core/blob/master/http_check/CHANGELOG.md)
 * Hudi [2.0.0](https://github.com/DataDog/integrations-core/blob/master/hudi/CHANGELOG.md) **BREAKING CHANGE**
 * IBM Db2 [1.9.0](https://github.com/DataDog/integrations-core/blob/master/ibm_db2/CHANGELOG.md)
 * IBM i [1.1.0](https://github.com/DataDog/integrations-core/blob/master/ibm_i/CHANGELOG.md)

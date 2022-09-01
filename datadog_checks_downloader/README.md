@@ -28,7 +28,7 @@ to work with the check.
 To install the check in dev mode:
 
 ```shell
-pip install -e .[dev,deps]
+pip install -e '.[deps]'
 ```
 
 To download a new or updated integration, you may specify a precise

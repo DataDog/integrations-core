@@ -67,7 +67,7 @@ def test_server_down(aggregator, instance_basic, dd_run_check):
         (['connection_pool_metrics'], CONNECTION_POOL_METRICS, ['hostgroup', 'srv_host', 'srv_port']),
         (['users_metrics'], USER_TAGS_METRICS, ['username']),
         (['memory_metrics'], MEMORY_METRICS, []),
-        (['backends_metrics'], BACKENDS_METRICS, ['hostgroup_id', 'status']),
+        (['backends_metrics'], BACKENDS_METRICS, ['hostgroup', 'status']),
         (['query_rules_metrics'], QUERY_RULES_TAGS_METRICS, ['rule_id']),
     ),
     ids=('global', 'command_counters', 'connection_pool', 'users', 'memory', 'backends', 'query_rules'),

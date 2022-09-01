@@ -102,12 +102,36 @@ def instance_ssl_keyfile(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_ssl_match_hostname(field, value):
+    return True
+
+
 def instance_tags(field, value):
     return get_default_field_value(field, value)
 
 
 def instance_timeout(field, value):
     return 30
+
+
+def instance_tls(field, value):
+    return False
+
+
+def instance_tls_allow_invalid_certificates(field, value):
+    return False
+
+
+def instance_tls_allow_invalid_hostnames(field, value):
+    return False
+
+
+def instance_tls_ca_file(field, value):
+    return get_default_field_value(field, value)
+
+
+def instance_tls_certificate_key_file(field, value):
+    return get_default_field_value(field, value)
 
 
 def instance_username(field, value):

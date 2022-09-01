@@ -555,7 +555,7 @@ Additional helpful documentation, links, and articles:
 [20]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [21]: https://github.com/DataDog/integrations-core/blob/master/mysql/metadata.csv
 [22]: https://github.com/DataDog/integrations-core/blob/master/mysql/assets/service_checks.json
-[23]: https://docs.datadoghq.com/integrations/faq/connection-issues-with-the-sql-server-integration/
+[23]: https://docs.datadoghq.com/integrations/guide/connection-issues-with-the-sql-server-integration/
 [24]: https://docs.datadoghq.com/integrations/faq/can-i-use-a-named-instance-in-the-sql-server-integration/
 [25]: https://docs.datadoghq.com/integrations/faq/can-i-set-up-the-dd-agent-mysql-check-on-my-google-cloudsql/
 [26]: https://docs.datadoghq.com/integrations/faq/how-to-collect-metrics-from-custom-mysql-queries/

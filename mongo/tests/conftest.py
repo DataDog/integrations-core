@@ -13,6 +13,7 @@ from datadog_test_libs.utils.mock_dns import mock_local
 from tests.mocked_api import MockedPyMongoClient
 
 from datadog_checks.dev import LazyFunction, WaitFor, docker_run, run_command
+from datadog_checks.dev.conditions import WaitForPortListening
 from datadog_checks.mongo import MongoDb
 
 from . import common
@@ -35,17 +36,45 @@ HOSTNAME_TO_PORT_MAPPING = {
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    compose_file = os.path.join(common.HERE, 'compose', 'docker-compose.yml')
+    compose_file = os.path.join(common.HERE, 'compose', common.COMPOSE_FILE)
 
-    with docker_run(
-        compose_file,
-        conditions=[
+    if common.IS_AUTH:
+        conditions = [
+            WaitForPortListening(common.HOST, common.PORT1),
+            InitializeAuthDB(),
+        ]
+        with docker_run(
+            compose_file,
+            conditions=conditions,
+        ):
+            yield common.INSTANCE_BASIC, {}
+    elif common.IS_TLS:
+        conditions = [WaitForPortListening(common.HOST, common.PORT1)]
+        with docker_run(
+            compose_file,
+            conditions=conditions,
+        ):
+            yield common.INSTANCE_BASIC, common.TLS_METADATA
+    elif common.IS_STANDALONE:
+        conditions = [
+            WaitForPortListening(common.HOST, common.PORT1),
+            InitializeDB(),
+        ]
+        with docker_run(
+            compose_file,
+            conditions=conditions,
+        ):
+            yield common.INSTANCE_BASIC, {}
+    elif common.IS_SHARD:
+        conditions = [
             WaitFor(setup_sharding, args=(compose_file,), attempts=5, wait=5),
             InitializeDB(),
-            WaitFor(create_shard_user, attempts=60, wait=5),
-        ],
-    ):
-        yield common.INSTANCE_CUSTOM_QUERIES, {'custom_hosts': get_custom_hosts()}
+        ]
+        with docker_run(
+            compose_file,
+            conditions=conditions,
+        ):
+            yield common.INSTANCE_CUSTOM_QUERIES, {'custom_hosts': get_custom_hosts()}
 
 
 def get_custom_hosts():
@@ -100,7 +129,7 @@ def mock_pymongo(deployment):
         'pymongo.collection.Collection'
     ), mock.patch('pymongo.command_cursor') as cur:
         cur.CommandCursor = lambda *args, **kwargs: args[1]['firstBatch']
-        yield
+        yield mocked_client
 
 
 @pytest.fixture
@@ -152,7 +181,9 @@ def setup_sharding(compose_file):
 class InitializeDB(LazyFunction):
     def __call__(self):
         cli = pymongo.mongo_client.MongoClient(
-            common.MONGODB_SERVER, socketTimeoutMS=30000, read_preference=pymongo.ReadPreference.PRIMARY_PREFERRED
+            "mongodb://%s:%s" % (common.HOST, common.PORT1),
+            socketTimeoutMS=30000,
+            read_preference=pymongo.ReadPreference.PRIMARY_PREFERRED,
         )
 
         foos = []
@@ -182,13 +213,65 @@ class InitializeDB(LazyFunction):
             db.orders.insert_many(orders)
             db.command("createUser", 'testUser2', pwd='testPass2', roles=[{'role': 'read', 'db': db_name}])
 
+        cli['admin'].command(
+            "createUser",
+            'testUser',
+            pwd='testPass',
+            roles=[
+                {'role': 'read', 'db': 'test'},
+                {'role': "clusterManager", 'db': "admin"},
+                {'role': "clusterMonitor", 'db': "admin"},
+            ],
+        )
         auth_db = cli['authDB']
         auth_db.command("createUser", 'testUser', pwd='testPass', roles=[{'role': 'read', 'db': 'test'}])
         auth_db.command("createUser", 'special test user', pwd='s3\\kr@t', roles=[{'role': 'read', 'db': 'test'}])
 
 
-def create_shard_user():
-    cli_shard = pymongo.mongo_client.MongoClient(
-        common.SHARD_SERVER, socketTimeoutMS=30000, read_preference=pymongo.ReadPreference.PRIMARY_PREFERRED
-    )
-    cli_shard['admin'].command("createUser", "testUser", pwd="testPass", roles=["root"])
+class InitializeAuthDB(LazyFunction):
+    def __call__(self):
+        cli = pymongo.mongo_client.MongoClient(
+            "mongodb://root:rootPass@%s:%s" % (common.HOST, common.PORT1),
+            socketTimeoutMS=30000,
+            read_preference=pymongo.ReadPreference.PRIMARY_PREFERRED,
+        )
+
+        foos = []
+        for i in range(70):
+            foos.append({'1': []})
+            foos.append({'1': i})
+            foos.append({})
+
+        bars = []
+        for _ in range(50):
+            bars.append({'1': []})
+            bars.append({})
+
+        orders = [
+            {"cust_id": "abc1", "status": "A", "amount": 50, "elements": 3},
+            {"cust_id": "xyz1", "status": "A", "amount": 100},
+            {"cust_id": "abc1", "status": "D", "amount": 50, "elements": 1},
+            {"cust_id": "abc1", "status": "A", "amount": 25},
+            {"cust_id": "xyz1", "status": "A", "amount": 25},
+            {"cust_id": "abc1", "status": "A", "amount": 300, "elements": 10},
+        ]
+
+        for db_name in ['admin']:
+            db = cli[db_name]
+            db.foo.insert_many(foos)
+            db.bar.insert_many(bars)
+            db.orders.insert_many(orders)
+            db.command("createUser", 'testUser2', pwd='testPass2', roles=[{'role': 'read', 'db': db_name}])
+
+        auth_db = cli['authDB']
+        auth_db.command(
+            "createUser",
+            'testUser',
+            pwd='testPass',
+            roles=[
+                {'role': 'read', 'db': 'test'},
+                {'role': "clusterManager", 'db': "admin"},
+                {'role': "clusterMonitor", 'db': "admin"},
+            ],
+        )
+        auth_db.command("createUser", 'special test user', pwd='s3\\kr@t', roles=[{'role': 'read', 'db': 'test'}])

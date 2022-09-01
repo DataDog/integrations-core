@@ -41,39 +41,40 @@ db = [
 deps = [
     "binary==1.0.0",
     "cachetools==3.1.1; python_version < '3.0'",
-    "cachetools==5.0.0; python_version > '3.0'",
+    "cachetools==5.2.0; python_version > '3.0'",
     "contextlib2==0.6.0.post1; python_version < '3.0'",
     "cryptography==3.3.2; python_version < '3.0'",
     "cryptography==3.4.8; python_version > '3.0'",
     "ddtrace==0.32.2; sys_platform == 'win32' and python_version < '3.0'",
     "ddtrace==0.53.2; sys_platform != 'win32' or python_version > '3.0'",
     "enum34==1.1.10; python_version < '3.0'",
-    "immutables==0.17; python_version > '3.0'",
+    "immutables==0.18; python_version > '3.0'",
     "ipaddress==1.0.23; python_version < '3.0'",
     "jellyfish==0.9.0; python_version > '3.0'",
     "prometheus-client==0.12.0; python_version < '3.0'",
     "prometheus-client==0.14.1; python_version > '3.0'",
     "protobuf==3.17.3; python_version < '3.0'",
     "protobuf==3.20.1; python_version > '3.0'",
-    "pydantic==1.9.0; python_version > '3.0'",
+    "pydantic==1.9.1; python_version > '3.0'",
     "python-dateutil==2.8.2",
     "pywin32==228; sys_platform == 'win32' and python_version < '3.0'",
     "pywin32==304; sys_platform == 'win32' and python_version > '3.0'",
-    "pyyaml==5.4.1",
+    "pyyaml==5.4.1; python_version < '3.0'",
+    "pyyaml==6.0; python_version > '3.0'",
     "requests-toolbelt==0.9.1",
     "requests-unixsocket==0.3.0",
     "requests==2.27.1; python_version < '3.0'",
-    "requests==2.27.1; python_version > '3.0'",
+    "requests==2.28.1; python_version > '3.0'",
     "simplejson==3.17.6",
     "six==1.16.0",
     "typing==3.10.0.0; python_version < '3.0'",
     "uptime==3.0.1",
-    "wrapt==1.14.0",
+    "wrapt==1.14.1",
 ]
 http = [
     "aws-requests-auth==0.4.3",
     "botocore==1.20.112; python_version < '3.0'",
-    "botocore==1.25.8; python_version > '3.0'",
+    "botocore==1.27.44; python_version > '3.0'",
     "pyjwt==1.7.1; python_version < '3.0'",
     "pyjwt==2.4.0; python_version > '3.0'",
     "pysocks==1.7.1",
@@ -83,11 +84,11 @@ http = [
     "win-inet-pton==1.1.0; sys_platform == 'win32' and python_version < '3.0'",
 ]
 json = [
-    "orjson==3.6.8; python_version > '3.0'",
+    "orjson==3.7.11; python_version > '3.0'",
 ]
 kube = [
     "kubernetes==18.20.0; python_version < '3.0'",
-    "kubernetes==22.6.0; python_version > '3.0'",
+    "kubernetes==24.2.0; python_version > '3.0'",
 ]
 
 [project.urls]

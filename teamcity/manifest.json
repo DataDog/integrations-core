@@ -30,6 +30,10 @@
   "assets": {
     "integration": {
       "source_type_name": "Teamcity",
+      "process_signatures": [
+        "teamcity-server.sh",
+        "teamcity-server"
+      ],
       "configuration": {
         "spec": "assets/configuration/spec.yaml"
       },

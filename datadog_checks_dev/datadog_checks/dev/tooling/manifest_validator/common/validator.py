@@ -12,7 +12,7 @@ import six
 from ...datastructures import JSONDict
 from ...git import git_show_file
 from ...utils import get_metadata_file, has_logs, is_metric_in_metadata_file, read_metadata_rows
-from ..constants import V1, V2
+from ..constants import V1, V1_STRING, V2, V2_STRING
 
 
 class ValidationResult(object):
@@ -311,3 +311,9 @@ class LogsCategoryValidator(BaseManifestValidator):
                 + ' or define the logs properly'
             )
             self.fail(output)
+
+
+class VersionValidator(BaseManifestValidator):
+    def validate(self, check_name, decoded, fix):
+        if decoded.get('manifest_version', V2_STRING) == V1_STRING:
+            self.fail('Manifest version must be >= 2.0.0')
