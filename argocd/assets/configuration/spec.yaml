@@ -4,7 +4,31 @@ files:
   options:
   - template: init_config
     options:
-    - template: init_config/default
+    - template: init_config/openmetrics
   - template: instances
     options:
-    - template: instances/default
+    - name: app_controller_endpoint
+      description: |
+        Noting right now
+      value:
+        display_default: null
+        example: http://localhost:8082/metrics
+        type: string
+    - name: api_server_endpoint
+      description: |
+        Noting right now
+      value:
+        display_default: null
+        example: http://localhost:8083/metrics
+        type: string
+    - name: repo_server_endpoint
+      description: |
+        Noting right now
+      value:
+        display_default: null
+        example: http://localhost:8084/metrics
+        type: string
+    - template: instances/openmetrics
+      overrides:
+        openmetrics_endpoint.required: false
+        openmetrics_endpoint.hidden: true
