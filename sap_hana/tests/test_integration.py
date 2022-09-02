@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import time
+
 import mock
 import pytest
 from mock.mock import ANY, call
@@ -24,8 +26,7 @@ def test_check(aggregator, instance, dd_run_check):
 def test_check_invalid_schema(aggregator, instance, dd_run_check):
     instance["schema"] = "UNKNOWN_SCHEMA"
     check = SapHanaCheck('sap_hana', {}, [instance])
-    check.log = mock.MagicMock()
-    dd_run_check(check)
+    _run_until_stable(dd_run_check, check, aggregator, mock_log=True)
 
     check.log.error.assert_has_calls(
         calls=[
@@ -42,18 +43,22 @@ def test_check_invalid_schema(aggregator, instance, dd_run_check):
         any_order=False,
     )
 
-    assert check.log.error.call_count == 9
-
     for call_args in check.log.error.call_args_list:
         assert "invalid schema name: UNKNOWN_SCHEMA" in call_args[0][2]
 
+    assert check.log.error.call_count == 9
 
-def _run_until_stable(dd_run_check, check, aggregator):
+
+def _run_until_stable(dd_run_check, check, aggregator, mock_log=False):
     retries = 3
+    if mock_log:
+        check.log = mock.MagicMock()
     dd_run_check(check)
     while retries and connection_flaked(aggregator):
-        aggregator.reset()
+        if mock_log:
+            check.log.reset_mock()
         dd_run_check(check)
+        time.sleep(4 - retries)
         retries -= 1
 
 
