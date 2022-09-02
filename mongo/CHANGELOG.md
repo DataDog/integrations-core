@@ -1,5 +1,9 @@
 # CHANGELOG - mongo
 
+## 4.0.2 / 2022-09-02
+
+* [Fixed] Solve issue after migration to pymongo 4. See [#12860](https://github.com/DataDog/integrations-core/pull/12860).
+
 ## 4.0.1 / 2022-08-15
 
 * [Fixed] Rename SSL parameters. See [#12743](https://github.com/DataDog/integrations-core/pull/12743).
