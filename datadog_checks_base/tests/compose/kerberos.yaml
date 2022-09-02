@@ -1,7 +1,6 @@
 version: '3.7'
 
 services:
-
   kerberos-kdc:
     build: ./kerberos-kdc
     image: kerberos-kdc
@@ -31,6 +30,7 @@ services:
   web:
     image: kerberos-nginx:1.17.3
     build: ./kerberos-nginx
+    container_name: kerberos-nginx
     environment:
       KRB5_KEYTAB: ${KRB5_KEYTAB}
       KRB5_CCNAME: ${KRB5_CCNAME}
@@ -60,4 +60,3 @@ services:
 
 networks:
   kdc-net: {}
-
