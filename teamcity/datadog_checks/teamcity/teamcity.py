@@ -4,20 +4,11 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from urllib.parse import urlparse
 
-import requests
 from six import PY2
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 
-from .common import (
-    BUILD_PROBLEM_OCCURRENCES_URL,
-    BUILD_STATS_URL,
-    LAST_BUILD_URL,
-    NEW_BUILD_URL,
-    SERVICE_CHECK_STATUS_MAP,
-    TEST_OCCURRENCES_URL,
-    construct_event,
-)
+from .common import SERVICE_CHECK_STATUS_MAP, BuildConfigCache, construct_event, get_response
 from .metrics import build_metric
 
 
@@ -48,7 +39,7 @@ class TeamCityCheck(AgentCheck):
 
     def __init__(self, name, init_config, instances):
         super(TeamCityCheck, self).__init__(name, init_config, instances)
-        self.last_build_ids = {}
+        self.build_config_cache = BuildConfigCache()
         self.instance_name = self.instance.get('name')
         self.host = self.instance.get('host_affected') or self.hostname
         self.build_config = self.instance.get('build_configuration')
@@ -59,6 +50,7 @@ class TeamCityCheck(AgentCheck):
 
         parsed_endpoint = urlparse(self.instance.get('server'))
         self.server_url = "{}://{}".format(parsed_endpoint.scheme, parsed_endpoint.netloc)
+        self.base_url = "{}/{}".format(self.server_url, self.auth_type)
 
         instance_tags = [
             'build_config:{}'.format(self.build_config),
@@ -69,82 +61,63 @@ class TeamCityCheck(AgentCheck):
         self.tags.update(instance_tags)
 
     def _build_and_send_event(self, new_build):
-        self.log.debug("Found new build with id %s, saving and alerting.", new_build["number"])
-        self.last_build_ids[self.instance_name] = new_build["id"]
+        self.log.debug(
+            "Found new build with id %s (build number: %s), saving and alerting.", new_build['id'], new_build['number']
+        )
+        self.build_config_cache.set_last_build_id(self.build_config, new_build['id'], new_build['number'])
 
         teamcity_event = construct_event(self.is_deployment, self.instance_name, self.host, new_build, list(self.tags))
-
+        self.log.trace('Submitting event: %s', teamcity_event)
         self.event(teamcity_event)
         self.service_check('build.status', SERVICE_CHECK_STATUS_MAP.get(new_build['status']), tags=list(self.tags))
 
     def _initialize(self):
-        last_build_id = None
-        last_build_url = LAST_BUILD_URL.format(
-            server=self.server_url, auth_type=self.auth_type, build_conf=self.build_config
-        )
         self.log.debug("Initializing %s", self.instance_name)
 
-        try:
-            resp = self.http.get(last_build_url)
-            resp.raise_for_status()
+        last_build_res = get_response(self, 'last_build', base_url=self.base_url, build_conf=self.build_config)
 
-            if resp.json()['count'] == 0:
-                self.log.debug('No builds found during initialization.')
-                return
-            else:
-                last_build_id = resp.json().get("build")[0].get("number")
+        last_build_id = last_build_res['build'][0]['id']
+        last_build_number = last_build_res['build'][0]['number']
+        build_config_id = last_build_res['build'][0]['buildTypeId']
 
-        except requests.exceptions.HTTPError:
-            if resp.status_code == 401:
-                self.log.error("Access denied. Enable guest authentication or check user permissions.")
-            self.log.error(
-                "Failed to retrieve last build ID with code %s for instance '%s'", resp.status_code, self.instance_name
-            )
-            raise
-        except Exception:
-            self.log.exception("Unhandled exception to get last build ID for instance '%s'", self.instance_name)
-            raise
-        self.log.debug("Last build id for instance %s is %s.", self.instance_name, last_build_id)
-        self.last_build_ids[self.instance_name] = last_build_id
+        self.log.debug(
+            "Last build id for instance %s is %s (build number:%s).",
+            self.instance_name,
+            last_build_id,
+            last_build_number,
+        )
+        self.build_config_cache.set_build_config(build_config_id)
+        self.build_config_cache.set_last_build_id(build_config_id, last_build_id, last_build_number)
 
     def _collect_build_stats(self, new_build):
         build_id = new_build['id']
-        build_stats_url = BUILD_STATS_URL.format(
-            server=self.server_url, auth_type=self.auth_type, build_conf=self.build_config, build_id=build_id
+        build_number = new_build['number']
+        build_stats = get_response(
+            self, 'build_stats', base_url=self.base_url, build_conf=self.build_config, build_id=build_id
         )
 
-        resp = self.http.get(build_stats_url)
-        resp.raise_for_status()
-        build_stats = resp.json()
-        self.log.trace('Build configuration statistics response payload: {}'.format(build_stats))
-
-        for stat_property in build_stats['property']:
-            stat_property_name = stat_property['name']
-            metric_name, additional_tags, method = build_metric(stat_property_name)
-            metric_value = stat_property['value']
-            method = getattr(self, method)
-            method(metric_name, metric_value, tags=list(self.tags) + additional_tags)
+        if build_stats:
+            for stat_property in build_stats['property']:
+                stat_property_name = stat_property['name']
+                metric_name, additional_tags, method = build_metric(stat_property_name)
+                metric_value = stat_property['value']
+                additional_tags.append('build_number:{}'.format(build_number))
+                method = getattr(self, method)
+                method(metric_name, metric_value, tags=list(self.tags) + additional_tags)
 
     def _collect_test_results(self, new_build):
         build_id = new_build['id']
         build_number = new_build['number']
-        test_occurrences_url = TEST_OCCURRENCES_URL.format(
-            server=self.server_url, auth_type=self.auth_type, build_id=build_id
-        )
+        test_results = get_response(self, 'test_occurrences', base_url=self.base_url, build_id=build_id)
 
-        resp = self.http.get(test_occurrences_url)
-        resp.raise_for_status()
-        test_results = resp.json()
-        self.log.trace('Test occurrences response payload: {}'.format(test_results))
-        self.log.debug('Test occurrences response payload: {}'.format(test_results))
-        if test_results.get('count') and test_results['count'] > 0:
+        if test_results:
             for test in test_results['testOccurrence']:
                 test_status = test['status']
                 value = 1 if test_status == 'SUCCESS' else 0
                 tags = [
                     'result:{}'.format(test_status.lower()),
                     'build_number:{}'.format(build_number),
-                    'build_id:{}'.format(build_number),
+                    'build_id:{}'.format(build_id),
                     'test_name:{}'.format(test['name']),
                 ]
                 self.gauge('test_result', value, tags=list(self.tags) + tags)
@@ -152,16 +125,9 @@ class TeamCityCheck(AgentCheck):
     def _collect_build_problems(self, new_build):
         build_id = new_build['id']
         build_number = new_build['number']
-        problem_occurrences_url = BUILD_PROBLEM_OCCURRENCES_URL.format(
-            server=self.server_url, auth_type=self.auth_type, build_id=build_id
-        )
+        problem_results = get_response(self, 'build_problems', base_url=self.base_url, build_id=build_id)
 
-        resp = self.http.get(problem_occurrences_url)
-        resp.raise_for_status()
-        problem_results = resp.json()
-        self.log.trace('Problem occurrences response payload: {}'.format(problem_results))
-        self.log.debug('Problem occurrences response payload: {}'.format(problem_results))
-        if problem_results.get('count') and problem_results['count'] > 0:
+        if problem_results:
             for problem in problem_results['problemOccurrence']:
                 problem_type = problem['type']
                 problem_identity = problem['identity']
@@ -173,33 +139,31 @@ class TeamCityCheck(AgentCheck):
                 ]
                 self.service_check('build_problem', AgentCheck.WARNING, tags=list(self.tags) + tags)
 
+    def _collect_all_builds(self):
+        all_builds = get_response(self, 'all_builds', base_url=self.base_url)
+        for build in all_builds['buildType']:
+
+            self.build_config_cache.set_build_config(build['id'], build['name'])
+
+    def _collect_new_builds(self):
+        last_build_ids_dict = self.build_config_cache.get_last_build_id(self.build_config)
+        last_build_id = last_build_ids_dict['id']
+        new_builds = get_response(
+            self, 'new_builds', base_url=self.base_url, build_conf=self.build_config, since_build=last_build_id
+        )
+        return new_builds
+
     def check(self, _):
-        if not self.last_build_ids.get(self.instance_name):
+        if not self.build_config_cache.get_build_config(self.build_config):
             self._initialize()
 
-        new_build_url = NEW_BUILD_URL.format(
-            server=self.server_url,
-            auth_type=self.auth_type,
-            build_conf=self.build_config,
-            since_build=self.last_build_ids[self.instance_name],
-        )
-        try:
-            resp = self.http.get(new_build_url)
-            resp.raise_for_status()
-            new_builds = resp.json()
-
-            if new_builds["count"] == 0:
-                self.log.debug("No new builds found.")
-            else:
-                self.log.trace("New builds found: {}".format(new_builds))
-                for build in new_builds['build']:
-                    self._build_and_send_event(build)
-                    self._collect_build_stats(build)
-                    self._collect_test_results(build)
-                    self._collect_build_problems(build)
-        except requests.exceptions.HTTPError:
-            self.log.exception("Couldn't fetch last build, got code %s", resp.status_code)
-            raise
-        except Exception:
-            self.log.exception("Couldn't fetch last build, unhandled exception")
-            raise
+        new_builds = self._collect_new_builds()
+        if new_builds:
+            self.log.debug("New builds found: {}".format(new_builds))
+            for build in new_builds['build']:
+                self._build_and_send_event(build)
+                self._collect_build_stats(build)
+                self._collect_test_results(build)
+                self._collect_build_problems(build)
+        else:
+            self.log.debug('No new builds found.')
