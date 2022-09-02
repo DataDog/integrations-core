@@ -1,4 +1,4 @@
-version: '3.5'
+version: '3.8'
 
 services:
   socks5:
@@ -13,3 +13,5 @@ services:
     image: nginx:stable-alpine
     ports:
       - "80:80"
+    depends_on:
+      - socks5

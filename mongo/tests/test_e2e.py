@@ -5,7 +5,7 @@ import pytest
 
 from datadog_checks.mongo import MongoDb
 
-from .common import HOST, PORT1, shard, standalone, tls
+from .common import HOST, PORT1, auth, shard, standalone, tls
 
 BASE_METRICS = [
     'mongodb.connections.available',
@@ -71,7 +71,21 @@ def test_e2e_mongo_shard(dd_agent_check, instance_authdb):
     aggregator = dd_agent_check(instance_authdb, rate=True)
     for metric in MONGOS_METRICS:
         aggregator.assert_metric(metric)
+    aggregator.assert_service_check('mongodb.can_connect', status=MongoDb.OK)
 
+
+@auth
+@pytest.mark.e2e
+def test_e2e_mongo_auth(dd_agent_check):
+    instance = {
+        'hosts': ['{}:{}'.format(HOST, PORT1)],
+        'username': 'testUser',
+        'password': 'testPass',
+        'options': {'authSource': 'authDB'},
+    }
+    aggregator = dd_agent_check(instance, rate=True)
+    for metric in MONGOD_METRICS:
+        aggregator.assert_metric(metric)
     aggregator.assert_service_check('mongodb.can_connect', status=MongoDb.OK)
 
 
@@ -81,9 +95,9 @@ def test_e2e_mongo_tls(dd_agent_check):
     instance = {
         'hosts': ['{}:{}'.format(HOST, PORT1)],
         'tls': True,
-        'tlsAllowInvalidCertificates': True,
-        'tlsCertificateKeyFile': '/certs/client1.pem',
-        'tlsCAFile': '/certs/ca.pem',
+        'tls_allow_invalid_certificates': True,
+        'tls_certificate_key_file': '/certs/client1.pem',
+        'tls_ca_file': '/certs/ca.pem',
     }
     aggregator = dd_agent_check(instance, rate=True)
     for metric in MONGOD_METRICS:

@@ -47,4 +47,4 @@ def test_e2e(dd_agent_check, datadog_agent, integration_instance, get_expected_m
         aggregator.assert_metric(metric['name'], metric['value'], metric['tags'], metric_type=metric['type'])
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
-    datadog_agent.assert_metadata_count(7)
+    datadog_agent.assert_metadata_count(5)

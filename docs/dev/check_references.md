@@ -69,20 +69,9 @@ For more information about YAML syntax, see [Wikipedia][2]. Feel free to play ar
 
 ## Manifest file
 
-Every integration contains a `manifest.json` file that describes operating parameters, positioning within the greater Datadog integration eco-system, and other such items.
+Every offering on the [Integrations page][4] or [Marketplace][11] contains a `manifest.json` file that describes operating parameters, positioning within the greater Datadog integration eco-system, and other metadata.
 
-There are two versions of the `manifest.json` file. While we will continue supporting manifest version 1 for existing integrations, all **new** integrations, Datadog Apps, and Marketplace offerings should use version 2 of the manifest.
-
-If you see the following at the top of your `manifest.json` file, this means you are using version 2:
-
-```"manifest_version": "2.0.0"```
-
-Otherwise, you can assume that you are using version 1. 
-
-These two versions have different attributes and structures. You can find the complete list of mandatory and optional attributes for both versions of the `manifest.json` file below: 
-
-{{< tabs >}}
-{{% tab "Manifest Version 2" %}}
+You can find the complete list of mandatory and optional attributes for the `manifest.json` file below: 
 
 | Attribute                                            | Type                        | Mandatory/Optional                        | Description                                                                                                                                                                                                                                 |
 |------------------------------------------------------|-----------------------------|-------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -115,7 +104,7 @@ These two versions have different attributes and structures. You can find the co
 | `display_on_public_website `                         | Boolean                     | Mandatory                                 | Whether or not information about this listing is displayed on the public Datadog docs site. Once this is set to True, it cannot be changed.                                                                                                 |
 | `legal_terms `                                       | Dictionary                  | Mandatory                                 | Any legal documentation that a user needs to agree to in order to use this app.                                                                                                                                                             |
 | `legal_terms[eula] `                                 | String                      | Mandatory                                 | Relative path to the EULA (End User License Agreement) PDF in relation to this manifest.                                                                                                                                                    |
-| `pricing`                                            | Array of Dictionaries       | Mandatory                                 | List of objects representing the pricing model of the integration. See [Marketplace GitHub repository][1] for pricing details. The Marketplace GitHub repository is private, email marketplace@datadog.com for access.                      |
+| `pricing`                                            | Array of Dictionaries       | Mandatory                                 | List of objects representing the pricing model of the integration. See [Marketplace GitHub repository][12] for pricing details. The Marketplace GitHub repository is private, email marketplace@datadog.com for access.                      |
 | `tile`                                               | Dictionary                  | Mandatory                                 | Information about this offering                                                                                                                                                                                                             |
 | `tile[media]`                                        | Array of Dictionaries       | Mandatory, can be `[ ]`                   | Information about various image and video style objects that are presented in the media gallery carousel on the listing page.                                                                                                               |
 | `tile[media[media_type]]`                            | String or Enum              | Mandatory                                 | The type of media this is. Allowed values are `image` and `video`.                                                                                                                                                                          |
@@ -124,49 +113,6 @@ These two versions have different attributes and structures. You can find the co
 | `tile[classifier_tags]`                              | Array of String             | Mandatory, can be `[ ]`                   | Some classifier information about this app. This includes information such as `supported_os` and `available_offerings`.                                                                                                                     |
 | `tile[description]`                                  | String\[80\]                | Mandatory                                 | A brief description of what this offering provides. Limited to 80 characters.                                                                                                                                                               |
 | `tile[title]`                                        | String\[50\]                | Mandatory                                 | The user-friendly title for this app.                                                                                                                                                                                                       |
-
-
-[1]: https://github.com/DataDog/marketplace#faq
-
-
-{{% /tab %}}
-
-{{% tab "Manifest Version 1" %}}
-
-
-| Attribute                   | Type            | Mandatory/Optional | Description                                                                                                                                                                                                              |
-| --------------------------- | --------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `integration_id`            | String          | Mandatory          | The unique identifying name of this integration. Usually kebab case of the Display Name                                                                                                                                  |
-| `categories`                | Array of String | Mandatory          | Integration categories used on the public documentation [Integrations][1] page.                                                                                                                                          |
-| `creates_events`            | Boolean         | Mandatory          | If the integration should be able to create events. If this is set to `false`, attempting to create an event from the integration results in an error.                                                                   |
-| `display_name`              | String          | Mandatory          | The title displayed on the corresponding integration tile on the Datadog site and the [Integrations page][1].                                                                                                            |
-| `guid`                      | String          | Mandatory          | Unique ID for the integration. [Generate a UUID][2]                                                                                                                                                                      |
-| `is_public`                 | Boolean         | Mandatory          | If set to `false` the integration `README.md` content is not included in the Datadog public documentation.                                                                                                               |
-| `maintainer`                | String          | Mandatory          | Email of the owner of the integration.                                                                                                                                                                                   |
-| `manifest_version`          | String          | Mandatory          | Version of the current manifest.                                                                                                                                                                                         |
-| `name`                      | String          | Mandatory          | Unique name for the integration. Use the folder name for this parameter.                                                                                                                                                 |
-| `public_title`              | String          | Mandatory          | Title of the integration displayed on the documentation. Should follow the following format: `<INTEGRATION_NAME>`.                                                                                                       |
-| `short_description`         | String          | Mandatory          | This text appears at the top of the integration tile as well as the integration's rollover text on the integrations page. Maximum 80 characters.                                                                         |
-| `support`                   | String          | Mandatory          | Owner of the integration.                                                                                                                                                                                                |
-| `supported_os`              | Array of String | Mandatory          | List of supported OSs. Choose among `linux`,`mac_os`, and `windows`.                                                                                                                                                     |
-| `type`                      | String          | Mandatory          | Type of the integration, should be set to `check`.                                                                                                                                                                       |
-| `aliases`                   | Array of String | Optional           | A list of URL aliases for the Datadog documentation.                                                                                                                                                                     |
-| `description`               | String          | Optional           | This text appears when sharing an integration documentation link.                                                                                                                                                        |
-| `is_beta`                   | Boolean         | Optional           | Default `false`. If set to `true` the integration `README.md` content is not displayed in the Datadog public documentation.                                                                                              |
-| `metric_to_check`           | String          | Optional           | The presence of this metric determines if this integration is working properly. If this metric is not being reported when this integration is installed, the integration is marked as broken on the Datadog site.        |
-| `metric_prefix`             | String          | Optional           | The namespace for this integration's metrics. Every metric reported by this integration is prepended with this value.                                                                                                    |
-| `process_signatures`        | Array of String | Optional           | A list of signatures that matches the command line of this integration.                                                                                                                                                  |
-| `assets`                    | Dictionary      | Mandatory          | Relative location of where certain asset files live and their respective names.                                                                                                                                          |
-| `assets`-> `dashboards`     | Dictionary      | Mandatory          | Dictionary where the key is the name of the dashboard (must be globally unique across integrations) and the value is the relative file path where the dashboard definition lives.                                        |
-| `assets`-> `monitors`       | Dictionary      | Mandatory          | Dictionary where the key is the name of the monitor (must be globally unique across integrations) and the value is the relative file path where the dashboard definition lives.                                          |
-| `assets`-> `service_checks` | String          | Mandatory          | Relative location of where the `service_checks.json` file lives.                                                                                                                                                         |
-
-[1]: https://docs.datadoghq.com/integrations/
-[2]: https://www.uuidgenerator.net
-
-
-{{% /tab %}}
-{{< /tabs >}}
 
 
 ## Service check file
@@ -216,3 +162,5 @@ Descriptions of each column of the `metadata.csv` file:
 [8]: https://docs.datadoghq.com/getting_started/tagging/
 [9]: https://docs.datadoghq.com/developers/marketplace/
 [10]: https://docs.datadoghq.com/developers/datadog_apps/
+[11]: https://app.datadoghq.com/marketplace
+[12]: https://github.com/DataDog/marketplace#faq

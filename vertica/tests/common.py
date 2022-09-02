@@ -59,3 +59,15 @@ TLS_CONFIG_LEGACY = {
 }
 
 VERTICA_MAJOR_VERSION = parse_major_version(os.environ.get('VERTICA_VERSION', 9))
+
+
+def connection_options_from_config(config):
+    return {
+        'database': config['db'],
+        'host': config['server'],
+        'port': config['port'],
+        'user': config['username'],
+        'password': config['password'],
+        'connection_timeout': config['timeout'],
+        'connection_load_balance': config.get('connection_load_balance'),
+    }

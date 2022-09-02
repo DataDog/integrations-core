@@ -61,7 +61,7 @@ pytestmark = [pytest.mark.usefixtures('dd_environment'), pytest.mark.integration
         pytest.param(common.INSTANCE_AUTHDB_LEGACY_CONFIG, id='legacy'),
     ],
 )
-def test_mongo(aggregator, check, instance_authdb, dd_run_check):
+def test_mongo_authdb(aggregator, check, instance_authdb, dd_run_check):
     check = check(instance_authdb)
     dd_run_check(check)
 
@@ -80,7 +80,7 @@ def test_mongo(aggregator, check, instance_authdb, dd_run_check):
     'instance_user',
     [pytest.param(common.INSTANCE_USER, id='standard'), pytest.param(common.INSTANCE_USER_LEGACY_CONFIG, id='legacy')],
 )
-def test_mongo2(aggregator, check, instance_user, dd_run_check):
+def test_mongo_db_test(aggregator, check, instance_user, dd_run_check):
     check = check(instance_user)
     dd_run_check(check)
 
@@ -121,7 +121,7 @@ def test_mongo_arbiter(aggregator, check, instance_arbiter, dd_run_check):
         'mongodb.replset.state': 7,
     }
     expected_tags = [
-        'server:mongodb://testUser:*****@localhost:27020/',
+        'server:mongodb://localhost:27020/',
         'replset_name:shard01',
         'replset_state:arbiter',
         'sharding_cluster_role:shardsvr',
@@ -132,21 +132,6 @@ def test_mongo_arbiter(aggregator, check, instance_arbiter, dd_run_check):
 
 @common.standalone
 def test_mongo_old_config(aggregator, check, instance, dd_run_check):
-    check = check(instance)
-    dd_run_check(check)
-
-    metric_names = aggregator.metric_names
-    assert metric_names
-
-    for metric_name in metric_names:
-        if metric_name in METRIC_VAL_CHECKS_OLD:
-            metric = aggregator.metrics(metric_name)[0]
-            assert METRIC_VAL_CHECKS_OLD[metric_name](metric.value)
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
-
-
-@common.standalone
-def test_mongo_old_config_2(aggregator, check, instance, dd_run_check):
     check = check(instance)
     dd_run_check(check)
 

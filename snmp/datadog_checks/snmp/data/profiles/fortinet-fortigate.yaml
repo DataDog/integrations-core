@@ -6,6 +6,7 @@ extends:
   - _base.yaml
   - _generic-if.yaml
   - _fortinet-fortigate-cpu-memory.yaml
+  - _fortinet-fortigate-vpn-tunnel.yaml
 
 device:
   vendor: "fortinet"
@@ -265,12 +266,12 @@ metrics:
       - OID: 1.3.6.1.4.1.12356.101.5.1.2.1.1.3
         name: fgFwPolByteCount
     metric_tags:
+      # Internal virtual domain index used to uniquely identify rows in this table. This index is also used by other tables referencing a virtual domain.
+      - index: 1
+        tag: virtualdomain_index
       # Firewall policy ID. Only enabled policies are present in this table. Policy IDs are only unique within a virtual domain.
-      - tag: policy_index
-        column:
-          OID: 1.3.6.1.4.1.12356.101.5.1.2.1.1.1
-          name: fgFwPolID
-
+      - index: 2
+        tag: policy_index
   # Firewall policy6 statistics table.
   - MIB: FORTINET-FORTIGATE-MIB
     table:
@@ -285,8 +286,9 @@ metrics:
       - OID: 1.3.6.1.4.1.12356.101.5.1.2.2.1.3
         name: fgFwPol6ByteCount
     metric_tags:
+      # Internal virtual domain index used to uniquely identify rows in this table. This index is also used by other tables referencing a virtual domain.
+      - index: 1
+        tag: virtualdomain_index
       # Firewall policy6 ID. Only enabled policies are present in this table. Policy IDs are only unique within a virtual domain.
-      - tag: policy6_index
-        column:
-          OID: 1.3.6.1.4.1.12356.101.5.1.2.2.1.1
-          name: fgFwPol6ID
+      - index: 2
+        tag: policy6_index

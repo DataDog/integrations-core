@@ -46,6 +46,9 @@ mmh3,PyPI,CC0-1.0,Hajime Senuma
 openstacksdk,PyPI,Apache-2.0,OpenStack
 orjson,PyPI,Apache-2.0,ijl <ijl@mailbox.org>
 orjson,PyPI,MIT,ijl <ijl@mailbox.org>
+packaging,PyPI,Apache-2.0,Donald Stufft and individual contributors
+packaging,PyPI,BSD-2-Clause,Donald Stufft and individual contributors
+packaging,PyPI,BSD-3-Clause,Donald Stufft and individual contributors
 paramiko,PyPI,LGPL-2.1-only,Jeff Forcier
 ply,PyPI,BSD-3-Clause,David Beazley
 prometheus-client,PyPI,Apache-2.0,Brian Brazil
@@ -57,8 +60,8 @@ pyasn1,PyPI,BSD-3-Clause,Ilya Etingof
 pycryptodomex,PyPI,BSD-2-Clause,Helder Eijs
 pycryptodomex,PyPI,Unlicense,Helder Eijs
 pydantic,PyPI,MIT,Samuel Colvin
-pymongo,PyPI,Apache-2.0,Bernie Hackett
-pymqi,PyPI,PSF,Dariusz Suchojad
+pymongo,PyPI,Apache-2.0,The MongoDB Python Team
+pymqi,PyPI,PSF,Zato Source s.r.o.
 pyodbc,PyPI,MIT,Michael Kleehammer
 pysmi,PyPI,BSD-3-Clause,Ilya Etingof
 pysnmp,PyPI,BSD-3-Clause,Ilya Etingof

@@ -14,7 +14,6 @@ Follow the instructions below to install and configure this check for an Agent r
 ### Installation
 
 The Snowflake check is included in the [Datadog Agent][2] package.
-No additional installation is needed on your server.
 
 **Note**: The Snowflake check is not available in Datadog Agent v6 using Python 2. To use Snowflake on Agent v6 see [Use Python 3 with Datadog Agent v6][3] or upgrade to Agent v7.
 
@@ -96,12 +95,12 @@ datadog-agent integration install datadog-snowflake==2.0.1
         #
         role: <ROLE>
    
-        ## @param min_collection_interval - number - optional - default: 3600
+        ## @param min_collection_interval - number - optional - default: 15
         ## This changes the collection interval of the check. For more information, see:
         ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
         ##
         ## NOTE: Most Snowflake ACCOUNT_USAGE views are populated on an hourly basis,
-        ## so to minimize unnecessary queries the `min_collection_interval` defaults to 1 hour.
+        ## so to minimize unnecessary queries, set the `min_collection_interval` to 1 hour.
         #
         min_collection_interval: 3600
    
@@ -111,7 +110,7 @@ datadog-agent integration install datadog-snowflake==2.0.1
         # disable_generic_tags: true
     ```
 
-    <div class="alert alert-info">By default, the <code>min_collection_interval</code> is 1 hour. 
+    <div class="alert alert-info">In the default `conf.yaml`, the <code>min_collection_interval</code> is 1 hour. 
     Snowflake metrics are aggregated by day, you can increase the interval to reduce the number of queries.<br>
     <bold>Note</bold>: Snowflake ACCOUNT_USAGE views have a <a href="https://docs.snowflake.com/en/sql-reference/account-usage.html#data-latency">known latency</a> of 45 minutes to 3 hours.</div>
 

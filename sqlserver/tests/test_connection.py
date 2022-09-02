@@ -11,14 +11,14 @@ import pyodbc
 import pytest
 
 from datadog_checks.base import ConfigurationError
+from datadog_checks.dev.utils import running_on_windows_ci
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.connection import Connection, SQLConnectionError, parse_connection_string_properties
 
-from .common import CHECK_NAME
-
-pytestmark = pytest.mark.unit
+from .common import CHECK_NAME, SQLSERVER_MAJOR_VERSION
 
 
+@pytest.mark.unit
 @pytest.mark.parametrize(
     'cs,parsed',
     [
@@ -53,6 +53,7 @@ def test_parse_connection_string_properties(cs, parsed):
         parse_connection_string_properties(cs)
 
 
+@pytest.mark.unit
 @pytest.mark.parametrize(
     'cs,username,password,expect_warning',
     [
@@ -76,6 +77,7 @@ def test_warn_trusted_connection_username_pass(instance_minimal_defaults, cs, us
         connection.log.warning.assert_not_called()
 
 
+@pytest.mark.unit
 @pytest.mark.parametrize(
     'connector, param',
     [
@@ -94,6 +96,7 @@ def test_will_warn_parameters_for_the_wrong_connection(instance_minimal_defaults
     )
 
 
+@pytest.mark.unit
 @pytest.mark.parametrize(
     'connector, cs, param, should_fail',
     [
@@ -130,6 +133,7 @@ def test_will_fail_for_duplicate_parameters(instance_minimal_defaults, connector
         connection._connection_options_validation('somekey', 'somedb')
 
 
+@pytest.mark.unit
 @pytest.mark.parametrize(
     'connector, cs',
     [
@@ -158,8 +162,44 @@ def test_will_fail_for_wrong_parameters_in_the_connection_string(instance_minima
         connection._connection_options_validation('somekey', 'somedb')
 
 
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    'host, port, expected_host',
+    [
+        pytest.param('1.2.3.4', '22', '1.2.3.4,22', id='if port provided as a config option, it should be recognized'),
+        pytest.param('1.2.3.4', 'mcnugget', '1.2.3.4,1433', id='if port is not numeric, it should use default port'),
+        pytest.param(
+            '1.2.3.4,mcnugget',
+            None,
+            '1.2.3.4,1433',
+            id='if host port is not numeric, it should use default port',
+        ),
+        pytest.param(
+            '1.2.3.4,22',
+            None,
+            '1.2.3.4,22',
+            id='if port is provided as part of host, it should be recognized',
+        ),
+        pytest.param('1.2.3.4', None, '1.2.3.4,1433', id='if no port is provided anywhere, should default to 1433'),
+        pytest.param(
+            '1.2.3.4,35',
+            22,
+            '1.2.3.4,35',
+            id='if port is provided and included in host string, host port is used',
+        ),
+    ],
+)
+def test_config_with_and_without_port(instance_minimal_defaults, host, port, expected_host):
+    instance_minimal_defaults["host"] = host
+    instance_minimal_defaults["port"] = port
+    connection = Connection({}, instance_minimal_defaults, None)
+    _, result_host, _, _, _, _ = connection._get_access_info('somekey', 'somedb')
+    assert result_host == expected_host
+
+
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
+@pytest.mark.skipif(running_on_windows_ci() and SQLSERVER_MAJOR_VERSION == 2019, reason='Test flakes on this set up')
 def test_query_timeout(instance_docker):
     instance_docker['command_timeout'] = 1
     check = SQLServer(CHECK_NAME, {}, [instance_docker])
@@ -248,6 +288,7 @@ def test_connection_failure(aggregator, dd_run_check, instance_docker):
     )
 
 
+@pytest.mark.unit
 @pytest.mark.parametrize(
     "test_case_name, instance_overrides, expected_error_patterns",
     [
@@ -261,7 +302,7 @@ def test_connection_failure(aggregator, dd_run_check, instance_docker):
             {"host": "wrong"},
             {
                 "odbc-windows|MSOLEDBSQL": "TCP-connection\\(ERROR: getaddrinfo failed\\).*"
-                "Named Pipes Provider: Could not open a connection to SQL Server",
+                "TCP Provider: No such host is known",
                 "SQLOLEDB|SQLNCLI11": "TCP-connection\\(ERROR: getaddrinfo failed\\).*"
                 "could not open database requested by login",
                 "odbc-linux": "TCP-connection\\(ERROR: Temporary failure in name resolution\\).*"

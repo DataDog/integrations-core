@@ -8,8 +8,8 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Track all the metrics from your Gitlab runners with Datadog",
-    "title": "Gitlab Runners",
+    "description": "Track all the metrics from your GitLab runners with Datadog.",
+    "title": "GitLab Runners",
     "media": [],
     "classifier_tags": [
       "Supported OS::Linux",

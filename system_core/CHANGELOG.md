@@ -1,5 +1,10 @@
 # CHANGELOG - system_core
 
+## 1.14.0 / 2022-08-05
+
+* [Added] Add total cpu percentages as a metric. See [#12525](https://github.com/DataDog/integrations-core/pull/12525).
+* [Fixed] Dependency updates. See [#12653](https://github.com/DataDog/integrations-core/pull/12653).
+
 ## 1.13.0 / 2022-04-05 / Agent 7.36.0
 
 * [Added] Add metric_patterns options to filter all metric submission by a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).

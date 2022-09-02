@@ -49,8 +49,8 @@
       }
     },
     "dashboards": {
-      "Kong Overview": "assets/dashboards/kong_overview.json",
-      "kong": "assets/dashboards/kong_dashboard.json"
+      "Kong Overview OpenMetrics": "assets/dashboards/kong_overview_openmetrics.json",
+      "Kong Overview": "assets/dashboards/kong_overview.json"
     },
     "saved_views": {
       "4xx_errors": "assets/saved_views/4xx_errors.json",
