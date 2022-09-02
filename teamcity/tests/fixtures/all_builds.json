@@ -1,0 +1,38 @@
+{
+  "count": "4",
+  "href": "/guestAuth/app/rest/buildTypes",
+  "buildType": [
+    {
+      "id": "TeamcityPython_Build",
+      "name": "Build",
+      "projectName": "Teamcity Python",
+      "projectId": "TeamcityPython",
+      "href": "/guestAuth/app/rest/buildTypes/id:TeamcityPython_Build",
+      "webUrl": "http://localhost:8111/viewType.html?buildTypeId=TeamcityPython_Build"
+    },
+    {
+      "id": "TeamcityPythonFork_Build",
+      "name": "Build",
+      "projectName": "Teamcity Python Fork",
+      "projectId": "TeamcityPythonFork",
+      "href": "/guestAuth/app/rest/buildTypes/id:TeamcityPythonFork_Build",
+      "webUrl": "http://localhost:8111/viewType.html?buildTypeId=TeamcityPythonFork_Build"
+    },
+    {
+      "id": "TeamcityPythonFork_FailedBuild",
+      "name": "Failed Build",
+      "projectName": "Teamcity Python Fork",
+      "projectId": "TeamcityPythonFork",
+      "href": "/guestAuth/app/rest/buildTypes/id:TeamcityPythonFork_FailedBuild",
+      "webUrl": "http://localhost:8111/viewType.html?buildTypeId=TeamcityPythonFork_FailedBuild"
+    },
+    {
+      "id": "TeamcityPythonFork_FailedTests",
+      "name": "Failed Tests",
+      "projectName": "Teamcity Python Fork",
+      "projectId": "TeamcityPythonFork",
+      "href": "/guestAuth/app/rest/buildTypes/id:TeamcityPythonFork_FailedTests",
+      "webUrl": "http://localhost:8111/viewType.html?buildTypeId=TeamcityPythonFork_FailedTests"
+    }
+  ]
+}

@@ -6,7 +6,7 @@ from urllib.parse import urlparse
 
 from datadog_checks.base import OpenMetricsBaseCheckV2, is_affirmative
 
-from .metrics import METRIC_MAP
+from .metrics import METRIC_MAP, construct_metrics_config
 
 
 class TeamCityCheckV2(OpenMetricsBaseCheckV2):
@@ -41,4 +41,5 @@ class TeamCityCheckV2(OpenMetricsBaseCheckV2):
         super().configure_scrapers()
 
     def get_default_config(self):
-        return {'metrics': [METRIC_MAP]}
+        metrics = construct_metrics_config(METRIC_MAP)
+        return {'metrics': metrics}

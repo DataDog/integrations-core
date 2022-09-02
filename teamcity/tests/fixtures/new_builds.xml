@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<builds count="8"
+        href="/guestAuth/app/rest/builds/?locator=buildType:TeamcityPythonFork_Build,sinceBuild:id:0,state:finished">
+    <build id="134" buildTypeId="TeamcityPythonFork_Build" number="8" status="SUCCESS" state="finished"
+           branchName="main" defaultBranch="true" href="/guestAuth/app/rest/builds/id:134"
+           webUrl="http://localhost:8111/viewLog.html?buildId=134&amp;buildTypeId=TeamcityPythonFork_Build">
+        <finishOnAgentDate>20220902T034658+0000</finishOnAgentDate>
+    </build>
+    <build id="116" buildTypeId="TeamcityPythonFork_Build" number="7" status="SUCCESS" state="finished"
+           branchName="main" defaultBranch="true" href="/guestAuth/app/rest/builds/id:116"
+           webUrl="http://localhost:8111/viewLog.html?buildId=116&amp;buildTypeId=TeamcityPythonFork_Build">
+        <finishOnAgentDate>20220902T022051+0000</finishOnAgentDate>
+    </build>
+    <build id="115" buildTypeId="TeamcityPythonFork_Build" number="6" status="SUCCESS" state="finished"
+           branchName="main" defaultBranch="true" href="/guestAuth/app/rest/builds/id:115"
+           webUrl="http://localhost:8111/viewLog.html?buildId=115&amp;buildTypeId=TeamcityPythonFork_Build">
+        <finishOnAgentDate>20220902T021840+0000</finishOnAgentDate>
+    </build>
+    <build id="114" buildTypeId="TeamcityPythonFork_Build" number="5" status="SUCCESS" state="finished"
+           branchName="main" defaultBranch="true" href="/guestAuth/app/rest/builds/id:114"
+           webUrl="http://localhost:8111/viewLog.html?buildId=114&amp;buildTypeId=TeamcityPythonFork_Build">
+        <finishOnAgentDate>20220902T021549+0000</finishOnAgentDate>
+    </build>
+    <build id="113" buildTypeId="TeamcityPythonFork_Build" number="4" status="SUCCESS" state="finished"
+           branchName="main" defaultBranch="true" href="/guestAuth/app/rest/builds/id:113"
+           webUrl="http://localhost:8111/viewLog.html?buildId=113&amp;buildTypeId=TeamcityPythonFork_Build">
+        <finishOnAgentDate>20220902T021347+0000</finishOnAgentDate>
+    </build>
+    <build id="112" buildTypeId="TeamcityPythonFork_Build" number="3" status="SUCCESS" state="finished"
+           branchName="main" defaultBranch="true" href="/guestAuth/app/rest/builds/id:112"
+           webUrl="http://localhost:8111/viewLog.html?buildId=112&amp;buildTypeId=TeamcityPythonFork_Build">
+        <finishOnAgentDate>20220902T021109+0000</finishOnAgentDate>
+    </build>
+    <build id="107" buildTypeId="TeamcityPythonFork_Build" number="2" status="SUCCESS" state="finished"
+           branchName="main" defaultBranch="true" href="/guestAuth/app/rest/builds/id:107"
+           webUrl="http://localhost:8111/viewLog.html?buildId=107&amp;buildTypeId=TeamcityPythonFork_Build">
+        <finishOnAgentDate>20220902T015812+0000</finishOnAgentDate>
+    </build>
+    <build id="102" buildTypeId="TeamcityPythonFork_Build" number="1" status="SUCCESS" state="finished"
+           branchName="main" defaultBranch="true" href="/guestAuth/app/rest/builds/id:102"
+           webUrl="http://localhost:8111/viewLog.html?buildId=102&amp;buildTypeId=TeamcityPythonFork_Build">
+        <finishOnAgentDate>20220901T200947+0000</finishOnAgentDate>
+    </build>
+</builds>

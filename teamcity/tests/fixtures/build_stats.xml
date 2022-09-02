@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<properties count="20">
+    <property name="ArtifactsSize" value="47339"/>
+    <property name="BuildDuration" value="11840"/>
+    <property name="BuildDurationNetTime" value="11403"/>
+    <property name="buildStageDuration:artifactsPublishing" value="170"/>
+    <property name="buildStageDuration:buildFinishing" value="11"/>
+    <property name="buildStageDuration:buildStepRUNNER_1" value="6132"/>
+    <property name="buildStageDuration:buildStepRUNNER_2" value="5271"/>
+    <property name="buildStageDuration:firstStepPreparation" value="3"/>
+    <property name="buildStageDuration:sourcesUpdate" value="118"/>
+    <property name="buildStageDuration:toolsUpdating" value="1"/>
+    <property name="BuildTestStatus" value="3"/>
+    <property name="FailedTestCount" value="1"/>
+    <property name="InspectionStatsE" value="0"/>
+    <property name="InspectionStatsW" value="0"/>
+    <property name="PassedTestCount" value="1"/>
+    <property name="queueWaitReason:Build_settings_have_not_been_finalized" value="10"/>
+    <property name="serverSideBuildFinishing" value="9"/>
+    <property name="SuccessRate" value="0"/>
+    <property name="TimeSpentInQueue" value="10"/>
+    <property name="TotalTestCount" value="2"/>
+</properties>

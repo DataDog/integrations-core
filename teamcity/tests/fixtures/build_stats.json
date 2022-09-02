@@ -1,0 +1,85 @@
+{
+  "count": "20",
+  "property": [
+    {
+      "name": "ArtifactsSize",
+      "value": "47339"
+    },
+    {
+      "name": "BuildDuration",
+      "value": "11840"
+    },
+    {
+      "name": "BuildDurationNetTime",
+      "value": "11403"
+    },
+    {
+      "name": "buildStageDuration:artifactsPublishing",
+      "value": "170"
+    },
+    {
+      "name": "buildStageDuration:buildFinishing",
+      "value": "11"
+    },
+    {
+      "name": "buildStageDuration:buildStepRUNNER_1",
+      "value": "6132"
+    },
+    {
+      "name": "buildStageDuration:buildStepRUNNER_2",
+      "value": "5271"
+    },
+    {
+      "name": "buildStageDuration:firstStepPreparation",
+      "value": "3"
+    },
+    {
+      "name": "buildStageDuration:sourcesUpdate",
+      "value": "118"
+    },
+    {
+      "name": "buildStageDuration:toolsUpdating",
+      "value": "1"
+    },
+    {
+      "name": "BuildTestStatus",
+      "value": "3"
+    },
+    {
+      "name": "FailedTestCount",
+      "value": "1"
+    },
+    {
+      "name": "InspectionStatsE",
+      "value": "0"
+    },
+    {
+      "name": "InspectionStatsW",
+      "value": "0"
+    },
+    {
+      "name": "PassedTestCount",
+      "value": "1"
+    },
+    {
+      "name": "queueWaitReason:Build_settings_have_not_been_finalized",
+      "value": "10"
+    },
+    {
+      "name": "serverSideBuildFinishing",
+      "value": "9"
+    },
+    {
+      "name": "SuccessRate",
+      "value": "0"
+    },
+    {
+      "name": "TimeSpentInQueue",
+      "value": "10"
+    },
+    {
+      "name": "TotalTestCount",
+      "value": "2"
+    }
+  ]
+}

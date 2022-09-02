@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<builds count="1" href="/guestAuth/app/rest/builds/?locator=buildType:TeamcityPythonFork_Build,count:1"
+        nextHref="/guestAuth/app/rest/builds/?locator=buildType:TeamcityPythonFork_Build,count:1,start:1">
+    <build id="134" buildTypeId="TeamcityPythonFork_Build" number="8" status="SUCCESS" state="finished"
+           branchName="main" defaultBranch="true" href="/guestAuth/app/rest/builds/id:134"
+           webUrl="http://localhost:8111/viewLog.html?buildId=134&amp;buildTypeId=TeamcityPythonFork_Build">
+        <finishOnAgentDate>20220902T034658+0000</finishOnAgentDate>
+    </build>
+</builds>
