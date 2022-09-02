@@ -66,6 +66,8 @@ def test_simple_grpc(dd_run_check, aggregator, instance):
 
     channel_state_tags = ['state:READY', f'target:{server_addr}']
     aggregator.assert_metric('grpc.channel.state', value=1, tags=channel_state_tags)
+    aggregator.assert_metric('grpc.channel.uptime', value=0, tags=channel_state_tags)
+
     channel_tags = [f'target:{server_addr}']
     aggregator.assert_metric('grpc.channel.calls_started', value=2, tags=channel_tags)
     aggregator.assert_metric('grpc.channel.calls_succeeded', value=1, tags=channel_tags)

@@ -7,10 +7,16 @@ from datadog_checks.base import AgentCheck
 
 import grpc
 import logging
+from datetime import datetime, timezone
 from grpc_channelz.v1 import channelz_pb2
 from grpc_channelz.v1 import channelz_pb2_grpc
 
 logger = logging.getLogger(__name__)
+
+
+def _pb_timestamp_to_datetime(ts):
+    dt = datetime.fromtimestamp(ts.seconds)
+    return dt.replace(microsecond=(ts.nanos // 1000))
 
 
 class GrpcCheck(AgentCheck):
@@ -37,16 +43,25 @@ class GrpcCheck(AgentCheck):
             self.gauge("server.calls_failed", server_data.calls_failed, tags=tags)
 
 
+    # Generate metrics from a channelz_pb2.ChannelData
+    # This include both channels and subchannels
     def _channel_data_metrics(self, channel_type, channel_data, additional_tags):
         state_value = channel_data.state.state
         state_str = channel_data.state.State.Name(state_value)
         target = channel_data.target
-        self.gauge(f"{channel_type}.state", 1, [f'state:{state_str}', f'target:{target}'] + additional_tags)
+
+        state_tags = [f'state:{state_str}', f'target:{target}'] + additional_tags
+        self.gauge(f"{channel_type}.state", 1, tags=state_tags)
+
+        creation_time = channel_data.trace.creation_timestamp.ToDatetime()
+        uptime = datetime.now() - creation_time
+        self.gauge(f"{channel_type}.uptime", uptime.seconds, tags=state_tags)
 
         tags = [f'target:{target}'] + additional_tags
         self.gauge(f"{channel_type}.calls_started", channel_data.calls_started, tags=tags)
         self.gauge(f"{channel_type}.calls_succeeded", channel_data.calls_succeeded, tags=tags)
         self.gauge(f"{channel_type}.calls_failed", channel_data.calls_failed, tags=tags)
+
 
 
     def _get_subchannel_metrics(self, channelz_stub, subchannel_id, additional_tags):
