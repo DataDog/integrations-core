@@ -26,50 +26,12 @@ from grpc_channelz.v1 import channelz_pb2_grpc
 
 log = logging.getLogger('test_grpc')
 
-# def test_check(dd_run_check, aggregator, instance):
-#     # type: (Callable[[AgentCheck, bool], None], AggregatorStub, Dict[str, Any]) -> None
-#     check = GrpcCheck('grpc', {}, [instance])
-#     dd_run_check(check)
-#
-#     aggregator.assert_all_metrics_covered()
-#     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
-
-
-# def test_emits_critical_service_check_when_service_is_down(dd_run_check, aggregator, instance):
-    # # type: (Callable[[AgentCheck, bool], None], AggregatorStub, Dict[str, Any]) -> None
-    # check = GrpcCheck('grpc', {}, [instance])
-    # dd_run_check(check)
-    # aggregator.assert_service_check('grpc.can_connect', GrpcCheck.CRITICAL)
-
 
 def create_server(addr):
     server = grpc.server(futures.ThreadPoolExecutor())
     channelz.add_channelz_servicer(server)
     server.add_insecure_port(addr)
     return server
-
-
-# def _start_test_server(server_addr):
-#     log.debug('Create server')
-#     server = create_server(addr=server_addr)
-#     log.debug('Start server')
-#     server.start()
-#
-#
-# def test_grpc_metrics(dd_run_check, aggregator, instance):
-#     # type: (Callable[[AgentCheck, bool], None], AggregatorStub, Dict[str, Any]) -> None
-#     _start_test_server(SERVER_ADDR)
-#     # Query server to generate some metrics
-#     query_stats(SERVER_ADDR)
-#
-#     instance = {'addr': SERVER_ADDR}
-#     check = GrpcCheck('grpc', {}, [instance])
-#     dd_run_check(check)
-#
-#     aggregator.assert_metric('grpc.server.number_servers', value=1, tags=[])
-#     aggregator.assert_metric('grpc.server.calls_started', value=2, tags=[])
-#     aggregator.assert_metric('grpc.server.calls_succeeded', value=1, tags=[])
-
 
 
 def _start_test_server(addr):
@@ -90,7 +52,6 @@ def _query_stats(addr):
 def test_simple_grpc(dd_run_check, aggregator, instance):
     # type: (Callable[[AgentCheck, bool], None], AggregatorStub, Dict[str, Any]) -> None
     server_addr = "127.0.0.1:12345"
-
     server = _start_test_server(server_addr)
     _query_stats(server_addr)
 
@@ -101,13 +62,35 @@ def test_simple_grpc(dd_run_check, aggregator, instance):
     aggregator.assert_metric('grpc.server.number_servers', value=1, tags=[])
     aggregator.assert_metric('grpc.server.calls_started', value=2, tags=[])
     aggregator.assert_metric('grpc.server.calls_succeeded', value=1, tags=[])
+    aggregator.assert_metric('grpc.server.calls_failed', value=0, tags=[])
 
-    channel_tags = ['state:READY', f'target:{server_addr}']
+    channel_state_tags = ['state:READY', f'target:{server_addr}']
+    aggregator.assert_metric('grpc.channel.state', value=1, tags=channel_state_tags)
+    channel_tags = [f'target:{server_addr}']
     aggregator.assert_metric('grpc.channel.calls_started', value=2, tags=channel_tags)
     aggregator.assert_metric('grpc.channel.calls_succeeded', value=1, tags=channel_tags)
 
-    subchannel_tags = ['state:READY', f'target:ipv4:{server_addr}']
+
+    subchannel_state_tags = ['state:READY', f'target:ipv4:{server_addr}', f'channel_target:{server_addr}']
+    aggregator.assert_metric('grpc.subchannel.state', value=1, tags=subchannel_state_tags)
+    subchannel_tags = [f'target:ipv4:{server_addr}', f'channel_target:{server_addr}']
     aggregator.assert_metric('grpc.subchannel.calls_started', value=3, tags=subchannel_tags)
     aggregator.assert_metric('grpc.subchannel.calls_succeeded', value=2, tags=subchannel_tags)
+    aggregator.assert_metric('grpc.subchannel.calls_failed', value=0, tags=subchannel_tags)
 
     server.stop(0)
+
+
+# def test_transient_failure(dd_run_check, aggregator, instance):
+#     # type: (Callable[[AgentCheck, bool], None], AggregatorStub, Dict[str, Any]) -> None
+#     server_addr = "127.0.0.1:12345"
+#     server = _start_test_server(server_addr)
+#     broken_channel = grpc.insecure_channel('127.0.0.1:12346')
+#
+#     instance= {'addr': server_addr}
+#     check = GrpcCheck('grpc', {}, [instance])
+#     dd_run_check(check)
+#
+#     aggregator.assert_metric('grpc.server.number_servers', value=1, tags=[])
+#
+#     server.stop(0)
