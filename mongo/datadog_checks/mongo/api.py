@@ -29,7 +29,11 @@ class MongoApi(object):
             'read_preference': ReadPreference.PRIMARY_PREFERRED,
             'appname': DD_APP_NAME,
         }
-        if self._config.do_auth and not self._is_arbiter():
+        if replicaset:
+            options['replicaSet'] = replicaset
+        options.update(self._config.additional_options)
+        options.update(self._config.ssl_params)
+        if self._config.do_auth and not self._is_arbiter(options):
             self._log.info("Using '%s' as the authentication database", self._config.auth_source)
             if self._config.username:
                 options['username'] = self._config.username
@@ -37,10 +41,6 @@ class MongoApi(object):
                 options['password'] = self._config.password
             if self._config.auth_source:
                 options['authSource'] = self._config.auth_source
-        if replicaset:
-            options['replicaSet'] = replicaset
-        options.update(self._config.additional_options)
-        options.update(self._config.ssl_params)
         self._log.debug("options: %s", options)
         self._cli = MongoClient(**options)
         self.deployment_type = self.get_deployment_type()
@@ -54,8 +54,8 @@ class MongoApi(object):
     def list_database_names(self, session=None):
         return self._cli.list_database_names(session)
 
-    def _is_arbiter(self):
-        cli = MongoClient(host=self._config.server if self._config.server else self._config.hosts)
+    def _is_arbiter(self, options):
+        cli = MongoClient(**options)
         is_master_payload = cli['admin'].command('isMaster')
         return is_master_payload.get('arbiterOnly', False)
 
