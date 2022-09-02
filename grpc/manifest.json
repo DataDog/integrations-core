@@ -1,0 +1,35 @@
+{
+  "display_name": "gRPC",
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "name": "grpc",
+  "metric_prefix": "grpc.",
+  "metric_to_check": "",
+  "creates_events": false,
+  "short_description": "",
+  "guid": "8c990f65-6b29-46b7-85d0-d5b9efa99901",
+  "support": "core",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "public_title": "gRPC",
+  "categories": [
+    ""
+  ],
+  "type": "check",
+  "is_public": false,
+  "integration_id": "grpc",
+  "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
+    "dashboards": {},
+    "monitors": {},
+    "saved_views": {},
+    "service_checks": "assets/service_checks.json",
+    "logs": {},
+    "metrics_metadata": "metadata.csv"
+  }
+}
