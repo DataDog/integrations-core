@@ -89,7 +89,7 @@ def _query_stats(addr):
 
 def test_simple_grpc(dd_run_check, aggregator, instance):
     # type: (Callable[[AgentCheck, bool], None], AggregatorStub, Dict[str, Any]) -> None
-    server_addr = "localhost:12345"
+    server_addr = "127.0.0.1:12345"
 
     server = _start_test_server(server_addr)
     _query_stats(server_addr)
@@ -98,7 +98,16 @@ def test_simple_grpc(dd_run_check, aggregator, instance):
     check = GrpcCheck('grpc', {}, [instance])
     dd_run_check(check)
 
-    aggregator.assert_metric('grpc.server.calls_started', value=2.0, tags=[])
-    aggregator.assert_metric('grpc.server.calls_succeeded', value=2, tags=[])
+    aggregator.assert_metric('grpc.server.number_servers', value=1, tags=[])
+    aggregator.assert_metric('grpc.server.calls_started', value=2, tags=[])
+    aggregator.assert_metric('grpc.server.calls_succeeded', value=1, tags=[])
+
+    channel_tags = ['state:READY', f'target:{server_addr}']
+    aggregator.assert_metric('grpc.channel.calls_started', value=2, tags=channel_tags)
+    aggregator.assert_metric('grpc.channel.calls_succeeded', value=1, tags=channel_tags)
+
+    subchannel_tags = ['state:READY', f'target:ipv4:{server_addr}']
+    aggregator.assert_metric('grpc.subchannel.calls_started', value=3, tags=subchannel_tags)
+    aggregator.assert_metric('grpc.subchannel.calls_succeeded', value=2, tags=subchannel_tags)
 
     server.stop(0)
