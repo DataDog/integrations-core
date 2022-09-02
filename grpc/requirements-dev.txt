@@ -1,1 +1,2 @@
 -e ../datadog_checks_dev
+grpcio-tools>=1.41.1

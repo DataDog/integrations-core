@@ -30,6 +30,8 @@ classifiers = [
 ]
 dependencies = [
     "datadog-checks-base>=25.1.0",
+    "grpcio>=1.48.1",
+    "grpcio-channelz>=1.48.1",
 ]
 dynamic = [
     "version",

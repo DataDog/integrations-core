@@ -5,9 +5,16 @@ from typing import Any
 
 from datadog_checks.base import AgentCheck
 
+import grpc
+import logging
+from grpc_channelz.v1 import channelz_pb2
+from grpc_channelz.v1 import channelz_pb2_grpc
+
 # from datadog_checks.base.utils.db import QueryManager
 # from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
 # from json import JSONDecodeError
+
+logger = logging.getLogger(__name__)
 
 
 class GrpcCheck(AgentCheck):
@@ -17,82 +24,38 @@ class GrpcCheck(AgentCheck):
 
     def __init__(self, name, init_config, instances):
         super(GrpcCheck, self).__init__(name, init_config, instances)
+        self.addr = self.instance.get("addr")
+        logger.debug("addr: %s", self.addr)
 
-        # Use self.instance to read the check configuration
-        # self.url = self.instance.get("url")
 
-        # If the check is going to perform SQL queries you should define a query manager here.
-        # More info at
-        # https://datadoghq.dev/integrations-core/base/databases/#datadog_checks.base.utils.db.core.QueryManager
-        # sample_query = {
-        #     "name": "sample",
-        #     "query": "SELECT * FROM sample_table",
-        #     "columns": [
-        #         {"name": "metric", "type": "gauge"}
-        #     ],
-        # }
-        # self._query_manager = QueryManager(self, self.execute_query, queries=[sample_query])
-        # self.check_initializations.append(self._query_manager.compile_queries)
+    def _get_servers_metrics(self, channelz_stub):
+        get_server = channelz_stub.GetServers(channelz_pb2.GetServersRequest())
+        servers = get_server.server
+        self.gauge("server.number_servers", len(servers), tags=[])
+        for server in servers:
+            server_data = server.data
+            tags = []
+            self.gauge("server.calls_started", server_data.calls_started, tags=tags)
+            self.gauge("server.calls_succeeded", server_data.calls_succeeded, tags=tags)
+
+
+    def _get_channels_metrics(self, channelz_stub):
+        top_channels = channelz_stub.GetTopChannels(channelz_pb2.GetTopChannelsRequest())
+        print(top_channels)
+        # servers = get_server.server
+        # self.gauge("server.number_servers", len(servers), tags=[])
+        # for server in servers:
+            # server_data = server.data
+            # tags = []
+            # # LB Used?
+            # self.gauge("server.calls_started", server_data.calls_started, tags=tags)
+            # self.gauge("server.calls_succeeded", server_data.calls_succeeded, tags=tags)
+
 
     def check(self, _):
         # type: (Any) -> None
-        # The following are useful bits of code to help new users get started.
-
-        # Perform HTTP Requests with our HTTP wrapper.
-        # More info at https://datadoghq.dev/integrations-core/base/http/
-        # try:
-        #     response = self.http.get(self.url)
-        #     response.raise_for_status()
-        #     response_json = response.json()
-
-        # except Timeout as e:
-        #     self.service_check(
-        #         "can_connect",
-        #         AgentCheck.CRITICAL,
-        #         message="Request timeout: {}, {}".format(self.url, e),
-        #     )
-        #     raise
-
-        # except (HTTPError, InvalidURL, ConnectionError) as e:
-        #     self.service_check(
-        #         "can_connect",
-        #         AgentCheck.CRITICAL,
-        #         message="Request failed: {}, {}".format(self.url, e),
-        #     )
-        #     raise
-
-        # except JSONDecodeError as e:
-        #     self.service_check(
-        #         "can_connect",
-        #         AgentCheck.CRITICAL,
-        #         message="JSON Parse failed: {}, {}".format(self.url, e),
-        #     )
-        #     raise
-
-        # except ValueError as e:
-        #     self.service_check(
-        #         "can_connect", AgentCheck.CRITICAL, message=str(e)
-        #     )
-        #     raise
-
-        # This is how you submit metrics
-        # There are different types of metrics that you can submit (gauge, event).
-        # More info at https://datadoghq.dev/integrations-core/base/api/#datadog_checks.base.checks.base.AgentCheck
-        # self.gauge("test", 1.23, tags=['foo:bar'])
-
-        # Perform database queries using the Query Manager
-        # self._query_manager.execute()
-
-        # This is how you use the persistent cache. This cache file based and persists across agent restarts.
-        # If you need an in-memory cache that is persisted across runs
-        # You can define a dictionary in the __init__ method.
-        # self.write_persistent_cache("key", "value")
-        # value = self.read_persistent_cache("key")
-
-        # If your check ran successfully, you can send the status.
-        # More info at
-        # https://datadoghq.dev/integrations-core/base/api/#datadog_checks.base.checks.base.AgentCheck.service_check
-        # self.service_check("can_connect", AgentCheck.OK)
-
-        # If it didn't then it should send a critical service check
-        self.service_check("can_connect", AgentCheck.CRITICAL)
+        logger.error("Connecting to %s", self.addr)
+        with grpc.insecure_channel(self.addr) as channel:
+            channelz_stub = channelz_pb2_grpc.ChannelzStub(channel)
+            self._get_servers_metrics(channelz_stub)
+            self._get_channels_metrics(channelz_stub)
