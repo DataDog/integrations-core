@@ -10,7 +10,7 @@ from datadog_checks.dev.ci import running_on_ci, running_on_windows_ci
 pytestmark = [
     pytest.mark.integration,
     pytest.mark.skipif(running_on_windows_ci(), reason='Test cannot be run on Windows CI'),
-    pytest.mark.skipif(running_on_ci(), reason='Test is failing on CI')
+    pytest.mark.skipif(running_on_ci(), reason='Test is failing on CI'),
 ]
 
 
