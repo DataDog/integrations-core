@@ -13,21 +13,32 @@ from . import common
 
 
 @pytest.mark.unit
-@mock.patch('pymongo.database.Database.command', side_effect=ConnectionFailure('Service not available'))
-def test_emits_critical_service_check_when_service_is_down(mock_command, dd_run_check, aggregator, instance):
+@mock.patch('pymongo.mongo_client.MongoClient.server_info', side_effect=ConnectionFailure('Service not available'))
+def test_emits_critical_service_check_when_service_is_down(mock_server_info, dd_run_check, aggregator, instance):
     # Given
     check = TddCheck('tdd', {}, [instance])
     # When
     dd_run_check(check)
     # Then
     aggregator.assert_service_check('tdd.can_connect', TddCheck.CRITICAL)
-    mock_command.assert_has_calls([mock.call('ping')])
 
 
 @pytest.mark.unit
-@mock.patch('pymongo.database.Database.command', return_value={'ok': 0})
-def test_emits_critical_service_check_when_service_is_up_but_ping_returns_0(
-    mock_command, dd_run_check, aggregator, instance
+@mock.patch('pymongo.mongo_client.MongoClient.server_info', return_value={'version': '3.0.0'})
+def test_emits_critical_service_check_when_version_not_supported(mock_server_info, dd_run_check, aggregator, instance):
+    # Given
+    check = TddCheck('tdd', {}, [instance])
+    # When
+    dd_run_check(check)
+    # Then
+    aggregator.assert_service_check('tdd.can_connect', TddCheck.CRITICAL)
+
+
+@pytest.mark.unit
+@mock.patch('pymongo.database.Database.command', side_effect=ConnectionFailure('Ping failure'))
+@mock.patch('pymongo.mongo_client.MongoClient.server_info', return_value={'version': '5.0.0'})
+def test_emits_critical_service_check_when_service_is_up_but_ping_causes_exception(
+    mock_server_info, mock_command, dd_run_check, aggregator, instance
 ):
     # Given
     check = TddCheck('tdd', {}, [instance])
@@ -35,19 +46,34 @@ def test_emits_critical_service_check_when_service_is_up_but_ping_returns_0(
     dd_run_check(check)
     # Then
     aggregator.assert_service_check('tdd.can_connect', TddCheck.CRITICAL)
-    mock_command.assert_has_calls([mock.call('ping')])
+
+
+@pytest.mark.unit
+@mock.patch('pymongo.database.Database.command', return_value={'ok': 0})
+@mock.patch('pymongo.mongo_client.MongoClient.server_info', return_value={'version': '5.0.0'})
+def test_emits_critical_service_check_when_service_is_up_but_ping_returns_0(
+    mock_server_info, mock_command, dd_run_check, aggregator, instance
+):
+    # Given
+    check = TddCheck('tdd', {}, [instance])
+    # When
+    dd_run_check(check)
+    # Then
+    aggregator.assert_service_check('tdd.can_connect', TddCheck.CRITICAL)
 
 
 @pytest.mark.unit
 @mock.patch('pymongo.database.Database.command', return_value={'ok': 1})
-def test_emits_ok_service_check_when_service_is_up_and_ping_returns_1(mock_command, dd_run_check, aggregator, instance):
+@mock.patch('pymongo.mongo_client.MongoClient.server_info', return_value={'version': '5.0.0'})
+def test_emits_ok_service_check_when_service_is_up_and_ping_returns_1(
+    mock_server_info, mock_command, dd_run_check, aggregator, instance
+):
     # Given
     check = TddCheck('tdd', {}, [instance])
     # When
     dd_run_check(check)
     # Then
     aggregator.assert_service_check('tdd.can_connect', TddCheck.OK)
-    mock_command.assert_has_calls([mock.call('ping')])
 
 
 @pytest.mark.unit
@@ -70,8 +96,6 @@ def test_version_metadata(mock_server_info, mock_command, dd_run_check, datadog_
             'version.raw': '5.0.0',
         },
     )
-    mock_command.assert_has_calls([mock.call('ping')])
-    mock_server_info.assert_called_once()
 
 
 @pytest.mark.unit
@@ -110,8 +134,7 @@ def test_emits_serverstatus_without_tcmalloc_metrics_when_service_is_up(
         aggregator.assert_metric(metric, count=0)
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
-    mock_command.assert_has_calls([mock.call('ping'), mock.call('serverStatus', tcmalloc=0)])
-    mock_server_info.assert_called_once()
+    mock_command.assert_has_calls([mock.call('serverStatus', tcmalloc=0)])
 
 
 @pytest.mark.unit
@@ -172,8 +195,7 @@ def test_emits_serverstatus_with_tcmalloc_metrics_when_service_is_up(
         aggregator.assert_metric(metric)
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
-    mock_command.assert_has_calls([mock.call('ping'), mock.call('serverStatus', tcmalloc=1)])
-    mock_server_info.assert_called_once()
+    mock_command.assert_has_calls([mock.call('serverStatus', tcmalloc=1)])
 
 
 @pytest.mark.unit
@@ -207,10 +229,7 @@ def test_emits_collstats_metrics_when_service_is_up(mock_server_info, mock_comma
         aggregator.assert_metric(metric)
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
-    mock_command.assert_has_calls(
-        [mock.call('ping'), mock.call('serverStatus', tcmalloc=0), mock.call('collStats', mock.ANY)]
-    )
-    mock_server_info.assert_called_once()
+    mock_command.assert_has_calls([mock.call('collStats', mock.ANY)])
 
 
 @pytest.mark.unit
@@ -244,36 +263,7 @@ def test_emits_indexstats_metrics_when_service_is_up(
         aggregator.assert_metric(metric)
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
-    mock_command.assert_has_calls(
-        [mock.call('ping'), mock.call('serverStatus', tcmalloc=0), mock.call('collStats', mock.ANY)]
-    )
     mock_aggregate.assert_has_calls([mock.call([{'$indexStats': {}}])])
-    mock_server_info.assert_called_once()
-
-
-@pytest.mark.unit
-@mock.patch(
-    'pymongo.database.Database.command',
-    side_effect=[{'ok': 1}, {}, {}],
-)
-@mock.patch('pymongo.mongo_client.MongoClient.server_info', return_value={'version': '3.0.0'})
-def test_not_emits_indexstats_metrics_when_service_is_up_but_version_lower_than_3_2(
-    mock_server_info, mock_command, dd_run_check, aggregator, instance
-):
-    # Given
-    instance['collections_indexes_stats'] = True
-    not_expected_metrics = common.INDEX_STATS
-    check = TddCheck('tdd', {}, [instance])
-    # When
-    dd_run_check(check)
-    # Then
-    for metric in not_expected_metrics:
-        aggregator.assert_metric(metric, count=0)
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
-    mock_command.assert_has_calls(
-        [mock.call('ping'), mock.call('serverStatus', tcmalloc=0), mock.call('collStats', mock.ANY)]
-    )
-    mock_server_info.assert_called_once()
 
 
 @pytest.mark.unit
@@ -299,7 +289,4 @@ def test_emits_top_metrics_when_service_is_up(mock_server_info, mock_command, dd
         aggregator.assert_metric(metric)
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
-    mock_command.assert_has_calls(
-        [mock.call('ping'), mock.call('serverStatus', tcmalloc=0), mock.call('collStats', mock.ANY)]
-    )
-    mock_server_info.assert_called_once()
+    mock_command.assert_has_calls([mock.call('top')])
