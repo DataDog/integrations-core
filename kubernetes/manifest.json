@@ -64,7 +64,7 @@
       "[kubernetes] Monitor Kubernetes Statefulset Replicas": "assets/monitors/monitor_statefulset_replicas.json"
     },
     "saved_views": {
-      "Pods with non OK statuses by Cluster": "assets/saved_views/non_ok_pods.json"
+      "non_ok_pods_by_cluster": "assets/saved_views/non_ok_pods.json"
     }
   }
 }
