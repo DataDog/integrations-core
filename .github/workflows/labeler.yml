@@ -5,11 +5,8 @@ on:
 - pull_request
 
 jobs:
-  apply:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Add labels
-      uses: DataDog/labeler@glob-all
-      with:
-        repo-token: "${{ secrets.DD_CHANGELOG_CHECK_TOKEN }}"
-        configuration-path: .github/workflows/config/labeler.yml
+  labeler:
+    if: ${{ github.event.pull_request.head.repo.full_name == github.repository }} # only PRs from this repo
+    uses: ./.github/workflows/labeler-reusable.yml
+    secrets:
+      repo-token: "${{ secrets.DD_CHANGELOG_CHECK_TOKEN }}"
