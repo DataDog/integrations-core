@@ -23,12 +23,9 @@ def dd_environment():
     with docker_run(
         common.COMPOSE_FILE,
         service_name="etcd0",
-        conditions=[
-            CheckDockerLogs(common.COMPOSE_FILE, 'Ready to accept connections'),
-            setup_post_data
-        ],
+        conditions=[CheckDockerLogs(common.COMPOSE_FILE, 'Ready to accept connections'), setup_post_data],
         mount_logs=True,
-        attempts=2
+        attempts=2,
     ):
         with docker_run(common.COMPOSE_FILE, log_patterns="listening on stats server", attempts=2):
             yield common.INSTANCE
