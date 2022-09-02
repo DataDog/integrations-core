@@ -258,7 +258,8 @@ def get_job_queue_info(timeout):
 
 
 def get_message_queue_info(timeout, sev, selected_message_queues):
-    message_queues_filter = f"WHERE MESSAGE_QUEUE_NAME IN ({', '.join(selected_message_queues)})" if selected_message_queues else ""
+    message_queues_list = [f"'{elt}'" for elt in selected_message_queues]
+    message_queues_filter = f"WHERE MESSAGE_QUEUE_NAME IN ({', '.join(message_queues_list)})" if selected_message_queues else ""
     return {
         'name': 'message_queue_info',
         'query': {
