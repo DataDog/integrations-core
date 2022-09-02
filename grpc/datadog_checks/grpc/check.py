@@ -7,16 +7,11 @@ from datadog_checks.base import AgentCheck
 
 import grpc
 import logging
-from datetime import datetime, timezone
+from datetime import datetime
 from grpc_channelz.v1 import channelz_pb2
 from grpc_channelz.v1 import channelz_pb2_grpc
 
 logger = logging.getLogger(__name__)
-
-
-def _pb_timestamp_to_datetime(ts):
-    dt = datetime.fromtimestamp(ts.seconds)
-    return dt.replace(microsecond=(ts.nanos // 1000))
 
 
 class GrpcCheck(AgentCheck):
@@ -28,7 +23,6 @@ class GrpcCheck(AgentCheck):
         super(GrpcCheck, self).__init__(name, init_config, instances)
         self.addr = self.instance.get("addr")
         logger.debug("addr: %s", self.addr)
-
 
     def _get_servers_metrics(self, channelz_stub):
         get_server = channelz_stub.GetServers(channelz_pb2.GetServersRequest())
@@ -42,6 +36,12 @@ class GrpcCheck(AgentCheck):
             self.gauge("server.calls_succeeded", server_data.calls_succeeded, tags=tags)
             self.gauge("server.calls_failed", server_data.calls_failed, tags=tags)
 
+    def _get_lb_policy(self, events):
+        for event in events:
+            lb_prefix = 'Created new LB policy "'
+            if event.description.startswith(lb_prefix):
+                lb_policy = event.description[len(lb_prefix):]
+                return lb_policy.strip('"')
 
     # Generate metrics from a channelz_pb2.ChannelData
     # This include both channels and subchannels
@@ -51,6 +51,10 @@ class GrpcCheck(AgentCheck):
         target = channel_data.target
 
         state_tags = [f'state:{state_str}', f'target:{target}'] + additional_tags
+        lb_policy = self._get_lb_policy(channel_data.trace.events)
+        if lb_policy:
+            state_tags += [f'lb_policy:{lb_policy}']
+
         self.gauge(f"{channel_type}.state", 1, tags=state_tags)
 
         creation_time = channel_data.trace.creation_timestamp.ToDatetime()
@@ -62,13 +66,10 @@ class GrpcCheck(AgentCheck):
         self.gauge(f"{channel_type}.calls_succeeded", channel_data.calls_succeeded, tags=tags)
         self.gauge(f"{channel_type}.calls_failed", channel_data.calls_failed, tags=tags)
 
-
-
     def _get_subchannel_metrics(self, channelz_stub, subchannel_id, additional_tags):
         subchannel_response = channelz_stub.GetSubchannel(channelz_pb2.GetSubchannelRequest(subchannel_id=subchannel_id))
         subchannel = subchannel_response.subchannel
         self._channel_data_metrics('subchannel', subchannel.data, additional_tags)
-
 
     def _get_channels_metrics(self, channelz_stub):
         top_channels = channelz_stub.GetTopChannels(channelz_pb2.GetTopChannelsRequest())
@@ -79,7 +80,6 @@ class GrpcCheck(AgentCheck):
             additional_tags = [f'channel_target:{channel_target}']
             for subchannel_ref in channel.subchannel_ref:
                 self._get_subchannel_metrics(channelz_stub, subchannel_ref.subchannel_id, additional_tags)
-
 
     def check(self, _):
         # type: (Any) -> None
