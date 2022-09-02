@@ -119,7 +119,7 @@ def uds_path():
         pytest.skip('Sharing Unix sockets is not supported by Docker for Mac.')
 
     with TempDir() as tmp_dir:
-        compose_file = os.path.join(HERE, 'compose', 'uds.yaml')
+        compose_file = os.path.join(HERE, 'compose', 'uds', 'uds.yaml')
         uds_filename = 'tmp.sock'
         uds_path = os.path.join(tmp_dir, uds_filename)
         with docker_run(
