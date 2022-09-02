@@ -3,8 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 from requests.exceptions import ConnectTimeout, ProxyError
-from datadog_checks.base.utils.platform import Platform
+
 from datadog_checks.base.utils.http import RequestsWrapper
+from datadog_checks.base.utils.platform import Platform
 from datadog_checks.dev.ci import running_on_windows_ci
 
 pytestmark = [
