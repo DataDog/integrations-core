@@ -33,10 +33,9 @@ def socks5_proxy():
 
 @pytest.fixture(scope="session")
 def kerberos():
-
     with TempDir() as tmp_dir:
         shared_volume = os.path.join(tmp_dir, "shared-volume")
-        compose_file = os.path.join(HERE, "compose", "kerberos.yaml")
+        compose_file = os.path.join(HERE, "compose", "kerberos", "kerberos.yaml")
         realm = "EXAMPLE.COM"
         svc = "HTTP"
         webserver_hostname = "web.example.com"
@@ -74,7 +73,6 @@ def kerberos():
 
 @pytest.fixture(scope="session")
 def kerberos_agent():
-
     with TempDir() as tmp_dir:
         shared_volume = os.path.join(tmp_dir, "shared-volume")
         compose_file = os.path.join(HERE, "compose", "kerberos-agent.yaml")
