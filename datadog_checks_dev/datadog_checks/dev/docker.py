@@ -8,7 +8,6 @@ from typing import Iterator
 from six import string_types
 from six.moves.urllib.parse import urlparse
 
-from .ci import running_on_ci
 from .conditions import CheckDockerLogs
 from .env import environment_run, get_state, save_state
 from .fs import create_file, file_exists
@@ -210,8 +209,6 @@ def docker_run(
                 raise TypeError(
                     'mount_logs: expected True, a list or a set, but got {}'.format(type(mount_logs).__name__)
                 )
-    if attempts is None and running_on_ci():
-        attempts = 2
 
     with environment_run(
         up=set_up,
