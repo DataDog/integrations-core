@@ -7,6 +7,7 @@ from mock import mock
 
 from datadog_checks.dev import EnvVars, RetryError, environment_run
 from datadog_checks.dev._env import E2E_SET_UP, E2E_TEAR_DOWN, set_up_env, tear_down_env
+from datadog_checks.dev.ci import running_on_ci
 
 
 def test_set_up_env_default_true():
@@ -32,7 +33,7 @@ def test_tear_down_env_false():
 @pytest.mark.parametrize(
     "attempts,expected_call_count",
     [
-        (None, 1),
+        (None, 2 if running_on_ci() else 1),
         (0, 1),
         (1, 1),
         (3, 3),
