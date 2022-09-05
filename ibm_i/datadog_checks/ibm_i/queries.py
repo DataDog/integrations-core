@@ -259,13 +259,13 @@ def get_job_queue_info(timeout):
 
 def get_message_queue_info(timeout, sev, selected_message_queues):
     message_queues_list = [f"'{elt}'" for elt in selected_message_queues]
-    message_queues_filter = f"WHERE MESSAGE_QUEUE_NAME IN ({', '.join(message_queues_list)})" if selected_message_queues else ""
+    message_queues_filter = f"WHERE MESSAGE_QUEUE_NAME IN ({', '.join(message_queues_list)})" if selected_message_queues else ""  # noqa:E501
     return {
         'name': 'message_queue_info',
         'query': {
             'text': (
                 f'SELECT MESSAGE_QUEUE_NAME, MESSAGE_QUEUE_LIBRARY, COUNT(*), SUM(CASE WHEN SEVERITY >= {sev} THEN 1 ELSE 0 END) '  # noqa:E501
-                f'FROM QSYS2.MESSAGE_QUEUE_INFO {message_queues_filter} GROUP BY MESSAGE_QUEUE_NAME, MESSAGE_QUEUE_LIBRARY'
+                f'FROM QSYS2.MESSAGE_QUEUE_INFO {message_queues_filter} GROUP BY MESSAGE_QUEUE_NAME, MESSAGE_QUEUE_LIBRARY'  # noqa:E501
             ),
             'timeout': timeout,
         },
@@ -289,5 +289,5 @@ def query_map(config: InstanceConfig):
         "job_memory_usage": get_job_memory_usage(config.job_query_timeout),
         "memory_info": get_memory_info(config.query_timeout),
         "job_queue": get_job_queue_info(config.query_timeout),
-        "message_queue_info": get_message_queue_info(config.system_mq_query_timeout, config.severity_threshold, config.selected_message_queues),
+        "message_queue_info": get_message_queue_info(config.system_mq_query_timeout, config.severity_threshold, config.selected_message_queues),  # noqa:E501
     }
