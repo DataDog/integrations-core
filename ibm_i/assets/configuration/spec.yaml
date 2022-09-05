@@ -94,4 +94,14 @@ files:
           - name: "job_queue"
           - name: "message_queue_info"
         default: *queries_default
+    - name: selected_message_queues
+      description: |
+        Filters the message queues to make your queries less computer-intensive. By default no filter is applied.
+      value:
+        type: array
+        items:
+          type: string
+        example:
+          - QSYSOPR
+          - QPGMR
     - template: instances/default
