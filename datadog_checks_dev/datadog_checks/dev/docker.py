@@ -8,6 +8,7 @@ from typing import Iterator
 from six import string_types
 from six.moves.urllib.parse import urlparse
 
+from .ci import running_on_ci
 from .conditions import CheckDockerLogs
 from .env import environment_run, get_state, save_state
 from .fs import create_file, file_exists
@@ -156,7 +157,7 @@ def docker_run(
       check for errors
     - **env_vars** (_dict_) - A dictionary to update `os.environ` with during execution
     - **wrappers** (_List[callable]_) - A list of context managers to use during execution
-    - **attempts** (_int_) - Number of attempts to run `up` and the `conditions` successfully
+    - **attempts** (_int_) - Number of attempts to run `up` and the `conditions` successfully. Defaults to 2 in CI
     - **attempts_wait** (_int_) - Time to wait between attempts
     """
     if compose_file and up:
@@ -209,6 +210,8 @@ def docker_run(
                 raise TypeError(
                     'mount_logs: expected True, a list or a set, but got {}'.format(type(mount_logs).__name__)
                 )
+    if attempts is None and running_on_ci():
+        attempts = 2
 
     with environment_run(
         up=set_up,
