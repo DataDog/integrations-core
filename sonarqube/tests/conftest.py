@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 import shutil
+import time
 from copy import deepcopy
 
 import pytest
@@ -35,6 +36,8 @@ def dd_environment():
             ],
             mount_logs=True,
         ):
+            # Wait a bit for the listener be ready
+            time.sleep(5)
             with docker_run(
                 compose_file,
                 service_name='sonar-scanner',
