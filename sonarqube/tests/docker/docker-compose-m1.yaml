@@ -41,12 +41,6 @@ services:
       -Dcom.sun.management.jmxremote.ssl=false
       -Djava.rmi.server.hostname=localhost
       "
-    healthcheck:
-      test: curl --fail http://localhost:9000 || exit 1
-      interval: 10s
-      retries: 5
-      start_period: 30s
-      timeout: 5s
   sonar-scanner:
     container_name: sonar-scanner
     image: sonarsource/sonar-scanner-cli:4.5
