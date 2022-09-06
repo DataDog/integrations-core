@@ -37,7 +37,7 @@ def dd_environment():
             mount_logs=True,
         ):
             # Wait a bit for the listener be ready
-            time.sleep(5)
+            time.sleep(60)
             with docker_run(
                 compose_file,
                 service_name='sonar-scanner',
