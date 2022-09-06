@@ -1,0 +1,4 @@
+FROM sonarqube:7.9-community
+USER root
+RUN apt-get update && apt-get -y install curl
+USER 1001
