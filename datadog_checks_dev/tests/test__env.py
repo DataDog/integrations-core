@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import os
+
 import pytest
 import tenacity
 from mock import mock
@@ -45,9 +47,12 @@ def test_environment_run_on_failed_conditions(attempts, expected_call_count):
     condition = mock.MagicMock()
     condition.side_effect = RetryError("error")
 
-    with pytest.raises(tenacity.RetryError):
-        with environment_run(up=up, down=down, attempts=attempts, conditions=[condition]):
-            pass
+    try:
+        with pytest.raises(tenacity.RetryError):
+            with environment_run(up=up, down=down, attempts=attempts, conditions=[condition]):
+                pass
+    except RetryError:
+        assert 0 == 1, str(os.environ)
 
     assert condition.call_count == expected_call_count
 
