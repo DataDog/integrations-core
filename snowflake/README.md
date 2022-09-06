@@ -284,6 +284,12 @@ See [service_checks.json][16] for a list of service checks provided by this inte
 
 Need help? Contact [Datadog support][17].
 
+## Further Reading
+
+Additional helpful documentation, links, and articles:
+
+- [Monitor Snowflake with Datadog][18]
+
 
 [1]: https://www.snowflake.com/
 [2]: https://app.datadoghq.com/account/settings#agent
@@ -302,3 +308,4 @@ Need help? Contact [Datadog support][17].
 [15]: https://github.com/DataDog/integrations-core/blob/master/snowflake/metadata.csv
 [16]: https://github.com/DataDog/integrations-core/blob/master/snowflake/assets/service_checks.json
 [17]: https://docs.datadoghq.com/help/
+[18]: https://www.datadoghq.com/blog/snowflake-monitoring-datadog/
