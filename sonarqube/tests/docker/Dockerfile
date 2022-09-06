@@ -1,5 +1,5 @@
 ARG SONARQUBE_VERSION
 
 FROM sonarqube:$SONARQUBE_VERSION-community
-RUN apk update
-RUN apk add curl
+RUN apt-get update
+RUN apt-get install -y curl
