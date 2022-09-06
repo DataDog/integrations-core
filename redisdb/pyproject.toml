@@ -9,7 +9,6 @@ build-backend = "hatchling.build"
 name = "datadog-redisdb"
 description = "The Redis check"
 readme = "README.md"
-license = {text = "BSD-3-Clause"}
 keywords = [
     "datadog",
     "datadog agent",
@@ -35,10 +34,13 @@ dynamic = [
     "version",
 ]
 
+[project.license]
+text = "BSD-3-Clause"
+
 [project.optional-dependencies]
 deps = [
     "redis==3.5.3; python_version < '3.0'",
-    "redis==4.2.2; python_version > '3.0'",
+    "redis==4.3.4; python_version > '3.0'",
 ]
 
 [project.urls]

@@ -8,7 +8,6 @@ build-backend = "hatchling.build"
 name = "datadog-ibm-ace"
 description = "The IBM ACE check"
 readme = "README.md"
-license = {text = "BSD-3-Clause"}
 requires-python = ">=3.8"
 keywords = [
     "datadog",
@@ -34,9 +33,12 @@ dynamic = [
     "version",
 ]
 
+[project.license]
+text = "BSD-3-Clause"
+
 [project.optional-dependencies]
 deps = [
-    "pymqi==1.12.0",
+    "pymqi==1.12.8",
 ]
 
 [project.urls]

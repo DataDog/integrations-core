@@ -54,6 +54,8 @@ def test_check_metrics_1_23(aggregator, mock_metrics, mock_leader):
         # Wrapper to keep assertions < 120 chars
         aggregator.assert_metric(NAMESPACE + name, **kwargs)
 
+    assert_metric('.pod_preemption.attempts', value=3.0, tags=[])
+
     assert_metric('.scheduling.algorithm_duration.count', value=7, tags=['upper_bound:0.001'])
     assert_metric('.scheduling.algorithm_duration.sum', value=0.002138012)
 
@@ -91,6 +93,36 @@ def test_check_metrics_1_23(aggregator, mock_metrics, mock_leader):
 
     assert_metric('.scheduling.pod.scheduling_attempts.sum', value=10.0)
     assert_metric('.scheduling.pod.scheduling_attempts.count', value=7.0)
+
+    assert_metric(
+        '.client.http.requests_duration.count',
+        tags=['url:https://172.18.0.2:6443/apis/events.k8s.io/v1', 'upper_bound:0.001', 'verb:GET'],
+    )
+    assert_metric(
+        '.client.http.requests_duration.sum',
+        value=0.022055548,
+        tags=['url:https://172.18.0.2:6443/apis/events.k8s.io/v1', 'verb:GET'],
+    )
+
+    assert_metric(
+        '.pod_preemption.victims.sum',
+        value=2.0,
+        tags=[],
+    )
+
+    assert_metric(
+        '.pod_preemption.victims.count',
+        value=2.0,
+        tags=[],
+    )
+
+    assert_metric('.pending_pods', value=1.0, tags=['queue:active'])
+    assert_metric('.pending_pods', value=2.0, tags=['queue:backoff'])
+    assert_metric('.pending_pods', value=3.0, tags=['queue:unschedulable'])
+
+    assert_metric('.queue.incoming_pods', value=7.0, tags=['event:PodAdd', 'queue:active'])
+    assert_metric('.queue.incoming_pods', value=3.0, tags=['event:NodeTaintChange', 'queue:active'])
+    assert_metric('.queue.incoming_pods', value=3.0, tags=['event:ScheduleAttemptFailure', 'queue:unschedulable'])
 
     assert_metric('.goroutines')
     assert_metric('.gc_duration_seconds.sum')

@@ -46,9 +46,23 @@ from .stop import stop
 @click.option('--ddtrace', is_flag=True, help='Run tests using dd-trace-py')
 @click.option('--filter', '-k', 'test_filter', help='Only run tests matching given substring expression')
 @click.option('--changed', is_flag=True, help='Only test changed checks')
+@click.option('--debug', '-d', is_flag=True, help='Set the log level to debug')
 @click.pass_context
 def test(
-    ctx, checks, agent, python, dev, base, env_vars, new_env, profile_memory, junit, ddtrace, test_filter, changed
+    ctx,
+    checks,
+    agent,
+    python,
+    dev,
+    base,
+    env_vars,
+    new_env,
+    profile_memory,
+    junit,
+    ddtrace,
+    test_filter,
+    changed,
+    debug,
 ):
     """Test an environment."""
     check_envs = get_test_envs(checks, e2e_tests_only=True, changed_only=changed)
@@ -104,7 +118,7 @@ def test(
                     ctx.invoke(
                         test_command,
                         checks=[f'{check}:{env}'],
-                        debug=DEBUG_OUTPUT,
+                        debug=debug or DEBUG_OUTPUT,
                         e2e=True,
                         passenv=' '.join(persisted_env_vars) if persisted_env_vars else None,
                         junit=junit,

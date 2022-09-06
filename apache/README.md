@@ -111,6 +111,8 @@ To configure this check for an Agent running on Kubernetes:
 
 Set [Autodiscovery Integrations Templates][10] as pod annotations on your application container. Aside from this, templates can also be configured with [a file, a configmap, or a key-value store][11].
 
+**Annotations v1** (for Datadog Agent < v7.36)
+
 ```yaml
 apiVersion: v1
 kind: Pod
@@ -130,12 +132,38 @@ spec:
     - name: apache
 ```
 
+**Annotations v2** (for Datadog Agent v7.36+)
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: apache
+  annotations:
+    ad.datadoghq.com/apache.checks: |
+      {
+        "apache": {
+          "init_config": {},
+          "instances": [
+            {
+              "apache_status_url": "http://%%host%%/server-status?auto"
+            }
+          ]
+        }
+      }
+spec:
+  containers:
+    - name: apache
+```
+
 ##### Log collection
 
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][12].
 
 Then, set [Log Integrations][9] as pod annotations. This can also be configured with [a file, a configmap, or a key-value store][13].
+
+**Annotations v1/v2**
 
 ```yaml
 apiVersion: v1

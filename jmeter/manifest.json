@@ -1,37 +1,52 @@
 {
-  "display_name": "JMeter",
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "name": "jmeter",
-  "metric_prefix": "jmeter.",
-  "metric_to_check": "jmeter.responses_count",
-  "creates_events": false,
-  "short_description": "A Datadog plugin for Apache JMeter",
-  "guid": "73e25799-9bc1-413b-a5f3-989a7c5bd554",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "public_title": "JMeter",
-  "categories": [
-    "log collection",
-    "testing"
-  ],
-  "type": "check",
-  "is_public": true,
-  "integration_id": "jmeter",
+  "manifest_version": "2.0.0",
+  "app_uuid": "be62a333-998e-4fea-b0e4-dd4a45b859b4",
+  "app_id": "jmeter",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "A Datadog plugin for Apache JMeter",
+    "title": "JMeter",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Log Collection",
+      "Category::Testing"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
+    "integration": {
+      "source_type_name": "JMeter",
+      "configuration": {},
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "jmeter.",
+        "check": "jmeter.responses_count",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
     "dashboards": {
       "JMeter Overview": "assets/dashboards/JMeterOverview.json"
     },
-    "saved_views": {},
-    "monitors": {},
-    "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "jmeter"
-    },
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

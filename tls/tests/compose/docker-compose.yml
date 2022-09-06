@@ -20,18 +20,6 @@ services:
     depends_on:
       - cert-builder
 
-  # Serves tls-v1-1.valid.mock
-  nginx-tls1-1:
-    container_name: nginx-tls1-1
-    image: nginx:alpine
-    volumes:
-      - ./nginx-tls1-1.conf:/etc/nginx/conf.d/default.conf
-      - certs:/etc/nginx/certs/:ro
-    ports:
-      - "4444:443"
-    depends_on:
-      - cert-builder
-
   # Serves tls-v1-2.valid.mock
   nginx-tls1-2:
     container_name: nginx-tls1-2
@@ -53,6 +41,20 @@ services:
       - certs:/etc/nginx/certs/:ro
     ports:
       - "4446:443"
+    depends_on:
+      - cert-builder
+
+  # postgres serving valid.postgresql.mock
+  starttls-postgres:
+    container_name: postgres-valid
+    image: postgres:12-alpine
+    volumes:
+      - certs:/var/lib/postgresql/certs/:ro
+    ports:
+      - "55432:5432"
+    command: -c ssl=on -c ssl_cert_file=/var/lib/postgresql/certs/postgres.valid.mock.crt -c ssl_key_file=/var/lib/postgresql/certs/postgres.valid.mock.key
+    environment:
+      - POSTGRES_PASSWORD=masterpassw0rd
     depends_on:
       - cert-builder
 

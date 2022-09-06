@@ -41,7 +41,10 @@ class DatadogAgentStub(object):
         assert data == actual
 
     def assert_metadata_count(self, count):
-        assert len(self._metadata) == count
+        metadata_items = len(self._metadata)
+        assert metadata_items == count, 'Expected {} metadata items, found {}. Submitted metadata: {}'.format(
+            count, metadata_items, repr(self._metadata)
+        )
 
     def get_hostname(self):
         return self._hostname

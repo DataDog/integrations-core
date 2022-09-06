@@ -61,7 +61,14 @@ FACTORS = {
 
 
 WHITELISTED_CONTAINER_STATE_REASONS = {
-    'waiting': ['errimagepull', 'imagepullbackoff', 'crashloopbackoff', 'containercreating'],
+    'waiting': [
+        'errimagepull',
+        'imagepullbackoff',
+        'crashloopbackoff',
+        'containercreating',
+        'createcontainererror',
+        'invalidimagename',
+    ],
     'terminated': ['oomkilled', 'containercannotrun', 'error'],
 }
 
@@ -320,6 +327,11 @@ class KubeletCheck(
         # Test the kubelet health ASAP
         self._perform_kubelet_check(self.instance_tags)
 
+        # Kubelet credentials handling
+        self.kubelet_credentials.configure_scraper(self.cadvisor_scraper_config)
+        self.kubelet_credentials.configure_scraper(self.kubelet_scraper_config)
+        self.kubelet_credentials.configure_scraper(self.probes_scraper_config)
+
         if 'cadvisor_metrics_endpoint' in instance:
             self.cadvisor_scraper_config['prometheus_url'] = instance.get(
                 'cadvisor_metrics_endpoint', urljoin(endpoint, CADVISOR_METRICS_PATH)
@@ -336,19 +348,15 @@ class KubeletCheck(
             'kubelet_metrics_endpoint', urljoin(endpoint, KUBELET_METRICS_PATH)
         )
 
+        http_handler = self.get_http_handler(self.probes_scraper_config)
         probes_metrics_endpoint = urljoin(endpoint, PROBES_METRICS_PATH)
-        if self.detect_probes(probes_metrics_endpoint):
+        if self.detect_probes(http_handler, probes_metrics_endpoint):
             self.probes_scraper_config['prometheus_url'] = instance.get(
                 'probes_metrics_endpoint', probes_metrics_endpoint
             )
         else:
             # Disable probe metrics collection (k8s 1.15+ required)
             self.probes_scraper_config['prometheus_url'] = ''
-
-        # Kubelet credentials handling
-        self.kubelet_credentials.configure_scraper(self.cadvisor_scraper_config)
-        self.kubelet_credentials.configure_scraper(self.kubelet_scraper_config)
-        self.kubelet_credentials.configure_scraper(self.probes_scraper_config)
 
         # Legacy cadvisor support
         try:

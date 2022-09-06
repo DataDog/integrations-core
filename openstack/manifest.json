@@ -1,45 +1,60 @@
 {
-  "categories": [
-    "cloud",
-    "log collection"
-  ],
-  "creates_events": false,
-  "display_name": "OpenStack",
-  "guid": "944452d0-208e-4d1c-8adb-495f517ce2c2",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "openstack.",
-  "metric_to_check": "openstack.nova.hypervisor_load.1",
-  "name": "openstack",
-  "process_signatures": [
-    "stack.sh"
-  ],
-  "public_title": "OpenStack (legacy)",
-  "short_description": "Track hypervisor and VM-level resource usage, plus Neutron metrics.",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "type": "check",
-  "integration_id": "openstack",
+  "manifest_version": "2.0.0",
+  "app_uuid": "38f1f51e-9f6a-49fc-84d5-358bde9e3782",
+  "app_id": "openstack",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Track hypervisor and VM-level resource usage, plus Neutron metrics.",
+    "title": "OpenStack (legacy)",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Cloud",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "OpenStack",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "openstack.",
+        "check": "openstack.nova.hypervisor_load.1",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      },
+      "process_signatures": [
+        "stack.sh"
+      ]
     },
-    "monitors": {},
     "dashboards": {
       "openstack": "assets/dashboards/openstack_dashboard.json"
     },
-    "service_checks": "assets/service_checks.json",
-    "logs": {
-      "source": "openstack"
-    },
-    "metrics_metadata": "metadata.csv",
     "saved_views": {
       "openstack_processes": "assets/saved_views/openstack_processes.json"
+    },
+    "logs": {
+      "source": "openstack"
     }
   }
 }

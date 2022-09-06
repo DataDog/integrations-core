@@ -12,11 +12,17 @@ class Config(object):
     Encapsulates the validation of an `instance` dictionary and authentication options.
     """
 
-    DEFAULT_METRIC_GROUP = [
+    DEFAULT_METRIC_GROUPS = [
         'snowflake.query',
         'snowflake.billing',
         'snowflake.storage',
         'snowflake.logins',
+    ]
+
+    DEFAULT_ORG_METRIC_GROUPS = [
+        'snowflake.organization.warehouse',
+        'snowflake.organization.currency',
+        'snowflake.organization.storage',
     ]
 
     AUTHENTICATION_MODES = ['snowflake', 'oauth', 'snowflake_jwt']
@@ -47,7 +53,10 @@ class Config(object):
         aggregate_last_24_hours = instance.get('aggregate_last_24_hours', False)
         custom_queries_defined = len(instance.get('custom_queries', [])) > 0
 
-        metric_groups = instance.get('metric_groups', self.DEFAULT_METRIC_GROUP)
+        default_metric_groups = (
+            self.DEFAULT_ORG_METRIC_GROUPS if schema == 'ORGANIZATION_USAGE' else self.DEFAULT_METRIC_GROUPS
+        )
+        metric_groups = instance.get('metric_groups', default_metric_groups)
 
         if account is None:
             raise ConfigurationError('Must specify an account')

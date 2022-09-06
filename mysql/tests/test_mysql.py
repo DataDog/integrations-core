@@ -41,7 +41,13 @@ def test_minimal_config(aggregator, dd_run_check, instance_basic):
     aggregator.assert_service_check('mysql.can_connect', status=MySql.OK, tags=tags.SC_TAGS_MIN, count=1)
 
     # Test metrics
-    testable_metrics = variables.STATUS_VARS + variables.VARIABLES_VARS + variables.INNODB_VARS + variables.BINLOG_VARS
+    testable_metrics = (
+        variables.STATUS_VARS
+        + variables.VARIABLES_VARS
+        + variables.INNODB_VARS
+        + variables.BINLOG_VARS
+        + variables.COMMON_PERFORMANCE_VARS
+    )
 
     for mname in testable_metrics:
         aggregator.assert_metric(mname, at_least=1)
@@ -104,6 +110,7 @@ def _assert_complex_config(aggregator, hostname='stubbed.hostname'):
         + variables.SYNTHETIC_VARS
         + variables.STATEMENT_VARS
         + variables.TABLE_VARS
+        + variables.ROW_TABLE_STATS_VARS
     )
     if MYSQL_REPLICATION == 'group':
         testable_metrics.extend(variables.GROUP_REPLICATION_VARS)
@@ -116,7 +123,7 @@ def _assert_complex_config(aggregator, hostname='stubbed.hostname'):
         )
 
     if MYSQL_VERSION_PARSED >= parse_version('5.6'):
-        testable_metrics.extend(variables.PERFORMANCE_VARS)
+        testable_metrics.extend(variables.PERFORMANCE_VARS + variables.COMMON_PERFORMANCE_VARS)
 
     # Test metrics
     for mname in testable_metrics:
@@ -214,10 +221,11 @@ def test_complex_config_replica(aggregator, dd_run_check, instance_complex):
         + variables.SYNTHETIC_VARS
         + variables.STATEMENT_VARS
         + variables.TABLE_VARS
+        + variables.ROW_TABLE_STATS_VARS
     )
 
     if MYSQL_VERSION_PARSED >= parse_version('5.6') and environ.get('MYSQL_FLAVOR') != 'mariadb':
-        testable_metrics.extend(variables.PERFORMANCE_VARS)
+        testable_metrics.extend(variables.PERFORMANCE_VARS + variables.COMMON_PERFORMANCE_VARS)
 
     # Test metrics
     for mname in testable_metrics:
@@ -277,9 +285,9 @@ def test_correct_hostname(dbm_enabled, reported_hostname, expected_hostname, agg
     instance_basic['dbm'] = dbm_enabled
     instance_basic['disable_generic_tags'] = False  # This flag also affects the hostname
     instance_basic['reported_hostname'] = reported_hostname
-    mysql_check = MySql(common.CHECK_NAME, {}, [instance_basic])
 
     with mock.patch('datadog_checks.mysql.MySql.resolve_db_host', return_value='resolved.hostname') as resolve_db_host:
+        mysql_check = MySql(common.CHECK_NAME, {}, [instance_basic])
         dd_run_check(mysql_check)
         if reported_hostname:
             assert resolve_db_host.called is False, 'Expected resolve_db_host.called to be False'
@@ -364,6 +372,7 @@ def test_only_custom_queries(aggregator, dd_run_check, instance_custom_queries):
         SYNTHETIC_VARS,
         REPLICA_VARS,
         GROUP_REPLICATION_VARS,
+        variables.QUERY_EXECUTOR_METRIC_SETS,
     ]
     for metric_set in standard_metric_sets:
         for metric_def in metric_set.values():

@@ -29,3 +29,9 @@ pgbouncer.pools.maxwait_us,gauge,,microsecond,,Microsecond part of the maximum w
 pgbouncer.databases.pool_size,gauge,,connection,,Maximum number of server connections,0,pgbouncer,database pool size,
 pgbouncer.databases.max_connections,gauge,,connection,,Maximum number of allowed connections,0,pgbouncer,database max conns,
 pgbouncer.databases.current_connections,gauge,,connection,,Current number of connections for this database,0,pgbouncer,database current conns,cpu
+pgbouncer.clients.connect_time,gauge,,second,,"When the connection was made (seconds since epoch)",-1,pgbouncer,client connect time,
+pgbouncer.clients.request_time,gauge,,second,,"When last request was issued (seconds since epoch)",-1,pgbouncer,client request time,
+pgbouncer.clients.wait,gauge,,second,,"Current waiting time in seconds",-1,pgbouncer,client wait,
+pgbouncer.clients.wait_us,gauge,,microsecond,,The microsecond portion of the current waiting time,-1,pgbouncer,client wait,
+pgbouncer.servers.connect_time,gauge,,second,,"When the connection was made (seconds since epoch)",-1,pgbouncer,server connect time,
+pgbouncer.servers.request_time,gauge,,second,,"When last request was issued (seconds since epoch)",-1,pgbouncer,server request time,

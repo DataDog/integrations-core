@@ -262,6 +262,8 @@ To configure this check for an Agent running on Kubernetes:
 
 Set [Autodiscovery Integrations Templates][15] as pod annotations on your application container. Alternatively, you can configure templates with a [file, configmap, or key-value store][16].
 
+**Annotations v1** (for Datadog Agent < v7.36)
+
 ```yaml
 apiVersion: v1
 kind: Pod
@@ -285,6 +287,34 @@ spec:
     - name: mysql
 ```
 
+**Annotations v2** (for Datadog Agent v7.36+)
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mysql
+  annotations:
+    ad.datadoghq.com/mysql.checks: |
+      {
+        "mysql": {
+          "init_config": {},
+          "instances": [
+            {
+              "server": "%%host%%", 
+              "user": "datadog",
+              "password": "<UNIQUEPASSWORD>"
+            }
+          ]
+        }
+      }
+  labels:
+    name: mysql
+spec:
+  containers:
+    - name: mysql
+```
+
 See [Autodiscovery template variables][12] for details on using `<UNIQUEPASSWORD>` as an environment variable instead of a label.
 
 #### Log collection
@@ -293,6 +323,8 @@ See [Autodiscovery template variables][12] for details on using `<UNIQUEPASSWORD
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][17].
 
 Then, set [Log Integrations][14] as pod annotations. Alternatively, you can configure this with a [file, configmap, or key-value store][18].
+
+**Annotations v1/v2**
 
 ```yaml
 apiVersion: v1
@@ -522,7 +554,7 @@ See [service_checks.json][22] for a list of service checks provided by this inte
 - [Can I use a named instance in the SQL Server integration?][24]
 - [Can I set up the dd-agent MySQL check on my Google CloudSQL?][25]
 - [MySQL Custom Queries][26]
-- [Can I collect SQL Server performance metrics beyond what is available in the sys.dm_os_performance_counters table? Try WMI][27]
+- [Use WMI to collect more SQL Server performance metrics][27]
 - [How can I collect more metrics from my SQL Server integration?][28]
 - [Database user lacks privileges][29]
 - [How to collect metrics with a SQL Stored Procedure?][30]
@@ -555,11 +587,11 @@ Additional helpful documentation, links, and articles:
 [20]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [21]: https://github.com/DataDog/integrations-core/blob/master/mysql/metadata.csv
 [22]: https://github.com/DataDog/integrations-core/blob/master/mysql/assets/service_checks.json
-[23]: https://docs.datadoghq.com/integrations/faq/connection-issues-with-the-sql-server-integration/
+[23]: https://docs.datadoghq.com/integrations/guide/connection-issues-with-the-sql-server-integration/
 [24]: https://docs.datadoghq.com/integrations/faq/can-i-use-a-named-instance-in-the-sql-server-integration/
 [25]: https://docs.datadoghq.com/integrations/faq/can-i-set-up-the-dd-agent-mysql-check-on-my-google-cloudsql/
 [26]: https://docs.datadoghq.com/integrations/faq/how-to-collect-metrics-from-custom-mysql-queries/
-[27]: https://docs.datadoghq.com/integrations/faq/can-i-collect-sql-server-performance-metrics-beyond-what-is-available-in-the-sys-dm-os-performance-counters-table-try-wmi/
+[27]: https://docs.datadoghq.com/integrations/guide/use-wmi-to-collect-more-sql-server-performance-metrics/
 [28]: https://docs.datadoghq.com/integrations/faq/how-can-i-collect-more-metrics-from-my-sql-server-integration/
 [29]: https://docs.datadoghq.com/integrations/faq/database-user-lacks-privileges/
 [30]: https://docs.datadoghq.com/integrations/guide/collect-sql-server-custom-metrics/#collecting-metrics-from-a-custom-procedure

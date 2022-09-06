@@ -51,11 +51,27 @@ def openmetrics_metrics():
     metrics = list(METRIC_MAP.values())
     metrics.append('server.version')
 
-    histograms = ['network.peer.round_trip_time.seconds']
+    histograms = [
+        'network.peer.round_trip_time.seconds',
+        'debugging.mvcc.db.compaction.total.duration.milliseconds',
+        'debugging.mvcc.db.compaction.pause.duration.milliseconds',
+        'debugging.mvcc.index.compaction.pause.duration.milliseconds',
+        'debugging.snap.save.marshalling.duration.seconds',
+        'debugging.snap.save.total.duration.seconds',
+        'disk.wal.fsync.duration.seconds',
+        'disk.backend.commit.duration.seconds',
+        'disk.backend.snapshot.duration.seconds',
+        'go.gc.duration.seconds',
+        'snap.db.fsync.duration.seconds',
+        'snap.db.save.total.duration.seconds',
+        'snap.fsync.duration.seconds',
+    ]
 
     for histogram in histograms:
         metrics.remove(histogram)
         metrics.append('{}.count'.format(histogram))
         metrics.append('{}.sum'.format(histogram))
+
+    metrics.append('go.gc.duration.seconds.quantile')
 
     return metrics

@@ -8,6 +8,7 @@ import jsonschema
 import requests
 
 import datadog_checks.dev.tooling.manifest_validator.common.validator as common
+from datadog_checks.dev.fs import file_exists
 
 from ...constants import get_root
 from ...manifest_validator.common.validator import BaseManifestValidator
@@ -43,16 +44,19 @@ class DisplayOnPublicValidator(BaseManifestValidator):
 
 class TileDescriptionValidator(BaseManifestValidator):
     DESCRIPTION_PATH = '/tile/description'
-    MAX_DESCRIPTION_LENGTH = 70
+    MAX_DESCRIPTION_LENGTH = 80
+    MAX_DESCRIPTION_LENGTH_MP = 70
 
     def validate(self, check_name, decoded, fix):
-        # The description for V2 manifests should not be longer than 70 characters to avoid being
-        # cut off or shortened on the UI
+        # The description for V2 manifests should not exceed the max
         tile_description = decoded.get_path(self.DESCRIPTION_PATH)
         current_length = len(tile_description)
-        if current_length > self.MAX_DESCRIPTION_LENGTH:
-            output = f'  The tile description is {current_length} characters long. It should be no longer than \
-{self.MAX_DESCRIPTION_LENGTH} characters.'
+        max_desc_length = self.MAX_DESCRIPTION_LENGTH_MP if self.is_marketplace else self.MAX_DESCRIPTION_LENGTH
+        if current_length > max_desc_length:
+            output = (
+                f'  The tile description is {current_length} characters long. It should be no longer than '
+                f'{max_desc_length} characters.'
+            )
             self.fail(output)
 
 
@@ -231,6 +235,18 @@ class MediaGalleryValidator(BaseManifestValidator):
             self.fail(output)
 
 
+class ChangelogValidator(BaseManifestValidator):
+    def validate(self, check_name, decoded, fix):
+        tile = decoded.get('tile')
+        changelog = tile.get("changelog", None)
+
+        if changelog:
+            path = os.path.join(get_root(), check_name, changelog)
+
+            if not file_exists(path):
+                self.fail(f"{os.path.join(check_name, changelog)} does not exist.")
+
+
 def get_v2_validators(ctx, is_extras, is_marketplace):
     return [
         common.MaintainerValidator(
@@ -241,8 +257,9 @@ def get_v2_validators(ctx, is_extras, is_marketplace):
         common.ImmutableAttributesValidator(version=V2),
         common.LogsCategoryValidator(version=V2),
         DisplayOnPublicValidator(version=V2),
-        TileDescriptionValidator(is_marketplace, is_extras, version=V2),
-        MediaGalleryValidator(is_marketplace, is_extras, version=V2),
+        TileDescriptionValidator(is_marketplace=is_marketplace, is_extras=is_extras, version=V2),
+        MediaGalleryValidator(is_marketplace=is_marketplace, is_extras=is_extras, version=V2),
+        ChangelogValidator(version=V2),
         # keep SchemaValidator last, and avoid running this validation if errors already found
         SchemaValidator(ctx=ctx, version=V2, skip_if_errors=True),
     ]

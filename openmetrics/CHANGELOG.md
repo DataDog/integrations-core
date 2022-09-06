@@ -1,6 +1,10 @@
 # CHANGELOG - OpenMetrics
 
-## 2.2.1 / 2022-05-18
+## 2.2.2 / 2022-08-05
+
+* [Fixed] Hide `extra_metrics` in example config. See [#12470](https://github.com/DataDog/integrations-core/pull/12470).
+
+## 2.2.1 / 2022-05-18 / Agent 7.37.0
 
 * [Fixed] Fix extra metrics description example. See [#12043](https://github.com/DataDog/integrations-core/pull/12043).
 

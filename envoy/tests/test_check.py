@@ -17,6 +17,7 @@ SKIP_TAG_ASSERTION = [
 @pytest.mark.usefixtures('dd_environment')
 def test_check(aggregator, dd_run_check, check):
     c = check(DEFAULT_INSTANCE)
+
     dd_run_check(c)
     dd_run_check(c)
 

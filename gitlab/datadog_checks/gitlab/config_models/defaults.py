@@ -223,7 +223,7 @@ def instance_send_histograms_buckets(field, value):
 
 
 def instance_send_monotonic_counter(field, value):
-    return True
+    return False
 
 
 def instance_send_monotonic_with_gauge(field, value):

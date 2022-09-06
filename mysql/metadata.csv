@@ -1,5 +1,7 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
 mysql.info.schema.size,gauge,,mebibyte,,"Size of schemas in MiB",0,mysql,mysql schema size,
+mysql.info.table.rows.read,count,,row,,"Total number of rows read per table (Percona userstat only)",0,mysql,mysql table rows read,
+mysql.info.table.rows.changed,count,,row,,"Total number of rows changed per table (Percona userstat only)",0,mysql,mysql table rows changed,
 mysql.info.table.index_size,gauge,,mebibyte,,"Size of tables index in MiB",0,mysql,mysql index table size,
 mysql.info.table.data_size,gauge,,mebibyte,,"Size of tables data in MiB",0,mysql,mysql data table size,memory
 mysql.galera.wsrep_cluster_size,gauge,,node,,The current number of nodes in the Galera cluster.,0,mysql,galera cluster size,
@@ -19,6 +21,7 @@ mysql.innodb.row_lock_waits,gauge,,event,second,The number of times per second a
 mysql.net.connections,gauge,,connection,second,The rate of connections to the server.,0,mysql,conns per s,cpu
 mysql.net.max_connections,gauge,,connection,,The maximum number of connections that have been in use simultaneously since the server started.,-1,mysql,max used conn,
 mysql.net.max_connections_available,gauge,,connection,,The maximum permitted number of simultaneous client connections.,-1,mysql,max used conn avail,
+mysql.performance.user_connections,gauge,,connection,,"The number of user connections. Tags: processlist_db, processlist_host, processlist_state, processlist_user",0,mysql,user conns,
 mysql.performance.com_delete,gauge,,query,second,The rate of delete statements.,0,mysql,deletes,
 mysql.performance.com_delete_multi,gauge,,query,second,The rate of delete-multi statements.,0,mysql,delete multi,
 mysql.performance.com_insert,gauge,,query,second,The rate of insert statements.,0,mysql,inserts,cpu
@@ -77,6 +80,8 @@ mysql.innodb.ibuf_merged_inserts,gauge,,operation,,"Insert buffer and adaptative
 mysql.innodb.ibuf_merged,gauge,,operation,,"Insert buffer and adaptative hash index merged",0,mysql,mysql innodb merged,
 mysql.innodb.ibuf_merges,gauge,,operation,,"Insert buffer and adaptative hash index merges",0,mysql,mysql innodb merges,
 mysql.innodb.lock_structs,gauge,,operation,,"Lock structs",0,mysql,mysql innodb lock structs,
+mysql.innodb.locked_tables,gauge,,operation,,"Locked tables",0,mysql,mysql innodb locked tables,
+mysql.innodb.tables_in_use,gauge,,operation,,"Tables in use",0,mysql,mysql innodb used tables,
 mysql.innodb.os_file_fsyncs,gauge,,operation,,"(Delta) The total number of fsync() operations performed by InnoDB.",0,mysql,mysql innodb os file fsyncs,
 mysql.innodb.os_file_reads,gauge,,operation,,"(Delta) The total number of files reads performed by read threads within InnoDB.",0,mysql,mysql innodb os file reads,
 mysql.innodb.os_file_writes,gauge,,operation,,"(Delta) The total number of file writes performed by write threads within InnoDB.",0,mysql,mysql innodb os file writes,

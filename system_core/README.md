@@ -49,6 +49,20 @@ See [service_checks.json][8] for a list of service checks provided by this integ
 
 Need help? Contact [Datadog support][9].
 
+### Windows and high numbers of processors
+
+Due to [the way Windows splits processors into groups][10], metrics
+for individual cores collected from this integration may have invalid
+values for Windows hosts with high (> 64) numbers of cores for a
+portion of the cores.
+
+Note that `*.total` metrics should still reflect accurate values in
+the above situation, and only per-core metrics are affected.
+
+Datadog recommends that users with this type of configuration set up the
+[Windows Performance Counters integration][11] to track counters
+inside the `Processor Information`. This enables users to get accurate per-core
+metrics.
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/system_core/images/syscoredash.png
 [2]: https://app.datadoghq.com/account/settings#agent
@@ -59,3 +73,5 @@ Need help? Contact [Datadog support][9].
 [7]: https://github.com/DataDog/integrations-core/blob/master/system_core/metadata.csv
 [8]: https://github.com/DataDog/integrations-core/blob/master/system_core/assets/service_checks.json
 [9]: https://docs.datadoghq.com/help/
+[10]: https://docs.microsoft.com/en-us/windows/win32/procthread/processor-groups
+[11]: https://docs.datadoghq.com/integrations/windows_performance_counters/

@@ -62,6 +62,10 @@ coverage:
         target: 75
         flags:
         - azure_iot_edge
+      Boundary:
+        target: 75
+        flags:
+        - boundary
       Btrfs:
         target: 75
         flags:
@@ -77,7 +81,7 @@ coverage:
       Calico:
         target: 75
         flags:
-          - calico
+        - calico
       Cassandra_Nodetool:
         target: 75
         flags:
@@ -582,6 +586,10 @@ coverage:
         target: 75
         flags:
         - cert_manager
+      ddev:
+        target: 75
+        flags:
+        - ddev
       etcd:
         target: 75
         flags:
@@ -655,6 +663,11 @@ flags:
     paths:
     - azure_iot_edge/datadog_checks/azure_iot_edge
     - azure_iot_edge/tests
+  boundary:
+    carryforward: true
+    paths:
+    - boundary/datadog_checks/boundary
+    - boundary/tests
   btrfs:
     carryforward: true
     paths:
@@ -668,8 +681,8 @@ flags:
   calico:
     carryforward: true
     paths:
-      - calico/datadog_checks/calico
-      - calico/tests
+    - calico/datadog_checks/calico
+    - calico/tests
   cassandra_nodetool:
     carryforward: true
     paths:
@@ -760,6 +773,11 @@ flags:
     paths:
     - datadog_cluster_agent/datadog_checks/datadog_cluster_agent
     - datadog_cluster_agent/tests
+  ddev:
+    carryforward: true
+    paths:
+    - ddev/datadog_checks/ddev
+    - ddev/tests
   directory:
     carryforward: true
     paths:
@@ -828,8 +846,8 @@ flags:
   foundationdb:
     carryforward: true
     paths:
-      - foundationdb/datadog_checks/foundationdb
-      - foundationdb/tests
+    - foundationdb/datadog_checks/foundationdb
+    - foundationdb/tests
   gearmand:
     carryforward: true
     paths:

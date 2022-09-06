@@ -1,6 +1,38 @@
 # CHANGELOG - datadog_checks_base
 
-## 25.4.1 / 2022-05-15
+## 27.0.0 / 2022-08-05
+
+* [Fixed] Dependency updates. See [#12653](https://github.com/DataDog/integrations-core/pull/12653).
+* [Fixed] Pin `pymysql` to `0.10.1`. See [#12612](https://github.com/DataDog/integrations-core/pull/12612).
+* [Fixed] Better failed assertion message, print return code. See [#12615](https://github.com/DataDog/integrations-core/pull/12615).
+* [Security] Bump `lxml` package. See [#12663](https://github.com/DataDog/integrations-core/pull/12663).
+* [Changed] Upgrade pymongo to 4.2. See [#12594](https://github.com/DataDog/integrations-core/pull/12594).
+
+## 26.0.0 / 2022-07-22
+
+* [Added] Support custom messages in `QueryManager` queries of type `'service_check'`. See [#12537](https://github.com/DataDog/integrations-core/pull/12537).
+* [Removed] Remove inventories configuration submission. See [#12500](https://github.com/DataDog/integrations-core/pull/12500).
+
+## 25.6.0 / 2022-07-11
+
+* [Added] Ship `pymongo-srv` to support DNS seed connection schemas. See [#12442](https://github.com/DataDog/integrations-core/pull/12442).
+* [Fixed] Fix typo detection for config field aliases. See [#12468](https://github.com/DataDog/integrations-core/pull/12468).
+* [Fixed] [PerfCountersBaseCheck] Refresh performance objects in a separate thread. See [#12372](https://github.com/DataDog/integrations-core/pull/12372).
+* [Fixed] Allow empty username and password for basic auth. See [#12437](https://github.com/DataDog/integrations-core/pull/12437).
+
+## 25.5.1 / 2022-08-08 / Agent 7.38.2
+
+* [Security] Bump `lxml` package. See [#12663](https://github.com/DataDog/integrations-core/pull/12663).
+
+## 25.5.0 / 2022-07-08 / Agent 7.38.0
+
+* [Security] Upgrade pyjwt to 2.4.0. See [#12481](https://github.com/DataDog/integrations-core/pull/12481).
+
+## 25.4.2 / 2022-06-27
+
+* [Fixed] Change refreshing counters log level to debug. See [#12069](https://github.com/DataDog/integrations-core/pull/12069).
+
+## 25.4.1 / 2022-05-15 / Agent 7.37.0
 
 * [Fixed] Upgrade dependencies. See [#11958](https://github.com/DataDog/integrations-core/pull/11958).
 
@@ -61,6 +93,10 @@
 
 * [Added] Upgrade psutil to 5.9.0. See [#11139](https://github.com/DataDog/integrations-core/pull/11139).
 * [Changed] Add tls_protocols_allowed configuration option. See [#11237](https://github.com/DataDog/integrations-core/pull/11237).
+
+## 23.7.7 / 2022-04-12
+
+* [Fixed] Fix obfuscate_sql_with_metadata wrapper memory usage. See [#11815](https://github.com/DataDog/integrations-core/pull/11815).
 
 ## 23.7.6 / 2022-02-03 / Agent 7.34.0
 

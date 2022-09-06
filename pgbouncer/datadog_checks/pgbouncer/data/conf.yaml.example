@@ -48,6 +48,20 @@ instances:
     #
     # use_cached: true
 
+    ## @param collect_per_client_metrics - boolean - optional - default: false
+    ## Whether to collect detailed per-client metrics.
+    ##
+    ## This is useful for detailed analysis of client behavior (e.g., wait time).
+    #
+    # collect_per_client_metrics: false
+
+    ## @param collect_per_server_metrics - boolean - optional - default: false
+    ## Whether to collect detailed per-server metrics.
+    ##
+    ## This is useful for detailed analysis of server behavior (e.g., last request time).
+    #
+    # collect_per_server_metrics: false
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##

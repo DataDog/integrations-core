@@ -12,6 +12,7 @@ files:
             namespace.hidden: false
             metrics.required: true
             metrics.hidden: false
+            extra_metrics.hidden: true
             openmetrics_endpoint.required: false
             tag_by_endpoint.example: false
             tag_by_endpoint.hidden: false

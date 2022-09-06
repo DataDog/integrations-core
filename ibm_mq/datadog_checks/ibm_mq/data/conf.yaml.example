@@ -156,7 +156,8 @@ instances:
 
     ## @param convert_endianness - boolean - optional - default: false
     ## If you are monitoring IBM MQ remotely and if the Agent and the server are using different endianness,
-    ## set this field to true.
+    ## set this field to true. For example, you will need to enable this option if you are monitoring a server that
+    ## is running on AIX or IBM i.
     #
     # convert_endianness: false
 

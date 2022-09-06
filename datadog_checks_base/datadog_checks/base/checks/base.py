@@ -67,7 +67,7 @@ if datadog_agent.get_config('disable_unsafe_yaml'):
     monkey_patch_pyyaml()
 
 if not PY2:
-    from pydantic import ValidationError
+    from pydantic import BaseModel, ValidationError
 
 if TYPE_CHECKING:
     import ssl
@@ -130,10 +130,6 @@ class AgentCheck(object):
     # If the return type is a string, then it will be sent as the value for `name`. If the return type is
     # a mapping type, then each key will be considered a `name` and will be sent with its (str) value.
     METADATA_TRANSFORMERS = None
-
-    # Default fields to whitelist for metadata submission
-    METADATA_DEFAULT_CONFIG_INIT_CONFIG = None
-    METADATA_DEFAULT_CONFIG_INSTANCE = None
 
     FIRST_CAP_RE = re.compile(br'(.)([A-Z][a-z]+)')
     ALL_CAP_RE = re.compile(br'([a-z0-9])([A-Z])')
@@ -285,7 +281,7 @@ class AgentCheck(object):
         self._config_model_shared = None  # type: Any
 
         # Functions that will be called exactly once (if successful) before the first check run
-        self.check_initializations = deque([self.send_config_metadata])  # type: Deque[Callable[[], None]]
+        self.check_initializations = deque()  # type: Deque[Callable[[], None]]
 
         if not PY2:
             self.check_initializations.append(self.load_configuration_models)
@@ -443,7 +439,14 @@ class AgentCheck(object):
         models_config = models_config or {}
         typos = set()  # type: Set[str]
 
-        known_options = [k for k, _ in models_config]  # type: List[str]
+        known_options = set([k for k, _ in models_config])  # type: Set[str]
+
+        if not PY2:
+
+            if isinstance(models_config, BaseModel):
+                # Also add aliases, if any
+                known_options.update(set(models_config.dict(by_alias=True)))
+
         unknown_options = [option for option in user_configs.keys() if option not in known_options]  # type: List[str]
 
         for unknown_option in unknown_options:
@@ -880,13 +883,6 @@ class AgentCheck(object):
         :param options: keyword arguments to pass to any defined transformer
         """
         self.metadata_manager.submit(name, value, options)
-
-    def send_config_metadata(self):
-        # type: () -> None
-        self.set_metadata('config', self.instance, section='instance', whitelist=self.METADATA_DEFAULT_CONFIG_INSTANCE)
-        self.set_metadata(
-            'config', self.init_config, section='init_config', whitelist=self.METADATA_DEFAULT_CONFIG_INIT_CONFIG
-        )
 
     @staticmethod
     def is_metadata_collection_enabled():

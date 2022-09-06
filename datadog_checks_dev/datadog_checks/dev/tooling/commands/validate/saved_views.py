@@ -58,7 +58,7 @@ def saved_views(check):
     echo_info(f"Validating saved views for {len(integrations)} checks ...")
 
     for integration in integrations:
-        saved_views, _ = get_assets_from_manifest(integration, 'saved_views')
+        saved_views, non_existing = get_assets_from_manifest(integration, 'saved_views')
 
         for saved_view in saved_views:
             display_queue = []
@@ -192,6 +192,10 @@ def saved_views(check):
                 annotate_display_queue(saved_view, display_queue)
                 for func, message in display_queue:
                     func(message)
+
+        for saved_view in non_existing:
+            errors = True
+            echo_failure(f"{integration} saved view does not exist: {saved_view}")
 
     if errors:
         abort()

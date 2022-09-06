@@ -1,6 +1,22 @@
 # CHANGELOG - sqlserver
 
-## 8.0.0 / 2022-05-15
+## 8.1.0 / 2022-08-05
+
+* [Added] Add AlwaysOn Availability Group replica status metric. See [#12494](https://github.com/DataDog/integrations-core/pull/12494).
+* [Fixed] Dependency updates. See [#12653](https://github.com/DataDog/integrations-core/pull/12653).
+* [Fixed] Check for port provided in config. See [#12610](https://github.com/DataDog/integrations-core/pull/12610).
+* [Fixed] Improve failed connection error messages. See [#12533](https://github.com/DataDog/integrations-core/pull/12533).
+* [Fixed] Fix documentation for GA DBM support. See [#12512](https://github.com/DataDog/integrations-core/pull/12512).
+* [Fixed] Support version specific AlwaysOn metrics. See [#12424](https://github.com/DataDog/integrations-core/pull/12424).
+* [Security] Bump `lxml` package. See [#12663](https://github.com/DataDog/integrations-core/pull/12663).
+
+## 8.0.1 / 2022-06-27 / Agent 7.38.0
+
+* [Fixed] Fix engine edition logic bug and simplify configuration for Azure SQL Database . See [#12397](https://github.com/DataDog/integrations-core/pull/12397).
+* [Fixed] Support virtual file stats on SQL Server 2012. See [#12094](https://github.com/DataDog/integrations-core/pull/12094).
+* [Fixed] Improve handling of encrypted stored procedures. See [#12060](https://github.com/DataDog/integrations-core/pull/12060).
+
+## 8.0.0 / 2022-05-15 / Agent 7.37.0
 
 * [Added] Add AlwaysOn metrics. See [#11979](https://github.com/DataDog/integrations-core/pull/11979).
 * [Added] sqlserver: Add option to keep aliases in sql server (`keep_sql_alias`). See [#12020](https://github.com/DataDog/integrations-core/pull/12020).
