@@ -51,7 +51,7 @@ def test_environment_run_on_failed_conditions(attempts, expected_call_count):
         with pytest.raises(tenacity.RetryError):
             with environment_run(up=up, down=down, attempts=attempts, conditions=[condition]):
                 pass
-    except RetryError:
+    except:
         assert 0 == 1, str(os.environ)
 
     assert condition.call_count == expected_call_count
