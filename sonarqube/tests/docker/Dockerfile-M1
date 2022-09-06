@@ -1,0 +1,3 @@
+FROM davealdon/sonarqube-with-docker-and-m1-macs
+RUN apk update
+RUN apk add curl

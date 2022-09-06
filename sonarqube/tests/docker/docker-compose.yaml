@@ -3,7 +3,12 @@ version: '3.8'
 services:
   sonarqube:
     container_name: sonarqube
-    image: sonarqube:${SONARQUBE_VERSION}-community
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      args:
+        SONARQUBE_VERSION: ${SONARQUBE_VERSION}
+    image: dd-sonarqube:${SONARQUBE_VERSION}
     ulimits:
       nproc: 4096
       nofile:
@@ -13,6 +18,12 @@ services:
       - "9000:9000"
       - "10443:10443"
       - "10444:10444"
+    healthcheck:
+      test: curl -f http://localhost:9000/api/system/status | grep "\"status\":\"UP\"" || exit 1
+      interval: 3s
+      retries: 100
+      start_period: 30s
+      timeout: 5s
     environment:
       SONARQUBE_WEB_ACCESSLOGS_PATTERN: combined
       SONARQUBE_WEB_JVM_OPTS: >-
@@ -52,7 +63,8 @@ services:
     networks:
       - sonarqube-network
     depends_on:
-      - sonarqube
+      sonarqube:
+        condition: service_healthy
 
 networks:
   sonarqube-network: {}

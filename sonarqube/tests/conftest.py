@@ -24,30 +24,16 @@ def dd_environment():
         project_dir = os.path.join(temp_dir, 'project')
         if not os.path.isdir(project_dir):
             shutil.copytree(os.path.join(common.HERE, 'docker', 'project'), project_dir)
-
         with docker_run(
             compose_file,
-            service_name='sonarqube',
             env_vars={'PROJECT_DIR': project_dir},
             conditions=[
                 CheckDockerLogs('sonarqube', ['SonarQube is up'], attempts=100, wait=3),
-                CheckEndpoints([common.WEB_INSTANCE['web_endpoint']]),
-                WaitForPortListening(common.HOST, common.PORT),
+                CheckDockerLogs('sonar-scanner', ['ANALYSIS SUCCESSFUL'], attempts=100, wait=3)
             ],
             mount_logs=True,
         ):
-            # Wait a bit for the listener be ready
-            time.sleep(60)
-            with docker_run(
-                compose_file,
-                service_name='sonar-scanner',
-                env_vars={'PROJECT_DIR': project_dir},
-                conditions=[CheckDockerLogs('sonar-scanner', ['ANALYSIS SUCCESSFUL'], attempts=100, wait=3)],
-                sleep=10,
-                # Don't worry about spinning down since the outermost runner will already do that
-                down=lambda: None,
-            ):
-                yield common.CHECK_CONFIG, {'use_jmx': True}
+            yield common.CHECK_CONFIG, {'use_jmx': True}
 
 
 @pytest.fixture

@@ -3,7 +3,10 @@ version: '3.8'
 services:
   sonarqube:
     container_name: sonarqube
-    image: davealdon/sonarqube-with-docker-and-m1-macs
+    build:
+      context: .
+      dockerfile: ./Dockerfile-M1
+    image: dd-sonarqube:m1
     ulimits:
       nproc: 4096
       nofile:
@@ -13,6 +16,12 @@ services:
       - "9000:9000"
       - "10443:10443"
       - "10444:10444"
+    healthcheck:
+      test: curl -f http://localhost:9000/api/system/status | grep "\"status\":\"UP\"" || exit 1
+      interval: 3s
+      retries: 100
+      start_period: 30s
+      timeout: 5s
     environment:
       SONAR_FORCEAUTHENTICATION: "False"
       SONARQUBE_WEB_ACCESSLOGS_PATTERN: combined
@@ -53,7 +62,8 @@ services:
     networks:
       - sonarqube-network
     depends_on:
-      - sonarqube
+      sonarqube:
+        condition: service_healthy
 
 networks:
   sonarqube-network: {}
