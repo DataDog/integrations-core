@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import os
+
 from datadog_checks.dev import get_docker_hostname, get_here, load_jmx_config
 
 HERE = get_here()
@@ -13,6 +15,8 @@ WEB_INSTANCE = {
     'components': {PROJECT: {'tag': 'project'}},
     'tags': ['foo:bar'],
 }
+
+COMPOSE_FILE = os.getenv('COMPOSE_FILE')
 
 CHECK_CONFIG = load_jmx_config()
 CHECK_CONFIG['instances'] = [JMX_WEB_INSTANCE, JMX_CE_INSTANCE, WEB_INSTANCE]

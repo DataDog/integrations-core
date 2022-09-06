@@ -16,7 +16,7 @@ from . import common
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    compose_file = os.path.join(common.HERE, 'docker', 'docker-compose.yaml')
+    compose_file = os.path.join(common.HERE, 'docker', common.COMPOSE_FILE)
 
     # The scanner creates artifacts within the project such as `.scannerwork/`
     with TempDir('sonarqube-project') as temp_dir:

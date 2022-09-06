@@ -3,7 +3,7 @@ version: '3.8'
 services:
   sonarqube:
     container_name: sonarqube
-    image: sonarqube:${SONARQUBE_VERSION}-community
+    image: davealdon/sonarqube-with-docker-and-m1-macs
     ulimits:
       nproc: 4096
       nofile:
@@ -14,6 +14,7 @@ services:
       - "10443:10443"
       - "10444:10444"
     environment:
+      SONAR_FORCEAUTHENTICATION: "False"
       SONARQUBE_WEB_ACCESSLOGS_PATTERN: combined
       SONARQUBE_WEB_JVM_OPTS: >-
         -Dcom.sun.management.jmxremote
