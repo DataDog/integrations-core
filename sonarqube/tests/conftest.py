@@ -8,7 +8,7 @@ from copy import deepcopy
 import pytest
 
 from datadog_checks.dev import TempDir, docker_run
-from datadog_checks.dev.conditions import CheckDockerLogs, CheckEndpoints
+from datadog_checks.dev.conditions import CheckDockerLogs, CheckEndpoints, WaitForPortListening
 from datadog_checks.sonarqube import SonarqubeCheck
 
 from . import common
@@ -31,6 +31,7 @@ def dd_environment():
             conditions=[
                 CheckDockerLogs('sonarqube', ['SonarQube is up'], attempts=100, wait=3),
                 CheckEndpoints([common.WEB_INSTANCE['web_endpoint']]),
+                WaitForPortListening(common.HOST, common.PORT),
             ],
             mount_logs=True,
         ):
