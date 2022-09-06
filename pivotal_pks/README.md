@@ -8,7 +8,7 @@ This integration monitors [Pivotal Container Service][1] clusters.
 
 Since Datadog already integrates with Kubernetes, it is ready-made to monitor Pivotal Kubernetes Service (PKS). You can use the Datadog [Cluster Monitoring tile][7] along with this integration to monitor your cluster.
 
-Install the Datadog Agent on each non-worker VM in your PKS environment. In environments without PAS installed, select the `Resource Config` section of the tile and set `instances` of the `datadog-firehose-nozzle` to `0`.
+Install the Datadog Agent on each non-worker VM in your PKS environment. In environments without Pivotal Application Service (PAS) installed, select the `Resource Config` section of the tile and set `instances` of the `datadog-firehose-nozzle` to `0`.
 
 ### Metric collection
 
