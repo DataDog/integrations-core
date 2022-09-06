@@ -29,6 +29,8 @@ services:
       - ${DD_LOG_3}:/opt/sonarqube/logs/es.log
       - ${DD_LOG_4}:/opt/sonarqube/logs/sonar.log
       - ${DD_LOG_5}:/opt/sonarqube/logs/web.log
+    networks:
+      - sonarqube-network
     # https://github.com/SonarSource/docker-sonarqube/issues/83
     command: >-
       -Dsonar.ce.javaOpts="
@@ -47,5 +49,10 @@ services:
       SONAR_HOST_URL: http://sonarqube:9000
     volumes:
       - ${PROJECT_DIR}:/usr/src
+    networks:
+      - sonarqube-network
     depends_on:
       - sonarqube
+
+networks:
+  sonarqube-network: {}
