@@ -10,17 +10,16 @@ CERT_METRICS = {
 
 ACME_METRICS = {
     'cert_manager.http_acme_client.request.count': aggregator.MONOTONIC_COUNT,
-    'cert_manager.http_acme_client.request.duration.sum': aggregator.GAUGE,
-    'cert_manager.http_acme_client.request.duration.count': aggregator.GAUGE,
+    'cert_manager.http_acme_client.request.duration.sum': aggregator.MONOTONIC_COUNT,
+    'cert_manager.http_acme_client.request.duration.count': aggregator.MONOTONIC_COUNT,
     'cert_manager.http_acme_client.request.duration.quantile': aggregator.GAUGE,
 }
 
 CONTROLLER_METRICS = {
     'cert_manager.clock_time': aggregator.GAUGE,
     'cert_manager.controller.sync_call.count': aggregator.MONOTONIC_COUNT,
-    'cert_manager.prometheus.health': aggregator.GAUGE,
 }
 
 MOCK_INSTANCE = {
-    'prometheus_url': 'http://fake.tld/prometheus',
+    'openmetrics_endpoint': 'http://fake.tld/prometheus',
 }

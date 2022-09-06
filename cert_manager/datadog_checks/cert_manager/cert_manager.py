@@ -1,37 +1,35 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from datadog_checks.base import OpenMetricsBaseCheck
+
+from datadog_checks.base import OpenMetricsBaseCheckV2
 
 from .metrics import ACME_METRICS, CERT_METRICS, CONTROLLER_METRICS, TYPE_OVERRIDES
 
 
-class CertManagerCheck(OpenMetricsBaseCheck):
+class CertManagerCheck(OpenMetricsBaseCheckV2):
+    __NAMESPACE__ = 'cert_manager'
+
     DEFAULT_METRIC_LIMIT = 0
-    HEALTH_METRIC = 'cert_manager.prometheus.health'
 
-    def __init__(self, name, init_config, instances=None):
-        METRIC_MAP = dict(CONTROLLER_METRICS)
-        METRIC_MAP.update(ACME_METRICS)
-        METRIC_MAP.update(CERT_METRICS)
+    def __init__(self, name, init_config, instances):
+        super(CertManagerCheck, self).__init__(name, init_config, instances)
 
-        default_instances = {'cert_manager': {'metrics': [METRIC_MAP], 'type_overrides': TYPE_OVERRIDES}}
+    def get_default_config(self):
+        metric_map = dict(CONTROLLER_METRICS)
+        metric_map.update(ACME_METRICS)
+        metric_map.update(CERT_METRICS)
 
-        super(CertManagerCheck, self).__init__(
-            name, init_config, instances, default_instances=default_instances, default_namespace='cert_manager'
-        )
+        return {'metrics': construct_metrics_config(metric_map, TYPE_OVERRIDES)}
 
-    def process(self, scraper_config, metric_transformers=None):
-        # Override the process method to send the health metric, as service checks can be disabled.
-        endpoint = scraper_config.get('prometheus_url')
-        tags = ['endpoint:{}'.format(endpoint)]
-        if scraper_config.get('custom_tags'):
-            tags.extend(scraper_config.get('custom_tags'))
 
-        try:
-            super(CertManagerCheck, self).process(scraper_config, metric_transformers=metric_transformers)
-        except Exception:
-            self.gauge(self.HEALTH_METRIC, 1, tags=tags)
-            raise
-        else:
-            self.gauge(self.HEALTH_METRIC, 0, tags=tags)
+def construct_metrics_config(metric_map, type_overrides):
+    metrics = []
+    for raw_metric_name, metric_name in metric_map.items():
+        config = {raw_metric_name: {'name': metric_name}}
+        if raw_metric_name in type_overrides:
+            config[raw_metric_name]['type'] = type_overrides[raw_metric_name]
+
+        metrics.append(config)
+
+    return metrics

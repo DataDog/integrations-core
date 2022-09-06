@@ -99,11 +99,11 @@
           {
             "id": 5530919959649137,
             "definition": {
-              "title": "Prometheus Endpoint Status",
+              "title": "OpenMetrics Endpoint Status",
               "title_size": "16",
               "title_align": "left",
               "type": "check_status",
-              "check": "cert_manager.prometheus.health",
+              "check": "cert_manager.openmetrics.health",
               "grouping": "cluster",
               "group_by": [],
               "tags": []

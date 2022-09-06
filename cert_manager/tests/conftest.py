@@ -88,7 +88,7 @@ def dd_environment():
             ]
         instances = {
             'instances': [
-                {'prometheus_url': 'http://{}:{}/metrics'.format(*ip_ports[0])},
+                {'openmetrics_endpoint': 'http://{}:{}/metrics'.format(*ip_ports[0])},
             ]
         }
 

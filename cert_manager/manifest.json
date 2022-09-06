@@ -4,7 +4,7 @@
   "manifest_version": "1.0.0",
   "name": "cert_manager",
   "metric_prefix": "cert_manager.",
-  "metric_to_check": "cert_manager.prometheus.health",
+  "metric_to_check": "cert_manager.openmetrics.health",
   "creates_events": false,
   "short_description": "Track all your cert-manager metrics with Datadog",
   "guid": "c9bdaf11-fe15-4892-ae30-47c5124144e5",

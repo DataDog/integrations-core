@@ -6,29 +6,10 @@ import os
 import mock
 import pytest
 
-from datadog_checks.base.errors import CheckException
 from datadog_checks.cert_manager import CertManagerCheck
+from datadog_checks.dev.http import MockResponse
 
 from .common import ACME_METRICS, CERT_METRICS, CONTROLLER_METRICS, MOCK_INSTANCE
-
-
-def get_response(filename):
-    metrics_file_path = os.path.join(os.path.dirname(__file__), 'fixtures', filename)
-    with open(metrics_file_path, 'r') as f:
-        response = f.read()
-    return response
-
-
-@pytest.fixture()
-def mock_metrics():
-    text_data = get_response('cert_manager.txt')
-    with mock.patch(
-        'requests.get',
-        return_value=mock.MagicMock(
-            status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
-        ),
-    ):
-        yield
 
 
 @pytest.fixture()
@@ -42,29 +23,31 @@ def error_metrics():
 
 @pytest.mark.unit
 def test_config():
-    with pytest.raises(CheckException):
-        CertManagerCheck('cert_manager', {}, [{}])
-
     # this should not fail
     CertManagerCheck('cert_manager', {}, [MOCK_INSTANCE])
 
 
 @pytest.mark.unit
-def test_check(aggregator, instance, mock_metrics):
+def test_check(aggregator, dd_run_check):
     check = CertManagerCheck('cert_manager', {}, [MOCK_INSTANCE])
-    check.check(MOCK_INSTANCE)
 
-    EXPECTED_METRICS = dict(CERT_METRICS)
-    EXPECTED_METRICS.update(CONTROLLER_METRICS)
-    EXPECTED_METRICS.update(ACME_METRICS)
+    def mock_requests_get(url, *args, **kwargs):
+        return MockResponse(file_path=os.path.join(os.path.dirname(__file__), 'fixtures', 'cert_manager.txt'))
 
-    for metric_name, metric_type in EXPECTED_METRICS.items():
+    with mock.patch('requests.get', side_effect=mock_requests_get, autospec=True):
+        dd_run_check(check)
+
+    expected_metrics = dict(CERT_METRICS)
+    expected_metrics.update(CONTROLLER_METRICS)
+    expected_metrics.update(ACME_METRICS)
+
+    for metric_name, metric_type in expected_metrics.items():
         aggregator.assert_metric(metric_name, metric_type=metric_type)
 
     aggregator.assert_all_metrics_covered()
 
     aggregator.assert_service_check(
-        'cert_manager.prometheus.health',
+        'cert_manager.openmetrics.health',
         status=CertManagerCheck.OK,
         tags=['endpoint:http://fake.tld/prometheus'],
         count=1,
@@ -77,7 +60,7 @@ def test_openmetrics_error(aggregator, instance, error_metrics):
     with pytest.raises(Exception):
         check.check(MOCK_INSTANCE)
         aggregator.assert_service_check(
-            'cert_manager.prometheus.health',
+            'cert_manager.openmetrics.health',
             status=CertManagerCheck.CRITICAL,
             tags=['endpoint:http://fake.tld/prometheus'],
             count=1,
