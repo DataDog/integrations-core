@@ -291,7 +291,7 @@ you can potentially reduce the scope of the check by trying the following:
 * `Unpack for type ((67108864,)) not implemented`: If you're seeing errors like this, and your MQ server is running on a IBM OS, enable `convert_endianness` and restart your Agent.
 
 ### Warnings in the logs
-* `Error getting [...]: MQI Error. Comp: 2, Reason 2085: FAILED: MQRC_UNKNOWN_OBJECT_NAME`: If you're seeing messages like this is because the integration is trying to collect metrics from a queue that doesn't exist. This can be either due to missconfiguration or, if you're using autodiscovery  the integration can discover a [dynamic queue][16] and then, when it tries to gather its metrics, it no longer exists. In this case you can mitigate the issue by providing a stricter `queue_patterns` or `queue_regex` or just ignore the warning.  
+* `Error getting [...]: MQI Error. Comp: 2, Reason 2085: FAILED: MQRC_UNKNOWN_OBJECT_NAME`: If you're seeing messages like this, it is because the integration is trying to collect metrics from a queue that doesn't exist. This can be either due to misconfiguration or, if you're using `auto_discover_queues`,  the integration can discover a [dynamic queue][16] and then, when it tries to gather its metrics, the queue no longer exists. In this case you can mitigate the issue by providing a stricter `queue_patterns` or `queue_regex`, or just ignore the warning.  
 
 
 ### Other
