@@ -320,4 +320,4 @@ Additional helpful documentation, links, and articles:
 [13]: https://www.datadoghq.com/blog/monitor-ibmmq-with-datadog
 [14]: https://www.ibm.com/docs/en/ibm-mq/9.1?topic=formats-reset-queue-statistics
 [15]: https://www.ibm.com/docs/en/ibm-mq/9.2?topic=reference-setmqaut-grant-revoke-authority
-[16]: https://www.ibm.com/docs/en/ibm-mq/7.5?topic=queues-dynamic-model
+[16]: https://www.ibm.com/docs/en/ibm-mq/9.2?topic=queues-dynamic-model
