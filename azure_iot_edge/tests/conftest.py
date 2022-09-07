@@ -84,7 +84,14 @@ def mock_server():
     compose_file = os.path.join(common.HERE, 'compose', 'mock_server', 'docker-compose.yaml')
     env_vars = {"MOCK_SERVER_PORT": str(common.MOCK_SERVER_PORT)}
 
-    with docker_run(compose_file, env_vars=env_vars):
+    with docker_run(
+        compose_file,
+        endpoints=[
+            common.MOCK_EDGE_HUB_PROMETHEUS_URL,
+            common.MOCK_EDGE_AGENT_PROMETHEUS_URL,
+        ],
+        env_vars=env_vars,
+    ):
         yield
 
 
