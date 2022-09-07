@@ -141,7 +141,7 @@ def test_download(capfd, distribution_name, distribution_version):
     assert len(output) == 1, "Only one output line expected, got {}:\n\t{}".format(len(output), stdout)
 
     # XXX: could be extended to be less error-prone.
-    delimiter = "datadog_checks_downloader/datadog_checks/downloader/data/repo/targets/" "simple/{}/{}-{}".format(
+    delimiter = "datadog_checks_downloader/datadog_checks/downloader/data/repo/targets/simple/{}/{}-{}".format(
         distribution_name, distribution_name.replace("-", "_"), distribution_version
     )
 
