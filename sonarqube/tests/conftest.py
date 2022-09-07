@@ -3,13 +3,12 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 import shutil
-import time
 from copy import deepcopy
 
 import pytest
 
 from datadog_checks.dev import TempDir, docker_run
-from datadog_checks.dev.conditions import CheckDockerLogs, CheckEndpoints, WaitForPortListening
+from datadog_checks.dev.conditions import CheckDockerLogs
 from datadog_checks.sonarqube import SonarqubeCheck
 
 from . import common
@@ -29,7 +28,7 @@ def dd_environment():
             env_vars={'PROJECT_DIR': project_dir},
             conditions=[
                 CheckDockerLogs('sonarqube', ['SonarQube is up'], attempts=100, wait=3),
-                CheckDockerLogs('sonar-scanner', ['ANALYSIS SUCCESSFUL'], attempts=100, wait=3)
+                CheckDockerLogs('sonar-scanner', ['ANALYSIS SUCCESSFUL'], attempts=100, wait=3),
             ],
             mount_logs=True,
         ):
