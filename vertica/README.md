@@ -40,18 +40,16 @@ As the metrics for current license usage use the values from the most recent [au
 
 #### Authenticating with Kerberos
 
-The Vertica integration supports using Kerberos for authentication. To enable Kerberos authentication,
-you need to manually install the [kerberos][13] library:
+The Vertica integration supports using Kerberos for authentication. To enable Kerberos authentication:
 
-```bash
-sudo -Hu dd-agent /opt/datadog-agent/embedded/bin/pip install kerberos==1.3.1
-```
+ 1. Manually install the [kerberos][13] library:
 
-Also, you may have to set the `kerberos_host_name` and `kerberos_service_name` options in the configuration
-to match your setup.
+   ```bash
+   sudo -Hu dd-agent /opt/datadog-agent/embedded/bin/pip install kerberos==1.3.1
 
-Note that you need to make sure that a Ticket-Granting Ticket (TGT) is available and valid. This may
-be obtained by running `kinit` or by logging in.
+2. Check that the `kerberos_host_name` and `kerberos_service_name` options in the configuration are set to match your setup.
+
+3. Make sure that a Ticket-Granting Ticket (TGT) is available and valid. You can obtain this by running `kinit` or by logging in.
 
 #### Log collection
 
