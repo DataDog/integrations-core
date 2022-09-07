@@ -23,7 +23,7 @@ class WindowsPerformanceObjectRefresher(threading.Thread):
         super(WindowsPerformanceObjectRefresher, self).__init__(name=name)
 
         self.interval = 60
-        if datadog_agent and not datadog_agent.get_config('windows_counter_refresh_interval') == None:
+        if datadog_agent and datadog_agent.get_config('windows_counter_refresh_interval') is not None:
             self.interval = datadog_agent.get_config('windows_counter_refresh_interval')
         self.logger = logging.getLogger(name)
         self.logger.info('Windows Counters refresh interval set to %d seconds', self.interval)
