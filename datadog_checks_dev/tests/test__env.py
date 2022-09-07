@@ -46,7 +46,7 @@ def test_environment_run_on_failed_conditions(attempts, expected_call_count):
     down = mock.MagicMock()
     condition = mock.MagicMock()
     condition.side_effect = RetryError("error")
-    assert os.environ == []
+    assert running_on_ci(), repr(os.environ)
 
     with pytest.raises(tenacity.RetryError):
         with environment_run(up=up, down=down, attempts=attempts, conditions=[condition]):

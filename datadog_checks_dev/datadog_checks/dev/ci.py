@@ -12,12 +12,7 @@ def get_ci_env_vars():
 
 
 def running_on_ci():
-    if 'SYSTEM_TEAMFOUNDATIONCOLLECTIONURI' in os.environ or 'Pipeline.Workspace' in os.environ:
-        return True
-    for env_var in ('CI', 'GITHUB_ACTIONS'):
-        if os.environ.get(env_var) in ('true', '1'):
-            return True
-    return False
+    return 'SYSTEM_TEAMFOUNDATIONCOLLECTIONURI' in os.environ
 
 
 def running_on_windows_ci():
