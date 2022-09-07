@@ -95,7 +95,7 @@ def instance_exclude_metrics_by_labels(field, value):
 
 
 def instance_experimental_metrics(field, value):
-    return True
+    return False
 
 
 def instance_extra_headers(field, value):

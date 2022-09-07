@@ -28,10 +28,10 @@ instances:
     #
     # use_openmetrics: false
 
-    ## @param experimental_metrics - boolean - optional - default: true
+    ## @param experimental_metrics - boolean - optional - default: false
     ## Set to true to enable collection of experimental metrics.
     #
-    # experimental_metrics: true
+    # experimental_metrics: false
 
     ## @param collect_events - boolean - optional - default: true
     ## Set to true to enable collection of TeamCity build and deployment success and failure events

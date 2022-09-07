@@ -28,7 +28,7 @@ files:
         Set to true to enable collection of experimental metrics.
       value:
         type: boolean
-        example: true
+        example: false
     - name: collect_events
       description: |
         Set to true to enable collection of TeamCity build and deployment success and failure events
