@@ -190,7 +190,7 @@
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "avg:kong_openmetrics.kong_latency.sum{$kong.service} by {service}",
+                      "query": "avg:kong.latency.sum{$kong.service} by {service}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
@@ -237,7 +237,7 @@
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "p95:kong_openmetrics.kong_latency.sum{*} by {service}",
+                      "query": "p95:kong.latency.sum{*} by {service}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
@@ -305,7 +305,7 @@
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "avg:kong_openmetrics.kong_latency.count{$kong.service} by {service}",
+                      "query": "avg:kong.latency.count{$kong.service} by {service}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
@@ -352,7 +352,7 @@
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "p95:kong_openmetrics.kong_latency.count{*} by {service}",
+                      "query": "p95:kong.latency.count{*} by {service}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
