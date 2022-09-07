@@ -54,7 +54,7 @@ services:
       "
   sonar-scanner:
     container_name: sonar-scanner
-    image: sonarsource/sonar-scanner-cli:4.5
+    image: sonarsource/sonar-scanner-cli:4.7
     environment:
       SONAR_HOST_URL: http://sonarqube:9000
     volumes:

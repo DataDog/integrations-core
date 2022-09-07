@@ -29,6 +29,7 @@ def dd_environment():
             conditions=[
                 CheckDockerLogs('sonarqube', ['SonarQube is up'], attempts=100, wait=3),
                 CheckDockerLogs('sonar-scanner', ['ANALYSIS SUCCESSFUL'], attempts=100, wait=3),
+                CheckDockerLogs('sonarqube', ['Executed task | project=org.sonarqube:sonarqube-scanner'], attempts=100, wait=3),
             ],
             mount_logs=True,
         ):
