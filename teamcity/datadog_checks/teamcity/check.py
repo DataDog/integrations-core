@@ -54,9 +54,13 @@ class TeamCityCheckV2(OpenMetricsBaseCheckV2):
             flush_first_value = runtime_data['flush_first_value']
             for sample, tags, hostname in sample_data:
                 if sample.name.endswith('_total'):
-                    monotonic_count_method(sum_metric, sample.value, tags=tags, hostname=hostname, flush_first_value=flush_first_value)
+                    monotonic_count_method(
+                        sum_metric, sample.value, tags=tags, hostname=hostname, flush_first_value=flush_first_value
+                    )
                 if sample.name.endswith('_count'):
-                    monotonic_count_method(count_metric, sample.value, tags=tags, hostname=hostname, flush_first_value=flush_first_value)
+                    monotonic_count_method(
+                        count_metric, sample.value, tags=tags, hostname=hostname, flush_first_value=flush_first_value
+                    )
                 elif sample.name == metric.name:
                     gauge_method(quantile_metric, sample.value, tags=tags, hostname=hostname)
 
@@ -66,6 +70,8 @@ class TeamCityCheckV2(OpenMetricsBaseCheckV2):
         if not self.scrapers:
             return
         for raw_metric_name, new_metric_name in SUMMARY_METRICS.items():
-            self.scrapers["{}{}".format(self.server_url, self.metrics_endpoint)].metric_transformer.add_custom_transformer(
+            self.scrapers[
+                "{}{}".format(self.server_url, self.metrics_endpoint)
+            ].metric_transformer.add_custom_transformer(
                 raw_metric_name, self.configure_transformer_summary_metric(new_metric_name)
             )
