@@ -1,39 +1,52 @@
 {
-  "display_name": "cert-manager",
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "name": "cert_manager",
-  "metric_prefix": "cert_manager.",
-  "metric_to_check": "cert_manager.clock_time",
-  "creates_events": false,
-  "short_description": "Track all your cert-manager metrics with Datadog",
-  "guid": "c9bdaf11-fe15-4892-ae30-47c5124144e5",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "public_title": "cert-manager Integration",
-  "categories": [
-    "security",
-    "configuration & deployment",
-    "containers"
-  ],
-  "type": "check",
-  "is_public": true,
-  "integration_id": "cert-manager",
+  "manifest_version": "2.0.0",
+  "app_uuid": "a3b15f7a-5edb-4d8b-8e74-84cabf38b7e7",
+  "app_id": "cert-manager",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Track all your cert-manager metrics with Datadog",
+    "title": "cert-manager Integration",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::Mac OS",
+      "Supported OS::Windows",
+      "Category::Security",
+      "Category::Configuration & Deployment",
+      "Category::Containers"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "cert-manager",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "cert_manager.",
+        "check": "cert_manager.clock_time",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
     },
     "dashboards": {
       "Cert-Manager Overview Dashboard": "assets/dashboards/certmanager_overview.json"
-    },
-    "monitors": {},
-    "saved_views": {},
-    "service_checks": "assets/service_checks.json",
-    "logs": {},
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }
