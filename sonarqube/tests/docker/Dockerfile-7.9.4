@@ -1,4 +1,5 @@
 FROM sonarqube:7.9-community
 USER root
+RUN chmod 777 /opt/sonarqube -R
 RUN apt-get update && apt-get -y install curl
 USER 1001
