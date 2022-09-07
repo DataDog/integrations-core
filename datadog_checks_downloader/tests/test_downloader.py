@@ -75,11 +75,11 @@ def _clear_cache():
         "metadata",
         "current",
     )
-    for file_ in os.listdir(metadata_current_dir):
-        if file_ == "root.json" or file_.startswith("."):
+    for file in os.listdir(metadata_current_dir):
+        if file == "root.json" or file.startswith("."):
             continue
 
-        file_path = os.path.join(metadata_current_dir, file_)
+        file_path = os.path.join(metadata_current_dir, file)
 
         if not os.path.isfile(file_path):
             # Skip any nested dirs.
@@ -95,11 +95,11 @@ def _clear_cache():
         "metadata",
         "previous",
     )
-    for file_ in os.listdir(metadata_previous_dir):
-        if file_.startswith("."):
+    for file in os.listdir(metadata_previous_dir):
+        if file.startswith("."):
             continue
 
-        file_path = os.path.join(metadata_previous_dir, file_)
+        file_path = os.path.join(metadata_previous_dir, file)
 
         if not os.path.isfile(file_path):
             # Skip any nested dirs.
