@@ -124,7 +124,7 @@ def _do_run_downloader(argv):
     try:
         download()
     finally:
-        sys.args = old_sys_argv
+        sys.argv = old_sys_argv
 
 
 @pytest.mark.online
