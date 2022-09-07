@@ -34,7 +34,7 @@ def dd_environment():
                 ),
             ],
             mount_logs=True,
-            sleep=10
+            sleep=10,
         ):
             yield common.CHECK_CONFIG, {'use_jmx': True}
 
