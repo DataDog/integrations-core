@@ -46,6 +46,7 @@ The Vertica integration supports using Kerberos for authentication. To enable Ke
 
    ```bash
    sudo -Hu dd-agent /opt/datadog-agent/embedded/bin/pip install kerberos==1.3.1
+   ```
 
 2. Check that the `kerberos_host_name` and `kerberos_service_name` options in the configuration are set to match your setup.
 
