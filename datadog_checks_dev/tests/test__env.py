@@ -1,8 +1,6 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import os
-
 import pytest
 import tenacity
 from mock import mock
@@ -54,9 +52,17 @@ def test_environment_run_on_failed_conditions(attempts, expected_call_count):
         else:
             expected_exception = RetryError
 
-    with pytest.raises(expected_exception):
-        with environment_run(up=up, down=down, attempts=attempts, conditions=[condition]):
-            pass
+    try:
+        with pytest.raises(expected_exception):
+            with environment_run(up=up, down=down, attempts=attempts, conditions=[condition]):
+                pass
+    except Exception as e:
+        raise Exception(
+            "Attempts: {}\nexpected_call_count: {}\nrunning_on_ci: {}"
+            "\nexpected_exception: {}\nactual_exception: {}".format(
+                attempts, expected_call_count, running_on_ci(), str(expected_exception), str(e)
+            )
+        )
 
     assert condition.call_count == expected_call_count
 
