@@ -52,17 +52,9 @@ def test_environment_run_on_failed_conditions(attempts, expected_call_count):
         else:
             expected_exception = RetryError
 
-    try:
-        with pytest.raises(expected_exception):
-            with environment_run(up=up, down=down, attempts=attempts, conditions=[condition]):
-                pass
-    except Exception as e:
-        raise Exception(
-            "Attempts: {}\nexpected_call_count: {}\nrunning_on_ci: {}"
-            "\nexpected_exception: {}\nactual_exception: {}".format(
-                attempts, expected_call_count, running_on_ci(), str(expected_exception), str(e)
-            )
-        )
+    with pytest.raises(expected_exception):
+        with environment_run(up=up, down=down, attempts=attempts, conditions=[condition]):
+            pass
 
     assert condition.call_count == expected_call_count
 
