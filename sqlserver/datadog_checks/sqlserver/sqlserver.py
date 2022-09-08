@@ -82,6 +82,75 @@ if adodbapi is None and pyodbc is None:
 
 set_default_driver_conf()
 
+# TODO: remove
+from inspect import currentframe
+
+class TimedFeatureRelease(object):
+    """
+    This class is used to gate features until a time release delay in increasing order. It can be used to detect
+    portions of code which are responsible for a slow memory leak by slowly enabling features of the check over
+    time.
+
+    Usage:
+        class MyCheck(AgentCheck):
+
+            def __init__(self, instance):
+                ...
+                self.timed_feature_release = TimedFeatureRelease(instance, True, 60)
+                ...
+
+            def check(self):
+                if self.time_feature_release.check_should_exit('startup'):
+                    return
+
+                # code for some feature
+
+                if self.time_feature_release.check_should_exit('feature1'):
+                    return
+
+                # code for some feature
+
+                if self.time_feature_release.check_should_exit('feature2'):
+                    return
+
+                # code for some feature
+    """
+
+    def __init__(self, instance, enabled, delay):
+        self._instance = instance
+        self._enabled = enabled
+        self._delay = delay
+        self._startup_time = time.time()
+        self._discovered_features = []
+
+    def check_should_exit(self, feature_name):
+        if not self._enabled:
+            return False
+
+        if feature_name not in self._discovered_features:
+            self._discovered_features.append(feature_name)
+
+        feature_idx = self._discovered_features.index(feature_name) + 1
+
+        cf = currentframe()
+        lineno = cf.f_back.f_lineno
+
+        tags = [
+            'check_name:{}'.format(self._instance.name),
+            'feature_index:{}'.format(feature_idx),
+            'feature_name:{}'.format(feature_name),
+            'lineno:{}'.format(lineno)
+        ]
+
+        if time.time() > self._startup_time + (self._delay * feature_idx):
+            self._instance.log.info('Feature {} will CONTINUE'.format(feature_name))
+            self._instance.count('dd.agent_check.feature_reached', 1, tags=['aborted:false']+tags, raw=True)
+            return False
+        else:
+            self._instance.log.info('Feature {} will ABORT'.format(feature_name))
+            self._instance.count('dd.agent_check.feature_reached', 1, tags=['aborted:true']+tags, raw=True)
+            return True
+
 
 class SQLServer(AgentCheck):
     __NAMESPACE__ = 'sqlserver'
@@ -112,6 +181,12 @@ class SQLServer(AgentCheck):
         self.proc = self.instance.get('stored_procedure')
         self.proc_type_mapping = {'gauge': self.gauge, 'rate': self.rate, 'histogram': self.histogram}
         self.custom_metrics = init_config.get('custom_metrics', [])
+
+        # Progressively roll out features for debugging
+        # TODO: Note that this flag is not getting recognized in the config
+        feature_release_delay = self.instance.get('timed_feature_release_delay', 60) or 0
+        feature_release_enabled = feature_release_delay > 0
+        self.timed_feature_release = TimedFeatureRelease(self, feature_release_enabled, feature_release_delay)
 
         # DBM
         self.dbm_enabled = self.instance.get('dbm', False)
@@ -699,14 +774,24 @@ class SQLServer(AgentCheck):
     def collect_metrics(self):
         """Fetch the metrics from all of the associated database tables."""
 
+        if self.timed_feature_release.check_should_exit('collect_metrics_begin'):
+            return
+
         with self.connection.open_managed_default_connection():
             with self.connection.get_managed_cursor() as cursor:
+
+
+                if self.timed_feature_release.check_should_exit('autodiscovery'):
+                    return
                 # initiate autodiscovery or if the server was down at check __init__ key could be missing.
                 if self.autodiscover_databases(cursor) or not self.instance_metrics:
                     self._make_metric_list_to_collect(self.custom_metrics)
 
                 instance_results = {}
 
+
+                if self.timed_feature_release.check_should_exit('per_type_metrics'):
+                    return
                 # Execute the `fetch_all` operations first to minimize the database calls
                 for cls, metric_names in six.iteritems(self.instance_per_type_metrics):
                     if not metric_names:
@@ -725,6 +810,9 @@ class SQLServer(AgentCheck):
 
                         instance_results[cls] = rows, cols
 
+
+                if self.timed_feature_release.check_should_exit('instance_metrics'):
+                    return
                 # Using the cached data, extract and report individual metrics
                 for metric in self.instance_metrics:
                     if type(metric) is metrics.SqlIncrFractionMetric:
@@ -747,6 +835,9 @@ class SQLServer(AgentCheck):
             with self.connection.get_managed_cursor() as cursor:
                 cursor.execute("SET NOCOUNT ON")
             try:
+
+                if self.timed_feature_release.check_should_exit('server_state'):
+                    return
                 # Server state queries require VIEW SERVER STATE permissions, which some managed database
                 # versions do not support.
                 if self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION) not in [
@@ -754,9 +845,20 @@ class SQLServer(AgentCheck):
                 ]:
                     self.server_state_queries.execute()
 
+
+                if self.timed_feature_release.check_should_exit('check_queries'):
+                    return
                 self._check_queries.execute()
+
+
+                if self.timed_feature_release.check_should_exit('dynamic_queries'):
+                    return
                 if self.dynamic_queries:
                     self.dynamic_queries.execute()
+
+
+                if self.timed_feature_release.check_should_exit('custom_queries'):
+                    return
                 # reuse connection for any custom queries
                 self._query_manager.execute()
             finally:
