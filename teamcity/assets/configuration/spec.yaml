@@ -42,6 +42,36 @@ files:
       value:
         type: string
         example: <BUILD_NAME>
+    - name: monitored_projects_build_configs
+      description: |
+        List of projects and build configurations to monitor.
+      value:
+        anyOf:
+          - type: array
+            items:
+              type: string
+          - type: array
+            items:
+              anyOf:
+                - type: object
+                  properties:
+                    - name: include
+                      type: array
+                      items:
+                        type: string
+                    - name: exclude
+                      type: array
+                      items:
+                        type: string
+                - type: string
+        example:
+          - <PROJECT_A>:
+              include:
+                - <BUILD_CONFIG_A>
+                - <BUILD_CONFIG_B>
+              exclude:
+                - <BUILD_CONFIG_C>
+          - <PROJECT_B>
     - name: build_configuration
       description: |
         This is the internal build ID of the build configuration you wish to track.

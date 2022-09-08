@@ -3,6 +3,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from urllib.parse import urlparse
+from collections import namedtuple
 
 from six import PY2
 
@@ -60,7 +61,7 @@ class TeamCityCheck(AgentCheck):
         ]
         self.tags.update(instance_tags)
 
-    def _build_and_send_event(self, new_build):
+    def _send_events(self, new_build):
         self.log.debug(
             "Found new build with id %s (build number: %s), saving and alerting.", new_build['id'], new_build['number']
         )
@@ -153,7 +154,28 @@ class TeamCityCheck(AgentCheck):
         )
         return new_builds
 
+    def _build_collection_object(self):
+        collection_config = self.instance.get('monitored_projects_build_configs')
+        collection_dict = {}
+
+        for config in collection_config:
+            # check if str => project_name
+            if isinstance(config, str):
+                if not collection_dict[config]:
+                    collection_dict[config] = {}
+                else:
+                    collection_dict
+            # check if dict => project and build_configs filters
+            # config = {'project': {'include': 'include_something', 'exclude': 'exclude_something'}}
+            if isinstance(config, dict):
+
+
+
+
+
     def check(self, _):
+        if self.instance.get('monitored_projects_build_configs') is not None:
+            self._build_collection_object()
         if not self.build_config_cache.get_build_config(self.build_config):
             self._initialize()
 
@@ -161,7 +183,7 @@ class TeamCityCheck(AgentCheck):
         if new_builds:
             self.log.debug("New builds found: {}".format(new_builds))
             for build in new_builds['build']:
-                self._build_and_send_event(build)
+                self._send_events(build)
                 self._collect_build_stats(build)
                 self._collect_test_results(build)
                 self._collect_build_problems(build)

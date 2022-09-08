@@ -2,9 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
-from copy import deepcopy
 
-BASE_METRICS = {
+METRIC_MAP = {
     'agents_connected_authorized_number': 'agents.connected.authorized',
     'agents_running_builds_number': 'agents.running.builds',
     'buildConfigurations_active_number': 'build.configs.active',
@@ -109,63 +108,6 @@ BASE_METRICS = {
     'vcs_get_current_state_calls_number': 'vcs.get.current.state.calls.number',
 }
 
-SUMMARY_METRICS = {
-    'build_triggers_execution_milliseconds': 'build.triggers.execution.milliseconds',
-    'build_triggers_execution_milliseconds_count': 'build.triggers.execution.milliseconds',
-    'build_triggers_execution_milliseconds_total': 'build.triggers.execution.milliseconds',
-    'build_triggers_per_type_execution_milliseconds': 'build.triggers.per.type.execution.milliseconds',
-    'build_triggers_per_type_execution_milliseconds_count': 'build.triggers.per.type.execution.milliseconds',
-    'build_triggers_per_type_execution_milliseconds_total': 'build.triggers.per.type.execution.milliseconds',
-    'finishingBuild_buildFinishDelay_milliseconds': 'finishingbuild.buildfinishdelay.milliseconds',
-    'finishingBuild_buildFinishDelay_milliseconds_count': 'finishingbuild.buildfinishdelay.milliseconds',
-    'finishingBuild_buildFinishDelay_milliseconds_total': 'finishingbuild.buildfinishdelay.milliseconds',
-    'process_queue_milliseconds': 'process.queue.milliseconds',
-    'process_queue_milliseconds_count': 'process.queue.milliseconds',
-    'process_queue_milliseconds_total': 'process.queue.milliseconds',
-    'process_queue_parts_milliseconds': 'process.queue.parts.milliseconds',
-    'process_queue_parts_milliseconds_count': 'process.queue.parts.milliseconds',
-    'process_queue_parts_milliseconds_total': 'process.queue.parts.milliseconds',
-    'process_websocket_send_pending_messages_milliseconds': 'process.websocket.send.pending.messages.milliseconds',
-    'process_websocket_send_pending_messages_milliseconds_count': 'process.websocket.send.pending.messages'
-    '.milliseconds',
-    'process_websocket_send_pending_messages_milliseconds_total': 'process.websocket.send.pending.messages'
-    '.milliseconds',
-    'pullRequests_batch_time_milliseconds': 'pullrequests.batch.time.milliseconds',
-    'pullRequests_batch_time_milliseconds_count': 'pullrequests.batch.time.milliseconds',
-    'pullRequests_batch_time_milliseconds_total': 'pullrequests.batch.time.milliseconds',
-    'pullRequests_single_time_milliseconds': 'pullrequests.single.time.milliseconds',
-    'pullRequests_single_time_milliseconds_count': 'pullrequests.single.time.milliseconds',
-    'pullRequests_single_time_milliseconds_total': 'pullrequests.single.time.milliseconds',
-    'queuedBuild_waitingTime_milliseconds': 'queuedbuild.waitingtime.milliseconds',
-    'queuedBuild_waitingTime_milliseconds_count': 'queuedbuild.waitingtime.milliseconds',
-    'queuedBuild_waitingTime_milliseconds_total': 'queuedbuild.waitingtime.milliseconds',
-    'startingBuild_buildStartDelay_milliseconds': 'startingbuild.buildstartdelay.milliseconds',
-    'startingBuild_buildStartDelay_milliseconds_count': 'startingbuild.buildstartdelay.milliseconds',
-    'startingBuild_buildStartDelay_milliseconds_total': 'startingbuild.buildstartdelay.milliseconds',
-    'startingBuild_runBuildDelay_milliseconds': 'startingbuild.runbuilddelay.milliseconds',
-    'startingBuild_runBuildDelay_milliseconds_count': 'startingbuild.runbuilddelay.milliseconds',
-    'startingBuild_runBuildDelay_milliseconds_total': 'startingbuild.runbuilddelay.milliseconds',
-    'vcsChangesCollection_delay_milliseconds': 'vcschangescollection.delay.milliseconds',
-    'vcsChangesCollection_delay_milliseconds_count': 'vcschangescollection.delay.milliseconds',
-    'vcsChangesCollection_delay_milliseconds_total': 'vcschangescollection.delay.milliseconds',
-    'vcs_changes_checking_milliseconds': 'vcs.changes.checking.milliseconds',
-    'vcs_changes_checking_milliseconds_count': 'vcs.changes.checking.milliseconds',
-    'vcs_changes_checking_milliseconds_total': 'vcs.changes.checking.milliseconds',
-    'vcs_git_fetch_duration_milliseconds': 'vcs.git.fetch.duration.milliseconds',
-    'vcs_git_fetch_duration_milliseconds_count': 'vcs.git.fetch.duration.milliseconds',
-    'vcs_git_fetch_duration_milliseconds_total': 'vcs.git.fetch.duration.milliseconds',
-}
-
-HISTOGRAM_METRICS = {
-    'http_requests_duration_milliseconds': 'http.requests.duration.milliseconds',
-    'http_requests_duration_milliseconds_bucket': 'http.requests.duration.milliseconds',
-    'http_requests_duration_milliseconds_count': 'http.requests.duration.milliseconds',
-    'http_requests_duration_milliseconds_total': 'http.requests.duration.milliseconds',
-}
-
-METRIC_MAP = deepcopy(BASE_METRICS)
-METRIC_MAP.update(SUMMARY_METRICS)
-METRIC_MAP.update(HISTOGRAM_METRICS)
 
 SIMPLE_BUILD_STATS_METRICS = {
     'ArtifactsSize': {'name': 'artifacts_size', 'method': 'gauge'},
@@ -220,19 +162,3 @@ def build_metric(metric_name):
         else:
             return None, [], method
     return name, additional_tags, method
-
-
-def construct_metrics_config(metric_map):
-    metrics = []
-    for raw_metric_name, metric_name in metric_map.items():
-        if raw_metric_name in SUMMARY_METRICS:
-            if raw_metric_name.endswith('_count') or raw_metric_name.endswith('_total'):
-                raw_metric_name = raw_metric_name[:-6]
-            config = {raw_metric_name: {'name': metric_name, 'type': 'summary'}}
-        elif raw_metric_name in HISTOGRAM_METRICS:
-            config = {raw_metric_name: {'name': metric_name, 'type': 'histogram'}}
-        else:
-            config = {raw_metric_name: {'name': metric_name}}
-        metrics.append(config)
-
-    return metrics
