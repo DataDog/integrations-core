@@ -27,6 +27,15 @@ class MetricPatterns(BaseModel):
     include: Optional[Sequence[str]]
 
 
+class SaslOauthTokenProvider(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    client_id: Optional[str]
+    client_secret: Optional[str]
+    url: Optional[str]
+
+
 class InstanceConfig(BaseModel):
     class Config:
         allow_mutation = False
@@ -45,6 +54,7 @@ class InstanceConfig(BaseModel):
     sasl_kerberos_domain_name: Optional[str]
     sasl_kerberos_service_name: Optional[str]
     sasl_mechanism: Optional[str]
+    sasl_oauth_token_provider: Optional[SaslOauthTokenProvider]
     sasl_plain_password: Optional[str]
     sasl_plain_username: Optional[str]
     security_protocol: Optional[str]

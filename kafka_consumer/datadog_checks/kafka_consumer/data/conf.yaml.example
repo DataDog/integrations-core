@@ -138,6 +138,25 @@ instances:
     #
     # sasl_kerberos_domain_name: localhost
 
+    ## Settings for when `sasl_mechanism` is set to `OAUTHBEARER`.
+    #
+    # sasl_oauth_token_provider:
+
+        ## @param url - string - required
+        ## The token endpoint.
+        #
+        # url: <URL>
+
+        ## @param client_id - string - required
+        ## The client identifier.
+        #
+        # client_id: <CLIENT_ID>
+
+        ## @param client_secret - string - required
+        ## The client secret.
+        #
+        # client_secret: <CLIENT_SECRET>
+
     ## @param tls_verify - boolean - optional - default: true
     ## Instructs the check to validate the TLS certificate(s) of the service(s).
     #
