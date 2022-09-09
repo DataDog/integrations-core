@@ -184,7 +184,7 @@ class SQLServer(AgentCheck):
 
         # Progressively roll out features for debugging
         # TODO: Note that this flag is not getting recognized in the config
-        feature_release_delay = self.instance.get('timed_feature_release_delay', 60) or 0
+        feature_release_delay = self.instance.get('timed_feature_release_delay', 1800) or 0
         feature_release_enabled = feature_release_delay > 0
         self.timed_feature_release = TimedFeatureRelease(self, feature_release_enabled, feature_release_delay)
 
