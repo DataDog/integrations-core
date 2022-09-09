@@ -9,6 +9,7 @@ from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding, obfuscate_sql_with_metadata
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
+from datadog_checks.sqlserver.utils import is_statement_proc
 
 try:
     import datadog_agent
@@ -47,7 +48,12 @@ SELECT
     DB_NAME(sess.database_id) as database_name,
     sess.status as session_status,
     req.status as request_status,
-    text.text as text,
+    SUBSTRING(qt.text, (req.statement_start_offset / 2) + 1,
+    ((CASE req.statement_end_offset
+        WHEN -1 THEN DATALENGTH(qt.text)
+        ELSE req.statement_end_offset END
+            - req.statement_start_offset) / 2) + 1) AS statement_text,
+    qt.text,
     c.client_tcp_port as client_port,
     c.client_net_address as client_address,
     sess.host_name as host_name,
@@ -57,7 +63,7 @@ FROM sys.dm_exec_sessions sess
         ON sess.session_id = c.session_id
     INNER JOIN sys.dm_exec_requests req
         ON c.connection_id = req.connection_id
-    CROSS APPLY sys.dm_exec_sql_text(req.sql_handle) text
+    CROSS APPLY sys.dm_exec_sql_text(req.sql_handle) qt
 WHERE sess.session_id != @@spid AND sess.status != 'sleeping'
 """,
 ).strip()
@@ -200,16 +206,25 @@ class SqlserverActivity(DBMAsyncJob):
 
     def _obfuscate_and_sanitize_row(self, row):
         row = self._remove_null_vals(row)
-        if 'text' not in row:
+        if 'statement_text' not in row:
             return row
         try:
-            statement = obfuscate_sql_with_metadata(row['text'], self.check.obfuscator_options)
+            statement = obfuscate_sql_with_metadata(row['statement_text'], self.check.obfuscator_options)
+            procedure_statement = None
+            # sqlserver doesn't have a boolean data type so convert integer to boolean
+            row['is_proc'] = is_statement_proc(row['text'])
+            if row['is_proc'] and 'text' in row:
+                procedure_statement = obfuscate_sql_with_metadata(row['text'], self.check.obfuscator_options)
             obfuscated_statement = statement['query']
             metadata = statement['metadata']
             row['dd_commands'] = metadata.get('commands', None)
             row['dd_tables'] = metadata.get('tables', None)
             row['dd_comments'] = metadata.get('comments', None)
             row['query_signature'] = compute_sql_signature(obfuscated_statement)
+            # procedure_signature is used to link this activity event with
+            # its related plan events
+            if procedure_statement:
+                row['procedure_signature'] = compute_sql_signature(procedure_statement['query'])
         except Exception as e:
             # obfuscation errors are relatively common so only log them during debugging
             self.log.debug("Failed to obfuscate query: %s", e)
@@ -223,11 +238,16 @@ class SqlserverActivity(DBMAsyncJob):
 
     @staticmethod
     def _sanitize_row(row, obfuscated_statement):
+        # rename the statement_text field to 'text' because that
+        # is what our backend is expecting
         row['text'] = obfuscated_statement
         if 'query_hash' in row:
             row['query_hash'] = _hash_to_hex(row['query_hash'])
         if 'query_plan_hash' in row:
             row['query_plan_hash'] = _hash_to_hex(row['query_plan_hash'])
+        # remove deobfuscated sql text from event
+        if 'statement_text' in row:
+            del row['statement_text']
         return row
 
     @staticmethod

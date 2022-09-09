@@ -110,71 +110,171 @@ def test_get_statement_metrics_query_cached(aggregator, dbm_instance, caplog):
 
 
 test_statement_metrics_and_plans_parameterized = (
-    "database,query,match_pattern,param_groups,is_encrypted,disable_secondary_tags",
+    "database,query,expected_queries_patterns,param_groups,exe_count,is_encrypted,is_proc,disable_secondary_tags",
     [
+        [
+            "master",
+            "EXEC multiQueryProc",
+            [
+                r"select @total = @total \+ count\(\*\) from sys\.databases where name like '%_'",
+                r"select @total = @total \+ count\(\*\) from sys\.sysobjects where type = 'U'",
+            ],
+            ((),),
+            1,
+            False,
+            True,
+            True,
+        ],
+        [
+            "master",
+            "EXEC multiQueryProc",
+            [
+                r"select @total = @total \+ count\(\*\) from sys\.databases where name like '%_'",
+                r"select @total = @total \+ count\(\*\) from sys\.sysobjects where type = 'U'",
+            ],
+            ((),),
+            5,
+            False,
+            True,
+            True,
+        ],
+        [
+            "master",
+            "EXEC encryptedProc",
+            [""],
+            ((),),
+            5,
+            True,
+            True,
+            True,
+        ],
         [
             "datadog_test",
             "SELECT * FROM ϑings",
-            r"SELECT \* FROM ϑings",
+            [r"SELECT \* FROM ϑings"],
             ((),),
+            1,
+            False,
             False,
             False,
         ],
         [
             "datadog_test",
             "SELECT * FROM ϑings where id = ?",
-            r"\(@P1 \w+\)SELECT \* FROM ϑings where id = @P1",
+            [r"SELECT \* FROM ϑings where id = @P1"],
             (
                 (1,),
                 (2,),
                 (3,),
             ),
+            1,
+            False,
             False,
             False,
         ],
         [
+            "datadog_test",
+            "EXEC bobProc",
+            [r"SELECT \* FROM ϑings"],
+            ((),),
+            1,
+            False,
+            True,
+            True,
+        ],
+        [
+            "datadog_test",
+            "EXEC bobProc",
+            [r"SELECT \* FROM ϑings"],
+            ((),),
+            10,
+            False,
+            True,
+            True,
+        ],
+        [
             "master",
             "SELECT * FROM datadog_test.dbo.ϑings where id = ?",
-            r"\(@P1 \w+\)SELECT \* FROM datadog_test.dbo.ϑings where id = @P1",
+            [r"SELECT \* FROM datadog_test.dbo.ϑings where id = @P1"],
             (
                 (1,),
                 (2,),
                 (3,),
             ),
+            1,
+            False,
             False,
             False,
         ],
         [
             "datadog_test",
             "SELECT * FROM ϑings where id = ? and name = ?",
-            r"\(@P1 \w+,@P2 (N)?VARCHAR\(\d+\)\)SELECT \* FROM ϑings where id = @P1 and name = @P2",
+            [r"SELECT \* FROM ϑings where id = @P1 and name = @P2"],
             (
                 (1, "hello"),
                 (2, "there"),
                 (3, "bill"),
             ),
+            1,
+            False,
             False,
             False,
         ],
         [
             "datadog_test",
             "SELECT * FROM ϑings where id = ?",
-            r"\(@P1 \w+\)SELECT \* FROM ϑings where id = @P1",
+            [r"SELECT \* FROM ϑings where id = @P1"],
             (
                 (1,),
                 (2,),
                 (3,),
             ),
+            1,
+            False,
             False,
             True,
         ],
         [
             "master",
             "EXEC encryptedProc",
-            None,
+            [""],
             ((),),
+            1,
+            True,
             True,
             False,
+        ],
+        [
+            "datadog_test",
+            "EXEC bobProcParams @P1 = ?, @P2 = ?",
+            [
+                r"SELECT \* FROM ϑings WHERE id = @P1",
+                r"SELECT id FROM ϑings WHERE name = @P2",
+            ],
+            (
+                (1, "foo"),
+                (2, "bar"),
+            ),
+            1,
+            False,
+            True,
+            True,
+        ],
+        [
+            "datadog_test",
+            "EXEC bobProcParams @P1 = ?, @P2 = ?",
+            [
+                r"SELECT \* FROM ϑings WHERE id = @P1",
+                r"SELECT id FROM ϑings WHERE name = @P2",
+            ],
+            (
+                (1, "foo"),
+                (2, "bar"),
+            ),
+            5,
+            False,
+            True,
+            True,
         ],
     ],
 )
@@ -191,9 +291,11 @@ def test_statement_metrics_and_plans(
     database,
     query,
     param_groups,
+    exe_count,
     is_encrypted,
+    is_proc,
     disable_secondary_tags,
-    match_pattern,
+    expected_queries_patterns,
     caplog,
     datadog_agent,
 ):
@@ -208,12 +310,14 @@ def test_statement_metrics_and_plans(
     # 2) load the test queries into the StatementMetrics state
     # 3) emit the query metrics based on the diff of current and last state
     dd_run_check(check)
-    for params in param_groups:
-        bob_conn.execute_with_retries(query, params, database=database)
+    for _ in range(0, exe_count):
+        for params in param_groups:
+            bob_conn.execute_with_retries(query, params, database=database)
     dd_run_check(check)
     aggregator.reset()
-    for params in param_groups:
-        bob_conn.execute_with_retries(query, params, database=database)
+    for _ in range(0, exe_count):
+        for params in param_groups:
+            bob_conn.execute_with_retries(query, params, database=database)
     dd_run_check(check)
 
     _conn_key_prefix = "dbm-"
@@ -239,20 +343,28 @@ def test_statement_metrics_and_plans(
     # metrics rows
     sqlserver_rows = payload.get('sqlserver_rows', [])
     assert sqlserver_rows, "should have collected some sqlserver query metrics rows"
-    if match_pattern:
-        matching_rows = [r for r in sqlserver_rows if re.match(match_pattern, r['text'], re.IGNORECASE)]
-    else:
+    match_pattern = "(" + ")|(".join(expected_queries_patterns) + ")"
+    if is_encrypted:
         matching_rows = [r for r in sqlserver_rows if not r['text']]
-    assert len(matching_rows) >= 1, "expected at least one matching metrics row"
+    else:
+        matching_rows = [r for r in sqlserver_rows if re.match(match_pattern, r['text'], re.IGNORECASE)]
+    assert len(matching_rows) == len(expected_queries_patterns), "missing expected matching rows"
     total_execution_count = sum([r['execution_count'] for r in matching_rows])
-    assert total_execution_count == len(param_groups), "wrong execution count"
+    assert (
+        total_execution_count == len(param_groups) * len(expected_queries_patterns) * exe_count
+    ), "wrong execution count"
     for row in matching_rows:
         if is_encrypted:
             # we get NULL text for encrypted statements so we have no calculated query signature
             assert not row['query_signature']
         else:
             assert row['query_signature'], "missing query signature"
+        assert 'statement_text' not in row, "statement_text field should not be forwarded"
         assert row['is_encrypted'] == is_encrypted
+        if not is_encrypted:
+            assert row['is_proc'] == is_proc
+        if is_proc and not is_encrypted:
+            assert row['procedure_signature'], "missing proc signature"
         if disable_secondary_tags:
             assert 'database_name' not in row
         else:
@@ -260,14 +372,20 @@ def test_statement_metrics_and_plans(
         for column in available_query_metrics_columns:
             assert column in row, "missing required metrics column {}".format(column)
             assert type(row[column]) in (float, int), "wrong type for metrics column {}".format(column)
+    # all the plan handles / proc sigs should be the same for the same procedure execution
+    if is_proc:
+        assert all(row['plan_handle'] == matching_rows[0]['plan_handle'] for row in matching_rows)
+    if is_proc and not is_encrypted:
+        assert all(row['procedure_signature'] == matching_rows[0]['procedure_signature'] for row in matching_rows)
 
     dbm_samples = aggregator.get_event_platform_events("dbm-samples")
     assert dbm_samples, "should have collected at least one sample"
 
-    if match_pattern:
-        matching_samples = [s for s in dbm_samples if re.match(match_pattern, s['db']['statement'], re.IGNORECASE)]
-    else:
+    if is_encrypted:
         matching_samples = [s for s in dbm_samples if not s['db']['statement']]
+    else:
+        matching_samples = [s for s in dbm_samples if re.search(match_pattern, s['db']['statement'], re.IGNORECASE)]
+
     assert matching_samples, "should have collected some matching samples"
 
     # validate common host fields
@@ -283,13 +401,18 @@ def test_statement_metrics_and_plans(
             ), "wrong instance tags for plan event"
 
     plan_events = [s for s in matching_samples if s['dbm_type'] == "plan"]
-    assert plan_events, "should have collected some plans"
+    # plan sampling should limit the number of plans we collect per query/ proc
+    # to one, despite changing parameters or mult queries in a single proc
+    assert len(plan_events) == 1, "should have collected exactly one plan event"
 
     for event in plan_events:
         if is_encrypted:
             assert not event['db']['plan']['definition']
             assert event['sqlserver']['is_plan_encrypted']
             assert event['sqlserver']['is_statement_encrypted']
+        elif is_proc:
+            assert event['db']['procedure_signature'], "missing proc signature"
+            assert not event['db']['query_signature'], "procedure plans should not have query_signature field set"
         else:
             assert event['db']['plan']['definition'], "event plan definition missing"
             parsed_plan = ET.fromstring(event['db']['plan']['definition'])
@@ -298,7 +421,9 @@ def test_statement_metrics_and_plans(
             assert not event['sqlserver']['is_statement_encrypted']
 
     fqt_events = [s for s in matching_samples if s['dbm_type'] == "fqt"]
-    assert fqt_events, "should have collected some FQT events"
+    assert len(fqt_events) == len(
+        expected_queries_patterns
+    ), "should have collected an FQT event per unique query signature"
 
     # internal debug metrics
     aggregator.assert_metric(
@@ -331,7 +456,7 @@ def test_statement_metadata(
     query = '''
     -- Test comment
     select * from sys.databases'''
-    query_signature = 'ee1663c796378ab0'
+    query_signature = '6d1d070f9b6c5647'
 
     def _run_query():
         bob_conn.execute_with_retries(query)
