@@ -129,6 +129,19 @@ Note: To monitor organization metrics, your `user` must have the `ORGADMIN` role
         min_collection_interval: 43200
   ```
 
+Only some organization metrics are enabled by default. To collect all available organization metrics, utilize the `metric_groups` configuration option:
+
+  ```yaml
+      metric_groups:
+        - snowflake.organization.warehouse
+        - snowflake.organization.currency
+        - snowflake.organization.credit
+        - snowflake.organization.storage
+        - snowflake.organization.contracts
+        - snowflake.organization.balance
+        - snowflake.organization.rate
+        - snowflake.organization.data_transfer
+  ```
 
 Additionally, you can monitor both account and organization metrics at the same time:
 
