@@ -1,5 +1,11 @@
 # CHANGELOG - datadog_checks_base
 
+## 27.1.0 / 2022-09-09
+
+* [Added] Add OAuth functionality to the HTTP util. See [#12884](https://github.com/DataDog/integrations-core/pull/12884).
+* [Added] Add `packaging` to dependencies. See [#12753](https://github.com/DataDog/integrations-core/pull/12753).
+* [Fixed] Fix formatting of message. See [#12827](https://github.com/DataDog/integrations-core/pull/12827).
+
 ## 27.0.0 / 2022-08-05
 
 * [Fixed] Dependency updates. See [#12653](https://github.com/DataDog/integrations-core/pull/12653).
