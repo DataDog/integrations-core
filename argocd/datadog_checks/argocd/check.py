@@ -4,10 +4,12 @@
 from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheckV2
 
 from .config_models import ConfigMixin
+from .constants import API_SERVER_NAMESPACE, APP_CONTROLLER_NAMESPACE, REPO_SERVER_NAMESPACE
 from .metrics import API_SERVER_METRICS, APPLICATION_CONTROLLER_METRICS, REPO_SERVER_METRICS
 
+
 class ArgocdCheck(OpenMetricsBaseCheckV2, ConfigMixin):
-    __NAMESPACE__ = 'argocd'
+    # __NAMESPACE__ = 'argocd'
     DEFAULT_METRIC_LIMIT = 0
 
     def __init__(self, name, init_config, instances):
@@ -26,17 +28,23 @@ class ArgocdCheck(OpenMetricsBaseCheckV2, ConfigMixin):
             )
 
         if app_controller_endpoint:
-            self.scraper_configs.append(self._generate_config(app_controller_endpoint, APPLICATION_CONTROLLER_METRICS))
+            self.scraper_configs.append(
+                self._generate_config(app_controller_endpoint, APP_CONTROLLER_NAMESPACE, APPLICATION_CONTROLLER_METRICS)
+            )
         if api_server_endpoint:
-            self.scraper_configs.append(self._generate_config(api_server_endpoint, API_SERVER_METRICS))
+            self.scraper_configs.append(
+                self._generate_config(api_server_endpoint, API_SERVER_NAMESPACE, API_SERVER_METRICS)
+            )
         if repo_server_endpoint:
-            self.scraper_configs.append(self._generate_config(repo_server_endpoint, REPO_SERVER_METRICS))
+            self.scraper_configs.append(
+                self._generate_config(repo_server_endpoint, REPO_SERVER_NAMESPACE, REPO_SERVER_METRICS)
+            )
 
-    def _generate_config(self, endpoint, metrics):
+    def _generate_config(self, endpoint, namespace, metrics):
         config = {
             'openmetrics_endpoint': endpoint,
             'metrics': metrics,
+            'namespace': namespace,
         }
         config.update(self.instance)
         return config
-
