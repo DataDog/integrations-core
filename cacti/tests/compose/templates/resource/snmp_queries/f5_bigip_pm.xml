@@ -1,0 +1,71 @@
+<interface>
+        <name>Get F5 Big-IP Load Balancer Pool Member Statistics</name>
+        <oid_index>.1.3.6.1.4.1.3375.2.2.5.4.3.1.1.9</oid_index>
+        <oid_index_parse>OID/REGEXP:^.*\.3375\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.(.*)$</oid_index_parse>
+        <index_order>pmIndex</index_order>
+        <index_order_type>alphabetic</index_order_type>
+
+        <fields>
+                <pmIndex>
+                        <name>Index</name>
+                        <source>index</source>
+                        <direction>input</direction>
+                </pmIndex>
+                <pmIPAddress>
+                        <name>IP Address</name>
+                        <method>walk</method>
+                        <source>value</source>
+                        <direction>input</direction>
+                        <oid>.1.3.6.1.4.1.3375.2.2.5.4.3.1.3.9</oid>
+                </pmIPAddress>
+                <pmServicePort>
+                        <name>Service Port</name>
+                        <method>walk</method>
+                        <source>value</source>
+                        <direction>input</direction>
+                        <oid>.1.3.6.1.4.1.3375.2.2.5.4.3.1.4.9</oid>
+                </pmServicePort>
+                <pmPktsIn>
+                        <name>Packets In</name>
+                        <method>walk</method>
+                        <source>value</source>
+                        <direction>output</direction>
+                        <oid>.1.3.6.1.4.1.3375.2.2.5.4.3.1.5.9</oid>
+                </pmPktsIn>
+                <pmPktsOut>
+                        <name>Packets Out</name>
+                        <method>walk</method>
+                        <source>value</source>
+                        <direction>output</direction>
+                        <oid>.1.3.6.1.4.1.3375.2.2.5.4.3.1.7.9</oid>
+                </pmPktsOut>
+                <pmBytesIn>
+                        <name>Bytes In</name>
+                        <method>walk</method>
+                        <source>value</source>
+                        <direction>output</direction>
+                        <oid>.1.3.6.1.4.1.3375.2.2.5.4.3.1.6.9</oid>
+                </pmBytesIn>
+                <pmBytesOut>
+                        <name>Bytes Out</name>
+                        <method>walk</method>
+                        <source>value</source>
+                        <direction>output</direction>
+                        <oid>.1.3.6.1.4.1.3375.2.2.5.4.3.1.8.9</oid>
+                </pmBytesOut>
+                <pmTotConnections>
+                        <name>Connection Rate</name>
+                        <method>walk</method>
+                        <source>value</source>
+                        <direction>output</direction>
+                        <oid>.1.3.6.1.4.1.3375.2.2.5.4.3.1.10.9</oid>
+                </pmTotConnections>
+                <pmConcurrentConnections>
+                        <name>Concurrent Connections</name>
+                        <method>walk</method>
+                        <source>value</source>
+                        <direction>output</direction>
+                        <oid>.1.3.6.1.4.1.3375.2.2.5.4.3.1.11.9</oid>
+                </pmConcurrentConnections>
+        </fields>
+</interface>

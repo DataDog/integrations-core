@@ -1,0 +1,98 @@
+<sec_policy>
+        <name>Get Juniper SRX Security Policy Stats</name>
+        <oid_index>.1.3.6.1.4.1.2636.3.39.1.4.1.1.2.1</oid_index>
+        <index_order>Index</index_order>
+        <oid_index_parse>OID/REGEXP:^.*\.2636\.3\.39\.1\.4\.1\.1\.[0-9]{1,3}\.1\.[0-9]{1,3}\.(.*)$</oid_index_parse>
+
+        <fields>
+                <Index>
+                        <name>Index</name>
+                        <source>index</source>
+                        <direction>input</direction>
+                </Index>
+                <FromZone>
+                        <name>From Zone</name>
+                        <method>walk</method>
+                        <source>value</source>
+                        <direction>input</direction>
+                        <oid>.1.3.6.1.4.1.2636.3.39.1.4.1.1.2.1.1</oid>
+                </FromZone>
+                <ToZone>
+                        <name>To Zone</name>
+                        <method>walk</method>
+                        <source>value</source>
+                        <direction>input</direction>
+                        <oid>.1.3.6.1.4.1.2636.3.39.1.4.1.1.2.1.2</oid>
+                </ToZone>
+                <PolicyName>
+                        <name>Policy Name</name>
+                        <method>walk</method>
+                        <source>value</source>
+                        <direction>input</direction>
+                        <oid>.1.3.6.1.4.1.2636.3.39.1.4.1.1.2.1.3</oid>
+                </PolicyName>
+                <Scheduler>
+                        <name>Scheduler</name>
+                        <method>walk</method>
+                        <source>value</source>
+                        <direction>input</direction>
+                        <oid>.1.3.6.1.4.1.2636.3.39.1.4.1.1.2.1.6</oid>
+                </Scheduler>
+                <StatsAvailability>
+                        <name>Stats Availability</name>
+                        <method>walk</method>
+                        <source>value</source>
+                        <direction>input</direction>
+                        <oid>.1.3.6.1.4.1.2636.3.39.1.4.1.1.2.1.8</oid>
+                </StatsAvailability>
+                <InputBytes>
+                        <name>Input Bytes</name>
+                        <method>walk</method>
+                        <source>value</source>
+                        <direction>output</direction>
+                        <oid>.1.3.6.1.4.1.2636.3.39.1.4.1.1.3.1.2</oid>
+                 </InputBytes>
+                <OutputBytes>
+                        <name>Output Bytes </name>
+                        <method>walk</method>
+                        <source>value</source>
+                        <direction>output</direction>
+                        <oid>.1.3.6.1.4.1.2636.3.39.1.4.1.1.3.1.4</oid>
+                 </OutputBytes>
+                <InputPackets>
+                        <name>Input Packets</name>
+                        <method>walk</method>
+                        <source>value</source>
+                        <direction>output</direction>
+                        <oid>.1.3.6.1.4.1.2636.3.39.1.4.1.1.3.1.6</oid>
+                 </InputPackets>
+                <OutputPackets>
+                        <name>Output Packets</name>
+                        <method>walk</method>
+                        <source>value</source>
+                        <direction>output</direction>
+                        <oid>.1.3.6.1.4.1.2636.3.39.1.4.1.1.3.1.8</oid>
+                 </OutputPackets>
+                <NumSessions>
+                        <name>Num Sessions</name>
+                        <method>walk</method>
+                        <source>value</source>
+                        <direction>output</direction>
+                        <oid>.1.3.6.1.4.1.2636.3.39.1.4.1.1.3.1.10</oid>
+                 </NumSessions>    
+                <SessionDeleted>
+                        <name>Session Deleted</name>
+                        <method>walk</method>
+                        <source>value</source>
+                        <direction>output</direction>
+                        <oid>.1.3.6.1.4.1.2636.3.39.1.4.1.1.3.1.12</oid>
+                 </SessionDeleted>           
+                <PolicyLookups>
+                        <name>Policy Lookups</name>
+                        <method>walk</method>
+                        <source>value</source>
+                        <direction>output</direction>
+                        <oid>.1.3.6.1.4.1.2636.3.39.1.4.1.1.3.1.13</oid>
+                 </PolicyLookups>  
+        </fields>
+</sec_policy>

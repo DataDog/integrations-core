@@ -1,0 +1,274 @@
+<screen_stats>
+    <name>Juniper SRX Screen Statisticss</name>
+    <oid_index>.1.3.6.1.4.1.2636.3.39.1.8.1.1.1.1.1</oid_index>
+    <index_order>Index</index_order>
+    <oid_index_parse>OID/REGEXP:^.*\.2636\.3\.39\.1\.8\.1\.1\.1\.1\.[0-9]{1,3}\.(.*)$</oid_index_parse>
+    
+    <fields>
+        <Index>
+            <name>Index</name>
+            <source>index</source>
+            <direction>input</direction>
+        </Index>
+        <jnxJsScreenZoneName>
+            <name>Zone Name</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>input</direction>
+            <oid>.1.3.6.1.4.1.2636.3.39.1.8.1.1.1.1.1</oid>
+        </jnxJsScreenZoneName>
+        <jnxJsScreenNumOfIf>
+            <name>Number of Interfaces</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>input</direction>
+            <oid>.1.3.6.1.4.1.2636.3.39.1.8.1.1.1.1.2</oid>
+        </jnxJsScreenNumOfIf>
+        <jnxJsScreenMonSynAttk>
+            <name>TCP SYN flood</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>output</direction>
+            <oid>.1.3.6.1.4.1.2636.3.39.1.8.1.1.1.1.3</oid>
+        </jnxJsScreenMonSynAttk>
+        <jnxJsScreenMonTearDrop>
+            <name>IP tear drop</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>output</direction>
+            <oid>.1.3.6.1.4.1.2636.3.39.1.8.1.1.1.1.4</oid>
+        </jnxJsScreenMonTearDrop>
+        <jnxJsScreenMonSrcRoute>
+            <name>IP source route option</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>output</direction>
+            <oid>.1.3.6.1.4.1.2636.3.39.1.8.1.1.1.1.5</oid>
+        </jnxJsScreenMonSrcRoute>
+        <jnxJsScreenMonPingDeath>
+            <name>ICMP ping of death</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>output</direction>
+            <oid>.1.3.6.1.4.1.2636.3.39.1.8.1.1.1.1.6</oid>
+        </jnxJsScreenMonPingDeath>
+        <jnxJsScreenMonAddrSpoof>
+            <name>IP spoofing</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>output</direction>
+            <oid>.1.3.6.1.4.1.2636.3.39.1.8.1.1.1.1.7</oid>
+        </jnxJsScreenMonAddrSpoof>
+        <jnxJsScreenMonLand>
+            <name>TCP land attack</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>output</direction>
+            <oid>.1.3.6.1.4.1.2636.3.39.1.8.1.1.1.1.8</oid>
+        </jnxJsScreenMonLand>
+        <jnxJsScreenMonIcmpFlood>
+            <name>ICMP flood</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>output</direction>
+            <oid>.1.3.6.1.4.1.2636.3.39.1.8.1.1.1.1.9</oid>
+        </jnxJsScreenMonIcmpFlood>
+        <jnxJsScreenMonUdpFlood>
+            <name>UDP flood</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>output</direction>
+            <oid>.1.3.6.1.4.1.2636.3.39.1.8.1.1.1.1.10</oid>
+        </jnxJsScreenMonUdpFlood>
+        <jnxJsScreenMonWinnuke>
+            <name>TCP winnuke</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>output</direction>
+            <oid>.1.3.6.1.4.1.2636.3.39.1.8.1.1.1.1.11</oid>
+        </jnxJsScreenMonWinnuke>
+        <jnxJsScreenMonPortScan>
+            <name>TCP port scan</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>output</direction>
+            <oid>.1.3.6.1.4.1.2636.3.39.1.8.1.1.1.1.12</oid>
+        </jnxJsScreenMonPortScan>
+        <jnxJsScreenMonIpSweep>
+            <name>ICMP address sweep</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>output</direction>
+            <oid>.1.3.6.1.4.1.2636.3.39.1.8.1.1.1.1.13</oid>
+        </jnxJsScreenMonIpSweep>
+        <jnxJsScreenMonSynFrag>
+            <name>TCP SYN fragment</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>output</direction>
+            <oid>.1.3.6.1.4.1.2636.3.39.1.8.1.1.1.1.14</oid>
+        </jnxJsScreenMonSynFrag>
+        <jnxJsScreenMonTcpNoFlag>
+            <name>TCP no flag</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>output</direction>
+            <oid>.1.3.6.1.4.1.2636.3.39.1.8.1.1.1.1.15</oid>
+        </jnxJsScreenMonTcpNoFlag>
+        <jnxJsScreenMonIpUnknownProt>
+            <name>IP unknown protocol</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>output</direction>
+            <oid>.1.3.6.1.4.1.2636.3.39.1.8.1.1.1.1.16</oid>
+        </jnxJsScreenMonIpUnknownProt>
+        <jnxJsScreenMonIpOptBad>
+            <name>IP bad options</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>output</direction>
+            <oid>.1.3.6.1.4.1.2636.3.39.1.8.1.1.1.1.17</oid>
+        </jnxJsScreenMonIpOptBad>
+        <jnxJsScreenMonIpOptRecRt>
+            <name>IP record route option</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>output</direction>
+            <oid>.1.3.6.1.4.1.2636.3.39.1.8.1.1.1.1.18</oid>
+        </jnxJsScreenMonIpOptRecRt>
+        <jnxJsScreenMonIpOptTimestamp>
+            <name>IP timestamp option</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>output</direction>
+            <oid>.1.3.6.1.4.1.2636.3.39.1.8.1.1.1.1.19</oid>
+        </jnxJsScreenMonIpOptTimestamp>
+        <jnxJsScreenMonIpOptSecurity>
+            <name>IP security option</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>output</direction>
+            <oid>.1.3.6.1.4.1.2636.3.39.1.8.1.1.1.1.20</oid>
+        </jnxJsScreenMonIpOptSecurity>
+        <jnxJsScreenMonIpOptLSR>
+            <name>IP loose source route option</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>output</direction>
+            <oid>.1.3.6.1.4.1.2636.3.39.1.8.1.1.1.1.21</oid>
+        </jnxJsScreenMonIpOptLSR>
+        <jnxJsScreenMonIpOptSSR>
+            <name>IP strict source route option</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>output</direction>
+            <oid>.1.3.6.1.4.1.2636.3.39.1.8.1.1.1.1.22</oid>
+        </jnxJsScreenMonIpOptSSR>
+        <jnxJsScreenMonIpOptStream>
+            <name>IP stream option</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>output</direction>
+            <oid>.1.3.6.1.4.1.2636.3.39.1.8.1.1.1.1.23</oid>
+        </jnxJsScreenMonIpOptStream>
+        <jnxJsScreenMonIcmpFrag>
+            <name>ICMP fragment</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>output</direction>
+            <oid>.1.3.6.1.4.1.2636.3.39.1.8.1.1.1.1.24</oid>
+        </jnxJsScreenMonIcmpFrag>
+        <jnxJsScreenMonIcmpLarge>
+            <name>ICMP large packet</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>output</direction>
+            <oid>.1.3.6.1.4.1.2636.3.39.1.8.1.1.1.1.25</oid>
+        </jnxJsScreenMonIcmpLarge>
+        <jnxJsScreenMonTcpSynFin>
+            <name>TCP SYN FIN</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>output</direction>
+            <oid>.1.3.6.1.4.1.2636.3.39.1.8.1.1.1.1.26</oid>
+        </jnxJsScreenMonTcpSynFin>
+        <jnxJsScreenMonTcpFinNoAck>
+            <name>TCP FIN no ACK</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>output</direction>
+            <oid>.1.3.6.1.4.1.2636.3.39.1.8.1.1.1.1.27</oid>
+        </jnxJsScreenMonTcpFinNoAck>
+        <jnxJsScreenMonLimitSessSrc>
+            <name>Source session limit</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>output</direction>
+            <oid>.1.3.6.1.4.1.2636.3.39.1.8.1.1.1.1.28</oid>
+        </jnxJsScreenMonLimitSessSrc>
+        <jnxJsScreenMonLimitSessDest>
+            <name>Destination session limit</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>output</direction>
+            <oid>.1.3.6.1.4.1.2636.3.39.1.8.1.1.1.1.29</oid>
+        </jnxJsScreenMonLimitSessDest>
+        <jnxJsScreenMonSynAckAck>
+            <name>TCP SYN-ACK-ACK proxy</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>output</direction>
+            <oid>.1.3.6.1.4.1.2636.3.39.1.8.1.1.1.1.30</oid>
+        </jnxJsScreenMonSynAckAck>
+        <jnxJsScreenMonIpFrag>
+            <name>IP block fragment</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>output</direction>
+            <oid>.1.3.6.1.4.1.2636.3.39.1.8.1.1.1.1.31</oid>
+        </jnxJsScreenMonIpFrag>
+        <jnxJsScreenMonIpv6ExtHdr>
+            <name>IPv6 extension header</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>output</direction>
+            <oid>.1.3.6.1.4.1.2636.3.39.1.8.1.1.1.1.42</oid>
+        </jnxJsScreenMonIpv6ExtHdr>
+        <jnxJsScreenMonIpv6HopOpt>
+            <name>IPv6 extension hop by hop option</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>output</direction>
+            <oid>.1.3.6.1.4.1.2636.3.39.1.8.1.1.1.1.43</oid>
+        </jnxJsScreenMonIpv6HopOpt>
+        <jnxJsScreenMonIpv6DstOpt>
+            <name>IPv6 extension destination option</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>output</direction>
+            <oid>.1.3.6.1.4.1.2636.3.39.1.8.1.1.1.1.44</oid>
+        </jnxJsScreenMonIpv6DstOpt>
+        <jnxJsScreenMonIpv6ExtLimit>
+            <name>IPv6 extension header limit</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>output</direction>
+            <oid>.1.3.6.1.4.1.2636.3.39.1.8.1.1.1.1.45</oid>
+        </jnxJsScreenMonIpv6ExtLimit>
+        <jnxJsScreenMonIpMalIpv6>
+            <name>IPv6 malformed header</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>output</direction>
+            <oid>.1.3.6.1.4.1.2636.3.39.1.8.1.1.1.1.46</oid>
+        </jnxJsScreenMonIpMalIpv6>
+        <jnxJsScreenMonIcmpMalIcmpv6>
+            <name>ICMPv6 malformed packet</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>output</direction>
+            <oid>.1.3.6.1.4.1.2636.3.39.1.8.1.1.1.1.47</oid>
+        </jnxJsScreenMonIcmpMalIcmpv6>
+    </fields>
+    
+</screen_stats>

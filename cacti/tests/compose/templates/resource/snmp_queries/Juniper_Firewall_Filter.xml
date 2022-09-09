@@ -1,0 +1,45 @@
+<interface>
+        <name>Get Juniper EX Switch Firewall Filter Stats</name>
+        <oid_index>.1.3.6.1.4.1.2636.3.5.2.1.8</oid_index>
+        <index_order>Index</index_order>
+        <oid_index_parse>OID/REGEXP:^.*\.2636\.3\.5\.2\.1\.[0-9]{1,3}\.(.*)$</oid_index_parse>
+        <index_order_type>alphabetic</index_order_type>
+        <index_title_format>|chosen_order_field|</index_title_format>
+
+        <fields>
+                <Index>
+                        <name>Index</name>
+                        <source>index</source>
+                        <method>walk</method>
+                        <direction>input</direction>
+                </Index>
+                <FirewallName>
+                        <name>Firewall Name</name>
+                        <method>walk</method>
+                        <source>value</source>
+                        <direction>input</direction>
+                        <oid>.1.3.6.1.4.1.2636.3.5.2.1.6</oid>
+                </FirewallName>
+                <FilterName>
+                        <name>Filter Name</name>
+                        <method>walk</method>
+                        <source>value</source>
+                        <direction>input</direction>
+                        <oid>.1.3.6.1.4.1.2636.3.5.2.1.7</oid>
+                </FilterName>
+                <Packets>
+                        <name>Packets Filtered</name>
+                        <method>walk</method>
+                        <source>value</source>
+                        <direction>output</direction>
+                        <oid>.1.3.6.1.4.1.2636.3.5.2.1.4</oid>
+		</Packets>
+		<Bytes>
+                        <name>Bytes Filtered</name>
+                        <method>walk</method>
+                        <source>value</source>
+                        <direction>output</direction>
+                        <oid>.1.3.6.1.4.1.2636.3.5.2.1.5</oid>
+		</Bytes>
+        </fields>
+</interface>

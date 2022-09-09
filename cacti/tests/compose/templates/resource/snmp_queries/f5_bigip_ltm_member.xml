@@ -1,0 +1,151 @@
+<interface>
+	<name>F5 BigIP LTM Pool Member Statistics</name>
+    <description>From F5 MIBS bigipLocalTM->ltmPoolMemberStat</description>
+	<oid_index>.1.3.6.1.4.1.3375.2.2.5.4.3.1.1</oid_index>
+    <oid_index_parse>OID/REGEXP:^.{30,31}\.(.*)</oid_index_parse>
+    <index_order>ltmPoolMemberIndex</index_order>
+    <index_order_type>alphabetic</index_order_type>
+    <fields>
+
+        <ltmPoolMemberIndex>
+            <name>Index</name>
+            <source>index</source>
+            <direction>input</direction>
+        </ltmPoolMemberIndex>
+		<ltmPoolName>
+			<name>Name</name>
+			<method>walk</method>
+			<source>value</source>
+			<direction>input</direction>
+			<oid>.1.3.6.1.4.1.3375.2.2.5.4.3.1.1</oid>
+		</ltmPoolName>
+		<ltmPoolMemberAddress>
+			<name>Address</name>
+			<method>walk</method>
+			<!--source>value</source-->
+            <source>OID/REGEXP:^.*\.(.*\..*\..*\..*\..*)$</source>
+			<direction>input</direction>
+			<oid>.1.3.6.1.4.1.3375.2.2.5.4.3.1.3</oid>
+		</ltmPoolMemberAddress>
+		<ltmPoolMemberPort>
+			<name>Port</name>
+			<method>walk</method>
+			<source>value</source>
+			<direction>input</direction>
+			<oid>.1.3.6.1.4.1.3375.2.2.5.4.3.1.4</oid>
+		</ltmPoolMemberPort>
+
+        <!-- Experimental: address is also an output so we can use a cdef to convert to dec ip notation
+        Of course this will waste space as it is a static value being polled -->
+		<ltmPoolMemberAddressOut>
+			<name>Address</name>
+			<method>walk</method>
+			<source>value</source>
+			<direction>output</direction>
+			<oid>.1.3.6.1.4.1.3375.2.2.5.4.3.1.3</oid>
+		</ltmPoolMemberAddressOut>
+
+		<ltmPoolMemberPktsIn>
+			<name>Server Packets In</name>
+			<method>walk</method>
+			<source>value</source>
+			<direction>output</direction>
+			<oid>.1.3.6.1.4.1.3375.2.2.5.4.3.1.5</oid>
+		</ltmPoolMemberPktsIn>
+		<ltmPoolMemberPktsOut>
+			<name>Server Packets Out</name>
+			<method>walk</method>
+			<source>value</source>
+			<direction>output</direction>
+			<oid>.1.3.6.1.4.1.3375.2.2.5.4.3.1.7</oid>
+		</ltmPoolMemberPktsOut>
+		<ltmPoolMemberBytesIn>
+			<name>Server Bytes In</name>
+			<method>walk</method>
+			<source>value</source>
+			<direction>output</direction>
+			<oid>.1.3.6.1.4.1.3375.2.2.5.4.3.1.6</oid>
+		</ltmPoolMemberBytesIn>
+		<ltmPoolMemberBytesOut>
+			<name>Server Bytes Out</name>
+			<method>walk</method>
+			<source>value</source>
+			<direction>output</direction>
+			<oid>.1.3.6.1.4.1.3375.2.2.5.4.3.1.8</oid>
+		</ltmPoolMemberBytesOut>
+		<ltmPoolMemberConnsTotal>
+			<name>Total Server Conns</name>
+			<method>walk</method>
+			<source>value</source>
+			<direction>output</direction>
+			<oid>.1.3.6.1.4.1.3375.2.2.5.4.3.1.10</oid>
+		</ltmPoolMemberConnsTotal>
+        <ltmPoolMemberConnsCurr>
+            <name>Current Server Conns</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>output</direction>
+            <oid>.1.3.6.1.4.1.3375.2.2.5.4.3.1.11</oid>
+        </ltmPoolMemberConnsCurr>
+
+        <ltmPoolMemberPvaPktsIn>
+            <name>PVA Packets In</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>output</direction>
+            <oid>.1.3.6.1.4.1.3375.2.2.5.4.3.1.12</oid>
+        </ltmPoolMemberPvaPktsIn>
+        <ltmPoolMemberPvaPktsOut>
+            <name>PVA Packets Out</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>output</direction>
+            <oid>.1.3.6.1.4.1.3375.2.2.5.4.3.1.14</oid>
+        </ltmPoolMemberPvaPktsOut>
+        <ltmPoolMemberPvaBytesIn>
+            <name>PVA Bytes In</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>output</direction>
+            <oid>.1.3.6.1.4.1.3375.2.2.5.4.3.1.13</oid>
+        </ltmPoolMemberPvaBytesIn>
+        <ltmPoolMemberPvaBytesOut>
+            <name>PVA Bytes Out</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>output</direction>
+            <oid>.1.3.6.1.4.1.3375.2.2.5.4.3.1.15</oid>
+        </ltmPoolMemberPvaBytesOut>
+        <ltmPoolMemberPvaConnsTotal>
+            <name>Total PVA Conns</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>output</direction>
+            <oid>.1.3.6.1.4.1.3375.2.2.5.4.3.1.17</oid>
+        </ltmPoolMemberPvaConnsTotal>
+        <ltmPoolMemberPvaConnsCurr>
+            <name>Current PVA Conns</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>output</direction>
+            <oid>.1.3.6.1.4.1.3375.2.2.5.4.3.1.18</oid>
+        </ltmPoolMemberPvaConnsCurr>
+
+        <ltmPoolMemberPvaAssistConnsTotal>
+            <name>Total PVA Assisted Conns</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>output</direction>
+            <oid>.1.3.6.1.4.1.3375.2.2.5.4.3.1.20</oid>
+        </ltmPoolMemberPvaAssistConnsTotal>
+        <ltmPoolMemberPvaAssistConnsCurr>
+            <name>Current PVA Assisted Conns</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>output</direction>
+            <oid>.1.3.6.1.4.1.3375.2.2.5.4.3.1.21</oid>
+        </ltmPoolMemberPvaAssistConnsCurr>
+
+	</fields>
+
+</interface>

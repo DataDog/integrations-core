@@ -1,0 +1,45 @@
+<interface>
+        <name>Juniper BGP Peer Stats</name>
+        <script_path>|path_php_binary| -q |path_cacti|/scripts/juniper_bgp_prefix.php</script_path>
+        <arg_prepend>|host_hostname| |host_snmp_version|:|host_snmp_port|:|host_snmp_timeout|:|host_ping_retries|:|host_max_oids|:|host_snmp_community|:|host_snmp_username|:|host_snmp_password|:|host_snmp_auth_protocol|:|host_snmp_priv_passphrase|:|host_snmp_priv_protocol|:|host_snmp_context|</arg_prepend>
+        <arg_index>index</arg_index>
+        <arg_query>query</arg_query>
+        <arg_get>get</arg_get>
+        <output_delimeter>!</output_delimeter>
+        <index_order>hrPeerIndex</index_order>
+        <index_order_type>numeric</index_order_type>
+        <index_title_format>|chosen_order_field|</index_title_format>
+
+        <fields>
+                <hrPeerIndex>
+                        <name>Index</name>
+                        <direction>input</direction>
+                        <query_name>index</query_name>
+                </hrPeerIndex>
+                <hrPeerIP>
+                        <name>BGP Peer IP</name>
+                        <direction>input</direction>
+                        <query_name>peerip</query_name>
+                </hrPeerIP>
+                <hrReceived>
+                        <name>Prefixes Received</name>
+                        <direction>output</direction>
+                        <query_name>received</query_name>
+                </hrReceived>
+                <hrAccepted>
+                        <name>Prefixes Accepted</name>
+                        <direction>output</direction>
+                        <query_name>accepted</query_name>
+                </hrAccepted>
+                <hrRejected>
+                        <name>Prefixes Rejected</name>
+                        <direction>output</direction>
+                        <query_name>rejected</query_name>
+                </hrRejected>
+                <hrSent>
+                        <name>Prefixes Sent</name>
+                        <direction>output</direction>
+                        <query_name>sent</query_name>
+                </hrSent>
+        </fields>
+</interface>

@@ -1,0 +1,218 @@
+<interface>
+	<name>F5 BigIP LTM Virtual Server Statistics</name>
+    <description>From F5 MIBS bigipLocalTM->ltmVirtualServers</description>
+	<oid_index>.1.3.6.1.4.1.3375.2.2.10.1.2.1.1</oid_index>
+    <oid_index_parse>OID/REGEXP:^.{31}\.(.*)</oid_index_parse>
+    <index_order>ltmVSIndex</index_order>
+    <index_order_type>alphabetic</index_order_type>
+    <fields>
+
+        <ltmVSIndex>
+            <name>Index</name>
+            <source>index</source>
+            <direction>input</direction>
+        </ltmVSIndex>
+		<ltmVSName>
+			<name>Name</name>
+			<method>walk</method>
+			<source>value</source>
+			<direction>input</direction>
+			<oid>.1.3.6.1.4.1.3375.2.2.10.1.2.1.1</oid>
+		</ltmVSName>
+		<ltmVSServAddr>
+			<name>Address</name>
+			<method>walk</method>
+			<source>value</source>
+			<direction>input</direction>
+			<oid>.1.3.6.1.4.1.3375.2.2.10.1.2.1.3</oid>
+		</ltmVSServAddr>
+		<ltmVSServWildMask>
+			<name>Mask</name>
+			<method>walk</method>
+			<source>value</source>
+			<direction>input</direction>
+			<oid>.1.3.6.1.4.1.3375.2.2.10.1.2.1.5</oid>
+		</ltmVSServWildMask>
+		<ltmVSServPort>
+			<name>Port</name>
+			<method>walk</method>
+			<source>value</source>
+			<direction>input</direction>
+			<oid>.1.3.6.1.4.1.3375.2.2.10.1.2.1.6</oid>
+		</ltmVSServPort>
+        <!--ltmVSServType>
+            <name>Type</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>input</direction>
+            <oid>.1.3.6.1.4.1.3375.2.2.10.1.2.1.15</oid>
+        </ltmVSServType>
+        <ltmVSServEnabledState>
+            <name>Enabled State</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>input</direction>
+            <oid>.1.3.6.1.4.1.3375.2.2.10.13.2.1.3</oid>
+        </ltmVSServEnabledState>
+        <ltmVSServTranslateAddr>
+            <name>Address Translation</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>input</direction>
+            <oid>.1.3.6.1.4.1.3375.2.2.10.1.2.1.13</oid>
+        </ltmVSServTranslateAddr>
+        <ltmVSServTranslatePort>
+            <name>Port Translation</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>input</direction>
+            <oid>.1.3.6.1.4.1.3375.2.2.10.1.2.1.14</oid>
+        </ltmVSServTranslatePort-->
+
+		<ltmVSPktsIn>
+			<name>Other Packets In</name>
+			<method>walk</method>
+			<source>value</source>
+			<direction>output</direction>
+			<oid>.1.3.6.1.4.1.3375.2.2.10.2.3.1.6</oid>
+		</ltmVSPktsIn>
+		<ltmVSPktsOut>
+			<name>Other Packets Out</name>
+			<method>walk</method>
+			<source>value</source>
+			<direction>output</direction>
+			<oid>.1.3.6.1.4.1.3375.2.2.10.2.3.1.8</oid>
+		</ltmVSPktsOut>
+		<ltmVSBytesIn>
+			<name>Other Bytes In</name>
+			<method>walk</method>
+			<source>value</source>
+			<direction>output</direction>
+			<oid>.1.3.6.1.4.1.3375.2.2.10.2.3.1.7</oid>
+		</ltmVSBytesIn>
+		<ltmVSBytesOut>
+			<name>Other Bytes Out</name>
+			<method>walk</method>
+			<source>value</source>
+			<direction>output</direction>
+			<oid>.1.3.6.1.4.1.3375.2.2.10.2.3.1.9</oid>
+		</ltmVSBytesOut>
+		<ltmVSConnsTotal>
+			<name>Total Other Conns</name>
+			<method>walk</method>
+			<source>value</source>
+			<direction>output</direction>
+			<oid>.1.3.6.1.4.1.3375.2.2.10.2.3.1.11</oid>
+		</ltmVSConnsTotal>
+        <ltmVSConnsCurr>
+            <name>Current Other Conns</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>output</direction>
+            <oid>.1.3.6.1.4.1.3375.2.2.10.2.3.1.12</oid>
+        </ltmVSConnsCurr>
+
+        <ltmVSEphPktsIn>
+            <name>Ephemeral Packets In</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>output</direction>
+            <oid>.1.3.6.1.4.1.3375.2.2.10.2.3.1.13</oid>
+        </ltmVSEphPktsIn>
+        <ltmVSEphPktsOut>
+            <name>Ephemeral Packets Out</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>output</direction>
+            <oid>.1.3.6.1.4.1.3375.2.2.10.2.3.1.15</oid>
+        </ltmVSEphPktsOut>
+        <ltmVSEphBytesIn>
+            <name>Ephemeral Bytes In</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>output</direction>
+            <oid>.1.3.6.1.4.1.3375.2.2.10.2.3.1.14</oid>
+        </ltmVSEphBytesIn>
+        <ltmVSEphBytesOut>
+            <name>Ephemeral Bytes Out</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>output</direction>
+            <oid>.1.3.6.1.4.1.3375.2.2.10.2.3.1.16</oid>
+        </ltmVSEphBytesOut>
+        <ltmVSEphConnsTotal>
+            <name>Total Ephemeral Conns</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>output</direction>
+            <oid>.1.3.6.1.4.1.3375.2.2.10.2.3.1.18</oid>
+        </ltmVSEphConnsTotal>
+        <ltmVSEphConnsCurr>
+            <name>Current Ephemeral Conns</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>output</direction>
+            <oid>.1.3.6.1.4.1.3375.2.2.10.2.3.1.19</oid>
+        </ltmVSEphConnsCurr>
+
+        <ltmVSPvaPktsIn>
+            <name>PVA Packets In</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>output</direction>
+            <oid>.1.3.6.1.4.1.3375.2.2.10.2.3.1.20</oid>
+        </ltmVSPvaPktsIn>
+        <ltmVSPvaPktsOut>
+            <name>PVA Packets Out</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>output</direction>
+            <oid>.1.3.6.1.4.1.3375.2.2.10.2.3.1.22</oid>
+        </ltmVSPvaPktsOut>
+        <ltmVSPvaBytesIn>
+            <name>PVA Bytes In</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>output</direction>
+            <oid>.1.3.6.1.4.1.3375.2.2.10.2.3.1.21</oid>
+        </ltmVSPvaBytesIn>
+        <ltmVSPvaBytesOut>
+            <name>PVA Bytes Out</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>output</direction>
+            <oid>.1.3.6.1.4.1.3375.2.2.10.2.3.1.23</oid>
+        </ltmVSPvaBytesOut>
+        <ltmVSPvaConnsTotal>
+            <name>Total PVA Conns</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>output</direction>
+            <oid>.1.3.6.1.4.1.3375.2.2.10.2.3.1.25</oid>
+        </ltmVSPvaConnsTotal>
+        <ltmVSPvaConnsCurr>
+            <name>Current PVA Conns</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>output</direction>
+            <oid>.1.3.6.1.4.1.3375.2.2.10.2.3.1.26</oid>
+        </ltmVSPvaConnsCurr>
+
+        <ltmVSPvaAssistConnsTotal>
+            <name>Total PVA Assisted Conns</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>output</direction>
+            <oid>.1.3.6.1.4.1.3375.2.2.10.2.3.1.28</oid>
+        </ltmVSPvaAssistConnsTotal>
+        <ltmVSPvaAssistConnsCurr>
+            <name>Current PVA Assisted Conns</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>output</direction>
+            <oid>.1.3.6.1.4.1.3375.2.2.10.2.3.1.29</oid>
+        </ltmVSPvaAssistConnsCurr>
+
+	</fields>
+
+</interface>

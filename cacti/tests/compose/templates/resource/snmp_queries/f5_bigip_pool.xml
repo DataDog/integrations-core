@@ -1,0 +1,134 @@
+<interface>
+        <name>Get F5 Big-IP Load Balancer Pool Statistics</name>
+        <oid_index>.1.3.6.1.4.1.3375.2.2.5.2.3.1.1</oid_index>
+        <oid_index_parse>OID/REGEXP:^.*\.3375\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.(.*)$</oid_index_parse>
+        <index_order>poolIndex</index_order>
+        <index_order_type>alphabetic</index_order_type>
+
+        <fields>
+                <poolIndex>
+                        <name>Index</name>
+                        <source>index</source>
+                        <direction>input</direction>
+                </poolIndex>
+                <poolName>
+                        <name>Name</name>
+                        <method>walk</method>
+                        <source>value</source>
+                        <direction>input</direction>
+                        <oid>.1.3.6.1.4.1.3375.2.2.5.2.3.1.1</oid>
+                </poolName>
+                <poolPktsIn>
+                        <name>Packets In</name>
+                        <method>walk</method>
+                        <source>value</source>
+                        <direction>output</direction>
+                        <oid>.1.3.6.1.4.1.3375.2.2.5.2.3.1.2</oid>
+                </poolPktsIn>
+                <poolPktsOut>
+                        <name>Packets Out</name>
+                        <method>walk</method>
+                        <source>value</source>
+                        <direction>output</direction>
+                        <oid>.1.3.6.1.4.1.3375.2.2.5.2.3.1.4</oid>
+                </poolPktsOut>
+                <poolBytesIn>
+                        <name>Bytes In</name>
+                        <method>walk</method>
+                        <source>value</source>
+                        <direction>output</direction>
+                        <oid>.1.3.6.1.4.1.3375.2.2.5.2.3.1.3</oid>
+                </poolBytesIn>
+                <poolBytesOut>
+                        <name>Bytes Out</name>
+                        <method>walk</method>
+                        <source>value</source>
+                        <direction>output</direction>
+                        <oid>.1.3.6.1.4.1.3375.2.2.5.2.3.1.5</oid>
+                </poolBytesOut>
+                <poolMaxConnections>
+                        <name>Maximum Connections</name>
+                        <method>walk</method>
+                        <source>value</source>
+                        <direction>output</direction>
+                        <oid>.1.3.6.1.4.1.3375.2.2.5.2.3.1.6</oid>
+                </poolMaxConnections>
+		<poolTotalConnections>
+                        <name>Total Connections</name>
+                        <method>walk</method>
+                        <source>value</source>
+                        <direction>output</direction>
+                        <oid>.1.3.6.1.4.1.3375.2.2.5.2.3.1.7</oid>
+                </poolTotalConnections>
+                <poolCurrentConnections>
+                        <name>Concurrent Connections</name>
+                        <method>walk</method>
+                        <source>value</source>
+                        <direction>output</direction>
+                        <oid>.1.3.6.1.4.1.3375.2.2.5.2.3.1.8</oid>
+                </poolCurrentConnections>
+		<poolPvaPktsIn>
+			<name>PVA Accelerated Packets In</name>
+			<method>walk</method>
+			<source>value</source>
+			<direction>output</direction>
+			<oid>.1.3.6.1.4.1.3375.2.2.5.2.3.1.9</oid>
+		</poolPvaPktsIn>
+                <poolPvaPktsOut>
+                        <name>PVA Accelerated Packets Out</name>
+                        <method>walk</method>
+                        <source>value</source>
+                        <direction>output</direction>
+                        <oid>.1.3.6.1.4.1.3375.2.2.5.2.3.1.11</oid>
+                </poolPvaPktsOut>
+                <poolPvaBytesIn>
+                        <name>PVA Accelerated Bytes In</name>
+                        <method>walk</method>
+                        <source>value</source>
+                        <direction>output</direction>
+                        <oid>.1.3.6.1.4.1.3375.2.2.5.2.3.1.10</oid>
+                </poolPvaBytesIn>
+                <poolPvaBytesOut>
+                        <name>PVA Accelerated Bytes Out</name>
+                        <method>walk</method>
+                        <source>value</source>
+                        <direction>output</direction>
+                        <oid>.1.3.6.1.4.1.3375.2.2.5.2.3.1.12</oid>
+                </poolPvaBytesOut>
+                <poolPvaMaxConnections>
+                        <name>Maximum Accelerated Connections</name>
+                        <method>walk</method>
+                        <source>value</source>
+                        <direction>output</direction>
+                        <oid>.1.3.6.1.4.1.3375.2.2.5.2.3.1.13</oid>
+                </poolPvaMaxConnections>
+                <poolPvaTotalConnections>
+                        <name>Total Accelerated Connections</name>
+                        <method>walk</method>
+                        <source>value</source>
+                        <direction>output</direction>
+                        <oid>.1.3.6.1.4.1.3375.2.2.5.2.3.1.14</oid>
+                </poolPvaTotalConnections>
+                <poolPvaCurrentConnections>
+                        <name>Concurrent Accelerated Connections</name>
+                        <method>walk</method>
+                        <source>value</source>
+                        <direction>output</direction>
+                        <oid>.1.3.6.1.4.1.3375.2.2.5.2.3.1.15</oid>
+                </poolPvaCurrentConnections>
+                <poolPvaTotalAssistConnections>
+                        <name>Total Assisted Accelerated Connections</name>
+                        <method>walk</method>
+                        <source>value</source>
+                        <direction>output</direction>
+                        <oid>.1.3.6.1.4.1.3375.2.2.5.2.3.1.16</oid>
+                </poolPvaTotalAssistConnections>
+                <poolPvaCurrentAssistConnections>
+                        <name>Concurrent Assisted Accelerated Connections</name>
+                        <method>walk</method>
+                        <source>value</source>
+                        <direction>output</direction>
+                        <oid>.1.3.6.1.4.1.3375.2.2.5.2.3.1.17</oid>
+                </poolPvaCurrentAssistConnections>
+        </fields>
+</interface>

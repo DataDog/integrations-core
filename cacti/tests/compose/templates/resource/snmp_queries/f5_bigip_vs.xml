@@ -1,0 +1,85 @@
+<interface>
+        <name>Get F5 Big-IP Load Balancer Virtual Server Statistics</name>
+        <oid_index>.1.3.6.1.4.1.3375.2.2.10.2.3.1.1</oid_index>
+        <oid_index_parse>OID/REGEXP:^.*\.3375\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.(.*)$</oid_index_parse>
+        <index_order>vsIndex</index_order>
+        <index_order_type>alphabetic</index_order_type>
+
+        <fields>
+                <vsIndex>
+                        <name>Index</name>
+                        <source>index</source>
+                        <direction>input</direction>
+                </vsIndex>
+                <vsName>
+                        <name>Name</name>
+                        <method>walk</method>
+                        <source>value</source>
+                        <direction>input</direction>
+                        <oid>.1.3.6.1.4.1.3375.2.2.10.2.3.1.1</oid>
+                </vsName>
+                <vsIPAddress>
+                        <name>IP Address</name>
+                        <method>walk</method>
+                        <source>value</source>
+                        <direction>input</direction>
+                        <oid>.1.3.6.1.4.1.3375.2.2.10.1.2.1.3</oid>
+                </vsIPAddress>
+                <vsServicePort>
+                        <name>Service Port</name>
+                        <method>walk</method>
+                        <source>value</source>
+                        <direction>input</direction>
+                        <oid>.1.3.6.1.4.1.3375.2.2.10.1.2.1.6</oid>
+                </vsServicePort>
+                <vsPktsIn>
+                        <name>Packets In</name>
+                        <method>walk</method>
+                        <source>value</source>
+                        <direction>output</direction>
+                        <oid>.1.3.6.1.4.1.3375.2.2.10.2.3.1.6</oid>
+                </vsPktsIn>
+                <vsPktsOut>
+                        <name>Packets Out</name>
+                        <method>walk</method>
+                        <source>value</source>
+                        <direction>output</direction>
+                        <oid>.1.3.6.1.4.1.3375.2.2.10.2.3.1.8</oid>
+                </vsPktsOut>
+                <vsBytesIn>
+                        <name>Bytes In</name>
+                        <method>walk</method>
+                        <source>value</source>
+                        <direction>output</direction>
+                        <oid>.1.3.6.1.4.1.3375.2.2.10.2.3.1.7</oid>
+                </vsBytesIn>
+                <vsBytesOut>
+                        <name>Bytes Out</name>
+                        <method>walk</method>
+                        <source>value</source>
+                        <direction>output</direction>
+                        <oid>.1.3.6.1.4.1.3375.2.2.10.2.3.1.9</oid>
+                </vsBytesOut>
+                <vsTotConnections>
+                        <name>Connection Rate</name>
+                        <method>walk</method>
+                        <source>value</source>
+                        <direction>output</direction>
+                        <oid>.1.3.6.1.4.1.3375.2.2.10.2.3.1.11</oid>
+                </vsTotConnections>
+                <vsConcurrentConnections>
+                        <name>Concurrent Connections</name>
+                        <method>walk</method>
+                        <source>value</source>
+                        <direction>output</direction>
+                        <oid>.1.3.6.1.4.1.3375.2.2.10.2.3.1.12</oid>
+                </vsConcurrentConnections>
+                <vsNoNodesErrors>
+                        <name>No Nodes Errors</name>
+                        <method>walk</method>
+                        <source>value</source>
+                        <direction>output</direction>
+                        <oid>.1.3.6.1.4.1.3375.2.2.10.2.3.1.5</oid>
+                </vsNoNodesErrors>
+        </fields>
+</interface>

@@ -1,0 +1,44 @@
+<cp>
+        <name>Get SRX CP Connection Stats</name>
+        <description>Juniper SRX 3K Series CP Stats</description>
+        <index_order_type>numeric</index_order_type>
+        <oid_index>1.3.6.1.4.1.2636.3.39.1.12.1.4.1.1</oid_index>
+        <index_order>Index</index_order>
+
+        <fields>
+		<Index>
+			<name>Index</name>
+			<source>index</source>
+			<direction>input</direction>
+		</Index>
+		<NodeDescr>
+                        <name>Cluster Names</name>
+                        <method>walk</method>
+                        <source>value</source>
+                        <direction>input</direction>
+                        <oid>1.3.6.1.4.1.2636.3.39.1.12.1.4.1.2</oid>
+		</NodeDescr>
+		<CurrentTotalSession>
+                        <name>Current Sessions</name>
+                        <method>walk</method>
+                        <source>value</source>
+                        <direction>output</direction>
+                        <oid>.1.3.6.1.4.1.2636.3.39.1.12.1.4.1.3</oid>
+		</CurrentTotalSession>
+		<MaxTotalSession>
+                        <name>Total Sessions</name>
+                        <method>walk</method>
+                        <source>value</source>
+                        <direction>output</direction>
+                        <oid>.1.3.6.1.4.1.2636.3.39.1.12.1.4.1.4</oid>
+		</MaxTotalSession>
+		<SessionPerSecond>
+                        <name>Sessions Per Second</name>
+                        <method>walk</method>
+                        <source>value</source>
+                        <direction>output</direction>
+                        <oid>.1.3.6.1.4.1.2636.3.39.1.12.1.4.1.5</oid>
+		</SessionPerSecond>
+        </fields>
+
+</cp>

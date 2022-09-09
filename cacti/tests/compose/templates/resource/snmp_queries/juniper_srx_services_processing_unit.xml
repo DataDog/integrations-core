@@ -1,0 +1,73 @@
+<spu>
+        <name>Get SRX SPU Stats</name>
+        <description>Juniper SRX 3K Series CP/SPU Stats</description>
+        <index_order_type>numeric</index_order_type>
+        <oid_index>.1.3.6.1.4.1.2636.3.39.1.12.1.1.1.2</oid_index>
+	 <oid_index_parse>OID/REGEXP:^.*\.([0-9]+)$</oid_index_parse>
+        <index_order>Index</index_order>
+
+        <fields>
+		<Index>
+			<name>Index</name>
+			<source>index</source>
+			<direction>input</direction>
+		</Index>
+		<SPUSlot>
+                        <name>SPU Slot</name>
+                        <method>walk</method>
+                        <source>value</source>
+                        <direction>input</direction>
+                        <oid>.1.3.6.1.4.1.2636.3.39.1.12.1.1.1.2</oid>
+		</SPUSlot>
+		<NodeDescr>
+                        <name>Cluster Names</name>
+                        <method>walk</method>
+                        <source>value</source>
+                        <direction>input</direction>
+                        <oid>.1.3.6.1.4.1.2636.3.39.1.12.1.1.1.11</oid>
+		</NodeDescr>
+		<CPUUsage>
+                        <name>CPU Usage</name>
+                        <method>walk</method>
+                        <source>value</source>
+                        <direction>output</direction>
+                        <oid>.1.3.6.1.4.1.2636.3.39.1.12.1.1.1.4</oid>
+		</CPUUsage>
+		<MemoryUsage>
+                        <name>Memory Usage</name>
+                        <method>walk</method>
+                        <source>value</source>
+                        <direction>output</direction>
+                        <oid>.1.3.6.1.4.1.2636.3.39.1.12.1.1.1.5</oid>
+		</MemoryUsage>
+		<CurrentFlowSession>
+                        <name>Current Flow Session</name>
+                        <method>walk</method>
+                        <source>value</source>
+                        <direction>output</direction>
+                        <oid>.1.3.6.1.4.1.2636.3.39.1.12.1.1.1.6</oid>
+		</CurrentFlowSession>
+		<MaxFlowSession>
+                        <name>Max Flow Session</name>
+                        <method>walk</method>
+                        <source>value</source>
+                        <direction>output</direction>
+                        <oid>.1.3.6.1.4.1.2636.3.39.1.12.1.1.1.7</oid>
+		</MaxFlowSession>
+                <CurrentCPSession>
+                        <name>Current Control Point Session</name>
+                        <method>walk</method>
+                        <source>value</source>
+                        <direction>output</direction>
+                        <oid>.1.3.6.1.4.1.2636.3.39.1.12.1.1.1.8</oid>
+                </CurrentCPSession>
+                <MaxCPSession>
+                        <name>Max Control Point Session</name>
+                        <method>walk</method>
+                        <source>value</source>
+                        <direction>output</direction>
+                        <oid>.1.3.6.1.4.1.2636.3.39.1.12.1.1.1.9</oid>
+                </MaxCPSession>
+        </fields>
+
+</spu>

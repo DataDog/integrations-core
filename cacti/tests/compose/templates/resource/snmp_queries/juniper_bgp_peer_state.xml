@@ -1,0 +1,69 @@
+<interface>
+	<name>Juniper - BGP Peer Information</name>
+	<oid_index>.1.3.6.1.4.1.2636.5.1.1.2.1.1.1.14</oid_index>
+	<oid_index_parse>OID/REGEXP:.*\.([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})$</oid_index_parse>
+	<index_order>Index</index_order>
+	<index_order_type>numeric</index_order_type>
+	<index_title_format>|chosen_order_field|</index_title_format>
+
+	<fields>
+		<Index>
+			<name>Index</name>
+			<method>walk</method>
+			<source>index</source>
+			<direction>input</direction>
+		</Index>
+
+		<LocalIP>
+			<name>Local IP</name>
+			<method>walk</method>
+			<source>value</source>
+			<direction>input</direction>
+			<oid>.1.3.6.1.4.1.2636.5.1.1.2.1.1.1.2</oid>
+			<source>OID/REGEXP:.*\.([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$</source>
+		</LocalIP>
+
+		<jnxBgpM2PeerLocalAs>
+			<name>Local AS</name>
+			<method>walk</method>
+			<source>value</source>
+			<direction>input</direction>
+			<oid>.1.3.6.1.4.1.2636.5.1.1.2.1.1.1.9</oid>
+		</jnxBgpM2PeerLocalAs>
+
+		<PeerIP>
+			<name>Peer IP</name>
+			<method>walk</method>
+			<source>value</source>
+			<direction>input</direction>
+			<oid>.1.3.6.1.4.1.2636.5.1.1.2.1.1.1.2</oid>
+			<source>OID/REGEXP:.*\.([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})$</source>
+		</PeerIP>
+
+		<jnxBgpM2PeerRemoteAs>
+			<name>Peer AS</name>
+			<method>walk</method>
+			<source>value</source>
+			<direction>input</direction>
+			<oid>.1.3.6.1.4.1.2636.5.1.1.2.1.1.1.13</oid>
+		</jnxBgpM2PeerRemoteAs>
+
+		<jnxBgpM2PeerState>
+			<name>Peer State</name>
+			<method>walk</method>
+			<source>value</source>
+			<direction>output</direction>
+			<oid>.1.3.6.1.4.1.2636.5.1.1.2.1.1.1.2</oid>
+
+		</jnxBgpM2PeerState>
+
+		<jnxBgpM2PeerStatus>
+			<name>Peer Status</name>
+			<method>walk</method>
+			<source>value</source>
+			<direction>input</direction>
+			<oid>.1.3.6.1.4.1.2636.5.1.1.2.1.1.1.3</oid>
+		</jnxBgpM2PeerStatus>
+
+	</fields>
+</interface>

@@ -1,0 +1,131 @@
+<interface>
+    <name>F5 BigIP Interface statistics</name>
+    <description>From F5 MIBS bigipsystem->sysNetwork->sysInterfaces->sysInterfaceStat</description>
+    <oid_index>.1.3.6.1.4.1.3375.2.1.2.4.4.3.1.1</oid_index>
+    <!--oid_index_parse>OID/REGEXP:^.{33}(.*)</oid_index_parse-->
+    <oid_index_parse>OID/REGEXP:^.{24}.{8,9}\.(.*)</oid_index_parse>
+    <index_order>bigIPifIndex</index_order>
+    <index_order_type>alphabetic</index_order_type>
+    <fields>
+
+        <bigIPifIndex>
+            <name>Index</name>
+            <source>index</source>
+            <direction>input</direction>
+        </bigIPifIndex>
+        <bigIPifName>
+            <name>Name</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>input</direction>
+            <oid>.1.3.6.1.4.1.3375.2.1.2.4.4.3.1.1</oid>
+        </bigIPifName>
+        <bigIPifStatus>
+            <name>Status</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>input</direction>
+            <oid>.1.3.6.1.4.1.3375.2.1.2.4.1.2.1.17</oid>
+        </bigIPifStatus>
+        <bigIPifSpeed>
+            <name>Speed</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>input</direction>
+            <oid>.1.3.6.1.4.1.3375.2.1.2.4.1.2.1.4</oid>
+        </bigIPifSpeed>
+        <bigIPifDuplex>
+            <name>Duplex</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>input</direction>
+            <oid>.1.3.6.1.4.1.3375.2.1.2.4.1.2.1.5</oid>
+        </bigIPifDuplex>
+        <bigIPifMACAddr>
+            <name>MAC Address</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>input</direction>
+            <oid>.1.3.6.1.4.1.3375.2.1.2.4.1.2.1.6</oid>
+        </bigIPifMACAddr>
+
+        <bigIPifPktsIn>
+            <name>Packets In</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>output</direction>
+            <oid>.1.3.6.1.4.1.3375.2.1.2.4.4.3.1.2</oid>
+        </bigIPifPktsIn>
+        <bigIPifPktsOut>
+            <name>Packets Out</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>output</direction>
+            <oid>.1.3.6.1.4.1.3375.2.1.2.4.4.3.1.4</oid>
+        </bigIPifPktsOut>
+        <bigIPifBytesIn>
+            <name>Bytes In</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>output</direction>
+            <oid>.1.3.6.1.4.1.3375.2.1.2.4.4.3.1.3</oid>
+        </bigIPifBytesIn>
+        <bigIPifBytesOut>
+            <name>Bytes Out</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>output</direction>
+            <oid>.1.3.6.1.4.1.3375.2.1.2.4.4.3.1.5</oid>
+        </bigIPifBytesOut>
+        <bigIPifMcastIn>
+            <name>Multicast In</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>output</direction>
+            <oid>.1.3.6.1.4.1.3375.2.1.2.4.4.3.1.6</oid>
+        </bigIPifMcastIn>
+        <bigIPifMcastOut>
+            <name>Multicast Out</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>output</direction>
+            <oid>.1.3.6.1.4.1.3375.2.1.2.4.4.3.1.7</oid>
+        </bigIPifMcastOut>
+        <bigIPifErrorsIn>
+            <name>Errors In</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>output</direction>
+        <oid>.1.3.6.1.4.1.3375.2.1.2.4.4.3.1.8</oid>
+        </bigIPifErrorsIn>
+        <bigIPifErrorsOut>
+            <name>Errors Out</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>output</direction>
+            <oid>.1.3.6.1.4.1.3375.2.1.2.4.4.3.1.9</oid>
+        </bigIPifErrorsOut>
+        <bigIPifDropsIn>
+            <name>Drops In</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>output</direction>
+            <oid>.1.3.6.1.4.1.3375.2.1.2.4.4.3.1.10</oid>
+        </bigIPifDropsIn>
+        <bigIPifDropsOut>
+            <name>Drops Out</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>output</direction>
+            <oid>.1.3.6.1.4.1.3375.2.1.2.4.4.3.1.11</oid>
+        </bigIPifDropsOut>
+        <bigIPifCollisions>
+            <name>Collisions</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>output</direction>
+            <oid>.1.3.6.1.4.1.3375.2.1.2.4.4.3.1.12</oid>
+        </bigIPifCollisions>
+    </fields>
+
+</interface>
