@@ -3,7 +3,8 @@ base_package:
 changelog/no-changelog:
 - requirements-agent-release.txt
 - datadog_checks_dev/datadog_checks/dev/__about__.py
-- all:['*/!(datadog_checks)/**', '*/!(pyproject.toml)', '*/tests/**']
+- '*/!(datadog_checks)/**'
+- '*/!(pyproject.toml)'
 ddev:
 - ddev/**/*
 dependencies:
@@ -25,6 +26,7 @@ documentation:
 - '*/manifest.json'
 - '*/assets/configuration/**'
 - '*/CHANGELOG.md'
+- '*/README.md'
 - docs/**
 downloader:
 - datadog_checks_downloader/**/*
