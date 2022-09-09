@@ -39,7 +39,7 @@
       },
       "metrics": {
         "prefix": "teamcity.",
-        "check": [],
+        "check": ["teamcity.builds", "teamcity.build_duration"],
         "metadata_path": "metadata.csv"
       },
       "events": {

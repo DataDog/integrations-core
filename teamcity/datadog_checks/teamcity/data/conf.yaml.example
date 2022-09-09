@@ -45,7 +45,7 @@ instances:
     # name: <BUILD_NAME>
 
     ## @param monitored_projects_build_configs - list of strings or (list of mapping or string) - optional
-    ## Monitor projects and build configs
+    ## List of projects and build configurations to monitor.
     #
     # monitored_projects_build_configs:
     #   - <PROJECT_A>:

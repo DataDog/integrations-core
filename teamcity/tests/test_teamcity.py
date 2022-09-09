@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import os
 from copy import deepcopy
 
 import pytest
@@ -8,7 +9,7 @@ from mock import ANY, MagicMock, patch
 
 from datadog_checks.teamcity import TeamCityCheck
 
-from .common import CHECK_NAME, CONFIG
+from .common import CHECK_NAME, CONFIG, HERE, REST_METRICS
 
 
 @pytest.mark.integration
@@ -137,3 +138,19 @@ def test_config(test_case, extra_config, expected_http_kwargs):
         http_wargs.update(expected_http_kwargs)
 
         r.assert_called_with(ANY, **http_wargs)
+
+
+def mock_data(file):
+    filepath = os.path.join(HERE, 'fixtures', file)
+    with open(filepath, 'rb') as f:
+        return f.read()
+
+
+def test_metric_collection_build_config_stats(aggregator, instance, check):
+    with patch('datadog_checks.teamcity.common.get_response', return_value=mock_data('build_stats.xml')):
+        check = check(instance)
+        check.check(instance)
+
+    for metric_name in REST_METRICS:
+        aggregator.assert_metric(metric_name)
+        # aggregator.assert_metric_has_tag(metric_name, 'key1:value1')

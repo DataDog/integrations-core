@@ -2,9 +2,6 @@
 # (C) Paul Kirby <pkirby@matrix-solutions.com> 2014
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from urllib.parse import urlparse
-from collections import namedtuple
-
 from six import PY2
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
@@ -48,9 +45,8 @@ class TeamCityCheck(AgentCheck):
         self.basic_http_auth = is_affirmative(self.instance.get('basic_http_authentication', False))
         self.auth_type = 'httpAuth' if self.basic_http_auth else 'guestAuth'
         self.tags = set(self.instance.get('tags', []))
-
-        parsed_endpoint = urlparse(self.instance.get('server'))
-        self.server_url = "{}://{}".format(parsed_endpoint.scheme, parsed_endpoint.netloc)
+        server = self.instance.get('server')
+        self.server_url = self._normalize_server_url(server)
         self.base_url = "{}/{}".format(self.server_url, self.auth_type)
 
         instance_tags = [
@@ -133,10 +129,10 @@ class TeamCityCheck(AgentCheck):
                 problem_type = problem['type']
                 problem_identity = problem['identity']
                 tags = [
-                    f'problem_type:{problem_type}',
-                    f'problem_identity:{problem_identity}',
-                    f'build_id:{build_id}',
-                    f'build_number:{build_number}',
+                    'problem_type:{}'.format(problem_type),
+                    'problem_identity:{}'.format(problem_identity),
+                    'build_id:{}'.format(build_id),
+                    'build_number:{}'.format(build_number),
                 ]
                 self.service_check('build_problem', AgentCheck.WARNING, tags=list(self.tags) + tags)
 
@@ -154,24 +150,12 @@ class TeamCityCheck(AgentCheck):
         )
         return new_builds
 
-    def _build_collection_object(self):
-        collection_config = self.instance.get('monitored_projects_build_configs')
-        collection_dict = {}
-
-        for config in collection_config:
-            # check if str => project_name
-            if isinstance(config, str):
-                if not collection_dict[config]:
-                    collection_dict[config] = {}
-                else:
-                    collection_dict
-            # check if dict => project and build_configs filters
-            # config = {'project': {'include': 'include_something', 'exclude': 'exclude_something'}}
-            if isinstance(config, dict):
-
-
-
-
+    def _normalize_server_url(self, server):
+        """
+        Check if the server URL starts with a HTTP or HTTPS scheme, fall back to http if not present
+        """
+        server = server if server.startswith(("http://", "https://")) else "http://{}".format(server)
+        return server
 
     def check(self, _):
         if self.instance.get('monitored_projects_build_configs') is not None:
@@ -181,7 +165,7 @@ class TeamCityCheck(AgentCheck):
 
         new_builds = self._collect_new_builds()
         if new_builds:
-            self.log.debug("New builds found: {}".format(new_builds))
+            self.log.debug("New builds found: %s", new_builds)
             for build in new_builds['build']:
                 self._send_events(build)
                 self._collect_build_stats(build)

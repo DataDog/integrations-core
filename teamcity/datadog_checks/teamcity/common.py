@@ -7,6 +7,9 @@ from copy import deepcopy
 import requests
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.dev import get_here
+
+HERE = get_here()
 
 EVENT_STATUS_MAP = {"SUCCESS": "successful", "FAILURE": "failed"}
 
