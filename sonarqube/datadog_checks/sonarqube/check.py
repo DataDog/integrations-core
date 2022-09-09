@@ -35,10 +35,9 @@ class SonarqubeCheck(AgentCheck):
         else:
             self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, tags=self._tags)
 
+    @AgentCheck.metadata_entrypoint
     def collect_metadata(self):
-        response = self.http.get('{}/api/server/version'.format(self._web_endpoint))
-        response.raise_for_status()
-        self.collect_version(response)
+        self.collect_version()
 
     def collect_metrics(self):
         available_metrics = self.discover_available_metrics()
@@ -100,8 +99,9 @@ class SonarqubeCheck(AgentCheck):
 
         return available_metrics
 
-    @AgentCheck.metadata_entrypoint
-    def collect_version(self, response):
+    def collect_version(self):
+        response = self.http.get('{}/api/server/version'.format(self._web_endpoint))
+        response.raise_for_status()
         version = response.text
         if not version:
             self.log.warning('The SonarQube version was not found in response')
