@@ -28,6 +28,8 @@ EXPLICIT_LICENSES = {
     'gssapi': ['ISC'],
     # https://github.com/cannatag/ldap3/blob/dev/COPYING.txt
     'ldap3': ['LGPL-3.0-only'],
+    # https://github.com/oauthlib/oauthlib/blob/master/LICENSE
+    'oauthlib': ['BSD-3-Clause'],
     # https://github.com/paramiko/paramiko/blob/master/LICENSE
     'paramiko': ['LGPL-2.1-only'],
     # https://github.com/psycopg/psycopg2/blob/master/LICENSE

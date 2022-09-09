@@ -79,7 +79,7 @@ class TestAuthTokenHandlerCreation:
         init_config = {}
 
         with pytest.raises(
-            ConfigurationError, match='^Unknown `auth_token` reader type, must be one of: dcos_auth, file$'
+            ConfigurationError, match='^Unknown `auth_token` reader type, must be one of: dcos_auth, file, oauth$'
         ):
             RequestsWrapper(instance, init_config)
 
@@ -137,6 +137,79 @@ class TestAuthTokenFileReaderCreation:
 
         with pytest.raises(
             ValueError, match='^The pattern `bar` setting of `auth_token` reader must define exactly one group$'
+        ):
+            RequestsWrapper(instance, init_config)
+
+
+class TestAuthTokenOAuthReaderCreation:
+    def test_url_missing(self):
+        instance = {'auth_token': {'reader': {'type': 'oauth'}, 'writer': {'type': 'header'}}}
+        init_config = {}
+
+        with pytest.raises(ConfigurationError, match='^The `url` setting of `auth_token` reader is required$'):
+            RequestsWrapper(instance, init_config)
+
+    def test_url_not_string(self):
+        instance = {'auth_token': {'reader': {'type': 'oauth', 'url': {}}, 'writer': {'type': 'header'}}}
+        init_config = {}
+
+        with pytest.raises(ConfigurationError, match='^The `url` setting of `auth_token` reader must be a string$'):
+            RequestsWrapper(instance, init_config)
+
+    def test_client_id_missing(self):
+        instance = {'auth_token': {'reader': {'type': 'oauth', 'url': 'foo'}, 'writer': {'type': 'header'}}}
+        init_config = {}
+
+        with pytest.raises(ConfigurationError, match='^The `client_id` setting of `auth_token` reader is required$'):
+            RequestsWrapper(instance, init_config)
+
+    def test_client_id_not_string(self):
+        instance = {
+            'auth_token': {'reader': {'type': 'oauth', 'url': 'foo', 'client_id': {}}, 'writer': {'type': 'header'}}
+        }
+        init_config = {}
+
+        with pytest.raises(
+            ConfigurationError, match='^The `client_id` setting of `auth_token` reader must be a string$'
+        ):
+            RequestsWrapper(instance, init_config)
+
+    def test_client_secret_missing(self):
+        instance = {
+            'auth_token': {'reader': {'type': 'oauth', 'url': 'foo', 'client_id': 'bar'}, 'writer': {'type': 'header'}}
+        }
+        init_config = {}
+
+        with pytest.raises(
+            ConfigurationError, match='^The `client_secret` setting of `auth_token` reader is required$'
+        ):
+            RequestsWrapper(instance, init_config)
+
+    def test_client_secret_not_string(self):
+        instance = {
+            'auth_token': {
+                'reader': {'type': 'oauth', 'url': 'foo', 'client_id': 'bar', 'client_secret': {}},
+                'writer': {'type': 'header'},
+            }
+        }
+        init_config = {}
+
+        with pytest.raises(
+            ConfigurationError, match='^The `client_secret` setting of `auth_token` reader must be a string$'
+        ):
+            RequestsWrapper(instance, init_config)
+
+    def test_basic_auth_not_boolean(self):
+        instance = {
+            'auth_token': {
+                'reader': {'type': 'oauth', 'url': 'foo', 'client_id': 'bar', 'client_secret': 'baz', 'basic_auth': {}},
+                'writer': {'type': 'header'},
+            }
+        }
+        init_config = {}
+
+        with pytest.raises(
+            ConfigurationError, match='^The `basic_auth` setting of `auth_token` reader must be a boolean$'
         ):
             RequestsWrapper(instance, init_config)
 
@@ -367,6 +440,72 @@ class TestAuthTokenReadFile:
                 )
 
                 assert http.options['headers'] == expected_headers
+
+
+class TestAuthTokenOAuth:
+    def test_failure(self):
+        instance = {
+            'auth_token': {
+                'reader': {'type': 'oauth', 'url': 'foo', 'client_id': 'bar', 'client_secret': 'baz'},
+                'writer': {'type': 'header', 'name': 'Authorization', 'value': 'Bearer <TOKEN>'},
+            }
+        }
+        init_config = {}
+        http = RequestsWrapper(instance, init_config)
+
+        expected_headers = {'Authorization': 'Bearer foo'}
+        expected_headers.update(DEFAULT_OPTIONS['headers'])
+
+        class MockOAuth2Session(object):
+            def __init__(self, *args, **kwargs):
+                pass
+
+            def fetch_token(self, *args, **kwargs):
+                return {'error': 'unauthorized_client'}
+
+        with mock.patch('requests.get'), mock.patch('oauthlib.oauth2.BackendApplicationClient'), mock.patch(
+            'requests_oauthlib.OAuth2Session', side_effect=MockOAuth2Session
+        ):
+            with pytest.raises(Exception, match='OAuth2 client credentials grant error: unauthorized_client'):
+                http.get('https://www.google.com')
+
+    def test_success(self):
+        instance = {
+            'auth_token': {
+                'reader': {'type': 'oauth', 'url': 'foo', 'client_id': 'bar', 'client_secret': 'baz'},
+                'writer': {'type': 'header', 'name': 'Authorization', 'value': 'Bearer <TOKEN>'},
+            }
+        }
+        init_config = {}
+        http = RequestsWrapper(instance, init_config)
+
+        expected_headers = {'Authorization': 'Bearer foo'}
+        expected_headers.update(DEFAULT_OPTIONS['headers'])
+
+        class MockOAuth2Session(object):
+            def __init__(self, *args, **kwargs):
+                pass
+
+            def fetch_token(self, *args, **kwargs):
+                return {'access_token': 'foo', 'expires_in': 9000}
+
+        with mock.patch('requests.get') as get, mock.patch('oauthlib.oauth2.BackendApplicationClient'), mock.patch(
+            'requests_oauthlib.OAuth2Session', side_effect=MockOAuth2Session
+        ):
+            http.get('https://www.google.com')
+
+            get.assert_called_with(
+                'https://www.google.com',
+                headers=expected_headers,
+                auth=None,
+                cert=None,
+                proxies=None,
+                timeout=(10.0, 10.0),
+                verify=True,
+                allow_redirects=True,
+            )
+
+            assert http.options['headers'] == expected_headers
 
 
 class TestAuthTokenDCOS:
