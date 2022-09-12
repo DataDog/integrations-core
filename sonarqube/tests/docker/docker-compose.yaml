@@ -5,7 +5,7 @@ services:
     container_name: sonarqube
     build:
       context: .
-      dockerfile: ./Dockerfile-${SONARQUBE_VERSION}
+      dockerfile: ./Dockerfile-${DOCKERFILE_VERSION}
     image: dd-sonarqube:${SONARQUBE_VERSION}
     ulimits:
       nproc: 4096
@@ -23,6 +23,7 @@ services:
       start_period: 30s
       timeout: 5s
     environment:
+      SONAR_FORCEAUTHENTICATION: "False"
       SONARQUBE_WEB_ACCESSLOGS_PATTERN: combined
       SONARQUBE_WEB_JVM_OPTS: >-
         -Dcom.sun.management.jmxremote
