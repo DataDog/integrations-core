@@ -1,6 +1,6 @@
 # CHANGELOG - mysql
 
-## 8.5.0 / 2022-08-05
+## 8.5.0 / 2022-08-05 / Agent 7.39.0
 
 * [Added] Add MySQL user connections metric. See [#12657](https://github.com/DataDog/integrations-core/pull/12657).
 * [Fixed] Dependency updates. See [#12653](https://github.com/DataDog/integrations-core/pull/12653).

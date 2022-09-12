@@ -1,6 +1,6 @@
 # CHANGELOG - snmp
 
-## 5.9.0 / 2022-08-05
+## 5.9.0 / 2022-08-05 / Agent 7.39.0
 
 * [Added] Add metrics for VPN Tunnels. See [#11977](https://github.com/DataDog/integrations-core/pull/11977). Thanks [jalmeroth](https://github.com/jalmeroth).
 * [Fixed] Dependency updates. See [#12653](https://github.com/DataDog/integrations-core/pull/12653).

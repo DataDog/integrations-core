@@ -1,6 +1,6 @@
 # CHANGELOG - network
 
-## 2.8.0 / 2022-08-05
+## 2.8.0 / 2022-08-05 / Agent 7.39.0
 
 * [Added] Add collection of ethtool queue stats. See [#11056](https://github.com/DataDog/integrations-core/pull/11056).
 * [Fixed] Dependency updates. See [#12653](https://github.com/DataDog/integrations-core/pull/12653).

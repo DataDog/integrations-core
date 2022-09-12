@@ -1,6 +1,6 @@
 # CHANGELOG - TLS
 
-## 2.9.0 / 2022-08-05
+## 2.9.0 / 2022-08-05 / Agent 7.39.0
 
 * [Added] Implement StartTLS protocol for postgres. See [#12596](https://github.com/DataDog/integrations-core/pull/12596). Thanks [krogon](https://github.com/krogon).
 

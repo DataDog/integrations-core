@@ -1,6 +1,6 @@
 # CHANGELOG - SingleStore
 
-## 1.3.1 / 2022-08-05
+## 1.3.1 / 2022-08-05 / Agent 7.39.0
 
 * [Fixed] Pin `pymysql` to `0.10.1`. See [#12612](https://github.com/DataDog/integrations-core/pull/12612).
 
