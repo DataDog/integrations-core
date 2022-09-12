@@ -1,32 +1,46 @@
 {
-  "display_name": "Nvidia Jetson",
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "name": "nvidia_jetson",
-  "metric_prefix": "nvidia.jetson.",
-  "metric_to_check": "nvidia.jetson.mem.used",
-  "creates_events": false,
-  "short_description": "Get metrics about your Nvidia Jetson board",
-  "guid": "72845bb7-c3a6-4017-96f6-c232171102f8",
-  "support": "core",
-  "supported_os": [
-    "linux"
-  ],
-  "public_title": "Nvidia Jetson",
-  "categories": [
-    "iot"
-  ],
-  "type": "check",
-  "is_public": true,
-  "integration_id": "nvidia-jetson",
+  "manifest_version": "2.0.0",
+  "app_uuid": "eccb9836-9dc7-443c-ac05-9c341e5ccf90",
+  "app_id": "nvidia-jetson",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Get metrics about your Nvidia Jetson board",
+    "title": "Nvidia Jetson",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Category::IOT"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
+    "integration": {
+      "source_type_name": "Nvidia Jetson",
+      "configuration": {},
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "nvidia.jetson.",
+        "check": "nvidia.jetson.mem.used",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
     "dashboards": {
       "Nvidia Jetson": "assets/dashboards/nvidia_jetson.json"
-    },
-    "saved_views": {},
-    "monitors": {},
-    "service_checks": "assets/service_checks.json",
-    "logs": {},
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

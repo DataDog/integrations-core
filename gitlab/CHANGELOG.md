@@ -1,5 +1,9 @@
 # CHANGELOG - gitlab
 
+## 5.2.3 / 2022-08-05
+
+* [Fixed] Dependency updates. See [#12653](https://github.com/DataDog/integrations-core/pull/12653).
+
 ## 5.2.2 / 2022-06-30 / Agent 7.38.0
 
 * [Fixed] Fix default config value. See [#12429](https://github.com/DataDog/integrations-core/pull/12429).

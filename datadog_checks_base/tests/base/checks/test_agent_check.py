@@ -419,7 +419,7 @@ class TestMetricNormalization:
     [
         ('nothing to normalize', 'abc:123', 'abc:123'),
         ('unicode', u'Klüft inför på fédéral', 'Klüft_inför_på_fédéral'),
-        ('invalid chars', 'foo,+*-/()[]{}  \t\nbar:123', 'foo_bar:123'),
+        ('invalid chars', 'foo,+*-/()[]{}-  \t\nbar:123', 'foo_bar:123'),
         ('leading and trailing underscores', '__abc:123__', 'abc:123'),
         ('redundant underscore', 'foo_____bar', 'foo_bar'),
         ('invalid chars and underscore', 'foo++__bar', 'foo_bar'),

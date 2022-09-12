@@ -317,7 +317,7 @@ class Vault(OpenMetricsBaseCheck):
                 else:
                     self.set_client_token(self._client_token)
 
-        # https://www.vaultproject.io/api/overview#the-x-vault-request-header
+        # https://www.vaultproject.io/api-docs#the-x-vault-request-header
         self._set_header(self.http, 'X-Vault-Request', 'true')
 
     def set_client_token(self, client_token):
@@ -330,9 +330,9 @@ class Vault(OpenMetricsBaseCheck):
             self.set_client_token(f.read().decode('utf-8'))
 
     def poll(self, scraper_config, headers=None):
-        # https://www.vaultproject.io/api/overview#the-x-vault-request-header
+        # https://www.vaultproject.io/api-docs#the-x-vault-request-header
         headers = {'X-Vault-Request': 'true'}
-        if self._client_token:
+        if self._client_token and not self._no_token:
             headers['X-Vault-Token'] = self._client_token
 
         return super(Vault, self).poll(scraper_config, headers=headers)

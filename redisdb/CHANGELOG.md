@@ -1,5 +1,10 @@
 # CHANGELOG - redisdb
 
+## 4.5.2 / 2022-08-05
+
+* [Fixed] Dependency updates. See [#12653](https://github.com/DataDog/integrations-core/pull/12653).
+* [Fixed] Fix latency measurement to exclude agent load. See [#12505](https://github.com/DataDog/integrations-core/pull/12505).
+
 ## 4.5.1 / 2022-05-15 / Agent 7.37.0
 
 * [Fixed] Upgrade dependencies. See [#11958](https://github.com/DataDog/integrations-core/pull/11958).

@@ -1,5 +1,9 @@
 # CHANGELOG - Vault
 
+## 3.3.1 / 2022-08-05
+
+* [Fixed] Properly read `collect_secondary_dr` and improve code readability. See [#12435](https://github.com/DataDog/integrations-core/pull/12435).
+
 ## 3.3.0 / 2022-06-01 / Agent 7.38.0
 
 * [Added] Add config option to collect from secondary replication mode. See [#12099](https://github.com/DataDog/integrations-core/pull/12099).

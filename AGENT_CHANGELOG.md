@@ -1,3 +1,7 @@
+## Datadog Agent version [7.38.2](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7382)
+
+* datadog_checks_base [25.5.1](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/CHANGELOG.md)
+
 ## Datadog Agent version [7.38.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7380)
 
 * Airflow [3.1.1](https://github.com/DataDog/integrations-core/blob/master/airflow/CHANGELOG.md)

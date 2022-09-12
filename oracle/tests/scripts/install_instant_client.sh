@@ -1,4 +1,4 @@
-# This script makes the necessary setup to be able to compile pymqi on the agent machine
+# This script makes the necessary setup to install the instant client on the agent machine
 
 set -x
 
@@ -6,7 +6,7 @@ INSTANT_CLIENT_URL="https://ddintegrations.blob.core.windows.net/oracle/instantc
 
 mkdir -p /opt/oracle
 apt-get update
-DEBIAN_FRONTEND=noninteractive apt-get install -yq unzip
+DEBIAN_FRONTEND=noninteractive apt-get install -yq unzip libaio1 gcc g++
 
 # Retry necessary due to flaky download that might trigger:
 # curl: (56) OpenSSL SSL_read: SSL_ERROR_SYSCALL, errno 110

@@ -9,7 +9,6 @@ build-backend = "hatchling.build"
 name = "datadog-openstack-controller"
 description = "The Openstack_controller check"
 readme = "README.md"
-license = {text = "BSD-3-Clause"}
 keywords = [
     "datadog",
     "datadog agent",
@@ -34,6 +33,9 @@ dependencies = [
 dynamic = [
     "version",
 ]
+
+[project.license]
+text = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [

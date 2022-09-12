@@ -1,5 +1,23 @@
 # CHANGELOG - mongo
 
+## 4.0.2 / 2022-09-02
+
+* [Fixed] Solve issue after migration to pymongo 4. See [#12860](https://github.com/DataDog/integrations-core/pull/12860).
+
+## 4.0.1 / 2022-08-15
+
+* [Fixed] Rename SSL parameters. See [#12743](https://github.com/DataDog/integrations-core/pull/12743).
+
+## 4.0.0 / 2022-08-05
+
+* [Added] Support allow invalid hostnames in SSL connections. See [#12541](https://github.com/DataDog/integrations-core/pull/12541).
+* [Added] Added new metrics for oplatencies. See [#12479](https://github.com/DataDog/integrations-core/pull/12479).
+* [Added] Added new metric "mongodb.metrics.queryexecutor.scannedobjectsps". See [#12467](https://github.com/DataDog/integrations-core/pull/12467).
+* [Added] Add dbnames allowlist config option. See [#12450](https://github.com/DataDog/integrations-core/pull/12450).
+* [Added] Ship `pymongo-srv` to support DNS seed connection schemas. See [#12442](https://github.com/DataDog/integrations-core/pull/12442).
+* [Fixed] Dependency updates. See [#12653](https://github.com/DataDog/integrations-core/pull/12653).
+* [Changed] Upgrade pymongo to 4.2. See [#12594](https://github.com/DataDog/integrations-core/pull/12594).
+
 ## 3.2.3 / 2022-06-27 / Agent 7.38.0
 
 * [Fixed] Allow hosts to be a singular value. See [#12090](https://github.com/DataDog/integrations-core/pull/12090).

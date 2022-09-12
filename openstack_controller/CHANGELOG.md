@@ -1,5 +1,9 @@
 # CHANGELOG - Openstack_controller
 
+## 2.1.2 / 2022-08-05
+
+* [Fixed] Dependency updates. See [#12653](https://github.com/DataDog/integrations-core/pull/12653).
+
 ## 2.1.1 / 2022-06-17 / Agent 7.38.0
 
 * [Fixed] Attempt to use token from project scope with an admin role. See [#12135](https://github.com/DataDog/integrations-core/pull/12135).

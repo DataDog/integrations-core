@@ -1,31 +1,49 @@
 {
-  "display_name": "SonarQube",
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "name": "sonarqube",
-  "metric_prefix": "sonarqube.",
-  "metric_to_check": "sonarqube.server.database.pool_active_connections",
-  "creates_events": false,
-  "short_description": "Monitor your SonarQube server and projects.",
-  "guid": "ce089575-93bf-47f0-80b6-ffaf6e34722c",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "public_title": "SonarQube",
-  "categories": [
-    "security",
-    "issue tracking",
-    "log collection"
-  ],
-  "type": "check",
-  "is_public": true,
-  "integration_id": "sonarqube",
+  "manifest_version": "2.0.0",
+  "app_uuid": "c6033e2f-8b3d-4b82-8d35-7c61ce7d0908",
+  "app_id": "sonarqube",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor your SonarQube server and projects.",
+    "title": "SonarQube",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Security",
+      "Category::Issue Tracking",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "SonarQube",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "sonarqube.",
+        "check": "sonarqube.server.database.pool_active_connections",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
     },
     "dashboards": {
       "Sonarqube Overview": "assets/dashboards/overview.json"
@@ -36,17 +54,8 @@
     "saved_views": {
       "status_overview": "assets/saved_views/status_overview.json"
     },
-    "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "sonarqube"
-    },
-    "metrics_metadata": "metadata.csv"
-  },
-  "further_reading": [
-    {
-      "link": "https://www.datadoghq.com/blog/datadog-sonarqube-integration/",
-      "tag": "Blog",
-      "text": "Monitor code quality in Datadog with SonarQube"
     }
-  ]
+  }
 }

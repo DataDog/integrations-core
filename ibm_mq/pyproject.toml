@@ -9,7 +9,6 @@ build-backend = "hatchling.build"
 name = "datadog-ibm-mq"
 description = "The IBM MQ check"
 readme = "README.md"
-license = {text = "BSD-3-Clause"}
 keywords = [
     "datadog",
     "datadog agent",
@@ -35,9 +34,12 @@ dynamic = [
     "version",
 ]
 
+[project.license]
+text = "BSD-3-Clause"
+
 [project.optional-dependencies]
 deps = [
-    "pymqi==1.12.0",
+    "pymqi==1.12.8",
 ]
 
 [project.urls]

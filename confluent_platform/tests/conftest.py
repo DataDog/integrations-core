@@ -55,9 +55,15 @@ def dd_environment():
             # Kafka Broker
             CheckDockerLogs('broker', 'Created log for partition _confluent'),
             # Kafka Schema Registry
-            CheckDockerLogs('schema-registry', 'Server started, listening for requests...', attempts=90),
+            CheckDockerLogs('schema-registry', 'Server started, listening for requests...', attempts=45, wait=2),
             # Kafka Connect
-            CheckDockerLogs('connect', 'Kafka Connect started', attempts=120),
+            CheckDockerLogs(
+                'connect',
+                [' Started KafkaBasedLog', 'INFO REST resources initialized', 'Kafka Connect started'],
+                matches='all',
+                attempts=60,
+                wait=3,
+            ),
             # Create connectors
             WaitFor(create_connectors),
             CheckDockerLogs('connect', 'flushing 0 outstanding messages for offset commit'),

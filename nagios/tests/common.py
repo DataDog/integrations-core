@@ -10,6 +10,8 @@ HERE = get_here()
 HOST = get_docker_hostname()
 
 CONTAINER_NAME = "dd-test-nagios"
+HOST_PERFDATA_FILE = 'host-perfdata.log'
+SERVICE_PERFDATA_FILE = 'service-perfdata.log'
 
 INSTANCE_INTEGRATION = {
     'nagios_conf': '/opt/nagios/etc/nagios.cfg',
