@@ -2,12 +2,11 @@
 
 ## Overview
 
-SingleStore offers transactional and analytical processing of stored data without compromising on speed, performance, or data size. 
+This check monitors [SingleStore][1] through the Datadog Agent. SingleStore offers transactional and analytical processing of stored data. Enable the Datadog-SingleStoreDB integration to:
 
-Datadog's out-of-the-box integration with SingleStoreDB collects and monitors performance metrics from your SingleStoreDB instance so you can:
-- Understand the health of your cluster and your nodes using metrics and events 
-- Easily address drops in storage capacity 
-- Improve resource utilization efficiency by studying CPU usage and stolen time 
+- Understand the health of clusters and nodes through metrics and events.
+- Address drops in storage capacity.
+- Improve resource utilization efficiency.
 
 
 ## Setup
