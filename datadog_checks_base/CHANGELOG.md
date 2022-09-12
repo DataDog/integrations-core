@@ -6,7 +6,7 @@
 * [Added] Add `packaging` to dependencies. See [#12753](https://github.com/DataDog/integrations-core/pull/12753).
 * [Fixed] Fix formatting of message. See [#12827](https://github.com/DataDog/integrations-core/pull/12827).
 
-## 27.0.0 / 2022-08-05
+## 27.0.0 / 2022-08-05 / Agent 7.39.0
 
 * [Fixed] Dependency updates. See [#12653](https://github.com/DataDog/integrations-core/pull/12653).
 * [Fixed] Pin `pymysql` to `0.10.1`. See [#12612](https://github.com/DataDog/integrations-core/pull/12612).

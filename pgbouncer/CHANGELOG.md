@@ -1,6 +1,6 @@
 # CHANGELOG - pgbouncer
 
-## 4.3.0 / 2022-08-05
+## 4.3.0 / 2022-08-05 / Agent 7.39.0
 
 * [Added] Add per-client/server metrics. See [#12350](https://github.com/DataDog/integrations-core/pull/12350). Thanks [jcoleman](https://github.com/jcoleman).
 

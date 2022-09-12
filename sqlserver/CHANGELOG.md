@@ -1,6 +1,6 @@
 # CHANGELOG - sqlserver
 
-## 8.1.0 / 2022-08-05
+## 8.1.0 / 2022-08-05 / Agent 7.39.0
 
 * [Added] Add AlwaysOn Availability Group replica status metric. See [#12494](https://github.com/DataDog/integrations-core/pull/12494).
 * [Fixed] Dependency updates. See [#12653](https://github.com/DataDog/integrations-core/pull/12653).

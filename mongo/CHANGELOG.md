@@ -1,6 +1,6 @@
 # CHANGELOG - mongo
 
-## 4.0.2 / 2022-09-02
+## 4.0.2 / 2022-09-02 / Agent 7.39.0
 
 * [Fixed] Solve issue after migration to pymongo 4. See [#12860](https://github.com/DataDog/integrations-core/pull/12860).
 
