@@ -17,6 +17,8 @@ No additional installation is needed on your server.
 
 This is a cluster check. For more information, see the [Cluster checks documentation][2].
 
+**Note**: It is important to note that an empty confd can be passed if there is no configuration required
+
 ### Validation
 
 [Run the Agent's status subcommand][3] and look for `helm` under the Checks section.
