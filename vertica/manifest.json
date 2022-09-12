@@ -47,6 +47,9 @@
     "dashboards": {
       "Vertica Overview": "assets/dashboards/overview.json"
     },
+    "monitors": {
+      "[Vertica] Nodes down above K-safety level": "assets/monitors/vertica_replication_safety.json"
+    },
     "logs": {
       "source": "vertica"
     }
