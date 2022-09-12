@@ -55,3 +55,4 @@ kube_apiserver.grpc_client_handled_total,count,,request,,The total number of RPC
 kube_apiserver.grpc_client_msg_received_total,count,,message,,The total number of gRPC stream messages received by the client,1,kubernetes_api_server_metrics,gRPC client messages received,
 kube_apiserver.grpc_client_msg_sent_total,count,,message,,The total number of gRPC stream messages sent by the client,1,kubernetes_api_server_metrics,gRPC client messages sent,
 kube_apiserver.grpc_client_started_total,count,,request,,The total number of RPCs started on the client,1,kubernetes_api_server_metrics,gRPC client requests started,
+kube_apiserver.requested_deprecated_apis,gauge,,request,,"Gauge of deprecated APIs that have been requested, broken out by API group, version, resource, subresource, and removed_release",0,kubernetes_api_server_metrics,deprecated API requests,
