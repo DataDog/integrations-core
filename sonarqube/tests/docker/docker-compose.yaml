@@ -6,6 +6,8 @@ services:
     build:
       context: .
       dockerfile: ./Dockerfile-${DOCKERFILE_VERSION}
+      args:
+        SONARQUBE_VERSION: ${SONARQUBE_VERSION}
     image: dd-sonarqube:${SONARQUBE_VERSION}
     ulimits:
       nproc: 4096
