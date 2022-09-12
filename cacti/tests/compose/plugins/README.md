@@ -1,1 +1,0 @@
-﻿# Place uncompressed plugins here for automatic installation at build.
