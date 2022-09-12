@@ -617,3 +617,128 @@ instances:
     #   - <INCLUDE_REGEX>
     #   exclude:
     #   - <EXCLUDE_REGEX>
+
+## Log Section
+##
+## type - required - Type of log input source (tcp / udp / file / windows_event)
+## port / path / channel_path - required - Set port if type is tcp or udp.
+##                                         Set path if type is file.
+##                                         Set channel_path if type is windows_event.
+## source  - required - Attribute that defines which integration sent the logs.
+## encoding - optional - For file specifies the file encoding, default is utf-8, other
+##                       possible values are utf-16-le and utf-16-be.
+## service - optional - The name of the service that generates the log.
+##                      Overrides any `service` defined in the `init_config` section.
+## tags - optional - Add tags to the collected logs.
+##
+## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
+#
+# logs:
+#   - type: file
+#     path: /opt/impala/logs/impalad.INFO
+#     source: impala
+#     tags:
+#     - service_type:daemon
+#     log_processing_rules:
+#     - type: multi_line
+#       pattern: ^[IWEF]\d{4} (\d{2}:){2}\d{2}
+#       name: new_log_start_with_log_level_and_date
+#   - type: file
+#     path: /opt/impala/logs/impalad.WARNING
+#     source: impala
+#     tags:
+#     - service_type:daemon
+#     log_processing_rules:
+#     - type: multi_line
+#       pattern: ^[IWEF]\d{4} (\d{2}:){2}\d{2}
+#       name: new_log_start_with_log_level_and_date
+#   - type: file
+#     path: /opt/impala/logs/impalad.ERROR
+#     source: impala
+#     tags:
+#     - service_type:daemon
+#     log_processing_rules:
+#     - type: multi_line
+#       pattern: ^[IWEF]\d{4} (\d{2}:){2}\d{2}
+#       name: new_log_start_with_log_level_and_date
+#   - type: file
+#     path: /opt/impala/logs/impalad.FATAL
+#     source: impala
+#     tags:
+#     - service_type:daemon
+#     log_processing_rules:
+#     - type: multi_line
+#       pattern: ^[IWEF]\d{4} (\d{2}:){2}\d{2}
+#       name: new_log_start_with_log_level_and_date
+#   - type: file
+#     path: /opt/impala/logs/catalogd.INFO
+#     source: impala
+#     tags:
+#     - service_type:catalog
+#     log_processing_rules:
+#     - type: multi_line
+#       pattern: ^[IWEF]\d{4} (\d{2}:){2}\d{2}
+#       name: new_log_start_with_log_level_and_date
+#   - type: file
+#     path: /opt/impala/logs/catalogd.WARNING
+#     source: impala
+#     tags:
+#     - service_type:catalog
+#     log_processing_rules:
+#     - type: multi_line
+#       pattern: ^[IWEF]\d{4} (\d{2}:){2}\d{2}
+#       name: new_log_start_with_log_level_and_date
+#   - type: file
+#     path: /opt/impala/logs/catalogd.ERROR
+#     source: impala
+#     tags:
+#     - service_type:catalog
+#     log_processing_rules:
+#     - type: multi_line
+#       pattern: ^[IWEF]\d{4} (\d{2}:){2}\d{2}
+#       name: new_log_start_with_log_level_and_date
+#   - type: file
+#     path: /opt/impala/logs/catalogd.FATAL
+#     source: impala
+#     tags:
+#     - service_type:catalog
+#     log_processing_rules:
+#     - type: multi_line
+#       pattern: ^[IWEF]\d{4} (\d{2}:){2}\d{2}
+#       name: new_log_start_with_log_level_and_date
+#   - type: file
+#     path: /opt/impala/logs/statestored.INFO
+#     source: impala
+#     tags:
+#     - service_type:statestore
+#     log_processing_rules:
+#     - type: multi_line
+#       pattern: ^[IWEF]\d{4} (\d{2}:){2}\d{2}
+#       name: new_log_start_with_log_level_and_date
+#   - type: file
+#     path: /opt/impala/logs/statestored.WARNING
+#     source: impala
+#     tags:
+#     - service_type:statestore
+#     log_processing_rules:
+#     - type: multi_line
+#       pattern: ^[IWEF]\d{4} (\d{2}:){2}\d{2}
+#       name: new_log_start_with_log_level_and_date
+#   - type: file
+#     path: /opt/impala/logs/statestored.ERROR
+#     source: impala
+#     tags:
+#     - service_type:statestore
+#     log_processing_rules:
+#     - type: multi_line
+#       pattern: ^[IWEF]\d{4} (\d{2}:){2}\d{2}
+#       name: new_log_start_with_log_level_and_date
+#   - type: file
+#     path: /opt/impala/logs/statestored.FATAL
+#     source: impala
+#     tags:
+#     - service_type:statestore
+#     log_processing_rules:
+#     - type: multi_line
+#       pattern: ^[IWEF]\d{4} (\d{2}:){2}\d{2}
+#       name: new_log_start_with_log_level_and_date
