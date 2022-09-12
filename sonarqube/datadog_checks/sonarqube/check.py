@@ -28,16 +28,11 @@ class SonarqubeCheck(AgentCheck):
 
     def check(self, _):
         try:
-            self.collect_metadata()
             self.collect_metrics()
         except RequestException as e:
             self.service_check(self.SERVICE_CHECK_CONNECT, self.CRITICAL, tags=self._tags, message=str(e))
         else:
             self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, tags=self._tags)
-
-    @AgentCheck.metadata_entrypoint
-    def collect_metadata(self):
-        self.collect_version()
 
     def collect_metrics(self):
         available_metrics = self.discover_available_metrics()
@@ -66,6 +61,7 @@ class SonarqubeCheck(AgentCheck):
                 self.gauge(available_metrics[measure['metric']], measure['value'], tags=tags)
 
     def discover_available_metrics(self):
+        metadata_collected = False
         available_metrics = {}
 
         page = 1
@@ -75,6 +71,10 @@ class SonarqubeCheck(AgentCheck):
         while seen != total:
             response = self.http.get('{}/api/metrics/search'.format(self._web_endpoint), params={'p': page})
             response.raise_for_status()
+
+            if not metadata_collected:
+                metadata_collected = True
+                self.collect_version(response)
 
             search_results = response.json()
             total = search_results['total']
@@ -99,12 +99,11 @@ class SonarqubeCheck(AgentCheck):
 
         return available_metrics
 
-    def collect_version(self):
-        response = self.http.get('{}/api/server/version'.format(self._web_endpoint))
-        response.raise_for_status()
-        version = response.text
+    @AgentCheck.metadata_entrypoint
+    def collect_version(self, response):
+        version = response.headers.get('Sonar-Version', '')
         if not version:
-            self.log.warning('The SonarQube version was not found in response')
+            self.log.warning('The SonarQube version was not found in response headers')
             return
 
         # The version comes in like `8.5.0.37579` though sometimes there is no build part

@@ -1,14 +1,9 @@
-version: '3.8'
+version: '3'
 
 services:
   sonarqube:
     container_name: sonarqube
-    build:
-      context: .
-      dockerfile: ./Dockerfile-${DOCKERFILE_VERSION}
-      args:
-        SONARQUBE_VERSION: ${SONARQUBE_VERSION}
-    image: dd-sonarqube:${SONARQUBE_VERSION}
+    image: sonarqube:${SONARQUBE_VERSION}-community
     ulimits:
       nproc: 4096
       nofile:
@@ -18,14 +13,7 @@ services:
       - "9000:9000"
       - "10443:10443"
       - "10444:10444"
-    healthcheck:
-      test: curl -f http://localhost:9000/api/system/status | grep "\"status\":\"UP\"" || exit 1
-      interval: 3s
-      retries: 100
-      start_period: 30s
-      timeout: 5s
     environment:
-      SONAR_FORCEAUTHENTICATION: "False"
       SONARQUBE_WEB_ACCESSLOGS_PATTERN: combined
       SONARQUBE_WEB_JVM_OPTS: >-
         -Dcom.sun.management.jmxremote
@@ -41,8 +29,6 @@ services:
       - ${DD_LOG_3}:/opt/sonarqube/logs/es.log
       - ${DD_LOG_4}:/opt/sonarqube/logs/sonar.log
       - ${DD_LOG_5}:/opt/sonarqube/logs/web.log
-    networks:
-      - sonarqube-network
     # https://github.com/SonarSource/docker-sonarqube/issues/83
     command: >-
       -Dsonar.ce.javaOpts="
@@ -56,16 +42,10 @@ services:
       "
   sonar-scanner:
     container_name: sonar-scanner
-    image: sonarsource/sonar-scanner-cli:4.7
+    image: sonarsource/sonar-scanner-cli:4.5
     environment:
       SONAR_HOST_URL: http://sonarqube:9000
     volumes:
       - ${PROJECT_DIR}:/usr/src
-    networks:
-      - sonarqube-network
     depends_on:
-      sonarqube:
-        condition: service_healthy
-
-networks:
-  sonarqube-network: {}
+      - sonarqube
