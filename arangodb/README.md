@@ -2,7 +2,13 @@
 
 ## Overview
 
-ArangoDB allows developers, architects, and data scientists to natively store data for graph and multi-model purposes. Engineering teams can easily access and map data using the best patterns for the job through a powerful SQL-like query language used for all data models. 
+This check monitors [ArangoDB][1] through the Datadog Agent. ArangoDB 3.8 and above are supported.
+
+Enable the Datadog-ArangoDB integration to:
+
+- Identify slow queries based on user-defined thresholds.
+- Understand the impact of a long request and troubleshoot latency issues.
+- Monitor underlying RocksDB memory, disk, and cache limits.
 
 Monitoring ArangoDB with Datadog allows you to:
 - Identify slow queries based on user-defined thresholds.
