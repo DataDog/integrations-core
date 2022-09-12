@@ -774,10 +774,14 @@ class SQLServer(AgentCheck):
     def collect_metrics(self):
         """Fetch the metrics from all of the associated database tables."""
 
-        if self.timed_feature_release.check_should_exit('collect_metrics_begin'):
+        if self.timed_feature_release.check_should_exit('open_connection'):
             return
 
         with self.connection.open_managed_default_connection():
+
+            if self.timed_feature_release.check_should_exit('open_cursor'):
+                return
+
             with self.connection.get_managed_cursor() as cursor:
 
 
