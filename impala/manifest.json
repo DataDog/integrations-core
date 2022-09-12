@@ -38,6 +38,12 @@
     },
     "logs": {
       "source": "impala"
+    },
+    "dashboards": {
+      "Impala - Overview": "assets/dashboards/impala_overview.json",
+      "Impala - Statestore - Overview": "assets/dashboards/impala_statestore_overview.json",
+      "Impala - Catalog - Overview": "assets/dashboards/impala_catalog_overview.json",
+      "Impala - Daemon - Overview": "assets/dashboards/impala_daemon_overview.json"
     }
   },
   "author": {
