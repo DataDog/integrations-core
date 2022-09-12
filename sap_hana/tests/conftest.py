@@ -91,7 +91,6 @@ def dd_environment(schema="SYS_DATABASES"):
             db.initialize,
         ],
         env_vars={'PASSWORD': ADMIN_CONFIG['password']},
-        sleep=10,
     ):
         yield CONFIG, E2E_METADATA
 
