@@ -2,7 +2,14 @@
     "author_name": "Datadog",
     "description": "## Vertica Dashboard\n\nThis is an example Vertica dashboard demonstrating the metrics that the integration collects.",
     "layout_type": "ordered",
-    "template_variables": [],
+    "template_variables": [
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "service",
+            "prefix": "service"
+        }
+    ],
     "title": "Vertica Overview",
     "widgets": [
         {
@@ -87,13 +94,13 @@
                                             "aggregator": "max",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "max:vertica.node.total{*}"
+                                            "query": "max:vertica.node.total{$service}"
                                         },
                                         {
                                             "aggregator": "max",
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "max:vertica.node.down{*}"
+                                            "query": "max:vertica.node.down{$service}"
                                         }
                                     ],
                                     "response_format": "scalar"
@@ -148,7 +155,7 @@
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:vertica.storage.utilized{*}"
+                                            "query": "sum:vertica.storage.utilized{$service}"
                                         }
                                     ],
                                     "response_format": "scalar"
@@ -219,7 +226,7 @@
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:vertica.memory.utilized{*}"
+                                            "query": "sum:vertica.memory.utilized{$service}"
                                         }
                                     ],
                                     "response_format": "scalar"
@@ -285,7 +292,7 @@
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "max:vertica.ksafety.current{*}"
+                                            "query": "max:vertica.ksafety.current{$service}"
                                         }
                                     ],
                                     "response_format": "scalar"
@@ -341,7 +348,7 @@
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "max:vertica.ksafety.intended{*}"
+                                            "query": "max:vertica.ksafety.intended{$service}"
                                         }
                                     ],
                                     "response_format": "scalar"
@@ -381,7 +388,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "max:vertica.node.down{*}"
+                                            "query": "max:vertica.node.down{$service}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -421,7 +428,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "max:vertica.node.total{*}"
+                                            "query": "max:vertica.node.total{$service}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -482,7 +489,7 @@
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:vertica.query.active{*} by {node_name}"
+                                            "query": "avg:vertica.query.active{$service} by {node_name}"
                                         }
                                     ],
                                     "response_format": "scalar"
@@ -548,12 +555,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:vertica.query.active{*}"
+                                            "query": "avg:vertica.query.active{$service}"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "avg:vertica.query.total{*}.as_count()"
+                                            "query": "avg:vertica.query.total{$service}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -593,7 +600,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:vertica.query.total{*}.as_count()"
+                                            "query": "avg:vertica.query.total{$service}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -651,12 +658,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:vertica.thread.active{*} by {node_name}"
+                                            "query": "avg:vertica.thread.active{$service} by {node_name}"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "avg:vertica.socket.open{*} by {node_name}"
+                                            "query": "avg:vertica.socket.open{$service} by {node_name}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -693,12 +700,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:vertica.storage.utilized{*}"
+                                            "query": "avg:vertica.storage.utilized{$service}"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "avg:vertica.memory.utilized{*}"
+                                            "query": "avg:vertica.memory.utilized{$service}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -738,7 +745,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:vertica.node.resource_requests{*}"
+                                            "query": "avg:vertica.node.resource_requests{$service}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -774,6 +781,34 @@
                 "is_column_break": true,
                 "width": 6,
                 "x": 0,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "columns": [
+                    "host",
+                    "service"
+                ],
+                "indexes": [],
+                "message_display": "expanded-md",
+                "query": "source:vertica $service",
+                "show_date_column": true,
+                "show_message_column": true,
+                "sort": {
+                    "column": "time",
+                    "order": "desc"
+                },
+                "title": "",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "log_stream"
+            },
+            "id": 4301198688298808,
+            "layout": {
+                "height": 7,
+                "width": 6,
+                "x": 6,
                 "y": 0
             }
         }
