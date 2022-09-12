@@ -1,2 +1,0 @@
-FROM davealdon/sonarqube-with-docker-and-m1-macs
-RUN apk update && apk add curl
