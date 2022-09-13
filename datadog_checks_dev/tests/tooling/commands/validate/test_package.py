@@ -17,6 +17,7 @@ name = "datadog-my-check"
 authors = {authors}
 [tool.hatch.version]
 path = "datadog_checks/my_check/__about__.py"
+new = "test"
 '''
 
 

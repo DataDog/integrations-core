@@ -221,6 +221,7 @@ def validate_master_jobs(fix, repo_data, testable_checks, cached_display_names):
         output = yaml.safe_dump(jobs_definition, default_flow_style=False, sort_keys=False)
         write_file(jobs_definition_path, output)
         echo_success('Successfully fixed {}'.format(jobs_definition_relative_path))
+        echo_success('Successfully fixed {}'.format(jobs_definition_relative_path))
 
 
 def validate_coverage_flags(fix, repo_data, testable_checks, cached_display_names):
