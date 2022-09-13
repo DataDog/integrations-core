@@ -6,11 +6,12 @@ from six import PY2
 
 from datadog_checks.dev.utils import get_metadata_metrics
 
-from .common import PROMETHEUS_METRICS
+from .common import PROMETHEUS_METRICS, get_fixture_path
 
 
 @pytest.mark.skipif(PY2, reason='OpenMetrics V2 is only available with Python 3')
-def test_omv2_check(aggregator, omv2_instance_use_openmetrics, mock_prometheus_data, dd_run_check, check_v2):
+def test_omv2_check(aggregator, omv2_instance_use_openmetrics, mock_http_response, dd_run_check, check_v2):
+    mock_http_response(file_path=get_fixture_path('metrics.txt'))
     c = check_v2(omv2_instance_use_openmetrics(True))
     dd_run_check(c)
     for m in PROMETHEUS_METRICS:

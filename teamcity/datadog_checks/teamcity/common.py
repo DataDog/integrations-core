@@ -102,7 +102,6 @@ def get_response(check, resource, **kwargs):
         resp.raise_for_status()
 
         json_payload = resp.json()
-
         if resource == 'project':
             if not json_payload.get('buildTypes').get('count') or json_payload.get('buildTypes').get('count') == 0:
                 check.log.debug("No results found for resource %s ur: %s", resource_name, resource_url)
@@ -147,4 +146,4 @@ class BuildConfigs(BuildConfig):
 
     def get_last_build_id(self, build_type_id):
         if self.build_configs.get(build_type_id):
-            return self.build_configs[build_type_id]["last_build_ids"]
+            return self.build_configs[build_type_id].get("last_build_ids", None)

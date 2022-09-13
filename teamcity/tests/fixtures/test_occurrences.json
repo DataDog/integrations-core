@@ -1,41 +1,19 @@
-[
-  {
-    "count": "2",
-    "href": "http://localhost:8111/app/rest/testOccurrences?locator=build:134",
-    "passed": "2",
-    "testOccurrence": [
-      {
-        "id": "build:(id:134),id:237",
-        "name": "tests.test_todolist.test_list",
-        "status": "SUCCESS",
-        "href": "/guestAuth/app/rest/testOccurrences/build:(id:134),id:237"
-      },
-      {
-        "id": "build:(id:134),id:242",
-        "name": "tests.test_todolist.test_something_else",
-        "status": "SUCCESS",
-        "href": "/guestAuth/app/rest/testOccurrences/build:(id:134),id:242"
-      }
-    ]
-  },
-  {
-    "count": "2",
-    "href": "http://localhost:8111/app/rest/testOccurrences?locator=build:120",
-    "failed": "1",
-    "passed": "1",
-    "testOccurrence": [
-      {
-        "id": "build:(id:120),id:232",
-        "name": "tests.test_todolist.test_list",
-        "status": "FAILURE",
-        "href": "/guestAuth/app/rest/testOccurrences/build:(id:120),id:232"
-      },
-      {
-        "id": "build:(id:120),id:239",
-        "name": "tests.test_todolist.test_something_else",
-        "status": "SUCCESS",
-        "href": "/guestAuth/app/rest/testOccurrences/build:(id:120),id:239"
-      }
-    ]
-  }
-]
+{
+  "count": "2",
+  "href": "http://localhost:8111/app/rest/testOccurrences?locator=build:232",
+  "passed": "2",
+  "testOccurrence": [
+    {
+      "id": "build:(id:232),id:237",
+      "name": "tests.test_todolist.test_list",
+      "status": "SUCCESS",
+      "href": "/guestAuth/app/rest/testOccurrences/build:(id:232),id:237"
+    },
+    {
+      "id": "build:(id:232),id:242",
+      "name": "tests.test_todolist.test_something_else",
+      "status": "SUCCESS",
+      "href": "/guestAuth/app/rest/testOccurrences/build:(id:232),id:242"
+    }
+  ]
+}

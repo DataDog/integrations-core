@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import os
 from copy import deepcopy
 
 import pytest
@@ -9,7 +8,7 @@ from mock import ANY, MagicMock, patch
 
 from datadog_checks.teamcity import TeamCityCheck
 
-from .common import CHECK_NAME, CONFIG, HERE, REST_METRICS
+from .common import BUILD_STATS_METRICS, CHECK_NAME, CONFIG, TEST_OCCURRENCES_METRICS, get_fixture_path
 
 
 @pytest.mark.integration
@@ -140,17 +139,71 @@ def test_config(test_case, extra_config, expected_http_kwargs):
         r.assert_called_with(ANY, **http_wargs)
 
 
-def mock_data(file):
-    filepath = os.path.join(HERE, 'fixtures', file)
-    with open(filepath, 'rb') as f:
-        return f.read()
+@pytest.mark.parametrize(
+    'file_name, method, expected_metrics',
+    [
+        pytest.param("build_stats.json", "_collect_build_stats", BUILD_STATS_METRICS, id="Build config metrices"),
+        pytest.param(
+            "test_occurrences.json", "_collect_test_results", TEST_OCCURRENCES_METRICS, id="Test result metrics"
+        ),
+    ],
+)
+def test_collect_rest_metrics(
+    aggregator, mock_http_response, tcv2_instance, file_name, method, expected_metrics, check
+):
+    mock_http_response(file_path=get_fixture_path(file_name))
+    check = check(tcv2_instance)
+    mock_new_build = {
+        'id': 232,
+        'buildTypeId': 'TeamcityPythonFork_Build',
+        'number': '11',
+        'status': 'SUCCESS',
+        'state': 'finished',
+        'branchName': 'main',
+        'defaultBranch': True,
+        'href': '/guestAuth/app/rest/builds/id:232',
+        'webUrl': 'http://localhost:8111/viewLog.html?buildId=232&buildTypeId=TeamcityPythonFork_Build',
+        'finishOnAgentDate': '20220913T210820+0000',
+    }
+    method = getattr(check, method)
+    method(mock_new_build)
 
-
-def test_metric_collection_build_config_stats(aggregator, instance, check):
-    with patch('datadog_checks.teamcity.common.get_response', return_value=mock_data('build_stats.xml')):
-        check = check(instance)
-        check.check(instance)
-
-    for metric_name in REST_METRICS:
+    for metric_name in expected_metrics:
         aggregator.assert_metric(metric_name)
-        # aggregator.assert_metric_has_tag(metric_name, 'key1:value1')
+
+
+def test_build_problem_service_checks(aggregator, mock_http_response, tcv2_instance, check):
+    mock_http_response(file_path=get_fixture_path('build_problems.json'))
+    check = check(tcv2_instance)
+    mock_new_build = {
+        'id': 233,
+        'buildTypeId': 'TeamcityPythonFork_FailedBuild',
+        'number': '12',
+        'status': 'FAILURE',
+        'state': 'finished',
+        'branchName': 'main',
+        'defaultBranch': True,
+        'href': '/guestAuth/app/rest/builds/id:233',
+        'webUrl': 'http://localhost:8111/viewLog.html?buildId=233&buildTypeId=TeamcityPythonFork_FailedBuild',
+        'finishOnAgentDate': '20220913T210826+0000',
+    }
+
+    check._collect_build_problems(mock_new_build)
+
+    aggregator.assert_service_check(
+        'teamcity.build_problem',
+        count=1,
+        tags=[
+            'build_config:None',
+            'build_env:test',
+            'build_id:233',
+            'build_number:12',
+            'instance_name:TeamCityV2 test build',
+            'problem_identity:python_build_error_identity',
+            'problem_type:TC_EXIT_CODE',
+            'server:http://localhost:8111',
+            'test_tag:ci_builds',
+            'type:build',
+        ],
+        status=check.WARNING,
+    )

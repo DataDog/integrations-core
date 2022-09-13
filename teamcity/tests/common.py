@@ -15,13 +15,27 @@ CHECK_NAME = 'teamcity'
 CONFIG = {
     'instances': [
         {
-            'name': 'One test build',
+            'name': 'Legacy test build',
             'server': '{}:{}'.format(HOST, PORT),
             'build_configuration': 'TestProject_TestBuild',
             'host_affected': 'buildhost42.dtdg.co',
             'basic_http_authentication': False,
             'is_deployment': False,
             'tags': ['one:tag', 'one:test'],
+        },
+        {
+            'name': 'TeamCityV2 test build',
+            'server': '{}:{}'.format(HOST, PORT),
+            'monitored_projects_build_configs': [
+                {
+                    'name': 'TeamcityPythonFork',
+                    'include': ['TeamcityPythonFork_FailedBuild', 'TeamcityPythonFork_FailedTests'],
+                    'exclude': ['TeamcityPythonFork_Build'],
+                }
+            ],
+            'basic_http_authentication': False,
+            'is_deployment': False,
+            'tags': ['build_env:test', 'test_tag:ci_builds'],
         },
         {
             'server': 'http://localhost:8111',
@@ -136,7 +150,7 @@ PROMETHEUS_METRICS = [
     'teamcity.vcs.get.current.state.calls.number.count',
 ]
 
-REST_METRICS = [
+BUILD_STATS_METRICS = [
     'teamcity.artifacts_size',
     'teamcity.build_duration',
     'teamcity.build_duration.net_time',
@@ -152,3 +166,9 @@ REST_METRICS = [
     'teamcity.build_stage_duration',
     'teamcity.queue_wait_reason',
 ]
+
+TEST_OCCURRENCES_METRICS = ['teamcity.test_result']
+
+
+def get_fixture_path(filename):
+    return os.path.join(HERE, 'fixtures', filename)

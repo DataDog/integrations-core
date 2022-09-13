@@ -73,29 +73,22 @@ class TeamCityCheck(AgentCheck):
     def _initialize(self):
         self.log.debug("Initializing TeamCity builds...")
 
-        if self.monitored_configs:
-            for project in self.monitored_configs:
-                project_id = project if isinstance(project, str) else project.get('name')
-                build_configs = get_response(self, 'project', base_url=self.base_url, project_id=project_id)
-                for build_config in build_configs.get('buildType'):
-                    # if not excluded and it's new, put it in the cache
-                    if not self._filter_build_config(build_config['id']) and not self.build_config_cache.get_build_config(build_config['id']):
-                        self.build_config_cache.set_build_config(build_config.get('id'))
         for build_config in self.build_config_cache.build_configs:
-            last_build_res = get_response(self, 'last_build', base_url=self.base_url, build_conf=build_config)
+            if self.build_config_cache.get_last_build_id(build_config) is None:
+                last_build_res = get_response(self, 'last_build', base_url=self.base_url, build_conf=build_config)
 
-            last_build_id = last_build_res['build'][0]['id']
-            last_build_number = last_build_res['build'][0]['number']
-            build_config_id = last_build_res['build'][0]['buildTypeId']
+                last_build_id = last_build_res['build'][0]['id']
+                last_build_number = last_build_res['build'][0]['number']
+                build_config_id = last_build_res['build'][0]['buildTypeId']
 
-            self.log.debug(
-                "Last build id for instance %s is %s (build number:%s).",
-                self.instance_name,
-                last_build_id,
-                last_build_number,
-            )
-            self.build_config_cache.set_build_config(build_config_id)
-            self.build_config_cache.set_last_build_id(build_config_id, last_build_id, last_build_number)
+                self.log.debug(
+                    "Last build id for instance %s is %s (build number:%s).",
+                    self.instance_name,
+                    last_build_id,
+                    last_build_number,
+                )
+                self.build_config_cache.set_build_config(build_config_id)
+                self.build_config_cache.set_last_build_id(build_config_id, last_build_id, last_build_number)
 
     def _collect_build_stats(self, new_build):
         build_id = new_build['id']
@@ -162,11 +155,12 @@ class TeamCityCheck(AgentCheck):
 
     def _collect_new_builds(self):
         last_build_ids_dict = self.build_config_cache.get_last_build_id(self.build_config)
-        last_build_id = last_build_ids_dict['id']
-        new_builds = get_response(
-            self, 'new_builds', base_url=self.base_url, build_conf=self.build_config, since_build=last_build_id
-        )
-        return new_builds
+        last_build_id = last_build_ids_dict.get('id')
+        if last_build_id:
+            new_builds = get_response(
+                self, 'new_builds', base_url=self.base_url, build_conf=self.build_config, since_build=last_build_id
+            )
+            return new_builds
 
     def _normalize_server_url(self, server):
         """
@@ -191,31 +185,38 @@ class TeamCityCheck(AgentCheck):
 
         return excluded_build_configs, included_build_configs
 
+    def _collect(self):
+        new_builds = self._collect_new_builds()
+        if new_builds:
+            self.log.debug("New builds found: %s", new_builds)
+            for build in new_builds['build']:
+                self._send_events(build)
+                self._collect_build_stats(build)
+                self._collect_test_results(build)
+                self._collect_build_problems(build)
+        else:
+            self.log.debug('No new builds found.')
+
+    def _get_or_set_build_configs(self, project_id):
+        build_configs = get_response(self, 'project', base_url=self.base_url, project_id=project_id)
+        for build_config in build_configs.get('buildType'):
+            # if build config is not excluded and it's new, put it in the cache
+            if not self._filter_build_config(build_config['id']) and not self.build_config_cache.get_build_config(
+                build_config['id']
+            ):
+                self.build_config_cache.set_build_config(build_config.get('id'))
+                self._initialize()
+
     def check(self, _):
         if self.monitored_configs:
-            self._initialize()
+            for project in self.monitored_configs:
+                project_id = project if isinstance(project, str) else project.get('name', None)
+                if project_id:
+                    self._get_or_set_build_configs(project_id)
             for build_config in self.build_config_cache.build_configs:
                 self.build_config = build_config
-                new_builds = self._collect_new_builds()
-                if new_builds:
-                    self.log.debug("New builds found: %s", new_builds)
-                    for build in new_builds['build']:
-                        self._send_events(build)
-                        self._collect_build_stats(build)
-                        self._collect_test_results(build)
-                        self._collect_build_problems(build)
-                else:
-                    self.log.debug('No new builds found.')
+                self._collect()
         else:
             if not self.build_config_cache.get_build_config(self.build_config):
                 self._initialize()
-                new_builds = self._collect_new_builds()
-                if new_builds:
-                    self.log.debug("New builds found: %s", new_builds)
-                    for build in new_builds['build']:
-                        self._send_events(build)
-                        self._collect_build_stats(build)
-                        self._collect_test_results(build)
-                        self._collect_build_problems(build)
-                else:
-                    self.log.debug('No new builds found.')
+            self._collect()

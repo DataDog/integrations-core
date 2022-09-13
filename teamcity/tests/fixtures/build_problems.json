@@ -1,30 +1,12 @@
-[
-  {
-    "count": "2",
-    "href": "http://localhost:8111/app/rest/problemOccurrences?locator=build:(id:130)",
-    "problemOccurrence": [
-      {
-        "id": "build:(id:130),problem:(id:2)",
-        "type": "TC_FAILED_TESTS",
-        "identity": "TC_FAILED_TESTS_bt5",
-        "href": "/guestAuth/app/rest/problemOccurrences/build:(id:130),problem:(id:2)"
-      },
-      {
-        "id": "build:(id:130),problem:(id:1)",
-        "type": "TC_EXIT_CODE",
-        "identity": "python_build_error_identity",
-        "href": "/guestAuth/app/rest/problemOccurrences/build:(id:130),problem:(id:1)"
-      }
-    ]
-  },
-  {
-    "count": "1",
-    "href": "http://localhost:8111/app/rest/problemOccurrences?locator=build:(id:133)",
-    "problemOccurrence": {
-      "id": "build:(id:133),problem:(id:1)",
+{
+  "count": "1",
+  "href": "http://localhost:8111/app/rest/problemOccurrences?locator=build:(id:233)",
+  "problemOccurrence": [
+    {
+      "id": "build:(id:233),problem:(id:1)",
       "type": "TC_EXIT_CODE",
       "identity": "python_build_error_identity",
-      "href": "/guestAuth/app/rest/problemOccurrences/build:(id:133),problem:(id:1)"
+      "href": "/guestAuth/app/rest/problemOccurrences/build:(id:233),problem:(id:1)"
     }
-  }
-]
+  ]
+}
