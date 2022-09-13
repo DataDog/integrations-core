@@ -32,9 +32,9 @@ class GrpcCheck(AgentCheck):
             server_data = server.data
             tags = []
             # TODO Need tag
-            self.gauge("server.calls_started", server_data.calls_started, tags=tags)
-            self.gauge("server.calls_succeeded", server_data.calls_succeeded, tags=tags)
-            self.gauge("server.calls_failed", server_data.calls_failed, tags=tags)
+            self.monotonic_count("server.calls_started", server_data.calls_started, tags=tags)
+            self.monotonic_count("server.calls_succeeded", server_data.calls_succeeded, tags=tags)
+            self.monotonic_count("server.calls_failed", server_data.calls_failed, tags=tags)
 
     def _get_lb_policy(self, events):
         for event in events:
@@ -62,9 +62,9 @@ class GrpcCheck(AgentCheck):
         self.gauge(f"{channel_type}.uptime", uptime.seconds, tags=state_tags)
 
         tags = [f'target:{target}'] + additional_tags
-        self.gauge(f"{channel_type}.calls_started", channel_data.calls_started, tags=tags)
-        self.gauge(f"{channel_type}.calls_succeeded", channel_data.calls_succeeded, tags=tags)
-        self.gauge(f"{channel_type}.calls_failed", channel_data.calls_failed, tags=tags)
+        self.monotonic_count(f"{channel_type}.calls_started", channel_data.calls_started, tags=tags)
+        self.monotonic_count(f"{channel_type}.calls_succeeded", channel_data.calls_succeeded, tags=tags)
+        self.monotonic_count(f"{channel_type}.calls_failed", channel_data.calls_failed, tags=tags)
 
     def _get_subchannel_metrics(self, channelz_stub, subchannel_id, additional_tags):
         subchannel_response = channelz_stub.GetSubchannel(channelz_pb2.GetSubchannelRequest(subchannel_id=subchannel_id))
@@ -83,7 +83,7 @@ class GrpcCheck(AgentCheck):
 
     def check(self, _):
         # type: (Any) -> None
-        logger.error("Connecting to %s", self.addr)
+        logger.info("Connecting to %s", self.addr)
         with grpc.insecure_channel(self.addr) as channel:
             channelz_stub = channelz_pb2_grpc.ChannelzStub(channel)
             self._get_servers_metrics(channelz_stub)

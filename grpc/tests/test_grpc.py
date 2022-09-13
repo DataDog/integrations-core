@@ -13,10 +13,10 @@ from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.grpc import GrpcCheck
 
-import argparse
 from concurrent import futures
 import logging
 
+import pytest
 import grpc
 # TODO: Suppress until the macOS segfault fix rolled out
 from grpc_channelz.v1 import channelz  # pylint: disable=wrong-import-position
@@ -49,6 +49,7 @@ def _query_stats(addr):
         _ = channelz_stub.GetServers(channelz_pb2.GetServersRequest())
 
 
+@pytest.mark.unit
 def test_simple_grpc(dd_run_check, aggregator, instance):
     # type: (Callable[[AgentCheck, bool], None], AggregatorStub, Dict[str, Any]) -> None
     server_addr = "127.0.0.1:12345"
@@ -79,6 +80,9 @@ def test_simple_grpc(dd_run_check, aggregator, instance):
     aggregator.assert_metric('grpc.subchannel.calls_started', value=3, tags=subchannel_tags)
     aggregator.assert_metric('grpc.subchannel.calls_succeeded', value=2, tags=subchannel_tags)
     aggregator.assert_metric('grpc.subchannel.calls_failed', value=0, tags=subchannel_tags)
+
+    # aggregator.assert_all_metrics_covered()
+    # aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
     server.stop(0)
 
