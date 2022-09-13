@@ -177,6 +177,9 @@ instances:
 
     ## @param ssl_auth - boolean - optional - default: false
     ## Whether or not to use SSL auth while connecting to the channel.
+    ## Note: Multiple concurrent SSL connections from the same process to the same or different queue managers
+    ## are not permitted. If you define multiple check instances using ssl_auth you may experience
+    ## MQRC_SSL_INITIALIZATION_ERROR or MQRC_SSL_ALREADY_INITIALIZED errors.
     #
     # ssl_auth: false
 
