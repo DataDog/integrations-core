@@ -6,10 +6,10 @@ beautifulsoup4==4.11.1; python_version > '3.0'
 beautifulsoup4==4.9.3; python_version < '3.0'
 binary==1.0.0
 boto3==1.17.112; python_version < '3.0'
-boto3==1.24.70; python_version > '3.0'
+boto3==1.24.71; python_version > '3.0'
 boto==2.49.0
 botocore==1.20.112; python_version < '3.0'
-botocore==1.27.70; python_version > '3.0'
+botocore==1.27.71; python_version > '3.0'
 cachetools==3.1.1; python_version < '3.0'
 cachetools==5.2.0; python_version > '3.0'
 clickhouse-cityhash==1.0.2.3
