@@ -241,9 +241,8 @@ class ChangelogValidator(BaseManifestValidator):
         changelog = tile.get("changelog", None)
 
         if changelog:
-            path = os.path.join(get_root(), check_name, changelog)
-
-            if not file_exists(path):
+            check_dir = os.path.join(get_root(), check_name)
+            if changelog not in os.listdir(check_dir):
                 self.fail(f"{os.path.join(check_name, changelog)} does not exist.")
 
 
