@@ -1,0 +1,22 @@
+[env.collectors.datadog-checks]
+check-types = true
+mypy-args = [
+    "--py2",
+    "--follow-imports silent",
+    "--install-types",
+    "--non-interactive",
+    "datadog_checks/aerospike",
+    "--exclude '.*/config_models/.*\\.py$'",
+]
+
+[[envs.default.matrix]]
+python = ["27", "38"]
+aerospike-version = ["4.9.0.11", "5.0.0.10", "5.3.0.6", "5.6.0.5"]
+
+[envs.default.overrides]
+matrix.aerospike-version.env-vars = "AEROSPIKE_VERSION"
+
+[envs.default.env-vars]
+AEROSPIKE_EXPORTER_VERSION = "1.5.0"
+
+[envs.bench]
