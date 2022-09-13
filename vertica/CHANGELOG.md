@@ -1,5 +1,8 @@
 # CHANGELOG - Vertica
 
+## 3.5.0-beta.1 / 2022-09-13
+
+
 ## 3.4.1 / 2022-08-05
 
 * [Fixed] Dependency updates. See [#12653](https://github.com/DataDog/integrations-core/pull/12653).
