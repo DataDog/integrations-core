@@ -48,12 +48,12 @@ instances:
     ## List of projects and build configurations to monitor.
     #
     # monitored_projects_build_configs:
-    #   - <PROJECT_A>:
-    #       include:
-    #       - <BUILD_CONFIG_A>
-    #       - <BUILD_CONFIG_B>
-    #       exclude:
-    #       - <BUILD_CONFIG_C>
+    #   - name: <PROJECT_A>
+    #     include:
+    #     - <BUILD_CONFIG_A>
+    #     - <BUILD_CONFIG_B>
+    #     exclude:
+    #     - <BUILD_CONFIG_C>
     #   - <PROJECT_B>
 
     ## @param build_configuration - string - optional

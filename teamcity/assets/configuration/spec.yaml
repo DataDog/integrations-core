@@ -55,6 +55,8 @@ files:
               anyOf:
                 - type: object
                   properties:
+                    - name: name
+                      type: string
                     - name: include
                       type: array
                       items:
@@ -65,12 +67,12 @@ files:
                         type: string
                 - type: string
         example:
-          - <PROJECT_A>:
-              include:
-                - <BUILD_CONFIG_A>
-                - <BUILD_CONFIG_B>
-              exclude:
-                - <BUILD_CONFIG_C>
+          - name: <PROJECT_A>
+            include:
+              - <BUILD_CONFIG_A>
+              - <BUILD_CONFIG_B>
+            exclude:
+              - <BUILD_CONFIG_C>
           - <PROJECT_B>
     - name: build_configuration
       description: |

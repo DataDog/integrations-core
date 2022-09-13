@@ -16,7 +16,7 @@ USE_OPENMETRICS = os.getenv('USE_OPENMETRICS')
 
 
 @pytest.fixture(scope='session')
-def dd_environment():
+def dd_environment(instance, omv2_instance):
     with docker_run(COMPOSE_FILE, sleep=10):
         if USE_OPENMETRICS:
             yield omv2_instance
@@ -24,12 +24,12 @@ def dd_environment():
             yield instance
 
 
-@pytest.fixture()
+@pytest.fixture(scope='session')
 def instance():
     return CONFIG['instances'][0]
 
 
-@pytest.fixture()
+@pytest.fixture(scope='session')
 def omv2_instance():
     return CONFIG['instances'][1]
 

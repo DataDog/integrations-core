@@ -59,6 +59,7 @@ class MonitoredProjectsBuildConfig(BaseModel):
 
     exclude: Optional[Sequence[str]]
     include: Optional[Sequence[str]]
+    name: Optional[str]
 
 
 class Proxy(BaseModel):

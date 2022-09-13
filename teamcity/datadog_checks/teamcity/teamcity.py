@@ -6,7 +6,7 @@ from six import PY2
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 
-from .common import SERVICE_CHECK_STATUS_MAP, BuildConfigCache, construct_event, get_response
+from .common import SERVICE_CHECK_STATUS_MAP, BuildConfigs, construct_event, get_response
 from .metrics import build_metric
 
 
@@ -37,10 +37,12 @@ class TeamCityCheck(AgentCheck):
 
     def __init__(self, name, init_config, instances):
         super(TeamCityCheck, self).__init__(name, init_config, instances)
-        self.build_config_cache = BuildConfigCache()
+        self.build_config_cache = BuildConfigs()
         self.instance_name = self.instance.get('name')
         self.host = self.instance.get('host_affected') or self.hostname
-        self.build_config = self.instance.get('build_configuration')
+        self.monitored_configs = self.instance.get('monitored_projects_build_configs', [])
+        self.monitored_build_configs = {}
+        self.build_config = self.instance.get('build_configuration', None)
         self.is_deployment = is_affirmative(self.instance.get('is_deployment', False))
         self.basic_http_auth = is_affirmative(self.instance.get('basic_http_authentication', False))
         self.auth_type = 'httpAuth' if self.basic_http_auth else 'guestAuth'
@@ -69,22 +71,31 @@ class TeamCityCheck(AgentCheck):
         self.service_check('build.status', SERVICE_CHECK_STATUS_MAP.get(new_build['status']), tags=list(self.tags))
 
     def _initialize(self):
-        self.log.debug("Initializing %s", self.instance_name)
+        self.log.debug("Initializing TeamCity builds...")
 
-        last_build_res = get_response(self, 'last_build', base_url=self.base_url, build_conf=self.build_config)
+        if self.monitored_configs:
+            for project in self.monitored_configs:
+                project_id = project if isinstance(project, str) else project.get('name')
+                build_configs = get_response(self, 'project', base_url=self.base_url, project_id=project_id)
+                for build_config in build_configs.get('buildType'):
+                    # if not excluded and it's new, put it in the cache
+                    if not self._filter_build_config(build_config['id']) and not self.build_config_cache.get_build_config(build_config['id']):
+                        self.build_config_cache.set_build_config(build_config.get('id'))
+        for build_config in self.build_config_cache.build_configs:
+            last_build_res = get_response(self, 'last_build', base_url=self.base_url, build_conf=build_config)
 
-        last_build_id = last_build_res['build'][0]['id']
-        last_build_number = last_build_res['build'][0]['number']
-        build_config_id = last_build_res['build'][0]['buildTypeId']
+            last_build_id = last_build_res['build'][0]['id']
+            last_build_number = last_build_res['build'][0]['number']
+            build_config_id = last_build_res['build'][0]['buildTypeId']
 
-        self.log.debug(
-            "Last build id for instance %s is %s (build number:%s).",
-            self.instance_name,
-            last_build_id,
-            last_build_number,
-        )
-        self.build_config_cache.set_build_config(build_config_id)
-        self.build_config_cache.set_last_build_id(build_config_id, last_build_id, last_build_number)
+            self.log.debug(
+                "Last build id for instance %s is %s (build number:%s).",
+                self.instance_name,
+                last_build_id,
+                last_build_number,
+            )
+            self.build_config_cache.set_build_config(build_config_id)
+            self.build_config_cache.set_last_build_id(build_config_id, last_build_id, last_build_number)
 
     def _collect_build_stats(self, new_build):
         build_id = new_build['id']
@@ -136,11 +147,18 @@ class TeamCityCheck(AgentCheck):
                 ]
                 self.service_check('build_problem', AgentCheck.WARNING, tags=list(self.tags) + tags)
 
-    def _collect_all_builds(self):
-        all_builds = get_response(self, 'all_builds', base_url=self.base_url)
-        for build in all_builds['buildType']:
+    def _filter_build_config(self, build_config):
+        excluded_bc, included_bc = self._construct_monitored_build_configs()
+        # if exclude is configured
+        if len(excluded_bc) and build_config in excluded_bc:
+            return True
+        # if include is configured
+        if len(included_bc) and build_config in included_bc:
+            return False
+        if len(included_bc) and build_config not in included_bc:
+            return True
 
-            self.build_config_cache.set_build_config(build['id'], build['name'])
+        return False
 
     def _collect_new_builds(self):
         last_build_ids_dict = self.build_config_cache.get_last_build_id(self.build_config)
@@ -157,19 +175,47 @@ class TeamCityCheck(AgentCheck):
         server = server if server.startswith(("http://", "https://")) else "http://{}".format(server)
         return server
 
-    def check(self, _):
-        if self.instance.get('monitored_projects_build_configs') is not None:
-            self._build_collection_object()
-        if not self.build_config_cache.get_build_config(self.build_config):
-            self._initialize()
+    def _construct_monitored_build_configs(self):
+        excluded_build_configs = set()
+        included_build_configs = set()
+        for project in self.monitored_configs:
+            if isinstance(project, dict):
+                exclude_list = project.get('exclude', [])
+                include_list = project.get('include', [])
+                if exclude_list:
+                    excluded_build_configs.update(exclude_list)
+                if include_list:
+                    for include_bc in include_list:
+                        if include_bc not in excluded_build_configs:
+                            included_build_configs.update([include_bc])
 
-        new_builds = self._collect_new_builds()
-        if new_builds:
-            self.log.debug("New builds found: %s", new_builds)
-            for build in new_builds['build']:
-                self._send_events(build)
-                self._collect_build_stats(build)
-                self._collect_test_results(build)
-                self._collect_build_problems(build)
+        return excluded_build_configs, included_build_configs
+
+    def check(self, _):
+        if self.monitored_configs:
+            self._initialize()
+            for build_config in self.build_config_cache.build_configs:
+                self.build_config = build_config
+                new_builds = self._collect_new_builds()
+                if new_builds:
+                    self.log.debug("New builds found: %s", new_builds)
+                    for build in new_builds['build']:
+                        self._send_events(build)
+                        self._collect_build_stats(build)
+                        self._collect_test_results(build)
+                        self._collect_build_problems(build)
+                else:
+                    self.log.debug('No new builds found.')
         else:
-            self.log.debug('No new builds found.')
+            if not self.build_config_cache.get_build_config(self.build_config):
+                self._initialize()
+                new_builds = self._collect_new_builds()
+                if new_builds:
+                    self.log.debug("New builds found: %s", new_builds)
+                    for build in new_builds['build']:
+                        self._send_events(build)
+                        self._collect_build_stats(build)
+                        self._collect_test_results(build)
+                        self._collect_build_problems(build)
+                else:
+                    self.log.debug('No new builds found.')

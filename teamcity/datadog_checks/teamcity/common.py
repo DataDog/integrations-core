@@ -7,15 +7,13 @@ from copy import deepcopy
 import requests
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.dev import get_here
-
-HERE = get_here()
 
 EVENT_STATUS_MAP = {"SUCCESS": "successful", "FAILURE": "failed"}
 
 SERVICE_CHECK_STATUS_MAP = {"SUCCESS": AgentCheck.OK, "FAILURE": AgentCheck.CRITICAL}
 
 RESOURCE_URL_MAP = {
+    "project": {"url": "{base_url}/app/rest/projects/id:{project_id}", "name": "project"},
     "all_builds": {"url": "{base_url}/app/rest/buildTypes", "name": "all build configurations"},
     "new_builds": {
         "url": "{base_url}/app/rest/builds/?locator=buildType:{build_conf},sinceBuild:id:{since_build},state:finished",
@@ -105,6 +103,12 @@ def get_response(check, resource, **kwargs):
 
         json_payload = resp.json()
 
+        if resource == 'project':
+            if not json_payload.get('buildTypes').get('count') or json_payload.get('buildTypes').get('count') == 0:
+                check.log.debug("No results found for resource %s ur: %s", resource_name, resource_url)
+            else:
+                check.log.debug("Results found for resource %s url: %s", resource_name, resource_url)
+                return json_payload.get('buildTypes')
         if not json_payload.get("count") or json_payload["count"] == 0:
             check.log.debug("No results found for resource %s url: %s", resource_name, resource_url)
         else:
@@ -120,21 +124,27 @@ def get_response(check, resource, **kwargs):
         raise
 
 
-class BuildConfigCache(object):
+class BuildConfig(object):
+    def __init__(self, build_config_id, builds):
+        self.build_config_id = build_config_id
+        self.builds = builds
+
+
+class BuildConfigs(BuildConfig):
     def __init__(self):
-        self._content = {}
+        self.build_configs = {}
 
     def set_build_config(self, build_type_id):
-        if not self._content.get(build_type_id):
-            self._content[build_type_id] = {"builds": set()}
+        if not self.build_configs.get(build_type_id):
+            self.build_configs[build_type_id] = {"builds": set()}
 
     def get_build_config(self, build_type_id):
-        if self._content.get(build_type_id):
-            return self._content[build_type_id]
+        if self.build_configs.get(build_type_id):
+            return self.build_configs[build_type_id]
 
     def set_last_build_id(self, build_type_id, build_id, build_number):
-        self._content[build_type_id]['last_build_ids'] = {'id': build_id, 'number': build_number}
+        self.build_configs[build_type_id]['last_build_ids'] = {'id': build_id, 'number': build_number}
 
     def get_last_build_id(self, build_type_id):
-        if self._content.get(build_type_id):
-            return self._content[build_type_id]["last_build_ids"]
+        if self.build_configs.get(build_type_id):
+            return self.build_configs[build_type_id]["last_build_ids"]
