@@ -3,8 +3,8 @@ base_package:
 changelog/no-changelog:
 - requirements-agent-release.txt
 - datadog_checks_dev/datadog_checks/dev/__about__.py
-- '*/!(datadog_checks)/**'
-- '*/!(pyproject.toml)'
+- all: ['*/!(datadog_checks)/**']
+- all: ['*/!(pyproject.toml)']
 ddev:
 - ddev/**/*
 dependencies:
