@@ -18,4 +18,4 @@ jobs:
         with:
           configuration-path: .github/workflows/config/labeler.yml
           repo-token: "${{ secrets.repo-token }}"
-          sync-labels: false
+          sync-labels: "false"
