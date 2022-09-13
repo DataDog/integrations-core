@@ -110,7 +110,7 @@ class Win32EventLogCheck(AgentCheck, ConfigMixin):
         self.check_initializations.append(self.parse_config)
         self.check_initializations.append(self.construct_query)
         self.check_initializations.append(self.create_session)
-        self.check_initializations.append(self.create_subscription)
+        self.check_initializations.append(self.init_subscription)
 
         # Define every property collector
         self._collectors = [self.collect_timestamp, self.collect_fqdn, self.collect_level, self.collect_provider]
@@ -285,15 +285,22 @@ class Win32EventLogCheck(AgentCheck, ConfigMixin):
                 # https://docs.microsoft.com/en-us/windows/win32/api/winevt/nf-winevt-evtnext
                 # https://mhammond.github.io/pywin32/win32evtlog__EvtNext_meth.html
                 #
-                # An error saying EvtNext: The operation identifier is not valid happens
-                # when you call the method and there are no events to read (i.e. polling).
-                # There is an unreleased upstream contribution to return
-                # an empty tuple instead https://github.com/mhammond/pywin32/pull/1648
-                # For the moment is logged as a debug line.
+                # Behavior when you call the EvtNext and there are no events to read (i.e. polling).
+                # Python 2: An error saying EvtNext: The operation identifier is not valid happens.
+                #           This is logged as a debug line.
+                # Python 3: Returns an empty tuple
                 try:
                     events = win32evtlog.EvtNext(self._subscription, self.config.payload_size)
                 except pywintypes.error as e:
                     self.log_windows_error(e)
+                    if (
+                        e.winerror == 15007  # ERROR_EVT_CHANNEL_NOT_FOUND: The specified channel could not be found.
+                        or e.winerror == 6  # ERROR_INVALID_HANDLE_VALUE: The handle is invalid
+                    ):
+                        # Can happen if the event publisher is unregistered,
+                        # which sometimes happens during software updates.
+                        # Must get a new subscription handle.
+                        self.reset_subscription()
                     break
                 else:
                     if not events:
@@ -358,7 +365,7 @@ class Win32EventLogCheck(AgentCheck, ConfigMixin):
         # https://mhammond.github.io/pywin32/win32evtlog__EvtOpenSession_meth.html
         self._session = win32evtlog.EvtOpenSession(session_struct, win32evtlog.EvtRpcLogin, 0, 0)
 
-    def create_subscription(self):
+    def init_subscription(self):
         # https://docs.microsoft.com/en-us/windows/win32/api/synchapi/nf-synchapi-createeventa
         # https://mhammond.github.io/pywin32/win32event__CreateEvent_meth.html
         self._event_handle = win32event.CreateEvent(None, 0, 0, self.check_id)
@@ -376,6 +383,14 @@ class Win32EventLogCheck(AgentCheck, ConfigMixin):
         # https://mhammond.github.io/pywin32/win32evtlog__EvtCreateBookmark_meth.html
         self._bookmark_handle = win32evtlog.EvtCreateBookmark(bookmark)
 
+        self.create_subscription(flags, bookmark)
+
+        # https://docs.microsoft.com/en-us/windows/win32/api/winevt/nf-winevt-evtcreaterendercontext
+        # https://docs.microsoft.com/en-us/windows/win32/api/winevt/ne-winevt-evt_render_context_flags
+        self._render_context_system = win32evtlog.EvtCreateRenderContext(win32evtlog.EvtRenderContextSystem)
+        self._render_context_data = win32evtlog.EvtCreateRenderContext(win32evtlog.EvtRenderContextUser)
+
+    def create_subscription(self, flags, bookmark):
         # https://docs.microsoft.com/en-us/windows/win32/api/winevt/nf-winevt-evtsubscribe
         # https://mhammond.github.io/pywin32/win32evtlog__EvtSubscribe_meth.html
         self._subscription = win32evtlog.EvtSubscribe(
@@ -387,10 +402,12 @@ class Win32EventLogCheck(AgentCheck, ConfigMixin):
             Bookmark=self._bookmark_handle if bookmark else None,
         )
 
-        # https://docs.microsoft.com/en-us/windows/win32/api/winevt/nf-winevt-evtcreaterendercontext
-        # https://docs.microsoft.com/en-us/windows/win32/api/winevt/ne-winevt-evt_render_context_flags
-        self._render_context_system = win32evtlog.EvtCreateRenderContext(win32evtlog.EvtRenderContextSystem)
-        self._render_context_data = win32evtlog.EvtCreateRenderContext(win32evtlog.EvtRenderContextUser)
+    def reset_subscription(self):
+        # Destroy old subscription
+        # Important so that it doesn't affect event or bookmark handle states.
+        self._subscription = None
+        # Create new subscription
+        self.create_subscription(win32evtlog.EvtSubscribeStartAfterBookmark, True)
 
     def get_session_struct(self):
         server = self.instance.get('server', 'localhost')

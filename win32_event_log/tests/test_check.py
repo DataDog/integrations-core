@@ -14,6 +14,7 @@ def test_expected(aggregator, dd_run_check, new_check, instance, report_event, s
     instance['server'] = server
     check = new_check(instance)
     report_event('message')
+
     dd_run_check(check)
 
     aggregator.assert_event(
@@ -26,6 +27,38 @@ def test_expected(aggregator, dd_run_check, new_check, instance, report_event, s
         msg_title='Application/{}'.format(common.EVENT_SOURCE),
         tags=[],
     )
+
+
+def test_recover_from_broken_subscribe(aggregator, dd_run_check, new_check, instance, event_reporter, caplog):
+    """
+    Test the check can recover from a broken EvtSubscribe handle
+
+    Issue originally surfaced when the event publisher is unregistered while we
+    have an EvtSubscribe handle to one of it's channels. This is difficult to test
+    here so we mimic it by replacing the subscription handle.
+    """
+    # Speed up test
+    instance['timeout'] = 0.1
+    check = new_check(instance)
+
+    # Run check_initializations to create EvtSubscribe
+    dd_run_check(check)
+
+    # Create an event
+    event_reporter.report('message').join()
+
+    # Mutate the subscription handle so that the check's EvtNext() fails
+    check._subscription = None
+
+    # Run the check to initiate the reset
+    dd_run_check(check)
+
+    # Run the check again to collect the event we missed
+    dd_run_check(check)
+
+    # Assert we saw the expected error and we still got an event
+    assert 'The handle is invalid' in caplog.text
+    aggregator.assert_event('message')
 
 
 @pytest.mark.parametrize(
