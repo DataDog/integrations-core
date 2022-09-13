@@ -8,15 +8,11 @@ CERT_METRICS = {
 }
 
 CONTROLLER_METRICS = {
-    'certmanager_clock_time_seconds': 'clock_time',
+    'certmanager_clock_time_seconds': {'name': 'clock_time', 'type': 'gauge'},
     'certmanager_controller_sync_call_count': 'controller.sync_call',
 }
 
 ACME_METRICS = {
     'certmanager_http_acme_client_request_count': 'http_acme_client.request',
     'certmanager_http_acme_client_request_duration_seconds': 'http_acme_client.request.duration',
-}
-
-TYPE_OVERRIDES = {
-    'certmanager_clock_time_seconds': 'gauge',
 }

@@ -4,7 +4,7 @@
 
 from datadog_checks.base import OpenMetricsBaseCheckV2
 
-from .metrics import ACME_METRICS, CERT_METRICS, CONTROLLER_METRICS, TYPE_OVERRIDES
+from .metrics import ACME_METRICS, CERT_METRICS, CONTROLLER_METRICS
 
 
 class CertManagerCheck(OpenMetricsBaseCheckV2):
@@ -20,16 +20,4 @@ class CertManagerCheck(OpenMetricsBaseCheckV2):
         metric_map.update(ACME_METRICS)
         metric_map.update(CERT_METRICS)
 
-        return {'metrics': construct_metrics_config(metric_map, TYPE_OVERRIDES)}
-
-
-def construct_metrics_config(metric_map, type_overrides):
-    metrics = []
-    for raw_metric_name, metric_name in metric_map.items():
-        config = {raw_metric_name: {'name': metric_name}}
-        if raw_metric_name in type_overrides:
-            config[raw_metric_name]['type'] = type_overrides[raw_metric_name]
-
-        metrics.append(config)
-
-    return metrics
+        return {'metrics': [metric_map]}
