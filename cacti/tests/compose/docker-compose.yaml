@@ -3,7 +3,7 @@ version: "3"
 services:
   cacti:
     container_name: cacti
-    image: datadog/docker-library:cacti_1_2_19
+    image: datadog/docker-library:cacti-1.2.19
     domainname: example.com
     hostname: cacti
     ports:
