@@ -11,8 +11,8 @@ pr:
 
 trigger: none
 
-variables:
-  - group: core-variables
+#variables:
+#  - group: core-variables
 
 resources:
   containers:
