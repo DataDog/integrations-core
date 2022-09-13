@@ -8,7 +8,6 @@ import jsonschema
 import requests
 
 import datadog_checks.dev.tooling.manifest_validator.common.validator as common
-from datadog_checks.dev.fs import file_exists
 
 from ...constants import get_root
 from ...manifest_validator.common.validator import BaseManifestValidator
