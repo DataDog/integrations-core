@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
-from .conftest import _assert_all_metrics, _assert_metadata
+from .conftest import _assert_all_metrics
 
 
 @pytest.mark.e2e
