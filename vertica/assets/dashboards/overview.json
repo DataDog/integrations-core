@@ -799,7 +799,7 @@
                     "column": "time",
                     "order": "desc"
                 },
-                "title": "",
+                "title": "All Logs",
                 "title_align": "left",
                 "title_size": "16",
                 "type": "log_stream"
