@@ -186,7 +186,7 @@ Need help? Contact [Datadog support][22].
 [18]: https://docs.datadoghq.com/agent/#cli
 [19]: https://github.com/DataDog/integrations-core/blob/master/docker_daemon/metadata.csv
 [20]: https://github.com/DataDog/integrations-core/blob/master/docker_daemon/assets/service_checks.json
-[21]: https://github.com/DataDog/integrations-core/blob/master/docker_daemon/datadog_checks/docker_daemon/data/conf.yaml.example#L154
+[21]: https://github.com/DataDog/integrations-core/blob/7.39.0/docker_daemon/datadog_checks/docker_daemon/data/conf.yaml.example#L151-L154
 [22]: https://docs.datadoghq.com/help
 [23]: https://docs.datadoghq.com/integrations/faq/compose-and-the-datadog-agent
 [24]: https://docs.datadoghq.com/integrations/faq/dogstatsd-and-docker
