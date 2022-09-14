@@ -106,8 +106,8 @@ def test_startup_type(aggregator, check, instance_basic):
         count=1,
     )
     aggregator.assert_service_check(
-        WindowsService.SERVICE_CHECK_NAME,
-        status=WindowsService.UNKNOWN,
+        c.SERVICE_CHECK_NAME,
+        status=c.UNKNOWN,
         tags=[
             'service:NonExistentService',
             'windows_service:NonExistentService',
