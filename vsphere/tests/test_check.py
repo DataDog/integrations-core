@@ -453,9 +453,9 @@ def test_connection_refresh(aggregator, dd_run_check, realtime_instance, test_ti
     check = VSphereCheck('vsphere', {}, [realtime_instance])
     dd_run_check(check)
     first_connection = check.api
-    
+
     time.sleep(5)
-    
+
     dd_run_check(check)
 
     same_object = False
