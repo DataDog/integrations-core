@@ -2383,6 +2383,11 @@ def test_fortinet_fortigate(aggregator):
     ]
     processor_tags = common_tags + ['processor_index:12']
 
+    phase1_name = [
+        'ESMAO-Lomtec',
+        'ESMAO',
+    ]
+
     vd_metrics = [
         'fgVdEntOpMode',
         'fgVdEntHaState',
@@ -2413,6 +2418,12 @@ def test_fortinet_fortigate(aggregator):
 
     # Interface
     aggregator.assert_metric('snmp.fgIntfEntVdom', metric_type=aggregator.GAUGE, count=1)
+
+    for name in phase1_name:
+        tags = common_tags + ['vpn_tunnel:' + name]
+        aggregator.assert_metric('snmp.fgVpnTunEntInOctets', metric_type=aggregator.RATE, tags=tags, count=1)
+        aggregator.assert_metric('snmp.fgVpnTunEntOutOctets', metric_type=aggregator.RATE, tags=tags, count=1)
+        aggregator.assert_metric('snmp.fgVpnTunEntStatus', metric_type=aggregator.GAUGE, tags=tags, count=1)
 
     # Firewall
     firewall_tags = common_tags + ['policy_index:22', 'virtualdomain_index:2']
