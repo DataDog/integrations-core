@@ -57,7 +57,7 @@ In addition to mounting `system-probe.yaml` and `oom_kill.d/conf.yaml` as descri
     --privileged
     ```
     
-    From kernel version 5.8, the `--privilege` parameter can be replaces by `--cap-add CAP_BPF`. 
+    From kernel version 5.8, the `--privileged` parameter can be replaces by `--cap-add CAP_BPF`. 
 
 **Note**: `privilege` mode is not supported in Docker swarm.
 
