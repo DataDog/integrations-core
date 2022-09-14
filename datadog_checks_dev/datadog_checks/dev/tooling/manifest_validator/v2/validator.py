@@ -8,7 +8,6 @@ import jsonschema
 import requests
 
 import datadog_checks.dev.tooling.manifest_validator.common.validator as common
-from datadog_checks.dev.fs import file_exists
 
 from ...constants import get_root
 from ...manifest_validator.common.validator import BaseManifestValidator
@@ -241,9 +240,8 @@ class ChangelogValidator(BaseManifestValidator):
         changelog = tile.get("changelog", None)
 
         if changelog:
-            path = os.path.join(get_root(), check_name, changelog)
-
-            if not file_exists(path):
+            check_dir = os.path.join(get_root(), check_name)
+            if changelog not in os.listdir(check_dir):
                 self.fail(f"{os.path.join(check_name, changelog)} does not exist.")
 
 

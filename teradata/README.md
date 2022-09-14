@@ -2,7 +2,9 @@
 
 ## Overview
 
-This check monitors [Teradata][1] through the Datadog Agent.
+[Teradata][1] is an enterprise-level relational database management system within a multi-cloud data platform. 
+
+This check monitors Teradata through the Datadog Agent. Enable the Datadog-Teradata integration to view Teradata performance, disk usage, and resource consumption.
 
 ## Setup
 

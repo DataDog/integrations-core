@@ -8,7 +8,7 @@ from copy import deepcopy
 import pytest
 
 from datadog_checks.dev import TempDir, docker_run
-from datadog_checks.dev.conditions import CheckDockerLogs, CheckEndpoints
+from datadog_checks.dev.conditions import CheckDockerLogs
 from datadog_checks.sonarqube import SonarqubeCheck
 
 from . import common
@@ -16,34 +16,27 @@ from . import common
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    compose_file = os.path.join(common.HERE, 'docker', 'docker-compose.yaml')
+    compose_file = os.path.join(common.HERE, 'docker', common.COMPOSE_FILE)
 
     # The scanner creates artifacts within the project such as `.scannerwork/`
     with TempDir('sonarqube-project') as temp_dir:
         project_dir = os.path.join(temp_dir, 'project')
         if not os.path.isdir(project_dir):
             shutil.copytree(os.path.join(common.HERE, 'docker', 'project'), project_dir)
-
         with docker_run(
             compose_file,
-            service_name='sonarqube',
             env_vars={'PROJECT_DIR': project_dir},
             conditions=[
                 CheckDockerLogs('sonarqube', ['SonarQube is up'], attempts=100, wait=3),
-                CheckEndpoints([common.WEB_INSTANCE['web_endpoint']]),
+                CheckDockerLogs('sonar-scanner', ['ANALYSIS SUCCESSFUL'], attempts=100, wait=3),
+                CheckDockerLogs(
+                    'sonarqube', ['Executed task | project=org.sonarqube:sonarqube-scanner'], attempts=100, wait=3
+                ),
             ],
             mount_logs=True,
+            sleep=10,
         ):
-            with docker_run(
-                compose_file,
-                service_name='sonar-scanner',
-                env_vars={'PROJECT_DIR': project_dir},
-                conditions=[CheckDockerLogs('sonar-scanner', ['ANALYSIS SUCCESSFUL'], attempts=100, wait=3)],
-                sleep=10,
-                # Don't worry about spinning down since the outermost runner will already do that
-                down=lambda: None,
-            ):
-                yield common.CHECK_CONFIG, {'use_jmx': True}
+            yield common.CHECK_CONFIG, {'use_jmx': True}
 
 
 @pytest.fixture

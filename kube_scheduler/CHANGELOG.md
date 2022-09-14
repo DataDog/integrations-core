@@ -1,6 +1,6 @@
 # CHANGELOG - Kube_scheduler
 
-## 4.4.0 / 2022-08-05
+## 4.4.0 / 2022-08-05 / Agent 7.39.0
 
 * [Added] Add pending pods metrics for kube_scheduler. See [#12673](https://github.com/DataDog/integrations-core/pull/12673).
 * [Added] Add queue.incoming_pods metric. See [#12674](https://github.com/DataDog/integrations-core/pull/12674).

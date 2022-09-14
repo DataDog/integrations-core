@@ -1,6 +1,6 @@
 # CHANGELOG - kubernetes_state
 
-## 7.2.1 / 2022-08-05
+## 7.2.1 / 2022-08-05 / Agent 7.39.0
 
 * [Fixed] Dependency updates. See [#12653](https://github.com/DataDog/integrations-core/pull/12653).
 

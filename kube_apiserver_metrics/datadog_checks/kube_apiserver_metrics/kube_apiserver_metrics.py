@@ -58,6 +58,9 @@ METRICS = {
     # For Kubernetes >= 1.21
     # https://github.com/kubernetes/kubernetes/pull/100082
     'apiserver_storage_objects': 'storage_objects',
+    # For Kubernetes >= 1.22
+    # https://kubernetes.io/docs/reference/using-api/deprecation-policy/#rest-resources-aka-api-objects
+    'apiserver_requested_deprecated_apis': 'requested_deprecated_apis',
     # For Kubernetes >= 1.23
     # https://github.com/kubernetes/kubernetes/pull/104983
     'apiserver_storage_list_total': 'storage_list_total',

@@ -1,6 +1,6 @@
 # CHANGELOG - kubelet
 
-## 7.4.1 / 2022-08-05
+## 7.4.1 / 2022-08-05 / Agent 7.39.0
 
 * [Fixed] Fix probe metrics collection when credentials are required. See [#12642](https://github.com/DataDog/integrations-core/pull/12642).
 

@@ -1,6 +1,6 @@
 # CHANGELOG - Datadog-Cluster-Agent
 
-## 2.3.0 / 2022-08-05
+## 2.3.0 / 2022-08-05 / Agent 7.39.0
 
 * [Added] Collect lib injection metrics. See [#12536](https://github.com/DataDog/integrations-core/pull/12536).
 

@@ -149,6 +149,31 @@ files:
           type: string
           example: localhost
           display_default: null
+      - name: sasl_oauth_token_provider
+        description: |
+          Settings for when `sasl_mechanism` is set to `OAUTHBEARER`.
+        options:
+        - name: url
+          required: true
+          enabled: false
+          description: |
+            The token endpoint.
+          value:
+            type: string
+        - name: client_id
+          required: true
+          enabled: false
+          description: |
+            The client identifier.
+          value:
+            type: string
+        - name: client_secret
+          required: true
+          enabled: false
+          description: |
+            The client secret.
+          value:
+            type: string
       - template: instances/tls
       - name: tls_crlfile
         description: |

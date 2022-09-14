@@ -1,6 +1,6 @@
 # CHANGELOG - tcp_check
 
-## 4.6.0 / 2022-08-05
+## 4.6.0 / 2022-08-05 / Agent 7.39.0
 
 * [Added] Add IPv4-only configuration option. See [#12632](https://github.com/DataDog/integrations-core/pull/12632).
 

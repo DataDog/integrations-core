@@ -17,7 +17,7 @@ datadog-calico==1.0.1
 datadog-cassandra-nodetool==1.11.0
 datadog-cassandra==1.15.1
 datadog-ceph==2.7.0; sys_platform != 'win32'
-datadog-checks-base==27.0.0
+datadog-checks-base==27.1.0
 datadog-checks-dependency-provider==1.3.0
 datadog-checks-downloader==3.8.0
 datadog-cilium==2.2.1
@@ -74,7 +74,7 @@ datadog-iis==2.17.0; sys_platform == 'win32'
 datadog-istio==4.2.1
 datadog-jboss-wildfly==2.0.1
 datadog-journald==1.1.0
-datadog-kafka-consumer==2.15.3
+datadog-kafka-consumer==2.15.4
 datadog-kafka==2.13.0
 datadog-kong==2.1.1
 datadog-kube-apiserver-metrics==3.2.0

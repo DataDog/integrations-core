@@ -1,6 +1,10 @@
 # CHANGELOG - kafka_consumer
 
-## 2.15.3 / 2022-08-05
+## 2.15.4 / 2022-09-09
+
+* [Fixed] Fix support for OAUTHBEARER SASL mechanism. See [#12891](https://github.com/DataDog/integrations-core/pull/12891).
+
+## 2.15.3 / 2022-08-05 / Agent 7.39.0
 
 * [Fixed] Handle errors getting producer offset. See [#12648](https://github.com/DataDog/integrations-core/pull/12648).
 

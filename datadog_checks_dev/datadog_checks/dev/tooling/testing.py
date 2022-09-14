@@ -424,7 +424,7 @@ def prepare_hatch_test_commands(
         commands.append(['hatch', 'env', 'run', '--env', 'lint', '--', 'fmt' if format_style else 'all'])
 
     if env_names:
-        command = ['hatch', '-v', 'env', 'run']
+        command = ['hatch', '-v', 'env', 'run', '--ignore-compat']
         for env_name in env_names:
             command.append('--env')
             command.append(env_name)
