@@ -8,7 +8,7 @@ Get Kubernetes metrics from [`kube-state-metrics`](https://github.com/kubernetes
 - Be notified about Kubernetes failovers and events.
 
 This check supersedes the legacy `kubernetes_state` check.
-Unlike the legacy check, it doesn’t require any stand-alone `kube-state-metrics` deployment.
+Unlike the legacy check, it doesn't require any stand-alone `kube-state-metrics` deployment.
 
 ## Setup
 
