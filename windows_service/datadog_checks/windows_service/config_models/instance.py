@@ -33,6 +33,7 @@ class InstanceConfig(BaseModel):
 
     disable_generic_tags: Optional[bool]
     disable_legacy_service_tag: Optional[bool]
+    windows_service_startup_type_tag: Optional[bool]
     empty_default_hostname: Optional[bool]
     metric_patterns: Optional[MetricPatterns]
     min_collection_interval: Optional[float]
