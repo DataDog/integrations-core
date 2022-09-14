@@ -9,7 +9,6 @@ build-backend = "hatchling.build"
 name = "datadog-kafka-consumer"
 description = "The Kafka Consumer check"
 readme = "README.md"
-license = {text = "BSD-3-Clause"}
 keywords = [
     "datadog",
     "datadog agent",
@@ -35,10 +34,13 @@ dynamic = [
     "version",
 ]
 
+[project.license]
+text = "BSD-3-Clause"
+
 [project.optional-dependencies]
 deps = [
     "gssapi==1.6.1; python_version < '3.0'",
-    "gssapi==1.7.3; python_version > '3.0'",
+    "gssapi==1.8.1; python_version > '3.0'",
     "kafka-python==2.0.2",
     "kazoo==2.8.0",
 ]
