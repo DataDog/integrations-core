@@ -19,6 +19,13 @@ from datadog_checks.base.utils.models import validation
 from . import defaults, validators
 
 
+class MessageQueueInfo(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    selected_message_queues: Optional[Sequence[str]]
+
+
 class MetricPatterns(BaseModel):
     class Config:
         allow_mutation = False
@@ -44,12 +51,12 @@ class InstanceConfig(BaseModel):
     empty_default_hostname: Optional[bool]
     hostname: Optional[str] = Field(None, max_length=255, min_length=1)
     job_query_timeout: Optional[int] = Field(None, gt=0)
+    message_queue_info: Optional[MessageQueueInfo]
     metric_patterns: Optional[MetricPatterns]
     min_collection_interval: Optional[float]
     password: Optional[str]
     queries: Optional[Sequence[Query]]
     query_timeout: Optional[int] = Field(None, gt=0)
-    selected_message_queues: Optional[Sequence[str]]
     service: Optional[str]
     severity_threshold: Optional[int] = Field(None, ge=0, le=99)
     system: Optional[str]

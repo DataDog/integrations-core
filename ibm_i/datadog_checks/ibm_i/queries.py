@@ -257,11 +257,18 @@ def get_job_queue_info(timeout):
     }
 
 
-def get_message_queue_info(timeout, sev, selected_message_queues):
-    message_queues_list = [f"'{elt}'" for elt in selected_message_queues]
+def get_message_queue_info(timeout, sev, message_queue_info):
+
+    # Getting the selected message queues if some were passed in the config file
+    message_queues_list = []
+    if hasattr(message_queue_info, 'selected_message_queues') and message_queue_info.selected_message_queues:
+        message_queues_list = [f"'{elt}'" for elt in message_queue_info.selected_message_queues]
+
+    # Building the message queues filter
     message_queues_filter = (
-        f"WHERE MESSAGE_QUEUE_NAME IN ({', '.join(message_queues_list)})" if selected_message_queues else ""
+        f"WHERE MESSAGE_QUEUE_NAME IN ({', '.join(message_queues_list)})" if message_queues_list else ""
     )
+
     return {
         'name': 'message_queue_info',
         'query': {
@@ -292,6 +299,6 @@ def query_map(config: InstanceConfig):
         "memory_info": get_memory_info(config.query_timeout),
         "job_queue": get_job_queue_info(config.query_timeout),
         "message_queue_info": get_message_queue_info(
-            config.system_mq_query_timeout, config.severity_threshold, config.selected_message_queues
+            config.system_mq_query_timeout, config.severity_threshold, config.message_queue_info
         ),
     }

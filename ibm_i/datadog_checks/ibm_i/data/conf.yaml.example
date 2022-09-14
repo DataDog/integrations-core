@@ -78,10 +78,14 @@ instances:
     #   - name: job_queue
     #   - name: message_queue_info
 
-    ## @param selected_message_queues - list of strings - optional
-    ## Filters the message queues to make your queries less computer-intensive. By default no filter is applied.
+    ## @param message_queue_info - mapping - optional
+    ## A configuration mapping for the message_queue_info query.
+    ##
+    ## selected_message_queues filters the message queues to make your queries less computer-intensive.
+    ## By default no filter is applied.
     #
-    # selected_message_queues:
+    # message_queue_info:
+    #   selected_message_queues:
     #   - QSYSOPR
     #   - QPGMR
 
