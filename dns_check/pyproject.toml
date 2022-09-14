@@ -9,7 +9,6 @@ build-backend = "hatchling.build"
 name = "datadog-dns-check"
 description = "The DNS check"
 readme = "README.md"
-license = {text = "BSD-3-Clause"}
 keywords = [
     "datadog",
     "datadog agent",
@@ -35,9 +34,13 @@ dynamic = [
     "version",
 ]
 
+[project.license]
+text = "BSD-3-Clause"
+
 [project.optional-dependencies]
 deps = [
-    "dnspython==1.16.0",
+    "dnspython==1.16.0; python_version < '3.0'",
+    "dnspython==2.2.1; python_version > '3.0'",
 ]
 
 [project.urls]

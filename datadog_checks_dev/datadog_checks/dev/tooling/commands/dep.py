@@ -31,10 +31,6 @@ IGNORED_DEPS = {
     'psycopg2-binary',  # https://github.com/DataDog/integrations-core/pull/10456
     'ddtrace',  # https://github.com/DataDog/integrations-core/pull/9132
     'flup',  # https://github.com/DataDog/integrations-core/pull/1997
-    # https://github.com/DataDog/integrations-core/pull/10105;
-    # snowflake-connector-python 2.6.0 has requirement cryptography<4.0.0,>=2.5.0
-    'cryptography',
-    'dnspython',
     'pymysql',  # https://github.com/DataDog/integrations-core/pull/12612
     'protobuf',  # Breaking datadog_checks_base
     'foundationdb',  # Breaking datadog_checks_base tests
@@ -273,5 +269,5 @@ def updates(ctx, sync_dependencies, include_security_deps, batch_size):
                         f'on {" and ".join(sorted(python_versions))}'
                     )
             abort()
-        else:
-            echo_info('All dependencies are up to date')
+
+    echo_info('All dependencies are up to date')
