@@ -1,5 +1,9 @@
 # CHANGELOG - gitlab_runner
 
+## 3.2.1 / 2022-08-05 / Agent 7.39.0
+
+* [Fixed] Dependency updates. See [#12653](https://github.com/DataDog/integrations-core/pull/12653).
+
 ## 3.2.0 / 2022-05-15 / Agent 7.37.0
 
 * [Added] Support dynamic bearer tokens (Bound Service Account Token Volume). See [#11915](https://github.com/DataDog/integrations-core/pull/11915).

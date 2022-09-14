@@ -1,5 +1,9 @@
 # CHANGELOG - SonarQube
 
+## 2.0.2 / 2022-08-05 / Agent 7.39.0
+
+* [Fixed] Dependency updates. See [#12653](https://github.com/DataDog/integrations-core/pull/12653).
+
 ## 2.0.1 / 2022-04-05 / Agent 7.36.0
 
 * [Fixed] Remove check options from jmx template. See [#11686](https://github.com/DataDog/integrations-core/pull/11686).

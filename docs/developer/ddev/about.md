@@ -46,5 +46,3 @@ graph BT
 ```
 
 </div>
-
---8<-- "uml.txt"

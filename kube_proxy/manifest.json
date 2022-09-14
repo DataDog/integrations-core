@@ -8,7 +8,7 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "kube_proxy description.",
+    "description": "Monitor Kube Proxy with Datadog.",
     "title": "Kube Proxy",
     "media": [],
     "classifier_tags": [

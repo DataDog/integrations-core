@@ -2,7 +2,12 @@
 
 ## Overview
 
-This check monitors [SingleStore][1] through the Datadog Agent.
+This check monitors [SingleStore][1] through the Datadog Agent. SingleStore offers transactional and analytical processing of stored data. Enable the Datadog-SingleStoreDB integration to:
+
+- Understand the health of clusters and nodes through metrics and events.
+- Address drops in storage capacity.
+- Improve resource utilization efficiency.
+
 
 ## Setup
 

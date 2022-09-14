@@ -234,6 +234,17 @@ class MediaGalleryValidator(BaseManifestValidator):
             self.fail(output)
 
 
+class ChangelogValidator(BaseManifestValidator):
+    def validate(self, check_name, decoded, fix):
+        tile = decoded.get('tile')
+        changelog = tile.get("changelog", None)
+
+        if changelog:
+            check_dir = os.path.join(get_root(), check_name)
+            if changelog not in os.listdir(check_dir):
+                self.fail(f"{os.path.join(check_name, changelog)} does not exist.")
+
+
 def get_v2_validators(ctx, is_extras, is_marketplace):
     return [
         common.MaintainerValidator(
@@ -246,6 +257,7 @@ def get_v2_validators(ctx, is_extras, is_marketplace):
         DisplayOnPublicValidator(version=V2),
         TileDescriptionValidator(is_marketplace=is_marketplace, is_extras=is_extras, version=V2),
         MediaGalleryValidator(is_marketplace=is_marketplace, is_extras=is_extras, version=V2),
+        ChangelogValidator(version=V2),
         # keep SchemaValidator last, and avoid running this validation if errors already found
         SchemaValidator(ctx=ctx, version=V2, skip_if_errors=True),
     ]

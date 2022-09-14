@@ -243,6 +243,8 @@ To configure this check for an Agent running on Kubernetes:
 
 Set [Autodiscovery Integrations Templates][12] as pod annotations on your application container. Aside from this, templates can also be configured with [a file, a configmap, or a key-value store][13].
 
+**Annotations v1** (for Datadog Agent < v7.36)
+
 ```yaml
 apiVersion: v1
 kind: Pod
@@ -262,6 +264,30 @@ spec:
     - name: haproxy
 ```
 
+**Annotations v2** (for Datadog Agent v7.36+)
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: haproxy
+  annotations:
+    ad.datadoghq.com/haproxy.checks: |
+      {
+        "haproxy": {
+          "init_config": {},
+          "instances": [
+            {
+              "url": "https://%%host%%/admin?stats"
+            }
+          ]
+        }
+      }
+spec:
+  containers:
+    - name: haproxy
+```
+
 ##### Log collection
 
 _Available for Agent versions >6.0_
@@ -269,6 +295,8 @@ _Available for Agent versions >6.0_
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][14].
 
 Then, set [Log Integrations][11] as pod annotations. This can also be configured with [a file, a configmap, or a key-value store][15].
+
+**Annotations v1/v2**
 
 ```yaml
 apiVersion: v1

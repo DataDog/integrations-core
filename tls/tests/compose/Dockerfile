@@ -31,3 +31,8 @@ ENV DONT_FAKE_MONOTONIC=1
 RUN openssl genrsa -out expired.mock.key 2048 \
  && openssl req -new -sha256 -key expired.mock.key -subj "/C=US/ST=NY/O=foo/CN=expired.mock" -out expired.mock.csr \
  && openssl x509 -req -in expired.mock.csr -CA /root/ca_cert/ca.crt -CAkey /root/ca_cert/ca.key -CAcreateserial -out expired.mock.crt -days 1 -sha256
+
+## Prepare postgresql certificates
+ENV PSQL_UID=70
+ENV PSQL_GUID=70
+RUN for file in valid.mock.key valid.mock.crt; do cp $file postgres.$file; chown $PSQL_UID:$PSQL_GUID postgres.$file; done

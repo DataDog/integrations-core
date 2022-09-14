@@ -71,7 +71,7 @@ snowflake.organization.warehouse.cloud_service.avg,gauge,,,,Average number of cr
 snowflake.organization.warehouse.cloud_service.sum,gauge,,,,Sum of credits used for cloud services.,0,snowflake,org wh cs sum,
 snowflake.organization.warehouse.total_credit.sum,gauge,,,,The total number of credits used by the warehouse. Sum of snowflake.organization.warehouse.cloud_service.sum and snowflake.organization.warehouse.total_credit.sum.,0,snowflake,org tc sum,
 snowflake.organization.warehouse.total_credit.avg,gauge,,,,The average total number of credits used by the warehouse. Sum of snowflake.organization.warehouse.cloud_service.avg and snowflake.organization.warehouse.total_credit.avg,0,snowflake,org tc avg,
-snowflake.organization.storage.average_bytes,gauge,,byte,,"Number of bytes of database storage used, including data in Time, Travel, and Fail-safe.",0,snowflake,org storage bytes,
+snowflake.organization.storage.average_bytes,gauge,,byte,,"Number of bytes of database storage used, including data in Time Travel and Fail-safe.",0,snowflake,org storage bytes,
 snowflake.organization.storage.credits,gauge,,,,"Sum of total number of credits used for all accounts in the organization. Sum of credits used for database storage and stages.",0,snowflake,org storage credits sum,
 snowflake.organization.rate.effective_rate,gauge,,,,The rate after applying any applicable discounts per the contract for the organization.,0,snowflake,org rate effective,
 snowflake.organization.data_transfer.bytes_transferred,gauge,,byte,,Number of bytes transferred during the usage date.,0,snowflake,org tb transfer,

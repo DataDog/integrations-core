@@ -118,19 +118,19 @@ def instance_tls(field, value):
     return False
 
 
-def instance_tlsAllowInvalidCertificates(field, value):
+def instance_tls_allow_invalid_certificates(field, value):
     return False
 
 
-def instance_tlsAllowInvalidHostnames(field, value):
+def instance_tls_allow_invalid_hostnames(field, value):
     return False
 
 
-def instance_tlsCAFile(field, value):
+def instance_tls_ca_file(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_tlsCertificateKeyFile(field, value):
+def instance_tls_certificate_key_file(field, value):
     return get_default_field_value(field, value)
 
 

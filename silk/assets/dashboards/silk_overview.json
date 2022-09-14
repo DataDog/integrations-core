@@ -1301,7 +1301,6 @@
         "title_align": "left",
         "type": "event_stream",
         "query": "source:silk",
-        "tags_execution": "and",
         "event_size": "s"
       },
       "layout": {

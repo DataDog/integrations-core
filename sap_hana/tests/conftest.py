@@ -23,7 +23,7 @@ from datadog_checks.sap_hana.queries import (
     SystemDatabases,
 )
 
-from .common import ADMIN_CONFIG, COMPOSE_FILE, CONFIG, E2E_METADATA
+from .common import ADMIN_CONFIG, COMPOSE_FILE, CONFIG, E2E_METADATA, TIMEOUT
 
 
 class DbManager(object):
@@ -91,6 +91,7 @@ def dd_environment(schema="SYS_DATABASES"):
             db.initialize,
         ],
         env_vars={'PASSWORD': ADMIN_CONFIG['password']},
+        sleep=10,
     ):
         yield CONFIG, E2E_METADATA
 
@@ -108,6 +109,7 @@ def instance_custom_queries():
             'tags': ['test:sap_hana'],
             'query': 'SELECT DATABASE_NAME, COUNT(*) FROM SYS_DATABASES.M_DATA_VOLUMES GROUP BY DATABASE_NAME',
             'columns': [{'name': 'db', 'type': 'tag'}, {'name': 'data_volume.total', 'type': 'gauge'}],
+            'timeout': TIMEOUT,
         }
     ]
     return instance

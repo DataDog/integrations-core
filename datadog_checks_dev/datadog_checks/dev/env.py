@@ -16,6 +16,7 @@ from ._env import (
     set_up_env,
     tear_down_env,
 )
+from .ci import running_on_ci
 from .conditions import CheckEndpoints
 from .structures import EnvVars
 
@@ -56,7 +57,7 @@ def environment_run(
     :param env_vars: A dictionary to update ``os.environ`` with during execution.
     :type env_vars: ``dict``
     :param wrappers: A list of context managers to use during execution.
-    :param attempts: Number of attempts to run `up` and the `conditions` successfully
+    :param attempts: Number of attempts to run `up` and the `conditions` successfully. Defaults to 2 in CI
     :type attempts: ``int``
     :param attempts_wait: Time to wait between attempts
     :type attempts_wait: ``int``
@@ -83,6 +84,9 @@ def environment_run(
         return set_up_result
 
     set_up_func = set_up
+
+    if attempts is None and running_on_ci():
+        attempts = 2
 
     if attempts is not None:
 

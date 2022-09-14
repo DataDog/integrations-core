@@ -3,11 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
-from .conftest import _assert_all_metrics, _assert_metadata
+from .conftest import _assert_all_metrics
 
 
 @pytest.mark.e2e
-def test_e2e(dd_agent_check, datadog_agent):
+def test_e2e(dd_agent_check):
     aggregator = dd_agent_check(rate=True)
-    _assert_metadata(datadog_agent, check_id='proxysql')
     _assert_all_metrics(aggregator)

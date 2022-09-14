@@ -237,7 +237,10 @@ def get_package_name(check_name):
 
 
 def get_version_file(check_name):
-    return os.path.join(get_root(), check_name, 'datadog_checks', get_package_name(check_name), '__about__.py')
+    if check_name == 'ddev':
+        return os.path.join(get_root(), check_name, 'src', 'ddev', '__about__.py')
+    else:
+        return os.path.join(get_root(), check_name, 'datadog_checks', get_package_name(check_name), '__about__.py')
 
 
 def is_agent_check(check_name):
@@ -252,7 +255,7 @@ def is_agent_check(check_name):
 
 
 def code_coverage_enabled(check_name):
-    if check_name in ('datadog_checks_base', 'datadog_checks_dev', 'datadog_checks_downloader'):
+    if check_name in ('datadog_checks_base', 'datadog_checks_dev', 'datadog_checks_downloader', 'ddev'):
         return True
 
     return is_agent_check(check_name)

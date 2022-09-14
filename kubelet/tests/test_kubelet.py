@@ -1403,8 +1403,11 @@ def mock_request():
 
 def test_detect_probes(monkeypatch, mock_request):
     mock_request.head('http://kubelet:10250/metrics/probes', status_code=200)
-    check = mock_kubelet_check(monkeypatch, [{}])
-    available = check.detect_probes('http://kubelet:10250/metrics/probes')
+    instance = dict({'prometheus_url': 'http://kubelet:10250', 'namespace': 'kubernetes'})
+    check = mock_kubelet_check(monkeypatch, [instance])
+    scraper_config = check.get_scraper_config(instance)
+    http_handler = check.get_http_handler(scraper_config)
+    available = check.detect_probes(http_handler, 'http://kubelet:10250/metrics/probes')
     assert available is True
     assert check._probes_available is True
     assert mock_request.call_count == 1
@@ -1412,12 +1415,15 @@ def test_detect_probes(monkeypatch, mock_request):
 
 def test_detect_probes_cached(monkeypatch, mock_request):
     mock_request.head('http://kubelet:10250/metrics/probes', status_code=200)
-    check = mock_kubelet_check(monkeypatch, [{}])
-    available = check.detect_probes('http://kubelet:10250/metrics/probes')
+    instance = dict({'prometheus_url': 'http://kubelet:10250', 'namespace': 'kubernetes'})
+    check = mock_kubelet_check(monkeypatch, [instance])
+    scraper_config = check.get_scraper_config(instance)
+    http_handler = check.get_http_handler(scraper_config)
+    available = check.detect_probes(http_handler, 'http://kubelet:10250/metrics/probes')
     assert available is True
     assert check._probes_available is True
     assert mock_request.call_count == 1
-    available = check.detect_probes('http://kubelet:10250/metrics/probes')
+    available = check.detect_probes(http_handler, 'http://kubelet:10250/metrics/probes')
     assert available is True
     assert check._probes_available is True
     assert mock_request.call_count == 1
@@ -1425,8 +1431,11 @@ def test_detect_probes_cached(monkeypatch, mock_request):
 
 def test_detect_probes_404(monkeypatch, mock_request):
     mock_request.head('http://kubelet:10250/metrics/probes', status_code=404)
-    check = mock_kubelet_check(monkeypatch, [{}])
-    available = check.detect_probes('http://kubelet:10250/metrics/probes')
+    instance = dict({'prometheus_url': 'http://kubelet:10250', 'namespace': 'kubernetes'})
+    check = mock_kubelet_check(monkeypatch, [instance])
+    scraper_config = check.get_scraper_config(instance)
+    http_handler = check.get_http_handler(scraper_config)
+    available = check.detect_probes(http_handler, 'http://kubelet:10250/metrics/probes')
     assert available is False
     assert check._probes_available is False
     assert mock_request.call_count == 1
@@ -1434,12 +1443,15 @@ def test_detect_probes_404(monkeypatch, mock_request):
 
 def test_detect_probes_404_cached(monkeypatch, mock_request):
     mock_request.head('http://kubelet:10250/metrics/probes', status_code=404)
-    check = mock_kubelet_check(monkeypatch, [{}])
-    available = check.detect_probes('http://kubelet:10250/metrics/probes')
+    instance = dict({'prometheus_url': 'http://kubelet:10250', 'namespace': 'kubernetes'})
+    check = mock_kubelet_check(monkeypatch, [instance])
+    scraper_config = check.get_scraper_config(instance)
+    http_handler = check.get_http_handler(scraper_config)
+    available = check.detect_probes(http_handler, 'http://kubelet:10250/metrics/probes')
     assert available is False
     assert check._probes_available is False
     assert mock_request.call_count == 1
-    available = check.detect_probes('http://kubelet:10250/metrics/probes')
+    available = check.detect_probes(http_handler, 'http://kubelet:10250/metrics/probes')
     assert available is False
     assert check._probes_available is False
     assert mock_request.call_count == 1
@@ -1447,8 +1459,11 @@ def test_detect_probes_404_cached(monkeypatch, mock_request):
 
 def test_detect_probes_req_exception(monkeypatch, mock_request):
     mock_request.head('http://kubelet:10250/metrics/probes', exc=requests.exceptions.ConnectTimeout)
-    check = mock_kubelet_check(monkeypatch, [{}])
-    available = check.detect_probes('http://kubelet:10250/metrics/probes')
+    instance = dict({'prometheus_url': 'http://kubelet:10250', 'namespace': 'kubernetes'})
+    check = mock_kubelet_check(monkeypatch, [instance])
+    scraper_config = check.get_scraper_config(instance)
+    http_handler = check.get_http_handler(scraper_config)
+    available = check.detect_probes(http_handler, 'http://kubelet:10250/metrics/probes')
     assert available is False
     assert check._probes_available is None
     assert mock_request.call_count == 1
