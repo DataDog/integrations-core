@@ -612,7 +612,7 @@ class VSphereCheck(AgentCheck):
         # Assert the health of the vCenter API by getting the version, and submit the service_check accordingly
 
         now = get_timestamp()
-        if self.last_connection_time + self._config.connection_reset_timeout <= now or self.api is None:
+        if self.last_connection_time + int(self._config.connection_reset_timeout) <= now or self.api is None:
             self.last_connection_time = now
             self.log.debug("Refreshing vCenter connection")
             self.initiate_api_connection()
