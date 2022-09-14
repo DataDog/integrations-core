@@ -42,9 +42,9 @@ files:
       value:
         type: string
         example: <BUILD_NAME>
-    - name: monitored_projects_build_configs
+    - name: monitored_build_configs
       description: |
-        List of projects and build configurations to monitor.
+        List of build configurations to monitor, by project name.
       value:
         anyOf:
           - type: array
@@ -55,7 +55,7 @@ files:
               anyOf:
                 - type: object
                   properties:
-                    - name: name
+                    - name: project
                       type: string
                     - name: include
                       type: array

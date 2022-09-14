@@ -11,6 +11,7 @@ HOST = get_docker_hostname()
 PORT = '8111'
 SERVER_URL = "http://{}:{}".format(HOST, PORT)
 CHECK_NAME = 'teamcity'
+USE_OPENMETRICS = os.getenv('USE_OPENMETRICS')
 
 CONFIG = {
     'instances': [
@@ -26,7 +27,7 @@ CONFIG = {
         {
             'name': 'TeamCityV2 test build',
             'server': '{}:{}'.format(HOST, PORT),
-            'monitored_projects_build_configs': [
+            'monitored_build_configs': [
                 {
                     'name': 'TeamcityPythonFork',
                     'include': ['TeamcityPythonFork_FailedBuild', 'TeamcityPythonFork_FailedTests'],

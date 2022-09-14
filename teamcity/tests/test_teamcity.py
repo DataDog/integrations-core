@@ -1,16 +1,19 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
 from copy import deepcopy
 
+import mock
 import pytest
 from mock import ANY, patch
 
 from datadog_checks.teamcity import TeamCityCheck
 
-from .common import BUILD_STATS_METRICS, CHECK_NAME, CONFIG, TEST_OCCURRENCES_METRICS, get_fixture_path
+from .common import BUILD_STATS_METRICS, CHECK_NAME, CONFIG, TEST_OCCURRENCES_METRICS, USE_OPENMETRICS, get_fixture_path
 
 
+@pytest.mark.skipif(USE_OPENMETRICS, reason='Event collection is not available in OpenMetricsV2 instance')
 @pytest.mark.integration
 def test_build_event(aggregator, legacy_instance, mock_http_response):
     legacy_instance['build_config_metrics'] = False
@@ -19,28 +22,37 @@ def test_build_event(aggregator, legacy_instance, mock_http_response):
 
     teamcity = TeamCityCheck(CHECK_NAME, {}, [legacy_instance])
 
-    mock_http_response(file_path=get_fixture_path('legacy_last_build.json'))
-    mock_http_response(file_path=get_fixture_path('legacy_new_builds.json'))
-    teamcity.check(legacy_instance)
+    responses = json.load(open(get_fixture_path('event_responses.json'), 'r'))
+
+    json_responses = [
+        responses['legacy_build_details'],
+        responses['legacy_last_build'],
+        responses['legacy_new_builds'],
+    ]
+
+    with mock.patch('datadog_checks.base.utils.http.requests') as req:
+        mock_resp = mock.MagicMock(status_code=200)
+        mock_resp.json.side_effect = json_responses
+        req.get.return_value = mock_resp
+
+        teamcity.check(legacy_instance)
 
     assert len(aggregator.metric_names) == 0
     assert len(aggregator.events) == 1
 
-    events = aggregator.events
-    assert events[0]['host'] == "buildhost42.dtdg.co"
     aggregator.assert_event(
-        msg_title="Build for Legacy test build successful",
-        msg_text="Build Number: 1\nDeployed To: buildhost42.dtdg.co\n\nMore Info: "
-        + "http://localhost:8111/viewLog.html?buildId=1&buildTypeId=TestProject_TestBuild",
+        msg_title='Build for Legacy test build successful',
+        msg_text='Build Number: 1\nDeployed To: buildhost42.dtdg.co\n\nMore Info: '
+        'http://localhost:8111/viewLog.html?buildId=1&buildTypeId=TestProject_TestBuild',
+        host='buildhost42.dtdg.co',
         count=1,
         tags=[
-            'build',
             'server:http://localhost:8111',
-            'instance_name:Legacy test build',
             'one:test',
-            'build_config:TestProject_TestBuild',
             'one:tag',
             'type:build',
+            'instance_name:Legacy test build',
+            'build_config:TestProject_TestBuild',
             'build_id:1',
             'build_number:1',
         ],
@@ -49,8 +61,11 @@ def test_build_event(aggregator, legacy_instance, mock_http_response):
     aggregator.reset()
 
     # One more check should not create any more events
-    mock_http_response(file_path=get_fixture_path('legacy_no_new_builds.json'))
-    teamcity.check(legacy_instance)
+    with mock.patch('datadog_checks.base.utils.http.requests') as req:
+        mock_resp = mock.MagicMock(status_code=200)
+        mock_resp.json.side_effect = [responses['legacy_no_new_builds']]
+        req.get.return_value = mock_resp
+        teamcity.check(legacy_instance)
 
     aggregator.assert_event(msg_title="", msg_text="", count=0)
 
@@ -94,11 +109,21 @@ def test_config(extra_config, expected_http_kwargs):
         ),
     ],
 )
-def test_collect_rest_metrics(
-    aggregator, mock_http_response, tcv2_instance, file_name, method, expected_metrics, check
-):
+def test_collect_rest_metrics(aggregator, mock_http_response, instance, file_name, method, expected_metrics, check):
     mock_http_response(file_path=get_fixture_path(file_name))
-    check = check(tcv2_instance)
+    check = check(instance)
+    tags = [
+        'build_config:None',
+        'build_env:test',
+        'build_id:233',
+        'build_number:12',
+        'instance_name:TeamCityV2 test build',
+        'problem_identity:python_build_error_identity',
+        'problem_type:TC_EXIT_CODE',
+        'server:http://localhost:8111',
+        'test_tag:ci_builds',
+        'type:build',
+    ]
     mock_new_build = {
         'id': 232,
         'buildTypeId': 'TeamcityPythonFork_Build',
@@ -112,16 +137,24 @@ def test_collect_rest_metrics(
         'finishOnAgentDate': '20220913T210820+0000',
     }
     method = getattr(check, method)
-    method(mock_new_build)
+    method(mock_new_build, tags)
 
     for metric_name in expected_metrics:
         aggregator.assert_metric(metric_name)
 
 
-def test_build_problem_service_checks(aggregator, mock_http_response, tcv2_instance, check):
+def test_build_problem_service_checks(aggregator, mock_http_response, instance, check):
     mock_http_response(file_path=get_fixture_path('build_problems.json'))
-    check = check(tcv2_instance)
-    mock_new_build = {
+    check = check(instance)
+    build_tags = [
+        'server:http://localhost:8111',
+        'test_tag:ci_builds',
+        'build_env:test',
+        'instance_name:TeamCityV2 test build',
+        'type:build',
+        'build_config:TeamcityPythonFork_Build',
+    ]
+    mock_new_failed_build = {
         'id': 233,
         'buildTypeId': 'TeamcityPythonFork_FailedBuild',
         'number': '12',
@@ -134,22 +167,20 @@ def test_build_problem_service_checks(aggregator, mock_http_response, tcv2_insta
         'finishOnAgentDate': '20220913T210826+0000',
     }
 
-    check._collect_build_problems(mock_new_build)
+    check._collect_build_problems(mock_new_failed_build, build_tags)
 
     aggregator.assert_service_check(
         'teamcity.build_problem',
         count=1,
         tags=[
-            'build_config:None',
-            'build_env:test',
-            'build_id:233',
-            'build_number:12',
-            'instance_name:TeamCityV2 test build',
-            'problem_identity:python_build_error_identity',
-            'problem_type:TC_EXIT_CODE',
             'server:http://localhost:8111',
             'test_tag:ci_builds',
+            'build_env:test',
+            'instance_name:TeamCityV2 test build',
             'type:build',
+            'build_config:TeamcityPythonFork_Build',
+            'problem_identity:python_build_error_identity',
+            'problem_type:TC_EXIT_CODE',
         ],
         status=check.WARNING,
     )

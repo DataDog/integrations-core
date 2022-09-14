@@ -190,7 +190,7 @@ def instance_min_collection_interval(field, value):
     return 15
 
 
-def instance_monitored_projects_build_configs(field, value):
+def instance_monitored_build_configs(field, value):
     return get_default_field_value(field, value)
 
 
