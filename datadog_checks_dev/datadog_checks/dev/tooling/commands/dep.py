@@ -31,6 +31,7 @@ IGNORED_DEPS = {
     'psycopg2-binary',  # https://github.com/DataDog/integrations-core/pull/10456
     'ddtrace',  # https://github.com/DataDog/integrations-core/pull/9132
     'flup',  # https://github.com/DataDog/integrations-core/pull/1997
+    'dnspython', # https://github.com/DataDog/integrations-core/pull/10580
     'pymysql',  # https://github.com/DataDog/integrations-core/pull/12612
     'protobuf',  # Breaking datadog_checks_base
     'foundationdb',  # Breaking datadog_checks_base tests
