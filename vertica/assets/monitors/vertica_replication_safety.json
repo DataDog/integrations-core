@@ -29,6 +29,6 @@
 	"priority": null,
 	"restricted_roles": null,
 	"recommended_monitor_metadata": {
-		"description": "Get notified when the query load is high."
+		"description": "Get notified when the database is at risk of becoming unsafe."
 	}
 }
