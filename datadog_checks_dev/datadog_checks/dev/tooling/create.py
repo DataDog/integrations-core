@@ -65,7 +65,9 @@ To install the {integration_name} check on your host:
         )
         license_header = get_license_header()
         support_type = 'core'
-        integration_links = integration_type_links.get(integration_type).format(name=normalized_integration_name)
+        integration_links = integration_type_links.get(integration_type).format(
+            name=normalized_integration_name, repository="integrations-core"
+        )
     elif repo_choice == 'marketplace':
         check_name = normalize_package_name(f"{kwargs.get('author')}_{normalized_integration_name}")
         # Updated by the kwargs passed in
@@ -85,6 +87,15 @@ To install the {integration_name} check on your host:
         license_header = ''
         support_type = 'contrib'
         integration_links = integration_type_links.get(integration_type)
+
+        if repo_choice == 'internal':
+            integration_links = integration_links.format(
+                name=normalized_integration_name, repository="integrations-internal"
+            )
+        else:
+            integration_links = integration_links.format(
+                name=normalized_integration_name, repository="integrations-extras"
+            )
 
     config = {
         'author': author,
