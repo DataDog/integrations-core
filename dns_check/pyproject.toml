@@ -39,8 +39,7 @@ text = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
-    "dnspython==1.16.0; python_version < '3.0'",
-    "dnspython==2.2.1; python_version > '3.0'",
+    "dnspython==1.16.0",
 ]
 
 [project.urls]
