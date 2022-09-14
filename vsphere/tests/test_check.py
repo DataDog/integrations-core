@@ -437,9 +437,9 @@ def test_specs_start_time(aggregator, dd_run_check, historical_instance):
 @pytest.mark.parametrize(
     'test_timeout, expected_result',
     [
-        (5, False),
-        (10, False),
-        (20, True),
+        (1, False),
+        (2, False),
+        (10, True),
     ],
 )
 @pytest.mark.usefixtures('mock_type', 'mock_api')
@@ -452,7 +452,7 @@ def test_connection_refresh(aggregator, dd_run_check, realtime_instance, test_ti
     dd_run_check(check)
     first_connection = check.api
 
-    time.sleep(10)
+    time.sleep(2)
 
     dd_run_check(check)
 
