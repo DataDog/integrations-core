@@ -92,9 +92,6 @@ If you need to use a metric that is not provided by default, you can add an entr
 
 Simply follow the examples present in the [default configuration][4].
 
-**Note**: we append, in our code, linkerd metrics ending with '_total' to 'count' (ex. "linkerd.tcp.open_total" will be "linkerd.tcp.open.count")
-https://github.com/DataDog/integrations-core/blob/7585dad4f622339f87eed87ad15e2986d9025bde/linkerd/datadog_checks/linkerd/metrics.py#L123-L125 
-
 
 ### Service Checks
 
