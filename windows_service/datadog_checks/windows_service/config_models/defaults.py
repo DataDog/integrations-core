@@ -22,10 +22,6 @@ def instance_disable_legacy_service_tag(field, value):
     return False
 
 
-def instance_windows_service_startup_type_tag(field, value):
-    return False
-
-
 def instance_empty_default_hostname(field, value):
     return False
 
@@ -44,3 +40,7 @@ def instance_service(field, value):
 
 def instance_tags(field, value):
     return get_default_field_value(field, value)
+
+
+def instance_windows_service_startup_type_tag(field, value):
+    return False
