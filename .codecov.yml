@@ -582,6 +582,10 @@ coverage:
         target: 75
         flags:
         - zk
+      cert-manager:
+        target: 75
+        flags:
+        - cert_manager
       ddev:
         target: 75
         flags:
@@ -689,6 +693,11 @@ flags:
     paths:
     - ceph/datadog_checks/ceph
     - ceph/tests
+  cert_manager:
+    carryforward: true
+    paths:
+    - cert_manager/datadog_checks/cert_manager
+    - cert_manager/tests
   cilium:
     carryforward: true
     paths:

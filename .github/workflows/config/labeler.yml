@@ -76,6 +76,8 @@ integration/cassandra_nodetool:
 - cassandra_nodetool/**/*
 integration/ceph:
 - ceph/**/*
+integration/cert_manager:
+- cert_manager/**/*
 integration/cilium:
 - cilium/**/*
 integration/cisco_aci:

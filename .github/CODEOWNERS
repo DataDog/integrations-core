@@ -20,6 +20,9 @@ assets/               @DataDog/agent-integrations
 /datadog_checks_base/datadog_checks/base/checks/kube_leader/   @DataDog/agent-core @DataDog/agent-integrations @DataDog/container-integrations
 
 # Container monitoring
+/cert_manager/                            @DataDog/container-integrations @DataDog/agent-integrations
+/cert_manager/*.md                        @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
+/cert_manager/manifest.json               @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 /container/                               @DataDog/container-integrations @DataDog/agent-integrations
 /container/*.md                           @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 /container/manifest.json                  @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
