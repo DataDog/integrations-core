@@ -440,11 +440,9 @@ def test_specs_start_time(aggregator, dd_run_check, historical_instance):
         (5, False),
         (10, False),
         (20, True),
-        ('5', False),
-        ('20', True),
     ],
 )
-@pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api', 'mock_rest_api')
+@pytest.mark.usefixtures('mock_type', 'mock_api')
 def test_connection_refresh(aggregator, dd_run_check, realtime_instance, test_timeout, expected_result):
     # This test is to ensure that the connection is refreshed after a specified period of time.
     # We run the check initially to get a connection object, sleep for a period of time, and then
