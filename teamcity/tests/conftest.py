@@ -3,12 +3,14 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 
-import mock
 import pytest
+from six import PY3
 
 from datadog_checks.dev import docker_run
 from datadog_checks.teamcity import TeamCityCheck
-from datadog_checks.teamcity.check import TeamCityCheckV2
+
+if PY3:
+    from datadog_checks.teamcity.check import TeamCityCheckV2
 
 from .common import COMPOSE_FILE, CONFIG, SERVER_URL
 

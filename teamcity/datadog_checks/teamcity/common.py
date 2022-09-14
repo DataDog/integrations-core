@@ -64,7 +64,7 @@ def construct_event(is_deployment, instance_name, host, new_build, tags):
     build_id = new_build['id']
     build_number = new_build['number']
     build_tags = ['build_id:{}'.format(build_id), 'build_number:{}'.format(build_number)]
-    tags.append(build_tags)
+    tags.extend(build_tags)
     if is_deployment:
         build_status = EVENT_STATUS_MAP.get(new_build['status'])
         teamcity_event = deepcopy(DEPLOYMENT_EVENT)
@@ -132,6 +132,9 @@ class BuildConfig(object):
 class BuildConfigs(BuildConfig):
     def __init__(self):
         self.build_configs = {}
+
+    def get_build_configs(self):
+        return deepcopy(self.build_configs)
 
     def set_build_config(self, build_type_id):
         if not self.build_configs.get(build_type_id):

@@ -62,6 +62,21 @@ instances:
     #
     # build_configuration: <BUILD_CONFIGURATION>
 
+    ## @param build_config_metrics - boolean - optional - default: true
+    ## Collect Build Configuration statistics per build.
+    #
+    # build_config_metrics: true
+
+    ## @param test_result_metrics - boolean - optional - default: true
+    ## Collect test result statistics per build.
+    #
+    # test_result_metrics: true
+
+    ## @param build_problem_checks - boolean - optional - default: true
+    ## Collect build problem service checks
+    #
+    # build_problem_checks: true
+
     ## @param basic_http_authentication - boolean - optional - default: false
     ## Set to true to turn on basic http authentication.
     #

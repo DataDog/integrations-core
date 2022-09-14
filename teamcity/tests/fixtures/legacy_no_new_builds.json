@@ -1,0 +1,4 @@
+{
+    "count": 0,
+    "href": "/guestAuth/app/rest/builds/?locator=buildType:TestProject_TestBuild,sinceBuild:id:1,state:finished"
+}

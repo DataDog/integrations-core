@@ -39,7 +39,7 @@ def test_server_normalization():
     Make sure server URLs are being normalized correctly
     """
 
-    teamcity = TeamCityCheck(CHECK_NAME, {}, {})
+    teamcity = TeamCityCheck(CHECK_NAME, {}, [{'server': 'localhost:8111', 'use_openmetrics': False}])
 
     for server, expected_server in iteritems(TEAMCITY_SERVER_VALUES):
         normalized_server = teamcity._normalize_server_url(server)

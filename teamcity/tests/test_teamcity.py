@@ -4,7 +4,7 @@
 from copy import deepcopy
 
 import pytest
-from mock import ANY, MagicMock, patch
+from mock import ANY, patch
 
 from datadog_checks.teamcity import TeamCityCheck
 
@@ -12,112 +12,58 @@ from .common import BUILD_STATS_METRICS, CHECK_NAME, CONFIG, TEST_OCCURRENCES_ME
 
 
 @pytest.mark.integration
-def test_build_event(aggregator):
-    teamcity = TeamCityCheck(CHECK_NAME, {}, [CONFIG])
+def test_build_event(aggregator, legacy_instance, mock_http_response):
+    legacy_instance['build_config_metrics'] = False
+    legacy_instance['test_result_metrics'] = False
+    legacy_instance['build_problem_checks'] = False
 
-    with patch('datadog_checks.base.utils.http.requests.get', get_mock_first_build):
-        teamcity.check(CONFIG['instances'][0])
+    teamcity = TeamCityCheck(CHECK_NAME, {}, [legacy_instance])
+
+    mock_http_response(file_path=get_fixture_path('legacy_last_build.json'))
+    mock_http_response(file_path=get_fixture_path('legacy_new_builds.json'))
+    teamcity.check(legacy_instance)
 
     assert len(aggregator.metric_names) == 0
-    assert len(aggregator.events) == 0
-    aggregator.reset()
-
-    with patch('datadog_checks.base.utils.http.requests.get', get_mock_one_more_build):
-        teamcity.check(CONFIG['instances'][0])
+    assert len(aggregator.events) == 1
 
     events = aggregator.events
-    assert len(events) == 1
-    assert events[0]['msg_title'] == "Build for One test build successful"
-    assert (
-        events[0]['msg_text']
-        == "Build Number: 2\nDeployed To: buildhost42.dtdg.co\n\nMore Info: "
-        + "http://localhost:8111/viewLog.html?buildId=2&buildTypeId=TestProject_TestBuild"
-    )
-    assert events[0]['tags'] == ['build', 'one:tag', 'one:test']
     assert events[0]['host'] == "buildhost42.dtdg.co"
+    aggregator.assert_event(
+        msg_title="Build for Legacy test build successful",
+        msg_text="Build Number: 1\nDeployed To: buildhost42.dtdg.co\n\nMore Info: "
+        + "http://localhost:8111/viewLog.html?buildId=1&buildTypeId=TestProject_TestBuild",
+        count=1,
+        tags=[
+            'build',
+            'server:http://localhost:8111',
+            'instance_name:Legacy test build',
+            'one:test',
+            'build_config:TestProject_TestBuild',
+            'one:tag',
+            'type:build',
+            'build_id:1',
+            'build_number:1',
+        ],
+    )
+
     aggregator.reset()
 
     # One more check should not create any more events
-    with patch('datadog_checks.base.utils.http.requests.get', get_mock_one_more_build):
-        teamcity.check(CONFIG['instances'][0])
+    mock_http_response(file_path=get_fixture_path('legacy_no_new_builds.json'))
+    teamcity.check(legacy_instance)
 
-    assert len(aggregator.events) == 0
-
-
-def get_mock_first_build(url, *args, **kwargs):
-    mock_resp = MagicMock()
-    if 'sinceBuild' in url:
-        # looking for new builds
-        json = {
-            "count": 0,
-            "href": (
-                "/guestAuth/app/rest/builds/?locator=buildType:TestProject_TestBuild,sinceBuild:id:1,status:SUCCESS"
-            ),
-        }
-    else:
-        json = {
-            "count": 1,
-            "href": "/guestAuth/app/rest/builds/?locator=buildType:TestProject_TestBuild,count:1",
-            "nextHref": "/guestAuth/app/rest/builds/?locator=buildType:TestProject_TestBuild,count:1,start:1",
-            "build": [
-                {
-                    "id": 1,
-                    "buildTypeId": "TestProject_TestBuild",
-                    "number": "1",
-                    "status": "SUCCESS",
-                    "state": "finished",
-                    "href": "/guestAuth/app/rest/builds/id:1",
-                    "webUrl": "http://localhost:8111/viewLog.html?buildId=1&buildTypeId=TestProject_TestBuild",
-                }
-            ],
-        }
-
-    mock_resp.json.return_value = json
-    return mock_resp
-
-
-def get_mock_one_more_build(url, *args, **kwargs):
-    mock_resp = MagicMock()
-    json = {}
-
-    if 'sinceBuild:id:1' in url:
-        json = {
-            "count": 1,
-            "href": "/guestAuth/app/rest/builds/?"
-            + "locator=buildType:TestProject_TestBuild,sinceBuild:id:1,status:SUCCESS",
-            "build": [
-                {
-                    "id": 2,
-                    "buildTypeId": "TestProject_TestBuild",
-                    "number": "2",
-                    "status": "SUCCESS",
-                    "state": "finished",
-                    "href": "/guestAuth/app/rest/builds/id:2",
-                    "webUrl": "http://localhost:8111/viewLog.html?buildId=2&buildTypeId=TestProject_TestBuild",
-                }
-            ],
-        }
-    elif 'sinceBuild:id:2' in url:
-        json = {
-            "count": 0,
-            "href": (
-                "/guestAuth/app/rest/builds/?locator=buildType:TestProject_TestBuild,sinceBuild:id:2,status:SUCCESS"
-            ),
-        }
-
-    mock_resp.json.return_value = json
-    return mock_resp
+    aggregator.assert_event(msg_title="", msg_text="", count=0)
 
 
 @pytest.mark.parametrize(
-    'test_case, extra_config, expected_http_kwargs',
+    'extra_config, expected_http_kwargs',
     [
-        ("legacy ssl config True", {'ssl_validation': True}, {'verify': True}),
-        ("legacy ssl config False", {'ssl_validation': False}, {'verify': False}),
-        ("legacy ssl config unset", {}, {'verify': True}),
+        pytest.param({'ssl_validation': True}, {'verify': True}, id="legacy ssl config True"),
+        pytest.param({'ssl_validation': False}, {'verify': False}, id="legacy ssl config False"),
+        pytest.param({}, {'verify': True}, id="legacy ssl config unset"),
     ],
 )
-def test_config(test_case, extra_config, expected_http_kwargs):
+def test_config(extra_config, expected_http_kwargs):
     instance = deepcopy(CONFIG['instances'][0])
     instance.update(extra_config)
     check = TeamCityCheck(CHECK_NAME, {}, [instance])

@@ -80,6 +80,24 @@ files:
         You can find it labelled as "Build configuration ID" when editing the configuration in question.
       value:
         type: string
+    - name: build_config_metrics
+      description: |
+        Collect Build Configuration statistics per build.
+      value:
+        type: boolean
+        example: true
+    - name: test_result_metrics
+      description: |
+        Collect test result statistics per build.
+      value:
+        type: boolean
+        example: true
+    - name: build_problem_checks
+      description: |
+        Collect build problem service checks
+      value:
+        type: boolean
+        example: true
     - name: basic_http_authentication
       description: |
         Set to true to turn on basic http authentication.

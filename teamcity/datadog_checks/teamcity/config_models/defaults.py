@@ -42,8 +42,16 @@ def instance_basic_http_authentication(field, value):
     return False
 
 
+def instance_build_config_metrics(field, value):
+    return True
+
+
 def instance_build_configuration(field, value):
     return get_default_field_value(field, value)
+
+
+def instance_build_problem_checks(field, value):
+    return True
 
 
 def instance_cache_metric_wildcards(field, value):
@@ -264,6 +272,10 @@ def instance_tags(field, value):
 
 def instance_telemetry(field, value):
     return False
+
+
+def instance_test_result_metrics(field, value):
+    return True
 
 
 def instance_timeout(field, value):

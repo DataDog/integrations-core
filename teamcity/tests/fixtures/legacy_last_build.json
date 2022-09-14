@@ -1,0 +1,18 @@
+{
+    "count": 1,
+    "href": "/guestAuth/app/rest/builds/?locator=buildType:TestProject_TestBuild,count:1",
+    "nextHref": "/guestAuth/app/rest/builds/?locator=buildType:TestProject_TestBuild,count:1,start:1",
+    "build": [
+        {
+            "id": 1,
+            "buildTypeId": "TestProject_TestBuild",
+            "number": "1",
+            "status": "SUCCESS",
+            "state": "finished",
+            "branchName": "main",
+            "defaultBranch": "true",
+            "href": "/guestAuth/app/rest/builds/id:1",
+            "webUrl": "http://localhost:8111/viewLog.html?buildId=1&buildTypeId=TestProject_TestBuild"
+        }
+    ]
+}
