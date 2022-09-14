@@ -330,7 +330,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             normalized_row['dd_comments'] = metadata.get('comments', None)
         except Exception as e:
             if self._config.log_unobfuscated_queries:
-                self._log.info("Failed to obfuscate statement '%s': %s", row['query'], e)
+                self._log.warning("Failed to obfuscate statement '%s': %s", row['query'], e)
             else:
                 self._log.debug("Failed to obfuscate statement: %s", e)
             self._check.count(
@@ -616,10 +616,9 @@ class PostgresStatementSamples(DBMAsyncJob):
             try:
                 normalized_plan = datadog_agent.obfuscate_sql_exec_plan(plan, normalize=True)
                 obfuscated_plan = datadog_agent.obfuscate_sql_exec_plan(plan)
-                raise RuntimeError("Mock failure")
             except Exception as e:
                 if self._config.log_unobfuscated_plans:
-                    self._log.info("Failed to obfuscate plan '%s': %s", plan, e)
+                    self._log.warning("Failed to obfuscate plan '%s': %s", plan, e)
                 raise e
 
             plan_signature = compute_exec_plan_signature(normalized_plan)
