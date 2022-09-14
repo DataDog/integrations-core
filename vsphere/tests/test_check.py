@@ -439,7 +439,7 @@ def test_specs_start_time(aggregator, dd_run_check, historical_instance):
     [
         (1, False),
         (2, False),
-        (10, True),
+        (20, True),
     ],
 )
 @pytest.mark.usefixtures('mock_type', 'mock_api')
