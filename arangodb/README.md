@@ -10,11 +10,6 @@ Enable the Datadog-ArangoDB integration to:
 - Understand the impact of a long request and troubleshoot latency issues.
 - Monitor underlying RocksDB memory, disk, and cache limits.
 
-Monitoring ArangoDB with Datadog allows you to:
-- Identify slow queries based on user-defined thresholds.
-- Understand the impact of a long request and troubleshoot any latency issues.
-- Monitor underlying RocksDB memory, disk, and cache limits to fine-tune storage engine performance.
-
 ## Setup
 
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][3] to apply these instructions.
