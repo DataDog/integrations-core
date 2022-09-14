@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 import win32evtlog
+import logging
 
 from . import common
 
@@ -51,7 +52,9 @@ def test_recover_from_broken_subscribe(aggregator, dd_run_check, new_check, inst
     check._subscription = None
 
     # Run the check to initiate the reset
-    dd_run_check(check)
+    # Enable debug logging so we see expected error message
+    with caplog.at_level(logging.DEBUG):
+        dd_run_check(check)
 
     # Run the check again to collect the event we missed
     dd_run_check(check)
