@@ -13,7 +13,7 @@ init_config:
     ## Those options are used when making vSphere REST API calls to retrieve vSphere tags
     ## when `collect_tags` instance config is enabled.
     #
-    rest_api_options:
+    # rest_api_options:
 
         ## @param proxy - mapping - optional
         ## Set HTTP or HTTPS proxies for all instances. Use the `no_proxy` list
@@ -138,10 +138,6 @@ instances:
     ## @param tls_ignore_warning - boolean - optional - default: false
     ## If `ssl_verify ` is disabled, security warnings are logged by the check when making http requests.
     ## Disable those by setting `tls_ignore_warning` to true.
-    ##
-    ## Note: `tls_ignore_warning` set to true is currently only reliable if used by one instance of one integration.
-    ## If enabled for multiple instances, spurious warnings might still appear even if `tls_ignore_warning` is set
-    ## to true.
     #
     # tls_ignore_warning: false
 
@@ -385,7 +381,7 @@ instances:
     ## The options are used when making vSphere REST API calls to retrieve vSphere tags
     ## when `collect_tags` instance config is enabled.
     #
-    rest_api_options:
+    # rest_api_options:
 
         ## @param proxy - mapping - optional
         ## This overrides the `proxy` setting in `init_config`.
@@ -535,6 +531,12 @@ instances:
         ##     path (required): The absolute path for the file to read from.
         ##     pattern: A regular expression pattern with a single capture group used to find the
         ##              token rather than using the entire file, for example: Your secret is (.+)
+        ##   - type: oauth
+        ##     url (required): The token endpoint.
+        ##     client_id (required): The client identifier.
+        ##     client_secret (required): The client secret.
+        ##     basic_auth: Whether the provider expects credentials to be transmitted in
+        ##                 an HTTP Basic Auth header. The default is: false
         ##
         ## The available writers are:
         ##
@@ -708,3 +710,14 @@ instances:
     ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
     #
     # min_collection_interval: 15
+
+    ## @param metric_patterns - mapping - optional
+    ## A mapping of metrics to include or exclude, with each entry being a regular expression.
+    ##
+    ## Metrics defined in `exclude` will take precedence in case of overlap.
+    #
+    # metric_patterns:
+    #   include:
+    #   - <INCLUDE_REGEX>
+    #   exclude:
+    #   - <EXCLUDE_REGEX>

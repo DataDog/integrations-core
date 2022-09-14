@@ -1,7 +1,7 @@
 [build-system]
 requires = [
     "hatchling>=0.11.2",
-    "setuptools; python_version < '3.0'",
+    "setuptools<61",
 ]
 build-backend = "hatchling.build"
 
@@ -9,7 +9,7 @@ build-backend = "hatchling.build"
 name = "datadog-checks-downloader"
 description = "The Datadog Checks Downloader"
 readme = "README.md"
-license = "BSD-3-Clause"
+license = {text = "BSD-3-Clause"}
 keywords = [
     "datadog",
     "datadog agent",
@@ -19,6 +19,7 @@ authors = [
     { name = "Datadog", email = "packages@datadoghq.com" },
 ]
 classifiers = [
+    "Private :: Do Not Upload",
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
     "Intended Audience :: System Administrators",
@@ -34,6 +35,8 @@ dynamic = [
 [project.optional-dependencies]
 deps = [
     "in-toto==1.0.1",
+    "packaging==20.9; python_version < '3.0'",
+    "packaging==21.3; python_version > '3.0'",
     "securesystemslib[crypto,pynacl]==0.20.1",
     "tuf==0.17.0; python_version < '3.0'",
     "tuf==0.19.0; python_version > '3.0'",

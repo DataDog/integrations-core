@@ -93,9 +93,9 @@ init_config:
 instances:
 
     ## @param gitlab_url - string - required
-    ## Master URL to probe for service health status
-    ## If you are using gitlab CE and not EE, use this url with
-    ## the authorization token: http://localhost/?token=<TOKEN>
+    ## Master URL to probe for service health status.
+    ## If you are using GitLab CE and not EE, use this URL with
+    ## the authorization token: http://localhost/?token=<TOKEN>.
     #
   - gitlab_url: <GITLAB_URL>
 
@@ -205,6 +205,11 @@ instances:
     ## Note: bearer_token_auth should be set to true to enable adding the token to HTTP headers for authentication.
     #
     # bearer_token_path: <TOKEN_PATH>
+
+    ## @param bearer_token_refresh_interval - integer - optional - default: 60
+    ## The refresh interval to keep the bearer token up-to-date.
+    #
+    # bearer_token_refresh_interval: 60
 
     ## @param ignore_metrics - list of strings - optional
     ## A list of metrics to ignore, the "*" wildcard can be used to match multiple metric names.
@@ -382,6 +387,12 @@ instances:
     ##     path (required): The absolute path for the file to read from.
     ##     pattern: A regular expression pattern with a single capture group used to find the
     ##              token rather than using the entire file, for example: Your secret is (.+)
+    ##   - type: oauth
+    ##     url (required): The token endpoint.
+    ##     client_id (required): The client identifier.
+    ##     client_secret (required): The client secret.
+    ##     basic_auth: Whether the provider expects credentials to be transmitted in
+    ##                 an HTTP Basic Auth header. The default is: false
     ##
     ## The available writers are:
     ##
@@ -562,6 +573,17 @@ instances:
     ## This is useful for cluster-level checks.
     #
     # empty_default_hostname: false
+
+    ## @param metric_patterns - mapping - optional
+    ## A mapping of metrics to include or exclude, with each entry being a regular expression.
+    ##
+    ## Metrics defined in `exclude` will take precedence in case of overlap.
+    #
+    # metric_patterns:
+    #   include:
+    #   - <INCLUDE_REGEX>
+    #   exclude:
+    #   - <EXCLUDE_REGEX>
 
 ## Log Section
 ##

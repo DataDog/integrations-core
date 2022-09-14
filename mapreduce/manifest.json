@@ -1,40 +1,55 @@
 {
-  "categories": [
-    "processing",
-    "autodiscovery",
-    "log collection"
-  ],
-  "creates_events": false,
-  "display_name": "MapReduce",
-  "guid": "1c143492-84ac-42d2-89d5-a45c718092b0",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "mapreduce.",
-  "metric_to_check": "mapreduce.job.elapsed_time.max",
-  "name": "mapreduce",
-  "public_title": "Datadog-Map Reduce Integration",
-  "short_description": "Monitor the status and duration of map and reduce tasks.",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "type": "check",
-  "integration_id": "mapreduce",
+  "manifest_version": "2.0.0",
+  "app_uuid": "25ae6f45-147b-478c-9f0c-5013c3859796",
+  "app_id": "mapreduce",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor the status and duration of map and reduce tasks.",
+    "title": "Map Reduce",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Processing",
+      "Category::Autodiscovery",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "MapReduce",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "mapreduce.",
+        "check": "mapreduce.job.elapsed_time.max",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
     },
     "dashboards": {
       "mapreduce": "assets/dashboards/mapreduce_dashboard.json"
     },
-    "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "mapreduce"
-    },
-    "monitors": {},
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

@@ -46,7 +46,9 @@ init_config:
 instances:
 
     ## @param name - string - required
-    ## Name of your Http check instance.
+    ## Name of your HTTP check instance.
+    ##
+    ## Note: The `instance` tag takes the value of this parameter and normalizes all `,+*-/()[]{}` characters into `_`.
     #
   - name: My first service
 
@@ -129,8 +131,6 @@ instances:
     ## that configuration parameters expressed in seconds take precedence over
     ## the corresponding ones expressed in days.
     ##
-    ## The SSL certificate will always be validated for this additional
-    ## service check regardless of the value of `tls_verify`.
     ## By default, for the expiration check, the Agent validates the SSL certificate
     ## hostname against the host of the provided url.
     #
@@ -157,11 +157,6 @@ instances:
     ## the critical threshold for the HTTP check in second
     #
     # seconds_critical: <SECONDS_CRITICAL>
-
-    ## @param check_hostname - boolean - optional - default: true
-    ## Set check_hostname to false to disable the verification check for matching hostnames.
-    #
-    # check_hostname: true
 
     ## @param ssl_server_name - string - optional
     ## If necessary and check_hostname is set to true,
@@ -210,6 +205,17 @@ instances:
     ## This is useful for cluster-level checks.
     #
     # empty_default_hostname: false
+
+    ## @param metric_patterns - mapping - optional
+    ## A mapping of metrics to include or exclude, with each entry being a regular expression.
+    ##
+    ## Metrics defined in `exclude` will take precedence in case of overlap.
+    #
+    # metric_patterns:
+    #   include:
+    #   - <INCLUDE_REGEX>
+    #   exclude:
+    #   - <EXCLUDE_REGEX>
 
     ## @param proxy - mapping - optional
     ## This overrides the `proxy` setting in `init_config`.
@@ -359,6 +365,12 @@ instances:
     ##     path (required): The absolute path for the file to read from.
     ##     pattern: A regular expression pattern with a single capture group used to find the
     ##              token rather than using the entire file, for example: Your secret is (.+)
+    ##   - type: oauth
+    ##     url (required): The token endpoint.
+    ##     client_id (required): The client identifier.
+    ##     client_secret (required): The client secret.
+    ##     basic_auth: Whether the provider expects credentials to be transmitted in
+    ##                 an HTTP Basic Auth header. The default is: false
     ##
     ## The available writers are:
     ##
@@ -510,3 +522,15 @@ instances:
     ## Whether or not to allow URL redirection.
     #
     # allow_redirects: true
+
+    ## @param tls_private_key_password - string - optional
+    ## Optional password to decrypt tls_private_key.
+    ##
+    ## Setting this implicitly sets `tls_verify` to true.
+    #
+    # tls_private_key_password: <PRIVATE_KEY_PASSWORD>
+
+    ## @param tls_validate_hostname - boolean - optional - default: true
+    ## Verifies that the server's cert hostname matches the one requested.
+    #
+    # tls_validate_hostname: true

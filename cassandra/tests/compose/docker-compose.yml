@@ -1,8 +1,9 @@
-version: '2'
+version: '3'
 
 services:
   cassandra:
-    build: .
+    build:
+      context: .
     ports:
       - '7199:7199' # JMX
     environment:

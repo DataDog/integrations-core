@@ -66,7 +66,7 @@ def content_matches(current_model_file_lines, expected_model_file_lines):
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate configuration data models')
-@click.argument('check', autocompletion=complete_valid_checks, required=False)
+@click.argument('check', shell_complete=complete_valid_checks, required=False)
 @click.option('--sync', '-s', is_flag=True, help='Generate data models based on specifications')
 @click.option('--verbose', '-v', is_flag=True, help='Verbose mode')
 @click.pass_context
@@ -86,8 +86,8 @@ def models(ctx, check, sync, verbose):
     files_failed = {}
     num_files = 0
 
-    license_header_lines = get_license_header().splitlines(True) + ['\n']
-    documentation_header_lines = ['\n'] + get_config_models_documentation().splitlines(True) + ['\n']
+    license_header_lines = get_license_header().splitlines(True) + ['\n', '\n']
+    documentation_header_lines = get_config_models_documentation().splitlines(True) + ['\n']
 
     code_formatter = ModelConsumer.create_code_formatter()
 
@@ -165,22 +165,19 @@ def models(ctx, check, sync, verbose):
                     # validators.py and deprecations.py are custom files, they should only be rendered the first time
                     continue
 
+            if not community_check:
                 expected_model_file_lines.extend(license_header_lines)
-                if model_file not in CUSTOM_FILES:
-                    expected_model_file_lines.extend(documentation_header_lines)
-                expected_model_file_lines.extend(generated_model_file_lines)
-            else:
-                if not community_check:
-                    expected_model_file_lines.extend(license_header_lines)
-                if model_file not in CUSTOM_FILES:
-                    expected_model_file_lines.extend(documentation_header_lines)
 
-                expected_model_file_lines.extend(generated_model_file_lines)
+            if model_file not in CUSTOM_FILES:
+                expected_model_file_lines.extend(documentation_header_lines)
+
+            expected_model_file_lines.extend(generated_model_file_lines)
 
             # If we're re-generating a file, we should ensure we do not change the license date
             # We also want to handle the case where there is no license header
-            if len(current_model_file_lines) > 0 and LICENSE_HEADER in current_model_file_lines[0]:
-                expected_model_file_lines[0] = current_model_file_lines[0]
+            if not community_check:
+                if len(current_model_file_lines) > 0 and LICENSE_HEADER in current_model_file_lines[0]:
+                    expected_model_file_lines[0] = current_model_file_lines[0]
 
             if not current_model_file_lines or not content_matches(current_model_file_lines, expected_model_file_lines):
                 if sync:

@@ -30,6 +30,10 @@ def get_tox_env():
     return os.environ['TOX_ENV_NAME']
 
 
+def using_legacy_docker_compose():
+    return os.environ.get('LEGACY_DOCKER_COMPOSE', 'false') == 'true'
+
+
 def ensure_bytes(s):
     if not isinstance(s, bytes):
         s = s.encode('utf-8')
@@ -137,3 +141,8 @@ def get_metadata_metrics():
         for row in csv.DictReader(f):
             metrics[row['metric_name']] = row
     return metrics
+
+
+def get_hostname():
+    """Return the socket hostname"""
+    return socket.gethostname()

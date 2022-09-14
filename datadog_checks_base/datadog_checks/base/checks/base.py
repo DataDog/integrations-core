@@ -67,7 +67,7 @@ if datadog_agent.get_config('disable_unsafe_yaml'):
     monkey_patch_pyyaml()
 
 if not PY2:
-    from pydantic import ValidationError
+    from pydantic import BaseModel, ValidationError
 
 if TYPE_CHECKING:
     import ssl
@@ -130,10 +130,6 @@ class AgentCheck(object):
     # If the return type is a string, then it will be sent as the value for `name`. If the return type is
     # a mapping type, then each key will be considered a `name` and will be sent with its (str) value.
     METADATA_TRANSFORMERS = None
-
-    # Default fields to whitelist for metadata submission
-    METADATA_DEFAULT_CONFIG_INIT_CONFIG = None
-    METADATA_DEFAULT_CONFIG_INSTANCE = None
 
     FIRST_CAP_RE = re.compile(br'(.)([A-Z][a-z]+)')
     ALL_CAP_RE = re.compile(br'([a-z0-9])([A-Z])')
@@ -216,6 +212,13 @@ class AgentCheck(object):
         logger = logging.getLogger('{}.{}'.format(__name__, self.name))
         self.log = CheckLoggingAdapter(logger, self)
 
+        metric_patterns = self.instance.get('metric_patterns', {}) if instance else {}
+        if not isinstance(metric_patterns, dict):
+            raise ConfigurationError('Setting `metric_patterns` must be a mapping')
+
+        self.exclude_metrics_pattern = self._create_metrics_pattern(metric_patterns, 'exclude')
+        self.include_metrics_pattern = self._create_metrics_pattern(metric_patterns, 'include')
+
         # TODO: Remove with Agent 5
         # Set proxy settings
         self.proxies = self._get_requests_proxy()
@@ -278,10 +281,35 @@ class AgentCheck(object):
         self._config_model_shared = None  # type: Any
 
         # Functions that will be called exactly once (if successful) before the first check run
-        self.check_initializations = deque([self.send_config_metadata])  # type: Deque[Callable[[], None]]
+        self.check_initializations = deque()  # type: Deque[Callable[[], None]]
 
         if not PY2:
             self.check_initializations.append(self.load_configuration_models)
+
+    def _create_metrics_pattern(self, metric_patterns, option_name):
+        all_patterns = metric_patterns.get(option_name, [])
+
+        if not isinstance(all_patterns, list):
+            raise ConfigurationError('Setting `{}` of `metric_patterns` must be an array'.format(option_name))
+
+        metrics_patterns = []
+        for i, entry in enumerate(all_patterns, 1):
+            if not isinstance(entry, str):
+                raise ConfigurationError(
+                    'Entry #{} of setting `{}` of `metric_patterns` must be a string'.format(i, option_name)
+                )
+            if not entry:
+                self.log.debug(
+                    'Entry #%s of setting `%s` of `metric_patterns` must not be empty, ignoring', i, option_name
+                )
+                continue
+
+            metrics_patterns.append(entry)
+
+        if metrics_patterns:
+            return re.compile('|'.join(metrics_patterns))
+
+        return None
 
     def _get_metric_limiter(self, name, instance=None):
         # type: (str, InstanceType) -> Optional[Limiter]
@@ -411,7 +439,14 @@ class AgentCheck(object):
         models_config = models_config or {}
         typos = set()  # type: Set[str]
 
-        known_options = [k for k, _ in models_config]  # type: List[str]
+        known_options = set([k for k, _ in models_config])  # type: Set[str]
+
+        if not PY2:
+
+            if isinstance(models_config, BaseModel):
+                # Also add aliases, if any
+                known_options.update(set(models_config.dict(by_alias=True)))
+
         unknown_options = [option for option in user_configs.keys() if option not in known_options]  # type: List[str]
 
         for unknown_option in unknown_options:
@@ -600,12 +635,31 @@ class AgentCheck(object):
 
         aggregator.submit_event_platform_event(self, self.check_id, to_native_string(raw_event), "dbm-activity")
 
+    def should_send_metric(self, metric_name):
+        return not self._metric_excluded(metric_name) and self._metric_included(metric_name)
+
+    def _metric_included(self, metric_name):
+        if self.include_metrics_pattern is None:
+            return True
+
+        return self.include_metrics_pattern.search(metric_name) is not None
+
+    def _metric_excluded(self, metric_name):
+        if self.exclude_metrics_pattern is None:
+            return False
+
+        return self.exclude_metrics_pattern.search(metric_name) is not None
+
     def _submit_metric(
         self, mtype, name, value, tags=None, hostname=None, device_name=None, raw=False, flush_first_value=False
     ):
         # type: (int, str, float, Sequence[str], str, str, bool, bool) -> None
         if value is None:
             # ignore metric sample
+            return
+
+        name = self._format_namespace(name, raw)
+        if not self.should_send_metric(name):
             return
 
         tags = self._normalize_tags_type(tags or [], device_name, name)
@@ -634,9 +688,7 @@ class AgentCheck(object):
             self.warning(err_msg)
             return
 
-        aggregator.submit_metric(
-            self, self.check_id, mtype, self._format_namespace(name, raw), value, tags, hostname, flush_first_value
-        )
+        aggregator.submit_metric(self, self.check_id, mtype, name, value, tags, hostname, flush_first_value)
 
     def gauge(self, name, value, tags=None, hostname=None, device_name=None, raw=False):
         # type: (str, float, Sequence[str], str, str, bool) -> None
@@ -831,13 +883,6 @@ class AgentCheck(object):
         :param options: keyword arguments to pass to any defined transformer
         """
         self.metadata_manager.submit(name, value, options)
-
-    def send_config_metadata(self):
-        # type: () -> None
-        self.set_metadata('config', self.instance, section='instance', whitelist=self.METADATA_DEFAULT_CONFIG_INSTANCE)
-        self.set_metadata(
-            'config', self.init_config, section='init_config', whitelist=self.METADATA_DEFAULT_CONFIG_INIT_CONFIG
-        )
 
     @staticmethod
     def is_metadata_collection_enabled():
@@ -1174,10 +1219,19 @@ class AgentCheck(object):
         return normalized_tags
 
     def degeneralise_tag(self, tag):
-        tag_name, value = tag.split(':', 1)
+        split_tag = tag.split(':', 1)
+        if len(split_tag) > 1:
+            tag_name, value = split_tag
+        else:
+            tag_name = tag
+            value = None
+
         if tag_name in GENERIC_TAGS:
             new_name = '{}_{}'.format(self.name, tag_name)
-            return '{}:{}'.format(new_name, value)
+            if value:
+                return '{}:{}'.format(new_name, value)
+            else:
+                return new_name
         else:
             return tag
 

@@ -50,6 +50,25 @@ instances:
     #
   - kube_state_url: http://example.com:8080/metrics
 
+    ## @param join_standard_tags - boolean - optional - default: false
+    ## To enable joining standard tags from labels, you must set this parameter to true.
+    ## It will join standard tags found in these labels coming from info Kube State metrics (*_labels).
+    ##   tags.datadoghq.com/env     => env
+    ##   tags.datadoghq.com/service => service
+    ##   tags.datadoghq.com/version => version
+    ##
+    ## Resources enabled for join_standard_tags include:
+    ## Pod, Deployment, ReplicaSet, DaemonSet, StatefulSet, Job, CronJob
+    #
+    # join_standard_tags: false
+
+    ## @param hostname_override - boolean - optional - default: true
+    ## By default the hostname for metrics containing the node label is
+    ## overridden by the value of the label, this can be deactivated (all metrics
+    ## will be attached to the host running KSM)
+    #
+    # hostname_override: true
+
     ## @param health_service_check - boolean - optional - default: true
     ## Send a service check reporting about the health of the Prometheus endpoint.
     ## The service check is named <NAMESPACE>.prometheus.health
@@ -146,6 +165,11 @@ instances:
     ## Note: bearer_token_auth should be set to true to enable adding the token to HTTP headers for authentication.
     #
     # bearer_token_path: <TOKEN_PATH>
+
+    ## @param bearer_token_refresh_interval - integer - optional - default: 60
+    ## The refresh interval to keep the bearer token up-to-date.
+    #
+    # bearer_token_refresh_interval: 60
 
     ## @param ignore_metrics - list of strings - optional
     ## A list of metrics to ignore, the "*" wildcard can be used to match multiple metric names.
@@ -323,6 +347,12 @@ instances:
     ##     path (required): The absolute path for the file to read from.
     ##     pattern: A regular expression pattern with a single capture group used to find the
     ##              token rather than using the entire file, for example: Your secret is (.+)
+    ##   - type: oauth
+    ##     url (required): The token endpoint.
+    ##     client_id (required): The client identifier.
+    ##     client_secret (required): The client secret.
+    ##     basic_auth: Whether the provider expects credentials to be transmitted in
+    ##                 an HTTP Basic Auth header. The default is: false
     ##
     ## The available writers are:
     ##
@@ -503,3 +533,14 @@ instances:
     ## This is useful for cluster-level checks.
     #
     # empty_default_hostname: false
+
+    ## @param metric_patterns - mapping - optional
+    ## A mapping of metrics to include or exclude, with each entry being a regular expression.
+    ##
+    ## Metrics defined in `exclude` will take precedence in case of overlap.
+    #
+    # metric_patterns:
+    #   include:
+    #   - <INCLUDE_REGEX>
+    #   exclude:
+    #   - <EXCLUDE_REGEX>

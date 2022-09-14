@@ -49,6 +49,11 @@ instances:
     #
     password: <PASSWORD>
 
+    ## @param schema - string - optional - default: SYS_DATABASES
+    ## The schema containing the tenant databases views.
+    #
+    # schema: SYS_DATABASES
+
     ## @param connection_properties - mapping - optional
     ## When `hdbcli` is installed, this defines the properties of the database connections. Any property
     ## defined here overrides any default value set by the check. For more information, see:
@@ -202,3 +207,14 @@ instances:
     ## This is useful for cluster-level checks.
     #
     # empty_default_hostname: false
+
+    ## @param metric_patterns - mapping - optional
+    ## A mapping of metrics to include or exclude, with each entry being a regular expression.
+    ##
+    ## Metrics defined in `exclude` will take precedence in case of overlap.
+    #
+    # metric_patterns:
+    #   include:
+    #   - <INCLUDE_REGEX>
+    #   exclude:
+    #   - <EXCLUDE_REGEX>

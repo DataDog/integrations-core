@@ -1,6 +1,23 @@
 # CHANGELOG - VoltDB
 
-## 2.0.0 / 2022-02-19
+## 2.1.2 / 2022-06-27 / Agent 7.38.0
+
+* [Fixed] Fix mapping of columns and use delta=1 where required. See [#11775](https://github.com/DataDog/integrations-core/pull/11775). Thanks [kjmadscience](https://github.com/kjmadscience).
+
+## 2.1.1 / 2022-04-14 / Agent 7.36.0
+
+* [Fixed] Fix mapping of columns and use delta=1 where required. See [#11775](https://github.com/DataDog/integrations-core/pull/11775). Thanks [kjmadscience](https://github.com/kjmadscience).
+
+## 2.1.0 / 2022-04-05
+
+* [Added] Add metric_patterns options to filter all metric submission by a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
+
+## 2.0.1 / 2022-03-15
+
+* [Fixed] Pass Delta flag to calls to Statistics. See [#11655](https://github.com/DataDog/integrations-core/pull/11655). Thanks [ssomagani](https://github.com/ssomagani).
+* [Fixed] Remove outdated warning in the description for the `tls_ignore_warning` option. See [#11591](https://github.com/DataDog/integrations-core/pull/11591).
+
+## 2.0.0 / 2022-02-19 / Agent 7.35.0
 
 * [Added] Add `pyproject.toml` file. See [#11455](https://github.com/DataDog/integrations-core/pull/11455).
 * [Fixed] Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).

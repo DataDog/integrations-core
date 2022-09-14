@@ -42,6 +42,10 @@ def instance_empty_default_hostname(field, value):
     return False
 
 
+def instance_metric_patterns(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_min_collection_interval(field, value):
     return 15
 
@@ -56,6 +60,10 @@ def instance_persist_db_connections(field, value):
 
 def instance_port(field, value):
     return 30015
+
+
+def instance_schema_(field, value):
+    return 'SYS_DATABASES'
 
 
 def instance_service(field, value):

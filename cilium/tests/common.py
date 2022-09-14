@@ -96,6 +96,16 @@ AGENT_V2_METRICS = [
     "cilium.unreachable.nodes",
 ]
 
+OPERATOR_V2_PROCESS_METRICS = [
+    "cilium.operator.process.cpu.seconds.count",
+    "cilium.operator.process.max_fds",
+    "cilium.operator.process.open_fds",
+    "cilium.operator.process.resident_memory.bytes",
+    "cilium.operator.process.start_time.seconds",
+    "cilium.operator.process.virtual_memory.bytes",
+    "cilium.operator.process.virtual_memory_max.bytes",
+]
+
 OPERATOR_V2_METRICS = [
     "cilium.operator.eni.available",
     "cilium.operator.eni.available.ips_per_subnet",
@@ -130,13 +140,6 @@ OPERATOR_V2_METRICS = [
     "cilium.operator.eni.k8s_sync.queued.count",
     "cilium.operator.eni.nodes.total",
     "cilium.operator.eni.resync.count",
-    "cilium.operator.process.cpu.seconds.count",
-    "cilium.operator.process.max_fds",
-    "cilium.operator.process.open_fds",
-    "cilium.operator.process.resident_memory.bytes",
-    "cilium.operator.process.start_time.seconds",
-    "cilium.operator.process.virtual_memory.bytes",
-    "cilium.operator.process.virtual_memory_max.bytes",
     "cilium.operator.ec2.api.duration.seconds.sum",
     "cilium.operator.ec2.api.duration.seconds.count",
     "cilium.operator.ec2.api.duration.seconds.bucket",
@@ -172,7 +175,7 @@ OPERATOR_V2_METRICS = [
     "cilium.operator.ipam.allocation_ops.count",
     "cilium.operator.ipam.interface_creation_ops.count",
     "cilium.operator.ipam.release_ops.count",
-]
+] + OPERATOR_V2_PROCESS_METRICS
 
 # Not available in test metric fixtures
 ADDL_OPERATOR_AWS_METRICS = [
@@ -190,9 +193,12 @@ ADDL_OPERATOR_AWS_METRICS = [
     "cilium.operator.ipam.api.rate_limit.duration.seconds.bucket",
 ]
 
-ADDL_OPERATOR_METRICS = [
+ADDL_GC_OPERATOR_METRICS = [
     "cilium.operator.identity_gc.entries",
     "cilium.operator.identity_gc.runs",
+]
+
+ADDL_OPERATOR_METRICS = [
     "cilium.operator.num_ceps_per_ces.sum",
     "cilium.operator.num_ceps_per_ces.count",
     "cilium.operator.num_ceps_per_ces.bucket",

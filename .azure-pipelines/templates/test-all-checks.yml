@@ -66,6 +66,9 @@ jobs:
     - checkName: apache
       displayName: Apache
       os: linux
+    - checkName: arangodb
+      displayName: ArangoDB
+      os: linux
     - checkName: aspdotnet
       displayName: ASP.NET
       os: windows
@@ -75,11 +78,17 @@ jobs:
     - checkName: azure_iot_edge
       displayName: Azure IoT Edge
       os: linux
+    - checkName: boundary
+      displayName: Boundary
+      os: linux
     - checkName: btrfs
       displayName: Btrfs
       os: linux
     - checkName: cacti
       displayName: Cacti
+      os: linux
+    - checkName: calico
+      displayName: Calico
       os: linux
     - checkName: cassandra
       displayName: Cassandra
@@ -129,6 +138,9 @@ jobs:
     - checkName: datadog_cluster_agent
       displayName: Datadog Cluster Agent
       os: linux
+    - checkName: ddev
+      displayName: ddev
+      os: linux
     - checkName: directory
       displayName: Directory
       os: linux
@@ -174,6 +186,9 @@ jobs:
     - checkName: fluentd
       displayName: fluentd
       os: linux
+    - checkName: foundationdb
+      displayName: FoundationDB
+      os: linux
     - checkName: gearmand
       displayName: Gearman
       os: linux
@@ -218,6 +233,9 @@ jobs:
       os: linux
     - checkName: hudi
       displayName: Hudi
+      os: linux
+    - checkName: ibm_ace
+      displayName: IBM ACE
       os: linux
     - checkName: ibm_db2
       displayName: IBM Db2
@@ -459,6 +477,9 @@ jobs:
     - checkName: teamcity
       displayName: TeamCity
       os: linux
+    - checkName: teradata
+      displayName: Teradata
+      os: linux
     - checkName: tls
       displayName: TLS
       os: linux
@@ -468,6 +489,9 @@ jobs:
         os: linux
     - checkName: tomcat
       displayName: Tomcat
+      os: linux
+    - checkName: traffic_server
+      displayName: Traffic Server
       os: linux
     - checkName: twemproxy
       displayName: Twemproxy

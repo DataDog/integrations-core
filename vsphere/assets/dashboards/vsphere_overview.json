@@ -15,8 +15,7 @@
       "id": 1,
       "definition": {
         "type": "event_stream",
-        "query": "sources:vsphere $vcenter_server.value $vcenter_datacenter.value",
-        "tags_execution": "and",
+        "query": "source:vsphere $vcenter_server.value $vcenter_datacenter.value",
         "event_size": "l",
         "title": "vSphere events",
         "title_size": "16",
@@ -289,7 +288,7 @@
         "title_align": "center",
         "check": "vsphere.can_connect",
         "grouping": "cluster",
-        "group_by": ["$vcenter_server"],
+        "group_by": ["vcenter_server"],
         "tags": ["*"]
       },
       "layout": { "x": 0, "y": 12, "width": 15, "height": 9 }

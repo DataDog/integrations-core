@@ -37,7 +37,7 @@ The recommended way to set up this integration is by enabling the Prometheus end
 ##### Metric collection
 To configure this check for an Agent running on a host:
 
-1. Edit the `haproxy.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your HAProxy metrics. See the [sample haproxy.d/conf.yaml][27] for all available configuration options.
+1. Edit the `haproxy.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your HAProxy metrics. See the [sample haproxy.d/conf.yaml][8] for all available configuration options.
 
    ```yaml  
    instances:
@@ -59,7 +59,12 @@ To configure this check for an Agent running on a host:
      #
      openmetrics_endpoint: http://localhost:<PORT>/metrics
    ```
-2. [Restart the Agent][6].
+   **Note**: The `use_openmetrics` option uses [OpenMetrics v2][26] for metric collection, which requires Agent v7.35+ or [enabling Python 3][27] in Agent v6.35+. For hosts that are unable to use Python 3 or are on Agent v7.34 and below, use the OpenMetrics v1 implementation or the [socket-based legacy integration](#using-the-stats-endpoint). 
+
+   To view configuration options for the legacy implementation, see the [sample haproxy.d/conf.yaml][25] file for Agent v7.34.
+
+
+3. [Restart the Agent][6].
 
 <!-- xxz tab xxx -->
 <!-- xxx tab "Containerized" xxx -->
@@ -70,18 +75,42 @@ For containerized environments, see the [Autodiscovery Integration Templates][2]
 
 ##### Metric collection
 
-| Parameter            | Value                                                                                 |
-|----------------------|---------------------------------------------------------------------------------------|
-| `<INTEGRATION_NAME>` | `haproxy`                                                                             |
-| `<INIT_CONFIG>`      | blank or `{}`                                                                         |
-| `<INSTANCE_CONFIG>`  | `{"openmetrics_endpoint": "http://%%host%%:<PORT>/metrics", "use_openmetrics": True}` |
+| Parameter            | Value                                                                                   |
+|----------------------|-----------------------------------------------------------------------------------------|
+| `<INTEGRATION_NAME>` | `haproxy`                                                                               |
+| `<INIT_CONFIG>`      | blank or `{}`                                                                           |
+| `<INSTANCE_CONFIG>`  | `{"openmetrics_endpoint": "http://%%host%%:<PORT>/metrics", "use_openmetrics": "true"}` |
+
+##### Kubernetes Deployment example
+
+Add pod annotations under `.spec.template.metadata` for a Deployment:
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: haproxy
+spec:
+  template:
+    metadata:
+      labels:
+        name: haproxy
+      annotations:
+        ad.datadoghq.com/haproxy.check_names: '["haproxy"]'
+        ad.datadoghq.com/haproxy.init_configs: '[{}]'
+        ad.datadoghq.com/haproxy.instances: |
+          [
+            {
+              "openmetrics_endpoint": "http://%%host%%:<PORT>/metrics", "use_openmetrics": "true"
+            }
+          ]
+    spec:
+      containers:
+        - name: haproxy
+```
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
-   
-**NOTE**: The `use_openmetrics` option uses [OpenMetrics V2][26] for metric collection, which requires Python 3. For hosts unable to use Python 3, use the OpenMetrics V1 implementation or the [socket-based legacy integration](#using-the-stats-endpoint). 
-
-To view configuration options for the OpenMetrics V1 implementation see this [conf.yaml.example][25] file.
 
 
 #### Using the stats endpoint
@@ -214,6 +243,8 @@ To configure this check for an Agent running on Kubernetes:
 
 Set [Autodiscovery Integrations Templates][12] as pod annotations on your application container. Aside from this, templates can also be configured with [a file, a configmap, or a key-value store][13].
 
+**Annotations v1** (for Datadog Agent < v7.36)
+
 ```yaml
 apiVersion: v1
 kind: Pod
@@ -233,6 +264,30 @@ spec:
     - name: haproxy
 ```
 
+**Annotations v2** (for Datadog Agent v7.36+)
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: haproxy
+  annotations:
+    ad.datadoghq.com/haproxy.checks: |
+      {
+        "haproxy": {
+          "init_config": {},
+          "instances": [
+            {
+              "url": "https://%%host%%/admin?stats"
+            }
+          ]
+        }
+      }
+spec:
+  containers:
+    - name: haproxy
+```
+
 ##### Log collection
 
 _Available for Agent versions >6.0_
@@ -240,6 +295,8 @@ _Available for Agent versions >6.0_
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][14].
 
 Then, set [Log Integrations][11] as pod annotations. This can also be configured with [a file, a configmap, or a key-value store][15].
+
+**Annotations v1/v2**
 
 ```yaml
 apiVersion: v1
@@ -329,7 +386,6 @@ Need help? Contact [Datadog support][20].
 - [How to collect HAProxy metrics][22]
 - [Monitor HAProxy with Datadog][23]
 - [HA Proxy Multi Process Configuration][24]
-- [How to collect HAProxy metrics][22]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/haproxy/images/haproxy-dash.png
 [2]: https://app.datadoghq.com/account/settings#agent
@@ -357,4 +413,4 @@ Need help? Contact [Datadog support][20].
 [24]: https://docs.datadoghq.com/integrations/faq/haproxy-multi-process/
 [25]: https://github.com/DataDog/integrations-core/blob/7.34.x/haproxy/datadog_checks/haproxy/data/conf.yaml.example
 [26]: https://datadoghq.dev/integrations-core/base/openmetrics/
-[27]: https://github.com/DataDog/integrations-core/blob/master/haproxy/datadog_checks/haproxy/data/conf.yaml.example
+[27]: https://docs.datadoghq.com/agent/guide/agent-v6-python-3/?tab=helm#use-python-3-with-datadog-agent-v6

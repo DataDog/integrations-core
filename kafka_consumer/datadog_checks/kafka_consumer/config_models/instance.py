@@ -19,6 +19,23 @@ from datadog_checks.base.utils.models import validation
 from . import defaults, validators
 
 
+class MetricPatterns(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    exclude: Optional[Sequence[str]]
+    include: Optional[Sequence[str]]
+
+
+class SaslOauthTokenProvider(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    client_id: Optional[str]
+    client_secret: Optional[str]
+    url: Optional[str]
+
+
 class InstanceConfig(BaseModel):
     class Config:
         allow_mutation = False
@@ -30,12 +47,14 @@ class InstanceConfig(BaseModel):
     kafka_client_api_version: Optional[str]
     kafka_connect_str: Union[str, Sequence[str]]
     kafka_consumer_offsets: Optional[bool]
+    metric_patterns: Optional[MetricPatterns]
     min_collection_interval: Optional[float]
     monitor_all_broker_highwatermarks: Optional[bool]
     monitor_unlisted_consumer_groups: Optional[bool]
     sasl_kerberos_domain_name: Optional[str]
     sasl_kerberos_service_name: Optional[str]
     sasl_mechanism: Optional[str]
+    sasl_oauth_token_provider: Optional[SaslOauthTokenProvider]
     sasl_plain_password: Optional[str]
     sasl_plain_username: Optional[str]
     security_protocol: Optional[str]

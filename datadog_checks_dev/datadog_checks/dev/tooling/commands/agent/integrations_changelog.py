@@ -22,7 +22,7 @@ INTEGRATION_CHANGELOG_PATTERN = r'^## (\d+\.\d+\.\d+) / \d{4}-\d{2}-\d{2}$'
     context_settings=CONTEXT_SETTINGS,
     short_help="Update integration CHANGELOG.md by adding the Agent version",
 )
-@click.argument('checks', autocompletion=complete_active_checks, nargs=-1)
+@click.argument('checks', shell_complete=complete_active_checks, nargs=-1)
 @click.option('--since', help="Initial Agent version", default='6.3.0')
 @click.option('--to', help="Final Agent version")
 @click.option(

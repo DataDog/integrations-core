@@ -1,35 +1,48 @@
 {
-  "categories": [
-    "containers",
-    "network"
-  ],
-  "creates_events": false,
-  "display_name": "Kube Proxy",
-  "guid": "5cdc0363-a0df-469b-8346-2da4ab84128b",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "kubeproxy.",
-  "metric_to_check": "kubeproxy.cpu.time",
-  "name": "kube_proxy",
-  "public_title": "Datadog-Kube Proxy Integration",
-  "short_description": "kube_proxy description.",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "type": "check",
-  "integration_id": "kube-proxy",
+  "manifest_version": "2.0.0",
+  "app_uuid": "0f9508bc-f260-4268-b94d-13c8da1525fb",
+  "app_id": "kube-proxy",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor Kube Proxy with Datadog.",
+    "title": "Kube Proxy",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Containers",
+      "Category::Network"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "monitors": {},
-    "dashboards": {},
-    "service_checks": "assets/service_checks.json",
-    "logs": {},
-    "metrics_metadata": "metadata.csv",
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "Kube Proxy",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "kubeproxy.",
+        "check": "kubeproxy.cpu.time",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
     }
   }
 }

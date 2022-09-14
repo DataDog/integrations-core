@@ -11,6 +11,7 @@ import pytest
 from datadog_checks.base.checks.kubelet_base.base import KubeletCredentials, urljoin
 from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.kubelet import PodListUtils, get_pod_by_uid, is_static_pending_pod
+from datadog_checks.kubelet.common import get_container_label
 
 from .test_kubelet import mock_from_file
 
@@ -215,3 +216,26 @@ def test_credentials_token_noverify():
     assert scraper_config['ssl_cert'] is None
     assert scraper_config['ssl_private_key'] is None
     assert scraper_config['extra_headers'] == {}
+
+
+def test_get_container_label():
+    labels = {"container_name": "POD", "id": "/kubepods/burstable/pod531c80d9-9fc4-11e7-ba8b-42010af002bb"}
+    assert get_container_label(labels, "container_name") == "POD"
+    assert get_container_label({}, "not-in") is None
+
+
+def test_get_cid_by_labels():
+    pods = json.loads(mock_from_file('podlist_containerd.json'))
+    pod_list_utils = PodListUtils(pods)
+
+    # k8s >= 1.16
+    labels = {"container": "datadog-agent", "namespace": "default", "pod": "datadog-agent-pbqt2"}
+    container_id = pod_list_utils.get_cid_by_labels(labels)
+    assert container_id == "containerd://51cba2ca229069039575750d44ed3a67e9b5ead651312ba7ff218dd9202fde64"
+
+    # k8s < 1.16
+    labels = {"container_name": "datadog-agent", "namespace": "default", "pod_name": "datadog-agent-pbqt2"}
+    container_id = pod_list_utils.get_cid_by_labels(labels)
+    assert container_id == "containerd://51cba2ca229069039575750d44ed3a67e9b5ead651312ba7ff218dd9202fde64"
+
+    assert pod_list_utils.get_cid_by_labels([]) is None

@@ -1,43 +1,58 @@
 {
-  "aliases": [
-    "/integrations/redis/"
-  ],
-  "categories": [
-    "data store",
-    "caching",
-    "log collection"
-  ],
-  "creates_events": false,
-  "display_name": "Redis",
-  "guid": "0e2f3ed1-d36b-47a4-b69c-fedb50adf240",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "redis.",
-  "metric_to_check": "redis.net.clients",
-  "name": "redisdb",
-  "process_signatures": [
-    "redis-server"
-  ],
-  "public_title": "Datadog-Redis Integration",
-  "short_description": "Track redis performance, memory use, blocked clients, evicted keys, and more.",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "type": "check",
-  "integration_id": "redis",
+  "manifest_version": "2.0.0",
+  "app_uuid": "15f0ff37-2b36-4165-9606-758271d4a16d",
+  "app_id": "redis",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Track redis performance, memory use, blocked clients, evicted keys, and more.",
+    "title": "Redis",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Data Store",
+      "Category::Caching",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
-    },
-    "monitors": {
-      "[Redis] High memory consumption": "assets/monitors/high_mem.json"
+    "integration": {
+      "source_type_name": "Redis",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "redis.",
+        "check": "redis.net.clients",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      },
+      "process_signatures": [
+        "redis-server"
+      ]
     },
     "dashboards": {
       "redis": "assets/dashboards/overview.json"
+    },
+    "monitors": {
+      "[Redis] High memory consumption": "assets/monitors/high_mem.json"
     },
     "saved_views": {
       "error_warning_status": "assets/saved_views/error_warning_status.json",
@@ -45,10 +60,8 @@
       "redis_pattern": "assets/saved_views/redis_pattern.json",
       "redis_processes": "assets/saved_views/redis_processes.json"
     },
-    "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "redis"
-    },
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

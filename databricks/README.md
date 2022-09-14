@@ -23,6 +23,7 @@ Configure the Spark integration to monitor your Apache Spark Cluster on Databric
 3. Configure a new Databricks cluster with the cluster-scoped init script path using the UI, Databricks CLI, or invoking the Clusters API.
     - Set the `DD_API_KEY` environment variable in the cluster's Advanced Options with your Datadog API key.
     - Add `DD_ENV` environment variable under Advanced Options to add a global environment tag to better identify your clusters.
+    - Set `DD_SITE` to your [site URL][11].
 
 
 #### Standard cluster
@@ -53,7 +54,7 @@ if [[ \${DB_IS_DRIVER} = "TRUE" ]]; then
   DD_TAGS="environment:\${DD_ENV}","databricks_cluster_id:\${DB_CLUSTER_ID}","databricks_cluster_name:\${DB_CLUSTER_NAME}","spark_host_ip:\${SPARK_LOCAL_IP}","spark_node:driver"
 
   # INSTALL THE LATEST DATADOG AGENT 7
-  DD_AGENT_MAJOR_VERSION=7 DD_API_KEY=\$DD_API_KEY DD_HOST_TAGS=DD_TAGS bash -c "\$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script.sh)"
+  DD_INSTALL_ONLY=true DD_AGENT_MAJOR_VERSION=7 DD_API_KEY=\$DD_API_KEY DD_HOST_TAGS=DD_TAGS bash -c "\$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script.sh)"
 
   # WAIT FOR DATADOG AGENT TO BE INSTALLED
   while [ -z \$datadoginstalled ]; do
@@ -98,6 +99,7 @@ logs:
           pattern: \d{2,4}[\-\/]\d{2,4}[\-\/]\d{2,4}.*" > /etc/datadog-agent/conf.d/spark.yaml
 
   # RESTARTING AGENT
+  sleep 15
   sudo service datadog-agent restart
 
 fi
@@ -135,7 +137,7 @@ if [[ \${DB_IS_DRIVER} = "TRUE" ]]; then
   DD_TAGS="environment:\${DD_ENV}","databricks_cluster_id:\${DB_CLUSTER_ID}","databricks_cluster_name:\${DB_CLUSTER_NAME}","spark_host_ip:\${SPARK_LOCAL_IP}","spark_node:driver"
 
   # INSTALL THE LATEST DATADOG AGENT 7 ON DRIVER AND WORKER NODES
-  DD_AGENT_MAJOR_VERSION=7 DD_API_KEY=\$DD_API_KEY DD_HOST_TAGS=\$DD_TAGS bash -c "\$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script.sh)"
+  DD_INSTALL_ONLY=true DD_AGENT_MAJOR_VERSION=7 DD_API_KEY=\$DD_API_KEY DD_HOST_TAGS=\$DD_TAGS bash -c "\$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script.sh)"
   
   # WAIT FOR DATADOG AGENT TO BE INSTALLED
   while [ -z \$datadoginstalled ]; do
@@ -180,11 +182,12 @@ else
   DD_TAGS="environment:\${DD_ENV}","databricks_cluster_id:\${DB_CLUSTER_ID}","databricks_cluster_name:\${DB_CLUSTER_NAME}","spark_host_ip:\${SPARK_LOCAL_IP}","spark_node:worker"
 
   # INSTALL THE LATEST DATADOG AGENT 7 ON DRIVER AND WORKER NODES
-  DD_AGENT_MAJOR_VERSION=7 DD_API_KEY=\$DD_API_KEY DD_HOST_TAGS=\$DD_TAGS bash -c "\$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script.sh)"
+  DD_INSTALL_ONLY=true DD_AGENT_MAJOR_VERSION=7 DD_API_KEY=\$DD_API_KEY DD_HOST_TAGS=\$DD_TAGS bash -c "\$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script.sh)"
 
 fi
 
   # RESTARTING AGENT
+  sleep 15
   sudo service datadog-agent restart
 EOF
 
@@ -221,7 +224,7 @@ if [ \$DB_IS_DRIVER ]; then
   DD_TAGS="environment:\${DD_ENV}","databricks_cluster_id:\${DB_CLUSTER_ID}","databricks_cluster_name:\${DB_CLUSTER_NAME}","spark_host_ip:\${SPARK_LOCAL_IP}","spark_node:driver"
 
   # INSTALL THE LATEST DATADOG AGENT 7 ON DRIVER AND WORKER NODES
-  DD_AGENT_MAJOR_VERSION=7 DD_API_KEY=\$DD_API_KEY DD_HOST_TAGS=\$DD_TAGS bash -c "\$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script.sh)"
+  DD_INSTALL_ONLY=true DD_AGENT_MAJOR_VERSION=7 DD_API_KEY=\$DD_API_KEY DD_HOST_TAGS=\$DD_TAGS bash -c "\$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script.sh)"
 
   # WAIT FOR DATADOG AGENT TO BE INSTALLED
   while [ -z \$datadoginstalled ]; do
@@ -262,6 +265,7 @@ logs:
           pattern: \d{2,4}[\-\/]\d{2,4}[\-\/]\d{2,4}.*" > /etc/datadog-agent/conf.d/spark.yaml
 
   # RESTARTING AGENT
+  sleep 15
   sudo service datadog-agent restart
 
 fi
@@ -314,3 +318,4 @@ Need help? Contact [Datadog support][10].
 [8]: https://docs.datadoghq.com/integrations/spark/#metrics
 [9]: https://docs.datadoghq.com/integrations/spark/#service-checks
 [10]: https://docs.datadoghq.com/help/
+[11]: https://docs.datadoghq.com/getting_started/site/

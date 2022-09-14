@@ -14,35 +14,34 @@ from cachetools import TTLCache
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.utils.common import to_native_string
-from datadog_checks.base.utils.db import QueryManager
+from datadog_checks.base.utils.db import QueryExecutor, QueryManager
 from datadog_checks.base.utils.db.utils import resolve_db_host
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.sqlserver.activity import SqlserverActivity
-from datadog_checks.sqlserver.metrics import SqlFileStats
 from datadog_checks.sqlserver.statements import SqlserverStatementMetrics
+from datadog_checks.sqlserver.utils import parse_sqlserver_major_version
 
 try:
     import datadog_agent
 except ImportError:
     from ..stubs import datadog_agent
 
-from . import metrics
-from .connection import Connection, SQLConnectionError
-from .const import (
+from datadog_checks.sqlserver import metrics
+from datadog_checks.sqlserver.connection import Connection, SQLConnectionError, split_sqlserver_host_port
+from datadog_checks.sqlserver.const import (
     AO_METRICS,
     AO_METRICS_PRIMARY,
     AO_METRICS_SECONDARY,
     AUTODISCOVERY_QUERY,
     BASE_NAME_QUERY,
     COUNTER_TYPE_QUERY,
-    DATABASE_FILES_IO,
     DATABASE_FRAGMENTATION_METRICS,
     DATABASE_MASTER_FILES,
     DATABASE_METRICS,
     DATABASE_SERVICE_CHECK_NAME,
     DBM_MIGRATED_METRICS,
     DEFAULT_AUTODISCOVERY_INTERVAL,
-    FCI_METRICS,
+    ENGINE_EDITION_SQL_DATABASE,
     INSTANCE_METRICS,
     INSTANCE_METRICS_TOTAL,
     PERF_AVERAGE_BULK,
@@ -51,11 +50,22 @@ from .const import (
     PERF_LARGE_RAW_BASE,
     PERF_RAW_LARGE_FRACTION,
     SERVICE_CHECK_NAME,
+    STATIC_INFO_ENGINE_EDITION,
+    STATIC_INFO_MAJOR_VERSION,
+    STATIC_INFO_VERSION,
     TASK_SCHEDULER_METRICS,
     VALID_METRIC_TYPES,
 )
-from .metrics import DEFAULT_PERFORMANCE_TABLE, VALID_TABLES
-from .utils import set_default_driver_conf
+from datadog_checks.sqlserver.metrics import DEFAULT_PERFORMANCE_TABLE, VALID_TABLES
+from datadog_checks.sqlserver.queries import (
+    QUERY_AO_FAILOVER_CLUSTER,
+    QUERY_AO_FAILOVER_CLUSTER_MEMBER,
+    QUERY_FAILOVER_CLUSTER_INSTANCE,
+    QUERY_SERVER_STATIC_INFO,
+    get_query_ao_availability_groups,
+    get_query_file_stats,
+)
+from datadog_checks.sqlserver.utils import set_default_driver_conf
 
 try:
     import adodbapi
@@ -87,6 +97,7 @@ class SQLServer(AgentCheck):
         self.instance_per_type_metrics = defaultdict(set)
         self.do_check = True
 
+        self.tags = self.instance.get("tags", [])
         self.reported_hostname = self.instance.get('reported_hostname')
         self.autodiscovery = is_affirmative(self.instance.get('database_autodiscovery'))
         self.autodiscovery_include = self.instance.get('autodiscovery_include', ['.*'])
@@ -102,19 +113,22 @@ class SQLServer(AgentCheck):
         self.proc_type_mapping = {'gauge': self.gauge, 'rate': self.rate, 'histogram': self.histogram}
         self.custom_metrics = init_config.get('custom_metrics', [])
 
-        # use QueryManager to process custom queries
-        self.tags = self.instance.get("tags", [])
-        self._query_manager = QueryManager(self, self.execute_query_raw, queries=[], tags=self.tags)
-        self.check_initializations.append(self.config_checks)
-        self.check_initializations.append(self._query_manager.compile_queries)
-        self.check_initializations.append(self.initialize_connection)
-
         # DBM
         self.dbm_enabled = self.instance.get('dbm', False)
         self.statement_metrics_config = self.instance.get('query_metrics', {}) or {}
         self.statement_metrics = SqlserverStatementMetrics(self)
         self.activity_config = self.instance.get('query_activity', {}) or {}
         self.activity = SqlserverActivity(self)
+        self.cloud_metadata = {}
+        aws = self.instance.get('aws', {})
+        gcp = self.instance.get('gcp', {})
+        azure = self.instance.get('azure', {})
+        if aws:
+            self.cloud_metadata.update({'aws': aws})
+        if gcp:
+            self.cloud_metadata.update({'gcp': gcp})
+        if azure:
+            self.cloud_metadata.update({'azure': azure})
         obfuscator_options_config = self.instance.get('obfuscator_options', {}) or {}
         self.obfuscator_options = to_native_string(
             json.dumps(
@@ -122,11 +136,17 @@ class SQLServer(AgentCheck):
                     # Valid values for this can be found at
                     # https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/semantic_conventions/database.md#connection-level-attributes
                     'dbms': 'mssql',
-                    'replace_digits': obfuscator_options_config.get('replace_digits', False),
-                    'return_json_metadata': obfuscator_options_config.get('collect_metadata', False),
-                    'table_names': obfuscator_options_config.get('collect_tables', True),
-                    'collect_commands': obfuscator_options_config.get('collect_commands', True),
-                    'collect_comments': obfuscator_options_config.get('collect_comments', True),
+                    'replace_digits': is_affirmative(
+                        obfuscator_options_config.get(
+                            'replace_digits',
+                            obfuscator_options_config.get('quantize_sql_tables', False),
+                        )
+                    ),
+                    'keep_sql_alias': is_affirmative(obfuscator_options_config.get('keep_sql_alias', True)),
+                    'return_json_metadata': is_affirmative(obfuscator_options_config.get('collect_metadata', True)),
+                    'table_names': is_affirmative(obfuscator_options_config.get('collect_tables', True)),
+                    'collect_commands': is_affirmative(obfuscator_options_config.get('collect_commands', True)),
+                    'collect_comments': is_affirmative(obfuscator_options_config.get('collect_comments', True)),
                 }
             )
         )
@@ -136,6 +156,21 @@ class SQLServer(AgentCheck):
             # cache these for a full day
             ttl=60 * 60 * 24,
         )
+
+        # Query declarations
+        self.server_state_queries = self._new_query_executor([QUERY_SERVER_STATIC_INFO])
+        self.check_initializations.append(self.server_state_queries.compile_queries)
+
+        # use QueryManager to process custom queries
+        self._query_manager = QueryManager(
+            self, self.execute_query_raw, tags=self.tags, hostname=self.resolved_hostname
+        )
+
+        self._dynamic_queries = None
+
+        self.check_initializations.append(self.config_checks)
+        self.check_initializations.append(self._query_manager.compile_queries)
+        self.check_initializations.append(self.initialize_connection)
 
     def cancel(self):
         self.statement_metrics.cancel()
@@ -152,26 +187,14 @@ class SQLServer(AgentCheck):
                 "Autodiscovery is disabled, autodiscovery_include and autodiscovery_exclude will be ignored"
             )
 
-    def split_sqlserver_host_port(self, host):
-        """
-        Splits the host & port out of the provided SQL Server host connection string, returning (host, port).
-        """
-        if not host:
-            return host, None
-        host_split = [s.strip() for s in host.split(',')]
-        if len(host_split) == 1:
-            return host_split[0], None
-        if len(host_split) == 2:
-            return host_split
-        # else len > 2
-        s_host, s_port = host_split[0:2]
-        self.log.warning(
-            "invalid sqlserver host string has more than one comma: %s. using only 1st two items: host:%s, port:%s",
-            host,
-            s_host,
-            s_port,
+    def _new_query_executor(self, queries):
+        return QueryExecutor(
+            self.execute_query_raw,
+            self,
+            queries=queries,
+            tags=self.tags,
+            hostname=self.resolved_hostname,
         )
-        return s_host, s_port
 
     @property
     def resolved_hostname(self):
@@ -179,22 +202,61 @@ class SQLServer(AgentCheck):
             if self.reported_hostname:
                 self._resolved_hostname = self.reported_hostname
             elif self.dbm_enabled:
-                host, port = self.split_sqlserver_host_port(self.instance.get('host'))
+                host, port = split_sqlserver_host_port(self.instance.get('host'))
                 self._resolved_hostname = resolve_db_host(host)
+                engine_edition = self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION)
+                if engine_edition == ENGINE_EDITION_SQL_DATABASE:
+                    configured_database = self.instance.get('database', None)
+                    if not configured_database:
+                        configured_database = 'master'
+                        self.warning(
+                            "Missing 'database' in instance configuration."
+                            "For Azure SQL Database a non-master application database must be specified."
+                        )
+                    elif configured_database == 'master':
+                        self.warning(
+                            "Wrong 'database' configured."
+                            "For Azure SQL Database a non-master application database must be specified."
+                        )
+                    azure_server_suffix = ".database.windows.net"
+                    if host.endswith(azure_server_suffix):
+                        host = host[: -len(azure_server_suffix)]
+                    # for Azure SQL Database, each database on a given "server" has isolated compute resources,
+                    # meaning that the agent is only able to see query activity for the specific database it's
+                    # connected to. For this reason, each Azure SQL database is modeled as an independent host.
+                    self._resolved_hostname = "{}/{}".format(host, configured_database)
             else:
                 self._resolved_hostname = self.agent_hostname
         return self._resolved_hostname
 
     def load_static_information(self):
-        if 'version' not in self.static_info_cache:
+        expected_keys = {STATIC_INFO_VERSION, STATIC_INFO_MAJOR_VERSION, STATIC_INFO_ENGINE_EDITION}
+        missing_keys = expected_keys - set(self.static_info_cache.keys())
+        if missing_keys:
             with self.connection.open_managed_default_connection():
                 with self.connection.get_managed_cursor() as cursor:
-                    cursor.execute("select @@version")
-                    results = cursor.fetchall()
-                    if results and len(results) > 0 and len(results[0]) > 0 and results[0][0]:
-                        self.static_info_cache["version"] = results[0][0]
-                    else:
-                        self.log.warning("failed to load version static information due to empty results")
+                    if STATIC_INFO_VERSION not in self.static_info_cache:
+                        cursor.execute("select @@version")
+                        results = cursor.fetchall()
+                        if results and len(results) > 0 and len(results[0]) > 0 and results[0][0]:
+                            version = results[0][0]
+                            self.static_info_cache[STATIC_INFO_VERSION] = version
+                            self.static_info_cache[STATIC_INFO_MAJOR_VERSION] = parse_sqlserver_major_version(version)
+                            if not self.static_info_cache[STATIC_INFO_MAJOR_VERSION]:
+                                self.log.warning("failed to parse SQL Server major version from version: %s", version)
+                        else:
+                            self.log.warning("failed to load version static information due to empty results")
+                    if STATIC_INFO_ENGINE_EDITION not in self.static_info_cache:
+                        cursor.execute("SELECT CAST(ServerProperty('EngineEdition') AS INT) AS Edition")
+                        result = cursor.fetchone()
+                        if result:
+                            self.static_info_cache[STATIC_INFO_ENGINE_EDITION] = result[0]
+                        else:
+                            self.log.warning("failed to load version static information due to empty results")
+
+            # re-initialize resolved_hostname to ensure we take into consideration the static information
+            # after it's loaded
+            self._resolved_hostname = None
 
     def debug_tags(self):
         return self.tags + ['agent_hostname:{}'.format(self.agent_hostname)]
@@ -356,12 +418,6 @@ class SQLServer(AgentCheck):
                 cfg = {'name': name, 'table': table, 'column': column, 'instance_name': db_name, 'tags': tags}
                 metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
 
-        # Load database files
-        for name, column, metric_type in DATABASE_FILES_IO:
-            cfg = {'name': name, 'column': column, 'tags': tags}
-
-            metrics_to_collect.append(SqlFileStats(cfg, None, getattr(self, metric_type), column, self.log))
-
         # Load AlwaysOn metrics
         if is_affirmative(self.instance.get('include_ao_metrics', False)):
             for name, table, column in AO_METRICS + AO_METRICS_PRIMARY + AO_METRICS_SECONDARY:
@@ -375,17 +431,6 @@ class SQLServer(AgentCheck):
                     'ao_database': self.instance.get('ao_database', None),
                     'availability_group': self.instance.get('availability_group', None),
                     'only_emit_local': is_affirmative(self.instance.get('only_emit_local', False)),
-                }
-                metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
-
-        # Load FCI metrics
-        if is_affirmative(self.instance.get('include_fci_metrics', False)):
-            for name, table, column in FCI_METRICS:
-                cfg = {
-                    'name': name,
-                    'table': table,
-                    'column': column,
-                    'tags': tags,
                 }
                 metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
 
@@ -570,6 +615,8 @@ class SQLServer(AgentCheck):
             metric_type_str, cls = metrics.TABLE_MAPPING[table]
             metric_type = getattr(self, metric_type_str)
 
+        cfg_inst['hostname'] = self.resolved_hostname
+
         return cls(cfg_inst, base_name, metric_type, column, self.log)
 
     def check(self, _):
@@ -594,6 +641,43 @@ class SQLServer(AgentCheck):
 
         else:
             self.log.debug("Skipping check")
+
+    @property
+    def dynamic_queries(self):
+        """
+        Initializes dynamic queries which depend on static information loaded from the database
+        """
+        if self._dynamic_queries:
+            return self._dynamic_queries
+
+        major_version = self.static_info_cache.get(STATIC_INFO_MAJOR_VERSION)
+        if not major_version:
+            self.log.warning("missing major_version, cannot initialize dynamic queries")
+            return None
+
+        queries = [get_query_file_stats(major_version)]
+
+        if is_affirmative(self.instance.get('include_ao_metrics', False)):
+            if major_version > 2012:
+                queries.extend(
+                    [
+                        get_query_ao_availability_groups(major_version),
+                        QUERY_AO_FAILOVER_CLUSTER,
+                        QUERY_AO_FAILOVER_CLUSTER_MEMBER,
+                    ]
+                )
+            else:
+                self.log.warning('AlwaysOn metrics are not supported on version 2012')
+        if is_affirmative(self.instance.get('include_fci_metrics', False)):
+            if major_version > 2012:
+                queries.extend([QUERY_FAILOVER_CLUSTER_INSTANCE])
+            else:
+                self.log.warning('Failover Cluster Instance metrics are not supported on version 2012')
+
+        self._dynamic_queries = self._new_query_executor(queries)
+        self._dynamic_queries.compile_queries()
+        self.log.debug("initialized dynamic queries")
+        return self._dynamic_queries
 
     def collect_metrics(self):
         """Fetch the metrics from all of the associated database tables."""
@@ -646,6 +730,15 @@ class SQLServer(AgentCheck):
             with self.connection.get_managed_cursor() as cursor:
                 cursor.execute("SET NOCOUNT ON")
             try:
+                # Server state queries require VIEW SERVER STATE permissions, which some managed database
+                # versions do not support.
+                if self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION) not in [
+                    ENGINE_EDITION_SQL_DATABASE,
+                ]:
+                    self.server_state_queries.execute()
+
+                if self.dynamic_queries:
+                    self.dynamic_queries.execute()
                 # reuse connection for any custom queries
                 self._query_manager.execute()
             finally:

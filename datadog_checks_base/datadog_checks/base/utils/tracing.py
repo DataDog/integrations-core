@@ -96,7 +96,9 @@ def tracing_method(f, tracer):
 
 
 def traced_class(cls):
-    if os.getenv('DDEV_TRACE_ENABLED', 'false') == 'true':
+    if os.getenv('DDEV_TRACE_ENABLED', 'false') == 'true' or (
+        datadog_agent is not None and is_affirmative(datadog_agent.get_config('integration_tracing'))
+    ):
         try:
             from ddtrace import patch_all, tracer
 

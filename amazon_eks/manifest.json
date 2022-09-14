@@ -1,32 +1,43 @@
 {
-  "categories": [
-    "aws",
-    "containers",
-    "orchestration",
-    "log collection"
-  ],
-  "creates_events": false,
-  "display_name": "Amazon EKS",
-  "guid": "9bc1f66e-de05-4460-b082-783c45a07355",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "aws.eks.",
-  "name": "amazon_eks",
-  "public_title": "Datadog-Amazon-EKS Integration",
-  "short_description": "Amazon EKS is a managed service that makes it easy to run Kubernetes on AWS",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "type": "check",
-  "integration_id": "amazon-eks",
+  "manifest_version": "2.0.0",
+  "app_uuid": "abb8b86b-eeb7-4e38-b436-f4cbb09b4398",
+  "app_id": "amazon-eks",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Amazon EKS is a managed service that makes it easy to run Kubernetes on AWS",
+    "title": "Amazon-EKS",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::AWS",
+      "Category::Containers",
+      "Category::Orchestration",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "monitors": {},
-    "dashboards": {},
-    "service_checks": "assets/service_checks.json",
-    "logs": {}
+    "integration": {
+      "source_type_name": "Amazon EKS",
+      "configuration": {},
+      "events": {
+        "creates_events": false
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    }
   }
 }

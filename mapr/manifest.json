@@ -1,39 +1,54 @@
 {
-  "display_name": "MapR",
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "name": "mapr",
-  "metric_prefix": "mapr.",
-  "metric_to_check": "mapr.metrics.submitted",
-  "creates_events": false,
-  "short_description": "Collect the monitoring metrics made available by MapR.",
-  "guid": "7d1de422-85a6-47cc-9962-427a9499d109",
-  "support": "core",
-  "supported_os": [
-    "linux"
-  ],
-  "public_title": "Datadog-MapR Integration",
-  "categories": [
-    "data store",
-    "os & system",
-    "processing",
-    "log collection"
-  ],
-  "type": "check",
-  "is_public": true,
-  "integration_id": "mapr",
+  "manifest_version": "2.0.0",
+  "app_uuid": "96cb179f-2a53-424b-95ce-302610f155eb",
+  "app_id": "mapr",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Collect the monitoring metrics made available by MapR.",
+    "title": "MapR",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Category::Data Store",
+      "Category::OS & System",
+      "Category::Processing",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "MapR",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "mapr.",
+        "check": "mapr.metrics.submitted",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
     },
     "dashboards": {
       "MapR - Overview": "assets/dashboards/mapr_overview.json"
     },
-    "monitors": {},
-    "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "mapr"
-    },
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

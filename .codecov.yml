@@ -50,6 +50,10 @@ coverage:
         target: 75
         flags:
         - apache
+      ArangoDB:
+        target: 75
+        flags:
+        - arangodb
       Avi_Vantage:
         target: 75
         flags:
@@ -58,6 +62,10 @@ coverage:
         target: 75
         flags:
         - azure_iot_edge
+      Boundary:
+        target: 75
+        flags:
+        - boundary
       Btrfs:
         target: 75
         flags:
@@ -70,6 +78,10 @@ coverage:
         target: 75
         flags:
         - cacti
+      Calico:
+        target: 75
+        flags:
+        - calico
       Cassandra_Nodetool:
         target: 75
         flags:
@@ -170,6 +182,10 @@ coverage:
         target: 75
         flags:
         - external_dns
+      FoundationDB:
+        target: 75
+        flags:
+        - foundationdb
       Gearman:
         target: 75
         flags:
@@ -218,6 +234,10 @@ coverage:
         target: 75
         flags:
         - hazelcast
+      IBM_ACE:
+        target: 75
+        flags:
+        - ibm_ace
       IBM_Db2:
         target: 75
         flags:
@@ -502,10 +522,18 @@ coverage:
         target: 75
         flags:
         - teamcity
+      Teradata:
+        target: 75
+        flags:
+        - teradata
       TokuMX:
         target: 50
         flags:
         - tokumx
+      Traffic_Server:
+        target: 75
+        flags:
+        - traffic_server
       Twemproxy:
         target: 75
         flags:
@@ -554,6 +582,10 @@ coverage:
         target: 75
         flags:
         - zk
+      ddev:
+        target: 75
+        flags:
+        - ddev
       etcd:
         target: 75
         flags:
@@ -607,6 +639,11 @@ flags:
     paths:
     - apache/datadog_checks/apache
     - apache/tests
+  arangodb:
+    carryforward: true
+    paths:
+    - arangodb/datadog_checks/arangodb
+    - arangodb/tests
   aspdotnet:
     carryforward: true
     paths:
@@ -622,6 +659,11 @@ flags:
     paths:
     - azure_iot_edge/datadog_checks/azure_iot_edge
     - azure_iot_edge/tests
+  boundary:
+    carryforward: true
+    paths:
+    - boundary/datadog_checks/boundary
+    - boundary/tests
   btrfs:
     carryforward: true
     paths:
@@ -632,6 +674,11 @@ flags:
     paths:
     - cacti/datadog_checks/cacti
     - cacti/tests
+  calico:
+    carryforward: true
+    paths:
+    - calico/datadog_checks/calico
+    - calico/tests
   cassandra_nodetool:
     carryforward: true
     paths:
@@ -717,6 +764,11 @@ flags:
     paths:
     - datadog_cluster_agent/datadog_checks/datadog_cluster_agent
     - datadog_cluster_agent/tests
+  ddev:
+    carryforward: true
+    paths:
+    - ddev/datadog_checks/ddev
+    - ddev/tests
   directory:
     carryforward: true
     paths:
@@ -782,6 +834,11 @@ flags:
     paths:
     - fluentd/datadog_checks/fluentd
     - fluentd/tests
+  foundationdb:
+    carryforward: true
+    paths:
+    - foundationdb/datadog_checks/foundationdb
+    - foundationdb/tests
   gearmand:
     carryforward: true
     paths:
@@ -842,6 +899,11 @@ flags:
     paths:
     - http_check/datadog_checks/http_check
     - http_check/tests
+  ibm_ace:
+    carryforward: true
+    paths:
+    - ibm_ace/datadog_checks/ibm_ace
+    - ibm_ace/tests
   ibm_db2:
     carryforward: true
     paths:
@@ -1197,6 +1259,11 @@ flags:
     paths:
     - teamcity/datadog_checks/teamcity
     - teamcity/tests
+  teradata:
+    carryforward: true
+    paths:
+    - teradata/datadog_checks/teradata
+    - teradata/tests
   tls:
     carryforward: true
     paths:
@@ -1207,6 +1274,11 @@ flags:
     paths:
     - tokumx/datadog_checks/tokumx
     - tokumx/tests
+  traffic_server:
+    carryforward: true
+    paths:
+    - traffic_server/datadog_checks/traffic_server
+    - traffic_server/tests
   twemproxy:
     carryforward: true
     paths:

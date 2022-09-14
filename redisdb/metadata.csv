@@ -12,35 +12,35 @@ redis.aof.loading_total_bytes,gauge,,byte,,The total amount of bytes already loa
 redis.aof.loading_loaded_bytes,gauge,,byte,,The amount of bytes to load.,0,redis,aof total bytes loaded,
 redis.aof.loading_loaded_perc,gauge,,percent,,The percent loaded.,0,redis,aof loaded percent,
 redis.aof.loading_eta_seconds,gauge,,second,,The estimated amount of time left to load.,0,redis,aof loading time left,
-redis.clients.biggest_input_buf,gauge,,,,The biggest input buffer among current client connections.,0,redis,biggest input buf,
-redis.clients.recent_max_input_buffer,gauge,,,,The biggest input buffer among recent client connections.,0,redis,biggest input buf,
-redis.clients.blocked,gauge,,connection,,The number of connections waiting on a blocking call.,0,redis,clients blocked,
-redis.clients.longest_output_list,gauge,,,,The longest output list among current client connections.,0,redis,long output list,
-redis.clients.recent_max_output_buffer,gauge,,,,The longest output buffer among recent client connections.,0,redis,long output list,
-redis.cpu.sys,gauge,,,,System CPU consumed by the Redis server.,-1,redis,cpu sys,
+redis.clients.biggest_input_buf,gauge,,,,The biggest input buffer among current client connections [v3 & v4].,0,redis,biggest input buf,
+redis.clients.recent_max_input_buffer,gauge,,,,The biggest input buffer among recent client connections [v5+].,0,redis,biggest input buf,
+redis.clients.blocked,gauge,,connection,,The number of connections waiting on a blocking call.,0,redis,clients blocked,memory
+redis.clients.longest_output_list,gauge,,,,The longest output list among current client connections [v3 & v4].,0,redis,long output list,
+redis.clients.recent_max_output_buffer,gauge,,,,The longest output buffer among recent client connections [v5+].,0,redis,long output list,
+redis.cpu.sys,gauge,,,,System CPU consumed by the Redis server.,-1,redis,cpu sys,cpu
 redis.cpu.sys_children,gauge,,,,System CPU consumed by the background processes.,-1,redis,cpu sys children,
 redis.cpu.user,gauge,,,,User CPU consumed by the Redis server.,-1,redis,cpu user,
 redis.cpu.user_children,gauge,,,,User CPU consumed by the background processes.,-1,redis,cpu user children,
-redis.cpu.sys_main_thread,gauge,,,,System CPU consumed by the Redis server main thread. This metric is only provided by redis >=6.x.,-1,redis,cpu sys main thread,
-redis.cpu.user_main_thread,gauge,,,,User CPU consumed by the Redis server main thread. This metric is only provided by redis >=6.x.,-1,redis,cpu sys main thread,
+redis.cpu.sys_main_thread,gauge,,,,System CPU consumed by the Redis server main thread. [v7+].,-1,redis,cpu sys main thread,
+redis.cpu.user_main_thread,gauge,,,,User CPU consumed by the Redis server main thread. [v7+].,-1,redis,cpu sys main thread,
 redis.expires,gauge,,key,,The number of keys with an expiration.,0,redis,expires,
 redis.expires.percent,gauge,,percent,,Percentage of total keys with an expiration.,0,redis,expires pct,
-redis.info.latency_ms,gauge,,millisecond,,The latency of the redis INFO command.,0,redis,info latency,
+redis.info.latency_ms,gauge,,millisecond,,The latency of the redis INFO command.,0,redis,info latency,cpu
 redis.key.length,gauge,,,,"The number of elements in a given key, tagged by key, e.g. 'key:mykeyname'. Enable in Agent's redisdb.yaml with the keys option.",0,redis,key length,
-redis.keys,gauge,,key,,The total number of keys.,0,redis,keys,
-redis.keys.evicted,gauge,,key,,The total number of keys evicted due to the maxmemory limit.,0,redis,keys evicted,
-redis.keys.expired,gauge,,key,,The total number of keys expired from the db.,0,redis,keys expired,
-redis.mem.fragmentation_ratio,gauge,,fraction,,Ratio between used_memory_rss and used_memory.,-1,redis,frag ratio,
+redis.keys,gauge,,key,,The total number of keys.,0,redis,keys,memory
+redis.keys.evicted,gauge,,key,,The total number of keys evicted due to the maxmemory limit.,0,redis,keys evicted,memory
+redis.keys.expired,gauge,,key,,The total number of keys expired from the db.,0,redis,keys expired,memory
+redis.mem.fragmentation_ratio,gauge,,fraction,,Ratio between used_memory_rss and used_memory.,-1,redis,frag ratio,memory
 redis.mem.lua,gauge,,byte,,Amount of memory used by the Lua engine.,-1,redis,mem lua,
 redis.mem.maxmemory,gauge,,byte,,Maximum amount of memory allocated to the Redisdb system.,-1,redis,mem maxmemory,
 redis.mem.peak,gauge,,byte,,The peak amount of memory used by Redis.,-1,redis,mem peak,
 redis.mem.rss,gauge,,byte,,Amount of memory that Redis allocated as seen by the os.,-1,redis,mem rss,
-redis.mem.used,gauge,,byte,,Amount of memory allocated by Redis.,-1,redis,mem used,
+redis.mem.used,gauge,,byte,,Amount of memory allocated by Redis.,-1,redis,mem used,memory
 redis.mem.startup,gauge,,byte,,Amount of memory consumed by Redis at startup.,-1,redis,mem startup,
-redis.mem.overhead,gauge,,byte,,Sum of all overheads allocated by Redis for managing its internal datastructures.,-1,redis,mem overhead,
-redis.net.clients,gauge,,connection,,The number of connected clients (excluding slaves).,0,redis,clients,
+redis.mem.overhead,gauge,,byte,,Sum of all overheads allocated by Redis for managing its internal datastructures [v4+].,-1,redis,mem overhead,
+redis.net.clients,gauge,,connection,,The number of connected clients (excluding slaves).,0,redis,clients,cpu
 redis.net.commands,gauge,,command,,The number of commands processed by the server.,0,redis,net commands,
-redis.net.commands.instantaneous_ops_per_sec,gauge,,command,second,The number of commands processed by the server per second.,0,redis,net commands,
+redis.net.commands.instantaneous_ops_per_sec,gauge,,command,second,The number of commands processed by the server per second.,0,redis,net commands,cpu
 redis.net.connections,gauge,,connection,,The number of connections tagged by client name.,0,redis,connections,
 redis.net.instantaneous_ops_per_sec,gauge,,operation,second,Number of commands processed per second.,0,redis,ops per sec,
 redis.net.rejected,gauge,,connection,,The number of rejected connections.,-1,redis,net rejected,
@@ -67,8 +67,8 @@ redis.slowlog.micros.avg,gauge,,microsecond,,The average duration of queries rep
 redis.slowlog.micros.count,rate,,query,second,The rate of queries reported in the slow log.,0,redis,slowlog count,
 redis.slowlog.micros.max,gauge,,microsecond,,The maximum duration of queries reported in the slow log.,0,redis,slowlog max,
 redis.slowlog.micros.median,gauge,,microsecond,,The median duration of queries reported in the slow log.,0,redis,slowlog median,
-redis.stats.keyspace_hits,gauge,,key,second,The rate of successful lookups in the main db.,0,redis,keyspace hits,
-redis.stats.keyspace_misses,gauge,,key,second,The rate of missed lookups in the main db.,0,redis,keyspace misses,
+redis.stats.keyspace_hits,gauge,,key,second,The rate of successful lookups in the main db.,0,redis,keyspace hits,cpu
+redis.stats.keyspace_misses,gauge,,key,second,The rate of missed lookups in the main db.,0,redis,keyspace misses,cpu
 redis.stats.io_threaded_reads_processed,gauge,,,,Number of read events processed by the main and I/O threads. This metric is only provided by redis >=6.x.,0,redis,io threaded reads processed,
 redis.stats.io_threaded_writes_processed,gauge,,,,Number of write events processed by the main and I/O threads. This metric is only provided by redis >=6.x.,0,redis,io threaded writes processed,
 redis.server.io_threads_active,gauge,,,,Flag indicating if I/O threads are active. This metric is only provided by redis >=6.x.,0,redis,server io threads active,

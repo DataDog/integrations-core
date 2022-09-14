@@ -1,6 +1,29 @@
 # CHANGELOG - kubelet
 
-## 7.2.1 / 2022-02-24
+## 7.4.1 / 2022-08-05 / Agent 7.39.0
+
+* [Fixed] Fix probe metrics collection when credentials are required. See [#12642](https://github.com/DataDog/integrations-core/pull/12642).
+
+## 7.4.0 / 2022-05-15 / Agent 7.37.0
+
+* [Added] Support dynamic bearer tokens (Bound Service Account Token Volume). See [#11915](https://github.com/DataDog/integrations-core/pull/11915).
+* [Fixed] Fix kubernetes.memory.limits on kind clusters. See [#11914](https://github.com/DataDog/integrations-core/pull/11914).
+* [Fixed] Sanitize the `url` tag. See [#11989](https://github.com/DataDog/integrations-core/pull/11989).
+* [Fixed] Apply container filter to `kubernetes.kubelet.container.log_filesystem.used_bytes`. See [#11974](https://github.com/DataDog/integrations-core/pull/11974).
+
+## 7.3.1 / 2022-04-11 / Agent 7.36.0
+
+* [Fixed] Handle probe metrics when the endpoint is not available (Kubernetes < 1.15). See [#11807](https://github.com/DataDog/integrations-core/pull/11807).
+
+## 7.3.0 / 2022-04-05
+
+* [Added] Collect liveness and readiness probe metrics. See [#11682](https://github.com/DataDog/integrations-core/pull/11682).
+* [Added] Add metric_patterns options to filter all metric submission by a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
+* [Added] Add pleg metrics. See [#11616](https://github.com/DataDog/integrations-core/pull/11616).
+* [Fixed] Support newer versions of `click`. See [#11746](https://github.com/DataDog/integrations-core/pull/11746).
+* [Fixed] Remove outdated warning in the description for the `tls_ignore_warning` option. See [#11591](https://github.com/DataDog/integrations-core/pull/11591).
+
+## 7.2.1 / 2022-02-24 / Agent 7.35.0
 
 * [Fixed] Apply namespace exclusion rules in cadvisor and summary metrics. See [#11559](https://github.com/DataDog/integrations-core/pull/11559).
 

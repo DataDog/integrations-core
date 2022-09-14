@@ -9,7 +9,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Mapping, Optional, Sequence
+from typing import Any, Mapping, Optional, Sequence, Union
 
 from pydantic import BaseModel, root_validator, validator
 
@@ -39,6 +39,14 @@ class CustomQuery(BaseModel):
     tags: Optional[Sequence[str]]
 
 
+class MetricPatterns(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    exclude: Optional[Sequence[str]]
+    include: Optional[Sequence[str]]
+
+
 class InstanceConfig(BaseModel):
     class Config:
         allow_mutation = False
@@ -46,11 +54,14 @@ class InstanceConfig(BaseModel):
     additional_metrics: Optional[Sequence[str]]
     collections: Optional[Sequence[str]]
     collections_indexes_stats: Optional[bool]
+    connection_scheme: Optional[str]
     custom_queries: Optional[Sequence[CustomQuery]]
     database: Optional[str]
+    dbnames: Optional[Sequence[str]]
     disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
-    hosts: Optional[Sequence[str]]
+    hosts: Optional[Union[str, Sequence[str]]]
+    metric_patterns: Optional[MetricPatterns]
     min_collection_interval: Optional[float]
     options: Optional[Mapping[str, Any]]
     password: Optional[str]
@@ -62,8 +73,14 @@ class InstanceConfig(BaseModel):
     ssl_cert_reqs: Optional[int]
     ssl_certfile: Optional[str]
     ssl_keyfile: Optional[str]
+    ssl_match_hostname: Optional[bool]
     tags: Optional[Sequence[str]]
     timeout: Optional[int]
+    tls: Optional[bool]
+    tls_allow_invalid_certificates: Optional[bool]
+    tls_allow_invalid_hostnames: Optional[bool]
+    tls_ca_file: Optional[str]
+    tls_certificate_key_file: Optional[str]
     username: Optional[str]
 
     @root_validator(pre=True)

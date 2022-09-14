@@ -15,6 +15,8 @@ INSTANCE = {
 
 INVALID_HOST_INSTANCE = {'host': 'nonexistinghost'}
 
+WIN_SERVICES_LEGACY_CONFIG = {'host': '.', 'use_legacy_check_version': True}
+
 WIN_SERVICES_MINIMAL_CONFIG = {'host': '.', 'tags': ['mytag1', 'mytag2']}
 
 WIN_SERVICES_CONFIG = {
@@ -44,10 +46,6 @@ DEFAULT_APP_POOLS = [
 
 SITE_METRICS = [counter_data[3] for counter_data in DEFAULT_COUNTERS if counter_data[0] == 'Web Service']
 APP_POOL_METRICS = [counter_data[3] for counter_data in DEFAULT_COUNTERS if counter_data[0] == 'APP_POOL_WAS']
-
-# Skip test for legacy implementation since those giant fixtures are difficult to update
-for metric in ('iis.httpd_request_method.patch',):
-    SITE_METRICS.remove(metric)
 
 PERFORMANCE_OBJECTS = {}
 for object_name, instances in (('APP_POOL_WAS', ['foo-pool', 'bar-pool']), ('Web Service', ['foo.site', 'bar.site'])):

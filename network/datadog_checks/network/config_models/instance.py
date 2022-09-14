@@ -19,6 +19,14 @@ from datadog_checks.base.utils.models import validation
 from . import defaults, validators
 
 
+class MetricPatterns(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    exclude: Optional[Sequence[str]]
+    include: Optional[Sequence[str]]
+
+
 class InstanceConfig(BaseModel):
     class Config:
         allow_mutation = False
@@ -28,6 +36,7 @@ class InstanceConfig(BaseModel):
     collect_connection_queues: Optional[bool]
     collect_connection_state: Optional[bool]
     collect_count_metrics: Optional[bool]
+    collect_ethtool_metrics: Optional[bool]
     collect_rate_metrics: Optional[bool]
     combine_connection_states: Optional[bool]
     conntrack_path: Optional[str]
@@ -35,6 +44,7 @@ class InstanceConfig(BaseModel):
     empty_default_hostname: Optional[bool]
     excluded_interface_re: Optional[str]
     excluded_interfaces: Optional[Sequence[str]]
+    metric_patterns: Optional[MetricPatterns]
     min_collection_interval: Optional[float]
     service: Optional[str]
     tags: Optional[Sequence[str]]

@@ -4,10 +4,11 @@ import pytest
 
 from datadog_checks.dev import get_docker_hostname, get_here
 
+from .legacy.common import FLAVOR
+
 HERE = get_here()
 FIXTURE_DIR = os.path.join(HERE, 'fixtures')
 DOCKER_DIR = os.path.join(HERE, 'docker')
-ENVOY_LEGACY = os.getenv('ENVOY_LEGACY')
 ENVOY_VERSION = os.getenv('ENVOY_VERSION')
 
 HOST = get_docker_hostname()
@@ -15,7 +16,7 @@ PORT = '8001'
 
 URL = 'http://{}:{}'.format(HOST, PORT)
 DEFAULT_INSTANCE = {'openmetrics_endpoint': '{}/stats/prometheus'.format(URL)}
-requires_new_environment = pytest.mark.skipif(ENVOY_LEGACY != 'false', reason='Requires prometheus environment')
+requires_new_environment = pytest.mark.skipif(FLAVOR == 'api_v2', reason='Requires prometheus environment')
 
 PROMETHEUS_METRICS = [
     "cluster.assignment_stale.count",
@@ -27,6 +28,8 @@ PROMETHEUS_METRICS = [
     "cluster.circuit_breakers.rq_pending_open",
     "cluster.circuit_breakers.rq_retry_open",
     "cluster.default_total_match.count",
+    "cluster.ext_authz.error.count",
+    "cluster.ext_authz.failure_mode_allowed.count",
     "cluster.http1.dropped_headers_with_underscores.count",
     "cluster.http1.metadata_not_supported_error.count",
     "cluster.http1.requests_rejected_with_underscores_in_headers.count",
@@ -74,6 +77,8 @@ PROMETHEUS_METRICS = [
     "cluster.membership_healthy",
     "cluster.membership_total",
     "cluster.original_dst_host_invalid.count",
+    "cluster.ratelimit.error.count",
+    "cluster.ratelimit.failure_mode_allowed.count",
     "cluster.retry_or_shadow_abandoned.count",
     "cluster.update_attempt.count",
     "cluster.update_empty.count",
@@ -304,6 +309,20 @@ PROMETHEUS_METRICS = [
     "watchdog_miss.count",
     "workers.watchdog_mega_miss.count",
     "workers.watchdog_miss.count",
+    "cluster.outlier_detection.ejections_active",
+    "cluster.outlier_detection.ejections_overflow.count",
+    "cluster.outlier_detection.ejections_detected_consecutive_5xx.count",
+    "cluster.outlier_detection.ejections_enforced_consecutive_5xx.count",
+    "cluster.outlier_detection.ejections_enforced_success_rate.count",
+    "cluster.outlier_detection.ejections_detected_success_rate.count",
+    "cluster.outlier_detection.ejections_enforced_consecutive_gateway_failure.count",
+    "cluster.outlier_detection.ejections_detected_consecutive_gateway_failure.count",
+    "cluster.outlier_detection.ejections_enforced_consecutive_local_origin_failure.count",
+    "cluster.outlier_detection.ejections_detected_consecutive_local_origin_failure.count",
+    "cluster.outlier_detection.ejections_enforced_local_origin_success_rate.count",
+    "cluster.outlier_detection.ejections_detected_local_origin_success_rate.count",
+    "cluster.outlier_detection.ejections_enforced_failure_percentage.count",
+    "cluster.outlier_detection.ejections_detected_failure_percentage.count",
 ]
 
 FLAKY_METRICS = {

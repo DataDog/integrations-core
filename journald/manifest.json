@@ -1,35 +1,42 @@
 {
-  "display_name": "journald",
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "name": "journald",
-  "metric_prefix": "journald.",
-  "metric_to_check": "",
-  "creates_events": false,
-  "short_description": "Monitor your systemd-journald logs with Datadog.",
-  "guid": "845431ef-9092-4254-a188-138fc9273fa5",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "public_title": "journald",
-  "categories": [
-    "log collection"
-  ],
-  "type": "check",
-  "is_public": true,
-  "integration_id": "journald",
+  "manifest_version": "2.0.0",
+  "app_uuid": "2ee4cbe2-2d88-435b-9ed9-dbe07ca1d059",
+  "app_id": "journald",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor your systemd-journald logs with Datadog.",
+    "title": "journald",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec":"assets/configuration/spec.yaml"
-    },
-    "dashboards": {},
-    "saved_views": {},
-    "monitors": {},
-    "service_checks": "assets/service_checks.json",
-    "logs": {},
-    "metrics_metadata": "metadata.csv"
+    "integration": {
+      "source_type_name": "journald",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    }
   }
 }

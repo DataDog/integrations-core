@@ -43,7 +43,7 @@ from .utils import (
 DEFAULT_OID_BATCH_SIZE = 10
 LOADER_TAG = 'loader:python'
 
-_MAX_FETCH_NUMBER = 10 ** 6
+_MAX_FETCH_NUMBER = 10**6
 
 
 def reply_invalid(oid):
@@ -623,7 +623,7 @@ class SnmpCheck(AgentCheck):
             return
 
         try:
-            bandwidth_usage_value = (bits_value / (if_high_speed * (10 ** 6))) * 100
+            bandwidth_usage_value = (bits_value / (if_high_speed * (10**6))) * 100
         except ZeroDivisionError:
             self.log.debug('Zero value at ifHighSpeed, skipping this row. index=%s', index)
             return

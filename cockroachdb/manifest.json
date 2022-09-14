@@ -1,41 +1,56 @@
 {
-  "display_name": "CockroachDB",
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "name": "cockroachdb",
-  "metric_prefix": "cockroachdb.",
-  "metric_to_check": "cockroachdb.sys.uptime",
-  "creates_events": false,
-  "short_description": "Monitor the overall health and performance of CockroachDB clusters.",
-  "guid": "d66151ed-2e98-4037-ad89-bf4400e45f34",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "public_title": "Datadog-CockroachDB Integration",
-  "categories": [
-    "cloud",
-    "data store",
-    "autodiscovery",
-    "log collection"
-  ],
-  "type": "check",
-  "is_public": true,
-  "integration_id": "cockroachdb",
+  "manifest_version": "2.0.0",
+  "app_uuid": "7368f005-2333-4dc5-a2b5-14419e4995d1",
+  "app_id": "cockroachdb",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor the overall health and performance of CockroachDB clusters.",
+    "title": "CockroachDB",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Cloud",
+      "Category::Data Store",
+      "Category::Autodiscovery",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "CockroachDB",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "cockroachdb.",
+        "check": "cockroachdb.sys.uptime",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
     },
-    "monitors": {},
     "dashboards": {
       "CockroachDB Overview": "assets/dashboards/overview.json"
     },
-    "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "cockroachdb"
-    },
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

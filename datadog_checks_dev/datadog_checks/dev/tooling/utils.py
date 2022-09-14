@@ -16,6 +16,7 @@ import semver
 import tomli
 import tomli_w
 import yaml
+from packaging.specifiers import SpecifierSet
 
 from ..fs import dir_exists, file_exists, read_file, read_file_lines, write_file
 from .catalog_const import (
@@ -81,13 +82,23 @@ def is_package(d):
 def normalize_project_name(project_name):
     # https://www.python.org/dev/peps/pep-0508/#names
     if not re.search('^([A-Z0-9]|[A-Z0-9][A-Z0-9._-]*[A-Z0-9])$', project_name, re.IGNORECASE):
-        raise ValueError(
-            'Required field `project.name` must only contain ASCII letters/digits, '
-            'underscores, hyphens, and periods.'
-        )
+        raise ValueError('Project name must only contain ASCII letters/digits, underscores, hyphens, and periods.')
 
     # https://www.python.org/dev/peps/pep-0503/#normalized-names
     return re.sub(r'[-_.]+', '-', project_name).lower()
+
+
+def get_normalized_dependency(requirement):
+    requirement.name = normalize_project_name(requirement.name)
+
+    if requirement.specifier:
+        requirement.specifier = SpecifierSet(str(requirement.specifier).lower())
+
+    if requirement.extras:
+        requirement.extras = {normalize_project_name(extra) for extra in requirement.extras}
+
+    # All TOML writers use double quotes, so allow direct writing or copy/pasting to avoid escaping
+    return str(requirement).replace('"', "'")
 
 
 def normalize_package_name(package_name):
@@ -226,7 +237,10 @@ def get_package_name(check_name):
 
 
 def get_version_file(check_name):
-    return os.path.join(get_root(), check_name, 'datadog_checks', get_package_name(check_name), '__about__.py')
+    if check_name == 'ddev':
+        return os.path.join(get_root(), check_name, 'src', 'ddev', '__about__.py')
+    else:
+        return os.path.join(get_root(), check_name, 'datadog_checks', get_package_name(check_name), '__about__.py')
 
 
 def is_agent_check(check_name):
@@ -241,7 +255,7 @@ def is_agent_check(check_name):
 
 
 def code_coverage_enabled(check_name):
-    if check_name in ('datadog_checks_base', 'datadog_checks_dev', 'datadog_checks_downloader'):
+    if check_name in ('datadog_checks_base', 'datadog_checks_dev', 'datadog_checks_downloader', 'ddev'):
         return True
 
     return is_agent_check(check_name)
@@ -253,6 +267,14 @@ def get_manifest_file(check_name):
 
 def get_tox_file(check_name):
     return os.path.join(get_root(), check_name, 'tox.ini')
+
+
+def get_hatch_file(check_name):
+    return os.path.join(get_root(), check_name, 'hatch.toml')
+
+
+def is_testable_check(check_name):
+    return file_exists(get_tox_file(check_name)) or file_exists(get_hatch_file(check_name))
 
 
 def get_extra_license_files():
@@ -267,6 +289,13 @@ def get_extra_license_files():
 def get_metadata_file(check_name):
     path = load_manifest(check_name).get('assets', {}).get("metrics_metadata", "metadata.csv")
     return os.path.join(get_root(), check_name, path)
+
+
+def get_display_name(check_name, manifest=None):
+    manifest = manifest or load_manifest(check_name)
+    return manifest.get('display_name') or manifest.get('assets', {}).get('integration', {}).get(
+        'source_type_name', check_name
+    )
 
 
 def get_jmx_metrics_file(check_name):
@@ -404,7 +433,7 @@ def get_valid_integrations():
 
 
 def get_testable_checks():
-    return {path for path in os.listdir(get_root()) if file_exists(get_tox_file(path))}
+    return {path for path in os.listdir(get_root()) if is_testable_check(path)}
 
 
 def get_metric_sources():
@@ -629,6 +658,23 @@ def has_saved_views(check):
 
 def has_recommended_monitor(check):
     return _has_asset_in_manifest(check, 'monitors')
+
+
+def is_manifest_v2(check):
+    """
+    Check if a manifest is version 2
+    Return True if the manifest exists AND its version is "2.0.0", False otherwise
+    """
+    manifest_file = get_manifest_file(check)
+    if not file_exists(manifest_file):
+        return False
+    try:
+        with open(manifest_file) as f:
+            manifest = json.loads(f.read())
+    except JSONDecodeError as e:
+        raise Exception("Cannot decode {}: {}".format(manifest_file, e))
+
+    return manifest.get("manifest_version") == "2.0.0"
 
 
 def _has_asset_in_manifest(check, asset):

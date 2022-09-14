@@ -98,6 +98,7 @@ def instance_complex():
             'schema_size_metrics': True,
             'table_size_metrics': True,
             'system_table_size_metrics': True,
+            'table_row_stats_metrics': True,
         },
         'tags': tags.METRIC_TAGS,
         'queries': [
@@ -128,12 +129,12 @@ def instance_additional_status():
         'disable_generic_tags': 'true',
         'additional_status': [
             {
-                'name': "innodb_rows_read",
+                'name': "Innodb_rows_read",
                 'metric_name': "mysql.innodb.rows_read",
                 'type': "rate",
             },
             {
-                'name': "row_lock_time",
+                'name': "Innodb_row_lock_time",
                 'metric_name': "mysql.innodb.row_lock_time",
                 'type': "rate",
             },
@@ -299,6 +300,7 @@ def init_group_replication():
     conns = [pymysql.connect(host=common.HOST, port=p, user='root', password='mypass') for p in common.PORTS_GROUP]
     _add_dog_user(conns[0])
     _add_bob_user(conns[0])
+    _add_fred_user(conns[0])
     _init_datadog_sample_collection(conns[0])
 
     cur_primary = conns[0].cursor()
@@ -371,6 +373,7 @@ def init_master():
     conn = pymysql.connect(host=common.HOST, port=common.PORT, user='root')
     _add_dog_user(conn)
     _add_bob_user(conn)
+    _add_fred_user(conn)
     _init_datadog_sample_collection(conn)
 
 
@@ -413,9 +416,22 @@ def _add_bob_user(conn):
     cur.execute("GRANT USAGE on *.* to 'bob'@'%'")
 
 
+def _add_fred_user(conn):
+    cur = conn.cursor()
+    cur.execute("CREATE USER 'fred'@'%' IDENTIFIED BY 'fred'")
+    cur.execute("GRANT USAGE on *.* to 'fred'@'%'")
+
+
 @pytest.fixture
 def bob_conn():
     conn = pymysql.connect(host=common.HOST, port=common.PORT, user='bob', password='bob')
+    yield conn
+    conn.close()
+
+
+@pytest.fixture
+def fred_conn():
+    conn = pymysql.connect(host=common.HOST, port=common.PORT, user='fred', password='fred')
     yield conn
     conn.close()
 
@@ -435,7 +451,8 @@ def populate_database():
     cur.execute("INSERT INTO testdb.users (id,name,age) VALUES(1,'Alice',25);")
     cur.execute("INSERT INTO testdb.users (id,name,age) VALUES(2,'Bob',20);")
     cur.execute("GRANT SELECT ON testdb.users TO 'dog'@'%';")
-    cur.execute("GRANT SELECT ON testdb.users TO 'bob'@'%';")
+    cur.execute("GRANT SELECT, UPDATE ON testdb.users TO 'bob'@'%';")
+    cur.execute("GRANT SELECT, UPDATE ON testdb.users TO 'fred'@'%';")
     cur.close()
     _create_explain_procedure(conn, "testdb")
 

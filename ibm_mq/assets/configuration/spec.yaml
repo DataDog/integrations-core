@@ -46,6 +46,13 @@ files:
         value:
           type: string
           minLength: 1
+      - name: override_hostname
+        description: |
+          If enabled, the check sends the provided `host` as hostname instead of the agent's host.
+          In this case the `mq_host` tag will not be emitted. This cannot be used alongside `connection_name`
+        value:
+          type: boolean
+          example: false
       - name: username
         value:
           type: string
@@ -98,6 +105,15 @@ files:
           type: array
           items:
             type: string
+      - name: auto_discover_channels
+        description: |
+          Autodiscover channels to monitor. This finds all discoverable channels.
+
+          Note: autodiscovered channels are in addition to the ones provided in `channels`.
+          Disabling this option will stop autodiscovery only for status metrics but not for property metrics.
+        value:
+          example: true
+          type: boolean
       - name: channel_status_mapping
         description: |
           Custom channel status mapping for service check `ibm_mq.channel.status`.
@@ -137,6 +153,17 @@ files:
         value:
           example: false
           type: boolean
+      - name: collect_reset_queue_metrics
+        description: |
+          Collect metrics from Reset Queue Statistics. Statistics collected are:
+            - reset queue statistics (MQCMD_RESET_Q_STATS)
+
+          Note: Collecting reset queue statistics will also reset the performance data and requires `+chg`
+          permissions. More information found here:
+          https://www.ibm.com/docs/en/ibm-mq/9.1?topic=formats-reset-queue-statistics
+        value:
+          example: true
+          type: boolean
       - name: mqcd_version
         description: |
           Which channel definition version to use. Supported values are 1 to 9 including.
@@ -149,7 +176,8 @@ files:
       - name: convert_endianness
         description: |
           If you are monitoring IBM MQ remotely and if the Agent and the server are using different endianness,
-          set this field to true.
+          set this field to true. For example, you will need to enable this option if you are monitoring a server that
+          is running on AIX or IBM i.
         value:
           example: false
           type: boolean
@@ -175,6 +203,16 @@ files:
         value:
           example: False
           type: boolean
+      - name: try_basic_auth
+        description: |
+          Whether or not to try connecting with just username and password before SSL when `ssl_auth` is enabled.
+
+          WARNING: There is a known issue with the client library in which disabling
+          this option has the potential to cause a memory leak.
+        value:
+          example: false
+          type: boolean
+          display_default: true
       - name: ssl_cipher_spec
         type: string
         description: The ssl cipher to use. It should match the value of the channels SSLCIPH attribute.
@@ -210,13 +248,6 @@ files:
             'SYSTEM.*': queue_type:system
             'DEV.*': role:dev,queue_type:default
           type: object
-      - name: override_hostname
-        description: |
-          If enabled, the check sends the provided `host` as hostname instead of the agent's host.
-          In this case the `mq_host` tag will not be emitted. This cannot be used alongside `connection_name`
-        value:
-          type: boolean
-          example: false
       - template: instances/default
   - template: logs
     example:

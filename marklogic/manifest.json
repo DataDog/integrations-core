@@ -1,33 +1,51 @@
 {
-  "display_name": "MarkLogic",
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "name": "marklogic",
-  "metric_prefix": "marklogic.",
-  "metric_to_check": "marklogic.hosts.total_hosts",
-  "process_signatures": [
-    "MarkLogic"
-  ],
-  "creates_events": false,
-  "short_description": "Tracks metrics about MarkLogic databases, forests, hosts and servers.",
-  "guid": "0c200415-731f-4b67-9b2c-d6bd1225eee1",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "public_title": "Datadog-MarkLogic Integration",
-  "categories": [
-    "data store",
-    "log collection"
-  ],
-  "type": "check",
-  "is_public": true,
-  "integration_id": "marklogic",
+  "manifest_version": "2.0.0",
+  "app_uuid": "92342b09-db9a-4542-b442-76bb9b7f716e",
+  "app_id": "marklogic",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Tracks metrics about MarkLogic databases, forests, hosts and servers.",
+    "title": "MarkLogic",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Data Store",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "MarkLogic",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "marklogic.",
+        "check": "marklogic.hosts.total_hosts",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      },
+      "process_signatures": [
+        "MarkLogic"
+      ]
     },
     "dashboards": {
       "MarkLogic - Overview": "assets/dashboards/overview.json"
@@ -40,10 +58,8 @@
     "saved_views": {
       "marklogic_processes": "assets/saved_views/marklogic_processes.json"
     },
-    "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "marklogic"
-    },
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

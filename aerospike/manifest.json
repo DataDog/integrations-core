@@ -1,38 +1,53 @@
 {
-  "display_name": "Aerospike",
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "name": "aerospike",
-  "metric_prefix": "aerospike.",
-  "metric_to_check": "aerospike.uptime",
-  "creates_events": false,
-  "short_description": "Collect cluster and namespaces statistics from the Aerospike database",
-  "guid": "582de9e7-0c99-4037-9cc5-bc34612ce039",
-  "support": "core",
-  "supported_os": [
-    "linux"
-  ],
-  "public_title": "Datadog-Aerospike Integration",
-  "categories": [
-    "data store",
-    "autodiscovery",
-    "log collection"
-  ],
-  "type": "check",
-  "is_public": true,
-  "integration_id": "aerospike",
+  "manifest_version": "2.0.0",
+  "app_uuid": "68799442-b764-489c-8bbd-44cb11a15f4e",
+  "app_id": "aerospike",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Collect cluster and namespaces statistics from the Aerospike database",
+    "title": "Aerospike",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Category::Data Store",
+      "Category::Autodiscovery",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "Aerospike",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "aerospike.",
+        "check": "aerospike.uptime",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
     },
-    "monitors": {},
     "dashboards": {
       "Aerospike Overview": "assets/dashboards/overview.json"
     },
-    "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "aerospike"
-    },
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

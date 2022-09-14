@@ -51,6 +51,14 @@ instances:
     #
     # password: <PASSWORD>
 
+    ## @param server_version - string - optional - default: 2014
+    ## Server version year of sqlserver the agent will connect to. 
+    ## Important for validating connection string attributes for older sqlserver versions.
+    ##
+    ## This is required if connecting to a SQLServer instance older than 2014.
+    #
+    # server_version: '2014'
+
     ## @param database - string - optional - default: master
     ## Database name to query.  Not compatible with `database_autodiscovery`.
     #
@@ -170,8 +178,8 @@ instances:
     ## @param adoprovider - string - optional - default: SQLOLEDB
     ## Choose the ADO provider.  Note that the (default) provider
     ## SQLOLEDB is being deprecated.  To use the newer MSOLEDBSQL
-    ## provider, set the adoprovider to "MSOLEDBSQL" below. You will also need
-    ## to download the new provider from
+    ## provider, set the adoprovider to "MSOLEDBSQL" below or "MSOLEDBSQL19" for version 19 of the driver.
+    ## You will also need to download the new provider from
     ## https://docs.microsoft.com/en-us/sql/connect/oledb/oledb-driver-for-sql-server?view=sql-server-2017
     #
     # adoprovider: SQLOLEDB
@@ -195,22 +203,25 @@ instances:
 
     ## @param connection_string - string - optional
     ## Specify a custom connection string to be used
-    ## Ex: "ApplicationIntent=ReadWrite" or "MultiSubnetFailover=yes"
-    ## "Trusted_Connection=yes" to use Windows Authentication (note that in this case the connection will be performed
-    ## with the `ddagentuser` user, you can find more information about this user
-    ## in https://docs.datadoghq.com/agent/faq/windows-agent-ddagent-user/)
+    ## Ex: "ApplicationIntent=ReadWrite" or "Trusted_Connection=Yes" to use Windows Authentication
+    ## (note that in this case the connection will be performed with the `ddagentuser` user, you can
+    ## find more information about this user in https://docs.datadoghq.com/agent/faq/windows-agent-ddagent-user/)
+    ##
+    ## Please note that certain connection string values will vary depending on the connection Provider used,
+    ## for example:
+    ## * "OLE DB" provider uses "MultiSubnetFailover=Yes"
+    ## * "ADO" provider uses "MultiSubnetFailover=True"
     #
     # connection_string: <CONNECTION_STRING>
 
     ## @param dbm - boolean - optional - default: false
     ## Set to `true` to enable Database Monitoring.
-    ## Reach out to your Customer Success Manager to request access to the beta.
     #
     # dbm: false
 
     ## Configure collection of query metrics
     #
-    query_metrics:
+    # query_metrics:
 
         ## @param enabled - boolean - optional - default: true
         ## Enable collection of query metrics. Requires `dbm: true`.
@@ -237,7 +248,7 @@ instances:
 
     ## Configure collection of active sessions monitoring
     #
-    query_activity:
+    # query_activity:
 
         ## @param enabled - boolean - optional - default: true
         ## Enable collection of active sessions. Requires `dbm: true`.
@@ -252,10 +263,84 @@ instances:
         #
         # collection_interval: 10
 
+    ## This block defines the configuration for AWS RDS and Aurora instances. 
+    ##
+    ## Complete this section if you have installed the Datadog AWS Integration 
+    ## (https://docs.datadoghq.com/integrations/amazon_web_services) to enrich instances 
+    ## with SQL Server integration telemetry.
+    ##
+    ## These values are only applied when `dbm: true` option is set.
+    #
+    # aws:
+
+        ## @param instance_endpoint - string - optional - default: mydb.cfxgae8cilcf.us-east-1.rds.amazonaws.com
+        ## Equal to the Endpoint.Address of the instance the agent is connecting to. 
+        ## This value is optional if the value of `host` is already configured to the instance endpoint.
+        ##
+        ## For more information on instance endpoints, 
+        ## see the AWS docs https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_Endpoint.html
+        #
+        # instance_endpoint: mydb.cfxgae8cilcf.us-east-1.rds.amazonaws.com
+
+    ## This block defines the configuration for Google Cloud SQL instances.
+    ##
+    ## Complete this section if you have installed the Datadog GCP Integration 
+    ## (https://docs.datadoghq.com/integrations/google_cloud_platform) to enrich instances 
+    ## with SQL Server integration telemetry.
+    ##
+    ## These values are only applied when `dbm: true` option is set.
+    #
+    # gcp:
+
+        ## @param project_id - string - optional - default: foo-project
+        ## Equal to the GCP resource's project ID.
+        ##
+        ## For more information on project IDs,
+        ## See the GCP docs https://cloud.google.com/resource-manager/docs/creating-managing-projects
+        #
+        # project_id: foo-project
+
+        ## @param instance_id - string - optional - default: foo-database
+        ## Equal to the GCP resource's instance ID.
+        ##
+        ## For more information on instance IDs,
+        ## See the GCP docs https://cloud.google.com/sql/docs/sqlserver/instance-settings#instance-id-2ndgen
+        #
+        # instance_id: foo-database
+
+    ## This block defines the configuration for Azure Managed Instance, Azure SQL Database or 
+    ## SQLServer on Virtual Machines.
+    ##
+    ## Complete this section if you have installed the Datadog Azure Integration 
+    ## (https://docs.datadoghq.com/integrations/azure) to enrich instances 
+    ## with SQL Server integration telemetry.
+    ##
+    ## These values are only applied when `dbm: true` option is set.
+    #
+    # azure:
+
+        ## @param deployment_type - string - optional - default: sql_database
+        ## Equal to the deployment type for the managed database. 
+        ##
+        ## Acceptable values are:
+        ##   - `sql_database` 
+        ##   - `managed_instance`
+        ##   - `virtual_machine`
+        ##
+        ## For more information on deployment types, see the Azure
+        ## docs https://docs.microsoft.com/en-us/azure/azure-sql/azure-sql-iaas-vs-paas-what-is-overview?view=azuresql
+        #
+        # deployment_type: sql_database
+
+        ## @param name - string - optional - default: my-sqlserver-instance
+        ## Equal to the name of the SQL Database, Managed Instance (SQL MI) or virtual machine.
+        #
+        # name: my-sqlserver-instance
+
     ## Configure how the SQL obfuscator behaves.
     ## Note: This option only applies when `dbm` is enabled.
     #
-    obfuscator_options:
+    # obfuscator_options:
 
         ## @param replace_digits - boolean - optional - default: false
         ## Set to `true` to replace digits in identifiers and table names with question marks in your SQL statements.
@@ -263,11 +348,11 @@ instances:
         #
         # replace_digits: false
 
-        ## @param collect_metadata - boolean - optional - default: false
-        ## Set to `true` to enable the collection of metadata in your SQL statements.
+        ## @param collect_metadata - boolean - optional - default: true
+        ## Set to `false` to disable the collection of metadata in your SQL statements.
         ## Metadata includes things such as tables, commands, and comments.
         #
-        # collect_metadata: false
+        # collect_metadata: true
 
         ## @param collect_tables - boolean - optional - default: true
         ## Set to `false` to disable the collection of tables in your SQL statements.
@@ -288,6 +373,13 @@ instances:
         ## Requires `collect_metadata: true`.
         #
         # collect_comments: true
+
+        ## @param keep_sql_alias - boolean - optional - default: true
+        ## Set to `true` to keep sql aliases in obfuscated SQL statements. Examples of aliases are
+        ## `with select 1 as alias`, `select column as other_name`, or `select * from table t`.
+        ## When `true` these aliases will not be removed.
+        #
+        # keep_sql_alias: true
 
     ## @param command_timeout - integer - optional - default: 5
     ## Timeout in seconds for the connection and each command run
@@ -396,6 +488,17 @@ instances:
     ## getting mixed with other integraton tags.
     #
     disable_generic_tags: true
+
+    ## @param metric_patterns - mapping - optional
+    ## A mapping of metrics to include or exclude, with each entry being a regular expression.
+    ##
+    ## Metrics defined in `exclude` will take precedence in case of overlap.
+    #
+    # metric_patterns:
+    #   include:
+    #   - <INCLUDE_REGEX>
+    #   exclude:
+    #   - <EXCLUDE_REGEX>
 
 ## Log Section
 ##

@@ -1,0 +1,168 @@
+{
+  "title": "Helm - Overview",
+  "description": "## Helm - Overview\n\nThis dashboard provides a high-level overview of the Helm releases monitored by Datadog.",
+  "widgets": [
+    {
+      "id": 6341809895193038,
+      "definition": {
+        "title": "Releases Status",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "check_status",
+        "check": "helm.release_state",
+        "grouping": "cluster",
+        "group_by": [
+          "kube_cluster_name",
+          "helm_release"
+        ],
+        "tags": [
+          "$kube_cluster_name",
+          "$helm_release",
+          "$helm_namespace"
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 5,
+        "height": 3
+      }
+    },
+    {
+      "id": 57953601687114,
+      "definition": {
+        "title": "Events",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "event_stream",
+        "query": "source:helm kube_cluster_name:$kube_cluster_name.value helm_release:$helm_release.value helm_status:$helm_status.value helm_namespace:$helm_namespace.value",
+        "event_size": "l"
+      },
+      "layout": {
+        "x": 5,
+        "y": 0,
+        "width": 7,
+        "height": 3
+      }
+    },
+    {
+      "id": 5229210289262404,
+      "definition": {
+        "title": "Helm releases",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": true,
+        "legend_layout": "auto",
+        "legend_columns": [
+          "avg",
+          "min",
+          "max",
+          "value",
+          "sum"
+        ],
+        "type": "timeseries",
+        "requests": [
+          {
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "response_format": "timeseries",
+            "queries": [
+              {
+                "query": "sum:helm.release{$kube_cluster_name,$helm_release,$helm_status,$helm_namespace} by {helm_status}",
+                "data_source": "metrics",
+                "name": "query1"
+              }
+            ],
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            },
+            "display_type": "bars"
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 3,
+        "width": 12,
+        "height": 3
+      }
+    },
+    {
+      "id": 8212990758383134,
+      "definition": {
+        "title": "Helm releases (only shows 500)",
+        "title_size": "16",
+        "title_align": "left",
+        "time": {},
+        "type": "query_table",
+        "requests": [
+          {
+            "formulas": [
+              {
+                "conditional_formats": [],
+                "cell_display_mode": "bar",
+                "formula": "query1",
+                "limit": {
+                  "count": 500,
+                  "order": "desc"
+                }
+              }
+            ],
+            "response_format": "scalar",
+            "queries": [
+              {
+                "query": "sum:helm.release{$kube_cluster_name,$helm_release,$helm_status,$helm_namespace,$helm_namespace} by {helm_chart_name,helm_chart_version,cluster_name,helm_status,helm_revision,helm_release,helm_namespace}",
+                "data_source": "metrics",
+                "name": "query1",
+                "aggregator": "avg"
+              }
+            ]
+          }
+        ],
+        "has_search_bar": "auto"
+      },
+      "layout": {
+        "x": 0,
+        "y": 6,
+        "width": 12,
+        "height": 7
+      }
+    }
+  ],
+  "template_variables": [
+    {
+      "name": "kube_cluster_name",
+      "default": "*",
+      "prefix": "kube_cluster_name",
+      "available_values": []
+    },
+    {
+      "name": "helm_release",
+      "default": "*",
+      "prefix": "helm_release",
+      "available_values": []
+    },
+    {
+      "name": "helm_status",
+      "default": "*",
+      "prefix": "helm_status",
+      "available_values": []
+    },
+    {
+      "name": "helm_namespace",
+      "default": "*",
+      "prefix": "helm_namespace",
+      "available_values": []
+    }
+  ],
+  "layout_type": "ordered",
+  "is_read_only": false,
+  "notify_list": [],
+  "reflow_type": "fixed",
+  "id": "2bq-8gn-gmz"
+}

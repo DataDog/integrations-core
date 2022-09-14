@@ -26,7 +26,6 @@ V2_TO_V1_MAP = JSONDict(
     {
         "/manifest_version": SKIP_IF_FOUND,
         "/app_id": "/integration_id",
-        "/classifier_tags": [],
         "/display_on_public_website": "/is_public",
         "/tile": {},
         "/tile/overview": "README.md#Overview",
@@ -36,6 +35,7 @@ V2_TO_V1_MAP = JSONDict(
         "/tile/description": "/short_description",
         "/tile/title": "/public_title",
         "/tile/media": [],
+        "/tile/classifier_tags": [],
         "/author": {},
         "/author/homepage": "/author/homepage",
         "/author/name": "/author/name",
@@ -54,6 +54,7 @@ V2_TO_V1_MAP = JSONDict(
         "/assets/integration/metrics/metadata_path": "/assets/metrics_metadata",
         "/assets/integration/service_checks": {},
         "/assets/integration/service_checks/metadata_path": "/assets/service_checks",
+        "/assets/integration/process_signatures": "/process_signatures",
         "/assets/dashboards": "/assets/dashboards",
         "/assets/monitors": "/assets/monitors",
         "/assets/saved_views": "/assets/saved_views",
@@ -63,7 +64,7 @@ V2_TO_V1_MAP = JSONDict(
 
 OS_TO_CLASSIFIER_TAGS = {
     "linux": "Supported OS::Linux",
-    "mac_os": "Supported OS::Mac OS",
+    "mac_os": "Supported OS::macOS",
     "windows": "Supported OS::Windows",
 }
 
@@ -77,7 +78,7 @@ CATEGORIES_TO_CLASSIFIER_TAGS = {
     "cloud": "Category::Cloud",
     "collaboration": "Category::Collaboration",
     "compliance": "Category::Compliance",
-    "configuration & deployment": "Category::Configuration Deployment",
+    "configuration & deployment": "Category::Configuration & Deployment",
     "containers": "Category::Containers",
     "cost management": "Category::Cost Management",
     "data store": "Category::Data Store",
@@ -152,7 +153,7 @@ def migrate_manifest(repo_name, integration, to_version):
 
     # Update any previously skipped field in which we can use logic to assume the value of
     # Also iterate through any lists to include new/updated fields at each index of the list
-    migrated_manifest.set_path("/classifier_tags", TODO_FILL_IN)
+    migrated_manifest.set_path("/tile/classifier_tags", TODO_FILL_IN)
 
     # Retrieve and map all categories from other fields
     classifier_tags = []
@@ -169,10 +170,15 @@ def migrate_manifest(repo_name, integration, to_version):
             classifier_tags.append(category_tag)
 
     # Write the manifest back to disk
-    migrated_manifest.set_path("/classifier_tags", classifier_tags)
+    migrated_manifest.set_path("/tile/classifier_tags", classifier_tags)
 
-    # Marketplace-only fields:
-    if repo_name == "marketplace":
+    # Temporarily required official fields
+    if repo_name == "integrations-core":
+        migrated_manifest.set_path("/author/name", "Datadog")
+        migrated_manifest.set_path("/author/homepage", "https://www.datadoghq.com")
+        migrated_manifest.set_path("/author/sales_email", "info@datadoghq.com")
+    # Marketplace-only fields
+    elif repo_name == "marketplace":
         migrated_manifest.set_path("/author/vendor_id", TODO_FILL_IN)
         migrated_manifest.set_path("/author/sales_email", loaded_manifest.get_path("/terms/legal_email"))
 
@@ -185,4 +191,4 @@ def migrate_manifest(repo_name, integration, to_version):
             migrated_manifest.set_path(f"/pricing/{idx}/short_description", TODO_FILL_IN)
             migrated_manifest.set_path(f"/pricing/{idx}/includes_assets", True)
 
-    write_file(get_manifest_file(integration), json.dumps(migrated_manifest, indent=2))
+    write_file(get_manifest_file(integration), f"{json.dumps(migrated_manifest, indent=2)}\n")

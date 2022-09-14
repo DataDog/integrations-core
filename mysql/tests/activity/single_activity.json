@@ -1,0 +1,22 @@
+[
+    {
+        "current_schema": "dog",
+        "ip": "localhost",
+        "lock_time": 3000000,
+        "port": 34942,
+        "processlist_command": "Query",
+        "processlist_db": "doghouse",
+        "processlist_host": "localhost",
+        "processlist_id": 1532,
+        "processlist_state": "executing",
+        "processlist_user": "shopper_13",
+        "sql_text": "select * from datadog",
+        "query_signature": "bbb771e694fe5689",
+        "event_timer_end": 354301626064000,
+        "event_timer_start": 353141155758000,
+        "thread_id": 1748,
+        "wait_event": "wait/io/table/sql/handler",
+        "wait_timer_end": 355186901147492,
+        "wait_timer_start": 355167424787616
+    }
+]

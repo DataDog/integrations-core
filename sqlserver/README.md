@@ -10,6 +10,8 @@ You can also create your own metrics by having the check run custom queries.
 
 ## Setup
 
+<div class="alert alert-info">This page describes the SQL Server Agent integration. If you are looking for the Database Monitoring product for SQL Server, see <a href="https://docs.datadoghq.com/database_monitoring" target="_blank">Datadog Database Monitoring</a>.</div>
+
 ### Installation
 
 The SQL Server check is included in the [Datadog Agent][2] package. No additional installation is necessary on your SQL Server instances.
@@ -22,7 +24,7 @@ _Server Properties_ -> _Security_ -> _SQL Server and Windows Authentication mode
 
 1. Create a read-only login to connect to your server:
 
-    ```text
+    ```SQL
         CREATE LOGIN datadog WITH PASSWORD = '<PASSWORD>';
         CREATE USER datadog FOR LOGIN datadog;
         GRANT SELECT on sys.dm_os_performance_counters to datadog;
@@ -31,7 +33,7 @@ _Server Properties_ -> _Security_ -> _SQL Server and Windows Authentication mode
    
    To collect file size metrics per database, ensure the user you created (`datadog`) has [connect permission access][3] to your databases by running:
    
-   ```text
+   ```SQL
        GRANT CONNECT ANY DATABASE to datadog; 
    ```
 
@@ -39,7 +41,7 @@ _Server Properties_ -> _Security_ -> _SQL Server and Windows Authentication mode
 
 3. (Required for AlwaysOn and `sys.master_files` metrics) To gather AlwaysOn and `sys.master_files` metrics, grant the following additional permission:
 
-    ```text
+    ```SQL
         GRANT VIEW ANY DEFINITION to datadog;
     ```
 

@@ -1,34 +1,40 @@
 {
-  "aliases": [
-    "/integrations/winservices"
-  ],
-  "categories": [
-    "os & system"
-  ],
-  "creates_events": false,
-  "display_name": "Windows Service",
-  "guid": "2289acf0-e413-4384-83f7-88157b430805",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "windows_service.",
-  "name": "windows_service",
-  "public_title": "Datadog-Windows Services Integration",
-  "short_description": "Monitor the state of your Windows services.",
-  "support": "core",
-  "supported_os": [
-    "windows"
-  ],
-  "type": "check",
-  "integration_id": "windows-service",
+  "manifest_version": "2.0.0",
+  "app_uuid": "1d895e93-d6f1-49f9-82bc-a03df7ff215c",
+  "app_id": "windows-service",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor the state of your Windows services.",
+    "title": "Windows Services",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Windows",
+      "Category::OS & System"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
-    },
-    "monitors": {},
-    "dashboards": {},
-    "service_checks": "assets/service_checks.json",
-    "logs": {},
-    "metrics_metadata": "metadata.csv"
+    "integration": {
+      "source_type_name": "Windows Service",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    }
   }
 }

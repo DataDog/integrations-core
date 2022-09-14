@@ -1,33 +1,43 @@
 {
-  "categories": [
-    "monitoring",
-    "autodiscovery"
-  ],
-  "creates_events": false,
-  "display_name": "OpenMetrics",
-  "guid": "3f67af75-6987-468c-99b3-5001ba5ab414",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "name": "openmetrics",
-  "public_title": "Datadog-OpenMetrics Integration",
-  "short_description": "OpenMetrics is an open standard for exposing metric data",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "type": "check",
-  "integration_id": "openmetrics",
+  "manifest_version": "2.0.0",
+  "app_uuid": "302b841e-8270-4ecd-948e-f16317a316bc",
+  "app_id": "openmetrics",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "OpenMetrics is an open standard for exposing metric data",
+    "title": "OpenMetrics",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Monitoring",
+      "Category::Autodiscovery"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
-    },
-    "monitors": {},
-    "dashboards": {},
-    "service_checks": "assets/service_checks.json",
-    "logs": {},
-    "metrics_metadata": "metadata.csv"
+    "integration": {
+      "source_type_name": "OpenMetrics",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    }
   }
 }

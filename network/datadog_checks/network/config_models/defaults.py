@@ -34,6 +34,10 @@ def instance_collect_count_metrics(field, value):
     return False
 
 
+def instance_collect_ethtool_metrics(field, value):
+    return False
+
+
 def instance_collect_rate_metrics(field, value):
     return True
 
@@ -59,6 +63,10 @@ def instance_excluded_interface_re(field, value):
 
 
 def instance_excluded_interfaces(field, value):
+    return get_default_field_value(field, value)
+
+
+def instance_metric_patterns(field, value):
     return get_default_field_value(field, value)
 
 

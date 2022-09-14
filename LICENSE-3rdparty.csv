@@ -22,7 +22,7 @@ clickhouse-driver,PyPI,MIT,Konstantin Lebedev
 contextlib2,PyPI,PSF,Nick Coghlan
 cryptography,PyPI,Apache-2.0,The Python Cryptographic Authority and individual contributors | The cryptography developers
 cryptography,PyPI,BSD-3-Clause,The Python Cryptographic Authority and individual contributors | The cryptography developers
-cx-Oracle,PyPI,BSD-3-Clause,Anthony Tuininga
+cx-Oracle,PyPI,BSD-3-Clause,""Anthony Tuininga", | Anthony Tuininga"
 ddtrace,PyPI,BSD-3-Clause,"Datadog, Inc."
 dnspython,PyPI,ISC,Bob Halley
 enum34,PyPI,BSD-3-Clause,Ethan Furman
@@ -31,6 +31,7 @@ flup-py3,Vendor,BSD-3-Clause,Allan Saddi
 foundationdb,PyPI,Apache-2.0,FoundationDB
 futures,PyPI,PSF,Brian Quinlan
 gearman,PyPI,Apache-2.0,Matthew Tai
+gssapi,PyPI,ISC,The Python GSSAPI Team
 immutables,PyPI,Apache-2.0,MagicStack Inc
 in-toto,PyPI,Apache-2.0,New York University: Secure Systems Lab
 ipaddress,PyPI,PSF,Philipp Hagemeister
@@ -42,9 +43,13 @@ ldap3,PyPI,LGPL-3.0-only,Giovanni Cannata
 lxml,PyPI,BSD-3-Clause,lxml dev team
 lz4,PyPI,BSD-3-Clause,Jonathan Underwood
 mmh3,PyPI,CC0-1.0,Hajime Senuma
+oauthlib,PyPI,BSD-3-Clause,The OAuthlib Community
 openstacksdk,PyPI,Apache-2.0,OpenStack
 orjson,PyPI,Apache-2.0,ijl <ijl@mailbox.org>
 orjson,PyPI,MIT,ijl <ijl@mailbox.org>
+packaging,PyPI,Apache-2.0,Donald Stufft and individual contributors
+packaging,PyPI,BSD-2-Clause,Donald Stufft and individual contributors
+packaging,PyPI,BSD-3-Clause,Donald Stufft and individual contributors
 paramiko,PyPI,LGPL-2.1-only,Jeff Forcier
 ply,PyPI,BSD-3-Clause,David Beazley
 prometheus-client,PyPI,Apache-2.0,Brian Brazil
@@ -56,8 +61,8 @@ pyasn1,PyPI,BSD-3-Clause,Ilya Etingof
 pycryptodomex,PyPI,BSD-2-Clause,Helder Eijs
 pycryptodomex,PyPI,Unlicense,Helder Eijs
 pydantic,PyPI,MIT,Samuel Colvin
-pymongo,PyPI,Apache-2.0,Bernie Hackett
-pymqi,PyPI,PSF,Dariusz Suchojad
+pymongo,PyPI,Apache-2.0,The MongoDB Python Team
+pymqi,PyPI,PSF,Zato Source s.r.o.
 pyodbc,PyPI,MIT,Michael Kleehammer
 pysmi,PyPI,BSD-3-Clause,Ilya Etingof
 pysnmp,PyPI,BSD-3-Clause,Ilya Etingof
@@ -71,6 +76,8 @@ pywin32,PyPI,PSF,Mark Hammond (et al)
 redis,PyPI,MIT,Andy McCurdy | Redis Inc.
 requests,PyPI,Apache-2.0,Kenneth Reitz
 requests-kerberos,PyPI,ISC,"Ian Cordasco, Cory Benfield, Michael Komitee"
+requests-oauthlib,PyPI,BSD-3-Clause,Kenneth Reitz
+requests-oauthlib,PyPI,ISC,Kenneth Reitz
 requests-toolbelt,PyPI,Apache-2.0,"Ian Cordasco, Cory Benfield"
 requests-unixsocket,PyPI,Apache-2.0,Marc Abramowitz
 requests_ntlm,PyPI,ISC,Ben Toews
@@ -90,7 +97,6 @@ tuf,PyPI,Apache-2.0,https://www.updateframework.com
 tuf,PyPI,MIT,https://www.updateframework.com
 typing,PyPI,PSF,"Guido van Rossum, Jukka Lehtosalo, Łukasz Langa, Ivan Levkivskyi"
 uptime,PyPI,BSD-2-Clause,Koen Crolla
-urllib3,PyPI,MIT,Andrey Petrov
 vertica-python,PyPI,Apache-2.0,"Justin Berka, Alex Kim, Siting Ren"
 win-inet-pton,PyPI,Unlicense,Ryan Vennell
 wrapt,PyPI,BSD-3-Clause,Graham Dumpleton

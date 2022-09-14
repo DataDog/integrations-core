@@ -2,11 +2,15 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import socket
+from collections import namedtuple
 from contextlib import closing
+from typing import Any, List, Optional
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.errors import CheckException
 from datadog_checks.base.utils.time import get_precise_time
+
+AddrTuple = namedtuple('AddrTuple', ['address', 'socket_type'])
 
 
 class TCPCheck(AgentCheck):
@@ -24,11 +28,11 @@ class TCPCheck(AgentCheck):
         self.timeout = float(instance.get('timeout', 10))
         self.collect_response_time = instance.get('collect_response_time', False)
         self.host = instance.get('host', None)
-        self.socket_type = None
         self._addrs = None
         self.ip_cache_last_ts = 0
         self.ip_cache_duration = self.DEFAULT_IP_CACHE_DURATION
         self.multiple_ips = instance.get('multiple_ips', False)
+        self.ipv4_only = instance.get('ipv4_only', False)
 
         ip_cache_duration = instance.get('ip_cache_duration', None)
         if ip_cache_duration is not None:
@@ -44,9 +48,7 @@ class TCPCheck(AgentCheck):
             self.port = int(port)
         except Exception:
             raise ConfigurationError(self.CONFIGURATION_ERROR_MSG.format(port, 'port', 'number'))
-        try:
-            split_url = self.host.split(":")
-        except Exception:  # Would be raised if url is not a string
+        if not isinstance(self.host, str):  # Would be raised if url is not a string
             raise ConfigurationError(self.CONFIGURATION_ERROR_MSG.format(self.host, 'url', 'string'))
 
         custom_tags = instance.get('tags', [])
@@ -61,22 +63,9 @@ class TCPCheck(AgentCheck):
             'instance:{}'.format(self.instance_name),
         ]
 
-        # IPv6 address format: 2001:db8:85a3:8d3:1319:8a2e:370:7348
-        if len(split_url) == 8:  # It may then be a IP V6 address, we check that
-            for block in split_url:
-                if len(block) != 4:
-                    raise ConfigurationError(
-                        self.CONFIGURATION_ERROR_MSG.format(self.host, 'IPv6 address', 'valid address')
-                    )
-            # It's a correct IP V6 address
-            self._addrs = self.host
-            self.socket_type = socket.AF_INET6
-        else:
-            self.socket_type = socket.AF_INET
-            # IP will be resolved at check time
-
     @property
     def addrs(self):
+        # type: () -> List[AddrTuple]
         if self._addrs is None or self._addrs == []:
             try:
                 self.resolve_ips()
@@ -87,22 +76,35 @@ class TCPCheck(AgentCheck):
         return self._addrs
 
     def resolve_ips(self):
-        if self.multiple_ips:
-            _, _, self._addrs = socket.gethostbyname_ex(self.host)
+        # type: () -> None
+        if self.ipv4_only:
+            _, _, ipv4_list = socket.gethostbyname_ex(self.host)
+            self._addrs = [AddrTuple(ipv4_addr, socket.AF_INET) for ipv4_addr in ipv4_list]
         else:
-            self._addrs = [socket.gethostbyname(self.host)]
+            self._addrs = [
+                AddrTuple(sockaddr[0], socket_type)
+                for (socket_type, _, _, _, sockaddr) in socket.getaddrinfo(
+                    self.host, self.port, 0, 0, socket.IPPROTO_TCP
+                )
+            ]
+        if not self.multiple_ips:
+            self._addrs = self._addrs[:1]
 
         if self._addrs == []:
             raise Exception("No IPs attached to host")
-        self.log.debug("%s resolved to %s", self.host, self._addrs)
+        self.log.debug(
+            "%s resolved to %s. Socket type: %s", self.host, self._addrs[0].address, self._addrs[0].socket_type
+        )
 
     def should_resolve_ips(self):
+        # type: () -> bool
         if self.ip_cache_duration is None:
             return False
         return get_precise_time() - self.ip_cache_last_ts > self.ip_cache_duration
 
-    def connect(self, addr):
-        with closing(socket.socket(self.socket_type)) as sock:
+    def connect(self, addr, socket_type):
+        # type: (str, socket.AddressFamily) -> float
+        with closing(socket.socket(socket_type)) as sock:
             sock.settimeout(self.timeout)
             start = get_precise_time()
             sock.connect((addr, self.port))
@@ -110,6 +112,7 @@ class TCPCheck(AgentCheck):
             return response_time
 
     def check(self, _):
+        # type: (Any) -> None
         start = get_precise_time()  # Avoid initialisation warning
 
         if self.should_resolve_ips():
@@ -118,9 +121,9 @@ class TCPCheck(AgentCheck):
 
         self.log.debug("Connecting to %s on port %d", self.host, self.port)
 
-        for addr in self.addrs:
+        for addr, socket_type in self.addrs:
             try:
-                response_time = self.connect(addr)
+                response_time = self.connect(addr, socket_type)
                 self.log.debug("%s:%d is UP (%s)", self.host, self.port, addr)
                 self.report_as_service_check(AgentCheck.OK, addr, 'UP')
                 if self.collect_response_time:
@@ -161,11 +164,12 @@ class TCPCheck(AgentCheck):
                         AgentCheck.CRITICAL, addr, "{}. Connection failed after {} ms".format(str(e), length)
                     )
 
-                if self.socket_type == socket.AF_INET:
+                if socket_type == socket.AF_INET:
                     self.log.debug("Will attempt to re-resolve IP for %s:%d on next run", self.host, self.port)
                     self._addrs = None
 
     def report_as_service_check(self, status, addr, msg=None):
+        # type: (AgentCheck.service_check, str, Optional[str]) -> None
         if status is AgentCheck.OK:
             msg = None
         extra_tags = ['address:{}'.format(addr)]

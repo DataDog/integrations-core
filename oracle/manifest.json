@@ -1,37 +1,51 @@
 {
-  "categories": [
-    "data store",
-    "autodiscovery"
-  ],
-  "creates_events": false,
-  "display_name": "Oracle Database",
-  "guid": "6c4ddc46-2763-4c56-8b71-c838b7f82d7b",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "oracle.",
-  "metric_to_check": "oracle.session_count",
-  "name": "Oracle",
-  "public_title": "Datadog-Oracle Integration",
-  "short_description": "Oracle relational database system designed for enterprise grid computing",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "type": "check",
-  "integration_id": "oracle",
+  "manifest_version": "2.0.0",
+  "app_uuid": "34835d2b-a812-4aac-8cc2-d298db851b80",
+  "app_id": "oracle",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Oracle relational database system designed for enterprise grid computing",
+    "title": "Oracle",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Data Store",
+      "Category::Autodiscovery"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "Oracle Database",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "oracle.",
+        "check": "oracle.session_count",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
     },
-    "monitors": {},
     "dashboards": {
       "oracle": "assets/dashboards/oracle_overview.json"
-    },
-    "service_checks": "assets/service_checks.json",
-    "logs": {},
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

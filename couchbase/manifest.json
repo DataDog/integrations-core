@@ -1,46 +1,61 @@
 {
-  "categories": [
-    "data store",
-    "autodiscovery",
-    "log collection"
-  ],
-  "creates_events": false,
-  "display_name": "Couchbase",
-  "guid": "ba7ce7de-4fcb-4418-8c90-329baa6a5d59",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "couchbase.",
-  "metric_to_check": "couchbase.ram.used",
-  "name": "couchbase",
-  "process_signatures": [
-    "beam.smp couchbase"
-  ],
-  "public_title": "Datadog-CouchBase Integration",
-  "short_description": "Track and graph your Couchbase activity and performance metrics.",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "type": "check",
-  "integration_id": "couchbase",
+  "manifest_version": "2.0.0",
+  "app_uuid": "e7fac1cd-65ba-4a58-af73-ee5f160cc6f9",
+  "app_id": "couchbase",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Track and graph your Couchbase activity and performance metrics.",
+    "title": "CouchBase",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Data Store",
+      "Category::Autodiscovery",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "Couchbase",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "couchbase.",
+        "check": "couchbase.ram.used",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      },
+      "process_signatures": [
+        "beam.smp couchbase"
+      ]
     },
-    "monitors": {},
     "dashboards": {
       "couchbase": "assets/dashboards/couchbase_dashboard.json"
     },
-    "service_checks": "assets/service_checks.json",
-    "logs": {
-      "source": "couchdb"
-    },
-    "metrics_metadata": "metadata.csv",
     "saved_views": {
       "couchbase_processes": "assets/saved_views/couchbase_processes.json"
+    },
+    "logs": {
+      "source": "couchdb"
     }
   }
 }

@@ -5,7 +5,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
 import logging
-from collections import OrderedDict
 from typing import Any
 
 import mock
@@ -420,7 +419,7 @@ class TestMetricNormalization:
     [
         ('nothing to normalize', 'abc:123', 'abc:123'),
         ('unicode', u'Klüft inför på fédéral', 'Klüft_inför_på_fédéral'),
-        ('invalid chars', 'foo,+*-/()[]{}  \t\nbar:123', 'foo_bar:123'),
+        ('invalid chars', 'foo,+*-/()[]{}-  \t\nbar:123', 'foo_bar:123'),
         ('leading and trailing underscores', '__abc:123__', 'abc:123'),
         ('redundant underscore', 'foo_____bar', 'foo_bar'),
         ('invalid chars and underscore', 'foo++__bar', 'foo_bar'),
@@ -638,15 +637,141 @@ class TestTags:
     @pytest.mark.parametrize(
         "disable_generic_tags, expected_tags",
         [
-            pytest.param(False, {"foo:bar", "cluster:my_cluster"}),
-            pytest.param(True, {"foo:bar", "myintegration_cluster:my_cluster"}),
+            pytest.param(False, {"foo:bar", "cluster:my_cluster", "version", "bar"}),
+            pytest.param(True, {"foo:bar", "myintegration_cluster:my_cluster", "myintegration_version", "bar"}),
         ],
     )
     def test_generic_tags(self, disable_generic_tags, expected_tags):
         instance = {'disable_generic_tags': disable_generic_tags}
         check = AgentCheck('myintegration', {}, [instance])
-        tags = check._normalize_tags_type(tags=["foo:bar", "cluster:my_cluster"])
+        tags = check._normalize_tags_type(tags=["foo:bar", "cluster:my_cluster", "version", "bar"])
         assert set(tags) == expected_tags
+
+    @pytest.mark.parametrize(
+        "exclude_metrics_filters, include_metrics_filters, expected_metrics",
+        [
+            pytest.param(['hello'], [], ['my_metric', 'my_metric_count', 'test.my_metric1'], id='exclude string'),
+            pytest.param([r'my_metric_*'], [], ['hello'], id='exclude multiple matches glob'),
+            pytest.param(
+                [],
+                [r'my_metricw*'],
+                ['my_metric', 'my_metric_count', 'test.my_metric1'],
+                id='include multiple matches glob',
+            ),
+            pytest.param(
+                [r'my_metrics'],
+                [],
+                ['my_metric', 'my_metric_count', 'hello', 'test.my_metric1'],
+                id='exclude no matches',
+            ),
+            pytest.param([r'.*'], [], [], id='exclude everything'),
+            pytest.param([r'.*'], ['hello'], [], id='exclude everything one include'),
+            pytest.param([], ['hello'], ['hello'], id='include string'),
+            pytest.param(
+                [], [r'^ns\.my_(me|test)tric*'], ['my_metric', 'my_metric_count'], id='include multiple matches'
+            ),
+            pytest.param([r'my_metric_count'], [r'my_metric*'], ['my_metric', 'test.my_metric1'], id='match both'),
+            pytest.param([r'my_metric_count'], [r'my_metric_count'], [], id='duplicate'),
+            pytest.param(
+                [],
+                ['metric'],
+                ['my_metric', 'my_metric_count', 'test.my_metric1'],
+                id='include multiple matches inside',
+            ),
+            pytest.param(['my_metric_count'], ['hello'], ['hello'], id='include exclude'),
+            pytest.param(
+                [r'testing'], [r'.*'], ['my_metric', 'my_metric_count', 'hello', 'test.my_metric1'], id='include all'
+            ),
+            pytest.param(
+                [r'test\.my_metric([0-9]{1})'],
+                [],
+                [r'my_metric', r'my_metric_count', 'hello'],
+                id='include all but regex',
+            ),
+        ],
+    )
+    def test_metrics_filters(self, exclude_metrics_filters, include_metrics_filters, expected_metrics, aggregator):
+        instance = {
+            'metric_patterns': {
+                'exclude': exclude_metrics_filters,
+                'include': include_metrics_filters,
+            }
+        }
+        check = AgentCheck('myintegration', {}, [instance])
+        check.__NAMESPACE__ = 'ns'
+        check.gauge('my_metric', 0)
+        check.count('my_metric_count', 0)
+        check.count('test.my_metric1', 1)
+        check.monotonic_count('hello', 0)
+        check.service_check('test.can_check', status=AgentCheck.OK)
+
+        for metric_name in expected_metrics:
+            aggregator.assert_metric('ns.{}'.format(metric_name), count=1)
+
+        aggregator.assert_service_check('ns.test.can_check', status=AgentCheck.OK)
+        aggregator.assert_all_metrics_covered()
+
+    @pytest.mark.parametrize(
+        "exclude_metrics_filters, include_metrics_filters, expected_error",
+        [
+            pytest.param(
+                'metric', [], r'^Setting `exclude` of `metric_patterns` must be an array', id='exclude not list'
+            ),
+            pytest.param(
+                [], 'metric', r'^Setting `include` of `metric_patterns` must be an array', id='include not list'
+            ),
+            pytest.param(
+                ['metric_one', 1000],
+                [],
+                r'^Entry #2 of setting `exclude` of `metric_patterns` must be a string',
+                id='exclude bad element',
+            ),
+            pytest.param(
+                [],
+                [10, 'metric_one'],
+                r'^Entry #1 of setting `include` of `metric_patterns` must be a string',
+                id='include bad element',
+            ),
+        ],
+    )
+    def test_metrics_filter_invalid(self, aggregator, exclude_metrics_filters, include_metrics_filters, expected_error):
+        instance = {
+            'metric_patterns': {
+                'exclude': exclude_metrics_filters,
+                'include': include_metrics_filters,
+            }
+        }
+        with pytest.raises(Exception, match=expected_error):
+            AgentCheck('myintegration', {}, [instance])
+
+    @pytest.mark.parametrize(
+        "exclude_metrics_filters, include_metrics_filters, expected_log",
+        [
+            pytest.param(
+                [''],
+                [],
+                'Entry #1 of setting `exclude` of `metric_patterns` must not be empty, ignoring',
+                id='empty exclude',
+            ),
+            pytest.param(
+                [],
+                [''],
+                'Entry #1 of setting `include` of `metric_patterns` must not be empty, ignoring',
+                id='empty include',
+            ),
+        ],
+    )
+    def test_metrics_filter_warnings(self, caplog, exclude_metrics_filters, include_metrics_filters, expected_log):
+        instance = {
+            'metric_patterns': {
+                'exclude': exclude_metrics_filters,
+                'include': include_metrics_filters,
+            }
+        }
+        caplog.clear()
+        caplog.set_level(logging.DEBUG)
+        AgentCheck('myintegration', {}, [instance])
+        assert expected_log in caplog.text
 
 
 class LimitedCheck(AgentCheck):
@@ -791,52 +916,6 @@ class TestLimits:
 
 
 class TestCheckInitializations:
-    def test_default(self):
-        class TestCheck(AgentCheck):
-            def check(self, _):
-                pass
-
-        check = TestCheck('test', {}, [{}])
-        check.check_id = 'test:123'
-
-        with mock.patch('datadog_checks.base.stubs.datadog_agent.set_check_metadata') as m:
-            check.run()
-
-            assert m.call_count == 0
-
-    def test_default_config_sent(self):
-        class TestCheck(AgentCheck):
-            METADATA_DEFAULT_CONFIG_INIT_CONFIG = ['foo']
-            METADATA_DEFAULT_CONFIG_INSTANCE = ['bar']
-
-            def check(self, _):
-                pass
-
-        # Ordered by call order in `AgentCheck.send_config_metadata`
-        value_map = OrderedDict((('instance', 'mock'), ('init_config', 5)))
-
-        config = {'foo': value_map['init_config'], 'bar': value_map['instance']}
-        check = TestCheck('test', config, [config])
-        check.check_id = 'test:123'
-
-        with mock.patch('datadog_checks.base.stubs.datadog_agent.set_check_metadata') as m:
-            check.run()
-
-            assert m.call_count == 2
-            check.run()
-            assert m.call_count == 2
-
-            for (config_type, value), call_args in zip(value_map.items(), m.call_args_list):
-                args, _ = call_args
-                assert args[0] == 'test:123'
-                assert args[1] == 'config.{}'.format(config_type)
-
-                data = json.loads(args[2])[0]
-
-                assert data.pop('is_set', None) is True
-                assert data.pop('value', None) == value
-                assert not data
-
     def test_success_only_once(self):
         class TestCheck(AgentCheck):
             def __init__(self, *args, **kwargs):
@@ -917,106 +996,226 @@ def test_load_configuration_models(dd_run_check, mocker):
     assert check._config_model_shared is shared_config
 
 
+if PY3:
+
+    from pydantic import BaseModel, Field
+
+    class BaseModelTest(BaseModel):
+        field = ""
+        schema_ = Field("", alias='schema')
+
+else:
+
+    class BaseModelTest:
+        def __init__(self, **kwargs):
+            pass
+
+
 @requires_py3
 @pytest.mark.parametrize(
-    'check_instance_config, default_instance_config, log_lines',
+    "check_instance_config, default_instance_config, log_lines, unknown_options",
     [
         pytest.param(
-            {'endpoint': 'url', 'tags': ['foo:bar'], 'proxy': {'http': 'http://1.2.3.4:9000'}},
+            {
+                "endpoint": "url",
+                "tags": ["foo:bar"],
+                "proxy": {"http": "http://1.2.3.4:9000"},
+            },
             [],
             None,
-            id='empty default',
+            [],
+            id="empty default",
         ),
         pytest.param(
-            {'endpoint': 'url', 'tags': ['foo:bar'], 'proxy': {'http': 'http://1.2.3.4:9000'}},
-            [('endpoint', 'url')],
+            {
+                "endpoint": "url",
+                "tags": ["foo:bar"],
+                "proxy": {"http": "http://1.2.3.4:9000"},
+            },
+            [
+                ("endpoint", "url"),
+            ],
             None,
-            id='no typo',
+            [],
+            id="no typo",
         ),
         pytest.param(
-            {'endpoints': 'url', 'tags': ['foo:bar'], 'proxy': {'http': 'http://1.2.3.4:9000'}},
-            [('endpoint', 'url')],
+            {
+                "endpoints": "url",
+                "tags": ["foo:bar"],
+                "proxy": {"http": "http://1.2.3.4:9000"},
+            },
+            [
+                ("endpoint", "url"),
+            ],
             [
                 (
-                    'Detected potential typo in configuration option in test/instance section: `endpoints`. '
-                    'Did you mean endpoint?'
+                    "Detected potential typo in configuration option in test/instance section: `endpoints`. "
+                    "Did you mean endpoint?"
                 )
             ],
-            id='typo',
+            ["endpoints"],
+            id="typo",
         ),
         pytest.param(
-            {'endpoints': 'url', 'tags': ['foo:bar'], 'proxy': {'http': 'http://1.2.3.4:9000'}},
-            [('endpoint', 'url'), ('endpoints', 'url')],
+            {
+                "endpoints": "url",
+                "tags": ["foo:bar"],
+                "proxy": {"http": "http://1.2.3.4:9000"},
+            },
+            [
+                ("endpoint", "url"),
+                ("endpoints", "url"),
+            ],
             None,
-            id='no typo similar option',
+            [],
+            id="no typo similar option",
         ),
         pytest.param(
-            {'endpont': 'url', 'tags': ['foo:bar'], 'proxy': {'http': 'http://1.2.3.4:9000'}},
-            [('endpoint', 'url'), ('endpoints', 'url')],
+            {
+                "endpont": "url",
+                "tags": ["foo:bar"],
+                "proxy": {"http": "http://1.2.3.4:9000"},
+            },
+            [
+                ("endpoint", "url"),
+                ("endpoints", "url"),
+            ],
             [
                 (
-                    'Detected potential typo in configuration option in test/instance section: `endpont`. '
-                    'Did you mean endpoint, or endpoints?'
+                    "Detected potential typo in configuration option in test/instance section: `endpont`. "
+                    "Did you mean endpoint, or endpoints?"
                 )
             ],
-            id='typo two candidates',
+            ["endpont"],
+            id="typo two candidates",
         ),
-        pytest.param({'tag': 'test'}, [('tags', 'test')], None, id='short option cant catch'),
         pytest.param(
-            {'testing_long_para': 'test'},
-            [('testing_long_param', 'test'), ('test_short_param', 'test')],
+            {
+                "tag": "test",
+            },
+            [
+                ("tags", "test"),
+            ],
+            None,
+            [],
+            id="short option cant catch",
+        ),
+        pytest.param(
+            {
+                "testing_long_para": "test",
+            },
+            [
+                ("testing_long_param", "test"),
+                ("test_short_param", "test"),
+            ],
             [
                 (
-                    'Detected potential typo in configuration option in test/instance section: `testing_long_para`. '
-                    'Did you mean testing_long_param?'
+                    "Detected potential typo in configuration option in test/instance section: `testing_long_para`. "
+                    "Did you mean testing_long_param?"
                 )
             ],
-            id='somewhat similar option',
+            ["testing_long_para"],
+            id="somewhat similar option",
         ),
         pytest.param(
-            {'send_distribution_sums_as_monotonic': False, 'exclude_labels': True},
-            [('send_distribution_counts_as_monotonic', True), ('include_labels', True)],
-            None,
-            id='different options no typos',
-        ),
-        pytest.param(
-            {'send_distribution_count_as_monotonic': True, 'exclude_label': True},
+            {
+                "send_distribution_sums_as_monotonic": False,
+                "exclude_labels": True,
+            },
             [
-                ('send_distribution_sums_as_monotonic', False),
-                ('send_distribution_counts_as_monotonic', True),
-                ('exclude_labels', False),
-                ('include_labels', True),
+                ("send_distribution_counts_as_monotonic", True),
+                ("include_labels", True),
+            ],
+            None,
+            [],
+            id="different options no typos",
+        ),
+        pytest.param(
+            {
+                "send_distribution_count_as_monotonic": True,
+                "exclude_label": True,
+            },
+            [
+                ("send_distribution_sums_as_monotonic", False),
+                ("send_distribution_counts_as_monotonic", True),
+                ("exclude_labels", False),
+                ("include_labels", True),
             ],
             [
                 (
-                    'Detected potential typo in configuration option in test/instance section: '
-                    '`send_distribution_count_as_monotonic`. Did you mean send_distribution_counts_as_monotonic?'
+                    "Detected potential typo in configuration option in test/instance section: "
+                    "`send_distribution_count_as_monotonic`. Did you mean send_distribution_counts_as_monotonic?"
                 ),
                 (
-                    'Detected potential typo in configuration option in test/instance section: `exclude_label`. '
-                    'Did you mean exclude_labels?'
+                    "Detected potential typo in configuration option in test/instance section: `exclude_label`. "
+                    "Did you mean exclude_labels?"
                 ),
             ],
-            id='different options typo',
+            [
+                "send_distribution_count_as_monotonic",
+                "exclude_label",
+            ],
+            id="different options typo",
+        ),
+        pytest.param(
+            {
+                "field": "value",
+                "schema": "my_schema",
+            },
+            BaseModelTest(field="my_field", schema_="the_schema"),
+            None,
+            [],
+            id="using an alias",
+        ),
+        pytest.param(
+            {
+                "field": "value",
+                "schem": "my_schema",
+            },
+            BaseModelTest(field="my_field", schema_="the_schema"),
+            [
+                (
+                    "Detected potential typo in configuration option in test/instance section: "
+                    "`schem`. Did you mean schema?"
+                ),
+            ],
+            ["schem"],
+            id="typo in an alias",
+        ),
+        pytest.param(
+            {
+                "field": "value",
+                "schema_": "my_schema",
+            },
+            BaseModelTest(field="my_field", schema_="the_schema"),
+            None,
+            [],
+            id="not using an alias",
         ),
     ],
 )
 def test_detect_typos_configuration_models(
-    dd_run_check, mocker, caplog, check_instance_config, default_instance_config, log_lines
+    dd_run_check,
+    caplog,
+    check_instance_config,
+    default_instance_config,
+    log_lines,
+    unknown_options,
 ):
     caplog.clear()
     caplog.set_level(logging.WARNING)
     empty_config = {}
-    default_instance = mocker.MagicMock()
-    default_instance.__iter__ = mocker.MagicMock(return_value=iter(default_instance_config))
 
-    check = AgentCheck('test', empty_config, [check_instance_config])
-    check.check_id = 'test:123'
+    check = AgentCheck("test", empty_config, [check_instance_config])
+    check.check_id = "test:123"
 
-    check.log_typos_in_options(check_instance_config, default_instance, 'instance')
+    typos = check.log_typos_in_options(check_instance_config, default_instance_config, "instance")
 
     if log_lines is not None:
         for log_line in log_lines:
             assert log_line in caplog.text
     else:
-        assert 'Detected potential typo in configuration option' not in caplog.text
+        assert "Detected potential typo in configuration option" not in caplog.text
+
+    assert typos == set(unknown_options)

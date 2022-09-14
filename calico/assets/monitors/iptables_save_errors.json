@@ -1,0 +1,28 @@
+{
+  "name": "[Calico] error with iptables save",
+  "type": "query alert",
+  "query": "sum(last_5m):avg:calico.felix.iptables.save_errors{*}.as_count() > 1",
+  "message": "Calico encountered a problem while saving iptables rules.",
+  "tags": ["integration:calico"],
+  "options": {
+    "notify_audit": false,
+    "locked": false,
+    "timeout_h": 0,
+    "new_host_delay": 300,
+    "require_full_window": false,
+    "notify_no_data": true,
+    "renotify_interval": "0",
+    "evaluation_delay": 10,
+    "escalation_message": "",
+    "no_data_timeframe": 10,
+    "include_tags": true,
+    "thresholds": {
+      "critical": 1,
+      "warning": 0
+    }
+  },
+  "priority": null,
+  "recommended_monitor_metadata": {
+    "description": "Get notified when Calico fails to save iptables rules."
+  }
+}

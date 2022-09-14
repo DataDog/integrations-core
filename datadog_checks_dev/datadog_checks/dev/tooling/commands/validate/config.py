@@ -34,7 +34,7 @@ TEMPLATES = ['default', 'openmetrics_legacy', 'openmetrics', 'jmx']
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate default configuration files')
-@click.argument('check', autocompletion=complete_valid_checks, required=False)
+@click.argument('check', shell_complete=complete_valid_checks, required=False)
 @click.option('--sync', '-s', is_flag=True, help='Generate example configuration files based on specifications')
 @click.option('--verbose', '-v', is_flag=True, help='Verbose mode')
 @click.pass_context
@@ -66,6 +66,10 @@ def config(ctx, check, sync, verbose):
 
         spec_file_path = manifest.get_config_spec()
         if not file_exists(spec_file_path):
+            check_display_queue.append(
+                lambda: echo_warning(f"Did not find spec file {spec_file_path} for check {check}")
+            )
+
             validate_config_legacy(check, check_display_queue, files_failed, files_warned, file_counter)
             if verbose:
                 check_display_queue.append(lambda: echo_warning('No spec found', indent=True))

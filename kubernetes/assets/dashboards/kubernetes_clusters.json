@@ -14,7 +14,7 @@
             "prefix": "kube_cluster_name"
         }
     ],
-    "title": "[WIP] Kubernetes Cluster Overview Dashboard",
+    "title": "Kubernetes Cluster Overview Dashboard",
     "widgets": [
         {
             "definition": {
@@ -942,7 +942,7 @@
                     {
                         "definition": {
                             "background_color": "white",
-                            "content": "View more in the [Kubernetes Nodes Overview Dashboard](https://dd.datad0g.com/screen/integration/30338/kubernetes-nodes-overview?tpl_var_cluster=$cluster.value)",
+                            "content": "View more in the [Kubernetes Nodes Overview Dashboard](https://app.datadoghq.com/screen/integration/30340/kubernetes-nodes-overview?tpl_var_cluster=$cluster.value)",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": false,
@@ -1393,7 +1393,7 @@
                     {
                         "definition": {
                             "background_color": "white",
-                            "content": "View more in the [Kubernetes Deployments Overview Dashboard](https://dd.datad0g.com/screen/integration/30340/kubernetes-deployments-overview?tpl_var_kube_cluster_name=$cluster.value&tpl_var_scope=$scope.value)\n",
+                            "content": "View more in the [Kubernetes Deployments Overview Dashboard](https://app.datadoghq.com/screen/integration/30341/kubernetes-deployments-overview?tpl_var_kube_cluster_name=$cluster.value&tpl_var_scope=$scope.value)\n",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": false,
@@ -1898,7 +1898,7 @@
                     {
                         "definition": {
                             "background_color": "white",
-                            "content": "View more in the [Kubernetes Daemonset Overview Dashboard](https://dd.datad0g.com/dashboard/8ig-pa3-ghx/kubernetes-daemonsets-overview?tpl_var_kube_cluster_name=$cluster.value&tpl_var_scope=$scope.value)",
+                            "content": "View more in the [Kubernetes Daemonset Overview Dashboard](https://app.datadoghq.com/screen/integration/30537/kubernetes-daemonsets-overview?tpl_var_kube_cluster_name=$cluster.value&tpl_var_scope=$scope.value)",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": false,
@@ -2861,7 +2861,7 @@
                     {
                         "definition": {
                             "background_color": "white",
-                            "content": "View more in the [Kubernetes Replicasets Overview Dashboard](https://dd.datad0g.com/screen/integration/30533/kubernetes-replicasets-overview?tpl_var_kube_cluster_name=$cluster.value&tpl_var_scope=$scope.value)",
+                            "content": "View more in the [Kubernetes Replicasets Overview Dashboard](https://app.datadoghq.com/screen/integration/30402/kubernetes-replicasets-overview?tpl_var_kube_cluster_name=$cluster.value&tpl_var_scope=$scope.value)",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": false,
@@ -3170,7 +3170,7 @@
                     {
                         "definition": {
                             "background_color": "white",
-                            "content": "View more in the [Kubernetes Pods Overview Dashboard](https://dd.datad0g.com/screen/integration/30280/kubernetes-pods-overview?tpl_var_cluster=$cluster.value&tpl_var_scope=$scope.value)",
+                            "content": "View more in the [Kubernetes Pods Overview Dashboard](https://app.datadoghq.com/dash/integration/30322/kubernetes-pods-overview?tpl_var_cluster=$cluster.value&tpl_var_scope=$scope.value)",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": false,
@@ -3456,7 +3456,7 @@
                     {
                         "definition": {
                             "background_color": "white",
-                            "content": "View more in the [Kubernetes Services Overview Dashboard](https://dd.datad0g.com/screen/integration/30534/kubernetes-services-overview?tpl_var_kube_cluster_name=$cluster.value&tpl_var_scope=$scope.value)",
+                            "content": "View more in the [Kubernetes Services Overview Dashboard](https://app.datadoghq.com/screen/integration/30403/kubernetes-services-overview?tpl_var_kube_cluster_name=$cluster.value&tpl_var_scope=$scope.value)",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": false,
@@ -4038,7 +4038,6 @@
                     {
                         "definition": {
                             "query": "source:kubernetes $scope $cluster",
-                            "tags_execution": "and",
                             "time": {
                                 "live_span": "1d"
                             },
@@ -4058,8 +4057,7 @@
                     {
                         "definition": {
                             "event_size": "s",
-                            "query": "sources:kubernetes $scope $cluster",
-                            "tags_execution": "and",
+                            "query": "source:kubernetes $scope $cluster",
                             "time": {
                                 "live_span": "1w"
                             },

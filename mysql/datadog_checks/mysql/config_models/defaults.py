@@ -26,6 +26,14 @@ def instance_additional_variable(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_aws(field, value):
+    return get_default_field_value(field, value)
+
+
+def instance_azure(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_charset(field, value):
     return get_default_field_value(field, value)
 
@@ -54,12 +62,20 @@ def instance_empty_default_hostname(field, value):
     return False
 
 
+def instance_gcp(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_host(field, value):
     return get_default_field_value(field, value)
 
 
 def instance_max_custom_queries(field, value):
     return 20
+
+
+def instance_metric_patterns(field, value):
+    return get_default_field_value(field, value)
 
 
 def instance_min_collection_interval(field, value):
@@ -87,6 +103,10 @@ def instance_port(field, value):
 
 
 def instance_queries(field, value):
+    return get_default_field_value(field, value)
+
+
+def instance_query_activity(field, value):
     return get_default_field_value(field, value)
 
 

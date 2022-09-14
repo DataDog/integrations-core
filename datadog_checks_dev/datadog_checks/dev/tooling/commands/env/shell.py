@@ -9,8 +9,8 @@ from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info
 
 
 @click.command('shell', context_settings=CONTEXT_SETTINGS, short_help='Run a shell inside agent container')
-@click.argument('check', autocompletion=complete_active_checks)
-@click.argument('env', autocompletion=complete_configured_envs, required=False)
+@click.argument('check', shell_complete=complete_active_checks)
+@click.argument('env', shell_complete=complete_configured_envs, required=False)
 @click.option('-c', '--exec-command', help='Optionally execute command inside container, executes after any installs')
 @click.option('-v', '--install-vim', is_flag=True, help='Optionally install editing/viewing tools vim and less')
 @click.option('-i', '--install-tools', multiple=True, help='Optionally install custom tools')

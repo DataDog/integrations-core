@@ -42,6 +42,14 @@ files:
         value:
           example: 10
           type: integer
+      - name: min_collection_interval
+        value:
+          example: 15
+          type: number
+        description: |
+          This changes the collection interval of the check. For more information, see:
+          https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
+          Only available using corecheck SNMP integration with `loader: core` config.
 
       - name: global_metrics
         description: |
@@ -130,15 +138,6 @@ files:
         value:
           type: boolean
           example: true
-      - name: namespace
-        description: |
-            Namespace can be used to disambiguate devices with same IPs.
-            Changing namespace will cause devices being recreated in NDM app.
-            Only available using corecheck SNMP integration with `loader: core` config.
-        value:
-          example: default
-          type: string
-          display_default: default
       - template: init_config/default
     - template: instances
       options:
@@ -170,16 +169,16 @@ files:
           example: 2
       - name: timeout
         description: |
-          Amount of second before timing out.
+          Amount of second before timing out. Default of 5 for Python version of this check.
         value:
           type: integer
-          example: 5
+          example: 2
       - name: retries
         description: |
-          Amount of retries before failure.
+          Amount of retries before failure. Default of 5 for Python version of this check.
         value:
           type: integer
-          example: 5
+          example: 3
       - name: loader
         enabled: true
         description: |
@@ -402,13 +401,4 @@ files:
         value:
           type: boolean
           example: true
-      - name: namespace
-        description: |
-          Namespace can be used to disambiguate devices with same IPs.
-          Changing namespace will cause devices being recreated in NDM app.
-          Only available using corecheck SNMP integration with `loader: core` config.
-        value:
-          example: default
-          type: string
-          display_default: default
       - template: instances/default

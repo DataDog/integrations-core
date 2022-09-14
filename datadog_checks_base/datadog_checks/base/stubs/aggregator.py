@@ -229,12 +229,14 @@ class AggregatorStub(object):
             msg = "The metric '{}' with tag '{}' was only found {}/{} times".format(metric_name, tag, count, at_least)
         elif candidates:
             msg = (
-                "The metric '{}' was found but not with the tag '{}'.\n"
+                "The metric '{}' was found but not with the tag '{}'.\n".format(metric_name, tag)
                 + "Similar submitted:\n"
                 + "\n".join(["     {}".format(m) for m in candidates])
             )
         else:
+            expected_stub = MetricStub(metric_name, type=None, value=None, tags=[tag], hostname=None, device=None)
             msg = "Metric '{}' not found".format(metric_name)
+            msg = "{}\n{}".format(msg, build_similar_elements_msg(expected_stub, self._metrics))
 
         if count is not None:
             assert len(candidates_with_tag) == count, msg
@@ -351,7 +353,7 @@ class AggregatorStub(object):
 
             candidates.append(metric)
 
-        expected_metric = MetricStub(name, metric_type, value, tags, hostname, device, flush_first_value)
+        expected_metric = MetricStub(name, metric_type, value, expected_tags, hostname, device, flush_first_value)
 
         if value is not None and candidates and all(self.is_aggregate(m.type) for m in candidates):
             got = sum(m.value for m in candidates)

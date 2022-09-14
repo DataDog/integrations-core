@@ -56,7 +56,7 @@ AGENT_V5_ONLY = {'agent_metrics', 'docker_daemon', 'go-metro', 'kubernetes', 'nt
 
 BETA_PACKAGES = {}
 
-NOT_CHECKS = {'datadog_checks_dev', 'datadog_checks_tests_helper'}
+NOT_CHECKS = {'datadog_checks_dev', 'datadog_checks_tests_helper', 'ddev'}
 
 # Some integrations do not have an associated tile, mostly system integrations
 NOT_TILES = [
@@ -87,11 +87,11 @@ CHECK_LINKS = """\
 [1]: **LINK_TO_INTEGRATION_SITE**
 [2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://docs.datadoghq.com/agent/kubernetes/integrations/
-[4]: https://github.com/DataDog/integrations-core/blob/master/check/datadog_checks/check/data/conf.yaml.example
+[4]: https://github.com/DataDog/integrations-core/blob/master/{name}/datadog_checks/{name}/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[7]: https://github.com/DataDog/integrations-core/blob/master/check/metadata.csv
-[8]: https://github.com/DataDog/integrations-core/blob/master/check/assets/service_checks.json
+[7]: https://github.com/DataDog/integrations-core/blob/master/{name}/metadata.csv
+[8]: https://github.com/DataDog/integrations-core/blob/master/{name}/assets/service_checks.json
 [9]: https://docs.datadoghq.com/help/
 """
 

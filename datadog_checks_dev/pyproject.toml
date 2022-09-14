@@ -1,7 +1,7 @@
 [build-system]
 requires = [
     "hatchling>=0.11.2",
-    "setuptools; python_version < '3.0'",
+    "setuptools<61",
 ]
 build-backend = "hatchling.build"
 
@@ -9,7 +9,7 @@ build-backend = "hatchling.build"
 name = "datadog-checks-dev"
 description = "The Datadog Checks Developer Tool"
 readme = "README.md"
-license = "BSD-3-Clause"
+license = {text = "BSD-3-Clause"}
 keywords = [
     "datadog",
     "datadog agent",
@@ -40,7 +40,7 @@ dependencies = [
     "pytest-benchmark[histogram]>=3.2.1",
     "pytest-cov>=2.6.1",
     "pytest-mock",
-    "pyyaml==5.4.1",
+    "pyyaml>=5.4.1",
     "requests>=2.22.0",
     "shutilwhich==1.1.0; python_version < '3.0'",
     "six",
@@ -58,11 +58,11 @@ cli = [
     "atomicwrites",
     "beautifulsoup4>=4.9.3",
     "build>=0.7.0",
-    "click~=8.0",
+    "click~=8.1",
     "codespell",
     "colorama",
-    "datamodel-code-generator~=0.11.4",
-    "docker-compose>=1.25",
+    "datamodel-code-generator~=0.12.0",
+    "hatch>=1.5.0",
     "in-toto>=0.4.2",
     "jsonschema",
     "markdown",
@@ -79,9 +79,9 @@ cli = [
     "tomli-w>=1.0.0",
     "tox>=3.12.1",
     "twine>=1.11.0",
-    "virtualenv>=20.5.0",
+    "virtualenv",
     # TODO: Remove once every check has a pyproject.toml
-    "setuptools>=38.6.0",
+    "setuptools<61",
     "wheel>=0.31.0",
 ]
 
@@ -93,6 +93,9 @@ datadog_checks = "datadog_checks.dev.plugin.pytest"
 
 [project.entry-points.tox]
 datadog_checks = "datadog_checks.dev.plugin.tox"
+
+[project.entry-points.hatch]
+datadog_checks = "datadog_checks.dev.plugin.hatch"
 
 [project.urls]
 Source = "https://github.com/DataDog/integrations-core"

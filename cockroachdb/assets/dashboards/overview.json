@@ -22,7 +22,7 @@
                 "type": "query_value",
                 "requests": [
                     {
-                        "q": "avg:cockroachdb.syscount{*}",
+                        "q": "avg:cockroachdb.syscount{$scope}",
                         "aggregator": "avg"
                     }
                 ],
@@ -46,7 +46,7 @@
                 "type": "query_value",
                 "requests": [
                     {
-                        "q": "avg:cockroachdb.liveness.livenodes{*}",
+                        "q": "avg:cockroachdb.liveness.livenodes{$scope}",
                         "aggregator": "avg"
                     }
                 ],
@@ -70,7 +70,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "avg:cockroachdb.sys.cpu.sys.percent{*}",
+                        "q": "avg:cockroachdb.sys.cpu.sys.percent{$scope}",
                         "display_type": "line",
                         "style": {
                             "palette": "dog_classic",
@@ -99,7 +99,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "avg:cockroachdb.sys.cpu.user.percent{*}",
+                        "q": "avg:cockroachdb.sys.cpu.user.percent{$scope}",
                         "display_type": "line",
                         "style": {
                             "palette": "dog_classic",
@@ -128,7 +128,7 @@
                 "type": "query_value",
                 "requests": [
                     {
-                        "q": "100-avg:cockroachdb.capacity.used{*}/avg:cockroachdb.capacity.total{*}*100",
+                        "q": "100-avg:cockroachdb.capacity.used{$scope}/avg:cockroachdb.capacity.total{$scope}*100",
                         "aggregator": "avg",
                         "conditional_formats": [
                             {
@@ -169,7 +169,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "(diff(avg:cockroachdb.sql.service.latency.sum{*})/diff(avg:cockroachdb.sql.service.latency.count{*}))/1000000",
+                        "q": "(diff(avg:cockroachdb.sql.service.latency.sum{$scope})/diff(avg:cockroachdb.sql.service.latency.count{$scope}))/1000000",
                         "display_type": "area",
                         "style": {
                             "palette": "dog_classic",
@@ -239,7 +239,7 @@
                 "type": "query_value",
                 "requests": [
                     {
-                        "q": "avg:cockroachdb.sql.conns{*}",
+                        "q": "avg:cockroachdb.sql.conns{$scope}",
                         "aggregator": "avg"
                     }
                 ],
@@ -263,7 +263,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "(diff(avg:cockroachdb.exec.latency.sum{*})/diff(avg:cockroachdb.exec.latency.count{*}))/1000000",
+                        "q": "(diff(avg:cockroachdb.exec.latency.sum{$scope})/diff(avg:cockroachdb.exec.latency.count{$scope}))/1000000",
                         "display_type": "line",
                         "style": {
                             "palette": "dog_classic",
@@ -314,7 +314,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "avg:cockroachdb.sql.select.count{*}.as_count()",
+                        "q": "avg:cockroachdb.sql.select.count{$scope}.as_count()",
                         "display_type": "bars",
                         "style": {
                             "palette": "dog_classic",
@@ -343,7 +343,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "avg:cockroachdb.sql.delete.count{*}.as_count()",
+                        "q": "avg:cockroachdb.sql.delete.count{$scope}.as_count()",
                         "display_type": "bars",
                         "style": {
                             "palette": "dog_classic",
@@ -372,7 +372,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "avg:cockroachdb.sql.insert.count{*}.as_count()",
+                        "q": "avg:cockroachdb.sql.insert.count{$scope}.as_count()",
                         "display_type": "bars",
                         "style": {
                             "palette": "dog_classic",
@@ -401,7 +401,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "avg:cockroachdb.sql.update.count{*}.as_count()",
+                        "q": "avg:cockroachdb.sql.update.count{$scope}.as_count()",
                         "display_type": "bars",
                         "style": {
                             "palette": "dog_classic",
@@ -449,7 +449,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "avg:cockroachdb.sql.mem.admin.max.sum{*}",
+                        "q": "avg:cockroachdb.sql.mem.admin.max.sum{$scope}",
                         "display_type": "line",
                         "style": {
                             "palette": "dog_classic",
@@ -478,7 +478,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "avg:cockroachdb.sql.mem.admin.session.max.sum{*}",
+                        "q": "avg:cockroachdb.sql.mem.admin.session.max.sum{$scope}",
                         "display_type": "line",
                         "style": {
                             "palette": "dog_classic",
@@ -507,7 +507,7 @@
                 "type": "query_value",
                 "requests": [
                     {
-                        "q": "avg:cockroachdb.capacity.total{*}/1000000000",
+                        "q": "avg:cockroachdb.capacity.total{$scope}/1000000000",
                         "aggregator": "avg"
                     }
                 ],
@@ -531,7 +531,7 @@
                 "type": "query_value",
                 "requests": [
                     {
-                        "q": "avg:cockroachdb.capacity.used{*}/1000000000",
+                        "q": "avg:cockroachdb.capacity.used{$scope}/1000000000",
                         "aggregator": "avg"
                     }
                 ],

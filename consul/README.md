@@ -239,6 +239,10 @@ Additional helpful documentation, links, and articles:
 - [Monitoring HCP Consul with Datadog][17]
 - [Monitor Consul health and performance with Datadog][18]
 - [Consul at Datadog][19]
+- [Key metrics for monitoring Consul][20]
+- [Consul monitoring tools][21]
+- [How to monitor Consul with Datadog][22]
+- [Datadog NPM now supports Consul networking][23]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/consul/images/consul-dash.png
 [2]: https://app.datadoghq.com/account/settings#agent
@@ -259,3 +263,7 @@ Additional helpful documentation, links, and articles:
 [17]: https://docs.datadoghq.com/integrations/guide/hcp-consul
 [18]: https://www.datadoghq.com/blog/monitor-consul-health-and-performance-with-datadog
 [19]: https://engineering.datadoghq.com/consul-at-datadog
+[20]: https://www.datadoghq.com/blog/consul-metrics/
+[21]: https://www.datadoghq.com/blog/consul-monitoring-tools/
+[22]: https://www.datadoghq.com/blog/consul-datadog/
+[23]: https://www.datadoghq.com/blog/monitor-consul-with-datadog-npm/

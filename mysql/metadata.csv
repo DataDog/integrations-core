@@ -1,12 +1,14 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
 mysql.info.schema.size,gauge,,mebibyte,,"Size of schemas in MiB",0,mysql,mysql schema size,
+mysql.info.table.rows.read,count,,row,,"Total number of rows read per table (Percona userstat only)",0,mysql,mysql table rows read,
+mysql.info.table.rows.changed,count,,row,,"Total number of rows changed per table (Percona userstat only)",0,mysql,mysql table rows changed,
 mysql.info.table.index_size,gauge,,mebibyte,,"Size of tables index in MiB",0,mysql,mysql index table size,
-mysql.info.table.data_size,gauge,,mebibyte,,"Size of tables data in MiB",0,mysql,mysql data table size,
+mysql.info.table.data_size,gauge,,mebibyte,,"Size of tables data in MiB",0,mysql,mysql data table size,memory
 mysql.galera.wsrep_cluster_size,gauge,,node,,The current number of nodes in the Galera cluster.,0,mysql,galera cluster size,
-mysql.innodb.buffer_pool_free,gauge,,page,,The number of free pages in the InnoDB Buffer Pool.,1,mysql,innodb buf pool free,
-mysql.innodb.buffer_pool_total,gauge,,page,,The total number of pages in the InnoDB Buffer Pool.,0,mysql,innodb buf pool total,
-mysql.innodb.buffer_pool_used,gauge,,page,,The number of used pages in the InnoDB Buffer Pool.,-1,mysql,innodb buf pool used,
-mysql.innodb.buffer_pool_utilization,gauge,,fraction,,The utilization of the InnoDB Buffer Pool.,-1,mysql,innodb buf pool usage,
+mysql.innodb.buffer_pool_free,gauge,,byte,,The number of free bytes in the InnoDB Buffer Pool.,1,mysql,innodb buf pool free,
+mysql.innodb.buffer_pool_total,gauge,,byte,,The total number of bytes in the InnoDB Buffer Pool.,0,mysql,innodb buf pool total,
+mysql.innodb.buffer_pool_used,gauge,,byte,,The number of used bytes in the InnoDB Buffer Pool.,-1,mysql,innodb buf pool used,memory
+mysql.innodb.buffer_pool_utilization,gauge,,fraction,,The utilization of the InnoDB Buffer Pool.,-1,mysql,innodb buf pool usage,memory
 mysql.innodb.current_row_locks,gauge,,lock,,The number of current row locks.,-1,mysql,current row locks,
 mysql.innodb.data_reads,gauge,,read,second,The rate of data reads.,0,mysql,data reads,
 mysql.innodb.data_writes,gauge,,write,second,The rate of data writes.,0,mysql,data writes,
@@ -16,15 +18,16 @@ mysql.innodb.mutex_spin_waits,gauge,,event,second,The rate of mutex spin waits.,
 mysql.innodb.os_log_fsyncs,gauge,,write,second,The rate of fsync writes to the log file.,0,mysql,log fsyncs,
 mysql.innodb.row_lock_time,gauge,,fraction,,Fraction of time spent (ms/s) acquiring row locks.,-1,mysql,row lock time,
 mysql.innodb.row_lock_waits,gauge,,event,second,The number of times per second a row lock had to be waited for.,0,mysql,innodb row lock waits,
-mysql.net.connections,gauge,,connection,second,The rate of connections to the server.,0,mysql,conns per s,
+mysql.net.connections,gauge,,connection,second,The rate of connections to the server.,0,mysql,conns per s,cpu
 mysql.net.max_connections,gauge,,connection,,The maximum number of connections that have been in use simultaneously since the server started.,-1,mysql,max used conn,
 mysql.net.max_connections_available,gauge,,connection,,The maximum permitted number of simultaneous client connections.,-1,mysql,max used conn avail,
+mysql.performance.user_connections,gauge,,connection,,"The number of user connections. Tags: processlist_db, processlist_host, processlist_state, processlist_user",0,mysql,user conns,
 mysql.performance.com_delete,gauge,,query,second,The rate of delete statements.,0,mysql,deletes,
 mysql.performance.com_delete_multi,gauge,,query,second,The rate of delete-multi statements.,0,mysql,delete multi,
-mysql.performance.com_insert,gauge,,query,second,The rate of insert statements.,0,mysql,inserts,
+mysql.performance.com_insert,gauge,,query,second,The rate of insert statements.,0,mysql,inserts,cpu
 mysql.performance.com_insert_select,gauge,,query,second,The rate of insert-select statements.,0,mysql,insrt select,
 mysql.performance.com_replace_select,gauge,,query,second,The rate of replace-select statements.,0,mysql,replc select,
-mysql.performance.com_select,gauge,,query,second,The rate of select statements.,0,mysql,selects,
+mysql.performance.com_select,gauge,,query,second,The rate of select statements.,0,mysql,selects,cpu
 mysql.performance.com_update,gauge,,query,second,The rate of update statements.,0,mysql,updates,
 mysql.performance.com_update_multi,gauge,,query,second,The rate of update-multi.,0,mysql,update multi,
 mysql.performance.created_tmp_disk_tables,gauge,,table,second,The rate of internal on-disk temporary tables created by second by the server while executing statements.,-1,mysql,disk tmp tables created,
@@ -40,9 +43,9 @@ mysql.performance.prepared_stmt_count,gauge,,query,second,The current number of 
 mysql.performance.slow_queries,gauge,,query,second,The rate of slow queries.,-1,mysql,slow queries,
 mysql.performance.table_locks_waited,gauge,,,,The total number of times that a request for a table lock could not be granted immediately and a wait was needed.,-1,mysql,table locks waited,
 mysql.performance.table_locks_waited.rate,gauge,,,,"The rate of times that a request for a table lock could not be granted immediately and a wait was needed.",0,mysql,table locks waited rate,
-mysql.performance.threads_connected,gauge,,connection,,The number of currently open connections.,0,mysql,threads connected,
+mysql.performance.threads_connected,gauge,,connection,,The number of currently open connections.,0,mysql,threads connected,cpu
 mysql.performance.threads_running,gauge,,thread,,The number of threads that are not sleeping.,0,mysql,threads running,
-mysql.performance.cpu_time,gauge,,percent,,Percentage of CPU time spent by MySQL.,-1,mysql,cpu,
+mysql.performance.cpu_time,gauge,,percent,,Percentage of CPU time spent by MySQL.,-1,mysql,cpu,cpu
 mysql.performance.user_time,gauge,,percent,,Percentage of CPU time spent in user space by MySQL.,-1,mysql,cpu user,
 mysql.replication.seconds_behind_master,gauge,,second,,The lag in seconds between the master and the slave.,-1,mysql,replication lag,
 mysql.replication.seconds_behind_source,gauge,,second,,The lag in seconds between the source and the replica.,-1,mysql,replication lag,
@@ -62,11 +65,11 @@ mysql.myisam.key_read_requests,gauge,,read,second,The number of requests to read
 mysql.myisam.key_reads,gauge,,read,second,"The number of physical reads of a key block from disk into the MyISAM key cache. If Key_reads is large, then your key_buffer_size value is probably too small. The cache miss rate can be calculated as Key_reads/Key_read_requests.",0,mysql,mysql myisam key_reads,
 mysql.myisam.key_write_requests,gauge,,write,second,"The number of requests to write a key block to the MyISAM key cache.",0,mysql,mysql myisam key_write_requests,
 mysql.myisam.key_writes,gauge,,write,second,"The number of physical writes of a key block from the MyISAM key cache to disk.",0,mysql,mysql myisam key_writes,
-mysql.myisam.key_buffer_size,gauge,,byte,,"Size of the buffer used for index blocks.",0,mysql,mysql myisam key_buffer_size,
+mysql.myisam.key_buffer_size,gauge,,byte,,"Size of the buffer used for index blocks.",0,mysql,mysql myisam key_buffer_size,memory
 mysql.performance.max_prepared_stmt_count,gauge,,,,"The maximum allowed prepared statements on the server.",0,mysql,max prepared statements,
 mysql.performance.qcache_size,gauge,,byte,,"The amount of memory allocated for caching query results.",0,mysql,mysql performance qcache_size,
 mysql.performance.table_open_cache,gauge,,,,"The number of open tables for all threads. Increasing this value increases the number of file descriptors that mysqld requires.",0,mysql,mysql performance table_open_cache,
-mysql.performance.thread_cache_size,gauge,,byte,,"How many threads the server should cache for reuse. When a client disconnects, the client's threads are put in the cache if there are fewer than thread_cache_size threads there.",0,mysql,mysql performance thread_cache_size,
+mysql.performance.thread_cache_size,gauge,,byte,,"How many threads the server should cache for reuse. When a client disconnects, the client's threads are put in the cache if there are fewer than thread_cache_size threads there.",0,mysql,mysql performance thread_cache_size,memory
 mysql.innodb.active_transactions,gauge,,operation,,"The number of active transactions on InnoDB tables.",0,mysql,mysql innodb active_transactions,
 mysql.innodb.buffer_pool_dirty,gauge,,byte,,"The total current number of bytes held in dirty pages in the InnoDB buffer pool.",0,mysql,mysql innodb buffer_pool_dirty,
 mysql.innodb.buffer_pool_read_requests,gauge,,read,second,The number of logical read requests.,0,mysql,mysql innodb buffer_pool_read_requests,
@@ -77,6 +80,8 @@ mysql.innodb.ibuf_merged_inserts,gauge,,operation,,"Insert buffer and adaptative
 mysql.innodb.ibuf_merged,gauge,,operation,,"Insert buffer and adaptative hash index merged",0,mysql,mysql innodb merged,
 mysql.innodb.ibuf_merges,gauge,,operation,,"Insert buffer and adaptative hash index merges",0,mysql,mysql innodb merges,
 mysql.innodb.lock_structs,gauge,,operation,,"Lock structs",0,mysql,mysql innodb lock structs,
+mysql.innodb.locked_tables,gauge,,operation,,"Locked tables",0,mysql,mysql innodb locked tables,
+mysql.innodb.tables_in_use,gauge,,operation,,"Tables in use",0,mysql,mysql innodb used tables,
 mysql.innodb.os_file_fsyncs,gauge,,operation,,"(Delta) The total number of fsync() operations performed by InnoDB.",0,mysql,mysql innodb os file fsyncs,
 mysql.innodb.os_file_reads,gauge,,operation,,"(Delta) The total number of files reads performed by read threads within InnoDB.",0,mysql,mysql innodb os file reads,
 mysql.innodb.os_file_writes,gauge,,operation,,"(Delta) The total number of file writes performed by write threads within InnoDB.",0,mysql,mysql innodb os file writes,
@@ -124,7 +129,7 @@ mysql.performance.sort_scan,gauge,,operation,second,"The number of sorts that we
 mysql.performance.table_locks_immediate,gauge,,,,"The number of times that a request for a table lock could be granted immediately.",0,mysql,mysql performance table_locks_immediate,
 mysql.performance.table_locks_immediate.rate,gauge,,,,"The rate of times that a request for a table lock could be granted immediately.",0,mysql,mysql performance table_locks_immediate rate,
 mysql.performance.threads_cached,gauge,,thread,,"The number of threads in the thread cache.",0,mysql,mysql performance threads_cached,
-mysql.performance.threads_created,count,,thread,,"The number of threads created to handle connections. If Threads_created is big, you may want to increase the thread_cache_size value.",0,mysql,mysql performance threads_created,
+mysql.performance.threads_created,count,,thread,,"The number of threads created to handle connections. If Threads_created is big, you may want to increase the thread_cache_size value.",0,mysql,mysql performance threads_created,memory
 mysql.performance.table_cache_hits,gauge,,hit,second,"The number of hits for open tables cache lookups.",0,mysql,mysql performance table_cache_hits,
 mysql.performance.table_cache_misses,gauge,,miss,second,"The number of misses for open tables cache lookups.",0,mysql,mysql performance table_cache_misses,
 mysql.innodb.buffer_pool_data,gauge,,byte,,"The total number of bytes in the InnoDB buffer pool containing data. The number includes both dirty and clean pages.",0,mysql,mysql innodb buffer_pool_data,
@@ -176,7 +181,7 @@ mysql.myisam.key_buffer_bytes_unflushed,gauge,,byte,,"MyISAM key buffer bytes un
 mysql.myisam.key_buffer_bytes_used,gauge,,byte,,"MyISAM key buffer bytes used.",0,mysql,mysql myisam key buffer bytes used,
 mysql.innodb.mem_adaptive_hash,gauge,,byte,,"As shown in the BUFFER POOL AND MEMORY section of the SHOW ENGINE INNODB STATUS output.",0,mysql,mysql innodb mem_adaptive_hash,
 mysql.innodb.mem_dictionary,gauge,,byte,,"As shown in the BUFFER POOL AND MEMORY section of the SHOW ENGINE INNODB STATUS output.",0,mysql,mysql innodb mem_dictionary,
-mysql.innodb.mem_total,gauge,,byte,,"As shown in the BUFFER POOL AND MEMORY section of the SHOW ENGINE INNODB STATUS output.",0,mysql,mysql innodb mem_total,
+mysql.innodb.mem_total,gauge,,byte,,"As shown in the BUFFER POOL AND MEMORY section of the SHOW ENGINE INNODB STATUS output.",0,mysql,mysql innodb mem_total,memory
 mysql.innodb.mem_additional_pool,gauge,,byte,,"As shown in the BUFFER POOL AND MEMORY section of the SHOW ENGINE INNODB STATUS output.",0,mysql,mysql innodb mem_additional_total,
 mysql.innodb.mem_file_system,gauge,,,,"As shown in the BUFFER POOL AND MEMORY section of the SHOW ENGINE INNODB STATUS output.",0,mysql,mysql innodb mem filesystem,
 mysql.innodb.mem_lock_system,gauge,,,,"As shown in the BUFFER POOL AND MEMORY section of the SHOW ENGINE INNODB STATUS output.",0,mysql,mysql innodb mem locksystem,
@@ -214,7 +219,7 @@ mysql.performance.qcache.utilization,gauge,,fraction,,Fraction of the query cach
 mysql.performance.digest_95th_percentile.avg_us,gauge,,microsecond,,Query response time 95th percentile per schema.,0,mysql,mysql response time 95th,
 mysql.performance.query_run_time.avg,gauge,,microsecond,,Avg query response time per schema.,0,mysql,mysql response time avg,
 mysql.binlog.disk_use,gauge,,byte,,Total binary log file size.,0,mysql,mysql binlog disk,
-mysql.queries.count,count,,query,,The total count of executed queries per normalized query and schema. (DBM only),0,mysql,mysql queries count,
+mysql.queries.count,count,,query,,The total count of executed queries per normalized query and schema. (DBM only),0,mysql,mysql queries count,cpu
 mysql.queries.errors,count,,error,,The total count of queries run with an error per normalized query and schema. (DBM only),0,mysql,mysql query errors,
 mysql.queries.time,count,,nanosecond,,The total query execution time per normalized query and schema. (DBM only),0,mysql,mysql queries total time,
 mysql.queries.select_scan,count,,,,The total count of full table scans on the first table per normalized query and schema. (DBM only),0,mysql,mysql queries select scan,

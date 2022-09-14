@@ -1,0 +1,36 @@
+# https://www.ibm.com/docs/en/app-connect/12.0?topic=properties-mqendpoint-policy
+remoteDefaultQueueManager: '{DefaultPolicies}:mqpolicy'
+
+# https://www.ibm.com/docs/en/app-connect/12.0?topic=events-configuring-publication-event-messages
+Events:
+  OperationalEvents:
+    MQ:
+      enabled: true
+  BusinessEvents:
+    MQ:
+      enabled: true
+      outputFormat: json
+
+# https://www.ibm.com/docs/en/app-connect/12.0?topic=ccmfasd-configuring-collection-message-flow-statistics-by-using-yaml-configuration-file
+Statistics:
+  Resource:
+    reportingOn: true
+  Snapshot:
+    publicationOn: active
+    outputFormat: json
+    accountingOrigin: basic
+    nodeDataLevel: advanced
+    threadDataLevel: basic
+
+# https://www.ibm.com/docs/en/app-connect/12.0?topic=flows-activating-monitoring
+Monitoring:
+  MessageFlow:
+    publicationOn: active
+    eventFormat: MonitoringEventV2
+
+# https://www.ibm.com/docs/en/app-connect/12.0?topic=log-writing-admin-entries-file
+AdminLog:
+  enabled: true
+  fileLog: true
+  consoleLog: true
+  consoleLogFormat: ibmjson

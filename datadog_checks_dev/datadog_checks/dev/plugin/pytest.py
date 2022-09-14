@@ -12,7 +12,6 @@ from typing import Dict, List, Optional, Tuple
 import pytest
 
 from .._env import (
-    AGENT_COLLECTOR_SEPARATOR,
     E2E_FIXTURE_NAME,
     E2E_PARENT_PYTHON,
     SKIP_ENVIRONMENT,
@@ -159,8 +158,9 @@ def dd_agent_check(request, aggregator, datadog_agent):
             root = new_root
 
         python_path = os.environ[E2E_PARENT_PYTHON]
-        env = os.environ['TOX_ENV_NAME']
+        env = os.environ.get('TOX_ENV_NAME') or os.environ['HATCH_ENV_ACTIVE']
 
+        # TODO: switch to `ddev` when the old CLI is gone
         check_command = [python_path, '-m', 'datadog_checks.dev', 'env', 'check', check, env, '--json']
 
         if config:
@@ -181,12 +181,13 @@ def dd_agent_check(request, aggregator, datadog_agent):
 
         result = run_command(check_command, capture=True)
 
-        matches = re.findall(AGENT_COLLECTOR_SEPARATOR + r'\n(.*?\n(?:\} \]|\]))', result.stdout, re.DOTALL)
+        matches = re.findall(r'((?:\{ \[|\[).*?\n(?:\} \]|\]))', result.stdout, re.DOTALL)
 
         if not matches:
             raise ValueError(
-                '{}{}\nCould not find `{}` in the output'.format(
-                    result.stdout, result.stderr, AGENT_COLLECTOR_SEPARATOR
+                '{}{}\nCould not find valid check output'.format(
+                    result.stdout,
+                    result.stderr,
                 )
             )
 
@@ -206,7 +207,12 @@ def dd_agent_check(request, aggregator, datadog_agent):
 
 @pytest.fixture
 def dd_run_check():
-    def run_check(check, extract_message=False):
+    checks = {}
+
+    def run_check(check, extract_message=False, cancel=True):
+        if cancel:
+            checks[id(check)] = check
+
         error = check.run()
 
         if error:
@@ -220,7 +226,13 @@ def dd_run_check():
 
         return ''
 
-    return run_check
+    yield run_check
+
+    for c in checks.values():
+        try:
+            c.cancel()
+        except Exception:
+            pass
 
 
 @pytest.fixture(scope='session')

@@ -39,6 +39,15 @@ files:
       description: Password for the Datadog-SQL server check user. It will be ignored if using Windows authentication.
       value:
         type: string
+    - name: server_version
+      description: |
+        Server version year of sqlserver the agent will connect to. 
+        Important for validating connection string attributes for older sqlserver versions.
+        
+        This is required if connecting to a SQLServer instance older than 2014.
+      value:
+        type: string
+        example: "2014"
     - name: database
       description: |
         Database name to query.  Not compatible with `database_autodiscovery`.
@@ -179,8 +188,8 @@ files:
       description: |
         Choose the ADO provider.  Note that the (default) provider
         SQLOLEDB is being deprecated.  To use the newer MSOLEDBSQL
-        provider, set the adoprovider to "MSOLEDBSQL" below. You will also need
-        to download the new provider from
+        provider, set the adoprovider to "MSOLEDBSQL" below or "MSOLEDBSQL19" for version 19 of the driver.
+        You will also need to download the new provider from
         https://docs.microsoft.com/en-us/sql/connect/oledb/oledb-driver-for-sql-server?view=sql-server-2017
       value:
         type: string
@@ -205,17 +214,20 @@ files:
     - name: connection_string
       description: |
         Specify a custom connection string to be used
-        Ex: "ApplicationIntent=ReadWrite" or "MultiSubnetFailover=yes"
-        "Trusted_Connection=yes" to use Windows Authentication (note that in this case the connection will be performed
-        with the `ddagentuser` user, you can find more information about this user
-        in https://docs.datadoghq.com/agent/faq/windows-agent-ddagent-user/)
+        Ex: "ApplicationIntent=ReadWrite" or "Trusted_Connection=Yes" to use Windows Authentication
+        (note that in this case the connection will be performed with the `ddagentuser` user, you can
+        find more information about this user in https://docs.datadoghq.com/agent/faq/windows-agent-ddagent-user/)
+
+        Please note that certain connection string values will vary depending on the connection Provider used,
+        for example:
+        * "OLE DB" provider uses "MultiSubnetFailover=Yes"
+        * "ADO" provider uses "MultiSubnetFailover=True"
       value:
         type: string
         example: "<CONNECTION_STRING>"
     - name: dbm
       description: |
         Set to `true` to enable Database Monitoring.
-        Reach out to your Customer Success Manager to request access to the beta.
       value:
         type: boolean
         example: false
@@ -268,7 +280,6 @@ files:
             type: boolean
             example: True
           hidden: true
-
     - name: query_activity
       description: Configure collection of active sessions monitoring
       options:
@@ -287,6 +298,89 @@ files:
           value:
             type: number
             example: 10
+
+    - name: aws
+      description: |
+        This block defines the configuration for AWS RDS and Aurora instances. 
+        
+        Complete this section if you have installed the Datadog AWS Integration 
+        (https://docs.datadoghq.com/integrations/amazon_web_services) to enrich instances 
+        with SQL Server integration telemetry.
+        
+        These values are only applied when `dbm: true` option is set.
+      options:
+        - name: instance_endpoint
+          description: |
+            Equal to the Endpoint.Address of the instance the agent is connecting to. 
+            This value is optional if the value of `host` is already configured to the instance endpoint.
+            
+            For more information on instance endpoints, 
+            see the AWS docs https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_Endpoint.html
+          value:
+            type: string
+            example: mydb.cfxgae8cilcf.us-east-1.rds.amazonaws.com
+
+    - name: gcp
+      description: |
+        This block defines the configuration for Google Cloud SQL instances.
+        
+        Complete this section if you have installed the Datadog GCP Integration 
+        (https://docs.datadoghq.com/integrations/google_cloud_platform) to enrich instances 
+        with SQL Server integration telemetry.
+
+        These values are only applied when `dbm: true` option is set.
+      options:
+        - name: project_id
+          description: |
+            Equal to the GCP resource's project ID.
+            
+            For more information on project IDs,
+            See the GCP docs https://cloud.google.com/resource-manager/docs/creating-managing-projects
+          value:
+            type: string
+            example: foo-project
+        - name: instance_id
+          description: |
+            Equal to the GCP resource's instance ID.
+            
+            For more information on instance IDs,
+            See the GCP docs https://cloud.google.com/sql/docs/sqlserver/instance-settings#instance-id-2ndgen
+          value:
+            type: string
+            example: foo-database
+
+    - name: azure
+      description: |
+        This block defines the configuration for Azure Managed Instance, Azure SQL Database or 
+        SQLServer on Virtual Machines.
+        
+        Complete this section if you have installed the Datadog Azure Integration 
+        (https://docs.datadoghq.com/integrations/azure) to enrich instances 
+        with SQL Server integration telemetry.
+
+        These values are only applied when `dbm: true` option is set.
+      options:
+        - name: deployment_type
+          description: |
+            Equal to the deployment type for the managed database. 
+            
+            Acceptable values are:
+              - `sql_database` 
+              - `managed_instance`
+              - `virtual_machine`
+            
+            For more information on deployment types, see the Azure
+            docs https://docs.microsoft.com/en-us/azure/azure-sql/azure-sql-iaas-vs-paas-what-is-overview?view=azuresql
+          value:
+            type: string
+            example: sql_database
+        - name: name
+          description: |
+            Equal to the name of the SQL Database, Managed Instance (SQL MI) or virtual machine.
+          value:
+            type: string
+            example: my-sqlserver-instance
+
     - name: obfuscator_options
       description: |
         Configure how the SQL obfuscator behaves.
@@ -301,11 +395,11 @@ files:
             example: false
         - name: collect_metadata
           description: |
-            Set to `true` to enable the collection of metadata in your SQL statements.
+            Set to `false` to disable the collection of metadata in your SQL statements.
             Metadata includes things such as tables, commands, and comments.
           value:
             type: boolean
-            example: false
+            example: true
         - name: collect_tables
           description: |
             Set to `false` to disable the collection of tables in your SQL statements.
@@ -329,6 +423,15 @@ files:
           value:
             type: boolean
             example: true
+        - name: keep_sql_alias
+          description: |
+            Set to `true` to keep sql aliases in obfuscated SQL statements. Examples of aliases are
+            `with select 1 as alias`, `select column as other_name`, or `select * from table t`.
+            When `true` these aliases will not be removed.
+          value:
+            type: boolean
+            example: true
+            display_default: true
     - name: command_timeout
       description: Timeout in seconds for the connection and each command run
       value:

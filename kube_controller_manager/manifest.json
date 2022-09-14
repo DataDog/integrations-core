@@ -1,37 +1,51 @@
 {
-  "display_name": "Kubernetes Controller Manager",
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "name": "kube_controller_manager",
-  "metric_prefix": "kube_controller_manager.",
-  "metric_to_check": "kube_controller_manager.threads",
-  "creates_events": false,
-  "short_description": "Monitors the Kubernetes Controller Manager",
-  "guid": "34156dda-9288-4968-962b-6b29e1753d33",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "public_title": "Datadog-Kubernetes Controller Manager Integration",
-  "categories": [
-    "orchestration",
-    "containers"
-  ],
-  "type": "check",
-  "is_public": true,
-  "integration_id": "kube-controller-manager",
+  "manifest_version": "2.0.0",
+  "app_uuid": "25d4ccd6-de50-4ef0-849f-b7ab1aea203e",
+  "app_id": "kube-controller-manager",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitors the Kubernetes Controller Manager",
+    "title": "Kubernetes Controller Manager",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Orchestration",
+      "Category::Containers"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "monitors": {},
+    "integration": {
+      "source_type_name": "Kubernetes Controller Manager",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "kube_controller_manager.",
+        "check": "kube_controller_manager.threads",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
     "dashboards": {
       "kube_controller_manager": "assets/dashboards/overview.json"
-    },
-    "service_checks": "assets/service_checks.json",
-    "logs": {},
-    "metrics_metadata": "metadata.csv",
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
     }
   }
 }

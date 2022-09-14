@@ -69,7 +69,7 @@ def check_widgets(decoded, filename, app_uuid, fix, file_fixed, file_failed, dis
 
 
 @click.command('dashboards', context_settings=CONTEXT_SETTINGS, short_help='Validate dashboard definition JSON files')
-@click.argument('check', autocompletion=complete_valid_checks, required=False)
+@click.argument('check', shell_complete=complete_valid_checks, required=False)
 @click.option('--fix', is_flag=True, help='Attempt to fix errors')
 def dashboards(check, fix):
     """Validate all Dashboard definition files.

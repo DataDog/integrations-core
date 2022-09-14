@@ -1,43 +1,58 @@
 {
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "name": "coredns",
-  "metric_prefix": "coredns.",
-  "metric_to_check": "coredns.request_count",
-  "display_name": "CoreDNS",
-  "short_description": "CoreDNS collects DNS metrics in Kubernetes.",
-  "support": "core",
-  "supported_os": [
-    "linux"
-  ],
-  "guid": "9b316155-fc8e-4cb0-8bd5-8af270759cfb",
-  "public_title": "Datadog-CoreDNS Integration",
-  "categories": [
-    "containers",
-    "network",
-    "autodiscovery",
-    "log collection"
-  ],
-  "type": "check",
-  "aliases": [],
-  "is_public": true,
-  "creates_events": false,
-  "integration_id": "coredns",
+  "manifest_version": "2.0.0",
+  "app_uuid": "b613759e-89ca-4d98-a2c1-4d465c42e413",
+  "app_id": "coredns",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "CoreDNS collects DNS metrics in Kubernetes.",
+    "title": "CoreDNS",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Category::Containers",
+      "Category::Network",
+      "Category::Autodiscovery",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "CoreDNS",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "coredns.",
+        "check": "coredns.request_count",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {
+      "CoreDNS": "assets/dashboards/coredns.json"
     },
     "monitors": {
       "[CoreDNS] Cache hits count low": "assets/monitors/coredns_cache_hits_low.json",
       "[CoreDNS] Request duration high": "assets/monitors/coredns_request_duration_high.json"
     },
-    "dashboards": {
-      "CoreDNS": "assets/dashboards/coredns.json"
-    },
-    "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "coredns"
-    },
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

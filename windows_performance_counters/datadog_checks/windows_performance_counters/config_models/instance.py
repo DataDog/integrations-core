@@ -53,6 +53,14 @@ class ExtraMetrics(BaseModel):
     use_localized_counters: Optional[bool]
 
 
+class MetricPatterns(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    exclude: Optional[Sequence[str]]
+    include: Optional[Sequence[str]]
+
+
 class Counter1(BaseModel):
     class Config:
         extra = Extra.allow
@@ -95,6 +103,7 @@ class InstanceConfig(BaseModel):
     empty_default_hostname: Optional[bool]
     enable_health_service_check: Optional[bool]
     extra_metrics: Optional[Mapping[str, ExtraMetrics]]
+    metric_patterns: Optional[MetricPatterns]
     metrics: Mapping[str, Metrics]
     min_collection_interval: Optional[float]
     namespace: Optional[str] = Field(None, regex='\\w*')
@@ -103,6 +112,7 @@ class InstanceConfig(BaseModel):
     server_tag: Optional[str]
     service: Optional[str]
     tags: Optional[Sequence[str]]
+    use_legacy_check_version: Optional[bool]
     username: Optional[str]
 
     @root_validator(pre=True)

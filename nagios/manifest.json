@@ -1,44 +1,58 @@
 {
-  "categories": [
-    "monitoring",
-    "notification",
-    "log collection"
-  ],
-  "creates_events": true,
-  "display_name": "Nagios",
-  "guid": "f7629918-751c-4a05-87e7-0e3de34e51e7",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "nagios.",
-  "metric_to_check": "nagios.host.rta",
-  "name": "nagios",
-  "process_signatures": [
-    "nagios"
-  ],
-  "public_title": "Datadog-Nagios Integration",
-  "short_description": "Send Nagios service flaps, host alerts, and more to your Datadog event stream.",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "type": "check",
-  "integration_id": "nagios",
+  "manifest_version": "2.0.0",
+  "app_uuid": "7e61b923-1847-4c43-85cf-5f4c49ff4806",
+  "app_id": "nagios",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Send Nagios service flaps, host alerts, and more to your Datadog event stream.",
+    "title": "Nagios",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Monitoring",
+      "Category::Notification",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "Nagios",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": true
+      },
+      "metrics": {
+        "prefix": "nagios.",
+        "check": "nagios.host.rta",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      },
+      "process_signatures": [
+        "nagios"
+      ]
     },
-    "monitors": {},
-    "dashboards": {},
-    "service_checks": "assets/service_checks.json",
-    "logs": {
-      "source": "nagios"
-    },
-    "metrics_metadata": "metadata.csv",
     "saved_views": {
       "nagios_processes": "assets/saved_views/nagios_processes.json"
+    },
+    "logs": {
+      "source": "nagios"
     }
   }
 }

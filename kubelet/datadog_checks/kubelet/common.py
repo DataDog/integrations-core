@@ -91,6 +91,17 @@ def replace_container_rt_prefix(cid):
     return cid
 
 
+def get_container_label(labels, l_name):
+    """
+    Iter on all labels to find the label.name equal to the l_name
+    :param labels: list of labels
+    :param l_name: str
+    :return: str or None
+    """
+    if l_name in labels:
+        return labels[l_name]
+
+
 class PodListUtils(object):
     """
     Queries the podlist and the agent6's filtering logic to determine whether to
@@ -208,3 +219,22 @@ class PodListUtils(object):
         excluded = c_is_excluded('', '', namespace)
         self.cache_namespace_exclusion[namespace] = excluded
         return excluded
+
+    def get_cid_by_labels(self, labels):
+        """
+        Should only be called on a container-scoped metric
+        It gets the container id from the podlist using the metrics labels
+
+        :param labels
+        :return str or None
+        """
+        namespace = get_container_label(labels, "namespace")
+        # k8s >= 1.16
+        pod_name = get_container_label(labels, "pod")
+        container_name = get_container_label(labels, "container")
+        # k8s < 1.16
+        if not pod_name:
+            pod_name = get_container_label(labels, "pod_name")
+        if not container_name:
+            container_name = get_container_label(labels, "container_name")
+        return self.get_cid_by_name_tuple((namespace, pod_name, container_name))

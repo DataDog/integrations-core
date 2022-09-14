@@ -17,11 +17,14 @@ from datadog_checks.base.utils.db.utils import (
 )
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
+from datadog_checks.sqlserver.utils import is_statement_proc
 
 try:
     import datadog_agent
 except ImportError:
     from ..stubs import datadog_agent
+
+from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_VERSION
 
 DEFAULT_COLLECTION_INTERVAL = 10
 
@@ -47,42 +50,76 @@ SQL_SERVER_QUERY_METRICS_COLUMNS = [
 
 STATEMENT_METRICS_QUERY = """\
 with qstats as (
-    select TOP {limit} query_hash, query_plan_hash, last_execution_time, plan_handle,
+    select TOP {limit} query_hash, query_plan_hash, last_execution_time,
+            CONCAT(
+                CONVERT(binary(64), plan_handle),
+                CONVERT(binary(4), statement_start_offset),
+                CONVERT(binary(4), statement_end_offset)) as plan_handle_and_offsets,
            (select value from sys.dm_exec_plan_attributes(plan_handle) where attribute = 'dbid') as dbid,
-           (select value from sys.dm_exec_plan_attributes(plan_handle) where attribute = 'user_id') as user_id,
            {query_metrics_columns}
     from sys.dm_exec_query_stats
     where last_execution_time > dateadd(second, -?, getdate())
 ),
 qstats_aggr as (
     select query_hash, query_plan_hash, CAST(S.dbid as int) as dbid,
-       D.name as database_name, U.name as user_name, max(plan_handle) as plan_handle,
+       D.name as database_name, max(plan_handle_and_offsets) as plan_handle_and_offsets,
     {query_metrics_column_sums}
     from qstats S
     left join sys.databases D on S.dbid = D.database_id
-    left join sys.sysusers U on S.user_id = U.uid
-    group by query_hash, query_plan_hash, S.dbid, D.name, U.name
+    group by query_hash, query_plan_hash, S.dbid, D.name
+),
+qstats_aggr_split as (select
+    convert(varbinary(64), substring(plan_handle_and_offsets, 1, 64)) as plan_handle,
+    convert(int, convert(varbinary(4), substring(plan_handle_and_offsets, 64+1, 4))) as statement_start_offset,
+    convert(int, convert(varbinary(4), substring(plan_handle_and_offsets, 64+6, 4))) as statement_end_offset,
+    * from qstats_aggr
 )
-select text, * from qstats_aggr
-    cross apply sys.dm_exec_sql_text(plan_handle)
+select
+    SUBSTRING(text, (statement_start_offset / 2) + 1,
+    ((CASE statement_end_offset
+        WHEN -1 THEN DATALENGTH(text)
+        ELSE statement_end_offset END
+            - statement_start_offset) / 2) + 1) AS statement_text,
+    qt.text,
+    encrypted as is_encrypted,
+    * from qstats_aggr_split
+    cross apply sys.dm_exec_sql_text(plan_handle) qt
 """
 
 # This query is an optimized version of the statement metrics query
-# which removes the additional aggregate dimensions user and database.
+# which removes the additional database aggregate dimension
 STATEMENT_METRICS_QUERY_NO_AGGREGATES = """\
 with qstats_aggr as (
-    select TOP {limit} query_hash, query_plan_hash, max(plan_handle) as plan_handle,
+    select TOP {limit} query_hash, query_plan_hash,
+        max(CONCAT(
+            CONVERT(binary(64), plan_handle),
+            CONVERT(binary(4), statement_start_offset),
+            CONVERT(binary(4), statement_end_offset))) as plan_handle_and_offsets,
         {query_metrics_column_sums}
         from sys.dm_exec_query_stats S
         where last_execution_time > dateadd(second, -?, getdate())
         group by query_hash, query_plan_hash
+),
+qstats_aggr_split as (select
+    convert(varbinary(64), substring(plan_handle_and_offsets, 1, 64)) as plan_handle,
+    convert(int, convert(varbinary(4), substring(plan_handle_and_offsets, 64+1, 4))) as statement_start_offset,
+    convert(int, convert(varbinary(4), substring(plan_handle_and_offsets, 64+6, 4))) as statement_end_offset,
+    * from qstats_aggr
 )
-select text, * from qstats_aggr
-    cross apply sys.dm_exec_sql_text(plan_handle)
+select
+    SUBSTRING(text, (statement_start_offset / 2) + 1,
+        ((CASE statement_end_offset
+        WHEN -1 THEN DATALENGTH(text)
+        ELSE statement_end_offset
+    END - statement_start_offset) / 2) + 1) AS statement_text,
+    qt.text,
+    encrypted as is_encrypted,
+    * from qstats_aggr_split
+    cross apply sys.dm_exec_sql_text(plan_handle) qt
 """
 
 PLAN_LOOKUP_QUERY = """\
-select cast(query_plan as nvarchar(max)) as query_plan
+select cast(query_plan as nvarchar(max)) as query_plan, encrypted as is_encrypted
 from sys.dm_exec_query_plan(CONVERT(varbinary(max), ?, 1))
 """
 
@@ -94,7 +131,6 @@ def _row_key(row):
     """
     return (
         row.get('database_name'),
-        row.get('user_name'),
         row['query_signature'],
         row['query_hash'],
         row['query_plan_hash'],
@@ -156,7 +192,6 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             enabled=is_affirmative(check.statement_metrics_config.get('enabled', True)),
             expected_db_exceptions=(),
             min_collection_interval=check.min_collection_interval,
-            config_host=check.resolved_hostname,
             dbms="sqlserver",
             rate_limit=1 / float(collection_interval),
             job_name="query-metrics",
@@ -246,7 +281,11 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         normalized_rows = []
         for row in rows:
             try:
-                statement = obfuscate_sql_with_metadata(row['text'], self.check.obfuscator_options)
+                statement = obfuscate_sql_with_metadata(row['statement_text'], self.check.obfuscator_options)
+                procedure_statement = None
+                row['is_proc'] = is_statement_proc(row['text'])
+                if row['is_proc']:
+                    procedure_statement = obfuscate_sql_with_metadata(row['text'], self.check.obfuscator_options)
             except Exception as e:
                 # obfuscation errors are relatively common so only log them during debugging
                 self.log.debug("Failed to obfuscate query: %s", e)
@@ -257,7 +296,11 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                 )
                 continue
             obfuscated_statement = statement['query']
+            # update 'text' field to be obfuscated stmt
             row['text'] = obfuscated_statement
+            if procedure_statement:
+                row['procedure_text'] = procedure_statement['query']
+                row['procedure_signature'] = compute_sql_signature(procedure_statement['query'])
             row['query_signature'] = compute_sql_signature(obfuscated_statement)
             row['query_hash'] = _hash_to_hex(row['query_hash'])
             row['query_plan_hash'] = _hash_to_hex(row['query_plan_hash'])
@@ -283,6 +326,10 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         row = {k: v for k, v in row.items()}
         if 'dd_comments' in row:
             del row['dd_comments']
+        # remove the statement_text field, so we do not forward deobfuscated text
+        # to the backend
+        if 'statement_text' in row:
+            del row['statement_text']
         # truncate query text to the maximum length supported by metrics tags
         row['text'] = row['text'][0:200]
         return row
@@ -293,8 +340,10 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             'timestamp': time.time() * 1000,
             'min_collection_interval': self.collection_interval,
             'tags': self.check.tags,
+            'cloud_metadata': self.check.cloud_metadata,
             'sqlserver_rows': [self._to_metrics_payload_row(r) for r in rows],
-            'sqlserver_version': self.check.static_info_cache.get("version", ""),
+            'sqlserver_version': self.check.static_info_cache.get(STATIC_INFO_VERSION, ""),
+            'sqlserver_engine_edition': self.check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
             'ddagentversion': datadog_agent.get_version(),
             'ddagenthostname': self._check.agent_hostname,
         }
@@ -356,8 +405,12 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                 "db": {
                     "instance": row.get('database_name', None),
                     "query_signature": row['query_signature'],
-                    "user": row.get('user_name', None),
+                    "procedure_signature": row.get('procedure_signature', None),
                     "statement": row['text'],
+                    "metadata": {
+                        "tables": row['dd_tables'],
+                        "commands": row['dd_commands'],
+                    },
                 },
                 'sqlserver': {
                     'query_hash': row['query_hash'],
@@ -374,10 +427,10 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         self.log.debug("Running query [%s] %s", PLAN_LOOKUP_QUERY, (plan_handle,))
         cursor.execute(PLAN_LOOKUP_QUERY, ("0x" + plan_handle,))
         result = cursor.fetchall()
-        if not result:
+        if not result or not result[0]:
             self.log.debug("failed to loan plan, it must have just been expired out of the plan cache")
-            return None
-        return result[0][0]
+            return None, None
+        return result[0]
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_plans(self, rows, cursor, deadline):
@@ -387,12 +440,18 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                 self.check.count("dd.sqlserver.statements.deadline_exceeded", 1, **self.check.debug_stats_kwargs())
                 return
             plan_key = (row['query_signature'], row['query_hash'], row['query_plan_hash'])
+            # for stored procedures, we only want to look up plans for the entire procedure
+            # not every query that is executed within the proc. In order to accomplish this,
+            # we use the plan handle
+            if row['is_proc'] or row['is_encrypted']:
+                plan_key = row['plan_handle']
             if self._seen_plans_ratelimiter.acquire(plan_key):
-                raw_plan = self._load_plan(row['plan_handle'], cursor)
+                raw_plan, is_plan_encrypted = self._load_plan(row['plan_handle'], cursor)
                 obfuscated_plan, collection_errors = None, None
 
                 try:
-                    obfuscated_plan = obfuscate_xml_plan(raw_plan, self.check.obfuscator_options)
+                    if raw_plan:
+                        obfuscated_plan = obfuscate_xml_plan(raw_plan, self.check.obfuscator_options)
                 except Exception as e:
                     self.log.debug(
                         (
@@ -412,10 +471,22 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                         **self.check.debug_stats_kwargs(tags=["error:obfuscate-xml-plan-{}".format(type(e))])
                     )
                 tags = list(self.check.tags)
+
+                # for stored procedures, we want to send the plan
+                # events with the full procedure text, not the text
+                # for the individual statement encapsulated within the proc
+                text_key = 'text'
+                if row['is_proc']:
+                    text_key = 'procedure_text'
+                query_signature = row['query_signature']
+                # for procedure plans, it only makes sense to send the
+                # procedure_signature
+                if row['is_proc']:
+                    query_signature = None
                 if 'database_name' in row:
                     tags += ["db:{}".format(row['database_name'])]
                 yield {
-                    "host": self._db_hostname,
+                    "host": self.check.resolved_hostname,
                     "ddagentversion": datadog_agent.get_version(),
                     "ddsource": "sqlserver",
                     "ddtags": ",".join(tags),
@@ -428,9 +499,9 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                             "signature": row['query_plan_hash'],
                             "collection_errors": collection_errors,
                         },
-                        "query_signature": row['query_signature'],
-                        "user": row.get("user_name", None),
-                        "statement": row['text'],
+                        "query_signature": query_signature,
+                        "procedure_signature": row.get('procedure_signature', None),
+                        "statement": row[text_key],
                         "metadata": {
                             "tables": row['dd_tables'],
                             "commands": row['dd_commands'],
@@ -438,8 +509,12 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                         },
                     },
                     'sqlserver': {
+                        "is_plan_encrypted": is_plan_encrypted,
+                        "is_statement_encrypted": row['is_encrypted'],
                         'query_hash': row['query_hash'],
                         'query_plan_hash': row['query_plan_hash'],
                         'plan_handle': row['plan_handle'],
+                        'execution_count': row.get('execution_count', None),
+                        'total_elapsed_time': row.get('total_elapsed_time', None),
                     },
                 }

@@ -85,20 +85,24 @@ instances:
     ## The key for each counter object represents the name of the desired counter.
     ## Counters can be defined in the following ways:
     ##
-    ## 1. If a value is a string, then it represents the suffix of the sent metric name, for example:
+    ## 1. Mapping the counter name to a string. If a value is a string, then it represents the suffix of the sent metric
+    ##    name, for example:
     ##
     ##      counters:
     ##      - '% Free Space': usable
     ##      - Current Disk Queue Length: queue_length.current
     ##
-    ## 2. If a value is a mapping, then it must have a `name` key that represents the suffix of the
+    ## 2. Mapping the counter name to a set of options. If a value is a mapping, then it must have a `name` or
+    ##    `metric_name` key that represents the suffix or full metric name of the
     ##    sent metric name, for example:
     ##
     ##      counters:
     ##      - '% Free Space':
     ##          name: usable
+    ##          type: rate
     ##      - Current Disk Queue Length:
-    ##          name: queue_length.current
+    ##          metric_name: queue_length.current
+    ##          average: true
     ##
     ## The available counter options are:
     ##
@@ -148,6 +152,17 @@ instances:
     ## This is useful for cluster-level checks.
     #
     # empty_default_hostname: false
+
+    ## @param metric_patterns - mapping - optional
+    ## A mapping of metrics to include or exclude, with each entry being a regular expression.
+    ##
+    ## Metrics defined in `exclude` will take precedence in case of overlap.
+    #
+    # metric_patterns:
+    #   include:
+    #   - <INCLUDE_REGEX>
+    #   exclude:
+    #   - <EXCLUDE_REGEX>
 
 ## Log Section
 ##

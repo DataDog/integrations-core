@@ -11,7 +11,7 @@ from ..console import CONTEXT_SETTINGS, annotate_warning, echo_info, echo_warnin
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate check style for python files')
-@click.argument('check', autocompletion=complete_valid_checks, required=False)
+@click.argument('check', shell_complete=complete_valid_checks, required=False)
 @click.option('--verbose', '-v', is_flag=True, help='Verbose mode')
 @click.pass_context
 def integration_style(ctx, check, verbose):

@@ -1,0 +1,224 @@
+[
+  {
+    "name": "teradata.file_lock.blocks",
+    "type": 0,
+    "tags": ["teradata_server:tdserver", "teradata_port:1025"],
+    "value": 245.0
+  },
+  {
+    "name": "teradata.file_lock.deadlocks",
+    "type": 0,
+    "tags": ["teradata_server:tdserver", "teradata_port:1025"],
+    "value": 51.0
+  },
+  {
+    "name": "teradata.file_lock.enters",
+    "type": 0,
+    "tags": ["teradata_server:tdserver", "teradata_port:1025"],
+    "value": 57884.0
+  },
+  {
+    "name": "teradata.db_lock.blocks",
+    "type": 0,
+    "tags": ["teradata_server:tdserver", "teradata_port:1025"],
+    "value": 3.0
+  },
+  {
+    "name": "teradata.db_lock.deadlocks",
+    "type": 0,
+    "tags": ["teradata_server:tdserver", "teradata_port:1025"],
+    "value": 0.0
+  },
+  {
+    "name": "teradata.io.throttle_count",
+    "type": 0,
+    "tags": ["teradata_server:tdserver", "teradata_port:1025"],
+    "value": 0.0
+  },
+  {
+    "name": "teradata.io.throttle_time",
+    "type": 0,
+    "tags": ["teradata_server:tdserver", "teradata_port:1025"],
+    "value": 0.0
+  },
+  {
+    "name": "teradata.io.throttle_time_max",
+    "type": 0,
+    "tags": ["teradata_server:tdserver", "teradata_port:1025"],
+    "value": 0.0
+  },
+  {
+    "name": "teradata.mem.ctxt_page_reads",
+    "type": 0,
+    "tags": ["teradata_server:tdserver", "teradata_port:1025"],
+    "value": 0.0
+  },
+  {
+    "name": "teradata.mem.ctxt_page_writes",
+    "type": 0,
+    "tags": ["teradata_server:tdserver", "teradata_port:1025"],
+    "value": 0.0
+  },
+  {
+    "name": "teradata.mem.txt_page_reads",
+    "type": 0,
+    "tags": ["teradata_server:tdserver", "teradata_port:1025"],
+    "value": 0.0
+  },
+  {
+    "name": "teradata.mem.vh_cache_size",
+    "type": 0,
+    "tags": ["teradata_server:tdserver", "teradata_port:1025"],
+    "value": 0.0
+  },
+  {
+    "name": "teradata.mem.kernel_inuse_size",
+    "type": 0,
+    "tags": ["teradata_server:tdserver", "teradata_port:1025"],
+    "value": 117739.0
+  },
+  {
+    "name": "teradata.mem.seg_mdl.inuse_size",
+    "type": 0,
+    "tags": ["teradata_server:tdserver", "teradata_port:1025"],
+    "value": 525908.0
+  },
+  {
+    "name": "teradata.mem.seg_max_avail_size",
+    "type": 0,
+    "tags": ["teradata_server:tdserver", "teradata_port:1025"],
+    "value": 6656.0
+  },
+  {
+    "name": "teradata.mem.seg_in_use_size",
+    "type": 0,
+    "tags": ["teradata_server:tdserver", "teradata_port:1025"],
+    "value": 1396.0
+  },
+  {
+    "name": "teradata.mem.seg_cache_size",
+    "type": 0,
+    "tags": ["teradata_server:tdserver", "teradata_port:1025"],
+    "value": 285.0
+  },
+  {
+    "name": "teradata.mem.seg_mdl.alloc",
+    "type": 0,
+    "tags": ["teradata_server:tdserver", "teradata_port:1025"],
+    "value": 0.0
+  },
+  {
+    "name": "teradata.mem.seg_mdl.free",
+    "type": 0,
+    "tags": ["teradata_server:tdserver", "teradata_port:1025"],
+    "value": 0.0
+  },
+  {
+    "name": "teradata.mem.seg_mdl.release",
+    "type": 0,
+    "tags": ["teradata_server:tdserver", "teradata_port:1025"],
+    "value": 0.0
+  },
+  {
+    "name": "teradata.mem.seg_mdl.recycle",
+    "type": 0,
+    "tags": ["teradata_server:tdserver", "teradata_port:1025"],
+    "value": 1274.0
+  },
+  {
+    "name": "teradata.mem.seg_mdl.alloc_size",
+    "type": 0,
+    "tags": ["teradata_server:tdserver", "teradata_port:1025"],
+    "value": 0.0
+  },
+  {
+    "name": "teradata.mem.seg_mdl.free_size",
+    "type": 0,
+    "tags": ["teradata_server:tdserver", "teradata_port:1025"],
+    "value": 0.0
+  },
+  {
+    "name": "teradata.mem.seg_mdl.release_size",
+    "type": 0,
+    "tags": ["teradata_server:tdserver", "teradata_port:1025"],
+    "value": 0.0
+  },
+  {
+    "name": "teradata.mem.seg_mdl.recycle_size",
+    "type": 0,
+    "tags": ["teradata_server:tdserver", "teradata_port:1025"],
+    "value": 81536.0
+  },
+  {
+    "name": "teradata.mem.fsg.cache_size",
+    "type": 0,
+    "tags": ["teradata_server:tdserver", "teradata_port:1025"],
+    "value": 1337876.0
+  },
+  {
+    "name": "teradata.mem.page_faults_major",
+    "type": 0,
+    "tags": ["teradata_server:tdserver", "teradata_port:1025"],
+    "value": 7.0
+  },
+  {
+    "name": "teradata.mem.page_faults_minor",
+    "type": 0,
+    "tags": ["teradata_server:tdserver", "teradata_port:1025"],
+    "value": 251936.0
+  },
+  {
+    "name": "teradata.process.blocked",
+    "type": 0,
+    "tags": ["teradata_server:tdserver", "teradata_port:1025"],
+    "value": 0.0
+  },
+  {
+    "name": "teradata.process.ready",
+    "type": 0,
+    "tags": ["teradata_server:tdserver", "teradata_port:1025"],
+    "value": 2.0
+  },
+  {
+    "name": "teradata.process.ready_max",
+    "type": 0,
+    "tags": ["teradata_server:tdserver", "teradata_port:1025"],
+    "value": 2.0
+  },
+  {
+    "name": "teradata.process.cpu_idle",
+    "type": 0,
+    "tags": ["teradata_server:tdserver", "teradata_port:1025"],
+    "value": 2.333952333952334e+59
+  },
+  {
+    "name": "teradata.process.cpu_io_wait",
+    "type": 0,
+    "tags": ["teradata_server:tdserver", "teradata_port:1025"],
+    "value": 2.5425425425425424e+29
+  },
+  {
+    "name": "teradata.process.cpu_serv",
+    "type": 0,
+    "tags": ["teradata_server:tdserver", "teradata_port:1025"],
+    "value": 2.5802580258025803e+39
+  },
+  {
+    "name": "teradata.process.cpu_exec",
+    "type": 0,
+    "tags": ["teradata_server:tdserver", "teradata_port:1025"],
+    "value": 3.7553755375537554e+39
+  },
+  {
+    "name": "teradata.process.cpu_throttle",
+    "type": 0,
+    "tags": ["teradata_server:tdserver", "teradata_port:1025"],
+    "value": 0.0
+  },
+  {
+    "name": "teradata.process.cpu_throttle_time",
+    "type": 0,
+    "tags": ["teradata_server:tdserver", "teradata_port:1025"],
+    "value": 0.0
+  }
+]

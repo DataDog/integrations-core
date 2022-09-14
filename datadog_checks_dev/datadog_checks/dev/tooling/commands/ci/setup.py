@@ -8,7 +8,7 @@ import subprocess
 import click
 
 from ...constants import get_root
-from ...testing import get_tox_envs
+from ...testing import get_test_envs
 from ..console import CONTEXT_SETTINGS, echo_debug, echo_info
 
 
@@ -35,7 +35,7 @@ def setup(checks, changed):
     else:
         echo_info('Checks chosen: changed')
 
-    check_envs = list(get_tox_envs(checks, every=True, sort=True, changed_only=changed))
+    check_envs = list(get_test_envs(checks, every=True, sort=True, changed_only=changed))
     echo_info(f'Configuring these envs: {check_envs}')
 
     for check, _ in check_envs:

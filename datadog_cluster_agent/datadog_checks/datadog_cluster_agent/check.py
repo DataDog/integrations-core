@@ -11,12 +11,15 @@ DEFAULT_METRICS = {
     'admission_webhooks_reconcile_errors': 'admission_webhooks.reconcile_errors',
     'admission_webhooks_reconcile_success': 'admission_webhooks.reconcile_success',
     'admission_webhooks_webhooks_received': 'admission_webhooks.webhooks_received',
+    'admission_webhooks_library_injection_attempts': 'admission_webhooks.library_injection_attempts',
+    'admission_webhooks_library_injection_errors': 'admission_webhooks.library_injection_errors',
     'aggregator__flush': 'aggregator.flush',
     'aggregator__processed': 'aggregator.processed',
     'api_requests': 'api_requests',
     'cluster_checks_busyness': 'cluster_checks.busyness',
     'cluster_checks_configs_dangling': 'cluster_checks.configs_dangling',
     'cluster_checks_configs_dispatched': 'cluster_checks.configs_dispatched',
+    'cluster_checks_configs_info': 'cluster_checks.configs_info',
     'cluster_checks_failed_stats_collection': 'cluster_checks.failed_stats_collection',
     'cluster_checks_nodes_reporting': 'cluster_checks.nodes_reporting',
     'cluster_checks_rebalancing_decisions': 'cluster_checks.rebalancing_decisions',
@@ -36,6 +39,10 @@ DEFAULT_METRICS = {
     'rate_limit_queries_remaining': 'datadog.rate_limit_queries.remaining',
     'rate_limit_queries_reset': 'datadog.rate_limit_queries.reset',
     'secret_backend__elapsed_ms': 'secret_backend.elapsed',
+    'endpoint_checks_configs_dispatched': 'endpoint_checks.configs_dispatched',
+    'autodiscovery_poll_duration': 'autodiscovery.poll_duration',
+    'autodiscovery_watched_resources': 'autodiscovery.watched_resources',
+    'autodiscovery_errors': 'autodiscovery.errors',
 }
 
 

@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from typing import Any, Mapping, Optional, Sequence
 
-from pydantic import BaseModel, root_validator, validator
+from pydantic import BaseModel, Field, root_validator, validator
 
 from datadog_checks.base.utils.functions import identity
 from datadog_checks.base.utils.models import validation
@@ -28,6 +28,14 @@ class CustomQuery(BaseModel):
     tags: Optional[Sequence[str]]
 
 
+class MetricPatterns(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    exclude: Optional[Sequence[str]]
+    include: Optional[Sequence[str]]
+
+
 class InstanceConfig(BaseModel):
     class Config:
         allow_mutation = False
@@ -37,11 +45,13 @@ class InstanceConfig(BaseModel):
     custom_queries: Optional[Sequence[CustomQuery]]
     disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
+    metric_patterns: Optional[MetricPatterns]
     min_collection_interval: Optional[float]
     only_custom_queries: Optional[bool]
     password: str
     persist_db_connections: Optional[bool]
     port: Optional[int]
+    schema_: Optional[str] = Field(None, alias='schema')
     server: str
     service: Optional[str]
     tags: Optional[Sequence[str]]

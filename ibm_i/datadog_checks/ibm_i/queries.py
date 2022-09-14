@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from .config_models import InstanceConfig
 
 
 def get_base_disk_usage_72(timeout):
@@ -272,4 +273,19 @@ def get_message_queue_info(timeout, sev):
             {'name': 'ibm_i.message_queue.size', 'type': 'gauge'},
             {'name': 'ibm_i.message_queue.critical_size', 'type': 'gauge'},
         ],
+    }
+
+
+def query_map(config: InstanceConfig):
+    """Build a query map from query names to queries."""
+
+    # subsystem and disk_usage queries are not here since they are handled in a special way
+    return {
+        "cpu_usage": get_cpu_usage(config.query_timeout),
+        "jobq_job_status": get_jobq_job_status(config.job_query_timeout),
+        "active_job_status": get_active_job_status(config.job_query_timeout),
+        "job_memory_usage": get_job_memory_usage(config.job_query_timeout),
+        "memory_info": get_memory_info(config.query_timeout),
+        "job_queue": get_job_queue_info(config.query_timeout),
+        "message_queue_info": get_message_queue_info(config.system_mq_query_timeout, config.severity_threshold),
     }

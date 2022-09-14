@@ -1,13 +1,11 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import pytest
-
 from datadog_checks.dev.testing import requires_py3, requires_windows
 
 from .utils import GLOBAL_TAGS, get_check
 
-pytestmark = [requires_py3, requires_windows, pytest.mark.perf_counters]
+pytestmark = [requires_py3, requires_windows]
 
 
 def test_include(aggregator, dd_run_check, mock_performance_objects):
