@@ -537,7 +537,7 @@ files:
       hidden: true
       description: |
         Set to `true` to enable logging of original unobfuscated SQL queries when obfuscation errors occur.
-        For security purposes, it is recommended to use this option for debugging only.
+        For security purposes, it is recommended to use this option for debugging only when requested by Datadog Support.
         Note: This option only applies when `dbm` is enabled.
       value:
         type: boolean
@@ -547,7 +547,7 @@ files:
       hidden: true
       description: |
         Set to `true` to enable logging of original unobfuscated SQL plans when obfuscation errors occur.
-        For security purposes, it is recommended to use this option for debugging only.
+        For security purposes, it is recommended to use this option for debugging only when requested by Datadog Support.
         Note: This option only applies when `dbm` is enabled.
       value:
         type: boolean
