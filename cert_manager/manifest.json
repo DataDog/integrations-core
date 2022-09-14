@@ -1,6 +1,6 @@
 {
   "manifest_version": "2.0.0",
-  "app_uuid": "a3b15f7a-5edb-4d8b-8e74-84cabf38b7e7",
+  "app_uuid": "d8bac6db-8cf7-49ca-a4b8-643714fbc7b9",
   "app_id": "cert-manager",
   "display_on_public_website": true,
   "tile": {
