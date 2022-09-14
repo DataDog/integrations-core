@@ -127,7 +127,7 @@ def create_template_files(template_name, new_root, config, read=False):
 
                     # Custom README for tile apps
                     elif config.get('support_type') == 'contrib':
-                        template_path = path_join(TEMPLATES_DIR, 'tile_v2/', 'README.md')
+                        template_path = path_join(TEMPLATES_DIR, 'tile/{check_name}', 'README.md')
                         file_path = path_join(config.get('check_name'), "README.md")
                     else:
                         template_path = path_join(root, template_file)
