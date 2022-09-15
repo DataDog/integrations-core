@@ -42,7 +42,7 @@ class ServiceFilter(object):
         # Example:
         #   - ServiceFilter(name=EventLog)
         #   - ServiceFilter(startup_type=automatic)
-        return '{}({})'.format(self.__name__, ', '.join(vals))
+        return '{}({})'.format(type(self).__name__, ', '.join(vals))
 
     @classmethod
     def _wmi_compat_name(cls, name):

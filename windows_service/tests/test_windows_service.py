@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
+import pywintypes
+from mock import patch
 
 from datadog_checks.windows_service import WindowsService
 
@@ -230,6 +232,16 @@ def test_startup_type_tag(aggregator, check, instance_basic):
         ],
         count=1,
     )
+
+
+def test_openservice_failure(aggregator, check, instance_basic, caplog):
+    instance_basic['windows_service_startup_type_tag'] = True
+    c = check(instance_basic)
+
+    with patch('win32service.OpenService', side_effect=pywintypes.error('mocked error')):
+        c.check(instance_basic)
+
+    assert 'Failed to query EventLog service config' in caplog.text
 
 
 @pytest.mark.e2e
