@@ -13,5 +13,3 @@ compose-file = ["activemq.yaml"]
 [envs.default.overrides]
 matrix.version.env-vars = "VERSION"
 matrix.compose-file.env-vars = "COMPOSE_FILE"
-
-[envs.bench]
