@@ -2,6 +2,7 @@
 # (C) Paul Kirby <pkirby@matrix-solutions.com> 2014
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import re
 from copy import deepcopy
 
 from six import PY2
@@ -45,7 +46,7 @@ class TeamCityCheck(AgentCheck):
         self.host = self.instance.get('host_affected') or self.hostname
         self.is_deployment = is_affirmative(self.instance.get('is_deployment', False))
 
-        self.monitored_build_configs = self.instance.get('monitored_build_configs')
+        self.monitored_build_configs = self.instance.get('projects', {})
         self.collect_events = is_affirmative(self.instance.get('collect_events', True))
         self.collect_build_metrics = is_affirmative(self.instance.get('build_config_metrics', True))
         self.collect_test_metrics = is_affirmative(self.instance.get('test_result_metrics', True))
@@ -80,24 +81,21 @@ class TeamCityCheck(AgentCheck):
         # Initialize single build config instance
         if not project_id:
             build_config_id = self.build_config
-            # Save new build config if it isn't already in the build config store
             if not self.bc_store.get_build_config(build_config_id):
                 build_config_details = get_response(self, 'build_config', build_conf=build_config_id)
                 project_id = build_config_details['projectId']
                 self.bc_store.set_build_config(build_config_id, project_id)
-        # Initialize multi build config instance
         else:
+            # Initialize multi build config instance
             # Check for new build configs in project
             build_configs = get_response(self, 'build_configs', project_id=project_id)
             for build_config in build_configs.get('buildType'):
-                # If build config is not excluded and it's new, save it in the build config store
-                if not self._filter_build_config(build_config['id']) and not self.bc_store.get_build_config(
+                if self._should_include_build_config(build_config['id']) and not self.bc_store.get_build_config(
                     build_config['id']
                 ):
                     self.bc_store.set_build_config(build_config.get('id'), project_id)
 
         for build_config in self.bc_store.get_build_configs():
-            # If last build ID is not in the bc store, retrieve and store it
             if self.bc_store.get_build_config(build_config):
                 if self.bc_store.get_last_build_id(build_config) is None:
                     last_build_res = get_response(self, 'last_build', build_conf=build_config)
@@ -153,19 +151,43 @@ class TeamCityCheck(AgentCheck):
                 ]
                 self.service_check('build_problem', AgentCheck.WARNING, tags=build_tags + tags)
 
-    def _filter_build_config(self, build_config):
-        # Return `True` if the build_config is filtered out (excluded), otherwise `False` (included)
-        excluded_bc, included_bc = self._construct_monitored_build_configs()
-        # Check if build config is excluded
-        if len(excluded_bc) and build_config in excluded_bc:
+    def _should_include_build_config(self, build_config):
+        """
+        Return `True` if the build_config is included, otherwise `False`
+        """
+        exclude_filter, include_filter = self._construct_build_configs_filter()
+        include_match = False
+        exclude_match = False
+        # If no filters configured, include everything
+        if not exclude_filter and not include_filter:
             return True
-        # Check if build config is included
-        if len(included_bc) and build_config in included_bc:
-            return False
-        if len(included_bc) and build_config not in included_bc:
-            return True
+        if exclude_filter:
+            for pattern in exclude_filter:
+                if re.search(re.compile(pattern), build_config):
+                    exclude_match = True
+        if include_filter:
+            for pattern in include_filter:
+                if re.search(re.compile(pattern), build_config):
+                    include_match = True
 
-        return False
+        # Include everything except in excluded_bc
+        if exclude_filter and not include_filter:
+            return not exclude_match
+        # Include only what's defined in included_bc
+        if include_filter and not exclude_filter:
+            return include_match
+        # If both include and exclude filters are configured
+        if include_filter and exclude_filter:
+            # If filter overlap or in neither filter, exclude
+            if (include_match and exclude_match) or (not include_match and not exclude_match):
+                return False
+            # Only matches include filter, include
+            if include_match and not exclude_match:
+                return include_match
+            # Only matches exclude filter, exclude
+            if exclude_match and not include_match:
+                return not exclude_match
+        return True
 
     def _collect_new_builds(self):
         last_build_id = self.bc_store.get_last_build_id(self.build_config)
@@ -180,20 +202,28 @@ class TeamCityCheck(AgentCheck):
         server = server if server.startswith(("http://", "https://")) else "http://{}".format(server)
         return server
 
-    def _construct_monitored_build_configs(self):
+    def _construct_build_configs_filter(self):
         excluded_build_configs = set()
         included_build_configs = set()
         for project in self.monitored_build_configs:
-            if isinstance(project, dict):
-                exclude_list = project.get('exclude', [])
-                include_list = project.get('include', [])
+            config = self.monitored_build_configs.get(project)
+            # collect all build configs in project
+            if isinstance(config, dict):
+                exclude_list = config.get('exclude', [])
+                include_list = config.get('include', [])
                 if exclude_list:
                     excluded_build_configs.update(exclude_list)
                 if include_list:
                     for include_bc in include_list:
                         if include_bc not in excluded_build_configs:
                             included_build_configs.update([include_bc])
-
+            elif config is None:
+                continue
+            else:
+                raise ConfigurationError(
+                    "`project` must be either an empty mapping to collect all build configurations in the project"
+                    "or a mapping of keys `include` and/or `exclude` lists of build configurations."
+                )
         return excluded_build_configs, included_build_configs
 
     def _collect(self):
@@ -225,7 +255,7 @@ class TeamCityCheck(AgentCheck):
         # Multi build config instance
         if self.monitored_build_configs:
             for project in self.monitored_build_configs:
-                project_id = project if isinstance(project, str) else project.get('name', None)
+                project_id = project.get('name') if isinstance(project, dict) else project
                 if project_id:
                     self._initialize(project_id)
             for build_config in self.bc_store.get_build_configs():

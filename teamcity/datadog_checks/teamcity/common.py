@@ -50,10 +50,13 @@ BUILD_EVENT.update(EVENT_BASE)
 def construct_event(is_deployment, instance_name, host, new_build, build_tags):
     build_id = new_build['id']
     build_number = new_build['number']
+    build_config = new_build['buildTypeId']
+    build_status = EVENT_STATUS_MAP.get(new_build['status'])
     event_tags = deepcopy(build_tags)
     event_tags.extend(['build_id:{}'.format(build_id), 'build_number:{}'.format(build_number)])
 
-    build_status = EVENT_STATUS_MAP.get(new_build['status'])
+    if not instance_name:
+        instance_name = build_config
 
     teamcity_event = deepcopy(DEPLOYMENT_EVENT) if is_deployment else deepcopy(BUILD_EVENT)
 
