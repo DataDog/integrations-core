@@ -190,10 +190,6 @@ def instance_min_collection_interval(field, value):
     return 15
 
 
-def instance_monitored_build_configs(field, value):
-    return get_default_field_value(field, value)
-
-
 def instance_name(field, value):
     return get_default_field_value(field, value)
 
@@ -220,6 +216,10 @@ def instance_password(field, value):
 
 def instance_persist_connections(field, value):
     return False
+
+
+def instance_projects(field, value):
+    return get_default_field_value(field, value)
 
 
 def instance_proxy(field, value):

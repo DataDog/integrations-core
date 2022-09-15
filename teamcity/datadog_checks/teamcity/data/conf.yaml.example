@@ -44,17 +44,25 @@ instances:
     #
     # name: <BUILD_NAME>
 
-    ## @param monitored_build_configs - list of strings or (list of mapping or string) - optional
+    ## @param projects - mapping - optional
     ## List of build configurations to monitor, by project name.
+    ## projects:
+    ##   <PROJECT>:
+    ##     include:
+    ##       - <BUILD_CONFIG>
+    ##       - <BUILD_CONFIG>
+    ##     exclude:
+    ##       - <BUILD_CONFIG>
+    ##   <PROJECT>: {}
     #
-    # monitored_build_configs:
-    #   - name: <PROJECT_A>
+    # projects:
+    #   <PROJECT_A>:
     #     include:
     #     - <BUILD_CONFIG_A>
     #     - <BUILD_CONFIG_B>
     #     exclude:
     #     - <BUILD_CONFIG_C>
-    #   - <PROJECT_B>
+    #   <PROJECT_B>: {}
 
     ## @param build_configuration - string - optional
     ## This is the internal build ID of the build configuration you wish to track.

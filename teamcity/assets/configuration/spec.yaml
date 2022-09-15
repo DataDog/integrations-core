@@ -8,6 +8,7 @@ files:
   - template: instances
     options:
     - name: server
+      reequired: true
       description: |
         Specify the server name of your teamcity instance
         Guest authentication must be on if you want the check to be able to get data
@@ -22,18 +23,21 @@ files:
         Set to true to enable OpenMetric collection from the TeamCity server's metrics endpoint.
       value:
         type: boolean
+        default: false
         example: false
     - name: experimental_metrics
       description: |
         Set to true to enable collection of experimental metrics.
       value:
         type: boolean
+        default: false
         example: false
     - name: collect_events
       description: |
         Set to true to enable collection of TeamCity build and deployment success and failure events
       value:
         type: boolean
+        default: true
         example: true
     - name: name
       description: |
@@ -42,38 +46,41 @@ files:
       value:
         type: string
         example: <BUILD_NAME>
-    - name: monitored_build_configs
+    - name: projects
       description: |
         List of build configurations to monitor, by project name.
+        projects:
+          <PROJECT>:
+            include:
+              - <BUILD_CONFIG>
+              - <BUILD_CONFIG>
+            exclude:
+              - <BUILD_CONFIG>
+          <PROJECT>: {}
       value:
-        anyOf:
-          - type: array
+        type: object
+        additional_properties:
+          type: object
+          required:
+            - include
+            - exclude
+          properties:
+          - name: include
+            type: array
             items:
-              type: string
-          - type: array
+              type: str
+          - name: exclude
+            type: array
             items:
-              anyOf:
-                - type: object
-                  properties:
-                    - name: project
-                      type: string
-                    - name: include
-                      type: array
-                      items:
-                        type: string
-                    - name: exclude
-                      type: array
-                      items:
-                        type: string
-                - type: string
+              type: str
         example:
-          - name: <PROJECT_A>
+          <PROJECT_A>:
             include:
               - <BUILD_CONFIG_A>
               - <BUILD_CONFIG_B>
             exclude:
               - <BUILD_CONFIG_C>
-          - <PROJECT_B>
+          <PROJECT_B>: {}
     - name: build_configuration
       description: |
         This is the internal build ID of the build configuration you wish to track.
@@ -85,24 +92,28 @@ files:
         Collect Build Configuration statistics per build.
       value:
         type: boolean
+        default: true
         example: true
     - name: test_result_metrics
       description: |
         Collect test result statistics per build.
       value:
         type: boolean
+        default: true
         example: true
     - name: build_problem_checks
       description: |
         Collect build problem service checks
       value:
         type: boolean
+        default: true
         example: true
     - name: basic_http_authentication
       description: |
         Set to true to turn on basic http authentication.
       value:
         type: boolean
+        default: false
         example: false
     - name: host_affected
       description: |
@@ -116,6 +127,7 @@ files:
         rather than just that a successful build happened
       value:
         type: boolean
+        default: false
         example: false
     - template: instances/openmetrics
       overrides:

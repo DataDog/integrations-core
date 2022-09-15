@@ -53,15 +53,6 @@ class Metric(BaseModel):
     type: Optional[str]
 
 
-class MonitoredBuildConfig(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    exclude: Optional[Sequence[str]]
-    include: Optional[Sequence[str]]
-    project: Optional[str]
-
-
 class Proxy(BaseModel):
     class Config:
         allow_mutation = False
@@ -127,7 +118,6 @@ class InstanceConfig(BaseModel):
     metric_patterns: Optional[MetricPatterns]
     metrics: Optional[Sequence[Union[str, Mapping[str, Union[str, Metric]]]]]
     min_collection_interval: Optional[float]
-    monitored_build_configs: Optional[Union[Sequence[str], Sequence[Union[MonitoredBuildConfig, str]]]]
     name: Optional[str]
     namespace: Optional[str] = Field(None, regex='\\w*')
     non_cumulative_histogram_buckets: Optional[bool]
@@ -135,6 +125,7 @@ class InstanceConfig(BaseModel):
     openmetrics_endpoint: Optional[str]
     password: Optional[str]
     persist_connections: Optional[bool]
+    projects: Optional[Mapping[str, Any]]
     proxy: Optional[Proxy]
     raw_line_filters: Optional[Sequence[str]]
     raw_metric_prefix: Optional[str]
