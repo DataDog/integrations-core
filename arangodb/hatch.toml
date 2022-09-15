@@ -6,5 +6,3 @@ version = ["3.8"]
 
 [envs.default.overrides]
 matrix.version.env-vars = "ARANGODB_VERSION"
-
-[envs.bench]
