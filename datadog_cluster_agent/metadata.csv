@@ -38,6 +38,6 @@ datadog.cluster_agent.autodiscovery.poll_duration.count,count,,,,Autodiscovery p
 datadog.cluster_agent.autodiscovery.poll_duration.sum,count,,,,Autodiscovery poll duration sum,0,datadog_cluster_agent,AD poll duration sum,
 datadog.cluster_agent.admission_webhooks.library_injection_attempts,count,,,,"Number of library injection attempts by language",0,datadog_cluster_agent,library injection attempts,
 datadog.cluster_agent.admission_webhooks.library_injection_errors,count,,,,"Number of library injection failures by language",0,datadog_cluster_agent,library injection errors,
-datadog.cluster_agent.kubernetes_apiserver_kube_events,count,,,,"Kubernetes events processed by the kubernetes_apiserver check",0,datadog_cluster_agent,apiserver events,
-datadog.cluster_agent.kubernetes_apiserver_emitted_events,count,,,,"Datadog events emitted by the kubernetes_apiserver check",0,datadog_cluster_agent,datadog events events,
+datadog.cluster_agent.kubernetes_apiserver.kube_events,count,,,,"Kubernetes events processed by the kubernetes_apiserver check",0,datadog_cluster_agent,apiserver events,
+datadog.cluster_agent.kubernetes_apiserver.emitted_events,count,,,,"Datadog events emitted by the kubernetes_apiserver check",0,datadog_cluster_agent,datadog events events,
 
