@@ -731,7 +731,7 @@ The ECS Fargate check does not include any events.
 
 ### Service Checks
 
-See [service_checks.json][36] for a list of service checks provided by this integration.
+See [service_checks.json][45] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
@@ -794,3 +794,4 @@ Need help? Contact [Datadog support][18].
 [42]: https://docs.datadoghq.com/resources/json/datadog-agent-ecs-fargate.json
 [43]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-ecs-taskdefinition.html
 [44]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-ecs-service.html
+[45]: https://github.com/DataDog/integrations-core/blob/master/ecs_fargate/assets/service_checks.json
