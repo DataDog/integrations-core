@@ -11,12 +11,15 @@ mypy-args = [
 
 [[envs.default.matrix]]
 python = ["27", "38"]
-aerospike-version = ["4.9.0.11", "5.0.0.10", "5.3.0.6", "5.6.0.5"]
+version = ["4", "5.0", "5.3", "5.6"]
 
 [envs.default.overrides]
-matrix.aerospike-version.env-vars = "AEROSPIKE_VERSION"
+matrix.version.env-vars = [
+  { key = "AEROSPIKE_VERSION", value = "4.9.0.11", if = ["4"] },
+  { key = "AEROSPIKE_VERSION", value = "5.0.0.10", if = ["5.0"] },
+  { key = "AEROSPIKE_VERSION", value = "5.3.0.6", if = ["5.3"] },
+  { key = "AEROSPIKE_VERSION", value = "5.6.0.5", if = ["5.6"] },
+]
 
 [envs.default.env-vars]
 AEROSPIKE_EXPORTER_VERSION = "1.5.0"
-
-[envs.bench]
