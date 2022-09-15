@@ -52,6 +52,8 @@ METRICS = [
     'autodiscovery.poll_duration.sum',
     'autodiscovery.watched_resources',
     'autodiscovery.errors',
+    'kubernetes_apiserver.kube_events',
+    'kubernetes_apiserver.emitted_events',
 ]
 
 
