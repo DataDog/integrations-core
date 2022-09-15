@@ -152,6 +152,8 @@ class InstanceConfig(BaseModel):
     empty_default_hostname: Optional[bool]
     gcp: Optional[Gcp]
     host: Optional[str]
+    log_unobfuscated_plans: Optional[bool]
+    log_unobfuscated_queries: Optional[bool]
     max_custom_queries: Optional[int]
     metric_patterns: Optional[MetricPatterns]
     min_collection_interval: Optional[float]

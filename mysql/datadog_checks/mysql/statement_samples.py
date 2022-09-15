@@ -492,9 +492,12 @@ class MySQLStatementSamples(DBMAsyncJob):
             statement = obfuscate_sql_with_metadata(row['sql_text'], self._obfuscate_options)
             statement_digest_text = obfuscate_sql_with_metadata(row['digest_text'], self._obfuscate_options)
         except Exception:
-            # do not log the raw sql_text to avoid leaking sensitive data into logs. digest_text is safe as parameters
-            # are obfuscated by the database
-            self._log.debug("Failed to obfuscate statement: %s", row['digest_text'])
+            # do not log raw sql_text to avoid leaking sensitive data into logs unless log_unobfuscated_queries is set
+            # digest_text is safe as parameters are obfuscated by the database
+            if self._config.log_unobfuscated_queries:
+                self._log.warning("Failed to obfuscate statement: %s", row['sql_text'])
+            else:
+                self._log.debug("Failed to obfuscate statement: %s", row['digest_text'])
             self._check.count(
                 "dd.mysql.query_samples.error",
                 1,
@@ -537,8 +540,13 @@ class MySQLStatementSamples(DBMAsyncJob):
 
         normalized_plan, obfuscated_plan, plan_signature = None, None, None
         if plan:
-            normalized_plan = datadog_agent.obfuscate_sql_exec_plan(plan, normalize=True) if plan else None
-            obfuscated_plan = datadog_agent.obfuscate_sql_exec_plan(plan)
+            try:
+                normalized_plan = datadog_agent.obfuscate_sql_exec_plan(plan, normalize=True) if plan else None
+                obfuscated_plan = datadog_agent.obfuscate_sql_exec_plan(plan)
+            except Exception as e:
+                if self._config.log_unobfuscated_plans:
+                    self._log.warning("Failed to obfuscate plan '%s': %s", plan, e)
+                raise e
             plan_signature = compute_exec_plan_signature(normalized_plan)
 
         query_plan_cache_key = (query_cache_key, plan_signature)
