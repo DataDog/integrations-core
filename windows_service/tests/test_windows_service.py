@@ -234,14 +234,34 @@ def test_startup_type_tag(aggregator, check, instance_basic):
     )
 
 
-def test_openservice_failure(aggregator, check, instance_basic, caplog):
-    instance_basic['windows_service_startup_type_tag'] = True
-    c = check(instance_basic)
+def test_openservice_failure(aggregator, check, instance_basic_dict, caplog):
+    # dict type
+    instance_basic_dict['services'].append({'startup_type': 'automatic'})
+    # str type
+    instance_basic_dict['services'].append('EventLog')
+
+    instance_basic_dict['windows_service_startup_type_tag'] = True
+    c = check(instance_basic_dict)
 
     with patch('win32service.OpenService', side_effect=pywintypes.error('mocked error')):
-        c.check(instance_basic)
+        c.check(instance_basic_dict)
 
     assert 'Failed to query EventLog service config' in caplog.text
+
+
+def test_invalid_pattern_type(aggregator, check, instance_basic_dict):
+    # Array is not valid type
+    instance_basic_dict['services'].append(
+        ['foo'],
+    )
+
+    instance_basic_dict['windows_service_startup_type_tag'] = True
+    c = check(instance_basic_dict)
+
+    with pytest.raises(Exception) as e_info:
+        c.check(instance_basic_dict)
+
+    assert "Invalid type 'list' for service" in str(e_info)
 
 
 @pytest.mark.e2e
