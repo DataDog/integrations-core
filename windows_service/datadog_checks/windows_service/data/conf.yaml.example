@@ -31,6 +31,19 @@ instances:
     #
     # disable_legacy_service_tag: false
 
+    ## @param windows_service_startup_type_tag - boolean - optional - default: false
+    ## Whether or not to submit the `windows_service_startup_type` tag along
+    ## with each service check.
+    ## This tag indicates the Windows service startup type as shown in a service's properties,
+    ## and can be used as a filter/scope in Monitors.
+    ## Possible values for this tag are:
+    ##   - disabled
+    ##   - manual
+    ##   - automatic
+    ##   - automatic_delayed_start
+    #
+    # windows_service_startup_type_tag: false
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
