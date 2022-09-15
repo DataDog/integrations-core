@@ -241,3 +241,10 @@ files:
           type: boolean
           example: false
         display_default: false
+      - name: data_streams_enabled
+        description: |
+          Beta feature to get a lag metric in Seconds. It's part of the Data Streams Monitoring Product
+        value:
+          type: boolean
+          example: false
+        display_default: false

@@ -42,6 +42,7 @@ class KafkaCheck(AgentCheck):
         super(KafkaCheck, self).__init__(name, init_config, instances)
         self.sub_check = None
         self._context_limit = int(self.init_config.get('max_partition_contexts', CONTEXT_UPPER_BOUND))
+        self._data_streams_enabled = is_affirmative(self.instance.get('data_streams_enabled', False))
         self._custom_tags = self.instance.get('tags', [])
         self._monitor_unlisted_consumer_groups = is_affirmative(
             self.instance.get('monitor_unlisted_consumer_groups', False)

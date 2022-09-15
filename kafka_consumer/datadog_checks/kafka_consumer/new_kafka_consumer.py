@@ -66,7 +66,8 @@ class NewKafkaConsumerCheck(object):
             self.log.exception("There was a problem collecting consumer offsets from Kafka.")
             # don't raise because we might get valid broker offsets
 
-        self._load_broker_timestamps()
+        if self._data_streams_enabled:
+            self._load_broker_timestamps()
         # Fetch the broker highwater offsets
         try:
             if len(self._consumer_offsets) < self._context_limit:
@@ -88,7 +89,8 @@ class NewKafkaConsumerCheck(object):
                 self._context_limit,
             )
 
-        self._save_broker_timestamps()
+        if self._data_streams_enabled:
+            self._save_broker_timestamps()
 
         # Report the metrics
         self._report_highwater_offsets(self._context_limit)
@@ -282,6 +284,8 @@ class NewKafkaConsumerCheck(object):
                     self.log.debug(message)
 
                 if reported_contexts >= contexts_limit:
+                    continue
+                if not self._data_streams_enabled:
                     continue
                 timestamps = self._broker_timestamps["{}_{}".format(topic, partition)]
                 # The producer timestamp can be not set if there was an error fetching broker offsets.
