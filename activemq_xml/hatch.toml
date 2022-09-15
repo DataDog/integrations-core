@@ -6,5 +6,3 @@ version = ["5.11.1"]
 
 [envs.default.overrides]
 matrix.version.env-vars = "ACTIVEMQ_XML_VERSION"
-
-[envs.bench]

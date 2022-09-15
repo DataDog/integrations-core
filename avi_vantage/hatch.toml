@@ -2,5 +2,3 @@
 
 [[envs.default.matrix]]
 python = ["38"]
-
-[envs.bench]
