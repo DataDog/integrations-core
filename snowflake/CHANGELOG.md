@@ -1,5 +1,9 @@
 # CHANGELOG - Snowflake
 
+## 4.4.3 / 2022-08-05 / Agent 7.39.0
+
+* [Fixed] Dependency updates. See [#12653](https://github.com/DataDog/integrations-core/pull/12653).
+
 ## 4.4.2 / 2022-07-05 / Agent 7.38.0
 
 * [Fixed] Properly read from `token_path` parameter. See [#12452](https://github.com/DataDog/integrations-core/pull/12452).

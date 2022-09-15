@@ -616,9 +616,9 @@ def test_mongod_bad_auth(check, dd_run_check, aggregator, username, password):
         'password': password,
         'options': {'authSource': 'authDB'},
     }
-    with pytest.raises(Exception, match="Authentication failed"):
-        mongo_check = check(instance)
-        dd_run_check(mongo_check)
+    mongo_check = check(instance)
+    dd_run_check(mongo_check)
+    aggregator.assert_service_check('mongodb.can_connect', status=MongoDb.CRITICAL)
 
 
 @tls
@@ -627,9 +627,9 @@ def test_mongod_tls_ok(check, dd_run_check, aggregator):
     instance = {
         'hosts': ['{}:{}'.format(HOST, PORT1)],
         'tls': True,
-        'tlsAllowInvalidCertificates': True,
-        'tlsCertificateKeyFile': '{}/client1.pem'.format(TLS_CERTS_FOLDER),
-        'tlsCAFile': '{}/ca.pem'.format(TLS_CERTS_FOLDER),
+        'tls_allow_invalid_certificates': True,
+        'tls_certificate_key_file': '{}/client1.pem'.format(TLS_CERTS_FOLDER),
+        'tls_ca_file': '{}/ca.pem'.format(TLS_CERTS_FOLDER),
     }
     mongo_check = check(instance)
     dd_run_check(mongo_check)
@@ -642,11 +642,10 @@ def test_mongod_tls_fail(check, dd_run_check, aggregator):
     instance = {
         'hosts': ['{}:{}'.format(HOST, PORT1)],
         'tls': True,
-        'tlsAllowInvalidCertificates': True,
-        'tlsCertificateKeyFile': '{}/fail.pem'.format(TLS_CERTS_FOLDER),
-        'tlsCAFile': '{}/ca.pem'.format(TLS_CERTS_FOLDER),
+        'tls_allow_invalid_certificates': True,
+        'tls_certificate_key_file': '{}/fail.pem'.format(TLS_CERTS_FOLDER),
+        'tls_ca_file': '{}/ca.pem'.format(TLS_CERTS_FOLDER),
     }
-    with pytest.raises(Exception, match="Private key doesn't match certificate"):
-        mongo_check = check(instance)
-        dd_run_check(mongo_check)
+    mongo_check = check(instance)
+    dd_run_check(mongo_check)
     aggregator.assert_service_check('mongodb.can_connect', status=MongoDb.CRITICAL)

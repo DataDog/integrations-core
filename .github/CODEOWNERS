@@ -20,6 +20,9 @@ assets/               @DataDog/agent-integrations
 /datadog_checks_base/datadog_checks/base/checks/kube_leader/   @DataDog/agent-core @DataDog/agent-integrations @DataDog/container-integrations
 
 # Container monitoring
+/cert_manager/                            @DataDog/container-integrations @DataDog/agent-integrations
+/cert_manager/*.md                        @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
+/cert_manager/manifest.json               @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 /container/                               @DataDog/container-integrations @DataDog/agent-integrations
 /container/*.md                           @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 /container/manifest.json                  @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
@@ -35,8 +38,8 @@ assets/               @DataDog/agent-integrations
 /datadog_cluster_agent/                   @DataDog/container-integrations @DataDog/agent-integrations
 /datadog_cluster_agent/*.md               @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 /docker_daemon/                           @DataDog/container-integrations @DataDog/agent-integrations
-/docker_daemon/*.md                       @DataDog/container-integrations @DataDog/agent-integrations @DataDog/baklava
-/docker_daemon/manifest.json              @DataDog/container-integrations @DataDog/agent-integrations @DataDog/baklava
+/docker_daemon/*.md                       @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
+/docker_daemon/manifest.json              @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 /ecs_fargate/                             @DataDog/container-integrations @DataDog/agent-integrations
 /ecs_fargate/*.md                         @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 /ecs_fargate/manifest.json                @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
@@ -98,24 +101,24 @@ assets/               @DataDog/agent-integrations
 /docs/developer/tutorials/snmp/                                    @DataDog/infrastructure-integrations @DataDog/agent-integrations @DataDog/documentation
 
 # Agent Platform
-/disk/                                    @DataDog/agent-integrations @DataDog/agent-platform
-/disk/*.md                                @DataDog/agent-integrations @DataDog/agent-platform @DataDog/documentation
-/disk/manifest.json                       @DataDog/agent-integrations @DataDog/agent-platform @DataDog/documentation
-/network/                                 @DataDog/agent-integrations @DataDog/agent-platform
-/network/*.md                             @DataDog/agent-integrations @DataDog/agent-platform @DataDog/documentation
-/network/manifest.json                    @DataDog/agent-integrations @DataDog/agent-platform @DataDog/documentation
-/process/                                 @DataDog/agent-integrations @DataDog/agent-platform
-/process/*.md                             @DataDog/agent-integrations @DataDog/agent-platform @DataDog/documentation
-/process/manifest.json                    @DataDog/agent-integrations @DataDog/agent-platform @DataDog/documentation
-/otel/                                    @DataDog/agent-integrations @DataDog/agent-platform
-/otel/*.md                                @DataDog/agent-integrations @DataDog/agent-platform @DataDog/documentation
-/otel/manifest.json                       @DataDog/agent-integrations @DataDog/agent-platform @DataDog/documentation
-/nvidia_jetson/                           @DataDog/agent-integrations @DataDog/agent-platform
-/nvidia_jetson/*.md                       @DataDog/agent-integrations @DataDog/agent-platform @DataDog/documentation
-/nvidia_jetson/manifest.json              @DataDog/agent-integrations @DataDog/agent-platform @DataDog/documentation
-/ibm_i/                                   @DataDog/agent-integrations @DataDog/agent-platform
-/ibm_i/*.md                               @DataDog/agent-integrations @DataDog/agent-platform @DataDog/documentation
-/ibm_i/manifest.json                      @DataDog/agent-integrations @DataDog/agent-platform @DataDog/documentation
+/disk/                                    @DataDog/agent-platform @DataDog/agent-integrations
+/disk/*.md                                @DataDog/agent-platform @DataDog/agent-integrations @DataDog/documentation
+/disk/manifest.json                       @DataDog/agent-platform @DataDog/agent-integrations @DataDog/documentation
+/network/                                 @DataDog/agent-platform @DataDog/agent-integrations
+/network/*.md                             @DataDog/agent-platform @DataDog/agent-integrations @DataDog/documentation
+/network/manifest.json                    @DataDog/agent-platform @DataDog/agent-integrations @DataDog/documentation
+/process/                                 @DataDog/agent-platform @DataDog/agent-integrations
+/process/*.md                             @DataDog/agent-platform @DataDog/agent-integrations @DataDog/documentation
+/process/manifest.json                    @DataDog/agent-platform @DataDog/agent-integrations @DataDog/documentation
+/otel/                                    @DataDog/agent-platform @DataDog/agent-integrations
+/otel/*.md                                @DataDog/agent-platform @DataDog/agent-integrations @DataDog/documentation
+/otel/manifest.json                       @DataDog/agent-platform @DataDog/agent-integrations @DataDog/documentation
+/nvidia_jetson/                           @DataDog/agent-platform @DataDog/agent-integrations
+/nvidia_jetson/*.md                       @DataDog/agent-platform @DataDog/agent-integrations @DataDog/documentation
+/nvidia_jetson/manifest.json              @DataDog/agent-platform @DataDog/agent-integrations @DataDog/documentation
+/ibm_i/                                   @DataDog/agent-platform @DataDog/agent-integrations
+/ibm_i/*.md                               @DataDog/agent-platform @DataDog/agent-integrations @DataDog/documentation
+/ibm_i/manifest.json                      @DataDog/agent-platform @DataDog/agent-integrations @DataDog/documentation
 
 
 # Database monitoring
@@ -177,10 +180,10 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /wmi_check/manifest.json                                             @DataDog/windows-agent @DataDog/agent-integrations @DataDog/documentation
 
 # To keep Security up-to-date with changes to the signing tool.
-/datadog_checks_dev/datadog_checks/dev/tooling/signing.py             @DataDog/software-integrity-and-trust
+/datadog_checks_dev/datadog_checks/dev/tooling/signing.py             @DataDog/software-integrity-and-trust @DataDog/agent-integrations
 # As well as the secure downloader.
-/datadog_checks_downloader/                                           @DataDog/software-integrity-and-trust
-docs/developer/process/integration-release.md                         @DataDog/software-integrity-and-trust
+/datadog_checks_downloader/                                           @DataDog/software-integrity-and-trust @DataDog/agent-integrations
+docs/developer/process/integration-release.md                         @DataDog/software-integrity-and-trust @DataDog/agent-integrations
 # As well as the pipelines.
-/.github/workflows/                                                   @DataDog/software-integrity-and-trust
-/.gitlab-ci.yml                                                       @DataDog/software-integrity-and-trust
+/.github/workflows/                                                   @DataDog/software-integrity-and-trust @DataDog/agent-integrations
+/.gitlab-ci.yml                                                       @DataDog/software-integrity-and-trust @DataDog/agent-integrations

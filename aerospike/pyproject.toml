@@ -9,7 +9,6 @@ build-backend = "hatchling.build"
 name = "datadog-aerospike"
 description = "The Aerospike check"
 readme = "README.md"
-license = {text = "BSD-3-Clause"}
 keywords = [
     "datadog",
     "datadog agent",
@@ -35,10 +34,13 @@ dynamic = [
     "version",
 ]
 
+[project.license]
+text = "BSD-3-Clause"
+
 [project.optional-dependencies]
 deps = [
     "aerospike==4.0.0; sys_platform != 'win32' and sys_platform != 'darwin' and python_version < '3.0'",
-    "aerospike==6.1.2; sys_platform != 'win32' and sys_platform != 'darwin' and python_version > '3.0'",
+    "aerospike==7.1.0; sys_platform != 'win32' and sys_platform != 'darwin' and python_version > '3.0'",
 ]
 
 [project.urls]

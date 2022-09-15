@@ -14,7 +14,7 @@ import tempfile
 from in_toto import verifylib
 from in_toto.exceptions import LinkNotFoundError
 from in_toto.models.metadata import Metablock
-from pkg_resources import parse_version
+from packaging.version import parse as parse_version
 from securesystemslib import interface
 from tuf import settings as tuf_settings
 from tuf.client.updater import Updater

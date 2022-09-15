@@ -74,6 +74,31 @@ SQL_GROUP_REPLICATION_PLUGIN_STATUS = """\
 SELECT plugin_status
 FROM information_schema.plugins WHERE plugin_name='group_replication'"""
 
+QUERY_USER_CONNECTIONS = {
+    'name': 'performance_schema.threads',
+    'query': """
+        SELECT
+            COUNT(processlist_user) AS connections,
+            processlist_user,
+            processlist_host,
+            processlist_db,
+            processlist_state
+        FROM
+            performance_schema.threads
+        WHERE
+            processlist_user IS NOT NULL AND
+            processlist_state IS NOT NULL
+        GROUP BY processlist_user, processlist_host, processlist_db, processlist_state
+    """.strip(),
+    'columns': [
+        {'name': 'mysql.performance.user_connections', 'type': 'gauge'},
+        {'name': 'processlist_user', 'type': 'tag'},
+        {'name': 'processlist_host', 'type': 'tag'},
+        {'name': 'processlist_db', 'type': 'tag'},
+        {'name': 'processlist_state', 'type': 'tag'},
+    ],
+}
+
 
 def show_replica_status_query(version, is_mariadb, channel=''):
     if version.version_compatible((10, 5, 1)) or not is_mariadb and version.version_compatible((8, 0, 22)):

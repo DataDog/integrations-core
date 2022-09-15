@@ -9,7 +9,6 @@ build-backend = "hatchling.build"
 name = "datadog-gitlab-runner"
 description = "The Gitlab Runner check"
 readme = "README.md"
-license = {text = "BSD-3-Clause"}
 keywords = [
     "datadog",
     "datadog agent",
@@ -35,6 +34,9 @@ dynamic = [
     "version",
 ]
 
+[project.license]
+text = "BSD-3-Clause"
+
 [project.optional-dependencies]
 deps = [
     "protobuf==3.17.3; python_version < '3.0'",
@@ -52,8 +54,6 @@ include = [
     "/datadog_checks",
     "/tests",
     "/manifest.json",
-    "/requirements-dev.txt",
-    "/tox.ini",
 ]
 
 [tool.hatch.build.targets.wheel]

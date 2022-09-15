@@ -1,5 +1,9 @@
 # CHANGELOG - Vertica
 
+## 3.4.1 / 2022-08-05 / Agent 7.39.0
+
+* [Fixed] Dependency updates. See [#12653](https://github.com/DataDog/integrations-core/pull/12653).
+
 ## 3.4.0 / 2022-08-03
 
 * [Added] Use QueryManager to get metrics from queries. See [#12542](https://github.com/DataDog/integrations-core/pull/12542).

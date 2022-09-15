@@ -35,6 +35,7 @@ rabbitmq.queue.messages,gauge,,message,,Count of the total messages in the queue
 rabbitmq.queue.messages.rate,gauge,,message,second,Count per second of the total messages in the queue,0,rabbitmq,msgs rate,
 rabbitmq.queue.messages_ready,gauge,,message,,Number of messages ready to be delivered to clients,0,rabbitmq,msgs rdy,
 rabbitmq.queue.messages_ready.rate,gauge,,message,second,Number per second of messages ready to be delivered to clients,0,rabbitmq,msgs rdy rate,
+rabbitmq.queue.message_bytes,gauge,,message,,Number of bytes of messages ready to be delivered to clients,0,rabbitmq,msgs rdy,
 rabbitmq.queue.messages_unacknowledged,gauge,,message,,Number of messages delivered to clients but not yet acknowledged,0,rabbitmq,msgs unack,
 rabbitmq.queue.messages_unacknowledged.rate,gauge,,message,second,Number per second of messages delivered to clients but not yet acknowledged,0,rabbitmq,msgs unack rate,
 rabbitmq.queue.messages.ack.count,gauge,,message,,Number of messages in queues delivered to clients and acknowledged,0,rabbitmq,msgs ack,

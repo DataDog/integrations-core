@@ -172,7 +172,7 @@ files:
             description: |
               Define custom queries to collect custom metrics from your MySQL database.
 
-              See https://docs.datadoghq.com/integrations/faq/how-to-collect-metrics-from-custom-mysql-queries to learn more.
+              See https://docs.datadoghq.com/integrations/guide/mysql-custom-queries to learn more.
 
               WARNING: This option is deprecated and will be removed in a future release.
               Use the `custom_queries` option instead.

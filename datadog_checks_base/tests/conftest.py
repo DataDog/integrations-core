@@ -16,7 +16,7 @@ def socks5_proxy():
     auth = "proxy_user:proxy_password"
 
     def check_proxy():
-        proxies = {'http': 'socks5://{}@{}'.format(auth, proxy)}
+        proxies = {'http': 'socks5h://{}@{}'.format(auth, proxy)}
         url = 'http://www.google.com'
         resp = requests.get(url, proxies=proxies)
         resp.raise_for_status()
@@ -33,10 +33,9 @@ def socks5_proxy():
 
 @pytest.fixture(scope="session")
 def kerberos():
-
     with TempDir() as tmp_dir:
         shared_volume = os.path.join(tmp_dir, "shared-volume")
-        compose_file = os.path.join(HERE, "compose", "kerberos.yaml")
+        compose_file = os.path.join(HERE, "compose", "kerberos", "kerberos.yaml")
         realm = "EXAMPLE.COM"
         svc = "HTTP"
         webserver_hostname = "web.example.com"
@@ -74,7 +73,6 @@ def kerberos():
 
 @pytest.fixture(scope="session")
 def kerberos_agent():
-
     with TempDir() as tmp_dir:
         shared_volume = os.path.join(tmp_dir, "shared-volume")
         compose_file = os.path.join(HERE, "compose", "kerberos-agent.yaml")
@@ -121,7 +119,7 @@ def uds_path():
         pytest.skip('Sharing Unix sockets is not supported by Docker for Mac.')
 
     with TempDir() as tmp_dir:
-        compose_file = os.path.join(HERE, 'compose', 'uds.yaml')
+        compose_file = os.path.join(HERE, 'compose', 'uds', 'uds.yaml')
         uds_filename = 'tmp.sock'
         uds_path = os.path.join(tmp_dir, uds_filename)
         with docker_run(

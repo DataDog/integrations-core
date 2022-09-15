@@ -99,6 +99,9 @@ jobs:
     - checkName: ceph
       displayName: Ceph
       os: linux
+    - checkName: cert_manager
+      displayName: cert-manager
+      os: linux
     - checkName: cilium
       displayName: Cilium
       os: linux
@@ -137,6 +140,9 @@ jobs:
       os: linux
     - checkName: datadog_cluster_agent
       displayName: Datadog Cluster Agent
+      os: linux
+    - checkName: ddev
+      displayName: ddev
       os: linux
     - checkName: directory
       displayName: Directory

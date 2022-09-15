@@ -57,12 +57,6 @@ def _assert_check(aggregator):
         for mname in GAUGES:
             aggregator.assert_metric(mname, tags=expected_tags, count=1)
 
-        aggregator.assert_metric('kong.table.count', len(DATABASES), tags=expected_tags, count=1)
-
-        for name in DATABASES:
-            tags = expected_tags + ['table:{}'.format(name)]
-            aggregator.assert_metric('kong.table.items', tags=tags, count=1)
-
         aggregator.assert_service_check(
             'kong.can_connect', status=Kong.OK, tags=['kong_host:localhost', 'kong_port:8001'] + expected_tags, count=1
         )

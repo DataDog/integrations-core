@@ -1,4 +1,4 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-__version__ = "26.0.0"
+__version__ = "27.1.0"

@@ -496,8 +496,7 @@
             "id": 15,
             "definition": {
                 "type": "event_timeline",
-                "query": "sources:kubernetes $host $cluster",
-                "tags_execution": "and",
+                "query": "source:kubernetes $host $cluster",
                 "title": "",
                 "title_size": "16",
                 "title_align": "left",
@@ -535,8 +534,7 @@
             "id": 17,
             "definition": {
                 "type": "event_stream",
-                "query": "sources:kubernetes $host $cluster",
-                "tags_execution": "and",
+                "query": "source:kubernetes $host $cluster",
                 "event_size": "s",
                 "title": "",
                 "title_size": "16",

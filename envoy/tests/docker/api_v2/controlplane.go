@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"google.golang.org/grpc"
 	"net"
 	"time"
 
@@ -10,10 +9,11 @@ import (
 	core "github.com/envoyproxy/go-control-plane/envoy/api/v2/core"
 	endpoint "github.com/envoyproxy/go-control-plane/envoy/api/v2/endpoint"
 	discovery "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v2"
+	cluster "github.com/envoyproxy/go-control-plane/envoy/api/v2/cluster"
 	"github.com/envoyproxy/go-control-plane/pkg/cache"
 	xds "github.com/envoyproxy/go-control-plane/pkg/server"
-
 	"github.com/golang/protobuf/ptypes"
+	"google.golang.org/grpc"
 )
 
 func main() {
@@ -61,6 +61,7 @@ func main() {
 				ClusterName: "dummy_dynamic_cluster",
 				Endpoints:   []*endpoint.LocalityLbEndpoints{&dummyLocalityLbEndpoint},
 			},
+			OutlierDetection: &cluster.OutlierDetection{},
 		},
 	}
 

@@ -28,11 +28,16 @@ class SonarqubeCheck(AgentCheck):
 
     def check(self, _):
         try:
+            self.collect_metadata()
             self.collect_metrics()
         except RequestException as e:
             self.service_check(self.SERVICE_CHECK_CONNECT, self.CRITICAL, tags=self._tags, message=str(e))
         else:
             self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, tags=self._tags)
+
+    @AgentCheck.metadata_entrypoint
+    def collect_metadata(self):
+        self.collect_version()
 
     def collect_metrics(self):
         available_metrics = self.discover_available_metrics()
@@ -61,7 +66,6 @@ class SonarqubeCheck(AgentCheck):
                 self.gauge(available_metrics[measure['metric']], measure['value'], tags=tags)
 
     def discover_available_metrics(self):
-        metadata_collected = False
         available_metrics = {}
 
         page = 1
@@ -71,10 +75,6 @@ class SonarqubeCheck(AgentCheck):
         while seen != total:
             response = self.http.get('{}/api/metrics/search'.format(self._web_endpoint), params={'p': page})
             response.raise_for_status()
-
-            if not metadata_collected:
-                metadata_collected = True
-                self.collect_version(response)
 
             search_results = response.json()
             total = search_results['total']
@@ -99,11 +99,12 @@ class SonarqubeCheck(AgentCheck):
 
         return available_metrics
 
-    @AgentCheck.metadata_entrypoint
-    def collect_version(self, response):
-        version = response.headers.get('Sonar-Version', '')
+    def collect_version(self):
+        response = self.http.get('{}/api/server/version'.format(self._web_endpoint))
+        response.raise_for_status()
+        version = response.text
         if not version:
-            self.log.warning('The SonarQube version was not found in response headers')
+            self.log.warning('The SonarQube version was not found in response')
             return
 
         # The version comes in like `8.5.0.37579` though sometimes there is no build part
@@ -133,11 +134,11 @@ class SonarqubeCheck(AgentCheck):
             if not isinstance(config, dict):
                 raise ConfigurationError('Component `{}` must refer to a mapping'.format(component))
 
-            should_include_metric = self.create_metric_matcher(
+            include_metric = self.create_metric_matcher(
                 self.compile_metric_patterns(config, 'include') or default_metric_inclusion_pattern,
                 default=True,
             )
-            should_exclude_metric = self.create_metric_matcher(
+            exclude_metric = self.create_metric_matcher(
                 self.compile_metric_patterns(config, 'exclude') or default_metric_exclusion_pattern,
                 default=False,
             )
@@ -148,7 +149,8 @@ class SonarqubeCheck(AgentCheck):
 
             component_data[component] = (
                 tag_name,
-                lambda metric: should_include_metric(metric) and not should_exclude_metric(metric),
+                lambda metric, include_metric=include_metric, exclude_metric=exclude_metric: include_metric(metric)
+                and not exclude_metric(metric),
             )
 
         self._components = component_data

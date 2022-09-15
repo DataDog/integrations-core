@@ -25,6 +25,11 @@ DEFAULT_COUNTERS = {
     'scheduler_total_preemption_attempts': 'pod_preemption.attempts',
 }
 
+NEW_1_17_COUNTERS = {
+    # (from 1.17) Number of pods added to scheduling queues by event and queue type
+    'scheduler_queue_incoming_pods_total': 'queue.incoming_pods'
+}
+
 NEW_1_19_COUNTERS = {
     # Total preemption attempts in the cluster till now (new name)
     'scheduler_preemption_attempts_total': 'pod_preemption.attempts',
@@ -97,6 +102,11 @@ DEFAULT_GAUGES = {
     'scheduler_pod_preemption_victims': 'pod_preemption.victims'
 }
 
+NEW_1_15_GAUGES = {
+    # Number of pending pods, by the queue type
+    'scheduler_pending_pods': 'pending_pods'
+}
+
 DEFAULT_GO_METRICS = {
     'go_gc_duration_seconds': 'gc_duration_seconds',
     'go_goroutines': 'goroutines',
@@ -142,10 +152,12 @@ class KubeSchedulerCheck(KubeLeaderElectionMixin, OpenMetricsBaseCheck):
                     'metrics': [
                         DEFAULT_COUNTERS,
                         DEFAULT_HISTOGRAMS,
+                        NEW_1_17_COUNTERS,
                         NEW_1_19_COUNTERS,
                         NEW_1_14_HISTOGRAMS,
                         NEW_1_19_HISTOGRAMS,
                         DEFAULT_GAUGES,
+                        NEW_1_15_GAUGES,
                         DEFAULT_GO_METRICS,
                         DEPRECARED_SUMMARIES,
                         NEW_1_23_HISTOGRAMS,

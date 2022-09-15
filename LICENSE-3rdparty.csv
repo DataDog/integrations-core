@@ -43,9 +43,13 @@ ldap3,PyPI,LGPL-3.0-only,Giovanni Cannata
 lxml,PyPI,BSD-3-Clause,lxml dev team
 lz4,PyPI,BSD-3-Clause,Jonathan Underwood
 mmh3,PyPI,CC0-1.0,Hajime Senuma
+oauthlib,PyPI,BSD-3-Clause,The OAuthlib Community
 openstacksdk,PyPI,Apache-2.0,OpenStack
 orjson,PyPI,Apache-2.0,ijl <ijl@mailbox.org>
 orjson,PyPI,MIT,ijl <ijl@mailbox.org>
+packaging,PyPI,Apache-2.0,Donald Stufft and individual contributors
+packaging,PyPI,BSD-2-Clause,Donald Stufft and individual contributors
+packaging,PyPI,BSD-3-Clause,Donald Stufft and individual contributors
 paramiko,PyPI,LGPL-2.1-only,Jeff Forcier
 ply,PyPI,BSD-3-Clause,David Beazley
 prometheus-client,PyPI,Apache-2.0,Brian Brazil
@@ -58,7 +62,7 @@ pycryptodomex,PyPI,BSD-2-Clause,Helder Eijs
 pycryptodomex,PyPI,Unlicense,Helder Eijs
 pydantic,PyPI,MIT,Samuel Colvin
 pymongo,PyPI,Apache-2.0,The MongoDB Python Team
-pymqi,PyPI,PSF,Dariusz Suchojad
+pymqi,PyPI,PSF,Zato Source s.r.o.
 pyodbc,PyPI,MIT,Michael Kleehammer
 pysmi,PyPI,BSD-3-Clause,Ilya Etingof
 pysnmp,PyPI,BSD-3-Clause,Ilya Etingof
@@ -72,6 +76,8 @@ pywin32,PyPI,PSF,Mark Hammond (et al)
 redis,PyPI,MIT,Andy McCurdy | Redis Inc.
 requests,PyPI,Apache-2.0,Kenneth Reitz
 requests-kerberos,PyPI,ISC,"Ian Cordasco, Cory Benfield, Michael Komitee"
+requests-oauthlib,PyPI,BSD-3-Clause,Kenneth Reitz
+requests-oauthlib,PyPI,ISC,Kenneth Reitz
 requests-toolbelt,PyPI,Apache-2.0,"Ian Cordasco, Cory Benfield"
 requests-unixsocket,PyPI,Apache-2.0,Marc Abramowitz
 requests_ntlm,PyPI,ISC,Ben Toews

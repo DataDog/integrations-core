@@ -1113,9 +1113,9 @@ scheduler_framework_extension_point_duration_seconds_sum{extension_point="Reserv
 scheduler_framework_extension_point_duration_seconds_count{extension_point="Reserve",profile="default-scheduler",status="Success"} 7
 # HELP scheduler_pending_pods [STABLE] Number of pending pods, by the queue type. 'active' means number of pods in activeQ; 'backoff' means number of pods in backoffQ; 'unschedulable' means number of pods in unschedulableQ.
 # TYPE scheduler_pending_pods gauge
-scheduler_pending_pods{queue="active"} 0
-scheduler_pending_pods{queue="backoff"} 0
-scheduler_pending_pods{queue="unschedulable"} 0
+scheduler_pending_pods{queue="active"} 1
+scheduler_pending_pods{queue="backoff"} 2
+scheduler_pending_pods{queue="unschedulable"} 3
 # HELP scheduler_plugin_execution_duration_seconds [ALPHA] Duration for running a plugin at a specific extension point.
 # TYPE scheduler_plugin_execution_duration_seconds histogram
 scheduler_plugin_execution_duration_seconds_bucket{extension_point="Bind",plugin="DefaultBinder",status="Success",le="1e-05"} 0

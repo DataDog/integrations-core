@@ -24,9 +24,9 @@ Then, edit the `vsphere.d/conf.yaml` file in the `conf.d/` folder at the root of
 
 ### Compatibility
 
-Starting with v5.0.0 of the check, shipped in Agent v6.18.0/7.18.0, a new implementation was introduced which required changes to the configuration file. To preserve backwards compatibility, a configuration parameter called `use_legacy_implementation` was temporarily introduced.
+Starting with v5.0.0 of the check, shipped in Agent v6.18.0/7.18.0, a new implementation was introduced which required changes to the configuration file. To preserve backwards compatibility, a configuration parameter called `use_legacy_check_version` was temporarily introduced.
 If you are upgrading from an older version of the integration, this parameter is unset in the config and forces the Agent to use the older implementation.
-If you are configuring the integration for the first time or if you want to benefit from the new features (like tag collection and advanced filtering options), see the [sample vsphere.d/conf.yaml][4] configuration file. In particular, make sure to set `use_legacy_implementation: false`.
+If you are configuring the integration for the first time or if you want to benefit from the new features (like tag collection and advanced filtering options), see the [sample vsphere.d/conf.yaml][4] configuration file. In particular, make sure to set `use_legacy_check_version: false`.
 
 ### Validation
 

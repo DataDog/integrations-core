@@ -1,5 +1,9 @@
 # CHANGELOG - oracle
 
+## 3.9.5 / 2022-08-05 / Agent 7.39.0
+
+* [Fixed] Dependency updates. See [#12653](https://github.com/DataDog/integrations-core/pull/12653).
+
 ## 3.9.4 / 2022-05-15 / Agent 7.37.0
 
 * [Fixed] Add a lock around jdbc connection. See [#11877](https://github.com/DataDog/integrations-core/pull/11877).

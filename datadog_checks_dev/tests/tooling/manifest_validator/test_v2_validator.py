@@ -476,3 +476,48 @@ def test_manifest_v2_tile_description_validator_invalid(setup_route):
     # Assert test case
     assert validator.result.failed, validator.result
     assert not validator.result.fixed
+
+
+def test_manifest_v2_changelog_found(setup_route):
+    manifest = JSONDict(
+        {
+            "tile": {
+                "changelog": "CHANGELOG.md",
+            },
+        }
+    )
+
+    validator = v2_validators.ChangelogValidator(version=V2)
+    validator.validate('datadog_checks_dev', manifest, False)
+
+    assert not validator.result.failed
+
+
+def test_manifest_v2_changelog_not_found(setup_route):
+    manifest = JSONDict(
+        {
+            "tile": {
+                "changelog": "CHANGELOG_NOT_FOUND.md",
+            },
+        }
+    )
+
+    validator = v2_validators.ChangelogValidator(version=V2)
+    validator.validate('datadog_checks_dev', manifest, False)
+
+    assert validator.result.failed
+
+
+def test_manifest_v2_changelog_case_sensitive(setup_route):
+    manifest = JSONDict(
+        {
+            "tile": {
+                "changelog": "CHANGELOG.MD",
+            },
+        }
+    )
+
+    validator = v2_validators.ChangelogValidator(version=V2)
+    validator.validate('datadog_checks_dev', manifest, False)
+
+    assert validator.result.failed
