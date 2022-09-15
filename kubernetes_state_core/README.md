@@ -2,9 +2,9 @@
 
 ## Overview
 
-Get Kubernetes metrics from [`kube-state-metrics`](https://github.com/kubernetes/kube-state-metrics) in real time to:
+Get Kubernetes metrics from [`kube-state-metrics`][1] in real time to:
 
-- Visualize and monitor Kubernetes states
+- Visualize and monitor Kubernetes states.
 - Be notified about Kubernetes failovers and events.
 
 This check supersedes the legacy `kubernetes_state` check.
@@ -48,7 +48,7 @@ See [service_checks.json][8] for a list of service checks provided by this integ
 Need help? Contact [Datadog support][9].
 
 
-[1]: **LINK_TO_INTEGRATION_SITE**
+[1]: https://github.com/kubernetes/kube-state-metrics
 [2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [4]: https://github.com/DataDog/integrations-core/blob/master/kubernetes_state_core/datadog_checks/kubernetes_state_core/data/conf.yaml.example
