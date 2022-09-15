@@ -19,3 +19,8 @@ files:
         openmetrics_endpoint.value.example: http://localhost:9203/metrics
         openmetrics_endpoint.description: |
           The URL where Boundary exposes Prometheus metrics.
+  - template: logs
+    example:
+      - type: file
+        source: boundary
+        path: /var/log/boundary/events.ndjson

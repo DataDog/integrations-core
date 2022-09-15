@@ -41,9 +41,7 @@ listener "tcp" {
   tls_disable = true
 }
 
-// Yoy can generate the keys by
-// `python3 kyegen.py`
-// Ref: https://www.boundaryproject.io/docs/configuration/kms/aead
+// https://www.boundaryproject.io/docs/configuration/kms/aead
 kms "aead" {
   purpose = "root"
   aead_type = "aes-gcm"
@@ -63,4 +61,20 @@ kms "aead" {
   aead_type = "aes-gcm"
   key = "8fZBjCUfN0TzjEGLQldGY4+iE9AkOvCfjh7+p0GtRBQ="
   key_id = "global_recovery"
+}
+
+// https://www.boundaryproject.io/docs/configuration/events
+events {
+  audit_enabled = true
+  observations_enabled = true
+  sysevents_enabled = true
+  sink {
+    name = "all-events"
+    event_types = ["*"]
+    format = "cloudevents-json"
+    file {
+      path = "/var/log/boundary"
+      file_name = "events.ndjson"
+    }
+  }
 }
