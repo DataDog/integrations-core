@@ -15,11 +15,11 @@ from datadog_checks.dev import TempDir, WaitFor, docker_run, run_command
 from datadog_checks.dev.docker import get_container_ip
 
 from .common import (
+    ACTIVE_ENV_NAME,
     COMPOSE_DIR,
     PORT,
     SNMP_CONTAINER_NAME,
     SNMP_LISTENER_ENV,
-    TOX_ENV_NAME,
     generate_container_instance_config,
 )
 
@@ -74,7 +74,7 @@ def autodiscovery_ready():
 
 def _autodiscovery_ready():
     result = run_command(
-        ['docker', 'exec', 'dd_snmp_{}'.format(TOX_ENV_NAME), 'agent', 'configcheck'], capture=True, check=True
+        ['docker', 'exec', 'dd_snmp_{}'.format(ACTIVE_ENV_NAME), 'agent', 'configcheck'], capture=True, check=True
     )
 
     autodiscovery_checks = []
