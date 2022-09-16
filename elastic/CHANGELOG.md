@@ -1,5 +1,9 @@
 # CHANGELOG - elastic
 
+## 5.3.0 / 2022-09-16
+
+* [Added] Update HTTP config spec templates. See [#12890](https://github.com/DataDog/integrations-core/pull/12890).
+
 ## 5.2.0 / 2022-06-27 / Agent 7.38.0
 
 * [Added] Collect the count version of certain rate metrics. See [#12352](https://github.com/DataDog/integrations-core/pull/12352).
