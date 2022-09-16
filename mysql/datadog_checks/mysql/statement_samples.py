@@ -333,7 +333,10 @@ class MySQLStatementSamples(DBMAsyncJob):
 
     def _read_version_info(self):
         if not self._version_processed and self._check.version:
-            self._has_window_functions = self._check.version.version_compatible((8, 0, 0))
+            if self._check.version.flavor == "MariaDB":
+                self._has_window_functions = self._check.version.version_compatible((10, 2, 0))
+            else:
+                self._has_window_functions = self._check.version.version_compatible((8, 0, 0))
             if self._check.version.flavor == "MariaDB" or not self._check.version.version_compatible((5, 7, 0)):
                 self._global_status_table = "information_schema.global_status"
             else:
