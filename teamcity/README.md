@@ -1,18 +1,18 @@
-# Agent Check: Teamcity
+# Agent Check: TeamCity
 
 ## Overview
 
-This integration connects to your TeamCity server for successful and failed builds and submits metrics and service checks from the TeamCity server's Prometheus endpoint and REST API allowing you to monitor your builds, build agents, tests, VCS, and JVM resources. 
+This integration connects to your TeamCity server to submit metrics, service checks, and events allowing you to monitor the health of your TeamCity projects' build configurations, build runs, server resources and more.
 
 ## Setup
 
 ### Installation
 
-The Teamcity check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your Teamcity servers.
+The TeamCity check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your TeamCity servers.
 
 ### Configuration
 
-#### Prepare Teamcity
+#### Prepare TeamCity
 
 1. To prepare TeamCity, see [Enabling Guest Login][2].
 2. To collect metrics, enable `Per-project permissions` and assign the `View Usage Statistics` permission to the Guest user.
@@ -59,7 +59,7 @@ The TeamCity check offers two methods of data collection. Configure two separate
 
 2. TeamCity Server REST API Method:
 
-   In a separate instance, configure your projects and build configurations using the `projects` option:
+   Configure a separate instance in the `teamcity.d/conf.yaml` file to collect additional build-specific metrics, service checks, and build status events from the TeamCity Server's REST API. Specify your projects and build configurations using the `projects` option:
 
 
    ```yaml
@@ -86,14 +86,14 @@ The TeamCity check offers two methods of data collection. Configure two separate
    ```
 
 
-   Customize each project's build configuration monitoring using the optional `include` and `exclude` filters. Use the `include` and `exclude` filters to specify a list build configuration IDs to include or exclude from monitoring, respectively. Regex patterns are supported. If both `include` and `exclude` filters are omitted, all build configurations are monitored for the specified project. 
+   Customize each project's build configuration monitoring using the optional `include` and `exclude` filters to specify build configuration IDs to include or exclude from monitoring, respectively. Regex patterns are supported in the `include` and `exclude` keys to specify build configuration ID matching patterns. If both `include` and `exclude` filters are omitted, all build configurations are monitored for the specified project. 
 
 
-[Restart the Agent][5] to start collecting and sending Teamcity events to Datadog.
+[Restart the Agent][5] to start collecting and sending TeamCity events to Datadog.
 
 ##### Log collection
 
-1. Configure Teamcity [logs settings][6].
+1. Configure TeamCity [logs settings][6].
 
 2. By default, Datadog's integration pipeline supports the following kind of log format:
 
