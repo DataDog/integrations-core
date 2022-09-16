@@ -258,10 +258,18 @@ def test_invalid_pattern_type(aggregator, check, instance_basic_dict):
     instance_basic_dict['windows_service_startup_type_tag'] = True
     c = check(instance_basic_dict)
 
-    with pytest.raises(Exception) as e_info:
+    with pytest.raises(Exception, match="Invalid type 'list' for service"):
         c.check(instance_basic_dict)
 
-    assert "Invalid type 'list' for service" in str(e_info)
+
+def test_invalid_pattern_regex(aggregator, check, instance_basic_dict):
+    instance_basic_dict['services'].append('(foo')
+
+    instance_basic_dict['windows_service_startup_type_tag'] = True
+    c = check(instance_basic_dict)
+
+    with pytest.raises(Exception, match=r"Regular expression syntax error in '\(foo': missing \)"):
+        c.check(instance_basic_dict)
 
 
 @pytest.mark.e2e
