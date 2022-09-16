@@ -47,7 +47,7 @@ init_config:
         #
         # timeout: 10
 
-## Every instance is scheduled independent of the others.
+## Every instance is scheduled independently of the others.
 #
 instances:
 

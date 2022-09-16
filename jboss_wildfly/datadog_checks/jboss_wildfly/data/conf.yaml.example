@@ -55,7 +55,7 @@ init_config:
     # custom_jar_paths:
     #   - /path/to/jboss-cli-client.jar
 
-## Every instance is scheduled independent of the others.
+## Every instance is scheduled independently of the others.
 #
 instances:
 
