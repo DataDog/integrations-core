@@ -6,8 +6,8 @@ import pytest
 from six import iteritems
 
 from datadog_checks.teamcity import TeamCityCheck
+from datadog_checks.teamcity.common import construct_build_configs_filter, should_include_build_config
 
-# project
 from .common import CHECK_NAME
 
 # A path regularly used in the TeamCity Check
@@ -108,14 +108,17 @@ def test_server_normalization():
 def test_projects_build_configs_filter(
     projects_config, expected_exclude, expected_include, sample_build_configs, should_include
 ):
+    """
+    Test that the build configurations filter is getting structured properly and filtering correctly
+    """
     instance_config = {'server': 'localhost:8111', 'use_openmetrics': False, 'projects': projects_config}
     check = TeamCityCheck(CHECK_NAME, {}, [instance_config])
 
-    exclude_filter, include_filter = check._construct_build_configs_filter()
+    exclude_filter, include_filter = construct_build_configs_filter(check)
 
     assert include_filter == expected_include
     assert exclude_filter == expected_exclude
 
     for i, sample in enumerate(sample_build_configs):
-        included = check._should_include_build_config(sample)
+        included = should_include_build_config(check, sample)
         assert included == should_include[i]

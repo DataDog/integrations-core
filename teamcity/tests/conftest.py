@@ -10,13 +10,16 @@ from datadog_checks.teamcity import TeamCityCheck
 if PY3:
     from datadog_checks.teamcity.check import TeamCityCheckV2
 
-from .common import COMPOSE_FILE, CONFIG
+from .common import COMPOSE_FILE, CONFIG, ENV_NAME
 
 
 @pytest.fixture(scope='session')
 def dd_environment(instance, omv2_instance):
     with docker_run(COMPOSE_FILE, sleep=10):
-        yield [instance, omv2_instance]
+        if ENV_NAME == 'py38':
+            yield omv2_instance
+        else:
+            yield instance
 
 
 @pytest.fixture(scope='session')

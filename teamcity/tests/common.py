@@ -13,6 +13,8 @@ SERVER_URL = "http://{}:{}".format(HOST, PORT)
 CHECK_NAME = 'teamcity'
 USE_OPENMETRICS = os.getenv('USE_OPENMETRICS')
 
+ENV_NAME = os.environ.get('TOX_ENV_NAME') or os.environ['HATCH_ENV_ACTIVE']
+
 CONFIG = {
     'instances': [
         {

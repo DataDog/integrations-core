@@ -101,7 +101,7 @@ METRIC_MAP = {
     'teamcity_cache_InvestigationTestRunsHolder_projectScopes_number': 'cache.InvestigationTestRunsHolder'
     '.projectScopes',
     'teamcity_cache_InvestigationTestRunsHolder_testNames_number': 'cache.InvestigationTestRunsHolder.testNames',
-    'teamcity_cache_InvestigationTestRunsHolder_testRuns_number': 'tcache.InvestigationTestRunsHolder.testRuns',
+    'teamcity_cache_InvestigationTestRunsHolder_testRuns_number': 'cache.InvestigationTestRunsHolder.testRuns',
     'users_active_number': 'users.active',
     'vcsRootInstances_active_number': 'vcsRootInstances.active',
     'vcsRoots_number': 'vcsRoots',

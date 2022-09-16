@@ -2,14 +2,14 @@
 # (C) Paul Kirby <pkirby@matrix-solutions.com> 2014
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import re
 from copy import deepcopy
 
 from six import PY2
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 
-from .common import SERVICE_CHECK_STATUS_MAP, BuildConfigs, construct_event, get_response
+from .common import construct_event, get_response, should_include_build_config
+from .constants import SERVICE_CHECK_STATUS_MAP, BuildConfigs
 from .metrics import build_metric
 
 
@@ -41,8 +41,8 @@ class TeamCityCheck(AgentCheck):
     def __init__(self, name, init_config, instances):
         super(TeamCityCheck, self).__init__(name, init_config, instances)
         # Legacy configs
-        self.build_config = self.instance.get('build_configuration', None)
-        self.instance_name = self.instance.get('name')
+        self.build_config = self.instance.get('build_configuration', '')
+        self.instance_name = self.instance.get('name', '')
         self.host = self.instance.get('host_affected') or self.hostname
         self.is_deployment = is_affirmative(self.instance.get('is_deployment', False))
 
@@ -70,11 +70,12 @@ class TeamCityCheck(AgentCheck):
 
         self.bc_store = BuildConfigs()
 
-    def _send_events(self, new_build, build_tags):
-        teamcity_event = construct_event(self.is_deployment, self.instance_name, self.host, new_build, build_tags)
-        self.log.trace('Submitting event: %s', teamcity_event)
-        self.event(teamcity_event)
-        self.service_check('build.status', SERVICE_CHECK_STATUS_MAP.get(new_build['status']), tags=build_tags)
+    def _normalize_server_url(self, server):
+        """
+        Check if the server URL starts with a HTTP or HTTPS scheme, fall back to http if not present
+        """
+        server = server if server.startswith(("http://", "https://")) else "http://{}".format(server)
+        return server
 
     def _initialize(self, project_id=None):
         self.log.debug("Initializing TeamCity builds...")
@@ -90,7 +91,7 @@ class TeamCityCheck(AgentCheck):
             # Check for new build configs in project
             build_configs = get_response(self, 'build_configs', project_id=project_id)
             for build_config in build_configs.get('buildType'):
-                if self._should_include_build_config(build_config['id']) and not self.bc_store.get_build_config(
+                if should_include_build_config(self, build_config['id']) and not self.bc_store.get_build_config(
                     build_config['id']
                 ):
                     self.bc_store.set_build_config(build_config.get('id'), project_id)
@@ -110,6 +111,12 @@ class TeamCityCheck(AgentCheck):
                     )
                     self.bc_store.set_build_config(build_config_id, project_id)
                     self.bc_store.set_last_build_id(build_config_id, last_build_id)
+
+    def _send_events(self, new_build, build_tags):
+        teamcity_event = construct_event(self.is_deployment, self.instance_name, self.host, new_build, build_tags)
+        self.log.trace('Submitting event: %s', teamcity_event)
+        self.event(teamcity_event)
+        self.service_check('build.status', SERVICE_CHECK_STATUS_MAP.get(new_build['status']), tags=build_tags)
 
     def _collect_build_stats(self, new_build, build_tags):
         build_id = new_build['id']
@@ -149,82 +156,14 @@ class TeamCityCheck(AgentCheck):
                     'problem_type:{}'.format(problem_type),
                     'problem_identity:{}'.format(problem_identity),
                 ]
-                self.service_check('build_problem', AgentCheck.WARNING, tags=build_tags + tags)
-
-    def _should_include_build_config(self, build_config):
-        """
-        Return `True` if the build_config is included, otherwise `False`
-        """
-        exclude_filter, include_filter = self._construct_build_configs_filter()
-        include_match = False
-        exclude_match = False
-        # If no filters configured, include everything
-        if not exclude_filter and not include_filter:
-            return True
-        if exclude_filter:
-            for pattern in exclude_filter:
-                if re.search(re.compile(pattern), build_config):
-                    exclude_match = True
-        if include_filter:
-            for pattern in include_filter:
-                if re.search(re.compile(pattern), build_config):
-                    include_match = True
-
-        # Include everything except in excluded_bc
-        if exclude_filter and not include_filter:
-            return not exclude_match
-        # Include only what's defined in included_bc
-        if include_filter and not exclude_filter:
-            return include_match
-        # If both include and exclude filters are configured
-        if include_filter and exclude_filter:
-            # If filter overlap or in neither filter, exclude
-            if (include_match and exclude_match) or (not include_match and not exclude_match):
-                return False
-            # Only matches include filter, include
-            if include_match and not exclude_match:
-                return include_match
-            # Only matches exclude filter, exclude
-            if exclude_match and not include_match:
-                return not exclude_match
-        return True
+                self.service_check('build.problem', AgentCheck.WARNING, tags=build_tags + tags)
+        self.service_check('build.problem', AgentCheck.OK, tags=build_tags + tags)
 
     def _collect_new_builds(self):
         last_build_id = self.bc_store.get_last_build_id(self.build_config)
         if last_build_id:
             new_builds = get_response(self, 'new_builds', build_conf=self.build_config, since_build=last_build_id)
             return new_builds
-
-    def _normalize_server_url(self, server):
-        """
-        Check if the server URL starts with a HTTP or HTTPS scheme, fall back to http if not present
-        """
-        server = server if server.startswith(("http://", "https://")) else "http://{}".format(server)
-        return server
-
-    def _construct_build_configs_filter(self):
-        excluded_build_configs = set()
-        included_build_configs = set()
-        for project in self.monitored_build_configs:
-            config = self.monitored_build_configs.get(project)
-            # collect all build configs in project
-            if isinstance(config, dict):
-                exclude_list = config.get('exclude', [])
-                include_list = config.get('include', [])
-                if exclude_list:
-                    excluded_build_configs.update(exclude_list)
-                if include_list:
-                    for include_bc in include_list:
-                        if include_bc not in excluded_build_configs:
-                            included_build_configs.update([include_bc])
-            elif config is None:
-                continue
-            else:
-                raise ConfigurationError(
-                    "`project` must be either an empty mapping to collect all build configurations in the project"
-                    "or a mapping of keys `include` and/or `exclude` lists of build configurations."
-                )
-        return excluded_build_configs, included_build_configs
 
     def _collect(self):
         new_builds = self._collect_new_builds()
