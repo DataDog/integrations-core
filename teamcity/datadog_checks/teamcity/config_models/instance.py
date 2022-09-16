@@ -132,7 +132,7 @@ class InstanceConfig(BaseModel):
     read_timeout: Optional[float]
     rename_labels: Optional[Mapping[str, Any]]
     request_size: Optional[float]
-    server: Optional[str]
+    server: str
     service: Optional[str]
     share_labels: Optional[Mapping[str, Union[bool, ShareLabel]]]
     skip_proxy: Optional[bool]

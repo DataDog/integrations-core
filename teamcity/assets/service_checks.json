@@ -1,1 +1,51 @@
-[]
+[
+    {
+        "agent_version": "7.40.0",
+        "integration": "Teamcity",
+        "check": "teamcity.openmetrics.health",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "groups": [
+            "host",
+            "endpoint"
+        ],
+        "name": "OpenMetrics endpoint health",
+        "description": "Returns `CRITICAL` if the Agent is unable to connect to the OpenMetrics endpoint, otherwise returns `OK`."
+    },
+    {
+        "agent_version": "7.40.0",
+        "integration": "Teamcity",
+        "check": "teamcity.build.status",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "groups": [
+            "build_config",
+            "server",
+            "type"
+        ],
+        "name": "TeamCity build status health",
+        "description": "Returns `CRITICAL` if the finished build has a status of FAILURE. Returns `OK` otherwise."
+    },
+    {
+        "agent_version": "7.40.0",
+        "integration": "Teamcity",
+        "check": "teamcity.build.problem",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "groups": [
+            "build_config",
+            "server",
+            "type",
+            "problem_identity",
+            "problem_type"
+        ],
+        "name": "TeamCity build problem health",
+        "description": "Returns `WARNING` if the finished build has encountered a problem. Returns `OK` otherwise."
+    }
+]

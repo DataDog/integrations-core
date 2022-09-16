@@ -13,47 +13,73 @@ init_config:
 #
 instances:
 
-  -
-    ## @param server - string - optional - default: http://teamcity.<ACCOUNT_NAME>.com
-    ## Specify the server name of your teamcity instance
-    ## Guest authentication must be on if you want the check to be able to get data
-    ## When using the optional `basic_http_authentication` use:
+    ## @param server - string - required
+    ## Specify the server name of your TeamCity instance.
+    ## Enable Guest Authentication on your instance or enable the
+    ## optional `basic_http_authentication` config param to collect data.
+    ## If using `basic_http_authentication`, specify:
     ##
-    ##  server: http://<USER>:<PASSWORD>@teamcity.<ACCOUNT_NAME>.com
+    ## server: http://<USER>:<PASSWORD>@teamcity.<ACCOUNT_NAME>.com
     #
-    # server: http://teamcity.<ACCOUNT_NAME>.com
+  - server: http://teamcity.<ACCOUNT_NAME>.com
+
+    ## @param basic_http_authentication - boolean - optional - default: false
+    ## Set to true to turn on basic http authentication.
+    #
+    # basic_http_authentication: false
 
     ## @param use_openmetrics - boolean - optional - default: false
-    ## Set to true to enable OpenMetric collection from the TeamCity server's metrics endpoint.
+    ## Use the latest OpenMetrics V2 implementation to collect metrics from
+    ## the TeamCity server's prometheus metrics endpoint.
+    ## Requires Python version 3.
+    ##
+    ## Enable in a separate instance to collect prometheus metrics.
+    ## This option does not collect events, service checks, or metrics from the TeamCity REST API.
     #
     # use_openmetrics: false
 
     ## @param experimental_metrics - boolean - optional - default: false
-    ## Set to true to enable collection of experimental metrics.
+    ## Enable collection of experimental TeamCity Prometheus metrics.
+    ## See https://www.jetbrains.com/help/teamcity/teamcity-monitoring-and-diagnostics.html#Metrics
+    ## Only available with `use_openmetrics: true`.
     #
     # experimental_metrics: false
 
     ## @param collect_events - boolean - optional - default: true
-    ## Set to true to enable collection of TeamCity build and deployment success and failure events
+    ## Enable collection of TeamCity build and deployment success and failure events.
+    ## Not available with `use_openmetrics: true`.
     #
     # collect_events: true
 
     ## @param name - string - optional
     ## A custom unique name per build configuration that is shown
-    ## in the events.
+    ## in the events. If omitted, the build configuration ID is used.
     #
     # name: <BUILD_NAME>
 
     ## @param projects - mapping - optional
-    ## List of build configurations to monitor, by project name.
-    ## projects:
-    ##   <PROJECT>:
-    ##     include:
-    ##       - <BUILD_CONFIG>
-    ##       - <BUILD_CONFIG>
-    ##     exclude:
-    ##       - <BUILD_CONFIG>
-    ##   <PROJECT>: {}
+    ## Mapping of TeamCity projects and build configurations to
+    ## collect events and metrics from the TeamCity REST API.
+    ##
+    ## The mapping must be configured with Project IDs as the top-level keys. Each Project ID key value
+    ## may be configured with a mapping of the optional `include` and `exclude` keys to specify
+    ## Build Configuration ID REGEX match patterns. If `include` and `exclude` keys are omitted,
+    ## all Build Configurations per specified Project ID is collected.
+    ## Patterns specified in the `exclude` take precedence in case of overlap.
+    ##
+    ## * To collect all build configurations per Project ID, configure an empty mapping value:
+    ##     projects:
+    ##      <PROJECT_ID>:
+    ##
+    ## * To filter build configurations in each configured Project, use the optional `include` and/or `exclude` keys
+    ##   to configure a list of Build Configuration ID REGEX matching patterns:
+    ##     projects:
+    ##       <PROJECT_ID>:
+    ##         include:
+    ##           - <BUILD_CONFIG_ID_REGEX>
+    ##           - <BUILD_CONFIG_ID_REGEX>
+    ##         exclude:
+    ##           - <BUILD_CONFIG_ID_REGEX>
     #
     # projects:
     #   <PROJECT_A>:
@@ -64,43 +90,46 @@ instances:
     #     - <BUILD_CONFIG_C>
     #   <PROJECT_B>: {}
 
-    ## @param build_configuration - string - optional
-    ## This is the internal build ID of the build configuration you wish to track.
-    ## You can find it labelled as "Build configuration ID" when editing the configuration in question.
-    #
-    # build_configuration: <BUILD_CONFIGURATION>
-
     ## @param build_config_metrics - boolean - optional - default: true
     ## Collect Build Configuration statistics per build.
+    ## Not available with `use_openmetrics: true`.
     #
     # build_config_metrics: true
 
     ## @param test_result_metrics - boolean - optional - default: true
     ## Collect test result statistics per build.
+    ## Not available with `use_openmetrics: true`.
     #
     # test_result_metrics: true
 
     ## @param build_problem_checks - boolean - optional - default: true
-    ## Collect build problem service checks
+    ## Collect build problem service checks.
+    ## Not available with `use_openmetrics: true`.
     #
     # build_problem_checks: true
 
-    ## @param basic_http_authentication - boolean - optional - default: false
-    ## Set to true to turn on basic http authentication.
+    ## @param build_configuration - string - optional
+    ## [DEPRECATED] This is the internal build ID of the build configuration you wish to track.
+    ## You can find it labeled as "Build configuration ID" when editing the configuration in question.
+    ##
+    ## Configure only one of `projects` or `build_configuration` per instance.
     #
-    # basic_http_authentication: false
-
-    ## @param host_affected - string - optional
-    ## Use this parameter to override the host that is affected by this build configuration.
-    ## Defaults to the host that the agent is running on.
-    #
-    # host_affected: <HOST_AFFECTED>
+    # build_configuration: <BUILD_CONFIGURATION>
 
     ## @param is_deployment - boolean - optional - default: false
-    ## Set to true to change the event message slightly to specify that TeamCity was used to deploy something
-    ## rather than just that a successful build happened
+    ## [DEPRECATED] Set to true to modify the event message to indicate that the TeamCity build configuration
+    ## is a deployment rather than a build run. Best used with the `build_configuration` option only.
+    ## If used with the `projects` option, all events from collected build configurations are affected.
+    ## Not available with `use_openmetrics: true`.
     #
     # is_deployment: false
+
+    ## @param host_affected - string - optional
+    ## [DEPRECATED] Use this parameter to override the hostname that is affected by the build configuration(s)
+    ## in the event message. Defaults to the host that the agent is running on.
+    ## Not available with `use_openmetrics: true`.
+    #
+    # host_affected: <HOST_AFFECTED>
 
     ## @param raw_metric_prefix - string - optional
     ## A prefix that will be removed from all exposed metric names, if present.

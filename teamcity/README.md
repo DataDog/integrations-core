@@ -2,9 +2,7 @@
 
 ## Overview
 
-This check watches for successful build-related events and sends them to Datadog.
-
-Unlike most Agent checks, this one doesn't collect any metrics-just events.
+This integration connects to your TeamCity server for successful and failed builds and submits metrics and service checks from the TeamCity server's Prometheus endpoint and REST API allowing you to monitor your builds, build agents, tests, VCS, and JVM resources. 
 
 ## Setup
 
@@ -16,7 +14,8 @@ The Teamcity check is included in the [Datadog Agent][1] package, so you don't n
 
 #### Prepare Teamcity
 
-To prepare Teamcity, see [Enabling Guest Login][2].
+1. To prepare TeamCity, see [Enabling Guest Login][2].
+2. To collect metrics, enable `Per-project permissions` and assign the `View Usage Statistics` permission to the Guest user.
 
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Host" xxx -->
@@ -27,18 +26,68 @@ To configure this check for an Agent running on a host:
 
 Edit the `teamcity.d/conf.yaml` in the `conf.d/` folder at the root of your [Agent's configuration directory][3]. See the [sample teamcity.d/conf.yaml][4] for all available configuration options:
 
-```yaml
-init_config:
+The TeamCity check offers two methods of data collection. Configure two separate instances to collect metrics from each method to optimally monitor your TeamCity environment. 
 
-instances:
-  - name: My Website
-    server: teamcity.mycompany.com
+1. OpenMetricsV2 Method:
 
-    # the internal build ID of the build configuration you wish to track
-    build_configuration: MyWebsite_Deploy
-```
+   Enable `use_openmetrics: true` to collect metrics from the TeamCity `/metrics` Prometheus endpoint.
 
-Add an item like the above to `instances` for each build configuration you want to track.
+
+   ```yaml
+   init_config:
+   
+   instances:
+       ## @param server - string - required
+       ## Specify the server name of your TeamCity instance.
+       ## Enable Guest Authentication on your instance or enable the
+       ## optional `basic_http_authentication` config param to collect data.
+       ## If using `basic_http_authentication`, specify:
+       ##
+       ## server: http://<USER>:<PASSWORD>@teamcity.<ACCOUNT_NAME>.com
+       #
+     - server: http://teamcity.<ACCOUNT_NAME>.com
+       ## @param use_openmetrics - boolean - optional - default: false
+       ## Use the latest OpenMetrics V2 implementation to collect metrics from
+       ## the TeamCity server's prometheus metrics endpoint.
+       ## Requires Python version 3.
+       ##
+       ## Enable in a separate instance to collect prometheus metrics.
+       ## This option does not collect events, service checks, or metrics from the TeamCity REST API.
+       #
+       use_openmetrics: true
+   ```
+
+2. TeamCity Server REST API Method:
+
+   In a separate instance, configure your projects and build configurations using the `projects` option:
+
+
+   ```yaml
+   init_config:
+   
+   instances:
+     - server: http://teamcity.<ACCOUNT_NAME>.com
+   
+       ## @param projects - mapping - optional
+       ## Mapping of TeamCity projects and build configurations to
+       ## collect events and metrics from the TeamCity REST API.
+       #
+       projects:
+         <PROJECT_A>:
+           include:    
+           - <BUILD_CONFIG_A>
+           - <BUILD_CONFIG_B>
+           exclude:
+           - <BUILD_CONFIG_C>
+         <PROJECT_B>:
+           include:
+           - <BUILD_CONFIG_D>
+         <PROJECT_C>: {}
+   ```
+
+
+   Customize each project's build configuration monitoring using the optional `include` and `exclude` filters. Use the `include` and `exclude` filters to specify a list build configuration IDs to include or exclude from monitoring, respectively. Regex patterns are supported. If both `include` and `exclude` filters are omitted, all build configurations are monitored for the specified project. 
+
 
 [Restart the Agent][5] to start collecting and sending Teamcity events to Datadog.
 
@@ -97,7 +146,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][9]
 | -------------------- | ------------------------------------------------------------------------------------------------- |
 | `<INTEGRATION_NAME>` | `teamcity`                                                                                        |
 | `<INIT_CONFIG>`      | blank or `{}`                                                                                     |
-| `<INSTANCE_CONFIG>`  | `{"name": "<BUILD_NAME>", "server":"%%host%%", "build_configuration":"<BUILD_CONFIGURATION_ID>"}` |
+| `<INSTANCE_CONFIG>`  | `{"server": "%%host%%", "use_openmetrics": "true"}`                                               |
 
 ##### Log collection
 
@@ -118,15 +167,15 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 ### Metrics
 
-The Teamcity check does not include any metrics.
+See [metadata.csv][14] for a list of metrics provided by this check.
 
 ### Events
 
-Teamcity events representing successful builds are forwarded to Datadog.
+TeamCity events representing successful and failed builds are forwarded to Datadog.
 
 ### Service Checks
 
-The Teamcity check does not include any service checks.
+See [service_checks.json][15] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
@@ -149,3 +198,5 @@ Need help? Contact [Datadog support][12].
 [11]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [12]: https://docs.datadoghq.com/help/
 [13]: https://www.datadoghq.com/blog/track-performance-impact-of-code-changes-with-teamcity-and-datadog
+[14]: https://github.com/DataDog/integrations-core/blob/master/teamcity/metadata.csv
+[15]: https://github.com/DataDog/integrations-core/blob/master/teamcity/assets/service_checks.json

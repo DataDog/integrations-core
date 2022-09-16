@@ -246,10 +246,6 @@ def instance_request_size(field, value):
     return 16
 
 
-def instance_server(field, value):
-    return 'http://teamcity.<ACCOUNT_NAME>.com'
-
-
 def instance_service(field, value):
     return get_default_field_value(field, value)
 

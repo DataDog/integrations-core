@@ -8,33 +8,49 @@ files:
   - template: instances
     options:
     - name: server
-      reequired: true
+      required: true
       description: |
-        Specify the server name of your teamcity instance
-        Guest authentication must be on if you want the check to be able to get data
-        When using the optional `basic_http_authentication` use:
+        Specify the server name of your TeamCity instance.
+        Enable Guest Authentication on your instance or enable the
+        optional `basic_http_authentication` config param to collect data.
+        If using `basic_http_authentication`, specify:
 
-         server: http://<USER>:<PASSWORD>@teamcity.<ACCOUNT_NAME>.com
+        server: http://<USER>:<PASSWORD>@teamcity.<ACCOUNT_NAME>.com
       value:
         type: string
         example: http://teamcity.<ACCOUNT_NAME>.com
+    - name: basic_http_authentication
+      description: |
+        Set to true to turn on basic http authentication.
+      value:
+        type: boolean
+        default: false
+        example: false
     - name: use_openmetrics
       description: |
-        Set to true to enable OpenMetric collection from the TeamCity server's metrics endpoint.
+        Use the latest OpenMetrics V2 implementation to collect metrics from
+        the TeamCity server's prometheus metrics endpoint.
+        Requires Python version 3.
+
+        Enable in a separate instance to collect prometheus metrics.
+        This option does not collect events, service checks, or metrics from the TeamCity REST API.
       value:
         type: boolean
         default: false
         example: false
     - name: experimental_metrics
       description: |
-        Set to true to enable collection of experimental metrics.
+        Enable collection of experimental TeamCity Prometheus metrics.
+        See https://www.jetbrains.com/help/teamcity/teamcity-monitoring-and-diagnostics.html#Metrics
+        Only available with `use_openmetrics: true`.
       value:
         type: boolean
         default: false
         example: false
     - name: collect_events
       description: |
-        Set to true to enable collection of TeamCity build and deployment success and failure events
+        Enable collection of TeamCity build and deployment success and failure events.
+        Not available with `use_openmetrics: true`.
       value:
         type: boolean
         default: true
@@ -42,26 +58,39 @@ files:
     - name: name
       description: |
         A custom unique name per build configuration that is shown
-        in the events.
+        in the events. If omitted, the build configuration ID is used.
       value:
         type: string
         example: <BUILD_NAME>
     - name: projects
       description: |
-        List of build configurations to monitor, by project name.
-        projects:
-          <PROJECT>:
-            include:
-              - <BUILD_CONFIG>
-              - <BUILD_CONFIG>
-            exclude:
-              - <BUILD_CONFIG>
-          <PROJECT>: {}
+        Mapping of TeamCity projects and build configurations to
+        collect events and metrics from the TeamCity REST API.
+
+        The mapping must be configured with Project IDs as the top-level keys. Each Project ID key value
+        may be configured with a mapping of the optional `include` and `exclude` keys to specify
+        Build Configuration ID REGEX match patterns. If `include` and `exclude` keys are omitted,
+        all Build Configurations per specified Project ID is collected.
+        Patterns specified in the `exclude` take precedence in case of overlap.
+
+        * To collect all build configurations per Project ID, configure an empty mapping value:
+            projects:
+             <PROJECT_ID>:
+
+        * To filter build configurations in each configured Project, use the optional `include` and/or `exclude` keys
+          to configure a list of Build Configuration ID REGEX matching patterns:
+            projects:
+              <PROJECT_ID>:
+                include:
+                  - <BUILD_CONFIG_ID_REGEX>
+                  - <BUILD_CONFIG_ID_REGEX>
+                exclude:
+                  - <BUILD_CONFIG_ID_REGEX>
       value:
         type: object
         additional_properties:
           type: object
-          required:
+          optional:
             - include
             - exclude
           properties:
@@ -81,15 +110,10 @@ files:
             exclude:
               - <BUILD_CONFIG_C>
           <PROJECT_B>: {}
-    - name: build_configuration
-      description: |
-        This is the internal build ID of the build configuration you wish to track.
-        You can find it labelled as "Build configuration ID" when editing the configuration in question.
-      value:
-        type: string
     - name: build_config_metrics
       description: |
         Collect Build Configuration statistics per build.
+        Not available with `use_openmetrics: true`.
       value:
         type: boolean
         default: true
@@ -97,38 +121,44 @@ files:
     - name: test_result_metrics
       description: |
         Collect test result statistics per build.
+        Not available with `use_openmetrics: true`.
       value:
         type: boolean
         default: true
         example: true
     - name: build_problem_checks
       description: |
-        Collect build problem service checks
+        Collect build problem service checks.
+        Not available with `use_openmetrics: true`.
       value:
         type: boolean
         default: true
         example: true
-    - name: basic_http_authentication
+    - name: build_configuration
       description: |
-        Set to true to turn on basic http authentication.
+        [DEPRECATED] This is the internal build ID of the build configuration you wish to track.
+        You can find it labeled as "Build configuration ID" when editing the configuration in question.
+
+        Configure only one of `projects` or `build_configuration` per instance.
+      value:
+        type: string
+    - name: is_deployment
+      description: |
+        [DEPRECATED] Set to true to modify the event message to indicate that the TeamCity build configuration
+        is a deployment rather than a build run. Best used with the `build_configuration` option only.
+        If used with the `projects` option, all events from collected build configurations are affected.
+        Not available with `use_openmetrics: true`.
       value:
         type: boolean
         default: false
         example: false
     - name: host_affected
       description: |
-        Use this parameter to override the host that is affected by this build configuration.
-        Defaults to the host that the agent is running on.
+        [DEPRECATED] Use this parameter to override the hostname that is affected by the build configuration(s)
+        in the event message. Defaults to the host that the agent is running on.
+        Not available with `use_openmetrics: true`.
       value:
         type: string
-    - name: is_deployment
-      description: |
-        Set to true to change the event message slightly to specify that TeamCity was used to deploy something
-        rather than just that a successful build happened
-      value:
-        type: boolean
-        default: false
-        example: false
     - template: instances/openmetrics
       overrides:
         openmetrics_endpoint.hidden: true
