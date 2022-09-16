@@ -197,11 +197,12 @@ class NewKafkaConsumerCheck(object):
                 error_type = kafka_errors.for_code(error_code)
                 if error_type is kafka_errors.NoError:
                     self._highwater_offsets[(topic, partition)] = offsets[0]
-                    timestamps = self._broker_timestamps["{}_{}".format(topic, partition)]
-                    timestamps[offsets[0]] = time()
-                    # If there's too many timestamps, we delete the oldest
-                    if len(timestamps) > MAX_TIMESTAMPS:
-                        del timestamps[min(timestamps)]
+                    if self._data_streams_enabled:
+                        timestamps = self._broker_timestamps["{}_{}".format(topic, partition)]
+                        timestamps[offsets[0]] = time()
+                        # If there's too many timestamps, we delete the oldest
+                        if len(timestamps) > MAX_TIMESTAMPS:
+                            del timestamps[min(timestamps)]
                 elif error_type is kafka_errors.NotLeaderForPartitionError:
                     self.log.warning(
                         "Kafka broker returned %s (error_code %s) for topic %s, partition: %s. This should only happen "
