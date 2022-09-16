@@ -1,5 +1,5 @@
 datadog-active-directory==1.16.0; sys_platform == 'win32'
-datadog-activemq-xml==2.1.0
+datadog-activemq-xml==2.2.0
 datadog-activemq==2.3.1
 datadog-aerospike==1.16.2; sys_platform == 'linux2'
 datadog-airflow==3.1.1
