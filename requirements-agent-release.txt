@@ -69,7 +69,7 @@ datadog-ibm-ace==1.0.3
 datadog-ibm-db2==1.11.1
 datadog-ibm-i==1.4.1; sys_platform != 'win32'
 datadog-ibm-mq==3.22.1
-datadog-ibm-was==2.2.0
+datadog-ibm-was==2.3.0
 datadog-ignite==2.2.1
 datadog-iis==2.17.0; sys_platform == 'win32'
 datadog-impala==1.0.0
