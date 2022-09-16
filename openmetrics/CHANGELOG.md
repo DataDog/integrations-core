@@ -1,5 +1,10 @@
 # CHANGELOG - OpenMetrics
 
+## 2.3.0 / 2022-09-16
+
+* [Added] Update HTTP config spec templates. See [#12890](https://github.com/DataDog/integrations-core/pull/12890).
+* [Fixed] Bumps base check requirement to v25.4.0. See [#12734](https://github.com/DataDog/integrations-core/pull/12734).
+
 ## 2.2.2 / 2022-08-05 / Agent 7.39.0
 
 * [Fixed] Hide `extra_metrics` in example config. See [#12470](https://github.com/DataDog/integrations-core/pull/12470).

@@ -1,5 +1,9 @@
 # CHANGELOG - mysql
 
+## 8.5.1 / 2022-09-16
+
+* [Fixed] Bumps base check requirement to v25.4.0. See [#12733](https://github.com/DataDog/integrations-core/pull/12733).
+
 ## 8.5.0 / 2022-08-05 / Agent 7.39.0
 
 * [Added] Add MySQL user connections metric. See [#12657](https://github.com/DataDog/integrations-core/pull/12657).
