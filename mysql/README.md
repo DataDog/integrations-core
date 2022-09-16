@@ -29,10 +29,17 @@ On each MySQL server, create a database user for the Datadog Agent.
 
 The following instructions grant the Agent permission to login from any host using `datadog@'%'`. You can restrict the `datadog` user to be allowed to login only from localhost by using `datadog@'localhost'`. See [MySQL Adding Accounts, Assigning Privileges, and Dropping Accounts][5] for more info.
 
-For MySQL versions 5.6 and 5.7, create the `datadog` user with the following command:
+For MySQL 5.6, MySQL 5.7 or MariaDB, create the `datadog` user with the following command:
 
 ```shell
 mysql> CREATE USER 'datadog'@'%' IDENTIFIED BY '<UNIQUEPASSWORD>';
+Query OK, 0 rows affected (0.00 sec)
+```
+
+For MariaDB, create another `datadog` user `@localhost`, otherwise you will see `Error 1045, "Access denied for user 'datadog'@'localhost' (using password: YES)"`:
+
+```shell
+mysql> CREATE USER 'datadog'@'localhost' IDENTIFIED BY '<UNIQUEPASSWORD>';
 Query OK, 0 rows affected (0.00 sec)
 ```
 
