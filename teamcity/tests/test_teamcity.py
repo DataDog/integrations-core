@@ -10,12 +10,23 @@ from mock import ANY, patch
 
 from datadog_checks.teamcity import TeamCityCheck
 
-from .common import BUILD_STATS_METRICS, CHECK_NAME, CONFIG, TEST_OCCURRENCES_METRICS, USE_OPENMETRICS, get_fixture_path
+from .common import (
+    BUILD_STATS_METRICS,
+    BUILD_TAGS,
+    CHECK_NAME,
+    CONFIG,
+    LEGACY_BUILD_TAGS,
+    NEW_FAILED_BUILD,
+    NEW_SUCCESSFUL_BUILD,
+    TESTS_SERVICE_CHECK_RESULTS,
+    USE_OPENMETRICS,
+    get_fixture_path,
+)
 
 
-@pytest.mark.skipif(USE_OPENMETRICS, reason='Event collection is not available in OpenMetricsV2 instance')
+@pytest.mark.skipif(USE_OPENMETRICS == 'true', reason='Event collection is not available in OpenMetricsV2 instance')
 @pytest.mark.integration
-def test_build_event(aggregator, legacy_instance, mock_http_response):
+def test_build_event(aggregator, legacy_instance):
     legacy_instance['build_config_metrics'] = False
     legacy_instance['test_result_metrics'] = False
     legacy_instance['build_problem_checks'] = False
@@ -34,28 +45,18 @@ def test_build_event(aggregator, legacy_instance, mock_http_response):
         mock_resp = mock.MagicMock(status_code=200)
         mock_resp.json.side_effect = json_responses
         req.get.return_value = mock_resp
-
         teamcity.check(legacy_instance)
 
     assert len(aggregator.metric_names) == 0
-    assert len(aggregator.events) == 1
-
     aggregator.assert_event(
-        msg_title='Build for Legacy test build successful',
+        event_type='build',
+        host='buildhost42.dtdg.co',
         msg_text='Build Number: 1\nDeployed To: buildhost42.dtdg.co\n\nMore Info: '
         'http://localhost:8111/viewLog.html?buildId=1&buildTypeId=TestProject_TestBuild',
-        host='buildhost42.dtdg.co',
+        msg_title='Build for Legacy test build successful',
+        source_type_name='teamcity',
+        tags=LEGACY_BUILD_TAGS + ['build_id:1', 'build_number:1', 'build'],
         count=1,
-        tags=[
-            'server:http://localhost:8111',
-            'one:test',
-            'one:tag',
-            'type:build',
-            'instance_name:Legacy test build',
-            'build_config:TestProject_TestBuild',
-            'build_id:1',
-            'build_number:1',
-        ],
     )
 
     aggregator.reset()
@@ -100,87 +101,44 @@ def test_config(extra_config, expected_http_kwargs):
         r.assert_called_with(ANY, **http_wargs)
 
 
-@pytest.mark.parametrize(
-    'file_name, method, expected_metrics',
-    [
-        pytest.param("build_stats.json", "_collect_build_stats", BUILD_STATS_METRICS, id="Build config metrices"),
-        pytest.param(
-            "test_occurrences.json", "_collect_test_results", TEST_OCCURRENCES_METRICS, id="Test result metrics"
-        ),
-    ],
-)
-def test_collect_rest_metrics(aggregator, mock_http_response, instance, file_name, method, expected_metrics, check):
-    mock_http_response(file_path=get_fixture_path(file_name))
+def test_collect_build_stats(aggregator, mock_http_response, instance, check):
     check = check(instance)
-    tags = [
-        'build_config:None',
-        'build_env:test',
-        'build_id:233',
-        'build_number:12',
-        'instance_name:TeamCityV2 test build',
-        'problem_identity:python_build_error_identity',
-        'problem_type:TC_EXIT_CODE',
-        'server:http://localhost:8111',
-        'test_tag:ci_builds',
-        'type:build',
-    ]
-    mock_new_build = {
-        'id': 232,
-        'buildTypeId': 'TeamcityPythonFork_Build',
-        'number': '11',
-        'status': 'SUCCESS',
-        'state': 'finished',
-        'branchName': 'main',
-        'defaultBranch': True,
-        'href': '/guestAuth/app/rest/builds/id:232',
-        'webUrl': 'http://localhost:8111/viewLog.html?buildId=232&buildTypeId=TeamcityPythonFork_Build',
-        'finishOnAgentDate': '20220913T210820+0000',
-    }
-    method = getattr(check, method)
-    method(mock_new_build, tags)
+    check.build_tags = BUILD_TAGS
 
-    for metric_name in expected_metrics:
-        aggregator.assert_metric(metric_name)
+    mock_http_response(file_path=get_fixture_path("build_stats.json"))
+    check._collect_build_stats(NEW_SUCCESSFUL_BUILD)
+
+    for metric in BUILD_STATS_METRICS:
+        metric_name = metric['name']
+        expected_val = metric['value']
+        expected_stats_tags = metric['tags']
+        aggregator.assert_metric(metric_name, tags=expected_stats_tags, value=expected_val)
 
 
-def test_build_problem_service_checks(aggregator, mock_http_response, instance, check):
+def test_collect_test_results(aggregator, mock_http_response, instance, check):
+    check = check(instance)
+    check.build_tags = BUILD_TAGS
+
+    mock_http_response(file_path=get_fixture_path("test_occurrences.json"))
+    check._collect_test_results(NEW_SUCCESSFUL_BUILD)
+
+    for res in TESTS_SERVICE_CHECK_RESULTS:
+        expected_status = res['value']
+        expected_tests_tags = res['tags']
+        aggregator.assert_service_check('teamcity.test.result', status=expected_status, tags=expected_tests_tags)
+
+
+def test_collect_build_problems(aggregator, mock_http_response, instance, check):
     mock_http_response(file_path=get_fixture_path('build_problems.json'))
     check = check(instance)
-    build_tags = [
-        'server:http://localhost:8111',
-        'test_tag:ci_builds',
-        'build_env:test',
-        'instance_name:TeamCityV2 test build',
-        'type:build',
-        'build_config:TeamcityPythonFork_Build',
-    ]
-    mock_new_failed_build = {
-        'id': 233,
-        'buildTypeId': 'TeamcityPythonFork_FailedBuild',
-        'number': '12',
-        'status': 'FAILURE',
-        'state': 'finished',
-        'branchName': 'main',
-        'defaultBranch': True,
-        'href': '/guestAuth/app/rest/builds/id:233',
-        'webUrl': 'http://localhost:8111/viewLog.html?buildId=233&buildTypeId=TeamcityPythonFork_FailedBuild',
-        'finishOnAgentDate': '20220913T210826+0000',
-    }
+    check.build_tags = BUILD_TAGS
+    expected_tags = BUILD_TAGS + ['problem_identity:python_build_error_identity', 'problem_type:TC_EXIT_CODE']
 
-    check._collect_build_problems(mock_new_failed_build, build_tags)
+    check._collect_build_problems(NEW_FAILED_BUILD)
 
     aggregator.assert_service_check(
-        'teamcity.build_problem',
+        'teamcity.build.problem',
         count=1,
-        tags=[
-            'server:http://localhost:8111',
-            'test_tag:ci_builds',
-            'build_env:test',
-            'instance_name:TeamCityV2 test build',
-            'type:build',
-            'build_config:TeamcityPythonFork_Build',
-            'problem_identity:python_build_error_identity',
-            'problem_type:TC_EXIT_CODE',
-        ],
+        tags=expected_tags,
         status=check.WARNING,
     )

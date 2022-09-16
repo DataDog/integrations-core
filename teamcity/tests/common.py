@@ -11,9 +11,8 @@ HOST = get_docker_hostname()
 PORT = '8111'
 SERVER_URL = "http://{}:{}".format(HOST, PORT)
 CHECK_NAME = 'teamcity'
-USE_OPENMETRICS = os.getenv('USE_OPENMETRICS')
 
-ENV_NAME = os.environ.get('TOX_ENV_NAME') or os.environ['HATCH_ENV_ACTIVE']
+USE_OPENMETRICS = os.getenv('USE_OPENMETRICS')
 
 CONFIG = {
     'instances': [
@@ -27,15 +26,17 @@ CONFIG = {
             'tags': ['one:tag', 'one:test'],
         },
         {
-            'name': 'TeamCityV2 test build',
             'server': '{}:{}'.format(HOST, PORT),
-            'monitored_build_configs': [
-                {
-                    'name': 'TeamcityPythonFork',
-                    'include': ['TeamcityPythonFork_FailedBuild', 'TeamcityPythonFork_FailedTests'],
-                    'exclude': ['TeamcityPythonFork_Build'],
+            'projects': {
+                'TeamCityV2Project': {
+                    'include': [
+                        'TeamCityV2Project_Build',
+                        'TeamCityV2Project_FailedBuild',
+                        'TeamCityV2Project_FailedTests',
+                    ],
+                    'exclude': ['TeamCityV2Project_TestBuild'],
                 }
-            ],
+            },
             'basic_http_authentication': False,
             'is_deployment': False,
             'tags': ['build_env:test', 'test_tag:ci_builds'],
@@ -55,13 +56,13 @@ PROMETHEUS_METRICS = [
     'teamcity.build.configs.active',
     'teamcity.build.configs.composite.active',
     'teamcity.build.configs',
-    'teamcity.build.messages.incoming.number.count',
-    'teamcity.build.messages.processing.number.count',
-    'teamcity.build.queue.estimates.processing.number.count',
-    'teamcity.build.queue.incoming.number.count',
-    'teamcity.build.queue.processing.number.count',
-    'teamcity.build.service.messages.number.count',
-    'teamcity.builds.finished.number.count',
+    'teamcity.build.messages.incoming.count',
+    'teamcity.build.messages.processing.count',
+    'teamcity.build.queue.estimates.processing.count',
+    'teamcity.build.queue.incoming.count',
+    'teamcity.build.queue.processing.count',
+    'teamcity.build.service.messages.count',
+    'teamcity.builds.finished.count',
     'teamcity.builds',
     'teamcity.builds.queued',
     'teamcity.builds.running',
@@ -70,7 +71,7 @@ PROMETHEUS_METRICS = [
     'teamcity.cpu.usage.process',
     'teamcity.cpu.usage.system',
     'teamcity.database.connections.active',
-    'teamcity.db.table.writes.number.count',
+    'teamcity.db.table.writes.count',
     'teamcity.disk_usage.artifacts.bytes',
     'teamcity.disk_usage.logs.bytes',
     'teamcity.executors.asyncXmlRpc.activeTasks',
@@ -137,40 +138,357 @@ PROMETHEUS_METRICS = [
     'teamcity.jvm.threads',
     'teamcity.node.events.unprocessed',
     'teamcity.node.tasks.accepted.count',
-    'teamcity.node.tasks.finished.number.count',
+    'teamcity.node.tasks.finished.count',
     'teamcity.node.tasks.pending',
     'teamcity.projects.active',
     'teamcity.projects',
-    'teamcity.runningBuildsOfUnprocessedMessages',
+    'teamcity.runningBuilds.UnprocessedMessages',
     'teamcity.server.uptime.milliseconds',
     'teamcity.system.load.average.1m',
     'teamcity.cache.InvestigationTestRunsHolder.projectScopes',
     'teamcity.cache.InvestigationTestRunsHolder.testNames',
-    'teamcity.tcache.InvestigationTestRunsHolder.testRuns',
+    'teamcity.cache.InvestigationTestRunsHolder.testRuns',
     'teamcity.users.active',
     'teamcity.vcsRootInstances.active',
     'teamcity.vcsRoots',
-    'teamcity.vcs.get.current.state.calls.number.count',
+    'teamcity.vcs.get.current.state.calls.count',
 ]
 
 BUILD_STATS_METRICS = [
-    'teamcity.artifacts_size',
-    'teamcity.build_duration',
-    'teamcity.build_duration.net_time',
-    'teamcity.build_test_status',
-    'teamcity.inspection_stats_e',
-    'teamcity.inspection_stats_w',
-    'teamcity.passed_test_count',
-    'teamcity.failed_test_count',
-    'teamcity.server_side_build_finishing',
-    'teamcity.success_rate',
-    'teamcity.time_spent_in_queue',
-    'teamcity.total_test_count',
-    'teamcity.build_stage_duration',
-    'teamcity.queue_wait_reason',
+    {
+        'name': 'teamcity.artifacts_size',
+        'value': 47339.0,
+        'tags': [
+            'build_config:TeamCityV2Project_Build',
+            'build_env:test',
+            'instance_name:TeamCityV2_test_build',
+            'project_id:TeamCityV2Project',
+            'server:http://localhost:8111',
+            'test_tag:ci_builds',
+            'type:build',
+        ],
+    },
+    {
+        'name': 'teamcity.inspection_stats_e',
+        'value': 0.0,
+        'tags': [
+            'build_config:TeamCityV2Project_Build',
+            'build_env:test',
+            'instance_name:TeamCityV2_test_build',
+            'project_id:TeamCityV2Project',
+            'server:http://localhost:8111',
+            'test_tag:ci_builds',
+            'type:build',
+        ],
+    },
+    {
+        'name': 'teamcity.inspection_stats_w',
+        'value': 0.0,
+        'tags': [
+            'build_config:TeamCityV2Project_Build',
+            'build_env:test',
+            'instance_name:TeamCityV2_test_build',
+            'project_id:TeamCityV2Project',
+            'server:http://localhost:8111',
+            'test_tag:ci_builds',
+            'type:build',
+        ],
+    },
+    {
+        'name': 'teamcity.success_rate',
+        'value': 0.0,
+        'tags': [
+            'build_config:TeamCityV2Project_Build',
+            'build_env:test',
+            'instance_name:TeamCityV2_test_build',
+            'project_id:TeamCityV2Project',
+            'server:http://localhost:8111',
+            'test_tag:ci_builds',
+            'type:build',
+        ],
+    },
+    {
+        'name': 'teamcity.time_spent_in_queue',
+        'value': 10.0,
+        'tags': [
+            'build_config:TeamCityV2Project_Build',
+            'build_env:test',
+            'instance_name:TeamCityV2_test_build',
+            'project_id:TeamCityV2Project',
+            'server:http://localhost:8111',
+            'test_tag:ci_builds',
+            'type:build',
+        ],
+    },
+    {
+        'name': 'teamcity.build_duration.net_time',
+        'value': 11403.0,
+        'tags': [
+            'build_config:TeamCityV2Project_Build',
+            'build_env:test',
+            'instance_name:TeamCityV2_test_build',
+            'project_id:TeamCityV2Project',
+            'server:http://localhost:8111',
+            'test_tag:ci_builds',
+            'type:build',
+        ],
+    },
+    {
+        'name': 'teamcity.total_test_count',
+        'value': 2.0,
+        'tags': [
+            'build_config:TeamCityV2Project_Build',
+            'build_env:test',
+            'instance_name:TeamCityV2_test_build',
+            'project_id:TeamCityV2Project',
+            'server:http://localhost:8111',
+            'test_tag:ci_builds',
+            'type:build',
+        ],
+    },
+    {
+        'name': 'teamcity.passed_test_count',
+        'value': 1.0,
+        'tags': [
+            'build_config:TeamCityV2Project_Build',
+            'build_env:test',
+            'instance_name:TeamCityV2_test_build',
+            'project_id:TeamCityV2Project',
+            'server:http://localhost:8111',
+            'test_tag:ci_builds',
+            'type:build',
+        ],
+    },
+    {
+        'name': 'teamcity.failed_test_count',
+        'value': 1.0,
+        'tags': [
+            'build_config:TeamCityV2Project_Build',
+            'build_env:test',
+            'instance_name:TeamCityV2_test_build',
+            'project_id:TeamCityV2Project',
+            'server:http://localhost:8111',
+            'test_tag:ci_builds',
+            'type:build',
+        ],
+    },
+    {
+        'name': 'teamcity.build_test_status',
+        'value': 3.0,
+        'tags': [
+            'build_config:TeamCityV2Project_Build',
+            'build_env:test',
+            'instance_name:TeamCityV2_test_build',
+            'project_id:TeamCityV2Project',
+            'server:http://localhost:8111',
+            'test_tag:ci_builds',
+            'type:build',
+        ],
+    },
+    {
+        'name': 'teamcity.build_duration',
+        'value': 11840.0,
+        'tags': [
+            'build_config:TeamCityV2Project_Build',
+            'build_env:test',
+            'instance_name:TeamCityV2_test_build',
+            'project_id:TeamCityV2Project',
+            'server:http://localhost:8111',
+            'test_tag:ci_builds',
+            'type:build',
+        ],
+    },
+    {
+        'name': 'teamcity.queue_wait_reason',
+        'value': 10.0,
+        'tags': [
+            'build_config:TeamCityV2Project_Build',
+            'build_env:test',
+            'instance_name:TeamCityV2_test_build',
+            'project_id:TeamCityV2Project',
+            'reason:Build_settings_have_not_been_finalized',
+            'server:http://localhost:8111',
+            'test_tag:ci_builds',
+            'type:build',
+        ],
+    },
+    {
+        'name': 'teamcity.build_stage_duration',
+        'value': 118.0,
+        'tags': [
+            'build_config:TeamCityV2Project_Build',
+            'build_env:test',
+            'build_stage:sourcesUpdate',
+            'instance_name:TeamCityV2_test_build',
+            'project_id:TeamCityV2Project',
+            'server:http://localhost:8111',
+            'test_tag:ci_builds',
+            'type:build',
+        ],
+    },
+    {
+        'name': 'teamcity.build_stage_duration',
+        'value': 6132.0,
+        'tags': [
+            'build_config:TeamCityV2Project_Build',
+            'build_env:test',
+            'build_stage:buildStepRUNNER_1',
+            'instance_name:TeamCityV2_test_build',
+            'project_id:TeamCityV2Project',
+            'server:http://localhost:8111',
+            'test_tag:ci_builds',
+            'type:build',
+        ],
+    },
+    {
+        'name': 'teamcity.build_stage_duration',
+        'value': 5271.0,
+        'tags': [
+            'build_config:TeamCityV2Project_Build',
+            'build_env:test',
+            'build_stage:buildStepRUNNER_2',
+            'instance_name:TeamCityV2_test_build',
+            'project_id:TeamCityV2Project',
+            'server:http://localhost:8111',
+            'test_tag:ci_builds',
+            'type:build',
+        ],
+    },
 ]
 
-TEST_OCCURRENCES_METRICS = ['teamcity.test_result']
+
+TESTS_SERVICE_CHECK_RESULTS = [
+    {
+        'value': 0,
+        'tags': [
+            'build_config:TeamCityV2Project_Build',
+            'build_env:test',
+            'instance_name:TeamCityV2_test_build',
+            'project_id:TeamCityV2Project',
+            'result:success',
+            'server:http://localhost:8111',
+            'test_name:tests.test_foo.test_bar',
+            'test_tag:ci_builds',
+            'type:build',
+        ],
+    },
+    {
+        'value': 2,
+        'tags': [
+            'build_config:TeamCityV2Project_Build',
+            'build_env:test',
+            'instance_name:TeamCityV2_test_build',
+            'project_id:TeamCityV2Project',
+            'result:failure',
+            'server:http://localhost:8111',
+            'test_name:tests.test_foo.test_bop',
+            'test_tag:ci_builds',
+            'type:build',
+        ],
+    },
+    {
+        'value': 0,
+        'tags': [
+            'build_config:TeamCityV2Project_Build',
+            'build_env:test',
+            'instance_name:TeamCityV2_test_build',
+            'project_id:TeamCityV2Project',
+            'result:normal',
+            'server:http://localhost:8111',
+            'test_name:tests.test_bar.test_foo',
+            'test_tag:ci_builds',
+            'type:build',
+        ],
+    },
+    {
+        'value': 3,
+        'tags': [
+            'build_config:TeamCityV2Project_Build',
+            'build_env:test',
+            'instance_name:TeamCityV2_test_build',
+            'project_id:TeamCityV2Project',
+            'result:unknown',
+            'server:http://localhost:8111',
+            'test_name:tests.test_bar.test_zip',
+            'test_tag:ci_builds',
+            'type:build',
+        ],
+    },
+    {
+        'value': 2,
+        'tags': [
+            'build_config:TeamCityV2Project_Build',
+            'build_env:test',
+            'instance_name:TeamCityV2_test_build',
+            'project_id:TeamCityV2Project',
+            'result:error',
+            'server:http://localhost:8111',
+            'test_name:tests.test_bar.test_zap',
+            'test_tag:ci_builds',
+            'type:build',
+        ],
+    },
+    {
+        'value': 1,
+        'tags': [
+            'build_config:TeamCityV2Project_Build',
+            'build_env:test',
+            'instance_name:TeamCityV2_test_build',
+            'project_id:TeamCityV2Project',
+            'result:warning',
+            'server:http://localhost:8111',
+            'test_name:tests.test_zip.test_bar',
+            'test_tag:ci_builds',
+            'type:build',
+        ],
+    },
+]
+
+LEGACY_BUILD_TAGS = [
+    'server:http://localhost:8111',
+    'type:build',
+    'build_config:TestProject_TestBuild',
+    'project_id:TestProject',
+    'instance_name:Legacy test build',
+    'one:test',
+    'one:tag',
+]
+
+BUILD_TAGS = [
+    'server:http://localhost:8111',
+    'type:build',
+    'build_config:TeamCityV2Project_Build',
+    'project_id:TeamCityV2Project',
+    'instance_name:TeamCityV2_test_build',
+    'build_env:test',
+    'test_tag:ci_builds',
+]
+
+NEW_SUCCESSFUL_BUILD = {
+    'id': 232,
+    'buildTypeId': 'TeamCityV2Project_Build',
+    'number': '11',
+    'status': 'SUCCESS',
+    'state': 'finished',
+    'branchName': 'main',
+    'defaultBranch': True,
+    'href': '/guestAuth/app/rest/builds/id:232',
+    'webUrl': 'http://localhost:8111/viewLog.html?buildId=232&buildTypeId=TeamCityV2Project_Build',
+    'finishOnAgentDate': '20220913T210820+0000',
+}
+
+NEW_FAILED_BUILD = {
+    'id': 233,
+    'buildTypeId': 'TeamCityV2Project_FailedBuild',
+    'number': '12',
+    'status': 'FAILURE',
+    'state': 'finished',
+    'branchName': 'main',
+    'defaultBranch': True,
+    'href': '/guestAuth/app/rest/builds/id:233',
+    'webUrl': 'http://localhost:8111/viewLog.html?buildId=233&buildTypeId=TeamCityV2Project_FailedBuild',
+    'finishOnAgentDate': '20220913T210826+0000',
+}
 
 
 def get_fixture_path(filename):

@@ -5,14 +5,38 @@
   "testOccurrence": [
     {
       "id": "build:(id:232),id:237",
-      "name": "tests.test_todolist.test_list",
+      "name": "tests.test_foo.test_bar",
       "status": "SUCCESS",
       "href": "/guestAuth/app/rest/testOccurrences/build:(id:232),id:237"
     },
     {
+      "id": "build:(id:232),id:238",
+      "name": "tests.test_foo.test_bop",
+      "status": "FAILURE",
+      "href": "/guestAuth/app/rest/testOccurrences/build:(id:232),id:238"
+    },
+        {
+      "id": "build:(id:232),id:239",
+      "name": "tests.test_bar.test_foo",
+      "status": "NORMAL",
+      "href": "/guestAuth/app/rest/testOccurrences/build:(id:232),id:239"
+    },
+    {
+      "id": "build:(id:232),id:240",
+      "name": "tests.test_bar.test_zip",
+      "status": "UNKNOWN",
+      "href": "/guestAuth/app/rest/testOccurrences/build:(id:232),id:240"
+    },
+        {
+      "id": "build:(id:232),id:241",
+      "name": "tests.test_bar.test_zap",
+      "status": "ERROR",
+      "href": "/guestAuth/app/rest/testOccurrences/build:(id:232),id:241"
+    },
+    {
       "id": "build:(id:232),id:242",
-      "name": "tests.test_todolist.test_something_else",
-      "status": "SUCCESS",
+      "name": "tests.test_zip.test_bar",
+      "status": "WARNING",
       "href": "/guestAuth/app/rest/testOccurrences/build:(id:232),id:242"
     }
   ]
