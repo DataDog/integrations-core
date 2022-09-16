@@ -306,6 +306,16 @@ instances:
         #
         # extra_performance_metrics: false
 
+        ## @param disable_binlog_size_metrics - boolean - optional - default: false
+        ## Set to `true` to disable the collection of binary log sizes.
+        ##
+        ## Some MySQL implementations like Aurora can keep thousands of files, leading to `SHOW BINARY LOGS;`
+        ## taking seconds to run.
+        ##
+        ## This impacts the `mysql.binlog.disk_use` metric.
+        #
+        # disable_binlog_size_metrics: false
+
     ## @param dbm - boolean - optional - default: false
     ## Set to `true` enable Database Monitoring.
     #

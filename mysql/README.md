@@ -120,6 +120,7 @@ Edit the `mysql.d/conf.yaml` file, in the `conf.d/` folder at the root of your [
         extra_performance_metrics: true
         schema_size_metrics: false
         disable_innodb_metrics: false
+        disable_binlog_size_metrics: false
   ```
 
 **Note**: Wrap your password in single quotes in case a special character is present.

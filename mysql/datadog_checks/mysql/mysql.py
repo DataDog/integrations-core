@@ -376,7 +376,9 @@ class MySql(AgentCheck):
             self.innodb_stats.process_innodb_stats(results, self._config.options, metrics)
 
         # Binary log statistics
-        if self._get_variable_enabled(results, 'log_bin'):
+        if not is_affirmative(
+            self._config.options.get('disable_binlog_size_metrics', False)
+        ) and self._get_variable_enabled(results, 'log_bin'):
             results['Binlog_space_usage_bytes'] = self._get_binary_log_stats(db)
 
         # Compute key cache utilization metric
