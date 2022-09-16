@@ -1,5 +1,10 @@
 # CHANGELOG - CockroachDB
 
+## 2.4.0 / 2022-09-16
+
+* [Added] Update HTTP config spec templates. See [#12890](https://github.com/DataDog/integrations-core/pull/12890).
+* [Added] Document Openmetrics V2 version of backup metrics. See [#12730](https://github.com/DataDog/integrations-core/pull/12730).
+
 ## 2.3.0 / 2022-08-05 / Agent 7.39.0
 
 * [Added] [CockroachDB] Add additional metrics for CockroachDB integration. See [#12382](https://github.com/DataDog/integrations-core/pull/12382). Thanks [tomellis91](https://github.com/tomellis91).

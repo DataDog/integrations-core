@@ -1,5 +1,10 @@
 # CHANGELOG - Vault
 
+## 3.3.2 / 2022-09-16
+
+* [Fixed] Do not use the `client_token` if `no_token` is true with the openmetrics v1 implementation. See [#12776](https://github.com/DataDog/integrations-core/pull/12776).
+* [Fixed] Use the `client_token` option with the openmetrics v2 implementation. See [#12764](https://github.com/DataDog/integrations-core/pull/12764).
+
 ## 3.3.1 / 2022-08-05 / Agent 7.39.0
 
 * [Fixed] Properly read `collect_secondary_dr` and improve code readability. See [#12435](https://github.com/DataDog/integrations-core/pull/12435).

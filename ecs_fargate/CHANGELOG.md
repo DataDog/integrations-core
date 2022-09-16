@@ -1,5 +1,9 @@
 # CHANGELOG - ECS Fargate
 
+## 3.2.0 / 2022-09-16
+
+* [Added] Update HTTP config spec templates. See [#12890](https://github.com/DataDog/integrations-core/pull/12890).
+
 ## 3.1.1 / 2022-04-11 / Agent 7.36.0
 
 * [Fixed] Remove outdated warning in the description for the `tls_ignore_warning` option. See [#11800](https://github.com/DataDog/integrations-core/pull/11800).
