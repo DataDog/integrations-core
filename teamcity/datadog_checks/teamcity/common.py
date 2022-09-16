@@ -79,30 +79,36 @@ def should_include_build_config(check, build_config):
     return True
 
 
-def construct_event(is_deployment, instance_name, host, new_build, build_tags):
+def construct_event(check, new_build):
     """
     Construct event based on build status.
     """
+    instance_name = check.instance_name
     build_id = new_build['id']
     build_number = new_build['number']
     build_config = new_build['buildTypeId']
     build_status = EVENT_STATUS_MAP.get(new_build['status'])
-    event_tags = deepcopy(build_tags)
+    event_tags = deepcopy(check.build_tags)
     event_tags.extend(['build_id:{}'.format(build_id), 'build_number:{}'.format(build_number)])
 
-    if not instance_name:
+    if not check.instance_name:
         instance_name = build_config
 
-    teamcity_event = deepcopy(DEPLOYMENT_EVENT) if is_deployment else deepcopy(BUILD_EVENT)
+    if check.is_deployment:
+        teamcity_event = deepcopy(DEPLOYMENT_EVENT)
+        teamcity_event['tags'].append('type:deployment')
+    else:
+        teamcity_event = deepcopy(BUILD_EVENT)
+        teamcity_event['tags'].append('build')
 
     teamcity_event['timestamp'] = int(time.time())
     teamcity_event['msg_title'] = teamcity_event['msg_title'].format(
-        instance_name=instance_name, host=host, build_status=build_status
+        instance_name=instance_name, host=check.host, build_status=build_status
     )
     teamcity_event['msg_text'] = teamcity_event['msg_text'].format(
-        build_number=new_build['number'], host=host, build_webUrl=new_build['webUrl']
+        build_number=new_build['number'], host=check.host, build_webUrl=new_build['webUrl']
     )
-    teamcity_event['host'] = host
+    teamcity_event['host'] = check.host
     teamcity_event['tags'].extend(event_tags)
 
     return teamcity_event

@@ -7,7 +7,14 @@ from datadog_checks.base import AgentCheck
 
 EVENT_STATUS_MAP = {"SUCCESS": "successful", "FAILURE": "failed"}
 
-SERVICE_CHECK_STATUS_MAP = {"SUCCESS": AgentCheck.OK, "FAILURE": AgentCheck.CRITICAL}
+SERVICE_CHECK_STATUS_MAP = {
+    "SUCCESS": AgentCheck.OK,
+    "FAILURE": AgentCheck.CRITICAL,
+    "UNKNOWN": AgentCheck.UNKNOWN,
+    "NORMAL": AgentCheck.OK,
+    "WARNING": AgentCheck.WARNING,
+    "ERROR": AgentCheck.CRITICAL,
+}
 
 RESOURCE_URL_MAP = {
     "build_configs": "{base_url}/app/rest/buildTypes?locator=project(id:{project_id})",
@@ -30,14 +37,14 @@ DEPLOYMENT_EVENT = {
     "event_type": "teamcity_deployment",
     "msg_title": "{instance_name} deployed to {host} {build_status}",
     "msg_text": "Build Number: {build_number}\n\nMore Info: {build_webUrl}",
-    "tags": ["teamcity:deployment"],
+    "tags": [],
 }
 
 BUILD_EVENT = {
     "event_type": "build",
     "msg_title": "Build for {instance_name} {build_status}",
     "msg_text": "Build Number: {build_number}\nDeployed To: {host}\n\nMore Info: {build_webUrl}",
-    "tags": ["build"],
+    "tags": [],
 }
 
 DEPLOYMENT_EVENT.update(EVENT_BASE)

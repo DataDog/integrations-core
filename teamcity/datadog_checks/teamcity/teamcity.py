@@ -55,6 +55,7 @@ class TeamCityCheck(AgentCheck):
         self.basic_http_auth = is_affirmative(self.instance.get('basic_http_authentication', False))
         self.auth_type = 'httpAuth' if self.basic_http_auth else 'guestAuth'
         self.tags = set(self.instance.get('tags', []))
+        self.build_tags = []
 
         server = self.instance.get('server')
         self.server_url = self._normalize_server_url(server)
@@ -112,13 +113,13 @@ class TeamCityCheck(AgentCheck):
                     self.bc_store.set_build_config(build_config_id, project_id)
                     self.bc_store.set_last_build_id(build_config_id, last_build_id)
 
-    def _send_events(self, new_build, build_tags):
-        teamcity_event = construct_event(self.is_deployment, self.instance_name, self.host, new_build, build_tags)
+    def _send_events(self, new_build):
+        teamcity_event = construct_event(self, new_build)
         self.log.trace('Submitting event: %s', teamcity_event)
         self.event(teamcity_event)
-        self.service_check('build.status', SERVICE_CHECK_STATUS_MAP.get(new_build['status']), tags=build_tags)
+        self.service_check('build.status', SERVICE_CHECK_STATUS_MAP.get(new_build['status']), tags=self.build_tags)
 
-    def _collect_build_stats(self, new_build, build_tags):
+    def _collect_build_stats(self, new_build):
         build_id = new_build['id']
         build_stats = get_response(self, 'build_stats', build_conf=self.build_config, build_id=build_id)
 
@@ -128,23 +129,22 @@ class TeamCityCheck(AgentCheck):
                 metric_name, additional_tags, method = build_metric(stat_property_name)
                 metric_value = stat_property['value']
                 method = getattr(self, method)
-                method(metric_name, metric_value, tags=build_tags + additional_tags)
+                method(metric_name, metric_value, tags=self.build_tags + additional_tags)
 
-    def _collect_test_results(self, new_build, build_tags):
+    def _collect_test_results(self, new_build):
         build_id = new_build['id']
         test_results = get_response(self, 'test_occurrences', build_id=build_id)
 
         if test_results:
             for test in test_results['testOccurrence']:
-                test_status = test['status']
-                value = 1 if test_status == 'SUCCESS' else 0
+                test_status = SERVICE_CHECK_STATUS_MAP[test['status']]
                 tags = [
-                    'result:{}'.format(test_status.lower()),
+                    'result:{}'.format(test['status'].lower()),
                     'test_name:{}'.format(test['name']),
                 ]
-                self.gauge('test_result', value, tags=build_tags + tags)
+                self.service_check('test.result', test_status, tags=self.build_tags + tags)
 
-    def _collect_build_problems(self, new_build, build_tags):
+    def _collect_build_problems(self, new_build):
         build_id = new_build['id']
         problem_results = get_response(self, 'build_problems', build_id=build_id)
 
@@ -152,12 +152,13 @@ class TeamCityCheck(AgentCheck):
             for problem in problem_results['problemOccurrence']:
                 problem_type = problem['type']
                 problem_identity = problem['identity']
-                tags = [
+                problem_tags = [
                     'problem_type:{}'.format(problem_type),
                     'problem_identity:{}'.format(problem_identity),
                 ]
-                self.service_check('build.problem', AgentCheck.WARNING, tags=build_tags + tags)
-        self.service_check('build.problem', AgentCheck.OK, tags=build_tags + tags)
+                self.service_check('build.problem', AgentCheck.WARNING, tags=self.build_tags + problem_tags)
+        else:
+            self.service_check('build.problem', AgentCheck.OK, tags=self.build_tags)
 
     def _collect_new_builds(self):
         last_build_id = self.bc_store.get_last_build_id(self.build_config)
@@ -168,25 +169,27 @@ class TeamCityCheck(AgentCheck):
     def _collect(self):
         new_builds = self._collect_new_builds()
         if new_builds:
-            last_build = new_builds['build'][0]
+            new_last_build = new_builds['build'][0]
             self.log.debug("Found new builds: %s", [build['buildTypeId'] for build in new_builds['build']])
             self.log.trace("New builds payload: %s", new_builds)
-            self.bc_store.set_last_build_id(self.build_config, last_build['id'])
+            self.bc_store.set_last_build_id(self.build_config, new_last_build['id'])
 
             for build in new_builds['build']:
+                project_id = self.bc_store.get_build_config(self.build_config).project_id
                 build_tags = list(deepcopy(self.tags))
-                build_tags.extend(['build_config:{}'.format(build['buildTypeId'])])
+                build_tags.extend(['build_config:{}'.format(self.build_config), 'project_id:{}'.format(project_id)])
+                self.build_tags = build_tags
                 self.log.debug(
                     "New build with id %s (build number: %s), saving and alerting.", build['id'], build['number']
                 )
                 if self.collect_events:
-                    self._send_events(build, build_tags)
+                    self._send_events(build)
                 if self.collect_build_metrics:
-                    self._collect_build_stats(build, build_tags)
+                    self._collect_build_stats(build)
                 if self.collect_test_metrics:
-                    self._collect_test_results(build, build_tags)
+                    self._collect_test_results(build)
                 if self.collect_problem_checks:
-                    self._collect_build_problems(build, build_tags)
+                    self._collect_build_problems(build)
         else:
             self.log.debug('No new builds found.')
 
