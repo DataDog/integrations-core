@@ -1,5 +1,9 @@
 # CHANGELOG - php_fpm
 
+## 2.2.0 / 2022-09-16
+
+* [Added] Update HTTP config spec templates. See [#12890](https://github.com/DataDog/integrations-core/pull/12890).
+
 ## 2.1.1 / 2022-06-27 / Agent 7.38.0
 
 * [Fixed] Fix missing import in PHP-FPM's check. See [#12365](https://github.com/DataDog/integrations-core/pull/12365). Thanks [DennisCGc](https://github.com/DennisCGc).
