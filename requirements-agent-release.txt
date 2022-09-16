@@ -162,7 +162,7 @@ datadog-vsphere==6.2.0
 datadog-weblogic==1.1.1
 datadog-win32-event-log==2.13.2; sys_platform == 'win32'
 datadog-windows-performance-counters==1.4.0; sys_platform == 'win32'
-datadog-windows-service==4.2.1; sys_platform == 'win32'
+datadog-windows-service==4.3.0; sys_platform == 'win32'
 datadog-wmi-check==1.15.1; sys_platform == 'win32'
 datadog-yarn==4.1.0
 datadog-zk==4.2.0; sys_platform != 'win32'
