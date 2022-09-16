@@ -393,7 +393,7 @@ class AerospikeCheck(AgentCheck):
     def get_metric_name(self, line):
         # match only works at the beginning
         # ':' or ';' are not allowed in namespace-name: https://www.aerospike.com/docs/guide/limitations.html
-        ns_metric_name_match = re.match(r'\{([^}:;]+)\}-(\w+):', line)
+        ns_metric_name_match = re.match(r'\{([^}:;]+)\}-([-\w]+):', line)
         if ns_metric_name_match:
             return ns_metric_name_match.groups()[0], ns_metric_name_match.groups()[1]
         elif line.startswith("batch-index"):
