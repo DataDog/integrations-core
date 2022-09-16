@@ -268,7 +268,7 @@ def test_invalid_pattern_regex(aggregator, check, instance_basic_dict):
     instance_basic_dict['windows_service_startup_type_tag'] = True
     c = check(instance_basic_dict)
 
-    with pytest.raises(Exception, match=r"Regular expression syntax error in '\(foo': missing \)"):
+    with pytest.raises(Exception, match=r"Regular expression syntax error in '\(foo':"):
         c.check(instance_basic_dict)
 
 
