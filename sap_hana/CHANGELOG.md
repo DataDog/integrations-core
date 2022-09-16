@@ -1,5 +1,9 @@
 # CHANGELOG - SAP HANA
 
+## 2.2.1 / 2022-09-16
+
+* [Fixed] Change docker image / Do not emit message on OK service check. See [#12826](https://github.com/DataDog/integrations-core/pull/12826).
+
 ## 2.2.0 / 2022-08-01 / Agent 7.39.0
 
 * [Added] Add retries to test and emit warnings when connections fail. See [#12528](https://github.com/DataDog/integrations-core/pull/12528).
