@@ -418,7 +418,7 @@ class AerospikeCheck(AgentCheck):
 
             ns, metric_name = self.get_metric_name(line)
             if metric_name is None:
-                return
+                continue
 
             namespace_tags = ['namespace:{}'.format(ns)] if ns else []
             namespace_tags.extend(self._tags)
@@ -474,7 +474,7 @@ class AerospikeCheck(AgentCheck):
 
             ns, metric_name = self.get_metric_name(line)
             if metric_name is None:
-                return
+                continue
 
             # need search because this isn't at the beginning
             ops_per_sec = re.search(r'(\w+\/\w+)', line)
