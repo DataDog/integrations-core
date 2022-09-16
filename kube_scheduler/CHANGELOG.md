@@ -1,5 +1,9 @@
 # CHANGELOG - Kube_scheduler
 
+## 4.5.0 / 2022-09-16
+
+* [Added] Update HTTP config spec templates. See [#12890](https://github.com/DataDog/integrations-core/pull/12890).
+
 ## 4.4.0 / 2022-08-05 / Agent 7.39.0
 
 * [Added] Add pending pods metrics for kube_scheduler. See [#12673](https://github.com/DataDog/integrations-core/pull/12673).
