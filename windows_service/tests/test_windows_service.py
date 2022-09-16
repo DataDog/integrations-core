@@ -69,7 +69,7 @@ def test_all(aggregator, check, instance_all):
 
 def test_startup_type_filter_automatic(aggregator, check, instance_startup_type_filter):
     instance_startup_type_filter['services'] = [
-        {'startup_type': '^automatic$'},
+        {'startup_type': 'automatic'},
     ]
     c = check(instance_startup_type_filter)
     c.check(instance_startup_type_filter)
@@ -83,25 +83,8 @@ def test_startup_type_filter_automatic(aggregator, check, instance_startup_type_
 
 def test_startup_type_filter_automatic_and_delayed(aggregator, check, instance_startup_type_filter):
     instance_startup_type_filter['services'] = [
-        {'startup_type': '^automatic$'},
-        {'startup_type': 'automatic_delayed_start'},
-    ]
-    c = check(instance_startup_type_filter)
-    c.check(instance_startup_type_filter)
-
-    # Make sure we got at least one
-    aggregator.assert_service_check(c.SERVICE_CHECK_NAME, status=c.OK, at_least=1)
-    # Assert all found were automatic or delayed
-    for sc in aggregator.service_checks(c.SERVICE_CHECK_NAME):
-        assert (
-            'windows_service_startup_type:automatic' in sc.tags
-            or 'windows_service_startup_type:automatic_delayed_start' in sc.tags
-        )
-
-
-def test_startup_type_filter_automatic_and_delayed_pattern(aggregator, check, instance_startup_type_filter):
-    instance_startup_type_filter['services'] = [
         {'startup_type': 'automatic'},
+        {'startup_type': 'automatic_delayed_start'},
     ]
     c = check(instance_startup_type_filter)
     c.check(instance_startup_type_filter)

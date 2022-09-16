@@ -24,9 +24,6 @@ class ServiceFilter(object):
             if self.name is not None:
                 pattern = self.name
                 self._name_re = re.compile(pattern, SERVICE_PATTERN_FLAGS)
-            if self.startup_type is not None:
-                pattern = self.startup_type
-                self._startup_type_re = re.compile(pattern, SERVICE_PATTERN_FLAGS)
         except re.error as e:
             raise_from(Exception("Regular expression syntax error in '{}': {}".format(pattern, str(e))), None)
 
@@ -35,7 +32,7 @@ class ServiceFilter(object):
             if not self._name_re.match(service_view.name):
                 return False
         if self.startup_type is not None:
-            if not self._startup_type_re.match(service_view.startup_type_string()):
+            if self.startup_type.lower() != service_view.startup_type_string().lower():
                 return False
         return True
 
@@ -44,7 +41,7 @@ class ServiceFilter(object):
         if self.name is not None:
             vals.append('name={}'.format(self._name_re.pattern))
         if self.startup_type is not None:
-            vals.append('startup_type={}'.format(self._startup_type_re.pattern))
+            vals.append('startup_type={}'.format(self.startup_type))
         # Example:
         #   - ServiceFilter(name=EventLog)
         #   - ServiceFilter(startup_type=automatic)

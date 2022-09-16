@@ -13,7 +13,7 @@ files:
               List of services to monitor e.g. Dnscache, wmiApSrv, etc.
 
               Services can also be selectively monitored by their startup type.
-              Possible values for the `startup_type` pattern:
+              The possible values for `startup_type` are:
                 - disabled
                 - manual
                 - automatic
@@ -22,9 +22,9 @@ files:
               If any service is set to `ALL`, all services registered with the SCM will be monitored, and
               all other patterns provided in this instance will be ignored.
 
-              Patterns are case insensitive. `ALL` is case sensitive.
+              Service name patterns are case insensitive. `ALL` is case sensitive.
 
-              NOTE: The configured patterns will match all services starting with the pattern. For example,
+              NOTE: The service name patterns will match all services starting with the pattern. For example,
               if `service` is provided, it will match all services starting with `service` as if service.* is configured.
               For an exact match, use ^service$
             required: true
@@ -36,8 +36,8 @@ files:
                   - type: object
               example:
                 - <SERVICE_NAME_1>
-                - <SERVICE_NAME_2>
-                - startup_type: ^automatic$
+                - name: <SERVICE_NAME_2>
+                - startup_type: automatic
           - name: disable_legacy_service_tag
             description: |
               Whether or not to stop submitting the tag `service` that has been renamed
