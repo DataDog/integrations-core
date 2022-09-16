@@ -22,11 +22,13 @@ class ServiceFilter(object):
     def _init_patterns(self):
         try:
             if self.name is not None:
-                self._name_re = re.compile(self.name, SERVICE_PATTERN_FLAGS)
+                pattern = self.name
+                self._name_re = re.compile(pattern, SERVICE_PATTERN_FLAGS)
             if self.startup_type is not None:
-                self._startup_type_re = re.compile(self.startup_type, SERVICE_PATTERN_FLAGS)
+                pattern = self.startup_type
+                self._startup_type_re = re.compile(pattern, SERVICE_PATTERN_FLAGS)
         except re.error as e:
-            raise_from(Exception("Regular expression syntax error in '{}': {}".format(e.pattern, str(e))), None)
+            raise_from(Exception("Regular expression syntax error in '{}': {}".format(pattern, str(e))), None)
 
     def match(self, service_view):
         if self.name is not None:
