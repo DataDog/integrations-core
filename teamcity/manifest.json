@@ -9,7 +9,7 @@
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
     "description": "Track builds and understand the performance impact of every deploy.",
-    "title": "Teamcity Integration",
+    "title": "Teamcity",
     "media": [],
     "classifier_tags": [
       "Supported OS::Linux",
