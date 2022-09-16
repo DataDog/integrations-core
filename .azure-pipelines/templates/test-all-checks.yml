@@ -261,6 +261,9 @@ jobs:
     - checkName: iis
       displayName: IIS
       os: windows
+    - checkName: impala
+      displayName: Impala
+      os: linux
     - checkName: istio
       displayName: Istio
       os: linux

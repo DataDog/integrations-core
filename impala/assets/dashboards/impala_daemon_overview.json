@@ -1,0 +1,1209 @@
+{
+  "title": "Impala - Daemon - Overview",
+  "description": "## Impala Daemon\n\nThis dashboard provides a high-level overview of your Impala Daemons so you can monitor their performance and health.\n\n- [Official Impala integration docs](https://docs.datadoghq.com/integrations/impala/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
+  "widgets": [
+    {
+      "id": 2064009195524202,
+      "definition": {
+        "title": "About Impala",
+        "title_align": "center",
+        "type": "group",
+        "banner_img": "/static/images/logos/impala_large.svg",
+        "show_title": false,
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 2426290674948290,
+            "definition": {
+              "type": "note",
+              "content": "This is a high-level overview of your Impala Daemons, so you can track health status, search and indexing performance, and resource utilization metrics from all your services and be better prepared to address potential issues.\n\n##### [**Datadog Impala integration docs&nbsp;↗**](https://docs.datadoghq.com/integrations/impala/)",
+              "background_color": "transparent",
+              "font_size": "18",
+              "text_align": "left",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 2
+            }
+          }
+        ],
+        "template_variables": []
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 6,
+        "height": 5
+      }
+    },
+    {
+      "id": 6087938154744734,
+      "definition": {
+        "title": "Overview",
+        "title_align": "left",
+        "type": "group",
+        "background_color": "blue",
+        "show_title": true,
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 7237624004875720,
+            "definition": {
+              "title": "Healthy services",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "check_status",
+              "check": "impala.daemon.openmetrics.health",
+              "grouping": "cluster",
+              "group_by": [],
+              "tags": []
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 2
+            }
+          },
+          {
+            "id": 5605023638945858,
+            "definition": {
+              "type": "note",
+              "content": "The number of daemon processes running. \n\nIf a daemon process is not running, the Statestore will forward the information to the other daemons so they won't try to reach it until it is back up.",
+              "background_color": "blue",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": true,
+              "tick_pos": "50%",
+              "tick_edge": "top",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 6,
+              "height": 2
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 6,
+        "y": 0,
+        "width": 6,
+        "height": 5
+      }
+    },
+    {
+      "id": 4652375794989892,
+      "definition": {
+        "title": "System",
+        "title_align": "left",
+        "type": "group",
+        "background_color": "pink",
+        "show_title": true,
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 5329401152847312,
+            "definition": {
+              "title": "Memory",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "In use",
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Allocated",
+                      "formula": "query2"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "avg:impala.daemon.jvm.total_current_usage{$service,$host,$scope} by {service}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    },
+                    {
+                      "query": "avg:impala.daemon.memory.mapped{$service,$host,$scope} by {service}",
+                      "data_source": "metrics",
+                      "name": "query2"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": false
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 2
+            }
+          },
+          {
+            "id": 5401350379699492,
+            "definition": {
+              "title": "Threads",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Running",
+                      "formula": "query1"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "avg:impala.daemon.thread_manager.running_threads{$service,$host,$scope} by {service}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 0,
+              "width": 6,
+              "height": 2
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 5,
+        "width": 12,
+        "height": 3
+      }
+    },
+    {
+      "id": 2046892499652374,
+      "definition": {
+        "title": "Query",
+        "title_align": "left",
+        "type": "group",
+        "background_color": "purple",
+        "show_title": true,
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 205374525166216,
+            "definition": {
+              "title": "Running",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Running",
+                      "formula": "query4"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "sum:impala.daemon.num_queries_executing{$service,$host,$scope}",
+                      "data_source": "metrics",
+                      "name": "query4"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "area"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 2
+            }
+          },
+          {
+            "id": 7288543331687400,
+            "definition": {
+              "title": "Average duration",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Duration",
+                      "formula": "query1 / query2"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "avg:impala.daemon.query_durations_ms.sum{$service,$host,$scope}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    },
+                    {
+                      "query": "avg:impala.daemon.query_durations_ms.count{$service,$host,$scope}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query2"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ],
+              "yaxis": {
+                "include_zero": false,
+                "scale": "log"
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 0,
+              "width": 6,
+              "height": 2
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 8,
+        "width": 12,
+        "height": 3
+      }
+    },
+    {
+      "id": 7189394688037754,
+      "definition": {
+        "title": "Catalog",
+        "type": "group",
+        "background_color": "gray",
+        "show_title": true,
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 1416145666939710,
+            "definition": {
+              "title": "Cache",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "vertical",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Hit",
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Miss",
+                      "formula": "query2"
+                    },
+                    {
+                      "alias": "Eviction",
+                      "formula": "query3"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "sum:impala.daemon.catalog_cache.hit.count{$service,$host,$scope}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    },
+                    {
+                      "query": "sum:impala.daemon.catalog_cache.miss.count{$service,$host,$scope}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query2"
+                    },
+                    {
+                      "query": "sum:impala.daemon.catalog_cache.eviction.count{$service,$host,$scope}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query3"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 2809650294869030,
+            "definition": {
+              "title": "Cache load time",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Duration",
+                      "formula": "query1"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "sum:impala.daemon.catalog_cache.total_load_time.count{$service,$host,$scope}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 0,
+              "width": 6,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 11,
+        "width": 12,
+        "height": 4
+      }
+    },
+    {
+      "id": 8163426691973574,
+      "definition": {
+        "title": "IO Manager Queue",
+        "title_align": "left",
+        "type": "group",
+        "background_color": "yellow",
+        "show_title": true,
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 241557364178120,
+            "definition": {
+              "title": "Errors by service",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "limit": {
+                        "order": "desc"
+                      }
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "sum:impala.daemon.io_mgr_queue.write_io_error_total.count{$service,$host,$scope} by {service}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "sum"
+                    }
+                  ]
+                }
+              ],
+              "type": "sunburst",
+              "legend": {
+                "type": "inline"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 3,
+              "height": 3
+            }
+          },
+          {
+            "id": 8620377399666788,
+            "definition": {
+              "title": "Errors by queue",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "vertical",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "sum:impala.daemon.io_mgr_queue.write_io_error_total.count{$service,$io_manager_queue_id,$host,$scope} by {id}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 3,
+              "y": 0,
+              "width": 5,
+              "height": 3
+            }
+          },
+          {
+            "id": 2788476051196178,
+            "definition": {
+              "title": "Errors by queue",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_table",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Errors",
+                      "conditional_formats": [
+                        {
+                          "palette": "black_on_light_green",
+                          "comparator": "<",
+                          "value": 1
+                        },
+                        {
+                          "palette": "black_on_light_red",
+                          "comparator": ">",
+                          "value": 1
+                        }
+                      ],
+                      "limit": {
+                        "count": 25,
+                        "order": "desc"
+                      },
+                      "cell_display_mode": "bar",
+                      "formula": "query1"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "sum:impala.daemon.io_mgr_queue.write_io_error_total.count{$service,$io_manager_queue_id,$host,$scope} by {id}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "avg"
+                    }
+                  ]
+                }
+              ]
+            },
+            "layout": {
+              "x": 8,
+              "y": 0,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 3030580126099060,
+            "definition": {
+              "title": "Read latency",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Latency",
+                      "formula": "query1 / query2"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "sum:impala.daemon.io_mgr_queue.read_latency.sum{$service,$io_manager_queue_id,$host,$scope}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    },
+                    {
+                      "query": "sum:impala.daemon.io_mgr_queue.read_latency.count{$service,$io_manager_queue_id,$host,$scope}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query2"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 6490765743851436,
+            "definition": {
+              "title": "Write latency",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Latency",
+                      "formula": "query1 / query2"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "sum:impala.daemon.io_mgr_queue.write_latency.sum{$service,$io_manager_queue_id,$host,$scope}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    },
+                    {
+                      "query": "sum:impala.daemon.io_mgr_queue.write_latency.count{$service,$io_manager_queue_id,$host,$scope}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query2"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 3,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 1473511510677666,
+            "definition": {
+              "title": "Read size",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Size",
+                      "formula": "query1 / query2"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "sum:impala.daemon.io_mgr_queue.read_size.sum{$service,$io_manager_queue_id,$host,$scope}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    },
+                    {
+                      "query": "sum:impala.daemon.io_mgr_queue.read_size.count{$service,$io_manager_queue_id,$host,$scope}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query2"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 6,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 2135886512094958,
+            "definition": {
+              "title": "Write size",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Size",
+                      "formula": "query1 / query2"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "sum:impala.daemon.io_mgr_queue.write_size.sum{$service,$io_manager_queue_id,$host,$scope}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    },
+                    {
+                      "query": "sum:impala.daemon.io_mgr_queue.write_size.count{$service,$io_manager_queue_id,$host,$scope}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query2"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 6,
+              "width": 6,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 12,
+        "height": 10,
+        "is_column_break": true
+      }
+    },
+    {
+      "id": 4866872922837388,
+      "definition": {
+        "title": "Logs",
+        "title_align": "left",
+        "type": "group",
+        "background_color": "white",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 2081377763432968,
+            "definition": {
+              "title": "Activity by host",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_table",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Logs",
+                      "cell_display_mode": "bar",
+                      "limit": {
+                        "count": 10,
+                        "order": "desc"
+                      },
+                      "formula": "query1"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "search": {
+                        "query": "source:impala service_type:daemon $service $host $scope"
+                      },
+                      "data_source": "logs",
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "host",
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc"
+                          },
+                          "limit": 100
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 1416449885878176,
+            "definition": {
+              "title": "Activity by service",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_table",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Logs",
+                      "cell_display_mode": "bar",
+                      "limit": {
+                        "count": 100,
+                        "order": "desc"
+                      },
+                      "formula": "query1"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "search": {
+                        "query": "source:impala service_type:daemon $service $host $scope"
+                      },
+                      "data_source": "logs",
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "service",
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc"
+                          },
+                          "limit": 10
+                        },
+                        {
+                          "facet": "host",
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc"
+                          },
+                          "limit": 10
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            "layout": {
+              "x": 4,
+              "y": 0,
+              "width": 8,
+              "height": 2
+            }
+          },
+          {
+            "id": 1141352422116882,
+            "definition": {
+              "title": "Volume by status",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "limit": {
+                        "order": "desc"
+                      }
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "search": {
+                        "query": "source:impala service_type:daemon $service $host $scope"
+                      },
+                      "data_source": "logs",
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "status",
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc"
+                          },
+                          "limit": 10
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "type": "sunburst",
+              "hide_total": false,
+              "legend": {
+                "hide_percent": false,
+                "type": "inline"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 991137175508150,
+            "definition": {
+              "title": "Volume by status",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "max",
+                "value"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query2"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "search": {
+                        "query": "source:impala service_type:daemon $service $host $scope"
+                      },
+                      "data_source": "logs",
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "name": "query2",
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "status",
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc"
+                          },
+                          "limit": 10
+                        }
+                      ]
+                    }
+                  ],
+                  "style": {
+                    "palette": "semantic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "label": "",
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 4,
+              "y": 2,
+              "width": 8,
+              "height": 3
+            }
+          },
+          {
+            "id": 4071435744074776,
+            "definition": {
+              "title": "Errors",
+              "title_size": "16",
+              "type": "log_stream",
+              "indexes": [],
+              "query": "status:(error OR critical) source:impala service_type:daemon $service $host $scope",
+              "sort": {
+                "column": "time",
+                "order": "desc"
+              },
+              "columns": [
+                "host",
+                "service"
+              ],
+              "show_date_column": true,
+              "show_message_column": true,
+              "message_display": "inline"
+            },
+            "layout": {
+              "x": 0,
+              "y": 5,
+              "width": 12,
+              "height": 3
+            }
+          },
+          {
+            "id": 5233949610167488,
+            "definition": {
+              "title": "All Logs",
+              "title_size": "16",
+              "type": "log_stream",
+              "indexes": [],
+              "query": "source:impala service_type:daemon $service $host $scope",
+              "sort": {
+                "column": "time",
+                "order": "desc"
+              },
+              "columns": [
+                "core_host",
+                "core_service"
+              ],
+              "show_date_column": true,
+              "show_message_column": true,
+              "message_display": "inline"
+            },
+            "layout": {
+              "x": 0,
+              "y": 8,
+              "width": 12,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 10,
+        "width": 12,
+        "height": 12
+      }
+    }
+  ],
+  "template_variables": [
+    {
+      "name": "service",
+      "prefix": "service",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "io_manager_queue_id",
+      "prefix": "id",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "host",
+      "prefix": "host",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "scope",
+      "prefix": "scope",
+      "available_values": [],
+      "default": "*"
+    }
+  ],
+  "layout_type": "ordered",
+  "is_read_only": false,
+  "notify_list": [],
+  "reflow_type": "fixed",
+  "id": "h56-er6-yfh"
+}
