@@ -1,5 +1,9 @@
 # CHANGELOG - kafka_consumer
 
+## 2.16.0 / 2022-09-16
+
+* [Added] [kafka consumer integration] Put lag in seconds behind a feature flag. See [#12942](https://github.com/DataDog/integrations-core/pull/12942).
+
 ## 2.15.4 / 2022-09-09
 
 * [Fixed] Fix support for OAUTHBEARER SASL mechanism. See [#12891](https://github.com/DataDog/integrations-core/pull/12891).
