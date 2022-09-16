@@ -28,7 +28,7 @@ datadog-clickhouse==2.8.0
 datadog-cloud-foundry-api==2.2.0
 datadog-cockroachdb==2.4.0
 datadog-confluent-platform==1.8.1
-datadog-consul==2.1.0
+datadog-consul==2.2.0
 datadog-coredns==2.2.1; sys_platform == 'linux2'
 datadog-couch==5.1.1
 datadog-couchbase==2.1.0
