@@ -25,8 +25,7 @@ def requirements(ctx):
     echo_info('Freezing check releases')
     checks = get_valid_checks()
 
-    checks.remove('datadog_checks_dev')
-    checks.remove('ddev')
+    checks -= {'datadog_checks_dev', 'ddev'}
 
     entries = []
     for check in checks:
