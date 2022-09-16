@@ -1,5 +1,8 @@
 # CHANGELOG - cert_manager
 
+## 3.0.0 / 2022-09-16
+
+
 ## 2.2.0 / 2021-11-03
 
 * [Added] Add days to certificate expiration widget to default dashboard. See [#1063](https://github.com/DataDog/integrations-extras/pull/1063).
