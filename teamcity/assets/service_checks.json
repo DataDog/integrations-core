@@ -33,19 +33,43 @@
     {
         "agent_version": "7.40.0",
         "integration": "Teamcity",
-        "check": "teamcity.build.problem",
+        "check": "teamcity.build.problems",
         "statuses": [
             "ok",
             "critical"
         ],
         "groups": [
+            "host",
             "build_config",
+            "project_id",
             "server",
             "type",
-            "problem_identity",
-            "problem_type"
+            "problem_type",
+            "problem_identity"
         ],
         "name": "TeamCity build problem health",
-        "description": "Returns `WARNING` if the finished build has encountered a problem. Returns `OK` otherwise."
+        "description": "Returns `CRITICAL` if the finished build has encountered a problem. Returns `OK` otherwise."
+    },
+    {
+        "agent_version": "7.40.0",
+        "integration": "Teamcity",
+        "check": "teamcity.test.results",
+        "statuses": [
+            "ok",
+            "warning",
+            "critical",
+            "unknown"
+        ],
+        "groups": [
+            "host",
+            "build_config",
+            "project_id",
+            "server",
+            "type",
+            "test_status",
+            "test_name"
+        ],
+        "name": "TeamCity build tests status health",
+        "description": "Returns `CRITICAL` if the finished build test has encountered a problem, `WARNING` if it has encountered a warning, or `UNKNOWN` if it has encountered an unknown problem. Returns `OK` otherwise."
     }
 ]
