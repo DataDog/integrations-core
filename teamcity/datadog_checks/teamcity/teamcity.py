@@ -49,7 +49,7 @@ class TeamCityCheck(AgentCheck):
         self.monitored_build_configs = self.instance.get('projects', {})
         self.collect_events = is_affirmative(self.instance.get('collect_events', True))
         self.collect_build_metrics = is_affirmative(self.instance.get('build_config_metrics', True))
-        self.collect_test_metrics = is_affirmative(self.instance.get('test_result_metrics', True))
+        self.collect_test_checks = is_affirmative(self.instance.get('test_result_metrics', True))
         self.collect_problem_checks = is_affirmative(self.instance.get('build_problem_checks', True))
 
         self.basic_http_auth = is_affirmative(self.instance.get('basic_http_authentication', False))
@@ -121,15 +121,19 @@ class TeamCityCheck(AgentCheck):
 
     def _collect_build_stats(self, new_build):
         build_id = new_build['id']
-        build_stats = get_response(self, 'build_stats', build_conf=self.build_config, build_id=build_id)
+        build_stats = get_response(self, 'build_stats', build_id=build_id)
 
         if build_stats:
             for stat_property in build_stats['property']:
                 stat_property_name = stat_property['name']
                 metric_name, additional_tags, method = build_metric(stat_property_name)
-                metric_value = stat_property['value']
-                method = getattr(self, method)
-                method(metric_name, metric_value, tags=self.build_tags + additional_tags)
+                if not metric_name or not method:
+                    self.log.debug('Found unknown build configuration statistic: %s, skipping.', stat_property_name)
+                    continue
+                else:
+                    metric_value = stat_property['value']
+                    method = getattr(self, method)
+                    method(metric_name, metric_value, tags=self.build_tags + additional_tags)
 
     def _collect_test_results(self, new_build):
         build_id = new_build['id']
@@ -139,10 +143,10 @@ class TeamCityCheck(AgentCheck):
             for test in test_results['testOccurrence']:
                 test_status = SERVICE_CHECK_STATUS_MAP[test['status']]
                 tags = [
-                    'result:{}'.format(test['status'].lower()),
+                    'test_status:{}'.format(test['status'].lower()),
                     'test_name:{}'.format(test['name']),
                 ]
-                self.service_check('test.result', test_status, tags=self.build_tags + tags)
+                self.service_check('test.results', test_status, tags=self.build_tags + tags)
 
     def _collect_build_problems(self, new_build):
         build_id = new_build['id']
@@ -156,9 +160,8 @@ class TeamCityCheck(AgentCheck):
                     'problem_type:{}'.format(problem_type),
                     'problem_identity:{}'.format(problem_identity),
                 ]
-                self.service_check('build.problem', AgentCheck.WARNING, tags=self.build_tags + problem_tags)
-        else:
-            self.service_check('build.problem', AgentCheck.OK, tags=self.build_tags)
+                self.service_check('build.problems', AgentCheck.CRITICAL, tags=self.build_tags + problem_tags)
+        self.service_check('build.problems', AgentCheck.OK, tags=self.build_tags)
 
     def _collect_new_builds(self):
         last_build_id = self.bc_store.get_last_build_id(self.build_config)
@@ -186,7 +189,7 @@ class TeamCityCheck(AgentCheck):
                     self._send_events(build)
                 if self.collect_build_metrics:
                     self._collect_build_stats(build)
-                if self.collect_test_metrics:
+                if self.collect_test_checks:
                     self._collect_test_results(build)
                 if self.collect_problem_checks:
                     self._collect_build_problems(build)

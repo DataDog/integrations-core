@@ -24,7 +24,7 @@ RESOURCE_URL_MAP = {
     "started_builds": "{base_url}/app/rest/builds/?locator=buildType:{build_conf},sinceBuild:id:{since_build},"
     "state:finished,defaultFilter:false",
     "last_build": "{base_url}/app/rest/builds/?locator=buildType:{build_conf},count:1",
-    "build_stats": "{base_url}/app/rest/builds/buildType:{build_conf},buildId:{build_id}/statistics",
+    "build_stats": "{base_url}/app/rest/builds/buildId:{build_id}/statistics",
     "agent_usage_stats": "{base_url}/app/rest/builds?locator=agent:(id:{agent_id})&fields=build(id:{build_id},"
     "buildTypeId:{build_conf})",
     "test_occurrences": "{base_url}/app/rest/testOccurrences?locator=build:{build_id}",

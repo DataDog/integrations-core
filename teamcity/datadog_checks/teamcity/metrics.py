@@ -122,6 +122,27 @@ SIMPLE_BUILD_STATS_METRICS = {
     'SuccessRate': {'name': 'success_rate', 'method': 'gauge'},
     'TimeSpentInQueue': {'name': 'time_spent_in_queue', 'method': 'gauge'},
     'TotalTestCount': {'name': 'total_test_count', 'method': 'gauge'},
+    'VisibleArtifactsSize': {'name': 'visible_artifacts_size', 'method': 'gauge'},
+    'CodeCoverageB': {'name': 'code_coverage.blocks.pct', 'method': 'gauge'},
+    'CodeCoverageC': {'name': 'code_coverage.classes.pct', 'method': 'gauge'},
+    'CodeCoverageL': {'name': 'code_coverage.lines.pct', 'method': 'gauge'},
+    'CodeCoverageM': {'name': 'code_coverage.methods.pct', 'method': 'gauge'},
+    'CodeCoverageR': {'name': 'code_coverage.branches.pct', 'method': 'gauge'},
+    'CodeCoverageS': {'name': 'code_coverage.statements.pct', 'method': 'gauge'},
+    'CodeCoverageAbsBCovered': {'name': 'code_coverage.blocks.covered', 'method': 'gauge'},
+    'CodeCoverageAbsBTotal': {'name': 'code_coverage.blocks.total', 'method': 'gauge'},
+    'CodeCoverageAbsCCovered': {'name': 'code_coverage.classes.covered', 'method': 'gauge'},
+    'CodeCoverageAbsCTotal': {'name': 'code_coverage.classes.total', 'method': 'gauge'},
+    'CodeCoverageAbsLCovered': {'name': 'code_coverage.lines.covered', 'method': 'gauge'},
+    'CodeCoverageAbsLTotal': {'name': 'code_coverage.lines.total', 'method': 'gauge'},
+    'CodeCoverageAbsMCovered': {'name': 'code_coverage.methods.covered', 'method': 'gauge'},
+    'CodeCoverageAbsMTotal': {'name': 'code_coverage.methods.total', 'method': 'gauge'},
+    'CodeCoverageAbsRCovered': {'name': 'code_coverage.branches.covered', 'method': 'gauge'},
+    'CodeCoverageAbsRTotal': {'name': 'code_coverage.branches.total', 'method': 'gauge'},
+    'CodeCoverageAbsSCovered': {'name': 'code_coverage.statements.covered', 'method': 'gauge'},
+    'CodeCoverageAbsSTotal': {'name': 'code_coverage.statements.total', 'method': 'gauge'},
+    'DuplicatorStats': {'name': 'duplicator_stats', 'method': 'gauge'},
+    'IgnoredTestCount': {'name': 'ignored_test_count', 'method': 'gauge'},
 }
 
 REGEX_BUILD_STATS_METRICS = [
@@ -142,23 +163,26 @@ REGEX_BUILD_STATS_METRICS = [
 
 def build_metric(metric_name):
     additional_tags = []
+    name = None
+    method = None
     if metric_name in SIMPLE_BUILD_STATS_METRICS:
         metric_mapping = SIMPLE_BUILD_STATS_METRICS[metric_name]
         name = metric_mapping['name']
         method = metric_mapping['method']
     else:
         for regex in REGEX_BUILD_STATS_METRICS:
+            name = str(regex['name'])
+            method = regex['method']
             results = re.findall(str(regex['regex']), metric_name)
+            if len(results) == 0:
+                continue
             if len(results) > 0 and isinstance(results[0], tuple):
                 tags_values = list(results[0])
             else:
                 tags_values = results
             if len(tags_values) == len(regex['tags']):
-                method = regex['method']
-                name = str(regex['name'])
                 for i in range(len(regex['tags'])):
                     additional_tags.append('{}:{}'.format(regex['tags'][i], tags_values[i]))
-                break
-        else:
-            return None, [], method
+                return name, additional_tags, method
+            return name, tags_values, method
     return name, additional_tags, method
