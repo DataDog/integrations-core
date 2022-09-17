@@ -1,5 +1,5 @@
 {
-  "count": "2",
+  "count": "6",
   "href": "http://localhost:8111/app/rest/testOccurrences?locator=build:232",
   "passed": "2",
   "testOccurrence": [

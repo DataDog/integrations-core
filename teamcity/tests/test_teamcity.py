@@ -114,6 +114,8 @@ def test_collect_build_stats(aggregator, mock_http_response, instance, check):
         expected_stats_tags = metric['tags']
         aggregator.assert_metric(metric_name, tags=expected_stats_tags, value=expected_val)
 
+    aggregator.assert_all_metrics_covered()
+
 
 def test_collect_test_results(aggregator, mock_http_response, instance, check):
     check = check(instance)
@@ -125,7 +127,7 @@ def test_collect_test_results(aggregator, mock_http_response, instance, check):
     for res in TESTS_SERVICE_CHECK_RESULTS:
         expected_status = res['value']
         expected_tests_tags = res['tags']
-        aggregator.assert_service_check('teamcity.test.result', status=expected_status, tags=expected_tests_tags)
+        aggregator.assert_service_check('teamcity.test.results', status=expected_status, tags=expected_tests_tags)
 
 
 def test_collect_build_problems(aggregator, mock_http_response, instance, check):
@@ -137,8 +139,8 @@ def test_collect_build_problems(aggregator, mock_http_response, instance, check)
     check._collect_build_problems(NEW_FAILED_BUILD)
 
     aggregator.assert_service_check(
-        'teamcity.build.problem',
+        'teamcity.build.problems',
         count=1,
         tags=expected_tags,
-        status=check.WARNING,
+        status=check.CRITICAL,
     )

@@ -1,5 +1,5 @@
 {
-  "count": "20",
+  "count": "41",
   "property": [
     {
       "name": "ArtifactsSize",
@@ -66,6 +66,10 @@
       "value": "10"
     },
     {
+      "name": "queueWaitReason:Waiting_for_the_build_queue_distribution_process",
+      "value": "20"
+    },
+    {
       "name": "serverSideBuildFinishing",
       "value": "9"
     },
@@ -80,6 +84,90 @@
     {
       "name": "TotalTestCount",
       "value": "2"
+    },
+    {
+      "name": "CodeCoverageB",
+      "value": "90"
+    },
+    {
+      "name": "CodeCoverageC",
+      "value": "87"
+    },
+    {
+      "name": "CodeCoverageL",
+      "value": "65"
+    },
+    {
+      "name": "CodeCoverageM",
+      "value": "88"
+    },
+    {
+      "name": "CodeCoverageR",
+      "value": "70"
+    },
+    {
+      "name": "CodeCoverageS",
+      "value": "56"
+    },
+    {
+      "name": "CodeCoverageAbsBCovered",
+      "value": "90"
+    },
+    {
+      "name": "CodeCoverageAbsBTotal",
+      "value": "87"
+    },
+    {
+      "name": "CodeCoverageAbsCCovered",
+      "value": "65"
+    },
+    {
+      "name": "CodeCoverageAbsCTotal",
+      "value": "88"
+    },
+    {
+      "name": "CodeCoverageAbsLCovered",
+      "value": "70"
+    },
+    {
+      "name": "CodeCoverageAbsLTotal",
+      "value": "56"
+    },
+    {
+      "name": "CodeCoverageAbsMCovered",
+      "value": "90"
+    },
+    {
+      "name": "CodeCoverageAbsMTotal",
+      "value": "87"
+    },
+    {
+      "name": "CodeCoverageAbsRCovered",
+      "value": "65"
+    },
+    {
+      "name": "CodeCoverageAbsRTotal",
+      "value": "88"
+    },
+    {
+      "name": "CodeCoverageAbsSCovered",
+      "value": "70"
+    },
+    {
+      "name": "CodeCoverageAbsSTotal",
+      "value": "56"
+    },
+    {
+      "name": "DuplicatorStats",
+      "value": "2"
+    },
+    {
+      "name": "IgnoredTestCount",
+      "value": "3"
+    },
+    {
+      "name": "VisibleArtifactsSize",
+      "value": "389"
     }
   ]
 }
