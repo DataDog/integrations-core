@@ -67,7 +67,7 @@ pydantic==1.10.2; python_version > '3.0'
 pyjwt==1.7.1; python_version < '3.0'
 pyjwt==2.4.0; python_version > '3.0'
 pymongo[srv]==4.2.0; python_version >= '3.8'
-pymqi==1.12.8
+pymqi==1.9.2
 pymysql==0.10.1
 pyodbc==4.0.32
 pyro4==4.82; sys_platform == 'win32'
