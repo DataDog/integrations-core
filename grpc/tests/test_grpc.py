@@ -36,16 +36,15 @@ def _start_test_server(addr):
 
 
 def _query_server(addr):
-    log.debug(f'Query channelz endpoint on {addr}')
+    log.debug('Query channelz endpoint on %s', addr)
     with grpc.insecure_channel(addr) as channel:
         channelz_stub = channelz_pb2_grpc.ChannelzStub(channel)
         _ = channelz_stub.GetServers(channelz_pb2.GetServersRequest())
 
 
-
 @pytest.mark.unit
 def test_extract_lb_policy():
-    instance= {'host': '127.0.0.1', 'port': 12345}
+    instance = {'host': '127.0.0.1', 'port': 12345}
     check = GrpcCheck('grpc', {}, [instance])
     lb_policy = check._extract_lb_policy('Channel switches to new LB policy "round_robin"')
     assert lb_policy == 'round_robin'
@@ -61,7 +60,7 @@ def test_simple_grpc(dd_run_check, aggregator, instance):
     server = _start_test_server(server_addr)
     _query_server(server_addr)
 
-    instance= {'host': '127.0.0.1', 'port': 12345}
+    instance = {'host': '127.0.0.1', 'port': 12345}
     check = GrpcCheck('grpc', {}, [instance])
     dd_run_check(check)
 
@@ -83,7 +82,6 @@ def test_simple_grpc(dd_run_check, aggregator, instance):
     aggregator.assert_metric('grpc.channel.calls_succeeded', value=2, tags=channel_tags)
     aggregator.assert_metric('grpc.channel.calls_failed', value=0, tags=channel_tags)
 
-
     subchannel_tags = ['state:READY', f'target:ipv4:{server_addr}', f'channel_target:{server_addr}']
     aggregator.assert_metric('grpc.subchannel.state', value=1, tags=subchannel_tags)
     aggregator.assert_metric('grpc.subchannel.calls_started', value=4, tags=subchannel_tags)
@@ -95,18 +93,3 @@ def test_simple_grpc(dd_run_check, aggregator, instance):
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
     server.stop(0)
-
-
-# def test_transient_failure(dd_run_check, aggregator, instance):
-#     # type: (Callable[[AgentCheck, bool], None], AggregatorStub, Dict[str, Any]) -> None
-#     server_addr = "127.0.0.1:12345"
-#     server = _start_test_server(server_addr)
-#     broken_channel = grpc.insecure_channel('127.0.0.1:12346')
-#
-#     instance= {'addr': server_addr}
-#     check = GrpcCheck('grpc', {}, [instance])
-#     dd_run_check(check)
-#
-#     aggregator.assert_metric('grpc.server.number_servers', value=1, tags=[])
-#
-#     server.stop(0)

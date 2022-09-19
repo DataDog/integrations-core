@@ -9,6 +9,7 @@ from datadog_checks.grpc import GrpcCheck
 
 from .common import GRPC_METRICS
 
+
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_grpc_check(dd_run_check, aggregator, instance):
@@ -44,7 +45,6 @@ def test_grpc_check(dd_run_check, aggregator, instance):
     aggregator.assert_metric('grpc.subchannel.state', value=4, tags=bad_address_subchannel_tags)
     aggregator.assert_metric('grpc.subchannel.uptime', tags=bad_address_subchannel_tags)
 
-
     server_tags = ['listening_socket:[::]:8080']
     aggregator.assert_metric('grpc.server.calls_failed', value=0, tags=server_tags)
     aggregator.assert_metric('grpc.server.calls_started', value=1, tags=server_tags)
@@ -52,7 +52,6 @@ def test_grpc_check(dd_run_check, aggregator, instance):
     aggregator.assert_metric('grpc.server.connected_clients', value=3, tags=server_tags)
 
     aggregator.assert_metric('grpc.server.number_servers', value=1, tags=[])
-
 
     for metric in GRPC_METRICS:
         formatted_metric = "grpc.{}".format(metric)

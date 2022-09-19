@@ -30,11 +30,12 @@ class GrpcCheck(AgentCheck):
     def _get_server_metrics(self, channelz_stub, server):
         num_sockets = 0
         end = False
-        last_socket_id=0
+        last_socket_id = 0
 
         while not end:
             logger.debug('Queryring sockets, server_id: %d, start_socket_id: %d', server.ref.server_id, last_socket_id)
-            sockets_stub = channelz_stub.GetServerSockets(channelz_pb2.GetServerSocketsRequest(server_id=server.ref.server_id,
+            sockets_stub = channelz_stub.GetServerSockets(channelz_pb2.GetServerSocketsRequest(
+                server_id=server.ref.server_id,
                 max_results=100,
                 start_socket_id=last_socket_id))
             # [{socket_id: 17, name: "127.0.0.1:40438 -> 127.0.0.1:8888"}]
@@ -113,7 +114,8 @@ class GrpcCheck(AgentCheck):
         self.monotonic_count(f"{channel_type}.calls_failed", channel_data.calls_failed, tags=state_tags)
 
     def _get_subchannel_metrics(self, channelz_stub, subchannel_id, additional_tags):
-        subchannel_response = channelz_stub.GetSubchannel(channelz_pb2.GetSubchannelRequest(subchannel_id=subchannel_id))
+        subchannel_response = channelz_stub.GetSubchannel(channelz_pb2.GetSubchannelRequest(
+            subchannel_id=subchannel_id))
         subchannel = subchannel_response.subchannel
         self._channel_data_metrics('subchannel', subchannel.data, additional_tags)
 
