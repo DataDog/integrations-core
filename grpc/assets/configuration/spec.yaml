@@ -8,3 +8,15 @@ files:
   - template: instances
     options:
     - template: instances/default
+    - name: host
+      required: true
+      value:
+        example: localhost
+        type: string
+      description: Enter the host to connect to.
+    - name: port
+      required: true
+      value:
+        example: 6061
+        type: integer
+      description: Enter the port exposing the gRPC channelz endpoint.
