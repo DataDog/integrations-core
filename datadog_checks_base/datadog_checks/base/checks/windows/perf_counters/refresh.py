@@ -9,17 +9,24 @@ from collections import defaultdict
 import pywintypes
 import win32pdh
 
+try:
+    import datadog_agent
+except ImportError:
+    datadog_agent = None
+
 from ....utils.time import get_precise_time
 
 
 class WindowsPerformanceObjectRefresher(threading.Thread):
-    INTERVAL = 60
-
     def __init__(self):
         name = self.__class__.__name__
         super(WindowsPerformanceObjectRefresher, self).__init__(name=name)
 
+        self.interval = 60
+        if datadog_agent and datadog_agent.get_config('windows_counter_refresh_interval') is not None:
+            self.interval = datadog_agent.get_config('windows_counter_refresh_interval')
         self.logger = logging.getLogger(name)
+        self.logger.info('Windows Counters refresh interval set to %d seconds', self.interval)
         self.last_refresh = {}
         self.servers = defaultdict(int)
 
@@ -38,7 +45,7 @@ class WindowsPerformanceObjectRefresher(threading.Thread):
                     continue
 
                 now = get_precise_time()
-                if server in self.last_refresh and now - self.last_refresh[server] < self.INTERVAL:
+                if server in self.last_refresh and now - self.last_refresh[server] < self.interval:
                     continue
 
                 self.logger.info('Refreshing performance objects for server: %s', server)
@@ -55,7 +62,7 @@ class WindowsPerformanceObjectRefresher(threading.Thread):
 
                 self.last_refresh[server] = now
 
-            time.sleep(2)
+            time.sleep(1)
 
     def add_server(self, server):
         self.servers[server] += 1
