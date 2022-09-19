@@ -1,5 +1,10 @@
 # CHANGELOG - datadog_checks_base
 
+## 27.2.0 / 2022-09-19
+
+* [Added] Add agent config option to control Window Counter refresh rate. See [#12665](https://github.com/DataDog/integrations-core/pull/12665).
+* [Fixed] Bump dependencies for 7.40. See [#12896](https://github.com/DataDog/integrations-core/pull/12896).
+
 ## 27.1.0 / 2022-09-09
 
 * [Added] Add OAuth functionality to the HTTP util. See [#12884](https://github.com/DataDog/integrations-core/pull/12884).

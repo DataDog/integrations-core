@@ -1,5 +1,9 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 17.0.1 / 2022-09-19
+
+* [Fixed] Do not fail the validation if `pr_labels_config_relative_path` is not defined. See [#12965](https://github.com/DataDog/integrations-core/pull/12965).
+
 ## 17.0.0 / 2022-09-16
 
 * [Added] Refactor tooling for getting the current env name. See [#12939](https://github.com/DataDog/integrations-core/pull/12939).
