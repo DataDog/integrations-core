@@ -2,13 +2,14 @@
 
 ## Overview
 
-Apache Traffic Server is a high-performance and scalable solution that allows you to improve website response time, reduce server load and bandwidth, filter or anonymize content requests, and so much more.
- 
-Monitor Apache Traffic Server metrics and logs using the Datadog out-of-the-box integration to:
-- Ensure the availability and performance of all your online resources, including websites and business critical applications.
-- Track key metrics like hits, volume and changes in traffic to various websites and applications.
-- Determine average response times and sizes for requests and identify areas for improvement.
-- Monitor key system and error logs to investigate critical errors and performance bottlenecks. 
+This check monitors [Traffic Server][1] through the Datadog Agent. 
+
+Enable the Datadog-Apache Traffic Server integration to:
+
+- Ensure the availability and performance of online resources, such as websites and applications.
+- Track metrics such as hits, volume, and changes in traffic to websites and applications.
+- Determine average response times and sizes for requests.
+- Monitor system and error logs. 
 
 
 ## Setup
