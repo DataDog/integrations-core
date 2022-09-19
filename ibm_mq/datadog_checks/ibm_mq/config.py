@@ -126,16 +126,21 @@ class IBMMQConfig:
             'ssl_key_repository_location', '/var/mqm/ssl-db/client/KeyringClient'
         )  # type: str
         self.ssl_certificate_label = instance.get('ssl_certificate_label')  # type: str
-        if instance.get('ssl_auth') is None and (
-            instance.get('ssl_cipher_spec') or instance.get('ssl_key_repository_location') or self.ssl_certificate_label
-        ):
-            self.log.info(
-                "ssl_auth has not been explicitly enabled but other SSL options have been provided. "
-                "SSL will be used for connecting"
-            )
-            self.ssl = True
+
+        ssl_options = ['ssl_cipher_spec', 'ssl_key_repository_location', 'ssl_certificate_label']
+
+        # Implicitly enable SSL auth connection if SSL options are used and `ssl_auth` isn't set
+        if instance.get('ssl_auth') is None:
+            for option in ssl_options:
+                if instance.get(option):
+                    self.log.info(
+                        "ssl_auth has not been explicitly enabled but other SSL options have been provided. "
+                        "SSL will be used for connecting"
+                    )
+                    self.ssl = True
+
+        # Explicitly disable SSL auth connection if SSL options are used but `ssl_auth` is False
         if instance.get('ssl_auth') is False:
-            ssl_options = ['ssl_cipher_spec', 'ssl_key_repository_location']
             for option in ssl_options:
                 if instance.get(option):
                     self.log.warning(
