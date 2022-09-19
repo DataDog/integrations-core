@@ -288,7 +288,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                     procedure_statement = obfuscate_sql_with_metadata(row['text'], self.check.obfuscator_options)
             except Exception as e:
                 if self.check.log_unobfuscated_queries:
-                    failed_obfuscation = row['text'] if row['is_proc'] else row['statement_text']
+                    failed_obfuscation = row['text'] if row.get('is_proc', False) else row['statement_text']
                     self.log.warning("Failed to obfuscate query=[%s] | err=[%s]", failed_obfuscation, e)
                 else:
                     self.log.debug("Failed to obfuscate query | err=[%s]", e)
