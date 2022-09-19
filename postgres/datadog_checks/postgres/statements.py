@@ -360,9 +360,9 @@ class PostgresStatementMetrics(DBMAsyncJob):
                 statement = obfuscate_sql_with_metadata(row['query'], self._obfuscate_options)
             except Exception as e:
                 if self._config.log_unobfuscated_queries:
-                    self._log.warning("Failed to obfuscate query '%s': %s", row['query'], e)
+                    self._log.warning("Failed to obfuscate query=[%s] | err=[%s]", row['query'], e)
                 else:
-                    self._log.debug("Failed to obfuscate query: %s", e)
+                    self._log.debug("Failed to obfuscate query | err=[%s]", e)
                 continue
 
             obfuscated_query = statement['query']
