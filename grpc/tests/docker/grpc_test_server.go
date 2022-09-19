@@ -90,10 +90,13 @@ func queryClient(ctx context.Context, dialTarget string, ignoreErr bool, queryRa
 			if queryRandomTime > 0 {
 				randomDuration = time.Duration(rand.Int63n(queryRandomTime.Nanoseconds()))
 			}
-			time.Sleep(time.Second + randomDuration)
-			channelzClient := channelzgrpc.NewChannelzClient(conn)
-			req := &channelzgrpc.GetServersRequest{StartServerId: 0}
-			channelzClient.GetServers(ctx, req)
+			perQuerySleep := (time.Second + randomDuration) / time.Duration(queryRate)
+			for i := 0; i < queryRate; i++ {
+				time.Sleep(perQuerySleep)
+				channelzClient := channelzgrpc.NewChannelzClient(conn)
+				req := &channelzgrpc.GetServersRequest{StartServerId: 0}
+				channelzClient.GetServers(ctx, req)
+			}
 		}
 	}
 }
