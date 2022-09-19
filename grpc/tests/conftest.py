@@ -7,10 +7,8 @@ import pytest
 
 from datadog_checks.dev import docker_run, get_docker_hostname, get_here
 
-
-TEST_SERVER_ADDRESS = '{}:8080'.format(get_docker_hostname())
 READY_ENDPOINT = 'http://{}:8081/ready'.format(get_docker_hostname())
-INSTANCE = {'addr': TEST_SERVER_ADDRESS}
+INSTANCE = {'host': get_docker_hostname(), 'port': 8080}
 
 
 @pytest.fixture(scope='session')
@@ -22,7 +20,6 @@ def dd_environment():
     # 1. Spins up the services defined in the compose file
     # 2. Waits for the url to be available before running the tests
     # 3. Tears down the services when the tests are finished
-    print(READY_ENDPOINT)
     with docker_run(compose_file,
             build=True,
             endpoints=[READY_ENDPOINT],
