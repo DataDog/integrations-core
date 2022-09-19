@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import mock
 import pytest
 
 from datadog_checks.dev.utils import get_metadata_metrics
@@ -17,6 +18,7 @@ def test_e2e_legacy(dd_agent_check):
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
+@mock.patch.dict('os.environ', {'DDEV_SKIP_GENERIC_TAGS_CHECK': 'true'})
 def test_e2e(dd_agent_check):
     aggregator = dd_agent_check(CONFIG, rate=True)
     assert_check(aggregator, METRICS_TO_TEST)
