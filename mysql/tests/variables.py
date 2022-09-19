@@ -102,7 +102,7 @@ COMPLEX_INNODB_VARS = [
     # 'mysql.innodb.current_row_locks', MariaDB status
 ]
 
-# Calculated from "SHOW MASTER LOGS;"
+# Calculated from "SHOW BINARY LOGS;"
 BINLOG_VARS = [
     'mysql.binlog.disk_use',  # Only collected if log_bin is true
 ]

@@ -92,7 +92,7 @@ INNODB_VARS = {
 }
 
 
-# Calculated from "SHOW MASTER LOGS;"
+# Calculated from "SHOW BINARY LOGS;"
 BINLOG_VARS = {'Binlog_space_usage_bytes': ('mysql.binlog.disk_use', GAUGE)}
 
 # Additional Vars found in "SHOW STATUS;"
