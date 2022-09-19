@@ -270,6 +270,7 @@ def testable(
             '5': 'Platform',
             '6': 'Tools and Libraries',
             '7': 'Database Monitoring',
+            '8': 'Windows-Agent',
             's': 'Skip',
             'q': 'Quit',
         }
@@ -286,6 +287,7 @@ def testable(
             '9': 'Infra-Integrations',
             '10': 'Tools and Libraries',
             '11': 'Database Monitoring',
+            '12': 'Windows-Agent',
             's': 'Skip',
             'q': 'Quit',
         }
