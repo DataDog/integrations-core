@@ -1,5 +1,8 @@
 # CHANGELOG - IBM MQ
 
+## 3.23.0-rc.1 / 2022-09-20
+
+
 ## 3.22.1 / 2022-08-05 / Agent 7.39.0
 
 * [Fixed] Dependency updates. See [#12653](https://github.com/DataDog/integrations-core/pull/12653).
