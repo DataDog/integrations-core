@@ -19,7 +19,6 @@ pytestmark = pytest.mark.skipif(
     not is_supported('kafka'), reason='kafka consumer offsets not supported in current environment'
 )
 
-
 BROKER_METRICS = ['kafka.broker_offset']
 
 CONSUMER_METRICS = ['kafka.consumer_offset', 'kafka.consumer_lag']
@@ -89,7 +88,6 @@ def test_gssapi(kafka_instance, dd_run_check):
 def test_tls_config_ok(kafka_instance_tls):
     with mock.patch('datadog_checks.base.utils.tls.ssl') as ssl:
         with mock.patch('kafka.KafkaClient') as kafka_client:
-
             # mock Kafka Client
             kafka_client.return_value = mock.MagicMock()
 
@@ -125,6 +123,30 @@ def test_tls_config_legacy(extra_config, expected_http_kwargs, kafka_instance):
         k: v for k, v in kafka_consumer_check._tls_context_wrapper.config.items() if k in expected_http_kwargs
     }
     assert expected_http_kwargs == actual_options
+
+
+@pytest.mark.unit
+def test_authtoken_failure(aggregator, kafka_instance, dd_run_check):
+    instance = copy.deepcopy(kafka_instance)
+
+    instance['auth_token'] = {
+        'reader': {'type': 'oauth', 'url': 'foo', 'client_id': 'bar', 'client_secret': 'baz'},
+        'writer': {'type': 'header', 'name': 'Authorization', 'value': 'Bearer <TOKEN>'},
+    }
+
+    kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [instance])
+
+    class MockOAuth2Session(object):
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def fetch_token(self, *args, **kwargs):
+            return {'error': 'unauthorized_client'}
+
+    with mock.patch('requests.get'), mock.patch('oauthlib.oauth2.BackendApplicationClient'), mock.patch(
+            'requests_oauthlib.OAuth2Session', side_effect=MockOAuth2Session
+    ):
+        dd_run_check(kafka_consumer_check)
 
 
 @pytest.mark.integration
