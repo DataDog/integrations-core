@@ -9,5 +9,3 @@ version = ["10.8.0"]
 
 [envs.default.overrides]
 matrix.version.env-vars = "GITLAB_RUNNER_VERSION"
-
-[envs.bench]

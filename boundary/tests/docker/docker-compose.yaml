@@ -7,6 +7,7 @@ services:
     command: ["server", "-config", "/boundary/boundary.hcl"]
     volumes:
       - ./boundary.hcl:/boundary/boundary.hcl
+      - ${DD_LOG_1}:/var/log/boundary/events.ndjson
     ports:
       - "9200:9200"
       - "9201:9201"
@@ -15,6 +16,8 @@ services:
     environment:
       - BOUNDARY_PG_URL=postgresql://postgres:postgres@db/boundary?sslmode=disable
       - HOSTNAME=boundary
+    cap_add:
+      - IPC_LOCK
     depends_on:
       db-init:
         condition: service_completed_successfully

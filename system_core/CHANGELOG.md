@@ -1,6 +1,6 @@
 # CHANGELOG - system_core
 
-## 1.14.0 / 2022-08-05
+## 1.14.0 / 2022-08-05 / Agent 7.39.0
 
 * [Added] Add total cpu percentages as a metric. See [#12525](https://github.com/DataDog/integrations-core/pull/12525).
 * [Fixed] Dependency updates. See [#12653](https://github.com/DataDog/integrations-core/pull/12653).

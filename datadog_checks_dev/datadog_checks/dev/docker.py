@@ -156,7 +156,7 @@ def docker_run(
       check for errors
     - **env_vars** (_dict_) - A dictionary to update `os.environ` with during execution
     - **wrappers** (_List[callable]_) - A list of context managers to use during execution
-    - **attempts** (_int_) - Number of attempts to run `up` and the `conditions` successfully
+    - **attempts** (_int_) - Number of attempts to run `up` and the `conditions` successfully. Defaults to 2 in CI
     - **attempts_wait** (_int_) - Time to wait between attempts
     """
     if compose_file and up:

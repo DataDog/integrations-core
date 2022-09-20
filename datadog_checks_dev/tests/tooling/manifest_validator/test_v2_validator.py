@@ -506,3 +506,18 @@ def test_manifest_v2_changelog_not_found(setup_route):
     validator.validate('datadog_checks_dev', manifest, False)
 
     assert validator.result.failed
+
+
+def test_manifest_v2_changelog_case_sensitive(setup_route):
+    manifest = JSONDict(
+        {
+            "tile": {
+                "changelog": "CHANGELOG.MD",
+            },
+        }
+    )
+
+    validator = v2_validators.ChangelogValidator(version=V2)
+    validator.validate('datadog_checks_dev', manifest, False)
+
+    assert validator.result.failed

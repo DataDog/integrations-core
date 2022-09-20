@@ -1,6 +1,17 @@
 # CHANGELOG - datadog_checks_base
 
-## 27.0.0 / 2022-08-05
+## 27.2.0 / 2022-09-19
+
+* [Added] Add agent config option to control Window Counter refresh rate. See [#12665](https://github.com/DataDog/integrations-core/pull/12665).
+* [Fixed] Bump dependencies for 7.40. See [#12896](https://github.com/DataDog/integrations-core/pull/12896).
+
+## 27.1.0 / 2022-09-09
+
+* [Added] Add OAuth functionality to the HTTP util. See [#12884](https://github.com/DataDog/integrations-core/pull/12884).
+* [Added] Add `packaging` to dependencies. See [#12753](https://github.com/DataDog/integrations-core/pull/12753).
+* [Fixed] Fix formatting of message. See [#12827](https://github.com/DataDog/integrations-core/pull/12827).
+
+## 27.0.0 / 2022-08-05 / Agent 7.39.0
 
 * [Fixed] Dependency updates. See [#12653](https://github.com/DataDog/integrations-core/pull/12653).
 * [Fixed] Pin `pymysql` to `0.10.1`. See [#12612](https://github.com/DataDog/integrations-core/pull/12612).

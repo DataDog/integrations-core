@@ -366,3 +366,9 @@ admission_webhooks_library_injection_attempts{injected="true",language="java"} 4
 # HELP admission_webhooks_library_injection_errors Number of library injection failures by language
 # TYPE admission_webhooks_library_injection_errors counter
 admission_webhooks_library_injection_errors{language="java"} 1
+# HELP kubernetes_apiserver_emitted_events Number of events emitted by the check.
+# TYPE kubernetes_apiserver_emitted_events counter
+kubernetes_apiserver_emitted_events{kind="ConfigMap",type="Normal"} 7
+# HELP kubernetes_apiserver_kube_events Number of Kubernetes events received by the check.
+# TYPE kubernetes_apiserver_kube_events counter
+kubernetes_apiserver_kube_events{component="",kind="Pod",reason="FailedScheduling",type="Warning"} 10424

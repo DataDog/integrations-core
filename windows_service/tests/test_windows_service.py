@@ -79,6 +79,45 @@ def test_basic_disable_service_tag(aggregator, check, instance_basic_disable_ser
     )
 
 
+def test_startup_type(aggregator, check, instance_basic):
+    instance_basic['windows_service_startup_type_tag'] = True
+    c = check(instance_basic)
+    c.check(instance_basic)
+    aggregator.assert_service_check(
+        c.SERVICE_CHECK_NAME,
+        status=c.OK,
+        tags=[
+            'service:EventLog',
+            'windows_service:EventLog',
+            'windows_service_startup_type:automatic',
+            'optional:tag1',
+        ],
+        count=1,
+    )
+    aggregator.assert_service_check(
+        c.SERVICE_CHECK_NAME,
+        status=c.OK,
+        tags=[
+            'service:Dnscache',
+            'windows_service:Dnscache',
+            'windows_service_startup_type:automatic',
+            'optional:tag1',
+        ],
+        count=1,
+    )
+    aggregator.assert_service_check(
+        c.SERVICE_CHECK_NAME,
+        status=c.UNKNOWN,
+        tags=[
+            'service:NonExistentService',
+            'windows_service:NonExistentService',
+            'windows_service_startup_type:unknown',
+            'optional:tag1',
+        ],
+        count=1,
+    )
+
+
 @pytest.mark.e2e
 def test_basic_e2e(dd_agent_check, check, instance_basic):
     aggregator = dd_agent_check(instance_basic)

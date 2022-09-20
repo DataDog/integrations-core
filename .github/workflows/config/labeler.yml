@@ -3,7 +3,8 @@ base_package:
 changelog/no-changelog:
 - requirements-agent-release.txt
 - datadog_checks_dev/datadog_checks/dev/__about__.py
-- all:^(?![^/]+/datadog_checks/.*|[^/]+/pyproject\.toml).*
+- all: ['*/!(datadog_checks)/**']
+- all: ['*/!(pyproject.toml)']
 ddev:
 - ddev/**/*
 dependencies:
@@ -24,7 +25,8 @@ dev_package:
 documentation:
 - '*/manifest.json'
 - '*/assets/configuration/**'
-- (?<!CHANGELOG)\.md$
+- '*/CHANGELOG.md'
+- '*/README.md'
 - docs/**
 downloader:
 - datadog_checks_downloader/**/*
@@ -74,6 +76,8 @@ integration/cassandra_nodetool:
 - cassandra_nodetool/**/*
 integration/ceph:
 - ceph/**/*
+integration/cert_manager:
+- cert_manager/**/*
 integration/cilium:
 - cilium/**/*
 integration/cisco_aci:
@@ -200,6 +204,8 @@ integration/ignite:
 - ignite/**/*
 integration/iis:
 - iis/**/*
+integration/impala:
+- impala/**/*
 integration/istio:
 - istio/**/*
 integration/jboss_wildfly:

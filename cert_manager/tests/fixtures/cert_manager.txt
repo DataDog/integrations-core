@@ -1,0 +1,68 @@
+# HELP certmanager_certificate_expiration_timestamp_seconds The date after which the certificate expires. Expressed as a Unix Epoch Time.
+# TYPE certmanager_certificate_expiration_timestamp_seconds gauge
+certmanager_certificate_expiration_timestamp_seconds{name="acme-cert",namespace="default"} 1.773579979e+09
+certmanager_certificate_expiration_timestamp_seconds{name="acme-cert2",namespace="default"} 0
+certmanager_certificate_expiration_timestamp_seconds{name="myingress-cert",namespace="cert-manager-test"} 1.622709533e+09
+certmanager_certificate_expiration_timestamp_seconds{name="selfsigned-cert",namespace="cert-manager-test"} 1.622708753e+09
+# HELP certmanager_certificate_ready_status The ready status of the certificate.
+# TYPE certmanager_certificate_ready_status gauge
+certmanager_certificate_ready_status{condition="False",name="acme-cert",namespace="default"} 0
+certmanager_certificate_ready_status{condition="False",name="acme-cert2",namespace="default"} 1
+certmanager_certificate_ready_status{condition="False",name="myingress-cert",namespace="cert-manager-test"} 0
+certmanager_certificate_ready_status{condition="False",name="selfsigned-cert",namespace="cert-manager-test"} 0
+certmanager_certificate_ready_status{condition="True",name="acme-cert",namespace="default"} 1
+certmanager_certificate_ready_status{condition="True",name="acme-cert2",namespace="default"} 0
+certmanager_certificate_ready_status{condition="True",name="myingress-cert",namespace="cert-manager-test"} 1
+certmanager_certificate_ready_status{condition="True",name="selfsigned-cert",namespace="cert-manager-test"} 1
+certmanager_certificate_ready_status{condition="Unknown",name="acme-cert",namespace="default"} 0
+certmanager_certificate_ready_status{condition="Unknown",name="acme-cert2",namespace="default"} 0
+certmanager_certificate_ready_status{condition="Unknown",name="myingress-cert",namespace="cert-manager-test"} 0
+certmanager_certificate_ready_status{condition="Unknown",name="selfsigned-cert",namespace="cert-manager-test"} 0
+# HELP certmanager_clock_time_seconds The clock time given in seconds (from 1970/01/01 UTC).
+# TYPE certmanager_clock_time_seconds counter
+certmanager_clock_time_seconds 1.61915483e+09
+# HELP certmanager_controller_sync_call_count The number of sync() calls made by a controller.
+# TYPE certmanager_controller_sync_call_count counter
+certmanager_controller_sync_call_count{controller="CertificateIssuing"} 20
+certmanager_controller_sync_call_count{controller="CertificateKeyManager"} 16
+certmanager_controller_sync_call_count{controller="CertificateMetrics"} 15
+certmanager_controller_sync_call_count{controller="CertificateReadiness"} 35
+certmanager_controller_sync_call_count{controller="CertificateRequestManager"} 19
+certmanager_controller_sync_call_count{controller="CertificateTrigger"} 19
+certmanager_controller_sync_call_count{controller="certificaterequests-issuer-acme"} 11
+certmanager_controller_sync_call_count{controller="certificaterequests-issuer-ca"} 8
+certmanager_controller_sync_call_count{controller="certificaterequests-issuer-selfsigned"} 8
+certmanager_controller_sync_call_count{controller="certificaterequests-issuer-vault"} 8
+certmanager_controller_sync_call_count{controller="certificaterequests-issuer-venafi"} 8
+certmanager_controller_sync_call_count{controller="clusterissuers"} 1
+certmanager_controller_sync_call_count{controller="ingress-shim"} 1
+certmanager_controller_sync_call_count{controller="issuers"} 1
+certmanager_controller_sync_call_count{controller="orders"} 4
+# HELP certmanager_http_acme_client_request_count The number of requests made by the ACME client.
+# TYPE certmanager_http_acme_client_request_count counter
+certmanager_http_acme_client_request_count{host="pebble.default.svc.cluster.local",method="GET",path="/dir",scheme="https",status="200"} 1
+certmanager_http_acme_client_request_count{host="pebble.default.svc.cluster.local",method="HEAD",path="/nonce-plz",scheme="https",status="200"} 1
+certmanager_http_acme_client_request_count{host="pebble.default.svc.cluster.local",method="POST",path="/order-plz",scheme="https",status="400"} 2
+certmanager_http_acme_client_request_count{host="pebble.default.svc.cluster.local",method="POST",path="/sign-me-up",scheme="https",status="400"} 2
+# HELP certmanager_http_acme_client_request_duration_seconds The HTTP request latencies in seconds for the ACME client.
+# TYPE certmanager_http_acme_client_request_duration_seconds summary
+certmanager_http_acme_client_request_duration_seconds{host="pebble.default.svc.cluster.local",method="GET",path="/dir",scheme="https",status="200",quantile="0.5"} 0.044921499
+certmanager_http_acme_client_request_duration_seconds{host="pebble.default.svc.cluster.local",method="GET",path="/dir",scheme="https",status="200",quantile="0.9"} 0.044921499
+certmanager_http_acme_client_request_duration_seconds{host="pebble.default.svc.cluster.local",method="GET",path="/dir",scheme="https",status="200",quantile="0.99"} 0.044921499
+certmanager_http_acme_client_request_duration_seconds_sum{host="pebble.default.svc.cluster.local",method="GET",path="/dir",scheme="https",status="200"} 0.044921499
+certmanager_http_acme_client_request_duration_seconds_count{host="pebble.default.svc.cluster.local",method="GET",path="/dir",scheme="https",status="200"} 1
+certmanager_http_acme_client_request_duration_seconds{host="pebble.default.svc.cluster.local",method="HEAD",path="/nonce-plz",scheme="https",status="200",quantile="0.5"} 0.002433074
+certmanager_http_acme_client_request_duration_seconds{host="pebble.default.svc.cluster.local",method="HEAD",path="/nonce-plz",scheme="https",status="200",quantile="0.9"} 0.002433074
+certmanager_http_acme_client_request_duration_seconds{host="pebble.default.svc.cluster.local",method="HEAD",path="/nonce-plz",scheme="https",status="200",quantile="0.99"} 0.002433074
+certmanager_http_acme_client_request_duration_seconds_sum{host="pebble.default.svc.cluster.local",method="HEAD",path="/nonce-plz",scheme="https",status="200"} 0.002433074
+certmanager_http_acme_client_request_duration_seconds_count{host="pebble.default.svc.cluster.local",method="HEAD",path="/nonce-plz",scheme="https",status="200"} 1
+certmanager_http_acme_client_request_duration_seconds{host="pebble.default.svc.cluster.local",method="POST",path="/order-plz",scheme="https",status="400",quantile="0.5"} 0.002429659
+certmanager_http_acme_client_request_duration_seconds{host="pebble.default.svc.cluster.local",method="POST",path="/order-plz",scheme="https",status="400",quantile="0.9"} 0.004111258
+certmanager_http_acme_client_request_duration_seconds{host="pebble.default.svc.cluster.local",method="POST",path="/order-plz",scheme="https",status="400",quantile="0.99"} 0.004111258
+certmanager_http_acme_client_request_duration_seconds_sum{host="pebble.default.svc.cluster.local",method="POST",path="/order-plz",scheme="https",status="400"} 0.006540916999999999
+certmanager_http_acme_client_request_duration_seconds_count{host="pebble.default.svc.cluster.local",method="POST",path="/order-plz",scheme="https",status="400"} 2
+certmanager_http_acme_client_request_duration_seconds{host="pebble.default.svc.cluster.local",method="POST",path="/sign-me-up",scheme="https",status="400",quantile="0.5"} 0.007592396
+certmanager_http_acme_client_request_duration_seconds{host="pebble.default.svc.cluster.local",method="POST",path="/sign-me-up",scheme="https",status="400",quantile="0.9"} 0.009903988
+certmanager_http_acme_client_request_duration_seconds{host="pebble.default.svc.cluster.local",method="POST",path="/sign-me-up",scheme="https",status="400",quantile="0.99"} 0.009903988
+certmanager_http_acme_client_request_duration_seconds_sum{host="pebble.default.svc.cluster.local",method="POST",path="/sign-me-up",scheme="https",status="400"} 0.017496384
+certmanager_http_acme_client_request_duration_seconds_count{host="pebble.default.svc.cluster.local",method="POST",path="/sign-me-up",scheme="https",status="400"} 2

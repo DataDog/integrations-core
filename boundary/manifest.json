@@ -15,7 +15,8 @@
       "Supported OS::Linux",
       "Supported OS::Windows",
       "Supported OS::macOS",
-      "Category::Configuration & Deployment"
+      "Category::Configuration & Deployment",
+      "Category::Log Collection"
     ]
   },
   "author": {
@@ -42,6 +43,9 @@
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       }
+    },
+    "monitors": {
+      "[Boundary] High active connections": "assets/monitors/active_connections.json"
     }
   }
 }

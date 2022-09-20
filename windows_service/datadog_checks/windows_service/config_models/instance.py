@@ -39,6 +39,7 @@ class InstanceConfig(BaseModel):
     service: Optional[str]
     services: Sequence[str]
     tags: Optional[Sequence[str]]
+    windows_service_startup_type_tag: Optional[bool]
 
     @root_validator(pre=True)
     def _initial_validation(cls, values):

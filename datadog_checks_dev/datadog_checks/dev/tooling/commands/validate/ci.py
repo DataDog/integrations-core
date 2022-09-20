@@ -393,7 +393,7 @@ def validate_coverage_flags(fix, repo_data, testable_checks, cached_display_name
 
 
 def validate_integration_pr_labels(fix, repo_data, valid_integrations):
-    pr_labels_config_relative_path = repo_data['pr_labels_config_relative_path']
+    pr_labels_config_relative_path = repo_data.get('pr_labels_config_relative_path')
     if not pr_labels_config_relative_path:
         echo_info("Skipping since PR Labels config path isn't defined")
         return

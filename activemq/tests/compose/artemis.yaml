@@ -2,7 +2,7 @@ version: "3"
 
 services:
   namenode:
-    image: vromero/activemq-artemis:${ARTEMIS_VERSION}
+    image: vromero/activemq-artemis:${VERSION}
     container_name: dd-test-activemq-server
     environment:
       JAVA_OPTS: >-

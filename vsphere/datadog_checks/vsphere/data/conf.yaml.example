@@ -531,6 +531,12 @@ instances:
         ##     path (required): The absolute path for the file to read from.
         ##     pattern: A regular expression pattern with a single capture group used to find the
         ##              token rather than using the entire file, for example: Your secret is (.+)
+        ##   - type: oauth
+        ##     url (required): The token endpoint.
+        ##     client_id (required): The client identifier.
+        ##     client_secret (required): The client secret.
+        ##     basic_auth: Whether the provider expects credentials to be transmitted in
+        ##                 an HTTP Basic Auth header. The default is: false
         ##
         ## The available writers are:
         ##
@@ -682,6 +688,11 @@ instances:
         ## Whether or not to allow URL redirection.
         #
         # allow_redirects: true
+
+    ## @param connection_reset_timeout - integer - optional - default: 900
+    ## The time interval in seconds at which the agent should re-authenticate using the provided credentials
+    #
+    # connection_reset_timeout: 900
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.

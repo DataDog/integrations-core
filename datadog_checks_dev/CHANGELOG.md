@@ -1,5 +1,31 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 17.0.1 / 2022-09-19
+
+* [Fixed] Do not fail the validation if `pr_labels_config_relative_path` is not defined. See [#12965](https://github.com/DataDog/integrations-core/pull/12965).
+
+## 17.0.0 / 2022-09-16
+
+* [Added] Refactor tooling for getting the current env name. See [#12939](https://github.com/DataDog/integrations-core/pull/12939).
+* [Added] Attempts default to 2 on ci. See [#12867](https://github.com/DataDog/integrations-core/pull/12867).
+* [Added] Update HTTP config spec templates. See [#12890](https://github.com/DataDog/integrations-core/pull/12890).
+* [Added] Add OAuth functionality to the HTTP util. See [#12884](https://github.com/DataDog/integrations-core/pull/12884).
+* [Added] Upgrade Hatch. See [#12872](https://github.com/DataDog/integrations-core/pull/12872).
+* [Added] Validate the `changelog` field in the manifest file. See [#12829](https://github.com/DataDog/integrations-core/pull/12829).
+* [Added] Upgrade dependencies for environment management. See [#12785](https://github.com/DataDog/integrations-core/pull/12785).
+* [Added] Make sure process_signatures gets migrated during V2 migrations. See [#12589](https://github.com/DataDog/integrations-core/pull/12589).
+* [Added] Enforce version 2 of manifests. See [#12775](https://github.com/DataDog/integrations-core/pull/12775).
+* [Added] Update templates for new integrations. See [#12744](https://github.com/DataDog/integrations-core/pull/12744).
+* [Added] Update new integration templates to use v2 manifests. See [#12592](https://github.com/DataDog/integrations-core/pull/12592).
+* [Fixed] Templatize the repository in the README links. See [#12930](https://github.com/DataDog/integrations-core/pull/12930).
+* [Fixed] Fix tile-only README template generation. See [#12918](https://github.com/DataDog/integrations-core/pull/12918).
+* [Fixed] Add case sensitive changelog validation. See [#12920](https://github.com/DataDog/integrations-core/pull/12920).
+* [Fixed] Add a validator for the manifest version. See [#12788](https://github.com/DataDog/integrations-core/pull/12788).
+* [Fixed] Make the manifest validation fail if the file is not found. See [#12789](https://github.com/DataDog/integrations-core/pull/12789).
+* [Fixed] Fix Hatch environment plugin. See [#12769](https://github.com/DataDog/integrations-core/pull/12769).
+* [Fixed] Templatize the README links. See [#12742](https://github.com/DataDog/integrations-core/pull/12742).
+* [Changed] Use official labeler GH action. See [#12546](https://github.com/DataDog/integrations-core/pull/12546).
+
 ## 16.7.0 / 2022-08-05
 
 * [Added] Make ddev a standalone package. See [#12565](https://github.com/DataDog/integrations-core/pull/12565).

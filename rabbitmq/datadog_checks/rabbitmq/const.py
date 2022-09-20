@@ -44,6 +44,7 @@ QUEUE_ATTRIBUTES = [
     ('messages_details/rate', 'messages.rate', float),
     ('messages_ready', 'messages_ready', float),
     ('messages_ready_details/rate', 'messages_ready.rate', float),
+    ('message_bytes', 'message_bytes', float),
     ('messages_unacknowledged', 'messages_unacknowledged', float),
     ('messages_unacknowledged_details/rate', 'messages_unacknowledged.rate', float),
     ('message_stats/ack', 'messages.ack.count', float),

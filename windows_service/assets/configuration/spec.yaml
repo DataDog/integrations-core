@@ -31,4 +31,18 @@ files:
             value:
               type: boolean
               example: false
+          - name: windows_service_startup_type_tag
+            description: |
+              Whether or not to submit the `windows_service_startup_type` tag along
+              with each service check.
+              This tag indicates the Windows service startup type as shown in a service's properties,
+              and can be used as a filter/scope in Monitors.
+              Possible values for this tag are:
+                - disabled
+                - manual
+                - automatic
+                - automatic_delayed_start
+            value:
+              type: boolean
+              example: false
           - template: instances/default

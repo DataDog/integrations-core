@@ -1,5 +1,9 @@
 # CHANGELOG - windows_service
 
+## 4.3.0 / 2022-09-16
+
+* [Added] Add optional windows_service_startup_type tag. See [#12932](https://github.com/DataDog/integrations-core/pull/12932).
+
 ## 4.2.1 / 2022-05-15 / Agent 7.37.0
 
 * [Fixed] Upgrade dependencies. See [#11958](https://github.com/DataDog/integrations-core/pull/11958).

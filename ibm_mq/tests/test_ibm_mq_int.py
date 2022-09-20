@@ -12,8 +12,6 @@ from six import iteritems
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.time import ensure_aware_datetime
 from datadog_checks.dev.utils import get_metadata_metrics
-from datadog_checks.ibm_mq import IbmMqCheck
-from datadog_checks.ibm_mq.collectors import ChannelMetricCollector, QueueMetricCollector
 
 from . import common
 from .common import QUEUE_METRICS, assert_all_metrics, skip_windows_ci
@@ -71,6 +69,10 @@ def test_unknown_service_check(aggregator, get_check, instance, caplog, dd_run_c
 
 
 def test_check_cant_connect(aggregator, get_check, instance, dd_run_check):
+    # Late import to ignore missing library for e2e
+    from datadog_checks.ibm_mq import IbmMqCheck
+    from datadog_checks.ibm_mq.collectors import ChannelMetricCollector
+
     instance['queue_manager'] = "not_real"
 
     with pytest.raises(Exception, match=r'MQI Error'):
@@ -116,6 +118,9 @@ def test_errors_are_logged(get_check, instance, caplog, dd_run_check):
     [False, True],
 )
 def test_check_metrics_and_service_checks(aggregator, get_check, instance, seed_data, override_hostname, dd_run_check):
+    # Late import to ignore missing library for e2e
+    from datadog_checks.ibm_mq.collectors import ChannelMetricCollector, QueueMetricCollector
+
     instance['mqcd_version'] = os.getenv('IBM_MQ_VERSION')
     instance['override_hostname'] = override_hostname
     check = get_check(instance)

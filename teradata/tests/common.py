@@ -7,11 +7,11 @@ from copy import deepcopy
 
 from datadog_checks.dev import get_here
 from datadog_checks.dev.ci import running_on_ci
-from datadog_checks.dev.utils import get_tox_env
+from datadog_checks.dev.utils import get_active_env
 
 HERE = get_here()
 CHECK_NAME = 'teradata'
-TOX_ENV = get_tox_env()
+ACTIVE_ENV = get_active_env()
 ON_CI = running_on_ci()
 
 TERADATA_SERVER = os.environ.get('TERADATA_SERVER')

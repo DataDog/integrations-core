@@ -14,7 +14,7 @@ from ....utils import ON_WINDOWS
 from ...e2e import E2E_SUPPORTED_TYPES, derive_interface, start_environment, stop_environment
 from ...e2e.agent import DEFAULT_PYTHON_VERSION, DEFAULT_SAMPLING_COLLECTION_INTERVAL
 from ...git import get_current_branch
-from ...testing import complete_envs, get_available_envs, get_tox_env_python_version
+from ...testing import complete_envs, get_active_env_python_version, get_available_envs
 from ...utils import complete_testable_checks, is_testable_check
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_waiting, echo_warning
 
@@ -319,9 +319,9 @@ def _check_env(check, env):
 
 
 def _get_python_version(env, python):
-    env_python_version = get_tox_env_python_version(env)
+    env_python_version = get_active_env_python_version(env)
     if not python:
-        # Make the tox environment Python specifier influence the Agent
+        # Make the environment Python specifier influence the Agent
         python = env_python_version or DEFAULT_PYTHON_VERSION
     elif env_python_version and env_python_version != int(python):
         echo_warning(
