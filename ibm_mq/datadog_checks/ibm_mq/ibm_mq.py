@@ -1,16 +1,21 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import os
+import subprocess
+import sys
 
 from six import iteritems
 
-from datadog_checks.base import AgentCheck
+from datadog_checks.base import AgentCheck, ensure_bytes
+from datadog_checks.base.utils.serialization import json
 from datadog_checks.ibm_mq.collectors.stats_collector import StatsCollector
 from datadog_checks.ibm_mq.metrics import COUNT, GAUGE
 
 from . import connection, errors
 from .collectors import ChannelMetricCollector, MetadataCollector, QueueMetricCollector
 from .config import IBMMQConfig
+from .constants import KNOWN_DATADOG_AGENT_SETTER_METHODS
 
 try:
     from typing import Any, Dict, List
@@ -50,6 +55,10 @@ class IbmMqCheck(AgentCheck):
         self.stats_collector = StatsCollector(self._config, self.send_metrics_from_properties, self.log)
 
     def check(self, _):
+        if self.instance.get('process_isolation', False):
+            self.run_with_isolation()
+            return
+
         try:
             queue_manager = connection.get_queue_manager_connection(self._config, self.log)
             self.service_check(self.SERVICE_CHECK, AgentCheck.OK, self._config.tags, hostname=self._config.hostname)
@@ -129,3 +138,62 @@ class IbmMqCheck(AgentCheck):
                     )
                     return
                 self.send_metric(metric_type, metric_full_name, metric_value, new_tags)
+
+    def run_with_isolation(self):
+        # Lazy import required for monkey patching
+        from datadog_checks.base.checks.base import aggregator, datadog_agent
+
+        message_indicator = os.urandom(8).hex()
+        instance = dict(self.instance)
+
+        # Prevent fork bomb
+        instance['process_isolation'] = False
+
+        env_vars = dict(os.environ)
+        env_vars['REPLAY_MESSAGE_INDICATOR'] = message_indicator
+        env_vars['REPLAY_INSTANCE'] = json.dumps(instance)
+        env_vars['REPLAY_INIT_CONFIG'] = json.dumps(self.init_config)
+        env_vars['REPLAY_CHECK_ID'] = self.check_id
+
+        process = subprocess.Popen(
+            [
+                sys.executable,
+                '-u',
+                '-c',
+                'from datadog_checks.ibm_mq.replay import main;main()',
+            ],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            env=env_vars,
+        )
+        with process:
+            # To avoid blocking never use a pipe's file descriptor iterator. See https://bugs.python.org/issue3907
+            for line in iter(process.stdout.readline, b''):
+                line = line.rstrip().decode('utf-8')
+                indicator, _, procedure = line.partition(':')
+                if indicator != message_indicator:
+                    self.log.debug(line)
+                    continue
+
+                message_type, _, message = procedure.partition(':')
+                message = json.loads(message)
+                if message_type == 'aggregator':
+                    getattr(aggregator, message['method'])(self, *message['args'], **message['kwargs'])
+                elif message_type == 'log':
+                    getattr(self.log, message['method'])(*message['args'])
+                elif message_type == 'datadog_agent':
+                    method = message['method']
+                    value = getattr(datadog_agent, method)(*message['args'], **message['kwargs'])
+                    if method not in KNOWN_DATADOG_AGENT_SETTER_METHODS:
+                        process.stdin.write(b'%s\n' % ensure_bytes(json.dumps({'value': value})))
+                        process.stdin.flush()
+                elif message_type == 'error':
+                    self.log.error(message[0]['traceback'])
+                    break
+                else:
+                    self.log.error(
+                        'Unknown message type encountered during communication with the isolated process: %s',
+                        message_type,
+                    )
+                    break

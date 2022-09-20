@@ -248,6 +248,14 @@ files:
             'SYSTEM.*': queue_type:system
             'DEV.*': role:dev,queue_type:default
           type: object
+      - name: process_isolation
+        description: |
+          Whether to run the check in a separate process.
+
+          WARNING: In this mode, connection persistence is disabled.
+        value:
+          example: false
+          type: boolean
       - template: instances/default
   - template: logs
     example:

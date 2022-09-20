@@ -82,6 +82,10 @@ def instance_port(field, value):
     return 1414
 
 
+def instance_process_isolation(field, value):
+    return False
+
+
 def instance_queue_manager_timezone(field, value):
     return 'Etc/UTC'
 

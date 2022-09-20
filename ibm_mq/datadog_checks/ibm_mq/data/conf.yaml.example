@@ -220,6 +220,13 @@ instances:
     #   SYSTEM.*: queue_type:system
     #   DEV.*: role:dev,queue_type:default
 
+    ## @param process_isolation - boolean - optional - default: false
+    ## Whether to run the check in a separate process.
+    ##
+    ## WARNING: In this mode, connection persistence is disabled.
+    #
+    # process_isolation: false
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
