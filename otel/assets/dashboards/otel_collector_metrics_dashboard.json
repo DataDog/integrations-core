@@ -1,7 +1,7 @@
 {
     "author_name": "Datadog",
     "title": "OpenTelemetry Collector Metrics Dashboard",
-    "description": "Default dashboard to visualize metrics for the OpenTelemetry Collector.\n\nThese metrics are prefixed by [otelcol](https://app.datadoghq.com/metric/summary?filter=otelcol).\n\nNote: In order to view these metrics, the prometheus receiver needs to be enabled in the collector config file, as seen in [this example](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/6946b963820d391325254cb9cc6bb34ae12907a0/exporter/datadogexporter/examples/collector.yaml#L37).",
+    "description": "Default dashboard to visualize metrics for the OpenTelemetry Collector.\n\nThese metrics are prefixed by [otelcol](https://app.datadoghq.com/metric/summary?filter=otelcol).\n\nNote: To view these metrics, enable the Prometheus receiver in the collector config file, as shown in [this example](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/6946b963820d391325254cb9cc6bb34ae12907a0/exporter/datadogexporter/examples/collector.yaml#L37).",
     "widgets": [
         {
             "id": 7581494098406438,
