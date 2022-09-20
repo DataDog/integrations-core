@@ -150,10 +150,10 @@ class IbmMqCheck(AgentCheck):
         instance['process_isolation'] = False
 
         env_vars = dict(os.environ)
-        env_vars['REPLAY_MESSAGE_INDICATOR'] = message_indicator
-        env_vars['REPLAY_INSTANCE'] = json.dumps(instance)
-        env_vars['REPLAY_INIT_CONFIG'] = json.dumps(self.init_config)
-        env_vars['REPLAY_CHECK_ID'] = self.check_id
+        env_vars['DD_REPLAY_MESSAGE_INDICATOR'] = message_indicator
+        env_vars['DD_REPLAY_INSTANCE'] = json.dumps(instance)
+        env_vars['DD_REPLAY_INIT_CONFIG'] = json.dumps(self.init_config)
+        env_vars['DD_REPLAY_CHECK_ID'] = self.check_id
 
         process = subprocess.Popen(
             [
@@ -168,6 +168,8 @@ class IbmMqCheck(AgentCheck):
             env=env_vars,
         )
         with process:
+            self.log.info('Running check in a separate process')
+
             # To avoid blocking never use a pipe's file descriptor iterator. See https://bugs.python.org/issue3907
             for line in iter(process.stdout.readline, b''):
                 line = line.rstrip().decode('utf-8')
@@ -175,6 +177,8 @@ class IbmMqCheck(AgentCheck):
                 if indicator != message_indicator:
                     self.log.debug(line)
                     continue
+
+                self.log.trace(line)
 
                 message_type, _, message = procedure.partition(':')
                 message = json.loads(message)

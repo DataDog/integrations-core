@@ -7,13 +7,13 @@ import sys
 
 from datadog_checks.base import to_native_string
 from datadog_checks.base.checks import base
-from datadog_checks.base.log import LOG_LEVEL_MAP
+from datadog_checks.base.log import LOG_LEVEL_MAP, TRACE_LEVEL, _get_py_loglevel
 from datadog_checks.base.utils.metadata import core
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.ibm_mq import IbmMqCheck
 from datadog_checks.ibm_mq.constants import KNOWN_DATADOG_AGENT_SETTER_METHODS
 
-MESSAGE_INDICATOR = os.environ['REPLAY_MESSAGE_INDICATOR']
+MESSAGE_INDICATOR = os.environ['DD_REPLAY_MESSAGE_INDICATOR']
 LOG_METHODS = {log_level: log_method.lower() for log_method, log_level in LOG_LEVEL_MAP.items()}
 
 
@@ -72,14 +72,18 @@ class ReplayLogger(logging.Logger):
 base.using_stub_aggregator = False
 base.aggregator = ReplayAggregator()
 base.datadog_agent = core.datadog_agent = ReplayDatadogAgent()
+
+logging.addLevelName(TRACE_LEVEL, 'TRACE')
 logging.setLoggerClass(ReplayLogger)
+rootLogger = logging.getLogger()
+rootLogger.setLevel(_get_py_loglevel(base.datadog_agent.get_config('log_level')))
 
 
 def main():
     check = IbmMqCheck(
-        'ibm_mq', json.loads(os.environ['REPLAY_INIT_CONFIG']), [json.loads(os.environ['REPLAY_INSTANCE'])]
+        'ibm_mq', json.loads(os.environ['DD_REPLAY_INIT_CONFIG']), [json.loads(os.environ['DD_REPLAY_INSTANCE'])]
     )
-    check.check_id = os.environ['REPLAY_CHECK_ID']
+    check.check_id = os.environ['DD_REPLAY_CHECK_ID']
 
     result = check.run()
     if result:
