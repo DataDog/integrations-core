@@ -1,21 +1,80 @@
 {
     "author_name": "Datadog",
-    "title": "OTel Collector Metrics Dashboard",
-    "description": "Default dashboard to visualize metrics for the OpenTelemetry Collector.\n\nThese metrics are prefixed by [otelcol](https://app.datadoghq.com/metric/summary?filter=otelcol).",
+    "title": "OpenTelemetry Collector Metrics Dashboard",
+    "description": "Default dashboard to visualize metrics for the OpenTelemetry Collector.\n\nThese metrics are prefixed by [otelcol](https://app.datadoghq.com/metric/summary?filter=otelcol).\n\nNote: In order to view these metrics, the prometheus receiver needs to be enabled in the collector config file, as seen in [this example](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/6946b963820d391325254cb9cc6bb34ae12907a0/exporter/datadogexporter/examples/collector.yaml#L37).",
     "widgets": [
+        {
+            "id": 7581494098406438,
+            "definition": {
+                "title": "New group",
+                "type": "group",
+                "banner_img": "/static/images/integration_dashboard/otel_hero_1.png",
+                "show_title": false,
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 6416205973430436,
+                        "definition": {
+                            "type": "note",
+                            "content": "This is a default dashboard to visualize metrics from the OpenTelemetry Collector. These metrics are prefixed by [`otelcol`](https://app.datadoghq.com/metric/summary?filter=otelcol) and are scraped by the prometheus receiver.\n\n## In order to view these metrics, verify that the prometheus receiver is  enabled in the collector configuration, as seen in [this example](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/6946b963820d391325254cb9cc6bb34ae12907a0/exporter/datadogexporter/examples/collector.yaml#L37).",
+                            "background_color": "transparent",
+                            "font_size": "18",
+                            "text_align": "left",
+                            "show_tick": false,
+                            "tick_pos": "50%",
+                            "tick_edge": "left",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 8,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 7907026745649816,
+                        "definition": {
+                            "type": "note",
+                            "content": "**OpenTelemetry Collector guides**\n\n[Collector documentation&nbsp;↗](https://opentelemetry.io/docs/collector/)",
+                            "background_color": "transparent",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "vertical_align": "top",
+                            "show_tick": false,
+                            "tick_pos": "50%",
+                            "tick_edge": "left",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 0,
+                            "width": 4,
+                            "height": 2
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 12,
+                "height": 5
+            }
+        },
         {
             "id": 6537209141697758,
             "definition": {
                 "title": "Overall Health",
                 "type": "group",
-                "background_color": "vivid_green",
+                "background_color": "vivid_blue",
                 "show_title": true,
                 "layout_type": "ordered",
                 "widgets": [
                     {
                         "id": 5573486690411152,
                         "definition": {
-                            "title": "Process Uptime",
+                            "title": "Process uptime",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,
@@ -38,13 +97,13 @@
                                     "response_format": "timeseries",
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_process_uptime{*} by {service_version}.as_count()",
+                                            "query": "sum:otelcol_process_uptime{$host} by {service_version}.as_count()",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
                                     ],
                                     "style": {
-                                        "palette": "dog_classic",
+                                        "palette": "blue",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -62,7 +121,7 @@
                     {
                         "id": 2354107430277160,
                         "definition": {
-                            "title": "CPU Seconds",
+                            "title": "CPU seconds",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,
@@ -85,13 +144,13 @@
                                     "response_format": "timeseries",
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_process_cpu_seconds{*} by {service_version}.as_rate()",
+                                            "query": "sum:otelcol_process_cpu_seconds{$host} by {service_version}.as_rate()",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
                                     ],
                                     "style": {
-                                        "palette": "dog_classic",
+                                        "palette": "blue",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -107,9 +166,9 @@
                         }
                     },
                     {
-                        "id": 2361677840171604,
+                        "id": 7831353312899136,
                         "definition": {
-                            "title": "CPU Seconds",
+                            "title": "Runtime total system memory",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,
@@ -132,13 +191,13 @@
                                     "response_format": "timeseries",
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_process_cpu_seconds{*} by {service_version}.as_rate()",
+                                            "query": "avg:otelcol_process_runtime_total_sys_memory_bytes{$host} by {host}",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
                                     ],
                                     "style": {
-                                        "palette": "dog_classic",
+                                        "palette": "blue",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -150,194 +209,6 @@
                             "x": 8,
                             "y": 0,
                             "width": 4,
-                            "height": 2
-                        }
-                    },
-                    {
-                        "id": 5140447794799642,
-                        "definition": {
-                            "title": "Exporter Queue Size",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "queries": [
-                                        {
-                                            "query": "avg:otelcol_exporter_queue_size{*} by {service_version}",
-                                            "data_source": "metrics",
-                                            "name": "query1"
-                                        }
-                                    ],
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 2,
-                            "width": 4,
-                            "height": 2
-                        }
-                    },
-                    {
-                        "id": 4288366563988268,
-                        "definition": {
-                            "title": "Failed send requests",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "queries": [
-                                        {
-                                            "query": "sum:otelcol_exporter_send_failed_requests{*}.as_count()",
-                                            "data_source": "metrics",
-                                            "name": "query1"
-                                        }
-                                    ],
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "bars"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 4,
-                            "y": 2,
-                            "width": 4,
-                            "height": 2
-                        }
-                    },
-                    {
-                        "id": 6803229914468192,
-                        "definition": {
-                            "title": "RSS Memory Used",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "queries": [
-                                        {
-                                            "query": "avg:otelcol_process_memory_rss{*} by {host,service_version}",
-                                            "data_source": "metrics",
-                                            "name": "query1"
-                                        }
-                                    ],
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 8,
-                            "y": 2,
-                            "width": 4,
-                            "height": 2
-                        }
-                    },
-                    {
-                        "id": 8314177216033788,
-                        "definition": {
-                            "title": "Metric points sent per second",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "per_second(query1)"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "queries": [
-                                        {
-                                            "query": "sum:otelcol_exporter_sent_metric_points{*} by {service_version}.as_rate()",
-                                            "data_source": "metrics",
-                                            "name": "query1"
-                                        }
-                                    ],
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 4,
-                            "width": 6,
                             "height": 2
                         }
                     },
@@ -367,13 +238,60 @@
                                     "response_format": "timeseries",
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_exporter_sent_spans{*} by {service_version}.as_rate()",
+                                            "query": "sum:otelcol_exporter_sent_spans{$host} by {service_version}.as_rate()",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
                                     ],
                                     "style": {
-                                        "palette": "dog_classic",
+                                        "palette": "blue",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 2,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 8314177216033788,
+                        "definition": {
+                            "title": "Metric points sent per second",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "per_second(query1)"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "sum:otelcol_exporter_sent_metric_points{$host} by {service_version}.as_rate()",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "blue",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -383,7 +301,7 @@
                         },
                         "layout": {
                             "x": 6,
-                            "y": 4,
+                            "y": 2,
                             "width": 6,
                             "height": 2
                         }
@@ -392,17 +310,17 @@
             },
             "layout": {
                 "x": 0,
-                "y": 0,
+                "y": 5,
                 "width": 12,
-                "height": 7
+                "height": 5
             }
         },
         {
             "id": 8041422185924356,
             "definition": {
-                "title": "Receiver",
+                "title": "Component: Receivers",
                 "type": "group",
-                "background_color": "vivid_blue",
+                "background_color": "purple",
                 "show_title": true,
                 "layout_type": "ordered",
                 "widgets": [
@@ -417,11 +335,13 @@
                                 {
                                     "formulas": [
                                         {
-                                            "formula": "query1",
+                                            "alias": "Accepted metric points",
+                                            "conditional_formats": [],
                                             "limit": {
                                                 "count": 500,
-                                                "order": "desc"
-                                            }
+                                                "order": "asc"
+                                            },
+                                            "formula": "query1"
                                         }
                                     ],
                                     "response_format": "scalar",
@@ -454,17 +374,18 @@
                                 {
                                     "formulas": [
                                         {
-                                            "formula": "query1",
+                                            "alias": "Accepted spans",
                                             "limit": {
                                                 "count": 500,
                                                 "order": "desc"
-                                            }
+                                            },
+                                            "formula": "query1"
                                         }
                                     ],
                                     "response_format": "scalar",
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_receiver_accepted_spans{*} by {receiver}.as_count()",
+                                            "query": "sum:otelcol_receiver_accepted_spans{$host} by {receiver}.as_count()",
                                             "data_source": "metrics",
                                             "name": "query1",
                                             "aggregator": "avg"
@@ -506,13 +427,13 @@
                                     "response_format": "timeseries",
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_receiver_accepted_metric_points{*} by {receiver}.as_rate()",
+                                            "query": "sum:otelcol_receiver_accepted_metric_points{$host} by {receiver}.as_rate()",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
                                     ],
                                     "style": {
-                                        "palette": "dog_classic",
+                                        "palette": "purple",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -553,13 +474,13 @@
                                     "response_format": "timeseries",
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_receiver_accepted_spans{*} by {receiver}.as_rate()",
+                                            "query": "sum:otelcol_receiver_accepted_spans{$host} by {receiver}.as_rate()",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
                                     ],
                                     "style": {
-                                        "palette": "dog_classic",
+                                        "palette": "purple",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -600,13 +521,13 @@
                                     "response_format": "timeseries",
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_receiver_accepted_metric_points{*} by {receiver}.as_count()",
+                                            "query": "sum:otelcol_receiver_accepted_metric_points{$host} by {receiver}.as_count()",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
                                     ],
                                     "style": {
-                                        "palette": "dog_classic",
+                                        "palette": "purple",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -647,13 +568,13 @@
                                     "response_format": "timeseries",
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_receiver_accepted_spans{*} by {receiver}.as_count()",
+                                            "query": "sum:otelcol_receiver_accepted_spans{$host} by {receiver}.as_count()",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
                                     ],
                                     "style": {
-                                        "palette": "dog_classic",
+                                        "palette": "purple",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -694,13 +615,13 @@
                                     "response_format": "timeseries",
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_receiver_refused_metric_points{*}.as_count()",
+                                            "query": "sum:otelcol_receiver_refused_metric_points{$host}.as_count()",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
                                     ],
                                     "style": {
-                                        "palette": "dog_classic",
+                                        "palette": "purple",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -741,13 +662,13 @@
                                     "response_format": "timeseries",
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_receiver_refused_spans{*}.as_count()",
+                                            "query": "sum:otelcol_receiver_refused_spans{$host}.as_count()",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
                                     ],
                                     "style": {
-                                        "palette": "dog_classic",
+                                        "palette": "purple",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -761,22 +682,446 @@
                             "width": 6,
                             "height": 2
                         }
+                    },
+                    {
+                        "id": 4183049418927876,
+                        "definition": {
+                            "title": "Scraped metric points",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "sum:otelcol_scraper_scraped_metric_points{$host}.as_count()",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "purple",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 8,
+                            "width": 4,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 3294883772736648,
+                        "definition": {
+                            "title": "Scraped metric points per second",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "per_second(query1)"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "sum:otelcol_scraper_scraped_metric_points{$host}.as_rate()",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "purple",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 8,
+                            "width": 4,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 6826797800818452,
+                        "definition": {
+                            "title": "Errored metric points",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "sum:otelcol_scraper_errored_metric_points{$host}.as_count()",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "purple",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 8,
+                            "width": 4,
+                            "height": 2
+                        }
                     }
                 ]
             },
             "layout": {
                 "x": 0,
-                "y": 7,
+                "y": 10,
                 "width": 12,
-                "height": 9
+                "height": 11
+            }
+        },
+        {
+            "id": 4869373166772386,
+            "definition": {
+                "title": "Component: Processors",
+                "type": "group",
+                "background_color": "purple",
+                "show_title": true,
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 7541839960022268,
+                        "definition": {
+                            "title": "Batch send size by processor",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Average batch send size",
+                                            "limit": {
+                                                "count": 500,
+                                                "order": "desc"
+                                            },
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "query": "avg:otelcol_processor_batch_batch_send_size{$host} by {service,processor}",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "aggregator": "avg"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 7547900287670884,
+                        "definition": {
+                            "title": "Batch size trigger send by processor",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Batch size trigger send",
+                                            "limit": {
+                                                "count": 500,
+                                                "order": "desc"
+                                            },
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "query": "sum:otelcol_processor_batch_batch_size_trigger_send{$host} by {service,processor}.as_count()",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "aggregator": "avg"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 0,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 4822339738405116,
+                        "definition": {
+                            "title": "Batch send size",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "avg:otelcol_processor_batch_batch_send_size{$host} by {host}",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "purple",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 2,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 6953698662416766,
+                        "definition": {
+                            "title": "Batch size trigger send",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "sum:otelcol_processor_batch_batch_size_trigger_send{$host} by {host}.as_count()",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "purple",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 2,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 6605942082516500,
+                        "definition": {
+                            "title": "Batch send size per second",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "per_second(query1)"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "avg:otelcol_processor_batch_batch_send_size{$host} by {host}",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "purple",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 7203814543578154,
+                        "definition": {
+                            "title": "Batch timeout trigger send",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "sum:otelcol_processor_batch_timeout_trigger_send{$host}.as_count()",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "purple",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 4,
+                            "width": 6,
+                            "height": 2
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 21,
+                "width": 12,
+                "height": 7,
+                "is_column_break": true
             }
         },
         {
             "id": 7510133872566486,
             "definition": {
-                "title": "Exporter",
+                "title": "Component: Exporters",
                 "type": "group",
-                "background_color": "vivid_purple",
+                "background_color": "purple",
                 "show_title": true,
                 "layout_type": "ordered",
                 "widgets": [
@@ -791,17 +1136,18 @@
                                 {
                                     "formulas": [
                                         {
-                                            "formula": "query1",
+                                            "alias": "Sent metric points",
                                             "limit": {
                                                 "count": 500,
                                                 "order": "desc"
-                                            }
+                                            },
+                                            "formula": "query1"
                                         }
                                     ],
                                     "response_format": "scalar",
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_exporter_sent_metric_points{*} by {service,exporter}.as_count()",
+                                            "query": "sum:otelcol_exporter_sent_metric_points{$host} by {service,exporter}.as_count()",
                                             "data_source": "metrics",
                                             "name": "query1",
                                             "aggregator": "avg"
@@ -828,17 +1174,18 @@
                                 {
                                     "formulas": [
                                         {
-                                            "formula": "query1",
+                                            "alias": "Sent spans",
                                             "limit": {
                                                 "count": 500,
                                                 "order": "desc"
-                                            }
+                                            },
+                                            "formula": "query1"
                                         }
                                     ],
                                     "response_format": "scalar",
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_exporter_sent_spans{*} by {service,exporter}.as_count()",
+                                            "query": "sum:otelcol_exporter_sent_spans{$host} by {service,exporter}.as_count()",
                                             "data_source": "metrics",
                                             "name": "query1",
                                             "aggregator": "avg"
@@ -880,13 +1227,13 @@
                                     "response_format": "timeseries",
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_exporter_sent_metric_points{*}.as_rate()",
+                                            "query": "sum:otelcol_exporter_sent_metric_points{$host}.as_rate()",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
                                     ],
                                     "style": {
-                                        "palette": "dog_classic",
+                                        "palette": "purple",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -927,13 +1274,13 @@
                                     "response_format": "timeseries",
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_exporter_sent_spans{*}.as_rate()",
+                                            "query": "sum:otelcol_exporter_sent_spans{$host}.as_rate()",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
                                     ],
                                     "style": {
-                                        "palette": "dog_classic",
+                                        "palette": "purple",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -974,13 +1321,13 @@
                                     "response_format": "timeseries",
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_exporter_sent_metric_points{*} by {exporter}.as_count()",
+                                            "query": "sum:otelcol_exporter_sent_metric_points{$host} by {exporter}.as_count()",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
                                     ],
                                     "style": {
-                                        "palette": "dog_classic",
+                                        "palette": "purple",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -1021,13 +1368,13 @@
                                     "response_format": "timeseries",
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_exporter_sent_spans{*} by {exporter}.as_count()",
+                                            "query": "sum:otelcol_exporter_sent_spans{$host} by {exporter}.as_count()",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
                                     ],
                                     "style": {
-                                        "palette": "dog_classic",
+                                        "palette": "purple",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -1068,13 +1415,13 @@
                                     "response_format": "timeseries",
                                     "queries": [
                                         {
-                                            "query": "avg:otelcol_exporter_queue_size{*}",
+                                            "query": "avg:otelcol_exporter_queue_size{$host}",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
                                     ],
                                     "style": {
-                                        "palette": "dog_classic",
+                                        "palette": "purple",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -1085,54 +1432,7 @@
                         "layout": {
                             "x": 0,
                             "y": 6,
-                            "width": 4,
-                            "height": 2
-                        }
-                    },
-                    {
-                        "id": 6594529273261358,
-                        "definition": {
-                            "title": "Failed send metric points",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "queries": [
-                                        {
-                                            "query": "sum:otelcol_exporter_send_failed_metric_points{*}.as_count()",
-                                            "data_source": "metrics",
-                                            "name": "query1"
-                                        }
-                                    ],
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "bars"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 4,
-                            "y": 6,
-                            "width": 4,
+                            "width": 6,
                             "height": 2
                         }
                     },
@@ -1162,13 +1462,13 @@
                                     "response_format": "timeseries",
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_exporter_send_failed_spans{*}.as_count()",
+                                            "query": "sum:otelcol_exporter_send_failed_spans{$host}.as_count()",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
                                     ],
                                     "style": {
-                                        "palette": "dog_classic",
+                                        "palette": "purple",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -1177,16 +1477,16 @@
                             ]
                         },
                         "layout": {
-                            "x": 8,
+                            "x": 6,
                             "y": 6,
-                            "width": 4,
+                            "width": 6,
                             "height": 2
                         }
                     },
                     {
-                        "id": 1329043835048090,
+                        "id": 6751538797814796,
                         "definition": {
-                            "title": "Failed send requests",
+                            "title": "Failed enqueue log records",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,
@@ -1209,13 +1509,13 @@
                                     "response_format": "timeseries",
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_exporter_send_failed_requests{*}.as_count()",
+                                            "query": "sum:otelcol_exporter_enqueue_failed_log_records{$host}.as_count()",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
                                     ],
                                     "style": {
-                                        "palette": "dog_classic",
+                                        "palette": "purple",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -1256,13 +1556,13 @@
                                     "response_format": "timeseries",
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_exporter_enqueue_failed_metric_points{*}.as_count()",
+                                            "query": "sum:otelcol_exporter_enqueue_failed_metric_points{$host}.as_count()",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
                                     ],
                                     "style": {
-                                        "palette": "dog_classic",
+                                        "palette": "purple",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -1303,13 +1603,13 @@
                                     "response_format": "timeseries",
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_exporter_enqueue_failed_spans{*}.as_count()",
+                                            "query": "sum:otelcol_exporter_enqueue_failed_spans{$host}.as_count()",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
                                     ],
                                     "style": {
-                                        "palette": "dog_classic",
+                                        "palette": "purple",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -1323,61 +1623,14 @@
                             "width": 4,
                             "height": 2
                         }
-                    },
-                    {
-                        "id": 6751538797814796,
-                        "definition": {
-                            "title": "Failed enqueue log records",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "queries": [
-                                        {
-                                            "query": "sum:otelcol_exporter_enqueue_failed_log_records{*}.as_count()",
-                                            "data_source": "metrics",
-                                            "name": "query1"
-                                        }
-                                    ],
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "bars"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 10,
-                            "width": 4,
-                            "height": 2
-                        }
                     }
                 ]
             },
             "layout": {
                 "x": 0,
-                "y": 16,
+                "y": 28,
                 "width": 12,
-                "height": 13
+                "height": 11
             }
         },
         {
@@ -1385,14 +1638,14 @@
             "definition": {
                 "title": "Process",
                 "type": "group",
-                "background_color": "vivid_orange",
+                "background_color": "pink",
                 "show_title": true,
                 "layout_type": "ordered",
                 "widgets": [
                     {
                         "id": 4604688596865160,
                         "definition": {
-                            "title": "Process Uptime",
+                            "title": "Process uptime",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,
@@ -1415,13 +1668,13 @@
                                     "response_format": "timeseries",
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_process_uptime{*}.as_count()",
+                                            "query": "sum:otelcol_process_uptime{$host}.as_count()",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
                                     ],
                                     "style": {
-                                        "palette": "dog_classic",
+                                        "palette": "warm",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -1439,7 +1692,7 @@
                     {
                         "id": 2510903991180322,
                         "definition": {
-                            "title": "CPU Seconds",
+                            "title": "CPU seconds",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,
@@ -1462,13 +1715,13 @@
                                     "response_format": "timeseries",
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_process_cpu_seconds{*}.as_rate()",
+                                            "query": "sum:otelcol_process_cpu_seconds{$host}.as_rate()",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
                                     ],
                                     "style": {
-                                        "palette": "dog_classic",
+                                        "palette": "warm",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -1486,7 +1739,7 @@
                     {
                         "id": 5974590671284596,
                         "definition": {
-                            "title": "RSS Memory Used",
+                            "title": "RSS memory used",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,
@@ -1509,13 +1762,13 @@
                                     "response_format": "timeseries",
                                     "queries": [
                                         {
-                                            "query": "avg:otelcol_process_memory_rss{*} by {host}",
+                                            "query": "avg:otelcol_process_memory_rss{$host} by {host}",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
                                     ],
                                     "style": {
-                                        "palette": "dog_classic",
+                                        "palette": "warm",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -1533,7 +1786,7 @@
                     {
                         "id": 346589480155598,
                         "definition": {
-                            "title": "Runtime Heap Alloc Bytes",
+                            "title": "Runtime heap alloc",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,
@@ -1556,13 +1809,13 @@
                                     "response_format": "timeseries",
                                     "queries": [
                                         {
-                                            "query": "avg:otelcol_process_runtime_heap_alloc_bytes{*} by {host}",
+                                            "query": "avg:otelcol_process_runtime_heap_alloc_bytes{$host} by {host}",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
                                     ],
                                     "style": {
-                                        "palette": "dog_classic",
+                                        "palette": "warm",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -1580,7 +1833,7 @@
                     {
                         "id": 1054348548001084,
                         "definition": {
-                            "title": "Runtime Total Alloc Bytes",
+                            "title": "Runtime total alloc",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,
@@ -1603,13 +1856,13 @@
                                     "response_format": "timeseries",
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_process_runtime_total_alloc_bytes{*} by {host}.as_count()",
+                                            "query": "sum:otelcol_process_runtime_total_alloc_bytes{$host} by {host}.as_count()",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
                                     ],
                                     "style": {
-                                        "palette": "dog_classic",
+                                        "palette": "warm",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -1627,7 +1880,7 @@
                     {
                         "id": 4098523814626648,
                         "definition": {
-                            "title": "Runtime Total System Memory Bytes",
+                            "title": "Runtime total system memory",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,
@@ -1650,13 +1903,13 @@
                                     "response_format": "timeseries",
                                     "queries": [
                                         {
-                                            "query": "avg:otelcol_process_runtime_total_sys_memory_bytes{*} by {host}",
+                                            "query": "avg:otelcol_process_runtime_total_sys_memory_bytes{$host} by {host}",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
                                     ],
                                     "style": {
-                                        "palette": "dog_classic",
+                                        "palette": "warm",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -1667,372 +1920,6 @@
                         "layout": {
                             "x": 8,
                             "y": 2,
-                            "width": 4,
-                            "height": 2
-                        }
-                    }
-                ]
-            },
-            "layout": {
-                "x": 0,
-                "y": 29,
-                "width": 12,
-                "height": 5,
-                "is_column_break": true
-            }
-        },
-        {
-            "id": 4869373166772386,
-            "definition": {
-                "title": "Processor",
-                "type": "group",
-                "background_color": "vivid_green",
-                "show_title": true,
-                "layout_type": "ordered",
-                "widgets": [
-                    {
-                        "id": 4822339738405116,
-                        "definition": {
-                            "title": "Batch Send Size",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "queries": [
-                                        {
-                                            "query": "avg:otelcol_processor_batch_batch_send_size{*} by {host}",
-                                            "data_source": "metrics",
-                                            "name": "query1"
-                                        }
-                                    ],
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 0,
-                            "width": 6,
-                            "height": 2
-                        }
-                    },
-                    {
-                        "id": 6605942082516500,
-                        "definition": {
-                            "title": "Batch Send Size per second",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "per_second(query1)"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "queries": [
-                                        {
-                                            "query": "avg:otelcol_processor_batch_batch_send_size{*} by {host}",
-                                            "data_source": "metrics",
-                                            "name": "query1"
-                                        }
-                                    ],
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 6,
-                            "y": 0,
-                            "width": 6,
-                            "height": 2
-                        }
-                    },
-                    {
-                        "id": 6953698662416766,
-                        "definition": {
-                            "title": "Batch Size Trigger Send",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "queries": [
-                                        {
-                                            "query": "sum:otelcol_processor_batch_batch_size_trigger_send{*} by {host}.as_count()",
-                                            "data_source": "metrics",
-                                            "name": "query1"
-                                        }
-                                    ],
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 2,
-                            "width": 6,
-                            "height": 2
-                        }
-                    },
-                    {
-                        "id": 7203814543578154,
-                        "definition": {
-                            "title": "Batch Timeout Trigger Send",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "queries": [
-                                        {
-                                            "query": "sum:otelcol_processor_batch_timeout_trigger_send{*}.as_count()",
-                                            "data_source": "metrics",
-                                            "name": "query1"
-                                        }
-                                    ],
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 6,
-                            "y": 2,
-                            "width": 6,
-                            "height": 2
-                        }
-                    }
-                ]
-            },
-            "layout": {
-                "x": 0,
-                "y": 34,
-                "width": 12,
-                "height": 5
-            }
-        },
-        {
-            "id": 2472234197466974,
-            "definition": {
-                "title": "Scraper",
-                "type": "group",
-                "background_color": "vivid_pink",
-                "show_title": true,
-                "layout_type": "ordered",
-                "widgets": [
-                    {
-                        "id": 4183049418927876,
-                        "definition": {
-                            "title": "Scraped metric points",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "queries": [
-                                        {
-                                            "query": "sum:otelcol_scraper_scraped_metric_points{*}.as_count()",
-                                            "data_source": "metrics",
-                                            "name": "query1"
-                                        }
-                                    ],
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 0,
-                            "width": 4,
-                            "height": 2
-                        }
-                    },
-                    {
-                        "id": 3294883772736648,
-                        "definition": {
-                            "title": "Scraped metric points per second",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "per_second(query1)"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "queries": [
-                                        {
-                                            "query": "sum:otelcol_scraper_scraped_metric_points{*}.as_rate()",
-                                            "data_source": "metrics",
-                                            "name": "query1"
-                                        }
-                                    ],
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 4,
-                            "y": 0,
-                            "width": 4,
-                            "height": 2
-                        }
-                    },
-                    {
-                        "id": 6826797800818452,
-                        "definition": {
-                            "title": "Errored metric points",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "queries": [
-                                        {
-                                            "query": "sum:otelcol_scraper_errored_metric_points{*}.as_count()",
-                                            "data_source": "metrics",
-                                            "name": "query1"
-                                        }
-                                    ],
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "bars"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 8,
-                            "y": 0,
                             "width": 4,
                             "height": 2
                         }
@@ -2043,11 +1930,18 @@
                 "x": 0,
                 "y": 39,
                 "width": 12,
-                "height": 3
+                "height": 5
             }
         }
     ],
-    "template_variables": [],
+    "template_variables": [
+        {
+            "name": "host",
+            "prefix": "host",
+            "available_values": [],
+            "default": "*"
+        }
+    ],
     "layout_type": "ordered",
     "is_read_only": false,
     "notify_list": [],
