@@ -15,6 +15,11 @@ import re
 logger = logging.getLogger(__name__)
 
 
+class ChannelData(object):
+    def __init__(self):
+        pass
+
+
 class GrpcCheck(AgentCheck):
 
     # This will be the prefix of every metric and service check the integration sends
@@ -25,6 +30,7 @@ class GrpcCheck(AgentCheck):
         host = self.instance.get("host")
         port = self.instance.get("port")
         self.addr = "{}:{}".format(host, port)
+        self.channel_ids_to_values = {}
         logger.debug("addr: %s", self.addr)
 
     def _get_server_metrics(self, channelz_stub, server):
@@ -51,9 +57,7 @@ class GrpcCheck(AgentCheck):
             last_socket_id = sockets[-1].socket_id
             end = sockets_stub.end
 
-        logger.debug("Processing server %r, %d connected sockets", server, num_sockets)
         server_data = server.data
-
         tags = []
         # Very likely to be empty
         # https://github.com/grpc/grpc-go/blob/aee9f0ed1722db9c45e66eab9e530e72fa2b067c/server.go#L620
@@ -106,7 +110,7 @@ class GrpcCheck(AgentCheck):
         state_str = channel_data.state.State.Name(state_value)
 
         state_tags = [f"state:{state_str}"] + additional_tags
-        if channel_data.target:
+        if channel_type == 'channel' and channel_data.target:
             state_tags += [f"target:{channel_data.target}"]
         if channel_type == "channel":
             lb_policy = self._get_lb_policy(channel_data.trace.events)
@@ -120,6 +124,9 @@ class GrpcCheck(AgentCheck):
         uptime = datetime.now() - creation_time
         self.gauge(f"{channel_type}.uptime", uptime.seconds, tags=state_tags)
 
+        # logger.debug('Have channel_data: %s, tags:%s', channel_data, state_tags)
+        if channel_type == 'channel':
+            logger.debug('Submitting channel_data: %s, tags:%s', channel_data.calls_started, state_tags)
         self.monotonic_count(
             f"{channel_type}.calls_started", channel_data.calls_started, tags=state_tags
         )

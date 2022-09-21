@@ -93,3 +93,33 @@ def test_simple_grpc(dd_run_check, aggregator, instance):
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
     server.stop(0)
+
+
+@pytest.mark.unit
+def test_multiple_connected_clients(dd_run_check, aggregator, instance):
+    # type: (Callable[[AgentCheck, bool], None], AggregatorStub, Dict[str, Any]) -> None
+    server_addr = "127.0.0.1:12345"
+    server = _start_test_server(server_addr)
+
+    # channel_1 = grpc.insecure_channel(server_addr)
+    # channel_2 = grpc.insecure_channel(server_addr)
+
+    # channelz_stub_1 = channelz_pb2_grpc.ChannelzStub(channel_1)
+    # _ = channelz_stub_1.GetServers(channelz_pb2.GetServersRequest())
+
+    # channelz_stub_2 = channelz_pb2_grpc.ChannelzStub(channel_2)
+    # _ = channelz_stub_2.GetServers(channelz_pb2.GetServersRequest())
+
+    instance = {'host': '127.0.0.1', 'port': 12345}
+    check = GrpcCheck('grpc', {}, [instance])
+    dd_run_check(check)
+
+    channel_tags = ['lb_policy:pick_first', 'state:READY', f'target:{server_addr}']
+    aggregator.assert_metric('grpc.channel.calls_started', value=4, tags=channel_tags)
+    aggregator.assert_metric('grpc.channel.calls_succeeded', value=2, tags=channel_tags)
+    aggregator.assert_metric('grpc.channel.calls_failed', value=0, tags=channel_tags)
+
+    # aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+    server.stop(0)
