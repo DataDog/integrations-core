@@ -18,9 +18,9 @@ services:
       - INITIALIZE_DB=1
       - TZ=America/Los_Angeles
     volumes:
-      - cacti-data:/cacti
-      - cacti-spine:/spine
-      - cacti-backups:/backups
+      - ./cacti-data:/cacti
+      - ./cacti-spine:/spine
+      - ./cacti-backups:/backups
     links:
       - db
 
@@ -35,10 +35,4 @@ services:
       - MYSQL_ROOT_PASSWORD=rootpassword
       - TZ=America/Los_Angeles
     volumes:
-      - cacti-db:/var/lib/mysql
-
-volumes:
-  cacti-db:
-  cacti-data:
-  cacti-spine:
-  cacti-backups:
+      - ./cacti-db:/var/lib/mysql
