@@ -575,7 +575,6 @@ class IbmDb2Check(AgentCheck):
         else:
             self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, tags=self._tags)
 
-
     @classmethod
     def get_connection_data(cls, db, username, password, host, port, security, tls_cert):
         if host:
