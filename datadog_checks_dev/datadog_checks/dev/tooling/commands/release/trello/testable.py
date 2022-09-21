@@ -181,10 +181,13 @@ def pick_card_member(
         random.shuffle(team_members)
         card_assignments[team] = dict.fromkeys(team_members, 0)
 
-    member = min(
-        [member for member in card_assignments[team] if member != author and member not in approvers],
-        key=card_assignments[team].get,
-    )
+    potential_testers = [member for member in card_assignments[team] if
+                         member != author and member not in approvers]
+
+    if not potential_testers:
+        return None, None
+
+    member = min(users, key=card_assignments[team].get)
     card_assignments[team][member] += 1
     return member, users[member]
 
