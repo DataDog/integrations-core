@@ -181,9 +181,11 @@ def pick_card_member(
         random.shuffle(team_members)
         card_assignments[team] = dict.fromkeys(team_members, 0)
 
+    # try to find someone who did not approve the PR
     potential_testers = [member for member in card_assignments[team] if member != author and member not in approvers]
 
     if not potential_testers:
+        # try to find someone in the team, even if they approve
         potential_testers = [member for member in card_assignments[team] if member != author]
 
         if not potential_testers:
