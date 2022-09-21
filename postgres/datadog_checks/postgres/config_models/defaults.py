@@ -43,7 +43,7 @@ def instance_collect_database_size_metrics(field, value):
 
 
 def instance_collect_default_database(field, value):
-    return False
+    return True
 
 
 def instance_collect_function_metrics(field, value):

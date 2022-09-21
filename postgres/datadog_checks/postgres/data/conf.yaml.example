@@ -183,10 +183,10 @@ instances:
     #
     # collect_database_size_metrics: true
 
-    ## @param collect_default_database - boolean - optional - default: false
+    ## @param collect_default_database - boolean - optional - default: true
     ## Include statistics from the default database 'postgres' in the check metrics.
     #
-    # collect_default_database: false
+    # collect_default_database: true
 
     ## @param collect_bloat_metrics - boolean - optional - default: false
     ## Collect metrics about table bloat. Only available when `relation` metrics are enabled.

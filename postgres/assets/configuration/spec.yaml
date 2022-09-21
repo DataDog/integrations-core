@@ -227,7 +227,7 @@ files:
       description: Include statistics from the default database 'postgres' in the check metrics.
       value:
         type: boolean
-        example: false
+        example: true
     - name: collect_bloat_metrics
       description: Collect metrics about table bloat. Only available when `relation` metrics are enabled.
       enabled: true
