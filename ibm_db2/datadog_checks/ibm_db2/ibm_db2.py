@@ -63,6 +63,8 @@ class IbmDb2Check(AgentCheck):
         )
 
     def check(self, instance):
+        # The reason this connection is not cached between check runs is because in the event of the credentials
+        # becoming invalid DB2 would still consider the existing open connection to be a valid one.
         self._conn = self.get_connection()
         if self._conn is None:
             return
