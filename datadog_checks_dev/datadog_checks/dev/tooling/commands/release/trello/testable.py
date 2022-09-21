@@ -184,9 +184,12 @@ def pick_card_member(
     potential_testers = [member for member in card_assignments[team] if member != author and member not in approvers]
 
     if not potential_testers:
-        return None, None
+        potential_testers = [member for member in card_assignments[team] if member != author]
 
-    member = min(users, key=card_assignments[team].get)
+        if not potential_testers:
+            return None, None
+
+    member = min(potential_testers, key=card_assignments[team].get)
     card_assignments[team][member] += 1
     return member, users[member]
 
