@@ -65,8 +65,9 @@ class IbmDb2Check(AgentCheck):
     def check(self, instance):
         if self._conn is None:
             self._conn = self.get_connection()
-            if self._conn is None:
-                return
+        self.emmit_connection_service_checks()
+        if self._conn is None:
+            return
 
         self.collect_metadata()
         for query_method in self._query_methods:
@@ -561,17 +562,19 @@ class IbmDb2Check(AgentCheck):
             else:  # no cov
                 self.log.error('Unable to connect to database `%s` as user `%s`: %s', target, username, e)
             connection = None
+        return connection
 
-        if connection is not None:
-            self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, tags=self._tags)
-        else:
+    def emmit_connection_service_checks(self):
+        if self._conn is None:
             self.service_check(
                 self.SERVICE_CHECK_CONNECT,
                 self.CRITICAL,
                 tags=self._tags,
                 message="Unable to create new connection to database: {}".format(self._db),
             )
-        return connection
+        else:
+            self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, tags=self._tags)
+
 
     @classmethod
     def get_connection_data(cls, db, username, password, host, port, security, tls_cert):
@@ -600,6 +603,7 @@ class IbmDb2Check(AgentCheck):
             # ToDo: Probably the best strategy here would be to just set self._conn = None, abort the current check run
             # and retry on the next check run.
             self._conn = self.get_connection()
+            self.emmit_connection_service_checks()
             if self._conn is None:
                 raise ConnectionError("Unable to create new connection")
 
