@@ -597,6 +597,8 @@ class IbmDb2Check(AgentCheck):
         except Exception as e:
             error = str(e)
             self.log.error("Error executing query: %s.\nAttempting to reconnect", error)
+            # ToDo: Probably the best strategy here would be to just set self._conn = None, abort the current check run
+            # and retry on the next check run.
             self._conn = self.get_connection()
             if self._conn is None:
                 raise ConnectionError("Unable to create new connection")
