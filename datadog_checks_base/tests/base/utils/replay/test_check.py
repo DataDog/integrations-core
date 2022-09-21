@@ -46,6 +46,7 @@ def test_replay_all(caplog, dd_run_check, aggregator, datadog_agent):
     aggregator.assert_metric('replay.initialize', 0, count=1, tags=expected_tags)
     aggregator.assert_metric('replay.metric', 0, count=1, tags=expected_tags)
     aggregator.assert_service_check('replay.sc', ServiceCheck.OK, count=1, tags=expected_tags)
+    aggregator.assert_all_metrics_covered()
 
     expected_message = 'Initializing - replay - test:123'
     for _, level, message in caplog.record_tuples:

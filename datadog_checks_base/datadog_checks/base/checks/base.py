@@ -1086,7 +1086,7 @@ class AgentCheck(object):
         # type: () -> str
         try:
             # Ignore check initializations if running in a separate process
-            if self.instance.get('process_isolation', False):
+            if is_affirmative(self.instance.get('process_isolation', self.init_config.get('process_isolation', False))):
                 from ..utils.replay.execute import run_with_isolation
 
                 run_with_isolation(self, aggregator, datadog_agent)
