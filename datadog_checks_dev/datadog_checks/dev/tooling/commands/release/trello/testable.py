@@ -34,7 +34,7 @@ def create_trello_card(
     pr_author: str,
     config: dict,
     card_assignments: dict,
-    pr_approvers: List[str] = None,
+    pr_approvers: Optional[List[str]] = None,
 ) -> None:
     labels = ', '.join(f'`{label}`' for label in sorted(pr_labels))
     body = f'''\
@@ -156,7 +156,7 @@ def get_commits_between(base_ref: str, target_ref: str, *, root: str) -> List[Tu
 
 
 def pick_card_member(
-    config: dict, author: str, team: str, card_assignments: dict, approvers: List[str] = None
+    config: dict, author: str, team: str, card_assignments: dict, approvers: Optional[List[str]] = None
 ) -> Tuple[Any, Any]:
     """Return a member to assign to the created issue.
     In practice, it returns one trello user which is not the PR author or an approver, for the given team.
