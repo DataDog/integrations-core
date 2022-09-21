@@ -2,7 +2,7 @@
 
 ## Overview
 
-This check monitors [ArgoCD][1] through the Datadog Agent.
+This check monitors [Argo CD][1] through the Datadog Agent.
 
 ## Setup
 
@@ -10,12 +10,12 @@ Follow the instructions below to install and configure this check for an Agent r
 
 ### Installation
 
-The ArgoCD check is included in the [Datadog Agent][2] package.
+The Argo CD check is included in the [Datadog Agent][2] package.
 No additional installation is needed on your server.
 
 ### Configuration
 
-1. Edit the `argocd.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your argocd performance data. See the [sample argocd.d/conf.yaml][4] for all available configuration options.
+1. Edit the `argocd.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Argo CD performance data. See the [sample argocd.d/conf.yaml][4] for all available configuration options.
 
 2. [Restart the Agent][5].
 
@@ -31,11 +31,11 @@ See [metadata.csv][7] for a list of metrics provided by this integration.
 
 ### Events
 
-The ArgoCD integration does not include any events.
+The Argo CD integration does not include any events.
 
 ### Service Checks
 
-The ArgoCD integration does not include any service checks.
+The Argo CD integration does not include any service checks.
 
 See [service_checks.json][8] for a list of service checks provided by this integration.
 

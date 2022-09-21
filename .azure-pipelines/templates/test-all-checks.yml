@@ -69,6 +69,9 @@ jobs:
     - checkName: arangodb
       displayName: ArangoDB
       os: linux
+    - checkName: argocd
+      displayName: Argo CD
+      os: linux
     - checkName: aspdotnet
       displayName: ASP.NET
       os: windows

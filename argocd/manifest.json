@@ -1,35 +1,50 @@
 {
-  "display_name": "ArgoCD",
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "name": "argocd",
-  "metric_prefix": "argocd.",
-  "metric_to_check": "",
-  "creates_events": false,
-  "short_description": "",
-  "guid": "c7ee6111-ca10-417b-8df0-1f21bfc0e3ad",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "public_title": "ArgoCD",
-  "categories": [
-    ""
-  ],
-  "type": "check",
-  "is_public": false,
-  "integration_id": "argocd",
+  "manifest_version": "2.0.0",
+  "app_uuid": "49ad19d0-1452-4275-b0fe-cbda3821807d",
+  "app_id": "argocd",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "",
+    "title": "Argo CD",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS"
+    ]
+  },
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "Argo CD",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "argocd.",
+        "check": "",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
     },
     "dashboards": {},
     "monitors": {},
-    "saved_views": {},
-    "service_checks": "assets/service_checks.json",
     "logs": {},
-    "metrics_metadata": "metadata.csv"
-  }
+    "saved_views": {}
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {}
 }

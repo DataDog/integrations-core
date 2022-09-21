@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "datadog-argocd"
-description = "The ArgoCD check"
+description = "The Argo CD check"
 readme = "README.md"
 license = "BSD-3-Clause"
 authors = [
