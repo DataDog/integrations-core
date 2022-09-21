@@ -598,12 +598,10 @@ class IbmDb2Check(AgentCheck):
         except Exception as e:
             error = str(e)
             self.log.error("Error executing query: %s.\nAttempting to reconnect", error)
-            connection = self.get_connection()
-
-            if connection is None:
+            self._conn = self.get_connection()
+            if self._conn is None:
                 raise ConnectionError("Unable to create new connection")
 
-            self._conn = connection
             cursor = ibm_db.exec_immediate(self._conn, query)
 
         row = method(cursor)
