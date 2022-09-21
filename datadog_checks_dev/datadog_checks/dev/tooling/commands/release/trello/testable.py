@@ -181,8 +181,7 @@ def pick_card_member(
         random.shuffle(team_members)
         card_assignments[team] = dict.fromkeys(team_members, 0)
 
-    potential_testers = [member for member in card_assignments[team] if
-                         member != author and member not in approvers]
+    potential_testers = [member for member in card_assignments[team] if member != author and member not in approvers]
 
     if not potential_testers:
         return None, None
