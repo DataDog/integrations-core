@@ -14,7 +14,10 @@ from datadog_checks.dev.tooling.github import get_pr_approvers
         ([], []),
         ([{"user": {"login": "user1"}, "state": "APPROVED"}], ["user1"]),
         ([{"user": {"login": "user1"}, "state": "PENDING"}], []),
-        ([{"user": {"login": "user1"}, "state": "APPROVED"}, {"user": {"login": "user2"}, "state": "PENDING"}], ["user1"]),
+        (
+            [{"user": {"login": "user1"}, "state": "APPROVED"}, {"user": {"login": "user2"}, "state": "PENDING"}],
+            ["user1"],
+        ),
     ],
 )
 def test_get_pr_approvers(github_response, expected_approvers):
@@ -24,8 +27,7 @@ def test_get_pr_approvers(github_response, expected_approvers):
     mock_response.json.return_value = github_response
 
     with mock.patch(
-            "requests.get",
-            return_value=mock_response,
+        "requests.get",
+        return_value=mock_response,
     ):
         assert get_pr_approvers("integrations-core", "42", {}) == expected_approvers
-
