@@ -62,6 +62,14 @@ def test_fails_to_reconnect(aggregator, instance):
     aggregator.assert_service_check(IbmDb2Check.SERVICE_CHECK_CONNECT, IbmDb2Check.CRITICAL)
 
 
+def test_ok_service_check_is_emitted_on_every_check_run(instance, aggregator):
+    ibmdb2 = IbmDb2Check('ibm_db2', {}, [instance])
+    ibmdb2._conn = mock.MagicMock()
+    with mock.patch('ibm_db.exec_immediate'):
+        ibmdb2.check(instance)
+    aggregator.assert_service_check(IbmDb2Check.SERVICE_CHECK_CONNECT, IbmDb2Check.OK)
+
+
 def test_query_function_error(aggregator, instance):
     exception_msg = (
         '[IBM][CLI Driver][DB2/NT64] SQL0440N  No authorized routine named "MON_GET_INSTANCE" of type '
