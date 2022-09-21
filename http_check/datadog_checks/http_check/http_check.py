@@ -106,7 +106,11 @@ class HTTPCheck(AgentCheck):
         r = None  # type: Response
         try:
             parsed_uri = urlparse(addr)
-            self.log.debug("Connecting to %s", addr)
+            self.log.debug(
+                "Connecting to %s%s",
+                addr,
+                "with proxy config, %s" % self.proxies if self.proxies['http'] or self.proxies['https'] else "",
+            )
             self.http.session.trust_env = False
 
             # Add 'Content-Type' for non GET requests when they have not been specified in custom headers
