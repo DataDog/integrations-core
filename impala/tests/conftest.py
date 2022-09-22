@@ -32,7 +32,7 @@ def dd_environment():
         compose_file=compose_file,
         conditions=conditions,
         wrappers=[create_log_volumes()],
-        sleep=5,
+        sleep=10,
     ):
 
         yield {
@@ -119,6 +119,7 @@ def create_log_volumes():
     with ExitStack() as stack:
         for service in ["impalad", "catalogd", "statestored"]:
             d = stack.enter_context(TempDir(service))
+            os.chmod(d, 0o777)
             docker_volumes.append(f'{d}:/var/log/{service}')
             env_vars[f"{service.upper()}_LOG_FOLDER"] = d
 
