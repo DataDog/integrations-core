@@ -1,48 +1,33 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import os
-import subprocess
-import sys
+from functools import cached_property
 
 from six import iteritems
 
 from datadog_checks.base import AgentCheck, ensure_bytes
 from datadog_checks.base.utils.serialization import json
-from datadog_checks.ibm_mq.collectors.stats_collector import StatsCollector
-from datadog_checks.ibm_mq.metrics import COUNT, GAUGE
-
-from . import connection, errors
-from .collectors import ChannelMetricCollector, MetadataCollector, QueueMetricCollector
-from .config import IBMMQConfig
-from .constants import KNOWN_DATADOG_AGENT_SETTER_METHODS
 
 try:
     from typing import Any, Dict, List
 except ImportError:
     pass
 
-try:
-    import pymqi
-except ImportError as e:
-    pymqiException = e
-    pymqi = None
-
 
 class IbmMqCheck(AgentCheck):
     SERVICE_CHECK = 'ibm_mq.can_connect'
 
-    def __init__(self, *args, **kwargs):
-        # type: (*Any, **Any) -> None
-        super(IbmMqCheck, self).__init__(*args, **kwargs)
+    @cached_property
+    def _config(self):
+        from .config import IBMMQConfig
 
-        if not pymqi:
-            self.log.error("You need to install pymqi: %s", pymqiException)
-            raise errors.PymqiException("You need to install pymqi: {}".format(pymqiException))
+        return IBMMQConfig(self.instance)
 
-        self._config = IBMMQConfig(self.instance)
+    @cached_property
+    def queue_metric_collector(self):
+        from .collectors import QueueMetricCollector
 
-        self.queue_metric_collector = QueueMetricCollector(
+        return QueueMetricCollector(
             self._config,
             self.service_check,
             self.warning,
@@ -50,14 +35,32 @@ class IbmMqCheck(AgentCheck):
             self.send_metrics_from_properties,
             self.log,
         )
-        self.channel_metric_collector = ChannelMetricCollector(self._config, self.service_check, self.gauge, self.log)
-        self.metadata_collector = MetadataCollector(self._config, self.log)
-        self.stats_collector = StatsCollector(self._config, self.send_metrics_from_properties, self.log)
+
+    @cached_property
+    def channel_metric_collector(self):
+        from .collectors import ChannelMetricCollector
+
+        return ChannelMetricCollector(self._config, self.service_check, self.gauge, self.log)
+
+    @cached_property
+    def metadata_collector(self):
+        from .collectors import MetadataCollector
+
+        return MetadataCollector(self._config, self.log)
+
+    @cached_property
+    def stats_collector(self):
+        from .collectors.stats_collector import StatsCollector
+
+        return StatsCollector(self._config, self.send_metrics_from_properties, self.log)
 
     def check(self, _):
-        if self.instance.get('process_isolation', False):
+        if self.instance.get('process_isolation', self.init_config.get('process_isolation', False)):
             self.run_with_isolation()
             return
+
+        from . import connection
+        from .collectors import QueueMetricCollector
 
         try:
             queue_manager = connection.get_queue_manager_connection(self._config, self.log)
@@ -86,6 +89,8 @@ class IbmMqCheck(AgentCheck):
             queue_manager.disconnect()
 
     def send_metric(self, metric_type, metric_name, metric_value, tags):
+        from .metrics import COUNT, GAUGE
+
         if metric_type in [GAUGE, COUNT]:
             getattr(self, metric_type)(metric_name, metric_value, tags=tags, hostname=self._config.hostname)
         else:
@@ -140,8 +145,14 @@ class IbmMqCheck(AgentCheck):
                 self.send_metric(metric_type, metric_full_name, metric_value, new_tags)
 
     def run_with_isolation(self):
+        import os
+        import subprocess
+        import sys
+
         # Lazy import required for monkey patching
         from datadog_checks.base.checks.base import aggregator, datadog_agent
+
+        from .constants import KNOWN_DATADOG_AGENT_SETTER_METHODS
 
         message_indicator = os.urandom(8).hex()
         instance = dict(self.instance)
@@ -168,6 +179,8 @@ class IbmMqCheck(AgentCheck):
             env=env_vars,
         )
         with process:
+            self.log.info('Running check in a separate process')
+
             # To avoid blocking never use a pipe's file descriptor iterator. See https://bugs.python.org/issue3907
             for line in iter(process.stdout.readline, b''):
                 line = line.rstrip().decode('utf-8')
@@ -175,6 +188,8 @@ class IbmMqCheck(AgentCheck):
                 if indicator != message_indicator:
                     self.log.debug(line)
                     continue
+
+                self.log.trace(line)
 
                 message_type, _, message = procedure.partition(':')
                 message = json.loads(message)

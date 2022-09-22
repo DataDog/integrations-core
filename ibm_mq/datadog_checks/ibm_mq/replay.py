@@ -7,7 +7,7 @@ import sys
 
 from datadog_checks.base import to_native_string
 from datadog_checks.base.checks import base
-from datadog_checks.base.log import LOG_LEVEL_MAP
+from datadog_checks.base.log import LOG_LEVEL_MAP, TRACE_LEVEL, _get_py_loglevel
 from datadog_checks.base.utils.metadata import core
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.ibm_mq import IbmMqCheck
@@ -72,7 +72,10 @@ class ReplayLogger(logging.Logger):
 base.using_stub_aggregator = False
 base.aggregator = ReplayAggregator()
 base.datadog_agent = core.datadog_agent = ReplayDatadogAgent()
+
+logging.addLevelName(TRACE_LEVEL, 'TRACE')
 logging.setLoggerClass(ReplayLogger)
+logging.getLogger().setLevel(_get_py_loglevel(base.datadog_agent.get_config('log_level')))
 
 
 def main():
