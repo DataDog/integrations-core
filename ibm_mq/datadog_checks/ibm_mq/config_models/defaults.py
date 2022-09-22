@@ -86,6 +86,10 @@ def instance_process_isolation(field, value):
     return False
 
 
+def instance_process_must_exist(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_queue_manager_timezone(field, value):
     return 'Etc/UTC'
 

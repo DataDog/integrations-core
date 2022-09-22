@@ -256,6 +256,17 @@ files:
         value:
           example: false
           type: boolean
+      - name: process_must_exist
+        description: |
+          A regular expression that must match the name of a running process in
+          order for the check to run.
+
+          The following placeholders are supported:
+
+            <hostname> -> the Agent hostname
+            <queue_manager> -> the value of the `queue_manager` option
+        value:
+          type: string
       - template: instances/default
   - template: logs
     example:

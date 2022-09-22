@@ -5,8 +5,7 @@ from functools import cached_property
 
 from six import iteritems
 
-from datadog_checks.base import AgentCheck, ensure_bytes
-from datadog_checks.base.utils.serialization import json
+from datadog_checks.base import AgentCheck
 
 try:
     from typing import Any, Dict, List
@@ -57,6 +56,9 @@ class IbmMqCheck(AgentCheck):
     def check(self, _):
         if self.instance.get('process_isolation', self.init_config.get('process_isolation', False)):
             self.run_with_isolation()
+            return
+
+        if not self.check_process_indicator():
             return
 
         from . import connection
@@ -144,13 +146,35 @@ class IbmMqCheck(AgentCheck):
                     return
                 self.send_metric(metric_type, metric_full_name, metric_value, new_tags)
 
+    def check_process_indicator(self):
+        process_pattern = self.instance.get('process_must_exist', '')
+        if not process_pattern:
+            return True
+
+        import re
+
+        import psutil
+
+        process_pattern = process_pattern.replace('<hostname>', re.escape(self.hostname))
+        process_pattern = process_pattern.replace('<queue_manager>', re.escape(self.instance['queue_manager']))
+
+        self.log.info('Searching for a process that matches: %s', process_pattern)
+        for process in psutil.process_iter(['name']):
+            if re.search(process_pattern, process.info['name']):
+                self.log.info('Process found: %s', process.info['name'])
+                return True
+        else:
+            self.log.info('Process not found, skipping check run')
+            return False
+
     def run_with_isolation(self):
         import os
         import subprocess
         import sys
 
-        # Lazy import required for monkey patching
         from datadog_checks.base.checks.base import aggregator, datadog_agent
+        from datadog_checks.base.utils.common import ensure_bytes
+        from datadog_checks.base.utils.serialization import json
 
         from .constants import KNOWN_DATADOG_AGENT_SETTER_METHODS
 

@@ -227,6 +227,17 @@ instances:
     #
     # process_isolation: false
 
+    ## @param process_must_exist - string - optional
+    ## A regular expression that must match the name of a running process in
+    ## order for the check to run.
+    ##
+    ## The following placeholders are supported:
+    ##
+    ##   <hostname> -> the Agent hostname
+    ##   <queue_manager> -> the value of the `queue_manager` option
+    #
+    # process_must_exist: <PROCESS_MUST_EXIST>
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
