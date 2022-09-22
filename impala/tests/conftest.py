@@ -2,12 +2,12 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
-from contextlib import ExitStack
+from contextlib import ExitStack, contextmanager
 from unittest import mock
 
 import pytest
 
-from datadog_checks.dev import TempDir, docker_run, get_docker_hostname, get_here
+from datadog_checks.dev import EnvVars, TempDir, docker_run, get_docker_hostname, get_here
 from datadog_checks.dev._env import get_state, save_state
 from datadog_checks.dev.conditions import CheckEndpoints
 from datadog_checks.impala import ImpalaCheck
@@ -22,42 +22,35 @@ def pytest_configure(config):
 @pytest.fixture(scope="session")
 def dd_environment():
     compose_file = os.path.join(get_here(), "compose", "docker-compose.yaml")
+    conditions = []
 
-    with ExitStack() as stack:
+    # daemon, statestore, catalog
+    for port in [25000, 25010, 25020]:
+        conditions.append(CheckEndpoints(f"http://{get_docker_hostname()}:{port}/metrics_prometheus"))
 
-        save_state('logs_config', get_logs_config())
+    with docker_run(
+        compose_file=compose_file,
+        conditions=conditions,
+        wrappers=[create_log_volumes()],
+        sleep=5,
+    ):
 
-        conditions = []
-
-        # daemon, statestore, catalog
-        for port in [25000, 25010, 25020]:
-            conditions.append(CheckEndpoints(f"http://{get_docker_hostname()}:{port}/metrics_prometheus", wait=10))
-
-        with docker_run(
-            compose_file=compose_file,
-            conditions=conditions,
-            env_vars={
-                "IMPALAD_LOG_FOLDER": create_log_volume(stack, "impalad"),
-                "CATALOGD_LOG_FOLDER": create_log_volume(stack, "catalogd"),
-                "STATESTORED_LOG_FOLDER": create_log_volume(stack, "statestored"),
-            },
-        ):
-            yield {
-                'instances': [
-                    {
-                        "openmetrics_endpoint": f"http://{get_docker_hostname()}:25000/metrics_prometheus",
-                        "service_type": "daemon",
-                    },
-                    {
-                        "openmetrics_endpoint": f"http://{get_docker_hostname()}:25010/metrics_prometheus",
-                        "service_type": "statestore",
-                    },
-                    {
-                        "openmetrics_endpoint": f"http://{get_docker_hostname()}:25020/metrics_prometheus",
-                        "service_type": "catalog",
-                    },
-                ]
-            }
+        yield {
+            'instances': [
+                {
+                    "openmetrics_endpoint": f"http://{get_docker_hostname()}:25000/metrics_prometheus",
+                    "service_type": "daemon",
+                },
+                {
+                    "openmetrics_endpoint": f"http://{get_docker_hostname()}:25010/metrics_prometheus",
+                    "service_type": "statestore",
+                },
+                {
+                    "openmetrics_endpoint": f"http://{get_docker_hostname()}:25020/metrics_prometheus",
+                    "service_type": "catalog",
+                },
+            ]
+        }
 
 
 @pytest.fixture
@@ -118,12 +111,22 @@ def mock_metrics(request):
         yield
 
 
-def create_log_volume(stack, name):
+@contextmanager
+def create_log_volumes():
+    env_vars = {}
     docker_volumes = get_state('docker_volumes', [])
-    d = stack.enter_context(TempDir(name))
-    docker_volumes.append('{}:{}'.format(d, f"/var/log/{name}"))
-    save_state('docker_volumes', docker_volumes)
-    return d
+
+    with ExitStack() as stack:
+        for service in ["impalad", "catalogd", "statestored"]:
+            d = stack.enter_context(TempDir(service))
+            docker_volumes.append(f'{d}:/var/log/{service}')
+            env_vars[f"{service.upper()}_LOG_FOLDER"] = d
+
+        save_state('logs_config', get_logs_config())
+        save_state('docker_volumes', docker_volumes)
+
+        with EnvVars(env_vars):
+            yield
 
 
 def get_logs_config():
