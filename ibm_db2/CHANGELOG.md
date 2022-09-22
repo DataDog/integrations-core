@@ -1,5 +1,9 @@
 # CHANGELOG - IBM Db2
 
+## 1.11.2 / 2022-09-22
+
+* [Fixed] Emit critical service check when connection is lost. See [#12995](https://github.com/DataDog/integrations-core/pull/12995).
+
 ## 1.11.1 / 2022-08-26
 
 * [Fixed] Get a connection every check run. See [#12736](https://github.com/DataDog/integrations-core/pull/12736).
