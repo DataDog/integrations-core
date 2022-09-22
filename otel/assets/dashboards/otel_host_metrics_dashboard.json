@@ -1,12 +1,12 @@
 {
     "author_name": "Datadog",
     "title": "OpenTelemetry Host Metrics Dashboard",
-    "description": "Default dashboard to visualize OpenTelemetry host metrics from the hostmetrics receiver.\n\nThese metrics are prefixed by [otel.system](https://app.datadoghq.com/metric/summary?filter=otel.system). For additional details, see the [specification](https://opentelemetry.io/docs/reference/specification/metrics/semantic_conventions/system-metrics/).",
+    "description": "Default dashboard to visualize OpenTelemetry host metrics from the hostmetrics receiver.\n\nFor additional details, see the [specification (https://opentelemetry.io/docs/reference/specification/metrics/semantic_conventions/system-metrics/).",
     "widgets": [
         {
             "id": 3310659042452680,
             "definition": {
-                "title": "New group",
+                "title": "About",
                 "type": "group",
                 "banner_img": "/static/images/integration_dashboard/otel_hero_1.png",
                 "show_title": false,
@@ -16,7 +16,7 @@
                         "id": 87360381994124,
                         "definition": {
                             "type": "note",
-                            "content": "This is a default dashboard to visualize OpenTelemetry host metrics. These metrics come from the hostmetrics receiver and are prefixed by [`otel.system`](https://app.datadoghq.com/metric/summary?filter=otel.system).\n\n##### [**Semantic Conventions for System Metrics&nbsp;↗**](https://opentelemetry.io/docs/reference/specification/metrics/semantic_conventions/system-metrics/)",
+                            "content": "This is a default dashboard to visualize OpenTelemetry host metrics. [These metrics](https://app.datadoghq.com/metric/summary?filter=otel.system) come from the hostmetrics receiver.\n\n##### [**Semantic Conventions for System Metrics&nbsp;↗**](https://opentelemetry.io/docs/reference/specification/metrics/semantic_conventions/system-metrics/)",
                             "background_color": "transparent",
                             "font_size": "18",
                             "text_align": "left",
@@ -114,7 +114,7 @@
                                         }
                                     ],
                                     "style": {
-                                        "palette": "blue",
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -187,7 +187,7 @@
                                         }
                                     ],
                                     "style": {
-                                        "palette": "blue",
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -234,7 +234,7 @@
                                         }
                                     ],
                                     "style": {
-                                        "palette": "blue",
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -298,7 +298,7 @@
                                         }
                                     ],
                                     "style": {
-                                        "palette": "blue",
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -360,7 +360,7 @@
                                         }
                                     ],
                                     "style": {
-                                        "palette": "blue",
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -412,7 +412,7 @@
                                         }
                                     ],
                                     "style": {
-                                        "palette": "blue",
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -448,7 +448,7 @@
             "definition": {
                 "title": "CPU",
                 "type": "group",
-                "background_color": "purple",
+                "background_color": "white",
                 "show_title": true,
                 "layout_type": "ordered",
                 "widgets": [
@@ -482,7 +482,7 @@
                                         }
                                     ],
                                     "style": {
-                                        "palette": "purple",
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -555,7 +555,7 @@
                                         }
                                     ],
                                     "style": {
-                                        "palette": "purple",
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -619,7 +619,7 @@
                                         }
                                     ],
                                     "style": {
-                                        "palette": "purple",
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -655,7 +655,7 @@
             "definition": {
                 "title": "Memory",
                 "type": "group",
-                "background_color": "pink",
+                "background_color": "white",
                 "show_title": true,
                 "layout_type": "ordered",
                 "widgets": [
@@ -708,7 +708,7 @@
                                         }
                                     ],
                                     "style": {
-                                        "palette": "warm",
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -781,7 +781,7 @@
                                         }
                                     ],
                                     "style": {
-                                        "palette": "warm",
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -826,7 +826,7 @@
                                         }
                                     ],
                                     "style": {
-                                        "palette": "warm",
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -862,7 +862,7 @@
             "definition": {
                 "title": "Network",
                 "type": "group",
-                "background_color": "blue",
+                "background_color": "white",
                 "show_title": true,
                 "layout_type": "ordered",
                 "widgets": [
@@ -906,7 +906,7 @@
                                         }
                                     ],
                                     "style": {
-                                        "palette": "blue",
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -958,7 +958,7 @@
                                         }
                                     ],
                                     "style": {
-                                        "palette": "blue",
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -1010,7 +1010,7 @@
                                         }
                                     ],
                                     "style": {
-                                        "palette": "blue",
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -1057,7 +1057,7 @@
                                         }
                                     ],
                                     "style": {
-                                        "palette": "blue",
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -1109,7 +1109,7 @@
                                         }
                                     ],
                                     "style": {
-                                        "palette": "blue",
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -1146,7 +1146,7 @@
             "definition": {
                 "title": "Processes",
                 "type": "group",
-                "background_color": "purple",
+                "background_color": "white",
                 "show_title": true,
                 "layout_type": "ordered",
                 "widgets": [
@@ -1180,7 +1180,7 @@
                                         }
                                     ],
                                     "style": {
-                                        "palette": "purple",
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -1232,7 +1232,7 @@
                                         }
                                     ],
                                     "style": {
-                                        "palette": "purple",
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -1284,7 +1284,7 @@
                                         }
                                     ],
                                     "style": {
-                                        "palette": "purple",
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -1320,7 +1320,7 @@
             "definition": {
                 "title": "Disk",
                 "type": "group",
-                "background_color": "pink",
+                "background_color": "white",
                 "show_title": true,
                 "layout_type": "ordered",
                 "widgets": [
@@ -1362,7 +1362,7 @@
                                         }
                                     ],
                                     "style": {
-                                        "palette": "warm",
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -1409,7 +1409,7 @@
                                         }
                                     ],
                                     "style": {
-                                        "palette": "warm",
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -1461,7 +1461,7 @@
                                         }
                                     ],
                                     "style": {
-                                        "palette": "warm",
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -1513,7 +1513,7 @@
                                         }
                                     ],
                                     "style": {
-                                        "palette": "warm",
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -1560,7 +1560,7 @@
                                         }
                                     ],
                                     "style": {
-                                        "palette": "warm",
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -1612,7 +1612,7 @@
                                         }
                                     ],
                                     "style": {
-                                        "palette": "warm",
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -1664,7 +1664,7 @@
                                         }
                                     ],
                                     "style": {
-                                        "palette": "warm",
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -1700,7 +1700,7 @@
             "definition": {
                 "title": "Filesystem",
                 "type": "group",
-                "background_color": "blue",
+                "background_color": "white",
                 "show_title": true,
                 "layout_type": "ordered",
                 "widgets": [
@@ -1729,7 +1729,7 @@
                                         }
                                     ],
                                     "style": {
-                                        "palette": "blue",
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -1783,7 +1783,7 @@
                                         }
                                     ],
                                     "style": {
-                                        "palette": "blue",
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -1830,7 +1830,7 @@
                                         }
                                     ],
                                     "style": {
-                                        "palette": "blue",
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -1859,7 +1859,7 @@
             "definition": {
                 "title": "Swap memory",
                 "type": "group",
-                "background_color": "purple",
+                "background_color": "white",
                 "show_title": true,
                 "layout_type": "ordered",
                 "widgets": [
@@ -1893,7 +1893,7 @@
                                         }
                                     ],
                                     "style": {
-                                        "palette": "purple",
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -1945,7 +1945,7 @@
                                         }
                                     ],
                                     "style": {
-                                        "palette": "purple",
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -1997,7 +1997,7 @@
                                         }
                                     ],
                                     "style": {
-                                        "palette": "purple",
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },

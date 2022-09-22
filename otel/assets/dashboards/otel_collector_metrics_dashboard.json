@@ -1,12 +1,12 @@
 {
     "author_name": "Datadog",
     "title": "OpenTelemetry Collector Metrics Dashboard",
-    "description": "Default dashboard to visualize metrics for the OpenTelemetry Collector.\n\nThese metrics are prefixed by [otelcol](https://app.datadoghq.com/metric/summary?filter=otelcol).\n\nNote: To view these metrics, enable the Prometheus receiver in the collector config file, as shown in [this example](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/6946b963820d391325254cb9cc6bb34ae12907a0/exporter/datadogexporter/examples/collector.yaml#L37).",
+    "description": "Default dashboard to visualize metrics for the OpenTelemetry Collector.\n\nNote: To view these metrics, enable the Prometheus receiver in the collector configuration, as shown in [this example](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/6946b963820d391325254cb9cc6bb34ae12907a0/exporter/datadogexporter/examples/collector.yaml#L37).",
     "widgets": [
         {
             "id": 7581494098406438,
             "definition": {
-                "title": "New group",
+                "title": "About",
                 "type": "group",
                 "banner_img": "/static/images/integration_dashboard/otel_hero_1.png",
                 "show_title": false,
@@ -16,7 +16,7 @@
                         "id": 6416205973430436,
                         "definition": {
                             "type": "note",
-                            "content": "This is a default dashboard to visualize metrics from the OpenTelemetry Collector. These metrics are prefixed by [`otelcol`](https://app.datadoghq.com/metric/summary?filter=otelcol) and are scraped by the prometheus receiver.\n\n## In order to view these metrics, verify that the prometheus receiver is  enabled in the collector configuration, as seen in [this example](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/6946b963820d391325254cb9cc6bb34ae12907a0/exporter/datadogexporter/examples/collector.yaml#L37).",
+                            "content": "This is a default dashboard to visualize metrics from the OpenTelemetry Collector. [These metrics](https://app.datadoghq.com/metric/summary?filter=otelcol) are scraped by the Prometheus receiver.\n\n## To view these metrics, enable the Prometheus receiver in the collector configuration, as shown in [this example](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/6946b963820d391325254cb9cc6bb34ae12907a0/exporter/datadogexporter/examples/collector.yaml#L37).",
                             "background_color": "transparent",
                             "font_size": "18",
                             "text_align": "left",
@@ -103,7 +103,7 @@
                                         }
                                     ],
                                     "style": {
-                                        "palette": "blue",
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -150,7 +150,7 @@
                                         }
                                     ],
                                     "style": {
-                                        "palette": "blue",
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -197,7 +197,7 @@
                                         }
                                     ],
                                     "style": {
-                                        "palette": "blue",
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -244,7 +244,7 @@
                                         }
                                     ],
                                     "style": {
-                                        "palette": "blue",
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -291,7 +291,7 @@
                                         }
                                     ],
                                     "style": {
-                                        "palette": "blue",
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -320,7 +320,7 @@
             "definition": {
                 "title": "Component: Receivers",
                 "type": "group",
-                "background_color": "purple",
+                "background_color": "white",
                 "show_title": true,
                 "layout_type": "ordered",
                 "widgets": [
@@ -433,7 +433,7 @@
                                         }
                                     ],
                                     "style": {
-                                        "palette": "purple",
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -480,7 +480,7 @@
                                         }
                                     ],
                                     "style": {
-                                        "palette": "purple",
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -527,7 +527,7 @@
                                         }
                                     ],
                                     "style": {
-                                        "palette": "purple",
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -574,7 +574,7 @@
                                         }
                                     ],
                                     "style": {
-                                        "palette": "purple",
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -621,7 +621,7 @@
                                         }
                                     ],
                                     "style": {
-                                        "palette": "purple",
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -668,7 +668,7 @@
                                         }
                                     ],
                                     "style": {
-                                        "palette": "purple",
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -715,7 +715,7 @@
                                         }
                                     ],
                                     "style": {
-                                        "palette": "purple",
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -762,7 +762,7 @@
                                         }
                                     ],
                                     "style": {
-                                        "palette": "purple",
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -809,7 +809,7 @@
                                         }
                                     ],
                                     "style": {
-                                        "palette": "purple",
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -838,7 +838,7 @@
             "definition": {
                 "title": "Component: Processors",
                 "type": "group",
-                "background_color": "purple",
+                "background_color": "white",
                 "show_title": true,
                 "layout_type": "ordered",
                 "widgets": [
@@ -950,7 +950,7 @@
                                         }
                                     ],
                                     "style": {
-                                        "palette": "purple",
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -997,7 +997,7 @@
                                         }
                                     ],
                                     "style": {
-                                        "palette": "purple",
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -1044,7 +1044,7 @@
                                         }
                                     ],
                                     "style": {
-                                        "palette": "purple",
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -1091,7 +1091,7 @@
                                         }
                                     ],
                                     "style": {
-                                        "palette": "purple",
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -1121,7 +1121,7 @@
             "definition": {
                 "title": "Component: Exporters",
                 "type": "group",
-                "background_color": "purple",
+                "background_color": "white",
                 "show_title": true,
                 "layout_type": "ordered",
                 "widgets": [
@@ -1233,7 +1233,7 @@
                                         }
                                     ],
                                     "style": {
-                                        "palette": "purple",
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -1280,7 +1280,7 @@
                                         }
                                     ],
                                     "style": {
-                                        "palette": "purple",
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -1327,7 +1327,7 @@
                                         }
                                     ],
                                     "style": {
-                                        "palette": "purple",
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -1374,7 +1374,7 @@
                                         }
                                     ],
                                     "style": {
-                                        "palette": "purple",
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -1421,7 +1421,7 @@
                                         }
                                     ],
                                     "style": {
-                                        "palette": "purple",
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -1468,7 +1468,7 @@
                                         }
                                     ],
                                     "style": {
-                                        "palette": "purple",
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -1515,7 +1515,7 @@
                                         }
                                     ],
                                     "style": {
-                                        "palette": "purple",
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -1562,7 +1562,7 @@
                                         }
                                     ],
                                     "style": {
-                                        "palette": "purple",
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -1609,7 +1609,7 @@
                                         }
                                     ],
                                     "style": {
-                                        "palette": "purple",
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -1638,7 +1638,7 @@
             "definition": {
                 "title": "Process",
                 "type": "group",
-                "background_color": "pink",
+                "background_color": "white",
                 "show_title": true,
                 "layout_type": "ordered",
                 "widgets": [
@@ -1674,7 +1674,7 @@
                                         }
                                     ],
                                     "style": {
-                                        "palette": "warm",
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -1721,7 +1721,7 @@
                                         }
                                     ],
                                     "style": {
-                                        "palette": "warm",
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -1768,7 +1768,7 @@
                                         }
                                     ],
                                     "style": {
-                                        "palette": "warm",
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -1815,7 +1815,7 @@
                                         }
                                     ],
                                     "style": {
-                                        "palette": "warm",
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -1862,7 +1862,7 @@
                                         }
                                     ],
                                     "style": {
-                                        "palette": "warm",
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -1909,7 +1909,7 @@
                                         }
                                     ],
                                     "style": {
-                                        "palette": "warm",
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
