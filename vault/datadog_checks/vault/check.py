@@ -220,6 +220,9 @@ class VaultCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
             config['openmetrics_endpoint'] = self._metrics_url
             config['tags'] = list(self._tags)
 
+            # https://www.vaultproject.io/api-docs#the-x-vault-request-header
+            config.setdefault('headers', {})['X-Vault-Request'] = 'true'
+
             if not self.config.no_token:
                 if self.config.client_token_path:
                     self.HTTP_CONFIG_REMAPPER = {
@@ -232,7 +235,7 @@ class VaultCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
                         }
                     }
                 if self.config.client_token:
-                    config.setdefault('headers', {})['X-Vault-Token'] = self.config.client_token
+                    config['headers']['X-Vault-Token'] = self.config.client_token
 
             self.scraper_configs.clear()
             self.scraper_configs.append(config)
