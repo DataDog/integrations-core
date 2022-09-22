@@ -4,6 +4,17 @@ files:
   options:
   - template: init_config
     options:
+      - name: process_must_match
+        description: |
+          A regular expression that must match the command line of a running process in
+          order for the check to run.
+
+          The following placeholders are supported:
+
+            <hostname> -> the Agent hostname
+            <queue_manager> -> the value of the `queue_manager` option
+        value:
+          type: string
       - template: init_config/default
   - template: instances
     options:
@@ -248,6 +259,19 @@ files:
             'SYSTEM.*': queue_type:system
             'DEV.*': role:dev,queue_type:default
           type: object
+      - name: process_must_match
+        description: |
+          A regular expression that must match the command line of a running process in
+          order for the check to run.
+
+          The following placeholders are supported:
+
+            <hostname> -> the Agent hostname
+            <queue_manager> -> the value of the `queue_manager` option
+
+          This overrides the `process_must_match` option in the `init_config` section.
+        value:
+          type: string
       - name: process_isolation
         description: |
           Whether to run the check in a separate process.
@@ -256,17 +280,6 @@ files:
         value:
           example: false
           type: boolean
-      - name: process_must_exist
-        description: |
-          A regular expression that must match the name of a running process in
-          order for the check to run.
-
-          The following placeholders are supported:
-
-            <hostname> -> the Agent hostname
-            <queue_manager> -> the value of the `queue_manager` option
-        value:
-          type: string
       - template: instances/default
   - template: logs
     example:

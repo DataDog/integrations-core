@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import sys
 from datetime import datetime
 
 from dateutil import tz
@@ -8,6 +9,18 @@ from dateutil import tz
 from datadog_checks.base import to_string
 from datadog_checks.base.utils.common import round_value
 from datadog_checks.base.utils.time import EPOCH, get_timestamp
+
+if sys.platform == 'win32':
+    import subprocess
+
+    def join_command_args(command_args):
+        return subprocess.list2cmdline(command_args)
+
+else:
+    import shlex
+
+    def join_command_args(command_args):
+        return shlex.join(command_args)
 
 
 def sanitize_strings(s):

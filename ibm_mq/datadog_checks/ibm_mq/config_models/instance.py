@@ -50,7 +50,7 @@ class InstanceConfig(BaseModel):
     password: Optional[str] = Field(None, min_length=1)
     port: Optional[int]
     process_isolation: Optional[bool]
-    process_must_exist: Optional[str]
+    process_must_match: Optional[str]
     queue_manager: str = Field(..., min_length=1)
     queue_manager_timezone: Optional[str] = Field(None, min_length=1)
     queue_patterns: Optional[Sequence[str]]

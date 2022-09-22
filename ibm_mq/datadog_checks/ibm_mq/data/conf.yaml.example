@@ -2,6 +2,17 @@
 #
 init_config:
 
+    ## @param process_must_match - string - optional
+    ## A regular expression that must match the command line of a running process in
+    ## order for the check to run.
+    ##
+    ## The following placeholders are supported:
+    ##
+    ##   <hostname> -> the Agent hostname
+    ##   <queue_manager> -> the value of the `queue_manager` option
+    #
+    # process_must_match: <PROCESS_MUST_MATCH>
+
     ## @param service - string - optional
     ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
     ##
@@ -220,23 +231,25 @@ instances:
     #   SYSTEM.*: queue_type:system
     #   DEV.*: role:dev,queue_type:default
 
-    ## @param process_isolation - boolean - optional - default: false
-    ## Whether to run the check in a separate process.
-    ##
-    ## WARNING: In this mode, connection persistence is disabled.
-    #
-    # process_isolation: false
-
-    ## @param process_must_exist - string - optional
-    ## A regular expression that must match the name of a running process in
+    ## @param process_must_match - string - optional
+    ## A regular expression that must match the command line of a running process in
     ## order for the check to run.
     ##
     ## The following placeholders are supported:
     ##
     ##   <hostname> -> the Agent hostname
     ##   <queue_manager> -> the value of the `queue_manager` option
+    ##
+    ## This overrides the `process_must_match` option in the `init_config` section.
     #
-    # process_must_exist: <PROCESS_MUST_EXIST>
+    # process_must_match: <PROCESS_MUST_MATCH>
+
+    ## @param process_isolation - boolean - optional - default: false
+    ## Whether to run the check in a separate process.
+    ##
+    ## WARNING: In this mode, connection persistence is disabled.
+    #
+    # process_isolation: false
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.

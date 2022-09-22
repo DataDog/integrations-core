@@ -147,7 +147,7 @@ class IbmMqCheck(AgentCheck):
                 self.send_metric(metric_type, metric_full_name, metric_value, new_tags)
 
     def check_process_indicator(self):
-        process_pattern = self.instance.get('process_must_exist', '')
+        process_pattern = self.instance.get('process_must_match', self.init_config.get('process_must_match', ''))
         if not process_pattern:
             return True
 
@@ -155,13 +155,16 @@ class IbmMqCheck(AgentCheck):
 
         import psutil
 
+        from .utils import join_command_args
+
         process_pattern = process_pattern.replace('<hostname>', re.escape(self.hostname))
         process_pattern = process_pattern.replace('<queue_manager>', re.escape(self.instance['queue_manager']))
 
         self.log.info('Searching for a process that matches: %s', process_pattern)
-        for process in psutil.process_iter(['name']):
-            if re.search(process_pattern, process.info['name']):
-                self.log.info('Process found: %s', process.info['name'])
+        for process in psutil.process_iter(['cmdline']):
+            cmdline = join_command_args(process.info['cmdline'])
+            if re.search(process_pattern, cmdline):
+                self.log.info('Process found: %s', cmdline)
                 return True
         else:
             self.log.info('Process not found, skipping check run')

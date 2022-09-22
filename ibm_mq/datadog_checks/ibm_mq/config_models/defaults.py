@@ -10,6 +10,10 @@
 from datadog_checks.base.utils.models.fields import get_default_field_value
 
 
+def shared_process_must_match(field, value):
+    return get_default_field_value(field, value)
+
+
 def shared_service(field, value):
     return get_default_field_value(field, value)
 
@@ -86,7 +90,7 @@ def instance_process_isolation(field, value):
     return False
 
 
-def instance_process_must_exist(field, value):
+def instance_process_must_match(field, value):
     return get_default_field_value(field, value)
 
 

@@ -23,6 +23,7 @@ class SharedConfig(BaseModel):
     class Config:
         allow_mutation = False
 
+    process_must_match: Optional[str]
     service: Optional[str]
 
     @root_validator(pre=True)
