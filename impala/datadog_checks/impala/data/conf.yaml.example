@@ -646,7 +646,7 @@ instances:
 #
 # logs:
 #   - type: file
-#     path: /opt/impala/logs/impalad.INFO
+#     path: /var/log/impala/impalad.INFO
 #     source: impala
 #     tags:
 #     - service_type:daemon
@@ -655,7 +655,7 @@ instances:
 #       pattern: ^[IWEF]\d{4} (\d{2}:){2}\d{2}
 #       name: new_log_start_with_log_level_and_date
 #   - type: file
-#     path: /opt/impala/logs/impalad.WARNING
+#     path: /var/log/impala/impalad.WARNING
 #     source: impala
 #     tags:
 #     - service_type:daemon
@@ -664,7 +664,7 @@ instances:
 #       pattern: ^[IWEF]\d{4} (\d{2}:){2}\d{2}
 #       name: new_log_start_with_log_level_and_date
 #   - type: file
-#     path: /opt/impala/logs/impalad.ERROR
+#     path: /var/log/impala/impalad.ERROR
 #     source: impala
 #     tags:
 #     - service_type:daemon
@@ -673,7 +673,7 @@ instances:
 #       pattern: ^[IWEF]\d{4} (\d{2}:){2}\d{2}
 #       name: new_log_start_with_log_level_and_date
 #   - type: file
-#     path: /opt/impala/logs/impalad.FATAL
+#     path: /var/log/impala/impalad.FATAL
 #     source: impala
 #     tags:
 #     - service_type:daemon
@@ -682,7 +682,7 @@ instances:
 #       pattern: ^[IWEF]\d{4} (\d{2}:){2}\d{2}
 #       name: new_log_start_with_log_level_and_date
 #   - type: file
-#     path: /opt/impala/logs/catalogd.INFO
+#     path: /var/log/impala/catalogd.INFO
 #     source: impala
 #     tags:
 #     - service_type:catalog
@@ -691,7 +691,7 @@ instances:
 #       pattern: ^[IWEF]\d{4} (\d{2}:){2}\d{2}
 #       name: new_log_start_with_log_level_and_date
 #   - type: file
-#     path: /opt/impala/logs/catalogd.WARNING
+#     path: /var/log/impala/catalogd.WARNING
 #     source: impala
 #     tags:
 #     - service_type:catalog
@@ -700,7 +700,7 @@ instances:
 #       pattern: ^[IWEF]\d{4} (\d{2}:){2}\d{2}
 #       name: new_log_start_with_log_level_and_date
 #   - type: file
-#     path: /opt/impala/logs/catalogd.ERROR
+#     path: /var/log/impala/catalogd.ERROR
 #     source: impala
 #     tags:
 #     - service_type:catalog
@@ -709,7 +709,7 @@ instances:
 #       pattern: ^[IWEF]\d{4} (\d{2}:){2}\d{2}
 #       name: new_log_start_with_log_level_and_date
 #   - type: file
-#     path: /opt/impala/logs/catalogd.FATAL
+#     path: /var/log/impala/catalogd.FATAL
 #     source: impala
 #     tags:
 #     - service_type:catalog
@@ -718,7 +718,7 @@ instances:
 #       pattern: ^[IWEF]\d{4} (\d{2}:){2}\d{2}
 #       name: new_log_start_with_log_level_and_date
 #   - type: file
-#     path: /opt/impala/logs/statestored.INFO
+#     path: /var/log/impala/statestored.INFO
 #     source: impala
 #     tags:
 #     - service_type:statestore
@@ -727,7 +727,7 @@ instances:
 #       pattern: ^[IWEF]\d{4} (\d{2}:){2}\d{2}
 #       name: new_log_start_with_log_level_and_date
 #   - type: file
-#     path: /opt/impala/logs/statestored.WARNING
+#     path: /var/log/impala/statestored.WARNING
 #     source: impala
 #     tags:
 #     - service_type:statestore
@@ -736,7 +736,7 @@ instances:
 #       pattern: ^[IWEF]\d{4} (\d{2}:){2}\d{2}
 #       name: new_log_start_with_log_level_and_date
 #   - type: file
-#     path: /opt/impala/logs/statestored.ERROR
+#     path: /var/log/impala/statestored.ERROR
 #     source: impala
 #     tags:
 #     - service_type:statestore
@@ -745,7 +745,7 @@ instances:
 #       pattern: ^[IWEF]\d{4} (\d{2}:){2}\d{2}
 #       name: new_log_start_with_log_level_and_date
 #   - type: file
-#     path: /opt/impala/logs/statestored.FATAL
+#     path: /var/log/impala/statestored.FATAL
 #     source: impala
 #     tags:
 #     - service_type:statestore
