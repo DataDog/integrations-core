@@ -2,12 +2,14 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+from contextlib import ExitStack
 from unittest import mock
 
 import pytest
 
-from datadog_checks.dev import docker_run, get_docker_hostname, get_here
-from datadog_checks.dev.conditions import CheckDockerLogs
+from datadog_checks.dev import TempDir, docker_run, get_docker_hostname, get_here
+from datadog_checks.dev._env import get_state, save_state
+from datadog_checks.dev.conditions import CheckEndpoints
 from datadog_checks.impala import ImpalaCheck
 
 
@@ -20,43 +22,42 @@ def pytest_configure(config):
 @pytest.fixture(scope="session")
 def dd_environment():
     compose_file = os.path.join(get_here(), "compose", "docker-compose.yaml")
-    with docker_run(
-        compose_file=compose_file,
-        conditions=[
-            CheckDockerLogs(
-                identifier=compose_file,
-                patterns=[
-                    "Connected to metastore.",  # Statestore
-                    "Impala has started.",  # Daemon
-                    "CatalogService started",  # Catalog
-                ],
-                matches='all',
-                wait=5,
-                attempts=20,
-            )
-        ],
-        endpoints=[
-            f"http://{get_docker_hostname()}:25000/metrics_prometheus",  # Daemon
-            f"http://{get_docker_hostname()}:25010/metrics_prometheus",  # Statestore
-            f"http://{get_docker_hostname()}:25020/metrics_prometheus",  # Catalog
-        ],
-    ):
-        yield {
-            'instances': [
-                {
-                    "openmetrics_endpoint": f"http://{get_docker_hostname()}:25000/metrics_prometheus",
-                    "service_type": "daemon",
-                },
-                {
-                    "openmetrics_endpoint": f"http://{get_docker_hostname()}:25010/metrics_prometheus",
-                    "service_type": "statestore",
-                },
-                {
-                    "openmetrics_endpoint": f"http://{get_docker_hostname()}:25020/metrics_prometheus",
-                    "service_type": "catalog",
-                },
-            ]
-        }
+
+    with ExitStack() as stack:
+
+        save_state('logs_config', get_logs_config())
+
+        conditions = []
+
+        # daemon, statestore, catalog
+        for port in [25000, 25010, 25020]:
+            conditions.append(CheckEndpoints(f"http://{get_docker_hostname()}:{port}/metrics_prometheus", wait=10))
+
+        with docker_run(
+            compose_file=compose_file,
+            conditions=conditions,
+            env_vars={
+                "IMPALAD_LOG_FOLDER": create_log_volume(stack, "impalad"),
+                "CATALOGD_LOG_FOLDER": create_log_volume(stack, "catalogd"),
+                "STATESTORED_LOG_FOLDER": create_log_volume(stack, "statestored"),
+            },
+        ):
+            yield {
+                'instances': [
+                    {
+                        "openmetrics_endpoint": f"http://{get_docker_hostname()}:25000/metrics_prometheus",
+                        "service_type": "daemon",
+                    },
+                    {
+                        "openmetrics_endpoint": f"http://{get_docker_hostname()}:25010/metrics_prometheus",
+                        "service_type": "statestore",
+                    },
+                    {
+                        "openmetrics_endpoint": f"http://{get_docker_hostname()}:25020/metrics_prometheus",
+                        "service_type": "catalog",
+                    },
+                ]
+            }
 
 
 @pytest.fixture
@@ -115,3 +116,39 @@ def mock_metrics(request):
         ),
     ):
         yield
+
+
+def create_log_volume(stack, name):
+    docker_volumes = get_state('docker_volumes', [])
+    d = stack.enter_context(TempDir(name))
+    docker_volumes.append('{}:{}'.format(d, f"/var/log/{name}"))
+    save_state('docker_volumes', docker_volumes)
+    return d
+
+
+def get_logs_config():
+    config = []
+    for service in [
+        {"name": "impalad", "type": "daemon"},
+        {"name": "catalogd", "type": "catalog"},
+        {"name": "statestored", "type": "statestore"},
+    ]:
+        for level in ["WARNING", "ERROR", "INFO", "FATAL"]:
+            config.append(
+                {
+                    'type': 'file',
+                    'path': f'/var/log/{service["name"]}/{service["name"]}.{level}',
+                    'source': 'impala',
+                    'service': service["name"],
+                    'tags': [f'service_type:{service["type"]}'],
+                    'log_processing_rules': [
+                        {
+                            'type': 'multi_line',
+                            'pattern': '^[IWEF]\\d{4} (\\d{2}:){2}\\d{2}',
+                            'name': 'new_log_start_with_log_level_and_date',
+                        }
+                    ],
+                },
+            )
+
+    return config
