@@ -227,8 +227,8 @@ class SqlserverActivity(DBMAsyncJob):
                 row['procedure_signature'] = compute_sql_signature(procedure_statement['query'])
         except Exception as e:
             if self.check.log_unobfuscated_queries:
-                failed_obfuscation = row['text'] if row.get('is_proc', False) else row['statement_text']
-                self.log.warning("Failed to obfuscate query=[%s] | err=[%s]", failed_obfuscation, e)
+                raw_query_text = row['text'] if row.get('is_proc', False) else row['statement_text']
+                self.log.warning("Failed to obfuscate query=[%s] | err=[%s]", raw_query_text, e)
             else:
                 self.log.debug("Failed to obfuscate query | err=[%s]", e)
             obfuscated_statement = "ERROR: failed to obfuscate"
