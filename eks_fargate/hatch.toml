@@ -2,3 +2,6 @@
 
 [[envs.default.matrix]]
 python = ["27", "38"]
+
+[envs.default.env-vars]
+e2e-env = "false"
