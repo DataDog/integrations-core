@@ -87,7 +87,7 @@ def instance_gcp(field, value):
 
 
 def instance_ignore_databases(field, value):
-    return ['template%', 'rdsadmin', 'azure_maintenance', 'postgres']
+    return ['template%', 'rdsadmin', 'azure_maintenance']
 
 
 def instance_max_relations(field, value):

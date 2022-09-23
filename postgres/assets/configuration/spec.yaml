@@ -65,12 +65,10 @@ files:
           - 'template%'
           - rdsadmin
           - azure_maintenance
-          - postgres
         default:
           - 'template%'
           - rdsadmin
           - azure_maintenance
-          - postgres
     - name: ssl
       description: |
         This option determines whether or not and with what priority a secure SSL TCP/IP connection
