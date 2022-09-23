@@ -266,7 +266,7 @@ def get_message_queue_info(timeout, sev, message_queue_info):
 
     # Building the message queues filter
     message_queues_filter = (
-        f"WHERE MESSAGE_QUEUE_NAME IN ({', '.join(message_queues_list)})" if message_queues_list else ""
+        f"WHERE MESSAGE_QUEUE_NAME IN ({', '.join(message_queues_list)}) " if message_queues_list else ""
     )
 
     return {
@@ -274,7 +274,7 @@ def get_message_queue_info(timeout, sev, message_queue_info):
         'query': {
             'text': (
                 f'SELECT MESSAGE_QUEUE_NAME, MESSAGE_QUEUE_LIBRARY, COUNT(*), SUM(CASE WHEN SEVERITY >= {sev} THEN 1 ELSE 0 END) '  # noqa:E501
-                f'FROM QSYS2.MESSAGE_QUEUE_INFO {message_queues_filter} GROUP BY MESSAGE_QUEUE_NAME, MESSAGE_QUEUE_LIBRARY'  # noqa:E501
+                f'FROM QSYS2.MESSAGE_QUEUE_INFO {message_queues_filter}GROUP BY MESSAGE_QUEUE_NAME, MESSAGE_QUEUE_LIBRARY'  # noqa:E501
             ),
             'timeout': timeout,
         },
