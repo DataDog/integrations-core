@@ -63,9 +63,9 @@ The instructions below show you how to configure the task using the [Amazon Web 
 <!-- xxx tab "AWS CLI" xxx -->
 ##### AWS CLI Task Definition
 
-1. Download [datadog-agent-ecs-fargate][1]. **Note**: If you are using Internet Explorer, this may download as gzip file, which contains the JSON file mentioned below.**
-2. Update the JSON with a `TASK_NAME`, your [Datadog API Key][2], and the appropriate `DD_SITE` ({{< region-param key="dd_site" code="true" >}}). **Note**: The environment variable `ECS_FARGATE` is already set to `"true"`.
-3. Add your other application containers to the task definition. For details on collecting integration metrics, see [Integration Setup for ECS Fargate][3].
+1. Download [datadog-agent-ecs-fargate.json][42]. **Note**: If you are using Internet Explorer, this may download as gzip file, which contains the JSON file mentioned below.**
+2. Update the JSON with a `TASK_NAME`, your [Datadog API Key][41], and the appropriate `DD_SITE` ({{< region-param key="dd_site" code="true" >}}). **Note**: The environment variable `ECS_FARGATE` is already set to `"true"`.
+3. Add your other application containers to the task definition. For details on collecting integration metrics, see [Integration Setup for ECS Fargate][12].
 4. Optionally - Add an Agent health check.
 
     Add the following to your ECS task definition to create an Agent health check:
@@ -723,7 +723,7 @@ The Agent can autodiscover and attach tags to all data emitted by the entire tas
 
 This integration works on Linux and Windows, but some metrics are OS dependent. All the metrics exposed when running on Windows are also exposed on Linux, but there are some metrics that are only available on Linux.
 
-See [metadata.csv][35] for a list of metrics provided by this integration. It also specifies which ones are Linux-only.
+See [metadata.csv][46] for a list of metrics provided by this integration. It also specifies which ones are Linux-only.
 
 ### Events
 
@@ -795,3 +795,4 @@ Need help? Contact [Datadog support][18].
 [43]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-ecs-taskdefinition.html
 [44]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-ecs-service.html
 [45]: https://github.com/DataDog/integrations-core/blob/master/ecs_fargate/assets/service_checks.json
+[46]: https://github.com/DataDog/integrations-core/blob/master/ecs_fargate/metadata.csv
