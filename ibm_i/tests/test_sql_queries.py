@@ -13,7 +13,7 @@ def test_get_message_queue_info():
         job_query_timeout=2,
         system_mq_query_timeout=3,
         severity_threshold=50,
-        message_queue_info=MessageQueueInfo(selected_message_queues=[])
+        message_queue_info=MessageQueueInfo(selected_message_queues=[]),
     )
     qmap_output = query_map(instance_conf)
     assert qmap_output['message_queue_info']['name'] == 'message_queue_info'
@@ -27,7 +27,7 @@ def test_get_message_queue_info():
         'SELECT MESSAGE_QUEUE_NAME, MESSAGE_QUEUE_LIBRARY, COUNT(*), SUM(CASE WHEN SEVERITY >= 50 THEN 1 ELSE 0 END) '  # noqa:E501
         'FROM QSYS2.MESSAGE_QUEUE_INFO GROUP BY MESSAGE_QUEUE_NAME, MESSAGE_QUEUE_LIBRARY'
     )
-    assert qmap_output['message_queue_info']['query']['text'] == 1
+    assert qmap_output['message_queue_info']['query']['timeout'] == 1
     instance_conf.message_queue_info = MessageQueueInfo(selected_message_queues=['QSYSOPR'])
     qmap_output = query_map(instance_conf)
     assert qmap_output['message_queue_info']['query']['text'] == (
