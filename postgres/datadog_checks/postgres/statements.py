@@ -239,6 +239,11 @@ class PostgresStatementMetrics(DBMAsyncJob):
             if self._config.dbstrict:
                 filters = "AND pg_database.datname = %s"
                 params = (self._config.dbname,)
+            elif self._config.ignore_databases:
+                filters = " AND " + " AND ".join(
+                    "pg_database.datname NOT ILIKE %s" for _ in self._config.ignore_databases
+                )
+                params = params + tuple(self._config.ignore_databases)
             return self._execute_query(
                 self._check._get_db(self._config.dbname).cursor(cursor_factory=psycopg2.extras.DictCursor),
                 STATEMENTS_QUERY.format(
