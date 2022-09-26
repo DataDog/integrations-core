@@ -214,10 +214,8 @@ files:
           type: boolean
           display_default: true
       - name: ssl_cipher_spec
-        type: string
         description: The ssl cipher to use. It should match the value of the channels SSLCIPH attribute.
         value:
-          example: 'TLS_RSA_WITH_AES_256_CBC_SHA'
           type: string
       - name: ssl_key_repository_location
         description: |

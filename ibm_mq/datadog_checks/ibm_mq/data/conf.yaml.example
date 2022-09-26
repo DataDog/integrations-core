@@ -188,10 +188,10 @@ instances:
     #
     # try_basic_auth: false
 
-    ## @param ssl_cipher_spec - string - optional - default: TLS_RSA_WITH_AES_256_CBC_SHA
+    ## @param ssl_cipher_spec - string - optional
     ## The ssl cipher to use. It should match the value of the channels SSLCIPH attribute.
     #
-    # ssl_cipher_spec: TLS_RSA_WITH_AES_256_CBC_SHA
+    # ssl_cipher_spec: <SSL_CIPHER_SPEC>
 
     ## @param ssl_key_repository_location - string - optional - default: /var/mqm/ssl-db/client/KeyringClient
     ## It specifies the location of the key database file in which keys and certificates are stored.
