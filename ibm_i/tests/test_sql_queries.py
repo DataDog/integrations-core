@@ -11,7 +11,7 @@ def test_get_message_queue_info():
     instance_conf_attr = {
         "query_timeout": 1,
         "job_query_timeout": 2,
-        "system_mq_query_timeout" : 3,
+        "system_mq_query_timeout": 3,
         "severity_threshold": 50,
     }
     instance_conf = InstanceConfig(
