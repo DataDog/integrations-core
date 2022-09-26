@@ -214,7 +214,9 @@ files:
           type: boolean
           display_default: true
       - name: ssl_cipher_spec
-        description: The ssl cipher to use. It should match the value of the channels SSLCIPH attribute.
+        description: |
+          The TLS/SSL cipher to use. It should match the value of the channels SSLCIPH attribute. For an enumeration
+          see: https://www.ibm.com/docs/en/ibm-mq/9.3?topic=jms-tls-cipherspecs-ciphersuites-in-mq-classes
         value:
           type: string
       - name: ssl_key_repository_location
