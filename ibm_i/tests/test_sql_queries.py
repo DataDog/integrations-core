@@ -37,7 +37,7 @@ def test_get_message_queue_info():
     )
     qmap_output = query_map(instance_conf)
     assert qmap_output['message_queue_info']['query']['text'] == (
-        'SELECT MESSAGE_QUEUE_NAME, MESSAGE_QUEUE_LIBRARY, COUNT(*), SUM(CASE WHEN SEVERITY >= 20 THEN 1 ELSE 0 END) '
+        'SELECT MESSAGE_QUEUE_NAME, MESSAGE_QUEUE_LIBRARY, COUNT(*), SUM(CASE WHEN SEVERITY >= 50 THEN 1 ELSE 0 END) '
         'FROM QSYS2.MESSAGE_QUEUE_INFO WHERE MESSAGE_QUEUE_NAME IN (\'QSYSOPR\') GROUP BY MESSAGE_QUEUE_NAME, MESSAGE_QUEUE_LIBRARY'  # noqa:E501
     )
     instance_conf = InstanceConfig(
@@ -46,6 +46,6 @@ def test_get_message_queue_info():
     )
     qmap_output = query_map(instance_conf)
     assert qmap_output['message_queue_info']['query']['text'] == (
-        'SELECT MESSAGE_QUEUE_NAME, MESSAGE_QUEUE_LIBRARY, COUNT(*), SUM(CASE WHEN SEVERITY >= 30 THEN 1 ELSE 0 END) '
+        'SELECT MESSAGE_QUEUE_NAME, MESSAGE_QUEUE_LIBRARY, COUNT(*), SUM(CASE WHEN SEVERITY >= 50 THEN 1 ELSE 0 END) '
         'FROM QSYS2.MESSAGE_QUEUE_INFO WHERE MESSAGE_QUEUE_NAME IN (\'QSYSOPR\', \'QPGMR\', \'CECUSER\') GROUP BY MESSAGE_QUEUE_NAME, MESSAGE_QUEUE_LIBRARY'  # noqa:E501
     )
