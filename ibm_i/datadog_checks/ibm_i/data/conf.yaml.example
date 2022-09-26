@@ -81,8 +81,8 @@ instances:
     ## @param message_queue_info - mapping - optional
     ## A configuration mapping for the message_queue_info query.
     ##
-    ## selected_message_queues filters the message queues to make your queries less computer-intensive.
-    ## By default no filter is applied.
+    ## selected_message_queues restricts the message_queue_info query to a subset of the queues.
+    ## This can reduce the CPU usage on the target IBM i machine. By default no filter is applied.
     #
     # message_queue_info:
     #   selected_message_queues:
