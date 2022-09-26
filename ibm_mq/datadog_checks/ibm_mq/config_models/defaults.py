@@ -127,7 +127,7 @@ def instance_ssl_certificate_label(field, value):
 
 
 def instance_ssl_cipher_spec(field, value):
-    return 'TLS_RSA_WITH_AES_256_CBC_SHA'
+    return get_default_field_value(field, value)
 
 
 def instance_ssl_key_repository_location(field, value):
