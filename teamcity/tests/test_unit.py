@@ -114,7 +114,7 @@ def test_projects_build_configs_filter(
     instance_config = {'server': 'localhost:8111', 'use_openmetrics': False, 'projects': projects_config}
     check = TeamCityCheck(CHECK_NAME, {}, [instance_config])
 
-    exclude_filter, include_filter = construct_build_configs_filter(check)
+    exclude_filter, include_filter = construct_build_configs_filter(check.monitored_build_configs)
 
     assert include_filter == expected_include
     assert exclude_filter == expected_exclude

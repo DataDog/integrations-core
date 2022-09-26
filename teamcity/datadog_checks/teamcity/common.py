@@ -12,14 +12,14 @@ from datadog_checks.base import ConfigurationError
 from .constants import BUILD_EVENT, DEPLOYMENT_EVENT, EVENT_STATUS_MAP, RESOURCE_URL_MAP
 
 
-def construct_build_configs_filter(check):
+def construct_build_configs_filter(monitored_build_configs):
     """
     Construct build configuration filter
     """
     excluded_build_configs = set()
     included_build_configs = set()
-    for project in check.monitored_build_configs:
-        config = check.monitored_build_configs.get(project)
+    for project in monitored_build_configs:
+        config = monitored_build_configs.get(project)
         # collect all build configs in project
         if isinstance(config, dict):
             exclude_list = config.get('exclude', [])
@@ -44,7 +44,7 @@ def should_include_build_config(check, build_config):
     """
     Return `True` if the build_config is included, otherwise `False`
     """
-    exclude_filter, include_filter = construct_build_configs_filter(check)
+    exclude_filter, include_filter = construct_build_configs_filter(check.monitored_build_configs)
     include_match = False
     exclude_match = False
     # If no filters configured, include everything

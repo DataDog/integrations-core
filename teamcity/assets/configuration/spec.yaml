@@ -32,7 +32,7 @@ files:
         the TeamCity server's prometheus metrics endpoint.
         Requires Python version 3.
 
-        Enable in a separate instance to collect prometheus metrics.
+        Enable in a separate instance to collect Prometheus metrics.
         This option does not collect events, service checks, or metrics from the TeamCity REST API.
       value:
         type: boolean
