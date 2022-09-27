@@ -1,5 +1,8 @@
 # CHANGELOG - Aerospike
 
+## 1.17.1-beta.1 / 2022-09-27
+
+
 ## 1.17.0 / 2022-09-16
 
 * [Added] Update HTTP config spec templates. See [#12890](https://github.com/DataDog/integrations-core/pull/12890).
