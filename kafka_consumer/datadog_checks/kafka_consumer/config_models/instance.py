@@ -33,6 +33,9 @@ class SaslOauthTokenProvider(BaseModel):
 
     client_id: Optional[str]
     client_secret: Optional[str]
+    tls_ca_cert: Optional[str]
+    tls_cert: Optional[str]
+    tls_verify: Optional[bool]
     url: Optional[str]
 
 

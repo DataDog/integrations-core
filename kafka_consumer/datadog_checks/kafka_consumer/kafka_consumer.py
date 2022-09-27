@@ -9,11 +9,11 @@ from kafka.oauth.abstract import AbstractTokenProvider
 from six import string_types
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
-from datadog_checks.base.utils.http import AuthTokenOAuthReader
 
 from .constants import CONTEXT_UPPER_BOUND, DEFAULT_KAFKA_TIMEOUT
 from .legacy_0_10_2 import LegacyKafkaCheck_0_10_2
 from .new_kafka_consumer import NewKafkaConsumerCheck
+from .oauth_token_reader import AuthTokenOAuthReader
 
 
 class OAuthTokenProvider(AbstractTokenProvider):
