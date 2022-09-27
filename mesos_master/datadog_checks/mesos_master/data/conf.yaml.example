@@ -347,7 +347,7 @@ instances:
     # log_requests: false
 
     ## @param persist_connections - boolean - optional - default: false
-    ## Whether or not to persist cookies and use connection pooling for increased performance.
+    ## Whether or not to persist cookies and use connection pooling for improved performance.
     #
     # persist_connections: false
 
