@@ -43,7 +43,7 @@ otelcol_exporter_enqueue_failed_spans,count,,unit,,Number of spans failed to be 
 otelcol_scraper_errored_metric_points,count,,unit,,Number of metric points that were unable to be scraped,-1,otel,scraper errored metric points,
 otelcol_scraper_scraped_metric_points,count,,unit,,Number of metric points successfully scraped,0,otel,scraped metric points,
 otelcol_receiver_refused_metric_points,count,,unit,,Number of metric points that could not be pushed into the pipeline,-1,otel,refused metric points,
-otelcol_processor_batch_batch_send_size,histogram,,unit,,Number of units in the batch,0,otel,batch send size,
+otelcol_processor_batch_batch_send_size,gauge,,unit,,Number of units in the batch,0,otel,batch send size,
 otelcol_receiver_accepted_metric_points,count,,unit,,Number of metric points successfully pushed into the pipeline,0,otel,accepted metric points,
 otelcol_process_runtime_heap_alloc_bytes,gauge,,byte,,Bytes of allocated heap objects (see 'go doc runtime.MemStats.HeapAlloc'),0,otel,runtime heap alloc bytes,
 otelcol_process_runtime_total_alloc_bytes,count,,byte,,Cumulative bytes allocated for heap objects (see 'go doc runtime.MemStats.TotalAlloc'),0,otel,total alloc bytes,
