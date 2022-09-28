@@ -19,7 +19,7 @@ class FsyncLockCollector(MongoCollector):
         return True
 
     def collect(self, api):
-        db = api[self.db_name]
+        db = api['admin']
         ops = db.aggregate([{"$currentOp": {}}])
         for op in ops:
             payload = {'fsyncLocked': 1 if op.get('fsyncLock') else 0}
