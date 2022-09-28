@@ -1,6 +1,11 @@
 # CHANGELOG - Datadog Checks Downloader
 
-## 3.8.0 / 2022-08-05
+## 3.9.0 / 2022-09-16
+
+* [Added] Add `packaging` to dependencies. See [#12753](https://github.com/DataDog/integrations-core/pull/12753).
+* [Fixed] Use packaging instead of pkg_resources for parsing version. See [#12560](https://github.com/DataDog/integrations-core/pull/12560). Thanks [fridex](https://github.com/fridex).
+
+## 3.8.0 / 2022-08-05 / Agent 7.39.0
 
 * [Added] Use context manager when creating temporary directory. See [#12559](https://github.com/DataDog/integrations-core/pull/12559). Thanks [fridex](https://github.com/fridex).
 * [Fixed] Prevent from publishing datadog-checks-downloader to PyPI. See [#12556](https://github.com/DataDog/integrations-core/pull/12556).

@@ -43,7 +43,7 @@ def instance_collect_database_size_metrics(field, value):
 
 
 def instance_collect_default_database(field, value):
-    return False
+    return True
 
 
 def instance_collect_function_metrics(field, value):
@@ -87,7 +87,7 @@ def instance_gcp(field, value):
 
 
 def instance_ignore_databases(field, value):
-    return ['template%', 'rdsadmin', 'azure_maintenance', 'postgres']
+    return ['template%', 'rdsadmin', 'azure_maintenance']
 
 
 def instance_max_relations(field, value):

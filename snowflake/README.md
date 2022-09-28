@@ -129,6 +129,19 @@ Note: To monitor organization metrics, your `user` must have the `ORGADMIN` role
         min_collection_interval: 43200
   ```
 
+Only some organization metrics are enabled by default. To collect all available organization metrics, utilize the `metric_groups` configuration option:
+
+  ```yaml
+      metric_groups:
+        - snowflake.organization.warehouse
+        - snowflake.organization.currency
+        - snowflake.organization.credit
+        - snowflake.organization.storage
+        - snowflake.organization.contracts
+        - snowflake.organization.balance
+        - snowflake.organization.rate
+        - snowflake.organization.data_transfer
+  ```
 
 Additionally, you can monitor both account and organization metrics at the same time:
 
@@ -284,6 +297,12 @@ See [service_checks.json][16] for a list of service checks provided by this inte
 
 Need help? Contact [Datadog support][17].
 
+## Further Reading
+
+Additional helpful documentation, links, and articles:
+
+- [Monitor Snowflake with Datadog][18]
+
 
 [1]: https://www.snowflake.com/
 [2]: https://app.datadoghq.com/account/settings#agent
@@ -302,3 +321,4 @@ Need help? Contact [Datadog support][17].
 [15]: https://github.com/DataDog/integrations-core/blob/master/snowflake/metadata.csv
 [16]: https://github.com/DataDog/integrations-core/blob/master/snowflake/assets/service_checks.json
 [17]: https://docs.datadoghq.com/help/
+[18]: https://www.datadoghq.com/blog/snowflake-monitoring-datadog/

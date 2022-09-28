@@ -1,5 +1,9 @@
 # CHANGELOG - Teradata
 
+## 1.1.0 / 2022-09-16
+
+* [Added] Refactor tooling for getting the current env name. See [#12939](https://github.com/DataDog/integrations-core/pull/12939).
+
 ## 1.0.1 / 2022-06-27 / Agent 7.38.0
 
 * [Fixed] Refactor util method signatures. See [#12063](https://github.com/DataDog/integrations-core/pull/12063).

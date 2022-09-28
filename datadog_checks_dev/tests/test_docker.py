@@ -8,6 +8,7 @@ import pytest
 import tenacity
 
 from datadog_checks.dev import RetryError
+from datadog_checks.dev.ci import running_on_ci
 from datadog_checks.dev.docker import compose_file_active, docker_run
 from datadog_checks.dev.subprocess import run_command
 
@@ -61,8 +62,15 @@ class TestDockerRun:
         condition = mock.MagicMock()
         condition.side_effect = RetryError("error")
 
+        expected_exception = tenacity.RetryError
+        if attempts is None:
+            if running_on_ci():
+                expected_call_count = 2
+            else:
+                expected_exception = RetryError
+
         try:
-            with pytest.raises(RetryError if attempts is None else tenacity.RetryError):
+            with pytest.raises(expected_exception):
                 with docker_run(compose_file, attempts=attempts, conditions=[condition]):
                     pass
 

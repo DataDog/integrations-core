@@ -1,6 +1,11 @@
 # CHANGELOG - snmp
 
-## 5.9.0 / 2022-08-05
+## 5.10.0 / 2022-09-16
+
+* [Added] Refactor tooling for getting the current env name. See [#12939](https://github.com/DataDog/integrations-core/pull/12939).
+* [Fixed] Add virtualdomain_index tag to fgFwPolStatsTable. See [#12760](https://github.com/DataDog/integrations-core/pull/12760).
+
+## 5.9.0 / 2022-08-05 / Agent 7.39.0
 
 * [Added] Add metrics for VPN Tunnels. See [#11977](https://github.com/DataDog/integrations-core/pull/11977). Thanks [jalmeroth](https://github.com/jalmeroth).
 * [Fixed] Dependency updates. See [#12653](https://github.com/DataDog/integrations-core/pull/12653).

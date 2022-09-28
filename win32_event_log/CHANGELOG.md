@@ -1,5 +1,9 @@
 # CHANGELOG - win32_event_log
 
+## 2.13.2 / 2022-09-16
+
+* [Fixed] Recover from EvtNext error when EvtSubscribe handle fails. See [#12925](https://github.com/DataDog/integrations-core/pull/12925).
+
 ## 2.13.1 / 2022-05-15 / Agent 7.37.0
 
 * [Fixed] Upgrade dependencies. See [#11958](https://github.com/DataDog/integrations-core/pull/11958).

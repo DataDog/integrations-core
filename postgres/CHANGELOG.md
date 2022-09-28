@@ -1,6 +1,6 @@
 # CHANGELOG - postgres
 
-## 12.5.1 / 2022-08-05
+## 12.5.1 / 2022-08-05 / Agent 7.39.0
 
 * [Fixed] Dependency updates. See [#12653](https://github.com/DataDog/integrations-core/pull/12653).
 * [Fixed] Escape underscore in LOCK_METRICS query. See [#12652](https://github.com/DataDog/integrations-core/pull/12652).

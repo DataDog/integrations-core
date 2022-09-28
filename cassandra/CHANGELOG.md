@@ -1,5 +1,9 @@
 # CHANGELOG - cassandra
 
+## 1.16.0 / 2022-09-16
+
+* [Added] Add back previously deleted `active_tasks` and `timeouts` metrics for the Cassandra integration. See [#12710](https://github.com/DataDog/integrations-core/pull/12710).
+
 ## 1.15.1 / 2022-04-05 / Agent 7.36.0
 
 * [Fixed] Remove check options from jmx template. See [#11686](https://github.com/DataDog/integrations-core/pull/11686).

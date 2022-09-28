@@ -2,7 +2,12 @@
 
 ## Overview
 
-This check monitors [SingleStore][1] through the Datadog Agent.
+This check monitors [SingleStore][1] through the Datadog Agent. SingleStore offers transactional and analytical processing of stored data. Enable the Datadog-SingleStoreDB integration to:
+
+- Understand the health of clusters and nodes through metrics and events.
+- Address drops in storage capacity.
+- Improve resource utilization efficiency.
+
 
 ## Setup
 
@@ -61,9 +66,6 @@ For containerized environments, see the [Autodiscovery Integration Templates][2]
 | `<INTEGRATION_NAME>` | `singlestore`                                                   |
 | `<INIT_CONFIG>`      | blank or `{}`                                              |
 | `<INSTANCE_CONFIG>`  | `{"host": "%%host%%", "port": "%%port%%", "username": "<USER>", "password": "<PASSWORD>"}`       |
-
-
-**Note**: By default, the SingleStore integration only collects metrics from the `MV_GLOBAL_STATUS`, `AGGREGATORS`, and `LEAVES` tables. To collect additional system level metrics (CPU, disk, network IO, and memory), add `"collect_system_metrics": "true"`  in your `singlestore.d/conf.yaml` file.
 
 ##### Log collection
 

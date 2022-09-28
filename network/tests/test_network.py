@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-import array
 import logging
 import os
 import platform
@@ -56,7 +55,6 @@ LINUX_SYS_NET_STATS = {
     'system.net.iface.num_rx_queues': (1, 2),
     'system.net.iface.num_tx_queues': (1, 3),
 }
-
 
 PROC_NET_STATS = {
     'system.net.ip.in_receives': 159747123,
@@ -491,62 +489,3 @@ def test_ss_with_custom_procfs(is_linux, is_bsd, is_solaris, is_windows, aggrega
             check.log,
             env={'PROC_ROOT': "/something/proc", 'PATH': os.environ["PATH"]},
         )
-
-
-def send_ethtool_ioctl_mock(iface, sckt, data):
-    for input, result in common.ETHTOOL_IOCTL_INPUTS_OUTPUTS.items():
-        if input == (iface, data.tobytes() if PY3 else data.tostring()):
-            data[:] = array.array('B', [])
-            data.frombytes(result) if PY3 else data.fromstring(result)
-            return
-    raise ValueError("Couldn't match any iface/data combination in the test data")
-
-
-@pytest.mark.skipif(platform.system() == 'Windows', reason="Only runs on Unix systems")
-@mock.patch('datadog_checks.network.network.Network._send_ethtool_ioctl')
-def test_collect_ena(send_ethtool_ioctl, check):
-    send_ethtool_ioctl.side_effect = send_ethtool_ioctl_mock
-    assert check._collect_ena('eth0') == {
-        'aws.ec2.bw_in_allowance_exceeded': 0,
-        'aws.ec2.bw_out_allowance_exceeded': 0,
-        'aws.ec2.conntrack_allowance_exceeded': 0,
-        'aws.ec2.linklocal_allowance_exceeded': 0,
-        'aws.ec2.pps_allowance_exceeded': 0,
-    }
-
-
-@pytest.mark.skipif(platform.system() == 'Windows', reason="Only runs on Unix systems")
-@mock.patch('datadog_checks.network.network.Network._send_ethtool_ioctl')
-def test_submit_ena(send_ethtool_ioctl, check, aggregator):
-    send_ethtool_ioctl.side_effect = send_ethtool_ioctl_mock
-    metrics = check._collect_ena('eth0')
-    check._excluded_ifaces = []
-    check._exclude_iface_re = ''
-    check._submit_ena_metrics('eth0', metrics, [])
-
-    expected_metrics = [
-        'system.net.aws.ec2.bw_in_allowance_exceeded',
-        'system.net.aws.ec2.bw_out_allowance_exceeded',
-        'system.net.aws.ec2.conntrack_allowance_exceeded',
-        'system.net.aws.ec2.linklocal_allowance_exceeded',
-        'system.net.aws.ec2.pps_allowance_exceeded',
-    ]
-
-    for m in expected_metrics:
-        aggregator.assert_metric(m, count=1, value=0, tags=['device:eth0'])
-
-
-@pytest.mark.skipif(platform.system() == 'Windows', reason="Only runs on Unix systems")
-@mock.patch('datadog_checks.network.network.Network._send_ethtool_ioctl')
-def test_collect_ena_values_not_present(send_ethtool_ioctl, check):
-    send_ethtool_ioctl.side_effect = send_ethtool_ioctl_mock
-    assert check._collect_ena('enp0s3') == {}
-
-
-@pytest.mark.skipif(platform.system() == 'Windows', reason="Only runs on Unix systems")
-@mock.patch('fcntl.ioctl')
-def test_collect_ena_unsupported_on_iface(ioctl_mock, check, caplog):
-    caplog.set_level(logging.DEBUG)
-    ioctl_mock.side_effect = OSError('mock error')
-    check._collect_ena('eth0')
-    assert 'OSError while trying to collect ENA metrics for interface eth0: mock error' in caplog.text

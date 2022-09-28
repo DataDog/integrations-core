@@ -329,14 +329,6 @@ class Vault(OpenMetricsBaseCheck):
         with open(self._client_token_path, 'rb') as f:
             self.set_client_token(f.read().decode('utf-8'))
 
-    def poll(self, scraper_config, headers=None):
-        # https://www.vaultproject.io/api-docs#the-x-vault-request-header
-        headers = {'X-Vault-Request': 'true'}
-        if self._client_token and not self._no_token:
-            headers['X-Vault-Token'] = self._client_token
-
-        return super(Vault, self).poll(scraper_config, headers=headers)
-
     def _set_header(self, http_wrapper, header, value):
         http_wrapper.options['headers'][header] = value
 

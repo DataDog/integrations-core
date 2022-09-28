@@ -1,5 +1,10 @@
 # CHANGELOG - vsphere
 
+## 6.2.0 / 2022-09-16
+
+* [Added] Add connection refresh option. See [#11507](https://github.com/DataDog/integrations-core/pull/11507).
+* [Added] Update HTTP config spec templates. See [#12890](https://github.com/DataDog/integrations-core/pull/12890).
+
 ## 6.1.2 / 2022-05-15 / Agent 7.37.0
 
 * [Fixed] Fix uncommented parent options. See [#12013](https://github.com/DataDog/integrations-core/pull/12013).

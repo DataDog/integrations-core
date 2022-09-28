@@ -424,7 +424,7 @@ def prepare_hatch_test_commands(
         commands.append(['hatch', 'env', 'run', '--env', 'lint', '--', 'fmt' if format_style else 'all'])
 
     if env_names:
-        command = ['hatch', '-v', 'env', 'run']
+        command = ['hatch', '-v', 'env', 'run', '--ignore-compat']
         for env_name in env_names:
             command.append('--env')
             command.append(env_name)
@@ -605,7 +605,7 @@ def get_changed_directories(include_uncommitted=True):
     return {line.split('/')[0] for line in changed_files}
 
 
-def get_tox_env_python_version(env):
+def get_active_env_python_version(env):
     match = re.match(PYTHON_MAJOR_PATTERN, env)
     if match:
         return int(match.group(1))

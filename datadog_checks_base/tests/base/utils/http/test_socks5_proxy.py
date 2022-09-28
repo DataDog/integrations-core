@@ -3,14 +3,16 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 from requests.exceptions import ConnectTimeout, ProxyError
+from six import PY2
 
 from datadog_checks.base.utils.http import RequestsWrapper
-from datadog_checks.dev.ci import running_on_ci, running_on_windows_ci
+from datadog_checks.base.utils.platform import Platform
+from datadog_checks.dev.ci import running_on_windows_ci
 
 pytestmark = [
     pytest.mark.integration,
+    pytest.mark.skipif(PY2, reason='Test flakes on py2'),
     pytest.mark.skipif(running_on_windows_ci(), reason='Test cannot be run on Windows CI'),
-    pytest.mark.skipif(running_on_ci(), reason='Test is failing on CI'),
 ]
 
 
@@ -29,7 +31,8 @@ def test_no_proxy_single_wildcard(socks5_proxy):
 
     http.get('http://www.example.org')
     http.get('http://www.example.com')
-    http.get('http://127.0.0.9')
+    if not Platform.is_mac():
+        http.get('http://127.0.0.9')
 
 
 def test_no_proxy_domain(socks5_proxy):
@@ -48,7 +51,8 @@ def test_no_proxy_domain(socks5_proxy):
     http.get('http://example.com')
 
     # no_proxy match: 9
-    http.get('http://127.0.0.9')
+    if not Platform.is_mac():
+        http.get('http://127.0.0.9')
 
 
 def test_no_proxy_domain_fail(socks5_proxy):
@@ -86,20 +90,21 @@ def test_no_proxy_ip(socks5_proxy):
     # no_proxy match: 127.0.0.1
     http.get('http://127.0.0.1', timeout=1)
 
-    # no_proxy match: 127.0.0.2/32
-    http.get('http://127.0.0.2', timeout=1)
+    if not Platform.is_mac():
+        # no_proxy match: 127.0.0.2/32
+        http.get('http://127.0.0.2', timeout=1)
 
-    # no_proxy match: IP within 127.1.0.0/25 subnet - cidr bits format
-    http.get('http://127.1.0.50', timeout=1)
-    http.get('http://127.1.0.100', timeout=1)
+        # no_proxy match: IP within 127.1.0.0/25 subnet - cidr bits format
+        http.get('http://127.1.0.50', timeout=1)
+        http.get('http://127.1.0.100', timeout=1)
 
-    # no_proxy match: IP within 127.1.1.0/255.255.255.128 subnet - net mask format
-    http.get('http://127.1.1.50', timeout=1)
-    http.get('http://127.1.1.100', timeout=1)
+        # no_proxy match: IP within 127.1.1.0/255.255.255.128 subnet - net mask format
+        http.get('http://127.1.1.50', timeout=1)
+        http.get('http://127.1.1.100', timeout=1)
 
-    # no_proxy match: IP within 127.1.2.0/0.0.0.127 subnet - host mask format
-    http.get('http://127.1.2.50', timeout=1)
-    http.get('http://127.1.2.100', timeout=1)
+        # no_proxy match: IP within 127.1.2.0/0.0.0.127 subnet - host mask format
+        http.get('http://127.1.2.50', timeout=1)
+        http.get('http://127.1.2.100', timeout=1)
 
 
 def test_no_proxy_ip_fail(socks5_proxy):

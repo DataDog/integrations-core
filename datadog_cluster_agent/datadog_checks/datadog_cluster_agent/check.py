@@ -43,6 +43,8 @@ DEFAULT_METRICS = {
     'autodiscovery_poll_duration': 'autodiscovery.poll_duration',
     'autodiscovery_watched_resources': 'autodiscovery.watched_resources',
     'autodiscovery_errors': 'autodiscovery.errors',
+    'kubernetes_apiserver_kube_events': 'kubernetes_apiserver.kube_events',
+    'kubernetes_apiserver_emitted_events': 'kubernetes_apiserver.emitted_events',
 }
 
 

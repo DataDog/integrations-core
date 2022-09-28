@@ -1,5 +1,9 @@
 # CHANGELOG - mcache
 
+## 3.3.0 / 2022-09-16
+
+* [Added] Add the `max_connections` metric. See [#12689](https://github.com/DataDog/integrations-core/pull/12689).
+
 ## 3.2.0 / 2022-04-05 / Agent 7.36.0
 
 * [Added] Upgrade dependencies. See [#11726](https://github.com/DataDog/integrations-core/pull/11726).

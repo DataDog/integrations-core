@@ -99,6 +99,9 @@ jobs:
     - checkName: ceph
       displayName: Ceph
       os: linux
+    - checkName: cert_manager
+      displayName: cert-manager
+      os: linux
     - checkName: cilium
       displayName: Cilium
       os: linux
@@ -258,6 +261,9 @@ jobs:
     - checkName: iis
       displayName: IIS
       os: windows
+    - checkName: impala
+      displayName: Impala
+      os: linux
     - checkName: istio
       displayName: Istio
       os: linux

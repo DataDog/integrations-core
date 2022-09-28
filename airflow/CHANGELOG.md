@@ -1,5 +1,9 @@
 # CHANGELOG - Airflow
 
+## 3.2.0 / 2022-09-16
+
+* [Added] Update HTTP config spec templates. See [#12890](https://github.com/DataDog/integrations-core/pull/12890).
+
 ## 3.1.1 / 2022-06-27 / Agent 7.38.0
 
 * [Fixed] Update mapping and tags in README.md. See [#11967](https://github.com/DataDog/integrations-core/pull/11967). Thanks [moshederri](https://github.com/moshederri).
