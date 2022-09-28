@@ -1,0 +1,32 @@
+{
+  "name": "Deployments with unavaible replicas",
+  "query": "",
+  "page": "container_orchestration_deployments",
+  "type": "container",
+  "options": {
+    "sort": {
+      "id": "unavailable_replicas",
+      "desc": true
+    },
+    "palette": "hostmap_blues",
+    "tab": "overview",
+    "metric": "deployment.uptime",
+    "showNogroupObjects": false,
+    "groups": [],
+    "query": "",
+    "view": "deployment",
+    "columns": [
+      "name",
+      "cluster",
+      "namespace",
+      "deployment_strategy",
+      "age",
+      "current_replicas",
+      "desired_replicas",
+      "updated_replicas",
+      "available_replicas",
+      "monitors_status"
+    ],
+    "paletteFlip": false
+  }
+}
