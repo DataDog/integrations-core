@@ -828,7 +828,7 @@ class MySQLStatementSamples(DBMAsyncJob):
                     self._check.histogram(
                         "dd.mysql.run_explain.time",
                         (time.time() - start_time) * 1000,
-                        tags=self._tags + ["strategy:{}".format(strategy)],
+                        tags=self._tags + ["strategy:{}".format(strategy)] + self._check._get_debug_tags(),
                         hostname=self._check.resolved_hostname,
                     )
                     return plan, None
