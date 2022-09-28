@@ -32,6 +32,7 @@ REPO_CHOICES = {
     'internal': 'integrations-internal',
     'agent': 'datadog-agent',
     'marketplace': 'marketplace',
+    'integrations': 'integrations',
 }
 
 VERSION_BUMP = {

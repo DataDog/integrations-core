@@ -40,6 +40,7 @@ DEFAULT_CONFIG = {
         'extras': os.path.join('~', 'dd', 'integrations-extras'),
         'agent': os.path.join('~', 'dd', 'datadog-agent'),
         'marketplace': os.path.join('~', 'dd', 'marketplace'),
+        'integrations': os.path.join('~', 'dd', 'integrations'),
     },
     'agents': {
         'master': {'docker': 'datadog/agent-dev:master', 'local': 'latest'},
