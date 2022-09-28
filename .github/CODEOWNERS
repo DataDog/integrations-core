@@ -93,12 +93,12 @@ assets/               @DataDog/agent-integrations
 /tcp_queue_length/manifest.json           @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 
 # Infrastructure integrations
-/snmp/                                                             @DataDog/infrastructure-integrations @DataDog/agent-integrations
-/snmp/*.md                                                         @DataDog/infrastructure-integrations @DataDog/agent-integrations @DataDog/documentation
-/snmp_*/                                                           @DataDog/infrastructure-integrations @DataDog/agent-integrations
-/snmp_*/*.md                                                       @DataDog/infrastructure-integrations @DataDog/agent-integrations @DataDog/documentation
-/datadog_checks_dev/datadog_checks/dev/tooling/commands/meta/snmp/ @DataDog/infrastructure-integrations @DataDog/agent-integrations
-/docs/developer/tutorials/snmp/                                    @DataDog/infrastructure-integrations @DataDog/agent-integrations @DataDog/documentation
+/snmp/                                                             @DataDog/network-device-monitoring @DataDog/agent-integrations
+/snmp/*.md                                                         @DataDog/network-device-monitoring @DataDog/agent-integrations @DataDog/documentation
+/snmp_*/                                                           @DataDog/network-device-monitoring @DataDog/agent-integrations
+/snmp_*/*.md                                                       @DataDog/network-device-monitoring @DataDog/agent-integrations @DataDog/documentation
+/datadog_checks_dev/datadog_checks/dev/tooling/commands/meta/snmp/ @DataDog/network-device-monitoring @DataDog/agent-integrations
+/docs/developer/tutorials/snmp/                                    @DataDog/network-device-monitoring @DataDog/agent-integrations @DataDog/documentation
 
 # Agent Platform
 /disk/                                    @DataDog/agent-platform @DataDog/agent-integrations
