@@ -6,9 +6,8 @@ class FsyncLockCollector(MongoCollector):
     """Collects the mongodb.fsyncLock metric by checking the output of the 'currentOp' command.
     Useful to know if the selected database is currently write-locked."""
 
-    def __init__(self, check, db_name, tags):
+    def __init__(self, check, tags):
         super(FsyncLockCollector, self).__init__(check, tags)
-        self.db_name = db_name
 
     def compatible_with(self, deployment):
         # Can be run on any mongod instance excepts arbiters.
