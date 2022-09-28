@@ -48,7 +48,7 @@ APPLICATION_CONTROLLER = {
     'argocd_cluster_api_resource_objects': 'cluster.api.resource_objects',
     'argocd_cluster_api_resources': 'cluster.api.resources',
     'argocd_cluster_cache_age_seconds': 'cluster.cache.age.seconds',
-    'argocd_cluster_connection_status': 'cluster.connection.status', # value 1 if connected, 0 if not
+    'argocd_cluster_connection_status': 'cluster.connection.status',  # value 1 if connected, 0 if not
     'argocd_cluster_events': 'cluster.events',
     'argocd_kubectl_exec_pending': 'kubectl.exec.pending',
     'argocd_kubectl_exec': 'kubectl.exec',
