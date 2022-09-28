@@ -38,6 +38,10 @@ def instance_job_query_timeout(field, value):
     return 240
 
 
+def instance_message_queue_info(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_metric_patterns(field, value):
     return get_default_field_value(field, value)
 
