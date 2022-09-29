@@ -242,6 +242,7 @@ class TrelloClient:
         try:
             membership = requests.get(f'{self.MEMBER_ENPOINT}/{id_member}', params=self.auth)
             membership.raise_for_status()
+            time.sleep(10)
         except requests.exceptions.HTTPError as e:
             if e.response.status_code == 429:
                 raise Exception('Timeout, please try in 900 secondes') from e
