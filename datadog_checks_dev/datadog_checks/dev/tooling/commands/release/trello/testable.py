@@ -281,7 +281,7 @@ def testable(
     if repo == 'integrations-core':
         options = {
             '1': 'Integrations',
-            '2': 'Infra-Integrations',
+            '2': 'Network Device Monitoring',
             '3': 'Containers',
             '4': 'Core',
             '5': 'Platform',
@@ -300,7 +300,7 @@ def testable(
             '6': 'Processes',
             '7': 'Trace',
             '8': 'Integrations',
-            '9': 'Infra-Integrations',
+            '9': 'Network Device Monitoring',
             '10': 'Tools and Libraries',
             '11': 'Database Monitoring',
             's': 'Skip',
