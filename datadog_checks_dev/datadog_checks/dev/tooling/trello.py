@@ -4,6 +4,7 @@
 
 import requests
 
+
 class TrelloClient:
     API_URL = 'https://api.trello.com'
     CREATE_ENDPOINT = API_URL + '/1/cards'
