@@ -90,6 +90,14 @@ def instance_ignore_databases(field, value):
     return ['template%', 'rdsadmin', 'azure_maintenance']
 
 
+def instance_log_unobfuscated_plans(field, value):
+    return False
+
+
+def instance_log_unobfuscated_queries(field, value):
+    return False
+
+
 def instance_max_relations(field, value):
     return 300
 
