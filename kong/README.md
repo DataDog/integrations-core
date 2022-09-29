@@ -117,13 +117,14 @@ The Kong check does not include any events.
 
 See [service_checks.json][9] for a list of service checks provided by this integration.
 
+## Datadog Plugin
+
+You can also use Kong's [Datadog Plugin][15] to send API, connection, and database metrics to Datadog with the Datadog Agent and [DogStatsD][16]. Read the [Monitor Kong with the Datadog integration][11] blog post for more information.
+
 ## Troubleshooting
 
 Need help? Contact [Datadog support][10].
 
-## Further Reading
-
-- [Monitor Kong with the Datadog integration][11]
 
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
@@ -139,3 +140,5 @@ Need help? Contact [Datadog support][10].
 [12]: https://docs.datadoghq.com/integrations/openmetrics/
 [13]: https://github.com/DataDog/integrations-core/blob/7.27.x/kong/datadog_checks/kong/data/conf.yaml.example
 [14]: https://docs.konghq.com/hub/kong-inc/prometheus/
+[15]: https://docs.konghq.com/hub/kong-inc/datadog/
+[16]: https://docs.datadoghq.com/developers/dogstatsd/
