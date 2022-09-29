@@ -38,7 +38,7 @@ general_gauges = [
 
 general_counters = [
     'redis.request.count',
-    # 'go.memstats.alloc_bytes.count',
+    'go.memstats.alloc_bytes.count',
     'go.memstats.frees.count',
     'go.memstats.lookups.count',
     'go.memstats.mallocs.count',

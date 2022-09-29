@@ -10,7 +10,7 @@ HERE = path.dirname(path.abspath(__file__))
 
 # Get version info
 ABOUT = {}
-with open(path.join(HERE, 'datadog_checks', 'argo_cd', '__about__.py')) as f:
+with open(path.join(HERE, 'datadog_checks', 'argocd', '__about__.py')) as f:
     exec(f.read(), ABOUT)
 
 # Get the long description from the README file
@@ -46,12 +46,12 @@ CHECKS_BASE_REQ = parse_pyproject_array('dependencies')[0]
 
 
 setup(
-    name='datadog-argo_cd',
+    name='datadog-argocd',
     version=ABOUT['__version__'],
     description='The ArgoCD check',
     long_description=long_description,
     long_description_content_type='text/markdown',
-    keywords='datadog agent argo_cd check',
+    keywords='datadog agent argocd check',
     # The project's main homepage.
     url='https://github.com/DataDog/integrations-core',
     # Author details
@@ -70,7 +70,7 @@ setup(
         'Programming Language :: Python :: 3.8',
     ],
     # The package we're going to ship
-    packages=['datadog_checks.argo_cd'],
+    packages=['datadog_checks.argocd'],
     # Run-time dependencies
     install_requires=[CHECKS_BASE_REQ],
     extras_require={'deps': parse_pyproject_array('deps')},
