@@ -119,7 +119,7 @@ See [service_checks.json][9] for a list of service checks provided by this integ
 
 ## Datadog Plugin
 
-You can also use Kong's [Datadog Plugin][15] to send API, connection, and database metrics to Datadog with the Datadog Agent and [DogStatsD][16]. Read the [Monitor Kong with the Datadog integration][11] blog post for more information.
+You can also use Kong's [Datadog Plugin][15] to send API, connection, and database metrics to Datadog through the Datadog Agent using [DogStatsD][16]. Read the [Monitor Kong with the Datadog integration][11] blog post for more information.
 
 ## Troubleshooting
 
