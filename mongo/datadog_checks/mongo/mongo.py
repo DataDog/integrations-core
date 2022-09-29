@@ -91,7 +91,7 @@ class MongoDb(AgentCheck):
         potential_collectors = [
             ConnPoolStatsCollector(self, tags),
             ReplicationOpLogCollector(self, tags),
-            FsyncLockCollector(self, self._config.db_name, tags),
+            FsyncLockCollector(self, tags),
             CollStatsCollector(self, self._config.db_name, tags, coll_names=self._config.coll_names),
             ServerStatusCollector(self, self._config.db_name, tags, tcmalloc=collect_tcmalloc_metrics),
         ]
