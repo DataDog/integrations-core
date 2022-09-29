@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import requests
-import time
 
 class TrelloClient:
     API_URL = 'https://api.trello.com'
