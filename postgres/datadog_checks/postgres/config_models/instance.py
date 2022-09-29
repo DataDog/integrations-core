@@ -128,6 +128,8 @@ class InstanceConfig(BaseModel):
     gcp: Optional[Gcp]
     host: str
     ignore_databases: Optional[Sequence[str]]
+    log_unobfuscated_plans: Optional[bool]
+    log_unobfuscated_queries: Optional[bool]
     max_relations: Optional[int]
     metric_patterns: Optional[MetricPatterns]
     min_collection_interval: Optional[float]

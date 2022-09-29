@@ -329,7 +329,10 @@ class PostgresStatementSamples(DBMAsyncJob):
             normalized_row['dd_commands'] = metadata.get('commands', None)
             normalized_row['dd_comments'] = metadata.get('comments', None)
         except Exception as e:
-            self._log.debug("Failed to obfuscate statement: %s", e)
+            if self._config.log_unobfuscated_queries:
+                self._log.warning("Failed to obfuscate query=[%s] | err=[%s]", row['query'], e)
+            else:
+                self._log.debug("Failed to obfuscate query | err=[%s]", e)
             self._check.count(
                 "dd.postgres.statement_samples.error",
                 1,
@@ -610,8 +613,14 @@ class PostgresStatementSamples(DBMAsyncJob):
             plan = json.dumps(plan_dict)
             # if we're using the orjson implementation then json.dumps returns bytes
             plan = plan.decode('utf-8') if isinstance(plan, bytes) else plan
-            normalized_plan = datadog_agent.obfuscate_sql_exec_plan(plan, normalize=True)
-            obfuscated_plan = datadog_agent.obfuscate_sql_exec_plan(plan)
+            try:
+                normalized_plan = datadog_agent.obfuscate_sql_exec_plan(plan, normalize=True)
+                obfuscated_plan = datadog_agent.obfuscate_sql_exec_plan(plan)
+            except Exception as e:
+                if self._config.log_unobfuscated_plans:
+                    self._log.warning("Failed to obfuscate plan=[%s] | err=[%s]", plan, e)
+                raise e
+
             plan_signature = compute_exec_plan_signature(normalized_plan)
 
         statement_plan_sig = (row['query_signature'], plan_signature)

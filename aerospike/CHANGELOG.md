@@ -1,5 +1,9 @@
 # CHANGELOG - Aerospike
 
+## 1.17.1 / 2022-09-28
+
+* [Fixed] Fix missing latency metrics from other namespaces. See [#12944](https://github.com/DataDog/integrations-core/pull/12944).
+
 ## 1.17.0 / 2022-09-16
 
 * [Added] Update HTTP config spec templates. See [#12890](https://github.com/DataDog/integrations-core/pull/12890).
