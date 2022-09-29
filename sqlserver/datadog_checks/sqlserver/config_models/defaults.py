@@ -138,6 +138,14 @@ def instance_include_task_scheduler_metrics(field, value):
     return False
 
 
+def instance_log_unobfuscated_plans(field, value):
+    return False
+
+
+def instance_log_unobfuscated_queries(field, value):
+    return False
+
+
 def instance_metric_patterns(field, value):
     return get_default_field_value(field, value)
 
