@@ -245,7 +245,7 @@ class TrelloClient:
             time.sleep(10)
         except requests.exceptions.HTTPError as e:
             if e.response.status_code == 429:
-                raise Exception('Timeout, please try in 900 secondes') from e
+                raise Exception('Timeout, please try in 900 seconds') from e
             else:
                 raise e
 

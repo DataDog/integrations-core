@@ -44,5 +44,5 @@ class TrelloUsers:
                         'full_name': fullname,
                         'username': member['username'],
                     }
-            self.__user_cache.set_value(trello_users)
+                    self.__user_cache.set_value(trello_users)
         return [TrelloUser(user) for user in trello_users.values()]
