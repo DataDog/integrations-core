@@ -22,10 +22,13 @@ IS_AUTH = COMPOSE_FILE == 'mongo-auth.yaml'
 
 TLS_CERTS_FOLDER = os.path.join(os.path.dirname(__file__), 'compose', 'certs')
 
-standalone = pytest.mark.skipif(not IS_STANDALONE, reason='Test only valid for standalone mongo')
-shard = pytest.mark.skipif(not IS_SHARD, reason='Test only valid for sharded mongo')
+standalone = pytest.mark.skipif(
+    not IS_STANDALONE, reason='Test only valid for standalone mongo')
+shard = pytest.mark.skipif(
+    not IS_SHARD, reason='Test only valid for sharded mongo')
 tls = pytest.mark.skipif(not IS_TLS, reason='Test only valid for TLS')
-auth = pytest.mark.skipif(not IS_AUTH, reason='Test only valid for mongo with --auth')
+auth = pytest.mark.skipif(
+    not IS_AUTH, reason='Test only valid for mongo with --auth')
 
 MONGODB_VERSION = os.environ['MONGO_VERSION']
 
@@ -33,7 +36,8 @@ ROOT = os.path.dirname(os.path.dirname(HERE))
 
 INSTANCE_BASIC = {'hosts': ['{}:{}'.format(HOST, PORT1)]}
 INSTANCE_BASIC_SHARD = {'hosts': ['{}:{}'.format(HOST, PORT2)]}
-INSTANCE_BASIC_LEGACY_CONFIG = {'server': "mongodb://%s:%s/test" % (HOST, PORT1)}
+INSTANCE_BASIC_LEGACY_CONFIG = {
+    'server': "mongodb://%s:%s/test" % (HOST, PORT1)}
 
 INSTANCE_AUTHDB = {
     'hosts': ['{}:{}'.format(HOST, PORT1)],
@@ -60,7 +64,17 @@ INSTANCE_USER = {
     'username': 'testUser2',
     'password': 'testPass2',
 }
-INSTANCE_USER_LEGACY_CONFIG = {'server': 'mongodb://testUser2:testPass2@{}:{}/test'.format(HOST, PORT1)}
+INSTANCE_USER_LEGACY_CONFIG = {
+    'server': 'mongodb://testUser2:testPass2@{}:{}/test'.format(HOST, PORT1)}
+
+INSTANCE_USER_LEGACY_CONFIG_SSL = {
+    'server': 'mongodb://testUser2:testPass2@{}:{}/test'.format(HOST, PORT1),
+    'database': 'test',
+    'ssl': True,
+    'ssl_cert_reqs': True,
+    'ssl_certfile': '/certs/client1.pem',
+    'ssl_ca_certs': '/certs/ca.pem',
+}
 
 INSTANCE_ARBITER = {'hosts': ['{}:{}'.format(HOST, PORT_ARBITER)]}
 
@@ -116,7 +130,8 @@ INSTANCE_CUSTOM_QUERIES = {
             },
             'database': 'admin',
             'fields': [
-                {'field_name': 'secs_running', 'name': 'secs_running', 'type': 'gauge'},
+                {'field_name': 'secs_running',
+                    'name': 'secs_running', 'type': 'gauge'},
                 {'field_name': 'appName', 'name': 'app_name', 'type': 'tag'},
                 {'field_name': 'ns', 'name': 'mongo_op_namespace', 'type': 'tag'},
             ],

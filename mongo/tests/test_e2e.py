@@ -103,3 +103,20 @@ def test_e2e_mongo_tls(dd_agent_check):
     for metric in MONGOD_METRICS:
         aggregator.assert_metric(metric)
     aggregator.assert_service_check('mongodb.can_connect', status=MongoDb.OK)
+
+
+@tls
+@pytest.mark.e2e
+def test_e2e_mongo_ssl(dd_agent_check):
+    instance = {
+        'hosts': ['{}:{}'.format(HOST, PORT1)],
+        'database': 'test',
+        'ssl': True,
+        'ssl_cert_reqs': True,
+        'ssl_certfile': '/certs/client1.pem',
+        'ssl_ca_certs': '/certs/ca.pem',
+    }
+    aggregator = dd_agent_check(instance, rate=True)
+    for metric in MONGOD_METRICS:
+        aggregator.assert_metric(metric)
+    aggregator.assert_service_check('mongodb.can_connect', status=MongoDb.OK)

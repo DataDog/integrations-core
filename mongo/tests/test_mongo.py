@@ -50,6 +50,7 @@ METRIC_VAL_CHECKS_OLD = {
 
 
 pytestmark = [pytest.mark.usefixtures('dd_environment'), pytest.mark.integration]
+    'dd_environment'), pytest.mark.integration]
 
 
 @common.standalone
@@ -72,20 +73,24 @@ def test_mongo_authdb(aggregator, check, instance_authdb, dd_run_check):
         if metric_name in METRIC_VAL_CHECKS:
             metric = aggregator.metrics(metric_name)[0]
             assert METRIC_VAL_CHECKS[metric_name](metric.value)
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+    aggregator.assert_metrics_using_metadata(
+        get_metadata_metrics(), check_submission_type=True)
 
 
 @common.standalone
 @pytest.mark.parametrize(
     'instance_user',
-    [pytest.param(common.INSTANCE_USER, id='standard'), pytest.param(common.INSTANCE_USER_LEGACY_CONFIG, id='legacy')],
+    [pytest.param(common.INSTANCE_USER, id='standard'), pytest.param(
+        common.INSTANCE_USER_LEGACY_CONFIG, id='legacy')],
 )
 def test_mongo_db_test(aggregator, check, instance_user, dd_run_check):
     check = check(instance_user)
     dd_run_check(check)
 
-    tags = ['host:{}'.format(common.HOST), 'port:{}'.format(common.PORT1), 'db:test']
-    aggregator.assert_service_check('mongodb.can_connect', status=MongoDb.OK, tags=tags)
+    tags = ['host:{}'.format(common.HOST), 'port:{}'.format(
+        common.PORT1), 'db:test']
+    aggregator.assert_service_check(
+        'mongodb.can_connect', status=MongoDb.OK, tags=tags)
 
     metric_names = aggregator.metric_names
     assert metric_names
@@ -94,7 +99,8 @@ def test_mongo_db_test(aggregator, check, instance_user, dd_run_check):
         if metric_name in METRIC_VAL_CHECKS:
             metric = aggregator.metrics(metric_name)[0]
             assert METRIC_VAL_CHECKS[metric_name](metric.value)
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+    aggregator.assert_metrics_using_metadata(
+        get_metadata_metrics(), check_submission_type=True)
 
 
 @common.shard
@@ -102,8 +108,10 @@ def test_mongo_arbiter(aggregator, check, instance_arbiter, dd_run_check):
     check = check(instance_arbiter)
     dd_run_check(check)
 
-    tags = ['host:{}'.format(common.HOST), 'port:{}'.format(common.PORT_ARBITER), 'db:admin']
-    aggregator.assert_service_check('mongodb.can_connect', status=MongoDb.OK, tags=tags)
+    tags = ['host:{}'.format(common.HOST), 'port:{}'.format(
+        common.PORT_ARBITER), 'db:admin']
+    aggregator.assert_service_check(
+        'mongodb.can_connect', status=MongoDb.OK, tags=tags)
 
     metric_names = aggregator.metric_names
     assert metric_names
@@ -112,7 +120,8 @@ def test_mongo_arbiter(aggregator, check, instance_arbiter, dd_run_check):
         if metric_name in METRIC_VAL_CHECKS:
             metric = aggregator.metrics(metric_name)[0]
             assert METRIC_VAL_CHECKS[metric_name](metric.value)
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+    aggregator.assert_metrics_using_metadata(
+        get_metadata_metrics(), check_submission_type=True)
 
     expected_metrics = {
         'mongodb.replset.health': 1.0,
@@ -142,7 +151,8 @@ def test_mongo_old_config(aggregator, check, instance, dd_run_check):
         if metric_name in METRIC_VAL_CHECKS_OLD:
             metric = aggregator.metrics(metric_name)[0]
             assert METRIC_VAL_CHECKS_OLD[metric_name](metric.value)
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+    aggregator.assert_metrics_using_metadata(
+        get_metadata_metrics(), check_submission_type=True)
 
 
 @common.standalone
@@ -164,36 +174,61 @@ def test_mongo_custom_queries(aggregator, check, instance_custom_queries, dd_run
     check = check(instance_custom_queries)
     dd_run_check(check)
 
-    aggregator.assert_metric("dd.custom.mongo.count", value=70, count=1, metric_type=aggregator.GAUGE)
-    aggregator.assert_metric_has_tag("dd.custom.mongo.count", 'collection:foo', count=1)
+    aggregator.assert_metric("dd.custom.mongo.count",
+                             value=70, count=1, metric_type=aggregator.GAUGE)
+    aggregator.assert_metric_has_tag(
+        "dd.custom.mongo.count", 'collection:foo', count=1)
 
-    aggregator.assert_metric("dd.custom.mongo.query_a.amount", value=500, count=4, metric_type=aggregator.COUNT)
-    aggregator.assert_metric_has_tag("dd.custom.mongo.query_a.amount", 'collection:orders', count=4)
-    aggregator.assert_metric_has_tag("dd.custom.mongo.query_a.amount", 'tag1:val1', count=4)
-    aggregator.assert_metric_has_tag("dd.custom.mongo.query_a.amount", 'tag2:val2', count=4)
-    aggregator.assert_metric_has_tag("dd.custom.mongo.query_a.amount", 'db:test', count=4)
-    aggregator.assert_metric_has_tag("dd.custom.mongo.query_a.amount", 'cluster_id:abc1', count=3)
-    aggregator.assert_metric_has_tag("dd.custom.mongo.query_a.amount", 'cluster_id:xyz1', count=1)
-    aggregator.assert_metric_has_tag("dd.custom.mongo.query_a.amount", 'status_tag:A', count=3)
-    aggregator.assert_metric_has_tag("dd.custom.mongo.query_a.amount", 'status_tag:D', count=1)
+    aggregator.assert_metric("dd.custom.mongo.query_a.amount",
+                             value=500, count=4, metric_type=aggregator.COUNT)
+    aggregator.assert_metric_has_tag(
+        "dd.custom.mongo.query_a.amount", 'collection:orders', count=4)
+    aggregator.assert_metric_has_tag(
+        "dd.custom.mongo.query_a.amount", 'tag1:val1', count=4)
+    aggregator.assert_metric_has_tag(
+        "dd.custom.mongo.query_a.amount", 'tag2:val2', count=4)
+    aggregator.assert_metric_has_tag(
+        "dd.custom.mongo.query_a.amount", 'db:test', count=4)
+    aggregator.assert_metric_has_tag(
+        "dd.custom.mongo.query_a.amount", 'cluster_id:abc1', count=3)
+    aggregator.assert_metric_has_tag(
+        "dd.custom.mongo.query_a.amount", 'cluster_id:xyz1', count=1)
+    aggregator.assert_metric_has_tag(
+        "dd.custom.mongo.query_a.amount", 'status_tag:A', count=3)
+    aggregator.assert_metric_has_tag(
+        "dd.custom.mongo.query_a.amount", 'status_tag:D', count=1)
 
-    aggregator.assert_metric("dd.custom.mongo.query_a.el", value=14, count=3, metric_type=aggregator.COUNT)
-    aggregator.assert_metric_has_tag("dd.custom.mongo.query_a.el", 'collection:orders', count=3)
-    aggregator.assert_metric_has_tag("dd.custom.mongo.query_a.el", 'tag1:val1', count=3)
-    aggregator.assert_metric_has_tag("dd.custom.mongo.query_a.el", 'tag2:val2', count=3)
-    aggregator.assert_metric_has_tag("dd.custom.mongo.query_a.el", 'status_tag:A', count=2)
-    aggregator.assert_metric_has_tag("dd.custom.mongo.query_a.el", 'status_tag:D', count=1)
-    aggregator.assert_metric_has_tag("dd.custom.mongo.query_a.el", 'cluster_id:abc1', count=3)
+    aggregator.assert_metric("dd.custom.mongo.query_a.el",
+                             value=14, count=3, metric_type=aggregator.COUNT)
+    aggregator.assert_metric_has_tag(
+        "dd.custom.mongo.query_a.el", 'collection:orders', count=3)
+    aggregator.assert_metric_has_tag(
+        "dd.custom.mongo.query_a.el", 'tag1:val1', count=3)
+    aggregator.assert_metric_has_tag(
+        "dd.custom.mongo.query_a.el", 'tag2:val2', count=3)
+    aggregator.assert_metric_has_tag(
+        "dd.custom.mongo.query_a.el", 'status_tag:A', count=2)
+    aggregator.assert_metric_has_tag(
+        "dd.custom.mongo.query_a.el", 'status_tag:D', count=1)
+    aggregator.assert_metric_has_tag(
+        "dd.custom.mongo.query_a.el", 'cluster_id:abc1', count=3)
 
-    aggregator.assert_metric("dd.custom.mongo.aggregate.total", value=500, count=2, metric_type=aggregator.COUNT)
+    aggregator.assert_metric("dd.custom.mongo.aggregate.total",
+                             value=500, count=2, metric_type=aggregator.COUNT)
 
-    aggregator.assert_metric_has_tag("dd.custom.mongo.aggregate.total", 'collection:orders', count=2)
-    aggregator.assert_metric_has_tag("dd.custom.mongo.aggregate.total", 'cluster_id:abc1', count=1)
-    aggregator.assert_metric_has_tag("dd.custom.mongo.aggregate.total", 'cluster_id:xyz1', count=1)
-    aggregator.assert_metric_has_tag("dd.custom.mongo.aggregate.total", 'tag1:val1', count=2)
-    aggregator.assert_metric_has_tag("dd.custom.mongo.aggregate.total", 'tag2:val2', count=2)
+    aggregator.assert_metric_has_tag(
+        "dd.custom.mongo.aggregate.total", 'collection:orders', count=2)
+    aggregator.assert_metric_has_tag(
+        "dd.custom.mongo.aggregate.total", 'cluster_id:abc1', count=1)
+    aggregator.assert_metric_has_tag(
+        "dd.custom.mongo.aggregate.total", 'cluster_id:xyz1', count=1)
+    aggregator.assert_metric_has_tag(
+        "dd.custom.mongo.aggregate.total", 'tag1:val1', count=2)
+    aggregator.assert_metric_has_tag(
+        "dd.custom.mongo.aggregate.total", 'tag2:val2', count=2)
 
-    aggregator.assert_metric('dd.mongodb.custom.queries_slower_than_60sec.secs_running', metric_type=aggregator.GAUGE)
+    aggregator.assert_metric(
+        'dd.mongodb.custom.queries_slower_than_60sec.secs_running', metric_type=aggregator.GAUGE)
 
 
 @common.standalone
@@ -240,14 +275,16 @@ def test_mongo_replset(instance_shard, aggregator, check, dd_run_check):
         "sharding_cluster_role:shardsvr",
     ]
     for metric in replset_metrics:
-        aggregator.assert_metric(metric, tags=replset_common_tags + ['replset_state:primary'])
+        aggregator.assert_metric(
+            metric, tags=replset_common_tags + ['replset_state:primary'])
     aggregator.assert_metric(
         'mongodb.replset.optime_lag', tags=replset_common_tags + ['replset_state:primary', 'member:shard01a:27018']
     )
     aggregator.assert_metric(
         'mongodb.replset.optime_lag', tags=replset_common_tags + ['replset_state:secondary', 'member:shard01b:27019']
     )
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+    aggregator.assert_metrics_using_metadata(
+        get_metadata_metrics(), check_submission_type=True)
 
 
 @common.standalone
@@ -255,7 +292,8 @@ def test_metadata(check, instance, datadog_agent):
     check = check(instance)
     check.check_id = 'test:123'
     major, minor = common.MONGODB_VERSION.split('.')[:2]
-    version_metadata = {'version.scheme': 'semver', 'version.major': major, 'version.minor': minor}
+    version_metadata = {'version.scheme': 'semver',
+                        'version.major': major, 'version.minor': minor}
 
     check.check(instance)
     datadog_agent.assert_metadata('test:123', version_metadata)
@@ -267,8 +305,25 @@ def test_refresh_role(instance_shard, aggregator, check, dd_run_check):
     mongo_check = check(instance_shard)
     dd_run_check(mongo_check)
     with mock.patch('datadog_checks.mongo.api.MongoApi._get_rs_deployment_from_status_payload') as get_deployment:
-        mock_deployment_type = ReplicaSetDeployment("sharding01", 9, cluster_role="TEST")
+        mock_deployment_type = ReplicaSetDeployment(
+            "sharding01", 9, cluster_role="TEST")
         get_deployment.return_value = mock_deployment_type
         dd_run_check(mongo_check)
         assert get_deployment.call_count == 1
         assert mongo_check.api_client.deployment_type.cluster_role == "TEST"
+
+
+@common.tls
+@pytest.mark.parametrize(
+    'instance_ssl',
+    [
+        pytest.param(common.INSTANCE_USER_LEGACY_CONFIG_SSL, id='legacy-ssl'),
+    ],
+)
+def test_deprecation_warning(aggregator, check, instance_ssl, caplog, dd_run_check):
+    check = check(instance_ssl)
+    with caplog.at_level(logging.WARN):
+        dd_run_check(check)
+
+    assert 'Option `server` is deprecated and will be removed in a future release. Use `hosts` instead.' in caplog.text
+    assert 'Option `ssl` is deprecated and will be removed in a future release. Use `tls` instead.' in caplog.text

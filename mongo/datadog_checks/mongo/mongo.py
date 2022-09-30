@@ -42,7 +42,7 @@ class MongoDb(AgentCheck):
     Various metric topics are collected by default. Others require the
     corresponding option enabled in the check configuration file.
 
-    ## Format
+    # Format
     Metrics are listed with the following format:
         ```
         metric_name -> metric_type
@@ -67,8 +67,42 @@ class MongoDb(AgentCheck):
         super(MongoDb, self).__init__(name, init_config, instances)
         self._config = MongoConfig(self.instance, self.log)
 
-        if 'server' in self.instance:
-            self.warning('Option `server` is deprecated and will be removed in a future release. Use `hosts` instead.')
+        deprecated_map = {
+            'server': 'hosts',
+            'ssl_certfile': 'tls_certificate_key_file',
+            'ssl': 'tls',
+            'ssl_cert_reqs': 'tls_allow_invalid_certificates',
+            'ssl_match_hostname': 'tls_allow_invalid_hostnames',
+            'ssl_ca_certs': 'tls_ca_file',
+        }
+
+        for param in deprecated_map:
+            if param in self.instance:
+                self.warning('Option `{}` is deprecated and will be removed in a future release. Use `{}` instead.'.format(
+                    param, deprecated_map[param]))
+        # if 'server' in self.instance:
+        #     self.warning(
+        #         'Option `server` is deprecated and will be removed in a future release. Use `hosts` instead.')
+
+        # if 'ssl_certfile' in self.instance:
+        #     self.warning(
+        #         'Option `ssl_certfile` is deprecated and will be removed in a future release. Use `tls_certificate_key_file` instead.')
+
+        # if 'ssl' in self.instance:
+        #     self.warning(
+        #         'Option `ssl` is deprecated and will be removed in a future release. Use `tls_certificate_key_file` instead.')
+
+        # if 'ssl_cert_reqs' in self.instance:
+        #     self.warning(
+        #         'Option `ssl_cert_reqs` is deprecated and will be removed in a future release. Use `tls_allow_invalid_certificates` instead.')
+
+        # if 'ssl_match_hostname' in self.instance:
+        #     self.warning(
+        #         'Option `ssl_match_hostname` is deprecated and will be removed in a future release. Use `tls_allow_invalid_hostnames` instead.')
+
+        # if 'ssl_ca_certs' in self.instance:
+        #     self.warning(
+        #         'Option `ssl_ca_certs` is deprecated and will be removed in a future release. Use `tls_ca_file` instead.')
 
         # Get the list of metrics to collect
         self.metrics_to_collect = self._build_metric_list_to_collect()
@@ -91,9 +125,11 @@ class MongoDb(AgentCheck):
         potential_collectors = [
             ConnPoolStatsCollector(self, tags),
             ReplicationOpLogCollector(self, tags),
-            FsyncLockCollector(self, self._config.db_name, tags),
-            CollStatsCollector(self, self._config.db_name, tags, coll_names=self._config.coll_names),
-            ServerStatusCollector(self, self._config.db_name, tags, tcmalloc=collect_tcmalloc_metrics),
+            FsyncLockCollector(self, tags),
+            CollStatsCollector(self, self._config.db_name,
+                               tags, coll_names=self._config.coll_names),
+            ServerStatusCollector(self, self._config.db_name,
+                                  tags, tcmalloc=collect_tcmalloc_metrics),
         ]
         if self._config.replica_check:
             potential_collectors.append(ReplicaCollector(self, tags))
@@ -106,7 +142,8 @@ class MongoDb(AgentCheck):
         if self._config.collections_indexes_stats:
             if LooseVersion(self._mongo_version) >= LooseVersion("3.2"):
                 potential_collectors.append(
-                    IndexStatsCollector(self, self._config.db_name, tags, self._config.coll_names)
+                    IndexStatsCollector(
+                        self, self._config.db_name, tags, self._config.coll_names)
                 )
             else:
                 self.log.debug(
@@ -120,11 +157,13 @@ class MongoDb(AgentCheck):
         # Custom queries are always collected except if the node is a secondary or an arbiter in a replica set.
         # It is possible to collect custom queries from secondary nodes as well but this has to be explicitly
         # stated in the configuration of the query.
-        is_secondary = isinstance(deployment_type, ReplicaSetDeployment) and deployment_type.is_secondary
+        is_secondary = isinstance(
+            deployment_type, ReplicaSetDeployment) and deployment_type.is_secondary
         queries = self._config.custom_queries
         if is_secondary:
             # On a secondary node, only collect the custom queries that define the 'run_on_secondary' parameter.
-            queries = [q for q in self._config.custom_queries if is_affirmative(q.get('run_on_secondary', False))]
+            queries = [q for q in self._config.custom_queries if is_affirmative(
+                q.get('run_on_secondary', False))]
             missing_queries = len(self._config.custom_queries) - len(queries)
             if missing_queries:
                 self.log.debug(
@@ -134,9 +173,11 @@ class MongoDb(AgentCheck):
                     "duplicated information."
                 )
 
-        potential_collectors.append(CustomQueriesCollector(self, self._config.db_name, tags, queries))
+        potential_collectors.append(CustomQueriesCollector(
+            self, self._config.db_name, tags, queries))
 
-        self.collectors = [coll for coll in potential_collectors if coll.compatible_with(deployment_type)]
+        self.collectors = [
+            coll for coll in potential_collectors if coll.compatible_with(deployment_type)]
 
     def _build_metric_list_to_collect(self):
         """
@@ -161,7 +202,8 @@ class MongoDb(AgentCheck):
                     )
                 continue
             additional_metrics = metrics.AVAILABLE_METRICS[option]
-            self.log.debug(u"Adding `%s` corresponding metrics to the list of metrics to collect.", option)
+            self.log.debug(
+                u"Adding `%s` corresponding metrics to the list of metrics to collect.", option)
             metrics_to_collect.update(additional_metrics)
 
         return metrics_to_collect
@@ -191,9 +233,11 @@ class MongoDb(AgentCheck):
             except Exception as e:
                 self._api_client = None
                 self.log.error('Exception: %s', e)
-                self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self._config.service_check_tags)
+                self.service_check(
+                    SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self._config.service_check_tags)
                 return False
-        self.service_check(SERVICE_CHECK_NAME, AgentCheck.OK, tags=self._config.service_check_tags)
+        self.service_check(SERVICE_CHECK_NAME, AgentCheck.OK,
+                           tags=self._config.service_check_tags)
         return True
 
     def _check(self):
@@ -208,7 +252,8 @@ class MongoDb(AgentCheck):
                 ]
             )
             if deployment.use_shards:
-                tags.append('sharding_cluster_role:{}'.format(deployment.cluster_role))
+                tags.append('sharding_cluster_role:{}'.format(
+                    deployment.cluster_role))
         elif isinstance(deployment, MongosDeployment):
             tags.append('sharding_cluster_role:mongos')
 
@@ -224,21 +269,26 @@ class MongoDb(AgentCheck):
 
     def _get_db_names(self, api, deployment, tags):
         if isinstance(deployment, ReplicaSetDeployment) and deployment.is_arbiter:
-            self.log.debug("Replicaset and arbiter deployment, no databases will be checked")
+            self.log.debug(
+                "Replicaset and arbiter deployment, no databases will be checked")
             dbnames = []
         else:
             server_databases = api.list_database_names()
             self.gauge('mongodb.dbs', len(server_databases), tags=tags)
             if self._config.db_names is None:
-                self.log.debug("No databases configured. Retrieving list of databases from the mongo server")
+                self.log.debug(
+                    "No databases configured. Retrieving list of databases from the mongo server")
                 dbnames = server_databases
             else:
-                self.log.debug("Collecting only from the configured databases: %s", self._config.db_names)
+                self.log.debug(
+                    "Collecting only from the configured databases: %s", self._config.db_names)
                 dbnames = []
-                self.log.debug("Checking the configured databases that exist on the mongo server")
+                self.log.debug(
+                    "Checking the configured databases that exist on the mongo server")
                 for config_dbname in self._config.db_names:
                     if config_dbname in server_databases:
-                        self.log.debug("'%s' database found on the mongo server", config_dbname)
+                        self.log.debug(
+                            "'%s' database found on the mongo server", config_dbname)
                         dbnames.append(config_dbname)
                     else:
                         self.log.warning(

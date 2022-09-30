@@ -12,25 +12,22 @@ class MongoConfig(object):
 
         # x.509 authentication
 
-        cacert_cert_dir = instance.get('ssl_ca_certs')
+        cacert_cert_dir = instance.get(
+            'ssl_ca_certs') or instance.get('tls_ca_file')
         if cacert_cert_dir is None and (
-            is_affirmative(instance.get('options', {}).get("ssl")) or is_affirmative(instance.get('ssl'))
+            is_affirmative(instance.get('options', {}).get("ssl")) or is_affirmative(
+                instance.get('ssl')) or is_affirmative(instance.get('tls'))
         ):
             cacert_cert_dir = certifi.where()
 
         self.ssl_params = exclude_undefined_keys(
             {
-                'ssl': instance.get('ssl', None),
                 'ssl_keyfile': instance.get('ssl_keyfile', None),
-                'ssl_certfile': instance.get('ssl_certfile', None),
-                'ssl_cert_reqs': instance.get('ssl_cert_reqs', None),
-                'ssl_ca_certs': cacert_cert_dir,
-                'ssl_match_hostname': instance.get('ssl_match_hostname', None),
-                'tls': instance.get('tls', None),
-                'tlsCertificateKeyFile': instance.get('tls_certificate_key_file', None),
-                'tlsCAFile': instance.get('tls_ca_file', None),
-                'tlsAllowInvalidHostnames': instance.get('tls_allow_invalid_hostnames', None),
-                'tlsAllowInvalidCertificates': instance.get('tls_allow_invalid_certificates', None),
+                'tls': instance.get('tls') or instance.get('ssl'),
+                'tlsCertificateKeyFile': instance.get('tls_certificate_key_file') or instance.get('ssl_certfile'),
+                'tlsCAFile': cacert_cert_dir,
+                'tlsAllowInvalidHostnames': instance.get('tls_allow_invalid_hostnames') or instance.get('ssl_match_hostname'),
+                'tlsAllowInvalidCertificates': instance.get('tls_allow_invalid_certificates') or instance.get('ssl_cert_reqs'),
             }
         )
         self.log.debug('ssl_params: %s', self.ssl_params)
@@ -58,17 +55,20 @@ class MongoConfig(object):
             self.scheme = instance.get('connection_scheme', 'mongodb')
             self.db_name = instance.get('database')
             self.additional_options = instance.get('options', {})
-            self.auth_source = self.additional_options.get('authSource') or self.db_name or 'admin'
+            self.auth_source = self.additional_options.get(
+                'authSource') or self.db_name or 'admin'
 
         if not self.hosts:
             raise ConfigurationError('No `hosts` specified')
 
         self.clean_server_name = self._get_clean_server_name()
         if self.password and not self.username:
-            raise ConfigurationError('`username` must be set when a `password` is specified')
+            raise ConfigurationError(
+                '`username` must be set when a `password` is specified')
 
         if not self.db_name:
-            self.log.info('No MongoDB database found in URI. Defaulting to admin.')
+            self.log.info(
+                'No MongoDB database found in URI. Defaulting to admin.')
             self.db_name = 'admin'
 
         self.db_names = instance.get('dbnames', None)
@@ -80,12 +80,15 @@ class MongoConfig(object):
         self.do_auth = True
         self.use_x509 = self.ssl_params and not self.password
         if not self.username:
-            self.log.info("Disabling authentication because a username was not provided.")
+            self.log.info(
+                "Disabling authentication because a username was not provided.")
             self.do_auth = False
 
-        self.replica_check = is_affirmative(instance.get('replica_check', True))
+        self.replica_check = is_affirmative(
+            instance.get('replica_check', True))
 
-        self.collections_indexes_stats = is_affirmative(instance.get('collections_indexes_stats'))
+        self.collections_indexes_stats = is_affirmative(
+            instance.get('collections_indexes_stats'))
         self.coll_names = instance.get('collections', [])
         self.custom_queries = instance.get("custom_queries", [])
 
@@ -111,7 +114,8 @@ class MongoConfig(object):
             return parse_mongo_uri(server, sanitize_username=bool(self.ssl_params))[4]
         except Exception as e:
             raise ConfigurationError(
-                "Could not build a mongo uri with the given hosts: %s. Error: %s" % (self.hosts, repr(e))
+                "Could not build a mongo uri with the given hosts: %s. Error: %s" % (
+                    self.hosts, repr(e))
             )
 
     def _compute_service_check_tags(self):
@@ -120,7 +124,8 @@ class MongoConfig(object):
         if ':' in main_host:
             main_host, main_port = main_host.split(':')
 
-        service_check_tags = ["db:%s" % self.db_name, "host:%s" % main_host, "port:%s" % main_port] + self._base_tags
+        service_check_tags = ["db:%s" % self.db_name, "host:%s" %
+                              main_host, "port:%s" % main_port] + self._base_tags
         return service_check_tags
 
     def _compute_metric_tags(self):
