@@ -116,9 +116,9 @@ assets/               @DataDog/agent-integrations
 /nvidia_jetson/                           @DataDog/agent-platform @DataDog/agent-integrations
 /nvidia_jetson/*.md                       @DataDog/agent-platform @DataDog/agent-integrations @DataDog/documentation
 /nvidia_jetson/manifest.json              @DataDog/agent-platform @DataDog/agent-integrations @DataDog/documentation
-/ibm_i/                                   @DataDog/agent-platform @DataDog/agent-integrations
-/ibm_i/*.md                               @DataDog/agent-platform @DataDog/agent-integrations @DataDog/documentation
-/ibm_i/manifest.json                      @DataDog/agent-platform @DataDog/agent-integrations @DataDog/documentation
+/ibm_i/                                   @DataDog/agent-integrations @DataDog/agent-platform
+/ibm_i/*.md                               @DataDog/agent-integrations @DataDog/agent-platform @DataDog/documentation
+/ibm_i/manifest.json                      @DataDog/agent-integrations @DataDog/agent-platform @DataDog/documentation
 
 
 # Database monitoring
