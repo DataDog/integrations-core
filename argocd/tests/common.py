@@ -2,6 +2,14 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+MOCKED_APP_CONTROLLER_INSTANCE = {'app_controller_endpoint': 'app_controller:8082'}
+
+MOCKED_API_SERVER_INSTANCE = {'api_server_endpoint': 'api_server:8083'}
+
+MOCKED_REPO_SERVER_INSTANCE = {'repo_server_endpoint': 'repo_server:8084'}
+
+EMPTY_INSTANCE = {''}
+
 app_controller_ns, api_server_ns, repo_server_ns = ["argocd.app_controller", "argocd.api_server", "argocd.repo_server"]
 
 general_gauges = [
@@ -115,7 +123,9 @@ repo_server_histograms = [
 ]
 
 NOT_EXPOSED_METRICS = [
+    'argocd.api_server.go.memstats.alloc_bytes.count',
     'argocd.app_controller.app.k8s.request',
+    'argocd.app_controller.go.memstats.alloc_bytes.count',
     'argocd.app_controller.app.reconcile',
     'argocd.app_controller.app.sync',
     'argocd.app_controller.cluster.api.resource_objects',
@@ -126,6 +136,7 @@ NOT_EXPOSED_METRICS = [
     'argocd.app_controller.kubectl.exec',
     'argocd.app_controller.kubectl.exec.pending',
     'argocd.app_controller.redis.request.duration',
+    'argocd.repo_server.go.memstats.alloc_bytes.count',
     'argocd.repo_server.redis.request.count',
     'argocd.repo_server.repo.pending.request.total',
     'argocd.repo_server.git.request.count',
