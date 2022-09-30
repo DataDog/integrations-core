@@ -122,7 +122,7 @@ To install the {integration_name} check on your host:
         'license_header': license_header,
         'install_info': install_info,
         'repo_choice': repo_choice,
-        'repo_name': REPO_CHOICES[repo_choice],
+        'repo_name': REPO_CHOICES.get(repo_choice, ''),
         'support_type': support_type,
         'integration_links': integration_links,
     }
