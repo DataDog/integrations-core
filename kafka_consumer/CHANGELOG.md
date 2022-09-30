@@ -1,5 +1,8 @@
 # CHANGELOG - kafka_consumer
 
+## 2.16.1-beta.1 / 2022-09-30
+
+
 ## 2.16.0 / 2022-09-16
 
 * [Added] [kafka consumer integration] Put lag in seconds behind a feature flag. See [#12942](https://github.com/DataDog/integrations-core/pull/12942).
