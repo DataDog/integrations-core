@@ -163,6 +163,8 @@ def create(ctx, name, integration_type, location, non_interactive, quiet, dry_ru
     "sales_email": "info@datadoghq.com"
   },"""
             else:
+                prompt_and_update_if_missing(template_fields, 'email', 'Email used for support requests')
+                prompt_and_update_if_missing(template_fields, 'author', 'Your name')
                 template_fields[
                     'author_info'
                 ] = f"""
@@ -206,3 +208,8 @@ def create(ctx, name, integration_type, location, non_interactive, quiet, dry_ru
     else:
         echo_info(f'Created in `{root}`:')
         display_path_tree(path_tree)
+
+
+def prompt_and_update_if_missing(mapping, field, prompt):
+    if mapping.get(field) is None:
+        mapping[field] = click.prompt(prompt)
