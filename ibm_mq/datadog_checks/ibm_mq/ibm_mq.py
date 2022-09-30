@@ -1,11 +1,14 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import re
 from functools import cached_property
 
 from six import iteritems
 
 from datadog_checks.base import AgentCheck
+
+from .process import QueueManagerProcessFinder
 
 try:
     from typing import Any, Dict, List
@@ -14,6 +17,8 @@ except ImportError:
 
 
 class IbmMqCheck(AgentCheck):
+    process_finder = QueueManagerProcessFinder()
+
     SERVICE_CHECK = 'ibm_mq.can_connect'
 
     @cached_property
@@ -53,6 +58,15 @@ class IbmMqCheck(AgentCheck):
 
         return StatsCollector(self._config, self.send_metrics_from_properties, self.log)
 
+    @cached_property
+    def queue_manager_process_pattern(self):
+        pattern = self.instance.get('queue_manager_process', self.init_config.get('queue_manager_process', ''))
+        if not pattern:
+            return None
+
+        pattern = pattern.replace('<queue_manager>', re.escape(self.instance['queue_manager']))
+        return re.compile(pattern)
+
     def check(self, _):
         if self.instance.get('process_isolation', self.init_config.get('process_isolation', False)):
             self.run_with_isolation()
@@ -78,6 +92,7 @@ class IbmMqCheck(AgentCheck):
                 self._config.tags,
                 hostname=self._config.hostname,
             )
+            self.remove_process_indication()
             raise
 
         self._collect_metadata(queue_manager)
@@ -147,28 +162,14 @@ class IbmMqCheck(AgentCheck):
                 self.send_metric(metric_type, metric_full_name, metric_value, new_tags)
 
     def check_process_indicator(self):
-        process_pattern = self.instance.get('process_must_match', self.init_config.get('process_must_match', ''))
-        if not process_pattern:
+        if self.queue_manager_process_pattern is None:
             return True
 
-        import re
+        return self.process_finder.check_condition(self.check_id, self.queue_manager_process_pattern, self.log)
 
-        import psutil
-
-        from .utils import join_command_args
-
-        process_pattern = process_pattern.replace('<hostname>', re.escape(self.hostname))
-        process_pattern = process_pattern.replace('<queue_manager>', re.escape(self.instance['queue_manager']))
-
-        self.log.info('Searching for a process that matches: %s', process_pattern)
-        for process in psutil.process_iter(['cmdline']):
-            cmdline = join_command_args(process.info['cmdline'])
-            if re.search(process_pattern, cmdline):
-                self.log.info('Process found: %s', cmdline)
-                return True
-        else:
-            self.log.info('Process not found, skipping check run')
-            return False
+    def remove_process_indication(self):
+        if self.queue_manager_process_pattern is not None:
+            return self.process_finder.remove(self.check_id)
 
     def run_with_isolation(self):
         import os
