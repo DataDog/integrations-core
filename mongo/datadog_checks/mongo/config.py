@@ -12,25 +12,24 @@ class MongoConfig(object):
 
         # x.509 authentication
 
-        cacert_cert_dir = instance.get('ssl_ca_certs')
+        cacert_cert_dir = instance.get('ssl_ca_certs') or instance.get('tls_ca_file')
         if cacert_cert_dir is None and (
-            is_affirmative(instance.get('options', {}).get("ssl")) or is_affirmative(instance.get('ssl'))
+            is_affirmative(instance.get('options', {}).get("ssl"))
+            or is_affirmative(instance.get('ssl'))
+            or is_affirmative(instance.get('tls'))
         ):
             cacert_cert_dir = certifi.where()
 
         self.ssl_params = exclude_undefined_keys(
             {
-                'ssl': instance.get('ssl', None),
                 'ssl_keyfile': instance.get('ssl_keyfile', None),
-                'ssl_certfile': instance.get('ssl_certfile', None),
-                'ssl_cert_reqs': instance.get('ssl_cert_reqs', None),
-                'ssl_ca_certs': cacert_cert_dir,
-                'ssl_match_hostname': instance.get('ssl_match_hostname', None),
-                'tls': instance.get('tls', None),
-                'tlsCertificateKeyFile': instance.get('tls_certificate_key_file', None),
-                'tlsCAFile': instance.get('tls_ca_file', None),
-                'tlsAllowInvalidHostnames': instance.get('tls_allow_invalid_hostnames', None),
-                'tlsAllowInvalidCertificates': instance.get('tls_allow_invalid_certificates', None),
+                'tls': instance.get('tls') or instance.get('ssl'),
+                'tlsCertificateKeyFile': instance.get('tls_certificate_key_file') or instance.get('ssl_certfile'),
+                'tlsCAFile': cacert_cert_dir,
+                'tlsAllowInvalidHostnames': instance.get('tls_allow_invalid_hostnames')
+                or instance.get('ssl_match_hostname'),
+                'tlsAllowInvalidCertificates': instance.get('tls_allow_invalid_certificates')
+                or instance.get('ssl_cert_reqs'),
             }
         )
         self.log.debug('ssl_params: %s', self.ssl_params)
