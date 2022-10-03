@@ -27,7 +27,7 @@ def dd_environment(instance):
 
 @pytest.fixture(scope='session')
 def instance_legacy():
-    return {'prometheus_url': 'http://{}:{}/_status/vars'.format(HOST, PORT)}
+    return {'prometheus_url': 'http://{}:{}/_status/vars'.format(HOST, PORT), 'max_returned_metrics': 20000}
 
 
 @pytest.fixture(scope='session')
