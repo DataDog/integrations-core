@@ -159,7 +159,7 @@
       type: string
 - name: exclude_metrics_by_labels
   description: |
-    A mapping of labels where metrics with matching label name and values are ignored. To match
+    A mapping of labels to exclude metrics with matching label name and their corresponding metric values. To match
     all values of a label, set it to `true`.
 
     Note: Label filtering happens before `rename_labels`.
