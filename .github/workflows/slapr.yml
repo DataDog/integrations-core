@@ -11,7 +11,7 @@ jobs:
   run_slapr_agent_integrations:
     runs-on: ubuntu-latest
     steps:
-    - uses: DataDog/slapr@master
+    - uses: DataDog/slapr@alex/configurable-approval-count
       env:
         GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
         SLACK_CHANNEL_ID: "${{ secrets.SLACK_CHANNEL_ID }}"
