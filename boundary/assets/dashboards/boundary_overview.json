@@ -122,7 +122,7 @@
                             "display_format": "list",
                             "color_preference": "text",
                             "hide_zero_counts": true,
-                            "query": "boundary.",
+                            "query": "tag:(integration:boundary)",
                             "sort": "status,asc",
                             "count": 50,
                             "start": 0,
@@ -144,131 +144,6 @@
                 "y": 0,
                 "width": 6,
                 "height": 5
-            }
-        },
-        {
-            "id": 5795964636204178,
-            "definition": {
-                "title": "Logs",
-                "type": "group",
-                "background_color": "vivid_green",
-                "show_title": true,
-                "layout_type": "ordered",
-                "widgets": [
-                    {
-                        "id": 2075404512063054,
-                        "definition": {
-                            "title": "",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "log_stream",
-                            "indexes": [],
-                            "query": "source:boundary",
-                            "sort": {
-                                "column": "time",
-                                "order": "desc"
-                            },
-                            "columns": [
-                                "host",
-                                "service"
-                            ],
-                            "show_date_column": true,
-                            "show_message_column": true,
-                            "message_display": "expanded-md"
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 0,
-                            "width": 12,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 8769239724627464,
-                        "definition": {
-                            "title": "Average Request Duration Time",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "query_table",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "alias": "Duration",
-                                            "conditional_formats": [],
-                                            "limit": {
-                                                "count": 625,
-                                                "order": "desc"
-                                            },
-                                            "cell_display_mode": "number",
-                                            "formula": "query3"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "queries": [
-                                        {
-                                            "search": {
-                                                "query": "source:boundary"
-                                            },
-                                            "data_source": "logs",
-                                            "compute": {
-                                                "metric": "@duration",
-                                                "aggregation": "avg"
-                                            },
-                                            "name": "query3",
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [
-                                                {
-                                                    "facet": "@http.request_id",
-                                                    "sort": {
-                                                        "metric": "@duration",
-                                                        "aggregation": "avg",
-                                                        "order": "desc"
-                                                    },
-                                                    "limit": 5
-                                                },
-                                                {
-                                                    "facet": "@network.client.ip",
-                                                    "sort": {
-                                                        "metric": "@duration",
-                                                        "aggregation": "avg",
-                                                        "order": "desc"
-                                                    },
-                                                    "limit": 5
-                                                },
-                                                {
-                                                    "facet": "host",
-                                                    "sort": {
-                                                        "metric": "@duration",
-                                                        "aggregation": "avg",
-                                                        "order": "desc"
-                                                    },
-                                                    "limit": 5
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                }
-                            ],
-                            "has_search_bar": "auto"
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 4,
-                            "width": 12,
-                            "height": 4
-                        }
-                    }
-                ],
-                "template_variables": []
-            },
-            "layout": {
-                "x": 0,
-                "y": 5,
-                "width": 12,
-                "height": 9
             }
         },
         {
@@ -713,6 +588,132 @@
                 "y": 0,
                 "width": 6,
                 "height": 10
+            }
+        },
+        {
+            "id": 5795964636204178,
+            "definition": {
+                "title": "Logs",
+                "type": "group",
+                "background_color": "vivid_green",
+                "show_title": true,
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 2075404512063054,
+                        "definition": {
+                            "title": "",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "log_stream",
+                            "indexes": [],
+                            "query": "source:boundary",
+                            "sort": {
+                                "column": "time",
+                                "order": "desc"
+                            },
+                            "columns": [
+                                "host",
+                                "service"
+                            ],
+                            "show_date_column": true,
+                            "show_message_column": true,
+                            "message_display": "expanded-md"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 12,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 8769239724627464,
+                        "definition": {
+                            "title": "Average Request Duration Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Duration",
+                                            "conditional_formats": [],
+                                            "limit": {
+                                                "count": 1000,
+                                                "order": "desc"
+                                            },
+                                            "cell_display_mode": "number",
+                                            "formula": "query3"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "search": {
+                                                "query": "source:boundary"
+                                            },
+                                            "data_source": "logs",
+                                            "compute": {
+                                                "metric": "@duration",
+                                                "aggregation": "avg"
+                                            },
+                                            "name": "query3",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@http.request_id",
+                                                    "sort": {
+                                                        "metric": "@duration",
+                                                        "aggregation": "avg",
+                                                        "order": "desc"
+                                                    },
+                                                    "limit": 10
+                                                },
+                                                {
+                                                    "facet": "@network.client.ip",
+                                                    "sort": {
+                                                        "metric": "@duration",
+                                                        "aggregation": "avg",
+                                                        "order": "desc"
+                                                    },
+                                                    "limit": 10
+                                                },
+                                                {
+                                                    "facet": "host",
+                                                    "sort": {
+                                                        "metric": "@duration",
+                                                        "aggregation": "avg",
+                                                        "order": "desc"
+                                                    },
+                                                    "limit": 10
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 12,
+                            "height": 4
+                        }
+                    }
+                ],
+                "template_variables": []
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 12,
+                "height": 9,
+                "is_column_break": true
             }
         }
     ],
