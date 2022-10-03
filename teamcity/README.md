@@ -2,7 +2,7 @@
 
 ## Overview
 
-This integration connects to your TeamCity server to submit metrics, service checks, and events allowing you to monitor the health of your TeamCity projects' build configurations, build runs, server resources and more.
+This integration connects to your TeamCity server to submit metrics, service checks, and events, allowing you to monitor the health of your TeamCity projects' build configurations, build runs, server resources, and more.
 
 ## Setup
 
@@ -28,7 +28,7 @@ Edit the `teamcity.d/conf.yaml` in the `conf.d/` folder at the root of your [Age
 
 The TeamCity check offers two methods of data collection. Configure two separate instances to collect metrics from each method to optimally monitor your TeamCity environment. 
 
-1. OpenMetricsV2 Method:
+1. OpenMetricsV2 method:
 
    Enable `use_openmetrics: true` to collect metrics from the TeamCity `/metrics` Prometheus endpoint.
 
@@ -48,18 +48,18 @@ The TeamCity check offers two methods of data collection. Configure two separate
      - server: http://teamcity.<ACCOUNT_NAME>.com
        ## @param use_openmetrics - boolean - optional - default: false
        ## Use the latest OpenMetrics V2 implementation to collect metrics from
-       ## the TeamCity server's prometheus metrics endpoint.
+       ## the TeamCity server's Prometheus metrics endpoint.
        ## Requires Python version 3.
        ##
-       ## Enable in a separate instance to collect prometheus metrics.
+       ## Enable in a separate instance to collect Prometheus metrics.
        ## This option does not collect events, service checks, or metrics from the TeamCity REST API.
        #
        use_openmetrics: true
    ```
 
-2. TeamCity Server REST API Method:
+2. TeamCity Server REST API method:
 
-   Configure a separate instance in the `teamcity.d/conf.yaml` file to collect additional build-specific metrics, service checks, and build status events from the TeamCity Server's REST API. Specify your projects and build configurations using the `projects` option:
+   Configure a separate instance in the `teamcity.d/conf.yaml` file to collect additional build-specific metrics, service checks, and build status events from the TeamCity server's REST API. Specify your projects and build configurations using the `projects` option:
 
 
    ```yaml
