@@ -93,7 +93,7 @@ The TeamCity check offers two methods of data collection. Configure two separate
 
 ##### Log collection
 
-1. Configure TeamCity [logs settings][6].
+1. Configure TeamCity [logging settings][6].
 
 2. By default, Datadog's integration pipeline supports the following kind of log format:
 

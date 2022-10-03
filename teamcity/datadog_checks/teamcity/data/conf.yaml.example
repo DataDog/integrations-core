@@ -24,16 +24,16 @@ instances:
   - server: http://teamcity.<ACCOUNT_NAME>.com
 
     ## @param basic_http_authentication - boolean - optional - default: false
-    ## Set to true to turn on basic http authentication.
+    ## Set to `true` to turn on basic http authentication.
     #
     # basic_http_authentication: false
 
     ## @param use_openmetrics - boolean - optional - default: false
     ## Use the latest OpenMetrics V2 implementation to collect metrics from
-    ## the TeamCity server's prometheus metrics endpoint.
+    ## the TeamCity server's Prometheus metrics endpoint.
     ## Requires Python version 3.
     ##
-    ## Enable in a separate instance to collect prometheus metrics.
+    ## Enable in a separate instance to collect Prometheus metrics.
     ## This option does not collect events, service checks, or metrics from the TeamCity REST API.
     #
     # use_openmetrics: false
@@ -46,7 +46,7 @@ instances:
     # experimental_metrics: false
 
     ## @param collect_events - boolean - optional - default: true
-    ## Enable collection of TeamCity build and deployment success and failure events.
+    ## Enable collection of TeamCity success and failure events for builds and deployments.
     ## Not available with `use_openmetrics: true`.
     #
     # collect_events: true
@@ -64,14 +64,14 @@ instances:
     ## The mapping must be configured with Project IDs as the top-level keys. Each Project ID key value
     ## may be configured with a mapping of the optional `include` and `exclude` keys to specify
     ## Build Configuration ID REGEX match patterns. If `include` and `exclude` keys are omitted,
-    ## all Build Configurations per specified Project ID is collected.
-    ## Patterns specified in the `exclude` take precedence in case of overlap.
+    ## all Build Configurations per specified Project ID are collected.
+    ## In case of overlap, patterns specified with `exclude` take precedence.
     ##
     ## * To collect all build configurations per Project ID, configure an empty mapping value:
     ##     projects:
     ##      <PROJECT_ID>:
     ##
-    ## * To filter build configurations in each configured Project, use the optional `include` and/or `exclude` keys
+    ## * To filter build configurations in each configured Project, use the optional `include` and `exclude` keys
     ##   to configure a list of Build Configuration ID REGEX matching patterns:
     ##     projects:
     ##       <PROJECT_ID>:
@@ -117,8 +117,8 @@ instances:
     # build_configuration: <BUILD_CONFIGURATION>
 
     ## @param is_deployment - boolean - optional - default: false
-    ## [DEPRECATED] Set to true to modify the event message to indicate that the TeamCity build configuration
-    ## is a deployment rather than a build run. Best used with the `build_configuration` option only.
+    ## [DEPRECATED] Set to `true` to modify the event message to indicate that the TeamCity build configuration
+    ## is a deployment rather than a build run. For use with the `build_configuration` option only.
     ## If used with the `projects` option, all events from collected build configurations are affected.
     ## Not available with `use_openmetrics: true`.
     #
