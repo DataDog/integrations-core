@@ -2,16 +2,12 @@
 #
 init_config:
 
-    ## @param process_must_match - string - optional
+    ## @param queue_manager_process - string - optional
     ## A regular expression that must match the command line of a running process in
-    ## order for the check to run.
-    ##
-    ## The following placeholders are supported:
-    ##
-    ##   <hostname> -> the Agent hostname
-    ##   <queue_manager> -> the value of the `queue_manager` option
+    ## order for the check to run. A `<queue_manager>` placeholder is supported which
+    ## represents the value of the `queue_manager` option.
     #
-    # process_must_match: <PROCESS_MUST_MATCH>
+    # queue_manager_process: amqpcsea <queue_manager>
 
     ## @param service - string - optional
     ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
@@ -232,18 +228,14 @@ instances:
     #   SYSTEM.*: queue_type:system
     #   DEV.*: role:dev,queue_type:default
 
-    ## @param process_must_match - string - optional
+    ## @param queue_manager_process - string - optional
     ## A regular expression that must match the command line of a running process in
-    ## order for the check to run.
+    ## order for the check to run. A `<queue_manager>` placeholder is supported which
+    ## represents the value of the `queue_manager` option.
     ##
-    ## The following placeholders are supported:
-    ##
-    ##   <hostname> -> the Agent hostname
-    ##   <queue_manager> -> the value of the `queue_manager` option
-    ##
-    ## This overrides the `process_must_match` option in the `init_config` section.
+    ## This overrides the `queue_manager_process` option in the `init_config` section.
     #
-    # process_must_match: <PROCESS_MUST_MATCH>
+    # queue_manager_process: amqpcsea <queue_manager>
 
     ## @param process_isolation - boolean - optional - default: false
     ## Whether to run the check in a separate process.
