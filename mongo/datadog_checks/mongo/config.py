@@ -24,7 +24,7 @@ class MongoConfig(object):
         # options were inverted https://pymongo.readthedocs.io/en/stable/migrate-to-pymongo4.html#renamed-uri-options
         handle_tls_ssl_hostname_opt = (
             not instance.get('ssl_match_hostname')
-            and instance.get('tls_allow_invalid_hostnaame')
+            and instance.get('tls_allow_invalid_hostnames')
             or instance.get('tls_allow_invalid_hostnames')
         )
 

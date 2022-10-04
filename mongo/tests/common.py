@@ -66,6 +66,7 @@ INSTANCE_USER_LEGACY_CONFIG_SSL = {
     'server': 'mongodb://testUser2:testPass2@{}:{}/test'.format(HOST, PORT1),
     'database': 'test',
     'ssl': True,
+    'ssl_match_hostname': True,
     'ssl_cert_reqs': True,
     'ssl_certfile': '/certs/client1.pem',
     'ssl_ca_certs': '/certs/ca.pem',
