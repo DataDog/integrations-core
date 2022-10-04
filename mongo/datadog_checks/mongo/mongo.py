@@ -78,7 +78,9 @@ class MongoDb(AgentCheck):
         for param in deprecated_map:
             if param in self.instance:
                 self.log.warning(
-                    "Option `%s` is deprecated and will be removed in a future release. Use `%s` instead.", param, deprecated_map[param],
+                    "Option `%s` is deprecated and will be removed in a future release. Use `%s` instead.",
+                    param,
+                    deprecated_map[param],
                 )
 
         # Get the list of metrics to collect
