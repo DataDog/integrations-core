@@ -272,19 +272,3 @@ def test_refresh_role(instance_shard, aggregator, check, dd_run_check):
         dd_run_check(mongo_check)
         assert get_deployment.call_count == 1
         assert mongo_check.api_client.deployment_type.cluster_role == "TEST"
-
-
-@common.tls
-@pytest.mark.parametrize(
-    'instance_ssl',
-    [
-        pytest.param(common.INSTANCE_USER_LEGACY_CONFIG_SSL, id='legacy-ssl'),
-    ],
-)
-def test_deprecation_warning(aggregator, check, instance_ssl, caplog, dd_run_check):
-    check = check(instance_ssl)
-    with caplog.at_level(logging.WARN):
-        dd_run_check(check)
-
-    assert 'Option `server` is deprecated and will be removed in a future release. Use `hosts` instead.' in caplog.text
-    assert 'Option `ssl` is deprecated and will be removed in a future release. Use `tls` instead.' in caplog.text

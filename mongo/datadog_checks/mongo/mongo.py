@@ -77,10 +77,8 @@ class MongoDb(AgentCheck):
 
         for param in deprecated_map:
             if param in self.instance:
-                self.warning(
-                    "Option `{}` is deprecated and will be removed in a future release. Use `{}` instead.".format(
-                        param, deprecated_map[param]
-                    )
+                self.log.warning(
+                    "Option `%s` is deprecated and will be removed in a future release. Use `%s` instead.", param, deprecated_map[param],
                 )
 
         # Get the list of metrics to collect
@@ -97,10 +95,10 @@ class MongoDb(AgentCheck):
 
     @classmethod
     def get_library_versions(cls):
-        return {"pymongo": pymongo.version}
+        return {'pymongo': pymongo.version}
 
     def refresh_collectors(self, deployment_type, all_dbs, tags):
-        collect_tcmalloc_metrics = "tcmalloc" in self._config.additional_metrics
+        collect_tcmalloc_metrics = 'tcmalloc' in self._config.additional_metrics
         potential_collectors = [
             ConnPoolStatsCollector(self, tags),
             ReplicationOpLogCollector(self, tags),
@@ -110,9 +108,9 @@ class MongoDb(AgentCheck):
         ]
         if self._config.replica_check:
             potential_collectors.append(ReplicaCollector(self, tags))
-        if "jumbo_chunks" in self._config.additional_metrics:
+        if 'jumbo_chunks' in self._config.additional_metrics:
             potential_collectors.append(JumboStatsCollector(self, tags))
-        if "top" in self._config.additional_metrics:
+        if 'top' in self._config.additional_metrics:
             potential_collectors.append(TopCollector(self, tags))
         if LooseVersion(self._mongo_version) >= LooseVersion("3.6"):
             potential_collectors.append(SessionStatsCollector(self, tags))
@@ -137,7 +135,7 @@ class MongoDb(AgentCheck):
         queries = self._config.custom_queries
         if is_secondary:
             # On a secondary node, only collect the custom queries that define the 'run_on_secondary' parameter.
-            queries = [q for q in self._config.custom_queries if is_affirmative(q.get("run_on_secondary", False))]
+            queries = [q for q in self._config.custom_queries if is_affirmative(q.get('run_on_secondary', False))]
             missing_queries = len(self._config.custom_queries) - len(queries)
             if missing_queries:
                 self.log.debug(
@@ -166,20 +164,15 @@ class MongoDb(AgentCheck):
             if option not in metrics.AVAILABLE_METRICS:
                 if option in metrics.DEFAULT_METRICS:
                     self.log.warning(
-                        "`%s` option is deprecated. The corresponding metrics are collected by default.",
-                        option,
+                        u"`%s` option is deprecated. The corresponding metrics are collected by default.", option
                     )
                 else:
                     self.log.warning(
-                        "Failed to extend the list of metrics to collect: unrecognized `%s` option",
-                        option,
+                        u"Failed to extend the list of metrics to collect: unrecognized `%s` option", option
                     )
                 continue
             additional_metrics = metrics.AVAILABLE_METRICS[option]
-            self.log.debug(
-                "Adding `%s` corresponding metrics to the list of metrics to collect.",
-                option,
-            )
+            self.log.debug(u"Adding `%s` corresponding metrics to the list of metrics to collect.", option)
             metrics_to_collect.update(additional_metrics)
 
         return metrics_to_collect
@@ -203,17 +196,13 @@ class MongoDb(AgentCheck):
                 self.log.debug("Connecting to '%s'", self._config.hosts)
                 self._api_client.connect()
                 self.log.debug("Connected!")
-                self._mongo_version = self.api_client.server_info().get("version", "0.0")
-                self.set_metadata("version", self._mongo_version)
-                self.log.debug("version: %s", self._mongo_version)
+                self._mongo_version = self.api_client.server_info().get('version', '0.0')
+                self.set_metadata('version', self._mongo_version)
+                self.log.debug('version: %s', self._mongo_version)
             except Exception as e:
                 self._api_client = None
-                self.log.error("Exception: %s", e)
-                self.service_check(
-                    SERVICE_CHECK_NAME,
-                    AgentCheck.CRITICAL,
-                    tags=self._config.service_check_tags,
-                )
+                self.log.error('Exception: %s', e)
+                self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self._config.service_check_tags)
                 return False
         self.service_check(SERVICE_CHECK_NAME, AgentCheck.OK, tags=self._config.service_check_tags)
         return True
@@ -230,9 +219,9 @@ class MongoDb(AgentCheck):
                 ]
             )
             if deployment.use_shards:
-                tags.append("sharding_cluster_role:{}".format(deployment.cluster_role))
+                tags.append('sharding_cluster_role:{}'.format(deployment.cluster_role))
         elif isinstance(deployment, MongosDeployment):
-            tags.append("sharding_cluster_role:mongos")
+            tags.append('sharding_cluster_role:mongos')
 
         dbnames = self._get_db_names(self.api_client, deployment, tags)
         self.refresh_collectors(deployment, dbnames, tags)
@@ -241,9 +230,7 @@ class MongoDb(AgentCheck):
                 collector.collect(self.api_client)
             except Exception:
                 self.log.info(
-                    "Unable to collect logs from collector %s. Some metrics will be missing.",
-                    collector,
-                    exc_info=True,
+                    "Unable to collect logs from collector %s. Some metrics will be missing.", collector, exc_info=True
                 )
 
     def _get_db_names(self, api, deployment, tags):
@@ -252,15 +239,12 @@ class MongoDb(AgentCheck):
             dbnames = []
         else:
             server_databases = api.list_database_names()
-            self.gauge("mongodb.dbs", len(server_databases), tags=tags)
+            self.gauge('mongodb.dbs', len(server_databases), tags=tags)
             if self._config.db_names is None:
                 self.log.debug("No databases configured. Retrieving list of databases from the mongo server")
                 dbnames = server_databases
             else:
-                self.log.debug(
-                    "Collecting only from the configured databases: %s",
-                    self._config.db_names,
-                )
+                self.log.debug("Collecting only from the configured databases: %s", self._config.db_names)
                 dbnames = []
                 self.log.debug("Checking the configured databases that exist on the mongo server")
                 for config_dbname in self._config.db_names:

@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
+import logging
 from urllib.parse import quote_plus
 
 import mock
@@ -409,14 +410,21 @@ def test_config_credentials(check, instance, options, is_error):
     with pytest.raises(ConfigurationError) if is_error else nullcontext():
         check(instance)
 
+def test_legacy_config_deprecation(check, caplog):
+    caplog.clear()
+    caplog.set_level(logging.WARNING)
 
-def test_legacy_config_deprecation(check):
     check = check(common.INSTANCE_BASIC_LEGACY_CONFIG)
 
-    assert check.get_warnings() == [
-        'Option `server` is deprecated and will be removed in a future release. Use `hosts` instead.'
-    ]
+    assert 'Option `server` is deprecated and will be removed in a future release. Use `hosts` instead.' in caplog.text
 
+def test_legacy_config_deprecation_with_ssl(check, caplog):
+    caplog.clear()
+    caplog.set_level(logging.WARNING)
+
+    check = check(common.INSTANCE_USER_LEGACY_CONFIG_SSL)
+
+    assert 'Option `ssl` is deprecated and will be removed in a future release. Use `tls` instead.' in caplog.text
 
 def test_collector_submit_payload(check, aggregator):
     check = check(common.INSTANCE_BASIC)

@@ -20,18 +20,25 @@ class MongoConfig(object):
         ):
             cacert_cert_dir = certifi.where()
 
+        # Handles potential conflicting combinations with `ssl_match_hostname` and `tls_allow_invalid_hostname` since
+        # options were inverted https://pymongo.readthedocs.io/en/stable/migrate-to-pymongo4.html#renamed-uri-options
+        handle_tls_ssl_hostname_opt = (
+            not instance.get('ssl_match_hostname')
+            and instance.get('tls_allow_invalid_hostnaame')
+            or instance.get('tls_allow_invalid_hostnames')
+        )
+
         self.ssl_params = exclude_undefined_keys(
             {
-                'ssl_keyfile': instance.get('ssl_keyfile', None),
                 'tls': instance.get('tls') or instance.get('ssl'),
-                'tlsCertificateKeyFile': instance.get('tls_certificate_key_file') or instance.get('ssl_certfile'),
+                'tlsCertificateKeyFile': instance.get('tls_certificate_key_file'),
                 'tlsCAFile': cacert_cert_dir,
-                'tlsAllowInvalidHostnames': instance.get('tls_allow_invalid_hostnames')
-                or instance.get('ssl_match_hostname'),
+                'tlsAllowInvalidHostnames': handle_tls_ssl_hostname_opt,
                 'tlsAllowInvalidCertificates': instance.get('tls_allow_invalid_certificates')
                 or instance.get('ssl_cert_reqs'),
             }
         )
+
         self.log.debug('ssl_params: %s', self.ssl_params)
 
         if 'server' in instance:

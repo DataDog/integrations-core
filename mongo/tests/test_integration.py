@@ -638,6 +638,21 @@ def test_mongod_tls_ok(check, dd_run_check, aggregator):
 
 @tls
 @pytest.mark.usefixtures('dd_environment')
+def test_mongod_ssl_still_ok(check, dd_run_check, aggregator):
+    instance = {
+        'hosts': ['{}:{}'.format(HOST, PORT1)],
+        'ssl': True,
+        'tls_allow_invalid_certificates': True,
+        'tls_certificate_key_file': '{}/client1.pem'.format(TLS_CERTS_FOLDER),
+        'ssl_ca_certs': '{}/ca.pem'.format(TLS_CERTS_FOLDER),
+    }
+    mongo_check = check(instance)
+    dd_run_check(mongo_check)
+    aggregator.assert_service_check('mongodb.can_connect', status=MongoDb.OK)
+
+
+@tls
+@pytest.mark.usefixtures('dd_environment')
 def test_mongod_tls_fail(check, dd_run_check, aggregator):
     instance = {
         'hosts': ['{}:{}'.format(HOST, PORT1)],
