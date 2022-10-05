@@ -196,12 +196,12 @@ logs:
         pattern: '"EventID":"(101|201|301)"'
 ```
 
-**Note**: the pattern may vary based on the format of the logs. The [Agent `stream-logs` subcommand][15] can be used to view this format.
+**Note**: The pattern may vary based on the format of the logs. The [Agent `stream-logs` subcommand][15] can be used to view this format.
 
 #### Legacy events
 _Applies to Agent versions less than 7.41_
 
-Legacy Provider EventID's have a [`Qualifiers`][14] attribute that changes the format of the log. These events have the following XML format, visible in Windows Event Viewer:
+Legacy Provider EventIDs have a `Qualifiers` attribute that changes the format of the log, as seen in the [Windows Event Schema][14]. These events have the following XML format, visible in Windows Event Viewer:
 ```xml
 <EventID Qualifiers="16384">3</EventID>
 ```
