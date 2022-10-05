@@ -179,6 +179,16 @@ def test_no_proxy_uris_coverage():
             'http://www.example.org',
         ),
         (
+                {'http': 'http://1.2.3.4:567', 'no_proxy': '.google.com,*.example.org,example.com,9'},
+                {'http': '', 'https': ''},
+                'http://www.google.com',
+        ),
+        (
+                {'http': 'http://1.2.3.4:567', 'no_proxy': '.google.com,*.example.org,example.com,9'},
+                {'http': '', 'https': ''},
+                'http://example.com',
+        ),
+        (
             {
                 'http': 'http://1.2.3.4:567',
                 'no_proxy': '127.0.0.1,127.0.0.2/32,127.1.0.0/25,127.1.1.0/255.255.255.128,127.1.2.0/0.0.0.127',
