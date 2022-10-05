@@ -18,9 +18,8 @@ def construct_build_configs_filter(monitored_build_configs):
     """
     excluded_build_configs = set()
     included_build_configs = set()
-    for project in monitored_build_configs:
-        config = monitored_build_configs.get(project)
-        # collect all build configs in project
+    for project in monitored_build_configs.items():
+        config = project[1]
         if isinstance(config, dict):
             exclude_list = config.get('exclude', [])
             include_list = config.get('include', [])
@@ -30,8 +29,6 @@ def construct_build_configs_filter(monitored_build_configs):
                 for include_bc in include_list:
                     if include_bc not in excluded_build_configs:
                         included_build_configs.update([include_bc])
-        elif config is None:
-            continue
         else:
             raise ConfigurationError(
                 "`project` must be either an empty mapping to collect all build configurations in the project"

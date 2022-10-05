@@ -10,7 +10,7 @@ from datadog_checks.teamcity import TeamCityCheck
 if PY3:
     from datadog_checks.teamcity.check import TeamCityCheckV2
 
-from .common import COMPOSE_FILE, CONFIG, USE_OPENMETRICS
+from .common import COMPOSE_FILE, LEGACY_INSTANCE, TEAMCITY_OMV2_INSTANCE, TEAMCITY_V2_INSTANCE, USE_OPENMETRICS
 
 
 @pytest.fixture(scope='session')
@@ -24,17 +24,17 @@ def dd_environment(instance, omv2_instance):
 
 @pytest.fixture(scope='session')
 def legacy_instance():
-    return CONFIG['instances'][0]
+    return LEGACY_INSTANCE
 
 
 @pytest.fixture(scope='session')
 def instance():
-    return CONFIG['instances'][1]
+    return TEAMCITY_V2_INSTANCE
 
 
 @pytest.fixture(scope='session')
 def omv2_instance():
-    return CONFIG['instances'][2]
+    return TEAMCITY_OMV2_INSTANCE
 
 
 @pytest.fixture(scope="session")

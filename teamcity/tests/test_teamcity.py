@@ -14,8 +14,8 @@ from .common import (
     BUILD_STATS_METRICS,
     BUILD_TAGS,
     CHECK_NAME,
-    CONFIG,
     LEGACY_BUILD_TAGS,
+    LEGACY_INSTANCE,
     NEW_FAILED_BUILD,
     NEW_SUCCESSFUL_BUILD,
     TESTS_SERVICE_CHECK_RESULTS,
@@ -80,7 +80,7 @@ def test_build_event(aggregator, legacy_instance):
     ],
 )
 def test_config(extra_config, expected_http_kwargs):
-    instance = deepcopy(CONFIG['instances'][0])
+    instance = deepcopy(LEGACY_INSTANCE)
     instance.update(extra_config)
     check = TeamCityCheck(CHECK_NAME, {}, [instance])
 

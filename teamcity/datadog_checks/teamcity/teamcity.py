@@ -71,6 +71,15 @@ class TeamCityCheck(AgentCheck):
 
         self.bc_store = BuildConfigs()
 
+        if PY2:
+            self.check_initializations.append(self._validate_config())
+
+    def _validate_config(self):
+        if self.instance.get('build_configuration') and self.instance.get('projects'):
+            raise ConfigurationError('Only one of `projects` or `build_configuration` must be configured, not both.')
+        if self.instance.get('build_configuration') is None and self.instance.get('projects') is None:
+            raise ConfigurationError('`projects` must be configured.')
+
     def _normalize_server_url(self, server):
         """
         Check if the server URL starts with a HTTP or HTTPS scheme, fall back to http if not present
@@ -82,6 +91,10 @@ class TeamCityCheck(AgentCheck):
         self.log.debug("Initializing TeamCity builds...")
         # Initialize single build config instance
         if not project_id:
+            self.log.debug(
+                "Initializing legacy single build configuration monitoring. "
+                "To monitor multiple build configurations per check run, use the `projects` option."
+            )
             build_config_id = self.build_config
             if not self.bc_store.get_build_config(build_config_id):
                 build_config_details = get_response(self, 'build_config', build_conf=build_config_id)
@@ -90,6 +103,7 @@ class TeamCityCheck(AgentCheck):
         else:
             # Initialize multi build config instance
             # Check for new build configs in project
+            self.log.debug("Initializing multi-build configuration monitoring.")
             build_configs = get_response(self, 'build_configs', project_id=project_id)
             for build_config in build_configs.get('buildType'):
                 if should_include_build_config(self, build_config['id']) and not self.bc_store.get_build_config(
@@ -134,6 +148,8 @@ class TeamCityCheck(AgentCheck):
                     metric_value = stat_property['value']
                     method = getattr(self, method)
                     method(metric_name, metric_value, tags=self.build_tags + additional_tags)
+        else:
+            self.log.debug('No build stats found for build ID: %s.', build_id)
 
     def _collect_test_results(self, new_build):
         build_id = new_build['id']
@@ -203,6 +219,8 @@ class TeamCityCheck(AgentCheck):
                 project_id = project.get('name') if isinstance(project, dict) else project
                 if project_id:
                     self._initialize(project_id)
+                else:
+                    self.log.debug('Project ID not configured. Defaulting to single build configuration monitoring.')
             for build_config in self.bc_store.get_build_configs():
                 self.build_config = build_config
                 self._collect()

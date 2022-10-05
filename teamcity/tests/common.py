@@ -14,39 +14,37 @@ CHECK_NAME = 'teamcity'
 
 USE_OPENMETRICS = os.getenv('USE_OPENMETRICS')
 
-CONFIG = {
-    'instances': [
-        {
-            'name': 'Legacy test build',
-            'server': '{}:{}'.format(HOST, PORT),
-            'build_configuration': 'TestProject_TestBuild',
-            'host_affected': 'buildhost42.dtdg.co',
-            'basic_http_authentication': False,
-            'is_deployment': False,
-            'tags': ['one:tag', 'one:test'],
-        },
-        {
-            'server': '{}:{}'.format(HOST, PORT),
-            'projects': {
-                'TeamCityV2Project': {
-                    'include': [
-                        'TeamCityV2Project_Build',
-                        'TeamCityV2Project_FailedBuild',
-                        'TeamCityV2Project_FailedTests',
-                    ],
-                    'exclude': ['TeamCityV2Project_TestBuild'],
-                }
-            },
-            'basic_http_authentication': False,
-            'is_deployment': False,
-            'tags': ['build_env:test', 'test_tag:ci_builds'],
-        },
-        {
-            'server': 'http://localhost:8111',
-            'use_openmetrics': True,
-            'basic_http_authentication': False,
-        },
-    ]
+LEGACY_INSTANCE = {
+    'name': 'Legacy test build',
+    'server': '{}:{}'.format(HOST, PORT),
+    'build_configuration': 'TestProject_TestBuild',
+    'host_affected': 'buildhost42.dtdg.co',
+    'basic_http_authentication': False,
+    'is_deployment': False,
+    'tags': ['one:tag', 'one:test'],
+}
+
+TEAMCITY_V2_INSTANCE = {
+    'server': '{}:{}'.format(HOST, PORT),
+    'projects': {
+        'TeamCityV2Project': {
+            'include': [
+                'TeamCityV2Project_Build',
+                'TeamCityV2Project_FailedBuild',
+                'TeamCityV2Project_FailedTests',
+            ],
+            'exclude': ['TeamCityV2Project_TestBuild'],
+        }
+    },
+    'basic_http_authentication': False,
+    'is_deployment': False,
+    'tags': ['build_env:test', 'test_tag:ci_builds'],
+}
+
+TEAMCITY_OMV2_INSTANCE = {
+    'server': 'http://localhost:8111',
+    'use_openmetrics': True,
+    'basic_http_authentication': False,
 }
 
 
