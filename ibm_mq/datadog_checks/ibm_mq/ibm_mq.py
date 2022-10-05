@@ -1,43 +1,29 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from __future__ import annotations
+
+from functools import cached_property
 
 from six import iteritems
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.ibm_mq.collectors.stats_collector import StatsCollector
-from datadog_checks.ibm_mq.metrics import COUNT, GAUGE
-
-from . import connection, errors
-from .collectors import ChannelMetricCollector, MetadataCollector, QueueMetricCollector
-from .config import IBMMQConfig
-
-try:
-    from typing import Any, Dict, List
-except ImportError:
-    pass
-
-try:
-    import pymqi
-except ImportError as e:
-    pymqiException = e
-    pymqi = None
 
 
 class IbmMqCheck(AgentCheck):
     SERVICE_CHECK = 'ibm_mq.can_connect'
 
-    def __init__(self, *args, **kwargs):
-        # type: (*Any, **Any) -> None
-        super(IbmMqCheck, self).__init__(*args, **kwargs)
+    @cached_property
+    def _config(self):
+        from .config import IBMMQConfig
 
-        if not pymqi:
-            self.log.error("You need to install pymqi: %s", pymqiException)
-            raise errors.PymqiException("You need to install pymqi: {}".format(pymqiException))
+        return IBMMQConfig(self.instance)
 
-        self._config = IBMMQConfig(self.instance)
+    @cached_property
+    def queue_metric_collector(self):
+        from .collectors import QueueMetricCollector
 
-        self.queue_metric_collector = QueueMetricCollector(
+        return QueueMetricCollector(
             self._config,
             self.service_check,
             self.warning,
@@ -45,11 +31,29 @@ class IbmMqCheck(AgentCheck):
             self.send_metrics_from_properties,
             self.log,
         )
-        self.channel_metric_collector = ChannelMetricCollector(self._config, self.service_check, self.gauge, self.log)
-        self.metadata_collector = MetadataCollector(self._config, self.log)
-        self.stats_collector = StatsCollector(self._config, self.send_metrics_from_properties, self.log)
+
+    @cached_property
+    def channel_metric_collector(self):
+        from .collectors import ChannelMetricCollector
+
+        return ChannelMetricCollector(self._config, self.service_check, self.gauge, self.log)
+
+    @cached_property
+    def metadata_collector(self):
+        from .collectors import MetadataCollector
+
+        return MetadataCollector(self._config, self.log)
+
+    @cached_property
+    def stats_collector(self):
+        from .collectors.stats_collector import StatsCollector
+
+        return StatsCollector(self._config, self.send_metrics_from_properties, self.log)
 
     def check(self, _):
+        from . import connection
+        from .collectors import QueueMetricCollector
+
         try:
             queue_manager = connection.get_queue_manager_connection(self._config, self.log)
             self.service_check(self.SERVICE_CHECK, AgentCheck.OK, self._config.tags, hostname=self._config.hostname)
@@ -77,6 +81,8 @@ class IbmMqCheck(AgentCheck):
             queue_manager.disconnect()
 
     def send_metric(self, metric_type, metric_name, metric_value, tags):
+        from .metrics import COUNT, GAUGE
+
         if metric_type in [GAUGE, COUNT]:
             getattr(self, metric_type)(metric_name, metric_value, tags=tags, hostname=self._config.hostname)
         else:
@@ -95,8 +101,7 @@ class IbmMqCheck(AgentCheck):
         except Exception as e:
             self.log.debug('Could not retrieve ibm_mq version info: %s', e)
 
-    def send_metrics_from_properties(self, properties, metrics_map, prefix, tags):
-        # type: (Dict, Dict, str, List[str]) -> None
+    def send_metrics_from_properties(self, properties: dict, metrics_map: dict, prefix: str, tags: list[str]):
         for metric_name, (pymqi_type, metric_type) in iteritems(metrics_map):
             metric_full_name = '{}.{}'.format(prefix, metric_name)
             if pymqi_type not in properties:

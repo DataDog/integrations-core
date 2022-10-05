@@ -90,7 +90,7 @@ def test_channel_status_service_check_custom_mapping_invalid_config(get_check, i
     instance['channel_status_mapping'] = channel_status_mapping
 
     with pytest.raises(ConfigurationError):
-        get_check(instance)
+        _ = get_check(instance)._config
 
 
 @pytest.mark.parametrize(
@@ -100,7 +100,7 @@ def test_invalid_mqcd_version(get_check, instance, mqcd_version):
     instance['mqcd_version'] = mqcd_version
 
     with pytest.raises(ConfigurationError):
-        get_check(instance)
+        _ = get_check(instance)._config
 
 
 def test_set_mqcd_version(instance):
