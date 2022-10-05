@@ -167,25 +167,29 @@ def test_no_proxy_uris_coverage():
     [
         ({'http': 'socks5h://myproxy'}, {'http': 'socks5h://myproxy'}, 'http://www.example.org'),
         (
-                {'http': 'http://1.2.3.4:567', 'no_proxy': '.foo,bar'},
-                {'http': 'http://1.2.3.4:567',},
-                'http://www.example.org'
+            {'http': 'http://1.2.3.4:567', 'no_proxy': '.foo,bar'},
+            {
+                'http': 'http://1.2.3.4:567',
+            },
+            'http://www.example.org',
         ),
         ({'http': 'http://1.2.3.4:567', 'no_proxy': '.foo,bar,*'}, {'http': '', 'https': ''}, 'http://www.example.org'),
         (
-                {'http': 'http://1.2.3.4:567', 'no_proxy': '.google.com,*.example.org,example.com,9'},
-                {'http': '', 'https': ''},
-                'http://www.example.org'
+            {'http': 'http://1.2.3.4:567', 'no_proxy': '.google.com,*.example.org,example.com,9'},
+            {'http': '', 'https': ''},
+            'http://www.example.org',
         ),
         (
-                {
-                    'http': 'http://1.2.3.4:567',
-                    'no_proxy': '127.0.0.1,127.0.0.2/32,127.1.0.0/25,127.1.1.0/255.255.255.128,127.1.2.0/0.0.0.127',
-                },
-                {'http': 'http://1.2.3.4:567',},
-                'http://www.example.org'
+            {
+                'http': 'http://1.2.3.4:567',
+                'no_proxy': '127.0.0.1,127.0.0.2/32,127.1.0.0/25,127.1.1.0/255.255.255.128,127.1.2.0/0.0.0.127',
+            },
+            {
+                'http': 'http://1.2.3.4:567',
+            },
+            'http://www.example.org',
         ),
-    ]
+    ],
 )
 @patch('datadog_checks.base.utils.http.requests')
 def test_proxy_passes_right_params_to_requests(requests, proxy, expected_proxy, url):
@@ -198,8 +202,12 @@ def test_proxy_passes_right_params_to_requests(requests, proxy, expected_proxy, 
     call_args = {
         'auth': None,
         'cert': None,
-        'headers': OrderedDict([
-            ('User-Agent', 'Datadog Agent/0.0.0'), ('Accept', '*/*'), ('Accept-Encoding', 'gzip, deflate')]),
-        'proxies': expected_proxy, 'timeout': (10.0, 10.0), 'verify': True, 'allow_redirects': True
+        'headers': OrderedDict(
+            [('User-Agent', 'Datadog Agent/0.0.0'), ('Accept', '*/*'), ('Accept-Encoding', 'gzip, deflate')]
+        ),
+        'proxies': expected_proxy,
+        'timeout': (10.0, 10.0),
+        'verify': True,
+        'allow_redirects': True,
     }
     requests.get.assert_called_with(url, **call_args)
