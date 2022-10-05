@@ -66,6 +66,8 @@ files:
       description: |
         Mapping of TeamCity projects and build configurations to
         collect events and metrics from the TeamCity REST API.
+        
+        Configure only one of `projects` or `build_configuration` per instance.
 
         The mapping must be configured with Project IDs as the top-level keys. Each Project ID key value
         may be configured with a mapping of the optional `include` and `exclude` keys to specify
@@ -75,7 +77,7 @@ files:
 
         * To collect all build configurations per Project ID, configure an empty mapping value:
             projects:
-             <PROJECT_ID>:
+             <PROJECT_ID>: {}
 
         * To filter build configurations in each configured Project, use the optional `include` and `exclude` keys
           to configure a list of Build Configuration ID REGEX matching patterns:
