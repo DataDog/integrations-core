@@ -55,7 +55,7 @@ def test_build_event(aggregator, legacy_instance):
         'http://localhost:8111/viewLog.html?buildId=1&buildTypeId=TestProject_TestBuild',
         msg_title='Build for Legacy test build successful',
         source_type_name='teamcity',
-        tags=LEGACY_BUILD_TAGS + ['build_id:1', 'build_number:1', 'build'],
+        tags=LEGACY_BUILD_TAGS + ['build_id:1', 'build_number:1', 'build', 'status:successful'],
         count=1,
     )
 
@@ -99,6 +99,46 @@ def test_config(extra_config, expected_http_kwargs):
         http_wargs.update(expected_http_kwargs)
 
         r.assert_called_with(ANY, **http_wargs)
+
+
+@pytest.mark.skipif(USE_OPENMETRICS == 'true', reason='These configs are not present in OpenMetrics')
+@pytest.mark.parametrize(
+    'build_config, expected_error',
+    [
+        pytest.param(
+            {'projects': {'project_id': {}}}, 'Failed to establish a new connection', id="One `projects` config"
+        ),
+        pytest.param(
+            {'build_configuration': 'build_config_id'},
+            'Failed to establish a new connection',
+            id="One `build_configurations` config",
+        ),
+        pytest.param({}, '`projects` must be configured', id="Missing projects config"),
+        pytest.param(
+            {'projects': {'project_id': {}}, 'build_configuration': 'build_config_id'},
+            'Only one of `projects` or `build_configuration` must be configured, not both.',
+            id="Redundant configs",
+        ),
+    ],
+)
+def test_validate_config(dd_run_check, build_config, expected_error, caplog):
+    """
+    Test that the `projects` and `build_configuration` config options are properly configured prior to running check.
+    Note: The properly configured test cases would be expected to have a `Failed to establish a new connection`
+    exception.
+    """
+    caplog.clear()
+    config = {'server': 'server.name', 'use_openmetrics': False}
+
+    instance = deepcopy(config)
+    instance.update(build_config)
+
+    check = TeamCityCheck(CHECK_NAME, {}, [instance])
+
+    with pytest.raises(Exception) as e:
+        dd_run_check(check)
+
+    assert expected_error in str(e.value)
 
 
 def test_collect_build_stats(aggregator, mock_http_response, instance, check):

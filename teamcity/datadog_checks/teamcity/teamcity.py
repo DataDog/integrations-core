@@ -72,7 +72,7 @@ class TeamCityCheck(AgentCheck):
         self.bc_store = BuildConfigs()
 
         if PY2:
-            self.check_initializations.append(self._validate_config())
+            self.check_initializations.append(self._validate_config)
 
     def _validate_config(self):
         if self.instance.get('build_configuration') and self.instance.get('projects'):
