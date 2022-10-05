@@ -86,7 +86,9 @@ def construct_event(check, new_build):
     build_config = new_build['buildTypeId']
     build_status = EVENT_STATUS_MAP.get(new_build['status'])
     event_tags = deepcopy(check.build_tags)
-    event_tags.extend(['build_id:{}'.format(build_id), 'build_number:{}'.format(build_number)])
+    event_tags.extend(
+        ['build_id:{}'.format(build_id), 'build_number:{}'.format(build_number), 'status:{}'.format(build_status)]
+    )
 
     if not check.instance_name:
         instance_name = build_config
