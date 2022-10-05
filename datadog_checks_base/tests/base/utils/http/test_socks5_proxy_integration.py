@@ -7,7 +7,7 @@ from six import PY2
 
 from datadog_checks.base.utils.http import RequestsWrapper
 from datadog_checks.base.utils.platform import Platform
-from datadog_checks.dev.ci import running_on_windows_ci, running_on_ci
+from datadog_checks.dev.ci import running_on_ci, running_on_windows_ci
 
 pytestmark = [
     pytest.mark.integration,

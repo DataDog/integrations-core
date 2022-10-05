@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from collections import OrderedDict
-from unittest.mock import patch
 
 import mock
 import pytest
@@ -191,7 +190,7 @@ def test_no_proxy_uris_coverage():
         ),
     ],
 )
-@patch('datadog_checks.base.utils.http.requests')
+@mock.patch('datadog_checks.base.utils.http.requests')
 def test_proxy_passes_right_params_to_requests(requests, proxy, expected_proxy, url):
     instance = {'proxy': proxy}
     init_config = {}
