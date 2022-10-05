@@ -27,7 +27,6 @@ FORMATTED_EXTRA_METRICS = [
     "calico.felix.active.local_endpoints",
     "calico.felix.active.local_policies",
     "calico.felix.active.local_selectors",
-    "calico.felix.active.local_tags",
     "calico.felix.cluster.num_host_endpoints",
     "calico.felix.cluster.num_hosts",
     "calico.felix.cluster.num_workload_endpoints",

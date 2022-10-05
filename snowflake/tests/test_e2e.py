@@ -8,7 +8,7 @@ from .common import EXPECTED_TAGS
 pytestmark = pytest.mark.e2e
 
 
-def test_account_usage_mock_data(dd_agent_check, datadog_agent, instance):
+def test_account_usage_mock_data(dd_agent_check, instance):
     instance['metric_groups'] = [
         'snowflake.billing',
         'snowflake.logins',
@@ -111,19 +111,8 @@ def test_account_usage_mock_data(dd_agent_check, datadog_agent, instance):
         tags=EXPECTED_TAGS + ['warehouse:COMPUTE_WH', 'database:SNOWFLAKE', 'schema:None', 'query_type:USE'],
     )
 
-    datadog_agent.assert_metadata(
-        'snowflake',
-        {
-            'version.major': '4',
-            'version.minor': '30',
-            'version.patch': '2',
-            'version.raw': '4.30.2',
-            'version.scheme': 'semver',
-        },
-    )
 
-
-def test_org_usage_mock_data(dd_agent_check, datadog_agent, instance):
+def test_org_usage_mock_data(dd_agent_check, instance):
     instance['schema'] = 'ORGANIZATION_USAGE'
     instance['metric_groups'] = [
         'snowflake.organization.contracts',

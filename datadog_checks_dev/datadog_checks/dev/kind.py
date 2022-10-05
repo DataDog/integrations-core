@@ -10,7 +10,7 @@ from .env import environment_run
 from .fs import create_file, file_exists, path_join
 from .structures import EnvVars, LazyFunction, TempDir
 from .subprocess import run_command
-from .utils import get_current_check_name, get_tox_env
+from .utils import get_active_env, get_current_check_name
 
 if PY3:
     from shutil import which
@@ -43,7 +43,7 @@ def kind_run(sleep=None, endpoints=None, conditions=None, env_vars=None, wrapper
     check_name = get_current_check_name(depth=2)
     # Replace undercores as kubeadm doesn't accept them
     check_name = check_name.replace("_", "-")
-    cluster_name = 'cluster-{}-{}'.format(check_name, get_tox_env())
+    cluster_name = 'cluster-{}-{}'.format(check_name, get_active_env())
 
     with TempDir(cluster_name) as temp_dir:
         kubeconfig_path = path_join(temp_dir, 'config')

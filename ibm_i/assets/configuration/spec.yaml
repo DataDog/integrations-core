@@ -94,4 +94,21 @@ files:
           - name: "job_queue"
           - name: "message_queue_info"
         default: *queries_default
+    - name: message_queue_info
+      description: |
+        A configuration mapping for the message_queue_info query.
+
+        selected_message_queues restricts the message_queue_info query to a subset of the queues.
+        This can reduce the CPU usage on the target IBM i machine. By default no filter is applied.
+      value:
+        example:
+          selected_message_queues:
+            - QSYSOPR
+            - QPGMR
+        type: object
+        properties:
+          - name: selected_message_queues
+            type: array
+            items:
+              type: string
     - template: instances/default

@@ -1,6 +1,10 @@
 # CHANGELOG - IBM WAS
 
-## 2.2.0 / 2022-08-05
+## 2.3.0 / 2022-09-16
+
+* [Added] Update HTTP config spec templates. See [#12890](https://github.com/DataDog/integrations-core/pull/12890).
+
+## 2.2.0 / 2022-08-05 / Agent 7.39.0
 
 * [Fixed] Dependency updates. See [#12653](https://github.com/DataDog/integrations-core/pull/12653).
 * [Security] Bump `lxml` package. See [#12663](https://github.com/DataDog/integrations-core/pull/12663).

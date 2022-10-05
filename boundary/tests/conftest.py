@@ -11,7 +11,7 @@ from . import common
 
 @pytest.fixture(scope='session')
 def dd_environment(instance):
-    with docker_run(common.COMPOSE_FILE, endpoints=[common.HEALTH_ENDPOINT, common.METRIC_ENDPOINT]):
+    with docker_run(common.COMPOSE_FILE, endpoints=[common.HEALTH_ENDPOINT, common.METRIC_ENDPOINT], mount_logs=True):
         yield instance
 
 

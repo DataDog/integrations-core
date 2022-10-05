@@ -1,6 +1,10 @@
 # CHANGELOG - Windows performance counters
 
-## 1.3.0 / 2022-08-05
+## 1.4.0 / 2022-09-16
+
+* [Added] Refactor tooling for getting the current env name. See [#12939](https://github.com/DataDog/integrations-core/pull/12939).
+
+## 1.3.0 / 2022-08-05 / Agent 7.39.0
 
 * [Added] Add functionality to load the legacy version of the integration. See [#12396](https://github.com/DataDog/integrations-core/pull/12396).
 

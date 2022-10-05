@@ -27,12 +27,22 @@ class MetricPatterns(BaseModel):
     include: Optional[Sequence[str]]
 
 
+class SaslOauthTokenProvider(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    client_id: Optional[str]
+    client_secret: Optional[str]
+    url: Optional[str]
+
+
 class InstanceConfig(BaseModel):
     class Config:
         allow_mutation = False
 
     broker_requests_batch_size: Optional[int]
     consumer_groups: Optional[Mapping[str, Any]]
+    data_streams_enabled: Optional[bool]
     disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
     kafka_client_api_version: Optional[str]
@@ -45,6 +55,7 @@ class InstanceConfig(BaseModel):
     sasl_kerberos_domain_name: Optional[str]
     sasl_kerberos_service_name: Optional[str]
     sasl_mechanism: Optional[str]
+    sasl_oauth_token_provider: Optional[SaslOauthTokenProvider]
     sasl_plain_password: Optional[str]
     sasl_plain_username: Optional[str]
     security_protocol: Optional[str]

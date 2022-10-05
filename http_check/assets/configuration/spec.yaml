@@ -10,7 +10,10 @@ files:
     options:
     - name: name
       required: true
-      description: Name of your Http check instance.
+      description: |
+        Name of your HTTP check instance.
+
+        Note: The `instance` tag takes the value of this parameter and normalizes all `,+*-/()[]{}` characters into `_`.
       value:
         example: My first service
         type: string

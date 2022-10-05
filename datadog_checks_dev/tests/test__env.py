@@ -7,6 +7,7 @@ from mock import mock
 
 from datadog_checks.dev import EnvVars, RetryError, environment_run
 from datadog_checks.dev._env import E2E_SET_UP, E2E_TEAR_DOWN, set_up_env, tear_down_env
+from datadog_checks.dev.ci import running_on_ci
 
 
 def test_set_up_env_default_true():
@@ -44,7 +45,14 @@ def test_environment_run_on_failed_conditions(attempts, expected_call_count):
     condition = mock.MagicMock()
     condition.side_effect = RetryError("error")
 
-    with pytest.raises(RetryError if attempts is None else tenacity.RetryError):
+    expected_exception = tenacity.RetryError
+    if attempts is None:
+        if running_on_ci():
+            expected_call_count = 2
+        else:
+            expected_exception = RetryError
+
+    with pytest.raises(expected_exception):
         with environment_run(up=up, down=down, attempts=attempts, conditions=[condition]):
             pass
 

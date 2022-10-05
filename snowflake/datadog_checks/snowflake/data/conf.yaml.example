@@ -40,7 +40,7 @@ init_config:
     #
     # service: <SERVICE>
 
-## Every instance is scheduled independent of the others.
+## Every instance is scheduled independently of the others.
 #
 instances:
 
@@ -249,12 +249,12 @@ instances:
     #
     # service: <SERVICE>
 
-    ## @param min_collection_interval - number - optional - default: 3600
+    ## @param min_collection_interval - number - optional - default: 15
     ## This changes the collection interval of the check. For more information, see:
     ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
     ##
     ## NOTE: Most Snowflake ACCOUNT_USAGE views are populated on an hourly basis,
-    ## so to minimize unnecessary queries the `min_collection_interval` defaults to 1 hour.
+    ## so to minimize unnecessary queries, set the `min_collection_interval` to 1 hour.
     ##
     ## Most metrics are aggregated by day, you can increase the interval to reduce the number of queries.
     #

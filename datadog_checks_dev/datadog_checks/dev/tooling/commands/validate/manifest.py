@@ -10,7 +10,7 @@ from ....fs import file_exists, read_file, write_file
 from ...constants import get_root
 from ...datastructures import JSONDict
 from ...manifest_validator import get_all_validators
-from ...manifest_validator.constants import V1_STRING, V2_STRING
+from ...manifest_validator.constants import V2_STRING
 from ...testing import process_checks_option
 from ...utils import complete_valid_checks
 from ..console import (
@@ -75,10 +75,6 @@ def manifest(ctx, check, fix):
             continue
 
         version = decoded.get('manifest_version', V2_STRING)
-        if version == V1_STRING:
-            file_failures += 1
-            display_queue.append((echo_failure, 'Manifest version must be >= 2.0.0'))
-
         all_validators = get_all_validators(ctx, version, is_extras, is_marketplace)
 
         for validator in all_validators:

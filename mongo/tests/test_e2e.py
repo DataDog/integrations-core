@@ -57,9 +57,8 @@ MONGOD_METRICS = BASE_METRICS + [
 
 @standalone
 @pytest.mark.e2e
-def test_e2e_mongo_standalone(dd_agent_check):
-    instance = {'hosts': ['{}:{}'.format(HOST, PORT1)], 'username': 'testUser', 'password': 'testPass'}
-    aggregator = dd_agent_check(instance, rate=True)
+def test_e2e_mongo_standalone(dd_agent_check, instance_user):
+    aggregator = dd_agent_check(instance_user, rate=True)
     for metric in MONGOD_METRICS:
         aggregator.assert_metric(metric)
     aggregator.assert_service_check('mongodb.can_connect', status=MongoDb.OK)
@@ -76,14 +75,8 @@ def test_e2e_mongo_shard(dd_agent_check, instance_authdb):
 
 @auth
 @pytest.mark.e2e
-def test_e2e_mongo_auth(dd_agent_check):
-    instance = {
-        'hosts': ['{}:{}'.format(HOST, PORT1)],
-        'username': 'testUser',
-        'password': 'testPass',
-        'options': {'authSource': 'authDB'},
-    }
-    aggregator = dd_agent_check(instance, rate=True)
+def test_e2e_mongo_auth(dd_agent_check, instance_authdb):
+    aggregator = dd_agent_check(instance_authdb, rate=True)
     for metric in MONGOD_METRICS:
         aggregator.assert_metric(metric)
     aggregator.assert_service_check('mongodb.can_connect', status=MongoDb.OK)
@@ -94,6 +87,7 @@ def test_e2e_mongo_auth(dd_agent_check):
 def test_e2e_mongo_tls(dd_agent_check):
     instance = {
         'hosts': ['{}:{}'.format(HOST, PORT1)],
+        'database': 'test',
         'tls': True,
         'tls_allow_invalid_certificates': True,
         'tls_certificate_key_file': '/certs/client1.pem',

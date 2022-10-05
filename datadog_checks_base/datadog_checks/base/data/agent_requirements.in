@@ -1,15 +1,15 @@
 adodbapi==2.6.2.0; sys_platform == 'win32'
 aerospike==4.0.0; sys_platform != 'win32' and sys_platform != 'darwin' and python_version < '3.0'
-aerospike==7.0.2; sys_platform != 'win32' and sys_platform != 'darwin' and python_version > '3.0'
+aerospike==7.1.0; sys_platform != 'win32' and sys_platform != 'darwin' and python_version > '3.0'
 aws-requests-auth==0.4.3
 beautifulsoup4==4.11.1; python_version > '3.0'
 beautifulsoup4==4.9.3; python_version < '3.0'
 binary==1.0.0
 boto3==1.17.112; python_version < '3.0'
-boto3==1.24.44; python_version > '3.0'
+boto3==1.24.71; python_version > '3.0'
 boto==2.49.0
 botocore==1.20.112; python_version < '3.0'
-botocore==1.27.44; python_version > '3.0'
+botocore==1.27.71; python_version > '3.0'
 cachetools==3.1.1; python_version < '3.0'
 cachetools==5.2.0; python_version > '3.0'
 clickhouse-cityhash==1.0.2.3
@@ -28,7 +28,7 @@ foundationdb==6.3.24; python_version > '3.0'
 futures==3.3.0; python_version < '3.0'
 gearman==2.0.2; sys_platform != 'win32' and python_version < '3.0'
 gssapi==1.6.1; python_version < '3.0'
-gssapi==1.7.3; python_version > '3.0'
+gssapi==1.8.1; python_version > '3.0'
 immutables==0.18; python_version > '3.0'
 in-toto==1.0.1
 ipaddress==1.0.23; python_version < '3.0'
@@ -46,9 +46,11 @@ lz4==2.2.1; python_version < '3.0'
 lz4==3.1.3; python_version > '3.0'
 mmh3==2.5.1; python_version < '3.0'
 mmh3==3.0.0; python_version > '3.0'
+oauthlib==3.1.0; python_version < '3.0'
+oauthlib==3.2.1; python_version > '3.0'
 openstacksdk==0.39.0; python_version < '3.0'
 openstacksdk==0.61.0; python_version > '3.0'
-orjson==3.7.11; python_version > '3.0'
+orjson==3.8.0; python_version > '3.0'
 packaging==20.9; python_version < '3.0'
 packaging==21.3; python_version > '3.0'
 paramiko==2.11.0
@@ -61,7 +63,7 @@ psutil==5.9.0
 psycopg2-binary==2.8.6
 pyasn1==0.4.6
 pycryptodomex==3.10.1
-pydantic==1.9.1; python_version > '3.0'
+pydantic==1.10.2; python_version > '3.0'
 pyjwt==1.7.1; python_version < '3.0'
 pyjwt==2.4.0; python_version > '3.0'
 pymongo[srv]==4.2.0; python_version >= '3.8'
@@ -87,6 +89,7 @@ redis==4.3.4; python_version > '3.0'
 requests-kerberos==0.12.0; python_version < '3.0'
 requests-kerberos==0.14.0; python_version > '3.0'
 requests-ntlm==1.1.0
+requests-oauthlib==1.3.1
 requests-toolbelt==0.9.1
 requests-unixsocket==0.3.0
 requests==2.27.1; python_version < '3.0'
@@ -101,7 +104,7 @@ serpent==1.41; sys_platform == 'win32' and python_version > '3.0'
 service-identity[idna]==21.1.0
 simplejson==3.17.6
 six==1.16.0
-snowflake-connector-python==2.7.11; python_version > '3.0'
+snowflake-connector-python==2.7.12; python_version > '3.0'
 supervisor==4.2.4
 tuf==0.17.0; python_version < '3.0'
 tuf==0.19.0; python_version > '3.0'

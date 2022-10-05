@@ -31,6 +31,12 @@ To install the check in dev mode:
 pip install -e '.[deps]'
 ```
 
+To install also development dependencies needed for executing tests:
+
+```shell
+pip install -r requirements-dev.txt
+```
+
 To download a new or updated integration, you may specify a precise
 [version][7]:
 
@@ -48,6 +54,27 @@ To run the tests, [install tox][8] and just run:
 
 ```shell
 tox
+```
+
+You can select between online and offline tests when running testsuite using
+pytest:
+
+```shell
+pytest -vvvv -m online     # Run tests that use data from publicly a accessible repository.
+pytest -vvvv -m offline    # Run tests that use data stored in the Git repository.
+```
+
+For online tests, you can specify explicitly distribution and its version to
+run tests against:
+
+```shell
+pytest -vvvv -m online --distribution-name datadog-active-directory --distribution-version 1.10.0
+```
+
+To run checks against content served from own local directory where TUF, in-toto and wheel files are present:
+
+```shell
+pytest -vvvv --local-dir=/path/to/dir --distribution-name datadog-active-directory --distribution-version 1.10.0
 ```
 
 ## Troubleshooting

@@ -8,7 +8,7 @@ This check monitors [Vault][1] cluster health and leader changes.
 
 ### Installation
 
-The Vault check is included in the [Datadog Agent][2] package. No additional installation is needed on your server.
+The Vault check is included in the [Datadog Agent][2] package.
 
 #### Prerequisites
 

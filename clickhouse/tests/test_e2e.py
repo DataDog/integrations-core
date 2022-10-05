@@ -23,7 +23,9 @@ def test_check(dd_agent_check, instance):
         aggregator.assert_metric_has_tag(metric, 'db:default', at_least=1)
         aggregator.assert_metric_has_tag(metric, 'foo:bar', at_least=1)
 
-    aggregator.assert_metric('clickhouse.table.replicated.total')
+    for metric in OPTIONAL_METRICS:
+        aggregator.assert_metric(metric, at_least=0)
+
     aggregator.assert_metric(
         'clickhouse.dictionary.item.current',
         tags=[server_tag, port_tag, 'db:default', 'foo:bar', 'dictionary:test'],

@@ -1,4 +1,4 @@
-version: '3.5'
+version: '3.8'
 
 services:
   socks5:
@@ -11,6 +11,7 @@ services:
       - PROXY_PASSWORD=proxy_password
   nginx:
     image: nginx:stable-alpine
+    container_name: socks5-nginx
     ports:
       - "80:80"
     depends_on:

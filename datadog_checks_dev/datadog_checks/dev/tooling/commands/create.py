@@ -121,7 +121,7 @@ def create(ctx, name, integration_type, location, non_interactive, quiet, dry_ru
         abort(f'Cannot use non-interactive mode with repo_choice: {repo_choice}')
 
     if not non_interactive and not dry_run:
-        if repo_choice != 'core':
+        if repo_choice not in ['core', 'integrations']:
             support_email = click.prompt('Email used for support requests')
             template_fields['email'] = support_email
             template_fields['email_packages'] = template_fields['email']
@@ -152,7 +152,7 @@ def create(ctx, name, integration_type, location, non_interactive, quiet, dry_ru
         else:
             # Fill in all common non Marketplace fields
             template_fields['pricing_plan'] = ''
-            if repo_choice == 'core':
+            if repo_choice in ['core', 'integrations']:
                 template_fields[
                     'author_info'
                 ] = """
@@ -163,6 +163,8 @@ def create(ctx, name, integration_type, location, non_interactive, quiet, dry_ru
     "sales_email": "info@datadoghq.com"
   },"""
             else:
+                prompt_and_update_if_missing(template_fields, 'email', 'Email used for support requests')
+                prompt_and_update_if_missing(template_fields, 'author', 'Your name')
                 template_fields[
                     'author_info'
                 ] = f"""
@@ -206,3 +208,8 @@ def create(ctx, name, integration_type, location, non_interactive, quiet, dry_ru
     else:
         echo_info(f'Created in `{root}`:')
         display_path_tree(path_tree)
+
+
+def prompt_and_update_if_missing(mapping, field, prompt):
+    if mapping.get(field) is None:
+        mapping[field] = click.prompt(prompt)
