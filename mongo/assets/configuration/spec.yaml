@@ -99,20 +99,42 @@ files:
         type: integer
         example: 30
     - name: ssl
+      deprecation:
+        Agent version: "8.0.0"
+        Migration: |
+          Use the following options insteaad:
+          tls
       description: If `True`, create the connection to the server using SSL.
       value:
         type: boolean
         example: false
     - name: ssl_keyfile
+      deprecation:
+        Agent version: "8.0.0"
+        Migration: |
+          Use the following options insteaad:
+          tls_certificate_key_file
+          https://pymongo.readthedocs.io/en/stable/examples/tls.html#client-certificates
       description: Path to the private key file used to identify the local connection against Mongodb.
       value:
         type: string
     - name: ssl_certfile
+      deprecation:
+        Agent version: "8.0.0"
+        Migration: |
+          Use the following options insteaad:
+          tls_certificate_key_file
+          https://pymongo.readthedocs.io/en/stable/examples/tls.html#client-certificates
       required: false
       description: Path to the certificate file used to identify the local connection against Mongodb.
       value:
         type: string
     - name: ssl_cert_reqs
+      deprecation:
+        Agent version: "8.0.0"
+        Migration: |
+          Use the following options instead:
+          tls_allow_invalid_certificates 
       description: |
         Specifies whether a certificate is required from the other side of the connection, and whether it will be
         validated if provided.
@@ -123,11 +145,20 @@ files:
       value:
         type: integer
     - name: ssl_ca_certs
+      deprecation:
+        Agent version: "8.0.0"
+        Migration: |
+          Use the following options insteaad:
+          tls_ca_file
       description: Path to the ca_certs file.
       value:
         type: string
     - name: ssl_match_hostname
       description: If `False`, disables SSL hostname verification.
+        Agent version: "8.0.0"
+        Migration: |
+          Use the following options insteaad:
+          tls_allow_invalid_hostnames
       value:
         type: boolean
         example: true
