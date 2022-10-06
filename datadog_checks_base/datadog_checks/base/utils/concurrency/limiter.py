@@ -5,6 +5,43 @@ import threading
 
 
 class ConditionLimiter(object):
+    """
+    This class is used to limit the number of concurrent satisfied conditions. Every subclass must implement
+    a `condition` method. For example, if you wanted to only run one check instance at a time based on the
+    command line arguments used to start an active process, you could do:
+
+    ```python
+    import re
+    import shlex
+
+    import psutil
+
+    from datadog_checks.base import AgentCheck
+    from datadog_checks.base.utils.concurrency.limiter import ConditionLimiter
+
+    class Limiter(ConditionLimiter):
+        def condition(self, pattern, logger):
+            logger.info('Searching for a process that matches: %s', pattern)
+            for process in psutil.process_iter(['cmdline']):
+                command = shlex.join(process.info['cmdline'])
+                if re.search(pattern, command):
+                    logger.info('Process found: %s', command)
+                    return True
+            else:
+                logger.info('Process not found, skipping check run')
+                return False
+
+    class Check(AgentCheck):
+        limiter = Limiter()
+
+        def check(self, _):
+            if not self.limiter.check_condition(self.check_id, self.config.pattern, self.log):
+                return
+
+            ...
+    ```
+    """
+
     def __init__(self, limit=1):
         self.__limit = max(limit, 1)
         self.__cached_identifiers = set()
