@@ -19,6 +19,7 @@ METRIC_MAP = {
     'kong_memory_lua_shared_dict_bytes': 'memory.lua.shared_dict.bytes',
     'kong_memory_lua_shared_dict_total_bytes': 'memory.lua.shared_dict.total_bytes',
     'kong_nginx_connections_total': 'nginx.connections.total',
+    'kong_nginx_hconnections_total': 'nginx.hconnections.total',
     'kong_nginx_http_current_connections': 'nginx.http.current_connections',
     'kong_nginx_stream_current_connections': 'nginx.stream.current_connections',
     'kong_node_info': 'node.info',
