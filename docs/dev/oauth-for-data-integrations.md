@@ -71,7 +71,7 @@ These steps outline the process for building a new data integration that will ha
 
 6. Publish the OAuth client
 
-    In order to publish an OAuth client, you’ll need to open a pull request for your data integration in either the integrations-extras or marketplace GitHub repositories. To learn more about the integration publishing process, see our [Marketplace and Integrations documentation][3]. 
+    In order to publish an OAuth client, you’ll need to open a pull request for your data integration in either the integrations-extras or marketplace GitHub repositories. To learn more about the integration publishing process, see the [Marketplace and Integrations documentation][3]. 
 
     - To start the publishing process, navigate to the **Publishing** tab within the Developer Platform. You’ll receive your published client ID and client secret, as well as your `app_uuid` to use for publishing (**reminder: save these values in a secure location**), and you will be prompted to fill out some information about your integration. 
 
@@ -95,6 +95,6 @@ Instead of creating a new app as specified in Step 1 above, navigate to the app 
 
 You will need to open a new pull request to update your existing tile with your integration code (if it’s an agent-based integration), as well as new information about your integration in your readme, images, etc. Please share a link to this new pull request during the publishing process.
 
-[1]: <link to datadog oauth2 docs>
+[1]: /developers/authorization/oauth2_in_datadog/
 [2]: https://app.datadoghq.com/apps
 [3]: https://docs.datadoghq.com/developers/marketplace/#develop-your-offering
