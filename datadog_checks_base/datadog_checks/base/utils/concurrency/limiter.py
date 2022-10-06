@@ -38,7 +38,11 @@ class ConditionLimiter(object):
             if not self.limiter.check_condition(self.check_id, self.config.pattern, self.log):
                 return
 
-            ...
+            try:
+                ...
+            except Exception:
+                self.limiter.remove(self.check_id)
+                raise
     ```
     """
 
