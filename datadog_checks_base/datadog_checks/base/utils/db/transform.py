@@ -284,7 +284,7 @@ def get_time_elapsed(transformers, column_name, **modifiers):
     Example:
 
     ```yaml
-        columns:
+    columns:
       - name: time_since_x
         type: time_elapsed
         format: native  # default value and can be omitted
