@@ -60,13 +60,8 @@ class AuthTokenOAuthReader(object):
 
     def read(self, **request):
         if self._token is None or get_timestamp() >= self._expiration or 'error' in request:
-            global oauth2
-            if oauth2 is None:
-                from oauthlib import oauth2
-
-            global requests_oauthlib
-            if requests_oauthlib is None:
-                import requests_oauthlib
+            from oauthlib import oauth2
+            import requests_oauthlib
 
             client = oauth2.BackendApplicationClient(client_id=self._client_id)
             oauth = requests_oauthlib.OAuth2Session(client=client)
