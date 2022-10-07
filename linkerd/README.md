@@ -4,7 +4,7 @@
 
 [Linkerd][1] is an ultra-light, ultra-simple, ultra-powerful open-source service mesh that provides developers with the tools they need to write secure, reliable, observable cloud-native applications. It is the only service mesh to reach CNCF graduated status. Linkerd uses mutual TLS to transparently secure all on-cluster TCP communication with no application changes, instantly adds latency-aware load balancing, request retries, timeouts, and blue-green deploys to keep your applications resilient, and provides instant platform health metrics by tracking success rates, latencies, and request volumes for every meshed workload - all with minimal configuration.
 
-This integration allows Datadog users to send their Linkerd metrics, including application success rates, latency, and saturation to their Datadog dashboards. The Datadog agent will collect metrics from the Linkerd proxy and make them available in your Datadog account.
+This integration sends your Linkerd metrics to Datadog, including application success rates, latency, and saturation.
 
 
 ## Setup
