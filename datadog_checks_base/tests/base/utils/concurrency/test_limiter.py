@@ -143,5 +143,4 @@ def test_locking():
 
     assert limiter.limit_reached()
 
-    assert limiter.check_condition('foo')
-    assert not limiter.check_condition('bar')
+    assert {limiter.check_condition('foo'), limiter.check_condition('bar')} == {True, False}
