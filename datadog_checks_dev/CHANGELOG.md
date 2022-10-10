@@ -31,6 +31,7 @@
 * [Fixed] Make the manifest validation fail if the file is not found. See [#12789](https://github.com/DataDog/integrations-core/pull/12789).
 * [Fixed] Fix Hatch environment plugin. See [#12769](https://github.com/DataDog/integrations-core/pull/12769).
 * [Fixed] Templatize the README links. See [#12742](https://github.com/DataDog/integrations-core/pull/12742).
+* [Fixed] Bump dependencies for 7.40. See [#12896](https://github.com/DataDog/integrations-core/pull/12896).
 * [Changed] Use official labeler GH action. See [#12546](https://github.com/DataDog/integrations-core/pull/12546).
 
 ## 16.7.0 / 2022-08-05

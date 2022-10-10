@@ -7,6 +7,7 @@
 ## 1.17.0 / 2022-09-16
 
 * [Added] Update HTTP config spec templates. See [#12890](https://github.com/DataDog/integrations-core/pull/12890).
+* [Fixed] Bump dependencies for 7.40. See [#12896](https://github.com/DataDog/integrations-core/pull/12896).
 
 ## 1.16.2 / 2022-08-05 / Agent 7.39.0
 
