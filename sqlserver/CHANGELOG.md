@@ -2,7 +2,7 @@
 
 ## 9.0.1 / 2022-10-10
 
-* [Fixed] sqlserver/connection: always cast port to str. See [#13061](https://github.com/DataDog/integrations-core/pull/13061).
+* [Fixed] Allow users to configure the port as a int or as a string. See [#13061](https://github.com/DataDog/integrations-core/pull/13061).
 
 ## 9.0.0 / 2022-09-16
 
