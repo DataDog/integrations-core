@@ -253,11 +253,7 @@ class TrelloClient:
         memberships = memberships.json()
         deactivated_users = {m['idMember'] for m in memberships if m['deactivated']}
 
-        return [
-            {'id_member': member['id'], 'full_name': member['fullName'], 'username': member['username']}
-            for member in members
-            if member['id'] not in deactivated_users
-        ]
+        return [member for member in members if member['id'] not in deactivated_users]
 
     def get_list(self, list_id):
         return self.__request(self.API_URL + f'/1/lists/{list_id}/cards')
