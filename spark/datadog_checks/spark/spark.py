@@ -119,6 +119,8 @@ class SparkCheck(AgentCheck):
                 AgentCheck.OK,
                 tags=['url:%s' % am_address] + tags,
             )
+        else:
+            self.log.warning('No running apps found. No metrics will be collected.')
 
     def _get_master_address(self):
         """
