@@ -305,6 +305,9 @@ def testable(
             '10': 'Tools and Libraries',
             '11': 'Database Monitoring',
             '12': 'Windows-Agent',
+            '13': 'eBPF Platform',
+            '14': 'Universal Service Monitoring',
+            '15': 'Windows Kernel Integrations',
             's': 'Skip',
             'q': 'Quit',
         }
