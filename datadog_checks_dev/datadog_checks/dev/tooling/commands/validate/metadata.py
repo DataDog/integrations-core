@@ -498,6 +498,7 @@ def metadata(check, check_duplicates, show_warnings):
             display_queue.append((echo_failure, f'{current_check}: {header} is empty in {count} rows.'))
 
         for prefix, count in metric_prefix_count.items():
+            errors = True
             display_queue.append(
                 (
                     echo_failure,
