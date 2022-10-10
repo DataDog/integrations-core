@@ -11,9 +11,7 @@ pr: none
 trigger: none
 
 variables:
-  PIP_CACHE_DIR: $(Pipeline.Workspace)/.cache/pip
-  DDEV_COLOR: 1
-  DD_TRACE_AGENT_PORT: 8127
+  - template: './templates/common-variables.yml'
 
 resources:
   containers:
