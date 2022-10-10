@@ -56,8 +56,8 @@ TEST_PASSWORD = 'password'
 
 CUSTOM_TAGS = ['optional:tag1']
 COMMON_TAGS = [
-    'app_name:' + APP_NAME,
-] + CLUSTER_TAGS
+                  'app_name:' + APP_NAME,
+              ] + CLUSTER_TAGS
 
 
 def join_url_dir(url, *args):
@@ -405,11 +405,11 @@ SPARK_JOB_RUNNING_METRIC_VALUES = {
 }
 
 SPARK_JOB_RUNNING_METRIC_TAGS = [
-    'status:running',
-    'job_id:0',
-    'stage_id:0',
-    'stage_id:1',
-] + COMMON_TAGS
+                                    'status:running',
+                                    'job_id:0',
+                                    'stage_id:0',
+                                    'stage_id:1',
+                                ] + COMMON_TAGS
 
 SPARK_JOB_SUCCEEDED_METRIC_VALUES = {
     'spark.job.count': 3,
@@ -425,11 +425,11 @@ SPARK_JOB_SUCCEEDED_METRIC_VALUES = {
 }
 
 SPARK_JOB_SUCCEEDED_METRIC_TAGS = [
-    'status:succeeded',
-    'job_id:0',
-    'stage_id:0',
-    'stage_id:1',
-] + COMMON_TAGS
+                                      'status:succeeded',
+                                      'job_id:0',
+                                      'stage_id:0',
+                                      'stage_id:1',
+                                  ] + COMMON_TAGS
 
 SPARK_STAGE_RUNNING_METRIC_VALUES = {
     'spark.stage.count': 3,
@@ -450,9 +450,9 @@ SPARK_STAGE_RUNNING_METRIC_VALUES = {
 }
 
 SPARK_STAGE_RUNNING_METRIC_TAGS = [
-    'status:running',
-    'stage_id:1',
-] + COMMON_TAGS
+                                      'status:running',
+                                      'stage_id:1',
+                                  ] + COMMON_TAGS
 
 SPARK_STAGE_COMPLETE_METRIC_VALUES = {
     'spark.stage.count': 2,
@@ -473,9 +473,9 @@ SPARK_STAGE_COMPLETE_METRIC_VALUES = {
 }
 
 SPARK_STAGE_COMPLETE_METRIC_TAGS = [
-    'status:complete',
-    'stage_id:0',
-] + COMMON_TAGS
+                                       'status:complete',
+                                       'stage_id:0',
+                                   ] + COMMON_TAGS
 
 SPARK_DRIVER_METRIC_VALUES = {
     'spark.driver.rdd_blocks': 99,
@@ -524,8 +524,8 @@ SPARK_EXECUTOR_LEVEL_METRIC_VALUES = {
 }
 
 SPARK_EXECUTOR_LEVEL_METRIC_TAGS = [
-    'executor_id:1',
-] + COMMON_TAGS
+                                       'executor_id:1',
+                                   ] + COMMON_TAGS
 
 SPARK_RDD_METRIC_VALUES = {
     'spark.rdd.count': 1,
@@ -550,7 +550,6 @@ SPARK_STREAMING_STATISTICS_METRIC_VALUES = {
     'spark.streaming.statistics.num_retained_completed_batches': 27,
     'spark.streaming.statistics.num_total_completed_batches': 28,
 }
-
 
 SPARK_STRUCTURED_STREAMING_METRIC_VALUES = {
     'spark.structured_streaming.input_rate': 12,
@@ -1025,7 +1024,7 @@ def test_disable_legacy_cluster_tags(aggregator, dd_run_check):
     ids=["driver", "yarn", "mesos", "standalone", "standalone_pre_20"],
 )
 def test_enable_query_name_tag_for_structured_streaming(
-    aggregator, dd_run_check, instance, requests_get_mock, base_tags
+        aggregator, dd_run_check, instance, requests_get_mock, base_tags
 ):
     instance['enable_query_name_tag'] = True
 
@@ -1091,6 +1090,31 @@ def test_do_not_crash_on_single_app_failure():
     with mock.patch.object(c, '_rest_request_to_json', rest_requests_to_json), mock.patch.object(c, '_collect_version'):
         c._get_spark_app_ids(running_apps, [])
         assert rest_requests_to_json.call_count == 2
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "instance,service_check",
+    [
+        (DRIVER_CONFIG, "driver"),
+        (YARN_CONFIG, "resource_manager"),
+        (MESOS_CONFIG, "mesos_master"),
+        (STANDALONE_CONFIG, "standalone_master"),
+        (STANDALONE_CONFIG_PRE_20, "standalone_master"),
+    ],
+    ids=["driver", "yarn", "mesos", "standalone", "standalone_pre_20"],
+)
+def test_no_running_apps(aggregator, dd_run_check, instance, service_check):
+    with mock.patch('requests.get', return_value=MockResponse("{}")):
+        dd_run_check(SparkCheck('spark', {}, [instance]))
+
+        # no metrics sent in this case
+        aggregator.assert_all_metrics_covered()
+        aggregator.assert_service_check(
+            'spark.{}.can_connect'.format(service_check),
+            status=SparkCheck.OK,
+            tags=['url:{}'.format(instance['spark_url'])] + CLUSTER_TAGS + instance.get('tags', []),
+        )
 
 
 class StandaloneAppsResponseHandler(BaseHTTPServer.BaseHTTPRequestHandler):
