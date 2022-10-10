@@ -41,6 +41,9 @@ class TrelloClient:
             'Agent-Metrics-Logs': '62a9bbeb1c71b2208581744e',
             'Agent-Shared-Components': '62a9bc0c9ab7f433a5c26f2f',
             'Windows-Agent': '62e8dd8d256d8968c20af29e',
+            'eBPF Platform': '63375c6c6eb62b019cdcec2b',
+            'Universal Service Monitoring': '63375c7b9be24303f4a23ab9',
+            'Windows Kernel Integrations': '63375c737bbfbc003ee007c9',
         }
 
         # Maps the team to the trello team label
@@ -63,6 +66,9 @@ class TrelloClient:
             'team/agent-metrics-logs': 'Agent-Metrics-Logs',
             'team/agent-shared-components': 'Agent-Shared-Components',
             'team/windows-agent': 'Windows-Agent',
+            'team/ebpf-platform': 'eBPF Platform',
+            'team/universal-service-monitoring': 'Universal Service Monitoring',
+            'team/windows-kernel-integrations': 'Windows Kernel Integrations',
         }
 
         # Maps the team to the github team
@@ -70,7 +76,7 @@ class TrelloClient:
             'team/agent-apm': 'agent-apm',
             'team/agent-platform': 'agent-platform',
             'team/triage': 'agent-platform',
-            'team/networks': 'agent-network',
+            'team/networks': 'Networks',
             'team/processes': 'processes',
             'team/containers': 'container-integrations',
             'team/container-app': 'container-app',
@@ -87,6 +93,9 @@ class TrelloClient:
             # as the team of a user is the first team available.
             'team/agent-core': 'agent-core',
             'team/windows-agent': 'windows-agent',
+            'team/ebpf-platform': 'ebpf-platform',
+            'team/usm': 'universal-service-monitoring',
+            'team/windows-kernel-integrations': 'windows-kernel-integrations',
         }
 
         # Maps the trello label name to trello label ID
@@ -109,6 +118,9 @@ class TrelloClient:
             'Agent-Metrics-Logs': '62a9bc5e60fb632602641d07',
             'Agent-Shared-Components': '62a9bc4cdb0cc563932f532f',
             'Windows-Agent': '62e8ddb35919c982499a7ccf',
+            'eBPF Platform': '63375cbf98d9f7003e2e7a0c',
+            'Universal Service Monitoring': '63375ccf0c2fe10560959d07',
+            'Windows Kernel Integrations': '63375cd704bbd201f1e577b5',
         }
 
         self.progress_columns = {
