@@ -1106,7 +1106,9 @@ def test_do_not_crash_on_single_app_failure():
 )
 def test_no_running_apps(aggregator, dd_run_check, instance, service_check):
     with mock.patch('requests.get', return_value=MockResponse("{}")):
-        dd_run_check(SparkCheck('spark', {}, [instance]))
+        check = SparkCheck('spark', {}, [instance])
+        check.log = mock.MagicMock()
+        dd_run_check(check)
 
         # no metrics sent in this case
         aggregator.assert_all_metrics_covered()
@@ -1115,6 +1117,7 @@ def test_no_running_apps(aggregator, dd_run_check, instance, service_check):
             status=SparkCheck.OK,
             tags=['url:{}'.format(instance['spark_url'])] + CLUSTER_TAGS + instance.get('tags', []),
         )
+        check.log.warning.assert_called_once_with('No running apps found. No metrics will be collected.')
 
 
 class StandaloneAppsResponseHandler(BaseHTTPServer.BaseHTTPRequestHandler):
