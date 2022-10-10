@@ -41,7 +41,7 @@ init_config:
     #
     # service: <SERVICE>
 
-## Every instance is scheduled independent of the others.
+## Every instance is scheduled independently of the others.
 #
 instances:
 
@@ -239,7 +239,7 @@ instances:
     ##   - type: header
     ##     name (required): The name of the field, for example: Authorization
     ##     value: The template value, for example `Bearer <TOKEN>`. The default is: <TOKEN>
-    ##     placeholder: The substring in `value` to replace by the token, defaults to: <TOKEN>
+    ##     placeholder: The substring in `value` to replace with the token, defaults to: <TOKEN>
     #
     # auth_token:
     #   reader:
@@ -376,7 +376,7 @@ instances:
     # log_requests: false
 
     ## @param persist_connections - boolean - optional - default: false
-    ## Whether or not to persist cookies and use connection pooling for increased performance.
+    ## Whether or not to persist cookies and use connection pooling for improved performance.
     #
     # persist_connections: false
 
@@ -427,12 +427,12 @@ instances:
 
 ## Log Section
 ##
-## type - required - Type of log input source (tcp / udp / file / windows_event)
+## type - required - Type of log input source (tcp / udp / file / windows_event).
 ## port / path / channel_path - required - Set port if type is tcp or udp.
 ##                                         Set path if type is file.
 ##                                         Set channel_path if type is windows_event.
 ## source  - required - Attribute that defines which integration sent the logs.
-## encoding - optional - For file specifies the file encoding, default is utf-8, other
+## encoding - optional - For file specifies the file encoding. Default is utf-8. Other
 ##                       possible values are utf-16-le and utf-16-be.
 ## service - optional - The name of the service that generates the log.
 ##                      Overrides any `service` defined in the `init_config` section.

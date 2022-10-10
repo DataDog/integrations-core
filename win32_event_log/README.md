@@ -114,7 +114,7 @@ Double-check your filters' values with <code>Get-WmiObject</code> if the integra
     For each filter, add an instance in the configuration file at `win32_event_log.d/conf.yaml`.
 
     Some example filters:
-    
+
     ```yaml
     - type: windows_event
       channel_path: Security
@@ -123,8 +123,8 @@ Double-check your filters' values with <code>Get-WmiObject</code> if the integra
       log_processing_rules:
       - type: include_at_match
         name: relevant_security_events
-        pattern: .*(?i)eventid.+(1102|4624|4625|4634|4648|4728|4732|4735|4737|4740|4755|4756)
-    
+        pattern: '"EventID":"(1102|4624|4625|4634|4648|4728|4732|4735|4737|4740|4755|4756)"'
+
     - type: windows_event
       channel_path: Security
       source: windows.events
@@ -132,8 +132,8 @@ Double-check your filters' values with <code>Get-WmiObject</code> if the integra
       log_processing_rules:
       - type: exclude_at_match
         name: relevant_security_events
-        pattern: \"EventID\":\"1102\"|\"4624\"t\"
-     
+        pattern: '"EventID":"(1102|4624)"'
+
     - type: windows_event
       channel_path: System
       source: windows.events
@@ -141,8 +141,8 @@ Double-check your filters' values with <code>Get-WmiObject</code> if the integra
       log_processing_rules:
       - type: include_at_match
         name: system_errors_and_warnings
-        pattern: .*(?i)level.+((?i)(warning|error))
-    
+        pattern: '"level":"((?i)warning|error)"'
+
     - type: windows_event
       channel_path: Application
       source: windows.events
@@ -150,7 +150,7 @@ Double-check your filters' values with <code>Get-WmiObject</code> if the integra
       log_processing_rules:
       - type: include_at_match
         name: application_errors_and_warnings
-        pattern: .*(?i)level.+((?i)(warning|error))
+        pattern: '"level":"((?i)warning|error)"'
     ```
 
     ```yaml
@@ -193,10 +193,33 @@ logs:
     log_processing_rules:
       - type: include_at_match
         name: include_x01
-        pattern: \"value\":\"(101|201|301)\"
+        pattern: '"EventID":"(101|201|301)"'
 ```
 
-**Note**: the pattern may vary based on the format of the logs
+**Note**: The pattern may vary based on the format of the logs. The [Agent `stream-logs` subcommand][15] can be used to view this format.
+
+#### Legacy events
+_Applies to Agent versions less than 7.41_
+
+Legacy Provider EventIDs have a `Qualifiers` attribute that changes the format of the log, as seen in the [Windows Event Schema][14]. These events have the following XML format, visible in Windows Event Viewer:
+```xml
+<EventID Qualifiers="16384">3</EventID>
+```
+
+The following regex must be used to match these EventIDs:
+```yaml
+logs:
+  - type: windows_event
+    channel_path: Security
+    source: windows.event
+    service: Windows
+    log_processing_rules:
+      - type: include_at_match
+        name: include_legacy_x01
+        pattern: '"EventID":{"value":"(101|201|301)"'
+```
+
+Agent versions 7.41 and later normalize the EventID field and this legacy pattern is no longer applicable.
 
 ### Validation
 
@@ -257,3 +280,5 @@ Need help? Contact [Datadog support][7].
 [11]: https://www.datadoghq.com/blog/windows-server-monitoring
 [12]: https://docs.datadoghq.com/agent/logs/advanced_log_collection/?tab=configurationfile
 [13]: https://docs.microsoft.com/en-us/windows/win32/eventlog/event-logging
+[14]: https://learn.microsoft.com/en-us/windows/win32/wes/eventschema-systempropertiestype-complextype
+[15]: https://docs.datadoghq.com/agent/guide/agent-commands/

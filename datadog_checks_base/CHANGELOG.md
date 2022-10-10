@@ -1,5 +1,9 @@
 # CHANGELOG - datadog_checks_base
 
+## 27.3.0 / 2022-09-22
+
+* [Added] Add ability for checks to run in an ephemeral process at every run. See [#12986](https://github.com/DataDog/integrations-core/pull/12986).
+
 ## 27.2.0 / 2022-09-19
 
 * [Added] Add agent config option to control Window Counter refresh rate. See [#12665](https://github.com/DataDog/integrations-core/pull/12665).

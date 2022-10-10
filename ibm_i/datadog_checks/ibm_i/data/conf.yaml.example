@@ -9,7 +9,7 @@ init_config:
     #
     # service: <SERVICE>
 
-## Every instance is scheduled independent of the others.
+## Every instance is scheduled independently of the others.
 #
 instances:
 
@@ -77,6 +77,17 @@ instances:
     #   - name: subsystem
     #   - name: job_queue
     #   - name: message_queue_info
+
+    ## @param message_queue_info - mapping - optional
+    ## A configuration mapping for the message_queue_info query.
+    ##
+    ## selected_message_queues restricts the message_queue_info query to a subset of the queues.
+    ## This can reduce the CPU usage on the target IBM i machine. By default no filter is applied.
+    #
+    # message_queue_info:
+    #   selected_message_queues:
+    #   - QSYSOPR
+    #   - QPGMR
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.

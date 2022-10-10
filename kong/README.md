@@ -4,6 +4,8 @@
 
 The Agent's Kong check tracks total requests, response codes, client connections, and more.
 
+You can also use Kong's [Datadog plugin][15] to send API, connection, and database metrics to Datadog through the Datadog Agent using [DogStatsD][16]. Read the [Monitor Kong with the Datadog integration][11] blog post for more information.
+
 ## Setup
 
 ### Installation
@@ -139,3 +141,5 @@ Need help? Contact [Datadog support][10].
 [12]: https://docs.datadoghq.com/integrations/openmetrics/
 [13]: https://github.com/DataDog/integrations-core/blob/7.27.x/kong/datadog_checks/kong/data/conf.yaml.example
 [14]: https://docs.konghq.com/hub/kong-inc/prometheus/
+[15]: https://docs.konghq.com/hub/kong-inc/datadog/
+[16]: https://docs.datadoghq.com/developers/dogstatsd/

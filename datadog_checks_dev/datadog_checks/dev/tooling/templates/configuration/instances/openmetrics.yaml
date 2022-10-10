@@ -159,7 +159,7 @@
     A mapping of labels where metrics with matching label name and values are ignored. To match
     all values of a label, set it to `true`.
 
-    Note: Labels filtering happens before `rename_labels`.
+    Note: Label filtering happens before `rename_labels`.
 
     For example, the following configuration instructs the check to exclude all metrics with
     a label `worker` or a label `pid` with the value of either `23` or `42`.
@@ -188,9 +188,9 @@
   description: |
     A list of labels to exclude, useful for high cardinality values like timestamps or UUIDs.
     May be used in conjunction with `include_labels`.
-    Labels defined in `excluded labels` will take precedence in case of overlap.
+    Labels defined in `exclude_labels` will take precedence in case of overlap.
 
-    Note: Labels filtering happens before `rename_labels`.
+    Note: Label filtering happens before `rename_labels`.
   value:
     type: array
     items:
@@ -198,9 +198,9 @@
 - name: include_labels
   description: |
     A list of labels to include. May be used in conjunction with `exclude_labels`.
-    Labels defined in `excluded labels` will take precedence in case of overlap.
+    Labels defined in `exclude_labels` will take precedence in case of overlap.
 
-    Note: Labels filtering happens before `rename_labels`.
+    Note: Label filtering happens before `rename_labels`.
   value:
     type: array
     items:
@@ -317,7 +317,7 @@
 - name: cache_shared_labels
   description: |
     When `share_labels` is set, it instructs the check to cache labels collected from the first payload
-    for increased performance.
+    for improved performance.
 
     Set this to `false` to compute label sharing for every payload at the risk of potentially increased memory usage.
   value:

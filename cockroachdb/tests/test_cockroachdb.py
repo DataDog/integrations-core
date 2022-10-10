@@ -22,7 +22,6 @@ def test_integration(aggregator, instance_legacy, dd_run_check):
 @pytest.mark.integration
 @pytest.mark.usefixtures("dd_environment")
 def test_version_metadata(aggregator, instance_legacy, datadog_agent, dd_run_check):
-
     check_instance = CockroachdbCheck('cockroachdb', {}, [instance_legacy])
     check_instance.check_id = 'test:123'
     dd_run_check(check_instance)

@@ -1085,35 +1085,41 @@ class AgentCheck(object):
     def run(self):
         # type: () -> str
         try:
-            while self.check_initializations:
-                initialization = self.check_initializations.popleft()
-                try:
-                    initialization()
-                except Exception:
-                    self.check_initializations.appendleft(initialization)
-                    raise
+            # Ignore check initializations if running in a separate process
+            if is_affirmative(self.instance.get('process_isolation', self.init_config.get('process_isolation', False))):
+                from ..utils.replay.execute import run_with_isolation
 
-            instance = copy.deepcopy(self.instances[0])
-
-            if 'set_breakpoint' in self.init_config:
-                from ..utils.agent.debug import enter_pdb
-
-                enter_pdb(self.check, line=self.init_config['set_breakpoint'], args=(instance,))
-            elif 'profile_memory' in self.init_config or (
-                datadog_agent.tracemalloc_enabled() and should_profile_memory(datadog_agent, self.name)
-            ):
-                from ..utils.agent.memory import profile_memory
-
-                metrics = profile_memory(
-                    self.check, self.init_config, namespaces=self.check_id.split(':', 1), args=(instance,)
-                )
-
-                tags = self.get_debug_metric_tags()
-                tags.extend(instance.get('__memory_profiling_tags', []))
-                for m in metrics:
-                    self.gauge(m.name, m.value, tags=tags, raw=True)
+                run_with_isolation(self, aggregator, datadog_agent)
             else:
-                self.check(instance)
+                while self.check_initializations:
+                    initialization = self.check_initializations.popleft()
+                    try:
+                        initialization()
+                    except Exception:
+                        self.check_initializations.appendleft(initialization)
+                        raise
+
+                instance = copy.deepcopy(self.instances[0])
+
+                if 'set_breakpoint' in self.init_config:
+                    from ..utils.agent.debug import enter_pdb
+
+                    enter_pdb(self.check, line=self.init_config['set_breakpoint'], args=(instance,))
+                elif 'profile_memory' in self.init_config or (
+                    datadog_agent.tracemalloc_enabled() and should_profile_memory(datadog_agent, self.name)
+                ):
+                    from ..utils.agent.memory import profile_memory
+
+                    metrics = profile_memory(
+                        self.check, self.init_config, namespaces=self.check_id.split(':', 1), args=(instance,)
+                    )
+
+                    tags = self.get_debug_metric_tags()
+                    tags.extend(instance.get('__memory_profiling_tags', []))
+                    for m in metrics:
+                        self.gauge(m.name, m.value, tags=tags, raw=True)
+                else:
+                    self.check(instance)
 
             result = ''
         except Exception as e:
