@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import logging
 import os
 import ssl
 import threading
@@ -1104,11 +1105,10 @@ def test_do_not_crash_on_single_app_failure():
     ],
     ids=["driver", "yarn", "mesos", "standalone", "standalone_pre_20"],
 )
-def test_no_running_apps(aggregator, dd_run_check, instance, service_check):
+def test_no_running_apps(aggregator, dd_run_check, instance, service_check, caplog):
     with mock.patch('requests.get', return_value=MockResponse("{}")):
-        check = SparkCheck('spark', {}, [instance])
-        check.log = mock.MagicMock()
-        dd_run_check(check)
+        with caplog.at_level(logging.WARNING):
+            dd_run_check(SparkCheck('spark', {}, [instance]))
 
         # no metrics sent in this case
         aggregator.assert_all_metrics_covered()
@@ -1117,7 +1117,8 @@ def test_no_running_apps(aggregator, dd_run_check, instance, service_check):
             status=SparkCheck.OK,
             tags=['url:{}'.format(instance['spark_url'])] + CLUSTER_TAGS + instance.get('tags', []),
         )
-        check.log.warning.assert_called_once_with('No running apps found. No metrics will be collected.')
+
+    assert 'No running apps found. No metrics will be collected.' in caplog.text
 
 
 class StandaloneAppsResponseHandler(BaseHTTPServer.BaseHTTPRequestHandler):
