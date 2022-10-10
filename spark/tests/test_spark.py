@@ -56,8 +56,8 @@ TEST_PASSWORD = 'password'
 
 CUSTOM_TAGS = ['optional:tag1']
 COMMON_TAGS = [
-                  'app_name:' + APP_NAME,
-              ] + CLUSTER_TAGS
+    'app_name:' + APP_NAME,
+] + CLUSTER_TAGS
 
 
 def join_url_dir(url, *args):
@@ -405,11 +405,11 @@ SPARK_JOB_RUNNING_METRIC_VALUES = {
 }
 
 SPARK_JOB_RUNNING_METRIC_TAGS = [
-                                    'status:running',
-                                    'job_id:0',
-                                    'stage_id:0',
-                                    'stage_id:1',
-                                ] + COMMON_TAGS
+    'status:running',
+    'job_id:0',
+    'stage_id:0',
+    'stage_id:1',
+] + COMMON_TAGS
 
 SPARK_JOB_SUCCEEDED_METRIC_VALUES = {
     'spark.job.count': 3,
@@ -425,11 +425,11 @@ SPARK_JOB_SUCCEEDED_METRIC_VALUES = {
 }
 
 SPARK_JOB_SUCCEEDED_METRIC_TAGS = [
-                                      'status:succeeded',
-                                      'job_id:0',
-                                      'stage_id:0',
-                                      'stage_id:1',
-                                  ] + COMMON_TAGS
+    'status:succeeded',
+    'job_id:0',
+    'stage_id:0',
+    'stage_id:1',
+] + COMMON_TAGS
 
 SPARK_STAGE_RUNNING_METRIC_VALUES = {
     'spark.stage.count': 3,
@@ -450,9 +450,9 @@ SPARK_STAGE_RUNNING_METRIC_VALUES = {
 }
 
 SPARK_STAGE_RUNNING_METRIC_TAGS = [
-                                      'status:running',
-                                      'stage_id:1',
-                                  ] + COMMON_TAGS
+    'status:running',
+    'stage_id:1',
+] + COMMON_TAGS
 
 SPARK_STAGE_COMPLETE_METRIC_VALUES = {
     'spark.stage.count': 2,
@@ -473,9 +473,9 @@ SPARK_STAGE_COMPLETE_METRIC_VALUES = {
 }
 
 SPARK_STAGE_COMPLETE_METRIC_TAGS = [
-                                       'status:complete',
-                                       'stage_id:0',
-                                   ] + COMMON_TAGS
+    'status:complete',
+    'stage_id:0',
+] + COMMON_TAGS
 
 SPARK_DRIVER_METRIC_VALUES = {
     'spark.driver.rdd_blocks': 99,
@@ -524,8 +524,8 @@ SPARK_EXECUTOR_LEVEL_METRIC_VALUES = {
 }
 
 SPARK_EXECUTOR_LEVEL_METRIC_TAGS = [
-                                       'executor_id:1',
-                                   ] + COMMON_TAGS
+    'executor_id:1',
+] + COMMON_TAGS
 
 SPARK_RDD_METRIC_VALUES = {
     'spark.rdd.count': 1,
@@ -1024,7 +1024,7 @@ def test_disable_legacy_cluster_tags(aggregator, dd_run_check):
     ids=["driver", "yarn", "mesos", "standalone", "standalone_pre_20"],
 )
 def test_enable_query_name_tag_for_structured_streaming(
-        aggregator, dd_run_check, instance, requests_get_mock, base_tags
+    aggregator, dd_run_check, instance, requests_get_mock, base_tags
 ):
     instance['enable_query_name_tag'] = True
 
