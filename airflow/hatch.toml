@@ -1,0 +1,11 @@
+[env.collectors.datadog-checks]
+
+[[envs.default.matrix]]
+python = ["27", "38"]
+version = ["v1", "v2"]
+
+[envs.default.overrides]
+matrix.version.env-vars = "AIRFLOW_VERSION"
+
+[envs.latest.env-vars]
+AIRFLOW_VERSION = "latest"

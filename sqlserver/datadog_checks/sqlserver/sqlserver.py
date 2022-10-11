@@ -150,6 +150,8 @@ class SQLServer(AgentCheck):
                 }
             )
         )
+        self.log_unobfuscated_queries = is_affirmative(self.instance.get('log_unobfuscated_queries', False))
+        self.log_unobfuscated_plans = is_affirmative(self.instance.get('log_unobfuscated_plans', False))
 
         self.static_info_cache = TTLCache(
             maxsize=100,

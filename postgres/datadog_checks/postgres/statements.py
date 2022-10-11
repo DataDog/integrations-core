@@ -364,8 +364,10 @@ class PostgresStatementMetrics(DBMAsyncJob):
             try:
                 statement = obfuscate_sql_with_metadata(row['query'], self._obfuscate_options)
             except Exception as e:
-                # obfuscation errors are relatively common so only log them during debugging
-                self._log.debug("Failed to obfuscate query '%s': %s", row['query'], e)
+                if self._config.log_unobfuscated_queries:
+                    self._log.warning("Failed to obfuscate query=[%s] | err=[%s]", row['query'], e)
+                else:
+                    self._log.debug("Failed to obfuscate query | err=[%s]", e)
                 continue
 
             obfuscated_query = statement['query']

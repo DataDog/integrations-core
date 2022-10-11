@@ -2,7 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "61898266-9c80-442d-89d3-22e7aeeafb94",
   "app_id": "boundary",
-  "display_on_public_website": false,
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
@@ -46,6 +46,9 @@
     },
     "monitors": {
       "[Boundary] High active connections": "assets/monitors/active_connections.json"
-    }
+    },
+    "dashboards": {
+        "Boundary Overview": "assets/dashboards/boundary_overview.json"
+      }
   }
 }

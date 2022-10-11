@@ -1064,6 +1064,10 @@ class Network(AgentCheck):
         if iface in self._excluded_ifaces or (self._exclude_iface_re and self._exclude_iface_re.match(iface)):
             # Skip this network interface.
             return
+        if iface in ['lo', 'lo0']:
+            # Skip loopback ifaces as they don't support SIOCETHTOOL
+            return
+
         driver_name, driver_version, ethtool_stats_names, ethtool_stats = self._fetch_ethtool_stats(iface)
         tags = [] if custom_tags is None else custom_tags[:]
         tags.append('driver_name:{}'.format(driver_name))

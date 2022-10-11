@@ -2,7 +2,13 @@
 
 ## Overview
 
-This check collects distributed system observability metrics from [Linkerd][1].
+[Linkerd][1] is a light but powerful open-source service mesh with CNCF graduated status. It provides the tools you need to write secure, reliable, observable cloud-native applications. With minimal configuration and no application changes, Linkerd:
+- Uses mutual TLS to transparently secure all on-cluster TCP communication. 
+- Adds latency-aware load balancing, request retries, timeouts, and blue-green deploys to keep your applications resilient.
+- Provides platform health metrics by tracking success rates, latencies, and request volumes for every meshed workload.
+
+This integration sends your Linkerd metrics to Datadog, including application success rates, latency, and saturation.
+
 
 ## Setup
 

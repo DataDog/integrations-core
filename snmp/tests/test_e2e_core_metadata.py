@@ -758,7 +758,7 @@ def test_e2e_core_metadata_checkpoint_firewall(dd_agent_check):
     device_ip = instance['ip_address']
 
     device = {
-        'description': 'Linux gw-af4bd9 3.10.0-957.21.3cpx86_64 #1 SMP Tue Jan 28 17:26:12 IST 2020 x86_64',
+        'description': 'Linux host1 3.10.0-957.21.3cpx86_64 #1 SMP Tue Jan 28 17:26:12 IST 2020 x86_64',
         'id': 'default:' + device_ip,
         'id_tags': [
             'device_namespace:default',

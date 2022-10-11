@@ -29,13 +29,15 @@ parameters:
   default: datadog/agent-dev:master-py2-win-servercore
 
 variables:
-  DDEV_E2E_AGENT: ${{ parameters.agent_image }}
-  DDEV_E2E_AGENT_PY2: ${{ parameters.agent_image_py2 }}
-  DDEV_E2E_AGENT_WIN: ${{ parameters.agent_windows_image }}
-  DDEV_E2E_AGENT_WIN_PY2: ${{ parameters.agent_windows_image_py2 }}
-  PIP_CACHE_DIR: $(Pipeline.Workspace)/.cache/pip
-  DDEV_COLOR: 1
-  DD_TRACE_AGENT_PORT: 8127
+  - template: './templates/common-variables.yml'
+  - name: DDEV_E2E_AGENT
+    value: ${{ parameters.agent_image }}
+  - name: DDEV_E2E_AGENT_PY2
+    value: ${{ parameters.agent_image_py2 }}
+  - name: DDEV_E2E_AGENT_WIN
+    value: ${{ parameters.agent_windows_image }}
+  - name: DDEV_E2E_AGENT_WIN_PY2
+    value: ${{ parameters.agent_windows_image_py2 }}
 
 resources:
   containers:

@@ -49,7 +49,7 @@ setup(
     description='The Datadog Checks Downloader',
     long_description=LONG_DESC,
     long_description_content_type='text/markdown',
-    keywords='datadog agent checks',
+    keywords='datadog,agent,checks',
     url='https://github.com/DataDog/integrations-core',
     author='Datadog',
     author_email='packages@datadoghq.com',
