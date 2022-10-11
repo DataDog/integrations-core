@@ -9,6 +9,7 @@ class ConditionLimiter(object):
     This class is used to limit the number of concurrent satisfied conditions. This is intended for use in
     scenarios where it is critical that no conditions are satisfied after a certain limit has been reached.
     Therefore, ephemeral false negatives are acceptable in order to maintain this guarantee without blocking.
+    After the limit is reached, no conditions are evaluated until an earlier slot is explicitly released.
 
     Every subclass must implement a `condition` method. For example, if you wanted to only run one check
     instance at a time based on the command line arguments used to start an active process, you could do:
