@@ -52,6 +52,13 @@ jobs:
       run_py2_tests: ${{ parameters.run_py2_tests }}
       dd_url: ${{ parameters.dd_url }}
 
+  # https://docs.codecov.com/docs/codecov-uploader
+  - script: |
+      curl -Os https://uploader.codecov.io/latest/linux/codecov
+      chmod +x codecov
+      mv codecov /user/bin/
+    displayName: 'Install Codecov'
+      
   - template: './set-up-integrations.yml'
     parameters:
       check: ${{ parameters.check }}

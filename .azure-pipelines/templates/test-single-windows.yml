@@ -66,6 +66,12 @@ jobs:
       run_py2_tests: ${{ parameters.run_py2_tests }}
       dd_url: ${{ parameters.dd_url }}
 
+  # https://docs.codecov.com/docs/codecov-uploader
+  - script: |
+      $ProgressPreference = 'SilentlyContinue'
+      Invoke-WebRequest -Uri https://uploader.codecov.io/latest/windows/codecov.exe -Outfile codecov.exe
+    displayName: 'Install Codecov'
+
   - template: './set-up-integrations.yml'
     parameters:
       check: ${{ parameters.check }}
