@@ -250,8 +250,8 @@ class Network(AgentCheck):
         for m in expected_metrics:
             assert m in vals_by_metric
         if len(vals_by_metric) > len(expected_metrics):
-            missing_metrics = set(vals_by_metric.keys()).difference(expected_metrics)
-            self.log.debug("Found unexpected metrics that will be ignored: {}".format(missing_metrics))
+            unexpected_metrics = set(vals_by_metric.keys()).difference(expected_metrics)
+            raise CheckException("Unexpected metrics found: {}".format(unexpected_metrics))
         if len(vals_by_metric) < len(expected_metrics):
             missing_metrics = set(expected_metrics).difference(vals_by_metric.keys())
             raise CheckException("Missing expected metrics: {}".format(missing_metrics))
