@@ -16,6 +16,7 @@ import psutil
 from six import PY3, iteritems, itervalues
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
+from datadog_checks.base.errors import CheckException
 from datadog_checks.base.utils.common import pattern_filter
 from datadog_checks.base.utils.platform import Platform
 from datadog_checks.base.utils.subprocess_output import SubprocessOutputEmptyError, get_subprocess_output
@@ -245,7 +246,12 @@ class Network(AgentCheck):
         expected_metrics = self._get_expected_metrics()
         for m in expected_metrics:
             assert m in vals_by_metric
-        assert len(vals_by_metric) == len(expected_metrics)
+        if len(vals_by_metric) > len(expected_metrics):
+            unexpected_metrics = set(vals_by_metric.keys()).difference(expected_metrics)
+            raise CheckException("Unexpected metrics found: {}".format(unexpected_metrics))
+        if len(vals_by_metric) < len(expected_metrics):
+            missing_metrics = set(expected_metrics).difference(vals_by_metric.keys())
+            raise CheckException("Missing expected metrics: {}".format(missing_metrics))
 
         count = 0
         for metric, val in iteritems(vals_by_metric):
@@ -262,7 +268,7 @@ class Network(AgentCheck):
             'packets_out.count',
             'packets_out.error',
         ]
-        if Platform.is_linux() or Platform.is_windows():
+        if Platform.is_linux() or Platform.is_windows() or Platform.is_darwin():
             expected_metrics.extend(
                 [
                     'packets_in.drop',
