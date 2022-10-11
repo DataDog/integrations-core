@@ -1,9 +1,9 @@
 # Profile for Checkpoint Firewall devices
 #
 # Example sysDescr:
-# - 1.3.6.1.4.1.2620.1.6.123.1.49   Linux gw-af4bd9 3.10.0-957.21.3cpx86_64 #1 SMP Tue Jan 28 17:26:12 IST 2020 x86_64
-# - 1.3.6.1.4.1.2620.1.6.123.1.56   Linux plnp-corp-vsx-fwa1 2.6.18-92cpx86_64 #1 SMP Tue May 16 12:09:46 IDT 2017 x86_64"
-# - 1.3.6.1.4.1.2620.1.6.123.1.56   Linux labp-corp-vsx-fwa2_21800 2.6.18-92cpx86_64 #1 SMP Tue May 16 12:09:46 IDT 2017 x86_64"
+# - 1.3.6.1.4.1.2620.1.6.123.1.49   Linux host1 3.10.0-957.21.3cpx86_64 #1 SMP Tue Jan 28 17:26:12 IST 2020 x86_64
+# - 1.3.6.1.4.1.2620.1.6.123.1.56   Linux host2 2.6.18-92cpx86_64 #1 SMP Tue May 16 12:09:46 IDT 2017 x86_64"
+# - 1.3.6.1.4.1.2620.1.6.123.1.56   Linux host3 2.6.18-92cpx86_64 #1 SMP Tue May 16 12:09:46 IDT 2017 x86_64"
 
 extends:
   - _base.yaml
@@ -54,7 +54,7 @@ metadata:
           OID: 1.3.6.1.2.1.1.1.0
           name: sysDescr
           extract_value: 'Linux\s+\S+\s+(\d+(?:\.\d+)*)'
-          # Example: `3.10.0` in `Linux gw-af4bd9 3.10.0-957.21.3cpx86_64`
+          # Example: `3.10.0` in `Linux host1 3.10.0-957.21.3cpx86_64`
           #
           # Note: The os version is also stored in two separate OIDs for major and minor. Example:
           #       .1.3.6.1.4.1.2620.1.6.5.2.0 (osMajorVer) = 2
