@@ -13,7 +13,7 @@ class TrelloClient:
     LABELS_ENDPOINT = API_URL + '/1/boards/ICjijxr4/labels'
     CARDS_ENDPOINT = API_URL + '/1/cards'
     MEMBERSHIP_ENDPOINT = API_URL + '/1/boards/ICjijxr4/memberships'
-    MEMBER_ENPOINT = API_URL + '/1/members'
+    BOARD_MEMBERS_ENDPOINT = API_URL + '/1/boards/ICjijxr4/members'
     HAVE_BUG_FIXE_ME_COLUMN = '58f0c271cbf2d534bd626916'
     FIXED_READY_TO_REBUILD_COLUMN = '5d5a8a50ca7a0189ae8ac5ac'
     RC_BUILDS_COLUMN = '5727778db5367f8b4cb520ca'
@@ -239,28 +239,21 @@ class TrelloClient:
         response.raise_for_status()
         return response.json()
 
-    def get_membership(self):
+    def get_board_members(self):
         """
-        Get the members.
+        Get the members from the board.
         """
-        membership = requests.get(self.MEMBERSHIP_ENDPOINT, params=self.auth)
-        membership.raise_for_status()
-        return membership.json()
+        members = requests.get(self.BOARD_MEMBERS_ENDPOINT, params=self.auth)
+        members.raise_for_status()
+        members = members.json()
 
-    def get_member(self, id_member):
-        """
-        Get the member.
-        """
-        try:
-            membership = requests.get(f'{self.MEMBER_ENPOINT}/{id_member}', params=self.auth)
-            membership.raise_for_status()
-        except requests.exceptions.HTTPError as e:
-            if e.response.status_code == 429:
-                raise Exception('Timeout, please try in 900 secondes') from e
-            else:
-                raise e
+        # We need the memberships to filter out deactivated users
+        memberships = requests.get(self.MEMBERSHIP_ENDPOINT, params=self.auth)
+        memberships.raise_for_status()
+        memberships = memberships.json()
+        deactivated_users = {m['idMember'] for m in memberships if m['deactivated']}
 
-        return membership.json()
+        return [member for member in members if member['id'] not in deactivated_users]
 
     def get_list(self, list_id):
         return self.__request(self.API_URL + f'/1/lists/{list_id}/cards')
