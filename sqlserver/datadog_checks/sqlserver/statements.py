@@ -28,6 +28,7 @@ from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_IN
 
 DEFAULT_COLLECTION_INTERVAL = 10
 
+
 SQL_SERVER_QUERY_METRICS_COLUMNS = [
     "execution_count",
     "total_worker_time",
@@ -48,9 +49,10 @@ SQL_SERVER_QUERY_METRICS_COLUMNS = [
     "total_spills",
 ]
 
+
 STATEMENT_METRICS_QUERY = """\
 with qstats as (
-    select TOP {limit} query_hash, query_plan_hash, last_execution_time,
+    select query_hash, query_plan_hash, last_execution_time,
             CONCAT(
                 CONVERT(binary(64), plan_handle),
                 CONVERT(binary(4), statement_start_offset),
@@ -58,21 +60,22 @@ with qstats as (
            (select value from sys.dm_exec_plan_attributes(plan_handle) where attribute = 'dbid') as dbid,
            {query_metrics_columns}
     from sys.dm_exec_query_stats
-    where last_execution_time > dateadd(second, -?, getdate())
 ),
 qstats_aggr as (
     select query_hash, query_plan_hash, CAST(S.dbid as int) as dbid,
        D.name as database_name, max(plan_handle_and_offsets) as plan_handle_and_offsets,
+       max(last_execution_time) as last_execution_time,
     {query_metrics_column_sums}
     from qstats S
     left join sys.databases D on S.dbid = D.database_id
     group by query_hash, query_plan_hash, S.dbid, D.name
 ),
-qstats_aggr_split as (select
+qstats_aggr_split as (select TOP {limit}
     convert(varbinary(64), substring(plan_handle_and_offsets, 1, 64)) as plan_handle,
     convert(int, convert(varbinary(4), substring(plan_handle_and_offsets, 64+1, 4))) as statement_start_offset,
     convert(int, convert(varbinary(4), substring(plan_handle_and_offsets, 64+6, 4))) as statement_end_offset,
     * from qstats_aggr
+    where last_execution_time > dateadd(second, -?, getdate())
 )
 select
     SUBSTRING(text, (statement_start_offset / 2) + 1,
