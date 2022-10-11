@@ -91,3 +91,17 @@ jobs:
       repo: ${{ parameters.repo }}
       coverage: ${{ parameters.coverage }}
       force_base_package: ${{ parameters.force_base_package }}
+
+  - ${{ if and(eq(parameters.test, 'true'), eq(parameters.coverage, 'true'), eq(parameters.force_base_package, 'false')) }}:
+    # https://docs.codecov.com/docs/codecov-uploader
+    - powershell: |
+        Invoke-WebRequest -Uri https://uploader.codecov.io/latest/windows/codecov.exe -Outfile codecov.exe
+      displayName: 'Install Codecov'
+    - bash: |        
+        for cov_file in */coverage.xml; do
+          echo "Uploading $cov_file with flag $(dirname $cov_file)"
+          ./codecov --F $(dirname $cov_file) -f $cov_file
+        done
+      displayName: 'Upload coverage data'
+      env:
+        CODECOV_TOKEN: $(CODECOV_TOKEN)
