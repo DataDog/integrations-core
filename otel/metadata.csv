@@ -51,3 +51,6 @@ otelcol_processor_batch_timeout_trigger_send,count,,unit,,Number of times the ba
 otelcol_exporter_enqueue_failed_metric_points,count,,unit,,Number of metric points failed to be added to the sending queue,-1,otel,enqueue failed metric points,
 otelcol_process_runtime_total_sys_memory_bytes,gauge,,byte,,Total bytes of memory obtained from the OS (see 'go doc runtime.MemStats.Sys'),0,otel,total sys memory bytes,
 otelcol_processor_batch_batch_size_trigger_send,count,,unit,,Number of times the batch was sent due to a size trigger,0,otel,batch size trigger send,
+otelcol_exporter_sent_log_records,count,,unit,,Number of log records successfully sent to destination,0,otel,exporter sent log records,
+otelcol_receiver_refused_log_records,count,,unit,,Number of log records that could not be pushed into the pipeline,0,otel,receiver refused log records,
+otelcol_receiver_accepted_log_records,count,,unit,,Number of log records successfully pushed into the pipeline,0,otel,receiver accepted log records,
