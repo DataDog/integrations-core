@@ -553,6 +553,8 @@ class CadvisorPrometheusScraperMixin(object):
 
     def container_memory_rss(self, metric, scraper_config):
         metric_name = scraper_config['namespace'] + '.memory.rss'
+        # Filter out aberrant values
+        metric.samples = [sample for sample in metric.samples if sample[self.SAMPLE_VALUE] < 2**63]
         self._process_container_metric('gauge', metric_name, metric, scraper_config)
 
     def container_memory_swap(self, metric, scraper_config):
