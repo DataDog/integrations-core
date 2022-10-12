@@ -5,13 +5,9 @@
 from six import PY3, iteritems
 
 from datadog_checks.base.utils.subprocess_output import SubprocessOutputEmptyError, get_subprocess_output
+
 from . import Network
 from .const import SOLARIS_TCP_METRICS
-
-try:
-    import datadog_agent
-except ImportError:
-    from datadog_checks.base.stubs import datadog_agent
 
 try:
     import fcntl
@@ -22,19 +18,19 @@ if PY3:
     long = int
 
 
-class BSDNetwork(Network):
+class SolarisNetwork(Network):
     def __init__(self, name, init_config, instances):
-        super(BSDNetwork, self).__init__(name, init_config, instances)
+        super(SolarisNetwork, self).__init__(name, init_config, instances)
 
-    def check(self, instance):
+    def check(self, _):
         # Can't get bytes sent and received via netstat
         # Default to kstat -p link:0:
-        custom_tags = instance.get('tags', [])
+        custom_tags = self.instance.get('tags', [])
         try:
             netstat, _, _ = get_subprocess_output(["kstat", "-p", "link:0:"], self.log)
             metrics_by_interface = self._parse_solaris_netstat(netstat)
             for interface, metrics in iteritems(metrics_by_interface):
-                self._submit_devicemetrics(interface, metrics, custom_tags)
+                self.submit_devicemetrics(interface, metrics, custom_tags)
         except SubprocessOutputEmptyError:
             self.log.exception("Error collecting kstat stats.")
 
@@ -49,7 +45,7 @@ class BSDNetwork(Network):
             # tcpRetransSegs      =     0 tcpRetransBytes     =     0
             # tcpOutAck           =   185 tcpOutAckDelayed    =     4
             # ...
-            self._submit_regexed_values(netstat, SOLARIS_TCP_METRICS, custom_tags)
+            self.submit_regexed_values(netstat, SOLARIS_TCP_METRICS, custom_tags)
         except SubprocessOutputEmptyError:
             self.log.exception("Error collecting TCP stats.")
 
@@ -144,7 +140,7 @@ class BSDNetwork(Network):
 
             # Add it to this interface's list of metrics.
             metrics = metrics_by_interface.get(iface, {})
-            metrics[ddname] = self._parse_value(cols[1])
+            metrics[ddname] = self.parse_long(cols[1])
             metrics_by_interface[iface] = metrics
 
         return metrics_by_interface

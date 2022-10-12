@@ -6,13 +6,9 @@ from six import PY3, iteritems
 
 from datadog_checks.base.utils.platform import Platform
 from datadog_checks.base.utils.subprocess_output import SubprocessOutputEmptyError, get_subprocess_output
+
 from . import Network
 from .const import BSD_TCP_METRICS
-
-try:
-    import datadog_agent
-except ImportError:
-    from datadog_checks.base.stubs import datadog_agent
 
 try:
     import fcntl
@@ -88,17 +84,17 @@ class BSDNetwork(Network):
                     current = iface
 
                 # Filter inactive interfaces
-                if self._parse_value(x[-5]) or self._parse_value(x[-2]):
+                if self.parse_long(x[-5]) or self.parse_long(x[-2]):
                     iface = current
                     metrics = {
-                        'bytes_rcvd': self._parse_value(x[-5]),
-                        'bytes_sent': self._parse_value(x[-2]),
-                        'packets_in.count': self._parse_value(x[-7]),
-                        'packets_in.error': self._parse_value(x[-6]),
-                        'packets_out.count': self._parse_value(x[-4]),
-                        'packets_out.error': self._parse_value(x[-3]),
+                        'bytes_rcvd': self.parse_long(x[-5]),
+                        'bytes_sent': self.parse_long(x[-2]),
+                        'packets_in.count': self.parse_long(x[-7]),
+                        'packets_in.error': self.parse_long(x[-6]),
+                        'packets_out.count': self.parse_long(x[-4]),
+                        'packets_out.error': self.parse_long(x[-3]),
                     }
-                    self._submit_devicemetrics(iface, metrics, custom_tags)
+                    self.submit_devicemetrics(iface, metrics, custom_tags)
         except SubprocessOutputEmptyError:
             self.log.exception("Error collecting connection stats.")
 
@@ -122,15 +118,15 @@ class BSDNetwork(Network):
             #         165400 duplicate acks
             #         ...
 
-            self._submit_regexed_values(netstat, BSD_TCP_METRICS, custom_tags)
+            self.submit_regexed_values(netstat, BSD_TCP_METRICS, custom_tags)
         except SubprocessOutputEmptyError:
             self.log.exception("Error collecting TCP stats.")
 
         proc_location = self.agentConfig.get('procfs_path', '/proc').rstrip('/')
 
-        net_proc_base_location = self._get_net_proc_base_location(proc_location)
+        net_proc_base_location = self.get_net_proc_base_location(proc_location)
 
-        if self._is_collect_cx_state_runnable(net_proc_base_location):
+        if self.is_collect_cx_state_runnable(net_proc_base_location):
             try:
                 self.log.debug("Using `netstat` to collect connection state")
                 output_TCP, _, _ = get_subprocess_output(["netstat", "-n", "-a", "-p", "tcp"], self.log)

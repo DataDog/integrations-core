@@ -2,12 +2,16 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import os
+import socket
 
-from six import PY3, iteritems
+from six import PY3, iteritems, itervalues
 
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.common import pattern_filter
 from datadog_checks.base.utils.subprocess_output import SubprocessOutputEmptyError, get_subprocess_output
+from datadog_checks.network import ethtool
+from datadog_checks.network.const import ENA_METRIC_NAMES, ENA_METRIC_PREFIX
+
 from . import Network
 
 try:
@@ -28,7 +32,7 @@ class LinuxNetwork(Network):
     def __init__(self, name, init_config, instances):
         super(LinuxNetwork, self).__init__(name, init_config, instances)
 
-    def check(self, instance):
+    def check(self, _):
         """
         _check_linux can be run inside a container and still collects the network metrics from the host
         For that procfs_path can be set to something like "/host/proc"
@@ -38,12 +42,12 @@ class LinuxNetwork(Network):
         if not proc_location:
             proc_location = '/proc'
         proc_location = proc_location.rstrip('/')
-        custom_tags = instance.get('tags', [])
+        custom_tags = self.instance.get('tags', [])
 
         self._get_iface_sys_metrics(custom_tags)
-        net_proc_base_location = self._get_net_proc_base_location(proc_location)
+        net_proc_base_location = self.get_net_proc_base_location(proc_location)
 
-        if self._is_collect_cx_state_runnable(net_proc_base_location):
+        if self.is_collect_cx_state_runnable(net_proc_base_location):
             try:
                 self.log.debug("Using `ss` to collect connection state")
                 # Try using `ss` for increased performance over `netstat`
@@ -106,7 +110,7 @@ class LinuxNetwork(Network):
                 # udp        0      0 0.0.0.0:123             0.0.0.0:*
                 # udp6       0      0 :::41458                :::*
 
-                metrics = self._parse_linux_cx_state(lines[2:], self.tcp_states['netstat'], 5)
+                metrics = self._parse_cx_state(lines[2:], self.tcp_states['netstat'], 5)
                 for metric, value in iteritems(metrics):
                     self.gauge(metric, value, tags=custom_tags)
 
@@ -136,19 +140,19 @@ class LinuxNetwork(Network):
             cols = line.split(':', 1)
             x = cols[1].split()
             # Filter inactive interfaces
-            if self._parse_value(x[0]) or self._parse_value(x[8]):
+            if self.parse_long(x[0]) or self.parse_long(x[8]):
                 iface = cols[0].strip()
                 metrics = {
-                    'bytes_rcvd': self._parse_value(x[0]),
-                    'bytes_sent': self._parse_value(x[8]),
-                    'packets_in.count': self._parse_value(x[1]),
-                    'packets_in.drop': self._parse_value(x[3]),
-                    'packets_in.error': self._parse_value(x[2]) + self._parse_value(x[3]),
-                    'packets_out.count': self._parse_value(x[9]),
-                    'packets_out.drop': self._parse_value(x[11]),
-                    'packets_out.error': self._parse_value(x[10]) + self._parse_value(x[11]),
+                    'bytes_rcvd': self.parse_long(x[0]),
+                    'bytes_sent': self.parse_long(x[8]),
+                    'packets_in.count': self.parse_long(x[1]),
+                    'packets_in.drop': self.parse_long(x[3]),
+                    'packets_in.error': self.parse_long(x[2]) + self.parse_long(x[3]),
+                    'packets_out.count': self.parse_long(x[9]),
+                    'packets_out.drop': self.parse_long(x[11]),
+                    'packets_out.error': self.parse_long(x[10]) + self.parse_long(x[11]),
                 }
-                self._submit_devicemetrics(iface, metrics, custom_tags)
+                self.submit_devicemetrics(iface, metrics, custom_tags)
                 self._handle_ethtool_stats(iface, custom_tags)
 
         netstat_data = {}
@@ -251,19 +255,19 @@ class LinuxNetwork(Network):
             for met in nstat_metrics_names[k]:
                 if met in netstat_data.get(k, {}):
                     self._submit_netmetric(
-                        nstat_metrics_names[k][met], self._parse_value(netstat_data[k][met]), tags=custom_tags
+                        nstat_metrics_names[k][met], self.parse_long(netstat_data[k][met]), tags=custom_tags
                     )
 
         for k in nstat_metrics_gauge_names:
             for met in nstat_metrics_gauge_names[k]:
                 if met in netstat_data.get(k, {}):
                     self._submit_netmetric_gauge(
-                        nstat_metrics_gauge_names[k][met], self._parse_value(netstat_data[k][met]), tags=custom_tags
+                        nstat_metrics_gauge_names[k][met], self.parse_long(netstat_data[k][met]), tags=custom_tags
                     )
 
         # Get the conntrack -S information
-        conntrack_path = instance.get('conntrack_path')
-        use_sudo_conntrack = is_affirmative(instance.get('use_sudo_conntrack', True))
+        conntrack_path = self.instance.get('conntrack_path')
+        use_sudo_conntrack = is_affirmative(self.instance.get('use_sudo_conntrack', True))
         if conntrack_path is not None:
             self._add_conntrack_stats_metrics(conntrack_path, use_sudo_conntrack, custom_tags)
 
@@ -271,8 +275,8 @@ class LinuxNetwork(Network):
         conntrack_files_location = os.path.join(proc_location, 'sys', 'net', 'netfilter')
         # By default, only max and count are reported. However if the blacklist is set,
         # the whitelist is losing its default value
-        blacklisted_files = instance.get('blacklist_conntrack_metrics')
-        whitelisted_files = instance.get('whitelist_conntrack_metrics')
+        blacklisted_files = self.instance.get('blacklist_conntrack_metrics')
+        whitelisted_files = self.instance.get('whitelist_conntrack_metrics')
         if blacklisted_files is None and whitelisted_files is None:
             whitelisted_files = ['max', 'count']
 
@@ -282,10 +286,10 @@ class LinuxNetwork(Network):
         try:
             for metric_file in os.listdir(conntrack_files_location):
                 if (
-                        os.path.isfile(os.path.join(conntrack_files_location, metric_file))
-                        and 'nf_conntrack_' in metric_file
+                    os.path.isfile(os.path.join(conntrack_files_location, metric_file))
+                    and 'nf_conntrack_' in metric_file
                 ):
-                    available_files.append(metric_file[len('nf_conntrack_'):])
+                    available_files.append(metric_file[len('nf_conntrack_') :])
         except Exception as e:
             self.log.debug("Unable to list the files in %s. %s", conntrack_files_location, e)
 
@@ -298,3 +302,232 @@ class LinuxNetwork(Network):
             value = self._read_int_file(metric_file_location)
             if value is not None:
                 self.gauge('system.net.conntrack.{}'.format(metric_name), value, tags=custom_tags)
+
+    def get_expected_metrics(self):
+        expected_metrics = super(LinuxNetwork, self).get_expected_metrics()
+        expected_metrics.extend(
+            [
+                'packets_in.drop',
+                'packets_out.drop',
+            ]
+        )
+        return expected_metrics
+
+    def _submit_netmetric(self, metric, value, tags=None):
+        if self._collect_rate_metrics:
+            self.rate(metric, value, tags=tags)
+        if self._collect_count_metrics:
+            self.monotonic_count('{}.count'.format(metric), value, tags=tags)
+
+    def _submit_netmetric_gauge(self, metric, value, tags=None):
+        self.gauge(metric, value, tags=tags)
+
+    def _read_int_file(self, file_location):
+        try:
+            with open(file_location, 'r') as f:
+                try:
+                    value = int(f.read().rstrip())
+                    return value
+                except ValueError:
+                    self.log.debug("Content of %s is not an integer", file_location)
+        except IOError as e:
+            self.log.debug("Unable to read %s, skipping %s.", file_location, e)
+            return None
+
+    def _get_iface_sys_metrics(self, custom_tags):
+        sys_net_location = '/sys/class/net'
+        sys_net_metrics = ['mtu', 'tx_queue_len']
+        try:
+            ifaces = os.listdir(sys_net_location)
+        except OSError as e:
+            self.log.debug("Unable to list %s, skipping system iface metrics: %s.", sys_net_location, e)
+            return None
+        for iface in ifaces:
+            for metric_name in sys_net_metrics:
+                metric_file_location = os.path.join(sys_net_location, iface, metric_name)
+                value = self._read_int_file(metric_file_location)
+                if value is not None:
+                    self.gauge('system.net.iface.{}'.format(metric_name), value, tags=custom_tags + ["iface:" + iface])
+            iface_queues_location = os.path.join(sys_net_location, iface, 'queues')
+            self._collect_iface_queue_metrics(iface, iface_queues_location, custom_tags)
+
+    def _collect_iface_queue_metrics(self, iface, iface_queues_location, custom_tags):
+        try:
+            iface_queues = os.listdir(iface_queues_location)
+        except OSError as e:
+            self.log.debug("Unable to list %s, skipping %s.", iface_queues_location, e)
+            return
+        num_rx_queues = len([q for q in iface_queues if q.startswith('rx-')])
+        num_tx_queues = len([q for q in iface_queues if q.startswith('tx-')])
+        self.gauge('system.net.iface.num_tx_queues', num_tx_queues, tags=custom_tags + ["iface:" + iface])
+        self.gauge('system.net.iface.num_rx_queues', num_rx_queues, tags=custom_tags + ["iface:" + iface])
+
+    def _add_conntrack_stats_metrics(self, conntrack_path, use_sudo_conntrack, tags):
+        """
+        Parse the output of conntrack -S
+        Add the parsed metrics
+        """
+        try:
+            cmd = [conntrack_path, "-S"]
+            if use_sudo_conntrack:
+                cmd.insert(0, "sudo")
+            output, _, _ = get_subprocess_output(cmd, self.log)
+            # conntrack -S sample:
+            # cpu=0 found=27644 invalid=19060 ignore=485633411 insert=0 insert_failed=1 \
+            #       drop=1 early_drop=0 error=0 search_restart=39936711
+            # cpu=1 found=21960 invalid=17288 ignore=475938848 insert=0 insert_failed=1 \
+            #       drop=1 early_drop=0 error=0 search_restart=36983181
+
+            lines = output.splitlines()
+
+            for line in lines:
+                cols = line.split()
+                cpu_num = cols[0].split('=')[-1]
+                cpu_tag = ['cpu:{}'.format(cpu_num)]
+                cols = cols[1:]
+
+                for cell in cols:
+                    metric, value = cell.split('=')
+                    self.monotonic_count('system.net.conntrack.{}'.format(metric), int(value), tags=tags + cpu_tag)
+        except SubprocessOutputEmptyError:
+            self.log.debug("Couldn't use %s to get conntrack stats", conntrack_path)
+
+    def _get_metrics(self):
+        return {val: 0 for val in itervalues(self.cx_state_gauge)}
+
+    def _parse_short_state_lines(self, lines, metrics, tcp_states, ip_version):
+        for line in lines:
+            value, state = line.split()
+            proto = "tcp{0}".format(ip_version)
+            if state in tcp_states:
+                metric = self.cx_state_gauge[proto, tcp_states[state]]
+                metrics[metric] += int(value)
+
+    def _parse_cx_state(self, lines, tcp_states, state_col, protocol=None, ip_version=None):
+        """
+        Parse the output of the command that retrieves the connection state (either `ss` or `netstat`)
+        Returns a dict metric_name -> value
+        """
+        metrics = self._get_metrics()
+        for l in lines:
+            cols = l.split()
+            if cols[0].startswith('tcp') or protocol == 'tcp':
+                proto = "tcp{0}".format(ip_version) if ip_version else ("tcp4", "tcp6")[cols[0] == "tcp6"]
+                if cols[state_col] in tcp_states:
+                    metric = self.cx_state_gauge[proto, tcp_states[cols[state_col]]]
+                    metrics[metric] += 1
+            elif cols[0].startswith('udp') or protocol == 'udp':
+                proto = "udp{0}".format(ip_version) if ip_version else ("udp4", "udp6")[cols[0] == "udp6"]
+                metric = self.cx_state_gauge[proto, 'connections']
+                metrics[metric] += 1
+
+        return metrics
+
+    def _parse_queues(self, tool, ss_output):
+        """
+        for each line of `ss_output`, returns a triplet with:
+        * a connection state (`established`, `listening`)
+        * the receive queue size
+        * the send queue size
+        """
+        for line in ss_output.splitlines():
+            fields = line.split()
+
+            if len(fields) < (6 if tool == "netstat" else 3):
+                continue
+
+            state_column = 0 if tool == "ss" else 5
+
+            try:
+                state = self.tcp_states[tool][fields[state_column]]
+            except KeyError:
+                continue
+
+            yield (state, fields[1], fields[2])
+
+    def _handle_ethtool_stats(self, iface, custom_tags):
+        # read Ethtool metrics, if configured and available
+        if not self._collect_ethtool_stats:
+            return
+        if iface in self._excluded_ifaces or (self._exclude_iface_re and self._exclude_iface_re.match(iface)):
+            # Skip this network interface.
+            return
+        if iface in ['lo', 'lo0']:
+            # Skip loopback ifaces as they don't support SIOCETHTOOL
+            return
+
+        driver_name, driver_version, ethtool_stats_names, ethtool_stats = self._fetch_ethtool_stats(iface)
+        tags = [] if custom_tags is None else custom_tags[:]
+        tags.append('driver_name:{}'.format(driver_name))
+        tags.append('driver_version:{}'.format(driver_version))
+        if self._collect_ena_metrics:
+            ena_metrics = ethtool.get_ena_metrics(ethtool_stats_names, ethtool_stats)
+            self._submit_ena_metrics(iface, ena_metrics, tags)
+        if self._collect_ethtool_metrics:
+            ethtool_metrics = ethtool.get_ethtool_metrics(driver_name, ethtool_stats_names, ethtool_stats)
+            self._submit_ethtool_metrics(iface, ethtool_metrics, tags)
+
+    def _submit_ena_metrics(self, iface, vals_by_metric, tags):
+        if not vals_by_metric:
+            return
+        if iface in self._excluded_ifaces or (self._exclude_iface_re and self._exclude_iface_re.match(iface)):
+            # Skip this network interface.
+            return
+
+        metric_tags = [] if tags is None else tags[:]
+        metric_tags.append('device:{}'.format(iface))
+
+        allowed = [ENA_METRIC_PREFIX + m for m in ENA_METRIC_NAMES]
+        for m in vals_by_metric:
+            assert m in allowed
+
+        count = 0
+        for metric, val in iteritems(vals_by_metric):
+            self.gauge('system.net.%s' % metric, val, tags=metric_tags)
+            count += 1
+        self.log.debug("tracked %s network ena metrics for interface %s", count, iface)
+
+    def _submit_ethtool_metrics(self, iface, ethtool_metrics, base_tags):
+        if not ethtool_metrics:
+            return
+        if iface in self._excluded_ifaces or (self._exclude_iface_re and self._exclude_iface_re.match(iface)):
+            # Skip this network interface.
+            return
+
+        base_tags_with_device = [] if base_tags is None else base_tags[:]
+        base_tags_with_device.append('device:{}'.format(iface))
+
+        count = 0
+        for ethtool_tag, metric_map in iteritems(ethtool_metrics):
+            tags = base_tags_with_device + [ethtool_tag]
+            for metric, val in iteritems(metric_map):
+                self.monotonic_count('system.net.%s' % metric, val, tags=tags)
+                count += 1
+        self.log.debug("tracked %s network ethtool metrics for interface %s", count, iface)
+
+    def _fetch_ethtool_stats(self, iface):
+        """
+        Collect ethtool metrics for given interface.
+
+        Ethtool metrics are collected via the ioctl SIOCETHTOOL call. At the time of writing
+        this method, there are no maintained Python libraries that do this. The solution
+        is based on:
+
+        * https://github.com/safchain/ethtool
+        * https://gist.github.com/yunazuno/d7cd7e1e127a39192834c75d85d45df9
+        """
+        ethtool_socket = None
+        try:
+            ethtool_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, 0)
+            driver_name, driver_version = ethtool.get_ethtool_drvinfo(iface, ethtool_socket)
+            stats_names, stats = ethtool.get_ethtool_stats(iface, ethtool_socket)
+            return driver_name, driver_version, stats_names, stats
+        except OSError as e:
+            # this will happen for interfaces that don't support SIOCETHTOOL - e.g. loopback or docker
+            self.log.debug('OSError while trying to collect ethtool metrics for interface %s: %s', iface, str(e))
+        except Exception:
+            self.log.exception('Unable to collect ethtool metrics for interface %s', iface)
+        finally:
+            if ethtool_socket is not None:
+                ethtool_socket.close()
+        return None, None, [], []
