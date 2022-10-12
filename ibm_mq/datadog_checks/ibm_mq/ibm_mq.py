@@ -60,6 +60,7 @@ class IbmMqCheck(AgentCheck):
     def check(self, _):
         if not self.check_queue_manager_process():
             self.log.debug('Process not found, skipping check run')
+            self.service_check(self.SERVICE_CHECK, self.WARNING, self._config.tags, hostname=self._config.hostname)
             return
 
         try:
@@ -162,3 +163,6 @@ class IbmMqCheck(AgentCheck):
 
             pattern = pattern.replace('<queue_manager>', re.escape(self.instance['queue_manager']))
             self.queue_manager_process_pattern = re.compile(pattern)
+
+    def cancel(self):
+        self.reset_queue_manager_process_match()

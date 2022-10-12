@@ -11,6 +11,7 @@ from six import iteritems
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.time import ensure_aware_datetime
+from datadog_checks.dev.testing import requires_py3
 from datadog_checks.dev.utils import get_metadata_metrics
 
 from . import common
@@ -393,3 +394,55 @@ def test_channel_status_no_duplicates(aggregator, get_check, instance, dd_run_ch
     ]
 
     aggregator.assert_service_check("ibm_mq.channel.status", check.OK, tags=tags, count=1)
+
+
+@requires_py3
+def test_queue_manager_process_not_found(aggregator, get_check, instance, dd_run_check):
+    class ProcessMock(object):
+        @property
+        def info(self):
+            return {'cmdline': ['amqpcsea', 'baz']}
+
+    instance['queue_manager'] = 'foo'
+    instance['queue_manager_process'] = 'amqpcsea {}'.format(instance['queue_manager'])
+    check = get_check(instance)
+
+    with mock.patch('psutil.process_iter', return_value=[ProcessMock()]):
+        dd_run_check(check)
+
+    tags = [
+        'connection_name:{}({})'.format(common.HOST, common.PORT),
+        'mq_host:{}'.format(common.HOST),
+        'port:{}'.format(common.PORT),
+        'queue_manager:foo',
+        'channel:{}'.format(common.CHANNEL),
+        'foo:bar',
+    ]
+
+    aggregator.assert_service_check(check.SERVICE_CHECK, check.WARNING, tags=tags, count=1)
+
+
+@requires_py3
+def test_queue_manager_process_found(aggregator, get_check, instance, dd_run_check):
+    class ProcessMock(object):
+        @property
+        def info(self):
+            return {'cmdline': ['amqpcsea', instance['queue_manager']]}
+
+    instance['queue_manager_process'] = 'amqpcsea {}'.format(instance['queue_manager'])
+    check = get_check(instance)
+
+    with mock.patch('psutil.process_iter', return_value=[ProcessMock()]):
+        dd_run_check(check)
+
+    tags = [
+        'connection_name:{}({})'.format(common.HOST, common.PORT),
+        'mq_host:{}'.format(common.HOST),
+        'port:{}'.format(common.PORT),
+        'queue_manager:{}'.format(common.QUEUE_MANAGER),
+        'channel:{}'.format(common.CHANNEL),
+        'foo:bar',
+    ]
+
+    aggregator.assert_service_check(check.SERVICE_CHECK, check.OK, tags=tags, count=1)
+    assert_all_metrics(aggregator)
