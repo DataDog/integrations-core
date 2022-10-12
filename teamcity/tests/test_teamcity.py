@@ -143,11 +143,11 @@ def test_validate_config(dd_run_check, build_config, expected_error, caplog):
 
 
 def test_collect_build_stats(aggregator, mock_http_response, instance, check):
-    check = check(instance)
-    check.build_tags = BUILD_TAGS
+    c = check(instance)
+    c.build_tags = BUILD_TAGS
 
     mock_http_response(file_path=get_fixture_path("build_stats.json"))
-    check._collect_build_stats(NEW_SUCCESSFUL_BUILD)
+    c._collect_build_stats(NEW_SUCCESSFUL_BUILD)
 
     for metric in BUILD_STATS_METRICS:
         metric_name = metric['name']
@@ -159,11 +159,11 @@ def test_collect_build_stats(aggregator, mock_http_response, instance, check):
 
 
 def test_collect_test_results(aggregator, mock_http_response, instance, check):
-    check = check(instance)
-    check.build_tags = BUILD_TAGS
+    c = check(instance)
+    c.build_tags = BUILD_TAGS
 
     mock_http_response(file_path=get_fixture_path("test_occurrences.json"))
-    check._collect_test_results(NEW_SUCCESSFUL_BUILD)
+    c._collect_test_results(NEW_SUCCESSFUL_BUILD)
 
     for res in TESTS_SERVICE_CHECK_RESULTS:
         expected_status = res['value']
@@ -173,15 +173,27 @@ def test_collect_test_results(aggregator, mock_http_response, instance, check):
 
 def test_collect_build_problems(aggregator, mock_http_response, instance, check):
     mock_http_response(file_path=get_fixture_path('build_problems.json'))
-    check = check(instance)
-    check.build_tags = BUILD_TAGS
+    c = check(instance)
+    c.build_tags = BUILD_TAGS
     expected_tags = BUILD_TAGS + ['problem_identity:python_build_error_identity', 'problem_type:TC_EXIT_CODE']
 
-    check._collect_build_problems(NEW_FAILED_BUILD)
+    c._collect_build_problems(NEW_FAILED_BUILD)
 
     aggregator.assert_service_check(
         'teamcity.build.problems',
         count=1,
         tags=expected_tags,
-        status=check.CRITICAL,
+        status=c.CRITICAL,
     )
+
+
+def test_handle_empty_builds(aggregator, mock_http_response, instance, legacy_instance, check):
+    instances = [instance, legacy_instance]
+
+    for inst in instances:
+        c = check(inst)
+        mock_http_response(file_path=get_fixture_path("init_no_builds.json"))
+        c._initialize(project_id='SampleProject')
+        aggregator.assert_service_check('teamcity.build.status', count=0)
+
+        aggregator.reset()

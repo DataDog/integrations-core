@@ -98,34 +98,39 @@ class TeamCityCheck(AgentCheck):
             build_config_id = self.build_config
             if not self.bc_store.get_build_config(build_config_id):
                 build_config_details = get_response(self, 'build_config', build_conf=build_config_id)
-                project_id = build_config_details['projectId']
-                self.bc_store.set_build_config(build_config_id, project_id)
+
+                if build_config_details:
+                    project_id = build_config_details['projectId']
+                    self.bc_store.set_build_config(build_config_id, project_id)
         else:
             # Initialize multi build config instance
             # Check for new build configs in project
             self.log.debug("Initializing multi-build configuration monitoring.")
             build_configs = get_response(self, 'build_configs', project_id=project_id)
-            for build_config in build_configs.get('buildType'):
-                if should_include_build_config(self, build_config['id']) and not self.bc_store.get_build_config(
-                    build_config['id']
-                ):
-                    self.bc_store.set_build_config(build_config.get('id'), project_id)
+
+            if build_configs:
+                for build_config in build_configs.get('buildType'):
+                    if should_include_build_config(self, build_config['id']) and not self.bc_store.get_build_config(
+                        build_config['id']
+                    ):
+                        self.bc_store.set_build_config(build_config.get('id'), project_id)
 
         for build_config in self.bc_store.get_build_configs():
             if self.bc_store.get_build_config(build_config):
                 if self.bc_store.get_last_build_id(build_config) is None:
                     last_build_res = get_response(self, 'last_build', build_conf=build_config)
 
-                    last_build_id = last_build_res['build'][0]['id']
-                    build_config_id = last_build_res['build'][0]['buildTypeId']
+                    if last_build_res:
+                        last_build_id = last_build_res['build'][0]['id']
+                        build_config_id = last_build_res['build'][0]['buildTypeId']
 
-                    self.log.debug(
-                        "Last build id for build configuration %s is %s.",
-                        build_config_id,
-                        last_build_id,
-                    )
-                    self.bc_store.set_build_config(build_config_id, project_id)
-                    self.bc_store.set_last_build_id(build_config_id, last_build_id)
+                        self.log.debug(
+                            "Last build id for build configuration %s is %s.",
+                            build_config_id,
+                            last_build_id,
+                        )
+                        self.bc_store.set_build_config(build_config_id, project_id)
+                        self.bc_store.set_last_build_id(build_config_id, last_build_id)
 
     def _send_events(self, new_build):
         teamcity_event = construct_event(self, new_build)
