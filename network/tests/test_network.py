@@ -12,6 +12,7 @@ import mock
 import pytest
 from six import PY3, iteritems
 
+from datadog_checks.base.utils.platform import Platform
 from datadog_checks.dev import EnvVars
 
 from . import common
@@ -198,6 +199,7 @@ def test_cx_state(aggregator, check):
             aggregator.assert_metric(metric, value=value)
 
 
+@pytest.mark.skipif(Platform.is_windows(), reason="Only runs on Unix systems")
 @mock.patch('datadog_checks.network.network.Platform.is_linux', return_value=True)
 @mock.patch('os.listdir', side_effect=os_list_dir_mock)
 @mock.patch('datadog_checks.network.network.Network._read_int_file', side_effect=read_int_file_mock)
