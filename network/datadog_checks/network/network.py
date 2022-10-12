@@ -226,7 +226,7 @@ class Network(AgentCheck):
                 },
             }
 
-    def _submit_devicemetrics(self, iface, vals_by_metric, tags):
+    def submit_devicemetrics(self, iface, vals_by_metric, tags):
         if iface in self._excluded_ifaces or (self._exclude_iface_re and self._exclude_iface_re.match(iface)):
             # Skip this network interface.
             return
@@ -443,7 +443,7 @@ class Network(AgentCheck):
                         'packets_out.count': self.parse_long(x[-4]),
                         'packets_out.error': self.parse_long(x[-3]),
                     }
-                    self._submit_devicemetrics(iface, metrics, custom_tags)
+                    self.submit_devicemetrics(iface, metrics, custom_tags)
         except SubprocessOutputEmptyError:
             self.log.exception("Error collecting connection stats.")
 
@@ -505,7 +505,7 @@ class Network(AgentCheck):
             netstat, _, _ = get_subprocess_output(["kstat", "-p", "link:0:"], self.log)
             metrics_by_interface = self._parse_solaris_netstat(netstat)
             for interface, metrics in iteritems(metrics_by_interface):
-                self._submit_devicemetrics(interface, metrics, custom_tags)
+                self.submit_devicemetrics(interface, metrics, custom_tags)
         except SubprocessOutputEmptyError:
             self.log.exception("Error collecting kstat stats.")
 
@@ -665,7 +665,7 @@ class Network(AgentCheck):
                 'packets_out.drop': counters.dropout,
                 'packets_out.error': counters.errout,
             }
-            self._submit_devicemetrics(iface, metrics, tags)
+            self.submit_devicemetrics(iface, metrics, tags)
 
     def _parse_protocol_psutil(self, conn):
         """
