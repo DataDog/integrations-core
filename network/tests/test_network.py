@@ -181,27 +181,32 @@ def netstat_subprocess_mock(*args, **kwargs):
 
 @pytest.mark.skipif(platform.system() != 'Linux', reason="Only runs on Unix systems")
 def test_cx_state(aggregator, check):
-    instance = {'collect_connection_state': True}
+    instance = copy.deepcopy(common.INSTANCE)
+    instance['collect_connection_state'] = True
+    check_instance = check(instance)
+
     with mock.patch('datadog_checks.network.network.get_subprocess_output') as out:
         out.side_effect = ss_subprocess_mock
-        check._collect_cx_state = True
-        check.check(instance)
+        check_instance.check(instance)
         for metric, value in iteritems(CX_STATE_GAUGES_VALUES):
             aggregator.assert_metric(metric, value=value)
         aggregator.reset()
 
         out.side_effect = netstat_subprocess_mock
-        check.check(instance)
+        check_instance.check(instance)
         for metric, value in iteritems(CX_STATE_GAUGES_VALUES):
             aggregator.assert_metric(metric, value=value)
 
 
-@pytest.mark.skipif(platform.system() != 'Linux', reason="Only runs on Unix systems")
 @mock.patch('datadog_checks.network.network.Platform.is_linux', return_value=True)
 @mock.patch('os.listdir', side_effect=os_list_dir_mock)
 @mock.patch('datadog_checks.network.network.Network._read_int_file', side_effect=read_int_file_mock)
 def test_linux_sys_net(is_linux, listdir, read_int_file, aggregator, check):
-    check.check({})
+    instance = copy.deepcopy(common.INSTANCE)
+    check_instance = check(instance)
+
+    check_instance.check({})
+
     for metric, value in iteritems(LINUX_SYS_NET_STATS):
         aggregator.assert_metric(metric, value=value[0], tags=['iface:lo'])
         aggregator.assert_metric(metric, value=value[1], tags=['iface:ens5'])
