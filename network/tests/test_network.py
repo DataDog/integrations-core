@@ -4,7 +4,6 @@
 import copy
 import logging
 import os
-import platform
 import socket
 from collections import namedtuple
 
@@ -180,8 +179,9 @@ def netstat_subprocess_mock(*args, **kwargs):
             return decode_string(contents), None, None
 
 
-@pytest.mark.skipif(platform.system() != 'Linux', reason="Only runs on Unix systems")
-def test_cx_state(aggregator, check):
+@pytest.mark.skipif(Platform.is_windows(), reason="Only runs on Unix systems")
+@mock.patch('datadog_checks.network.network.Platform.is_linux', return_value=True)
+def test_cx_state(is_linux, aggregator, check):
     instance = copy.deepcopy(common.INSTANCE)
     instance['collect_connection_state'] = True
     check_instance = check(instance)

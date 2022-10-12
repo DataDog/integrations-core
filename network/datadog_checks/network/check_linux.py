@@ -4,7 +4,7 @@
 import os
 import socket
 
-from six import PY3, iteritems, itervalues
+from six import PY3, iteritems
 
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.common import pattern_filter
@@ -110,7 +110,7 @@ class LinuxNetwork(Network):
                 # udp        0      0 0.0.0.0:123             0.0.0.0:*
                 # udp6       0      0 :::41458                :::*
 
-                metrics = self._parse_cx_state(lines[2:], self.tcp_states['netstat'], 5)
+                metrics = self.parse_cx_state(lines[2:], self.tcp_states['netstat'], 5)
                 for metric, value in iteritems(metrics):
                     self.gauge(metric, value, tags=custom_tags)
 
@@ -392,9 +392,6 @@ class LinuxNetwork(Network):
         except SubprocessOutputEmptyError:
             self.log.debug("Couldn't use %s to get conntrack stats", conntrack_path)
 
-    def _get_metrics(self):
-        return {val: 0 for val in itervalues(self.cx_state_gauge)}
-
     def _parse_short_state_lines(self, lines, metrics, tcp_states, ip_version):
         for line in lines:
             value, state = line.split()
@@ -402,26 +399,6 @@ class LinuxNetwork(Network):
             if state in tcp_states:
                 metric = self.cx_state_gauge[proto, tcp_states[state]]
                 metrics[metric] += int(value)
-
-    def _parse_cx_state(self, lines, tcp_states, state_col, protocol=None, ip_version=None):
-        """
-        Parse the output of the command that retrieves the connection state (either `ss` or `netstat`)
-        Returns a dict metric_name -> value
-        """
-        metrics = self._get_metrics()
-        for l in lines:
-            cols = l.split()
-            if cols[0].startswith('tcp') or protocol == 'tcp':
-                proto = "tcp{0}".format(ip_version) if ip_version else ("tcp4", "tcp6")[cols[0] == "tcp6"]
-                if cols[state_col] in tcp_states:
-                    metric = self.cx_state_gauge[proto, tcp_states[cols[state_col]]]
-                    metrics[metric] += 1
-            elif cols[0].startswith('udp') or protocol == 'udp':
-                proto = "udp{0}".format(ip_version) if ip_version else ("udp4", "udp6")[cols[0] == "udp6"]
-                metric = self.cx_state_gauge[proto, 'connections']
-                metrics[metric] += 1
-
-        return metrics
 
     def _parse_queues(self, tool, ss_output):
         """

@@ -8,7 +8,7 @@ import re
 import socket
 
 import psutil
-from six import PY3, iteritems
+from six import PY3, iteritems, itervalues
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.errors import CheckException
@@ -303,3 +303,26 @@ class Network(AgentCheck):
         else:
             net_proc_base_location = proc_location
         return net_proc_base_location
+
+    def parse_cx_state(self, lines, tcp_states, state_col, protocol=None, ip_version=None):
+        """
+        Parse the output of the command that retrieves the connection state (either `ss` or `netstat`)
+        Returns a dict metric_name -> value
+        """
+        metrics = self._get_metrics()
+        for l in lines:
+            cols = l.split()
+            if cols[0].startswith('tcp') or protocol == 'tcp':
+                proto = "tcp{0}".format(ip_version) if ip_version else ("tcp4", "tcp6")[cols[0] == "tcp6"]
+                if cols[state_col] in tcp_states:
+                    metric = self.cx_state_gauge[proto, tcp_states[cols[state_col]]]
+                    metrics[metric] += 1
+            elif cols[0].startswith('udp') or protocol == 'udp':
+                proto = "udp{0}".format(ip_version) if ip_version else ("udp4", "udp6")[cols[0] == "udp6"]
+                metric = self.cx_state_gauge[proto, 'connections']
+                metrics[metric] += 1
+
+        return metrics
+
+    def _get_metrics(self):
+        return {val: 0 for val in itervalues(self.cx_state_gauge)}

@@ -142,7 +142,7 @@ class BSDNetwork(Network):
                 # udp        0      0 0.0.0.0:123             0.0.0.0:*
                 # udp6       0      0 :::41458                :::*
 
-                metrics = self._parse_linux_cx_state(lines[2:], self.tcp_states['netstat'], 5)
+                metrics = self.parse_cx_state(lines[2:], self.tcp_states['netstat'], 5)
                 for metric, value in iteritems(metrics):
                     self.gauge(metric, value, tags=custom_tags)
             except SubprocessOutputEmptyError:
