@@ -453,7 +453,8 @@ def send_ethtool_ioctl_mock(iface, sckt, data):
 
 @pytest.mark.skipif(platform.system() == 'Windows', reason="Only runs on Unix systems")
 @mock.patch('datadog_checks.network.ethtool._send_ethtool_ioctl')
-def test_collect_ena(send_ethtool_ioctl, check):
+@mock.patch('datadog_checks.network.network.Platform.is_linux', return_value=True)
+def test_collect_ena(is_linux, send_ethtool_ioctl, check):
     check_instance = check(common.INSTANCE)
     send_ethtool_ioctl.side_effect = send_ethtool_ioctl_mock
     driver_name, driver_version, stats_names, stats = check_instance._fetch_ethtool_stats('eth0')
@@ -469,7 +470,8 @@ def test_collect_ena(send_ethtool_ioctl, check):
 
 @pytest.mark.skipif(platform.system() == 'Windows', reason="Only runs on Unix systems")
 @mock.patch('datadog_checks.network.ethtool._send_ethtool_ioctl')
-def test_collect_ethtool_metrics_ena(send_ethtool_ioctl, check):
+@mock.patch('datadog_checks.network.network.Platform.is_linux', return_value=True)
+def test_collect_ethtool_metrics_ena(is_linux, send_ethtool_ioctl, check):
     check_instance = check(common.INSTANCE)
     send_ethtool_ioctl.side_effect = send_ethtool_ioctl_mock
     driver_name, driver_version, stats_names, stats = check_instance._fetch_ethtool_stats('eth0')
@@ -479,7 +481,8 @@ def test_collect_ethtool_metrics_ena(send_ethtool_ioctl, check):
 
 @pytest.mark.skipif(platform.system() == 'Windows', reason="Only runs on Unix systems")
 @mock.patch('datadog_checks.network.ethtool._send_ethtool_ioctl')
-def test_collect_ethtool_metrics_virtio(send_ethtool_ioctl, check):
+@mock.patch('datadog_checks.network.network.Platform.is_linux', return_value=True)
+def test_collect_ethtool_metrics_virtio(is_linux, send_ethtool_ioctl, check):
     check_instance = check(common.INSTANCE)
     send_ethtool_ioctl.side_effect = send_ethtool_ioctl_mock
     driver_name, driver_version, stats_names, stats = check_instance._fetch_ethtool_stats('virtio')
@@ -489,7 +492,8 @@ def test_collect_ethtool_metrics_virtio(send_ethtool_ioctl, check):
 
 @pytest.mark.skipif(platform.system() == 'Windows', reason="Only runs on Unix systems")
 @mock.patch('datadog_checks.network.ethtool._send_ethtool_ioctl')
-def test_collect_ethtool_metrics_hv_netvsc(send_ethtool_ioctl, check):
+@mock.patch('datadog_checks.network.network.Platform.is_linux', return_value=True)
+def test_collect_ethtool_metrics_hv_netvsc(is_linux, send_ethtool_ioctl, check):
     check_instance = check(common.INSTANCE)
     send_ethtool_ioctl.side_effect = send_ethtool_ioctl_mock
     driver_name, driver_version, stats_names, stats = check_instance._fetch_ethtool_stats('hv_netvsc')
@@ -499,7 +503,8 @@ def test_collect_ethtool_metrics_hv_netvsc(send_ethtool_ioctl, check):
 
 @pytest.mark.skipif(platform.system() == 'Windows', reason="Only runs on Unix systems")
 @mock.patch('datadog_checks.network.ethtool._send_ethtool_ioctl')
-def test_collect_ethtool_metrics_gve(send_ethtool_ioctl, check):
+@mock.patch('datadog_checks.network.network.Platform.is_linux', return_value=True)
+def test_collect_ethtool_metrics_gve(is_linux, send_ethtool_ioctl, check):
     check_instance = check(common.INSTANCE)
     send_ethtool_ioctl.side_effect = send_ethtool_ioctl_mock
     driver_name, driver_version, stats_names, stats = check_instance._fetch_ethtool_stats('gve')
@@ -509,7 +514,8 @@ def test_collect_ethtool_metrics_gve(send_ethtool_ioctl, check):
 
 @pytest.mark.skipif(platform.system() == 'Windows', reason="Only runs on Unix systems")
 @mock.patch('datadog_checks.network.ethtool._send_ethtool_ioctl')
-def test_submit_ena(send_ethtool_ioctl, check, aggregator):
+@mock.patch('datadog_checks.network.network.Platform.is_linux', return_value=True)
+def test_submit_ena(is_linux, send_ethtool_ioctl, check, aggregator):
     instance = copy.deepcopy(common.INSTANCE)
     instance['collect_aws_ena_metrics'] = True
     check_instance = check(instance)
@@ -532,7 +538,8 @@ def test_submit_ena(send_ethtool_ioctl, check, aggregator):
 
 @pytest.mark.skipif(platform.system() == 'Windows', reason="Only runs on Unix systems")
 @mock.patch('datadog_checks.network.ethtool._send_ethtool_ioctl')
-def test_submit_ena_ethtool_metrics(send_ethtool_ioctl, check, aggregator):
+@mock.patch('datadog_checks.network.network.Platform.is_linux', return_value=True)
+def test_submit_ena_ethtool_metrics(is_linux, send_ethtool_ioctl, check, aggregator):
     instance = copy.deepcopy(common.INSTANCE)
     instance['collect_ethtool_metrics'] = True
     check_instance = check(instance)
@@ -552,7 +559,8 @@ def test_submit_ena_ethtool_metrics(send_ethtool_ioctl, check, aggregator):
 
 @pytest.mark.skipif(platform.system() == 'Windows', reason="Only runs on Unix systems")
 @mock.patch('datadog_checks.network.ethtool._send_ethtool_ioctl')
-def test_submit_hv_netvsc_ethtool_metrics(send_ethtool_ioctl, check, aggregator):
+@mock.patch('datadog_checks.network.network.Platform.is_linux', return_value=True)
+def test_submit_hv_netvsc_ethtool_metrics(is_linux, send_ethtool_ioctl, check, aggregator):
     instance = copy.deepcopy(common.INSTANCE)
     instance['collect_ethtool_metrics'] = True
     check_instance = check(instance)
@@ -572,7 +580,8 @@ def test_submit_hv_netvsc_ethtool_metrics(send_ethtool_ioctl, check, aggregator)
 
 @pytest.mark.skipif(platform.system() == 'Windows', reason="Only runs on Unix systems")
 @mock.patch('datadog_checks.network.ethtool._send_ethtool_ioctl')
-def test_submit_gve_ethtool_metrics(send_ethtool_ioctl, check, aggregator):
+@mock.patch('datadog_checks.network.network.Platform.is_linux', return_value=True)
+def test_submit_gve_ethtool_metrics(is_linux, send_ethtool_ioctl, check, aggregator):
     instance = copy.deepcopy(common.INSTANCE)
     instance['collect_ethtool_metrics'] = True
     check_instance = check(instance)
@@ -592,7 +601,8 @@ def test_submit_gve_ethtool_metrics(send_ethtool_ioctl, check, aggregator):
 
 @pytest.mark.skipif(platform.system() == 'Windows', reason="Only runs on Unix systems")
 @mock.patch('datadog_checks.network.ethtool._send_ethtool_ioctl')
-def test_collect_ena_values_not_present(send_ethtool_ioctl, check):
+@mock.patch('datadog_checks.network.network.Platform.is_linux', return_value=True)
+def test_collect_ena_values_not_present(is_linux, send_ethtool_ioctl, check):
     check_instance = check(common.INSTANCE)
 
     send_ethtool_ioctl.side_effect = send_ethtool_ioctl_mock
@@ -603,7 +613,8 @@ def test_collect_ena_values_not_present(send_ethtool_ioctl, check):
 
 @pytest.mark.skipif(platform.system() == 'Windows', reason="Only runs on Unix systems")
 @mock.patch('fcntl.ioctl')
-def test_collect_ena_unsupported_on_iface(ioctl_mock, check, caplog):
+@mock.patch('datadog_checks.network.network.Platform.is_linux', return_value=True)
+def test_collect_ena_unsupported_on_iface(is_linux, ioctl_mock, check, caplog):
     check_instance = check(common.INSTANCE)
     caplog.set_level(logging.DEBUG)
     ioctl_mock.side_effect = OSError('mock error')
