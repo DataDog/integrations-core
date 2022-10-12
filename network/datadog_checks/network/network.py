@@ -246,12 +246,7 @@ class Network(AgentCheck):
         expected_metrics = self._get_expected_metrics()
         for m in expected_metrics:
             assert m in vals_by_metric
-        if len(vals_by_metric) > len(expected_metrics):
-            unexpected_metrics = set(vals_by_metric.keys()).difference(expected_metrics)
-            raise CheckException("Unexpected metrics found: {}".format(unexpected_metrics))
-        if len(vals_by_metric) < len(expected_metrics):
-            missing_metrics = set(expected_metrics).difference(vals_by_metric.keys())
-            raise CheckException("Missing expected metrics: {}".format(missing_metrics))
+        assert len(vals_by_metric) == len(expected_metrics)
 
         count = 0
         for metric, val in iteritems(vals_by_metric):
