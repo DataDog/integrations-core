@@ -279,8 +279,9 @@ def test_win_uses_psutil(is_linux, is_bsd, is_solaris, is_windows, check):
 
 
 @mock.patch('datadog_checks.network.network.Platform.is_bsd', return_value=False)
+@mock.patch('datadog_checks.network.network.Platform.is_linux', return_value=False)
 @mock.patch('datadog_checks.network.network.Platform.is_windows', return_value=True)
-def test_check_psutil_no_collect_connection_state(is_bsd, is_windows, aggregator, check):
+def test_check_psutil_no_collect_connection_state(is_bsd, is_linux, is_windows, aggregator, check):
     instance = copy.deepcopy(common.INSTANCE)
     instance['collect_connection_state'] = False
     check_instance = check(instance)
@@ -295,8 +296,9 @@ def test_check_psutil_no_collect_connection_state(is_bsd, is_windows, aggregator
 
 
 @mock.patch('datadog_checks.network.network.Platform.is_bsd', return_value=False)
+@mock.patch('datadog_checks.network.network.Platform.is_linux', return_value=False)
 @mock.patch('datadog_checks.network.network.Platform.is_windows', return_value=True)
-def test_check_psutil_collect_connection_state(is_bsd, is_windows, aggregator, check):
+def test_check_psutil_collect_connection_state(is_bsd, is_linux, is_windows, aggregator, check):
     instance = copy.deepcopy(common.INSTANCE)
     instance['collect_connection_state'] = True
     check_instance = check(instance)
@@ -311,8 +313,9 @@ def test_check_psutil_collect_connection_state(is_bsd, is_windows, aggregator, c
 
 
 @mock.patch('datadog_checks.network.network.Platform.is_bsd', return_value=False)
+@mock.patch('datadog_checks.network.network.Platform.is_linux', return_value=False)
 @mock.patch('datadog_checks.network.network.Platform.is_windows', return_value=True)
-def test_cx_state_psutil(is_bsd, is_windows, aggregator, check):
+def test_cx_state_psutil(is_bsd, is_linux, is_windows, aggregator, check):
     sconn = namedtuple('sconn', ['fd', 'family', 'type', 'laddr', 'raddr', 'status', 'pid'])
     conn = [
         sconn(
@@ -408,8 +411,9 @@ def test_cx_state_psutil(is_bsd, is_windows, aggregator, check):
 
 
 @mock.patch('datadog_checks.network.network.Platform.is_bsd', return_value=False)
+@mock.patch('datadog_checks.network.network.Platform.is_linux', return_value=False)
 @mock.patch('datadog_checks.network.network.Platform.is_windows', return_value=True)
-def test_cx_counters_psutil(is_bsd, is_windows, aggregator, check):
+def test_cx_counters_psutil(is_bsd, is_linux, is_windows, aggregator, check):
     snetio = namedtuple(
         'snetio', ['bytes_sent', 'bytes_recv', 'packets_sent', 'packets_recv', 'errin', 'errout', 'dropin', 'dropout']
     )
@@ -444,8 +448,9 @@ def test_cx_counters_psutil(is_bsd, is_windows, aggregator, check):
 
 
 @mock.patch('datadog_checks.network.network.Platform.is_bsd', return_value=False)
+@mock.patch('datadog_checks.network.network.Platform.is_linux', return_value=False)
 @mock.patch('datadog_checks.network.network.Platform.is_windows', return_value=True)
-def test_parse_protocol_psutil(is_bsd, is_windows, aggregator, check):
+def test_parse_protocol_psutil(is_windows, is_linux, is_bsd, aggregator, check):
     import socket
 
     conn = mock.MagicMock()
