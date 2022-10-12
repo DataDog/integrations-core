@@ -26,7 +26,7 @@ To configure this check for an Agent running on a host:
 
 Edit the `teamcity.d/conf.yaml` in the `conf.d/` folder at the root of your [Agent's configuration directory][3]. See the [sample teamcity.d/conf.yaml][4] for all available configuration options:
 
-The TeamCity check offers two methods of data collection. Configure two separate instances to collect metrics from each method to optimally monitor your TeamCity environment. 
+The TeamCity check offers two methods of data collection. To optimally monitor your TeamCity environment, configure two separate instances to collect metrics from each method. 
 
 1. OpenMetricsV2 method:
 
