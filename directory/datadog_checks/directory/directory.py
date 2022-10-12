@@ -78,7 +78,11 @@ class DirectoryCheck(AgentCheck):
         walker = walk(self._config.abs_directory, self._config.follow_symlinks)
         if not self._config.recursive:
             # Only visit the first directory.
-            walker = [next(walker)]
+            try:
+                walker = [next(walker)]
+            except Exception as e:
+                self.log.error("failed to visit %s: %s", self._config.abs_directory, e)
+                return
 
         # Avoid repeated global lookups.
         get_length = len
