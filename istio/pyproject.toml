@@ -49,8 +49,6 @@ include = [
     "/datadog_checks",
     "/tests",
     "/manifest.json",
-    "/requirements-dev.txt",
-    "/tox.ini",
 ]
 
 [tool.hatch.build.targets.wheel]
@@ -59,4 +57,9 @@ include = [
 ]
 dev-mode-dirs = [
     ".",
+]
+
+[tool.hatch.envs.test]
+dependencies = [
+  "requests-mock==1.4.0",
 ]
