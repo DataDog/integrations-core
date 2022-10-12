@@ -28,7 +28,6 @@ from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_IN
 
 DEFAULT_COLLECTION_INTERVAL = 10
 
-
 SQL_SERVER_QUERY_METRICS_COLUMNS = [
     "execution_count",
     "total_worker_time",
@@ -48,7 +47,6 @@ SQL_SERVER_QUERY_METRICS_COLUMNS = [
     "total_columnstore_segment_skips",
     "total_spills",
 ]
-
 
 STATEMENT_METRICS_QUERY = """\
 with qstats as (
