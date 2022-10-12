@@ -12,7 +12,7 @@ from datadog_checks.ibm_mq.metrics import COUNT, GAUGE
 from . import connection, errors
 from .collectors import ChannelMetricCollector, MetadataCollector, QueueMetricCollector
 from .config import IBMMQConfig
-from .process import QueueManagerProcessFinder
+from .process_matcher import QueueManagerProcessMatcher
 
 try:
     from typing import Any, Dict, List
@@ -27,7 +27,7 @@ except ImportError as e:
 
 
 class IbmMqCheck(AgentCheck):
-    process_finder = QueueManagerProcessFinder()
+    process_matcher = QueueManagerProcessMatcher()
 
     SERVICE_CHECK = 'ibm_mq.can_connect'
 
@@ -41,13 +41,6 @@ class IbmMqCheck(AgentCheck):
 
         self._config = IBMMQConfig(self.instance)
 
-        pattern = self.instance.get('queue_manager_process', self.init_config.get('queue_manager_process', ''))
-        if not pattern:
-            self.queue_manager_process_pattern = None
-        else:
-            pattern = pattern.replace('<queue_manager>', re.escape(self.instance['queue_manager']))
-            self.queue_manager_process_pattern = re.compile(pattern)
-
         self.queue_metric_collector = QueueMetricCollector(
             self._config,
             self.service_check,
@@ -60,8 +53,13 @@ class IbmMqCheck(AgentCheck):
         self.metadata_collector = MetadataCollector(self._config, self.log)
         self.stats_collector = StatsCollector(self._config, self.send_metrics_from_properties, self.log)
 
+        self.queue_manager_process_pattern = None
+
+        self.check_initializations.append(self.parse_config)
+
     def check(self, _):
-        if not self.check_process_indicator():
+        if not self.check_queue_manager_process():
+            self.log.debug('Process not found, skipping check run')
             return
 
         try:
@@ -78,7 +76,7 @@ class IbmMqCheck(AgentCheck):
                 self._config.tags,
                 hostname=self._config.hostname,
             )
-            self.remove_process_indication()
+            self.reset_queue_manager_process_match()
             raise
 
         self._collect_metadata(queue_manager)
@@ -145,14 +143,22 @@ class IbmMqCheck(AgentCheck):
                     return
                 self.send_metric(metric_type, metric_full_name, metric_value, new_tags)
 
-    def check_process_indicator(self):
+    def check_queue_manager_process(self):
         if self.queue_manager_process_pattern is None:
             return True
-        elif PY2:
-            raise ConfigurationError('The `queue_manager_process` option is only supported on Agent 7')
 
-        return self.process_finder.check_condition(self.check_id, self.queue_manager_process_pattern, self.log)
+        return self.process_matcher.check_condition(self.check_id, self.queue_manager_process_pattern, self.log)
 
-    def remove_process_indication(self):
+    def reset_queue_manager_process_match(self):
         if self.queue_manager_process_pattern is not None:
-            return self.process_finder.remove(self.check_id)
+            self.log.debug('Resetting queue manager process match')
+            return self.process_matcher.remove(self.check_id)
+
+    def parse_config(self):
+        pattern = self.instance.get('queue_manager_process', self.init_config.get('queue_manager_process', ''))
+        if pattern:
+            if PY2:
+                raise ConfigurationError('The `queue_manager_process` option is only supported on Agent 7')
+
+            pattern = pattern.replace('<queue_manager>', re.escape(self.instance['queue_manager']))
+            self.queue_manager_process_pattern = re.compile(pattern)

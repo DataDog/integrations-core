@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2022-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import re
 import sys
 
 import psutil
@@ -22,8 +21,8 @@ else:
         return ' '.join(shlex.quote(arg) for arg in command_args)
 
 
-class QueueManagerProcessFinder(ConditionLimiter):
-    def condition(self, pattern: re.Pattern, logger):
+class QueueManagerProcessMatcher(ConditionLimiter):
+    def condition(self, pattern, logger):
         logger.info('Searching for a process that matches: %s', pattern.pattern)
         for process in psutil.process_iter(['cmdline']):
             command = join_command_args(process.info['cmdline'])
@@ -31,5 +30,4 @@ class QueueManagerProcessFinder(ConditionLimiter):
                 logger.info('Process found: %s', command)
                 return True
         else:
-            logger.info('Process not found, skipping check run')
             return False
