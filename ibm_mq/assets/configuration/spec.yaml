@@ -4,6 +4,17 @@ files:
   options:
   - template: init_config
     options:
+      - name: queue_manager_process
+        description: |
+          A regular expression that must match the command line of a running process in
+          order for the check to run. A `<queue_manager>` placeholder is supported which
+          represents the value of the `queue_manager` option.
+
+          This option is only available on Agent 7+.
+        value:
+          display_default: null
+          example: amqpcsea <queue_manager>
+          type: string
       - template: init_config/default
   - template: instances
     options:
@@ -248,6 +259,19 @@ files:
             'SYSTEM.*': queue_type:system
             'DEV.*': role:dev,queue_type:default
           type: object
+      - name: queue_manager_process
+        description: |
+          A regular expression that must match the command line of a running process in
+          order for the check to run. A `<queue_manager>` placeholder is supported which
+          represents the value of the `queue_manager` option.
+
+          This option is only available on Agent 7+.
+
+          This overrides the `queue_manager_process` option in the `init_config` section.
+        value:
+          display_default: null
+          example: amqpcsea <queue_manager>
+          type: string
       - template: instances/default
   - template: logs
     example:
