@@ -16,7 +16,6 @@ import psutil
 from six import PY3, iteritems, itervalues
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
-from datadog_checks.base.errors import CheckException
 from datadog_checks.base.utils.common import pattern_filter
 from datadog_checks.base.utils.platform import Platform
 from datadog_checks.base.utils.subprocess_output import SubprocessOutputEmptyError, get_subprocess_output
