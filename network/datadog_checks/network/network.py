@@ -268,7 +268,7 @@ class Network(AgentCheck):
             'packets_out.count',
             'packets_out.error',
         ]
-        if Platform.is_linux() or Platform.is_windows() or Platform.is_darwin():
+        if Platform.is_linux() or Platform.is_windows():
             expected_metrics.extend(
                 [
                     'packets_in.drop',
