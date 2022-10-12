@@ -377,6 +377,7 @@ def test_cx_state_psutil(aggregator, check):
             assert results[m[0].name] == m[0].value
 
 
+@mock.patch('datadog_checks.network.network.Platform.is_linux', return_value=True)
 def test_cx_counters_psutil(aggregator, check):
     snetio = namedtuple(
         'snetio', ['bytes_sent', 'bytes_recv', 'packets_sent', 'packets_recv', 'errin', 'errout', 'dropin', 'dropout']
