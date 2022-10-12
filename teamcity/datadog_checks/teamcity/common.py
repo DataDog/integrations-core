@@ -9,7 +9,7 @@ import requests
 
 from datadog_checks.base import ConfigurationError
 
-from .constants import BUILD_EVENT, DEPLOYMENT_EVENT, EVENT_STATUS_MAP, RESOURCE_URL_MAP
+from .constants import BUILD_EVENT, DEPLOYMENT_EVENT, RESOURCE_URL_MAP, STATUS_MAP
 
 
 def construct_build_configs_filter(monitored_build_configs):
@@ -84,11 +84,10 @@ def construct_event(check, new_build):
     build_id = new_build['id']
     build_number = new_build['number']
     build_config = new_build['buildTypeId']
-    build_status = EVENT_STATUS_MAP.get(new_build['status'])
+    build_status = STATUS_MAP.get(new_build['status'])['msg_title']
+    alert_type = STATUS_MAP.get(new_build['status'])['alert_type']
     event_tags = deepcopy(check.build_tags)
-    event_tags.extend(
-        ['build_id:{}'.format(build_id), 'build_number:{}'.format(build_number), 'status:{}'.format(build_status)]
-    )
+    event_tags.extend(['build_id:{}'.format(build_id), 'build_number:{}'.format(build_number)])
 
     if not check.instance_name:
         instance_name = build_config
@@ -107,6 +106,7 @@ def construct_event(check, new_build):
     teamcity_event['msg_text'] = teamcity_event['msg_text'].format(
         build_number=new_build['number'], host=check.host, build_webUrl=new_build['webUrl']
     )
+    teamcity_event['alert_type'] = alert_type
     teamcity_event['host'] = check.host
     teamcity_event['tags'].extend(event_tags)
 

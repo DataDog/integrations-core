@@ -9,7 +9,7 @@ from six import PY2
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 
 from .common import construct_event, get_response, should_include_build_config
-from .constants import SERVICE_CHECK_STATUS_MAP, BuildConfigs
+from .constants import STATUS_MAP, BuildConfigs
 from .metrics import build_metric
 
 
@@ -131,7 +131,7 @@ class TeamCityCheck(AgentCheck):
         teamcity_event = construct_event(self, new_build)
         self.log.trace('Submitting event: %s', teamcity_event)
         self.event(teamcity_event)
-        self.service_check('build.status', SERVICE_CHECK_STATUS_MAP.get(new_build['status']), tags=self.build_tags)
+        self.service_check('build.status', STATUS_MAP.get(new_build['status'])['check_status'], tags=self.build_tags)
 
     def _collect_build_stats(self, new_build):
         build_id = new_build['id']
@@ -157,7 +157,7 @@ class TeamCityCheck(AgentCheck):
 
         if test_results:
             for test in test_results['testOccurrence']:
-                test_status = SERVICE_CHECK_STATUS_MAP[test['status']]
+                test_status = STATUS_MAP[test['status']].get('check_status')
                 tags = [
                     'test_status:{}'.format(test['status'].lower()),
                     'test_name:{}'.format(test['name']),

@@ -55,7 +55,8 @@ def test_build_event(aggregator, legacy_instance):
         'http://localhost:8111/viewLog.html?buildId=1&buildTypeId=TestProject_TestBuild',
         msg_title='Build for Legacy test build successful',
         source_type_name='teamcity',
-        tags=LEGACY_BUILD_TAGS + ['build_id:1', 'build_number:1', 'build', 'status:successful'],
+        alert_type='success',
+        tags=LEGACY_BUILD_TAGS + ['build_id:1', 'build_number:1', 'build'],
         count=1,
     )
 

@@ -5,15 +5,13 @@ from copy import deepcopy
 
 from datadog_checks.base import AgentCheck
 
-EVENT_STATUS_MAP = {"SUCCESS": "successful", "FAILURE": "failed"}
-
-SERVICE_CHECK_STATUS_MAP = {
-    "SUCCESS": AgentCheck.OK,
-    "FAILURE": AgentCheck.CRITICAL,
-    "UNKNOWN": AgentCheck.UNKNOWN,
-    "NORMAL": AgentCheck.OK,
-    "WARNING": AgentCheck.WARNING,
-    "ERROR": AgentCheck.CRITICAL,
+STATUS_MAP = {
+    "SUCCESS": {"check_status": AgentCheck.OK, "msg_title": "successful", "alert_type": "success"},
+    "FAILURE": {"check_status": AgentCheck.CRITICAL, "msg_title": "failed", "alert_type": "error"},
+    "UNKNOWN": {"check_status": AgentCheck.UNKNOWN},
+    "NORMAL": {"check_status": AgentCheck.OK},
+    "WARNING": {"check_status": AgentCheck.WARNING},
+    "ERROR": {"check_status": AgentCheck.CRITICAL},
 }
 
 RESOURCE_URL_MAP = {
