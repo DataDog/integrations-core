@@ -40,29 +40,35 @@ if PY3:
 class Network(AgentCheck):
 
     SOURCE_TYPE_NAME = 'system'
-
     PSUTIL_TYPE_MAPPING = {socket.SOCK_STREAM: 'tcp', socket.SOCK_DGRAM: 'udp'}
-
     PSUTIL_FAMILY_MAPPING = {socket.AF_INET: '4', socket.AF_INET6: '6'}
 
-    def check(self, instance):
-        if instance is None:
-            instance = {}
+    def __init__(self, name, init_config, instances):
+        super(Network, self).__init__(name, init_config, instances)
+        self._excluded_ifaces = self.instance.get('excluded_interfaces', [])
+        self._collect_cx_state = self.instance.get('collect_connection_state', False)
+        self._collect_cx_queues = self.instance.get('collect_connection_queues', False)
+        self._collect_rate_metrics = self.instance.get('collect_rate_metrics', True)
+        self._collect_count_metrics = self.instance.get('collect_count_metrics', False)
+        self._collect_ena_metrics = self.instance.get('collect_aws_ena_metrics', False)
+        self._collect_ethtool_metrics = self.instance.get('collect_ethtool_metrics', False)
+        self._collect_ethtool_stats = self._collect_ena_metrics or self._collect_ethtool_metrics
+        self._exclude_iface_re = None
+        exclude_re = self.instance.get('excluded_interface_re', None)
+        if exclude_re:
+            self.log.debug("Excluding network devices matching: %s", exclude_re)
+            self._exclude_iface_re = re.compile(exclude_re)
+        # This decides whether we should split or combine connection states,
+        # along with a few other things
+        self._setup_metrics(self.instance)
+        self.check_initializations.append(self._validate)
 
-        self._excluded_ifaces = instance.get('excluded_interfaces', [])
+    def _validate(self):
         if not isinstance(self._excluded_ifaces, list):
             raise ConfigurationError(
                 "Expected 'excluded_interfaces' to be a list, got '{}'".format(type(self._excluded_ifaces).__name__)
             )
 
-        self._collect_cx_state = instance.get('collect_connection_state', False)
-        self._collect_cx_queues = instance.get('collect_connection_queues', False)
-        self._collect_rate_metrics = instance.get('collect_rate_metrics', True)
-        self._collect_count_metrics = instance.get('collect_count_metrics', False)
-        self._collect_ena_metrics = instance.get('collect_aws_ena_metrics', False)
-        self._collect_ethtool_metrics = instance.get('collect_ethtool_metrics', False)
-
-        self._collect_ethtool_stats = self._collect_ena_metrics or self._collect_ethtool_metrics
         if fcntl is None and self._collect_ethtool_stats:
             if Platform.is_windows():
                 raise ConfigurationError(
@@ -74,24 +80,15 @@ class Network(AgentCheck):
                     "fcntl not importable, collect_aws_ena_metrics and collect_ethtool_metrics should be disabled"
                 )
 
-        # This decides whether we should split or combine connection states,
-        # along with a few other things
-        self._setup_metrics(instance)
-
-        self._exclude_iface_re = None
-        exclude_re = instance.get('excluded_interface_re', None)
-        if exclude_re:
-            self.log.debug("Excluding network devices matching: %s", exclude_re)
-            self._exclude_iface_re = re.compile(exclude_re)
-
+    def check(self, _):
         if Platform.is_linux():
-            self._check_linux(instance)
+            self._check_linux(self.instance)
         elif Platform.is_bsd():
-            self._check_bsd(instance)
+            self._check_bsd(self.instance)
         elif Platform.is_solaris():
-            self._check_solaris(instance)
+            self._check_solaris(self.instance)
         elif Platform.is_windows():
-            self._check_psutil(instance)
+            self._check_psutil(self.instance)
 
     def _setup_metrics(self, instance):
         self._combine_connection_states = instance.get('combine_connection_states', True)
