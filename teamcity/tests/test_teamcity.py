@@ -52,7 +52,7 @@ def test_build_event(aggregator, legacy_instance):
         event_type='build',
         host='buildhost42.dtdg.co',
         msg_text='Build Number: 1\nDeployed To: buildhost42.dtdg.co\n\nMore Info: '
-        'http://localhost:8111/viewLog.html?buildId=1&buildTypeId=TestProject_TestBuild',
+        'http://localhost:8111/viewLog.html?buildId=1&buildTypeId=SampleProject_Build',
         msg_title='Build for Legacy test build successful',
         source_type_name='teamcity',
         alert_type='success',

@@ -1,0 +1,7 @@
+FROM jetbrains/teamcity-agent
+
+USER root
+
+# Update and install pip
+RUN apt-get update && \
+    apt-get -y --no-install-recommends install python3-pip

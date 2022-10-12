@@ -17,7 +17,7 @@ USE_OPENMETRICS = os.getenv('USE_OPENMETRICS')
 LEGACY_INSTANCE = {
     'name': 'Legacy test build',
     'server': '{}:{}'.format(HOST, PORT),
-    'build_configuration': 'TestProject_TestBuild',
+    'build_configuration': 'SampleProject_Build',
     'host_affected': 'buildhost42.dtdg.co',
     'basic_http_authentication': False,
     'is_deployment': False,
@@ -27,13 +27,17 @@ LEGACY_INSTANCE = {
 TEAMCITY_V2_INSTANCE = {
     'server': '{}:{}'.format(HOST, PORT),
     'projects': {
-        'TeamCityV2Project': {
+        'SampleProject': {
             'include': [
-                'TeamCityV2Project_Build',
-                'TeamCityV2Project_FailedBuild',
-                'TeamCityV2Project_FailedTests',
+                'SampleProject_Build',
+                'SampleProject_Deployment',
+                'SampleProject_FailedBuild',
+                'SampleProject_FailedTests',
+                'SampleProject_SkippedTests',
             ],
-            'exclude': ['TeamCityV2Project_TestBuild'],
+            'exclude': [
+                'SampleProject_SkippedBuild',
+            ],
         }
     },
     'basic_http_authentication': False,
@@ -55,8 +59,8 @@ def get_fixture_path(filename):
 LEGACY_BUILD_TAGS = [
     'server:http://localhost:8111',
     'type:build',
-    'build_config:TestProject_TestBuild',
-    'project_id:TestProject',
+    'build_config:SampleProject_Build',
+    'project_id:SampleProject',
     'instance_name:Legacy test build',
     'one:test',
     'one:tag',

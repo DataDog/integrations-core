@@ -1,47 +1,47 @@
 {
   "legacy_last_build": {
     "count": 1,
-    "href": "/guestAuth/app/rest/builds/?locator=buildType:TestProject_TestBuild,count:1",
-    "nextHref": "/guestAuth/app/rest/builds/?locator=buildType:TestProject_TestBuild,count:1,start:1",
+    "href": "/guestAuth/app/rest/builds/?locator=buildType:SampleProject_Build,count:1",
+    "nextHref": "/guestAuth/app/rest/builds/?locator=buildType:SampleProject_Build,count:1,start:1",
     "build": [
       {
         "id": 1,
-        "buildTypeId": "TestProject_TestBuild",
+        "buildTypeId": "SampleProject_Build",
         "number": "1",
         "status": "SUCCESS",
         "state": "finished",
         "branchName": "main",
         "defaultBranch": "true",
         "href": "/guestAuth/app/rest/builds/id:1",
-        "webUrl": "http://localhost:8111/viewLog.html?buildId=1&buildTypeId=TestProject_TestBuild"
+        "webUrl": "http://localhost:8111/viewLog.html?buildId=1&buildTypeId=SampleProject_Build"
       }
     ]
   },
   "legacy_build_details": {
-    "id": "TestProject_TestBuild",
-    "name": "Test Build",
-    "projectName": "Test Project",
-    "projectId": "TestProject",
-    "href": "/guestAuth/app/rest/builds/?locator=buildType:TestProject_TestBuild,sinceBuild:id:0,state:finished",
-    "webUrl": "http://localhost:8111/viewType.html?buildTypeId=TestProject_TestBuild"
+    "id": "SampleProject_Build",
+    "name": "Build",
+    "projectName": "Sample Project",
+    "projectId": "SampleProject",
+    "href": "/guestAuth/app/rest/builds/?locator=buildType:SampleProject_Build,sinceBuild:id:0,state:finished",
+    "webUrl": "http://localhost:8111/viewType.html?buildTypeId=SampleProject_Build"
   },
   "legacy_new_builds": {
     "count": 1,
-    "href": "/guestAuth/app/rest/builds/?locator=buildType:TestProject_TestBuild,sinceBuild:id:0,state:finished",
+    "href": "/guestAuth/app/rest/builds/?locator=buildType:SampleProject_Build,sinceBuild:id:0,state:finished",
     "build": [
       {
         "id": 1,
-        "buildTypeId": "TestProject_TestBuild",
+        "buildTypeId": "SampleProject_Build",
         "number": "1",
         "status": "SUCCESS",
         "state": "finished",
         "href": "/guestAuth/app/rest/builds/id:1",
-        "webUrl": "http://localhost:8111/viewLog.html?buildId=1&buildTypeId=TestProject_TestBuild"
+        "webUrl": "http://localhost:8111/viewLog.html?buildId=1&buildTypeId=SampleProject_Build"
       }
     ]
   },
   "legacy_no_new_builds": {
     "count": 0,
-    "href": "/guestAuth/app/rest/builds/?locator=buildType:TestProject_TestBuild,sinceBuild:id:1,state:finished"
+    "href": "/guestAuth/app/rest/builds/?locator=buildType:SampleProject_Build,sinceBuild:id:1,state:finished"
   }
 }

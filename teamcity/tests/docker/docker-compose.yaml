@@ -1,5 +1,4 @@
 version: '3'
-
 # Adapted from https://github.com/JetBrains/teamcity-docker-samples
 services:
   teamcity-server:
@@ -7,17 +6,29 @@ services:
     image: jetbrains/teamcity-server:latest
     ports:
       - "8111:8111"
+    volumes:
+      - ./teamcity_backup.zip:/teamcity_backup.zip
 
   teamcity-agent:
     container_name: teamcity-agent
-    image: jetbrains/teamcity-agent:latest
+    build:
+      context: .
+      dockerfile: Dockerfile-agent
     environment:
       - AGENT_NAME=regular_agent
       - SERVER_URL=http://teamcity-server:8111
+      - AGENT_TOKEN=0ab9bc8e4ce56f06f06f6d049aa71837
+    volumes:
+      - ./test_sample.py:/test_sample.py
 
   teamcity-minimal-agent:
     container_name: teamcity-minimal-agent
-    image: jetbrains/teamcity-minimal-agent:latest
+    build:
+      context: .
+      dockerfile: Dockerfile-minimal_agent
     environment:
       - AGENT_NAME=minimal_agent
       - SERVER_URL=http://teamcity-server:8111
+      - AGENT_TOKEN=f74337dbf5aa3f9fc48597a931205ad5
+    volumes:
+      - ./test_sample.py:/test_sample.py
