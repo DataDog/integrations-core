@@ -23,10 +23,10 @@ class BSDNetwork(Network):
     def __init__(self, name, init_config, instances):
         super(BSDNetwork, self).__init__(name, init_config, instances)
 
-    def check(self, instance):
+    def check(self, _):
         netstat_flags = ['-i', '-b']
 
-        custom_tags = instance.get('tags', [])
+        custom_tags = self.instance.get('tags', [])
 
         # FreeBSD's netstat truncates device names unless you pass '-W'
         if Platform.is_freebsd():

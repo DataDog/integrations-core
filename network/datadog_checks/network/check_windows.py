@@ -26,8 +26,8 @@ class WindowsNetwork(Network):
     def __init__(self, name, init_config, instances):
         super(WindowsNetwork, self).__init__(name, init_config, instances)
 
-    def check(self, instance):
-        custom_tags = instance.get('tags', [])
+    def check(self, _):
+        custom_tags = self.instance.get('tags', [])
         if self._collect_cx_state:
             self._cx_state_psutil(tags=custom_tags)
 
