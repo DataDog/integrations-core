@@ -7,8 +7,8 @@ GENERAL_METRICS = {
     'argocd_redis_request': 'redis.request',
     'go_gc_duration_seconds': 'go.gc.duration.seconds',
     'go_goroutines': 'go.goroutines',
-    'go_memstats_alloc_bytes': 'go.memstats.alloc_bytes',
-    'go_memstats_alloc_bytes': 'go.memstats.alloc_bytes',
+    # 'go_memstats_alloc_bytes': 'go.memstats.alloc_bytes',
+    # 'go_memstats_alloc_bytes': 'go.memstats.alloc_bytes',
     'go_memstats_buck_hash_sys_bytes': 'go.memstats.buck_hash.sys_bytes',
     'go_memstats_frees': 'go.memstats.frees',
     'go_memstats_gc_cpu_fraction': 'go.memstats.gc.cpu_fraction',
@@ -48,7 +48,7 @@ APPLICATION_CONTROLLER = {
     'argocd_cluster_api_resource_objects': 'cluster.api.resource_objects',
     'argocd_cluster_api_resources': 'cluster.api.resources',
     'argocd_cluster_cache_age_seconds': 'cluster.cache.age.seconds',
-    'argocd_cluster_connection_status': 'cluster.connection.status',  # value 1 if connected, 0 if not
+    # 'argocd_cluster_connection_status': 'cluster.connection.status',  # value 1 if connected, 0 if not
     'argocd_cluster_events': 'cluster.events',
     'argocd_kubectl_exec_pending': 'kubectl.exec.pending',
     'argocd_kubectl_exec': 'kubectl.exec',

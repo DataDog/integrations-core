@@ -15,6 +15,7 @@ class ArgocdCheck(OpenMetricsBaseCheckV2, ConfigMixin):
     def __init__(self, name, init_config, instances):
         super(ArgocdCheck, self).__init__(name, init_config, instances)
         self.check_initializations.appendleft(self._parse_config)
+        self.check_initializations.append(self.configure_additional_transformers)
 
     def _parse_config(self):
         self.scraper_configs = []
@@ -48,3 +49,46 @@ class ArgocdCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         }
         config.update(self.instance)
         return config
+
+    def configure_transformer_go_memstats_alloc_bytes(self, metric_name):
+        def go_memstats_alloc_bytes_transformer(metric, sample_data, runtime_data):
+            import pdb
+
+            pdb.set_trace()
+            for sample, tags, hostname in sample_data:
+                self.gauge(metric_name, sample.value, tags=tags, hostname=hostname)
+
+        return go_memstats_alloc_bytes_transformer
+
+    def configure_transformer_argocd_cluster_connection_status(self, metric_name):
+
+        # The metric reports a 1 if connected, and 0 if not. The mapping used here:
+        # OK if connected || OK if metric value is `1`
+        # Critical if not connected || Critical if value is '0'
+        # Unknown for everything else
+        status_map = {1: "OK", 0: "CRITICAL"}
+        service_check_method = self.service_check
+
+        def argocd_cluster_connection_status_transformer(metric, sample_data, runtime_data):
+            for sample, _, hostname in sample_data:
+                service_check_method(
+                    metric_name,
+                    status_map.get(int(sample.value), ServiceCheck.UNKNOWN),
+                    hostname=hostname,
+                )
+
+        return argocd_cluster_connection_status_transformer
+
+    def configure_additional_transformers(self):
+        if not self.scrapers:
+            return
+        for endpoint in self.instance.keys():
+            if endpoint == "app_controller_endpoint":
+                self.scrapers[self.instance[endpoint]].metric_transformer.add_custom_transformer(
+                    ("argocd_cluster_connection_status"),
+                    self.configure_transformer_argocd_cluster_connection_status("cluster.connection.status"),
+                )
+            self.scrapers[self.instance[endpoint]].metric_transformer.add_custom_transformer(
+                ("go_memstats_alloc_bytes"),
+                self.configure_transformer_go_memstats_alloc_bytes("go.memstats.alloc.bytes"),
+            )
