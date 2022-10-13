@@ -18,7 +18,7 @@ from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.utils.platform import Platform
 from datadog_checks.base.utils.subprocess_output import SubprocessOutputEmptyError, get_subprocess_output
 
-from .const import BSD_TCP_METRICS, ENA_METRIC_NAMES, ENA_METRIC_PREFIX, SOLARIS_TCP_METRICS
+from .const import BSD_TCP_METRICS, SOLARIS_TCP_METRICS
 
 try:
     import fcntl
@@ -263,44 +263,6 @@ class Network(AgentCheck):
                 ]
             )
         return expected_metrics
-
-    def _submit_ena_metrics(self, iface, vals_by_metric, tags):
-        if not vals_by_metric:
-            return
-        if iface in self._excluded_ifaces or (self._exclude_iface_re and self._exclude_iface_re.match(iface)):
-            # Skip this network interface.
-            return
-
-        metric_tags = [] if tags is None else tags[:]
-        metric_tags.append('device:{}'.format(iface))
-
-        allowed = [ENA_METRIC_PREFIX + m for m in ENA_METRIC_NAMES]
-        for m in vals_by_metric:
-            assert m in allowed
-
-        count = 0
-        for metric, val in iteritems(vals_by_metric):
-            self.gauge('system.net.%s' % metric, val, tags=metric_tags)
-            count += 1
-        self.log.debug("tracked %s network ena metrics for interface %s", count, iface)
-
-    def _submit_ethtool_metrics(self, iface, ethtool_metrics, base_tags):
-        if not ethtool_metrics:
-            return
-        if iface in self._excluded_ifaces or (self._exclude_iface_re and self._exclude_iface_re.match(iface)):
-            # Skip this network interface.
-            return
-
-        base_tags_with_device = [] if base_tags is None else base_tags[:]
-        base_tags_with_device.append('device:{}'.format(iface))
-
-        count = 0
-        for ethtool_tag, metric_map in iteritems(ethtool_metrics):
-            tags = base_tags_with_device + [ethtool_tag]
-            for metric, val in iteritems(metric_map):
-                self.monotonic_count('system.net.%s' % metric, val, tags=tags)
-                count += 1
-        self.log.debug("tracked %s network ethtool metrics for interface %s", count, iface)
 
     def parse_long(self, v):
         try:
