@@ -8,7 +8,7 @@ import six
 from scandir import scandir
 
 
-def _walk(top, follow_symlinks):
+def _walk(top, follow_symlinks, log):
     """Modified version of https://docs.python.org/3/library/os.html#os.scandir
     that returns https://docs.python.org/3/library/os.html#os.DirEntry for files
     directly to take advantage of possible cached os.stat calls.
@@ -16,7 +16,11 @@ def _walk(top, follow_symlinks):
     dirs = []
     nondirs = []
 
-    scandir_iter = scandir(top)
+    try:
+        scandir_iter = scandir(top)
+    except OSError as e:
+        log.error("Failed to scan %s: %s", top, e)
+        return
 
     # Avoid repeated global lookups.
     get_next = next
@@ -27,6 +31,7 @@ def _walk(top, follow_symlinks):
         except StopIteration:
             break
         except OSError:
+            log.error("Failed to scan: %s", e)
             return
 
         try:
@@ -42,7 +47,7 @@ def _walk(top, follow_symlinks):
     yield top, dirs, nondirs
 
     for dir_entry in dirs:
-        for entry in walk(dir_entry.path, follow_symlinks=follow_symlinks):
+        for entry in walk(dir_entry.path, follow_symlinks=follow_symlinks, log):
             yield entry
 
 
