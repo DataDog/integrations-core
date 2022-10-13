@@ -3,7 +3,6 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import copy
 
-import mock
 import pytest
 from six import PY3
 
@@ -15,10 +14,7 @@ if PY3:
     long = int
 
 
-CONNECTION_QUEUES_METRICS = [
-    'system.net.tcp.recv_q',
-    'system.net.tcp.send_q'
-]
+CONNECTION_QUEUES_METRICS = ['system.net.tcp.recv_q', 'system.net.tcp.send_q']
 
 
 @pytest.mark.skipif(not Platform.is_linux, reason="Only works on Linux systems")
