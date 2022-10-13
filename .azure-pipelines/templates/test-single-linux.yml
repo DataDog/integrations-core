@@ -81,7 +81,10 @@ jobs:
   - ${{ if and(eq(parameters.test, 'true'), eq(parameters.coverage, 'true'), eq(parameters.force_base_package, 'false')) }}:
     # https://docs.codecov.com/docs/codecov-uploader
     - script: |
-        curl -O https://uploader.codecov.io/latest/linux/codecov
+        curl -O https://uploader.codecov.io/v0.3.2/linux/codecov
+        # Verify checksum
+        printf '20f9c9d78483fce977b6cc39e231a734a23bcd36f4d536bb7355222fb88d02bc  codecov' > codecov.SHA256SUM
+        shasum -a 256 -c codecov.SHA256SUM
         chmod +x codecov
       displayName: 'Install Codecov'
     - script: |
