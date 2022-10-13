@@ -389,8 +389,7 @@ def test_channel_status_no_duplicates(aggregator, get_check, instance, dd_run_ch
         'port:{}'.format(common.PORT),
         'connection_name:{}({})'.format(common.HOST, common.PORT),
         'foo:bar',
-        'channel:{}'.format(common.CHANNEL)
+        'channel:{}'.format(common.CHANNEL),
     ]
 
     aggregator.assert_service_check("ibm_mq.channel.status", check.OK, tags=tags, count=1)
-
