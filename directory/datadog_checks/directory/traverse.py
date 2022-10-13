@@ -9,7 +9,7 @@ from scandir import scandir
 
 
 def _walk(top, follow_symlinks):
-    """Modified version of https://docs.python.org/3/library/os.html#os.scandirkkk
+    """Modified version of https://docs.python.org/3/library/os.html#os.scandir
     that returns https://docs.python.org/3/library/os.html#os.DirEntry for files
     directly to take advantage of possible cached os.stat calls.
     """
