@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheckV2
+from datadog_checks.base.constants import ServiceCheck
 
 from .config_models import ConfigMixin
 from .constants import API_SERVER_NAMESPACE, APP_CONTROLLER_NAMESPACE, REPO_SERVER_NAMESPACE
@@ -51,22 +52,21 @@ class ArgocdCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         return config
 
     def configure_transformer_go_memstats_alloc_bytes(self, metric_name):
+        # Custom transformer to ensure we only pick up the gauge version of this metric
+        # ArgoCD exposes a similar metric `go_memstats_alloc_bytes_total` as a counter
+        # which would also be collected and could cause inaccuracies in the metric value
         def go_memstats_alloc_bytes_transformer(metric, sample_data, runtime_data):
-            import pdb
-
-            pdb.set_trace()
             for sample, tags, hostname in sample_data:
                 self.gauge(metric_name, sample.value, tags=tags, hostname=hostname)
 
         return go_memstats_alloc_bytes_transformer
 
     def configure_transformer_argocd_cluster_connection_status(self, metric_name):
-
         # The metric reports a 1 if connected, and 0 if not. The mapping used here:
         # OK if connected || OK if metric value is `1`
         # Critical if not connected || Critical if value is '0'
         # Unknown for everything else
-        status_map = {1: "OK", 0: "CRITICAL"}
+        status_map = {1: ServiceCheck.OK, 0: ServiceCheck.CRITICAL}
         service_check_method = self.service_check
 
         def argocd_cluster_connection_status_transformer(metric, sample_data, runtime_data):
