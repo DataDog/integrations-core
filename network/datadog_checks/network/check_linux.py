@@ -19,11 +19,6 @@ try:
 except ImportError:
     from datadog_checks.base.stubs import datadog_agent
 
-try:
-    import fcntl
-except ImportError:
-    fcntl = None
-
 if PY3:
     long = int
 
@@ -35,7 +30,7 @@ class LinuxNetwork(Network):
 
     def check(self, _):
         """
-        _check_linux can be run inside a container and still collects the network metrics from the host
+        check can be run inside a container and still collects the network metrics from the host
         For that procfs_path can be set to something like "/host/proc"
         When a custom procfs_path is set, the collect_connection_state option is ignored
         """
