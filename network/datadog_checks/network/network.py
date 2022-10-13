@@ -41,7 +41,6 @@ class Network(AgentCheck):
             return super(Network, cls).__new__(cls)
         if Platform.is_linux():
             from .check_linux import LinuxNetwork
-
             return LinuxNetwork(name, init_config, instances)
         else:
             # Todo: remove later in the refactor
