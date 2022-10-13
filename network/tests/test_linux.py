@@ -10,6 +10,7 @@ import pytest
 from six import PY3, iteritems
 
 from datadog_checks.base.utils.platform import Platform
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.network.check_linux import LinuxNetwork
 
 from . import common
@@ -126,6 +127,50 @@ CONNTRACK_STATS = {
     'system.net.conntrack.search_restart': (39936711, 36983181),
 }
 
+LINUX_STATS = [
+    'system.net.conntrack.count',
+    'system.net.conntrack.expect_max',
+    'system.net.conntrack.max',
+    'system.net.conntrack.tcp_max_retrans',
+    'system.net.conntrack.tcp_timeout_max_retrans',
+    'system.net.iface.mtu',
+    'system.net.iface.num_rx_queues',
+    'system.net.iface.num_tx_queues',
+    'system.net.iface.tx_queue_len',
+    'system.net.ip.forwarded_datagrams',
+    'system.net.ip.fragmentation_creates',
+    'system.net.ip.fragmentation_fails',
+    'system.net.ip.fragmentation_oks',
+    'system.net.ip.in_addr_errors',
+    'system.net.ip.in_csum_errors',
+    'system.net.ip.in_delivers',
+    'system.net.ip.in_discards',
+    'system.net.ip.in_header_errors',
+    'system.net.ip.in_no_routes',
+    'system.net.ip.in_receives',
+    'system.net.ip.in_truncated_pkts',
+    'system.net.ip.in_unknown_protos',
+    'system.net.ip.out_discards',
+    'system.net.ip.out_no_routes',
+    'system.net.ip.out_requests',
+    'system.net.ip.reassembly_fails',
+    'system.net.ip.reassembly_oks',
+    'system.net.ip.reassembly_overlaps',
+    'system.net.ip.reassembly_requests',
+    'system.net.ip.reassembly_timeouts',
+    'system.net.ip.reverse_path_filter',
+    'system.net.tcp.abort_on_timeout',
+    'system.net.tcp.active_opens',
+    'system.net.tcp.attempt_fails',
+    'system.net.tcp.backlog_drops',
+    'system.net.tcp.current_established',
+    'system.net.tcp.established_resets',
+    'system.net.tcp.failed_retransmits',
+    'system.net.tcp.from_zero_window',
+    'system.net.tcp.in_csum_errors',
+    'system.net.tcp.in_errors',
+]
+
 
 CONNECTION_QUEUES_METRICS = ['system.net.tcp.recv_q', 'system.net.tcp.send_q']
 
@@ -195,11 +240,10 @@ def test_collect_cx_queues(check, aggregator):
 
     check_instance.check({})
 
-    for metric in CONNECTION_QUEUES_METRICS:
-        aggregator.assert_metric(metric)
-    for metric in common.EXPECTED_METRICS:
+    for metric in CONNECTION_QUEUES_METRICS + LINUX_STATS + common.EXPECTED_METRICS:
         aggregator.assert_metric(metric)
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 @pytest.mark.skipif(Platform.is_windows(), reason="Only runs on Unix systems")
