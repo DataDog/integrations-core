@@ -88,7 +88,7 @@ class TeamCityCheck(AgentCheck):
 
     def _normalize_server_url(self, server):
         """
-        Check if the server URL starts with a HTTP or HTTPS scheme, fall back to http if not present
+        Check if the server URL starts with an HTTP or HTTPS scheme, fall back to http if not present
         """
         server = server if server.startswith(("http://", "https://")) else "http://{}".format(server)
         return server

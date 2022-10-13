@@ -51,7 +51,7 @@ def test_server_normalization():
 @pytest.mark.parametrize(
     'projects_config, expected_exclude, expected_include, sample_build_configs, should_include',
     [
-        pytest.param({'project_a': {}}, set(), set(), ['A_build_foo', ['A_build_bar']], [True, True], id="No filters"),
+        pytest.param({'project_a': {}}, set(), set(), ['A_build_foo', 'A_build_bar'], [True, True], id="No filters"),
         pytest.param(
             {'project_A': {'include': ['^A_build_foo$', 'A_build_bar.*'], 'exclude': ['A_build_zap.*']}},
             {'A_build_zap.*'},
@@ -101,7 +101,7 @@ def test_server_normalization():
             {'B_build_foo.*', 'C_build_bar.*'},
             ['B_build_foo_abc', 'C_build_bar456', 'C_build_foo', 'C_build_foo_234', 'C_build_zap'],
             [True, True, False, False, False],
-            id="Multiple projects and with filter overlap",
+            id="Multiple projects with filter overlap",
         ),
     ],
 )
