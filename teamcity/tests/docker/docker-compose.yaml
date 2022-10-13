@@ -17,7 +17,7 @@ services:
     environment:
       - AGENT_NAME=regular_agent
       - SERVER_URL=http://teamcity-server:8111
-      - AGENT_TOKEN=0ab9bc8e4ce56f06f06f6d049aa71837
+      - AGENT_TOKEN=56ac4711fbd5355d2b10ed5be8f932f6
     volumes:
       - ./test_sample.py:/test_sample.py
 
@@ -29,6 +29,6 @@ services:
     environment:
       - AGENT_NAME=minimal_agent
       - SERVER_URL=http://teamcity-server:8111
-      - AGENT_TOKEN=f74337dbf5aa3f9fc48597a931205ad5
+      - AGENT_TOKEN=07f3ff35094bc13a45865f5abc8699bb
     volumes:
       - ./test_sample.py:/test_sample.py
