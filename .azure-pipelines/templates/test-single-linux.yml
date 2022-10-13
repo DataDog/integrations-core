@@ -78,7 +78,7 @@ jobs:
       coverage: ${{ parameters.coverage }}
       force_base_package: ${{ parameters.force_base_package }}
 
-  - ${{ if and(eq(parameters.test, 'true'), eq(parameters.coverage, 'true'), eq(parameters.force_base_package, 'false')) }}:
+  - ${{ if and(eq(parameters.repo, 'core'), eq(parameters.test, 'true'), eq(parameters.coverage, 'true'), eq(parameters.force_base_package, 'false')) }}:
     # https://docs.codecov.com/docs/codecov-uploader
     - script: |
         curl -O https://uploader.codecov.io/v0.3.2/linux/codecov
