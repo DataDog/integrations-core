@@ -134,7 +134,8 @@ class DirectoryCheck(AgentCheck):
                             filetags.extend(dirtags)
                             self.gauge('system.disk.directory.file.bytes', file_stat.st_size, tags=filetags)
                             self.gauge(
-                                'system.disk.directory.file.modified_sec_ago', time() - file_stat.st_mtime, tags=filetags
+                                'system.disk.directory.file.modified_sec_ago',
+                                time() - file_stat.st_mtime, tags=filetags,
                             )
                             self.gauge(
                                 'system.disk.directory.file.created_sec_ago', time() - file_stat.st_ctime, tags=filetags
