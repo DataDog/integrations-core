@@ -2,3 +2,8 @@
 
 [[envs.default.matrix]]
 python = ["27", "38"]
+
+[envs.default]
+dependencies = [
+  "confluent_kafka==1.4.1",
+]
