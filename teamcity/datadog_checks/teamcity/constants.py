@@ -5,6 +5,11 @@ from copy import deepcopy
 
 from datadog_checks.base import AgentCheck
 
+SERVICE_CHECK_BUILD_STATUS = 'build.status'
+SERVICE_CHECK_BUILD_PROBLEMS = 'build.problems'
+SERVICE_CHECK_TEST_RESULTS = 'test.results'
+SERVICE_CHECK_OPENMETRICS = 'teamcity.openmetrics.health'
+
 STATUS_MAP = {
     "SUCCESS": {"check_status": AgentCheck.OK, "msg_title": "successful", "alert_type": "success"},
     "FAILURE": {"check_status": AgentCheck.CRITICAL, "msg_title": "failed", "alert_type": "error"},

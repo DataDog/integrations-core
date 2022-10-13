@@ -9,16 +9,21 @@ import pytest
 from mock import ANY, patch
 
 from datadog_checks.teamcity import TeamCityCheck
+from datadog_checks.teamcity.constants import (
+    SERVICE_CHECK_BUILD_PROBLEMS,
+    SERVICE_CHECK_BUILD_STATUS,
+    SERVICE_CHECK_TEST_RESULTS,
+)
 
 from .common import (
     BUILD_STATS_METRICS,
     BUILD_TAGS,
     CHECK_NAME,
+    EXPECTED_SERVICE_CHECK_TEST_RESULTS,
     LEGACY_BUILD_TAGS,
     LEGACY_INSTANCE,
     NEW_FAILED_BUILD,
     NEW_SUCCESSFUL_BUILD,
-    TESTS_SERVICE_CHECK_RESULTS,
     USE_OPENMETRICS,
     get_fixture_path,
 )
@@ -165,10 +170,12 @@ def test_collect_test_results(aggregator, mock_http_response, instance, check):
     mock_http_response(file_path=get_fixture_path("test_occurrences.json"))
     c._collect_test_results(NEW_SUCCESSFUL_BUILD)
 
-    for res in TESTS_SERVICE_CHECK_RESULTS:
+    for res in EXPECTED_SERVICE_CHECK_TEST_RESULTS:
         expected_status = res['value']
         expected_tests_tags = res['tags']
-        aggregator.assert_service_check('teamcity.test.results', status=expected_status, tags=expected_tests_tags)
+        aggregator.assert_service_check(
+            'teamcity.{}'.format(SERVICE_CHECK_TEST_RESULTS), status=expected_status, tags=expected_tests_tags
+        )
 
 
 def test_collect_build_problems(aggregator, mock_http_response, instance, check):
@@ -180,7 +187,7 @@ def test_collect_build_problems(aggregator, mock_http_response, instance, check)
     c._collect_build_problems(NEW_FAILED_BUILD)
 
     aggregator.assert_service_check(
-        'teamcity.build.problems',
+        'teamcity.{}'.format(SERVICE_CHECK_BUILD_PROBLEMS),
         count=1,
         tags=expected_tags,
         status=c.CRITICAL,
@@ -194,6 +201,6 @@ def test_handle_empty_builds(aggregator, mock_http_response, instance, legacy_in
         c = check(inst)
         mock_http_response(file_path=get_fixture_path("init_no_builds.json"))
         c._initialize(project_id='SampleProject')
-        aggregator.assert_service_check('teamcity.build.status', count=0)
+        aggregator.assert_service_check('teamcity.{}'.format(SERVICE_CHECK_BUILD_STATUS), count=0)
 
         aggregator.reset()

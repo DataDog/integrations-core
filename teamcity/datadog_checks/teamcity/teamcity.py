@@ -9,7 +9,13 @@ from six import PY2
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 
 from .common import construct_event, get_response, should_include_build_config
-from .constants import STATUS_MAP, BuildConfigs
+from .constants import (
+    SERVICE_CHECK_BUILD_PROBLEMS,
+    SERVICE_CHECK_BUILD_STATUS,
+    SERVICE_CHECK_TEST_RESULTS,
+    STATUS_MAP,
+    BuildConfigs,
+)
 from .metrics import build_metric
 
 
@@ -136,7 +142,9 @@ class TeamCityCheck(AgentCheck):
         teamcity_event = construct_event(self, new_build)
         self.log.trace('Submitting event: %s', teamcity_event)
         self.event(teamcity_event)
-        self.service_check('build.status', STATUS_MAP.get(new_build['status'])['check_status'], tags=self.build_tags)
+        self.service_check(
+            SERVICE_CHECK_BUILD_STATUS, STATUS_MAP.get(new_build['status'])['check_status'], tags=self.build_tags
+        )
 
     def _collect_build_stats(self, new_build):
         build_id = new_build['id']
@@ -167,7 +175,7 @@ class TeamCityCheck(AgentCheck):
                     'test_status:{}'.format(test['status'].lower()),
                     'test_name:{}'.format(test['name']),
                 ]
-                self.service_check('test.results', test_status, tags=self.build_tags + tags)
+                self.service_check(SERVICE_CHECK_TEST_RESULTS, test_status, tags=self.build_tags + tags)
 
     def _collect_build_problems(self, new_build):
         build_id = new_build['id']
@@ -181,8 +189,10 @@ class TeamCityCheck(AgentCheck):
                     'problem_type:{}'.format(problem_type),
                     'problem_identity:{}'.format(problem_identity),
                 ]
-                self.service_check('build.problems', AgentCheck.CRITICAL, tags=self.build_tags + problem_tags)
-        self.service_check('build.problems', AgentCheck.OK, tags=self.build_tags)
+                self.service_check(
+                    SERVICE_CHECK_BUILD_PROBLEMS, AgentCheck.CRITICAL, tags=self.build_tags + problem_tags
+                )
+        self.service_check(SERVICE_CHECK_BUILD_PROBLEMS, AgentCheck.OK, tags=self.build_tags)
 
     def _collect_new_builds(self):
         last_build_id = self.bc_store.get_last_build_id(self.build_config)

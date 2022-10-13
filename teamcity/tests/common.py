@@ -206,6 +206,30 @@ PROMETHEUS_METRICS = [
     'teamcity.vcs.get.current.state.calls.count',
 ]
 
+E2E_PROMETHEUS_METRICS = [
+    'teamcity.agents.connected.authorized',
+    'teamcity.agents.running.builds',
+    'teamcity.build.configs',
+    'teamcity.builds.finished.count',
+    'teamcity.builds.queued',
+    'teamcity.builds.running',
+    'teamcity.builds.started.count',
+    'teamcity.cpu.count',
+    'teamcity.cpu.usage.process',
+    'teamcity.cpu.usage.system',
+    'teamcity.database.connections.active',
+    'teamcity.httpSessions.active',
+    'teamcity.jvm.memory.committed.bytes',
+    'teamcity.jvm.memory.used.bytes',
+    'teamcity.jvm.threads',
+    'teamcity.projects',
+    'teamcity.projects.active',
+    'teamcity.server.uptime.milliseconds',
+    'teamcity.system.load.average.1m',
+    'teamcity.users.active',
+    'teamcity.vcsRoots',
+]
+
 BUILD_STATS_METRICS = [
     {'name': 'teamcity.artifacts_size', 'value': 47339.0, 'tags': BUILD_TAGS},
     {'name': 'teamcity.inspection_stats_e', 'value': 0.0, 'tags': BUILD_TAGS},
@@ -256,7 +280,7 @@ BUILD_STATS_METRICS = [
 ]
 
 
-TESTS_SERVICE_CHECK_RESULTS = [
+EXPECTED_SERVICE_CHECK_TEST_RESULTS = [
     {'value': 0, 'tags': BUILD_TAGS + ['test_status:success', 'test_name:tests.test_foo.test_bar']},
     {'value': 2, 'tags': BUILD_TAGS + ['test_status:failure', 'test_name:tests.test_foo.test_bop']},
     {'value': 0, 'tags': BUILD_TAGS + ['test_status:normal', 'test_name:tests.test_bar.test_foo']},

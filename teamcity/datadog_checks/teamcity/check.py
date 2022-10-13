@@ -24,7 +24,7 @@ class TeamCityCheckV2(OpenMetricsBaseCheckV2):
         self.server_url = "{}://{}".format(parsed_endpoint.scheme, parsed_endpoint.netloc)
         self.metrics_endpoint = ''
 
-        experimental_metrics = is_affirmative(self.instance.get('experimental_metrics', True))
+        experimental_metrics = is_affirmative(self.instance.get('experimental_metrics', False))
 
         if experimental_metrics:
             self.metrics_endpoint = self.EXPERIMENTAL_METRICS_URL.format(self.auth_type)
