@@ -13,12 +13,6 @@ BSD_TCP_METRICS = [
     (re.compile(r"^\s*(\d+) packets received\s*$"), "system.net.tcp.rcv_packs"),
 ]
 
-SOLARIS_TCP_METRICS = [
-    (re.compile(r"\s*tcpRetransSegs\s*=\s*(\d+)\s*"), "system.net.tcp.retrans_segs"),
-    (re.compile(r"\s*tcpOutDataSegs\s*=\s*(\d+)\s*"), "system.net.tcp.in_segs"),
-    (re.compile(r"\s*tcpInSegs\s*=\s*(\d+)\s*"), "system.net.tcp.out_segs"),
-]
-
 # constants for extracting ethtool data via ioctl
 SIOCETHTOOL = 0x8946
 ETHTOOL_GDRVINFO = 0x00000003
