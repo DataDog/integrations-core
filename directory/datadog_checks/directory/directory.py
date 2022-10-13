@@ -80,8 +80,7 @@ class DirectoryCheck(AgentCheck):
             # Only visit the first directory.
             try:
                 walker = [next(walker)]
-            except Exception as e:
-                self.log.error("failed to visit %s: %s", self._config.abs_directory, e)
+            except StopIteration:
                 return
 
         # Avoid repeated global lookups.
