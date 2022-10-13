@@ -9,7 +9,7 @@
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
     "description": "Track all your cert-manager metrics with Datadog",
-    "title": "cert-manager Integration",
+    "title": "cert-manager",
     "media": [],
     "classifier_tags": [
       "Supported OS::Linux",
