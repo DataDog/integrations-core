@@ -7,9 +7,10 @@ import os
 
 import mock
 import pytest
-from datadog_checks.network.check_linux import LinuxNetwork
 from six import PY3, iteritems
+
 from datadog_checks.base.utils.platform import Platform
+from datadog_checks.network.check_linux import LinuxNetwork
 
 from . import common
 
@@ -26,6 +27,7 @@ else:
     def decode_string(s):
         s.decode(ESCAPE_ENCODING)
         return s.decode("utf-8")
+
 
 FIXTURE_DIR = os.path.join(common.HERE, 'fixtures')
 
