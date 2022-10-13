@@ -7,6 +7,7 @@ import os
 
 import mock
 import pytest
+from datadog_checks.network.check_linux import LinuxNetwork
 from six import PY3, iteritems
 from datadog_checks.base.utils.platform import Platform
 
@@ -177,12 +178,18 @@ def read_int_file_mock(location):
         return None
 
 
+@mock.patch('datadog_checks.network.network.Platform.is_linux', return_value=True)
+def test_returns_the_right_instance(is_linux, check):
+    check_instance = check({})
+    assert isinstance(check_instance, LinuxNetwork)
+
+
 @pytest.mark.skipif(not Platform.is_linux(), reason="Only works on Linux systems")
-def test_collect_cx_queues(is_linux, is_bsd, check, aggregator):
+def test_collect_cx_queues(check, aggregator):
     instance = copy.deepcopy(common.INSTANCE)
     instance['collect_connection_queues'] = True
     instance['collect_connection_state'] = True
-    check_instance = check(instance)
+    check_instance = LinuxNetwork('network', {}, [instance])
 
     check_instance.check({})
 
@@ -194,12 +201,10 @@ def test_collect_cx_queues(is_linux, is_bsd, check, aggregator):
 
 
 @pytest.mark.skipif(Platform.is_windows(), reason="Only runs on Unix systems")
-@mock.patch('datadog_checks.network.network.Platform.is_bsd', return_value=False)
-@mock.patch('datadog_checks.network.network.Platform.is_linux', return_value=True)
-def test_cx_state(is_bds, is_linux, aggregator, check):
+def test_cx_state(aggregator):
     instance = copy.deepcopy(common.INSTANCE)
     instance['collect_connection_state'] = True
-    check_instance = check(instance)
+    check_instance = LinuxNetwork('network', {}, [instance])
 
     with mock.patch('datadog_checks.network.check_linux.get_subprocess_output') as out:
         out.side_effect = ss_subprocess_mock
@@ -215,12 +220,11 @@ def test_cx_state(is_bds, is_linux, aggregator, check):
 
 
 @pytest.mark.skipif(Platform.is_windows(), reason="Only runs on Unix systems")
-@mock.patch('datadog_checks.network.network.Platform.is_linux', return_value=True)
 @mock.patch('os.listdir', side_effect=os_list_dir_mock)
 @mock.patch('datadog_checks.network.check_linux.LinuxNetwork._read_int_file', side_effect=read_int_file_mock)
-def test_linux_sys_net(is_linux, listdir, read_int_file, aggregator, check):
+def test_linux_sys_net(listdir, read_int_file, aggregator):
     instance = copy.deepcopy(common.INSTANCE)
-    check_instance = check(instance)
+    check_instance = LinuxNetwork('network', {}, [instance])
 
     check_instance.check({})
 
@@ -230,12 +234,10 @@ def test_linux_sys_net(is_linux, listdir, read_int_file, aggregator, check):
     aggregator.reset()
 
 
-@mock.patch('datadog_checks.network.network.Platform.is_bsd', return_value=False)
-@mock.patch('datadog_checks.network.network.Platform.is_linux', return_value=True)
-def test_cx_state_mocked(is_bsd, is_linux, aggregator, check):
+def test_cx_state_mocked(aggregator):
     instance = copy.deepcopy(common.INSTANCE)
     instance['collect_connection_state'] = True
-    check_instance = check(instance)
+    check_instance = LinuxNetwork('network', {}, [instance])
     with mock.patch('datadog_checks.network.check_linux.get_subprocess_output') as out:
         out.side_effect = ss_subprocess_mock
         check_instance._get_linux_sys_net = lambda x: True
@@ -253,16 +255,14 @@ def test_cx_state_mocked(is_bsd, is_linux, aggregator, check):
             aggregator.assert_metric(metric, value=value)
 
 
-@mock.patch('datadog_checks.network.network.Platform.is_bsd', return_value=False)
-@mock.patch('datadog_checks.network.network.Platform.is_linux', return_value=True)
-def test_add_conntrack_stats_metrics(is_linux, is_bsd, aggregator, check):
+def test_add_conntrack_stats_metrics(aggregator):
     mocked_conntrack_stats = (
         "cpu=0 found=27644 invalid=19060 ignore=485633411 insert=0 insert_failed=1 "
         "drop=1 early_drop=0 error=0 search_restart=39936711\n"
         "cpu=1 found=21960 invalid=17288 ignore=475938848 insert=0 insert_failed=1 "
         "drop=1 early_drop=0 error=0 search_restart=36983181"
     )
-    check_instance = check({})
+    check_instance = LinuxNetwork('network', {}, [{}])
     with mock.patch('datadog_checks.network.check_linux.get_subprocess_output') as subprocess:
         subprocess.return_value = mocked_conntrack_stats, None, None
         check_instance._add_conntrack_stats_metrics(None, None, ['foo:bar'])
@@ -273,12 +273,10 @@ def test_add_conntrack_stats_metrics(is_linux, is_bsd, aggregator, check):
 
 
 @pytest.mark.skipif(not PY3, reason="mock builtins only works on Python 3")
-@mock.patch('datadog_checks.network.network.Platform.is_bsd', return_value=False)
-@mock.patch('datadog_checks.network.network.Platform.is_linux', return_value=True)
-def test_proc_permissions_error(is_bsd, is_linux, aggregator, check, caplog):
+def test_proc_permissions_error(aggregator, caplog):
     instance = copy.deepcopy(common.INSTANCE)
     instance['collect_connection_state'] = False
-    check_instance = check(instance)
+    check_instance = LinuxNetwork('network', {}, [instance])
     caplog.set_level(logging.DEBUG)
 
     with mock.patch('builtins.open', mock.mock_open()) as mock_file:
@@ -290,15 +288,11 @@ def test_proc_permissions_error(is_bsd, is_linux, aggregator, check, caplog):
         assert 'Unable to read /proc/net/snmp.' in caplog.text
 
 
-@mock.patch('datadog_checks.network.network.Platform.is_linux', return_value=True)
-@mock.patch('datadog_checks.network.network.Platform.is_bsd', return_value=False)
-@mock.patch('datadog_checks.network.network.Platform.is_solaris', return_value=False)
-@mock.patch('datadog_checks.network.network.Platform.is_windows', return_value=False)
 @mock.patch('distutils.spawn.find_executable', return_value='/bin/ss')
-def test_ss_with_custom_procfs(is_linux, is_bsd, is_solaris, is_windows, aggregator, check):
+def test_ss_with_custom_procfs(aggregator):
     instance = copy.deepcopy(common.INSTANCE)
     instance['collect_connection_state'] = True
-    check_instance = check(instance)
+    check_instance = LinuxNetwork('network', {}, [instance])
     check_instance._get_linux_sys_net = lambda x: True
     with mock.patch(
         'datadog_checks.network.check_linux.get_subprocess_output', side_effect=ss_subprocess_mock
@@ -312,11 +306,10 @@ def test_ss_with_custom_procfs(is_linux, is_bsd, is_solaris, is_windows, aggrega
         )
 
 
-@mock.patch('datadog_checks.network.network.Platform.is_linux', return_value=True)
-def test_proc_net_metrics(is_linux, aggregator, check):
+def test_proc_net_metrics(aggregator):
     instance = copy.deepcopy(common.INSTANCE)
     instance['collect_count_metrics'] = True
-    check_instance = check(instance)
+    check_instance = LinuxNetwork('network', {}, [instance])
     check_instance.get_net_proc_base_location = lambda x: FIXTURE_DIR
 
     check_instance.check({})
