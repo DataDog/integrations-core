@@ -10,6 +10,7 @@ import pytest
 from six import PY3, iteritems
 
 from datadog_checks.base.utils.platform import Platform
+from datadog_checks.base.utils.subprocess_output import get_subprocess_output
 from datadog_checks.network.check_linux import LinuxNetwork
 
 from . import common
@@ -156,6 +157,13 @@ def ss_subprocess_mock(*args, **kwargs):
         return decode_string(contents), None, None
 
 
+def ss_subprocess_mock_fails(*args, **kwargs):
+    if args[0][2].startswith('ss '):
+        raise Exception('boom')
+    else:
+        return get_subprocess_output(*args, **kwargs)
+
+
 def netstat_subprocess_mock(*args, **kwargs):
     if args[0][0] == 'sh':
         raise OSError()
@@ -194,6 +202,20 @@ def test_collect_cx_queues(check, aggregator):
     check_instance = LinuxNetwork('network', {}, [instance])
 
     check_instance.check({})
+
+    for metric in CONNECTION_QUEUES_METRICS + common.EXPECTED_METRICS:
+        aggregator.assert_metric(metric)
+
+
+@pytest.mark.skipif(not Platform.is_linux(), reason="Only works on Linux systems")
+def test_collect_cx_queues_when_ss_fails(check, aggregator):
+    instance = copy.deepcopy(common.INSTANCE)
+    instance['collect_connection_queues'] = True
+    instance['collect_connection_state'] = True
+    check_instance = LinuxNetwork('network', {}, [instance])
+    with mock.patch('datadog_checks.network.check_linux.get_subprocess_output') as out:
+        out.side_effect = ss_subprocess_mock_fails
+        check_instance.check({})
 
     for metric in CONNECTION_QUEUES_METRICS + common.EXPECTED_METRICS:
         aggregator.assert_metric(metric)
