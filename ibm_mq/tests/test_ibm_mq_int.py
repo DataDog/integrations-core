@@ -419,7 +419,8 @@ def test_queue_manager_process_not_found(aggregator, get_check, instance, dd_run
         'foo:bar',
     ]
 
-    aggregator.assert_service_check(check.SERVICE_CHECK, check.WARNING, tags=tags, count=1)
+    aggregator.assert_service_check(check.SERVICE_CHECK, check.UNKNOWN, tags=tags, count=1)
+    aggregator.assert_service_check('ibm_mq.queue_manager', check.UNKNOWN, tags=tags, count=1)
 
 
 @requires_py3
@@ -445,4 +446,5 @@ def test_queue_manager_process_found(aggregator, get_check, instance, dd_run_che
     ]
 
     aggregator.assert_service_check(check.SERVICE_CHECK, check.OK, tags=tags, count=1)
+    aggregator.assert_service_check('ibm_mq.queue_manager', check.OK, tags=tags)
     assert_all_metrics(aggregator)
