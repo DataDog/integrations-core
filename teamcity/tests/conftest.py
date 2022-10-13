@@ -43,7 +43,7 @@ def dd_environment(instance, omv2_instance):
         WaitFor(restart_teamcity_server),
         CheckDockerLogs('teamcity-server', ['TeamCity initialized'], attempts=100, wait=5),
     ]
-    with docker_run(COMPOSE_FILE, conditions=conditions, sleep=10):
+    with docker_run(COMPOSE_FILE, conditions=conditions, sleep=10, mount_logs=True):
         if USE_OPENMETRICS:
             yield omv2_instance
         else:

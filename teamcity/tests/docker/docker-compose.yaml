@@ -8,6 +8,12 @@ services:
       - "8111:8111"
     volumes:
       - ./teamcity_backup.zip:/teamcity_backup.zip
+      - ${DD_LOG_1}:/opt/teamcity/logs/teamcity-server.log
+      - ${DD_LOG_2}:/opt/teamcity/logs/teamcity-activities.log
+      - ${DD_LOG_3}:/opt/teamcity/logs/teamcity-vcs.log
+      - ${DD_LOG_4}:/opt/teamcity/logs/teamcity-cleanup.log
+      - ${DD_LOG_5}:/opt/teamcity/logs/teamcity-notifications.log
+      - ${DD_LOG_6}:/opt/teamcity/logs/teamcity-ws.log
 
   teamcity-agent:
     container_name: teamcity-agent

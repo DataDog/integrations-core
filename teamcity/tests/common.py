@@ -4,6 +4,7 @@
 import os
 
 from datadog_checks.dev import get_docker_hostname, get_here
+from datadog_checks.base import is_affirmative
 
 HERE = get_here()
 COMPOSE_FILE = os.path.join(HERE, 'docker', 'docker-compose.yaml')
@@ -12,11 +13,11 @@ PORT = '8111'
 SERVER_URL = "http://{}:{}".format(HOST, PORT)
 CHECK_NAME = 'teamcity'
 
-USE_OPENMETRICS = os.getenv('USE_OPENMETRICS')
+USE_OPENMETRICS = is_affirmative(os.environ.get('USE_OPENMETRICS'))
 
 LEGACY_INSTANCE = {
     'name': 'Legacy test build',
-    'server': '{}:{}'.format(HOST, PORT),
+    'server': SERVER_URL,
     'build_configuration': 'SampleProject_Build',
     'host_affected': 'buildhost42.dtdg.co',
     'basic_http_authentication': False,
@@ -25,7 +26,7 @@ LEGACY_INSTANCE = {
 }
 
 TEAMCITY_V2_INSTANCE = {
-    'server': '{}:{}'.format(HOST, PORT),
+    'server': SERVER_URL,
     'projects': {
         'SampleProject': {
             'include': [
