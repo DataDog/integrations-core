@@ -47,7 +47,7 @@ def _walk(top, follow_symlinks, log):
     yield top, dirs, nondirs
 
     for dir_entry in dirs:
-        for entry in walk(dir_entry.path, follow_symlinks=follow_symlinks, log):
+        for entry in walk(dir_entry.path, follow_symlinks=follow_symlinks):
             yield entry
 
 
@@ -61,4 +61,4 @@ else:
     def walk(top, follow_symlinks):
         if isinstance(top, bytes):
             top = top.decode(file_system_encoding)
-        return _walk(top, follow_symlinks)
+        return _walk(top, follow_symlinks, log)
