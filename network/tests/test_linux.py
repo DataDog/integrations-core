@@ -159,7 +159,7 @@ def ss_subprocess_mock(*args, **kwargs):
 
 def ss_subprocess_mock_fails(*args, **kwargs):
     if args[0][2].startswith('ss '):
-        raise Exception('boom')
+        raise OSError('boom')
     else:
         return get_subprocess_output(*args, **kwargs)
 
