@@ -173,7 +173,7 @@ def obfuscate_xml_plan(raw_plan, obfuscator_options=None):
                 e.attrib[k] = ensure_unicode(statement['query'])
     return to_native_string(ET.tostring(tree, encoding="UTF-8"))
 
-
+#TEST PR TO MAKE CI RUN!!
 class SqlserverStatementMetrics(DBMAsyncJob):
     """Collects query metrics and plans"""
 
