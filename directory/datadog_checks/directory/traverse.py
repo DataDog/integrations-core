@@ -8,19 +8,15 @@ import six
 from scandir import scandir
 
 
-def _walk(top, follow_symlinks, log):
-    """Modified version of https://docs.python.org/3/library/os.html#os.scandir
+def _walk(top, follow_symlinks):
+    """Modified version of https://docs.python.org/3/library/os.html#os.scandirkkk
     that returns https://docs.python.org/3/library/os.html#os.DirEntry for files
     directly to take advantage of possible cached os.stat calls.
     """
     dirs = []
     nondirs = []
 
-    try:
-        scandir_iter = scandir(top)
-    except OSError as e:
-        log.error("Failed to scan %s: %s", top, e)
-        return
+    scandir_iter = scandir(top)
 
     # Avoid repeated global lookups.
     get_next = next
@@ -30,9 +26,6 @@ def _walk(top, follow_symlinks, log):
             entry = get_next(scandir_iter)
         except StopIteration:
             break
-        except OSError:
-            log.error("Failed to scan: %s", e)
-            return
 
         try:
             is_dir = entry.is_dir(follow_symlinks=follow_symlinks)
@@ -61,4 +54,4 @@ else:
     def walk(top, follow_symlinks):
         if isinstance(top, bytes):
             top = top.decode(file_system_encoding)
-        return _walk(top, follow_symlinks, log)
+        return _walk(top, follow_symlinks)
