@@ -6,7 +6,6 @@ import mock
 import pytest
 import tenacity
 
-from datadog_checks.dev import RetryError
 from datadog_checks.dev.ci import running_on_ci
 from datadog_checks.dev.kind import kind_run
 
