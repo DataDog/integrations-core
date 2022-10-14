@@ -235,16 +235,6 @@ test_statement_metrics_and_plans_parameterized = (
             True,
         ],
         [
-            "master",
-            "EXEC encryptedProc",
-            [""],
-            ((),),
-            1,
-            True,
-            True,
-            False,
-        ],
-        [
             "datadog_test",
             "EXEC bobProcParams @P1 = ?, @P2 = ?",
             [
