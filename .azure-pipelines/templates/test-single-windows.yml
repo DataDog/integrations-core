@@ -91,3 +91,20 @@ jobs:
       repo: ${{ parameters.repo }}
       coverage: ${{ parameters.coverage }}
       force_base_package: ${{ parameters.force_base_package }}
+
+  - ${{ if and(eq(parameters.repo, 'core'), eq(parameters.test, 'true'), eq(parameters.coverage, 'true'), eq(parameters.force_base_package, 'false')) }}:
+    # https://docs.codecov.com/docs/codecov-uploader
+    - powershell: |
+        Invoke-WebRequest -Uri https://uploader.codecov.io/v0.3.2/windows/codecov.exe -Outfile codecov.exe
+        # Verify checksum
+        "9dce1ac2d35f550d96d46f8a1116b4f03740d61ca4508bfccdbf1ea1dfeabe4d  codecov.exe" > codecov.exe.SHA256SUM
+        If ($(Compare-Object -ReferenceObject  $(($(certUtil -hashfile codecov.exe SHA256)[1], "codecov.exe") -join "  ") -DifferenceObject $(Get-Content codecov.exe.SHA256SUM)).length -eq 0) { echo "SHASUM verified" } Else {exit 1}
+      displayName: 'Install Codecov'
+    - bash: |        
+        for cov_file in */coverage.xml; do
+          echo "Uploading $cov_file with flag $(dirname $cov_file)"
+          ./codecov --F $(dirname $cov_file) -f $cov_file
+        done
+      displayName: 'Upload coverage data'
+      env:
+        CODECOV_TOKEN: $(CODECOV_TOKEN)
