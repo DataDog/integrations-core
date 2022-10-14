@@ -116,7 +116,7 @@ def get_agent_requirement_line(check, version):
 
 def update_agent_requirements(req_file, check, newline):
     """
-    Replace the requirements line for the given check
+    Update the requirements lines for the given check
     """
     package_name = get_package_name(check)
     lines = read_file_lines(req_file)
