@@ -10,8 +10,6 @@ from os import mkdir
 import mock
 import pytest
 
-import datadog_checks.directory.directory
-
 from datadog_checks.base.errors import CheckException, ConfigurationError
 from datadog_checks.dev.fs import create_file
 from datadog_checks.dev.fs import temp_dir as temp_directory
@@ -330,7 +328,7 @@ def test_os_error_mid_walk_emits_error_and_continues(aggregator, monkeypatch, ca
         yield next(walker)
         raise OSError('Permission denied')
 
-    monkeypatch.setattr(datadog_checks.directory.directory, 'walk', mock_walk)
+    monkeypatch.setattr('datadog_checks.directory.directory.walk', mock_walk)
 
     with temp_directory() as tdir:
 
