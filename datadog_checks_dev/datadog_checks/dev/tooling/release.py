@@ -121,17 +121,10 @@ def update_agent_requirements(req_file, check, newline):
     package_name = get_package_name(check)
     lines = read_file_lines(req_file)
 
-    for i, line in enumerate(lines):
-        current_package_name = line.split('==')[0]
+    pkg_lines = {line.split('==')[0]: line for line in lines}
+    pkg_lines[package_name] = f'{newline}\n'
 
-        if current_package_name == package_name:
-            lines[i] = f'{newline}\n'
-            break
-    else:
-        # If this is a new integration
-        lines.append(f'{newline}\n')
-
-    write_file_lines(req_file, sorted(lines))
+    write_file_lines(req_file, sorted(pkg_lines.values()))
 
 
 def build_package(package_path, sdist):

@@ -56,26 +56,26 @@ def test_get_agent_requirement_line():
     'check,new_version,expected_result',
     [
         (
-                "activemq",
-                "2.4.0",
-                [
-                    "datadog-activemq-xml==2.2.0\n",
-                    "datadog-activemq==2.4.0\n",
-                    "datadog-zk==1.0.0\n",
-                ]
+            "activemq",
+            "2.4.0",
+            [
+                "datadog-activemq-xml==2.2.0\n",
+                "datadog-activemq==2.4.0\n",
+                "datadog-zk==1.0.0\n",
+            ],
         ),
         (
-                "impala",
-                "1.0.0",
-                [
-                    "datadog-activemq-xml==2.2.0\n",
-                    "datadog-activemq==2.3.1\n",
-                    "datadog-impala==1.0.0\n",
-                    "datadog-zk==1.0.0\n",
-                ],
+            "impala",
+            "1.0.0",
+            [
+                "datadog-activemq-xml==2.2.0\n",
+                "datadog-activemq==2.3.1\n",
+                "datadog-impala==1.0.0\n",
+                "datadog-zk==1.0.0\n",
+            ],
         ),
     ],
-    ids=["existing_integration","new_integration"]
+    ids=["existing_integration", "new_integration"],
 )
 def test_update_agent_requirements(check, new_version, expected_result):
     with CliRunner().isolated_filesystem():
