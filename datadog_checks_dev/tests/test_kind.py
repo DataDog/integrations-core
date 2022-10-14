@@ -26,14 +26,14 @@ class TestKindRun:
     @not_windows_ci
     def test_retry_on_failed_conditions(self, attempts, expected_call_count):
         condition = mock.MagicMock()
-        condition.side_effect = RetryError("error")
+        condition.side_effect = Exception("exception")
 
         expected_exception = tenacity.RetryError
         if attempts is None:
             if running_on_ci():
                 expected_call_count = 2
             else:
-                expected_exception = RetryError
+                expected_exception = Exception
 
         with pytest.raises(expected_exception):
             with kind_run(attempts=attempts, conditions=[condition]):
@@ -44,7 +44,7 @@ class TestKindRun:
     @not_windows_ci
     def test_retry_condition_failed_only_on_first_run(self):
         condition = mock.MagicMock()
-        condition.side_effect = [RetryError("error"), None, None]
+        condition.side_effect = [Exception("exception"), None, None]
 
         with kind_run(attempts=3, conditions=[condition]):
             assert condition.call_count == 2
