@@ -14,6 +14,10 @@ def shared_queue_manager_process(field, value):
     return get_default_field_value(field, value)
 
 
+def shared_queue_manager_process_limit(field, value):
+    return 1
+
+
 def shared_service(field, value):
     return get_default_field_value(field, value)
 
