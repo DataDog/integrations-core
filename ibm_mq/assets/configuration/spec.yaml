@@ -16,6 +16,12 @@ files:
           display_default: null
           example: amqpcsea <queue_manager>
           type: string
+      - name: queue_manager_process_limit
+        description: What is the maximun number of active queue managers in the failover set up.
+        value:
+          display_default: 1
+          example: 1
+          type: integer
       - template: init_config/default
   - template: instances
     options:

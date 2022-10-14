@@ -22,6 +22,9 @@ else:
 
 
 class QueueManagerProcessMatcher(ConditionLimiter):
+    def __init__(self, limit=1):
+        super(QueueManagerProcessMatcher, self).__init__(limit)
+
     def condition(self, pattern, logger):
         logger.info('Searching for a process that matches: %s', pattern.pattern)
         for process in psutil.process_iter(['cmdline']):

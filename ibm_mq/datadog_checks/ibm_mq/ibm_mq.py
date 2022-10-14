@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
+import threading
 
 from six import PY2, iteritems
 
@@ -26,15 +27,17 @@ except ImportError as e:
     pymqi = None
 
 
+init_lock = threading.Lock()
+
+
 class IbmMqCheck(AgentCheck):
-    process_matcher = QueueManagerProcessMatcher()
+    process_matcher = None
 
     SERVICE_CHECK = 'ibm_mq.can_connect'
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, name, init_config, instances):
         # type: (*Any, **Any) -> None
-        super(IbmMqCheck, self).__init__(*args, **kwargs)
-
+        super(IbmMqCheck, self).__init__(name, init_config, instances)
         if not pymqi:
             self.log.error("You need to install pymqi: %s", pymqiException)
             raise errors.PymqiException("You need to install pymqi: {}".format(pymqiException))
@@ -54,6 +57,11 @@ class IbmMqCheck(AgentCheck):
         self.stats_collector = StatsCollector(self._config, self.send_metrics_from_properties, self.log)
 
         self.queue_manager_process_pattern = None
+        if 'queue_manager_process' in init_config or 'queue_manager_process' in self.instance:
+            with init_lock.acquire():
+                if self.process_matcher is None:
+                    limit = int(init_config.get('queue_manager_process_limit', 1))
+                    self.process_matcher = QueueManagerProcessMatcher(limit)
 
         self.check_initializations.append(self.parse_config)
 

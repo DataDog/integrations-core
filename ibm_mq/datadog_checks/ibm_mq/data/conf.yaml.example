@@ -12,6 +12,11 @@ init_config:
     #
     # queue_manager_process: amqpcsea <queue_manager>
 
+    ## @param queue_manager_process_limit - integer - optional - default: 1
+    ## What is the maximun number of active queue managers in the failover set up.
+    #
+    # queue_manager_process_limit: 1
+
     ## @param service - string - optional
     ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
     ##
