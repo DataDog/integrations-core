@@ -1,5 +1,9 @@
 # CHANGELOG - sqlserver
 
+## 9.0.2 / 2022-10-14
+
+* [Fixed] Fix Query Metrics query to correct for over-inflated / incorrect SQL Server metrics. See [#13123](https://github.com/DataDog/integrations-core/pull/13123).
+
 ## 9.0.1 / 2022-10-10
 
 * [Fixed] Allow users to configure the port as a int or as a string. See [#13061](https://github.com/DataDog/integrations-core/pull/13061).
