@@ -74,99 +74,86 @@ class DirectoryCheck(AgentCheck):
         max_filegauge_balance = self._config.max_filegauge_count
         submit_histograms = self._config.submit_histograms
 
-        # If we do not want to recursively search sub-directories only get the root.
-        walker = walk(self._config.abs_directory, self._config.follow_symlinks)
-        if not self._config.recursive:
-            # Only visit the first directory.
-            try:
-                walker = [next(walker)]
-            except OSError as e:
-                self.log.error("Failed to scan %s: %s", self._config.abs_directory, e)
-                return
-
         # Avoid repeated global lookups.
         get_length = len
 
-        try:
-            for root, dirs, files in walker:
-                matched_files = []
-                adjust_max_filegauge = False
+        for root, dirs, files in self._walk():
+            matched_files = []
+            adjust_max_filegauge = False
 
-                if self._config.exclude_dirs_pattern is not None:
-                    if self._config.dirs_patterns_full:
-                        dirs[:] = [d for d in dirs if not self._config.exclude_dirs_pattern.search(d.path)]
-                    else:
-                        dirs[:] = [d for d in dirs if not self._config.exclude_dirs_pattern.search(d.name)]
-                    self.log.debug('Directories: %s', str(dirs))
-                if self._config.pattern is not None:
-                    # Check if the path of the file relative to the directory
-                    # matches the pattern. Also check if the absolute path of the
-                    # filename matches the pattern, for compatibility with previous
-                    # agent versions.
-                    for file_entry in files:
-                        filename = join(root, file_entry.name)
-                        if fnmatch(filename, self._config.pattern) or fnmatch(
-                            relpath(filename, self._config.abs_directory), self._config.pattern
-                        ):
-                            matched_files.append(file_entry)
+            if self._config.exclude_dirs_pattern is not None:
+                if self._config.dirs_patterns_full:
+                    dirs[:] = [d for d in dirs if not self._config.exclude_dirs_pattern.search(d.path)]
                 else:
-                    matched_files = list(files)
+                    dirs[:] = [d for d in dirs if not self._config.exclude_dirs_pattern.search(d.name)]
+                self.log.debug('Directories: %s', str(dirs))
+            if self._config.pattern is not None:
+                # Check if the path of the file relative to the directory
+                # matches the pattern. Also check if the absolute path of the
+                # filename matches the pattern, for compatibility with previous
+                # agent versions.
+                for file_entry in files:
+                    filename = join(root, file_entry.name)
+                    if fnmatch(filename, self._config.pattern) or fnmatch(
+                        relpath(filename, self._config.abs_directory), self._config.pattern
+                    ):
+                        matched_files.append(file_entry)
+            else:
+                matched_files = list(files)
 
-                matched_files_length = get_length(matched_files)
-                directory_files += matched_files_length
+            matched_files_length = get_length(matched_files)
+            directory_files += matched_files_length
 
-                # We're just looking to count the files.
-                if self._config.countonly:
-                    continue
+            # We're just looking to count the files.
+            if self._config.countonly:
+                continue
 
-                for file_entry in matched_files:
-                    try:
-                        self.log.debug('File entries in matched files: %s', str(file_entry))
-                        file_stat = file_entry.stat(follow_symlinks=self._config.stat_follow_symlinks)
-                    except OSError as ose:
-                        self.warning('DirectoryCheck: could not stat file %s - %s', join(root, file_entry.name), ose)
-                    else:
-                        # file specific metrics
-                        directory_bytes += file_stat.st_size
-                        if self._config.filegauges and matched_files_length <= max_filegauge_balance:
-                            self.log.debug('Matched files length: %s', matched_files_length)
-                            filetags = ['{}:{}'.format(self._config.filetagname, join(root, file_entry.name))]
-                            filetags.extend(dirtags)
-                            self.gauge('system.disk.directory.file.bytes', file_stat.st_size, tags=filetags)
-                            self.gauge(
-                                'system.disk.directory.file.modified_sec_ago',
-                                time() - file_stat.st_mtime,
-                                tags=filetags,
-                            )
-                            self.gauge(
-                                'system.disk.directory.file.created_sec_ago', time() - file_stat.st_ctime, tags=filetags
-                            )
-                            adjust_max_filegauge = True
-                            self.log.debug(
-                                'File stat output - size:%s mtime:%s ctime:%s',
-                                str(file_stat.st_size),
-                                str(file_stat.st_mtime),
-                                str(file_stat.st_ctime),
-                            )
-                        elif submit_histograms:
-                            self.histogram('system.disk.directory.file.bytes', file_stat.st_size, tags=dirtags)
-                            self.histogram(
-                                'system.disk.directory.file.modified_sec_ago', time() - file_stat.st_mtime, tags=dirtags
-                            )
-                            self.histogram(
-                                'system.disk.directory.file.created_sec_ago', time() - file_stat.st_ctime, tags=dirtags
-                            )
-                            self.log.debug(
-                                'File stat output histogram - size:%s mtime:%s ctime:%s',
-                                str(file_stat.st_size),
-                                str(file_stat.st_mtime),
-                                str(file_stat.st_ctime),
-                            )
+            for file_entry in matched_files:
+                try:
+                    self.log.debug('File entries in matched files: %s', str(file_entry))
+                    file_stat = file_entry.stat(follow_symlinks=self._config.stat_follow_symlinks)
+                except OSError as ose:
+                    self.warning('DirectoryCheck: could not stat file %s - %s', join(root, file_entry.name), ose)
+                else:
+                    # file specific metrics
+                    directory_bytes += file_stat.st_size
+                    if self._config.filegauges and matched_files_length <= max_filegauge_balance:
+                        self.log.debug('Matched files length: %s', matched_files_length)
+                        filetags = ['{}:{}'.format(self._config.filetagname, join(root, file_entry.name))]
+                        filetags.extend(dirtags)
+                        self.gauge('system.disk.directory.file.bytes', file_stat.st_size, tags=filetags)
+                        self.gauge(
+                            'system.disk.directory.file.modified_sec_ago',
+                            time() - file_stat.st_mtime,
+                            tags=filetags,
+                        )
+                        self.gauge(
+                            'system.disk.directory.file.created_sec_ago', time() - file_stat.st_ctime, tags=filetags
+                        )
+                        adjust_max_filegauge = True
+                        self.log.debug(
+                            'File stat output - size:%s mtime:%s ctime:%s',
+                            str(file_stat.st_size),
+                            str(file_stat.st_mtime),
+                            str(file_stat.st_ctime),
+                        )
+                    elif submit_histograms:
+                        self.histogram('system.disk.directory.file.bytes', file_stat.st_size, tags=dirtags)
+                        self.histogram(
+                            'system.disk.directory.file.modified_sec_ago', time() - file_stat.st_mtime, tags=dirtags
+                        )
+                        self.histogram(
+                            'system.disk.directory.file.created_sec_ago', time() - file_stat.st_ctime, tags=dirtags
+                        )
+                        self.log.debug(
+                            'File stat output histogram - size:%s mtime:%s ctime:%s',
+                            str(file_stat.st_size),
+                            str(file_stat.st_mtime),
+                            str(file_stat.st_ctime),
+                        )
 
-                if adjust_max_filegauge:
-                    max_filegauge_balance -= matched_files_length
-        except OSError as e:
-            self.log.error("Error when traversing %s: %s", self._config.abs_directory, e)
+            if adjust_max_filegauge:
+                max_filegauge_balance -= matched_files_length
 
         # number of files
         self.gauge('system.disk.directory.files', directory_files, tags=dirtags)
@@ -175,3 +162,21 @@ class DirectoryCheck(AgentCheck):
         if not self._config.countonly:
             self.gauge('system.disk.directory.bytes', directory_bytes, tags=dirtags)
             self.log.debug("`countonly` not enabled: Collecting system.disk.directory.bytes metric.")
+
+    def _walk(self):
+        """
+        Wraps walker iteration to handle errors and recursive option.
+        """
+        walker = walk(self._config.abs_directory, self._config.follow_symlinks)
+
+        while True:
+            try:
+                yield next(walker)
+            except StopIteration:
+                break
+            except OSError as e:
+                self.log.error("Error when traversing %s: %s", self._config.abs_directory, e)
+
+            # Only visit the first directory when we don't want recursive search
+            if not self._config.recursive:
+                break
