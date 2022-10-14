@@ -52,30 +52,38 @@ def test_get_agent_requirement_line():
         assert res == "datadog-foo==1.2.3; sys_platform != 'win32'"
 
 
-def test_update_agent_requirements_with_existing_integration():
+@pytest.mark.parametrize(
+    'check,new_version,expected_result',
+    [
+        (
+                "activemq",
+                "2.4.0",
+                [
+                    "datadog-activemq-xml==2.2.0\n",
+                    "datadog-activemq==2.4.0\n",
+                    "datadog-zk==1.0.0\n",
+                ]
+        ),
+        (
+                "impala",
+                "1.0.0",
+                [
+                    "datadog-activemq-xml==2.2.0\n",
+                    "datadog-activemq==2.3.1\n",
+                    "datadog-impala==1.0.0\n",
+                    "datadog-zk==1.0.0\n",
+                ],
+        ),
+    ],
+    ids=["existing_integration","new_integration"]
+)
+def test_update_agent_requirements(check, new_version, expected_result):
     with CliRunner().isolated_filesystem():
-        with open('requirements-agent-release.txt', 'w') as f:
-            f.write("datadog-activemq-xml==2.2.0\n")
-            f.write("datadog-activemq==2.3.1\n")
+        with open('requirements-agent-release.txt', 'w') as file:
+            file.write("datadog-activemq-xml==2.2.0\n")
+            file.write("datadog-activemq==2.3.1\n")
+            file.write("datadog-zk==1.0.0\n")
 
-        update_agent_requirements('requirements-agent-release.txt', "activemq", "datadog-activemq==2.4.0")
+        update_agent_requirements('requirements-agent-release.txt', check, "datadog-{}=={}".format(check, new_version))
 
-        assert read_file_lines('requirements-agent-release.txt') == [
-            "datadog-activemq-xml==2.2.0\n",
-            "datadog-activemq==2.4.0\n",
-        ]
-
-
-def test_update_agent_requirements_with_new_integration():
-    with CliRunner().isolated_filesystem():
-        with open('requirements-agent-release.txt', 'w') as f:
-            f.write("datadog-activemq-xml==2.2.0\n")
-            f.write("datadog-activemq==2.3.1\n")
-
-        update_agent_requirements('requirements-agent-release.txt', "impala", "datadog-impala==1.0.0")
-
-        assert read_file_lines('requirements-agent-release.txt') == [
-            "datadog-activemq-xml==2.2.0\n",
-            "datadog-activemq==2.3.1\n",
-            "datadog-impala==1.0.0\n",
-        ]
+        assert read_file_lines('requirements-agent-release.txt') == expected_result
