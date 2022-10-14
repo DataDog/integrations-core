@@ -19,10 +19,8 @@ METRIC_MAP = {
     'kong_nginx_http_current_connections': 'nginx.http.current_connections',
     'kong_nginx_stream_current_connections': 'nginx.stream.current_connections',
     'kong_stream_status': 'stream.status',
-
     # Kong 2.8
     'kong_nginx_timers': 'nginx.timers',
-
     # Kong 3.0
     'kong_bandwidth_bytes': 'bandwidth',
     'kong_http_requests_total': 'http.status',
