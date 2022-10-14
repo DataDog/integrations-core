@@ -127,6 +127,9 @@ def update_agent_requirements(req_file, check, newline):
         if current_package_name == package_name:
             lines[i] = f'{newline}\n'
             break
+    else:
+        # If this is a new integration
+        lines.append(f'{newline}\n')
 
     write_file_lines(req_file, sorted(lines))
 
