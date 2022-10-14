@@ -26,7 +26,11 @@ files:
       Note: All '%' characters must be escaped as '%%'.
     options:
     - name: host
-      description: Host and port of your SQL server.
+      description: | 
+        Host and port of your SQL server. If a port is ommitted, a default port of 1433 will be used. 
+        If you use Sql Server Browser Service or a similar port autodiscovery service, pass in a port
+        of 0 to omit port from your connection string. This should allow SSBS to autodiscover the 
+        correct database port. 
       required: true
       value:
         type: string
