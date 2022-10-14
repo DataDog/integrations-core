@@ -12,6 +12,7 @@ DIRECTORY_REGEX = re.compile(r"\/(.*)\/$")
 
 # Integrations that are known to be tiles and have email-based codeowners
 IGNORE_TILES = {
+    '1e',
     'auth0',
     'bluematador',
     'bonsai',
