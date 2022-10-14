@@ -7,7 +7,6 @@ import mock
 import pytest
 import tenacity
 
-from datadog_checks.dev import RetryError
 from datadog_checks.dev.ci import running_on_ci
 from datadog_checks.dev.docker import compose_file_active, docker_run
 from datadog_checks.dev.subprocess import run_command
@@ -83,4 +82,3 @@ class TestDockerRun:
 
         with docker_run(compose_file, attempts=3, conditions=[condition]):
             assert condition.call_count == 2
-
