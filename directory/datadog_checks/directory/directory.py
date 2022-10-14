@@ -164,17 +164,11 @@ class DirectoryCheck(AgentCheck):
             self.log.debug("`countonly` not enabled: Collecting system.disk.directory.bytes metric.")
 
     def _walk(self):
+        """
+        Wraps walker iteration to handle errors and recursive option.
+        """
         walker = walk(self._config.abs_directory, self._config.follow_symlinks)
-        # If we do not want to recursively search sub-directories only get the root.
-        if not self._config.recursive:
-            # Only visit the first directory.
-            try:
-                walker = iter([next(walker)])
-            except OSError as e:
-                self.log.error("Failed to scan %s: %s", self._config.abs_directory, e)
-                return
 
-        # Wrap walker iterator to log errors
         while True:
             try:
                 yield next(walker)
@@ -182,3 +176,7 @@ class DirectoryCheck(AgentCheck):
                 break
             except OSError as e:
                 self.log.error("Error when traversing %s: %s", self._config.abs_directory, e)
+
+            # Only visit the first directory when we don't want recursive search
+            if not self._config.recursive:
+                break
