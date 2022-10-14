@@ -3,8 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 
-from datadog_checks.dev import get_docker_hostname, get_here
 from datadog_checks.base import is_affirmative
+from datadog_checks.dev import get_docker_hostname, get_here
 
 HERE = get_here()
 COMPOSE_FILE = os.path.join(HERE, 'docker', 'docker-compose.yaml')
@@ -207,29 +207,6 @@ PROMETHEUS_METRICS = [
     'teamcity.vcs.get.current.state.calls.count',
 ]
 
-E2E_PROMETHEUS_METRICS = [
-    'teamcity.agents.connected.authorized',
-    'teamcity.agents.running.builds',
-    'teamcity.build.configs',
-    'teamcity.builds.finished.count',
-    'teamcity.builds.queued',
-    'teamcity.builds.running',
-    'teamcity.builds.started.count',
-    'teamcity.cpu.count',
-    'teamcity.cpu.usage.process',
-    'teamcity.cpu.usage.system',
-    'teamcity.database.connections.active',
-    'teamcity.httpSessions.active',
-    'teamcity.jvm.memory.committed.bytes',
-    'teamcity.jvm.memory.used.bytes',
-    'teamcity.jvm.threads',
-    'teamcity.projects',
-    'teamcity.projects.active',
-    'teamcity.server.uptime.milliseconds',
-    'teamcity.system.load.average.1m',
-    'teamcity.users.active',
-    'teamcity.vcsRoots',
-]
 
 BUILD_STATS_METRICS = [
     {'name': 'teamcity.artifacts_size', 'value': 47339.0, 'tags': BUILD_TAGS},
