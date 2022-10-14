@@ -5,7 +5,7 @@ import sys
 
 import psutil
 
-from datadog_checks.base.utils.concurrency.limiter import ConditionLimiter
+from .limiter import ConditionLimiter
 
 if sys.platform == 'win32':
     import subprocess
