@@ -6,6 +6,7 @@ import mock
 import pytest
 import tenacity
 
+from common import not_windows_ci
 from datadog_checks.dev import RetryError
 from datadog_checks.dev.ci import running_on_ci
 from datadog_checks.dev.kind import kind_run
@@ -21,6 +22,7 @@ class TestKindRun:
             (3, 3),
         ],
     )
+    @not_windows_ci
     def test_retry_on_failed_conditions(self, attempts, expected_call_count):
         condition = mock.MagicMock()
         condition.side_effect = RetryError("error")
@@ -38,6 +40,7 @@ class TestKindRun:
 
         assert condition.call_count == expected_call_count
 
+    @not_windows_ci
     def test_retry_condition_failed_only_on_first_run(self):
         condition = mock.MagicMock()
         condition.side_effect = [RetryError("error"), None, None]
