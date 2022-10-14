@@ -58,10 +58,13 @@ class IbmMqCheck(AgentCheck):
 
         self.queue_manager_process_pattern = None
         if 'queue_manager_process' in init_config or 'queue_manager_process' in self.instance:
-            with init_lock.acquire():
+            init_lock.acquire()
+            try:
                 if self.process_matcher is None:
                     limit = int(init_config.get('queue_manager_process_limit', 1))
                     self.process_matcher = QueueManagerProcessMatcher(limit)
+            finally:
+                init_lock.release()
 
         self.check_initializations.append(self.parse_config)
 
