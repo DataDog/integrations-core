@@ -16,7 +16,7 @@ from .config import IBMMQConfig
 from .process_matcher import QueueManagerProcessMatcher
 
 try:
-    from typing import Any, Dict, List
+    from typing import Dict, List
 except ImportError:
     pass
 
@@ -36,7 +36,6 @@ class IbmMqCheck(AgentCheck):
     SERVICE_CHECK = 'ibm_mq.can_connect'
 
     def __init__(self, name, init_config, instances):
-        # type: (*Any, **Any) -> None
         super(IbmMqCheck, self).__init__(name, init_config, instances)
         if not pymqi:
             self.log.error("You need to install pymqi: %s", pymqiException)
