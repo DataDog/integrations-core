@@ -8,11 +8,6 @@ from six import PY3, iteritems
 
 from . import Network
 
-try:
-    import fcntl
-except ImportError:
-    fcntl = None
-
 if PY3:
     long = int
 
