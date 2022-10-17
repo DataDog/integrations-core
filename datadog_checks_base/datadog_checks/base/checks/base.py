@@ -207,9 +207,8 @@ class AgentCheck(object):
             self.debug_metrics.update(self.instance.get('debug_metrics', {}))
 
         # `self.hostname` is deprecated, use `datadog_agent.get_hostname()` instead
-        if self.instance is not None and self.instance.get('empty_default_hostname', False):
-            self.hostname = ""
-        else:
+        self.hostname = ""
+        if self.instance is None or not self.instance.get('empty_default_hostname', False):
             self.hostname = datadog_agent.get_hostname()  # type: str
 
         logger = logging.getLogger('{}.{}'.format(__name__, self.name))
