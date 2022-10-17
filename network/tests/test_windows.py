@@ -16,4 +16,4 @@ if PY3:
 @mock.patch('datadog_checks.network.network.Platform.is_windows', return_value=True)
 def test_win_uses_psutil(is_linux, is_bsd, is_solaris, is_windows, check):
     check_instance = check({})
-    isinstance(check_instance, WindowsNetwork)
+    assert isinstance(check_instance, WindowsNetwork)
