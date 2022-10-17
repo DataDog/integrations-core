@@ -17,8 +17,9 @@ if PY3:
     long = int
 
 
+@mock.patch('datadog_checks.network.network.Platform.is_linux', return_value=False)
 @mock.patch('datadog_checks.network.network.Platform.is_windows', return_value=True)
-def test_check_psutil_no_collect_connection_state(aggregator, check):
+def test_check_psutil_no_collect_connection_state(is_windows, is_linux, aggregator, check):
     instance = copy.deepcopy(common.INSTANCE)
     instance['collect_connection_state'] = False
     check_instance = check(instance)
@@ -32,8 +33,9 @@ def test_check_psutil_no_collect_connection_state(aggregator, check):
         _cx_counters_psutil.assert_called_once_with(tags=[])
 
 
+@mock.patch('datadog_checks.network.network.Platform.is_linux', return_value=False)
 @mock.patch('datadog_checks.network.network.Platform.is_windows', return_value=True)
-def test_check_psutil_collect_connection_state(aggregator, check):
+def test_check_psutil_collect_connection_state(is_windows, is_linux, aggregator, check):
     instance = copy.deepcopy(common.INSTANCE)
     instance['collect_connection_state'] = True
     check_instance = check(instance)
@@ -47,8 +49,9 @@ def test_check_psutil_collect_connection_state(aggregator, check):
         _cx_counters_psutil.assert_called_once_with(tags=[])
 
 
+@mock.patch('datadog_checks.network.network.Platform.is_linux', return_value=False)
 @mock.patch('datadog_checks.network.network.Platform.is_windows', return_value=True)
-def test_cx_state_psutil(aggregator, check):
+def test_cx_state_psutil(is_windows, is_linux, aggregator, check):
     sconn = namedtuple('sconn', ['fd', 'family', 'type', 'laddr', 'raddr', 'status', 'pid'])
     conn = [
         sconn(
@@ -180,8 +183,9 @@ def test_cx_counters_psutil(is_linux, is_bsd, is_windows, aggregator, check):
                 assert m[0].value == 3280598526
 
 
+@mock.patch('datadog_checks.network.network.Platform.is_linux', return_value=False)
 @mock.patch('datadog_checks.network.network.Platform.is_windows', return_value=True)
-def test_parse_protocol_psutil(aggregator, check):
+def test_parse_protocol_psutil(is_windows, is_linux, aggregator, check):
     import socket
 
     conn = mock.MagicMock()
