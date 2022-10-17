@@ -51,7 +51,6 @@ class Network(AgentCheck):
         super(Network, self).__init__(name, init_config, instances)
         self._excluded_ifaces = self.instance.get('excluded_interfaces', [])
         self._collect_cx_state = self.instance.get('collect_connection_state', False)
-        self._collect_cx_queues = self.instance.get('collect_connection_queues', False)
         self._collect_rate_metrics = self.instance.get('collect_rate_metrics', True)
         self._collect_count_metrics = self.instance.get('collect_count_metrics', False)
         self._collect_ena_metrics = self.instance.get('collect_aws_ena_metrics', False)
