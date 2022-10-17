@@ -8,7 +8,7 @@ import six
 from scandir import scandir
 
 
-def _walk(top, follow_symlinks):
+def _walk(top, follow_symlinks, log=None):
     """Modified version of https://docs.python.org/3/library/os.html#os.scandir
     that returns https://docs.python.org/3/library/os.html#os.DirEntry for files
     directly to take advantage of possible cached os.stat calls.
@@ -29,13 +29,13 @@ def _walk(top, follow_symlinks):
 
         try:
             is_dir = entry.is_dir(follow_symlinks=follow_symlinks)
-        except OSError:
-            is_dir = False
-
-        if is_dir:
-            dirs.append(entry)
-        else:
-            nondirs.append(entry)
+            if is_dir:
+                dirs.append(entry)
+            else:
+                nondirs.append(entry)
+        except OSError as ose:
+            if log:
+                log.debug('traverse OSError: %s', ose)
 
     yield top, dirs, nondirs
 

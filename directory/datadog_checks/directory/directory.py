@@ -167,7 +167,7 @@ class DirectoryCheck(AgentCheck):
         """
         Wraps walker iteration to handle errors and recursive option.
         """
-        walker = walk(self._config.abs_directory, self._config.follow_symlinks)
+        walker = walk(self._config.abs_directory, self._config.follow_symlinks, self.log)
 
         while True:
             try:
