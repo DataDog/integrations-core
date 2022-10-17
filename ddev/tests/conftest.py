@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 import os
-import secrets
+import random
 from typing import Generator
 
 import pytest
@@ -31,7 +31,7 @@ def valid_integrations(local_repo) -> list[str]:
 
 @pytest.fixture
 def valid_integration(valid_integrations) -> str:
-    return secrets.choice(valid_integrations)
+    return random.choice(valid_integrations)
 
 
 @pytest.fixture(autouse=True)

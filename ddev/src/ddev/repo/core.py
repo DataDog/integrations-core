@@ -40,9 +40,7 @@ class Repository:
         if not config_file.is_file():
             return RepositoryConfig({})
 
-        from ddev.utils.toml import load_toml_file
-
-        return RepositoryConfig(load_toml_file(config_file))
+        return RepositoryConfig.from_toml_file(config_file)
 
 
 class IntegrationRegistry:
@@ -54,7 +52,7 @@ class IntegrationRegistry:
     def repo(self) -> Repository:
         return self.__repo
 
-    def get(self, name):
+    def get(self, name: str) -> Integration:
         path = self.repo.path / name
         if not path.is_dir():
             raise OSError(f'Integration does not exist: {Path(self.repo.path.name, name)}')
