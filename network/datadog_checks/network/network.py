@@ -9,12 +9,12 @@ Collects network metrics.
 import distutils.spawn
 import re
 import socket
-from collections import defaultdict
 
 import psutil
 from six import PY3, iteritems, itervalues
 
 from datadog_checks.base import AgentCheck, ConfigurationError
+from datadog_checks.base.errors import CheckException
 from datadog_checks.base.utils.platform import Platform
 from datadog_checks.base.utils.subprocess_output import SubprocessOutputEmptyError, get_subprocess_output
 
@@ -43,6 +43,10 @@ class Network(AgentCheck):
             from .check_linux import LinuxNetwork
 
             return LinuxNetwork(name, init_config, instances)
+        elif Platform.is_windows():
+            from .check_windows import WindowsNetwork
+
+            return WindowsNetwork(name, init_config, instances)
         else:
             # Todo: remove later in the refactor
             return super(Network, cls).__new__(cls)
@@ -88,8 +92,8 @@ class Network(AgentCheck):
             self._check_bsd(self.instance)
         elif Platform.is_solaris():
             self._check_solaris(self.instance)
-        elif Platform.is_windows():
-            self._check_psutil(self.instance)
+        else:
+            raise CheckException("Not implemented")
 
     def _setup_metrics(self, instance):
         self._combine_connection_states = instance.get('combine_connection_states', True)
@@ -236,8 +240,10 @@ class Network(AgentCheck):
 
         expected_metrics = self.get_expected_metrics()
         for m in expected_metrics:
-            assert m in vals_by_metric
-        assert len(vals_by_metric) == len(expected_metrics)
+            assert m in vals_by_metric, 'Missing expected metric {}'.format(m)
+        assert len(vals_by_metric) == len(expected_metrics), 'Expected {} metrics, found {}'.format(
+            len(vals_by_metric), len(expected_metrics)
+        )
 
         count = 0
         for metric, val in iteritems(vals_by_metric):
@@ -254,13 +260,6 @@ class Network(AgentCheck):
             'packets_out.count',
             'packets_out.error',
         ]
-        if Platform.is_windows():
-            expected_metrics.extend(
-                [
-                    'packets_in.drop',
-                    'packets_out.drop',
-                ]
-            )
         return expected_metrics
 
     def parse_long(self, v):
@@ -580,59 +579,3 @@ class Network(AgentCheck):
             metrics_by_interface[iface] = metrics
 
         return metrics_by_interface
-
-    def _check_psutil(self, instance):
-        """
-        Gather metrics about connections states and interfaces counters
-        using psutil facilities
-        """
-        custom_tags = instance.get('tags', [])
-        if self._collect_cx_state:
-            self._cx_state_psutil(tags=custom_tags)
-
-        self._cx_counters_psutil(tags=custom_tags)
-
-    def _cx_state_psutil(self, tags=None):
-        """
-        Collect metrics about connections state using psutil
-        """
-        metrics = defaultdict(int)
-        tags = [] if tags is None else tags
-        for conn in psutil.net_connections():
-            protocol = self._parse_protocol_psutil(conn)
-            status = self.tcp_states['psutil'].get(conn.status)
-            metric = self.cx_state_gauge.get((protocol, status))
-            if metric is None:
-                self.log.warning('Metric not found for: %s,%s', protocol, status)
-            else:
-                metrics[metric] += 1
-
-        for metric, value in iteritems(metrics):
-            self.gauge(metric, value, tags=tags)
-
-    def _cx_counters_psutil(self, tags=None):
-        """
-        Collect metrics about interfaces counters using psutil
-        """
-        tags = [] if tags is None else tags
-        for iface, counters in iteritems(psutil.net_io_counters(pernic=True)):
-            metrics = {
-                'bytes_rcvd': counters.bytes_recv,
-                'bytes_sent': counters.bytes_sent,
-                'packets_in.count': counters.packets_recv,
-                'packets_in.drop': counters.dropin,
-                'packets_in.error': counters.errin,
-                'packets_out.count': counters.packets_sent,
-                'packets_out.drop': counters.dropout,
-                'packets_out.error': counters.errout,
-            }
-            self.submit_devicemetrics(iface, metrics, tags)
-
-    def _parse_protocol_psutil(self, conn):
-        """
-        Returns a string describing the protocol for the given connection
-        in the form `tcp4`, 'udp4` as in `self.cx_state_gauge`
-        """
-        protocol = self.PSUTIL_TYPE_MAPPING.get(conn.type, '')
-        family = self.PSUTIL_FAMILY_MAPPING.get(conn.family, '')
-        return '{}{}'.format(protocol, family)
