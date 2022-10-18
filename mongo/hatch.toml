@@ -1,0 +1,26 @@
+[env.collectors.datadog-checks]
+
+[envs.default]
+dependencies = [
+  "datadog_checks_tests_helper @ {root:uri}/../datadog_checks_tests_helper",
+]
+
+[[envs.default.matrix]]
+python = ["38"]
+version = ["4", "5"]
+flavor = ["standalone", "shard", "auth", "tls"]
+
+[envs.default.overrides]
+matrix.version.env-vars = [
+  { key = "MONGO_VERSION", value = "4.4", if = ["4"] },
+  { key = "MONGO_VERSION", value = "5.0", if = ["5"] },
+]
+matrix.flavor.env-vars = [
+  { key = "COMPOSE_FILE", value = "mongo-standalone.yaml", if = ["standalone"] },
+  { key = "COMPOSE_FILE", value = "mongo-shard.yaml", if = ["shard"] },
+  { key = "COMPOSE_FILE", value = "mongo-auth.yaml", if = ["auth"] },
+  { key = "COMPOSE_FILE", value = "mongo-tls.yaml", if = ["tls"] },
+]
+
+[envs.default.env-vars]
+DDEV_SKIP_GENERIC_TAGS_CHECK = "true"
