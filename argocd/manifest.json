@@ -28,7 +28,11 @@
       },
       "metrics": {
         "prefix": "argocd.",
-        "check": "",
+        "check": [
+          "argocd.api_server.go.goroutines",
+          "argocd.app_controller.go.goroutines",
+          "argocd.repo_server.go.goroutines"
+        ],
         "metadata_path": "metadata.csv"
       },
       "service_checks": {
