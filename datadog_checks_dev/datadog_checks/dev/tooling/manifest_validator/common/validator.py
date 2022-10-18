@@ -88,7 +88,6 @@ class BaseManifestValidator(object):
 
 
 class MaintainerValidator(BaseManifestValidator):
-
     MAINTAINER_PATH = {V1: '/maintainer', V2: '/author/support_email'}
 
     def validate(self, check_name, decoded, fix):
@@ -112,7 +111,6 @@ class MaintainerValidator(BaseManifestValidator):
 
 
 class MetricsMetadataValidator(BaseManifestValidator):
-
     METADATA_PATH = {V1: "/assets/metrics_metadata", V2: "/assets/integration/metrics/metadata_path"}
 
     def validate(self, check_name, decoded, fix):
@@ -206,12 +204,10 @@ class ImmutableAttributesValidator(BaseManifestValidator):
 
     SHORT_NAME_PATHS = {
         V1: (
-            "assets/dashboards",
             "assets/monitors",
             "assets/saved_views",
         ),
         V2: (
-            "assets/dashboards",
             "assets/monitors",
             "assets/saved_views",
         ),
@@ -317,3 +313,40 @@ class VersionValidator(BaseManifestValidator):
     def validate(self, check_name, decoded, fix):
         if decoded.get('manifest_version', V2_STRING) == V1_STRING:
             self.fail('Manifest version must be >= 2.0.0')
+
+
+class ModifiedAttributesValidator(BaseManifestValidator):
+    """
+    Raise a warning if some fields are modified and manual operations are needed after the PR is merged.
+    Skip if the manifest is a new file (i.e. new integration) or if the manifest is being upgraded to V2
+    """
+
+    SHORT_NAME_PATHS = ("assets/dashboards",)
+
+    def validate(self, check_name, decoded, fix):
+        # Check if previous version of manifest exists
+        # If not, this is a new file so this validation is skipped
+        try:
+            previous = git_show_file(path=f"{check_name}/manifest.json", ref="origin/master")
+            previous_manifest = JSONDict(json.loads(previous))
+        except Exception:
+            self.result.messages['info'].append(
+                "  skipping check for changed fields: integration not on default branch"
+            )
+            return
+
+        current_manifest = decoded
+
+        for key_path in self.SHORT_NAME_PATHS:
+            previous_short_name_dict = previous_manifest.get_path(key_path) or {}
+            current_short_name_dict = current_manifest.get_path(key_path) or {}
+
+            previous_short_names = previous_short_name_dict.keys()
+            current_short_names = set(current_short_name_dict.keys())
+            for short_name in previous_short_names:
+                if short_name not in current_short_names:
+                    output = (
+                        f'Short name `{short_name}` at `{key_path}` is allowed to be removed but '
+                        f'requires manual operations.'
+                    )
+                    self.warning(output)

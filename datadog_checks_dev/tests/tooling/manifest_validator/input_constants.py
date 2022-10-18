@@ -10,7 +10,12 @@ ORACLE_METADATA_CSV_EXAMPLE = [(0, {"metric_name": "oracle.session_count"})]
 V2_VALID_MANIFEST = {
     "app_id": "datadog-oracle",
     "assets": {
-        "dashboards": {"oracle": "assets/dashboards/example.json"},
+        "dashboards": {
+            "oracle": "assets/dashboards/example.json",
+        },
+        "monitors": {
+            "monitor": "assets/monitors/monitor.json",
+        },
         "integration": {
             "configuration": {"spec": "assets/configuration/spec.yaml"},
             "events": {"creates_events": True},

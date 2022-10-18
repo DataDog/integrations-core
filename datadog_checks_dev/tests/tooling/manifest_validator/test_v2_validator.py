@@ -23,8 +23,8 @@ def get_changed_immutable_short_name_manifest():
     Helper function to change immutable short names in a manifest
     """
     immutable_attributes_changed_short_name = JSONDict(deepcopy(input_constants.V2_VALID_MANIFEST))
-    immutable_attributes_changed_short_name['assets']['dashboards'] = {
-        "oracle-changed": "assets/dashboards/example.json"
+    immutable_attributes_changed_short_name['assets']['monitors'] = {
+        "monitors-changed": "assets/monitors/monitor.json",
     }
     return immutable_attributes_changed_short_name
 
@@ -521,3 +521,23 @@ def test_manifest_v2_changelog_case_sensitive(setup_route):
     validator.validate('datadog_checks_dev', manifest, False)
 
     assert validator.result.failed
+
+
+@mock.patch(
+    'datadog_checks.dev.tooling.manifest_validator.common.validator.git_show_file',
+    return_value=json.dumps(input_constants.V2_VALID_MANIFEST),
+)
+def test_manifest_v2_dashboard_removed(setup_route):
+    manifest = JSONDict(deepcopy(input_constants.V2_VALID_MANIFEST))
+    manifest['assets']['dashboards'] = {"oracle-changed": "assets/dashboards/example.json"}
+
+    validator = common.ModifiedAttributesValidator(version=V2)
+    validator.validate('datadog_checks_dev', manifest, False)
+
+    assert validator.result.warning
+    assert not validator.result.failed
+    assert not validator.result.fixed
+
+    assert validator.result.messages["warning"] == [
+        'Short name `oracle` at `assets/dashboards` is allowed to be removed but requires manual operations.'
+    ]
