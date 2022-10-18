@@ -18,18 +18,8 @@ if PY3:
 
 
 @mock.patch('datadog_checks.network.network.Platform.is_linux', return_value=False)
-@mock.patch('datadog_checks.network.network.Platform.is_bsd', return_value=False)
-@mock.patch('datadog_checks.network.network.Platform.is_solaris', return_value=False)
 @mock.patch('datadog_checks.network.network.Platform.is_windows', return_value=True)
-def test_win_uses_psutil(is_linux, is_bsd, is_solaris, is_windows, check):
-    check_instance = check({})
-    with mock.patch.object(check_instance, '_check_psutil') as _check_psutil:
-        check_instance.check({})
-        check._check_psutil = mock.MagicMock()
-        _check_psutil.assert_called_once_with({})
-
-
-def test_check_psutil_no_collect_connection_state(aggregator, check):
+def test_check_psutil_no_collect_connection_state(is_windows, is_linux, aggregator, check):
     instance = copy.deepcopy(common.INSTANCE)
     instance['collect_connection_state'] = False
     check_instance = check(instance)
@@ -37,13 +27,15 @@ def test_check_psutil_no_collect_connection_state(aggregator, check):
     with mock.patch.object(check_instance, '_cx_state_psutil') as _cx_state_psutil, mock.patch.object(
         check_instance, '_cx_counters_psutil'
     ) as _cx_counters_psutil:
-        check_instance._check_psutil({})
+        check_instance.check({})
 
         _cx_state_psutil.assert_not_called()
         _cx_counters_psutil.assert_called_once_with(tags=[])
 
 
-def test_check_psutil_collect_connection_state(aggregator, check):
+@mock.patch('datadog_checks.network.network.Platform.is_linux', return_value=False)
+@mock.patch('datadog_checks.network.network.Platform.is_windows', return_value=True)
+def test_check_psutil_collect_connection_state(is_windows, is_linux, aggregator, check):
     instance = copy.deepcopy(common.INSTANCE)
     instance['collect_connection_state'] = True
     check_instance = check(instance)
@@ -52,12 +44,14 @@ def test_check_psutil_collect_connection_state(aggregator, check):
         check_instance, '_cx_counters_psutil'
     ) as _cx_counters_psutil:
         check_instance._collect_cx_state = True
-        check_instance._check_psutil({})
+        check_instance.check({})
         _cx_state_psutil.assert_called_once_with(tags=[])
         _cx_counters_psutil.assert_called_once_with(tags=[])
 
 
-def test_cx_state_psutil(aggregator, check):
+@mock.patch('datadog_checks.network.network.Platform.is_linux', return_value=False)
+@mock.patch('datadog_checks.network.network.Platform.is_windows', return_value=True)
+def test_cx_state_psutil(is_windows, is_linux, aggregator, check):
     sconn = namedtuple('sconn', ['fd', 'family', 'type', 'laddr', 'raddr', 'status', 'pid'])
     conn = [
         sconn(
@@ -144,7 +138,7 @@ def test_cx_state_psutil(aggregator, check):
     }
 
     check_instance = check(common.INSTANCE)
-    with mock.patch('datadog_checks.network.network.psutil') as mock_psutil:
+    with mock.patch('datadog_checks.network.check_windows.psutil') as mock_psutil:
         mock_psutil.net_connections.return_value = conn
         check_instance._setup_metrics({})
         check_instance._cx_state_psutil()
@@ -180,7 +174,7 @@ def test_cx_counters_psutil(is_linux, is_bsd, is_windows, aggregator, check):
     instance['excluded_interface_re'] = ''
     check_instance = check(instance)
 
-    with mock.patch('datadog_checks.network.network.psutil') as mock_psutil:
+    with mock.patch('datadog_checks.network.check_windows.psutil') as mock_psutil:
         mock_psutil.net_io_counters.return_value = counters
         check_instance._cx_counters_psutil()
         for _, m in iteritems(aggregator._metrics):
@@ -189,7 +183,9 @@ def test_cx_counters_psutil(is_linux, is_bsd, is_windows, aggregator, check):
                 assert m[0].value == 3280598526
 
 
-def test_parse_protocol_psutil(aggregator, check):
+@mock.patch('datadog_checks.network.network.Platform.is_linux', return_value=False)
+@mock.patch('datadog_checks.network.network.Platform.is_windows', return_value=True)
+def test_parse_protocol_psutil(is_windows, is_linux, aggregator, check):
     import socket
 
     conn = mock.MagicMock()
