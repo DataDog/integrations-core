@@ -41,6 +41,14 @@ class Path(_PathBase):
         # https://bugs.python.org/issue38671
         return Path(os.path.realpath(self))
 
+    def read_text(self, **kwargs) -> str:
+        kwargs.setdefault('encoding', 'utf-8')
+        return super().read_text(**kwargs)
+
+    def write_text(self, *args, **kwargs) -> int:
+        kwargs.setdefault('encoding', 'utf-8')
+        return super().write_text(*args, **kwargs)
+
     def remove(self):
         if self.is_file():
             os.remove(self)
