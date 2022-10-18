@@ -1,4 +1,8 @@
 [env.collectors.datadog-checks]
+base-package-features = [
+    "deps",
+    "kube",
+]
 
 [[envs.default.matrix]]
 python = ["27", "38"]
