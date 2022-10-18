@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
+import threading
 
 from six import PY2, iteritems
 
@@ -27,7 +28,8 @@ except ImportError as e:
 
 
 class IbmMqCheck(AgentCheck):
-    process_matcher = QueueManagerProcessMatcher()
+    MATCHER_CREATION_LOCK = threading.Lock()
+    process_matcher = None
 
     SERVICE_CHECK = 'ibm_mq.can_connect'
 
@@ -59,7 +61,7 @@ class IbmMqCheck(AgentCheck):
 
     def check(self, _):
         if not self.check_queue_manager_process():
-            self.log.debug('Process not found, skipping check run')
+            self.log.info('Process not found, skipping check run')
             for sc_name in (self.SERVICE_CHECK, QueueMetricCollector.QUEUE_MANAGER_SERVICE_CHECK):
                 self.service_check(sc_name, self.UNKNOWN, self._config.tags, hostname=self._config.hostname)
 
@@ -165,6 +167,11 @@ class IbmMqCheck(AgentCheck):
 
             pattern = pattern.replace('<queue_manager>', re.escape(self.instance['queue_manager']))
             self.queue_manager_process_pattern = re.compile(pattern)
+
+            with IbmMqCheck.MATCHER_CREATION_LOCK:
+                if IbmMqCheck.process_matcher is None:
+                    limit = int(self.init_config.get('queue_manager_process_limit', 1))
+                    IbmMqCheck.process_matcher = QueueManagerProcessMatcher(limit)
 
     def cancel(self):
         self.reset_queue_manager_process_match()

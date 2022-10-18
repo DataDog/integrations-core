@@ -16,6 +16,13 @@ files:
           display_default: null
           example: amqpcsea <queue_manager>
           type: string
+      - name: queue_manager_process_limit
+        description: |
+          The maximum number of processes that can be matched at any given moment by
+          the `queue_manager_process` option.
+        value:
+          example: 1
+          type: integer
       - template: init_config/default
   - template: instances
     options:
