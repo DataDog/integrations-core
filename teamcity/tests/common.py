@@ -25,8 +25,8 @@ LEGACY_INSTANCE = {
     'tags': ['one:tag', 'one:test'],
 }
 
-TEAMCITY_V2_INSTANCE = {
-    'server': SERVER_URL,
+INSTANCE = {
+    'server': "https://dd-agent-ints.teamcity.com",
     'projects': {
         'SampleProject': {
             'include': [
@@ -46,7 +46,7 @@ TEAMCITY_V2_INSTANCE = {
     'tags': ['build_env:test', 'test_tag:ci_builds'],
 }
 
-TEAMCITY_OMV2_INSTANCE = {
+OPENMETRICS_INSTANCE = {
     'server': 'http://localhost:8111',
     'use_openmetrics': True,
     'basic_http_authentication': False,
@@ -175,7 +175,7 @@ PROMETHEUS_METRICS = [
     'teamcity.io.build.log.reads.bytes.count',
     'teamcity.io.build.log.writes.bytes.count',
     'teamcity.io.build.patch.writes.bytes.count',
-    'teamcity.jvm.buffer.count',
+    'teamcity.jvm.buffers_count',
     'teamcity.jvm.buffer.memory.used.bytes',
     'teamcity.jvm.buffer.total.capacity.bytes',
     'teamcity.jvm.gc.count',
@@ -205,6 +205,27 @@ PROMETHEUS_METRICS = [
     'teamcity.vcsRootInstances.active',
     'teamcity.vcsRoots',
     'teamcity.vcs.get.current.state.calls.count',
+    'teamcity.building_hosted_agents',
+    'teamcity.cloud.active_nodes',
+    'teamcity.cloud.agent.active_duration_afterBuild',
+    'teamcity.cloud.agent.active_duration_beforeBuild',
+    'teamcity.cloud.agent.active_duration_betweenBuilds',
+    'teamcity.cloud.agent.idle_duration',
+    'teamcity.cloud.agent.starting_duration_beforeRegister',
+    'teamcity.cloud.agent.total_build_duration',
+    'teamcity.cloud.agent.total_build_duration_beforeFinish',
+    'teamcity.cloud.build_stuck_canceled',
+    'teamcity.cloud.images',
+    'teamcity.cloud.plugins.failed_loading.count',
+    'teamcity.cloud.server.gc_usage_exceeded_errors',
+    'teamcity.cloud.server.high_total_memory_errors',
+    'teamcity.cloud.tcc_plugin_loaded',
+    'teamcity.current_full_agent_wait_instances',
+    'teamcity.current_full_agent_wait_time_max',
+    'teamcity.current_full_agent_wait_time_total',
+    'teamcity.full_agent_wait_time.quantile',
+    'teamcity.node.events.processing.count',
+    'teamcity.node.events.publishing.count',
 ]
 
 
