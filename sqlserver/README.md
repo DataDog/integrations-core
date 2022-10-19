@@ -69,7 +69,7 @@ To configure this check for an Agent running on a host:
 
     See the [example check configuration][6] for a comprehensive description of all options, including how to use custom queries to create your own metrics.
 
-For hosts that are configured with the `<hostname\instance name>`, add `reported_hostname:` to the `sqlserver.d/conf.yaml` file, in the `conf.d/` at the root of the [Agent’s configuration directory][5]:
+For hosts that are configured with the `<hostname\instance name>`, add `reported_hostname:` to the `sqlserver.d/conf.yaml` file, in the `conf.d/` at the root of the [Agent's configuration directory][5]:
 
 ```yaml
 init_config:
