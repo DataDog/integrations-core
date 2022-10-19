@@ -1,13 +1,17 @@
 # (C) Datadog, Inc. 2022-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from __future__ import annotations
+
 import os
+import random
 from typing import Generator
 
 import pytest
 
 from ddev.config.constants import ConfigEnvVars
 from ddev.config.file import ConfigFile
+from ddev.repo.core import Repository
 from ddev.utils.ci import running_in_ci
 from ddev.utils.fs import Path, temp_directory
 from ddev.utils.platform import Platform
@@ -18,6 +22,17 @@ PLATFORM = Platform()
 @pytest.fixture(scope='session')
 def local_repo() -> Path:
     return Path(__file__).resolve().parent.parent.parent
+
+
+@pytest.fixture(scope='session')
+def valid_integrations(local_repo) -> list[str]:
+    repo = Repository(local_repo.name, str(local_repo))
+    return [path.name for path in repo.integrations.iter_all()]
+
+
+@pytest.fixture
+def valid_integration(valid_integrations) -> str:
+    return random.choice(valid_integrations)
 
 
 @pytest.fixture(autouse=True)

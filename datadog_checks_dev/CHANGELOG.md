@@ -1,5 +1,14 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 17.1.1 / 2022-10-14
+
+* [Fixed] Allow 1e to have email-based codeowners. See [#13121](https://github.com/DataDog/integrations-core/pull/13121).
+* [Fixed] Remove the legacy docker-compose. See [#13073](https://github.com/DataDog/integrations-core/pull/13073).
+* [Fixed] Use specific endpoint to get all members from trello board at once. See [#13074](https://github.com/DataDog/integrations-core/pull/13074).
+* [Fixed] Make the `validate metadata` command fail if the metric prefix is invalid. See [#12903](https://github.com/DataDog/integrations-core/pull/12903).
+* [Fixed] Pin security deps in ddev. See [#12956](https://github.com/DataDog/integrations-core/pull/12956).
+* [Fixed] Fixed `validate manifest` command by providing default config for `dd_url` setting. See [#13057](https://github.com/DataDog/integrations-core/pull/13057).
+
 ## 17.1.0 / 2022-10-04
 
 * [Added] Support new `integrations` repo. See [#13007](https://github.com/DataDog/integrations-core/pull/13007).

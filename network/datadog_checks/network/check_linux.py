@@ -26,6 +26,7 @@ if PY3:
 class LinuxNetwork(Network):
     def __init__(self, name, init_config, instances):
         super(LinuxNetwork, self).__init__(name, init_config, instances)
+        self._collect_cx_queues = self.instance.get('collect_connection_queues', False)
 
     def check(self, _):
         """

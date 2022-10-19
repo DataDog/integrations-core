@@ -6,8 +6,8 @@ import json
 import time
 from typing import Any, Dict, Generator, Tuple
 
-import semver
 from requests.exceptions import HTTPError, RequestException
+from semver import VersionInfo
 from six.moves.urllib_parse import urlparse
 
 from datadog_checks.base import AgentCheck
@@ -94,7 +94,7 @@ class CloudFoundryApiCheck(AgentCheck):
             raise CheckException("Unable to collect API version and/or UAA URL from links {}".format(links))
 
         api_version = "v2"
-        if semver.parse_version_info(api_v3_version) >= MIN_V3_VERSION:
+        if VersionInfo.parse(api_v3_version) >= MIN_V3_VERSION:
             api_version = "v3"
         self.log.info("Discovered API `%s` and UAA URL `%s`", api_version, uaa_url)
         return api_version, uaa_url

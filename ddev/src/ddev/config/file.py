@@ -39,7 +39,7 @@ class ConfigFile:
         self.model = RootConfig(load_toml_data(self.read()))
 
     def read(self) -> str:
-        return self.path.read_text('utf-8')
+        return self.path.read_text()
 
     def read_scrubbed(self) -> str:
         import tomli_w

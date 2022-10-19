@@ -16,10 +16,7 @@ def _walk(top, follow_symlinks):
     dirs = []
     nondirs = []
 
-    try:
-        scandir_iter = scandir(top)
-    except OSError:
-        return
+    scandir_iter = scandir(top)
 
     # Avoid repeated global lookups.
     get_next = next
@@ -29,8 +26,6 @@ def _walk(top, follow_symlinks):
             entry = get_next(scandir_iter)
         except StopIteration:
             break
-        except OSError:
-            return
 
         try:
             is_dir = entry.is_dir(follow_symlinks=follow_symlinks)

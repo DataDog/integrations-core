@@ -119,6 +119,7 @@ jobs:
     - name: Comment PR on failure
       if: ${{ failure() && github.event.pull_request.merged != true }}
       uses: actions/github-script@0.3.0
+      continue-on-error: true
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         script: |
