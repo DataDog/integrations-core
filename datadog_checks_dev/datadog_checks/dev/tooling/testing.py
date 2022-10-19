@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
 import os
+import platform
 import re
 from fnmatch import fnmatch
 
@@ -499,6 +500,7 @@ def construct_pytest_options(
     pytest_args='',
     e2e=False,
     ddtrace=False,
+    memray=False,
 ):
     # Prevent no verbosity
     pytest_options = f'--verbosity={verbose or 1}'
@@ -551,6 +553,12 @@ def construct_pytest_options(
             # This will be formatted to the appropriate coverage paths for each package
             ' {}'
         )
+
+    if memray:
+        if platform.system().lower() not in ('linux', 'darwin'):
+            abort('\nThe `--memray` option can only be used on linux or MacOs!')
+
+        pytest_options += ' --memray'
 
     if marker:
         pytest_options += f' -m "{marker}"'

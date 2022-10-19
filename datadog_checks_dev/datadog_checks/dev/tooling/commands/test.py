@@ -49,6 +49,7 @@ from .console import CONTEXT_SETTINGS, abort, echo_debug, echo_info, echo_succes
 @click.option('--force-base-unpinned', is_flag=True, help='Force using datadog-checks-base as specified by check dep')
 @click.option('--force-base-min', is_flag=True, help='Force using lowest viable release version of datadog-checks-base')
 @click.option('--force-env-rebuild', is_flag=True, help='Force creating a new env')
+@click.option('--memray', is_flag=True, help='Run memray to measure memory usage')
 @click.pass_context
 def test(
     ctx,
@@ -76,6 +77,7 @@ def test(
     force_base_unpinned,
     force_base_min,
     force_env_rebuild,
+    memray,
 ):
     """Run tests for Agent-based checks.
 
@@ -199,6 +201,7 @@ def test(
             pytest_args=pytest_args,
             e2e=e2e,
             ddtrace=ddtrace_check,
+            memray=memray,
         )
         if coverage:
             pytest_options = pytest_options.format(pytest_coverage_sources(check))
