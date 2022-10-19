@@ -11,7 +11,7 @@ import pytest
 
 from ddev.config.constants import ConfigEnvVars
 from ddev.config.file import ConfigFile
-from ddev.integration.core import Integration
+from ddev.repo.core import Repository
 from ddev.utils.ci import running_in_ci
 from ddev.utils.fs import Path, temp_directory
 from ddev.utils.platform import Platform
@@ -26,7 +26,8 @@ def local_repo() -> Path:
 
 @pytest.fixture(scope='session')
 def valid_integrations(local_repo) -> list[str]:
-    return sorted(path.name for path in local_repo.iterdir() if Integration.is_valid(path))
+    repo = Repository(local_repo.name, str(local_repo))
+    return [path.name for path in repo.integrations.iter_all()]
 
 
 @pytest.fixture
