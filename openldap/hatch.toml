@@ -6,5 +6,5 @@ version = ["2.4"]
 
 [envs.default.overrides]
 matrix.version.env-vars = [
-  { key = "OPENLDAP_VERSION", value = "2_4_44", if = ["2"] },
+  { key = "OPENLDAP_VERSION", value = "2_4_44", if = ["2.4"] },
 ]
