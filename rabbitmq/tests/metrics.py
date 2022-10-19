@@ -69,6 +69,27 @@ OVERVIEW_METRICS_TOTALS = [
     'rabbitmq.overview.queue_totals.messages_unacknowledged.rate',
 ]
 
+# Present from 3.8
+if RABBITMQ_VERSION >= version.parse('3.8'):
+    OVERVIEW_METRICS_TOTALS.extend(
+        [
+            'rabbitmq.overview.churn.channel.created.count',
+            'rabbitmq.overview.churn.channel.created.rate',
+            'rabbitmq.overview.churn.channel.closed.count',
+            'rabbitmq.overview.churn.channel.closed.rate',
+            'rabbitmq.overview.churn.connection.created.count',
+            'rabbitmq.overview.churn.connection.created.rate',
+            'rabbitmq.overview.churn.connection.closed.count',
+            'rabbitmq.overview.churn.connection.closed.rate',
+            'rabbitmq.overview.churn.queue.created.count',
+            'rabbitmq.overview.churn.queue.created.rate',
+            'rabbitmq.overview.churn.queue.declared.count',
+            'rabbitmq.overview.churn.queue.declared.rate',
+            'rabbitmq.overview.churn.queue.deleted.count',
+            'rabbitmq.overview.churn.queue.deleted.rate',
+        ]
+    )
+
 OVERVIEW_METRICS_MESSAGES = [
     'rabbitmq.overview.messages.ack.count',
     'rabbitmq.overview.messages.ack.rate',
