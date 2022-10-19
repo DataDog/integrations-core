@@ -69,80 +69,57 @@ class IntegrationRegistry:
 
     def iter(self) -> Iterable[Integration]:
         for path in sorted(self.repo.path.iterdir()):
-            if path.name in self.__cache:
-                integration = self.__cache[path.name]
-                if integration.is_integration:
-                    yield integration
-            elif (integration := Integration(path, self.repo.path, self.repo.config)).is_integration:
-                self.__cache[path.name] = integration
+            integration = self.__get_from_path(path)
+            if integration.is_integration:
                 yield integration
 
     def iter_all(self) -> Iterable[Integration]:
         for path in sorted(self.repo.path.iterdir()):
-            if path.name in self.__cache:
-                integration = self.__cache[path.name]
-                if integration.is_valid:
-                    yield integration
-            elif (integration := Integration(path, self.repo.path, self.repo.config)).is_valid:
-                self.__cache[path.name] = integration
+            integration = self.__get_from_path(path)
+            if integration.is_valid:
                 yield integration
 
     def iter_packages(self) -> Iterable[Integration]:
         for path in sorted(self.repo.path.iterdir()):
-            if path.name in self.__cache:
-                integration = self.__cache[path.name]
-                if integration.is_package:
-                    yield integration
-            elif (integration := Integration(path, self.repo.path, self.repo.config)).is_package:
-                self.__cache[path.name] = integration
+            integration = self.__get_from_path(path)
+            if integration.is_package:
                 yield integration
 
     def iter_tiles(self) -> Iterable[Integration]:
         for path in sorted(self.repo.path.iterdir()):
-            if path.name in self.__cache:
-                integration = self.__cache[path.name]
-                if integration.is_tile:
-                    yield integration
-            elif (integration := Integration(path, self.repo.path, self.repo.config)).is_tile:
-                self.__cache[path.name] = integration
+            integration = self.__get_from_path(path)
+            if integration.is_tile:
                 yield integration
 
     def iter_testable(self) -> Iterable[Integration]:
         for path in sorted(self.repo.path.iterdir()):
-            if path.name in self.__cache:
-                integration = self.__cache[path.name]
-                if integration.is_testable:
-                    yield integration
-            elif (integration := Integration(path, self.repo.path, self.repo.config)).is_testable:
-                self.__cache[path.name] = integration
+            integration = self.__get_from_path(path)
+            if integration.is_testable:
                 yield integration
 
     def iter_shippable(self) -> Iterable[Integration]:
         for path in sorted(self.repo.path.iterdir()):
-            if path.name in self.__cache:
-                integration = self.__cache[path.name]
-                if integration.is_shippable:
-                    yield integration
-            elif (integration := Integration(path, self.repo.path, self.repo.config)).is_shippable:
-                self.__cache[path.name] = integration
+            integration = self.__get_from_path(path)
+            if integration.is_shippable:
                 yield integration
 
     def iter_agent_checks(self) -> Iterable[Integration]:
         for path in sorted(self.repo.path.iterdir()):
-            if path.name in self.__cache:
-                integration = self.__cache[path.name]
-                if integration.is_agent_check:
-                    yield integration
-            elif (integration := Integration(path, self.repo.path, self.repo.config)).is_agent_check:
-                self.__cache[path.name] = integration
+            integration = self.__get_from_path(path)
+            if integration.is_agent_check:
                 yield integration
 
     def iter_jmx_checks(self) -> Iterable[Integration]:
         for path in sorted(self.repo.path.iterdir()):
-            if path.name in self.__cache:
-                integration = self.__cache[path.name]
-                if integration.is_jmx_check:
-                    yield integration
-            elif (integration := Integration(path, self.repo.path, self.repo.config)).is_jmx_check:
-                self.__cache[path.name] = integration
+            integration = self.__get_from_path(path)
+            if integration.is_jmx_check:
                 yield integration
+
+    def __get_from_path(self, path: Path) -> Integration:
+        if path.name in self.__cache:
+            integration = self.__cache[path.name]
+        else:
+            integration = Integration(path, self.repo.path, self.repo.config)
+            self.__cache[path.name] = integration
+
+        return integration
