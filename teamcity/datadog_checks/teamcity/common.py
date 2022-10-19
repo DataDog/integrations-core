@@ -122,7 +122,7 @@ def get_response(check, resource, **kwargs):
         resp.raise_for_status()
 
         json_payload = resp.json()
-        if resource == 'build_config':
+        if resource == 'build_config' or resource == 'teamcity_server_details':
             return json_payload
         elif not json_payload.get("count") or json_payload["count"] == 0:
             check.log.debug("No results found for resource %s url: %s", resource_name, resource_url)
@@ -134,6 +134,6 @@ def get_response(check, resource, **kwargs):
             check.log.error("Access denied. Enable guest authentication or check user permissions.")
         check.log.exception("Couldn't fetch resource %s, got code %s", resource_name, resp.status_code)
         raise
-    except Exception:
-        check.log.exception("Couldn't fetch resource %s, unhandled exception", resource_name)
+    except Exception as e:
+        check.log.exception("Couldn't fetch resource %s, unhandled exception %s, %s", resource_name, str(e), resp)
         raise

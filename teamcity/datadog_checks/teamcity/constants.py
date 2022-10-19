@@ -32,6 +32,8 @@ RESOURCE_URL_MAP = {
     "buildTypeId:{build_conf})",
     "test_occurrences": "{base_url}/app/rest/testOccurrences?locator=build:{build_id}",
     "build_problems": "{base_url}/app/rest/problemOccurrences?locator=build:(id:{build_id})",
+    "build_config_settings": "{base_url}/app/rest/buildTypes/id:{build_conf}/settings",
+    "teamcity_server_details": "{base_url}/app/rest/server",
 }
 
 EVENT_BASE = {"timestamp": None, "source_type_name": "teamcity", "host": None, "tags": []}
@@ -64,6 +66,7 @@ class BuildConfig(object):
         self.build_config_id = build_config_id
         self.project_id = None
         self.last_build_id = None
+        self.build_config_type = None
 
 
 class BuildConfigs(BuildConfig):
@@ -73,19 +76,21 @@ class BuildConfigs(BuildConfig):
     def get_build_configs(self):
         return deepcopy(self.build_configs)
 
-    def set_build_config(self, build_type_id, project_id):
-        if not self.build_configs.get(build_type_id):
-            self.build_configs[build_type_id] = BuildConfig(build_type_id)
-            self.build_configs[build_type_id].project_id = project_id
+    def set_build_config(self, build_config_id, project_id=None, build_config_type=None):
+        if not self.build_configs.get(build_config_id):
+            self.build_configs[build_config_id] = BuildConfig(build_config_id)
+            self.build_configs[build_config_id].project_id = project_id
+        if build_config_type:
+            self.build_configs[build_config_id].build_config_type = build_config_type
 
-    def get_build_config(self, build_type_id):
-        return self.build_configs.get(build_type_id, None)
+    def get_build_config(self, build_config_id):
+        return self.build_configs.get(build_config_id, None)
 
-    def set_last_build_id(self, build_type_id, build_id):
-        self.build_configs[build_type_id].last_build_id = build_id
+    def set_last_build_id(self, build_config_id, build_id):
+        self.build_configs[build_config_id].last_build_id = build_id
 
-    def get_last_build_id(self, build_type_id):
-        build_config = self.build_configs.get(build_type_id, None)
+    def get_last_build_id(self, build_config_id):
+        build_config = self.build_configs.get(build_config_id, None)
         if build_config:
             return build_config.last_build_id
         return None

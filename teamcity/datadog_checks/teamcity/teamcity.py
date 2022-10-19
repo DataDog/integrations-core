@@ -69,7 +69,6 @@ class TeamCityCheck(AgentCheck):
 
         instance_tags = [
             'server:{}'.format(self.server_url),
-            'type:deployment' if self.is_deployment else 'type:build',
         ]
         if self.instance_name:
             instance_tags.extend(['instance_name:{}'.format(self.instance_name)])
@@ -106,29 +105,31 @@ class TeamCityCheck(AgentCheck):
                 build_config_details = get_response(self, 'build_config', build_conf=build_config_id)
 
                 if build_config_details:
-                    project_id = build_config_details['projectId']
-                    self.bc_store.set_build_config(build_config_id, project_id)
+                    project_id = build_config_details.get('projectId')
+                    build_config_type = self._get_build_config_type(build_config_id)
+                    self.bc_store.set_build_config(build_config_id, project_id, build_config_type)
         else:
             # Initialize multi build config instance
             # Check for new build configs in project
             self.log.debug("Initializing multi-build configuration monitoring.")
             build_configs = get_response(self, 'build_configs', project_id=project_id)
-
             if build_configs:
                 for build_config in build_configs.get('buildType'):
-                    if should_include_build_config(self, build_config['id']) and not self.bc_store.get_build_config(
-                        build_config['id']
+                    build_config_id = build_config['id']
+                    if should_include_build_config(self, build_config_id) and not self.bc_store.get_build_config(
+                        build_config_id
                     ):
-                        self.bc_store.set_build_config(build_config.get('id'), project_id)
+                        build_config_type = self._get_build_config_type(build_config['id'])
+                        self.bc_store.set_build_config(build_config_id, project_id, build_config_type)
 
         for build_config in self.bc_store.get_build_configs():
             if self.bc_store.get_build_config(build_config):
                 if self.bc_store.get_last_build_id(build_config) is None:
                     last_build_res = get_response(self, 'last_build', build_conf=build_config)
-
                     if last_build_res:
-                        last_build_id = last_build_res['build'][0]['id']
-                        build_config_id = last_build_res['build'][0]['buildTypeId']
+                        last_build = last_build_res.get('build')[0]
+                        last_build_id = last_build.get('id')
+                        build_config_id = last_build.get('buildTypeId')
 
                         self.log.debug(
                             "Last build id for build configuration %s is %s.",
@@ -199,6 +200,50 @@ class TeamCityCheck(AgentCheck):
         if last_build_id:
             new_builds = get_response(self, 'new_builds', build_conf=self.build_config, since_build=last_build_id)
             return new_builds
+        else:
+            self._initialize()
+
+    def _get_build_config_type(self, build_config):
+        if self.is_deployment:
+            return 'deployment'
+        else:
+            build_config_settings = get_response(self, 'build_config_settings', build_conf=build_config)
+            if build_config_settings:
+                for setting in build_config_settings['property']:
+                    if setting['name'] == 'buildConfigurationType':
+                        build_config_type = setting['value'].lower()
+                        return build_config_type
+            else:
+                self.log.debug(
+                    "Could not get build configuration type for %s. Assign `View build configuration settings` to the "
+                    "TeamCity user to automatically retrieve and tag metrics by build configuration type."
+                )
+        return 'build'
+
+    @AgentCheck.metadata_entrypoint
+    def _submit_version_metadata(self):
+        server_details = get_response(self, 'teamcity_server_details')
+        if server_details:
+            try:
+                version = str(server_details.get('buildDate')[:8])
+                build_number = str(server_details['buildNumber'])
+                major_version = version[:-4]
+                minor_version = version[4:6]
+                patch_version = version[-2:]
+
+                version_raw = '{}.{}.{}'.format(version[:-4], version[4:6], version[-2:])
+
+                version_parts = {
+                    'major': major_version,
+                    'minor': minor_version,
+                    'patch': patch_version,
+                    'build': build_number,
+                }
+                self.set_metadata('version', version_raw, scheme='parts', part_map=version_parts)
+            except Exception as e:
+                self.log.debug("Could not parse version metadata: %s", str(e))
+        else:
+            self.log.debug("Could not submit version metadata.")
 
     def _collect(self):
         new_builds = self._collect_new_builds()
@@ -209,9 +254,17 @@ class TeamCityCheck(AgentCheck):
             self.bc_store.set_last_build_id(self.build_config, new_last_build['id'])
 
             for build in new_builds['build']:
-                project_id = self.bc_store.get_build_config(self.build_config).project_id
+                stored_build_config = self.bc_store.get_build_config(self.build_config)
+                project_id = stored_build_config.project_id
+                build_config_type = stored_build_config.build_config_type
                 build_tags = list(deepcopy(self.tags))
-                build_tags.extend(['build_config:{}'.format(self.build_config), 'project_id:{}'.format(project_id)])
+                build_tags.extend(
+                    [
+                        'build_config:{}'.format(self.build_config),
+                        'project_id:{}'.format(project_id),
+                        'type:{}'.format(build_config_type),
+                    ]
+                )
                 self.build_tags = build_tags
                 self.log.debug(
                     "New build with id %s (build number: %s), saving and alerting.", build['id'], build['number']
@@ -235,7 +288,9 @@ class TeamCityCheck(AgentCheck):
                 if project_id:
                     self._initialize(project_id)
                 else:
-                    self.log.debug('Project ID not configured. Defaulting to single build configuration monitoring.')
+                    self.log.debug(
+                        'Project ID not configured. Refer to Datadog documentation for configuration options.'
+                    )
             for build_config in self.bc_store.get_build_configs():
                 self.build_config = build_config
                 self._collect()
@@ -243,3 +298,5 @@ class TeamCityCheck(AgentCheck):
         elif self.build_config:
             self._initialize()
             self._collect()
+
+        self._submit_version_metadata()

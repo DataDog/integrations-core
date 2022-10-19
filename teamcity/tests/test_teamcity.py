@@ -31,7 +31,7 @@ from .common import (
 
 @pytest.mark.skipif(USE_OPENMETRICS == 'true', reason='Event collection is not available in OpenMetricsV2 instance')
 @pytest.mark.integration
-def test_build_event(aggregator, legacy_instance):
+def test_build_event(dd_run_check, aggregator, legacy_instance):
     legacy_instance['build_config_metrics'] = False
     legacy_instance['test_result_metrics'] = False
     legacy_instance['build_problem_checks'] = False
@@ -41,9 +41,11 @@ def test_build_event(aggregator, legacy_instance):
     responses = json.load(open(get_fixture_path('event_responses.json'), 'r'))
 
     json_responses = [
-        responses['legacy_build_details'],
-        responses['legacy_last_build'],
-        responses['legacy_new_builds'],
+        responses['build_config'],
+        responses['build_config_settings'],
+        responses['last_build'],
+        responses['new_builds'],
+        responses['server_details'],
     ]
 
     with mock.patch('datadog_checks.base.utils.http.requests') as req:
@@ -61,7 +63,7 @@ def test_build_event(aggregator, legacy_instance):
         msg_title='Build for Legacy test build successful',
         source_type_name='teamcity',
         alert_type='success',
-        tags=LEGACY_BUILD_TAGS + ['build_id:1', 'build_number:1', 'build'],
+        tags=LEGACY_BUILD_TAGS + ['build_id:1', 'build_number:1', 'build', 'type:build'],
         count=1,
     )
 
@@ -70,7 +72,7 @@ def test_build_event(aggregator, legacy_instance):
     # One more check should not create any more events
     with mock.patch('datadog_checks.base.utils.http.requests') as req:
         mock_resp = mock.MagicMock(status_code=200)
-        mock_resp.json.side_effect = [responses['legacy_no_new_builds']]
+        mock_resp.json.side_effect = [responses['server_details'], responses['no_new_builds']]
         req.get.return_value = mock_resp
         teamcity.check(legacy_instance)
 
