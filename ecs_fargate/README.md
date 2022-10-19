@@ -125,6 +125,8 @@ For more information on CloudFormation templating and syntax, see the [AWS Cloud
 
 For all of these examples the `DD_API_KEY` environment variable can alternatively be populated by referencing the the [ARN of a "Plaintext" secret stored in AWS Secret Manager][7].
 
+> (Windows Only) Select “C:\\" as the working directory.
+
 #### Create or modify your IAM policy
 
 Add the following permissions to your [Datadog IAM policy][8] to collect ECS Fargate metrics. For more information, see the [ECS policies][9] on the AWS website.
