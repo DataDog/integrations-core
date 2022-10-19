@@ -4,6 +4,7 @@ services:
   teamcity-server:
     container_name: teamcity-server
     image: jetbrains/teamcity-server:latest
+    platform: linux/amd64
     ports:
       - "8111:8111"
     volumes:
@@ -20,6 +21,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile-agent
+    platform: linux/amd64
     environment:
       - AGENT_NAME=regular_agent
       - SERVER_URL=http://teamcity-server:8111
@@ -32,6 +34,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile-minimal_agent
+    platform: linux/amd64
     environment:
       - AGENT_NAME=minimal_agent
       - SERVER_URL=http://teamcity-server:8111

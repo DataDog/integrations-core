@@ -11,12 +11,12 @@ from datadog_checks.teamcity.constants import (
     SERVICE_CHECK_TEST_RESULTS,
 )
 
-from .common import TEAMCITY_V2_INSTANCE, USE_OPENMETRICS
+from .common import INSTANCE, USE_OPENMETRICS
 
 
 @pytest.mark.e2e
 def test_e2e(aggregator, dd_agent_check):
-    aggregator = dd_agent_check(TEAMCITY_V2_INSTANCE, rate=True)
+    aggregator = dd_agent_check(INSTANCE, rate=True)
     aggregator.assert_service_check('teamcity.{}'.format(SERVICE_CHECK_BUILD_STATUS), at_least=0)
     aggregator.assert_service_check('teamcity.{}'.format(SERVICE_CHECK_BUILD_PROBLEMS), at_least=0)
     aggregator.assert_service_check('teamcity.{}'.format(SERVICE_CHECK_TEST_RESULTS), at_least=0)
@@ -24,6 +24,6 @@ def test_e2e(aggregator, dd_agent_check):
 
 @pytest.mark.skipif(not USE_OPENMETRICS, reason='OpenMetrics V2 is only available with Python 3')
 @pytest.mark.e2e
-def test_omv2_e2e(aggregator, dd_agent_check, omv2_instance):
-    aggregator = dd_agent_check(omv2_instance)
+def test_omv2_e2e(aggregator, dd_agent_check, openmetrics_instance):
+    aggregator = dd_agent_check(openmetrics_instance)
     aggregator.assert_service_check(SERVICE_CHECK_OPENMETRICS, status=TeamCityCheck.OK)

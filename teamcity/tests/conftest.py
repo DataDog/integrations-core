@@ -11,7 +11,7 @@ from datadog_checks.teamcity import TeamCityCheck
 if PY3:
     from datadog_checks.teamcity.check import TeamCityCheckV2
 
-from .common import COMPOSE_FILE, LEGACY_INSTANCE, TEAMCITY_OMV2_INSTANCE, TEAMCITY_V2_INSTANCE, USE_OPENMETRICS
+from .common import COMPOSE_FILE, INSTANCE, LEGACY_INSTANCE, OPENMETRICS_INSTANCE, USE_OPENMETRICS
 
 
 def restore_teamcity_server():
@@ -37,7 +37,7 @@ def restart_teamcity_server():
 
 
 @pytest.fixture(scope='session')
-def dd_environment(instance, omv2_instance):
+def dd_environment(instance, openmetrics_instance):
     conditions = [
         WaitFor(restore_teamcity_server),
         WaitFor(restart_teamcity_server),
@@ -45,7 +45,7 @@ def dd_environment(instance, omv2_instance):
     ]
     with docker_run(COMPOSE_FILE, conditions=conditions, sleep=10, mount_logs=True):
         if USE_OPENMETRICS:
-            yield omv2_instance
+            yield openmetrics_instance
         else:
             yield instance
 
@@ -57,12 +57,12 @@ def legacy_instance():
 
 @pytest.fixture(scope='session')
 def instance():
-    return TEAMCITY_V2_INSTANCE
+    return INSTANCE
 
 
 @pytest.fixture(scope='session')
-def omv2_instance():
-    return TEAMCITY_OMV2_INSTANCE
+def openmetrics_instance():
+    return OPENMETRICS_INSTANCE
 
 
 @pytest.fixture(scope="session")
