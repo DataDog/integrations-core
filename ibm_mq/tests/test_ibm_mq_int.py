@@ -419,8 +419,9 @@ def test_queue_manager_process_not_found(aggregator, get_check, instance, dd_run
         'foo:bar',
     ]
 
-    aggregator.assert_service_check(check.SERVICE_CHECK, check.UNKNOWN, tags=tags, count=1)
-    aggregator.assert_service_check('ibm_mq.queue_manager', check.UNKNOWN, tags=tags, count=1)
+    message = 'Process not found, skipping check run'
+    aggregator.assert_service_check(check.SERVICE_CHECK, check.UNKNOWN, message=message, tags=tags, count=1)
+    aggregator.assert_service_check('ibm_mq.queue_manager', check.UNKNOWN, message=message, tags=tags, count=1)
     aggregator.assert_all_metrics_covered()
 
 

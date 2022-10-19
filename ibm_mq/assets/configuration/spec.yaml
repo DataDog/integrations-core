@@ -20,6 +20,10 @@ files:
         description: |
           The maximum number of processes that can be matched at any given moment by
           the `queue_manager_process` option.
+
+          Note that if this limit is lower than the actual limit the check will ignore
+          some active queue managers, while if this limit is higher than the actual
+          limit you may see increased CPU usage during check runs.
         value:
           example: 1
           type: integer
@@ -276,7 +280,8 @@ files:
 
           This option is only available on Agent 7+.
 
-          This overrides the `queue_manager_process` option in the `init_config` section.
+          This overrides the `queue_manager_process` option in the `init_config` section
+          but the `queue_manager_process_limit` option still applies.
         value:
           display_default: null
           example: amqpcsea <queue_manager>
