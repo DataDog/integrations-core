@@ -2,12 +2,12 @@
 
 [[envs.default.matrix]]
 python = ["27", "38"]
-version = ["1", "2"]
+version = ["1.10", "2.0"]
 
 [envs.default.overrides]
 matrix.version.env-vars = [
-  { key = "HARBOR_VERSION", value = "1.10.0", if = ["1"] },
-  { key = "HARBOR_VERSION", value = "2.0.5", if = ["2"] },
+  { key = "HARBOR_VERSION", value = "1.10.0", if = ["1.10"] },
+  { key = "HARBOR_VERSION", value = "2.0.5", if = ["2.0"] },
 ]
 
 [envs.default.env-vars]
