@@ -2,9 +2,9 @@
 
 [[envs.default.matrix]]
 python = ["38"]
-version = ["4"]
+version = ["4.0"]
 
 [envs.default.overrides]
 matrix.version.env-vars = [
-  { key = "HAZELCAST_VERSION", value = "4.0.1", if = ["4"] },
+  { key = "HAZELCAST_VERSION", value = "4.0.1", if = ["4.0"] },
 ]
