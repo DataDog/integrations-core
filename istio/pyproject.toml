@@ -58,8 +58,3 @@ include = [
 dev-mode-dirs = [
     ".",
 ]
-
-[tool.hatch.envs.test]
-dependencies = [
-  "requests-mock==1.4.0",
-]
