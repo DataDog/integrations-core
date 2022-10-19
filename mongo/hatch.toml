@@ -11,10 +11,7 @@ version = ["4.4", "5.0"]
 flavor = ["standalone", "shard", "auth", "tls"]
 
 [envs.default.overrides]
-matrix.version.env-vars = [
-  { key = "MONGO_VERSION", value = "4.4", if = ["4"] },
-  { key = "MONGO_VERSION", value = "5.0", if = ["5"] },
-]
+matrix.version.env-vars = "MONGO_VERSION"
 
 [envs.default.env-vars]
 COMPOSE_FILE = "mongo-{matrix:flavor}.yaml"
