@@ -2,11 +2,11 @@
 
 [[envs.default.matrix]]
 python = ["27", "38"]
-version = ["1"]
+version = ["1.13"]
 
 [envs.default.overrides]
 matrix.version.env-vars = [
-  { key = "ISTIO_VERSION", value = "1.13.3", if = ["1"] },
+  { key = "ISTIO_VERSION", value = "1.13.3", if = ["1.13"] },
 ]
 
 [envs.default.env-vars]
