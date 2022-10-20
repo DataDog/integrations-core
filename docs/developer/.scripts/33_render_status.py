@@ -345,7 +345,7 @@ def render_config_validation_progress():
 
 
 def render_hatch_migration_progress():
-    valid_checks = sorted(get_valid_integrations())
+    valid_checks = sorted(get_valid_checks())
     total_checks = len(valid_checks)
     checks_migrated = 0
 
