@@ -211,7 +211,7 @@ For more information on CloudFormation templating and syntax, see the [AWS Cloud
 
 After the Datadog Agent is setup as described above, the [ecs_fargate check][11] collects metrics with autodiscovery enabled. Add Docker labels to your other containers in the same task to collect additional metrics.
 
-Although the integration works on Linux and Windows, some metrics are OS dependent. All metrics exposed when running on Windows are also exposed on Linux, but there are some metrics that are only available on Linux. See [Data Collected][47] for the list of metrics provided by this integration. The list also specifies which metrics are Linux-only.
+Although the integration works on Linux and Windows, some metrics are OS dependent. All metrics exposed when running on Windows are also exposed on Linux, but there are some metrics that are only available on Linux. See [Data Collected](#data-collected) for the list of metrics provided by this integration. The list also specifies which metrics are Linux-only.
 
 For details on collecting integration metrics, see [Integration Setup for ECS Fargate][12].
 
