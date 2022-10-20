@@ -556,7 +556,7 @@ def construct_pytest_options(
 
     if memray:
         if platform.system().lower() not in ('linux', 'darwin'):
-            abort('\nThe `--memray` option can only be used on linux or MacOs!')
+            abort('\nThe `--memray` option can only be used on Linux or MacOS!')
 
         pytest_options += ' --memray'
 
