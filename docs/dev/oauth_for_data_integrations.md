@@ -21,7 +21,7 @@ When building an integration with OAuth, you can select the exact scopes of data
 
 ## Build a data integration with OAuth
 
-This section describes how to build a data integration with a tile on the [Marketplace][2] or [Integrations][3] page. If you’re building a data integration and want to add it to an existing tile on either page, see [Adding OAuth to an existing offering](##Adding-oauth-to-an-existing-offering).
+This section describes how to build a data integration with a tile on the [Marketplace][2] or [Integrations][3] page. If you’re building a data integration and want to add it to an existing tile on either page, see [Adding OAuth to an existing offering](#Adding-oauth-to-an-existing-offering).
 
 ### Create an app from a template
 
@@ -43,7 +43,7 @@ The client is the component of an application that enables users to authorize th
 
    The OAuth clients you create for data integrations are **confidential clients** that provide a client ID and client secret. The client you create in this step is a private version of the client, whose credentials you can use for testing. When a published version of this client is created, you will receive a new set of credentials. **These credentials are never shown again after you create the client, so be sure to store them in a secure location.**
 
-2. Enter your client information such as the name, description, client role (integration), redirect URIs, and onboarding URL. 
+2. Enter your client information such as the name, description, redirect URIs, and onboarding URL. 
 3. Configure scopes for the OAuth client by searching for scopes and selecting their checkboxes in the **Requested** column. 
     
    Scopes determine the types of data your app can access in the customer's Datadog account. This allows your integration to access the necessary scopes. Only request the minimum amount of scopes required for your use case, as more can be added later on as needed.
@@ -73,7 +73,7 @@ In order to publish an OAuth client, you need to open a pull request for your da
 
 To start the publishing process in the [Developer Platform][4]:
 
-1. Navigate to the **Publishing** tab under **General** to receive your published client ID, client secret, and `app_uuid` to use for publishing. Enter additional information about your integration in the fields.
+1. Navigate to the **Publishing** tab under **General**. In step 1 of the publishing flow, you receive your published client ID and secret. In step 2, you can enter additional information about your integration and see the published `app_uuid` to use below.
 
    Save your client ID, client secret, and `app_uuid` in a secure location. 
 
@@ -93,7 +93,7 @@ Follow the [steps](#build-a-data-integration-with-oauth) above. Instead of openi
 
 ### If you have an existing data integration that’s currently connected to a UI Extension (shares the same tile)
 
-Instead of creating an app, navigate to an app that includes your published UI Extension in the Developer Platform and follow the remaining [steps](#create-an-oauth-client). You need to open a pull request to update the `app_uuid` field in the `manifest.json` file. 
+Instead of creating an app, navigate to the app that includes your published UI Extension in the Developer Platform and follow the remaining [steps](#create-an-oauth-client). You need to open a pull request to update the `app_uuid` field in the `manifest.json` file. 
 
 Once you’ve created your data integration's OAuth client and are ready for publishing, click **Edit** on your app and navigate to the **Publishing** tab under **General**. After completing the fields, you receive an `app_uuid` to use for publishing. Set this value as the `app_uuid` in your data integration's `manifest.json` file. 
 
