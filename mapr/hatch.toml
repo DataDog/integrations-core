@@ -1,0 +1,9 @@
+[env.collectors.datadog-checks]
+
+[envs.default]
+dependencies = [
+  "confluent_kafka==1.4.1",
+]
+
+[[envs.default.matrix]]
+python = ["27", "38"]
