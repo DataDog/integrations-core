@@ -436,9 +436,10 @@ instances:
     #     - test:<INTEGRATION>
 
     ## @param stored_procedure - string - optional
+    ## DEPRECATED - use `custom_queries` instead. For guidance, see:
+    ## https://docs.datadoghq.com/integrations/guide/collect-sql-server-custom-metrics/
     ## Get metrics from custom proc in MyDB but only if the database is writable
     ## (i.e. it's the master in an availability group) Note: Custom proc must be defined in its own instance
-    ## See https://docs.datadoghq.com/integrations/guide/collect-sql-server-custom-metrics/
     #
     # stored_procedure: <PROCEDURE_NAME>
 
