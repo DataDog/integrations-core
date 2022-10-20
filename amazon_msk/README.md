@@ -2,9 +2,13 @@
 
 ## Overview
 
-This check monitors Amazon Managed Streaming for Apache Kafka ([Amazon MSK][1]) through the Datadog Agent.
+Amazon Managed Streaming for Apache Kafka (MSK) is a fully managed service that makes it easy to build and run applications that use Apache Kafka to process streaming data.
+
+You can collect metrics from this integration in two ways—with the [Datadog Agent](#setup) or with a [Crawler][18] that collects metrics from CloudWatch. 
 
 ## Setup
+
+The Agent check monitors Amazon Managed Streaming for Apache Kafka ([Amazon MSK][1]) through the Datadog Agent.
 
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying these instructions.
 
@@ -78,3 +82,4 @@ Additional helpful documentation, links, and articles:
 [15]: https://docs.datadoghq.com/help/
 [16]: https://www.datadoghq.com/blog/monitor-amazon-msk/
 [17]: https://docs.datadoghq.com/getting_started/tagging/
+[18]: https://docs.datadoghq.com/integrations/amazon_msk
