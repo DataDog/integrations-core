@@ -1,5 +1,13 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 17.2.0 / 2022-10-20
+
+* [Added] Add the ability to retry kind environments. See [#13106](https://github.com/DataDog/integrations-core/pull/13106).
+* [Fixed] Add f5-distributed-cloud as tile without github team or username. See [#13149](https://github.com/DataDog/integrations-core/pull/13149).
+* [Fixed] Fix `release make` to include new integrations in the agent requirements file. See [#13125](https://github.com/DataDog/integrations-core/pull/13125).
+* [Fixed] Fix deprecation warnings with `semver`. See [#12967](https://github.com/DataDog/integrations-core/pull/12967).
+* [Fixed] Migrate to new codecov uploader. See [#13085](https://github.com/DataDog/integrations-core/pull/13085).
+
 ## 17.1.1 / 2022-10-14
 
 * [Fixed] Allow 1e to have email-based codeowners. See [#13121](https://github.com/DataDog/integrations-core/pull/13121).
