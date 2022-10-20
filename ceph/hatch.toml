@@ -1,0 +1,11 @@
+[env.collectors.datadog-checks]
+
+[[envs.default.matrix]]
+python = ["27", "38"]
+version = ["4.0", "5.0"]
+
+[envs.default.overrides]
+matrix.version.env-vars = [
+  { key = "CEPH_VERSION", value = "v4.0.21-stable-4.0-nautilus-centos-7", if = ["4.0"] },
+  { key = "CEPH_VERSION", value = "v5.0.7-stable-5.0-octopus-centos-8", if = ["5.0"] },
+]
