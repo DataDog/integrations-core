@@ -19,9 +19,9 @@ OAuth allows Datadog customers to easily and securely authorize third-party plat
 
 When building an integration with OAuth, you can select the exact scopes of data that your application needs access to, and the customer can grant access to the granular scopes that you’ve requested. While optional scopes are not supported, all scopes requested by an integration become accessible when a customer authorizes it. 
 
-## Build a data integration with OAuth
+## Build a new data integration with OAuth
 
-This section describes how to build a data integration with a tile on the [Marketplace][2] or [Integrations][3] page. If you’re building a data integration and want to add it to an existing tile on either page, see [Adding OAuth to an existing offering](#Adding-oauth-to-an-existing-offering).
+This section describes how to build a new data integration with a tile on the [Marketplace][2] or [Integrations][3] page. If you’re building upon an existing data integration, or building a new data integration and want to add it to an existing tile on either page, see [Adding OAuth to an existing offering](#Adding-oauth-to-an-existing-offering).
 
 ### Create an app from a template
 
@@ -65,11 +65,23 @@ The client is the component of an application that enables users to authorize th
 
    If successful, this request returns an API key that you should securely save so you can use it to submit data into Datadog on behalf of the user. **You cannot access this API key value again after the initial request response**.
 
-8. Test any additional scopes that you’ve requested access for.
+8. Test that your OAuth client will work across multiple [Datadog sites][8] by kicking off authorization from a non-US1 Datadog account:
+   - If you do not have access to a Sandbox account in a different site, please contact marketplace@datadog.com. 
+   - Export your app manifest from the account in the *original* Datadog site by navigating to the app you've created in the Developer Platform, clicking the gear icon in the top right and clicking "Export App Manifest". 
+   - In your account in the *new* Datadog site, navigate to the Developer Platform and import your app manifest from step 2.
+   - Use this set of oauth client credentials (id and secret) to test that customers in this new data center can authorize the oauth client
+
+9. Test any additional scopes that you’ve requested access for.
 
 ### Publish the OAuth client
 
-In order to publish an OAuth client, you need to open a pull request for your data integration in either the [`integrations-extras`][5] or [Marketplace][6] GitHub repositories. 
+In order to publish an OAuth client, you first need to open a pull request for your data integration in either the [`integrations-extras`][5] or [Marketplace][6] GitHub repositories. 
+
+As a part of your pull request, please update your README file with an **uninstallation** section under `## Setup` that includes the following instructions (along with any custom instructions you would like to add):
+
+- To ensure this integration is fully uninstalled, revoke authorization in the Configure tab of this tile or in [OAuth Apps](https://app.datadoghq.com/organization-settings/oauth-applications) within Organization Settings in Datadog. 
+- Additionally, ensure that all API keys associated with this integration have been disabled by searching for the integration name on the [API Keys management page](https://app.datadoghq.com/organization-settings/api-keys).
+
 
 To start the publishing process in the [Developer Platform][4]:
 
@@ -89,7 +101,7 @@ The process for adding an OAuth client to an existing integration is similar to 
 
 ### If you have an existing data integration that’s not connected to a UI Extension
 
-Follow the [steps](#build-a-data-integration-with-oauth) above. Instead of opening a pull request, add a link to your existing file directory in the `integrations-extras` or Marketplace repository during the publishing process. 
+Follow the [steps](#build-a-data-integration-with-oauth) above, and ensure that you open a pull request to add new uninstallation instructions to your integration tile.
 
 ### If you have an existing data integration that’s currently connected to a UI Extension (shares the same tile)
 
@@ -114,3 +126,4 @@ Additional helpful documentation, links, and articles:
 [5]: https://github.com/DataDog/integrations-extras/
 [6]: http://github.com/DataDog/marketplace
 [7]: https://docs.datadoghq.com/developers/marketplace/#develop-your-offering
+[8]: https://docs.datadoghq.com/getting_started/site/
