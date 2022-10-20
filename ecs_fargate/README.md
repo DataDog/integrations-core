@@ -796,4 +796,3 @@ Need help? Contact [Datadog support][18].
 [44]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-ecs-service.html
 [45]: https://github.com/DataDog/integrations-core/blob/master/ecs_fargate/assets/service_checks.json
 [46]: https://github.com/DataDog/integrations-core/blob/master/ecs_fargate/metadata.csv
-[47]: https://docs.datadoghq.com/integrations/ecs_fargate/?tab=webui#data-collected
