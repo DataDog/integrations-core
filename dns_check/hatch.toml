@@ -1,0 +1,10 @@
+[env.collectors.datadog-checks]
+check-types = true
+mypy-args = [
+    "--py2",
+    "--follow-imports silent",
+    "datadog_checks/dns_check",
+]
+
+[[envs.default.matrix]]
+python = ["27", "38"]
