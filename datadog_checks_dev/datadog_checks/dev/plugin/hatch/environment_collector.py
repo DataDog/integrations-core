@@ -129,7 +129,7 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
         config = {'lint': lint_env}
 
         if self.check_types:
-            lint_env['scripts']['typing'] = [f'mypy --config-file=../mypy.ini {" ".join(self.mypy_args)}'.rstrip()]
+            lint_env['scripts']['typing'] = [f'mypy --config-file=../pyproject.toml {" ".join(self.mypy_args)}'.rstrip()]
             lint_env['scripts']['all'].append('typing')
             lint_env['dependencies'].extend(
                 [
