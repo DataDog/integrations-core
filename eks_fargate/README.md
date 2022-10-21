@@ -388,6 +388,8 @@ spec:
      ## Running the Agent as a side-car
      - image: datadog/agent
        name: datadog-agent
+       ## Enabling host pid namespace for origin detection with cgroup v2
+       hostPID: true
        ## Enabling port 8126 for Trace collection
        ports:
         - containerPort: 8126
