@@ -1,3 +1,0 @@
-# HELP vault_wal_gc_total vault_wal_gc_total
-# TYPE vault_wal_gc_total gauge
-vault_wal_gc_total 325
