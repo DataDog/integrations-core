@@ -69,7 +69,7 @@ The client is the component of an application that enables users to authorize th
    - If you do not have access to a Sandbox account in a different site, please contact marketplace@datadog.com. 
    - Export your app manifest from the account in the *original* Datadog site by navigating to the app you've created in the Developer Platform, clicking the gear icon in the top right and clicking "Export App Manifest". 
    - In your account in the *new* Datadog site, navigate to the Developer Platform and import your app manifest from step 2.
-   - Use this set of oauth client credentials (id and secret) to test that customers in this new data center can authorize the oauth client
+   - After successfully importing your manifest, navigate to the Oauth & Permissions tab to find your OAuth client, along with its Client ID and Client Secret. Use these credentials to test authorization from this site. 
 
 9. Test any additional scopes that you’ve requested access for.
 
@@ -89,7 +89,7 @@ To start the publishing process in the [Developer Platform][4]:
 
    Save your client ID, client secret, and `app_uuid` in a secure location. 
 
-2. When opening a pull request in `integrations-extras` or `Marketplace`, use the `app_uuid` value for publishing in the `app_uuid` field of the `manifest.json` file. If the `app_uuid` values do not align, your application does not publish correctly.
+2. When opening a pull request for a **new data integration** in `integrations-extras` or `Marketplace`, use the `app_uuid` value for publishing in the `app_uuid` field of the `manifest.json` file. If the `app_uuid` values do not align, your application does not publish correctly. If you have an **existing data integration**, there is no need to update the `app_uuid`.
 
 You cannot edit a published OAuth client directly, so only go through the publishing flow when everything has been tested and is ready to go. To make updates to the OAuth client, you need to go through the publishing flow again. **The published client credentials do not appear again**.
 
@@ -103,15 +103,21 @@ The process for adding an OAuth client to an existing integration is similar to 
 
 Follow the [steps](#build-a-data-integration-with-oauth) above, and ensure that you open a pull request to add new uninstallation instructions to your integration tile.
 
+**Note**: There's no need to change your `app_uuid` in the manifest.json file if you have an existing data integration.
+
 ### If you have an existing data integration that’s currently connected to a UI Extension (shares the same tile)
 
-Instead of creating an app, navigate to the app that includes your published UI Extension in the Developer Platform and follow the remaining [steps](#create-an-oauth-client). You need to open a pull request to update the `app_uuid` field in the `manifest.json` file. 
+Instead of creating an app, navigate to the app that includes your published UI Extension in the Developer Platform and follow the remaining [steps](#create-an-oauth-client). 
 
-Once you’ve created your data integration's OAuth client and are ready for publishing, click **Edit** on your app and navigate to the **Publishing** tab under **General**. After completing the fields, you receive an `app_uuid` to use for publishing. Set this value as the `app_uuid` in your data integration's `manifest.json` file. 
+Once you’ve created your data integration's OAuth client and are ready for publishing, click **Edit** on your app and navigate to the **Publishing** tab under **General**. 
+
+**Note**: There's no need to change your `app_uuid` in the manifest.json file if you have an existing data integration and/or UI Extension.
 
 ### If you have a published UI Extension and want to add a data integration to the same tile
 
-Instead of creating an app, navigate to an app that includes your published UI Extension in the Developer Platform and follow the remaining [steps](#create-an-oauth-client). You need to open a pull request to update your existing tile with additional information about your integration—including updates to the README, image folder, and more. Add a link to this pull request during the publishing process.
+Instead of creating an app, navigate to an app that includes your published UI Extension in the Developer Platform and follow the remaining [steps](#create-an-oauth-client).
+
+Open a pull request to update your existing tile with additional information about your integration—including updates to the README, image folder, and more. Additionally, update the `app_uuid` value in the manifest.json file to match the `app_uuid` value shown during the Developer Platform publishing process. Add a link to this pull request during the publishing process.
 
 ## Further Reading
 
