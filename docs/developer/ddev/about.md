@@ -19,7 +19,7 @@ The [test framework](test.md) provides everything necessary to test integrations
 - An [orchestrator](plugins.md#environment-manager) for arbitrary E2E environments
 
 !!! warning "Python 2 Alert!"
-    Some integrations still support Python version 2.7 and must be tested with it. As a consequence so must parts of our test framework, e.g. the pytest plugin.
+    Some integrations still support Python version 2.7 and must be tested with it. As a consequence, so must parts of our test framework, for example the pytest plugin.
 
 ## CLI
 
