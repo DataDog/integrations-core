@@ -123,7 +123,7 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
                 'flake8-bugbear==21.9.2',
                 'flake8-logging-format==0.6.0',
                 # Keep in sync with: /datadog_checks_base/pyproject.toml
-                'pydantic==1.8.2',
+                'pydantic==1.10.2',
             ],
         }
         config = {'lint': lint_env}
