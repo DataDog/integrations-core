@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING, Iterable
 from ddev.integration.core import Integration
 from ddev.repo.constants import CONFIG_DIRECTORY
 from ddev.utils.fs import Path
+from ddev.utils.git import GitManager
 
 if TYPE_CHECKING:
     from ddev.repo.config import RepositoryConfig
@@ -18,6 +19,7 @@ class Repository:
     def __init__(self, name: str, path: str):
         self.__name = name
         self.__path = Path(path)
+        self.__git = GitManager(self.__path)
         self.__integrations = IntegrationRegistry(self)
 
     @property
@@ -27,6 +29,10 @@ class Repository:
     @property
     def path(self) -> Path:
         return self.__path
+
+    @property
+    def git(self) -> GitManager:
+        return self.__git
 
     @property
     def integrations(self) -> IntegrationRegistry:
@@ -113,6 +119,13 @@ class IntegrationRegistry:
         for path in sorted(self.repo.path.iterdir()):
             integration = self.__get_from_path(path)
             if integration.is_jmx_check:
+                yield integration
+
+    def iter_changed(self) -> Iterable[Integration]:
+        changed_root_entries = {relative_path.split('/', 1)[0] for relative_path in self.repo.git.changed_files}
+        for path in sorted(self.repo.path.iterdir()):
+            integration = self.__get_from_path(path)
+            if integration.is_valid and integration.name in changed_root_entries:
                 yield integration
 
     def __get_from_path(self, path: Path) -> Integration:
