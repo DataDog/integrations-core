@@ -1,0 +1,10 @@
+[env.collectors.datadog-checks]
+
+[envs.default]
+platforms = [
+  "linux",
+  "darwin",
+]
+
+[[envs.default.matrix]]
+python = ["27", "38"]
