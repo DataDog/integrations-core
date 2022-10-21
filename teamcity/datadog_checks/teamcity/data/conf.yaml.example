@@ -85,12 +85,34 @@ instances:
     #
     # projects:
     #   <PROJECT_A>:
+    #     build_configs_limit: 5
     #     include:
     #     - <BUILD_CONFIG_A>
     #     - <BUILD_CONFIG_B>
     #     exclude:
     #     - <BUILD_CONFIG_C>
     #   <PROJECT_B>: {}
+
+    ## @param default_build_configs_limit - integer - optional - default: 5
+    ## The default maximum number of build configurations per project to discover when using the `projects` 
+    ## configuration option. The `default_build_configs_limit` value is overridden when `build_config_limit` 
+    ## is configured for a given project.
+    #
+    # default_build_configs_limit: 5
+
+    ## @param global_build_configs_include - list of strings - optional
+    ## List of build configuration RegEx patterns to include across all monitored projects.
+    ## In case of overlap, patterns specified with `global_build_configs_exclude` take precedence.
+    #
+    # global_build_configs_include:
+    #   - <BUILD_CONFIG_REGEX>
+
+    ## @param global_build_configs_exclude - list of strings - optional
+    ## List of build configuration RegEx patterns to exclude across all monitored projects. 
+    ## In case of overlap, patterns specified with `global_build_configs_exclude` take precedence.
+    #
+    # global_build_configs_exclude:
+    #   - <BUILD_CONFIG_REGEX>
 
     ## @param build_config_metrics - boolean - optional - default: true
     ## Collect Build Configuration statistics per build.

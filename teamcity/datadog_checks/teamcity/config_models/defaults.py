@@ -78,6 +78,10 @@ def instance_connect_timeout(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_default_build_configs_limit(field, value):
+    return 5
+
+
 def instance_disable_generic_tags(field, value):
     return False
 
@@ -111,6 +115,14 @@ def instance_extra_headers(field, value):
 
 
 def instance_extra_metrics(field, value):
+    return get_default_field_value(field, value)
+
+
+def instance_global_build_configs_exclude(field, value):
+    return get_default_field_value(field, value)
+
+
+def instance_global_build_configs_include(field, value):
     return get_default_field_value(field, value)
 
 

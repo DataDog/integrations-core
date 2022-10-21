@@ -10,6 +10,7 @@ from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 
 from .common import construct_event, get_response, should_include_build_config
 from .constants import (
+    DEFAULT_BUILD_CONFIGS_LIMIT,
     SERVICE_CHECK_BUILD_PROBLEMS,
     SERVICE_CHECK_BUILD_STATUS,
     SERVICE_CHECK_TEST_RESULTS,
@@ -52,7 +53,10 @@ class TeamCityCheck(AgentCheck):
         self.host = self.instance.get('host_affected') or self.hostname
         self.is_deployment = is_affirmative(self.instance.get('is_deployment', False))
 
-        self.monitored_build_configs = self.instance.get('projects', {})
+        self.monitored_projects = self.instance.get('projects', {})
+        self.default_build_configs_limit = self.instance.get('default_build_configs_limit', DEFAULT_BUILD_CONFIGS_LIMIT)
+        self.global_build_configs_include = self.instance.get('global_build_configs_include', [])
+        self.global_build_configs_exclude = self.instance.get('global_build_configs_exclude', [])
         self.collect_events = is_affirmative(self.instance.get('collect_events', True))
         self.collect_build_metrics = is_affirmative(self.instance.get('build_config_metrics', True))
         self.collect_test_checks = is_affirmative(self.instance.get('test_result_metrics', True))
@@ -116,28 +120,30 @@ class TeamCityCheck(AgentCheck):
             if build_configs:
                 for build_config in build_configs.get('buildType'):
                     build_config_id = build_config['id']
-                    if should_include_build_config(self, build_config_id) and not self.bc_store.get_build_config(
-                        build_config_id
-                    ):
+                    if should_include_build_config(
+                        self, build_config_id, project_id
+                    ) and not self.bc_store.get_build_config(project_id, build_config_id):
                         build_config_type = self._get_build_config_type(build_config['id'])
-                        self.bc_store.set_build_config(build_config_id, project_id, build_config_type)
-
-        for build_config in self.bc_store.get_build_configs():
-            if self.bc_store.get_build_config(build_config):
-                if self.bc_store.get_last_build_id(build_config) is None:
-                    last_build_res = get_response(self, 'last_build', build_conf=build_config)
-                    if last_build_res:
-                        last_build = last_build_res.get('build')[0]
-                        last_build_id = last_build.get('id')
-                        build_config_id = last_build.get('buildTypeId')
-
-                        self.log.debug(
-                            "Last build id for build configuration %s is %s.",
-                            build_config_id,
-                            last_build_id,
+                        self.bc_store.set_build_config(project_id, build_config_id, build_config_type)
+        if self.bc_store.get_build_configs(project_id):
+            for build_config in self.bc_store.get_build_configs(project_id):
+                if self.bc_store.get_build_config(project_id, build_config):
+                    if self.bc_store.get_last_build_id(project_id, build_config) is None:
+                        last_build_res = get_response(
+                            self, 'last_build', build_conf=build_config, project_id=project_id
                         )
-                        self.bc_store.set_build_config(build_config_id, project_id)
-                        self.bc_store.set_last_build_id(build_config_id, last_build_id)
+                        if last_build_res:
+                            last_build = last_build_res.get('build')[0]
+                            last_build_id = last_build.get('id')
+                            build_config_id = last_build.get('buildTypeId')
+
+                            self.log.debug(
+                                "Last build id for build configuration %s is %s.",
+                                build_config_id,
+                                last_build_id,
+                            )
+                            self.bc_store.set_build_config(build_config_id, project_id)
+                            self.bc_store.set_last_build_id(project_id, build_config_id, last_build_id)
 
     def _send_events(self, new_build):
         teamcity_event = construct_event(self, new_build)
@@ -195,8 +201,8 @@ class TeamCityCheck(AgentCheck):
                 )
         self.service_check(SERVICE_CHECK_BUILD_PROBLEMS, AgentCheck.OK, tags=self.build_tags)
 
-    def _collect_new_builds(self):
-        last_build_id = self.bc_store.get_last_build_id(self.build_config)
+    def _collect_new_builds(self, project_id):
+        last_build_id = self.bc_store.get_last_build_id(project_id, self.build_config)
         if last_build_id:
             new_builds = get_response(self, 'new_builds', build_conf=self.build_config, since_build=last_build_id)
             return new_builds
@@ -245,17 +251,16 @@ class TeamCityCheck(AgentCheck):
         else:
             self.log.debug("Could not submit version metadata.")
 
-    def _collect(self):
-        new_builds = self._collect_new_builds()
+    def _collect(self, project_id):
+        new_builds = self._collect_new_builds(project_id)
         if new_builds:
             new_last_build = new_builds['build'][0]
             self.log.debug("Found new builds: %s", [build['buildTypeId'] for build in new_builds['build']])
             self.log.trace("New builds payload: %s", new_builds)
-            self.bc_store.set_last_build_id(self.build_config, new_last_build['id'])
+            self.bc_store.set_last_build_id(project_id, self.build_config, new_last_build['id'])
 
             for build in new_builds['build']:
-                stored_build_config = self.bc_store.get_build_config(self.build_config)
-                project_id = stored_build_config.project_id
+                stored_build_config = self.bc_store.get_build_config(project_id, self.build_config)
                 build_config_type = stored_build_config.build_config_type
                 build_tags = list(deepcopy(self.tags))
                 build_tags.extend(
@@ -281,19 +286,19 @@ class TeamCityCheck(AgentCheck):
             self.log.debug('No new builds found.')
 
     def check(self, _):
-        # Multi build config instance
-        if self.monitored_build_configs:
-            for project in self.monitored_build_configs:
-                project_id = project.get('name') if isinstance(project, dict) else project
+        if self.monitored_projects:
+            for project in self.monitored_projects:
+                project_id = list(project.keys())[0] if isinstance(project, dict) else project
                 if project_id:
                     self._initialize(project_id)
                 else:
                     self.log.debug(
                         'Project ID not configured. Refer to Datadog documentation for configuration options.'
                     )
-            for build_config in self.bc_store.get_build_configs():
-                self.build_config = build_config
-                self._collect()
+                if self.bc_store.get_build_configs(project_id):
+                    for build_config in self.bc_store.get_build_configs(project_id):
+                        self.build_config = build_config
+                        self._collect(project_id)
         # Single build config instance
         elif self.build_config:
             self._initialize()

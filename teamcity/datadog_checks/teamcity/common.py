@@ -3,77 +3,60 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
 import time
+from collections import OrderedDict
 from copy import deepcopy
 
 import requests
 
-from datadog_checks.base import ConfigurationError
-
 from .constants import BUILD_EVENT, DEPLOYMENT_EVENT, RESOURCE_URL_MAP, STATUS_MAP
 
 
-def construct_build_configs_filter(monitored_build_configs):
-    """
-    Construct build configuration filter
-    """
-    excluded_build_configs = set()
-    included_build_configs = set()
-    for project in monitored_build_configs.items():
-        config = project[1]
-        if isinstance(config, dict):
-            exclude_list = config.get('exclude', [])
-            include_list = config.get('include', [])
-            if exclude_list:
-                excluded_build_configs.update(exclude_list)
-            if include_list:
-                for include_bc in include_list:
-                    if include_bc not in excluded_build_configs:
-                        included_build_configs.update([include_bc])
-        else:
-            raise ConfigurationError(
-                "`project` must be either an empty mapping to collect all build configurations in the project"
-                "or a mapping of keys `include` and/or `exclude` lists of build configurations."
-            )
-    return excluded_build_configs, included_build_configs
+def match(item: str, pattern_model) -> bool:
+    if isinstance(pattern_model, str):
+        return re.search(pattern_model, item)
+    if isinstance(pattern_model, dict) and len(pattern_model) == 1:
+        return re.search(list(pattern_model.keys())[0], item)
+    elif isinstance(pattern_model, list):
+        return any(match(item, pattern) for pattern in pattern_model)
+    return False
 
 
-def should_include_build_config(check, build_config):
+def filter_list(items, include_patterns, exclude_patterns):
+    excluded_items = [item for item in items if match(item, exclude_patterns) if exclude_patterns]
+    if not include_patterns:
+        return {item: None for item in items if item not in excluded_items}
+    else:
+        filtered_items = {}
+        for include_pattern in include_patterns:
+            filtered_items = filtered_items | {
+                item: include_pattern for item in items if item not in excluded_items and match(item, include_pattern)
+            }
+        return filtered_items
+
+
+def filter_items(
+    items, key: str, config: dict, default_limit: int, default_include: list, default_exclude: list
+) -> OrderedDict:
+    config_key = dict(config.get(key, {}))
+    limit = config_key.get('build_configs_limit', default_limit)
+    include_patterns = config_key.get('include', default_include)
+    exclude_patterns = config_key.get('exclude', default_exclude)
+    filtered_items = filter_list(items, include_patterns, exclude_patterns)
+    return OrderedDict(list(filtered_items.items())[0:limit])
+
+
+def should_include_build_config(check, build_config, project_id):
     """
     Return `True` if the build_config is included, otherwise `False`
     """
-    exclude_filter, include_filter = construct_build_configs_filter(check.monitored_build_configs)
-    include_match = False
-    exclude_match = False
-    # If no filters configured, include everything
-    if not exclude_filter and not include_filter:
-        return True
-    if exclude_filter:
-        for pattern in exclude_filter:
-            if re.search(re.compile(pattern), build_config):
-                exclude_match = True
-    if include_filter:
-        for pattern in include_filter:
-            if re.search(re.compile(pattern), build_config):
-                include_match = True
-
-    # Include everything except in excluded_bc
-    if exclude_filter and not include_filter:
-        return not exclude_match
-    # Include only what's defined in included_bc
-    if include_filter and not exclude_filter:
-        return include_match
-    # If both include and exclude filters are configured
-    if include_filter and exclude_filter:
-        # If filter overlap or in neither filter, exclude
-        if (include_match and exclude_match) or (not include_match and not exclude_match):
-            return False
-        # Only matches include filter, include
-        if include_match and not exclude_match:
-            return include_match
-        # Only matches exclude filter, exclude
-        if exclude_match and not include_match:
-            return not exclude_match
-    return True
+    return filter_items(
+        [build_config],
+        project_id,
+        check.monitored_projects,
+        check.default_build_configs_limit,
+        check.global_build_configs_include,
+        check.global_build_configs_exclude,
+    )
 
 
 def construct_event(check, new_build):

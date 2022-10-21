@@ -10,6 +10,8 @@ SERVICE_CHECK_BUILD_PROBLEMS = 'build.problems'
 SERVICE_CHECK_TEST_RESULTS = 'test.results'
 SERVICE_CHECK_OPENMETRICS = 'teamcity.openmetrics.health'
 
+DEFAULT_BUILD_CONFIGS_LIMIT = 5
+
 STATUS_MAP = {
     "SUCCESS": {"check_status": AgentCheck.OK, "msg_title": "successful", "alert_type": "success"},
     "FAILURE": {"check_status": AgentCheck.CRITICAL, "msg_title": "failed", "alert_type": "error"},
@@ -26,7 +28,7 @@ RESOURCE_URL_MAP = {
     "state:finished,defaultFilter:false",
     "started_builds": "{base_url}/app/rest/builds/?locator=buildType:{build_conf},sinceBuild:id:{since_build},"
     "state:finished,defaultFilter:false",
-    "last_build": "{base_url}/app/rest/builds/?locator=buildType:{build_conf},count:1",
+    "last_build": "{base_url}/app/rest/builds/?locator=buildType:{build_conf},project:{project_id},count:1",
     "build_stats": "{base_url}/app/rest/builds/buildId:{build_id}/statistics",
     "agent_usage_stats": "{base_url}/app/rest/builds?locator=agent:(id:{agent_id})&fields=build(id:{build_id},"
     "buildTypeId:{build_conf})",
@@ -64,33 +66,48 @@ class Build(object):
 class BuildConfig(object):
     def __init__(self, build_config_id):
         self.build_config_id = build_config_id
-        self.project_id = None
         self.last_build_id = None
         self.build_config_type = None
+
+    def get(self, attribute, default=None):
+        if attribute in self:
+            return self.getattr(attribute)
+        else:
+            return default
 
 
 class BuildConfigs(BuildConfig):
     def __init__(self):
         self.build_configs = {}
 
-    def get_build_configs(self):
-        return deepcopy(self.build_configs)
+    def get_build_configs(self, project_id):
+        if self.build_configs.get(project_id):
+            return deepcopy(self.build_configs[project_id])
 
-    def set_build_config(self, build_config_id, project_id=None, build_config_type=None):
-        if not self.build_configs.get(build_config_id):
-            self.build_configs[build_config_id] = BuildConfig(build_config_id)
-            self.build_configs[build_config_id].project_id = project_id
+    def set_build_config(self, project_id, build_config_id, build_config_type=None):
+        if not self.build_configs.get(project_id):
+            self.build_configs[project_id] = {}
+            self.build_configs[project_id][build_config_id] = BuildConfig(build_config_id)
+        else:
+            if build_config_id not in self.build_configs[project_id]:
+                self.build_configs[project_id][build_config_id] = BuildConfig(build_config_id)
         if build_config_type:
-            self.build_configs[build_config_id].build_config_type = build_config_type
+            self.build_configs[project_id][build_config_id].build_config_type = build_config_type
 
-    def get_build_config(self, build_config_id):
-        return self.build_configs.get(build_config_id, None)
+    def get_build_config(self, project_id, build_config_id):
+        stored_project = self.build_configs.get(project_id)
+        if stored_project:
+            return stored_project.get(build_config_id, None)
 
-    def set_last_build_id(self, build_config_id, build_id):
-        self.build_configs[build_config_id].last_build_id = build_id
+    def set_last_build_id(self, project_id, build_config_id, build_id):
+        stored_project = self.build_configs.get(project_id)
+        if stored_project and stored_project.get(build_config_id):
+            self.build_configs[project_id][build_config_id].last_build_id = build_id
 
-    def get_last_build_id(self, build_config_id):
-        build_config = self.build_configs.get(build_config_id, None)
-        if build_config:
-            return build_config.last_build_id
+    def get_last_build_id(self, project_id, build_config_id):
+        stored_project = self.build_configs.get(project_id)
+        if stored_project and stored_project.get(build_config_id):
+            build_config = stored_project.get(build_config_id, None)
+            if build_config:
+                return build_config.last_build_id
         return None
