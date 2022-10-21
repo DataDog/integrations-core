@@ -6,7 +6,7 @@
 [tool.black]
 exclude = '''
 # Directories
-/(
+    /(
     \.eggs
   | \.git
   | \.hg
@@ -22,14 +22,14 @@ exclude = '''
   | datadog_checks/dev/tooling/templates
   # Vendored third party libraries
   | datadog_checks/[^/]+/vendor
-)/
+    )/
   |
 # Files
-(
+    (
     # TODO: remove when upstream addresses https://github.com/DataDog/integrations-core/blob/c71e6d7204192a8002109da92452003598df2d28/datadog_checks_dev/datadog_checks/dev/tooling/signing.py#L9-L14
     datadog_checks/dev/tooling/signing\.py$
-)
-'''
+    )
+    '''
 include = '\.pyi?$'
 line-length = 120
 py36 = false
@@ -62,4 +62,6 @@ show_column_numbers = true
 mypy_path = "../.stubs"
 # Exclude generated files
 # TODO Remove when we drop python 2
-exclude = '.*/config_models/.*\.py$'
+exclude = [
+    ".*/config_models/.*\\.py$"
+    ]
