@@ -6,6 +6,7 @@ import os
 import pytest
 import requests
 from datadog_test_libs.utils.mock_dns import mock_local
+from copy import deepcopy
 
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckEndpoints, WaitFor
@@ -31,6 +32,11 @@ def dd_environment():
         attempts=2,
     ):
         yield INSTANCE_STANDALONE, {'custom_hosts': get_custom_hosts()}
+
+
+@pytest.fixture
+def instance():
+    return deepcopy(INSTANCE_STANDALONE)
 
 
 def check_metrics_available():

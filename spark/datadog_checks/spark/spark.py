@@ -329,19 +329,25 @@ class SparkCheck(AgentCheck):
 
         dom = BeautifulSoup(app_page.text, 'html.parser')
         app_detail_ui_links = dom.find_all('a', string='Application Detail UI')
+        import pdb; pdb.set_trace()
 
         if app_detail_ui_links and len(app_detail_ui_links) == 1:
             url = urlparse(app_detail_ui_links[0].attrs['href'])
+            # The href links can sometimes be a relative link. The helper functions combines it with the master_address
+            # in an attempt to collect metrics.
             if not url.scheme and url.path:
-                self.log.debug(
-                    "Failed to find valid URL, assuming link is relative. "
-                    "Combining relative path with master url: %s with path: %s",
-                    self.master_address,
-                    url.path,
-                )
-                return urljoin(self.master_address, url, url.path)
+                return self._relative_link_transformer(self.master_address, url.path)
             else:
                 return app_detail_ui_links[0].attrs['href']
+
+    def _relative_link_transformer(self, base_url, relative_url):
+        self.log.debug(
+            "Failed to find valid URL, assuming link is relative. "
+            "Combining relative path with master url: %s with path: %s",
+            base_url,
+            relative_url,
+        )
+        return urljoin(base_url, relative_url)
 
     def _yarn_get_running_spark_apps(self, tags):
         """
