@@ -98,7 +98,7 @@ class TrelloClient:
             'team/ebpf-platform': 'ebpf-platform',
             'team/usm': 'universal-service-monitoring',
             'team/windows-kernel-integrations': 'windows-kernel-integrations',
-            'tea,/opentelemetry': 'opentelemetry',
+            'team/opentelemetry': 'opentelemetry',
         }
 
         # Maps the trello label name to trello label ID
