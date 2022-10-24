@@ -9,7 +9,7 @@ kind: documentation
 
 ## Overview
 
-OAuth enables users to authorize third-party integrations with access to specific scopes of their Datadog data. This authorization allows integrations to push data into Datadog and pull data out from Datadog. For example, if a user authorizes an integration for read access to their Datadog monitors, the integration can directly read and extract their monitor data. 
+OAuth enables users to authorize third-party integrations with access to specific scopes of users' Datadog data. This authorization allows integrations to push data into Datadog and pull data out from Datadog. For example, if a user authorizes an integration for read access to their Datadog monitors, the integration can directly read and extract their monitor data. 
 
 For more information on Datadog’s OAuth implementation, see the [Datadog OAuth2 documentation][1].
 
@@ -115,9 +115,9 @@ Once you’ve created your data integration's OAuth client and are ready for pub
 
 ### If you have a published UI Extension and want to add a data integration to the same tile
 
-Instead of creating an app, navigate to an app that includes your published UI Extension in the Developer Platform and follow the remaining [steps](#create-an-oauth-client).
+Instead of creating an app, navigate to the app that includes your published UI Extension in the Developer Platform and follow the remaining [steps](#create-an-oauth-client).
 
-Open a pull request to update your existing tile with additional information about your integration—including updates to the README, image folder, and more. Additionally, update the `app_uuid` value in the manifest.json file to match the `app_uuid` value shown during the Developer Platform publishing process. Add a link to this pull request during the publishing process.
+Open a pull request to update your existing tile with additional information about your integration—including updates to the README, image folder, and more. Add a link to this pull request during the publishing process.
 
 ## Further Reading
 
