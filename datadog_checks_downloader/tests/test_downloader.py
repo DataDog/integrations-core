@@ -10,36 +10,31 @@ import shutil
 import string
 import subprocess
 import sys
-import time
 from collections import defaultdict, namedtuple
 from datetime import datetime
 
 import pytest
 import requests
+from freezegun import freeze_time
 from packaging.version import parse as parse_version
-from six import PY2, PY3, iteritems
+from six import PY2, iteritems
 from six.moves.urllib_parse import urljoin
 from tenacity import retry, stop_after_attempt, wait_exponential
 from tests.local_http import local_http_server, local_http_server_local_dir
-from tuf.exceptions import NoWorkingMirrorError
+from tuf.api.exceptions import DownloadError, ExpiredMetadataError, UnsignedMetadataError
 
 import datadog_checks.downloader
 from datadog_checks.downloader.cli import download
 from datadog_checks.downloader.download import REPOSITORY_URL_PREFIX
 from datadog_checks.downloader.exceptions import NonDatadogPackage
 
-if PY3:
-    from unittest import mock
-else:
-    from mock import mock
-
 _LOGGER = logging.getLogger("test_downloader")
 
 # Preserve datetime to make sure tests that use local metadata do not expire.
-_LOCAL_TESTS_DATA_TIMESTAMP = time.mktime(datetime(year=2022, month=7, day=25).timetuple())
+_LOCAL_TESTS_DATA_TIMESTAMP = datetime(year=2022, month=7, day=25)
 
 # Used to test local metadata expiration.
-_LOCAL_TESTS_DATA_TIMESTAMP_EXPIRED = time.mktime(datetime(year=2522, month=1, day=1).timetuple())
+_LOCAL_TESTS_DATA_TIMESTAMP_EXPIRED = datetime(year=2522, month=1, day=1)
 
 # The regex corresponding to package names in a global simple index.
 _HTML_PATTERN_RE = re.compile(r"<a href='(datadog-[\w-]+?)/'>\w+?</a><br />")
@@ -99,15 +94,9 @@ def test_expired_metadata_error(distribution_name, distribution_version):
     """Test expiration of metadata raises an exception."""
     argv = [distribution_name, "--version", distribution_version]
 
-    # Make sure time.time returns futuristic time.
-    with mock.patch(
-        "time.time",
-        mock.MagicMock(return_value=time.mktime(datetime(year=2524, month=1, day=1).timetuple())),
-    ), pytest.raises(NoWorkingMirrorError) as exc:
+    # Make sure we use futuristic time.
+    with freeze_time("2524-01-01"), pytest.raises(ExpiredMetadataError):
         _do_run_downloader(argv)
-
-    # No exception chaining done, make a check to see ExpiredMetadataError in the exception string.
-    assert "ExpiredMetadataError(\"Metadata 'timestamp' expired on" in str(exc)
 
 
 @pytest.mark.offline
@@ -131,8 +120,8 @@ def test_non_datadog_distribution():
     ],
 )
 @pytest.mark.skipif(PY2, reason="tuf builds for Python 2 do not provide required information in exception")
-@mock.patch("time.time", mock.MagicMock(return_value=_LOCAL_TESTS_DATA_TIMESTAMP))
-def test_local_download(capfd, distribution_name, distribution_version, target, monkeypatch):
+@freeze_time(_LOCAL_TESTS_DATA_TIMESTAMP)
+def test_local_download(capfd, distribution_name, distribution_version, target):
     """Test local verification of a wheel file."""
 
     with local_http_server("{}-{}".format(distribution_name, distribution_version)) as http_url:
@@ -196,15 +185,9 @@ def test_local_expired_metadata_error(distribution_name, distribution_version):
             http_url,
         ]
 
-        # Make sure time.time returns futuristic time.
-        with mock.patch(
-            "time.time",
-            mock.MagicMock(return_value=_LOCAL_TESTS_DATA_TIMESTAMP_EXPIRED),
-        ), pytest.raises(NoWorkingMirrorError) as exc:
+        # Make sure we use futuristic time.
+        with freeze_time(_LOCAL_TESTS_DATA_TIMESTAMP_EXPIRED), pytest.raises(ExpiredMetadataError):
             _do_run_downloader(argv)
-
-        # No exception chaining done, make a check to see ExpiredMetadataError in the exception string.
-        assert "ExpiredMetadataError(\"Metadata 'timestamp' expired on" in str(exc)
 
 
 @pytest.mark.offline
@@ -219,11 +202,8 @@ def test_local_unreachable_repository():
         "http://localhost:1",
     ]
 
-    with pytest.raises(NoWorkingMirrorError) as exc:
+    with pytest.raises(DownloadError):
         _do_run_downloader(argv)
-
-    # No exception chaining done, check the exception content.
-    assert "ConnectionError(MaxRetryError(" in str(exc)
 
 
 @pytest.mark.offline
@@ -234,7 +214,7 @@ def test_local_unreachable_repository():
     ],
 )
 @pytest.mark.skipif(PY2, reason="tuf builds for Python 2 do not provide required information in exception")
-@mock.patch("time.time", mock.MagicMock(return_value=_LOCAL_TESTS_DATA_TIMESTAMP))
+@freeze_time(_LOCAL_TESTS_DATA_TIMESTAMP)
 def test_local_wheels_signer_signature_leaf_error(distribution_name, distribution_version):
     """Test failure in verifying wheels-signer signature.
 
@@ -250,10 +230,10 @@ def test_local_wheels_signer_signature_leaf_error(distribution_name, distributio
             http_url,
         ]
 
-        with pytest.raises(NoWorkingMirrorError) as exc:
+        with pytest.raises(UnsignedMetadataError) as exc:
             _do_run_downloader(argv)
 
-    assert "BadSignatureError('wheels-signer-" in str(exc)
+    assert "wheels-signer-a was signed by 0/1 keys" in str(exc)
 
 
 def delete_files(files):

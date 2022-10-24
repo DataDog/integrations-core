@@ -30,6 +30,7 @@ def main():
 
         files_to_zip = set()
         versioned_metadata_files = {}
+        # Matches each naked target path to a list of paths including all known hashes
         hashed_target_files = {}
 
         def download_file(relative_url):
@@ -63,19 +64,19 @@ def main():
 
             target_data = metadata['signed']['targets'][target]
 
-            yield hashed_target_files[target]
+            yield from hashed_target_files[target]
             for name in target_data['custom'].get('in-toto', []):
-                yield hashed_target_files[name]
+                yield from hashed_target_files[name]
 
         def load_target_filenames(metadata_file):
             """Populate dictionary with hash-including filenames from the given file."""
             metadata = load_json(tempdir / metadata_file)
 
             for target, target_data in metadata['signed']['targets'].items():
-                hash_ = target_data['hashes']['sha512']
-                target_path = Path(target)
-                target_with_hash = 'targets' / target_path.parent / f'{hash_}.{target_path.name}'
-                hashed_target_files[target] = str(target_with_hash)
+                for hash_ in target_data['hashes'].values():
+                    target_path = Path(target)
+                    target_with_hash = 'targets' / target_path.parent / f'{hash_}.{target_path.name}'
+                    hashed_target_files.setdefault(target, []).append(str(target_with_hash))
 
         def zip_files(filename):
             """Write `files_to_zip` to a zip file."""

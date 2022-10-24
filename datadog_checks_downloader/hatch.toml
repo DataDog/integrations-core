@@ -10,6 +10,9 @@ matrix.python.scripts = [
 
 [envs.default]
 e2e-env = false
+dependencies = [
+  "freezegun==1.2.2",
+]
 
 [envs.test-data]
 description = """
