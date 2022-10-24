@@ -44,6 +44,7 @@ class TrelloClient:
             'eBPF Platform': '63375c6c6eb62b019cdcec2b',
             'Universal Service Monitoring': '63375c7b9be24303f4a23ab9',
             'Windows Kernel Integrations': '63375c737bbfbc003ee007c9',
+            'Open Telemetry': '63288ebed32e72013bbdd14d',
         }
 
         # Maps the team to the trello team label
@@ -69,6 +70,7 @@ class TrelloClient:
             'team/ebpf-platform': 'eBPF Platform',
             'team/universal-service-monitoring': 'Universal Service Monitoring',
             'team/windows-kernel-integrations': 'Windows Kernel Integrations',
+            'team/opentelemetry': 'Open Telemetry',
         }
 
         # Maps the team to the github team
@@ -96,6 +98,7 @@ class TrelloClient:
             'team/ebpf-platform': 'ebpf-platform',
             'team/usm': 'universal-service-monitoring',
             'team/windows-kernel-integrations': 'windows-kernel-integrations',
+            'tea,/opentelemetry': 'opentelemetry',
         }
 
         # Maps the trello label name to trello label ID
@@ -121,6 +124,7 @@ class TrelloClient:
             'eBPF Platform': '63375cbf98d9f7003e2e7a0c',
             'Universal Service Monitoring': '63375ccf0c2fe10560959d07',
             'Windows Kernel Integrations': '63375cd704bbd201f1e577b5',
+            'Open Telemetry': '635658ea01dd6a04e233f858',
         }
 
         self.progress_columns = {
