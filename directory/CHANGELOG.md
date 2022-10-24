@@ -1,5 +1,8 @@
 # CHANGELOG - directory
 
+## 1.14.0-beta.2 / 2022-10-24
+
+
 ## 1.14.0-beta.1 / 2022-10-17
 
 * [Fixed] directory: Improve error message. See [#13093](https://github.com/DataDog/integrations-core/pull/13093).
