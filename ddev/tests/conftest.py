@@ -19,6 +19,30 @@ from ddev.utils.platform import Platform
 PLATFORM = Platform()
 
 
+class ClonedRepo:
+    def __init__(self, path: Path, original_branch: str, testing_branch: str):
+        self.path = path
+        self.original_branch = original_branch
+        self.testing_branch = testing_branch
+
+    def reset_branch(self):
+        with self.path.as_cwd():
+            # Hard reset
+            PLATFORM.check_command_output(['git', 'checkout', '-fB', self.testing_branch, self.original_branch])
+
+            # Remove untracked files
+            PLATFORM.check_command_output(['git', 'clean', '-fd'])
+
+    @staticmethod
+    def new_branch():
+        return os.urandom(10).hex()
+
+
+@pytest.fixture(scope='session')
+def platform() -> Platform:
+    return PLATFORM
+
+
 @pytest.fixture(scope='session')
 def local_repo() -> Path:
     return Path(__file__).resolve().parent.parent.parent
@@ -52,24 +76,29 @@ def isolation() -> Generator[Path, None, None]:
 
 
 @pytest.fixture(scope='session')
-def local_clone(isolation, local_repo) -> Generator[Path, None, None]:
-    cloned_repo = isolation / local_repo.name
+def local_clone(isolation, local_repo) -> Generator[ClonedRepo, None, None]:
+    cloned_repo_path = isolation / local_repo.name
 
-    PLATFORM.check_command_output(['git', 'clone', '--local', '--shared', str(local_repo), str(cloned_repo)])
+    PLATFORM.check_command_output(['git', 'clone', '--local', '--shared', str(local_repo), str(cloned_repo_path)])
+    with cloned_repo_path.as_cwd():
+        PLATFORM.check_command_output(['git', 'config', 'user.name', 'Foo Bar'])
+        PLATFORM.check_command_output(['git', 'config', 'user.email', 'foo@bar.baz'])
+
+    cloned_repo = ClonedRepo(cloned_repo_path, 'origin/master', 'ddev-testing')
+    cloned_repo.reset_branch()
 
     yield cloned_repo
 
 
 @pytest.fixture
-def repository(local_clone, config_file) -> Generator[Path, None, None]:
-    config_file.model.repos['core'] = str(local_clone)
+def repository(local_clone, config_file) -> Generator[ClonedRepo, None, None]:
+    config_file.model.repos['core'] = str(local_clone.path)
     config_file.save()
 
-    with local_clone.as_cwd():
-        try:
-            yield local_clone
-        finally:
-            PLATFORM.check_command_output(['git', 'reset', '--hard'])
+    try:
+        yield local_clone
+    finally:
+        local_clone.reset_branch()
 
 
 @pytest.fixture(scope='session')

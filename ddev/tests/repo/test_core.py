@@ -149,3 +149,17 @@ class TestIteration:
         integrations = list(repo.integrations.iter_jmx_checks())
         assert [integration.name for integration in integrations] == integration_names
         assert list(repo.integrations.iter_jmx_checks()) == integrations
+
+    def test_changed(self, repository):
+        repo = Repository(repository.path.name, str(repository.path))
+
+        new_integration = repo.path / 'new'
+        new_integration.mkdir()
+        (new_integration / 'manifest.json').touch()
+
+        (repo.path / 'datadog_checks_base' / 'README.md').remove()
+        (repo.path / 'postgres' / 'README.md').remove()
+
+        integrations = list(repo.integrations.iter_changed())
+        assert [integration.name for integration in integrations] == ['datadog_checks_base', 'new', 'postgres']
+        assert list(repo.integrations.iter_changed()) == integrations

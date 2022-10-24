@@ -49,6 +49,10 @@ class Path(_PathBase):
         kwargs.setdefault('encoding', 'utf-8')
         return super().write_text(*args, **kwargs)
 
+    def open(self, **kwargs):
+        kwargs.setdefault('encoding', 'utf-8')
+        return super().open(**kwargs)
+
     def remove(self):
         if self.is_file():
             os.remove(self)
