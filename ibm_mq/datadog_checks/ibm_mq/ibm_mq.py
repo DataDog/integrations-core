@@ -54,7 +54,7 @@ class IbmMqCheck(AgentCheck):
         self.metadata_collector = MetadataCollector(self._config, self.log)
         self.stats_collector = StatsCollector(self._config, self.send_metrics_from_properties, self.log)
 
-        self.check_initializations.append(self.parse_config)
+        self.check_initializations.append(self.create_process_matcher)
 
     def check(self, _):
         if not self.check_queue_manager_process():
@@ -159,7 +159,7 @@ class IbmMqCheck(AgentCheck):
             self.log.debug('Resetting queue manager process match')
             return self.process_matcher.remove(self.check_id)
 
-    def parse_config(self):
+    def create_process_matcher(self):
         if self._config.queue_manager_process_pattern is not None:
             with IbmMqCheck.MATCHER_CREATION_LOCK:
                 if IbmMqCheck.process_matcher is None:

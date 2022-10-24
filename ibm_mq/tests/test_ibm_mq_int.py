@@ -451,6 +451,20 @@ def test_queue_manager_process_found(aggregator, get_check, instance, dd_run_che
     aggregator.assert_service_check('ibm_mq.queue_manager', check.OK, tags=tags)
     assert_all_metrics(aggregator)
 
+
+@requires_py3
+def test_queue_manager_process_found_cleanup(get_check, instance, dd_run_check):
+    class ProcessMock(object):
+        @property
+        def info(self):
+            return {'cmdline': ['amqpcsea', instance['queue_manager']]}
+
+    instance['queue_manager_process'] = 'amqpcsea {}'.format(instance['queue_manager'])
+    check = get_check(instance)
+
+    with mock.patch('psutil.process_iter', return_value=[ProcessMock()]):
+        dd_run_check(check)
+
     assert check.process_matcher.limit_reached()
     check.cancel()
     assert not check.process_matcher.limit_reached()
