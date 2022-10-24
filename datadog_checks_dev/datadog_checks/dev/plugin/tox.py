@@ -34,7 +34,8 @@ TYPES_DEPS = [
     'types_six==1.16.2',
     'types-simplejson==3.17.5',
 ]
-PYDANTIC_DEP = 'pydantic==1.10.2'  # Keep in sync with: /datadog_checks_base/datadog_checks/data/agent_requirements.in
+# Keep in sync with: /datadog_checks_base/datadog_checks/data/agent_requirements.in and ./hatch/environment_collector.py
+PYDANTIC_DEP = 'pydantic==1.10.2'
 
 
 @tox.hookimpl
@@ -168,7 +169,7 @@ def add_style_checker(config, sections, make_envconfig, reader):
         for mypy_dep in mypy_deps:
             dependencies.append(mypy_dep)
 
-        commands.append('mypy --config-file=../mypy.ini {}'.format(mypy_args))
+        commands.append('mypy --config-file=../pyproject.toml {}'.format(mypy_args))
 
     sections[section] = {
         'platform': 'linux|darwin|win32',
