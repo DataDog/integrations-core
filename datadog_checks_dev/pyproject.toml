@@ -36,7 +36,7 @@ dependencies = [
     "flaky",
     "mock",
     "psutil",
-    "pytest",
+    "pytest<7.2.0",  # pytest 7.2.0 has broken our tests
     "pytest-benchmark[histogram]>=3.2.1",
     "pytest-cov>=2.6.1",
     "pytest-mock",
