@@ -22,7 +22,6 @@ METRIC_MAP = {
     'kong_nginx_hconnections': 'nginx.hconnections',
     'kong_nginx_http_current_connections': 'nginx.http.current_connections',
     'kong_nginx_stream_current_connections': 'nginx.stream.current_connections',
-    'kong_node_info': 'node.info',
     'kong_request_latency_ms': 'request.latency.ms',
     'kong_session_duration_ms': 'session.duration.ms',
     'kong_stream_status': 'stream.status',
