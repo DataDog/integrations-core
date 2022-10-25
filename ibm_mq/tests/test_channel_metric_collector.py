@@ -32,7 +32,7 @@ def test_enable_auto_discover_channels(instance):
 
 
 def _get_mocked_instance(instance):
-    config = IBMMQConfig(instance)
+    config = IBMMQConfig(instance, {})
     collector = ChannelMetricCollector(config, service_check=Mock(), gauge=Mock(), log=Mock())
     collector._discover_channels = Mock(return_value=None)
     collector._submit_channel_status = Mock(return_value=None)

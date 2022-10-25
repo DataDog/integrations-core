@@ -6,7 +6,7 @@ import datetime as dt
 import re
 
 from dateutil.tz import UTC
-from six import iteritems
+from six import PY2, iteritems
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.constants import ServiceCheck
@@ -40,7 +40,7 @@ class IBMMQConfig:
         'SYSTEM.CLUSTER.TRANSMIT.MODEL.QUEUE',
     ]
 
-    def __init__(self, instance):
+    def __init__(self, instance, init_config):
         self.log = get_check_logger()
         self.channel = instance.get('channel')  # type: str
         self.queue_manager_name = instance.get('queue_manager', 'default')  # type: str
@@ -158,6 +158,16 @@ class IBMMQConfig:
             raise ConfigurationError(
                 "mqcd_version must be a number between 1 and 9. {} found.".format(raw_mqcd_version)
             )
+
+        pattern = instance.get('queue_manager_process', init_config.get('queue_manager_process', ''))
+        if pattern:
+            if PY2:
+                raise ConfigurationError('The `queue_manager_process` option is only supported on Agent 7')
+
+            pattern = pattern.replace('<queue_manager>', re.escape(self.queue_manager_name))
+            self.queue_manager_process_pattern = re.compile(pattern)
+        else:
+            self.queue_manager_process_pattern = None
 
         self.instance_creation_datetime = dt.datetime.now(UTC)
 

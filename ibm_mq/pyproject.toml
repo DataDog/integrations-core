@@ -29,7 +29,7 @@ classifiers = [
     "Private :: Do Not Upload",
 ]
 dependencies = [
-    "datadog-checks-base>=25.1.0",
+    "datadog-checks-base>=27.4.0",
 ]
 dynamic = [
     "version",
@@ -40,6 +40,7 @@ text = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
+    "psutil==5.9.0",
     "pymqi==1.12.8",
 ]
 
