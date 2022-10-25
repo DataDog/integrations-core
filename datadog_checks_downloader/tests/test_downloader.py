@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import glob
 import logging
 import os
 import random
@@ -266,32 +265,6 @@ def delete_files(files):
         os.remove(f)
 
 
-def _cleanup():
-    REPO_DIR = "datadog_checks/downloader/data/repo/"
-
-    METADATA_DIR = os.path.join(REPO_DIR, "metadata")
-    TARGETS_DIR = os.path.join(REPO_DIR, "targets")
-    IN_TOTO_METADATA_DIR = os.path.join(TARGETS_DIR, "in-toto-metadata")
-    IN_TOTO_PUBKEYS_DIR = os.path.join(TARGETS_DIR, "in-toto-pubkeys")
-    SIMPLE_DIR = os.path.join(TARGETS_DIR, "simple")
-
-    # First, nuke all known targets. but not the directory for targets itself.
-    shutil.rmtree(IN_TOTO_METADATA_DIR, ignore_errors=True)
-    shutil.rmtree(IN_TOTO_PUBKEYS_DIR, ignore_errors=True)
-    shutil.rmtree(SIMPLE_DIR, ignore_errors=True)
-
-    # Then, nuke all previous TUF metadata.
-    previous_jsons = os.path.join(METADATA_DIR, "previous/*.json")
-    previous_jsons = glob.glob(previous_jsons)
-    delete_files(previous_jsons)
-
-    # Finally, nuke ALL current TUF metadata EXCEPT the unversioned root metadata.
-    current_jsons = os.path.join(METADATA_DIR, "current/*.json")
-    current_jsons = glob.glob(current_jsons)
-    current_jsons = [c for c in current_jsons if os.path.basename(c) != "root.json"]
-    delete_files(current_jsons)
-
-
 @pytest.fixture
 def restore_repo_state(tmp_path):
     """
@@ -418,8 +391,6 @@ def test_downloader():
             integrations_to_test.append((match.group(1), version, root_layout_type))
 
     sample = random.sample(integrations_to_test, _TEST_DOWNLOADER_SAMPLE_SIZE)
-    try:
-        for integration_name, integration_version, root_layout_type in sample:
-            _do_download(integration_name, integration_version, root_layout_type)
-    finally:
-        _cleanup()
+
+    for integration_name, integration_version, root_layout_type in sample:
+        _do_download(integration_name, integration_version, root_layout_type)
