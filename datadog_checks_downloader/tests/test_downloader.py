@@ -64,58 +64,6 @@ EXCLUDED_INTEGRATION_VERSION = [
 ]
 
 
-@pytest.fixture(autouse=True)
-def _clear_cache():
-    """Clear the downloader's cache to make sure it does not affect test results."""
-    # current
-    metadata_current_dir = os.path.join(
-        os.path.dirname(datadog_checks.downloader.__file__),
-        "data",
-        "repo",
-        "metadata",
-        "current",
-    )
-    for file in os.listdir(metadata_current_dir):
-        if file == "root.json" or file.startswith("."):
-            continue
-
-        file_path = os.path.join(metadata_current_dir, file)
-
-        if not os.path.isfile(file_path):
-            # Skip any nested dirs.
-            continue
-
-        os.remove(file_path)
-
-    # previous
-    metadata_previous_dir = os.path.join(
-        os.path.dirname(datadog_checks.downloader.__file__),
-        "data",
-        "repo",
-        "metadata",
-        "previous",
-    )
-    for file in os.listdir(metadata_previous_dir):
-        if file.startswith("."):
-            continue
-
-        file_path = os.path.join(metadata_previous_dir, file)
-
-        if not os.path.isfile(file_path):
-            # Skip any nested dirs.
-            continue
-
-        os.remove(file_path)
-
-    # targets
-    targets_dir = os.path.join(os.path.dirname(datadog_checks.downloader.__file__), "data", "repo", "targets")
-    for item in os.listdir(targets_dir):
-        if item.startswith("."):
-            continue
-
-        shutil.rmtree(os.path.join(targets_dir, item))
-
-
 def _do_run_downloader(argv):
     """Run the Datadog checks downloader."""
     old_sys_argv = sys.argv
