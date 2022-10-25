@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2022-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import os
+import shutil
 
 import pytest
 
@@ -54,6 +56,26 @@ def distribution_name(request):
 def distribution_version(request):
     """Provide distribution_version fixture."""
     return request.config.getoption("--distribution-version")
+
+
+@pytest.fixture(autouse=True)
+def temporary_local_repo(request, monkeypatch, tmpdir):
+    """
+    This prevents tests from actually modifying the local repo that ships with the code,
+    using a temporary directory instead.
+    """
+    if request.node.get_closest_marker('online'):
+        from datadog_checks.downloader.download import REPOSITORIES_DIR, REPOSITORY_DIR
+
+        src_dir = os.path.join(REPOSITORIES_DIR, REPOSITORY_DIR)
+        dst_dir = os.path.join(tmpdir, REPOSITORY_DIR)
+    else:
+        src_dir = os.path.join(os.path.dirname(__file__), 'data', 'repositories', 'repo')
+        dst_dir = os.path.join(tmpdir, 'repo')
+
+    shutil.copytree(src_dir, dst_dir)
+    monkeypatch.setattr('datadog_checks.downloader.download.REPOSITORIES_DIR', tmpdir)
+    yield tmpdir
 
 
 def pytest_configure(config):

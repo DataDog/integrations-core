@@ -128,7 +128,7 @@ def _do_run_downloader(argv):
 
 
 @pytest.mark.online
-def test_download(capfd, distribution_name, distribution_version):
+def test_download(capfd, distribution_name, distribution_version, temporary_local_repo):
     """Test datadog-checks-downloader successfully downloads and validates a wheel file."""
     argv = [distribution_name, "--version", distribution_version]
 
@@ -141,8 +141,8 @@ def test_download(capfd, distribution_name, distribution_version):
     assert len(output) == 1, "Only one output line expected, got {}:\n\t{}".format(len(output), stdout)
 
     # XXX: could be extended to be less error-prone.
-    delimiter = "datadog_checks_downloader/datadog_checks/downloader/data/repo/targets/simple/{}/{}-{}".format(
-        distribution_name, distribution_name.replace("-", "_"), distribution_version
+    delimiter = "{}/repo/targets/simple/{}/{}-{}".format(
+        temporary_local_repo, distribution_name, distribution_name.replace("-", "_"), distribution_version
     )
 
     parts = output[0].split(delimiter)
@@ -184,16 +184,19 @@ def test_non_datadog_distribution():
         (
             "datadog-active-directory",
             "1.10.0",
-            "datadog_checks_downloader/datadog_checks/downloader/data/repo/targets/"
             "simple/datadog-active-directory/datadog_active_directory-1.10.0-py2.py3-none-any.whl",
         ),
     ],
 )
 @pytest.mark.skipif(PY2, reason="tuf builds for Python 2 do not provide required information in exception")
 @mock.patch("time.time", mock.MagicMock(return_value=_LOCAL_TESTS_DATA_TIMESTAMP))
-@pytest.mark.skip(reason="currently failing since offline metadata was generated with v9 ceremony but currently on v10")
-def test_local_download(capfd, distribution_name, distribution_version, target):
+def test_local_download(capfd, distribution_name, distribution_version, target, monkeypatch):
     """Test local verification of a wheel file."""
+    monkeypatch.setattr(
+        'datadog_checks.downloader.download.ROOT_LAYOUTS',
+        {'core': '4.core.root.layout', 'extras': '1.extras.root.layout'},
+    )
+
     with local_http_server("{}-{}".format(distribution_name, distribution_version)) as http_url:
         argv = [
             distribution_name,
@@ -212,7 +215,6 @@ def test_local_download(capfd, distribution_name, distribution_version, target):
 
 
 @pytest.mark.local_dir
-@pytest.mark.skip(reason="currently failing since offline metadata was generated with v9 ceremony but currently on v10")
 def test_local_dir_download(capfd, local_dir, distribution_name, distribution_version):
     """Test local verification of a wheel file."""
     if local_dir is None:
@@ -244,7 +246,6 @@ def test_local_dir_download(capfd, local_dir, distribution_name, distribution_ve
         ("datadog-active-directory", "1.10.0"),
     ],
 )
-@pytest.mark.skip(reason="currently failing since offline metadata was generated with v9 ceremony but currently on v10")
 @pytest.mark.skipif(PY2, reason="tuf builds for Python 2 do not provide required information in exception")
 def test_local_expired_metadata_error(distribution_name, distribution_version):
     """Test expiration of metadata raises an exception."""
@@ -269,7 +270,6 @@ def test_local_expired_metadata_error(distribution_name, distribution_version):
 
 
 @pytest.mark.offline
-@pytest.mark.skip(reason="currently failing since offline metadata was generated with v9 ceremony but currently on v10")
 @pytest.mark.skipif(PY2, reason="tuf builds for Python 2 do not provide required information in exception")
 def test_local_unreachable_repository():
     """Test unreachable repository raises an exception."""
@@ -296,7 +296,6 @@ def test_local_unreachable_repository():
     ],
 )
 @pytest.mark.skipif(PY2, reason="tuf builds for Python 2 do not provide required information in exception")
-@pytest.mark.skip(reason="currently failing since offline metadata was generated with v9 ceremony but currently on v10")
 @mock.patch("time.time", mock.MagicMock(return_value=_LOCAL_TESTS_DATA_TIMESTAMP))
 def test_local_wheels_signer_signature_leaf_error(distribution_name, distribution_version):
     """Test failure in verifying wheels-signer signature.
