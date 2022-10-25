@@ -140,15 +140,10 @@ def test_download(capfd, distribution_name, distribution_version, temporary_loca
     output = [line for line in stdout.splitlines() if line]
     assert len(output) == 1, "Only one output line expected, got {}:\n\t{}".format(len(output), stdout)
 
-    # XXX: could be extended to be less error-prone.
-    delimiter = "{}/repo/targets/simple/{}/{}-{}".format(
+    expected_output = r"{}/repo/targets/simple/{}/{}-{}-.*?\.whl".format(
         temporary_local_repo, distribution_name, distribution_name.replace("-", "_"), distribution_version
     )
-
-    parts = output[0].split(delimiter)
-
-    assert len(parts) == 2, "Unable to find expected substring {} in {}".format(delimiter, output[0])
-    assert parts[1].endswith(".whl"), "No wheel extension found in {}".format(parts[1])
+    assert re.match(expected_output, output[0]), "Expected '{}' to match '{}'".format(output[0], expected_output)
 
 
 @pytest.mark.online
