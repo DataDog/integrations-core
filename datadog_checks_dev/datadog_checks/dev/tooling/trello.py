@@ -84,7 +84,7 @@ class TrelloClient:
             'team/container-app': 'container-app',
             'team/integrations': 'agent-integrations',
             'team/database-monitoring': 'database-monitoring',
-            'team/intg-tools-libs': 'integrations-tools-and-libraries',
+            'team/platform-integrations': 'platform-integrations',
             'team/agent-security': 'agent-security',
             'team/network-device-monitoring': 'network-device-monitoring',
             'team/remote-config': 'remote-config',
