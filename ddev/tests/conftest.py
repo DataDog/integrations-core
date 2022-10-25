@@ -8,8 +8,9 @@ import random
 from typing import Generator
 
 import pytest
+from click.testing import CliRunner as __CliRunner
 
-from ddev.config.constants import ConfigEnvVars
+from ddev.config.constants import AppEnvVars, ConfigEnvVars
 from ddev.config.file import ConfigFile
 from ddev.repo.core import Repository
 from ddev.utils.ci import running_in_ci
@@ -36,6 +37,25 @@ class ClonedRepo:
     @staticmethod
     def new_branch():
         return os.urandom(10).hex()
+
+
+class CliRunner(__CliRunner):
+    def __init__(self, command):
+        super().__init__()
+        self._command = command
+
+    def __call__(self, *args, **kwargs):
+        # Exceptions should always be handled
+        kwargs.setdefault('catch_exceptions', False)
+
+        return self.invoke(self._command, args, **kwargs)
+
+
+@pytest.fixture(scope='session')
+def ddev():
+    from ddev import cli
+
+    return CliRunner(cli.ddev)
 
 
 @pytest.fixture(scope='session')
@@ -71,7 +91,8 @@ def config_file(tmp_path) -> ConfigFile:
 @pytest.fixture(scope='session', autouse=True)
 def isolation() -> Generator[Path, None, None]:
     with temp_directory() as d:
-        with d.as_cwd():
+        default_env_vars = {AppEnvVars.NO_COLOR: '1'}
+        with d.as_cwd(default_env_vars):
             yield d
 
 
