@@ -344,6 +344,21 @@ def _cleanup():
     delete_files(current_jsons)
 
 
+@pytest.fixture
+def restore_repo_state(tmpdir):
+    """
+    Backs up the state of the data folder to restore it after the test.
+
+    This is needed for tests that invoke the downloader from a subprocess.
+    """
+    src_dir = os.path.join(os.path.dirname(datadog_checks.downloader.__file__), 'data')
+    dst_dir = os.path.join(tmpdir, 'data')
+    shutil.copytree(src_dir, dst_dir)
+    yield
+    shutil.rmtree(src_dir)
+    shutil.copytree(dst_dir, src_dir)
+
+
 @retry(wait=wait_exponential(min=2, max=60), stop=stop_after_attempt(10))
 def _do_download(package, version=None, root_layout_type="core"):
     """
@@ -426,6 +441,7 @@ def get_all_integrations_metadata():
 
 
 @pytest.mark.online
+@pytest.mark.usefixtures("restore_repo_state")
 def test_downloader():
     integrations_metadata = get_all_integrations_metadata()
     # Download the global simple index, which contains all known package names.
