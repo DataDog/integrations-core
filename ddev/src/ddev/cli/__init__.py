@@ -19,6 +19,7 @@ from ddev.cli.docs import docs
 from ddev.cli.env import env
 from ddev.cli.meta import meta
 from ddev.cli.release import release
+from ddev.cli.status import status
 from ddev.cli.validate import validate
 from ddev.config.constants import AppEnvVars, ConfigEnvVars
 from ddev.plugin import specs
@@ -139,6 +140,7 @@ ddev.add_command(env)
 ddev.add_command(meta)
 ddev.add_command(release)
 ddev.add_command(run)
+ddev.add_command(status)
 ddev.add_command(test)
 ddev.add_command(validate)
 

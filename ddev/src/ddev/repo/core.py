@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 class Repository:
     def __init__(self, name: str, path: str):
         self.__name = name
-        self.__path = Path(path)
+        self.__path = Path(path).expand()
         self.__git = GitManager(self.__path)
         self.__integrations = IntegrationRegistry(self)
 
