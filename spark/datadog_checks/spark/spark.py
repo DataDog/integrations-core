@@ -329,7 +329,6 @@ class SparkCheck(AgentCheck):
 
         dom = BeautifulSoup(app_page.text, 'html.parser')
         app_detail_ui_links = dom.find_all('a', string='Application Detail UI')
-        import pdb; pdb.set_trace()
 
         if app_detail_ui_links and len(app_detail_ui_links) == 1:
             url = urlparse(app_detail_ui_links[0].attrs['href'])

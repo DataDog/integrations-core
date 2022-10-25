@@ -2,11 +2,11 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+from copy import deepcopy
 
 import pytest
 import requests
 from datadog_test_libs.utils.mock_dns import mock_local
-from copy import deepcopy
 
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckEndpoints, WaitFor
