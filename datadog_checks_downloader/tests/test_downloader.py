@@ -293,14 +293,17 @@ def _cleanup():
 
 
 @pytest.fixture
-def restore_repo_state(tmpdir):
+def restore_repo_state(tmp_path):
     """
     Backs up the state of the data folder to restore it after the test.
 
     This is needed for tests that invoke the downloader from a subprocess.
     """
+    # PY2's os.path prefers strings
+    tmp_path = str(tmp_path)
+
     src_dir = os.path.join(os.path.dirname(datadog_checks.downloader.__file__), 'data')
-    dst_dir = os.path.join(tmpdir, 'data')
+    dst_dir = os.path.join(tmp_path, 'data')
     shutil.copytree(src_dir, dst_dir)
     yield
     shutil.rmtree(src_dir)
