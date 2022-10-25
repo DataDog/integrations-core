@@ -43,5 +43,20 @@
         ],
         "name": "Repo Server OpenMetrics endpoint health",
         "description": "Returns `CRITICAL` if the Agent is unable to connect to the Repo Server OpenMetrics endpoint, otherwise returns `OK`."
+    },
+    {
+        "agent_version": "7.41.0",
+        "integration": "Argo CD",
+        "check": "argocd.app_controller.cluster.connection.status",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "groups": [
+            "host",
+            "endpoint"
+        ],
+        "name": "Application Controller cluster connection status",
+        "description": "Returns `CRITICAL` if not connected to the cluster, otherwise returns `OK`."
     }
 ]
