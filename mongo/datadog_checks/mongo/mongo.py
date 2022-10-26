@@ -6,8 +6,6 @@ from __future__ import division
 from copy import deepcopy
 from distutils.version import LooseVersion
 
-import pymongo
-
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.mongo.api import MongoApi
 from datadog_checks.mongo.collectors import (
@@ -81,10 +79,6 @@ class MongoDb(AgentCheck):
     @property
     def api_client(self):
         return self._api_client
-
-    @classmethod
-    def get_library_versions(cls):
-        return {'pymongo': pymongo.version}
 
     def refresh_collectors(self, deployment_type, all_dbs, tags):
         collect_tcmalloc_metrics = 'tcmalloc' in self._config.additional_metrics
