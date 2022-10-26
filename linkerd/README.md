@@ -84,7 +84,7 @@ See [metadata.csv][11] for a list of metrics provided by this integration.
 
 For Linkerd v1, see the [finagle metrics guide][12] for metric descriptions and [this gist][13] for an example of metrics exposed by Linkerd.
 
-**Note**: Depending on your Linkerd configuration, some metrics might not be exposed by Linkerd.
+**Note**: Linkerd is a Prometheus-based integration. Depending on your Linkerd configuration, some metrics might not be exposed by Linkerd. If any metric is not present in the curl output, the Datadog Agent is unable to collect that particular metric.
 
 To list the metrics exposed by your current configuration, run:
 
@@ -97,6 +97,7 @@ Where `linkerd_prometheus_endpoint` is the Linkerd Prometheus endpoint (you shou
 If you need to use a metric that is not provided by default, you can add an entry to `linkerd.yaml`.
 
 Simply follow the examples present in the [default configuration][4].
+
 
 ### Service Checks
 
