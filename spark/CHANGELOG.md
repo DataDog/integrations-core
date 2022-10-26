@@ -1,5 +1,9 @@
 # CHANGELOG - spark
 
+## 3.2.0-beta.1 / 2022-10-26
+
+* [Fixed] Add a log line when no running apps are found. See [#13067](https://github.com/DataDog/integrations-core/pull/13067).
+
 ## 3.1.1 / 2022-05-15 / Agent 7.37.0
 
 * [Fixed] Upgrade dependencies. See [#11958](https://github.com/DataDog/integrations-core/pull/11958).
