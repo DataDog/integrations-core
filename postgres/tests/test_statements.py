@@ -186,7 +186,7 @@ def test_statement_metrics(
         assert row['calls'] == 1
         assert row['datname'] == dbname
         assert row['rolname'] == username
-        assert row['query'] == expected_query[0:200], "query should be truncated when sending to metrics"
+        assert row['query'] == expected_query
         available_columns = set(row.keys())
         metric_columns = available_columns & PG_STAT_STATEMENTS_METRICS_COLUMNS
         if track_io_timing_enabled:
