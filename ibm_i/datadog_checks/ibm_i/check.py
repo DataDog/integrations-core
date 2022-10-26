@@ -55,7 +55,7 @@ class IbmICheck(AgentCheck, ConfigMixin):
             self.service_check(
                 self.SERVICE_CHECK_NAME,
                 check_status,
-                tags=self.config.tags if self.config else None,
+                tags=self.config.tags if self.config else [],
                 hostname=hostname,
             )
 
