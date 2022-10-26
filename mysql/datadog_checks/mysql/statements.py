@@ -133,10 +133,6 @@ class MySQLStatementMetrics(DBMAsyncJob):
         for event in self._rows_to_fqt_events(rows):
             self._check.database_monitoring_query_sample(json.dumps(event, default=default_json_event_encoding))
 
-        # truncate query text to the maximum length supported by metrics tags
-        for row in rows:
-            row['digest_text'] = row['digest_text'][0:200] if row['digest_text'] is not None else None
-
         payload = {
             'host': self._check.resolved_hostname,
             'timestamp': time.time() * 1000,

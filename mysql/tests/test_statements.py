@@ -149,7 +149,7 @@ def test_statement_metrics(
 
     assert row['digest']
     assert row['schema_name'] == default_schema
-    assert row['digest_text'].strip() == query.strip()[0:200]
+    assert row['digest_text'].strip() == query.strip()
 
     for col in statements.METRICS_COLUMNS:
         assert type(row[col]) in (float, int)
