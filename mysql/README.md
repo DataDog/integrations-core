@@ -29,17 +29,10 @@ On each MySQL server, create a database user for the Datadog Agent.
 
 The following instructions grant the Agent permission to login from any host using `datadog@'%'`. You can restrict the `datadog` user to be allowed to login only from localhost by using `datadog@'localhost'`. See [MySQL Adding Accounts, Assigning Privileges, and Dropping Accounts][5] for more info.
 
-For MySQL 5.6, MySQL 5.7 or MariaDB, create the `datadog` user with the following command:
+For MySQL 5.6 or MySQL 5.7 create the `datadog` user with the following command:
 
 ```shell
 mysql> CREATE USER 'datadog'@'%' IDENTIFIED BY '<UNIQUEPASSWORD>';
-Query OK, 0 rows affected (0.00 sec)
-```
-
-For MariaDB, create another `datadog` user `@localhost`, otherwise you will see `Error 1045, "Access denied for user 'datadog'@'localhost' (using password: YES)"`:
-
-```shell
-mysql> CREATE USER 'datadog'@'localhost' IDENTIFIED BY '<UNIQUEPASSWORD>';
 Query OK, 0 rows affected (0.00 sec)
 ```
 
@@ -60,16 +53,18 @@ echo -e "\033[0;31mCannot connect to MySQL\033[0m"
 
 The Agent needs a few privileges to collect metrics. Grant the `datadog` user only the following limited privileges.
 
-For MySQL versions 5.6 and 5.7, set `max_user_connections` with the following command:
+For MySQL versions 5.6 and 5.7, grant `replication client` and set `max_user_connections` with the following command:
 
 ```shell
 mysql> GRANT REPLICATION CLIENT ON *.* TO 'datadog'@'%' WITH MAX_USER_CONNECTIONS 5;
 Query OK, 0 rows affected, 1 warning (0.00 sec)
 ```
 
-For MySQL 8.0 or greater, set `max_user_connections` with the following command:
+For MySQL 8.0 or greater, grant `replication client` and set `max_user_connections` with the following commands:
 
 ```shell
+mysql> GRANT REPLICATION CLIENT ON *.* TO 'datadog'@'%'
+Query OK, 0 rows affected (0.00 sec)
 mysql> ALTER USER 'datadog'@'%' WITH MAX_USER_CONNECTIONS 5;
 Query OK, 0 rows affected (0.00 sec)
 ```
