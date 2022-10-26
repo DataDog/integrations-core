@@ -334,8 +334,6 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         # to the backend
         if 'statement_text' in row:
             del row['statement_text']
-        # truncate query text to the maximum length supported by metrics tags
-        row['text'] = row['text'][0:200]
         return row
 
     def _to_metrics_payload(self, rows):
