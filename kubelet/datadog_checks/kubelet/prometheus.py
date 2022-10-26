@@ -18,7 +18,7 @@ METRIC_TYPES = ['counter', 'gauge', 'summary']
 PRE_1_16_CONTAINER_LABELS = set(['namespace', 'name', 'image', 'id', 'container_name', 'pod_name'])
 POST_1_16_CONTAINER_LABELS = set(['namespace', 'name', 'image', 'id', 'container', 'pod'])
 
-# Value above which the figure can be discarded because it’s an aberrant transient value
+# Value above which the figure can be discarded because it's an aberrant transient value
 MAX_MEMORY_RSS = 2**63
 
 
