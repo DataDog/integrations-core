@@ -94,7 +94,7 @@ files:
         example: false
         type: boolean
     - name: ignore_missing
-      description: When true the check does not raise an exception on missing or inaccessible directories.
+      description: When true the check does not raise a warning on missing or inaccessible directories.
       value:
         example: false
         type: boolean

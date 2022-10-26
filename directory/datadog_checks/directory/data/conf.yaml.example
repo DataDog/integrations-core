@@ -89,7 +89,7 @@ instances:
     # countonly: false
 
     ## @param ignore_missing - boolean - optional - default: false
-    ## When true the check does not raise an exception on missing or inaccessible directories.
+    ## When true the check does not raise a warning on missing or inaccessible directories.
     #
     # ignore_missing: false
 
