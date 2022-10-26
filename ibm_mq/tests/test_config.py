@@ -19,7 +19,7 @@ pytestmark = pytest.mark.unit
 )
 def test_mq_host_tag(instance, override_hostname, expected_hostname, expected_tag):
     instance['override_hostname'] = override_hostname
-    config = IBMMQConfig(instance)
+    config = IBMMQConfig(instance, {})
 
     assert config.hostname == expected_hostname
     if expected_tag:
@@ -29,7 +29,7 @@ def test_mq_host_tag(instance, override_hostname, expected_hostname, expected_ta
 def test_cannot_set_host_and_connection_name(instance):
     instance['connection_name'] = "localhost(8080)"
     with pytest.raises(ConfigurationError, match="Specify only one host/port or connection_name configuration"):
-        IBMMQConfig(instance)
+        IBMMQConfig(instance, {})
 
 
 def test_cannot_set_override_hostname_and_connection_name(instance):
@@ -41,14 +41,14 @@ def test_cannot_set_override_hostname_and_connection_name(instance):
         ConfigurationError,
         match="You cannot override the hostname if you provide a `connection_name` instead of a `host`",
     ):
-        IBMMQConfig(instance)
+        IBMMQConfig(instance, {})
 
 
 def test_cannot_override_hostname_if_no_host_provided(instance):
     del instance['host']
     instance['override_hostname'] = True
     with pytest.raises(ConfigurationError, match="You cannot override the hostname if you don't provide a `host`"):
-        IBMMQConfig(instance)
+        IBMMQConfig(instance, {})
 
 
 @pytest.mark.skipif(PY2, reason="Config model validation only available in PY3.")
@@ -163,6 +163,6 @@ def test_ssl_auth_implicit_enable(instance, ssl_explicit_disable, ssl_option, ex
     # We only care that the option is enabled
     instance[ssl_option] = "dummy_value"
 
-    config = IBMMQConfig(instance)
+    config = IBMMQConfig(instance, {})
 
     assert config.ssl == expected_ssl

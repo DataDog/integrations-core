@@ -394,7 +394,7 @@ class Connection(object):
                 self.close_cursor(cursor)
 
         exists = False
-        if database.lower() in self.existing_databases:
+        if database and database.lower() in self.existing_databases:
             case_insensitive, cased_name = self.existing_databases[database.lower()]
             if case_insensitive or database == cased_name:
                 exists = True
@@ -465,10 +465,15 @@ class Connection(object):
         return dsn, host, username, password, database, driver
 
     def _get_host_with_port(self):
-        """Return a string with format host,port.
+        """Return a string with correctly formatted host and, if necessary, port.
         If the host string in the config contains a port, that port is used.
         If not, any port provided as a separate port config option is used.
         If the port is misconfigured or missing, default port is used.
+
+        In most cases, we return a string of host,port.
+        If the user provides a port value of 0, that indicates that they are
+        using a port autodiscovery service like Sql Server Browser Service. In
+        this case, we return just the host.
         """
         host = self.instance.get("host")
         if not host:
@@ -487,6 +492,12 @@ class Connection(object):
         except ValueError:
             self.log.warning("Invalid port %s; falling back to default 1433", port)
             port = DEFAULT_CONN_PORT
+
+        # If the user provides a port of 0, they are indicating that they
+        # are using a port autodiscovery service, and we want their connection
+        # string to include just the host.
+        if int(port) == 0:
+            return split_host
 
         return split_host + "," + str(port)
 

@@ -7,7 +7,7 @@
 
 def test_cloned_repo(repository, local_repo):
     integrations = sorted(
-        entry.name for entry in repository.iterdir() if (repository / entry.name / 'manifest.json').is_file()
+        entry.name for entry in repository.path.iterdir() if (repository.path / entry.name / 'manifest.json').is_file()
     )
     expected_integrations = sorted(
         entry.name for entry in local_repo.iterdir() if (local_repo / entry.name / 'manifest.json').is_file()

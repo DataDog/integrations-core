@@ -26,7 +26,11 @@ files:
       Note: All '%' characters must be escaped as '%%'.
     options:
     - name: host
-      description: Host and port of your SQL server.
+      description: | 
+        Host and port of your SQL server. If a port is ommitted, a default port of 1433 will be used. 
+        If you use Sql Server Browser Service or a similar port autodiscovery service, pass in a port
+        of 0 to omit port from your connection string. This should allow SSBS to autodiscover the 
+        correct database port. 
       required: true
       value:
         type: string
@@ -460,9 +464,10 @@ files:
     - template: instances/db
     - name: stored_procedure
       description: |
+        DEPRECATED - use `custom_queries` instead. For guidance, see:
+        https://docs.datadoghq.com/integrations/guide/collect-sql-server-custom-metrics/
         Get metrics from custom proc in MyDB but only if the database is writable
         (i.e. it's the master in an availability group) Note: Custom proc must be defined in its own instance
-        See https://docs.datadoghq.com/integrations/guide/collect-sql-server-custom-metrics/
       value:
         type: string
         example: <PROCEDURE_NAME>

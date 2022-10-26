@@ -7,7 +7,7 @@ from datetime import datetime
 from io import StringIO
 
 import click
-from semver import parse_version_info
+from semver import VersionInfo
 
 from ....fs import stream_file_lines, write_file
 from ...constants import CHANGELOG_TYPE_NONE, CHANGELOG_TYPES_ORDERED, get_root
@@ -64,7 +64,7 @@ def changelog(
             'following SemVer and matches the provided tag_prefix and/or tag_pattern.'
         )
 
-    if not no_semver and parse_version_info(version.replace(tag_prefix, '', 1)) <= parse_version_info(
+    if not no_semver and VersionInfo.parse(version.replace(tag_prefix, '', 1)) <= VersionInfo.parse(
         cur_version.replace(tag_prefix, '', 1)
     ):
         abort(f'Current version is {cur_version}, cannot bump to {version}')

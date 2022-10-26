@@ -6,7 +6,6 @@ mypy-args = [
     "--install-types",
     "--non-interactive",
     "datadog_checks/aerospike",
-    "--exclude '.*/config_models/.*\\.py$'",
 ]
 
 [[envs.default.matrix]]

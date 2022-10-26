@@ -33,9 +33,9 @@ class TrelloClient:
             'Networks': '5e1de8cf867357791ec5ee47',
             'Processes': '5aeca4c8621e4359b9cb9c27',
             'Trace': '5bcf3ffbe0651642ae029038',
-            'Tools and Libraries': '5ef373fb33b7b805120d5011',
+            'Platform Integrations': '5ef373fb33b7b805120d5011',
             'Runtime-Security': '5f3148683b7428276f0f2133',
-            'Infra-Integrations': '5f9f9e09af18c18c628d80ee',
+            'Network Device Monitoring': '5f9f9e09af18c18c628d80ee',
             'Remote-Config': '619262c91ae65d40bafb576f',
             'Container-Ecosystems': '627e693a6c58bc2144accc85',
             'Agent-Metrics-Logs': '62a9bbeb1c71b2208581744e',
@@ -44,6 +44,7 @@ class TrelloClient:
             'eBPF Platform': '63375c6c6eb62b019cdcec2b',
             'Universal Service Monitoring': '63375c7b9be24303f4a23ab9',
             'Windows Kernel Integrations': '63375c737bbfbc003ee007c9',
+            'Open Telemetry': '63288ebed32e72013bbdd14d',
         }
 
         # Maps the team to the trello team label
@@ -58,9 +59,9 @@ class TrelloClient:
             'team/container-app': 'Container App',
             'team/integrations': 'Integrations',
             'team/database-monitoring': 'Database Monitoring',
-            'team/intg-tools-libs': 'Tools and Libraries',
+            'team/plaftorm-integrations': 'Platform Integrations',
             'team/agent-security': 'Runtime-Security',
-            'team/infra-integrations': 'Infra-Integrations',
+            'team/network-device-monitoring': 'Network Device Monitoring',
             'team/remote-config': 'Remote-Config',
             'team/container-ecosystems': 'Container-Ecosystems',
             'team/agent-metrics-logs': 'Agent-Metrics-Logs',
@@ -69,6 +70,7 @@ class TrelloClient:
             'team/ebpf-platform': 'eBPF Platform',
             'team/universal-service-monitoring': 'Universal Service Monitoring',
             'team/windows-kernel-integrations': 'Windows Kernel Integrations',
+            'team/opentelemetry': 'Open Telemetry',
         }
 
         # Maps the team to the github team
@@ -82,9 +84,9 @@ class TrelloClient:
             'team/container-app': 'container-app',
             'team/integrations': 'agent-integrations',
             'team/database-monitoring': 'database-monitoring',
-            'team/intg-tools-libs': 'integrations-tools-and-libraries',
+            'team/platform-integrations': 'platform-integrations',
             'team/agent-security': 'agent-security',
-            'team/infra-integrations': 'infrastructure-integrations',
+            'team/network-device-monitoring': 'network-device-monitoring',
             'team/remote-config': 'remote-config',
             'team/container-ecosystems': 'container-ecosystems',
             'team/agent-metrics-logs': 'agent-metrics-logs',
@@ -96,6 +98,7 @@ class TrelloClient:
             'team/ebpf-platform': 'ebpf-platform',
             'team/usm': 'universal-service-monitoring',
             'team/windows-kernel-integrations': 'windows-kernel-integrations',
+            'team/opentelemetry': 'opentelemetry',
         }
 
         # Maps the trello label name to trello label ID
@@ -110,9 +113,9 @@ class TrelloClient:
             'Networks': '5e79109821620a60014fc016',
             'Processes': '5e7910789f92a918152b700d',
             'Trace': '5c050640ecb34f0915ec589a',
-            'Tools and Libraries': '5ab12740841642c2a8829053',
+            'Platform Integrations': '5ab12740841642c2a8829053',
             'Runtime-Security': '5f314f0a364ee16ea4e78868',
-            'Infra-Integrations': '5f9fa48537fb6633584b0e3e',
+            'Network Device Monitoring': '5f9fa48537fb6633584b0e3e',
             'Remote-Config': '61939089d51b6f842dba4c8f',
             'Container-Ecosystems': '627e69f0963c334272a31f19',
             'Agent-Metrics-Logs': '62a9bc5e60fb632602641d07',
@@ -121,6 +124,7 @@ class TrelloClient:
             'eBPF Platform': '63375cbf98d9f7003e2e7a0c',
             'Universal Service Monitoring': '63375ccf0c2fe10560959d07',
             'Windows Kernel Integrations': '63375cd704bbd201f1e577b5',
+            'Open Telemetry': '635658ea01dd6a04e233f858',
         }
 
         self.progress_columns = {

@@ -1,0 +1,14 @@
+[env.collectors.datadog-checks]
+
+[[envs.default.matrix]]
+python = ["27", "38"]
+version = ["1.0", "1.1"]
+
+[envs.default.overrides]
+matrix.version.env-vars = [
+  { key = "MESOS_MASTER_VERSION", value = "1.0.1-2.0.93.ubuntu1404", if = ["1.0"] },
+  { key = "MESOS_MASTER_VERSION", value = "1.1.0-2.0.107.ubuntu1404", if = ["1.1"] },
+    # TODO: Test newer mesos versions, seems some metrics are currently missing or not correctly collected
+    # { key = "MESOS_MASTER_VERSION", value = "1.2.0", if = ["1.2"] },
+    # { key = "MESOS_MASTER_VERSION", value = "1.7.1", if = ["1.7"] },
+]

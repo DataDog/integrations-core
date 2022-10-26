@@ -109,7 +109,7 @@ def test_set_mqcd_version(instance):
     from datadog_checks.ibm_mq.config import IBMMQConfig
 
     instance['mqcd_version'] = 9
-    config = IBMMQConfig(instance)
+    config = IBMMQConfig(instance, {})
     assert config.mqcd_version == pymqi.CMQC.MQCD_VERSION_9
 
 
@@ -128,7 +128,7 @@ def test_connection_config_ok(instance_config, expected_connection_name):
 
     instance_config.update({'channel': 'foo', 'queue_manager': 'bar'})
 
-    config = IBMMQConfig(instance_config)
+    config = IBMMQConfig(instance_config, {})
 
     assert config.connection_name == expected_connection_name
 
@@ -143,7 +143,7 @@ def test_connection_config_error(instance_config):
     instance_config.update({'channel': 'foo', 'queue_manager': 'bar'})
 
     with pytest.raises(ConfigurationError) as excinfo:
-        IBMMQConfig(instance_config)
+        IBMMQConfig(instance_config, {})
 
     assert 'Specify only one host/port or connection_name configuration' in str(excinfo.value)
 
@@ -160,7 +160,7 @@ def test_channel_queue_config_ok(instance_config):
 
     instance_config.update({'host': 'localhost', 'port': 1000})
 
-    IBMMQConfig(instance_config)
+    IBMMQConfig(instance_config, {})
     # finish without configuration error
 
 
@@ -179,7 +179,7 @@ def test_channel_queue_config_error(instance_config):
     instance_config.update({'host': 'localhost', 'port': 1000})
 
     with pytest.raises(ConfigurationError) as excinfo:
-        IBMMQConfig(instance_config)
+        IBMMQConfig(instance_config, {})
 
     assert 'channel, queue_manager are required configurations' in str(excinfo.value)
 
@@ -221,7 +221,7 @@ def test_ssl_check_normal_connection_before_ssl_connection(instance_ssl_dummy):
     from datadog_checks.ibm_mq.connection import get_queue_manager_connection
 
     logger = logging.getLogger(__file__)
-    config = IBMMQConfig(instance_ssl_dummy)
+    config = IBMMQConfig(instance_ssl_dummy, {})
 
     error = pymqi.MQMIError(pymqi.CMQC.MQCC_FAILED, pymqi.CMQC.MQRC_UNKNOWN_CHANNEL_NAME)
     with mock.patch(

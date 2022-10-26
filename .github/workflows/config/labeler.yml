@@ -5,6 +5,7 @@ changelog/no-changelog:
 - datadog_checks_dev/datadog_checks/dev/__about__.py
 - all: ['*/!(datadog_checks)/**']
 - all: ['*/!(pyproject.toml)']
+- all: ['*(!ddev)/**']
 ddev:
 - ddev/**/*
 dependencies:

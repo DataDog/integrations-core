@@ -2,6 +2,26 @@
 #
 init_config:
 
+    ## @param queue_manager_process - string - optional
+    ## A regular expression that must match the command line of a running process in
+    ## order for the check to run, which is useful if running MQ in a failover mode.
+    ## A `<queue_manager>` placeholder is supported which represents the value of
+    ## the `queue_manager` option defined in each check instance.
+    ##
+    ## This option is only available on Agent 7+.
+    #
+    # queue_manager_process: amqpcsea <queue_manager>
+
+    ## @param queue_manager_process_limit - integer - optional - default: 1
+    ## The maximum number of processes that can be matched at any given moment by
+    ## the `queue_manager_process` option.
+    ##
+    ## Note that if this limit is lower than the actual limit the check will ignore
+    ## some active queue managers, while if this limit is higher than the actual
+    ## limit you may see increased CPU usage during check runs.
+    #
+    # queue_manager_process_limit: 1
+
     ## @param service - string - optional
     ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
     ##
@@ -220,6 +240,19 @@ instances:
     # queue_tag_re:
     #   SYSTEM.*: queue_type:system
     #   DEV.*: role:dev,queue_type:default
+
+    ## @param queue_manager_process - string - optional
+    ## A regular expression that must match the command line of a running process in
+    ## order for the check to run, which is useful if running MQ in a failover mode.
+    ## A `<queue_manager>` placeholder is supported which represents the value of
+    ## the `queue_manager` option.
+    ##
+    ## This option is only available on Agent 7+.
+    ##
+    ## This overrides the `queue_manager_process` option in the `init_config` section
+    ## but the `queue_manager_process_limit` option still applies.
+    #
+    # queue_manager_process: amqpcsea <queue_manager>
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.

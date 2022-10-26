@@ -51,15 +51,11 @@ SELECT
     waits_a.object_name,
     waits_a.index_name,
     waits_a.object_type,
-    waits_a.source,
-    socket.ip,
-    socket.port,
-    socket.event_name AS socket_event_name
+    waits_a.source
 FROM
     performance_schema.threads AS thread_a
     LEFT JOIN performance_schema.events_waits_current AS waits_a ON waits_a.thread_id = thread_a.thread_id
     LEFT JOIN performance_schema.events_statements_current AS statement ON statement.thread_id = thread_a.thread_id
-    LEFT JOIN performance_schema.socket_instances AS socket ON socket.thread_id = thread_a.thread_id
 WHERE
     thread_a.processlist_state IS NOT NULL
     AND thread_a.processlist_command != 'Sleep'

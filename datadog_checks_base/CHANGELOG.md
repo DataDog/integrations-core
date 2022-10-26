@@ -1,5 +1,17 @@
 # CHANGELOG - datadog_checks_base
 
+## 27.4.1 / 2022-10-12
+
+* [Fixed] Prevent fork bomb when defining the experimental `process_isolation` option globally in the `init_config` section. See [#13091](https://github.com/DataDog/integrations-core/pull/13091).
+
+## 27.4.0 / 2022-10-11
+
+* [Added] Add utility to handle concurrent evaluation of conditions. See [#13053](https://github.com/DataDog/integrations-core/pull/13053).
+
+## 27.3.1 / 2022-10-12
+
+* [Fixed] Prevent fork bomb when defining the experimental process_isolation option globally in the init_config section. See [#13094](https://github.com/DataDog/integrations-core/pull/13094).
+
 ## 27.3.0 / 2022-09-22
 
 * [Added] Add ability for checks to run in an ephemeral process at every run. See [#12986](https://github.com/DataDog/integrations-core/pull/12986).
