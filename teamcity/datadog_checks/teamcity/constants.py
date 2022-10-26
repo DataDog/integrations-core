@@ -4,6 +4,7 @@
 from copy import deepcopy
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.utils.time import get_precise_time
 
 SERVICE_CHECK_BUILD_STATUS = 'build.status'
 SERVICE_CHECK_BUILD_PROBLEMS = 'build.problems'
@@ -11,6 +12,8 @@ SERVICE_CHECK_TEST_RESULTS = 'test.results'
 SERVICE_CHECK_OPENMETRICS = 'teamcity.openmetrics.health'
 
 DEFAULT_BUILD_CONFIGS_LIMIT = 5
+DEFAULT_PROJECTS_LIMIT = 5
+DEFAULT_PROJECTS_REFRESH_INTERVAL = 3600
 
 STATUS_MAP = {
     "SUCCESS": {"check_status": AgentCheck.OK, "msg_title": "successful", "alert_type": "success"},
@@ -22,16 +25,13 @@ STATUS_MAP = {
 }
 
 RESOURCE_URL_MAP = {
+    "projects": "{base_url}/app/rest/projects",
     "build_configs": "{base_url}/app/rest/buildTypes?locator=project(id:{project_id})",
     "build_config": "{base_url}/app/rest/buildTypes/id:{build_conf}",
     "new_builds": "{base_url}/app/rest/builds/?locator=buildType:{build_conf},sinceBuild:id:{since_build},"
     "state:finished,defaultFilter:false",
-    "started_builds": "{base_url}/app/rest/builds/?locator=buildType:{build_conf},sinceBuild:id:{since_build},"
-    "state:finished,defaultFilter:false",
     "last_build": "{base_url}/app/rest/builds/?locator=buildType:{build_conf},project:{project_id},count:1",
     "build_stats": "{base_url}/app/rest/builds/buildId:{build_id}/statistics",
-    "agent_usage_stats": "{base_url}/app/rest/builds?locator=agent:(id:{agent_id})&fields=build(id:{build_id},"
-    "buildTypeId:{build_conf})",
     "test_occurrences": "{base_url}/app/rest/testOccurrences?locator=build:{build_id}",
     "build_problems": "{base_url}/app/rest/problemOccurrences?locator=build:(id:{build_id})",
     "build_config_settings": "{base_url}/app/rest/buildTypes/id:{build_conf}/settings",
@@ -79,6 +79,9 @@ class BuildConfig(object):
 class BuildConfigs(BuildConfig):
     def __init__(self):
         self.build_configs = {}
+
+    def get_all_build_configs(self):
+        return deepcopy(self.build_configs)
 
     def get_build_configs(self, project_id):
         if self.build_configs.get(project_id):

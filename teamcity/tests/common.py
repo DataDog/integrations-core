@@ -20,42 +20,87 @@ LEGACY_INSTANCE = {
     'server': SERVER_URL,
     'build_configuration': 'SampleProject_Build',
     'host_affected': 'buildhost42.dtdg.co',
-    'basic_http_authentication': False,
-    'is_deployment': False,
     'tags': ['one:tag', 'one:test'],
 }
 
 INSTANCE = {
-    'server': "https://dd-agent-ints.teamcity.com",
+    'server': 'http://34.173.251.243:8111',
     'projects': {
-        'SampleProject': {
-            'include': [
-                'SampleProject_Build',
-                'SampleProject_Deployment',
-                'SampleProject_FailedBuild',
-                'SampleProject_FailedTests',
-                'SampleProject_SkippedTests',
-            ],
-            'exclude': [
-                'SampleProject_SkippedBuild',
-            ],
-        }
+        'include': [
+            {
+                'SampleProject': {
+                    'include': [
+                        'SampleProject_*',
+                    ],
+                    'exclude': [
+                        'SampleProject_SkippedBuild',
+                    ],
+                }
+            }
+        ]
     },
-    'basic_http_authentication': False,
-    'is_deployment': False,
     'tags': ['build_env:test', 'test_tag:ci_builds'],
 }
 
 OPENMETRICS_INSTANCE = {
     'server': 'http://localhost:8111',
     'use_openmetrics': True,
-    'basic_http_authentication': False,
 }
 
+CONFIG_BAD_FORMAT = {}
 
-def get_fixture_path(filename):
-    return os.path.join(HERE, 'fixtures', filename)
+CONFIG_ALL_PROJECTS = {"projects": {}}
 
+CONFIG_ONLY_EXCLUDE_ONE_PROJECT = {"projects": {"exclude": [{"project1.*\\.dev": {}}]}}
+
+CONFIG_ALL_BUILD_CONFIGS = {"projects": {"include": [{"project1.*\\.prod": {}}]}}
+
+CONFIG_ALL_BUILD_CONFIGS_WITH_LIMIT = {"projects": {"include": [{"project1.*\\.prod": {"limit": 3}}]}}
+
+CONFIG_ONLY_INCLUDE_ONE_BUILD_CONFIG = {"build_configs": {"include": ["build_config1.*\\.prod"]}}
+
+CONFIG_ONLY_EXCLUDE_ONE_BUILD_CONFIG = {"build_configs": {"exclude": ["build_config1.*\\.dev"]}}
+
+CONFIG_FILTERING_BUILD_CONFIGS = {
+    "global_build_configs_include": ["build_config.*"],
+    "global_build_configs_exclude": ["build_config1*.dev"],
+    "default_projects_limit": 5,
+    "default_build_configs_limit": 5,
+    "projects": {
+        "include": [
+            {
+                "project1.*\\.prod": {
+                    "build_configs": {"limit": 3, "include": ["build_config.*"], "exclude": ["build_config.prod"]}
+                }
+            }
+        ]
+    },
+}
+
+# A path regularly used in the TeamCity Check
+COMMON_PATH = "guestAuth/app/rest/builds/?locator=buildType:TestProject_TestBuild,sinceBuild:id:1,status:SUCCESS"
+
+
+# These values are acceptable URLs
+TEAMCITY_SERVER_VALUES = {
+    # Regular URLs
+    "localhost:8111/httpAuth": "http://localhost:8111/httpAuth",
+    "localhost:8111/{}".format(COMMON_PATH): "http://localhost:8111/{}".format(COMMON_PATH),
+    "http.com:8111/{}".format(COMMON_PATH): "http://http.com:8111/{}".format(COMMON_PATH),
+    "http://localhost:8111/some_extra_url_with_http://": "http://localhost:8111/some_extra_url_with_http://",
+    "https://localhost:8111/correct_url_https://": "https://localhost:8111/correct_url_https://",
+    "https://localhost:8111/{}".format(COMMON_PATH): "https://localhost:8111/{}".format(COMMON_PATH),
+    "http://http.com:8111/{}".format(COMMON_PATH): "http://http.com:8111/{}".format(COMMON_PATH),
+    # <user>:<password>@teamcity.company.com
+    "user:password@localhost:8111/http://_and_https://": "http://user:password@localhost:8111/http://_and_https://",
+    "user:password@localhost:8111/{}".format(COMMON_PATH): "http://user:password@localhost:8111/{}".format(COMMON_PATH),
+    "http://user:password@localhost:8111/{}".format(COMMON_PATH): "http://user:password@localhost:8111/{}".format(
+        COMMON_PATH
+    ),
+    "https://user:password@localhost:8111/{}".format(COMMON_PATH): "https://user:password@localhost:8111/{}".format(
+        COMMON_PATH
+    ),
+}
 
 LEGACY_BUILD_TAGS = [
     'server:http://localhost:8111',
@@ -287,3 +332,7 @@ EXPECTED_SERVICE_CHECK_TEST_RESULTS = [
     {'value': 2, 'tags': BUILD_TAGS + ['test_status:error', 'test_name:tests.test_bar.test_zap']},
     {'value': 1, 'tags': BUILD_TAGS + ['test_status:warning', 'test_name:tests.test_zip.test_bar']},
 ]
+
+
+def get_fixture_path(filename):
+    return os.path.join(HERE, 'fixtures', filename)

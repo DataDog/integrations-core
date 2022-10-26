@@ -6,6 +6,13 @@ import time
 from collections import OrderedDict
 from copy import deepcopy
 
+from six import PY2
+
+if PY2:
+    import urlparse
+else:
+    from urllib.parse import urlparse
+
 import requests
 
 from .constants import BUILD_EVENT, DEPLOYMENT_EVENT, RESOURCE_URL_MAP, STATUS_MAP
@@ -28,7 +35,7 @@ def filter_list(items, include_patterns, exclude_patterns):
     else:
         filtered_items = {}
         for include_pattern in include_patterns:
-            filtered_items = filtered_items | {
+            filtered_items = filtered_items or {
                 item: include_pattern for item in items if item not in excluded_items and match(item, include_pattern)
             }
         return filtered_items
@@ -36,26 +43,35 @@ def filter_list(items, include_patterns, exclude_patterns):
 
 def filter_items(
     items, key: str, config: dict, default_limit: int, default_include: list, default_exclude: list
-) -> OrderedDict:
-    config_key = dict(config.get(key, {}))
-    limit = config_key.get('build_configs_limit', default_limit)
+) -> (OrderedDict, bool):
+    config_key = dict(config.get(key, config))
+    limit = config_key.get('limit', default_limit)
     include_patterns = config_key.get('include', default_include)
     exclude_patterns = config_key.get('exclude', default_exclude)
     filtered_items = filter_list(items, include_patterns, exclude_patterns)
-    return OrderedDict(list(filtered_items.items())[0:limit])
+    reached_limit = len(OrderedDict(list(filtered_items.items())[0:limit])) < len(list(filtered_items.items()))
+    return OrderedDict(list(filtered_items.items())[0:limit]), reached_limit
 
 
-def should_include_build_config(check, build_config, project_id):
-    """
-    Return `True` if the build_config is included, otherwise `False`
-    """
+def filter_projects(check, projects_list):
     return filter_items(
-        [build_config],
-        project_id,
-        check.monitored_projects,
-        check.default_build_configs_limit,
-        check.global_build_configs_include,
-        check.global_build_configs_exclude,
+        items=projects_list,
+        key='projects',
+        config=check.instance,
+        default_limit=check.default_projects_limit,
+        default_include=None,
+        default_exclude=None,
+    )
+
+
+def filter_build_configs(check, build_configs_list, project_pattern, config):
+    return filter_items(
+        items=build_configs_list,
+        key=project_pattern,
+        config=config,
+        default_limit=check.default_build_configs_limit,
+        default_include=check.global_build_configs_include,
+        default_exclude=check.global_build_configs_exclude,
     )
 
 
@@ -108,15 +124,33 @@ def get_response(check, resource, **kwargs):
         if resource == 'build_config' or resource == 'teamcity_server_details':
             return json_payload
         elif not json_payload.get("count") or json_payload["count"] == 0:
-            check.log.debug("No results found for resource %s url: %s", resource_name, resource_url)
+            check.log.trace("No results found for resource %s url: %s", resource_name, resource_url)
         else:
-            check.log.debug("Results found for resource %s url: %s", resource_name, resource_url)
+            check.log.trace("Results found for resource %s url: %s", resource_name, resource_url)
             return json_payload
     except requests.exceptions.HTTPError:
-        if resp.status_code == 401:
+        if resp.status_code == 401 or resp.status_code == 403:
             check.log.error("Access denied. Enable guest authentication or check user permissions.")
         check.log.exception("Couldn't fetch resource %s, got code %s", resource_name, resp.status_code)
         raise
     except Exception as e:
-        check.log.exception("Couldn't fetch resource %s, unhandled exception %s, %s", resource_name, str(e), resp)
+        check.log.exception("Couldn't fetch resource %s, unhandled exception %s, %s", resource_name, str(e))
         raise
+
+
+def sanitize_server_url(url):
+    parsed_url = urlparse(url)
+    if parsed_url.password:
+        sanitized_endpoint = "{}://{}".format(parsed_url.scheme, parsed_url.hostname)
+        if parsed_url.port:
+            sanitized_endpoint += ":{}".format(parsed_url.port)
+        return sanitized_endpoint
+    return url
+
+
+def normalize_server_url(server):
+    """
+    Check if the server URL starts with an HTTP or HTTPS scheme, fall back to http if not present
+    """
+    server = server if server.startswith(("http://", "https://")) else "http://{}".format(server)
+    return server
