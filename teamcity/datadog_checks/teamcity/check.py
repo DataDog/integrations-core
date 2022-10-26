@@ -18,7 +18,9 @@ class TeamCityCheckV2(OpenMetricsBaseCheckV2):
 
     def __init__(self, name, init_config, instances):
         super(TeamCityCheckV2, self).__init__(name, init_config, instances)
-        self.basic_http_auth = is_affirmative(self.instance.get('basic_http_authentication'))
+        self.basic_http_auth = is_affirmative(
+            self.instance.get('basic_http_authentication', bool(self.instance.get('password', False)))
+        )
         self.auth_type = 'httpAuth' if self.basic_http_auth else 'guestAuth'
         parsed_endpoint = urlparse(self.instance.get('server'))
         self.server_url = "{}://{}".format(parsed_endpoint.scheme, parsed_endpoint.netloc)

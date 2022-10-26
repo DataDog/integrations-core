@@ -10,9 +10,9 @@ from .common import PROMETHEUS_METRICS, get_fixture_path
 
 
 @pytest.mark.skipif(PY2, reason='OpenMetrics V2 is only available with Python 3')
-def test_omv2_check(aggregator, openmetrics_instance, mock_http_response, dd_run_check, check_v2):
+def test_omv2_check(aggregator, openmetrics_instance, mock_http_response, dd_run_check, teamcity_check_v2):
     mock_http_response(file_path=get_fixture_path('metrics.txt'))
-    check = check_v2(openmetrics_instance)
+    check = teamcity_check_v2(openmetrics_instance)
     dd_run_check(check)
     for m in PROMETHEUS_METRICS:
         aggregator.assert_metric(m)

@@ -18,7 +18,6 @@ from datadog_checks.teamcity.constants import (
 from .common import (
     BUILD_STATS_METRICS,
     BUILD_TAGS,
-    CHECK_NAME,
     EXPECTED_SERVICE_CHECK_TEST_RESULTS,
     LEGACY_BUILD_TAGS,
     LEGACY_INSTANCE,
@@ -28,15 +27,18 @@ from .common import (
     get_fixture_path,
 )
 
+pytestmark = [
+    pytest.mark.skipif(USE_OPENMETRICS, reason='Tests not available in OpenMetrics version of check'),
+    pytest.mark.integration
+]
 
-@pytest.mark.skipif(USE_OPENMETRICS == 'true', reason='Event collection is not available in OpenMetricsV2 instance')
-@pytest.mark.integration
+
 def test_build_event(dd_run_check, aggregator, legacy_instance):
     legacy_instance['build_config_metrics'] = False
-    legacy_instance['test_result_metrics'] = False
-    legacy_instance['build_problem_checks'] = False
+    legacy_instance['tests_health_check'] = False
+    legacy_instance['build_problem_health_check'] = False
 
-    teamcity = TeamCityCheck(CHECK_NAME, {}, [legacy_instance])
+    teamcity = TeamCityCheck('teamcity', {}, [legacy_instance])
 
     responses = json.load(open(get_fixture_path('event_responses.json'), 'r'))
 
@@ -90,7 +92,7 @@ def test_build_event(dd_run_check, aggregator, legacy_instance):
 def test_config(extra_config, expected_http_kwargs):
     instance = deepcopy(LEGACY_INSTANCE)
     instance.update(extra_config)
-    check = TeamCityCheck(CHECK_NAME, {}, [instance])
+    check = TeamCityCheck('teamcity', {}, [instance])
 
     with patch('datadog_checks.base.utils.http.requests.get') as r:
         check.check(instance)
@@ -109,7 +111,6 @@ def test_config(extra_config, expected_http_kwargs):
         r.assert_called_with(ANY, **http_wargs)
 
 
-@pytest.mark.skipif(USE_OPENMETRICS == 'true', reason='These configs are not present in OpenMetrics')
 @pytest.mark.parametrize(
     'build_config, expected_error',
     [
@@ -124,7 +125,7 @@ def test_config(extra_config, expected_http_kwargs):
         pytest.param({}, '`projects` must be configured', id="Missing projects config"),
         pytest.param(
             {'projects': {'project_id': {}}, 'build_configuration': 'build_config_id'},
-            'Only one of `projects` or `build_configuration` must be configured, not both.',
+            'Only one of `projects` or `build_configuration` may be configured, not both.',
             id="Redundant configs",
         ),
     ],
@@ -141,7 +142,7 @@ def test_validate_config(dd_run_check, build_config, expected_error, caplog):
     instance = deepcopy(config)
     instance.update(build_config)
 
-    check = TeamCityCheck(CHECK_NAME, {}, [instance])
+    check = TeamCityCheck('teamcity', {}, [instance])
 
     with pytest.raises(Exception) as e:
         dd_run_check(check)
@@ -149,12 +150,12 @@ def test_validate_config(dd_run_check, build_config, expected_error, caplog):
     assert expected_error in str(e.value)
 
 
-def test_collect_build_stats(aggregator, mock_http_response, instance, check):
-    c = check(instance)
-    c.build_tags = BUILD_TAGS
+def test_collect_build_stats(aggregator, mock_http_response, instance, teamcity_check):
+    check = teamcity_check(instance)
+    check.build_tags = BUILD_TAGS
 
     mock_http_response(file_path=get_fixture_path("build_stats.json"))
-    c._collect_build_stats(NEW_SUCCESSFUL_BUILD)
+    check._collect_build_stats(NEW_SUCCESSFUL_BUILD)
 
     for metric in BUILD_STATS_METRICS:
         metric_name = metric['name']
@@ -165,12 +166,12 @@ def test_collect_build_stats(aggregator, mock_http_response, instance, check):
     aggregator.assert_all_metrics_covered()
 
 
-def test_collect_test_results(aggregator, mock_http_response, instance, check):
-    c = check(instance)
-    c.build_tags = BUILD_TAGS
+def test_collect_test_results(aggregator, mock_http_response, instance, teamcity_check):
+    check = teamcity_check(instance)
+    check.build_tags = BUILD_TAGS
 
     mock_http_response(file_path=get_fixture_path("test_occurrences.json"))
-    c._collect_test_results(NEW_SUCCESSFUL_BUILD)
+    check._collect_test_results(NEW_SUCCESSFUL_BUILD)
 
     for res in EXPECTED_SERVICE_CHECK_TEST_RESULTS:
         expected_status = res['value']
@@ -180,29 +181,29 @@ def test_collect_test_results(aggregator, mock_http_response, instance, check):
         )
 
 
-def test_collect_build_problems(aggregator, mock_http_response, instance, check):
+def test_collect_build_problems(aggregator, mock_http_response, instance, teamcity_check):
     mock_http_response(file_path=get_fixture_path('build_problems.json'))
-    c = check(instance)
-    c.build_tags = BUILD_TAGS
+    check = teamcity_check(instance)
+    check.build_tags = BUILD_TAGS
     expected_tags = BUILD_TAGS + ['problem_identity:python_build_error_identity', 'problem_type:TC_EXIT_CODE']
 
-    c._collect_build_problems(NEW_FAILED_BUILD)
+    check._collect_build_problems(NEW_FAILED_BUILD)
 
     aggregator.assert_service_check(
         'teamcity.{}'.format(SERVICE_CHECK_BUILD_PROBLEMS),
         count=1,
         tags=expected_tags,
-        status=c.CRITICAL,
+        status=TeamCityCheck.CRITICAL,
     )
 
 
-def test_handle_empty_builds(aggregator, mock_http_response, instance, legacy_instance, check):
+def test_handle_empty_builds(aggregator, mock_http_response, instance, legacy_instance, teamcity_check):
     instances = [instance, legacy_instance]
 
     for inst in instances:
-        c = check(inst)
+        check = teamcity_check(inst)
         mock_http_response(file_path=get_fixture_path("init_no_builds.json"))
-        c._initialize(project_id='SampleProject')
+        check.check(inst)
         aggregator.assert_service_check('teamcity.{}'.format(SERVICE_CHECK_BUILD_STATUS), count=0)
 
         aggregator.reset()
