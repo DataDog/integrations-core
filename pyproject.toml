@@ -45,3 +45,21 @@ line_length = 120
 multi_line_output = 3
 skip_glob = '.*,*/datadog_checks/dev/tooling/signing.py,*/datadog_checks/dev/tooling/templates/*,*/datadog_checks/*/vendor/*'
 use_parentheses = true
+
+[tool.mypy]
+plugins = "pydantic.mypy"
+# Follows imports and type-check imported modules.
+follow_imports = "normal"
+# Ignore errors about imported packages that don't provide type hints.
+ignore_missing_imports = true
+# Don't require that all functions be annotated, as it would create
+# a lot of noise for imported modules that aren't annotated yet.
+# Note that this is the default behavior, but we're making our choice explicit here.
+disallow_untyped_defs = false
+# Include column numbers in errors.
+show_column_numbers = true
+# Mypy path is relative to the tox execution path, it correspond here to the integration folder.
+mypy_path = "../.stubs"
+# Exclude generated files
+# TODO Remove when we drop python 2
+exclude = '.*/config_models/.*\.py$'

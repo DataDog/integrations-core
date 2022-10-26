@@ -11,10 +11,11 @@
         "check": "ibm_mq.can_connect",
         "statuses": [
             "ok",
-            "critical"
+            "critical",
+            "unknown"
         ],
         "name": "Can Connect",
-        "description": "Returns `CRITICAL` if the Agent cannot connect to the MQ server for any reason. Returns `OK` otherwise."
+        "description": "Returns `CRITICAL` if the Agent cannot connect to the MQ server for any reason or `UNKNOWN` if the configured queue manager is not matched by the `queue_manager_process` option. Returns `OK` otherwise."
     },
     {
         "agent_version": "6.8.1",
@@ -28,10 +29,11 @@
         "check": "ibm_mq.queue_manager",
         "statuses": [
             "ok",
-            "critical"
+            "critical",
+            "unknown"
         ],
         "name": "Queue Manager Can Connect",
-        "description": "Returns `CRITICAL` if the Agent cannot retrieve stats from the queue manager. Returns `OK` otherwise."
+        "description": "Returns `CRITICAL` if the Agent cannot retrieve stats from the queue manager or `UNKNOWN` if the configured queue manager is not matched by the `queue_manager_process` option. Returns `OK` otherwise."
     },
     {
         "agent_version": "6.8.1",

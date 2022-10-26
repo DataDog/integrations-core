@@ -70,6 +70,14 @@ def instance_host(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_log_unobfuscated_plans(field, value):
+    return False
+
+
+def instance_log_unobfuscated_queries(field, value):
+    return False
+
+
 def instance_max_custom_queries(field, value):
     return 20
 

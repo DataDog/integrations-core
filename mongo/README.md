@@ -84,7 +84,7 @@ db.createUser({
 ```
 
 ##### Configure the agents
-You need to configure one agent for each member. See below for configuration options.
+You need to configure one check instance for each member. See below for configuration options.
 **Note**: Monitoring of arbiter nodes is not supported remotely as mentioned in [MongoDB documentation][3]. Yet, any status change of an arbiter node is reported by the Agent connected to the primary.
 
 <!-- xxz tab xxx -->
@@ -268,6 +268,8 @@ To configure this check for an Agent running on Kubernetes:
 
 Set [Autodiscovery Integrations Templates][13] as pod annotations on your application container. Aside from this, templates can also be configure with a [file, configmap, or key-value store][14].
 
+**Annotations v1** (for Datadog Agent < v7.36)
+
 ```yaml
 apiVersion: v1
 kind: Pod
@@ -290,11 +292,40 @@ spec:
     - name: mongo
 ```
 
+**Annotations v2** (for Datadog Agent v7.36+)
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mongo
+  annotations:
+    ad.datadoghq.com/mongo.checks: |
+      {
+        "mongo": {
+          "init_config": {},
+          "instances": [
+            {
+              "hosts": ["%%host%%:%%port%%"], 
+              "username": "datadog", 
+              "password": "<UNIQUEPASSWORD>", 
+              "database": "<DATABASE>"
+            }
+          ]
+        }
+      }
+spec:
+  containers:
+    - name: mongo
+```
+
 ##### Log collection
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][15].
 
 Then, set [Log Integrations][11] as pod annotations. This can also be configured with [a file, a configmap, or a key-value store][16].
+
+**Annotations v1/v2**
 
 ```yaml
 apiVersion: v1

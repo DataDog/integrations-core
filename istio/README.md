@@ -27,15 +27,13 @@ If you want to monitor the Envoy proxies in Istio, configure the [Envoy integrat
 Edit the `istio.d/conf.yaml` file (in the `conf.d/` folder at the root of your [Agent's configuration directory][7]) to connect to Istio. See the [sample istio.d/conf.yaml][8] for all available configuration options.
 
 #### Metric collection
-To monitor the `istiod` deployment and `istio-proxy` in Istio `v1.5+`, use the following configuration:
-    
-```yaml
-init_config:
+To monitor the `istiod` deployment and `istio-proxy` in Istio `v1.5+` there are two key components involved to collect the Prometheus-formatted metrics. Aligning with the [Istio architecture][23], there is the **data plane** (the `istio-proxy` sidecar containers) and the **control plane** (the `istiod` service managing the proxies). These are both run as `istio` Agent checks, but have different responsibilities, and they are configured separately, as described below.
 
-instances:
-  - use_openmetrics: true  # Enables Openmetrics V2 version of the integration
-    istiod_endpoint: http://istiod.istio-system:15014/metrics
-    istio_mesh_endpoint: http://istio-proxy.istio-system:15090/stats/prometheus
+##### Data plane configuration
+To monitor the Istio data plane, the Agent includes an [`istio.d/auto_conf.yaml`][9] file to automatically set up the monitoring for each of the `istio-proxy` sidecar containers. The Agent initializes this check for each sidecar container that it detects automatically. This configuration enables the reporting of `istio.mesh.*` metrics for the data exposed by each of these sidecar containers.
+
+To customize the data plane portion of the integration, create an equivalent [configuration file][24] for Istio. Set `ad_identifiers` and `istio_mesh_endpoint` appropriately to set up the integration when an `istio-proxy` sidecar container is discovered. Refer to the provided [`istio.d/auto_conf.yaml`][9] and the [example configuration file][8] for all available configuration options. When you customize, set `use_openmetrics: true` and the `exclude_labels` to the following configuration:
+```yaml
     exclude_labels:
       - source_version
       - destination_version
@@ -52,18 +50,31 @@ instances:
       - request_protocol
       - connection_security_policy
 ```
-   
-**Note**: The `connectionID` Prometheus label is excluded. The [sample istio.d/conf.yaml][8] also has a list of suggested labels to exclude.
 
+##### Control plane configuration
+To monitor the Istio control plane and report the `mixer`, `galley`, `pilot`, and `citadel` metrics, you must configure the Agent to monitor the `istiod` deployment. In Istio `v1.5+`, apply the following Autodiscovery Annotations as pod annotations for the deployment `istiod` in the `istio-system` namespace:
 
-   Istio mesh metrics are only available from `istio-proxy` containers which are supported out-of-the-box with Autodiscovery, see [`istio.d/auto_conf.yaml`][9].   
+```yaml
+ad.datadoghq.com/discovery.check_names: '["istio"]'
+ad.datadoghq.com/discovery.init_configs: '[{}]'
+ad.datadoghq.com/discovery.instances: |
+     [
+       {
+         "istiod_endpoint": "http://%%host%%:15014/metrics",
+         "use_openmetrics": "true"
+       }
+     ]
+```
+The method for applying these annotations varies depending on the [Istio deployment strategy (Istioctl, Helm, Operator)][22] used. Consult the Istio docs for the proper method to apply these pod annotations.
+
+These annotations reference `discovery` as the `<CONTAINER_IDENTIFIER>` to match the default container name of the pods for the `istiod` deployment. If your container name is different, adjust accordingly.
 
 ##### OpenMetrics V2 vs OpenMetrics V1
 <div class="alert alert-warning">
 <b>Important Note</b>: If you have multiple instances of Datadog collecting Istio metrics, make sure to use the same implementation of OpenMetrics for all of them. Otherwise, the metrics data fluctuates on the Datadog site.
 </div>
 
-When you enable the `use_openmetrics` configuration option, the Istio integration uses the OpenMetrics V2 implementation of the check. 
+When you enable the `use_openmetrics` configuration option, the Istio integration uses the OpenMetrics V2 implementation of the check.
 
 In OpenMetrics V2, metrics are submitted more accurately by default and behave closer to Prometheus metric types. For example, Prometheus metrics ending in  `_count` and `_sum` are submitted as `monotonic_count` by default.
 
@@ -71,50 +82,47 @@ OpenMetrics V2 addresses performance and quality issues in OpenMetrics V1. Updat
 
 Set the `use_openmetrics` configuration option to `false` to use the OpenMetrics V1 implementation. To view the configuration parameters for OpenMetrics V1, see [the `conf.yaml.example` file][21].
 
-
-##### Disable sidecar injection for Datadog Agent pods
+#### Disable sidecar injection for Datadog Agent pods
 
 If you are installing the [Datadog Agent in a container][10], Datadog recommends that you first disable Istio's sidecar injection.
 
 _Istio versions >= 1.10:_
 
-Add the `sidecar.istio.io/inject: "false"` _label_ to the `datadog-agent` DaemonSet:
+Add the `sidecar.istio.io/inject: "false"` **label** to the `datadog-agent` DaemonSet:
 
 ```yaml
-...
+# (...)
 spec:
-   ...
   template:
     metadata:
       labels:
         sidecar.istio.io/inject: "false"
-     ...
+    # (...)
 ```
 
 This can also be done with the `kubectl patch` command.
 
-```text
+```shell
 kubectl patch daemonset datadog-agent -p '{"spec":{"template":{"metadata":{"labels":{"sidecar.istio.io/inject":"false"}}}}}'
 ```
 
-_Istio versions <= 1.9:_ 
+_Istio versions <= 1.9:_
 
-Add the `sidecar.istio.io/inject: "false"` _annotation_ to the `datadog-agent` DaemonSet:
+Add the `sidecar.istio.io/inject: "false"` **annotation** to the `datadog-agent` DaemonSet:
 
 ```yaml
-...
+# (...)
 spec:
-   ...
   template:
     metadata:
       annotations:
         sidecar.istio.io/inject: "false"
-     ...
+    # (...)
 ```
 
 Using the `kubectl patch` command:
 
-```text
+```shell
 kubectl patch daemonset datadog-agent -p '{"spec":{"template":{"metadata":{"annotations":{"sidecar.istio.io/inject":"false"}}}}}'
 ```
 
@@ -129,7 +137,7 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 | Parameter      | Value                                                |
 | -------------- | ---------------------------------------------------- |
-| `<LOG_CONFIG>` | `{"source": "istio", "service": "<SERVICE_NAME>"}` |
+| `<LOG_CONFIG>` | `{"source": "istio", "service": "<SERVICE_NAME>"}`   |
 
 ### Validation
 
@@ -155,7 +163,7 @@ See [service_checks.json][16] for a list of service checks provided by this inte
 If you see the following error on OpenMetricsBaseCheck (V1) implementation of Istio (Istio integration version `3.13.0` or older):
 
 ```python
-  Error: ("Connection broken: InvalidChunkLength(got length b'', 0 bytes read)", 
+  Error: ("Connection broken: InvalidChunkLength(got length b'', 0 bytes read)",
   InvalidChunkLength(got length b'', 0 bytes read))
 ```
 
@@ -176,7 +184,7 @@ To ensure that your Openmetrics configuration does not redundantly collect metri
 #### Openmetrics V2 configuration with generic metric collection
 
 Be sure to exclude Istio and Envoy metrics from your configuration to avoid high custom metrics billing. Use `exclude_metrics` if using the Openmetrics V2 configuration (`openmetrics_endpoint` enabled).
- 
+
 ```yaml
 ## Every instance is scheduled independent of the others.
 #
@@ -234,3 +242,6 @@ Additional helpful documentation, links, and articles:
 [19]: https://www.datadoghq.com/blog/istio-metrics/
 [20]: https://docs.datadoghq.com/integrations/openmetrics/
 [21]: https://github.com/DataDog/integrations-core/blob/7.32.x/istio/datadog_checks/istio/data/conf.yaml.example
+[22]: https://istio.io/latest/docs/setup/install/
+[23]: https://istio.io/latest/docs/ops/deployment/architecture/
+[24]: https://docs.datadoghq.com/agent/kubernetes/integrations/?tab=file#configuration

@@ -121,6 +121,9 @@ class DBExplainError(Enum):
     # database error i.e connection error
     database_error = 'database_error'
 
+    # datatype mismatch occurs when return type is not json, for instance when multiple queries are explained
+    datatype_mismatch = 'datatype_mismatch'
+
     # this could be the result of a missing EXPLAIN function
     invalid_schema = 'invalid_schema'
 
@@ -301,7 +304,10 @@ class PostgresStatementSamples(DBMAsyncJob):
             normalized_rows.append(self._normalize_row(row))
         if insufficient_privilege_count > 0:
             self._log.warning(
-                "Insufficient privilege for %s/%s queries when collecting from %s.", self._config.pg_stat_activity_view
+                "Insufficient privilege for %s/%s queries when collecting from %s.",
+                insufficient_privilege_count,
+                total_count,
+                self._config.pg_stat_activity_view,
             )
             self._check.count(
                 "dd.postgres.statement_samples.error",
@@ -323,7 +329,10 @@ class PostgresStatementSamples(DBMAsyncJob):
             normalized_row['dd_commands'] = metadata.get('commands', None)
             normalized_row['dd_comments'] = metadata.get('comments', None)
         except Exception as e:
-            self._log.debug("Failed to obfuscate statement: %s", e)
+            if self._config.log_unobfuscated_queries:
+                self._log.warning("Failed to obfuscate query=[%s] | err=[%s]", row['query'], e)
+            else:
+                self._log.debug("Failed to obfuscate query | err=[%s]", e)
             self._check.count(
                 "dd.postgres.statement_samples.error",
                 1,
@@ -456,6 +465,8 @@ class PostgresStatementSamples(DBMAsyncJob):
         except psycopg2.errors.InvalidSchemaName as e:
             self._log.warning("cannot collect execution plans due to invalid schema in dbname=%s: %s", dbname, repr(e))
             return DBExplainError.invalid_schema, e
+        except psycopg2.errors.DatatypeMismatch as e:
+            return DBExplainError.datatype_mismatch, e
         except psycopg2.DatabaseError as e:
             # if the schema is valid then it's some problem with the function (missing, or invalid permissions,
             # incorrect definition)
@@ -602,8 +613,14 @@ class PostgresStatementSamples(DBMAsyncJob):
             plan = json.dumps(plan_dict)
             # if we're using the orjson implementation then json.dumps returns bytes
             plan = plan.decode('utf-8') if isinstance(plan, bytes) else plan
-            normalized_plan = datadog_agent.obfuscate_sql_exec_plan(plan, normalize=True)
-            obfuscated_plan = datadog_agent.obfuscate_sql_exec_plan(plan)
+            try:
+                normalized_plan = datadog_agent.obfuscate_sql_exec_plan(plan, normalize=True)
+                obfuscated_plan = datadog_agent.obfuscate_sql_exec_plan(plan)
+            except Exception as e:
+                if self._config.log_unobfuscated_plans:
+                    self._log.warning("Failed to obfuscate plan=[%s] | err=[%s]", plan, e)
+                raise e
+
             plan_signature = compute_exec_plan_signature(normalized_plan)
 
         statement_plan_sig = (row['query_signature'], plan_signature)

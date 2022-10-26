@@ -33,7 +33,11 @@
               "type": "check_status",
               "check": "silk.can_connect",
               "grouping": "cluster",
-              "group_by": [],
+              "group_by": [
+                "$silk_host",
+                "$system_name",
+                "$system_id"
+              ],
               "tags": [
                 "*"
               ]
@@ -80,13 +84,13 @@
                   "response_format": "scalar",
                   "queries": [
                     {
-                      "query": "avg:silk.system.capacity.free{*}",
+                      "query": "avg:silk.system.capacity.free{$silk_host,$system_name,$system_id}",
                       "data_source": "metrics",
                       "name": "query1",
                       "aggregator": "avg"
                     },
                     {
-                      "query": "avg:silk.system.capacity.total{*}",
+                      "query": "avg:silk.system.capacity.total{$silk_host,$system_name,$system_id}",
                       "data_source": "metrics",
                       "name": "query2",
                       "aggregator": "avg"
@@ -122,13 +126,13 @@
                   "response_format": "scalar",
                   "queries": [
                     {
-                      "query": "avg:silk.system.capacity.reserved{*}",
+                      "query": "avg:silk.system.capacity.reserved{$silk_host,$system_name,$system_id}",
                       "data_source": "metrics",
                       "name": "query1",
                       "aggregator": "avg"
                     },
                     {
-                      "query": "avg:silk.system.capacity.total{*}",
+                      "query": "avg:silk.system.capacity.total{$silk_host,$system_name,$system_id}",
                       "data_source": "metrics",
                       "name": "query2",
                       "aggregator": "avg"
@@ -164,13 +168,13 @@
                   "response_format": "scalar",
                   "queries": [
                     {
-                      "query": "avg:silk.system.capacity.physical{*}",
+                      "query": "avg:silk.system.capacity.physical{$silk_host,$system_name,$system_id}",
                       "data_source": "metrics",
                       "name": "query1",
                       "aggregator": "avg"
                     },
                     {
-                      "query": "avg:silk.system.capacity.total{*}",
+                      "query": "avg:silk.system.capacity.total{$silk_host,$system_name,$system_id}",
                       "data_source": "metrics",
                       "name": "query2",
                       "aggregator": "avg"
@@ -206,13 +210,13 @@
                   "response_format": "scalar",
                   "queries": [
                     {
-                      "query": "avg:silk.system.capacity.logical{*}",
+                      "query": "avg:silk.system.capacity.logical{$silk_host,$system_name,$system_id}",
                       "data_source": "metrics",
                       "name": "query1",
                       "aggregator": "avg"
                     },
                     {
-                      "query": "avg:silk.system.capacity.total{*}",
+                      "query": "avg:silk.system.capacity.total{$silk_host,$system_name,$system_id}",
                       "data_source": "metrics",
                       "name": "query2",
                       "aggregator": "avg"
@@ -240,7 +244,11 @@
               "type": "check_status",
               "check": "silk.server.state",
               "grouping": "cluster",
-              "group_by": [],
+              "group_by": [
+                "$system_name",
+                "$silk_host",
+                "$system_id"
+              ],
               "tags": [
                 "*"
               ]
@@ -261,7 +269,11 @@
               "type": "check_status",
               "check": "silk.system.state",
               "grouping": "cluster",
-              "group_by": [],
+              "group_by": [
+                "$silk_host",
+                "$system_name",
+                "$system_id"
+              ],
               "tags": [
                 "*"
               ]
@@ -317,7 +329,7 @@
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "avg:silk.replication.system.logical_in{*} by {silk_host}",
+                      "query": "avg:silk.replication.system.logical_in{$silk_host,$system_name,$system_id} by {silk_host}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
@@ -338,7 +350,7 @@
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "avg:silk.replication.system.logical_out{*} by {silk_host}",
+                      "query": "avg:silk.replication.system.logical_out{$silk_host,$system_name,$system_id} by {silk_host}",
                       "data_source": "metrics",
                       "name": "query0"
                     }
@@ -393,7 +405,7 @@
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "avg:silk.replication.volume.logical_in{*} by {silk_host,peer_name,volume_name}",
+                      "query": "avg:silk.replication.volume.logical_in{$silk_host,$system_name,$system_id} by {silk_host,peer_name,volume_name}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
@@ -414,7 +426,7 @@
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "avg:silk.replication.volume.logical_out{*} by {silk_host,peer_name,volume_name}",
+                      "query": "avg:silk.replication.volume.logical_out{$silk_host,$system_name,$system_id} by {silk_host,peer_name,volume_name}",
                       "data_source": "metrics",
                       "name": "query0"
                     }
@@ -469,7 +481,7 @@
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "avg:silk.replication.system.physical_in{*} by {silk_host}",
+                      "query": "avg:silk.replication.system.physical_in{$silk_host,$system_name,$system_id} by {silk_host}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
@@ -490,7 +502,7 @@
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "avg:silk.replication.system.physical_out{*} by {silk_host}",
+                      "query": "avg:silk.replication.system.physical_out{$silk_host,$system_name,$system_id} by {silk_host}",
                       "data_source": "metrics",
                       "name": "query0"
                     }
@@ -545,7 +557,7 @@
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "avg:silk.replication.volume.physical_in{*} by {silk_host,peer_name,volume_name}",
+                      "query": "avg:silk.replication.volume.physical_in{$silk_host,$system_name,$system_id} by {silk_host,peer_name,volume_name}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
@@ -566,7 +578,7 @@
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "avg:silk.replication.volume.physical_out{*} by {silk_host,peer_name,volume_name}",
+                      "query": "avg:silk.replication.volume.physical_out{$silk_host,$system_name,$system_id} by {silk_host,peer_name,volume_name}",
                       "data_source": "metrics",
                       "name": "query0"
                     }
@@ -626,7 +638,7 @@
                     {
                       "formula": "query1",
                       "limit": {
-                        "count": 10,
+                        "count": 500,
                         "order": "desc"
                       }
                     }
@@ -634,7 +646,7 @@
                   "response_format": "scalar",
                   "queries": [
                     {
-                      "query": "avg:silk.volume.size{*,*} by {volume_raw_name}",
+                      "query": "avg:silk.volume.size{$silk_host,$system_name,$system_id} by {volume_raw_name}",
                       "data_source": "metrics",
                       "name": "query1",
                       "aggregator": "avg"
@@ -668,7 +680,7 @@
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "avg:silk.volume.io_ops.avg{*} by {volume_name}",
+                      "query": "avg:silk.volume.io_ops.avg{$system_name,$silk_host,$system_id} by {volume_name}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
@@ -715,7 +727,7 @@
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "avg:silk.volume.throughput.avg{*} by {volume_name}",
+                      "query": "avg:silk.volume.throughput.avg{$silk_host,$system_name,$system_id} by {volume_name}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
@@ -762,7 +774,7 @@
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "avg:silk.system.volumes_count{*}",
+                      "query": "avg:silk.system.volumes_count{$silk_host,$system_name,$system_id}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
@@ -809,7 +821,7 @@
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "avg:silk.volume.latency.inner{*} by {volume_name}",
+                      "query": "avg:silk.volume.latency.inner{$silk_host,$system_name,$system_id} by {volume_name}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
@@ -864,7 +876,7 @@
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "avg:silk.volume.latency.outer{*} by {volume_name}",
+                      "query": "avg:silk.volume.latency.outer{$silk_host,$system_name,$system_id} by {volume_name}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
@@ -938,7 +950,7 @@
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "avg:silk.system.io_ops.avg{*} by {capacity_state}",
+                      "query": "avg:silk.system.io_ops.avg{$silk_host,$system_name,$system_id} by {capacity_state}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
@@ -993,7 +1005,7 @@
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "avg:silk.system.capacity.allocated_snapshots_and_views{*} by {capacity_state}",
+                      "query": "avg:silk.system.capacity.allocated_snapshots_and_views{$silk_host,$system_name,$system_id} by {capacity_state}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
@@ -1048,7 +1060,7 @@
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "avg:silk.system.capacity.total{*} by {capacity_state}",
+                      "query": "avg:silk.system.capacity.total{$silk_host,$system_name,$system_id} by {capacity_state}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
@@ -1069,7 +1081,7 @@
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "avg:silk.system.capacity.free{*}",
+                      "query": "avg:silk.system.capacity.free{$silk_host,$system_name,$system_id}",
                       "data_source": "metrics",
                       "name": "query0"
                     }
@@ -1124,7 +1136,7 @@
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "avg:silk.system.throughput.avg{*} by {capacity_state}",
+                      "query": "avg:silk.system.throughput.avg{$silk_host,$system_name,$system_id} by {capacity_state}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
@@ -1179,7 +1191,7 @@
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "avg:silk.system.latency.inner{*} by {silk_host}",
+                      "query": "avg:silk.system.latency.inner{$silk_host,$system_name,$system_id} by {silk_host}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
@@ -1200,7 +1212,7 @@
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "avg:silk.system.latency.outer{*} by {silk_host}",
+                      "query": "avg:silk.system.latency.outer{$silk_host,$system_name,$system_id} by {silk_host}",
                       "data_source": "metrics",
                       "name": "query0"
                     }
@@ -1255,7 +1267,7 @@
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "avg:silk.system.capacity.physical{*} by {capacity_state}",
+                      "query": "avg:silk.system.capacity.physical{$silk_host,$system_name,$system_id} by {capacity_state}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
@@ -1301,7 +1313,6 @@
         "title_align": "left",
         "type": "event_stream",
         "query": "source:silk",
-        "tags_execution": "and",
         "event_size": "s"
       },
       "layout": {
@@ -1312,7 +1323,26 @@
       }
     }
   ],
-  "template_variables": [],
+  "template_variables": [
+    {
+      "name": "silk_host",
+      "prefix": "silk_host",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "system_name",
+      "prefix": "system_name",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "system_id",
+      "prefix": "system_id",
+      "available_values": [],
+      "default": "*"
+    }
+  ],
   "layout_type": "ordered",
   "is_read_only": true,
   "notify_list": [],

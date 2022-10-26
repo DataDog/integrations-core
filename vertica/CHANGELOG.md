@@ -1,6 +1,19 @@
 # CHANGELOG - Vertica
 
-## 3.3.1 / 2022-05-15
+## 3.4.1 / 2022-08-05 / Agent 7.39.0
+
+* [Fixed] Dependency updates. See [#12653](https://github.com/DataDog/integrations-core/pull/12653).
+
+## 3.4.0 / 2022-08-03
+
+* [Added] Use QueryManager to get metrics from queries. See [#12542](https://github.com/DataDog/integrations-core/pull/12542).
+
+## 3.3.2 / 2022-07-19
+
+* [Fixed] Support projection storage and storage containers for Vertica 11+. See [#12465](https://github.com/DataDog/integrations-core/pull/12465).
+* [Fixed] Make integration compatible with Vertica 11. See [#12394](https://github.com/DataDog/integrations-core/pull/12394).
+
+## 3.3.1 / 2022-05-15 / Agent 7.37.0
 
 * [Fixed] Upgrade dependencies. See [#11958](https://github.com/DataDog/integrations-core/pull/11958).
 

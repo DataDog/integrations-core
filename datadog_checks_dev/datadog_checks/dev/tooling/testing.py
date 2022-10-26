@@ -3,10 +3,12 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
 import os
+import platform
 import re
 from fnmatch import fnmatch
 
 from ..fs import chdir, file_exists, path_join, read_file_binary, write_file_binary
+from ..structures import EnvVars
 from ..subprocess import run_command
 from .commands.console import abort, echo_debug, echo_info, echo_success
 from .constants import NON_TESTABLE_FILES, TESTABLE_FILE_PATTERNS, get_root
@@ -235,7 +237,7 @@ def select_tox_envs(
 
 
 def get_hatch_env_data(check):
-    with chdir(path_join(get_root(), check)):
+    with chdir(path_join(get_root(), check), env_vars=EnvVars({'NO_COLOR': '1'})):
         return json.loads(run_command(['hatch', 'env', 'show', '--json'], capture='out').stdout)
 
 
@@ -423,7 +425,7 @@ def prepare_hatch_test_commands(
         commands.append(['hatch', 'env', 'run', '--env', 'lint', '--', 'fmt' if format_style else 'all'])
 
     if env_names:
-        command = ['hatch', '-v', 'env', 'run']
+        command = ['hatch', '-v', 'env', 'run', '--ignore-compat']
         for env_name in env_names:
             command.append('--env')
             command.append(env_name)
@@ -433,7 +435,7 @@ def prepare_hatch_test_commands(
 
         commands.insert(0, command)
 
-    base_or_dev = check.startswith('datadog_checks_')
+    base_or_dev = check.startswith('datadog_checks_') or check == 'ddev'
     if force_base_min and not base_or_dev:
         check_base_dependencies, errors = read_check_base_dependencies(check)
         if errors:
@@ -498,6 +500,7 @@ def construct_pytest_options(
     pytest_args='',
     e2e=False,
     ddtrace=False,
+    memray=False,
 ):
     # Prevent no verbosity
     pytest_options = f'--verbosity={verbose or 1}'
@@ -530,9 +533,11 @@ def construct_pytest_options(
         test_group = 'e2e' if e2e else 'unit'
         pytest_options += (
             # junit report file must contain the env name to handle multiple envs
+            # $HATCH_ENV_ACTIVE is a Hatch injected variable
+            # See https://hatch.pypa.io/latest/plugins/environment/reference/#hatch.env.plugin.interface.EnvironmentInterface.get_env_vars  # noqa
             # $TOX_ENV_NAME is a tox injected variable
             # See https://tox.readthedocs.io/en/latest/config.html#injected-environment-variables
-            f' --junit-xml=.junit/test-{test_group}-$TOX_ENV_NAME.xml'
+            f' --junit-xml=.junit/test-{test_group}-$HATCH_ENV_ACTIVE$TOX_ENV_NAME.xml'
             # Junit test results class prefix
             f' --junit-prefix={check}'
         )
@@ -548,6 +553,12 @@ def construct_pytest_options(
             # This will be formatted to the appropriate coverage paths for each package
             ' {}'
         )
+
+    if memray:
+        if platform.system().lower() not in ('linux', 'darwin'):
+            abort('\nThe `--memray` option can only be used on Linux or MacOS!')
+
+        pytest_options += ' --memray'
 
     if marker:
         pytest_options += f' -m "{marker}"'
@@ -602,7 +613,7 @@ def get_changed_directories(include_uncommitted=True):
     return {line.split('/')[0] for line in changed_files}
 
 
-def get_tox_env_python_version(env):
+def get_active_env_python_version(env):
     match = re.match(PYTHON_MAJOR_PATTERN, env)
     if match:
         return int(match.group(1))

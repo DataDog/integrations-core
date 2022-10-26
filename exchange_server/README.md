@@ -68,6 +68,10 @@ The Exchange server check does not include any events.
 
 The Exchange server check does not include any service checks.
 
+## Troubleshooting
+
+Need help? Contact [Datadog support][7].
+
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [3]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent

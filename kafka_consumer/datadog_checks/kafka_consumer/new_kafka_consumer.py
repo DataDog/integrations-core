@@ -14,6 +14,7 @@ from datadog_checks.base import AgentCheck, ConfigurationError
 from .constants import BROKER_REQUESTS_BATCH_SIZE, KAFKA_INTERNAL_TOPICS
 
 MAX_TIMESTAMPS = 1000
+BROKER_TIMESTAMP_CACHE_KEY = 'broker_timestamps'
 
 
 class NewKafkaConsumerCheck(object):
@@ -27,7 +28,6 @@ class NewKafkaConsumerCheck(object):
         self._parent_check = parent_check
         self._broker_requests_batch_size = self.instance.get('broker_requests_batch_size', BROKER_REQUESTS_BATCH_SIZE)
         self._kafka_client = None
-        self._broker_timestamp_cache_key = 'broker_timestamps' + "".join(sorted(self._custom_tags))
 
     def __getattr__(self, item):
         try:
@@ -66,7 +66,8 @@ class NewKafkaConsumerCheck(object):
             self.log.exception("There was a problem collecting consumer offsets from Kafka.")
             # don't raise because we might get valid broker offsets
 
-        self._load_broker_timestamps()
+        if self._data_streams_enabled:
+            self._load_broker_timestamps()
         # Fetch the broker highwater offsets
         try:
             if len(self._consumer_offsets) < self._context_limit:
@@ -88,7 +89,8 @@ class NewKafkaConsumerCheck(object):
                 self._context_limit,
             )
 
-        self._save_broker_timestamps()
+        if self._data_streams_enabled:
+            self._save_broker_timestamps()
 
         # Report the metrics
         self._report_highwater_offsets(self._context_limit)
@@ -108,10 +110,10 @@ class NewKafkaConsumerCheck(object):
             self.log.warning('Could not read broker timestamps from cache: %s', str(e))
 
     def _read_persistent_cache(self):
-        return self._parent_check.read_persistent_cache(self._broker_timestamp_cache_key)
+        return self._parent_check.read_persistent_cache(BROKER_TIMESTAMP_CACHE_KEY)
 
     def _save_broker_timestamps(self):
-        self._parent_check.write_persistent_cache(self._broker_timestamp_cache_key, json.dumps(self._broker_timestamps))
+        self._parent_check.write_persistent_cache(BROKER_TIMESTAMP_CACHE_KEY, json.dumps(self._broker_timestamps))
 
     def _create_kafka_admin_client(self, api_version):
         """Return a KafkaAdminClient."""
@@ -195,11 +197,12 @@ class NewKafkaConsumerCheck(object):
                 error_type = kafka_errors.for_code(error_code)
                 if error_type is kafka_errors.NoError:
                     self._highwater_offsets[(topic, partition)] = offsets[0]
-                    timestamps = self._broker_timestamps["{}_{}".format(topic, partition)]
-                    timestamps[offsets[0]] = time()
-                    # If there's too many timestamps, we delete the oldest
-                    if len(timestamps) > MAX_TIMESTAMPS:
-                        del timestamps[min(timestamps)]
+                    if self._data_streams_enabled:
+                        timestamps = self._broker_timestamps["{}_{}".format(topic, partition)]
+                        timestamps[offsets[0]] = time()
+                        # If there's too many timestamps, we delete the oldest
+                        if len(timestamps) > MAX_TIMESTAMPS:
+                            del timestamps[min(timestamps)]
                 elif error_type is kafka_errors.NotLeaderForPartitionError:
                     self.log.warning(
                         "Kafka broker returned %s (error_code %s) for topic %s, partition: %s. This should only happen "
@@ -283,9 +286,11 @@ class NewKafkaConsumerCheck(object):
 
                 if reported_contexts >= contexts_limit:
                     continue
+                if not self._data_streams_enabled:
+                    continue
                 timestamps = self._broker_timestamps["{}_{}".format(topic, partition)]
-                # producer_timestamp is set in the same check, so it should never be None
-                producer_timestamp = timestamps[producer_offset]
+                # The producer timestamp can be not set if there was an error fetching broker offsets.
+                producer_timestamp = timestamps.get(producer_offset, None)
                 consumer_timestamp = self._get_interpolated_timestamp(timestamps, consumer_offset)
                 if consumer_timestamp is None or producer_timestamp is None:
                     continue

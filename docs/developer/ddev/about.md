@@ -18,6 +18,9 @@ The [test framework](test.md) provides everything necessary to test integrations
 - Utilities for consistently handling complex logic or common operations
 - An [orchestrator](plugins.md#environment-manager) for arbitrary E2E environments
 
+!!! warning "Python 2 Alert!"
+    Some integrations still support Python version 2.7 and must be tested with it. As a consequence, so must parts of our test framework, for example the pytest plugin.
+
 ## CLI
 
 The [CLI](cli.md) provides the interface through which tests are invoked, E2E environments are managed, and general repository maintenance (such as dependency management) occurs.
@@ -46,5 +49,3 @@ graph BT
 ```
 
 </div>
-
---8<-- "uml.txt"

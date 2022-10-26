@@ -1,32 +1,46 @@
 {
-  "categories": [
-    "web",
-    "network"
-  ],
-  "creates_events": false,
-  "display_name": "NTP",
-  "guid": "9d105f8c-7fd3-48d7-a5d1-1cc386ec0367",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "ntp.",
-  "metric_to_check": "ntp.offset",
-  "name": "ntp",
-  "public_title": "Datadog-NTP Integration",
-  "short_description": "Get alerts when your hosts drift out of sync with your chosen NTP server.",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "type": "check",
-  "integration_id": "ntp",
+  "manifest_version": "2.0.0",
+  "app_uuid": "399b74d9-ece5-4517-ae16-c05cac6911b2",
+  "app_id": "ntp",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Get alerts when your hosts drift out of sync with your chosen NTP server.",
+    "title": "NTP",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Web",
+      "Category::Network"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "monitors": {},
-    "dashboards": {},
-    "service_checks": "assets/service_checks.json",
-    "logs": {},
-    "metrics_metadata": "metadata.csv"
+    "integration": {
+      "source_type_name": "NTP",
+      "configuration": {},
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "ntp.",
+        "check": "ntp.offset",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    }
   }
 }

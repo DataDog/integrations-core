@@ -1,30 +1,48 @@
 {
-  "display_name": "Azure IoT Edge",
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "name": "azure_iot_edge",
-  "metric_prefix": "azure.iot_edge.",
-  "metric_to_check": "azure.iot_edge.edge_agent.iotedged_uptime_seconds",
-  "creates_events": false,
-  "short_description": "Monitor the health and performance of an Azure IoT Edge device and modules.",
-  "guid": "9eafeab9-daf4-4f54-befc-fcc623ec9c1b",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "public_title": "Datadog-Azure IoT Edge Integration",
-  "categories": [
-    "azure",
-    "log collection"
-  ],
-  "type": "check",
-  "is_public": true,
-  "integration_id": "azure-iot-edge",
+  "manifest_version": "2.0.0",
+  "app_uuid": "9c4d7121-eed1-429c-bd86-18952b11d3f5",
+  "app_id": "azure-iot-edge",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor the health and performance of an Azure IoT Edge device and modules.",
+    "title": "Azure IoT Edge",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Azure",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "Azure IoT Edge",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "azure.iot_edge.",
+        "check": "azure.iot_edge.edge_agent.iotedged_uptime_seconds",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
     },
     "dashboards": {
       "azure_iot_edge": "assets/dashboards/overview.json"
@@ -35,11 +53,8 @@
       "IoT Hub syncs": "assets/monitors/iothub_syncs.json",
       "Edge Hub retries": "assets/monitors/edgehub_retries.json"
     },
-    "saved_views": {},
-    "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "azure.iot_edge"
-    },
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

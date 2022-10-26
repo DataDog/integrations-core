@@ -1,6 +1,11 @@
 # CHANGELOG - ProxySQL
 
-## 3.6.0 / 2022-04-27
+## 4.0.0 / 2022-08-05 / Agent 7.39.0
+
+* [Fixed] Pin `pymysql` to `0.10.1`. See [#12612](https://github.com/DataDog/integrations-core/pull/12612).
+* [Changed] Use stats database for proxysql backends count. See [#12555](https://github.com/DataDog/integrations-core/pull/12555). Thanks [aymeric-ledizes](https://github.com/aymeric-ledizes).
+
+## 3.6.0 / 2022-04-27 / Agent 7.37.0
 
 * [Added] Add `backends.count` metric. See [#11812](https://github.com/DataDog/integrations-core/pull/11812). Thanks [aymeric-ledizes](https://github.com/aymeric-ledizes).
 

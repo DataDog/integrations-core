@@ -51,6 +51,26 @@ GO
 GRANT EXECUTE on exampleProcWithoutNocount to datadog;
 GO
 
+CREATE PROCEDURE encryptedProc WITH ENCRYPTION AS
+BEGIN
+    select count(*) from sys.databases;
+END;
+GO
+GRANT EXECUTE on encryptedProc to bob;
+GO
+
+-- create test procedure with multiple queries
+CREATE PROCEDURE multiQueryProc AS
+BEGIN
+    declare @total int = 0;
+    select @total = @total + count(*) from sys.databases where name like '%_';
+    select @total = @total + count(*) from sys.sysobjects where type = 'U';
+    select @total;
+END;
+GO
+GRANT EXECUTE on multiQueryProc to bob;
+GO
+
 -- Create test database for integration tests.
 -- Only bob and fred have read/write access to this database.
 CREATE DATABASE datadog_test;
@@ -67,6 +87,24 @@ GO
 EXEC sp_addrolemember 'db_datareader', 'bob'
 EXEC sp_addrolemember 'db_datawriter', 'bob'
 EXEC sp_addrolemember 'db_datareader', 'fred'
+GO
+
+CREATE PROCEDURE bobProc AS
+BEGIN
+    SELECT * FROM ϑings;
+END;
+GO
+
+CREATE PROCEDURE bobProcParams @P1 INT = NULL, @P2 nvarchar(8) = NULL AS
+BEGIN
+    SELECT * FROM ϑings WHERE id = @P1;
+    SELECT id FROM ϑings WHERE name = @P2;
+END;
+GO
+
+GRANT EXECUTE on bobProcParams to bob;
+GRANT EXECUTE on bobProc to bob;
+GRANT EXECUTE on bobProc to fred;
 GO
 
 -- create an offline database to have an unavailable database to test with

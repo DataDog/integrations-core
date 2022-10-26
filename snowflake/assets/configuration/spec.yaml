@@ -67,7 +67,10 @@ files:
           type: string
           example: SNOWFLAKE
       - name: schema
-        description: Name of the default schema to use for the database.
+        description: |
+          Name of the default schema to use for the database.
+
+          To collect organization level metrics, set this to ORGANIZATION_USAGE.
         value:
           type: string
           example: ACCOUNT_USAGE
@@ -147,7 +150,7 @@ files:
         description: |
           List of Snowflake metric groups to collect. Metric groups are determined by the metric prefixes.
 
-          The available metric groups are:
+          When querying the ACCOUNT_USAGE schema, the available metric groups are:
 
             - snowflake.query (enabled by default)
             - snowflake.billing (enabled by default)
@@ -159,6 +162,16 @@ files:
             - snowflake.auto_recluster
             - snowflake.pipe
             - snowflake.replication
+
+          When querying the ORGANIZATION_USAGE schema, the available metric groups are:
+            - snowflake.organization.warehouse (enabled by default)
+            - snowflake.organization.currency (enabled by default)
+            - snowflake.organization.credit
+            - snowflake.organization.storage (enabled by default)
+            - snowflake.organization.contracts
+            - snowflake.organization.balance
+            - snowflake.organization.rate
+            - snowflake.organization.data_transfer
         value:
           type: array
           items:
@@ -194,11 +207,12 @@ files:
             https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
 
             NOTE: Most Snowflake ACCOUNT_USAGE views are populated on an hourly basis,
-            so to minimize unnecessary queries the `min_collection_interval` defaults to 1 hour.
+            so to minimize unnecessary queries, set the `min_collection_interval` to 1 hour.
 
             Most metrics are aggregated by day, you can increase the interval to reduce the number of queries.
-          min_collection_interval.display_default: 3600
+          min_collection_interval.value.display_default: 15
+          min_collection_interval.value.default: 3600
           min_collection_interval.value.example: 3600
-          min_collection_interval.enabled: 3600
+          min_collection_interval.enabled: true
           disable_generic_tags.hidden: False
           disable_generic_tags.enabled: True

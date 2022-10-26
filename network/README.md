@@ -64,7 +64,7 @@ The Network check does not include any service checks.
 
 ## Troubleshooting
 
-- [Send TCP/UDP host metrics with the Datadog API][9]
+- [Send TCP/UDP host metrics to the Datadog API][9]
 
 ## Further Reading
 
@@ -78,5 +78,5 @@ The Network check does not include any service checks.
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/network/metadata.csv
 [8]: https://github.com/DataDog/integrations-core/blob/master/network/CHANGELOG.md#1110--2019-05-14
-[9]: https://docs.datadoghq.com/integrations/faq/how-to-send-tcp-udp-host-metrics-via-the-datadog-api/
+[9]: https://docs.datadoghq.com/integrations/guide/send-tcp-udp-host-metrics-to-the-datadog-api/
 [10]: https://docs.datadoghq.com/monitors/monitor_types/network/

@@ -1,32 +1,49 @@
 {
-  "display_name": "Presto",
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "name": "presto",
-  "metric_prefix": "presto.",
-  "metric_to_check": "presto.failure_detector.active_count",
-  "creates_events": false,
-  "short_description": "Collects performance and usage stats on PrestoSQL cluster, and much more.",
-  "guid": "a05766fc-8760-464b-9e5d-a784500b7b90",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "public_title": "Datadog-Presto Integration",
-  "categories": [
-    "data store",
-    "log collection"
-  ],
-  "type": "check",
-  "is_public": true,
-  "integration_id": "presto",
+  "manifest_version": "2.0.0",
+  "app_uuid": "b725cadc-d041-4199-8b86-c714ee9a318f",
+  "app_id": "presto",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Collects performance and usage stats on PrestoSQL cluster, and much more.",
+    "title": "Presto",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Data Store",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "Presto",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "presto.",
+        "check": "presto.failure_detector.active_count",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
     },
-    "monitors": {},
     "dashboards": {
       "Presto Overview": "assets/dashboards/overview.json"
     },
@@ -37,10 +54,8 @@
       "error_patterns": "assets/saved_views/error_patterns.json",
       "response_time_overview": "assets/saved_views/response_time.json"
     },
-    "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "presto"
-    },
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

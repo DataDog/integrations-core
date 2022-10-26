@@ -1,10 +1,6 @@
 from datadog_checks.envoy.metrics import METRIC_PREFIX, METRIC_TREE, METRICS
 from datadog_checks.envoy.utils import make_metric_tree
 
-from .common import requires_legacy_environment
-
-pytestmark = [requires_legacy_environment]
-
 
 def test_metric_prefix():
     assert METRIC_PREFIX == 'envoy.'

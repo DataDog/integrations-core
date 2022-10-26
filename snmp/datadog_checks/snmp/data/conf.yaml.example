@@ -106,13 +106,6 @@ init_config:
     #
     # ignore_nonincreasing_oid: false
 
-    ## @param namespace - string - optional - default: default
-    ## Namespace can be used to disambiguate devices with same IPs.
-    ## Changing namespace will cause devices being recreated in NDM app.
-    ## Only available using corecheck SNMP integration with `loader: core` config.
-    #
-    # namespace: default
-
     ## @param service - string - optional
     ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
     ##
@@ -120,7 +113,7 @@ init_config:
     #
     # service: <SERVICE>
 
-## Every instance is scheduled independent of the others.
+## Every instance is scheduled independently of the others.
 #
 instances:
 
@@ -338,13 +331,6 @@ instances:
     ##         the OIDs are refreshed only according to the refresh interval.
     #
     # refresh_oids_cache_interval: 3600
-
-    ## @param namespace - string - optional - default: default
-    ## Namespace can be used to disambiguate devices with same IPs.
-    ## Changing namespace will cause devices being recreated in NDM app.
-    ## Only available using corecheck SNMP integration with `loader: core` config.
-    #
-    # namespace: default
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.

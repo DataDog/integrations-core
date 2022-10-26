@@ -45,11 +45,10 @@ steps:
 - script: python -m pip install --disable-pip-version-check --upgrade pip setuptools wheel
   displayName: 'Upgrade Python packaging tools'
 
-- script: pip install --disable-pip-version-check git+https://github.com/ofek/codecov-python.git@datadog
-  displayName: 'Install Codecov'
-
 - ${{ if eq(parameters.repo, 'core') }}:
-  - script: pip install ./datadog_checks_dev[cli]
+  - script: |
+      pip install ./datadog_checks_dev[cli]
+      pip install ./ddev
     displayName: 'Install ddev from local folder'
 
 - ${{ if not(eq(parameters.repo, 'core')) }}:

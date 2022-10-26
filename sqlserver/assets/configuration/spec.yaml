@@ -26,7 +26,11 @@ files:
       Note: All '%' characters must be escaped as '%%'.
     options:
     - name: host
-      description: Host and port of your SQL server.
+      description: | 
+        Host and port of your SQL server. If a port is ommitted, a default port of 1433 will be used. 
+        If you use Sql Server Browser Service or a similar port autodiscovery service, pass in a port
+        of 0 to omit port from your connection string. This should allow SSBS to autodiscover the 
+        correct database port. 
       required: true
       value:
         type: string
@@ -188,8 +192,8 @@ files:
       description: |
         Choose the ADO provider.  Note that the (default) provider
         SQLOLEDB is being deprecated.  To use the newer MSOLEDBSQL
-        provider, set the adoprovider to "MSOLEDBSQL" below. You will also need
-        to download the new provider from
+        provider, set the adoprovider to "MSOLEDBSQL" below or "MSOLEDBSQL19" for version 19 of the driver.
+        You will also need to download the new provider from
         https://docs.microsoft.com/en-us/sql/connect/oledb/oledb-driver-for-sql-server?view=sql-server-2017
       value:
         type: string
@@ -228,7 +232,6 @@ files:
     - name: dbm
       description: |
         Set to `true` to enable Database Monitoring.
-        Reach out to your Customer Success Manager to request access to the beta.
       value:
         type: boolean
         example: false
@@ -433,6 +436,26 @@ files:
             type: boolean
             example: true
             display_default: true
+    - name: log_unobfuscated_queries
+      hidden: true
+      description: |
+        Set to `true` to enable logging of original unobfuscated SQL queries when obfuscation errors occur.
+        For security purposes, it is recommended to use this option for debugging only when requested by Datadog Support.
+        Note: This option only applies when `dbm` is enabled.
+      value:
+        type: boolean
+        example: false
+        display_default: false
+    - name: log_unobfuscated_plans
+      hidden: true
+      description: |
+        Set to `true` to enable logging of original unobfuscated SQL plans when obfuscation errors occur.
+        For security purposes, it is recommended to use this option for debugging only when requested by Datadog Support.
+        Note: This option only applies when `dbm` is enabled.
+      value:
+        type: boolean
+        example: false
+        display_default: false
     - name: command_timeout
       description: Timeout in seconds for the connection and each command run
       value:
@@ -441,9 +464,10 @@ files:
     - template: instances/db
     - name: stored_procedure
       description: |
+        DEPRECATED - use `custom_queries` instead. For guidance, see:
+        https://docs.datadoghq.com/integrations/guide/collect-sql-server-custom-metrics/
         Get metrics from custom proc in MyDB but only if the database is writable
         (i.e. it's the master in an availability group) Note: Custom proc must be defined in its own instance
-        See https://docs.datadoghq.com/integrations/guide/collect-sql-server-custom-metrics/
       value:
         type: string
         example: <PROCEDURE_NAME>

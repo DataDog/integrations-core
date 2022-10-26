@@ -1,40 +1,55 @@
 {
-  "display_name": "IBM Db2",
-  "maintainer": "help@datadoghq.com",
-  "integration_id": "ibm-db2",
-  "name": "ibm_db2",
-  "metric_prefix": "ibm_db2.",
-  "metric_to_check": "ibm_db2.connection.active",
-  "creates_events": true,
-  "short_description": "Monitor table space, buffer pool, and other metrics from your IBM Db2 database.",
-  "manifest_version": "1.0.0",
-  "guid": "67378f79-e72b-4f49-8ec2-57053706523d",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "public_title": "Datadog-IBM Db2 Integration",
-  "categories": [
-    "data store",
-    "log collection",
-    "autodiscovery"
-  ],
-  "type": "check",
-  "is_public": true,
+  "manifest_version": "2.0.0",
+  "app_uuid": "e588293a-833f-4888-a7b4-2208e087059a",
+  "app_id": "ibm-db2",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor table space, buffer pool, and other metrics from your IBM Db2 database.",
+    "title": "IBM Db2",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Data Store",
+      "Category::Log Collection",
+      "Category::Autodiscovery"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "IBM Db2",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": true
+      },
+      "metrics": {
+        "prefix": "ibm_db2.",
+        "check": "ibm_db2.connection.active",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
     },
-    "monitors": {},
     "dashboards": {
       "IBM Db2 Overview": "assets/dashboards/overview.json"
     },
-    "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "ibm_db2"
-    },
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

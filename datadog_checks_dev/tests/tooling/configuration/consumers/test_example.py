@@ -8,8 +8,6 @@ from datadog_checks.dev.tooling.configuration.consumers.example import DESCRIPTI
 
 from ..utils import get_example_consumer, normalize_yaml
 
-pytestmark = [pytest.mark.conf, pytest.mark.conf_consumer, pytest.mark.conf_consumer_example]
-
 
 def test_option_no_section():
     consumer = get_example_consumer(
@@ -158,7 +156,7 @@ def test_section_hidden():
     assert not errors
     assert contents == normalize_yaml(
         """
-        ## Every instance is scheduled independent of the others.
+        ## Every instance is scheduled independently of the others.
         #
         instances:
 
@@ -314,12 +312,12 @@ def test_section_example_indent():
 
         ## Log Section
         ##
-        ## type - required - Type of log input source (tcp / udp / file / windows_event)
+        ## type - required - Type of log input source (tcp / udp / file / windows_event).
         ## port / path / channel_path - required - Set port if type is tcp or udp.
         ##                                         Set path if type is file.
         ##                                         Set channel_path if type is windows_event.
         ## source  - required - Attribute that defines which integration sent the logs.
-        ## encoding - optional - For file specifies the file encoding, default is utf-8, other
+        ## encoding - optional - For file specifies the file encoding. Default is utf-8. Other
         ##                       possible values are utf-16-le and utf-16-be.
         ## service - optional - The name of the service that generates the log.
         ##                      Overrides any `service` defined in the `init_config` section.
@@ -378,12 +376,12 @@ def test_section_example_indent_required():
 
         ## Log Section
         ##
-        ## type - required - Type of log input source (tcp / udp / file / windows_event)
+        ## type - required - Type of log input source (tcp / udp / file / windows_event).
         ## port / path / channel_path - required - Set port if type is tcp or udp.
         ##                                         Set path if type is file.
         ##                                         Set channel_path if type is windows_event.
         ## source  - required - Attribute that defines which integration sent the logs.
-        ## encoding - optional - For file specifies the file encoding, default is utf-8, other
+        ## encoding - optional - For file specifies the file encoding. Default is utf-8. Other
         ##                       possible values are utf-16-le and utf-16-be.
         ## service - optional - The name of the service that generates the log.
         ##                      Overrides any `service` defined in the `init_config` section.
@@ -439,7 +437,7 @@ def test_section_multiple_required():
             #
             # foo: <FOO>
 
-        ## Every instance is scheduled independent of the others.
+        ## Every instance is scheduled independently of the others.
         #
         instances:
 
@@ -489,7 +487,7 @@ def test_section_multiple_no_required():
             #
             # foo: <FOO>
 
-        ## Every instance is scheduled independent of the others.
+        ## Every instance is scheduled independently of the others.
         #
         instances:
 
@@ -544,7 +542,7 @@ def test_section_multiple_required_not_first():
             #
             # foo: <FOO>
 
-        ## Every instance is scheduled independent of the others.
+        ## Every instance is scheduled independently of the others.
         #
         instances:
 
@@ -1012,7 +1010,7 @@ def test_template():
     assert not errors
     assert contents == normalize_yaml(
         """
-        ## Every instance is scheduled independent of the others.
+        ## Every instance is scheduled independently of the others.
         #
         instances:
 
@@ -1062,7 +1060,7 @@ def test_template_recursion():
     assert not errors
     assert contents == normalize_yaml(
         """
-        ## Every instance is scheduled independent of the others.
+        ## Every instance is scheduled independently of the others.
         #
         instances:
 
@@ -1139,7 +1137,7 @@ def test_no_options():
         #
         init_config:
 
-        ## Every instance is scheduled independent of the others.
+        ## Every instance is scheduled independently of the others.
         #
         instances:
 
@@ -1274,7 +1272,7 @@ def test_compact_example_nested():
     assert not errors
     assert contents == normalize_yaml(
         """
-        ## Every instance is scheduled independent of the others.
+        ## Every instance is scheduled independently of the others.
         #
         instances:
 
@@ -1427,7 +1425,7 @@ def test_enabled_override_required():
             #
             foo: <FOO>
 
-        ## Every instance is scheduled independent of the others.
+        ## Every instance is scheduled independently of the others.
         #
         instances:
 
@@ -1467,7 +1465,7 @@ def test_option_multiple_types():
     assert not errors
     assert contents == normalize_yaml(
         """
-        ## Every instance is scheduled independent of the others.
+        ## Every instance is scheduled independently of the others.
         #
         instances:
 
@@ -1514,7 +1512,7 @@ def test_option_multiple_types_nested():
     assert not errors
     assert contents == normalize_yaml(
         """
-        ## Every instance is scheduled independent of the others.
+        ## Every instance is scheduled independently of the others.
         #
         instances:
 
@@ -1564,7 +1562,7 @@ def test_option_multiple_instances_defined():
     assert not errors
     assert contents == normalize_yaml(
         """
-        ## Every instance is scheduled independent of the others.
+        ## Every instance is scheduled independently of the others.
         #
         instances:
 
@@ -1624,7 +1622,7 @@ def test_parent_option_disabled():
     assert not errors
     assert contents == normalize_yaml(
         """
-        ## Every instance is scheduled independent of the others.
+        ## Every instance is scheduled independently of the others.
         #
         instances:
 
@@ -1690,7 +1688,7 @@ def test_parent_option_enabled():
     assert not errors
     assert contents == normalize_yaml(
         """
-        ## Every instance is scheduled independent of the others.
+        ## Every instance is scheduled independently of the others.
         #
         instances:
 

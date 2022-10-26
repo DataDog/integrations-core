@@ -147,7 +147,7 @@ The Docker integration produces the following events:
 
 See [service_checks.json][20] for a list of service checks provided by this integration.
 
-**Note**: To use `docker.exit`, add `collect_exit_code: true` in your [Docker YAML file][21] and restart the Agent.
+**Note**: To use `docker.exit`, add `collect_exit_codes: true` in your [Docker YAML file][21] and restart the Agent.
 
 ## Troubleshooting
 
@@ -186,9 +186,9 @@ Need help? Contact [Datadog support][22].
 [18]: https://docs.datadoghq.com/agent/#cli
 [19]: https://github.com/DataDog/integrations-core/blob/master/docker_daemon/metadata.csv
 [20]: https://github.com/DataDog/integrations-core/blob/master/docker_daemon/assets/service_checks.json
-[21]: https://github.com/DataDog/integrations-core/blob/master/docker_daemon/datadog_checks/docker_daemon/data/conf.yaml.example#L124
+[21]: https://github.com/DataDog/integrations-core/blob/7.39.0/docker_daemon/datadog_checks/docker_daemon/data/conf.yaml.example#L151-L154
 [22]: https://docs.datadoghq.com/help
-[23]: https://docs.datadoghq.com/integrations/faq/compose-and-the-datadog-agent
+[23]: https://docs.datadoghq.com/agent/guide/compose-and-the-datadog-agent
 [24]: https://docs.datadoghq.com/integrations/faq/dogstatsd-and-docker
 [25]: https://www.datadoghq.com/blog/the-docker-monitoring-problem
 [26]: https://www.datadoghq.com/blog/how-to-monitor-docker-resource-metrics

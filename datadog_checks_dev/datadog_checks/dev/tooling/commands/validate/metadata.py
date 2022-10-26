@@ -37,16 +37,10 @@ EXCLUDE_INTEGRATIONS = [
     'disk',
     'go-expvar',  # This has a special case externally
     'go-metro',
-    'hdfs_datanode',
-    'hdfs_namenode',
     'http',
-    'kafka_consumer',
     'kubelet',
     'kubernetes',
-    'kubernetes_api_server_metrics',
     'kubernetes_state',
-    'mesos_master',
-    'mesos_slave',
     'network',
     'ntp',
     'process',
@@ -352,7 +346,7 @@ def metadata(check, check_duplicates, show_warnings):
                 missing_headers = ALL_HEADERS.difference(all_keys)
                 if missing_headers:
                     errors = True
-                    display_queue.append(echo_failure(f'{current_check}:{line} Missing columns {missing_headers}'))
+                    display_queue.append((echo_failure, f'{current_check}:{line} Missing columns {missing_headers}'))
                 continue
 
             errors = errors or check_duplicate_values(
@@ -504,6 +498,7 @@ def metadata(check, check_duplicates, show_warnings):
             display_queue.append((echo_failure, f'{current_check}: {header} is empty in {count} rows.'))
 
         for prefix, count in metric_prefix_count.items():
+            errors = True
             display_queue.append(
                 (
                     echo_failure,

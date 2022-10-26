@@ -1,40 +1,56 @@
 {
-  "display_name": "Snowflake",
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "name": "snowflake",
-  "metric_prefix": "snowflake.",
-  "metric_to_check": "snowflake.storage.storage_bytes.total",
-  "creates_events": false,
-  "short_description": "Monitor key metrics for credit usage, storage, query, user history and more.",
-  "guid": "4813a514-e9a4-4f28-9b83-b4221b51b18b",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "public_title": "Datadog-Snowflake Integration",
-  "categories": [
-    "cloud",
-    "data store",
-    "cost management"
-  ],
-  "type": "check",
-  "is_public": true,
-  "integration_id": "snowflake",
+  "manifest_version": "2.0.0",
+  "app_uuid": "23e9084d-5801-4a71-88fe-f62b7c1bb289",
+  "app_id": "snowflake",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor key metrics for credit usage, storage, query, user history and more.",
+    "title": "Snowflake",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Cloud",
+      "Category::Data Store",
+      "Category::Cost Management"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "Snowflake",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "snowflake.",
+        "check": "snowflake.storage.storage_bytes.total",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
     },
     "dashboards": {
-      "Snowflake": "assets/dashboards/snowflake.json"
+      "Snowflake": "assets/dashboards/snowflake.json",
+      "Snowflake Organization Metrics": "assets/dashboards/organization_metrics.json"
     },
     "monitors": {
       "Snowflake failed logins": "assets/recommended_monitors/snowflake_failed_logins.json"
-    },
-    "saved_views": {},
-    "service_checks": "assets/service_checks.json",
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

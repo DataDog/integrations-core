@@ -14,7 +14,7 @@ pytestmark = pytest.mark.unit
 def test_pattern_preceedes_autodiscovery(instance):
     instance['auto_discover_queues'] = True
     instance['queue_patterns'] = ['pattern']
-    config = IBMMQConfig(instance)
+    config = IBMMQConfig(instance, {})
     collector = QueueMetricCollector(config, Mock(), Mock(), Mock(), Mock(), Mock())
     collector._discover_queues = Mock(return_value=['pattern_queue'])
     queue_manager = Mock()
@@ -27,7 +27,7 @@ def test_pattern_preceedes_autodiscovery(instance):
 def test_regex_precedes_autodiscovery(instance):
     instance['auto_discover_queues'] = True
     instance['queue_regex'] = ['pat*']
-    config = IBMMQConfig(instance)
+    config = IBMMQConfig(instance, {})
     collector = QueueMetricCollector(config, Mock(), Mock(), Mock(), Mock(), Mock())
     collector._discover_queues = Mock(return_value=['pattern_queue', 'other_queue'])
     queue_manager = Mock()

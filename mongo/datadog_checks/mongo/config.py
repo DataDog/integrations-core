@@ -25,8 +25,15 @@ class MongoConfig(object):
                 'ssl_certfile': instance.get('ssl_certfile', None),
                 'ssl_cert_reqs': instance.get('ssl_cert_reqs', None),
                 'ssl_ca_certs': cacert_cert_dir,
+                'ssl_match_hostname': instance.get('ssl_match_hostname', None),
+                'tls': instance.get('tls', None),
+                'tlsCertificateKeyFile': instance.get('tls_certificate_key_file', None),
+                'tlsCAFile': instance.get('tls_ca_file', None),
+                'tlsAllowInvalidHostnames': instance.get('tls_allow_invalid_hostnames', None),
+                'tlsAllowInvalidCertificates': instance.get('tls_allow_invalid_certificates', None),
             }
         )
+        self.log.debug('ssl_params: %s', self.ssl_params)
 
         if 'server' in instance:
             self.server = instance['server']
@@ -48,7 +55,6 @@ class MongoConfig(object):
                 self.hosts = [self.hosts]
             self.username = instance.get('username')
             self.password = instance.get('password')
-            # Deprecated
             self.scheme = instance.get('connection_scheme', 'mongodb')
             self.db_name = instance.get('database')
             self.additional_options = instance.get('options', {})
@@ -61,12 +67,11 @@ class MongoConfig(object):
         if self.password and not self.username:
             raise ConfigurationError('`username` must be set when a `password` is specified')
 
-        if self.scheme != 'mongodb':
-            self.log.info("connection_scheme is deprecated and shouldn't be set to a value other than 'mongodb'")
-
         if not self.db_name:
             self.log.info('No MongoDB database found in URI. Defaulting to admin.')
             self.db_name = 'admin'
+
+        self.db_names = instance.get('dbnames', None)
 
         self.timeout = float(instance.get('timeout', DEFAULT_TIMEOUT)) * 1000
         self.additional_metrics = instance.get('additional_metrics', [])

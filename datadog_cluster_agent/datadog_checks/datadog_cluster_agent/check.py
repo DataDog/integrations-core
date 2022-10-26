@@ -11,6 +11,8 @@ DEFAULT_METRICS = {
     'admission_webhooks_reconcile_errors': 'admission_webhooks.reconcile_errors',
     'admission_webhooks_reconcile_success': 'admission_webhooks.reconcile_success',
     'admission_webhooks_webhooks_received': 'admission_webhooks.webhooks_received',
+    'admission_webhooks_library_injection_attempts': 'admission_webhooks.library_injection_attempts',
+    'admission_webhooks_library_injection_errors': 'admission_webhooks.library_injection_errors',
     'aggregator__flush': 'aggregator.flush',
     'aggregator__processed': 'aggregator.processed',
     'api_requests': 'api_requests',
@@ -41,6 +43,8 @@ DEFAULT_METRICS = {
     'autodiscovery_poll_duration': 'autodiscovery.poll_duration',
     'autodiscovery_watched_resources': 'autodiscovery.watched_resources',
     'autodiscovery_errors': 'autodiscovery.errors',
+    'kubernetes_apiserver_kube_events': 'kubernetes_apiserver.kube_events',
+    'kubernetes_apiserver_emitted_events': 'kubernetes_apiserver.emitted_events',
 }
 
 

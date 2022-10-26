@@ -240,15 +240,26 @@ def get_service_check(transformers, column_name, **modifiers):
     - `UNKNOWN`
 
     Any encountered values that are not defined will be sent as `UNKNOWN`.
+
+    In addition, a `message` modifier can be passed which can contain placeholders
+    (based on Python's str.format) for other column names from the same query to add a message
+    dynamically to the service_check.
     """
     # Do work in a separate function to avoid having to `del` a bunch of variables
     status_map = _compile_service_check_statuses(modifiers)
+    message_field = modifiers.pop('message', None)
 
     service_check_method = transformers['__service_check'](transformers, column_name, **modifiers)  # type: Callable
 
-    def service_check(_, value, **kwargs):
+    def service_check(sources, value, **kwargs):
         # type: (List, str, Dict[str, Any]) -> None
-        service_check_method(_, status_map.get(value, ServiceCheck.UNKNOWN), **kwargs)
+        check_status = status_map.get(value, ServiceCheck.UNKNOWN)
+        if not message_field or check_status == ServiceCheck.OK:
+            message = None
+        else:
+            message = message_field.format(**sources)
+
+        service_check_method(sources, check_status, message=message, **kwargs)
 
     return service_check
 
@@ -273,7 +284,7 @@ def get_time_elapsed(transformers, column_name, **modifiers):
     Example:
 
     ```yaml
-        columns:
+    columns:
       - name: time_since_x
         type: time_elapsed
         format: native  # default value and can be omitted

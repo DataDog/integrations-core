@@ -14,7 +14,7 @@ import tempfile
 from in_toto import verifylib
 from in_toto.exceptions import LinkNotFoundError
 from in_toto.models.metadata import Metablock
-from pkg_resources import parse_version
+from packaging.version import parse as parse_version
 from securesystemslib import interface
 from tuf import settings as tuf_settings
 from tuf.client.updater import Updater
@@ -31,6 +31,7 @@ from .exceptions import (
     NoSuchDatadogPackageVersion,
     PythonVersionMismatch,
     RevokedDeveloperOrMachine,
+    UpdatedTargetsError,
 )
 from .parameters import substitute
 
@@ -49,7 +50,7 @@ REPOSITORY_DIR = 'repo'
 REPOSITORY_URL_PREFIX = 'https://dd-integrations-core-wheels-build-stable.datadoghq.com'
 # Where to find our in-toto root layout.
 IN_TOTO_METADATA_DIR = 'in-toto-metadata'
-ROOT_LAYOUTS = {'core': '4.core.root.layout', 'extras': '1.extras.root.layout'}
+ROOT_LAYOUTS = {'core': '5.core.root.layout', 'extras': '1.extras.root.layout'}
 DEFAULT_ROOT_LAYOUT_TYPE = 'core'
 
 
@@ -67,8 +68,7 @@ class TUFDownloader:
         # 3 => 30 (WARNING)
         # 4 => 20 (INFO)
         # 5 => 10 (DEBUG)
-        # And so it repeats from here...
-        remainder = verbose % 6
+        remainder = min(verbose, 5) % 6
         level = (6 - remainder) * 10
         assert level in range(10, 70, 10), level
         logging.basicConfig(format='%(levelname)-8s: %(message)s', level=level)
@@ -115,9 +115,18 @@ class TUFDownloader:
         # or, it has been updated, in which case...
         else:
             # First, we use TUF to download and verify the target.
-            assert len(updated_targets) == 1
+            if len(updated_targets) != 1:
+                raise UpdatedTargetsError(
+                    'Expecting only one target {!r} to be updated; got: {}'.format(target, ', '.join(updated_targets))
+                )
+
             updated_target = updated_targets[0]
-            assert updated_target == target
+
+            if updated_target != target:
+                raise UpdatedTargetsError(
+                    'Unknown target updated, expected {!r} but got {!r}'.format(target, updated_target)
+                )
+
             self.__updater.download_target(updated_target, self.__targets_dir)
 
         logger.info('TUF verified %s', target_relpath)
@@ -208,17 +217,17 @@ class TUFDownloader:
         # Make a temporary directory in a parent directory we control.
         tempdir = tempfile.mkdtemp(dir=REPOSITORIES_DIR)
 
-        # Copy files over into temp dir.
-        for abs_path in inspection_packet:
-            shutil.copy(abs_path, tempdir)
-
-        # Switch to the temp dir.
-        os.chdir(tempdir)
-
-        # Load the root layout and public keys in this temp dir.
-        root_layout, root_layout_pubkeys, root_layout_params = self.__load_root_layout(target_relpath)
-
         try:
+            # Copy files over into temp dir.
+            for abs_path in inspection_packet:
+                shutil.copy(abs_path, tempdir)
+
+            # Switch to the temp dir.
+            os.chdir(tempdir)
+
+            # Load the root layout and public keys in this temp dir.
+            root_layout, root_layout_pubkeys, root_layout_params = self.__load_root_layout(target_relpath)
+
             verifylib.in_toto_verify(root_layout, root_layout_pubkeys, substitution_parameters=root_layout_params)
         except Exception as e:
             self.__handle_in_toto_verification_exception(target_relpath, e)

@@ -1,338 +1,927 @@
 {
-  "title": "Kubernetes Controller Manager - Overview",
-  "description": "",
-  "widgets": [
-    {
-      "id": 0,
-      "definition": {
-        "type": "check_status",
-        "title": "Replicas up",
-        "title_size": "16",
-        "title_align": "center",
-        "check": "kube_controller_manager.prometheus.health",
-        "grouping": "cluster",
-        "group_by": [],
-        "tags": [
-          "$scope",
-          "$cluster_name"
-        ]
-      },
-      "layout": {
-        "x": 1,
-        "y": 1,
-        "width": 15,
-        "height": 8
-      }
-    },
-    {
-      "id": 1,
-      "definition": {
-        "type": "check_status",
-        "title": "Leader election",
-        "title_size": "16",
-        "title_align": "center",
-        "check": "kube_controller_manager.leader_election.status",
-        "grouping": "cluster",
-        "group_by": [],
-        "tags": [
-          "$scope",
-          "$cluster_name"
-        ]
-      },
-      "layout": {
-        "x": 1,
-        "y": 10,
-        "width": 15,
-        "height": 8
-      }
-    },
-    {
-      "id": 2,
-      "definition": {
-        "type": "query_value",
-        "requests": [
-          {
-            "q": "max:kube_controller_manager.goroutines{$scope,$cluster_name}",
-            "aggregator": "last"
-          }
-        ],
-        "custom_links": [],
-        "title": "Active goroutines",
-        "title_size": "16",
-        "title_align": "left",
-        "autoscale": true,
-        "precision": 0
-      },
-      "layout": {
-        "x": 1,
-        "y": 19,
-        "width": 15,
-        "height": 8
-      }
-    },
-    {
-      "id": 3,
-      "definition": {
-        "type": "query_value",
-        "requests": [
-          {
-            "q": "max:kube_controller_manager.threads{$scope,$cluster_name}",
-            "aggregator": "last"
-          }
-        ],
-        "custom_links": [],
-        "title": "Active threads",
-        "title_size": "16",
-        "title_align": "left",
-        "autoscale": true,
-        "precision": 0
-      },
-      "layout": {
-        "x": 1,
-        "y": 28,
-        "width": 15,
-        "height": 9
-      }
-    },
-    {
-      "id": 4,
-      "definition": {
-        "type": "toplist",
-        "requests": [
-          {
-            "q": "top(avg:kube_controller_manager.queue.latency.quantile{$scope,$quantile,$cluster_name} by {queue}, 10, 'mean', 'desc')",
-            "style": {
-              "palette": "dog_classic"
+    "title": "Kubernetes Controller Manager Overview",
+    "description": "### The Kubernetes Controller Manager is a control plane process that embeds the default control loops in Kubernetes.\n\nExamples of controllers that ship with Kubernetes today are the replication controller, endpoints controller, namespace controller, and serviceaccounts controller.\n\nThe Datadog Kubernetes Controller Manager Overview dashboard gives you broad visibility into the status of the default controllers, including the state of their queues.\n\nFurther reading around the Kubernetes Controller Manager:\n\n- [Datadog Kubernetes Controller Manager integration documentation](https://docs.datadoghq.com/integrations/kube_controller_manager/)\n\n- [Kubernetes Controllers official documentation](https://kubernetes.io/docs/concepts/architecture/controller/)\n\n- [Monitoring in the Kubernetes era](https://www.datadoghq.com/blog/monitoring-kubernetes-era/)\n",
+    "widgets": [
+        {
+            "id": 895563546267612,
+            "definition": {
+                "title": "New group",
+                "type": "group",
+                "banner_img": "/static/images/integration_dashboard/kubernetes_hero_2.jpeg",
+                "show_title": false,
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 2538956346653136,
+                        "definition": {
+                            "type": "note",
+                            "content": "### The Kubernetes Controller Manager is a control plane process that embeds the default control loops in Kubernetes.\n\nExamples of controllers that ship with Kubernetes today are the replication controller, endpoints controller, namespace controller, and serviceaccounts controller.\n\nThe Datadog Kubernetes Controller Manager Overview dashboard gives you broad visibility into the status of the default controllers, including the state of their queues.\n\nFurther reading around the Kubernetes Controller Manager:\n\n- [Datadog Kubernetes Controller Manager integration documentation](https://docs.datadoghq.com/integrations/kube_controller_manager/)\n\n- [Kubernetes Controllers official documentation](https://kubernetes.io/docs/concepts/architecture/controller/)\n\n- [Monitoring in the Kubernetes era](https://www.datadoghq.com/blog/monitoring-kubernetes-era/)\n",
+                            "background_color": "transparent",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "vertical_align": "top",
+                            "show_tick": false,
+                            "tick_pos": "50%",
+                            "tick_edge": "left",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 4,
+                            "height": 2
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 4,
+                "height": 5
             }
-          }
-        ],
-        "custom_links": [],
-        "title": "Processing latency per queue ($quantile)",
-        "title_size": "16",
-        "title_align": "left"
-      },
-      "layout": {
-        "x": 18,
-        "y": 1,
-        "width": 47,
-        "height": 15
-      }
-    },
-    {
-      "id": 5,
-      "definition": {
-        "type": "toplist",
-        "requests": [
-          {
-            "q": "top(avg:kube_controller_manager.queue.work_duration.quantile{$scope,$quantile,$cluster_name} by {queue}, 10, 'mean', 'desc')",
-            "style": {
-              "palette": "dog_classic"
+        },
+        {
+            "id": 6390333099532916,
+            "definition": {
+                "title": "Kubernetes Controller Manager Health",
+                "title_align": "left",
+                "type": "group",
+                "background_color": "blue",
+                "show_title": true,
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 5997974745054737,
+                        "definition": {
+                            "title": "Replicas Up",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "check_status",
+                            "check": "kube_controller_manager.up",
+                            "grouping": "cluster",
+                            "group_by": [],
+                            "tags": [
+                                "$cluster",
+                                "$scope"
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 27112096702006,
+                        "definition": {
+                            "title": "Kube Controller Manager CPU usage vs requests",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "requests",
+                                            "formula": "query5"
+                                        },
+                                        {
+                                            "alias": "usage",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "sum:kubernetes.cpu.requests{$cluster,$scope,image_name:k8s.gcr.io/kube-controller-manager} by {pod_name}",
+                                            "data_source": "metrics",
+                                            "name": "query5"
+                                        },
+                                        {
+                                            "query": "sum:kubernetes.cpu.usage.total{$cluster,$scope,image_name:k8s.gcr.io/kube-controller-manager} by {pod_name}",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "yaxis": {
+                                "include_zero": true,
+                                "scale": "linear",
+                                "label": "",
+                                "min": "auto",
+                                "max": "auto"
+                            },
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 2,
+                            "y": 0,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 5382860624626359,
+                        "definition": {
+                            "title": "Leader Election",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "check_status",
+                            "check": "kube_controller_manager.leader_election.status",
+                            "grouping": "cluster",
+                            "group_by": [],
+                            "tags": [
+                                "$cluster",
+                                "$scope"
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 2,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 5608027259222025,
+                        "definition": {
+                            "title": "Kube Controller Manager memory usage vs requests",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "requests",
+                                            "formula": "query5"
+                                        },
+                                        {
+                                            "alias": "usage",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "sum:kubernetes.memory.requests{$cluster,$scope,image_name:k8s.gcr.io/kube-controller-manager} by {pod_name}",
+                                            "data_source": "metrics",
+                                            "name": "query5"
+                                        },
+                                        {
+                                            "query": "sum:kubernetes.memory.usage{$cluster,$scope,image_name:k8s.gcr.io/kube-controller-manager} by {pod_name}",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "yaxis": {
+                                "include_zero": true,
+                                "scale": "linear",
+                                "label": "",
+                                "min": "auto",
+                                "max": "auto"
+                            },
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 2,
+                            "y": 2,
+                            "width": 6,
+                            "height": 2
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 4,
+                "y": 0,
+                "width": 8,
+                "height": 5
             }
-          }
-        ],
-        "custom_links": [],
-        "title": "Work duration per queue ($quantile)",
-        "title_size": "16",
-        "title_align": "left"
-      },
-      "layout": {
-        "x": 18,
-        "y": 17,
-        "width": 47,
-        "height": 15
-      }
-    },
-    {
-      "id": 6,
-      "definition": {
-        "type": "change",
-        "requests": [
-          {
-            "q": "avg:kube_controller_manager.queue.latency.quantile{$scope,$quantile,$cluster_name} by {queue}",
-            "change_type": "relative",
-            "compare_to": "hour_before",
-            "increase_good": false,
-            "order_by": "change",
-            "order_dir": "desc"
-          }
-        ],
-        "custom_links": [],
-        "title": "Latency change ($quantile), past hour",
-        "title_size": "16",
-        "title_align": "left"
-      },
-      "layout": {
-        "x": 18,
-        "y": 33,
-        "width": 47,
-        "height": 15
-      }
-    },
-    {
-      "id": 7,
-      "definition": {
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "sum:kube_controller_manager.client.http.requests{$scope,$cluster_name} by {method,code}.as_count()",
-            "display_type": "bars",
-            "style": {
-              "palette": "dog_classic",
-              "line_type": "solid",
-              "line_width": "normal"
+        },
+        {
+            "id": 4643450728041347,
+            "definition": {
+                "title": "Queue latency",
+                "type": "group",
+                "background_color": "green",
+                "show_title": true,
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 5674732146803099,
+                        "definition": {
+                            "title": "Avg time an item stays in a queue before being requested (by queue)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "time": {},
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1 / query2"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "avg:kube_controller_manager.queue.queue_duration.sum{$scope,$cluster} by {queue}",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        },
+                                        {
+                                            "query": "avg:kube_controller_manager.queue.queue_duration.count{$scope,$cluster} by {queue}",
+                                            "data_source": "metrics",
+                                            "name": "query2"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 2909613047774939,
+                        "definition": {
+                            "title": "Avg processing time (by queue)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1 / query2"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "avg:kube_controller_manager.queue.process_duration.sum{$scope,$cluster} by {queue}",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        },
+                                        {
+                                            "query": "avg:kube_controller_manager.queue.process_duration.count{$scope,$cluster} by {queue}",
+                                            "data_source": "metrics",
+                                            "name": "query2"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 0,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 5530175372450278,
+                        "definition": {
+                            "title": "Work longest duration (by queue)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "avg:kube_controller_manager.queue.work_longest_duration{$scope,$cluster} by {queue}",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 6,
+                            "height": 5
+                        }
+                    },
+                    {
+                        "id": 506103161100730,
+                        "definition": {
+                            "title": "Work unfinished duration (by queue)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "avg:kube_controller_manager.queue.work_unfinished_duration{$scope,$cluster} by {queue}",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 4,
+                            "width": 6,
+                            "height": 5
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 5,
+                "width": 12,
+                "height": 10
             }
-          }
-        ],
-        "custom_links": [],
-        "title": "HTTP requests to apiserver",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": true,
-        "legend_size": "0"
-      },
-      "layout": {
-        "x": 18,
-        "y": 49,
-        "width": 47,
-        "height": 23
-      }
-    },
-    {
-      "id": 8,
-      "definition": {
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "avg:kube_controller_manager.queue.adds{$scope,$cluster_name} by {queue}.as_count()",
-            "display_type": "bars",
-            "style": {
-              "palette": "dog_classic",
-              "line_type": "solid",
-              "line_width": "normal"
+        },
+        {
+            "id": 1509571421115336,
+            "definition": {
+                "title": "Queues",
+                "type": "group",
+                "background_color": "orange",
+                "show_title": true,
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 8640611249029529,
+                        "definition": {
+                            "title": "Work elements added per queue",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_size": "0",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "avg:kube_controller_manager.queue.adds{$scope,$cluster} by {queue}.as_count()",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ],
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 6760614664523071,
+                        "definition": {
+                            "title": "Retries per queue",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_size": "0",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "avg:kube_controller_manager.queue.retries{$scope,$cluster} by {queue}.as_count()",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ],
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 0,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 8051282997133963,
+                        "definition": {
+                            "title": "Queue depth",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "avg:kube_controller_manager.queue.depth{$scope,$cluster} by {queue}",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 0,
+                            "width": 4,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 15,
+                "width": 12,
+                "height": 5,
+                "is_column_break": true
             }
-          }
-        ],
-        "custom_links": [],
-        "title": "Work elements added per queue",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": false,
-        "legend_size": "0"
-      },
-      "layout": {
-        "x": 66,
-        "y": 1,
-        "width": 47,
-        "height": 15
-      }
-    },
-    {
-      "id": 9,
-      "definition": {
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "avg:kube_controller_manager.queue.retries{$scope,$cluster_name} by {queue}.as_count()",
-            "display_type": "bars",
-            "style": {
-              "palette": "dog_classic",
-              "line_type": "solid",
-              "line_width": "normal"
+        },
+        {
+            "id": 7885145587384818,
+            "definition": {
+                "title": "HTTP Requests",
+                "type": "group",
+                "background_color": "green",
+                "show_title": true,
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 6389822199554693,
+                        "definition": {
+                            "title": "HTTP client requests by (method,code)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "time": {},
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "sum:kube_controller_manager.client.http.requests{$cluster,$scope} by {method,code}.as_count()",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ],
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 6,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 6,
+                "height": 5
             }
-          }
-        ],
-        "custom_links": [],
-        "title": "Retries per queue",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": false,
-        "legend_size": "0"
-      },
-      "layout": {
-        "x": 66,
-        "y": 17,
-        "width": 47,
-        "height": 15
-      }
-    },
-    {
-      "id": 10,
-      "definition": {
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "avg:kube_controller_manager.rate_limiter.use{$scope,$cluster_name} by {limiter}",
-            "display_type": "bars",
-            "style": {
-              "palette": "dog_classic",
-              "line_type": "solid",
-              "line_width": "normal"
+        },
+        {
+            "id": 8277375896164218,
+            "definition": {
+                "title": "Rate Limits",
+                "type": "group",
+                "background_color": "purple",
+                "show_title": true,
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 6648231289941672,
+                        "definition": {
+                            "title": "Rate limiter uses",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_size": "0",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "avg:kube_controller_manager.rate_limiter.use{$scope,$cluster} by {limiter}",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ],
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 6,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 6,
+                "y": 0,
+                "width": 6,
+                "height": 5
             }
-          }
-        ],
-        "custom_links": [],
-        "title": "Rate limiter uses",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": false,
-        "legend_size": "0"
-      },
-      "layout": {
-        "x": 66,
-        "y": 33,
-        "width": 47,
-        "height": 15
-      }
-    },
-    {
-      "id": 11,
-      "definition": {
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "avg:kube_controller_manager.queue.depth{$scope,$cluster_name} by {queue}",
-            "display_type": "line",
-            "style": {
-              "palette": "dog_classic",
-              "line_type": "solid",
-              "line_width": "normal"
+        },
+        {
+            "id": 56137128632033,
+            "definition": {
+                "title": "Go Metrics",
+                "type": "group",
+                "background_color": "vivid_purple",
+                "show_title": true,
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 5806566826736078,
+                        "definition": {
+                            "title": "Active threads",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {},
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "avg:kube_controller_manager.threads{$cluster,$scope}",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 2904488759548787,
+                        "definition": {
+                            "title": "Open File Descriptors",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "avg:kube_controller_manager.max_fds{$cluster,$scope}",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        },
+                                        {
+                                            "query": "avg:kube_controller_manager.open_fds{$cluster,$scope}",
+                                            "data_source": "metrics",
+                                            "name": "query2"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "area"
+                                }
+                            ],
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 0,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 1253715625043501,
+                        "definition": {
+                            "title": "Active goroutines",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {},
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "avg:kube_controller_manager.goroutines{$cluster,$scope}",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 2,
+                            "width": 6,
+                            "height": 2
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 25,
+                "width": 12,
+                "height": 5
             }
-          }
-        ],
-        "custom_links": [],
-        "title": "Queue depth",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": true,
-        "legend_size": "0"
-      },
-      "layout": {
-        "x": 66,
-        "y": 49,
-        "width": 47,
-        "height": 23
-      }
-    }
-  ],
-  "template_variables": [
-    {
-      "name": "scope",
-      "default": "*",
-      "prefix": null
-    },
-    {
-      "name": "cluster_name",
-      "default": "*",
-      "prefix": "kube_cluster_name"
-    },
-    {
-      "name": "quantile",
-      "default": "*",
-      "prefix": "quantile"
-    }
-  ],
-  "layout_type": "free",
-  "is_read_only": true,
-  "notify_list": [],
-  "id": 30271
+        },
+        {
+            "id": 1018697804875837,
+            "definition": {
+                "title": "Kube Controller Manager Logs",
+                "type": "group",
+                "background_color": "pink",
+                "show_title": true,
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 7674420530817556,
+                        "definition": {
+                            "title": "Kube Controller Manager Logs",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "log_stream",
+                            "indexes": [],
+                            "query": "source:kube-controller-manager",
+                            "sort": {
+                                "column": "time",
+                                "order": "desc"
+                            },
+                            "columns": [
+                                "host",
+                                "service"
+                            ],
+                            "show_date_column": true,
+                            "show_message_column": true,
+                            "message_display": "expanded-md"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 12,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 30,
+                "width": 12,
+                "height": 5
+            }
+        }
+    ],
+    "template_variables": [
+        {
+            "name": "scope",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "cluster",
+            "prefix": "kube_cluster_name",
+            "available_values": [],
+            "default": "*"
+        }
+    ],
+    "layout_type": "ordered",
+    "is_read_only": false,
+    "notify_list": [],
+    "reflow_type": "fixed",
+    "id": "ri4-gcg-yp7"
 }

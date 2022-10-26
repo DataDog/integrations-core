@@ -19,7 +19,7 @@ pytestmark = pytest.mark.unit
 )
 def test_mq_host_tag(instance, override_hostname, expected_hostname, expected_tag):
     instance['override_hostname'] = override_hostname
-    config = IBMMQConfig(instance)
+    config = IBMMQConfig(instance, {})
 
     assert config.hostname == expected_hostname
     if expected_tag:
@@ -29,7 +29,7 @@ def test_mq_host_tag(instance, override_hostname, expected_hostname, expected_ta
 def test_cannot_set_host_and_connection_name(instance):
     instance['connection_name'] = "localhost(8080)"
     with pytest.raises(ConfigurationError, match="Specify only one host/port or connection_name configuration"):
-        IBMMQConfig(instance)
+        IBMMQConfig(instance, {})
 
 
 def test_cannot_set_override_hostname_and_connection_name(instance):
@@ -41,14 +41,14 @@ def test_cannot_set_override_hostname_and_connection_name(instance):
         ConfigurationError,
         match="You cannot override the hostname if you provide a `connection_name` instead of a `host`",
     ):
-        IBMMQConfig(instance)
+        IBMMQConfig(instance, {})
 
 
 def test_cannot_override_hostname_if_no_host_provided(instance):
     del instance['host']
     instance['override_hostname'] = True
     with pytest.raises(ConfigurationError, match="You cannot override the hostname if you don't provide a `host`"):
-        IBMMQConfig(instance)
+        IBMMQConfig(instance, {})
 
 
 @pytest.mark.skipif(PY2, reason="Config model validation only available in PY3.")
@@ -113,3 +113,56 @@ def test_min_properties_queue_tags_channel_status(instance, get_check, dd_run_ch
             dd_run_check(check)
         except Exception as e:
             AssertionError("`{}` contains empty mapping. Error is: {}".format(param, e))
+
+
+@pytest.mark.parametrize(
+    'ssl_explicit_disable, ssl_option, expected_ssl',
+    [
+        pytest.param(
+            False,
+            'ssl_cipher_spec',
+            True,
+            id="ssl_cipher_spec enabled, SSL implicitly enabled",
+        ),
+        pytest.param(
+            False,
+            'ssl_key_repository_location',
+            True,
+            id="ssl_key_repository_location enabled, SSL implicitly enabled",
+        ),
+        pytest.param(
+            False,
+            'ssl_certificate_label',
+            True,
+            id="ssl_certificate_label enabled, SSL implicitly enabled",
+        ),
+        pytest.param(
+            True,
+            'ssl_cipher_spec',
+            False,
+            id="ssl_cipher_spec enabled but ssl_auth disabled, SSL explicitly disabled",
+        ),
+        pytest.param(
+            True,
+            'ssl_key_repository_location',
+            False,
+            id="ssl_key_repository_location enabled but ssl_auth disabled, SSL explicitly disabled",
+        ),
+        pytest.param(
+            True,
+            'ssl_certificate_label',
+            False,
+            id="ssl_certificate_label enabled but ssl_auth disabled, SSL explicitly disabled",
+        ),
+    ],
+)
+def test_ssl_auth_implicit_enable(instance, ssl_explicit_disable, ssl_option, expected_ssl):
+    if ssl_explicit_disable:
+        instance['ssl_auth'] = False
+
+    # We only care that the option is enabled
+    instance[ssl_option] = "dummy_value"
+
+    config = IBMMQConfig(instance, {})
+
+    assert config.ssl == expected_ssl

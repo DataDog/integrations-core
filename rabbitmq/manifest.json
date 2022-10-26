@@ -1,53 +1,69 @@
 {
-  "categories": [
-    "processing",
-    "log collection",
-    "autodiscovery"
-  ],
-  "creates_events": true,
-  "display_name": "RabbitMQ",
-  "guid": "a790a556-fbaa-4208-9d39-c42c3d57084b",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "rabbitmq.",
-  "metric_to_check": "rabbitmq.queue.messages",
-  "name": "rabbitmq",
-  "process_signatures": [
-    "rabbitmq",
-    "rabbitmq-server"
-  ],
-  "public_title": "Datadog-RabbitMQ Integration",
-  "short_description": "Track queue size, consumer count, unacknowledged messages, and more.",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "type": "check",
-  "integration_id": "rabbitmq",
+  "manifest_version": "2.0.0",
+  "app_uuid": "a10b582b-71ef-4773-b7b8-b7751c724620",
+  "app_id": "rabbitmq",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Track queue size, consumer count, unacknowledged messages, and more.",
+    "title": "RabbitMQ",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Processing",
+      "Category::Log Collection",
+      "Category::Autodiscovery"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
-    },
-    "monitors": {
-      "disk_usage": "assets/monitors/disk_usage.json",
-      "message_unacknowledge_rate_anomaly": "assets/monitors/message_unacknowledge_rate_anomaly.json"
+    "integration": {
+      "source_type_name": "RabbitMQ",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": true
+      },
+      "metrics": {
+        "prefix": "rabbitmq.",
+        "check": "rabbitmq.queue.messages",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      },
+      "process_signatures": [
+        "rabbitmq",
+        "rabbitmq-server"
+      ]
     },
     "dashboards": {
       "rabbitmq_screenboard": "assets/dashboards/rabbitmq_screenboard_dashboard.json",
       "rabbitmq": "assets/dashboards/rabbitmq_dashboard.json"
+    },
+    "monitors": {
+      "disk_usage": "assets/monitors/disk_usage.json",
+      "message_unacknowledge_rate_anomaly": "assets/monitors/message_unacknowledge_rate_anomaly.json"
     },
     "saved_views": {
       "pid_overview": "assets/saved_views/status_overview.json",
       "rabbitmq_pattern": "assets/saved_views/rabbitmq_pattern.json",
       "rabbitmq_processes": "assets/saved_views/rabbitmq_processes.json"
     },
-    "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "rabbitmq"
-    },
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

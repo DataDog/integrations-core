@@ -1,51 +1,63 @@
 {
-  "aliases": [
-    "/integrations/powerdns"
-  ],
-  "categories": [
-    "web",
-    "network",
-    "autodiscovery",
-    "log collection"
-  ],
-  "creates_events": false,
-  "display_name": "PowerDNS Recursor",
-  "guid": "ae533b67-a2af-45ce-8e23-235acb3a3893",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "powerdns.",
-  "metric_to_check": "powerdns.recursor.questions",
-  "name": "powerdns_recursor",
-  "process_signatures": [
-    "pdns_server",
-    "systemctl start pdns@"
-  ],
-  "public_title": "Datadog-Power DNS Recursor Integration",
-  "short_description": "Keep an eye on strange traffic to and from your PowerDNS recursors.",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "type": "check",
-  "integration_id": "powerdns",
+  "manifest_version": "2.0.0",
+  "app_uuid": "44e491e1-f7c3-447a-b597-e740196479e0",
+  "app_id": "powerdns",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Keep an eye on strange traffic to and from your PowerDNS recursors.",
+    "title": "Power DNS Recursor",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Web",
+      "Category::Network",
+      "Category::Autodiscovery",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "PowerDNS Recursor",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "powerdns.",
+        "check": "powerdns.recursor.questions",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      },
+      "process_signatures": [
+        "pdns_server",
+        "systemctl start pdns@"
+      ]
     },
-    "monitors": {},
     "dashboards": {
       "powerdns": "assets/dashboards/powerdns_dashboard.json"
     },
-    "service_checks": "assets/service_checks.json",
-    "logs": {
-      "source": "powerdns"
-    },
-    "metrics_metadata": "metadata.csv",
     "saved_views": {
       "powerdns_processes": "assets/saved_views/powerdns_processes.json"
+    },
+    "logs": {
+      "source": "powerdns"
     }
   }
 }

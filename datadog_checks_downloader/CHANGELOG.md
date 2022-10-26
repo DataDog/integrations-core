@@ -1,5 +1,18 @@
 # CHANGELOG - Datadog Checks Downloader
 
+## 3.9.0 / 2022-09-16
+
+* [Added] Add `packaging` to dependencies. See [#12753](https://github.com/DataDog/integrations-core/pull/12753).
+* [Fixed] Use packaging instead of pkg_resources for parsing version. See [#12560](https://github.com/DataDog/integrations-core/pull/12560). Thanks [fridex](https://github.com/fridex).
+
+## 3.8.0 / 2022-08-05 / Agent 7.39.0
+
+* [Added] Use context manager when creating temporary directory. See [#12559](https://github.com/DataDog/integrations-core/pull/12559). Thanks [fridex](https://github.com/fridex).
+* [Fixed] Prevent from publishing datadog-checks-downloader to PyPI. See [#12556](https://github.com/DataDog/integrations-core/pull/12556).
+* [Fixed] Revert #12559 to make it compatible with python2. See [#12647](https://github.com/DataDog/integrations-core/pull/12647).
+* [Fixed] Avoid using assert statement by creating UpdatedTargetsError exception. See [#12558](https://github.com/DataDog/integrations-core/pull/12558).
+* [Fixed] Adjust logging setup when multiple -v flags are supplied. See [#12562](https://github.com/DataDog/integrations-core/pull/12562). Thanks [fridex](https://github.com/fridex).
+
 ## 3.7.0 / 2022-04-11 / Agent 7.36.0
 
 * [Added] Update downloader to use v4 root layout. See [#11779](https://github.com/DataDog/integrations-core/pull/11779).

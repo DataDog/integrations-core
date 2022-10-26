@@ -1,30 +1,52 @@
 {
-  "categories": [
-    "data store",
-    "log collection"
-  ],
-  "creates_events": false,
-  "display_name": "SQL Server",
-  "guid": "635cb962-ee9f-4788-aa55-a7ffb9661498",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "sqlserver.",
-  "metric_to_check": "sqlserver.stats.connections",
-  "name": "sqlserver",
-  "public_title": "Datadog-SQL Server Integration",
-  "short_description": "Collect important SQL Server performance and health metrics.",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "type": "check",
-  "integration_id": "sql-server",
+  "manifest_version": "2.0.0",
+  "app_uuid": "bfa2f276-da05-4153-b8d4-48d4e41f5e40",
+  "app_id": "sql-server",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Collect important SQL Server performance and health metrics.",
+    "title": "SQL Server",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Data Store",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "SQL Server",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "sqlserver.",
+        "check": "sqlserver.stats.connections",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {
+      "SQLServer-Overview": "assets/dashboards/SQLServer-Overview_dashboard.json",
+      "sqlserver": "assets/dashboards/sqlserver_dashboard.json"
     },
     "monitors": {
       "SQLServer ao not healthy": "assets/recommended_monitors/sqlserver_ao_not_healthy.json",
@@ -33,14 +55,8 @@
       "SQLServer db not online": "assets/recommended_monitors/sqlserver_db_not_online.json",
       "SQLServer db not in sync": "assets/recommended_monitors/sqlserver_db_not_sync.json"
     },
-    "dashboards": {
-      "SQLServer-Overview": "assets/dashboards/SQLServer-Overview_dashboard.json",
-      "sqlserver": "assets/dashboards/sqlserver_dashboard.json"
-    },
-    "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "sqlserver"
-    },
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

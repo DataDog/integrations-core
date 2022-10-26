@@ -1,0 +1,28 @@
+{
+    "name": "[Boundary] High active connections",
+    "type": "query alert",
+    "query": "avg(last_5m):boundary.worker.proxy.websocket.active_connections{*} by {endpoint} > 90",
+    "message": "There is a high number ({{value}}) of active connections.",
+    "tags": [
+        "integration:boundary"
+    ],
+    "options": {
+        "notify_audit": false,
+        "locked": false,
+        "timeout_h": 0,
+        "new_host_delay": 300,
+        "require_full_window": true,
+        "notify_no_data": false,
+        "renotify_interval": "0",
+        "escalation_message": "",
+        "no_data_timeframe": null,
+        "include_tags": true,
+        "thresholds": {
+            "critical": 90,
+            "warning": 70
+        }
+    },
+    "recommended_monitor_metadata": {
+        "description": "Notify your team when there is a high number of active connections."
+    }
+}

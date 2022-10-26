@@ -59,6 +59,11 @@ TABLE_VARS = [
     'mysql.info.table.data_size',
 ]
 
+ROW_TABLE_STATS_VARS = [
+    'mysql.info.table.rows.read',
+    'mysql.info.table.rows.changed',
+]
+
 # Possibly from SHOW GLOBAL VARIABLES
 VARIABLES_VARS = [
     'mysql.myisam.key_buffer_size',
@@ -243,6 +248,13 @@ OPTIONAL_INNODB_VARS = [
 ]
 
 PERFORMANCE_VARS = ['mysql.performance.query_run_time.avg', 'mysql.performance.digest_95th_percentile.avg_us']
+
+COMMON_PERFORMANCE_VARS = ['mysql.performance.user_connections']
+
+# This exists to comply with some of the testing patterns with the old API.
+QUERY_EXECUTOR_METRIC_SETS = {
+    'user_connections': ('mysql.performance.user_connections', 'guage'),
+}
 
 SCHEMA_VARS = ['mysql.info.schema.size']
 

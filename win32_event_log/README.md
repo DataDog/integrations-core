@@ -114,32 +114,43 @@ Double-check your filters' values with <code>Get-WmiObject</code> if the integra
     For each filter, add an instance in the configuration file at `win32_event_log.d/conf.yaml`.
 
     Some example filters:
-    
+
     ```yaml
     - type: windows_event
-        channel_path: Security
-        source: windows.events
-        service: Windows       
-        log_processing_rules:
-        - type: include_at_match
-          name: relevant_security_events
-          pattern: .*(?i)eventid.+(1102|4624|4625|4634|4648|4728|4732|4735|4737|4740|4755|4756)
-      - type: windows_event
-        channel_path: System
-        source: windows.events
-        service: Windows       
-        log_processing_rules:
-        - type: include_at_match
-          name: system_errors_and_warnings
-          pattern: .*(?i)level.+((?i)(warning|error))
-      - type: windows_event
-        channel_path: Application
-        source: windows.events
-        service: Windows       
-        log_processing_rules:
-        - type: include_at_match
-          name: application_errors_and_warnings
-          pattern: .*(?i)level.+((?i)(warning|error))
+      channel_path: Security
+      source: windows.events
+      service: Windows       
+      log_processing_rules:
+      - type: include_at_match
+        name: relevant_security_events
+        pattern: '"EventID":"(1102|4624|4625|4634|4648|4728|4732|4735|4737|4740|4755|4756)"'
+
+    - type: windows_event
+      channel_path: Security
+      source: windows.events
+      service: Windows       
+      log_processing_rules:
+      - type: exclude_at_match
+        name: relevant_security_events
+        pattern: '"EventID":"(1102|4624)"'
+
+    - type: windows_event
+      channel_path: System
+      source: windows.events
+      service: Windows       
+      log_processing_rules:
+      - type: include_at_match
+        name: system_errors_and_warnings
+        pattern: '"level":"((?i)warning|error)"'
+
+    - type: windows_event
+      channel_path: Application
+      source: windows.events
+      service: Windows       
+      log_processing_rules:
+      - type: include_at_match
+        name: application_errors_and_warnings
+        pattern: '"level":"((?i)warning|error)"'
     ```
 
     ```yaml
@@ -168,6 +179,47 @@ Double-check your filters' values with <code>Get-WmiObject</code> if the integra
 2. [Restart the Agent][4] using the Agent Manager (or restart the service).
 
 For more examples of filtering logs, see the [Advanced Log Collection documentation][12].
+
+### Filtering by EventID
+
+Here is an example regex pattern to only collect Windows Events Logs from a certain EventID:
+
+```yaml
+logs:
+  - type: windows_event
+    channel_path: Security
+    source: windows.event
+    service: Windows
+    log_processing_rules:
+      - type: include_at_match
+        name: include_x01
+        pattern: '"EventID":"(101|201|301)"'
+```
+
+**Note**: The pattern may vary based on the format of the logs. The [Agent `stream-logs` subcommand][15] can be used to view this format.
+
+#### Legacy events
+_Applies to Agent versions less than 7.41_
+
+Legacy Provider EventIDs have a `Qualifiers` attribute that changes the format of the log, as seen in the [Windows Event Schema][14]. These events have the following XML format, visible in Windows Event Viewer:
+```xml
+<EventID Qualifiers="16384">3</EventID>
+```
+
+The following regex must be used to match these EventIDs:
+```yaml
+logs:
+  - type: windows_event
+    channel_path: Security
+    source: windows.event
+    service: Windows
+    log_processing_rules:
+      - type: include_at_match
+        name: include_legacy_x01
+        pattern: '"EventID":{"value":"(101|201|301)"'
+```
+
+Agent versions 7.41 and later normalize the EventID field and this legacy pattern is no longer applicable.
 
 ### Validation
 
@@ -207,7 +259,7 @@ Need help? Contact [Datadog support][7].
 
 ### Documentation
 
-- [How to add event log files to the `Win32_NTLogEvent` WMI class][8]
+- [Add event log files to the `Win32_NTLogEvent` WMI class][8]
 
 ### Blog
 
@@ -222,9 +274,11 @@ Need help? Contact [Datadog support][7].
 [5]: https://docs.datadoghq.com/logs/processing/pipelines/#integration-pipelines
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [7]: https://docs.datadoghq.com/help/
-[8]: https://docs.datadoghq.com/integrations/faq/how-to-add-event-log-files-to-the-win32-ntlogevent-wmi-class/
+[8]: https://docs.datadoghq.com/integrations/guide/add-event-log-files-to-the-win32-ntlogevent-wmi-class/
 [9]: https://www.datadoghq.com/blog/monitoring-windows-server-2012
 [10]: https://www.datadoghq.com/blog/collect-windows-server-2012-metrics
 [11]: https://www.datadoghq.com/blog/windows-server-monitoring
 [12]: https://docs.datadoghq.com/agent/logs/advanced_log_collection/?tab=configurationfile
 [13]: https://docs.microsoft.com/en-us/windows/win32/eventlog/event-logging
+[14]: https://learn.microsoft.com/en-us/windows/win32/wes/eventschema-systempropertiestype-complextype
+[15]: https://docs.datadoghq.com/agent/guide/agent-commands/

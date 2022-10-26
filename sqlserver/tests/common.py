@@ -2,6 +2,7 @@
 
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import os
 from itertools import chain
 
 from datadog_checks.dev import get_docker_hostname, get_here
@@ -11,7 +12,6 @@ from datadog_checks.sqlserver.const import (
     AO_METRICS,
     AO_METRICS_PRIMARY,
     AO_METRICS_SECONDARY,
-    DATABASE_FILES_IO,
     DATABASE_FRAGMENTATION_METRICS,
     DATABASE_MASTER_FILES,
     DATABASE_METRICS,
@@ -20,6 +20,7 @@ from datadog_checks.sqlserver.const import (
     INSTANCE_METRICS_TOTAL,
     TASK_SCHEDULER_METRICS,
 )
+from datadog_checks.sqlserver.queries import get_query_file_stats
 
 
 def get_local_driver():
@@ -51,16 +52,30 @@ SERVER_METRICS = [
     'sqlserver.server.uptime',
     'sqlserver.server.virtual_memory',
 ]
-EXPECTED_DEFAULT_METRICS = [
-    m[0]
-    for m in chain(
-        INSTANCE_METRICS,
-        DBM_MIGRATED_METRICS,
-        INSTANCE_METRICS_TOTAL,
-        DATABASE_METRICS,
-        DATABASE_FILES_IO,
-    )
-] + SERVER_METRICS
+
+SQLSERVER_MAJOR_VERSION = int(os.environ.get('SQLSERVER_MAJOR_VERSION'))
+
+
+def get_expected_file_stats_metrics():
+    query_file_stats = get_query_file_stats(SQLSERVER_MAJOR_VERSION)
+    return ["sqlserver." + c["name"] for c in query_file_stats["columns"] if c["type"] != "tag"]
+
+
+EXPECTED_FILE_STATS_METRICS = get_expected_file_stats_metrics()
+
+EXPECTED_DEFAULT_METRICS = (
+    [
+        m[0]
+        for m in chain(
+            INSTANCE_METRICS,
+            DBM_MIGRATED_METRICS,
+            INSTANCE_METRICS_TOTAL,
+            DATABASE_METRICS,
+        )
+    ]
+    + SERVER_METRICS
+    + EXPECTED_FILE_STATS_METRICS
+)
 EXPECTED_METRICS = (
     EXPECTED_DEFAULT_METRICS
     + [
@@ -92,6 +107,7 @@ EXPECTED_QUERY_EXECUTOR_AO_METRICS_SECONDARY = [
 ]
 EXPECTED_QUERY_EXECUTOR_AO_METRICS_COMMON = [
     'sqlserver.ao.is_primary_replica',
+    'sqlserver.ao.replica_status',
     'sqlserver.ao.quorum_type',
     'sqlserver.ao.quorum_state',
     'sqlserver.ao.member.type',
@@ -159,10 +175,10 @@ INIT_CONFIG_OBJECT_NAME = {
             'tags': ['optional_tag:tag1'],
         },
         {
-            'name': 'sqlserver.active_requests',
-            'counter_name': 'Active requests',
-            'instance_name': 'default',
-            'object_name': 'SQLServer:Workload Group Stats',
+            'name': 'sqlserver.broker_activation.tasks_running',
+            'counter_name': 'Tasks Running',
+            'instance_name': 'tempdb',
+            'object_name': 'SQLServer:Broker Activation',
             'tags': ['optional_tag:tag1'],
         },
     ]

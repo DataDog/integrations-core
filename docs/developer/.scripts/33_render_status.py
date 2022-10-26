@@ -18,7 +18,9 @@ from datadog_checks.dev.tooling.utils import (
     has_process_signature,
     has_saved_views,
     has_recommended_monitor,
-    is_tile_only, is_logs_only, get_available_recommended_monitors_integrations,
+    is_tile_only,
+    is_logs_only,
+    get_available_recommended_monitors_integrations,
 )
 
 MARKER = '<docs-insert-status>'
@@ -44,6 +46,7 @@ def patch(lines):
         render_process_signatures_progress,
         render_check_signatures_progress,
         render_saved_views_progress,
+        render_hatch_migration_progress,
     ):
         new_lines.extend(renderer())
         new_lines.append('')
@@ -338,4 +341,27 @@ def render_config_validation_progress():
     formatted_percent = f'{percent:.2f}'
     lines[2] = f'[={formatted_percent}% "{formatted_percent}%"]'
     lines[4] = f'??? check "Completed {checks_with_config_validation}/{total_checks}"'
+    return lines
+
+
+def render_hatch_migration_progress():
+    valid_checks = sorted(get_valid_checks())
+    total_checks = len(valid_checks)
+    checks_migrated = 0
+
+    lines = ['## Hatch migration', '', None, '', '??? check "Completed"']
+
+    for check in valid_checks:
+        if os.path.exists(get_hatch_file(check)):
+            status = 'X'
+            checks_migrated += 1
+        else:
+            status = ' '
+
+        lines.append(f'    - [{status}] {check}')
+
+    percent = checks_migrated / total_checks * 100
+    formatted_percent = f'{percent:.2f}'
+    lines[2] = f'[={formatted_percent}% "{formatted_percent}%"]'
+    lines[4] = f'??? check "Completed {checks_migrated}/{total_checks}"'
     return lines
