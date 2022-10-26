@@ -1,5 +1,11 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 17.3.0 / 2022-10-26
+
+* [Added] Add the memray option to the `test` command. See [#13160](https://github.com/DataDog/integrations-core/pull/13160).
+* [Fixed] Rename Tools and Libs team to Platform Integrations. See [#13201](https://github.com/DataDog/integrations-core/pull/13201).
+* [Fixed] Force pytest<7.2.0 to avoid test breakage. See [#13198](https://github.com/DataDog/integrations-core/pull/13198).
+
 ## 17.2.0 / 2022-10-20
 
 * [Added] Add the ability to retry kind environments. See [#13106](https://github.com/DataDog/integrations-core/pull/13106).
