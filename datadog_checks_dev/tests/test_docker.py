@@ -7,7 +7,6 @@ import mock
 import pytest
 import tenacity
 
-from datadog_checks.dev import RetryError
 from datadog_checks.dev.ci import running_on_ci
 from datadog_checks.dev.docker import compose_file_active, docker_run
 from datadog_checks.dev.subprocess import run_command
@@ -60,33 +59,26 @@ class TestDockerRun:
         compose_file = os.path.join(DOCKER_DIR, "test_default.yaml")
 
         condition = mock.MagicMock()
-        condition.side_effect = RetryError("error")
+        condition.side_effect = Exception("exception")
 
         expected_exception = tenacity.RetryError
         if attempts is None:
             if running_on_ci():
                 expected_call_count = 2
             else:
-                expected_exception = RetryError
+                expected_exception = Exception
 
-        try:
-            with pytest.raises(expected_exception):
-                with docker_run(compose_file, attempts=attempts, conditions=[condition]):
-                    pass
+        with pytest.raises(expected_exception):
+            with docker_run(compose_file, attempts=attempts, conditions=[condition]):
+                pass
 
-            assert condition.call_count == expected_call_count
-        finally:
-            run_command(["docker", "compose", "-f", compose_file, "down"], capture=True)
+        assert condition.call_count == expected_call_count
 
     def test_retry_condition_failed_only_on_first_run(self):
         compose_file = os.path.join(DOCKER_DIR, "test_default.yaml")
 
         condition = mock.MagicMock()
-        condition.side_effect = [RetryError("error"), None, None]
+        condition.side_effect = [Exception("exception"), None, None]
 
-        try:
-            with docker_run(compose_file, attempts=3, conditions=[condition]):
-                assert condition.call_count == 2
-
-        finally:
-            run_command(["docker", "compose", "-f", compose_file, "down"], capture=True)
+        with docker_run(compose_file, attempts=3, conditions=[condition]):
+            assert condition.call_count == 2
