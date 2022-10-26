@@ -10,7 +10,7 @@ from os import mkdir
 import mock
 import pytest
 
-from datadog_checks.base.errors import CheckException, ConfigurationError
+from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.dev.fs import create_file
 from datadog_checks.dev.fs import temp_dir as temp_directory
 from datadog_checks.dev.utils import get_metadata_metrics
@@ -308,7 +308,7 @@ def test_non_existent_directory(aggregator):
     Missing or inaccessible directory coverage.
     """
     config = {'directory': '/non-existent/directory', 'tags': ['foo:bar']}
-    with pytest.raises(CheckException):
+    with pytest.raises(Warning):
         dir_check = DirectoryCheck('directory', {}, [config])
         dir_check.check(config)
     expected_tags = ['dir_name:/non-existent/directory', 'foo:bar']

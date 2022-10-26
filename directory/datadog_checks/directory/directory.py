@@ -7,7 +7,6 @@ from time import time
 from typing import Any
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.errors import CheckException
 from datadog_checks.directory.config import DirectoryConfig
 
 from .traverse import walk
@@ -31,7 +30,7 @@ class DirectoryCheck(AgentCheck):
         `recursive` - boolean, when true the stats will recurse into directories. default False
         `countonly` - boolean, when true the stats will only count the number of files matching the pattern.
                       Useful for very large directories. default False
-        `ignore_missing` - boolean, when true do not raise an exception on missing/inaccessible directories.
+        `ignore_missing` - boolean, when true do not raise a warning on missing/inaccessible directories.
                            default False
     """
 
@@ -54,9 +53,9 @@ class DirectoryCheck(AgentCheck):
             # report missing directory
             self.service_check(name=SERVICE_DIRECTORY_EXISTS, status=self.WARNING, tags=service_check_tags, message=msg)
 
-            # raise exception if `ignore_missing` is False
+            # raise warning if `ignore_missing` is False
             if not self._config.ignore_missing:
-                raise CheckException(msg)
+                raise Warning(msg)
 
             self.log.warning(msg)
 
