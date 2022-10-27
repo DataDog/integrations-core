@@ -15,9 +15,46 @@ No additional installation is needed on your server.
 
 ### Configuration
 
-1. Edit the `argocd.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Argo CD performance data. See the [sample argocd.d/conf.yaml][4] for all available configuration options.
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
 
-2. [Restart the Agent][5].
+#### Host
+
+To configure this check for an Agent running on a host:
+
+##### Metric collection
+
+1. Ensure that OpenMetrics metrics are exposed in your Kong service by [enabling the Prometheus plugin][14]. This needs to be configured first before the Agent can collect Kong metrics. 
+2. Add this configuration block to your `kong.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][2] to start gathering your [Kong metrics](#metrics). See the [sample kong.d/conf.yaml][3] for all available configuration options:
+
+
+   ```yaml
+   init_config:
+
+   instances:
+     ## @param openmetrics_endpoint - string - required
+     ## The URL exposing metrics in the OpenMetrics format.
+     #
+     - openmetrics_endpoint: http://localhost:8001/metrics
+   ```
+
+**Note**: The current version of the check (1.17.0+) uses [OpenMetrics][12] for metric collection, which requires Python 3. For hosts unable to use Python 3, or to use a legacy version of this check, see the following [config][13].
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
+
+#### Containerized
+
+Ensure that OpenMetrics metrics are exposed in your Kong service by [enabling the Prometheus plugin][14]. This needs to be configured first before the Agent can collect Kong metrics. 
+For containerized environments, see the [Autodiscovery Integration Templates][5] for guidance on applying the parameters below.
+
+##### Metric collection
+
+| Parameter            | Value                                                 |
+| -------------------- | ----------------------------------------------------- |
+| `<INTEGRATION_NAME>` | `kong`                                                |
+| `<INIT_CONFIG>`      | blank or `{}`                                         |
+| `<INSTANCE_CONFIG>`  | `{"openmetrics_endpoint": "http://%%host%%:8001/metrics"}` |
 
 ### Validation
 

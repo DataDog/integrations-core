@@ -47,19 +47,19 @@ instances:
 
   -
     ## @param app_controller_endpoint - string - optional
-    ## Noting right now
+    ## Endpoint where metrics of the Application Controller's Prometheus metrics are exposed.
     #
-    # app_controller_endpoint: http://localhost:8082/metrics
+    # app_controller_endpoint: http://argocd-metrics:8082/metrics
 
     ## @param api_server_endpoint - string - optional
-    ## Noting right now
+    ## Endpoint where metrics of the API Server's Prometheus metrics are exposed.
     #
-    # api_server_endpoint: http://localhost:8083/metrics
+    # api_server_endpoint: http://argocd-server-metrics:8083/metrics
 
     ## @param repo_server_endpoint - string - optional
-    ## Noting right now
+    ## Endpoint where metrics of the Repo Server's Prometheus metrics are exposed.
     #
-    # repo_server_endpoint: http://localhost:8084/metrics
+    # repo_server_endpoint: http://argocd-repo-server:8084/metrics
 
     ## @param raw_metric_prefix - string - optional
     ## A prefix that will be removed from all exposed metric names, if present.

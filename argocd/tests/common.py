@@ -25,7 +25,6 @@ general_gauges = [
     'go.memstats.heap.released_bytes',
     'go.memstats.heap.sys_bytes',
     'go.memstats.last_gc_time.seconds',
-    'go.memstats.alloc_bytes',
     'go.memstats.mcache.inuse_bytes',
     'go.memstats.mcache.sys_bytes',
     'go.memstats.mspan.inuse_use',
@@ -46,7 +45,6 @@ general_gauges = [
 
 general_counters = [
     'redis.request.count',
-    'go.memstats.alloc_bytes.count',
     'go.memstats.frees.count',
     'go.memstats.lookups.count',
     'go.memstats.mallocs.count',
@@ -123,9 +121,9 @@ repo_server_histograms = [
 ]
 
 NOT_EXPOSED_METRICS = [
-    'argocd.api_server.go.memstats.alloc_bytes.count',
+    # 'argocd.api_server.go.memstats.alloc_bytes',
     'argocd.app_controller.app.k8s.request',
-    'argocd.app_controller.go.memstats.alloc_bytes.count',
+    # 'argocd.app_controller.go.memstats.alloc_bytes',
     'argocd.app_controller.app.reconcile',
     'argocd.app_controller.app.sync',
     'argocd.app_controller.cluster.api.resource_objects',
@@ -136,7 +134,7 @@ NOT_EXPOSED_METRICS = [
     'argocd.app_controller.kubectl.exec',
     'argocd.app_controller.kubectl.exec.pending',
     'argocd.app_controller.redis.request.duration',
-    'argocd.repo_server.go.memstats.alloc_bytes.count',
+    # 'argocd.repo_server.go.memstats.alloc_bytes',
     'argocd.repo_server.redis.request.count',
     'argocd.repo_server.repo.pending.request.total',
     'argocd.repo_server.git.request.count',

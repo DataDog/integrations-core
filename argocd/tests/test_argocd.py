@@ -2,12 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from typing import Any, Callable, Dict
-
 from datadog_checks.argocd import ArgocdCheck
-from datadog_checks.base import AgentCheck, errors
-from datadog_checks.base.stubs.aggregator import AggregatorStub
-from datadog_checks.dev.utils import get_metadata_metrics
 
 from . import common
 from .utils import get_fixture_path
@@ -24,7 +19,6 @@ def test_app_controller(dd_run_check, aggregator, mock_http_response):
         else:
             aggregator.assert_metric(metric)
 
-    # aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
     aggregator.assert_all_metrics_covered()
 
 
@@ -39,7 +33,6 @@ def test_api_server(dd_run_check, aggregator, mock_http_response):
         else:
             aggregator.assert_metric(metric)
 
-    # aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
     aggregator.assert_all_metrics_covered()
 
 
@@ -54,7 +47,6 @@ def test_repo_server(dd_run_check, aggregator, mock_http_response):
         else:
             aggregator.assert_metric(metric)
 
-    # aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
     aggregator.assert_all_metrics_covered()
 
 
@@ -63,23 +55,6 @@ def test_empty_instance(dd_run_check):
         check = ArgocdCheck('argocd', {}, [{}])
         dd_run_check(check)
     except Exception as e:
-        assert (
-            "Must specify at least one of the following:`app_controller_endpoint`, `repo_server_endpoint` or `api_server_endpoint`."
-            in str(e)
+        assert "Must specify at least one of the following:`app_controller_endpoint`, `repo_server_endpoint` or" in str(
+            e
         )
-
-
-# def test_check(dd_run_check, aggregator, instance):
-#     # type: (Callable[[AgentCheck, bool], None], AggregatorStub, Dict[str, Any]) -> None
-#     check = ArgocdCheck('argocd', {}, [instance])
-#     dd_run_check(check)
-
-#     aggregator.assert_all_metrics_covered()
-#     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
-
-
-# def test_emits_critical_service_check_when_service_is_down(dd_run_check, aggregator, instance):
-#     # type: (Callable[[AgentCheck, bool], None], AggregatorStub, Dict[str, Any]) -> None
-#     check = ArgocdCheck('argocd', {}, [instance])
-#     dd_run_check(check)
-#     aggregator.assert_service_check('argocd.can_connect', ArgocdCheck.CRITICAL)

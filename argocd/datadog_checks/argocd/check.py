@@ -91,5 +91,5 @@ class ArgocdCheck(OpenMetricsBaseCheckV2, ConfigMixin):
                 )
             self.scrapers[self.instance[endpoint]].metric_transformer.add_custom_transformer(
                 ("go_memstats_alloc_bytes"),
-                self.configure_transformer_go_memstats_alloc_bytes("go.memstats.alloc.bytes"),
+                self.configure_transformer_go_memstats_alloc_bytes("go.memstats.alloc_bytes"),
             )

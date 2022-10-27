@@ -41,7 +41,7 @@ GENERAL_METRICS = {
 
 APPLICATION_CONTROLLER = {
     'argocd_app_k8s_request': 'app.k8s.request',
-    'argocd_app_info': 'app.info', 
+    'argocd_app_info': 'app.info',
     'argocd_app_reconcile': 'app.reconcile',
     'argocd_app_sync': 'app.sync',
     'argocd_cluster_api_resource_objects': 'cluster.api.resource_objects',
