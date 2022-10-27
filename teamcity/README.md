@@ -16,6 +16,7 @@ The TeamCity check is included in the [Datadog Agent][1] package, so you don't n
 
 1. To prepare TeamCity, see [Enabling Guest Login][2].
 2. To collect metrics, enable `Per-project permissions` and assign the `View Usage Statistics` permission to the Guest user.
+3. To enable the check to automatically detect build configuration type during event collection, assign the `View Build Configuration Settings` permission to the Guest user. 
 
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Host" xxx -->
@@ -86,7 +87,7 @@ The TeamCity check offers two methods of data collection. To optimally monitor y
    ```
 
 
-   Customize each project's build configuration monitoring using the optional `include` and `exclude` filters to specify build configuration IDs to include or exclude from monitoring, respectively. Regex patterns are supported in the `include` and `exclude` keys to specify build configuration ID matching patterns. If both `include` and `exclude` filters are omitted, all build configurations are monitored for the specified project. 
+   Customize each project's build configuration monitoring using the optional `include` and `exclude` filters to specify build configuration IDs to include or exclude from monitoring, respectively. RegEx patterns are supported in the `include` and `exclude` keys to specify build configuration ID matching patterns. If both `include` and `exclude` filters are omitted, all build configurations are monitored for the specified project. 
 
 
 [Restart the Agent][5] to start collecting and sending TeamCity events to Datadog.
