@@ -18,7 +18,7 @@ import requests
 from .constants import BUILD_EVENT, DEPLOYMENT_EVENT, RESOURCE_URL_MAP, STATUS_MAP
 
 
-def match(item: str, pattern_model) -> bool:
+def match(item, pattern_model):
     if isinstance(pattern_model, str):
         return re.search(pattern_model, item)
     if isinstance(pattern_model, dict) and len(pattern_model) == 1:
@@ -41,9 +41,7 @@ def filter_list(items, include_patterns, exclude_patterns):
         return filtered_items
 
 
-def filter_items(
-    items, key: str, default_limit: int, default_include: list, default_exclude: list, config: dict = None
-) -> (OrderedDict, bool):
+def filter_items(items, key, default_limit, default_include, default_exclude, config=None):
     config = config if config else {}
     config_key = dict(config.get(key, config))
     limit = config_key.get('limit', default_limit)
