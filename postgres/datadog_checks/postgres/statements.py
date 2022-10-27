@@ -184,9 +184,6 @@ class PostgresStatementMetrics(DBMAsyncJob):
                 return
             for event in self._rows_to_fqt_events(rows):
                 self._check.database_monitoring_query_sample(json.dumps(event, default=default_json_event_encoding))
-            # truncate query text to the maximum length supported by metrics tags
-            for row in rows:
-                row['query'] = row['query'][0:200]
             payload = {
                 'host': self._check.resolved_hostname,
                 'timestamp': time.time() * 1000,
