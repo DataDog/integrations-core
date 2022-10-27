@@ -4,7 +4,7 @@
 from collections import OrderedDict
 
 import pytest
-from six import iteritems
+from six import PY2, iteritems
 
 from datadog_checks.teamcity.common import filter_items, normalize_server_url
 
@@ -223,4 +223,10 @@ def test_server_normalization():
     ],
 )
 def test_filter_projects(list_to_filter, key, config, global_include, global_exclude, expected_filtered_list):
-    assert filter_items(list_to_filter, key, 5, global_include, global_exclude, config) == expected_filtered_list
+    if PY2:
+        filtered_list, reached_limit = filter_items(list_to_filter, key, 5, global_include, global_exclude, config)
+        expected_filtered_list, expected_reached_limit = expected_filtered_list
+
+        assert sorted(filtered_list.items()) == sorted(expected_filtered_list.items())
+    else:
+        assert filter_items(list_to_filter, key, 5, global_include, global_exclude, config) == expected_filtered_list

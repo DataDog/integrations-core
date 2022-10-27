@@ -9,7 +9,7 @@ from copy import deepcopy
 from six import PY2
 
 if PY2:
-    import urlparse
+    from urlparse import urlparse
 else:
     from urllib.parse import urlparse
 
