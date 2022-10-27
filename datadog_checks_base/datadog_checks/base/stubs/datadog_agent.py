@@ -20,7 +20,7 @@ class DatadogAgentStub(object):
         self._metadata = {}
         self._cache = {}
         self._config = self.get_default_config()
-        self._hostname = ''
+        self._hostname = 'stubbed.hostname'
         self._process_start_time = 0
 
     def get_default_config(self):
@@ -53,7 +53,7 @@ class DatadogAgentStub(object):
         self._hostname = hostname
 
     def reset_hostname(self):
-        self._hostname = ''
+        self._hostname = 'stubbed.hostname'
 
     def get_config(self, config_option):
         return self._config.get(config_option, '')
