@@ -104,7 +104,7 @@ files:
                       exclude:
                         - <BUILD_CONFIG_ID_REGEX>
 
-          * Configure configure `<PROJECT_ID>.limit` to limit discovered build configurations for the given project.
+          * Configure `<PROJECT_ID>.limit` to limit discovered build configurations for the given project.
             If `<PROJECT_ID>.limit` is omitted, the `default_build_configs_limit` is used.
 
               projects:
@@ -222,7 +222,7 @@ files:
           example: true
       - name: basic_http_authentication
         description: |
-          [DEPRECATED] Set to `true` to turn on basic http authentication. Starting in Datadog Agent v7.41.0,
+          [DEPRECATED] Set to `true` to turn on basic HTTP authentication. Starting in Datadog Agent v7.41.0,
           `basic_http_authentication` is inherently enabled if `username` and `password` are specified.
         value:
           type: boolean
