@@ -1,5 +1,9 @@
 # CHANGELOG - Cloud Foundry API
 
+## 2.2.1 / 2022-10-27
+
+* [Fixed] Fix deprecation warnings with `semver`. See [#12967](https://github.com/DataDog/integrations-core/pull/12967).
+
 ## 2.2.0 / 2022-09-16
 
 * [Added] Update HTTP config spec templates. See [#12890](https://github.com/DataDog/integrations-core/pull/12890).
