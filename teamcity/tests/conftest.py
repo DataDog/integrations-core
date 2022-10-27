@@ -4,8 +4,7 @@
 import pytest
 from six import PY3
 
-from datadog_checks.dev import WaitFor, docker_run, run_command
-from datadog_checks.dev.conditions import CheckDockerLogs
+from datadog_checks.dev import docker_run
 from datadog_checks.teamcity import TeamCityCheck
 
 if PY3:

@@ -146,18 +146,16 @@ class TeamCityCheck(AgentCheck):
 
             for project_pattern in filtered_projects:
                 """
-                Handle case where the `include` build_config element is a string. Assign `{}` as its filter config. 
+                Handle case where the `include` build_config element is a string. Assign `{}` as its filter config.
                 # projects:
                 #   project_regex:
                 #     include:
                 #       - build_config_regex
-                
+
                 `build_config_regex` == `build_config_regex: {}`
                 """
                 build_config_filter_config = (
-                    filtered_projects.get(project_id)
-                    if isinstance(filtered_projects.get(project_id), dict)
-                    else {}
+                    filtered_projects.get(project_id) if isinstance(filtered_projects.get(project_id), dict) else {}
                 )
                 filtered_build_configs, build_configs_limit_reached = filter_build_configs(
                     self, build_configs_list, project_pattern, build_config_filter_config

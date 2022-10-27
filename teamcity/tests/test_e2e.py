@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
-from datadog_checks.teamcity import TeamCityCheck
 from datadog_checks.teamcity.constants import (
     SERVICE_CHECK_BUILD_PROBLEMS,
     SERVICE_CHECK_BUILD_STATUS,
