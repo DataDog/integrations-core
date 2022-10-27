@@ -14,36 +14,9 @@ if PY3:
 from .common import COMPOSE_FILE, INSTANCE, LEGACY_INSTANCE, OPENMETRICS_INSTANCE, USE_OPENMETRICS
 
 
-def restore_teamcity_server():
-    cmd = [
-        'docker',
-        'exec',
-        'teamcity-server',
-        '/opt/teamcity/bin/maintainDB.sh',
-        'restore',
-        '-A',
-        '/data/teamcity_server/datadir',
-        '-I',
-        '-F',
-        '/teamcity_backup.zip',
-    ]
-    run_command(cmd)
-
-
-def restart_teamcity_server():
-    cmd = ['docker', 'exec', 'teamcity-server', '/opt/teamcity/bin/teamcity-server.sh', 'restart']
-
-    run_command(cmd)
-
-
 @pytest.fixture(scope='session')
 def dd_environment(instance, openmetrics_instance):
-    conditions = [
-        WaitFor(restore_teamcity_server),
-        WaitFor(restart_teamcity_server),
-        CheckDockerLogs('teamcity-server', ['TeamCity initialized'], attempts=100, wait=5),
-    ]
-    with docker_run(COMPOSE_FILE, conditions=conditions, sleep=10, mount_logs=True):
+    with docker_run(COMPOSE_FILE, sleep=10):
         if USE_OPENMETRICS:
             yield openmetrics_instance
         else:
@@ -66,10 +39,10 @@ def openmetrics_instance():
 
 
 @pytest.fixture(scope="session")
-def check():
+def teamcity_check():
     return lambda instance: TeamCityCheck('teamcity', {}, [instance])
 
 
 @pytest.fixture(scope="session")
-def check_v2():
+def teamcity_check_v2():
     return lambda instance: TeamCityCheckV2('teamcity', {}, [instance])

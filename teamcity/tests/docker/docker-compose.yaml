@@ -7,27 +7,13 @@ services:
     platform: linux/amd64
     ports:
       - "8111:8111"
-    volumes:
-      - ./teamcity_backup.zip:/teamcity_backup.zip
-      - ${DD_LOG_1}:/opt/teamcity/logs/teamcity-server.log
-      - ${DD_LOG_2}:/opt/teamcity/logs/teamcity-activities.log
-      - ${DD_LOG_3}:/opt/teamcity/logs/teamcity-vcs.log
-      - ${DD_LOG_4}:/opt/teamcity/logs/teamcity-cleanup.log
-      - ${DD_LOG_5}:/opt/teamcity/logs/teamcity-notifications.log
-      - ${DD_LOG_6}:/opt/teamcity/logs/teamcity-ws.log
 
   teamcity-agent:
     container_name: teamcity-agent
-    build:
-      context: .
-      dockerfile: Dockerfile-agent
     platform: linux/amd64
     environment:
       - AGENT_NAME=regular_agent
       - SERVER_URL=http://teamcity-server:8111
-      - AGENT_TOKEN=56ac4711fbd5355d2b10ed5be8f932f6
-    volumes:
-      - ./test_sample.py:/test_sample.py
 
   teamcity-minimal-agent:
     container_name: teamcity-minimal-agent
@@ -38,6 +24,3 @@ services:
     environment:
       - AGENT_NAME=minimal_agent
       - SERVER_URL=http://teamcity-server:8111
-      - AGENT_TOKEN=07f3ff35094bc13a45865f5abc8699bb
-    volumes:
-      - ./test_sample.py:/test_sample.py

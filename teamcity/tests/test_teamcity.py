@@ -29,7 +29,7 @@ from .common import (
 
 pytestmark = [
     pytest.mark.skipif(USE_OPENMETRICS, reason='Tests not available in OpenMetrics version of check'),
-    pytest.mark.integration
+    pytest.mark.integration,
 ]
 
 

@@ -24,7 +24,7 @@ LEGACY_INSTANCE = {
 }
 
 INSTANCE = {
-    'server': 'http://34.173.251.243:8111',
+    'server': SERVER_URL,
     'projects': {
         'include': [
             {
@@ -51,9 +51,15 @@ CONFIG_BAD_FORMAT = {}
 
 CONFIG_ALL_PROJECTS = {"projects": {}}
 
+CONFIG_MULTIPLE_PROJECTS_MAPPING = {"projects": {"include": [{"project1.*": {}}, {"project2.*": {}}]}}
+
 CONFIG_ONLY_EXCLUDE_ONE_PROJECT = {"projects": {"exclude": [{"project1.*\\.dev": {}}]}}
 
 CONFIG_ALL_BUILD_CONFIGS = {"projects": {"include": [{"project1.*\\.prod": {}}]}}
+
+CONFIG_INCLUDE_MULTIPLE_BUILD_CONFIGs = {
+    "projects": {"include": [{"project1.*\\.prod": {"include": ["build_config1", "build_config2"]}}]}
+}
 
 CONFIG_ALL_BUILD_CONFIGS_WITH_LIMIT = {"projects": {"include": [{"project1.*\\.prod": {"limit": 3}}]}}
 
@@ -75,6 +81,10 @@ CONFIG_FILTERING_BUILD_CONFIGS = {
             }
         ]
     },
+}
+
+CONFIG_FILTERING_PROJECTS = {
+    "projects": {"include": [{'project1.*': {}}, {'project2.*': {}}], "exclude": [{'.*tmp': {}}]}
 }
 
 # A path regularly used in the TeamCity Check

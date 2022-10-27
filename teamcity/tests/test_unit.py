@@ -14,6 +14,8 @@ from .common import (
     CONFIG_ALL_PROJECTS,
     CONFIG_BAD_FORMAT,
     CONFIG_FILTERING_BUILD_CONFIGS,
+    CONFIG_FILTERING_PROJECTS,
+    CONFIG_MULTIPLE_PROJECTS_MAPPING,
     CONFIG_ONLY_EXCLUDE_ONE_BUILD_CONFIG,
     CONFIG_ONLY_EXCLUDE_ONE_PROJECT,
     CONFIG_ONLY_INCLUDE_ONE_BUILD_CONFIG,
@@ -23,7 +25,7 @@ from .common import (
 
 pytestmark = [
     pytest.mark.skipif(USE_OPENMETRICS, reason='Tests not available in OpenMetrics version of check'),
-    pytest.mark.unit
+    pytest.mark.unit,
 ]
 
 
@@ -191,7 +193,34 @@ def test_server_normalization():
             (OrderedDict([('project1.prod', {"project1.*\\.prod": {"limit": 3}})]), False),
             id="Filter projects with one include",
         ),
+        pytest.param(
+            ['project1.prod', 'project2.prod'],
+            'projects',
+            CONFIG_MULTIPLE_PROJECTS_MAPPING,
+            [],
+            [],
+            (OrderedDict([('project1.prod', {'project1.*': {}}), ('project2.prod', {'project2.*': {}})]), False),
+            id="Filter multiple projects",
+        ),
+        pytest.param(
+            ['project1.prod', 'project2.prod', 'project2.dev', 'project1.tmp'],
+            'projects',
+            CONFIG_FILTERING_PROJECTS,
+            [],
+            [],
+            (
+                OrderedDict(
+                    [
+                        ('project1.prod', {'project1.*': {}}),
+                        ('project2.prod', {'project2.*': {}}),
+                        ('project2.dev', {'project2.*': {}}),
+                    ]
+                ),
+                False,
+            ),
+            id="Filter multiple projects with overlap and exclude override",
+        ),
     ],
 )
 def test_filter_projects(list_to_filter, key, config, global_include, global_exclude, expected_filtered_list):
-    assert filter_items(list_to_filter, key, config, 5, global_include, global_exclude) == expected_filtered_list
+    assert filter_items(list_to_filter, key, 5, global_include, global_exclude, config) == expected_filtered_list
