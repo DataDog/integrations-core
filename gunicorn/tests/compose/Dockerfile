@@ -1,4 +1,4 @@
-FROM python:alpine
+FROM python:3.10-alpine3.16
 ARG PROC_NAME
 ARG GUNICORN_VERSION
 ENV proc_name_env=${PROC_NAME}
