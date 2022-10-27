@@ -1,5 +1,9 @@
 # CHANGELOG - kafka_consumer
 
+## 2.17.0-beta.1 / 2022-10-27
+
+* [Fixed] Fix sensitive client_secret config specification. See [#12983](https://github.com/DataDog/integrations-core/pull/12983).
+
 ## 2.16.0 / 2022-09-16
 
 * [Added] Put lag in seconds behind a feature flag. See [#12942](https://github.com/DataDog/integrations-core/pull/12942).
