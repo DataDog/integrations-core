@@ -5,8 +5,13 @@ from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheckV2
 from datadog_checks.base.constants import ServiceCheck
 
 from .config_models import ConfigMixin
-from .constants import API_SERVER_NAMESPACE, APP_CONTROLLER_NAMESPACE, REPO_SERVER_NAMESPACE
 from .metrics import API_SERVER_METRICS, APPLICATION_CONTROLLER_METRICS, REPO_SERVER_METRICS
+
+API_SERVER_NAMESPACE, APP_CONTROLLER_NAMESPACE, REPO_SERVER_NAMESPACE = [
+    'argocd.api_server',
+    'argocd.app_controller',
+    'argocd.repo_server',
+]
 
 
 class ArgocdCheck(OpenMetricsBaseCheckV2, ConfigMixin):
