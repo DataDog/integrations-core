@@ -4,7 +4,6 @@
 from copy import deepcopy
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.utils.time import get_precise_time
 
 SERVICE_CHECK_BUILD_STATUS = 'build.status'
 SERVICE_CHECK_BUILD_PROBLEMS = 'build.problems'

@@ -35,15 +35,16 @@ def filter_list(items, include_patterns, exclude_patterns):
     else:
         filtered_items = {}
         for include_pattern in include_patterns:
-            filtered_items = filtered_items or {
-                item: include_pattern for item in items if item not in excluded_items and match(item, include_pattern)
-            }
+            filtered_items.update(
+                {item: include_pattern for item in items if item not in excluded_items and match(item, include_pattern)}
+            )
         return filtered_items
 
 
 def filter_items(
-    items, key: str, config: dict, default_limit: int, default_include: list, default_exclude: list
+    items, key: str, default_limit: int, default_include: list, default_exclude: list, config: dict = None
 ) -> (OrderedDict, bool):
+    config = config if config else {}
     config_key = dict(config.get(key, config))
     limit = config_key.get('limit', default_limit)
     include_patterns = config_key.get('include', default_include)
@@ -134,7 +135,7 @@ def get_response(check, resource, **kwargs):
         check.log.exception("Couldn't fetch resource %s, got code %s", resource_name, resp.status_code)
         raise
     except Exception as e:
-        check.log.exception("Couldn't fetch resource %s, unhandled exception %s, %s", resource_name, str(e))
+        check.log.exception("Couldn't fetch resource %s, unhandled exception %s", resource_name, str(e))
         raise
 
 

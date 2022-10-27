@@ -57,8 +57,7 @@ class TeamCityCheck(AgentCheck):
 
     def __init__(self, name, init_config, instances):
         super(TeamCityCheck, self).__init__(name, init_config, instances)
-        # Legacy options
-        self.current_build_config = self.instance.get('build_configuration', '') # used in both legacy and updated check
+        self.current_build_config = self.instance.get('build_configuration', None)
         self.instance_name = self.instance.get('name', '')
         self.host = self.instance.get('host_affected') or self.hostname
         self.is_deployment = is_affirmative(self.instance.get('is_deployment', False))
@@ -125,6 +124,8 @@ class TeamCityCheck(AgentCheck):
                 self.bc_store.set_last_build_id(project_id, build_config_id, last_build_id)
 
     def _initialize_multi_build_config(self):
+        filtered_projects = None
+        build_configs_list = None
         projects = get_response(self, 'projects')
         if projects and projects.get('project'):
             projects_list = [project['id'] for project in projects['project']]
@@ -132,28 +133,47 @@ class TeamCityCheck(AgentCheck):
             if projects_limit_reached:
                 self.log.warning(
                     "Reached projects limit of %s. Update your `projects` configuration using the `include` and "
-                    "`exclude` filter options or increase the `default_projects_limit` option.", len(filtered_projects)
+                    "`exclude` filter options or increase the `default_projects_limit` option.",
+                    len(filtered_projects),
                 )
+
+        if filtered_projects is not None and len(filtered_projects) >= 1:
             project_id_list = list(filtered_projects)
-            if project_id_list:
-                for project_id in project_id_list:
-                    build_configs = get_response(self, 'build_configs', project_id=project_id)
-                    if build_configs and build_configs.get('buildType'):
-                        build_configs_list = [build_config['id'] for build_config in build_configs['buildType']]
-                        for project_pattern in filtered_projects[project_id]:
-                            filtered_build_configs, build_configs_limit_reached = filter_build_configs(
-                                self, build_configs_list, project_pattern, filtered_projects[project_id]
-                            )
-                            if build_configs_limit_reached:
-                                self.log.warning("Reached build configurations limit of %s. Update your `projects` "
-                                                 "configuration using the `include` and `exclude` filter options or "
-                                                 "increase the `default_build_configs_limit` option.",
-                                                 len(filtered_build_configs))
-                            for build_config_id in list(filtered_build_configs):
-                                if not self.bc_store.get_build_config(project_id, build_config_id):
-                                    build_config_type = self._get_build_config_type(build_config_id)
-                                    self.bc_store.set_build_config(project_id, build_config_id, build_config_type)
-                                    self._get_last_build_id(project_id, build_config_id)
+            for project_id in project_id_list:
+                build_configs = get_response(self, 'build_configs', project_id=project_id)
+                if build_configs and build_configs.get('buildType'):
+                    build_configs_list = [build_config['id'] for build_config in build_configs['buildType']]
+
+            for project_pattern in filtered_projects:
+                """
+                Handle case where the `include` build_config element is a string. Assign `{}` as its filter config. 
+                # projects:
+                #   project_regex:
+                #     include:
+                #       - build_config_regex
+                
+                `build_config_regex` == `build_config_regex: {}`
+                """
+                build_config_filter_config = (
+                    filtered_projects.get(project_id)
+                    if isinstance(filtered_projects.get(project_id), dict)
+                    else {}
+                )
+                filtered_build_configs, build_configs_limit_reached = filter_build_configs(
+                    self, build_configs_list, project_pattern, build_config_filter_config
+                )
+                if build_configs_limit_reached:
+                    self.log.warning(
+                        "Reached build configurations limit of %s. Update your `projects` "
+                        "configuration using the `include` and `exclude` filter options or "
+                        "increase the `default_build_configs_limit` option.",
+                        len(filtered_build_configs),
+                    )
+                for build_config_id in list(filtered_build_configs):
+                    if not self.bc_store.get_build_config(project_id, build_config_id):
+                        build_config_type = self._get_build_config_type(build_config_id)
+                        self.bc_store.set_build_config(project_id, build_config_id, build_config_type)
+                        self._get_last_build_id(project_id, build_config_id)
 
     def _initialize_single_build_config(self):
         build_config_id = self.current_build_config
@@ -169,7 +189,7 @@ class TeamCityCheck(AgentCheck):
     def _initialize(self):
         msg = "%s TeamCity projects and build configs..."
         self.log.info(msg, "Re-initializing" if self.projects_last_refresh else "Initializing")
-        if not self.monitored_projects:
+        if not self.monitored_projects and self.current_build_config:
             self.log.debug(
                 "Initializing legacy single build configuration monitoring. "
                 "To monitor multiple build configurations per check run, use the `projects` option."
@@ -241,7 +261,9 @@ class TeamCityCheck(AgentCheck):
         if not last_build_id:
             self._initialize()
         else:
-            new_builds = get_response(self, 'new_builds', build_conf=self.current_build_config, since_build=last_build_id)
+            new_builds = get_response(
+                self, 'new_builds', build_conf=self.current_build_config, since_build=last_build_id
+            )
             return new_builds
 
     def _get_build_config_type(self, build_config):
