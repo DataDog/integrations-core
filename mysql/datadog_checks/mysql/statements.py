@@ -16,6 +16,7 @@ from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.statement_metrics import StatementMetrics
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding, obfuscate_sql_with_metadata
 from datadog_checks.base.utils.serialization import json
+from datadog_checks.base.utils.tracking import tracked_method
 
 from .util import DatabaseConfigurationError, warning_with_tags
 
@@ -43,6 +44,10 @@ METRICS_COLUMNS = {
     'sum_no_index_used',
     'sum_no_good_index_used',
 }
+
+
+def agent_check_getter(self):
+    return self.check
 
 
 def _row_key(row):
@@ -109,6 +114,7 @@ class MySQLStatementMetrics(DBMAsyncJob):
     def run_job(self):
         self.collect_per_statement_metrics()
 
+    @tracked_method(agent_check_getter=agent_check_getter)
     def collect_per_statement_metrics(self):
         # Detect a database misconfiguration by checking if the performance schema is enabled since mysql
         # just returns no rows without errors if the performance schema is disabled
@@ -146,6 +152,12 @@ class MySQLStatementMetrics(DBMAsyncJob):
             'mysql_rows': rows,
         }
         self._check.database_monitoring_query_metrics(json.dumps(payload, default=default_json_event_encoding))
+        self._check.count(
+            "dd.mysql.collect_per_statement_metrics.rows",
+            len(rows),
+            tags=self._tags + self._check._get_debug_tags(),
+            hostname=self._check.resolved_hostname,
+        )
 
     def _collect_per_statement_metrics(self):
         # type: () -> List[PyMysqlRow]

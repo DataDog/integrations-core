@@ -22,8 +22,14 @@ from datadog_checks.base.utils.db.utils import (
     obfuscate_sql_with_metadata,
 )
 from datadog_checks.base.utils.serialization import json
+from datadog_checks.base.utils.tracking import tracked_method
 
 from .util import DatabaseConfigurationError, StatementTruncationState, get_truncation_state, warning_with_tags
+
+
+def agent_check_getter(self):
+    return self.check
+
 
 SUPPORTED_EXPLAIN_STATEMENTS = frozenset({'select', 'table', 'delete', 'insert', 'replace', 'update', 'with'})
 
@@ -402,6 +408,7 @@ class MySQLStatementSamples(DBMAsyncJob):
             )
             raise
 
+    @tracked_method(agent_check_getter=agent_check_getter)
     def _get_new_events_statements(self, events_statements_table, row_limit):
         # Select the most recent events with a bias towards events which have higher wait times
         start = time.time()
@@ -583,6 +590,7 @@ class MySQLStatementSamples(DBMAsyncJob):
                 'mysql': {k: v for k, v in row.items() if k not in EVENTS_STATEMENTS_SAMPLE_EXCLUDE_KEYS},
             }
 
+    @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_plans_for_statements(self, rows):
         for row in rows:
             try:
