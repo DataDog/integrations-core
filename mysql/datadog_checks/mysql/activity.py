@@ -132,7 +132,8 @@ class MySQLActivity(DBMAsyncJob):
                     'Query activity and wait event collection is disabled on this host. To enable it, the setup '
                     'consumer `performance-schema-consumer-events-waits-current` must be enabled on the MySQL server. '
                     'Please refer to the troubleshooting documentation: '
-                    'https://docs.datadoghq.com/database_monitoring/setup_mysql/troubleshooting/',
+                    'https://docs.datadoghq.com/database_monitoring/setup_mysql/troubleshooting#%s',
+                    DatabaseConfigurationError.events_waits_current_not_enabled.value,
                     code=DatabaseConfigurationError.events_waits_current_not_enabled.value,
                     host=self._check.resolved_hostname,
                 ),
