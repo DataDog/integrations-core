@@ -40,10 +40,6 @@ DEFAULT_METRICS_LEN = len(
 )
 
 
-def test_get_library_versions():
-    assert MongoDb.get_library_versions() == {'pymongo': '4.2.0'}
-
-
 @mock.patch('pymongo.database.Database.command', side_effect=ConnectionFailure('Service not available'))
 def test_emits_critical_service_check_when_service_is_not_available(mock_command, dd_run_check, aggregator):
     # Given
