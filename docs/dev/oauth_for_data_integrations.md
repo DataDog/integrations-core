@@ -79,8 +79,8 @@ In order to publish an OAuth client, you first need to open a pull request for y
 
 As a part of your pull request, update your README file with an **uninstallation** section under `## Setup` that includes the following instructions (along with any custom instructions you would like to add):
 
-- To ensure this integration is fully uninstalled, revoke authorization in the Configure tab of this tile or in [OAuth Apps][9] within Organization Settings in Datadog. 
-- Additionally, ensure that all API keys associated with this integration have been disabled by searching for the integration name on the [API Keys management page][10].
+- To ensure this integration is fully uninstalled, revoke authorization in the **Configure** tab on this tile or in [**OAuth Apps**][9] within your **Organization Settings** in Datadog. 
+- Additionally, ensure that all API keys associated with this integration have been disabled by searching for the integration name on the [API Keys page][10].
 
 
 To start the publishing process in the [Developer Platform][4]:
