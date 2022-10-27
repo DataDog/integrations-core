@@ -65,11 +65,11 @@ The client is the component of an application that enables users to authorize th
 
    If successful, this request returns an API key that you should securely save so you can use it to submit data into Datadog on behalf of the user. **You cannot access this API key value again after the initial request response**.
 
-8. Test that your OAuth client will work across multiple [Datadog sites][8] by kicking off authorization from a non-US1 Datadog account:
-   - If you do not have access to a Sandbox account in a different site, please contact marketplace@datadog.com. 
-   - Export your app manifest from the account in the *original* Datadog site by navigating to the app you've created in the Developer Platform, clicking the gear icon in the top right and clicking "Export App Manifest". 
-   - In your account in the *new* Datadog site, navigate to the Developer Platform and import your app manifest from step 2.
-   - After successfully importing your manifest, navigate to the Oauth & Permissions tab to find your OAuth client, along with its Client ID and Client Secret. Use these credentials to test authorization from this site. 
+8. Test that your OAuth client can work across multiple [Datadog sites][8] by kicking off authorization from a non-US1 Datadog account:
+   - If you do not have access to a sandbox account on a different site, contact `marketplace@datadog.com`. 
+   - Export your app manifest from the account in the *original* Datadog site by navigating to the app you've created in the Developer Platform, clicking the gear icon on the top right, and clicking **Export App Manifest**. 
+   - In your account on the *new* Datadog site, navigate to the Developer Platform and import your app manifest from Step 2.
+   - After successfully importing your manifest, navigate to the **OAuth & Permissions** tab to find your OAuth client, along with its client ID and client secret. Use these credentials to test authorization from this site. 
 
 9. Test any additional scopes that you’ve requested access for.
 
@@ -77,15 +77,15 @@ The client is the component of an application that enables users to authorize th
 
 In order to publish an OAuth client, you first need to open a pull request for your data integration in either the [`integrations-extras`][5] or [Marketplace][6] GitHub repositories. 
 
-As a part of your pull request, please update your README file with an **uninstallation** section under `## Setup` that includes the following instructions (along with any custom instructions you would like to add):
+As a part of your pull request, update your README file with an **uninstallation** section under `## Setup` that includes the following instructions (along with any custom instructions you would like to add):
 
-- To ensure this integration is fully uninstalled, revoke authorization in the Configure tab of this tile or in [OAuth Apps](https://app.datadoghq.com/organization-settings/oauth-applications) within Organization Settings in Datadog. 
-- Additionally, ensure that all API keys associated with this integration have been disabled by searching for the integration name on the [API Keys management page](https://app.datadoghq.com/organization-settings/api-keys).
+- To ensure this integration is fully uninstalled, revoke authorization in the Configure tab of this tile or in [OAuth Apps][9] within Organization Settings in Datadog. 
+- Additionally, ensure that all API keys associated with this integration have been disabled by searching for the integration name on the [API Keys management page][10].
 
 
 To start the publishing process in the [Developer Platform][4]:
 
-1. Navigate to the **Publishing** tab under **General**. In step 1 of the publishing flow, you receive your published client ID and secret. In step 2, you can enter additional information about your integration and see the published `app_uuid` to use below.
+1. Navigate to the **Publishing** tab under **General**. In Step 1 of the publishing flow, you receive your published client ID and secret. In Step 2, you can enter additional information about your integration and see the published `app_uuid` to use below.
 
    Save your client ID, client secret, and `app_uuid` in a secure location. 
 
@@ -103,15 +103,15 @@ The process for adding an OAuth client to an existing integration is similar to 
 
 Follow the [steps](#build-a-data-integration-with-oauth) above, and ensure that you open a pull request to add new uninstallation instructions to your integration tile.
 
-**Note**: There's no need to change your `app_uuid` in the manifest.json file if you have an existing data integration.
+There's no need to change your `app_uuid` in the `manifest.json` file if you have an existing data integration.
 
 ### If you have an existing data integration that’s currently connected to a UI Extension (shares the same tile)
 
 Instead of creating an app, navigate to the app that includes your published UI Extension in the Developer Platform and follow the remaining [steps](#create-an-oauth-client). 
 
-Once you’ve created your data integration's OAuth client and are ready for publishing, click **Edit** on your app and navigate to the **Publishing** tab under **General**. 
+Once you’ve created your data integration's OAuth client and are ready for publishing, click **Edit** on your app and navigate to the **Publishing** tab under **General**. Ensure that you also open a pull request to add new uninstallation instructions to your tile.
 
-**Note**: There's no need to change your `app_uuid` in the manifest.json file if you have an existing data integration and/or UI Extension.
+**Note**: There's no need to change your `app_uuid` in the `manifest.json` file if you have an existing data integration or UI Extension.
 
 ### If you have a published UI Extension and want to add a data integration to the same tile
 
@@ -133,3 +133,5 @@ Additional helpful documentation, links, and articles:
 [6]: http://github.com/DataDog/marketplace
 [7]: https://docs.datadoghq.com/developers/marketplace/#develop-your-offering
 [8]: https://docs.datadoghq.com/getting_started/site/
+[9]: https://app.datadoghq.com/organization-settings/oauth-applications
+[10]: https://app.datadoghq.com/organization-settings/api-keys
