@@ -254,3 +254,7 @@ workqueue_work_duration_seconds_bucket{name="project_reconciliation_queue",le="1
 workqueue_work_duration_seconds_bucket{name="project_reconciliation_queue",le="+Inf"} 50
 workqueue_work_duration_seconds_sum{name="project_reconciliation_queue"} 0.00033533699999999995
 workqueue_work_duration_seconds_count{name="project_reconciliation_queue"} 50
+# HELP argocd_cluster_connection_status manually added
+# TYPE argocd_cluster_connection_status gauge
+argocd_cluster_connection_status{name="foo"} 0
+argocd_cluster_connection_status{name="bar"} 1

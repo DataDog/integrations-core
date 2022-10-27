@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 from datadog_checks.argocd import ArgocdCheck
+from datadog_checks.base.constants import ServiceCheck
 
 from . import common
 from .utils import get_fixture_path
@@ -64,3 +65,20 @@ def test_empty_instance(dd_run_check):
         assert "Must specify at least one of the following:`app_controller_endpoint`, `repo_server_endpoint` or" in str(
             e
         )
+
+
+def test_app_controller_service_check(dd_run_check, aggregator, mock_http_response):
+    mock_http_response(file_path=get_fixture_path('app_controller_metrics.txt'))
+    check = ArgocdCheck('argocd', {}, [common.MOCKED_APP_CONTROLLER_INSTANCE])
+    dd_run_check(check)
+
+    aggregator.assert_service_check(
+        'argocd.app_controller.cluster.connection.status',
+        ServiceCheck.OK,
+        tags=['endpoint:app_controller:8082', 'name:bar'],
+    )
+    aggregator.assert_service_check(
+        'argocd.app_controller.cluster.connection.status',
+        ServiceCheck.CRITICAL,
+        tags=['endpoint:app_controller:8082', 'name:foo'],
+    )

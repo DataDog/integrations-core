@@ -17,7 +17,6 @@ API_SERVER_NAMESPACE, APP_CONTROLLER_NAMESPACE, REPO_SERVER_NAMESPACE = [
 
 
 class ArgocdCheck(OpenMetricsBaseCheckV2, ConfigMixin):
-    # __NAMESPACE__ = 'argocd'
     DEFAULT_METRIC_LIMIT = 0
 
     def __init__(self, name, init_config, instances):
@@ -84,11 +83,9 @@ class ArgocdCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         service_check_method = self.service_check
 
         def argocd_cluster_connection_status_transformer(metric, sample_data, runtime_data):
-            for sample, _, hostname in sample_data:
+            for sample, tags, hostname in sample_data:
                 service_check_method(
-                    metric_name,
-                    status_map.get(int(sample.value), ServiceCheck.UNKNOWN),
-                    hostname=hostname,
+                    metric_name, status_map.get(int(sample.value), ServiceCheck.UNKNOWN), hostname=hostname, tags=tags
                 )
 
         return argocd_cluster_connection_status_transformer
