@@ -1,5 +1,10 @@
 # CHANGELOG - Datadog Checks Downloader
 
+## 3.10.0 / 2022-10-27
+
+* [Added] Update downloader to use v5 root layout. See [#13174](https://github.com/DataDog/integrations-core/pull/13174).
+* [Fixed] Fix setup.py keywords in datadog-checks-downloader. See [#12951](https://github.com/DataDog/integrations-core/pull/12951). Thanks [fridex](https://github.com/fridex).
+
 ## 3.9.0 / 2022-09-16
 
 * [Added] Add `packaging` to dependencies. See [#12753](https://github.com/DataDog/integrations-core/pull/12753).
