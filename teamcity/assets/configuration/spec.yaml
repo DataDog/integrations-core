@@ -205,6 +205,15 @@ files:
         value:
           type: integer
           default: 3600
+      - name: build_configuration
+        description: |
+          This is the internal build ID of the build configuration you wish to track.
+          You can find it labeled as "Build configuration ID" when editing the configuration in question.
+
+          Configure only one of `projects` or `build_configuration` per instance.
+          Not available with `use_openmetrics: true`.
+        value:
+          type: string
       - name: collect_events
         description: |
           Enable collection of TeamCity success and failure events for builds and deployments.
@@ -248,15 +257,6 @@ files:
         value:
           type: string
           example: <BUILD_NAME>
-      - name: build_configuration
-        description: |
-          [DEPRECATED] This is the internal build ID of the build configuration you wish to track.
-          You can find it labeled as "Build configuration ID" when editing the configuration in question.
-
-          Configure only one of `projects` or `build_configuration` per instance.
-          Not available with `use_openmetrics: true`.
-        value:
-          type: string
       - name: is_deployment
         description: |
           [DEPRECATED] Set to `true` to modify the event message to indicate that the TeamCity build configuration

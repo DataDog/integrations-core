@@ -716,6 +716,15 @@ instances:
     #
     # projects_refresh_interval: <PROJECTS_REFRESH_INTERVAL>
 
+    ## @param build_configuration - string - optional
+    ## This is the internal build ID of the build configuration you wish to track.
+    ## You can find it labeled as "Build configuration ID" when editing the configuration in question.
+    ##
+    ## Configure only one of `projects` or `build_configuration` per instance.
+    ## Not available with `use_openmetrics: true`.
+    #
+    # build_configuration: <BUILD_CONFIGURATION>
+
     ## @param collect_events - boolean - optional - default: true
     ## Enable collection of TeamCity success and failure events for builds and deployments.
     ## Not available with `use_openmetrics: true`.
@@ -752,15 +761,6 @@ instances:
     ## Not available with `use_openmetrics: true`.
     #
     # name: <BUILD_NAME>
-
-    ## @param build_configuration - string - optional
-    ## [DEPRECATED] This is the internal build ID of the build configuration you wish to track.
-    ## You can find it labeled as "Build configuration ID" when editing the configuration in question.
-    ##
-    ## Configure only one of `projects` or `build_configuration` per instance.
-    ## Not available with `use_openmetrics: true`.
-    #
-    # build_configuration: <BUILD_CONFIGURATION>
 
     ## @param is_deployment - boolean - optional - default: false
     ## [DEPRECATED] Set to `true` to modify the event message to indicate that the TeamCity build configuration
