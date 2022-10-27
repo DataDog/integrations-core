@@ -16,6 +16,8 @@ def test_app_controller(dd_run_check, aggregator, mock_http_response):
     for metric in common.APP_CONTROLLER_METRICS:
         if metric in common.NOT_EXPOSED_METRICS:
             aggregator.assert_metric(metric, at_least=0)
+        elif metric == 'argocd.app_controller.go.memstats.alloc_bytes':
+            aggregator.assert_metric(metric, metric_type=aggregator.GAUGE)
         else:
             aggregator.assert_metric(metric)
 
@@ -30,6 +32,8 @@ def test_api_server(dd_run_check, aggregator, mock_http_response):
     for metric in common.API_SERVER_METRICS:
         if metric in common.NOT_EXPOSED_METRICS:
             aggregator.assert_metric(metric, at_least=0)
+        elif metric == 'argocd.api_server.go.memstats.alloc_bytes':
+            aggregator.assert_metric(metric, metric_type=aggregator.GAUGE)
         else:
             aggregator.assert_metric(metric)
 
@@ -44,6 +48,8 @@ def test_repo_server(dd_run_check, aggregator, mock_http_response):
     for metric in common.REPO_SERVER_METRICS:
         if metric in common.NOT_EXPOSED_METRICS:
             aggregator.assert_metric(metric, at_least=0)
+        elif metric == 'argocd.repo_server.go.memstats.alloc_bytes':
+            aggregator.assert_metric(metric, metric_type=aggregator.GAUGE)
         else:
             aggregator.assert_metric(metric)
 
