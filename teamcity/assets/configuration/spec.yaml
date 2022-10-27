@@ -22,7 +22,7 @@ files:
         enabled: true
         value:
           type: boolean
-          default: false
+          display_default: false
           example: true
       - name: experimental_metrics
         description: |
@@ -31,7 +31,6 @@ files:
           Only available with `use_openmetrics: true`.
         value:
           type: boolean
-          default: false
           example: false
       - template: instances/openmetrics
         overrides:
@@ -155,7 +154,6 @@ files:
         value:
           type: integer
           example: 5
-          default: 5
       - name: default_projects_limit
         description: |
           The default maximum number of projects to discover when using the `projects`
@@ -164,7 +162,6 @@ files:
         value:
           type: integer
           example: 5
-          default: 5
       - name: global_build_configs_include
         description: |
           List of build configuration RegEx patterns to include across all monitored projects.
@@ -191,7 +188,6 @@ files:
           Not available with `use_openmetrics: true`.
         value:
           type: boolean
-          default: true
           example: true
       - name: build_config_metrics
         description: |
@@ -199,7 +195,6 @@ files:
           Not available with `use_openmetrics: true`.
         value:
           type: boolean
-          default: true
           example: true
       - name: tests_health_check
         description: |
@@ -207,7 +202,6 @@ files:
           Not available with `use_openmetrics: true`.
         value:
           type: boolean
-          default: true
           example: true
       - name: build_problem_health_check
         description: |
@@ -215,7 +209,6 @@ files:
           Not available with `use_openmetrics: true`.
         value:
           type: boolean
-          default: true
           example: true
       - name: basic_http_authentication
         description: |
@@ -223,7 +216,6 @@ files:
           `basic_http_authentication` is inherently enabled if `username` and `password` are specified.
         value:
           type: boolean
-          default: false
           example: false
       - name: name
         description: |
@@ -250,7 +242,6 @@ files:
           Not available with `use_openmetrics: true`.
         value:
           type: boolean
-          default: false
           example: false
       - name: host_affected
         description: |

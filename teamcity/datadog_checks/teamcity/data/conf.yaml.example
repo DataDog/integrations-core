@@ -25,7 +25,7 @@ instances:
     #
     # password: <PASSWORD>
 
-    ## @param use_openmetrics - boolean - optional - default: true
+    ## @param use_openmetrics - boolean - optional - default: false
     ## Use the latest OpenMetrics V2 implementation to collect metrics from
     ## the TeamCity server's Prometheus metrics endpoint.
     ## Requires Python version 3.
