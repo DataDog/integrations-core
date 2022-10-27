@@ -50,7 +50,7 @@ def instance_build_configuration(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_build_problem_checks(field, value):
+def instance_build_problem_health_check(field, value):
     return True
 
 
@@ -79,6 +79,10 @@ def instance_connect_timeout(field, value):
 
 
 def instance_default_build_configs_limit(field, value):
+    return 5
+
+
+def instance_default_projects_limit(field, value):
     return 5
 
 
@@ -282,7 +286,7 @@ def instance_telemetry(field, value):
     return False
 
 
-def instance_test_result_metrics(field, value):
+def instance_tests_health_check(field, value):
     return True
 
 

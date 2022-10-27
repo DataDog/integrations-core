@@ -15,18 +15,20 @@ instances:
 
     ## @param server - string - required
     ## Specify the server name of your TeamCity instance.
-    ## Enable Guest Authentication on your instance or enable the
-    ## optional `basic_http_authentication` config param to collect data.
-    ## If using `basic_http_authentication`, specify:
-    ##
-    ## server: http://<USER>:<PASSWORD>@teamcity.<ACCOUNT_NAME>.com
+    ## Enable Guest Authentication on your instance or specify `username` and `password` to 
+    ## enable basic HTTP authentication.
     #
   - server: http://teamcity.<ACCOUNT_NAME>.com
 
-    ## @param basic_http_authentication - boolean - optional - default: false
-    ## Set to `true` to turn on basic http authentication.
+    ## @param username - string - optional
+    ## The username to use if services are behind basic or digest auth.
     #
-    # basic_http_authentication: false
+    # username: <USERNAME>
+
+    ## @param password - string - optional
+    ## The password to use if services are behind basic or NTLM auth.
+    #
+    # password: <PASSWORD>
 
     ## @param use_openmetrics - boolean - optional - default: false
     ## Use the latest OpenMetrics V2 implementation to collect metrics from
@@ -45,64 +47,82 @@ instances:
     #
     # experimental_metrics: false
 
-    ## @param collect_events - boolean - optional - default: true
-    ## Enable collection of TeamCity success and failure events for builds and deployments.
-    ## Not available with `use_openmetrics: true`.
-    #
-    # collect_events: true
-
-    ## @param name - string - optional
-    ## A custom unique name per build configuration that is shown
-    ## in the events. If omitted, the build configuration ID is used.
-    #
-    # name: <BUILD_NAME>
-
     ## @param projects - mapping - optional
-    ## Mapping of TeamCity projects and build configurations to
-    ## collect events and metrics from the TeamCity REST API.
+    ## Mapping of TeamCity projects and build configurations to collect events and metrics from the TeamCity REST API.
     ##
     ## Configure only one of `projects` or `build_configuration` per instance.
     ##
-    ## The mapping must be configured with Project IDs as the top-level keys. Each Project ID key value
-    ## may be configured with a mapping of the optional `include` and `exclude` keys to specify
-    ## Build Configuration ID REGEX match patterns. If `include` and `exclude` keys are omitted,
-    ## all Build Configurations per specified Project ID are collected.
+    ## Configure each Project ID or Project ID RegEx pattern as the top-level keys or nested under the optional
+    ## `include` or `exclude` keys to filter your TeamCity projects more granularly. 
+    ##
+    ## Each Project ID key value may be configured with a mapping of the optional `include` and `exclude` keys to 
+    ## specify Build Configuration ID RegEx match patterns. If `include` and `exclude` keys are omitted,
+    ## all Build Configurations per specified Project are collected.
     ## In case of overlap, patterns specified with `exclude` take precedence.
     ##
     ## * To collect all build configurations per Project ID, configure an empty mapping value:
+    ##     
     ##     projects:
-    ##      <PROJECT_ID>: {}
+    ##       <PROJECT_ID>: {}
+    ##       <PROJECT_ID_REGEX>: {}
+    ##
+    ## OR
+    ##     
+    ##     projects:
+    ##       include:
+    ##         - <PROJECT_ID_REGEX>: {}
+    ##         - <PROJECT_ID_REGEX>: {}
+    ##       exclude:
+    ##         - <PROJECT_ID_REGEX>: {}
     ##
     ## * To filter build configurations in each configured Project, use the optional `include` and `exclude` keys
-    ##   to configure a list of Build Configuration ID REGEX matching patterns:
+    ##   to configure a list of Build Configuration IDs or RegEx matching patterns:
+    ##
     ##     projects:
-    ##       <PROJECT_ID>:
-    ##         include:
-    ##           - <BUILD_CONFIG_ID_REGEX>
-    ##           - <BUILD_CONFIG_ID_REGEX>
-    ##         exclude:
-    ##           - <BUILD_CONFIG_ID_REGEX>
+    ##       include:
+    ##         - <PROJECT_ID_REGEX>:
+    ##             include:
+    ##               - <BUILD_CONFIG_ID>
+    ##               - <BUILD_CONFIG_ID_REGEX>
+    ##             exclude:
+    ##               - <BUILD_CONFIG_ID_REGEX>
+    ##
+    ## * Configure configure `<PROJECT_ID>.limit` to limit discovered build configurations for the given project. 
+    ##   If `<PROJECT_ID>.limit` is omitted, the `default_build_configs_limit` is used.
+    ##
+    ##     projects:
+    ##       include:
+    ##         - <PROJECT_ID_REGEX>:
+    ##             limit: 5
+    ##             include:
+    ##               - <BUILD_CONFIG_ID_REGEX>
+    ##               - <BUILD_CONFIG_ID_REGEX>
+    ##             exclude:
+    ##               - <BUILD_CONFIG_ID_REGEX>
+    ##
+    ## Not available with `use_openmetrics: true`.
     #
-    # projects:
-    #   <PROJECT_A>:
-    #     build_configs_limit: 5
-    #     include:
-    #     - <BUILD_CONFIG_A>
-    #     - <BUILD_CONFIG_B>
-    #     exclude:
-    #     - <BUILD_CONFIG_C>
-    #   <PROJECT_B>: {}
+    # projects: {}
 
     ## @param default_build_configs_limit - integer - optional - default: 5
     ## The default maximum number of build configurations per project to discover when using the `projects` 
     ## configuration option. The `default_build_configs_limit` value is overridden when `build_config_limit` 
     ## is configured for a given project.
+    ## Not available with `use_openmetrics: true`.
     #
     # default_build_configs_limit: 5
+
+    ## @param default_projects_limit - integer - optional - default: 5
+    ## The default maximum number of projects to discover when using the `projects` 
+    ## configuration option.
+    ## Not available with `use_openmetrics: true`.
+    #
+    # default_projects_limit: 5
 
     ## @param global_build_configs_include - list of strings - optional
     ## List of build configuration RegEx patterns to include across all monitored projects.
     ## In case of overlap, patterns specified with `global_build_configs_exclude` take precedence.
+    ## Not available with `use_openmetrics: true`.
     #
     # global_build_configs_include:
     #   - <BUILD_CONFIG_REGEX>
@@ -110,9 +130,16 @@ instances:
     ## @param global_build_configs_exclude - list of strings - optional
     ## List of build configuration RegEx patterns to exclude across all monitored projects. 
     ## In case of overlap, patterns specified with `global_build_configs_exclude` take precedence.
+    ## Not available with `use_openmetrics: true`.
     #
     # global_build_configs_exclude:
     #   - <BUILD_CONFIG_REGEX>
+
+    ## @param collect_events - boolean - optional - default: true
+    ## Enable collection of TeamCity success and failure events for builds and deployments.
+    ## Not available with `use_openmetrics: true`.
+    #
+    # collect_events: true
 
     ## @param build_config_metrics - boolean - optional - default: true
     ## Collect Build Configuration statistics per build.
@@ -120,23 +147,37 @@ instances:
     #
     # build_config_metrics: true
 
-    ## @param test_result_metrics - boolean - optional - default: true
+    ## @param tests_health_check - boolean - optional - default: true
     ## Collect test result statistics per build.
     ## Not available with `use_openmetrics: true`.
     #
-    # test_result_metrics: true
+    # tests_health_check: true
 
-    ## @param build_problem_checks - boolean - optional - default: true
+    ## @param build_problem_health_check - boolean - optional - default: true
     ## Collect build problem service checks.
     ## Not available with `use_openmetrics: true`.
     #
-    # build_problem_checks: true
+    # build_problem_health_check: true
+
+    ## @param basic_http_authentication - boolean - optional - default: false
+    ## [DEPRECATED] Set to `true` to turn on basic http authentication. Starting in Datadog Agent v7.41.0, 
+    ## `basic_http_authentication` is inherently enabled if `username` and `password` are specified.
+    #
+    # basic_http_authentication: false
+
+    ## @param name - string - optional
+    ## [DEPRECATED] An optional custom unique name per instance that is shown in the events. 
+    ## If omitted, the build configuration ID is used.
+    ## Not available with `use_openmetrics: true`.
+    #
+    # name: <BUILD_NAME>
 
     ## @param build_configuration - string - optional
     ## [DEPRECATED] This is the internal build ID of the build configuration you wish to track.
     ## You can find it labeled as "Build configuration ID" when editing the configuration in question.
     ##
     ## Configure only one of `projects` or `build_configuration` per instance.
+    ## Not available with `use_openmetrics: true`.
     #
     # build_configuration: <BUILD_CONFIGURATION>
 
@@ -444,16 +485,6 @@ instances:
     ## When `auth_type` is set to `basic`, this determines whether to encode as `latin1` rather than `utf-8`.
     #
     # use_legacy_auth_encoding: true
-
-    ## @param username - string - optional
-    ## The username to use if services are behind basic or digest auth.
-    #
-    # username: <USERNAME>
-
-    ## @param password - string - optional
-    ## The password to use if services are behind basic or NTLM auth.
-    #
-    # password: <PASSWORD>
 
     ## @param ntlm_domain - string - optional
     ## If your services use NTLM authentication, specify

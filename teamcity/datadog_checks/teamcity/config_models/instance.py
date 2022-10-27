@@ -53,6 +53,24 @@ class Metric(BaseModel):
     type: Optional[str]
 
 
+class IncludeItem(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    exclude: Optional[Sequence[str]]
+    include: Optional[Sequence[str]]
+    limit: Optional[int] = 5
+
+
+class Projects(BaseModel):
+    class Config:
+        extra = Extra.allow
+        allow_mutation = False
+
+    exclude: Optional[Sequence[str]]
+    include: Optional[Sequence[IncludeItem]]
+
+
 class Proxy(BaseModel):
     class Config:
         allow_mutation = False
@@ -83,7 +101,7 @@ class InstanceConfig(BaseModel):
     basic_http_authentication: Optional[bool]
     build_config_metrics: Optional[bool]
     build_configuration: Optional[str]
-    build_problem_checks: Optional[bool]
+    build_problem_health_check: Optional[bool]
     cache_metric_wildcards: Optional[bool]
     cache_shared_labels: Optional[bool]
     collect_counters_with_distributions: Optional[bool]
@@ -91,6 +109,7 @@ class InstanceConfig(BaseModel):
     collect_histogram_buckets: Optional[bool]
     connect_timeout: Optional[float]
     default_build_configs_limit: Optional[int]
+    default_projects_limit: Optional[int]
     disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
     enable_health_service_check: Optional[bool]
@@ -128,7 +147,7 @@ class InstanceConfig(BaseModel):
     openmetrics_endpoint: Optional[str]
     password: Optional[str]
     persist_connections: Optional[bool]
-    projects: Optional[Mapping[str, Any]]
+    projects: Optional[Projects]
     proxy: Optional[Proxy]
     raw_line_filters: Optional[Sequence[str]]
     raw_metric_prefix: Optional[str]
@@ -142,7 +161,7 @@ class InstanceConfig(BaseModel):
     tag_by_endpoint: Optional[bool]
     tags: Optional[Sequence[str]]
     telemetry: Optional[bool]
-    test_result_metrics: Optional[bool]
+    tests_health_check: Optional[bool]
     timeout: Optional[float]
     tls_ca_cert: Optional[str]
     tls_cert: Optional[str]
