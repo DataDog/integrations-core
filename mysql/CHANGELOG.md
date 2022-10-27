@@ -1,5 +1,11 @@
 # CHANGELOG - mysql
 
+## 9.0.0 / 2022-10-27
+
+* [Added] [MySQL] Added Agent settings to log original unobfuscated strings. See [#12941](https://github.com/DataDog/integrations-core/pull/12941).
+* [Fixed] Fix check failing when missing unnecessary SELECT grant on perf schema. See [#13008](https://github.com/DataDog/integrations-core/pull/13008).
+* [Removed] Remove socket information from the activity query. See [#13196](https://github.com/DataDog/integrations-core/pull/13196).
+
 ## 8.5.1 / 2022-09-16
 
 * [Fixed] Bumps base check requirement to v25.4.0. See [#12733](https://github.com/DataDog/integrations-core/pull/12733).
