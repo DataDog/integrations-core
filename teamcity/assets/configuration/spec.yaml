@@ -24,6 +24,16 @@ files:
           type: boolean
           display_default: false
           example: true
+      - name: server
+        secret: true
+        required: true
+        description: |
+          Specify the server name of your TeamCity instance.
+          Enable Guest Authentication on your instance or specify `username` and `password` to
+          enable basic HTTP authentication.
+        value:
+          type: string
+          example: http://teamcity.<ACCOUNT_NAME>.com
       - name: experimental_metrics
         description: |
           Enable collection of experimental TeamCity Prometheus metrics.

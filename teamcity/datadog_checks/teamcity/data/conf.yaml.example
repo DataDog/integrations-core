@@ -35,6 +35,13 @@ instances:
     #
     use_openmetrics: true
 
+    ## @param server - string - required
+    ## Specify the server name of your TeamCity instance.
+    ## Enable Guest Authentication on your instance or specify `username` and `password` to
+    ## enable basic HTTP authentication.
+    #
+    server: http://teamcity.<ACCOUNT_NAME>.com
+
     ## @param experimental_metrics - boolean - optional - default: false
     ## Enable collection of experimental TeamCity Prometheus metrics.
     ## See https://www.jetbrains.com/help/teamcity/teamcity-monitoring-and-diagnostics.html#Metrics
