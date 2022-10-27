@@ -125,7 +125,7 @@ teamcity.artifacts_size,gauge,,byte,,The sum of all artifact file sizes in the a
 teamcity.build_duration,gauge,,millisecond,,The build duration (all build stages),0,teamcity,build dur,
 teamcity.build_duration.net_time,gauge,,millisecond,,"The build steps' duration (excluding the checkout, artifact publishing time, and so on)",0,teamcity,build dur net,
 teamcity.build_stage_duration,gauge,,millisecond,,The duration of tagged build step. See https://www.jetbrains.com/help/teamcity/custom-chart.html#Default+Statistics+Values+Provided+by+TeamCity,0,teamcity,build stg dur,
-teamcity.build_test_status,gauge,,,,Build test status,0,teamcity,build test status,
+teamcity.build_test_status,gauge,,,,Build test status. 1 - OK; 2 - UNKNOWN; 3 - FAILED,0,teamcity,build test status,
 teamcity.code_coverage.blocks.covered,gauge,,,,Number of covered blocks,0,teamcity,code cov covered blocks,
 teamcity.code_coverage.blocks.pct,gauge,,percent,,Block-level code coverage percentage,0,teamcity,code cov pct blocks,
 teamcity.code_coverage.blocks.total,gauge,,,,Total number of blocks,0,teamcity,code cov total blocks,

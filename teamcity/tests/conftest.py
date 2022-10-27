@@ -14,12 +14,12 @@ from .common import COMPOSE_FILE, LEGACY_REST_INSTANCE, OPENMETRICS_INSTANCE, RE
 
 
 @pytest.fixture(scope='session')
-def dd_environment(instance, openmetrics_instance):
+def dd_environment(rest_instance, openmetrics_instance):
     with docker_run(COMPOSE_FILE, sleep=10):
         if USE_OPENMETRICS:
             yield openmetrics_instance
         else:
-            yield instance
+            yield rest_instance
 
 
 @pytest.fixture(scope='session')

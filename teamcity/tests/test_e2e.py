@@ -3,18 +3,26 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
-from datadog_checks.teamcity.constants import (
-    SERVICE_CHECK_BUILD_PROBLEMS,
-    SERVICE_CHECK_BUILD_STATUS,
-    SERVICE_CHECK_TEST_RESULTS,
-)
+from datadog_checks.base import AgentCheck
+from datadog_checks.teamcity.constants import SERVICE_CHECK_OPENMETRICS
 
-from .common import REST_INSTANCE
+from .common import OPENMETRICS_INSTANCE, REST_INSTANCE, USE_OPENMETRICS
 
 
+@pytest.mark.skipif(USE_OPENMETRICS, reason="Not available in OpenMetricsV2 check")
 @pytest.mark.e2e
 def test_e2e(aggregator, dd_agent_check):
-    aggregator = dd_agent_check(REST_INSTANCE, rate=True)
-    aggregator.assert_service_check('teamcity.{}'.format(SERVICE_CHECK_BUILD_STATUS), at_least=0)
-    aggregator.assert_service_check('teamcity.{}'.format(SERVICE_CHECK_BUILD_PROBLEMS), at_least=0)
-    aggregator.assert_service_check('teamcity.{}'.format(SERVICE_CHECK_TEST_RESULTS), at_least=0)
+    # Prevent the integration from failing before even running the check
+    with pytest.raises(Exception):
+        dd_agent_check(REST_INSTANCE, rate=True)
+
+    assert len(aggregator.service_check_names) == 0
+
+
+@pytest.mark.skipif(not USE_OPENMETRICS, reason="Not available in REST check")
+@pytest.mark.e2e
+def test_e2e_openmetrics(aggregator, dd_agent_check):
+    with pytest.raises(Exception):
+        dd_agent_check(OPENMETRICS_INSTANCE, rate=True)
+
+    aggregator.assert_service_check(SERVICE_CHECK_OPENMETRICS, status=AgentCheck.CRITICAL)
