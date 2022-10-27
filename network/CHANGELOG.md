@@ -1,5 +1,11 @@
 # CHANGELOG - network
 
+## 2.9.2 / 2022-10-27
+
+* [Fixed] Extract windows check to separate class. See [#13143](https://github.com/DataDog/integrations-core/pull/13143).
+* [Fixed] Test & better document collect_cx_queues. See [#13117](https://github.com/DataDog/integrations-core/pull/13117).
+* [Fixed] Exclude loopback interface from ethtool. See [#13042](https://github.com/DataDog/integrations-core/pull/13042).
+
 ## 2.9.1 / 2022-10-04
 
 * [Fixed] Exclude loopback interface from ethtool. See [#13042](https://github.com/DataDog/integrations-core/pull/13042).
