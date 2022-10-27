@@ -9,21 +9,21 @@ files:
     options:
     - name: app_controller_endpoint
       description: |
-        Endpoint where metrics of the Application Controller's Prometheus metrics are exposed.
+        Endpoint exposing the Application Controller's Prometheus metrics.
       value:
         display_default: null
         example: http://argocd-metrics:8082/metrics
         type: string
     - name: api_server_endpoint
       description: |
-        Endpoint where metrics of the API Server's Prometheus metrics are exposed.
+        Endpoint exposing the API Server's Prometheus metrics.
       value:
         display_default: null
         example: http://argocd-server-metrics:8083/metrics
         type: string
     - name: repo_server_endpoint
       description: |
-        Endpoint where metrics of the Repo Server's Prometheus metrics are exposed.
+        Endpoint exposing the Repo Server's Prometheus metrics.
       value:
         display_default: null
         example: http://argocd-repo-server:8084/metrics

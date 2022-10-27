@@ -17,14 +17,101 @@ Argo CD exposes Prometheus-formatted metrics on three of their components: Appli
 
 **Note**: This check uses [OpenMetrics][11] for metric collection, which requires Python 3.
 
-#### Metric collection
+#### Containerized
+##### Metric collection
 
-1. Ensure that the Prometheus formatted metrics are exposed in your Argo CD cluster. This should be enabled by default if using Argo CD's [default manifests][10].
+Ensure that the Prometheus formatted metrics are exposed in your Argo CD cluster. This should be enabled by default if using Argo CD's [default manifests][10]. To gather all metrics, each of the three aforementioned components will need to be annotated for the agent to collect metrics. For more information about annotations, see the [Autodiscovery Integration Templates and for guidance][13]. Example configurations:
+
+Application Controller:
+```yaml
+apiVersion: v1
+kind: Pod
+# (...)
+metadata:
+  name: '<POD_NAME>'
+  annotations:
+    ad.datadoghq.com/argocd-application-controller.checks: |
+      {
+        "argocd": {
+          "init_config": {}},
+          "instances": [
+            {
+              "app_controller_endpoint": "%%host%%:8082/metrics"
+            }
+          ]
+        }
+      }
+    # (...)
+spec:
+  containers:
+    - name: 'argocd-application-controller'
+# (...)
+```
+
+API Server:
+```yaml
+apiVersion: v1
+kind: Pod
+# (...)
+metadata:
+  name: '<POD_NAME>'
+  annotations:
+    ad.datadoghq.com/argocd-server.checks: |
+      {
+        "argocd": {
+          "init_config": {}},
+          "instances": [
+            {
+              "api_server_endpoint": "%%host%%:8083/metrics"
+            }
+          ]
+        }
+      }
+    # (...)
+spec:
+  containers:
+    - name: 'argocd-server'
+# (...)
+```
+
+Repo Server:
+```yaml
+apiVersion: v1
+kind: Pod
+# (...)
+metadata:
+  name: '<POD_NAME>'
+  annotations:
+    ad.datadoghq.com/argocd-repo-server.checks: |
+      {
+        "argocd": {
+          "init_config": {}},
+          "instances": [
+            {
+              "repo_server_endpoint": "%%host%%:8084/metrics"
+            }
+          ]
+        }
+      }
+    # (...)
+spec:
+  containers:
+    - name: 'argocd-repo-server'
+# (...)
+```
 
 
-##### Containerized
+##### Log collection
 
+_Available for Agent versions >6.0_
 
+Argo CD logs can be collected from the different Argo CD pods through Kubernetes. Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][12].
+
+See the [Autodiscovery Integration Templates][3] for guidance on applying the parameters below.
+
+| Parameter      | Value                                                |
+| -------------- | ---------------------------------------------------- |
+| `<LOG_CONFIG>` | `{"source": "istio", "service": "<SERVICE_NAME>"}`   |
 
 ### Validation
 
@@ -60,3 +147,5 @@ Need help? Contact [Datadog support][9].
 [9]: https://docs.datadoghq.com/help/
 [10]: https://argo-cd.readthedocs.io/en/stable/operator-manual/installation/
 [11]: https://docs.datadoghq.com/integrations/openmetrics/
+[12]: https://docs.datadoghq.com/agent/kubernetes/log/
+[13]: https://docs.datadoghq.com/containers/kubernetes/integrations/?tab=kubernetesadv2
