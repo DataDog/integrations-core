@@ -131,39 +131,39 @@ METRIC_MAP = {
 
 
 SIMPLE_BUILD_STATS_METRICS = {
-    'ArtifactsSize': {'name': 'artifacts_size', 'method': 'gauge'},
-    'BuildDuration': {'name': 'build_duration', 'method': 'gauge'},
-    'BuildDurationNetTime': {'name': 'build_duration.net_time', 'method': 'gauge'},
-    'BuildTestStatus': {'name': 'build_test_status', 'method': 'gauge'},
-    'InspectionStatsE': {'name': 'inspection_stats_e', 'method': 'gauge'},
-    'InspectionStatsW': {'name': 'inspection_stats_w', 'method': 'gauge'},
-    'PassedTestCount': {'name': 'passed_test_count', 'method': 'gauge'},
-    'FailedTestCount': {'name': 'failed_test_count', 'method': 'gauge'},
-    'serverSideBuildFinishing': {'name': 'server_side_build_finishing', 'method': 'gauge'},
-    'SuccessRate': {'name': 'success_rate', 'method': 'gauge'},
-    'TimeSpentInQueue': {'name': 'time_spent_in_queue', 'method': 'gauge'},
-    'TotalTestCount': {'name': 'total_test_count', 'method': 'gauge'},
-    'VisibleArtifactsSize': {'name': 'visible_artifacts_size', 'method': 'gauge'},
-    'CodeCoverageB': {'name': 'code_coverage.blocks.pct', 'method': 'gauge'},
-    'CodeCoverageC': {'name': 'code_coverage.classes.pct', 'method': 'gauge'},
-    'CodeCoverageL': {'name': 'code_coverage.lines.pct', 'method': 'gauge'},
-    'CodeCoverageM': {'name': 'code_coverage.methods.pct', 'method': 'gauge'},
-    'CodeCoverageR': {'name': 'code_coverage.branches.pct', 'method': 'gauge'},
-    'CodeCoverageS': {'name': 'code_coverage.statements.pct', 'method': 'gauge'},
-    'CodeCoverageAbsBCovered': {'name': 'code_coverage.blocks.covered', 'method': 'gauge'},
-    'CodeCoverageAbsBTotal': {'name': 'code_coverage.blocks.total', 'method': 'gauge'},
-    'CodeCoverageAbsCCovered': {'name': 'code_coverage.classes.covered', 'method': 'gauge'},
-    'CodeCoverageAbsCTotal': {'name': 'code_coverage.classes.total', 'method': 'gauge'},
-    'CodeCoverageAbsLCovered': {'name': 'code_coverage.lines.covered', 'method': 'gauge'},
-    'CodeCoverageAbsLTotal': {'name': 'code_coverage.lines.total', 'method': 'gauge'},
-    'CodeCoverageAbsMCovered': {'name': 'code_coverage.methods.covered', 'method': 'gauge'},
-    'CodeCoverageAbsMTotal': {'name': 'code_coverage.methods.total', 'method': 'gauge'},
-    'CodeCoverageAbsRCovered': {'name': 'code_coverage.branches.covered', 'method': 'gauge'},
-    'CodeCoverageAbsRTotal': {'name': 'code_coverage.branches.total', 'method': 'gauge'},
-    'CodeCoverageAbsSCovered': {'name': 'code_coverage.statements.covered', 'method': 'gauge'},
-    'CodeCoverageAbsSTotal': {'name': 'code_coverage.statements.total', 'method': 'gauge'},
-    'DuplicatorStats': {'name': 'duplicator_stats', 'method': 'gauge'},
-    'IgnoredTestCount': {'name': 'ignored_test_count', 'method': 'gauge'},
+    'ArtifactsSize': {'name': 'artifacts_size', 'metric_type': 'gauge'},
+    'BuildDuration': {'name': 'build_duration', 'metric_type': 'gauge'},
+    'BuildDurationNetTime': {'name': 'build_duration.net_time', 'metric_type': 'gauge'},
+    'BuildTestStatus': {'name': 'build_test_status', 'metric_type': 'gauge'},
+    'InspectionStatsE': {'name': 'inspection_stats_e', 'metric_type': 'gauge'},
+    'InspectionStatsW': {'name': 'inspection_stats_w', 'metric_type': 'gauge'},
+    'PassedTestCount': {'name': 'passed_test_count', 'metric_type': 'gauge'},
+    'FailedTestCount': {'name': 'failed_test_count', 'metric_type': 'gauge'},
+    'serverSideBuildFinishing': {'name': 'server_side_build_finishing', 'metric_type': 'gauge'},
+    'SuccessRate': {'name': 'success_rate', 'metric_type': 'gauge'},
+    'TimeSpentInQueue': {'name': 'time_spent_in_queue', 'metric_type': 'gauge'},
+    'TotalTestCount': {'name': 'total_test_count', 'metric_type': 'gauge'},
+    'VisibleArtifactsSize': {'name': 'visible_artifacts_size', 'metric_type': 'gauge'},
+    'CodeCoverageB': {'name': 'code_coverage.blocks.pct', 'metric_type': 'gauge'},
+    'CodeCoverageC': {'name': 'code_coverage.classes.pct', 'metric_type': 'gauge'},
+    'CodeCoverageL': {'name': 'code_coverage.lines.pct', 'metric_type': 'gauge'},
+    'CodeCoverageM': {'name': 'code_coverage.methods.pct', 'metric_type': 'gauge'},
+    'CodeCoverageR': {'name': 'code_coverage.branches.pct', 'metric_type': 'gauge'},
+    'CodeCoverageS': {'name': 'code_coverage.statements.pct', 'metric_type': 'gauge'},
+    'CodeCoverageAbsBCovered': {'name': 'code_coverage.blocks.covered', 'metric_type': 'gauge'},
+    'CodeCoverageAbsBTotal': {'name': 'code_coverage.blocks.total', 'metric_type': 'gauge'},
+    'CodeCoverageAbsCCovered': {'name': 'code_coverage.classes.covered', 'metric_type': 'gauge'},
+    'CodeCoverageAbsCTotal': {'name': 'code_coverage.classes.total', 'metric_type': 'gauge'},
+    'CodeCoverageAbsLCovered': {'name': 'code_coverage.lines.covered', 'metric_type': 'gauge'},
+    'CodeCoverageAbsLTotal': {'name': 'code_coverage.lines.total', 'metric_type': 'gauge'},
+    'CodeCoverageAbsMCovered': {'name': 'code_coverage.methods.covered', 'metric_type': 'gauge'},
+    'CodeCoverageAbsMTotal': {'name': 'code_coverage.methods.total', 'metric_type': 'gauge'},
+    'CodeCoverageAbsRCovered': {'name': 'code_coverage.branches.covered', 'metric_type': 'gauge'},
+    'CodeCoverageAbsRTotal': {'name': 'code_coverage.branches.total', 'metric_type': 'gauge'},
+    'CodeCoverageAbsSCovered': {'name': 'code_coverage.statements.covered', 'metric_type': 'gauge'},
+    'CodeCoverageAbsSTotal': {'name': 'code_coverage.statements.total', 'metric_type': 'gauge'},
+    'DuplicatorStats': {'name': 'duplicator_stats', 'metric_type': 'gauge'},
+    'IgnoredTestCount': {'name': 'ignored_test_count', 'metric_type': 'gauge'},
 }
 
 REGEX_BUILD_STATS_METRICS = [
@@ -171,13 +171,13 @@ REGEX_BUILD_STATS_METRICS = [
         'regex': r'buildStageDuration\:([\s\S]*)',
         'name': 'build_stage_duration',
         'tags': ('build_stage',),
-        'method': 'gauge',
+        'metric_type': 'gauge',
     },
     {
         'regex': r'queueWaitReason\:([\s\S]*)',
         'name': 'queue_wait_reason',
         'tags': ('reason',),
-        'method': 'gauge',
+        'metric_type': 'gauge',
     },
 ]
 
@@ -185,15 +185,15 @@ REGEX_BUILD_STATS_METRICS = [
 def build_metric(metric_name):
     additional_tags = []
     name = None
-    method = None
+    metric_type = None
     if metric_name in SIMPLE_BUILD_STATS_METRICS:
         metric_mapping = SIMPLE_BUILD_STATS_METRICS[metric_name]
         name = metric_mapping['name']
-        method = metric_mapping['method']
+        metric_type = metric_mapping['metric_type']
     else:
         for regex in REGEX_BUILD_STATS_METRICS:
             name = str(regex['name'])
-            method = regex['method']
+            metric_type = regex['metric_type']
             results = re.findall(str(regex['regex']), metric_name)
             if len(results) == 0:
                 continue
@@ -204,6 +204,6 @@ def build_metric(metric_name):
             if len(tags_values) == len(regex['tags']):
                 for i in range(len(regex['tags'])):
                     additional_tags.append('{}:{}'.format(regex['tags'][i], tags_values[i]))
-                return name, additional_tags, method
-            return name, tags_values, method
-    return name, additional_tags, method
+                return name, additional_tags, metric_type
+            return name, tags_values, metric_type
+    return name, additional_tags, metric_type

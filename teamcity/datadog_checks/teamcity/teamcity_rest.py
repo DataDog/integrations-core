@@ -201,13 +201,13 @@ class TeamCityRest(AgentCheck):
         if build_stats and build_stats['property']:
             for stat_property in build_stats['property']:
                 stat_property_name = stat_property['name']
-                metric_name, additional_tags, method = build_metric(stat_property_name)
-                if not metric_name or not method:
+                metric_name, additional_tags, metric_type = build_metric(stat_property_name)
+                if not metric_name or not metric_type:
                     self.log.debug('Found unknown build configuration statistic: %s, skipping.', stat_property_name)
                     continue
                 else:
                     metric_value = stat_property['value']
-                    method = getattr(self, method)
+                    method = getattr(self, metric_type)
                     method(metric_name, metric_value, tags=self.build_tags + additional_tags)
         else:
             self.log.debug('No build stats found for build ID: %s.', build_id)
