@@ -17,9 +17,6 @@ services:
 
   teamcity-minimal-agent:
     container_name: teamcity-minimal-agent
-    build:
-      context: .
-      dockerfile: Dockerfile-minimal_agent
     platform: linux/amd64
     environment:
       - AGENT_NAME=minimal_agent
