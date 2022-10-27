@@ -7,7 +7,7 @@ The Win32 event log check watches for Windows Event Logs and forwards them to Da
 - Track system and application events in Datadog.
 - Correlate system and application events with the rest of your application.
 
-See the [Windows Event Logs documentation][13].
+For more information, see the [Windows Event Logging documentation][13].
 
 ## Setup
 
@@ -23,11 +23,10 @@ Windows Event logs can be collected as one or both of the following methods.
 
 Both methods are configured in `win32_event_log.d/conf.yaml` in the `conf.d/` folder at the root of your [Agent's configuration directory][2]. See the [sample win32_event_log.d/conf.yaml][3] for all available configuration options.
 
-First, identify the Windows Event Log channels you want to monitor.
 
 #### List Windows Event channels
 
-To see a list of channels, run the following command in PowerShell:
+First, identify the Windows Event Log channels you want to monitor. To see a list of channels, run the following command in PowerShell:
 
 ```powershell
 Get-WinEvent -ListLog *
@@ -89,7 +88,7 @@ instances:
 
 _Available for Agent versions >6.0_
 
-Log collection is disabled by default in the Datadog Agent; ensure to [activate log collection][18] (e.g. set `logs_enabled: true` in your `datadog.yaml` file) in order to collect Windows Event Logs as Datadog Logs.
+Log collection is disabled by default in the Datadog Agent. To collect Windows Event Logs as Datadog Logs, [activate log collection][18] by setting `logs_enabled: true` in your `datadog.yaml` file.
 
 To collect Windows Event Logs as Datadog Logs, configure channels under the `logs:` section of your `win32_event_log.d/conf.yaml` configuration file. This example shows entries for the `Security` and `<CHANNEL_2>` channels:
 
@@ -119,7 +118,7 @@ Finally, [restart the Agent][4].
 
 ### Filtering events
 
-1. Configure one or more filters for the event log. A filter allows you to choose what log events you want to get into Datadog.
+Configure one or more filters for the event log. A filter allows you to choose what log events you want to get into Datadog.
 
   <!-- xxx tabs xxx -->
   <!-- xxx tab "Events" xxx -->
@@ -147,17 +146,17 @@ Finally, [restart the Agent][4].
 
   Example legacy mode filters:
 
-  - log_file: Application, System, Setup, Security
-  - type: Critical, Error, Warning, Information, Audit Success, Audit Failure
-  - source_name: Any available source name
-  - event_id: Windows EventLog ID
+  - `log_file`: `Application`, `System`, `Setup`, `Security`
+  - `type`: `Critical`, `Error`, `Warning`, `Information`, `Audit Success`, `Audit Failure`
+  - `source_name`: Any available source name
+  - `event_id`: Windows EventLog ID
 
   Example non-legacy mode filters:
 
-  - path: Application, System, Setup, Security
-  - type: Critical, Error, Warning, Information, Success Audit, Failure Audit
-  - source: Any available source name
-  - id: event_id: Windows EventLog ID
+  - `path`: `Application`, `System`, `Setup`, `Security`
+  - `type`: `Critical`, `Error`, `Warning`, `Information`, `Success Audit`, `Failure Audit`
+  - `source`: Any available source name
+  - `id`: event_id: Windows EventLog ID
 
   See the [sample win32_event_log.d/conf.yaml][3] for all available filter options for respective modes.
 
@@ -262,7 +261,7 @@ Finally, [restart the Agent][4].
       log_processing_rules:
         - type: include_at_match
           name: include_x01
-          pattern: \"value\":\"(101|201|301)\"
+          pattern: '"EventID":"(101|201|301)"'
   ```
 
   **Note**: The pattern may vary based on the format of the logs. The [Agent `stream-logs` subcommand][15] can be used to view this format.
@@ -295,7 +294,7 @@ Finally, [restart the Agent][4].
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
-2. [Restart the Agent][4] using the Agent Manager (or restart the service).
+When you're done setting up filters, [restart the Agent][4] using the Agent Manager (or restart the service).
 
 ### Validation
 
