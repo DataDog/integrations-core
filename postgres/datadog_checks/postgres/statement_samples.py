@@ -118,7 +118,8 @@ class DBExplainError(Enum):
     Denotes the various reasons a query may not have an explain statement.
     """
 
-    # database error i.e connection error
+    # may be due to a misconfiguration of the database during setup or the Agent is
+    # not able to access the required function
     database_error = 'database_error'
 
     # datatype mismatch occurs when return type is not json, for instance when multiple queries are explained
@@ -138,6 +139,16 @@ class DBExplainError(Enum):
 
     # a truncated statement can't be explained
     query_truncated = "query_truncated"
+
+    # connection error may be due to a misconfiguration during setup
+    connection_error = 'connection_error'
+
+    # clients using the extended query protocol can't be explained due to
+    # the separation of the parsed query and raw bind parameters
+    extended_query_protocol = 'extended_query_protocol'
+
+    # search path may be different when the client executed a query from where we executed it.
+    undefined_table = 'undefined_table'
 
 
 DEFAULT_COLLECTION_INTERVAL = 1
@@ -458,7 +469,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             self._log.warning(
                 "cannot collect execution plans due to failed DB connection to dbname=%s: %s", dbname, repr(e)
             )
-            return DBExplainError.database_error, e
+            return DBExplainError.connection_error, e
 
         try:
             result = self._run_explain(dbname, EXPLAIN_VALIDATION_QUERY, EXPLAIN_VALIDATION_QUERY)
@@ -576,19 +587,25 @@ class PostgresStatementSamples(DBMAsyncJob):
 
         try:
             return self._run_explain(dbname, statement, obfuscated_statement), None, None
-        except psycopg2.errors.DatabaseError as e:
-            self._log.debug("Failed to collect execution plan: %s", repr(e))
-            error_response = None, DBExplainError.database_error, '{}'.format(type(e))
-            if isinstance(e, psycopg2.errors.ProgrammingError) and not isinstance(
-                e, psycopg2.errors.InsufficientPrivilege
-            ):
-                # ProgrammingError is things like InvalidName, InvalidSchema, SyntaxError
-                # we don't want to cache things like permission errors for a very long time because they can be fixed
-                # dynamically by the user. the goal here is to cache only those queries which there is no reason to
-                # retry
+        except Exception as e:
+            self._log.warning("Failed to collect execution plan: err=[%s] repr=[%s]", e, repr(e))
+            if isinstance(e, psycopg2.errors.UndefinedParameter):
+                error_response = None, DBExplainError.extended_query_protocol, '{}'.format(type(e))
                 self._explain_errors_cache[query_signature] = error_response
-
-            return error_response
+            elif isinstance(e, psycopg2.errors.UndefinedTable):
+                error_response = None, DBExplainError.undefined_table, '{}'.format(type(e))
+                self._explain_errors_cache[query_signature] = error_response
+            else:
+                error_response = None, DBExplainError.database_error, '{}'.format(type(e))
+                if isinstance(e, psycopg2.errors.ProgrammingError) and not isinstance(
+                    e, psycopg2.errors.InsufficientPrivilege
+                ):
+                    # ProgrammingError is things like InvalidName, InvalidSchema, SyntaxError
+                    # we don't want to cache things like permission errors for a very long time because they
+                    # can be fixed dynamically by the user. the goal here is to cache only those queries which there
+                    # is no reason to retry
+                    self._explain_errors_cache[query_signature] = error_response
+        return error_response
 
     def _collect_plan_for_statement(self, row):
         # limit the rate of explains done to the database
