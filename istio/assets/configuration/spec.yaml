@@ -97,7 +97,7 @@ files:
         enabled: true
         value:
           display_default: null
-          example: http://%%host%%:15090/stats/prometheus
+          example: http://%%host%%:15020/stats/prometheus
           type: string
       - name: tag_by_endpoint
         description: Wether to include an endpoint tag or not. This only applies if `use openmentrics` is enabled.
