@@ -181,12 +181,22 @@ class NewKafkaConsumerCheck(object):
                     ],
                 )
 
-                highwater_future = self.kafka_client._send_request_to_node(node_id=broker.nodeId, request=request)
+                # We can disable wakeup here because it is the same thread doing both polling and sending. Also, it
+                # is possible that the wakeup itself could block if a large number of sends were processed beforehand.
+                highwater_future = self._send_request_to_node(node_id=broker.nodeId, request=request, wakeup=False)
+
                 highwater_future.add_callback(self._highwater_offsets_callback)
                 highwater_futures.append(highwater_future)
 
             # Loop until all futures resolved.
             self.kafka_client._wait_for_futures(highwater_futures)
+
+    def _send_request_to_node(self, node_id, request, wakeup=True):
+        while not self.kafka_client._client.ready(node_id):
+            # poll until the connection to broker is ready, otherwise send()
+            # will fail with NodeNotReadyError
+            self.kafka_client._client.poll()
+        return self.kafka_client._client.send(node_id, request, wakeup=wakeup)
 
     def _highwater_offsets_callback(self, response):
         """Callback that parses an OffsetFetchResponse and saves it to the highwater_offsets dict."""
