@@ -68,6 +68,7 @@ def test_empty_instance(dd_run_check):
 
 
 def test_app_controller_service_check(dd_run_check, aggregator, mock_http_response):
+    # Test for transformer. The prometheus source submits a 1 or 0. 1 being OK and 0 being CRITICAL.
     mock_http_response(file_path=get_fixture_path('app_controller_metrics.txt'))
     check = ArgocdCheck('argocd', {}, [common.MOCKED_APP_CONTROLLER_INSTANCE])
     dd_run_check(check)
