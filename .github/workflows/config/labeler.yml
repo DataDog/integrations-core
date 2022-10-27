@@ -239,6 +239,8 @@ integration/kubernetes:
 - kubernetes/**/*
 integration/kubernetes_state:
 - kubernetes_state/**/*
+integration/kubernetes_state_core:
+- kubernetes_state_core/**/*
 integration/kyototycoon:
 - kyototycoon/**/*
 integration/lighttpd:
