@@ -1,5 +1,13 @@
 # CHANGELOG - sqlserver
 
+## 9.1.0 / 2022-10-27
+
+* [Added] Emma/sqlserver port 0. See [#13135](https://github.com/DataDog/integrations-core/pull/13135).
+* [Added] [SQL Server] Added Agent settings to log original unobfuscated strings. See [#12958](https://github.com/DataDog/integrations-core/pull/12958).
+* [Fixed] Fix exception thrown when database is null in config. See [#12882](https://github.com/DataDog/integrations-core/pull/12882).
+* [Fixed] Fix Query Metrics query to correct for over-inflated / incorrect SQL Server metrics . See [#13089](https://github.com/DataDog/integrations-core/pull/13089).
+* [Fixed] sqlserver/connection: always cast provided port to str. See [#13055](https://github.com/DataDog/integrations-core/pull/13055).
+
 ## 9.0.2 / 2022-10-14
 
 * [Fixed] Fix Query Metrics query to correct for over-inflated / incorrect SQL Server metrics. See [#13123](https://github.com/DataDog/integrations-core/pull/13123).
