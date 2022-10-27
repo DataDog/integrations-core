@@ -8,19 +8,19 @@ import mock
 import pytest
 from mock import ANY, patch
 
-from datadog_checks.teamcity import TeamCityCheck
 from datadog_checks.teamcity.constants import (
     SERVICE_CHECK_BUILD_PROBLEMS,
     SERVICE_CHECK_BUILD_STATUS,
     SERVICE_CHECK_TEST_RESULTS,
 )
+from datadog_checks.teamcity.teamcity_rest import TeamCityRest
 
 from .common import (
     BUILD_STATS_METRICS,
     BUILD_TAGS,
     EXPECTED_SERVICE_CHECK_TEST_RESULTS,
     LEGACY_BUILD_TAGS,
-    LEGACY_INSTANCE,
+    LEGACY_REST_INSTANCE,
     NEW_FAILED_BUILD,
     NEW_SUCCESSFUL_BUILD,
     USE_OPENMETRICS,
@@ -33,12 +33,12 @@ pytestmark = [
 ]
 
 
-def test_build_event(dd_run_check, aggregator, legacy_instance):
-    legacy_instance['build_config_metrics'] = False
-    legacy_instance['tests_health_check'] = False
-    legacy_instance['build_problem_health_check'] = False
+def test_build_event(dd_run_check, aggregator, legacy_rest_instance):
+    legacy_rest_instance['build_config_metrics'] = False
+    legacy_rest_instance['tests_health_check'] = False
+    legacy_rest_instance['build_problem_health_check'] = False
 
-    teamcity = TeamCityCheck('teamcity', {}, [legacy_instance])
+    teamcity = TeamCityRest('teamcity', {}, [legacy_rest_instance])
 
     responses = json.load(open(get_fixture_path('event_responses.json'), 'r'))
 
@@ -54,7 +54,7 @@ def test_build_event(dd_run_check, aggregator, legacy_instance):
         mock_resp = mock.MagicMock(status_code=200)
         mock_resp.json.side_effect = json_responses
         req.get.return_value = mock_resp
-        teamcity.check(legacy_instance)
+        teamcity.check(legacy_rest_instance)
 
     assert len(aggregator.metric_names) == 0
     aggregator.assert_event(
@@ -76,7 +76,7 @@ def test_build_event(dd_run_check, aggregator, legacy_instance):
         mock_resp = mock.MagicMock(status_code=200)
         mock_resp.json.side_effect = [responses['server_details'], responses['no_new_builds']]
         req.get.return_value = mock_resp
-        teamcity.check(legacy_instance)
+        teamcity.check(legacy_rest_instance)
 
     aggregator.assert_event(msg_title="", msg_text="", count=0)
 
@@ -90,9 +90,9 @@ def test_build_event(dd_run_check, aggregator, legacy_instance):
     ],
 )
 def test_config(extra_config, expected_http_kwargs):
-    instance = deepcopy(LEGACY_INSTANCE)
+    instance = deepcopy(LEGACY_REST_INSTANCE)
     instance.update(extra_config)
-    check = TeamCityCheck('teamcity', {}, [instance])
+    check = TeamCityRest('teamcity', {}, [instance])
 
     with patch('datadog_checks.base.utils.http.requests.get') as r:
         check.check(instance)
@@ -142,7 +142,7 @@ def test_validate_config(dd_run_check, build_config, expected_error, caplog):
     instance = deepcopy(config)
     instance.update(build_config)
 
-    check = TeamCityCheck('teamcity', {}, [instance])
+    check = TeamCityRest('teamcity', {}, [instance])
 
     with pytest.raises(Exception) as e:
         dd_run_check(check)
@@ -150,8 +150,8 @@ def test_validate_config(dd_run_check, build_config, expected_error, caplog):
     assert expected_error in str(e.value)
 
 
-def test_collect_build_stats(aggregator, mock_http_response, instance, teamcity_check):
-    check = teamcity_check(instance)
+def test_collect_build_stats(aggregator, mock_http_response, rest_instance, teamcity_rest_check):
+    check = teamcity_rest_check(rest_instance)
     check.build_tags = BUILD_TAGS
 
     mock_http_response(file_path=get_fixture_path("build_stats.json"))
@@ -166,8 +166,8 @@ def test_collect_build_stats(aggregator, mock_http_response, instance, teamcity_
     aggregator.assert_all_metrics_covered()
 
 
-def test_collect_test_results(aggregator, mock_http_response, instance, teamcity_check):
-    check = teamcity_check(instance)
+def test_collect_test_results(aggregator, mock_http_response, rest_instance, teamcity_rest_check):
+    check = teamcity_rest_check(rest_instance)
     check.build_tags = BUILD_TAGS
 
     mock_http_response(file_path=get_fixture_path("test_occurrences.json"))
@@ -181,9 +181,9 @@ def test_collect_test_results(aggregator, mock_http_response, instance, teamcity
         )
 
 
-def test_collect_build_problems(aggregator, mock_http_response, instance, teamcity_check):
+def test_collect_build_problems(aggregator, mock_http_response, rest_instance, teamcity_rest_check):
     mock_http_response(file_path=get_fixture_path('build_problems.json'))
-    check = teamcity_check(instance)
+    check = teamcity_rest_check(rest_instance)
     check.build_tags = BUILD_TAGS
     expected_tags = BUILD_TAGS + ['problem_identity:python_build_error_identity', 'problem_type:TC_EXIT_CODE']
 
@@ -193,15 +193,15 @@ def test_collect_build_problems(aggregator, mock_http_response, instance, teamci
         'teamcity.{}'.format(SERVICE_CHECK_BUILD_PROBLEMS),
         count=1,
         tags=expected_tags,
-        status=TeamCityCheck.CRITICAL,
+        status=TeamCityRest.CRITICAL,
     )
 
 
-def test_handle_empty_builds(aggregator, mock_http_response, instance, legacy_instance, teamcity_check):
-    instances = [instance, legacy_instance]
+def test_handle_empty_builds(aggregator, mock_http_response, rest_instance, legacy_rest_instance, teamcity_rest_check):
+    instances = [rest_instance, legacy_rest_instance]
 
     for inst in instances:
-        check = teamcity_check(inst)
+        check = teamcity_rest_check(inst)
         mock_http_response(file_path=get_fixture_path("init_no_builds.json"))
         check.check(inst)
         aggregator.assert_service_check('teamcity.{}'.format(SERVICE_CHECK_BUILD_STATUS), count=0)

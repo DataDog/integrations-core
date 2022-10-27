@@ -5,12 +5,12 @@ import pytest
 from six import PY3
 
 from datadog_checks.dev import docker_run
-from datadog_checks.teamcity import TeamCityCheck
+from datadog_checks.teamcity.teamcity_rest import TeamCityRest
 
 if PY3:
-    from datadog_checks.teamcity.check import TeamCityCheckV2
+    from datadog_checks.teamcity.teamcity_openmetrics import TeamCityOpenMetrics
 
-from .common import COMPOSE_FILE, INSTANCE, LEGACY_INSTANCE, OPENMETRICS_INSTANCE, USE_OPENMETRICS
+from .common import COMPOSE_FILE, LEGACY_REST_INSTANCE, OPENMETRICS_INSTANCE, REST_INSTANCE, USE_OPENMETRICS
 
 
 @pytest.fixture(scope='session')
@@ -23,13 +23,13 @@ def dd_environment(instance, openmetrics_instance):
 
 
 @pytest.fixture(scope='session')
-def legacy_instance():
-    return LEGACY_INSTANCE
+def legacy_rest_instance():
+    return LEGACY_REST_INSTANCE
 
 
 @pytest.fixture(scope='session')
-def instance():
-    return INSTANCE
+def rest_instance():
+    return REST_INSTANCE
 
 
 @pytest.fixture(scope='session')
@@ -38,10 +38,10 @@ def openmetrics_instance():
 
 
 @pytest.fixture(scope="session")
-def teamcity_check():
-    return lambda instance: TeamCityCheck('teamcity', {}, [instance])
+def teamcity_rest_check():
+    return lambda instance: TeamCityRest('teamcity', {}, [instance])
 
 
 @pytest.fixture(scope="session")
-def teamcity_check_v2():
-    return lambda instance: TeamCityCheckV2('teamcity', {}, [instance])
+def teamcity_om_check():
+    return lambda instance: TeamCityOpenMetrics('teamcity', {}, [instance])

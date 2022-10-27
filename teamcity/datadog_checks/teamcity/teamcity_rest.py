@@ -30,7 +30,7 @@ from .constants import (
 from .metrics import build_metric
 
 
-class TeamCityCheck(AgentCheck):
+class TeamCityRest(AgentCheck):
     __NAMESPACE__ = 'teamcity'
 
     HTTP_CONFIG_REMAPPER = {
@@ -38,25 +38,8 @@ class TeamCityCheck(AgentCheck):
         'headers': {'name': 'headers', 'default': {"Accept": "application/json"}},
     }
 
-    def __new__(cls, name, init_config, instances):
-        instance = instances[0]
-
-        if is_affirmative(instance.get('use_openmetrics', False)):
-            if PY2:
-                raise ConfigurationError(
-                    "This version of the integration is only available when using py3. "
-                    "Check https://docs.datadoghq.com/agent/guide/agent-v6-python-3 "
-                    "for more information or use the older style config."
-                )
-            # TODO: when we drop Python 2 move this import up top
-            from .check import TeamCityCheckV2
-
-            return TeamCityCheckV2(name, init_config, instances)
-        else:
-            return super(TeamCityCheck, cls).__new__(cls)
-
     def __init__(self, name, init_config, instances):
-        super(TeamCityCheck, self).__init__(name, init_config, instances)
+        super(TeamCityRest, self).__init__(name, init_config, instances)
         self.current_build_config = self.instance.get('build_configuration', None)
         self.instance_name = self.instance.get('name', '')
         self.host = self.instance.get('host_affected') or self.hostname

@@ -15,7 +15,7 @@ CHECK_NAME = 'teamcity'
 
 USE_OPENMETRICS = is_affirmative(os.environ.get('USE_OPENMETRICS'))
 
-LEGACY_INSTANCE = {
+LEGACY_REST_INSTANCE = {
     'name': 'Legacy test build',
     'server': SERVER_URL,
     'build_configuration': 'SampleProject_Build',
@@ -23,7 +23,7 @@ LEGACY_INSTANCE = {
     'tags': ['one:tag', 'one:test'],
 }
 
-INSTANCE = {
+REST_INSTANCE = {
     'server': SERVER_URL,
     'projects': {
         'include': [

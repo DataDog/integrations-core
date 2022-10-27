@@ -10,6 +10,7 @@ services:
 
   teamcity-agent:
     container_name: teamcity-agent
+    image: jetbrains/teamcity-agent:latest
     platform: linux/amd64
     environment:
       - AGENT_NAME=regular_agent
@@ -17,6 +18,7 @@ services:
 
   teamcity-minimal-agent:
     container_name: teamcity-minimal-agent
+    image: jetbrains/teamcity-minimal-agent:latest
     platform: linux/amd64
     environment:
       - AGENT_NAME=minimal_agent

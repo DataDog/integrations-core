@@ -1,43 +1,33 @@
-# (C) Datadog, Inc. 2022-present
+# (C) Datadog, Inc. 2014-present
+# (C) Paul Kirby <pkirby@matrix-solutions.com> 2014
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from copy import deepcopy
-from urllib.parse import urlparse
+from six import PY2
 
-from datadog_checks.base import OpenMetricsBaseCheckV2, is_affirmative
-
-from .metrics import METRIC_MAP
+from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 
 
-class TeamCityCheckV2(OpenMetricsBaseCheckV2):
+class TeamCityCheck(AgentCheck):
     __NAMESPACE__ = 'teamcity'
-    DEFAULT_METRIC_LIMIT = 0
 
-    DEFAULT_METRICS_URL = "/{}/app/metrics"
-    EXPERIMENTAL_METRICS_URL = "/{}/app/metrics?experimental=true"
+    def __new__(cls, name, init_config, instances):
+        instance = instances[0]
+
+        if is_affirmative(instance.get('use_openmetrics', False)):
+            if PY2:
+                raise ConfigurationError(
+                    "This version of the integration is only available when using py3. "
+                    "Check https://docs.datadoghq.com/agent/guide/agent-v6-python-3 "
+                    "for more information or use the older style config."
+                )
+            # TODO: when we drop Python 2 move this import up top
+            from .teamcity_openmetrics import TeamCityOpenMetrics
+
+            return TeamCityOpenMetrics(name, init_config, instances)
+        else:
+            from .teamcity_rest import TeamCityRest
+
+            return TeamCityRest(name, init_config, instances)
 
     def __init__(self, name, init_config, instances):
-        super(TeamCityCheckV2, self).__init__(name, init_config, instances)
-        self.basic_http_auth = is_affirmative(
-            self.instance.get('basic_http_authentication', bool(self.instance.get('password', False)))
-        )
-        self.auth_type = 'httpAuth' if self.basic_http_auth else 'guestAuth'
-        parsed_endpoint = urlparse(self.instance.get('server'))
-        self.server_url = "{}://{}".format(parsed_endpoint.scheme, parsed_endpoint.netloc)
-        self.metrics_endpoint = ''
-
-        experimental_metrics = is_affirmative(self.instance.get('experimental_metrics', False))
-
-        if experimental_metrics:
-            self.metrics_endpoint = self.EXPERIMENTAL_METRICS_URL.format(self.auth_type)
-        else:
-            self.metrics_endpoint = self.DEFAULT_METRICS_URL.format(self.auth_type)
-
-    def configure_scrapers(self):
-        config = deepcopy(self.instance)
-        config['openmetrics_endpoint'] = "{}{}".format(self.server_url, self.metrics_endpoint)
-        config['metrics'] = [METRIC_MAP]
-        self.scraper_configs.clear()
-        self.scraper_configs.append(config)
-
-        super().configure_scrapers()
+        super(TeamCityCheck, self).__init__(name, init_config, instances)
