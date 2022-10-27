@@ -238,6 +238,10 @@ def instance_projects(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_projects_refresh_interval(field, value):
+    return 3600
+
+
 def instance_proxy(field, value):
     return get_default_field_value(field, value)
 

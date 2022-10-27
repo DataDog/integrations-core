@@ -148,6 +148,7 @@ class InstanceConfig(BaseModel):
     password: Optional[str]
     persist_connections: Optional[bool]
     projects: Optional[Projects]
+    projects_refresh_interval: Optional[int]
     proxy: Optional[Proxy]
     raw_line_filters: Optional[Sequence[str]]
     raw_metric_prefix: Optional[str]

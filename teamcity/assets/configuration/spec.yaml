@@ -66,8 +66,12 @@ files:
       - name: projects
         description: |
           Mapping of TeamCity projects and build configurations to collect events and metrics from the TeamCity REST API.
-
+          
           Configure only one of `projects` or `build_configuration` per instance.
+          
+          Requires Python version 3. 
+          Note: For Python version 2, use the `build_configuration` option to configure 
+          one build configuration ID per instance
 
           Configure each Project ID or Project ID RegEx pattern as the top-level keys or nested under the optional
           `include` or `exclude` keys to filter your TeamCity projects more granularly.
@@ -192,6 +196,15 @@ files:
           items:
             type: string
           example: [<BUILD_CONFIG_REGEX>]
+      - name: projects_refresh_interval
+        description: |
+          Configure projects refresh interval (seconds) in which the check discovers updated projects and build 
+          configurations based on the `projects` configuration. Set a lower interval if projects and build 
+          configurations are subject to frequent changes on the TeamCity server. Set a higher interval if projects 
+          and build configurations change less frequently. Default interval is 3600 seconds (1 hour).
+        value:
+          type: integer
+          default: 3600
       - name: collect_events
         description: |
           Enable collection of TeamCity success and failure events for builds and deployments.

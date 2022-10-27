@@ -24,7 +24,8 @@ from .common import (
 )
 
 pytestmark = [
-    pytest.mark.skipif(USE_OPENMETRICS, reason='Tests not available in OpenMetrics version of check'),
+    pytest.mark.skipif(USE_OPENMETRICS, reason='Not available in OpenMetrics version of check'),
+    pytest.mark.skipif(PY2, reason='Not available in Python 2'),
     pytest.mark.unit,
 ]
 

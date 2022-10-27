@@ -29,7 +29,7 @@ Edit the `teamcity.d/conf.yaml` in the `conf.d/` folder at the root of your [Age
 
 The TeamCity check offers two methods of data collection. To optimally monitor your TeamCity environment, configure two separate instances to collect metrics from each method. 
 
-1. OpenMetricsV2 method:
+1. OpenMetricsV2 method (requires Python version 3):
 
    Enable `use_openmetrics: true` to collect metrics from the TeamCity `/metrics` Prometheus endpoint.
 
@@ -60,7 +60,7 @@ The TeamCity check offers two methods of data collection. To optimally monitor y
 
 2. TeamCity Server REST API method:
 
-   Configure a separate instance in the `teamcity.d/conf.yaml` file to collect additional build-specific metrics, service checks, and build status events from the TeamCity server's REST API. Specify your projects and build configurations using the `projects` option:
+   Configure a separate instance in the `teamcity.d/conf.yaml` file to collect additional build-specific metrics, service checks, and build status events from the TeamCity server's REST API. Specify your projects and build configurations using the `projects` option (requires Python version 3):
 
 
    ```yaml
@@ -88,6 +88,22 @@ The TeamCity check offers two methods of data collection. To optimally monitor y
 
 
    Customize each project's build configuration monitoring using the optional `include` and `exclude` filters to specify build configuration IDs to include or exclude from monitoring, respectively. RegEx patterns are supported in the `include` and `exclude` keys to specify build configuration ID matching patterns. If both `include` and `exclude` filters are omitted, all build configurations are monitored for the specified project. 
+
+   For Python version 2, configure one build configuration ID per instance using the `build_configuration` option:
+
+
+   ```yaml
+   init_config:
+   
+   instances:
+     - server: http://teamcity.<ACCOUNT_NAME>.com
+   
+       ## @param projects - mapping - optional
+       ## Mapping of TeamCity projects and build configurations to
+       ## collect events and metrics from the TeamCity REST API.
+       #
+       build_configuration: <BUILD_CONFIGURATION_ID>
+   ```
 
 
 [Restart the Agent][5] to start collecting and sending TeamCity events to Datadog.

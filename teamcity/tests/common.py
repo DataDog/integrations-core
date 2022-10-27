@@ -16,15 +16,16 @@ CHECK_NAME = 'teamcity'
 USE_OPENMETRICS = is_affirmative(os.environ.get('USE_OPENMETRICS'))
 
 LEGACY_REST_INSTANCE = {
-    'name': 'Legacy test build',
+    'name': 'SampleProject_Build',
     'server': SERVER_URL,
     'build_configuration': 'SampleProject_Build',
     'host_affected': 'buildhost42.dtdg.co',
-    'tags': ['one:tag', 'one:test'],
+    'tags': ['build_env:test', 'test_tag:ci_builds'],
 }
 
 REST_INSTANCE = {
     'server': SERVER_URL,
+    'host_affected': 'buildhost42.dtdg.co',
     'projects': {
         'include': [
             {
@@ -112,22 +113,11 @@ TEAMCITY_SERVER_VALUES = {
     ),
 }
 
-LEGACY_BUILD_TAGS = [
+BUILD_TAGS = [
     'server:http://localhost:8111',
     'type:build',
     'build_config:SampleProject_Build',
     'project_id:SampleProject',
-    'instance_name:Legacy test build',
-    'one:test',
-    'one:tag',
-]
-
-BUILD_TAGS = [
-    'server:http://localhost:8111',
-    'type:build',
-    'build_config:TeamCityV2Project_Build',
-    'project_id:TeamCityV2Project',
-    'instance_name:TeamCityV2_test_build',
     'build_env:test',
     'test_tag:ci_builds',
 ]

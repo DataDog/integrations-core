@@ -41,7 +41,7 @@ class TeamCityRest(AgentCheck):
     def __init__(self, name, init_config, instances):
         super(TeamCityRest, self).__init__(name, init_config, instances)
         self.current_build_config = self.instance.get('build_configuration', None)
-        self.instance_name = self.instance.get('name', '')
+        self.instance_name = self.instance.get('name', None)
         self.host = self.instance.get('host_affected') or self.hostname
         self.is_deployment = is_affirmative(self.instance.get('is_deployment', False))
         self.basic_http_auth = is_affirmative(
@@ -83,10 +83,11 @@ class TeamCityRest(AgentCheck):
             self.check_initializations.append(self._validate_config)
 
     def _validate_config(self):
-        if self.instance.get('build_configuration') and self.instance.get('projects'):
-            raise ConfigurationError('Only one of `projects` or `build_configuration` may be configured, not both.')
-        if self.instance.get('build_configuration') is None and self.instance.get('projects') is None:
-            raise ConfigurationError('`projects` must be configured.')
+        if self.instance.get('projects'):
+            raise ConfigurationError(
+                '`projects` option is not supported for Python 2. '
+                'Use the `build_configuration` option or upgrade to Python 3.'
+            )
 
     def _get_last_build_id(self, project_id, build_config_id):
         if (
@@ -178,6 +179,10 @@ class TeamCityRest(AgentCheck):
             self._initialize_single_build_config()
 
         else:
+            if PY2:
+                raise self.CheckException(
+                    'Multi-build configuration monitoring is not currently supported in Python 2.'
+                )
             self.log.debug("Initializing multi-build configuration monitoring.")
             self._initialize_multi_build_config()
 

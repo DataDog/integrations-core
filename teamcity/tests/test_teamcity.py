@@ -7,6 +7,7 @@ from copy import deepcopy
 import mock
 import pytest
 from mock import ANY, patch
+from six import PY2
 
 from datadog_checks.teamcity.constants import (
     SERVICE_CHECK_BUILD_PROBLEMS,
@@ -19,7 +20,6 @@ from .common import (
     BUILD_STATS_METRICS,
     BUILD_TAGS,
     EXPECTED_SERVICE_CHECK_TEST_RESULTS,
-    LEGACY_BUILD_TAGS,
     LEGACY_REST_INSTANCE,
     NEW_FAILED_BUILD,
     NEW_SUCCESSFUL_BUILD,
@@ -33,16 +33,17 @@ pytestmark = [
 ]
 
 
-def test_build_event(dd_run_check, aggregator, legacy_rest_instance):
-    legacy_rest_instance['build_config_metrics'] = False
-    legacy_rest_instance['tests_health_check'] = False
-    legacy_rest_instance['build_problem_health_check'] = False
+def test_build_event(dd_run_check, aggregator, rest_instance):
+    rest_instance['build_config_metrics'] = False
+    rest_instance['tests_health_check'] = False
+    rest_instance['build_problem_health_check'] = False
 
-    teamcity = TeamCityRest('teamcity', {}, [legacy_rest_instance])
+    teamcity = TeamCityRest('teamcity', {}, [rest_instance])
+    event_tags = BUILD_TAGS + ['instance_name:SampleProject_Build'] if PY2 else BUILD_TAGS
 
     responses = json.load(open(get_fixture_path('event_responses.json'), 'r'))
 
-    json_responses = [
+    single_build_responses = [
         responses['build_config'],
         responses['build_config_settings'],
         responses['last_build'],
@@ -50,22 +51,33 @@ def test_build_event(dd_run_check, aggregator, legacy_rest_instance):
         responses['server_details'],
     ]
 
+    multi_build_responses = [
+        responses['projects'],
+        responses['build_configs'],
+        responses['build_config_settings'],
+        responses['last_build'],
+        responses['new_builds'],
+        responses['server_details'],
+    ]
+
+    json_responses = single_build_responses if PY2 else multi_build_responses
+
     with mock.patch('datadog_checks.base.utils.http.requests') as req:
         mock_resp = mock.MagicMock(status_code=200)
         mock_resp.json.side_effect = json_responses
         req.get.return_value = mock_resp
-        teamcity.check(legacy_rest_instance)
+        teamcity.check(rest_instance)
 
     assert len(aggregator.metric_names) == 0
     aggregator.assert_event(
         event_type='build',
         host='buildhost42.dtdg.co',
-        msg_text='Build Number: 1\nDeployed To: buildhost42.dtdg.co\n\nMore Info: '
-        'http://localhost:8111/viewLog.html?buildId=1&buildTypeId=SampleProject_Build',
-        msg_title='Build for Legacy test build successful',
+        msg_text='Build Number: 1\nDeployed To: buildhost42.dtdg.co\n\n'
+        'More Info: http://localhost:8111/viewLog.html?buildId=1&buildTypeId=SampleProject_Build',
+        msg_title='Build for SampleProject_Build successful',
         source_type_name='teamcity',
         alert_type='success',
-        tags=LEGACY_BUILD_TAGS + ['build_id:1', 'build_number:1', 'build', 'type:build'],
+        tags=event_tags + ['build_id:1', 'build_number:1', 'build', 'type:build'],
         count=1,
     )
 
@@ -76,7 +88,7 @@ def test_build_event(dd_run_check, aggregator, legacy_rest_instance):
         mock_resp = mock.MagicMock(status_code=200)
         mock_resp.json.side_effect = [responses['server_details'], responses['no_new_builds']]
         req.get.return_value = mock_resp
-        teamcity.check(legacy_rest_instance)
+        teamcity.check(rest_instance)
 
     aggregator.assert_event(msg_title="", msg_text="", count=0)
 
@@ -122,7 +134,6 @@ def test_config(extra_config, expected_http_kwargs):
             'Failed to establish a new connection',
             id="One `build_configurations` config",
         ),
-        pytest.param({}, '`projects` must be configured', id="Missing projects config"),
         pytest.param(
             {'projects': {'project_id': {}}, 'build_configuration': 'build_config_id'},
             'Only one of `projects` or `build_configuration` may be configured, not both.',
@@ -132,7 +143,7 @@ def test_config(extra_config, expected_http_kwargs):
 )
 def test_validate_config(dd_run_check, build_config, expected_error, caplog):
     """
-    Test that the `projects` and `build_configuration` config options are properly configured prior to running check.
+    Test that the `build_configuration` config options are properly configured in Python 2 prior to running check.
     Note: The properly configured test cases would be expected to have a `Failed to establish a new connection`
     exception.
     """
@@ -147,7 +158,13 @@ def test_validate_config(dd_run_check, build_config, expected_error, caplog):
     with pytest.raises(Exception) as e:
         dd_run_check(check)
 
-    assert expected_error in str(e.value)
+    if PY2 and build_config.get('projects'):
+        assert (
+            '`projects` option is not supported for Python 2. '
+            'Use the `build_configuration` option or upgrade to Python 3.' in str(e.value)
+        )
+    else:
+        assert expected_error in str(e.value)
 
 
 def test_collect_build_stats(aggregator, mock_http_response, rest_instance, teamcity_rest_check):
@@ -197,13 +214,11 @@ def test_collect_build_problems(aggregator, mock_http_response, rest_instance, t
     )
 
 
-def test_handle_empty_builds(aggregator, mock_http_response, rest_instance, legacy_rest_instance, teamcity_rest_check):
-    instances = [rest_instance, legacy_rest_instance]
+def test_handle_empty_builds(aggregator, mock_http_response, rest_instance, teamcity_rest_check):
+    check = teamcity_rest_check(rest_instance)
 
-    for inst in instances:
-        check = teamcity_rest_check(inst)
-        mock_http_response(file_path=get_fixture_path("init_no_builds.json"))
-        check.check(inst)
-        aggregator.assert_service_check('teamcity.{}'.format(SERVICE_CHECK_BUILD_STATUS), count=0)
+    mock_http_response(file_path=get_fixture_path("init_no_builds.json"))
+    check.check(rest_instance)
+    aggregator.assert_service_check('teamcity.{}'.format(SERVICE_CHECK_BUILD_STATUS), count=0)
 
-        aggregator.reset()
+    aggregator.reset()

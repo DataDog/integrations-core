@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
-from six import PY3
+from six import PY2, PY3
 
 from datadog_checks.dev import docker_run
 from datadog_checks.teamcity.teamcity_rest import TeamCityRest
@@ -23,13 +23,11 @@ def dd_environment(instance, openmetrics_instance):
 
 
 @pytest.fixture(scope='session')
-def legacy_rest_instance():
-    return LEGACY_REST_INSTANCE
-
-
-@pytest.fixture(scope='session')
 def rest_instance():
-    return REST_INSTANCE
+    if PY2:
+        return LEGACY_REST_INSTANCE
+    else:
+        return REST_INSTANCE
 
 
 @pytest.fixture(scope='session')

@@ -1,4 +1,31 @@
 {
+  "projects": {
+  "count": 1,
+  "href": "/guestAuth/app/rest/projects",
+  "project": [
+    {
+    "id": "SampleProject",
+    "name": "Sample Project",
+    "parentProjectId": "_Root",
+    "href": "/app/rest/projects/id:SampleProject",
+    "webUrl": "http://localhost:8111/project.html?projectId=SampleProject"
+    }
+  ]
+},
+  "build_configs": {
+    "count": 1,
+    "href": "/app/rest/buildTypes?locator=project(id:SampleProject)",
+    "buildType": [
+      {
+        "id": "SampleProject_Build",
+        "name": "Build",
+        "projectName": "Sample Project",
+        "projectdId": "SampleProject",
+        "href": "/app/rest/buildTypes/id:SampleProject_Build",
+        "webUrl": "http://localhost:8111/viewType.html?buildTypeId=SampleProject_Build"
+      }
+    ]
+  },
   "last_build": {
     "count": 1,
     "href": "/guestAuth/app/rest/builds/?locator=buildType:SampleProject_Build,count:1",

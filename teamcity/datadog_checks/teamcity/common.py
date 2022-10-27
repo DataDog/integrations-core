@@ -78,17 +78,14 @@ def construct_event(check, new_build):
     """
     Construct event based on build status.
     """
-    instance_name = check.instance_name
     build_id = new_build['id']
     build_number = new_build['number']
     build_config = new_build['buildTypeId']
+    instance_name = check.instance_name if check.instance_name else build_config
     build_status = STATUS_MAP.get(new_build['status'])['msg_title']
     alert_type = STATUS_MAP.get(new_build['status'])['alert_type']
     event_tags = deepcopy(check.build_tags)
     event_tags.extend(['build_id:{}'.format(build_id), 'build_number:{}'.format(build_number)])
-
-    if not check.instance_name:
-        instance_name = build_config
 
     if check.is_deployment:
         teamcity_event = deepcopy(DEPLOYMENT_EVENT)
