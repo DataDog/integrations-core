@@ -1,5 +1,9 @@
 # CHANGELOG - Amazon MSK
 
+## 3.2.1 / 2022-10-28
+
+* [Fixed] Update dependencies. See [#13205](https://github.com/DataDog/integrations-core/pull/13205).
+
 ## 3.2.0 / 2022-09-16
 
 * [Added] Update HTTP config spec templates. See [#12890](https://github.com/DataDog/integrations-core/pull/12890).
