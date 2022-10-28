@@ -530,24 +530,21 @@ class PostgresStatementSamples(DBMAsyncJob):
         start_time = time.time()
         with self._check._get_db(dbname).cursor() as cursor:
             self._log.debug("Running query on dbname=%s: %s(%s)", dbname, self._explain_function, obfuscated_statement)
-            try:
-                cursor.execute(
-                    """SELECT {explain_function}($stmt${statement}$stmt$)""".format(
-                        explain_function=self._explain_function, statement=statement
-                    )
+            cursor.execute(
+                """SELECT {explain_function}($stmt${statement}$stmt$)""".format(
+                    explain_function=self._explain_function, statement=statement
                 )
-                result = cursor.fetchone()
-                self._check.histogram(
-                    "dd.postgres.run_explain.time",
-                    (time.time() - start_time) * 1000,
-                    tags=self._dbtags(dbname) + self._check._get_debug_tags(),
-                    hostname=self._check.resolved_hostname,
-                )
-                if not result or len(result) < 1 or len(result[0]) < 1:
-                    return None
-                return result[0][0]
-            except Exception:
-                raise
+            )
+            result = cursor.fetchone()
+            self._check.histogram(
+                "dd.postgres.run_explain.time",
+                (time.time() - start_time) * 1000,
+                tags=self._dbtags(dbname) + self._check._get_debug_tags(),
+                hostname=self._check.resolved_hostname,
+            )
+            if not result or len(result) < 1 or len(result[0]) < 1:
+                return None
+            return result[0][0]
 
     def _run_and_track_explain(self, dbname, statement, obfuscated_statement, query_signature):
         plan_dict, explain_err_code, err_msg = self._run_explain_safe(
