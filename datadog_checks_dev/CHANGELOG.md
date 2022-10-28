@@ -1,5 +1,9 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 17.3.1 / 2022-10-28
+
+* [Fixed] Fix process signature report. See [#13226](https://github.com/DataDog/integrations-core/pull/13226).
+
 ## 17.3.0 / 2022-10-26
 
 * [Added] Add the memray option to the `test` command. See [#13160](https://github.com/DataDog/integrations-core/pull/13160).
