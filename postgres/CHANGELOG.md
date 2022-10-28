@@ -2,9 +2,9 @@
 
 ## 13.0.0 / 2022-10-28
 
-* [Added] Added Agent settings to log original unobfuscated strings. See [#12926](https://github.com/DataDog/integrations-core/pull/12926).
+* [Added] Add Agent settings to log original unobfuscated strings. See [#12926](https://github.com/DataDog/integrations-core/pull/12926).
 * [Fixed] Fix deprecation warnings with `semver`. See [#12967](https://github.com/DataDog/integrations-core/pull/12967).
-* [Fixed] Honor ignore_databases in query metrics collection. See [#12998](https://github.com/DataDog/integrations-core/pull/12998).
+* [Fixed] Honor `ignore_databases` in query metrics collection. See [#12998](https://github.com/DataDog/integrations-core/pull/12998).
 * [Changed] Update default configuration to collect postgres database by default. See [#12999](https://github.com/DataDog/integrations-core/pull/12999).
 * [Removed] Remove postgres tag truncation for metrics. See [#13210](https://github.com/DataDog/integrations-core/pull/13210).
 
