@@ -54,7 +54,7 @@ coverage:
         target: 75
         flags:
         - arangodb
-      Argo_CD:
+      ArgoCD:
         target: 75
         flags:
         - argocd
@@ -265,7 +265,7 @@ coverage:
       Impala:
         target: 75
         flags:
-          - impala
+        - impala
       Istio:
         target: 75
         flags:

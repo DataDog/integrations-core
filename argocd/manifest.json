@@ -9,7 +9,7 @@
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
     "description": "",
-    "title": "Argo CD",
+    "title": "ArgoCD",
     "media": [],
     "classifier_tags": [
       "Supported OS::Linux",
@@ -20,7 +20,7 @@
   },
   "assets": {
     "integration": {
-      "source_type_name": "Argo CD",
+      "source_type_name": "ArgoCD",
       "configuration": {
         "spec": "assets/configuration/spec.yaml"
       },

@@ -70,7 +70,7 @@ jobs:
       displayName: ArangoDB
       os: linux
     - checkName: argocd
-      displayName: Argo CD
+      displayName: ArgoCD
       os: linux
     - checkName: aspdotnet
       displayName: ASP.NET
