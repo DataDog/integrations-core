@@ -640,7 +640,7 @@ def has_process_signature(check):
             manifest = json.loads(f.read())
     except JSONDecodeError as e:
         raise Exception("Cannot decode {}: {}".format(manifest_file, e))
-    return len(manifest.get('process_signatures', [])) > 0
+    return len(manifest.get('assets', {}).get('integration', {}).get('process_signatures', [])) > 0
 
 
 def has_agent_8_check_signature(check):
