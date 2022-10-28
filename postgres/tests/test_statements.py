@@ -378,21 +378,21 @@ failed_explain_test_repeat_count = 5
     [
         (
             "select * from fake_table",
-            "error:explain-database_error-<class 'psycopg2.errors.UndefinedTable'>",
+            "error:explain-undefined_table-<class 'psycopg2.errors.UndefinedTable'>",
             None,
             1,
             None,
         ),
         (
             "select * from fake_schema.fake_table",
-            "error:explain-database_error-<class 'psycopg2.errors.UndefinedTable'>",
+            "error:explain-undefined_table-<class 'psycopg2.errors.UndefinedTable'>",
             None,
             1,
             None,
         ),
         (
             "select * from pg_settings where name = $1",
-            "error:explain-database_error-<class 'psycopg2.errors.UndefinedParameter'>",
+            "error:explain-extended_query_protocol-<class 'psycopg2.errors.UndefinedParameter'>",
             None,
             1,
             None,
