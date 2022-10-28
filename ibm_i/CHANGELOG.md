@@ -3,7 +3,7 @@
 ## 1.5.0 / 2022-10-28
 
 * [Added] Add `selected_message_queues` flag to filter message queues and improve performances. See [#12808](https://github.com/DataDog/integrations-core/pull/12808).
-* [Fixed] ibm_i integration produces CRITICAL service check if it cannot connect. See [#13114](https://github.com/DataDog/integrations-core/pull/13114).
+* [Fixed] Produce CRITICAL service check if it cannot connect. See [#13114](https://github.com/DataDog/integrations-core/pull/13114).
 
 ## 1.4.1 / 2022-08-05 / Agent 7.39.0
 
