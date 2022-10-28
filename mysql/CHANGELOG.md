@@ -2,7 +2,7 @@
 
 ## 9.0.0 / 2022-10-28
 
-* [Added] Added Agent settings to log original unobfuscated strings. See [#12941](https://github.com/DataDog/integrations-core/pull/12941).
+* [Added] Add Agent settings to log original unobfuscated strings. See [#12941](https://github.com/DataDog/integrations-core/pull/12941).
 * [Fixed] Fix non-specific troubleshooting link on explain_plan_procedure_missing configuration error. See [#13215](https://github.com/DataDog/integrations-core/pull/13215).
 * [Fixed] Fix check failing when missing unnecessary SELECT grant on perf schema. See [#13008](https://github.com/DataDog/integrations-core/pull/13008).
 * [Removed] Remove mysql tag truncation for metrics. See [#13212](https://github.com/DataDog/integrations-core/pull/13212).
