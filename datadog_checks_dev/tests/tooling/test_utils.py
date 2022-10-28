@@ -11,6 +11,7 @@ from datadog_checks.dev.tooling.utils import (
     complete_set_root,
     get_check_files,
     get_version_string,
+    has_process_signature,
     initialize_root,
     is_logs_only,
     parse_agent_req_file,
@@ -36,6 +37,12 @@ def test_get_version_string():
 def test_is_logs_only(get_root):
     get_root.return_value = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../..'))
     assert is_logs_only('flink')
+
+
+@mock.patch('datadog_checks.dev.tooling.utils.get_root')
+def test_has_process_signature(get_root):
+    get_root.return_value = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../..'))
+    assert has_process_signature('rethinkdb')
 
 
 @mock.patch('datadog_checks.dev.tooling.utils.get_root')
