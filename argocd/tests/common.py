@@ -69,7 +69,6 @@ app_controller_gauges = [
     'cluster.api.resource_objects',
     'cluster.api.resources',
     'cluster.cache.age.seconds',
-    'cluster.connection.status',
     'cluster.events',
     'kubectl.exec.pending',
     'kubectl.exec',
@@ -121,20 +120,16 @@ repo_server_histograms = [
 ]
 
 NOT_EXPOSED_METRICS = [
-    # 'argocd.api_server.go.memstats.alloc_bytes',
     'argocd.app_controller.app.k8s.request',
-    # 'argocd.app_controller.go.memstats.alloc_bytes',
     'argocd.app_controller.app.reconcile',
     'argocd.app_controller.app.sync',
     'argocd.app_controller.cluster.api.resource_objects',
     'argocd.app_controller.cluster.api.resources',
     'argocd.app_controller.cluster.cache.age.seconds',
-    'argocd.app_controller.cluster.connection.status',  # value 1 if connected, 0 if not
     'argocd.app_controller.cluster.events',
     'argocd.app_controller.kubectl.exec',
     'argocd.app_controller.kubectl.exec.pending',
     'argocd.app_controller.redis.request.duration',
-    # 'argocd.repo_server.go.memstats.alloc_bytes',
     'argocd.repo_server.redis.request.count',
     'argocd.repo_server.repo.pending.request.total',
     'argocd.repo_server.git.request.count',
