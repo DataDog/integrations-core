@@ -3,7 +3,7 @@
 ## 27.4.2 / 2022-10-28
 
 * [Fixed] Update dependencies. See [#13207](https://github.com/DataDog/integrations-core/pull/13207).
-* [Fixed] Fix openmetrics v2 service check: there shouldn’t be any host. See [#13146](https://github.com/DataDog/integrations-core/pull/13146).
+* [Fixed] Make OpenMetrics checks honor `empty_default_hostname` option. See [#13146](https://github.com/DataDog/integrations-core/pull/13146).
 * [Fixed] Update dependencies. See [#13205](https://github.com/DataDog/integrations-core/pull/13205).
 
 ## 27.4.1 / 2022-10-12
