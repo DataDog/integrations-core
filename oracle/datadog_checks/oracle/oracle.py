@@ -101,7 +101,11 @@ class Oracle(AgentCheck):
                 if prefix.startswith(self.__NAMESPACE__ + '.'):
                     prefix = prefix[len(self.__NAMESPACE__) + 1 :]
                 for column in query.get('columns', []):
-                    if column.get('type') != 'tag':
+                    # if the column is supposed to be skipped
+                    if not column.get('type') and not column.get('name'):
+                        continue
+
+                    elif column.get('type') != 'tag':
                         column['name'] = '{}.{}'.format(prefix, column['name'])
 
     def validate_config(self):
