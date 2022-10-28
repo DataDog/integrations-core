@@ -1,5 +1,9 @@
 # CHANGELOG - kubernetes_state
 
+## 7.4.0 / 2022-10-28
+
+* [Added] Add documentation for `kubernetes_state_core` core check. See [#12552](https://github.com/DataDog/integrations-core/pull/12552).
+
 ## 7.3.0 / 2022-09-16
 
 * [Added] Update HTTP config spec templates. See [#12890](https://github.com/DataDog/integrations-core/pull/12890).
