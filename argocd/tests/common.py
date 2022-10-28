@@ -121,6 +121,9 @@ repo_server_histograms = [
 
 NOT_EXPOSED_METRICS = [
     'argocd.api_server.redis.request.duration.bucket',
+    'argocd.api_server.redis.request.duration.count',
+    'argocd.api_server.redis.request.duration.sum',
+    'argocd.api_server.redis.request.count',
     'argocd.app_controller.app.k8s.request',
     'argocd.app_controller.app.reconcile',
     'argocd.app_controller.app.sync',
