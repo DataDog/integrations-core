@@ -1,7 +1,7 @@
 [
     {
         "agent_version": "7.41.0",
-        "integration": "Argo CD",
+        "integration": "ArgoCD",
         "check": "argocd.api_server.openmetrics.health",
         "statuses": [
             "ok",
@@ -16,7 +16,7 @@
     },
     {
         "agent_version": "7.41.0",
-        "integration": "Argo CD",
+        "integration": "ArgoCD",
         "check": "argocd.app_controller.openmetrics.health",
         "statuses": [
             "ok",
@@ -31,7 +31,7 @@
     },
     {
         "agent_version": "7.41.0",
-        "integration": "Argo CD",
+        "integration": "ArgoCD",
         "check": "argocd.repo_server.openmetrics.health",
         "statuses": [
             "ok",
@@ -46,7 +46,7 @@
     },
     {
         "agent_version": "7.41.0",
-        "integration": "Argo CD",
+        "integration": "ArgoCD",
         "check": "argocd.app_controller.cluster.connection.status",
         "statuses": [
             "ok",

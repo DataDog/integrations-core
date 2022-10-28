@@ -1,4 +1,4 @@
-name: "Argo CD"
+name: "ArgoCD"
 files:
 - name: argocd.yaml
   options:
