@@ -411,7 +411,7 @@ jmx_metrics:
             alias: kafka.request.produce.failed.rate
     - include:
         domain: 'kafka.network'
-        bean_regex: 'kafka.network:type=RequestMetrics,name=RequestsPerSec,request=Produce.*'
+        bean_regex: 'kafka.network:type=RequestMetrics,name=RequestsPerSec,request=Produce(?:,version=.*)?'
         attribute:
           Count:
             metric_type: rate
