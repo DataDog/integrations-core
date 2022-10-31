@@ -118,7 +118,8 @@ class DBExplainError(Enum):
     Denotes the various reasons a query may not have an explain statement.
     """
 
-    # database error i.e connection error
+    # may be due to a misconfiguration of the database during setup or the Agent is
+    # not able to access the required function
     database_error = 'database_error'
 
     # datatype mismatch occurs when return type is not json, for instance when multiple queries are explained
@@ -138,6 +139,16 @@ class DBExplainError(Enum):
 
     # a truncated statement can't be explained
     query_truncated = "query_truncated"
+
+    # connection error may be due to a misconfiguration during setup
+    connection_error = 'connection_error'
+
+    # clients using the extended query protocol or prepared statements can't be explained due to
+    # the separation of the parsed query and raw bind parameters
+    parameterized_query = 'parameterized_query'
+
+    # search path may be different when the client executed a query from where we executed it.
+    undefined_table = 'undefined_table'
 
 
 DEFAULT_COLLECTION_INTERVAL = 1
@@ -454,9 +465,14 @@ class PostgresStatementSamples(DBMAsyncJob):
         # type: (str) -> Tuple[Optional[DBExplainError], Optional[Exception]]
         try:
             self._check._get_db(dbname)
-        except (psycopg2.DatabaseError, psycopg2.OperationalError) as e:
+        except psycopg2.OperationalError as e:
             self._log.warning(
                 "cannot collect execution plans due to failed DB connection to dbname=%s: %s", dbname, repr(e)
+            )
+            return DBExplainError.connection_error, e
+        except psycopg2.DatabaseError as e:
+            self._log.warning(
+                "cannot collect execution plans due to a database error in dbname=%s: %s", dbname, repr(e)
             )
             return DBExplainError.database_error, e
 
@@ -464,12 +480,15 @@ class PostgresStatementSamples(DBMAsyncJob):
             result = self._run_explain(dbname, EXPLAIN_VALIDATION_QUERY, EXPLAIN_VALIDATION_QUERY)
         except psycopg2.errors.InvalidSchemaName as e:
             self._log.warning("cannot collect execution plans due to invalid schema in dbname=%s: %s", dbname, repr(e))
+            self._emit_run_explain_error(dbname, DBExplainError.invalid_schema, e)
             return DBExplainError.invalid_schema, e
         except psycopg2.errors.DatatypeMismatch as e:
+            self._emit_run_explain_error(dbname, DBExplainError.datatype_mismatch, e)
             return DBExplainError.datatype_mismatch, e
         except psycopg2.DatabaseError as e:
             # if the schema is valid then it's some problem with the function (missing, or invalid permissions,
             # incorrect definition)
+            self._emit_run_explain_error(dbname, DBExplainError.failed_function, e)
             self._check.record_warning(
                 DatabaseConfigurationError.undefined_explain_function,
                 warning_with_tags(
@@ -511,31 +530,21 @@ class PostgresStatementSamples(DBMAsyncJob):
         start_time = time.time()
         with self._check._get_db(dbname).cursor() as cursor:
             self._log.debug("Running query on dbname=%s: %s(%s)", dbname, self._explain_function, obfuscated_statement)
-            try:
-                cursor.execute(
-                    """SELECT {explain_function}($stmt${statement}$stmt$)""".format(
-                        explain_function=self._explain_function, statement=statement
-                    )
+            cursor.execute(
+                """SELECT {explain_function}($stmt${statement}$stmt$)""".format(
+                    explain_function=self._explain_function, statement=statement
                 )
-                result = cursor.fetchone()
-                self._check.histogram(
-                    "dd.postgres.run_explain.time",
-                    (time.time() - start_time) * 1000,
-                    tags=self._dbtags(dbname) + self._check._get_debug_tags(),
-                    hostname=self._check.resolved_hostname,
-                )
-                if not result or len(result) < 1 or len(result[0]) < 1:
-                    return None
-                return result[0][0]
-            except Exception as e:
-                self._check.count(
-                    "dd.postgres.run_explain.error",
-                    1,
-                    tags=self._dbtags(dbname, "error:explain-database_error-{}".format(type(e)))
-                    + self._check._get_debug_tags(),
-                    hostname=self._check.resolved_hostname,
-                )
-                raise
+            )
+            result = cursor.fetchone()
+            self._check.histogram(
+                "dd.postgres.run_explain.time",
+                (time.time() - start_time) * 1000,
+                tags=self._dbtags(dbname) + self._check._get_debug_tags(),
+                hostname=self._check.resolved_hostname,
+            )
+            if not result or len(result) < 1 or len(result[0]) < 1:
+                return None
+            return result[0][0]
 
     def _run_and_track_explain(self, dbname, statement, obfuscated_statement, query_signature):
         plan_dict, explain_err_code, err_msg = self._run_explain_safe(
@@ -576,9 +585,26 @@ class PostgresStatementSamples(DBMAsyncJob):
 
         try:
             return self._run_explain(dbname, statement, obfuscated_statement), None, None
+        except psycopg2.errors.UndefinedParameter as e:
+            self._log.debug(
+                "Unable to collect execution plan, clients using the extended query protocol or prepared statements"
+                " can't be explained due to the separation of the parsed query and raw bind parameters: %s",
+                repr(e),
+            )
+            error_response = None, DBExplainError.parameterized_query, '{}'.format(type(e))
+            self._explain_errors_cache[query_signature] = error_response
+            self._emit_run_explain_error(dbname, DBExplainError.parameterized_query, e)
+            return error_response
+        except psycopg2.errors.UndefinedTable as e:
+            self._log.debug("Failed to collect execution plan: %s", repr(e))
+            error_response = None, DBExplainError.undefined_table, '{}'.format(type(e))
+            self._explain_errors_cache[query_signature] = error_response
+            self._emit_run_explain_error(dbname, DBExplainError.undefined_table, e)
+            return error_response
         except psycopg2.errors.DatabaseError as e:
             self._log.debug("Failed to collect execution plan: %s", repr(e))
             error_response = None, DBExplainError.database_error, '{}'.format(type(e))
+            self._emit_run_explain_error(dbname, DBExplainError.database_error, e)
             if isinstance(e, psycopg2.errors.ProgrammingError) and not isinstance(
                 e, psycopg2.errors.InsufficientPrivilege
             ):
@@ -587,8 +613,17 @@ class PostgresStatementSamples(DBMAsyncJob):
                 # dynamically by the user. the goal here is to cache only those queries which there is no reason to
                 # retry
                 self._explain_errors_cache[query_signature] = error_response
-
             return error_response
+
+    def _emit_run_explain_error(self, dbname, err_code, err):
+        # type: (str, DBExplainError, Exception) -> None
+        self._check.count(
+            "dd.postgres.run_explain.error",
+            1,
+            tags=self._dbtags(dbname, "error:explain-{}-{}".format(err_code.value, type(err)))
+            + self._check._get_debug_tags(),
+            hostname=self._check.resolved_hostname,
+        )
 
     def _collect_plan_for_statement(self, row):
         # limit the rate of explains done to the database
