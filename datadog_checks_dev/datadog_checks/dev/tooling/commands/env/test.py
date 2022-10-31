@@ -9,7 +9,7 @@ from ...e2e.agent import DEFAULT_PYTHON_VERSION
 from ...testing import complete_active_checks, get_test_envs
 from ..console import CONTEXT_SETTINGS, DEBUG_OUTPUT, echo_info, echo_warning
 from ..test import test as test_command
-from .start import start, dev_option, base_option
+from .start import base_option, dev_option, start
 from .stop import stop
 
 
