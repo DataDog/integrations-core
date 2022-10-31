@@ -1,5 +1,9 @@
 # CHANGELOG - postgres
 
+## 13.1.0 / 2022-10-31
+
+* [Added] Improve DBM explain plan error collection errors. See [#13224](https://github.com/DataDog/integrations-core/pull/13224).
+
 ## 13.0.0 / 2022-10-28
 
 * [Added] Add Agent settings to log original unobfuscated strings. See [#12926](https://github.com/DataDog/integrations-core/pull/12926).
