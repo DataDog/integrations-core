@@ -378,21 +378,21 @@ failed_explain_test_repeat_count = 5
     [
         (
             "select * from fake_table",
-            "error:explain-database_error-<class 'psycopg2.errors.UndefinedTable'>",
+            "error:explain-undefined_table-<class 'psycopg2.errors.UndefinedTable'>",
             None,
             1,
             None,
         ),
         (
             "select * from fake_schema.fake_table",
-            "error:explain-database_error-<class 'psycopg2.errors.UndefinedTable'>",
+            "error:explain-undefined_table-<class 'psycopg2.errors.UndefinedTable'>",
             None,
             1,
             None,
         ),
         (
             "select * from pg_settings where name = $1",
-            "error:explain-database_error-<class 'psycopg2.errors.UndefinedParameter'>",
+            "error:explain-parameterized_query-<class 'psycopg2.errors.UndefinedParameter'>",
             None,
             1,
             None,
@@ -1111,14 +1111,14 @@ def test_truncate_activity_rows(integration_check, dbm_instance, active_rows, ex
     [
         (
             "select * from fake_table",
-            "error:explain-database_error-<class 'psycopg2.errors.UndefinedTable'>",
-            DBExplainError.database_error,
+            "error:explain-undefined_table-<class 'psycopg2.errors.UndefinedTable'>",
+            DBExplainError.undefined_table,
             "<class 'psycopg2.errors.UndefinedTable'>",
         ),
         (
             "select * from pg_settings where name = $1",
-            "error:explain-database_error-<class 'psycopg2.errors.UndefinedParameter'>",
-            DBExplainError.database_error,
+            "error:explain-parameterized_query-<class 'psycopg2.errors.UndefinedParameter'>",
+            DBExplainError.parameterized_query,
             "<class 'psycopg2.errors.UndefinedParameter'>",
         ),
         (
