@@ -171,7 +171,7 @@ def test_collect_latency_invalid_data(aggregator):
         'xxxread:11:53:47-GMT,ops/sec,>1ms,>8ms,>64ms',
     )
 
-    for metric in (m for m in common.LAZY_METRICS if "write" in m):
+    for metric in (m for m in common.LAZY_METRICS):
         aggregator.assert_metric(metric, tags=['namespace:ns-2', 'tag:value'])
 
     aggregator.assert_all_metrics_covered()  # no metric
