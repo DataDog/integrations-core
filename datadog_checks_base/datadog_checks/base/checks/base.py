@@ -1121,11 +1121,11 @@ class AgentCheck(object):
                 else:
                     self.check(instance)
 
-            result = ''
+            error_report = ''
         except Exception as e:
             message = self.sanitize(str(e))
             tb = self.sanitize(traceback.format_exc())
-            result = json.dumps([{'message': message, 'traceback': tb}])
+            error_report = json.dumps([{'message': message, 'traceback': tb}])
         finally:
             if self.metric_limiter:
                 if is_affirmative(self.debug_metrics.get('metric_contexts', False)):
@@ -1140,7 +1140,7 @@ class AgentCheck(object):
 
                 self.metric_limiter.reset()
 
-        return result
+        return error_report
 
     def event(self, event):
         # type: (Event) -> None
