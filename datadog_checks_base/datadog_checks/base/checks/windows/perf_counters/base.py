@@ -26,6 +26,8 @@ class PerfCountersBaseCheck(AgentCheck):
         super().__init__(name, init_config, instances)
 
         self.interval = self.OBJECT_REFRESHER.interval
+        # Track refresh time (when self.interval is not 0)
+        self.last_refresh = 0
 
         self.enable_health_service_check = is_affirmative(self.instance.get('enable_health_service_check', True))
 
@@ -55,14 +57,32 @@ class PerfCountersBaseCheck(AgentCheck):
         with self.adopt_namespace(self.namespace):
             self._query_counters()
 
+    def _is_counters_refresh_needed(self):
+        # Performance Counters "refreshment" is not common. It is disabled by default, but can
+        # be activates by setting "windows_counter_refresh_interval" to non-zero value. It is
+        # useful only if configured objects and counters may installed or uninstalled after
+        # agent started running and expected their detection without restart. It is not
+        # recommended if agent process is not running with elevated privileges. More details are
+        # in WindowsPerformanceObjectRefresher() comments.
+        need_counters_refresh = False
+        if self.interval > 0:
+            last_refresh = self.OBJECT_REFRESHER.get_last_refresh(self._connection.server)
+            if last_refresh > self.last_refresh:
+                need_counters_refresh = True
+                self.last_refresh = last_refresh
+        
+        return need_counters_refresh
+
     def _query_counters(self):
         # Avoid collection of performance objects that failed to refresh
         collection_queue = []
 
+        need_counters_refresh = self._is_counters_refresh_needed()
+
         for perf_object in self.perf_objects:
             self.log.debug('Refreshing counters for performance object: %s', perf_object.name)
             try:
-                perf_object.refresh()
+                perf_object.refresh(need_counters_refresh)
             except ConfigurationError as e:
                 # Counters are lazily configured and any errors should prevent check execution
                 exception_class = type(e)

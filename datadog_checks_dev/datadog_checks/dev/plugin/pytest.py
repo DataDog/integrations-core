@@ -295,13 +295,43 @@ def mock_performance_objects(mocker, dd_default_hostname):
                 instance_counts[instance_name] += 1
 
             for counter_name, values in counter_values.items():
-                for instance_name, index, value in zip(instances, instance_indices, values):
-                    counters[
-                        win32pdh.MakeCounterPath((server, object_name, instance_name, None, index, counter_name))
-                    ] = value
+                if len(values) == 0:
+                    continue
 
+                if instance_name == None:
+                    # Single counter
+                    counters[
+                        win32pdh.MakeCounterPath((server, object_name, None, None, 0, counter_name))
+                    ] = values[0]
+                else:
+                    # Multiple instance counter                    
+                    counter_path_wildcard = win32pdh.MakeCounterPath((server, object_name, '*', None, 0, counter_name))
+                    instance_values_wildcard = {}
+                    for instance_name, index, value in zip(instances, instance_indices, values):
+                        # Add single instance counter (in case like IIS is using exact per-instnace wildcard)
+                        counter_path_exact = win32pdh.MakeCounterPath((server, object_name, instance_name, None, 0, counter_name))
+                        instance_values_exact = {}
+                        instance_values_exact[instance_name] = value
+                        counters[counter_path_exact] = instance_values_exact
+
+                        # Add wildcard path/value
+                        if index == 0:
+                            instance_values_wildcard[instance_name] = value
+                        elif index == 1:
+                            # Replace single value as a two instance list
+                            non_unique_instance_value = [instance_values_wildcard[instance_name], value]
+                            instance_values_wildcard[instance_name] = non_unique_instance_value
+                        else:
+                            # Append to the list
+                            non_unique_instance_value = instance_values_wildcard[instance_name]
+                            non_unique_instance_value.append(value)
+                            instance_values_wildcard[instance_name] = non_unique_instance_value
+
+                    counters[counter_path_wildcard] = instance_values_wildcard
+    
         mocker.patch('win32pdh.ValidatePath', side_effect=lambda path: 0 if path in counters else 1)
         mocker.patch('win32pdh.GetFormattedCounterValue', side_effect=lambda path, _: (None, counters[path]))
+        mocker.patch('datadog_checks.base.checks.windows.perf_counters.counter.get_counter_values', side_effect=lambda path: counters[path])
 
     return mock_perf_objects
 

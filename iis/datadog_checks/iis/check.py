@@ -19,6 +19,8 @@ class IISCheckV2(PerfCountersBaseCheckWithLegacySupport):
             instance_config = []
             include = []
             exclude = []
+            include_fast = []
+
             if object_name == 'APP_POOL_WAS':
                 new_config['tag_name'] = 'app_pool'
                 instance_config = self.instance.get('app_pools', [])
@@ -27,15 +29,21 @@ class IISCheckV2(PerfCountersBaseCheckWithLegacySupport):
                 instance_config = self.instance.get('sites', [])
 
             if isinstance(instance_config, list):
-                include.extend(f'^{instance}$' for instance in instance_config)
+                # literal instance which we can use for wildcard filtering
+                # app_pool or sites instances a full instance name. IIS cannot create pool or site
+                # with wildcard instance
+                include_fast = instance_config
             elif isinstance(instance_config, dict):
                 include.extend(instance_config.get('include', []))
                 exclude.extend(instance_config.get('exclude', []))
+                include_fast.extend(instance_config.get('include_fast', []))
 
             if include:
                 new_config['include'] = include
             if exclude:
                 new_config['exclude'] = exclude
+            if include_fast:
+                new_config['include_fast'] = include_fast
 
             metrics_config[object_name] = new_config
 
@@ -93,14 +101,14 @@ class CompatibilityPerfObject(PerfObject):
         # Resets during refreshes
         self.instances_unseen = set()
 
-    def refresh(self):
+    def collect(self):
         self.instances_unseen.clear()
         self.instances_unseen.update(self.instances_included)
 
         for instance in sorted(self.instances_unseen):
-            self.logger.debug('Expecting %ss: %s', self.instance_type, instance)
+            self.logger.debug('Expecting %s: %s', self.instance_type, instance)
 
-        super().refresh()
+        super().collect()
 
         for instance in sorted(self.instances_unseen):
             tags = [f'{self.instance_type}:{instance}']

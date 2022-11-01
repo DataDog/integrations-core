@@ -2,14 +2,14 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
-from collections import defaultdict
 
 import pywintypes
 import win32pdh
+import weakref
 
 from ....errors import ConfigTypeError, ConfigValueError
 from .transform import NATIVE_TRANSFORMERS, TRANSFORMERS
-from .utils import construct_counter_path, format_instance, get_counter_value
+from .utils import construct_counter_path, get_counter_value, get_counter_values
 
 
 class PerfObject:
@@ -35,6 +35,8 @@ class PerfObject:
         if not isinstance(self.tag_name, str):
             raise ConfigTypeError(f'Option `tag_name` for performance object `{self.name}` must be a string')
 
+        # List of regex patterns to filter multi-instance counters AFTER ALL the data
+        # is collected and retrieved from PDH layer
         include_patterns = config.get('include', [])
         if not isinstance(include_patterns, list):
             raise ConfigTypeError(f'Option `include` for performance object `{self.name}` must be an array')
@@ -49,6 +51,8 @@ class PerfObject:
 
             self.include_pattern = re.compile('|'.join(include_patterns))
 
+        # List of regex patterns to filter multi-instance counters AFTER ALL data
+        # is collected and retrieved from PDH layer
         exclude_patterns = config.get('exclude', [])
         if not isinstance(exclude_patterns, list):
             raise ConfigTypeError(f'Option `exclude` for performance object `{self.name}` must be an array')
@@ -62,6 +66,22 @@ class PerfObject:
             final_exclude_patterns = [r'\b_Total\b']
             final_exclude_patterns.extend(exclude_patterns)
             self.exclude_pattern = re.compile('|'.join(final_exclude_patterns))
+
+        # List of wildcards or instance name directly to filter multi-instance counters by PDH layer itself.
+        # Thus it is faster and and less resource intensive than regex-based include filtering.
+        include_wildcards = config.get('include_fast', [])
+        if not isinstance(include_wildcards, list):
+            raise ConfigTypeError(f'Option `include_fast` for performance object `{self.name}` must be an array')
+        elif not include_wildcards:
+            self.include_wildcards = None
+        else:
+            for i, pattern in enumerate(include_wildcards, 1):
+                if not isinstance(pattern, str):
+                    raise ConfigTypeError(
+                        f'Pattern #{i} of option `include_fast` for performance object `{self.name}` must be a string'
+                    )
+
+            self.include_wildcards = include_wildcards
 
         instance_counts = config.get('instance_counts', {})
         if not isinstance(instance_counts, dict):
@@ -101,43 +121,49 @@ class PerfObject:
         for counter in self.counters:
             counter.collect()
 
-    def refresh(self):
-        # https://docs.microsoft.com/en-us/windows/win32/api/pdh/nf-pdh-pdhenumobjectitemsa
-        # https://mhammond.github.io/pywin32/win32pdh__EnumObjectItems_meth.html
-        counters, instances = win32pdh.EnumObjectItems(
-            None, self.connection.server, self.name, win32pdh.PERF_DETAIL_WIZARD
-        )
-        if not self.counters:
-            self._configure_counters(counters, instances)
+        # Collect "instance" metrics directly from a MultiCounter counter object
+        if self.has_multiple_instances and len(self.counters) > 0:
+            counter = next(iter(self.counters))
+            total_instance_count, monitored_instance_count, unique_instance_count = counter.get_instance_count()
 
-        counters = set(counters)
-        total_instance_count = 0
-        monitored_instance_count = 0
-        unique_instance_counts = defaultdict(int)
-        for instance in instances:
-            total_instance_count += 1
-            if self._instance_excluded(instance):
-                continue
-
-            monitored_instance_count += 1
-            unique_instance_counts[instance] += 1
-
-        if self.has_multiple_instances:
             if self.instance_count_total_metric is not None:
                 self.check.gauge(self.instance_count_total_metric, total_instance_count, tags=self.tags)
             if self.instance_count_monitored_metric is not None:
                 self.check.gauge(self.instance_count_monitored_metric, monitored_instance_count, tags=self.tags)
             if self.instance_count_unique_metric is not None:
-                self.check.gauge(self.instance_count_unique_metric, len(unique_instance_counts), tags=self.tags)
+                self.check.gauge(self.instance_count_unique_metric, unique_instance_count, tags=self.tags)
 
-        for counter in self.counters:
-            if counter.name not in counters:
-                self.logger.error(
-                    'Did not find expected counter `%s` of performance object `%s`', counter.name, self.name
-                )
-                counter.clear()
-            else:
-                counter.refresh(unique_instance_counts)
+    def refresh(self, need_counters_refresh):
+        # Unless this refresh() is called the first time when we need to initialize counters, when 
+        # need_counters_refresh==False the call to PdhEnumObjectItems() will always yield the same counters and
+        # instances as previous call if PdhEnumObjects(refresh=True) had not been called and hence useless. From
+        # docs ...
+        #   ... Consecutive calls to this function will return identical lists of counters and instances,
+        # because PdhEnumObjectItems will always query the list of performance objects defined by the last call
+        # to PdhEnumObjects or PdhEnumObjectItems. To refresh the list of performance objects, call
+        # PdhEnumObjects with a bRefresh flag value of TRUE before calling PdhEnumObjectItems again.
+        # ...
+        # If "windows_counter_refresh_interval" is set to non-zero and PdhEnumObject() had been called then it
+        # is time activate or deactivate counters which installed or uninstalled since the last call to this
+        # method. More details inclass WindowsPerformanceObjectRefresher comments.
+        if need_counters_refresh or not self.counters:
+            # https://docs.microsoft.com/en-us/windows/win32/api/pdh/nf-pdh-pdhenumobjectitemsa
+            # https://mhammond.github.io/pywin32/win32pdh__EnumObjectItems_meth.html
+            counters, instances = win32pdh.EnumObjectItems(
+                None, self.connection.server, self.name, win32pdh.PERF_DETAIL_WIZARD
+            )
+
+            if not self.counters:
+                self._configure_counters(counters, instances)
+
+            for counter in self.counters:
+                if counter.name not in counters:
+                    self.logger.error(
+                        'Did not find expected counter `%s` of performance object `%s`', counter.name, self.name
+                    )
+                    counter.clear()
+                else:
+                    counter.refresh()
 
     def clear(self):
         for counter in self.counters:
@@ -236,6 +262,8 @@ class PerfObject:
                         self.tags,
                         custom_transformers.get(counter_name),
                         tag_name,
+                        self.include_wildcards,
+                        self,
                     )
 
         self.counters.extend(counters.values())
@@ -243,6 +271,8 @@ class PerfObject:
     def get_custom_transformers(self):
         return {}
 
+    # At least one derived class (IIS CompatibilityPerfObject(PerfObject)) relies on this
+    # function call as callback for its own state management
     def _instance_excluded(self, instance):
         return self.exclude_pattern.search(instance) or (
             self.include_pattern is not None and not self.include_pattern.search(instance)
@@ -359,7 +389,7 @@ class SingleCounter(CounterBase):
         else:
             self.transformer(value, tags=self.tags)
 
-    def refresh(self, _):
+    def refresh(self):
         if self.counter_handle is None:
             self.counter_handle = self.counter_selector(self.connection.query_handle, self.path)
 
@@ -395,10 +425,15 @@ class MultiCounter(CounterBase):
         tags,
         custom_transformer,
         tag_name,
+        include_wildcards,
+        perf_obj,
     ):
         super().__init__(
             name, config, check, connection, object_name, metric_prefix, counter_selector, tags, custom_transformer
         )
+
+        # Weak reference is used to avoid circular dependency and potentail memory leak
+        self.perf_obj_weakref = weakref.ref(perf_obj)
 
         self.tag_name = tag_name
 
@@ -426,127 +461,122 @@ class MultiCounter(CounterBase):
                 metric_name = f'{self.metric_name}.avg' if self.average else f'{self.metric_name}.sum'
                 self.aggregate_transformer = NATIVE_TRANSFORMERS[self.metric_type](check, metric_name, config)
 
+        self.include_wildcards = include_wildcards
+
+        self.total_instance_count = 0
+        self.monitored_instance_count = 0
+        self.unique_instance_count = 0
+
         # All monitored counter handles keyed by the instance name
         self.instances = {}
 
     def collect(self):
-        handles_with_data = 0
+        # Instance tracking is conducted for each counter although collected only from one.
+        # This counting is cheap but making it conditional here will only complicate this method
+        self.total_instance_count = 0
+        self.monitored_instance_count = 0
+        self.unique_instance_count = 0
+
         total = 0
-        for instance, counter_handles in self.instances.items():
-            # Some instances may not have a value yet, so we only
-            # use the ones that do for computing averages
-            instance_handles_with_data = len(counter_handles)
-            instance_total = 0
+        for counter_handle in self.instances:
+            try:
+                instance_items = get_counter_values(counter_handle)
 
-            for i, counter_handle in enumerate(counter_handles):
-                try:
-                    value = get_counter_value(counter_handle)
-                except pywintypes.error as error:
-                    instance_handles_with_data -= 1
-                    self.handle_counter_value_error(error, format_instance(instance, i))
-                else:
-                    instance_total += value
+                for instance, value in instance_items.items():
+                    # Some instances may not have a value yet, so we only
+                    # use the ones that do for computing averages
+                    instance_non_unique_count = 0
+                    instance_total = 0
 
-            if not instance_handles_with_data:
-                continue
+                    self.total_instance_count += 1
+                    if self._instance_excluded(instance):
+                        continue
 
-            handles_with_data += instance_handles_with_data
-            total += instance_total
+                    self.unique_instance_count += 1
 
-            if self.aggregate != 'only':
-                tags = [f'{self.tag_name}:{instance}']
-                tags.extend(self.tags)
+                    # Enumerate non-unique instances
+                    if isinstance(value, list):
+                        for sub_value in value:
+                            instance_total += sub_value
+                            instance_non_unique_count += 1
+                    else:
+                        instance_total = value
+                        instance_non_unique_count += 1
 
-                if self.average:
-                    self.transformer(instance_total / instance_handles_with_data, tags=tags)
-                else:
-                    self.transformer(instance_total, tags=tags)
+                    if self.aggregate != 'only':
+                        tags = [f'{self.tag_name}:{instance}']
+                        tags.extend(self.tags)
 
-        if not handles_with_data:
+                        if self.average:
+                            self.transformer(instance_total / instance_non_unique_count, tags=tags)
+                        else:
+                            self.transformer(instance_total, tags=tags)
+
+                    if not instance_non_unique_count:
+                        continue
+
+                    self.monitored_instance_count += instance_non_unique_count
+                    total += instance_total
+
+            except pywintypes.error as error:
+                self.handle_counter_value_error(error)
+            except KeyError as error:
+                # To support IIS mocking tests for non-existing wildcard counters
+                pass
+
+        if not self.monitored_instance_count:
             return
 
         if self.aggregate is not False:
             if self.average:
-                self.aggregate_transformer(total / handles_with_data, tags=self.tags)
+                self.aggregate_transformer(total / self.monitored_instance_count, tags=self.tags)
             else:
                 self.aggregate_transformer(total, tags=self.tags)
 
-    def refresh(self, instance_counts):
-        old_instances = self.instances
-        new_instances = {}
+    def refresh(self):
+        # No need to create counter handle or handles if they are already exist
+        if self.instances and len(self.instances) > 0:
+            return
 
-        for instance, current_count in instance_counts.items():
-            if instance in old_instances:
-                counter_handles = old_instances.pop(instance)
-                new_instances[instance] = counter_handles
-                old_count = len(counter_handles)
+        self.instances = []
+        if self.include_wildcards is None:
+            self.include_wildcards = ["*"]
 
-                if current_count > old_count:
-                    for index in range(old_count, current_count):
-                        path = construct_counter_path(
-                            machine_name=self.connection.server,
-                            object_name=self.object_name,
-                            counter_name=self.name,
-                            instance_name=instance,
-                            instance_index=index,
-                        )
-                        counter_handle = self.counter_selector(self.connection.query_handle, path)
-                        counter_handles.append(counter_handle)
-                elif current_count < old_count:
-                    for _ in range(old_count - current_count):
-                        counter_handle = counter_handles.pop()
+        for _, pattern in enumerate(self.include_wildcards, 1):
+            path = construct_counter_path(
+                machine_name=self.connection.server,
+                object_name=self.object_name,
+                counter_name=self.name,
+                instance_name=pattern,
+            )
 
-                        try:
-                            # https://docs.microsoft.com/en-us/windows/win32/api/pdh/nf-pdh-pdhremovecounter
-                            # https://mhammond.github.io/pywin32/win32pdh__RemoveCounter_meth.html
-                            win32pdh.RemoveCounter(counter_handle)
-                        except Exception as e:
-                            self.logger.warning(
-                                'Unable to remove handle for instance `%s` of counter `%s` '
-                                'of performance object `%s`: %s',
-                                format_instance(instance, len(counter_handles)),
-                                self.name,
-                                self.object_name,
-                                e,
-                            )
-            else:
-                counter_handles = []
-                new_instances[instance] = counter_handles
-
-                for index in range(current_count):
-                    path = construct_counter_path(
-                        machine_name=self.connection.server,
-                        object_name=self.object_name,
-                        counter_name=self.name,
-                        instance_name=instance,
-                        instance_index=index,
-                    )
-                    counter_handle = self.counter_selector(self.connection.query_handle, path)
-                    counter_handles.append(counter_handle)
-
-        # Remove expired instances
-        self.clear()
-
-        self.instances = new_instances
+            counter_handle = self.counter_selector(self.connection.query_handle, path)
+            self.instances.append(counter_handle)
 
     def clear(self):
         if not self.instances:
             return
 
-        for instance, counter_handles in self.instances.items():
-            while counter_handles:
-                counter_handle = counter_handles.pop()
-                try:
-                    # https://docs.microsoft.com/en-us/windows/win32/api/pdh/nf-pdh-pdhremovecounter
-                    # https://mhammond.github.io/pywin32/win32pdh__RemoveCounter_meth.html
-                    win32pdh.RemoveCounter(counter_handle)
-                except Exception as e:
-                    self.logger.warning(
-                        'Unable to remove handle for instance `%s` of counter `%s` of performance object `%s`: %s',
-                        format_instance(instance, len(counter_handles)),
-                        self.name,
-                        self.object_name,
-                        e,
-                    )
+        for counter_handle in self.instances:
+            try:
+                # https://docs.microsoft.com/en-us/windows/win32/api/pdh/nf-pdh-pdhremovecounter
+                # https://mhammond.github.io/pywin32/win32pdh__RemoveCounter_meth.html
+                win32pdh.RemoveCounter(counter_handle)
+            except Exception as e:
+                self.logger.warning(
+                    'Unable to remove handle for counter `%s` of performance object `%s`: %s',
+                    self.name,
+                    self.object_name,
+                    e,
+                )
 
         self.instances.clear()
+
+    def get_instance_count(self):
+        return self.total_instance_count, self.monitored_instance_count, self.unique_instance_count
+
+    def _instance_excluded(self, instance):
+        # There is no need for additional validation since call to this object
+        # is always done from the live parent object (perf_obj)
+        perf_obj = self.perf_obj_weakref()
+        return perf_obj._instance_excluded(instance)

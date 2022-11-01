@@ -22,9 +22,37 @@ class WindowsPerformanceObjectRefresher(threading.Thread):
         name = self.__class__.__name__
         super(WindowsPerformanceObjectRefresher, self).__init__(name=name)
 
-        self.interval = 60
+        # If not specified in configuration, "interval's" default value is 0, which effectively
+        # disables a call to PdhEnumObjects() API. Microsoft requires to call this function
+        # before number calling an API like PdhEnumObjectItems(). However there are a few
+        # problems with PdhEnumObjects() API call and it should be avoided if possible:
+        #   a) It is extremely slow (may take seconds and allocate/free memory 300,000 times).
+        #   b) Will generate warnings and errors in Windows Event logs is Agent service has
+        #      no Administrator rights.
+        # One cannot use PdhEnumObjectItems() to discover up-to-date counters and instances names
+        # without calling PdhEnumObjects(refresh=True) first. But on the other hand performance
+        # Objects and their Counters are already known and specified in the Agent configuration.
+        # There is also a matter of up-to-date instance names. But we do not have to get them
+        # from PdhEnumObjectItems() and instead can get them from PdhGetFormattedCounterArray().
+        #
+        # But here is a caveat. If some performance Objects and Counters are not installed yet
+        # and installed after Agent started, they still will not be "visible" for PDH API calls
+        # unless Agent is restarted or calls PdhEnumObjects(refresh=True). This is not common
+        # scenario though, since Performance Counters Providers are not frequently installed or
+        # uninstalled. However if this rare case is needed to be supported a customer will need
+        # to set global "windows_counter_refresh_interval" configuration to a number of second
+        # how often the counters should be refreshed. The only additional recommendation in this
+        # case would running Agent as Local System or Local Administrator user because
+        # otherwise these call will generate handful of errors and warning in Windows Event
+        # Logs every time PdhEnumObjects() API is called.
+        #
+        # It worth to point that other parts of Agent code or 3rd party libraries may invoke
+        # PdhEnumObjects(refresh=True), however it does not change above mentioned assertions.
+
+        self.interval = 0
         if datadog_agent and datadog_agent.get_config('windows_counter_refresh_interval') is not None:
             self.interval = datadog_agent.get_config('windows_counter_refresh_interval')
+
         self.logger = logging.getLogger(name)
         self.logger.info('Windows Counters refresh interval set to %d seconds', self.interval)
         self.last_refresh = {}
@@ -74,3 +102,9 @@ class WindowsPerformanceObjectRefresher(threading.Thread):
 
     def log_server_count(self, server):
         self.logger.info('Refresh counter set to %d for server: %s', self.servers[server], server)
+
+    def get_last_refresh(self, server):
+        if server in self.last_refresh:
+            return self.last_refresh[server]
+
+        return 0
