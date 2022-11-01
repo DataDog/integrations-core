@@ -1,0 +1,23 @@
+name: Cloudera
+files:
+- name: cloudera.yaml
+  options:
+  - name: api_url
+    required: true
+    description: The Swagger API Url
+    value:
+      type: string
+  - name: username
+    description: The workload username
+    value:
+      type: string
+  - name: password
+    description: The workload password
+    value:
+      type: string
+  - template: init_config
+    options:
+    - template: init_config/default
+  - template: instances
+    options:
+    - template: instances/default
