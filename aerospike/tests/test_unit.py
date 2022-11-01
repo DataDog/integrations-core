@@ -161,6 +161,8 @@ def test_collect_latency_invalid_data(aggregator):
             '11:53:57,0.0,0.00,0.00,0.00',
             '{ns-2}-write:11:53:47-GMT,ops/sec,>1ms,>8ms,>64ms',
             '11:53:57,0.0,0.00,0.00,0.00',
+            '{ns-2}-read:11:53:47-GMT,ops/sec,>1ms,>8ms,>64ms',
+            '11:53:57,0.0,0.00,0.00,0.00',
         ]
     )
     check.log = mock.MagicMock()
