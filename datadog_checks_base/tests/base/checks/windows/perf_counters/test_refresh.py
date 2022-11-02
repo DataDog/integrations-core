@@ -3,9 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from datadog_checks.dev.testing import requires_py3, requires_windows
 
-import mock
-
-from .utils import GLOBAL_TAGS, SERVER, get_check
+from .utils import GLOBAL_TAGS, get_check
 
 pytestmark = [requires_py3, requires_windows]
 

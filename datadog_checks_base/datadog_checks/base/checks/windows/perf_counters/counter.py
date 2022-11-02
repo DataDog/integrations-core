@@ -151,7 +151,7 @@ class PerfObject:
         #    * It does not appear that the feature was needed by customers
         #    * It adds non-insignificant complexity to the code
         #    * It relies on very slow and resource hungry PdhEnumObjects(refresh=TRUE) function.
-        #    * It pretty much requires the agent process to be run as administrator or local system 
+        #    * It pretty much requires the agent process to be run as administrator or local system
         #      user (otherwise will generate a handful of error messages in the event log every time
         #      refresh run). Microsoft support confirmed it even though it is not documented.  It is
         #      difficult to explain to customers.
@@ -191,7 +191,7 @@ class PerfObject:
             self.has_multiple_instances = False
         else:
             raise ConfigTypeError(
-                f'None of the specified `counters` for performance object `{self.name}` or performance object itself are installed'
+                f'None of the specified `counters` for performance object `{self.name}` are installed'
             )
 
         tag_name = self.tag_name
@@ -271,26 +271,30 @@ class PerfObject:
                     f'Entry #{i} of option `counters` for performance object `{self.name}` must be a mapping'
                 )
 
-            for counter_name, counter_config in entry.items():
+            for counter_name, _ in entry.items():
                 # https://docs.microsoft.com/en-us/windows/win32/api/pdh/nf-pdh-pdhvalidatepatha
                 # https://mhammond.github.io/pywin32/win32pdh__ValidatePath_meth.html
 
                 # Check for multi-instance counter path
                 possible_path = construct_counter_path(
-                    machine_name=self.connection.server, object_name=self.name, counter_name=counter_name, instance_name='*'
+                    machine_name=self.connection.server,
+                    object_name=self.name,
+                    counter_name=counter_name,
+                    instance_name='*'
                 )
                 if win32pdh.ValidatePath(possible_path) == 0:
                     return MultiCounter
 
                 # Check for single-instance counter path
                 possible_path = construct_counter_path(
-                    machine_name=self.connection.server, object_name=self.name, counter_name=counter_name
+                    machine_name=self.connection.server,
+                    object_name=self.name,
+                    counter_name=counter_name
                 )
                 if win32pdh.ValidatePath(possible_path) == 0:
                     return SingleCounter
 
-        return None                    
-
+        return None
 
     def get_custom_transformers(self):
         return {}
@@ -544,7 +548,7 @@ class MultiCounter(CounterBase):
 
             except pywintypes.error as error:
                 self.handle_counter_value_error(error)
-            except KeyError as error:
+            except KeyError:
                 # To support IIS mocking tests for non-existing wildcard counters
                 pass
 
