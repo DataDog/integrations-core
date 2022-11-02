@@ -5,94 +5,52 @@ from typing import Any
 
 from datadog_checks.base import AgentCheck
 
-# from datadog_checks.base.utils.db import QueryManager
-# from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
-# from json import JSONDecodeError
+from .client_factory import make_api_client
 
 
 class ClouderaCheck(AgentCheck):
-
-    # This will be the prefix of every metric and service check the integration sends
     __NAMESPACE__ = 'cloudera'
 
     def __init__(self, name, init_config, instances):
         super(ClouderaCheck, self).__init__(name, init_config, instances)
 
-        # Use self.instance to read the check configuration
-        # self.url = self.instance.get("url")
-
-        # If the check is going to perform SQL queries you should define a query manager here.
-        # More info at
-        # https://datadoghq.dev/integrations-core/base/databases/#datadog_checks.base.utils.db.core.QueryManager
-        # sample_query = {
-        #     "name": "sample",
-        #     "query": "SELECT * FROM sample_table",
-        #     "columns": [
-        #         {"name": "metric", "type": "gauge"}
-        #     ],
-        # }
-        # self._query_manager = QueryManager(self, self.execute_query, queries=[sample_query])
-        # self.check_initializations.append(self._query_manager.compile_queries)
+        self.client, self._error = make_api_client(self, self.instance)
+        if self.client is None:
+            self.log.error("API Client is none: %s", self._error)
+            self.service_check("can_connect", ClouderaCheck.CRITICAL)
 
     def check(self, _):
-        # type: (Any) -> None
-        # The following are useful bits of code to help new users get started.
+        # Run through the list of default metrics first
 
-        # Perform HTTP Requests with our HTTP wrapper.
-        # More info at https://datadoghq.dev/integrations-core/base/http/
-        # try:
-        #     response = self.http.get(self.url)
-        #     response.raise_for_status()
-        #     response_json = response.json()
+        # Get the clusters
+        # ClustersResourceApi
 
-        # except Timeout as e:
-        #     self.service_check(
-        #         "can_connect",
-        #         AgentCheck.CRITICAL,
-        #         message="Request timeout: {}, {}".format(self.url, e),
-        #     )
-        #     raise
+        # For each cluster, get the services
+        # ServicesResourceApi
 
-        # except (HTTPError, InvalidURL, ConnectionError) as e:
-        #     self.service_check(
-        #         "can_connect",
-        #         AgentCheck.CRITICAL,
-        #         message="Request failed: {}, {}".format(self.url, e),
-        #     )
-        #     raise
+        # Structure:
+        # Cluster
+        # - Service
+        #   - Nameservice
+        #   - Role
+        # - Host
 
-        # except JSONDecodeError as e:
-        #     self.service_check(
-        #         "can_connect",
-        #         AgentCheck.CRITICAL,
-        #         message="JSON Parse failed: {}, {}".format(self.url, e),
-        #     )
-        #     raise
+        # Get host metrics
+        # HostsResourceApi
 
-        # except ValueError as e:
-        #     self.service_check(
-        #         "can_connect", AgentCheck.CRITICAL, message=str(e)
-        #     )
-        #     raise
+        # get nameservice metrics
+        # NameservicesResourceApi
 
-        # This is how you submit metrics
-        # There are different types of metrics that you can submit (gauge, event).
-        # More info at https://datadoghq.dev/integrations-core/base/api/#datadog_checks.base.checks.base.AgentCheck
-        # self.gauge("test", 1.23, tags=['foo:bar'])
+        # get role metrics
+        # RolesResourceApi
 
-        # Perform database queries using the Query Manager
-        # self._query_manager.execute()
+        # get service metrics
+        # ServicesResourceApi
 
-        # This is how you use the persistent cache. This cache file based and persists across agent restarts.
-        # If you need an in-memory cache that is persisted across runs
-        # You can define a dictionary in the __init__ method.
-        # self.write_persistent_cache("key", "value")
-        # value = self.read_persistent_cache("key")
+        # Next steps: try to get cluster metrics and see how to structure hierarchy
 
-        # If your check ran successfully, you can send the status.
-        # More info at
-        # https://datadoghq.dev/integrations-core/base/api/#datadog_checks.base.checks.base.AgentCheck.service_check
-        # self.service_check("can_connect", AgentCheck.OK)
 
-        # If it didn't then it should send a critical service check
-        self.service_check("can_connect", AgentCheck.CRITICAL)
+        # Run any custom queries
+
+        # at the end, output can_connect
+        self.service_check("can_connect", ClouderaCheck.OK)
