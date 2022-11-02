@@ -1,6 +1,6 @@
 # CHANGELOG - cassandra
 
-## 1.16.0 / 2022-09-16
+## 1.16.0 / 2022-09-16 / Agent 7.40.0
 
 * [Added] Add back previously deleted `active_tasks` and `timeouts` metrics for the Cassandra integration. See [#12710](https://github.com/DataDog/integrations-core/pull/12710).
 

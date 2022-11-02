@@ -4,7 +4,7 @@
 
 * [Fixed] Ensure X-Vault-Request header is set to `true` on all requests. See [#13006](https://github.com/DataDog/integrations-core/pull/13006).
 
-## 3.3.2 / 2022-09-16
+## 3.3.2 / 2022-09-16 / Agent 7.40.0
 
 * [Fixed] Do not use the `client_token` if `no_token` is true with the openmetrics v1 implementation. See [#12776](https://github.com/DataDog/integrations-core/pull/12776).
 * [Fixed] Use the `client_token` option with the openmetrics v2 implementation. See [#12764](https://github.com/DataDog/integrations-core/pull/12764).

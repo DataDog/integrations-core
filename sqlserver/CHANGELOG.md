@@ -9,7 +9,7 @@
 * [Fixed] Always cast provided port to str. See [#13055](https://github.com/DataDog/integrations-core/pull/13055).
 * [Removed] Remove sqlserver tag truncation for metrics. See [#13211](https://github.com/DataDog/integrations-core/pull/13211).
 
-## 9.0.2 / 2022-10-14
+## 9.0.2 / 2022-10-14 / Agent 7.40.0
 
 * [Fixed] Fix Query Metrics query to correct for over-inflated / incorrect SQL Server metrics. See [#13123](https://github.com/DataDog/integrations-core/pull/13123).
 

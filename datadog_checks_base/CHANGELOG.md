@@ -12,7 +12,7 @@
 
 * [Added] Add utility to handle concurrent evaluation of conditions. See [#13053](https://github.com/DataDog/integrations-core/pull/13053).
 
-## 27.3.1 / 2022-10-12
+## 27.3.1 / 2022-10-12 / Agent 7.40.0
 
 * [Fixed] Prevent fork bomb when defining the experimental process_isolation option globally in the init_config section. See [#13094](https://github.com/DataDog/integrations-core/pull/13094).
 

@@ -8,7 +8,7 @@
 * [Removed] Remove mysql tag truncation for metrics. See [#13212](https://github.com/DataDog/integrations-core/pull/13212).
 * [Removed] Remove socket information from the activity query. See [#13196](https://github.com/DataDog/integrations-core/pull/13196).
 
-## 8.5.1 / 2022-09-16
+## 8.5.1 / 2022-09-16 / Agent 7.40.0
 
 * [Fixed] Bumps base check requirement to v25.4.0. See [#12733](https://github.com/DataDog/integrations-core/pull/12733).
 
