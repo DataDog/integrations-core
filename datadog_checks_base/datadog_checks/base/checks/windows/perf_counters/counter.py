@@ -133,46 +133,44 @@ class PerfObject:
             if self.instance_count_unique_metric is not None:
                 self.check.gauge(self.instance_count_unique_metric, unique_instance_count, tags=self.tags)
 
-    def refresh(self, need_counters_refresh):
-        # Unless this refresh() is called the first time when we need to initialize counters, when 
-        # need_counters_refresh==False the call to PdhEnumObjectItems() will always yield the same counters and
-        # instances as previous call if PdhEnumObjects(refresh=True) had not been called and hence useless. From
-        # docs ...
-        #   ... Consecutive calls to this function will return identical lists of counters and instances,
-        # because PdhEnumObjectItems will always query the list of performance objects defined by the last call
-        # to PdhEnumObjects or PdhEnumObjectItems. To refresh the list of performance objects, call
-        # PdhEnumObjects with a bRefresh flag value of TRUE before calling PdhEnumObjectItems again.
-        # ...
-        # If "windows_counter_refresh_interval" is set to non-zero and PdhEnumObject() had been called then it
-        # is time activate or deactivate counters which installed or uninstalled since the last call to this
-        # method. More details inclass WindowsPerformanceObjectRefresher comments.
-        if need_counters_refresh or not self.counters:
-            # https://docs.microsoft.com/en-us/windows/win32/api/pdh/nf-pdh-pdhenumobjectitemsa
-            # https://mhammond.github.io/pywin32/win32pdh__EnumObjectItems_meth.html
-            counters, instances = win32pdh.EnumObjectItems(
-                None, self.connection.server, self.name, win32pdh.PERF_DETAIL_WIZARD
-            )
+    def refresh(self):
+        # Counters configuration should run only once in the current implementation.
+        #
+        # Removed non-default edge case support of dynamic addition/removal of configured performance
+        # counters. Even if a provider of a performance counter object, specified in our configuration,
+        # is not running, as long as its provider has been installed/deployed on the box, that is all
+        # needed for this integration. When the counter provider starts, Agent will discover its new
+        # instances and report them as metrics correspondingly.
+        #
+        # However, if the provider is installed AFTER the agent starts running, this implementation
+        # will not be able to automatically discover and use it. In some way it is a step back because
+        # this ability had been added in 7.34 among few other very important changes including detection
+        # of appearance and disappearance of performance counter instances, support for non-unique
+        # instances and  localization support. In this release detection of newly registered performance
+        # counters providers (and their objects and counters) is pulled out for the following reasons:
+        #    * It does not appear that the feature was needed by customers
+        #    * It adds non-insignificant complexity to the code
+        #    * It relies on very slow and resource hungry PdhEnumObjects(refresh=TRUE) function.
+        #    * It pretty much requires the agent process to be run as administrator or local system 
+        #      user (otherwise will generate a handful of error messages in the event log every time
+        #      refresh run). Microsoft support confirmed it even though it is not documented.  It is
+        #      difficult to explain to customers.
+        #    * The logic of dynamically adding and removing counters handles to facilitate support appears
+        #      to may cause memory leaks in some counters (documented at least for ASP.NET e.g.).
+        # Perhaps in future if customers would really want that and are ready to deal with the caveats above
+        # we can add it back.
 
-            if not self.counters:
-                self._configure_counters(counters, instances)
-
-            for counter in self.counters:
-                if counter.name not in counters:
-                    self.logger.error(
-                        'Did not find expected counter `%s` of performance object `%s`', counter.name, self.name
-                    )
-                    counter.clear()
-                else:
+        if not self.counters:
+            self._configure_counters()
+            if self.counters:
+                for counter in self.counters:
                     counter.refresh()
 
     def clear(self):
         for counter in self.counters:
             counter.clear()
 
-    def _configure_counters(self, available_counters, available_instances):
-        if not available_counters:
-            return
-
+    def _configure_counters(self):
         if self.use_localized_counters:
             # https://docs.microsoft.com/en-us/windows/win32/api/pdh/nf-pdh-pdhaddcountera
             # https://mhammond.github.io/pywin32/win32pdh__AddCounter_meth.html
@@ -182,23 +180,19 @@ class PerfObject:
             # https://mhammond.github.io/pywin32/win32pdh__AddEnglishCounter_meth.html
             counter_selector = win32pdh.AddEnglishCounter
 
-        if available_instances:
-            counter_type = MultiCounter
+        # If a performance object and its counters are installed we will be able to determine its type.
+        # If they are not installed yet (see comment in refresh() method) counter type determination
+        # will fail. Moreover, it will continue to fail no matter how many times it is called even after
+        # the missing performance object and its counters have been installed.
+        counter_type = self._get_counters_type()
+        if counter_type == MultiCounter:
             self.has_multiple_instances = True
+        elif counter_type == SingleCounter:
+            self.has_multiple_instances = False
         else:
-            possible_path = construct_counter_path(
-                machine_name=self.connection.server, object_name=self.name, counter_name=available_counters[0]
+            raise ConfigTypeError(
+                f'None of the specified `counters` for performance object `{self.name}` or performance object itself are installed'
             )
-
-            # https://docs.microsoft.com/en-us/windows/win32/api/pdh/nf-pdh-pdhvalidatepatha
-            # https://mhammond.github.io/pywin32/win32pdh__ValidatePath_meth.html
-            if win32pdh.ValidatePath(possible_path) == 0:
-                counter_type = SingleCounter
-                self.has_multiple_instances = False
-            # Multi-instance counter with no instances presently
-            else:
-                counter_type = MultiCounter
-                self.has_multiple_instances = True
 
         tag_name = self.tag_name
         if self.has_multiple_instances:
@@ -267,6 +261,36 @@ class PerfObject:
                     )
 
         self.counters.extend(counters.values())
+
+    def _get_counters_type(self):
+        # Enumerate all counter to find if it is single or multiple instance counter
+        # The very virst iteration should be sufficienmt, just in case enumerate all
+        for i, entry in enumerate(self.counters_config, 1):
+            if not isinstance(entry, dict):
+                raise ConfigTypeError(
+                    f'Entry #{i} of option `counters` for performance object `{self.name}` must be a mapping'
+                )
+
+            for counter_name, counter_config in entry.items():
+                # https://docs.microsoft.com/en-us/windows/win32/api/pdh/nf-pdh-pdhvalidatepatha
+                # https://mhammond.github.io/pywin32/win32pdh__ValidatePath_meth.html
+
+                # Check for multi-instance counter path
+                possible_path = construct_counter_path(
+                    machine_name=self.connection.server, object_name=self.name, counter_name=counter_name, instance_name='*'
+                )
+                if win32pdh.ValidatePath(possible_path) == 0:
+                    return MultiCounter
+
+                # Check for single-instance counter path
+                possible_path = construct_counter_path(
+                    machine_name=self.connection.server, object_name=self.name, counter_name=counter_name
+                )
+                if win32pdh.ValidatePath(possible_path) == 0:
+                    return SingleCounter
+
+        return None                    
+
 
     def get_custom_transformers(self):
         return {}
@@ -534,7 +558,9 @@ class MultiCounter(CounterBase):
                 self.aggregate_transformer(total, tags=self.tags)
 
     def refresh(self):
-        # No need to create counter handle or handles if they are already exist
+        # No need to create a counter handle or handles if they already exist. And since new
+        # counters for a performance object can be detected (without PdhEnumObjects(refresh=True))
+        # there is no point to make sure that all counters are available.
         if self.instances and len(self.instances) > 0:
             return
 
