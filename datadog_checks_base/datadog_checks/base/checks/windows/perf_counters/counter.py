@@ -190,9 +190,7 @@ class PerfObject:
         elif counter_type == SingleCounter:
             self.has_multiple_instances = False
         else:
-            raise ConfigTypeError(
-                f'None of the specified `counters` for performance object `{self.name}` are installed'
-            )
+            raise Exception(f'None of the specified counters for performance object `{self.name}` are installed')
 
         tag_name = self.tag_name
         if self.has_multiple_instances:
@@ -280,16 +278,14 @@ class PerfObject:
                     machine_name=self.connection.server,
                     object_name=self.name,
                     counter_name=counter_name,
-                    instance_name='*'
+                    instance_name='*',
                 )
                 if win32pdh.ValidatePath(possible_path) == 0:
                     return MultiCounter
 
                 # Check for single-instance counter path
                 possible_path = construct_counter_path(
-                    machine_name=self.connection.server,
-                    object_name=self.name,
-                    counter_name=counter_name
+                    machine_name=self.connection.server, object_name=self.name, counter_name=counter_name,
                 )
                 if win32pdh.ValidatePath(possible_path) == 0:
                     return SingleCounter
