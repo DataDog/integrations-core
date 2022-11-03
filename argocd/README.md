@@ -13,14 +13,18 @@ No additional installation is needed on your server.
 
 ### Configuration
 
-Argo CD exposes Prometheus-formatted metrics on three of their components: Application Controller, API Server and Repo Server. The exposed metrics can be readily collected by the Agent using this integration. Follow the instructions below to configure the collection of any and or all of the components.
+Argo CD exposes Prometheus-formatted metrics on three of their components:
+   - Application Controller
+   - API Server
+   - Repo Server
+The Datadog Agent can collect the exposed metrics using this integration. Follow the instructions below to configure data collection from any or all of the components.
 
 **Note**: This check uses [OpenMetrics][11] for metric collection, which requires Python 3.
 
 #### Containerized
 ##### Metric collection
 
-Ensure that the Prometheus formatted metrics are exposed in your Argo CD cluster. This should be enabled by default if using Argo CD's [default manifests][10]. To gather all metrics, each of the three aforementioned components will need to be annotated for the agent to collect metrics. For more information about annotations, see the [Autodiscovery Integration Templates and for guidance][13]. Example configurations:
+Ensure that the Prometheus-formatted metrics are exposed in your Argo CD cluster. This is enabled by default if using Argo CD's [default manifests][10]. For the Agent to gather all metrics, each of the three aforementioned components needs to be annotated. For more information about annotations, see the [Autodiscovery Integration Templates][13] for guidance. Example configurations:
 
 Application Controller:
 ```yaml
