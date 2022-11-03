@@ -133,7 +133,7 @@ def test_min_properties_queue_tags_channel_status(instance, get_check, dd_run_ch
         ),
         pytest.param(
             False,
-            True,
+            False,
             id="SSL explicitly disabled",
         ),
         pytest.param(None, True, id="SSL implicitly enabled"),
@@ -154,4 +154,4 @@ def test_ssl_auth_with_ssl_options(instance, ssl_auth, expected_ssl, ssl_option)
 def test_ssl_auth_without_ssl_options(instance, ssl_auth):
     instance['ssl_auth'] = ssl_auth
     config = IBMMQConfig(instance, {})
-    assert config.ssl == ssl_auth
+    assert config.ssl == bool(ssl_auth)
