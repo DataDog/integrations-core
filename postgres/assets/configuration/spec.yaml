@@ -161,9 +161,12 @@ files:
         * f = foreign table
         * p = partitioned table
 
+        Note: You must provide either `relation_name` or `relation_regex` in each entry. If both are missing, the 
+        agent will throw a ConfigurationError at runtime. If you only need to track metrics for specific schemas or 
+        relkinds, use '.*' as the value for `relation_regex`.
+
         Note: For compatibility reasons you can also use the following syntax to track relations metrics by specifying
         the list of table names. All schemas are included and regex are not supported.
-        relations:
       value:
         type: array
         items:
