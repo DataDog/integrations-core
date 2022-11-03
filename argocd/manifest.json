@@ -9,7 +9,7 @@
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
     "description": "",
-    "title": "ArgoCD",
+    "title": "Argo CD",
     "media": [],
     "classifier_tags": [
       "Supported OS::Linux",

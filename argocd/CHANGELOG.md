@@ -1,2 +1,2 @@
-# CHANGELOG - ArgoCD
+# CHANGELOG - Argo CD
 

@@ -65,7 +65,7 @@ class ArgocdCheck(OpenMetricsBaseCheckV2, ConfigMixin):
 
     def configure_transformer_go_memstats_alloc_bytes(self, metric_name):
         # Custom transformer to ensure we only pick up the gauge version of this metric
-        # ArgoCD exposes a similar metric `go_memstats_alloc_bytes_total` as a counter
+        # Argo CD exposes a similar metric `go_memstats_alloc_bytes_total` as a counter
         # which would also be collected under the same name and could cause inaccuracies
         # in the metric value
         def go_memstats_alloc_bytes_transformer(_metric, sample_data, _runtime_data):

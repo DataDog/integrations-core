@@ -1,4 +1,4 @@
-# Agent Check: ArgoCD
+# Agent Check: Argo CD
 
 ## Overview
 
@@ -24,9 +24,9 @@ The Datadog Agent can collect the exposed metrics using this integration. Follow
 #### Containerized
 ##### Metric collection
 
-Ensure that the Prometheus-formatted metrics are exposed in your Argo CD cluster. This is enabled by default if using Argo CD's [default manifests][10]. For the Agent to gather all metrics, each of the three aforementioned components needs to be annotated. For more information about annotations, see the [Autodiscovery Integration Templates][13] for guidance. Example configurations:
+Ensure that the Prometheus-formatted metrics are exposed in your Argo CD cluster. This is enabled by default if using Argo CD's [default manifests][10]. For the Agent to gather all metrics, each of the three aforementioned components needs to be annotated. For more information about annotations, see the [Autodiscovery Integration Templates][4] for guidance. Example configurations:
 
-Application Controller:
+**Application Controller**:
 ```yaml
 apiVersion: v1
 kind: Pod
@@ -52,7 +52,7 @@ spec:
 # (...)
 ```
 
-API Server:
+**API Server**:
 ```yaml
 apiVersion: v1
 kind: Pod
@@ -78,7 +78,7 @@ spec:
 # (...)
 ```
 
-Repo Server:
+**Repo Server**:
 ```yaml
 apiVersion: v1
 kind: Pod
@@ -109,7 +109,7 @@ spec:
 
 _Available for Agent versions >6.0_
 
-Argo CD logs can be collected from the different Argo CD pods through Kubernetes. Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][12].
+Argo CD logs can be collected from the different Argo CD pods through Kubernetes. Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][5].
 
 See the [Autodiscovery Integration Templates][3] for guidance on applying the parameters below.
 
@@ -143,13 +143,12 @@ Need help? Contact [Datadog support][9].
 [1]: https://argo-cd.readthedocs.io/en/stable/
 [2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://docs.datadoghq.com/agent/kubernetes/integrations/
-[4]: https://github.com/DataDog/integrations-core/blob/master/check/datadog_checks/check/data/conf.yaml.example
-[5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[4]: https://docs.datadoghq.com/containers/kubernetes/integrations/?tab=kubernetesadv2
+[5]: https://docs.datadoghq.com/agent/kubernetes/log/
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/check/metadata.csv
 [8]: https://github.com/DataDog/integrations-core/blob/master/check/assets/service_checks.json
 [9]: https://docs.datadoghq.com/help/
 [10]: https://argo-cd.readthedocs.io/en/stable/operator-manual/installation/
 [11]: https://docs.datadoghq.com/integrations/openmetrics/
-[12]: https://docs.datadoghq.com/agent/kubernetes/log/
-[13]: https://docs.datadoghq.com/containers/kubernetes/integrations/?tab=kubernetesadv2
+
