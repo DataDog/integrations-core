@@ -81,5 +81,3 @@ Need help? Contact [Datadog support][9].
 [8]: https://github.com/DataDog/integrations-core/blob/master/active_directory/metadata.csv
 [9]: https://docs.datadoghq.com/help/
 [10]: https://github.com/DataDog/integrations-core/blob/7.33.x/active_directory/datadog_checks/active_directory/data/conf.yaml.example
-
-## Uninstallation
