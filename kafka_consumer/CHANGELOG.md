@@ -1,5 +1,9 @@
 # CHANGELOG - kafka_consumer
 
+## 2.17.0-beta.2 / 2022-11-04
+
+* [Fixed] Disable socket wakeup when listing consumer groups and send request. See [#13265](https://github.com/DataDog/integrations-core/pull/13265).
+
 ## 2.17.0-beta.1 / 2022-10-27
 
 * [Fixed] Fix sensitive client_secret config specification. See [#12983](https://github.com/DataDog/integrations-core/pull/12983).
