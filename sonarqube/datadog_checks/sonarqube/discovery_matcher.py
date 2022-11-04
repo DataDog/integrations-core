@@ -12,15 +12,15 @@ class DiscoveryMatcher:
         mandatory: bool = True,
         items_id: str = 'keys',
         default_limit: int = 10,
-        default_include: list = [],
-        default_exclude: list = [],
+        default_include: list = None,
+        default_exclude: list = None,
     ):
         self._log = log
         self._items_id = items_id
         self._config = config
         self._default_limit = default_limit
-        self._default_include = default_include
-        self._default_exclude = default_exclude
+        self._default_include = [] if default_include is None else default_include
+        self._default_exclude = [] if default_exclude is None else default_exclude
         self._log.debug('DiscoveryMatcher config: %s', self._config)
         if self._config is None and mandatory:
             raise ConfigurationError('DiscoveryMatcher config must be defined')
