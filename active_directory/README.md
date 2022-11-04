@@ -1,6 +1,6 @@
 # Active Directory Integration
 
-## Overview
+## Overview 
 
 Get metrics and logs from Microsoft Active Directory to visualize and monitor its performances.
 
