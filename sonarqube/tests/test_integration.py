@@ -14,4 +14,3 @@ def test_integration_service_check_ok(aggregator, dd_run_check, sonarqube_check,
     for metric in WEB_METRICS:
         aggregator.assert_metric(metric)
     aggregator.assert_service_check('sonarqube.api_access', status=check.OK)
-    assert False
