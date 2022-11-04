@@ -200,7 +200,7 @@ def dep(check, require_base_check_version, min_base_check_version):
                 failed = True
                 message = (
                     f'Dependency {name} found in the {check_name} integration requirements '
-                    f'but not on the agent requirements, they should be synced.'
+                    'but not on the agent requirements, they should be synced.'
                 )
                 echo_failure(message)
                 annotate_error(req_source, message)
