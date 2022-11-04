@@ -396,10 +396,6 @@ class NewKafkaConsumerCheck(object):
         del self._consumer_futures  # since it's reset on every check run, no sense holding the reference between runs
 
     def _list_consumer_groups_send_request(self, broker_id):
-        """Send a ListGroupsRequest to a broker.
-        :param broker_id: The broker's node_id.
-        :return: A message future
-        """
         kafka_version = self.kafka_client.config['api_version']
         if kafka_version <= 2:
             request = ListGroupsRequest[kafka_version]()
