@@ -2,55 +2,43 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import pytest
+
 from datadog_checks.argocd import ArgocdCheck
 from datadog_checks.base.constants import ServiceCheck
 
-from . import common
+from .common import (
+    API_SERVER_METRICS,
+    APP_CONTROLLER_METRICS,
+    MOCKED_API_SERVER_INSTANCE,
+    MOCKED_APP_CONTROLLER_INSTANCE,
+    MOCKED_REPO_SERVER_INSTANCE,
+    NOT_EXPOSED_METRICS,
+    REPO_SERVER_METRICS,
+)
 from .utils import get_fixture_path
 
 
-def test_app_controller(dd_run_check, aggregator, mock_http_response):
-    mock_http_response(file_path=get_fixture_path('app_controller_metrics.txt'))
-    check = ArgocdCheck('argocd', {}, [common.MOCKED_APP_CONTROLLER_INSTANCE])
+@pytest.mark.parametrize(
+    'namespace, instance,metrics',
+    [
+        ('app_controller', MOCKED_APP_CONTROLLER_INSTANCE, APP_CONTROLLER_METRICS),
+        ('api_server', MOCKED_API_SERVER_INSTANCE, API_SERVER_METRICS),
+        ('repo_server', MOCKED_REPO_SERVER_INSTANCE, REPO_SERVER_METRICS),
+    ],
+)
+def test_app_controller(dd_run_check, aggregator, mock_http_response, namespace, instance, metrics):
+    mock_http_response(file_path=get_fixture_path('{}_metrics.txt'.format(namespace)))
+    endpoint = instance.get('{}_endpoint'.format(namespace))
+    tags = ["endpoint:{}".format(endpoint)]
+    check = ArgocdCheck('argocd', {}, [instance])
     dd_run_check(check)
 
-    for metric in common.APP_CONTROLLER_METRICS:
-        if metric in common.NOT_EXPOSED_METRICS:
+    for metric in metrics:
+        if metric in NOT_EXPOSED_METRICS:
             aggregator.assert_metric(metric, at_least=0)
-        elif metric == 'argocd.app_controller.go.memstats.alloc_bytes':
-            aggregator.assert_metric(metric, metric_type=aggregator.GAUGE)
-        else:
-            aggregator.assert_metric(metric)
-
-    aggregator.assert_all_metrics_covered()
-
-
-def test_api_server(dd_run_check, aggregator, mock_http_response):
-    mock_http_response(file_path=get_fixture_path('api_server_metrics.txt'))
-    check = ArgocdCheck('argocd', {}, [common.MOCKED_API_SERVER_INSTANCE])
-    dd_run_check(check)
-
-    for metric in common.API_SERVER_METRICS:
-        if metric in common.NOT_EXPOSED_METRICS:
-            aggregator.assert_metric(metric, at_least=0)
-        elif metric == 'argocd.api_server.go.memstats.alloc_bytes':
-            aggregator.assert_metric(metric, metric_type=aggregator.GAUGE)
-        else:
-            aggregator.assert_metric(metric)
-
-    aggregator.assert_all_metrics_covered()
-
-
-def test_repo_server(dd_run_check, aggregator, mock_http_response):
-    mock_http_response(file_path=get_fixture_path('repo_server_metrics.txt'))
-    check = ArgocdCheck('argocd', {}, [common.MOCKED_REPO_SERVER_INSTANCE])
-    dd_run_check(check)
-
-    for metric in common.REPO_SERVER_METRICS:
-        if metric in common.NOT_EXPOSED_METRICS:
-            aggregator.assert_metric(metric, at_least=0)
-        elif metric == 'argocd.repo_server.go.memstats.alloc_bytes':
-            aggregator.assert_metric(metric, metric_type=aggregator.GAUGE)
+        elif metric == 'argocd.{}.go.memstats.alloc_bytes'.format(namespace):
+            aggregator.assert_metric(metric, metric_type=aggregator.GAUGE, tags=tags)
         else:
             aggregator.assert_metric(metric)
 
@@ -70,7 +58,7 @@ def test_empty_instance(dd_run_check):
 def test_app_controller_service_check(dd_run_check, aggregator, mock_http_response):
     # Test for transformer. The prometheus source submits a 1 or 0. 1 being OK and 0 being CRITICAL.
     mock_http_response(file_path=get_fixture_path('app_controller_metrics.txt'))
-    check = ArgocdCheck('argocd', {}, [common.MOCKED_APP_CONTROLLER_INSTANCE])
+    check = ArgocdCheck('argocd', {}, [MOCKED_APP_CONTROLLER_INSTANCE])
     dd_run_check(check)
 
     aggregator.assert_service_check(
