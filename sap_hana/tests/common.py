@@ -13,7 +13,6 @@ PORT = 39017
 TIMEOUT = 20
 CONFIG = {'server': SERVER, 'port': PORT, 'username': 'datadog', 'password': 'Datadog9000', 'timeout': TIMEOUT}
 ADMIN_CONFIG = {'server': SERVER, 'port': PORT, 'username': 'system', 'password': 'Admin1337'}
-
 E2E_METADATA = {'start_commands': ['pip install hdbcli==2.10.15']}
 
 CAN_CONNECT_SERVICE_CHECK = 'sap_hana.{}'.format(SapHanaCheck.SERVICE_CHECK_CONNECT)
