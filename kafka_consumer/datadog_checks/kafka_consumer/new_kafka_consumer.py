@@ -6,6 +6,7 @@ from collections import defaultdict
 from time import time
 
 from kafka import errors as kafka_errors
+from kafka.protocol.admin import ListGroupsRequest
 from kafka.protocol.offset import OffsetRequest, OffsetResetStrategy, OffsetResponse
 from kafka.structs import TopicPartition
 
@@ -393,6 +394,20 @@ class NewKafkaConsumerCheck(object):
         # Loop until all futures resolved.
         self.kafka_client._wait_for_futures(self._consumer_futures)
         del self._consumer_futures  # since it's reset on every check run, no sense holding the reference between runs
+
+    def _list_consumer_groups_send_request(self, broker_id):
+        """Send a ListGroupsRequest to a broker.
+        :param broker_id: The broker's node_id.
+        :return: A message future
+        """
+        kafka_version = self.kafka_client._matching_api_version
+        if kafka_version <= 2:
+            request = ListGroupsRequest[kafka_version]()
+        else:
+            raise NotImplementedError(
+                "Support for ListGroupsRequest_v{} has not yet been added to KafkaAdminClient.".format(kafka_version)
+            )
+        return self._send_request_to_node(broker_id, request, wakeup=False)
 
     def _list_groups_callback(self, broker_id, response):
         """Callback that takes a ListGroupsResponse and issues an OffsetFetchRequest for each group.
