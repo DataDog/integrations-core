@@ -407,6 +407,7 @@ class NewKafkaConsumerCheck(object):
             raise NotImplementedError(
                 "Support for ListGroupsRequest_v{} has not yet been added to KafkaAdminClient.".format(kafka_version)
             )
+        # Disable wakeup when sending request to prevent blocking send requests
         return self._send_request_to_node(broker_id, request, wakeup=False)
 
     def _list_groups_callback(self, broker_id, response):
