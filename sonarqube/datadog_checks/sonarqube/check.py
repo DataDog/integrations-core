@@ -7,7 +7,8 @@ from requests.exceptions import RequestException
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 
-from .constants import CATEGORIES, NUMERIC_TYPES
+from .api import Api
+from .discovery_matcher import DiscoveryMatcher
 
 
 class SonarqubeCheck(AgentCheck):
@@ -16,15 +17,131 @@ class SonarqubeCheck(AgentCheck):
 
     def __init__(self, name, init_config, instances):
         super(SonarqubeCheck, self).__init__(name, init_config, instances)
+        self._validate_config()
+        if self._projects is None:
+            raise ConfigurationError('\'projects\' setting must be defined')
+        self._api = Api(self.log, self.http, self._web_endpoint)
+        self._projects_discovery_matcher = DiscoveryMatcher(self.log, self._projects)
 
-        self._web_endpoint = self.instance.get('web_endpoint', '')
-        self._tags = ['endpoint:{}'.format(self._web_endpoint)]
-        self._tags.extend(self.instance.get('tags', []))
+    def _validate_config(self):
+        self._validate_web_endpoint()
+        self._validate_tags()
+        self._validate_projects()
+        if self._projects is None:
+            self._validate_default_tag()
+            self._validate_default_include()
+            self._validate_default_exclude()
+            self._validate_components()
 
-        # Construct the component data on the first check run
-        self._components = None
+    def _validate_web_endpoint(self):
+        self._web_endpoint = self.instance.get('web_endpoint')
+        if self._web_endpoint is None:
+            raise ConfigurationError('\'web_endpoint\' setting must be defined')
+        if not isinstance(self._web_endpoint, str):
+            raise ConfigurationError('\'web_endpoint\' setting must be a string')
 
-        self.check_initializations.append(self.parse_config)
+    def _validate_tags(self):
+        tags = self.instance.get('tags', [])
+        if not isinstance(tags, list):
+            raise ConfigurationError('\'tags\' setting must be a list')
+        self._tags = ['endpoint:{}'.format(self._web_endpoint)] + tags
+
+    def _validate_projects(self):
+        self._projects = None
+        self.log.debug('validating \'projects\': %s', self.instance)
+        projects = self.instance.get('projects', None)
+        if projects is not None:
+            self.log.debug('\'projects\' found in config: %s', projects)
+            self._projects = {'keys': []}
+            default_tag = projects.get('default_tag', 'component')
+            self.log.debug('default_tag: %s', default_tag)
+            self._default_metrics_limit = projects.get('default_metrics_limit', 100)
+            self.log.debug('default_metrics_limit: %s', self._default_metrics_limit)
+            self._default_metrics_include = projects.get('default_metrics_include', ['^.*'])
+            self.log.debug('default_metrics_include: %s', self._default_metrics_include)
+            self._default_metrics_exclude = projects.get('default_metrics_exclude', ['^.*\\.new_.*'])
+            self.log.debug('default_metrics_exclude: %s', self._default_metrics_exclude)
+            keys = projects.get('keys', [])
+            self.log.debug('keys: %s', keys)
+            for keys_item in keys:
+                if isinstance(keys_item, dict):
+                    self._projects['keys'].append(
+                        {
+                            list(keys_item.keys())[0]: {
+                                'tag': list(keys_item.values())[0].get('tag', default_tag),
+                                'metrics': list(keys_item.values())[0].get('metrics', {'discovery': {}}),
+                            }
+                        }
+                    )
+                elif isinstance(keys_item, str):
+                    self._projects['keys'].append(
+                        {
+                            keys_item: {
+                                'tag': default_tag,
+                                'metrics': {'discovery': {}},
+                            }
+                        }
+                    )
+                else:
+                    self.log.warning('project key setting must be a string or a dict: %s', keys_item)
+                    raise ConfigurationError('project key setting must be a string or a dict')
+            self.log.debug(self._projects)
+
+    def _validate_default_tag(self):
+        self._default_tag = self.instance.get('default_tag', 'component')
+        if not isinstance(self._default_tag, str):
+            raise ConfigurationError('\'default_tag\' setting must be a string')
+
+    def _validate_default_include(self):
+        self._default_include = self.instance.get('default_include', [])
+        if not isinstance(self._default_include, list):
+            raise ConfigurationError('\'default_include\' setting must be a list')
+
+    def _validate_default_exclude(self):
+        self._default_exclude = self.instance.get('default_exclude', [])
+        if not isinstance(self._default_exclude, list):
+            raise ConfigurationError('\'default_exclude\' setting must be a list')
+
+    def _validate_components(self):
+        self.log.debug('validating \'components\': %s', self.instance)
+        components = self.instance.get('components', None)
+        if components is not None:
+            self.log.debug('\'components\' found in config: %s', components)
+            self._projects = {'keys': []}
+            default_tag = self.instance.get('default_tag', 'component')
+            self.log.debug('default_tag: %s', default_tag)
+            self._default_metrics_limit = 100
+            self.log.debug('default_metrics_limit: %s', self._default_metrics_limit)
+            self._default_metrics_include = [
+                self._normalize_pattern(item) for item in self.instance.get('default_include', [])
+            ]
+            self._default_metrics_include = self._default_metrics_include if self._default_metrics_include else [r'.*']
+            self.log.debug('default_metrics_include: %s', self._default_metrics_include)
+            self._default_metrics_exclude = [
+                self._normalize_pattern(item) for item in self.instance.get('default_exclude', [])
+            ]
+            self._default_metrics_exclude = (
+                self._default_metrics_exclude if self._default_metrics_exclude else [r'^.*\.new_.*']
+            )
+            self.log.debug('default_metrics_exclude: %s', self._default_metrics_exclude)
+            for component_key, component_config in components.items():
+                self.log.debug('component_key: %s, component_config: %s', component_key, component_config)
+                component_config['tag'] = component_config.get('tag', default_tag)
+                component_config['metrics'] = {}
+                include = component_config.get('include', None)
+                exclude = component_config.get('exclude', None)
+                if include or exclude:
+                    component_config['metrics']['discovery'] = {}
+                    if include is not None:
+                        component_config['metrics']['discovery']['include'] = [
+                            self._normalize_pattern(item) for item in include
+                        ]
+                    if exclude is not None:
+                        component_config['metrics']['discovery']['exclude'] = [
+                            self._normalize_pattern(item) for item in exclude
+                        ] + [r'^.*\.new_.*']
+                self._projects['keys'].append({component_key: component_config})
+            self.log.debug(self._projects)
 
     def check(self, _):
         try:
@@ -39,170 +156,72 @@ class SonarqubeCheck(AgentCheck):
     def collect_metadata(self):
         self.collect_version()
 
+    def _normalize_pattern(self, pattern: str) -> str:
+        # Ensure dots are treated as literal
+        pattern = pattern.replace('\\.', '.').replace('.', '\\.')
+        # Get rid of any explicit start modifiers
+        pattern = pattern.lstrip('^')
+        # We only search on `<CATEGORY>.<KEY>`
+        pattern = re.sub(r'^sonarqube(\\.)?', '', pattern)
+        # Match from the start by default
+        pattern = '^{}'.format(pattern)
+        return pattern
+
     def collect_metrics(self):
-        available_metrics = self.discover_available_metrics()
-
-        for component, (tag_name, should_collect_metric) in self._components.items():
-            keys_to_query = []
-
-            for key, metric in available_metrics.items():
-                if should_collect_metric(metric):
-                    keys_to_query.append(key)
-
-            if not keys_to_query:
-                self.log.warning('Pattern for component `%s` does not match any available metrics', component)
-
-            response = self.http.get(
-                '{}/api/measures/component'.format(self._web_endpoint),
-                params={'component': component, 'metricKeys': ','.join(keys_to_query)},
-            )
-            response.raise_for_status()
-            metric_data = response.json()
-
-            for measure in metric_data['component']['measures']:
-                tags = ['{}:{}'.format(tag_name, component)]
-                tags.extend(self._tags)
-
-                self.gauge(available_metrics[measure['metric']], measure['value'], tags=tags)
-
-    def discover_available_metrics(self):
-        available_metrics = {}
-
-        page = 1
-        seen = 0
-        total = -1
-
-        while seen != total:
-            response = self.http.get('{}/api/metrics/search'.format(self._web_endpoint), params={'p': page})
-            response.raise_for_status()
-
-            search_results = response.json()
-            total = search_results['total']
-
-            for metric in search_results['metrics']:
-                seen += 1
-
-                if not self.is_valid_metric(metric):
-                    continue
-
-                domain = metric['domain']
-                key = metric['key']
-
-                category = CATEGORIES.get(domain)
-                if category is None:
-                    self.log.warning('Unknown metric category: %s', domain)
-                    continue
-
-                available_metrics[key] = '{}.{}'.format(category, key)
-
-            page += 1
-
-        return available_metrics
+        self.log.debug('collecting metrics')
+        projects = self._api.get_projects()
+        self.log.debug('%d projects obtained from Sonarqube: %s', len(projects), projects)
+        matched_projects = self._projects_discovery_matcher.match(projects)
+        self.log.debug('matched_projects: %s', matched_projects)
+        if matched_projects:
+            all_metrics = self._api.get_metrics()
+            self.log.debug('%d metrics obtained from Sonarqube: %s', len(all_metrics), all_metrics)
+            for matched_project_key, matched_project_config in matched_projects:
+                self.log.debug(
+                    'processing matched project \'%s\' with config \'%s\'',
+                    matched_project_key,
+                    matched_project_config,
+                )
+                metrics_discovery_matcher = DiscoveryMatcher(
+                    self.log,
+                    matched_project_config.get('metrics', None),
+                    mandatory=False,
+                    default_limit=self._projects.get('default_metrics_limit', self._default_metrics_limit),
+                    default_include=[f'({item})' for item in self._default_metrics_include],
+                    default_exclude=[f'({item})' for item in self._default_metrics_exclude],
+                )
+                matched_metrics = metrics_discovery_matcher.match(all_metrics)
+                self.log.debug('%d matched_metrics: %s', len(matched_metrics), matched_metrics)
+                map_metrics_measures = {key.split('.')[1]: key for key, _ in matched_metrics}
+                self.log.debug('%d map_metrics_measures: %s', len(map_metrics_measures), map_metrics_measures)
+                measures = self._api.get_measures(
+                    matched_project_key, [key.split('.')[1] for key, _ in matched_metrics]
+                )
+                self.log.debug(
+                    '%d measures from project \'%s\' obtained from Sonarqube: %s',
+                    len(measures),
+                    matched_project_key,
+                    measures,
+                )
+                for measure_key, measure_value in measures:
+                    mapped_measure = map_metrics_measures.get(measure_key, None)
+                    if mapped_measure:
+                        self.gauge(
+                            mapped_measure,
+                            measure_value,
+                            tags=self._tags + ['{}:{}'.format(matched_project_config['tag'], matched_project_key)],
+                        )
+                    else:
+                        self.log.warning('\'%s\' not found in matched metrics', measure_key)
 
     def collect_version(self):
-        response = self.http.get('{}/api/server/version'.format(self._web_endpoint))
-        response.raise_for_status()
-        version = response.text
+        self.log.debug('Collecting version')
+        version = self._api.get_version()
+        self.log.debug('Sonarqube version: %s', version)
         if not version:
             self.log.warning('The SonarQube version was not found in response')
             return
-
         # The version comes in like `8.5.0.37579` though sometimes there is no build part
         version_parts = {name: part for name, part in zip(('major', 'minor', 'patch', 'build'), version.split('.'))}
-
+        self.log.debug('Sonarqube version: %s', version_parts)
         self.set_metadata('version', version, scheme='parts', final_scheme='semver', part_map=version_parts)
-
-    def parse_config(self):
-        components = self.instance.get('components', {})
-        if not isinstance(components, dict):
-            raise ConfigurationError('The `components` setting must be a mapping')
-        elif not components:
-            raise ConfigurationError('The `components` setting must be defined')
-
-        default_component_tag = self.instance.get('default_tag', 'component')
-        if not isinstance(default_component_tag, str):
-            raise ConfigurationError('The `default_tag` setting must be a string')
-
-        default_metric_inclusion_pattern = self.compile_metric_patterns(self.instance, 'default_include')
-        default_metric_exclusion_pattern = self.compile_metric_patterns(self.instance, 'default_exclude')
-
-        component_data = {}
-        for component, config in components.items():
-            if config is None:
-                config = {}
-
-            if not isinstance(config, dict):
-                raise ConfigurationError('Component `{}` must refer to a mapping'.format(component))
-
-            include_metric = self.create_metric_matcher(
-                self.compile_metric_patterns(config, 'include') or default_metric_inclusion_pattern,
-                default=True,
-            )
-            exclude_metric = self.create_metric_matcher(
-                self.compile_metric_patterns(config, 'exclude') or default_metric_exclusion_pattern,
-                default=False,
-            )
-
-            tag_name = config.get('tag', default_component_tag)
-            if not isinstance(tag_name, str):
-                raise ConfigurationError('The `tag` setting must be a string')
-
-            component_data[component] = (
-                tag_name,
-                lambda metric, include_metric=include_metric, exclude_metric=exclude_metric: include_metric(metric)
-                and not exclude_metric(metric),
-            )
-
-        self._components = component_data
-
-    @staticmethod
-    def compile_metric_patterns(config, field):
-        metric_patterns = config.get(field, [])
-        if not isinstance(metric_patterns, list):
-            raise ConfigurationError('The `{}` setting must be an array'.format(field))
-
-        patterns = []
-        for i, metric_pattern in enumerate(metric_patterns, 1):
-            if not isinstance(metric_pattern, str):
-                raise ConfigurationError('Pattern #{} in `{}` setting must be a string'.format(i, field))
-
-            # Ensure dots are treated as literal
-            metric_pattern = metric_pattern.replace('\\.', '.').replace('.', '\\.')
-
-            # Get rid of any explicit start modifiers
-            metric_pattern = metric_pattern.lstrip('^')
-
-            # We only search on `<CATEGORY>.<KEY>`
-            metric_pattern = re.sub(r'^sonarqube(\\.)?', '', metric_pattern)
-            if not metric_pattern:
-                raise ConfigurationError('Pattern #{} in `{}` setting must be more specific'.format(i, field))
-
-            # Match from the start by default
-            metric_pattern = '^{}'.format(metric_pattern)
-
-            patterns.append(metric_pattern)
-
-        return re.compile('|'.join(patterns)) if patterns else None
-
-    @staticmethod
-    def create_metric_matcher(pattern, default):
-        if pattern is None:
-
-            def metric_matcher(metric):
-                return default
-
-        else:
-
-            def metric_matcher(metric):
-                return not not pattern.search(metric)
-
-        return metric_matcher
-
-    @staticmethod
-    def is_valid_metric(metric):
-        return (
-            not metric['hidden']
-            and metric['type'] in NUMERIC_TYPES
-            # https://github.com/DataDog/integrations-core/pull/8552
-            and not metric['key'].startswith('new_')
-        )

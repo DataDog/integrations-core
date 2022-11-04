@@ -5,33 +5,33 @@ import pytest
 
 from datadog_checks.base.constants import ServiceCheck
 
-from .common import CHECK_CONFIG
+from .common import CHECK_CONFIG_WITH_COMPONENTS
 from .metrics import ALL_METRICS
 
 pytestmark = [pytest.mark.e2e]
 
 
 def test_e2e(dd_agent_check):
-    aggregator = dd_agent_check(CHECK_CONFIG, rate=True)
+    aggregator = dd_agent_check(CHECK_CONFIG_WITH_COMPONENTS, rate=True)
 
     for metric in ALL_METRICS:
         aggregator.assert_metric(metric)
 
-    jmx_web_instance = CHECK_CONFIG['instances'][0]
+    jmx_web_instance = CHECK_CONFIG_WITH_COMPONENTS['instances'][0]
     tags = [
         'instance:sonarqube-{}-{}'.format(jmx_web_instance['host'], jmx_web_instance['port']),
         'jmx_server:{}'.format(jmx_web_instance['host']),
     ]
     aggregator.assert_service_check('sonarqube.can_connect', status=ServiceCheck.OK, tags=tags)
 
-    jmx_ce_instance = CHECK_CONFIG['instances'][1]
+    jmx_ce_instance = CHECK_CONFIG_WITH_COMPONENTS['instances'][1]
     tags = [
         'instance:sonarqube-{}-{}'.format(jmx_ce_instance['host'], jmx_ce_instance['port']),
         'jmx_server:{}'.format(jmx_ce_instance['host']),
     ]
     aggregator.assert_service_check('sonarqube.can_connect', status=ServiceCheck.OK, tags=tags)
 
-    web_instance = CHECK_CONFIG['instances'][2]
+    web_instance = CHECK_CONFIG_WITH_COMPONENTS['instances'][2]
     tags = ['endpoint:{}'.format(web_instance['web_endpoint'])]
     tags.extend(web_instance['tags'])
     aggregator.assert_service_check('sonarqube.api_access', status=ServiceCheck.OK, tags=tags)
