@@ -2,7 +2,7 @@ import pytest
 
 from .metrics import WEB_METRICS
 
-pytestmark = [pytest.mark.integration]
+pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
 
 
 def test_integration_service_check_ok(aggregator, dd_run_check, sonarqube_check, web_instance_with_components):
@@ -14,3 +14,4 @@ def test_integration_service_check_ok(aggregator, dd_run_check, sonarqube_check,
     for metric in WEB_METRICS:
         aggregator.assert_metric(metric)
     aggregator.assert_service_check('sonarqube.api_access', status=check.OK)
+    assert False
