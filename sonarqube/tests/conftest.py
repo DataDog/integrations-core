@@ -36,12 +36,17 @@ def dd_environment():
             mount_logs=True,
             sleep=10,
         ):
-            yield common.CHECK_CONFIG, {'use_jmx': True}
+            yield common.CHECK_CONFIG_WITH_COMPONENTS, {'use_jmx': True}
 
 
 @pytest.fixture
-def web_instance():
-    return deepcopy(common.WEB_INSTANCE)
+def web_instance_with_components():
+    return deepcopy(common.WEB_INSTANCE_WITH_COMPONENTS)
+
+
+@pytest.fixture
+def web_instance_with_projects():
+    return deepcopy(common.WEB_INSTANCE_WITH_PROJECTS)
 
 
 @pytest.fixture(scope='session')
