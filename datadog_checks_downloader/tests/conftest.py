@@ -59,7 +59,7 @@ def distribution_version(request):
 
 
 @pytest.fixture(autouse=True)
-def temporary_local_repo(request, monkeypatch, tmp_path):
+def temporary_local_repo(monkeypatch, tmp_path):
     """
     This prevents tests from actually modifying the local repo that ships with the code,
     using a temporary directory instead.
@@ -67,14 +67,10 @@ def temporary_local_repo(request, monkeypatch, tmp_path):
     # PY2's os.path prefers strings
     tmp_path = str(tmp_path)
 
-    if request.node.get_closest_marker('online'):
-        from datadog_checks.downloader.download import REPOSITORIES_DIR, REPOSITORY_DIR
+    from datadog_checks.downloader.download import REPOSITORIES_DIR, REPOSITORY_DIR
 
-        src_dir = os.path.join(REPOSITORIES_DIR, REPOSITORY_DIR)
-        dst_dir = os.path.join(tmp_path, REPOSITORY_DIR)
-    else:
-        src_dir = os.path.join(os.path.dirname(__file__), 'data', 'repositories', 'repo')
-        dst_dir = os.path.join(tmp_path, 'repo')
+    src_dir = os.path.join(REPOSITORIES_DIR, REPOSITORY_DIR)
+    dst_dir = os.path.join(tmp_path, REPOSITORY_DIR)
 
     shutil.copytree(src_dir, dst_dir)
     monkeypatch.setattr('datadog_checks.downloader.download.REPOSITORIES_DIR', tmp_path)

@@ -134,10 +134,6 @@ def test_non_datadog_distribution():
 @mock.patch("time.time", mock.MagicMock(return_value=_LOCAL_TESTS_DATA_TIMESTAMP))
 def test_local_download(capfd, distribution_name, distribution_version, target, monkeypatch):
     """Test local verification of a wheel file."""
-    monkeypatch.setattr(
-        'datadog_checks.downloader.download.ROOT_LAYOUTS',
-        {'core': '4.core.root.layout', 'extras': '1.extras.root.layout'},
-    )
 
     with local_http_server("{}-{}".format(distribution_name, distribution_version)) as http_url:
         argv = [
