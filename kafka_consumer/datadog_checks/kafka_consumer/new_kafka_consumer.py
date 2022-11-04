@@ -376,7 +376,7 @@ class NewKafkaConsumerCheck(object):
 
         if self._monitor_unlisted_consumer_groups:
             for broker in self.kafka_client._client.cluster.brokers():
-                list_groups_future = self.kafka_client._list_consumer_groups_send_request(broker.nodeId)
+                list_groups_future = self._list_consumer_groups_send_request(broker.nodeId)
                 list_groups_future.add_callback(self._list_groups_callback, broker.nodeId)
                 self._consumer_futures.append(list_groups_future)
         elif self._consumer_groups:
@@ -400,7 +400,7 @@ class NewKafkaConsumerCheck(object):
         :param broker_id: The broker's node_id.
         :return: A message future
         """
-        kafka_version = self.kafka_client._matching_api_version
+        kafka_version = self.kafka_client.config['api_version']
         if kafka_version <= 2:
             request = ListGroupsRequest[kafka_version]()
         else:
