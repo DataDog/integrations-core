@@ -9,7 +9,6 @@ build-backend = "hatchling.build"
 name = "datadog-sonarqube"
 description = "The SonarQube check"
 readme = "README.md"
-license = {text = "BSD-3-Clause"}
 keywords = [
     "datadog",
     "datadog agent",
@@ -36,9 +35,12 @@ dynamic = [
     "version",
 ]
 
+[project.license]
+text = "BSD-3-Clause"
+
 [project.optional-dependencies]
 deps = [
-    "inflection==0.5.1"
+    "inflection==0.5.1; python_version < '3.0'",
 ]
 
 [project.urls]
