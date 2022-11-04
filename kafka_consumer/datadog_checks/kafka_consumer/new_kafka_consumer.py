@@ -6,6 +6,7 @@ from collections import defaultdict
 from time import time
 
 from kafka import errors as kafka_errors
+from kafka.protocol.admin import ListGroupsRequest
 from kafka.protocol.offset import OffsetRequest, OffsetResetStrategy, OffsetResponse
 from kafka.structs import TopicPartition
 
@@ -375,7 +376,7 @@ class NewKafkaConsumerCheck(object):
 
         if self._monitor_unlisted_consumer_groups:
             for broker in self.kafka_client._client.cluster.brokers():
-                list_groups_future = self.kafka_client._list_consumer_groups_send_request(broker.nodeId)
+                list_groups_future = self._list_consumer_groups_send_request(broker.nodeId)
                 list_groups_future.add_callback(self._list_groups_callback, broker.nodeId)
                 self._consumer_futures.append(list_groups_future)
         elif self._consumer_groups:
@@ -393,6 +394,17 @@ class NewKafkaConsumerCheck(object):
         # Loop until all futures resolved.
         self.kafka_client._wait_for_futures(self._consumer_futures)
         del self._consumer_futures  # since it's reset on every check run, no sense holding the reference between runs
+
+    def _list_consumer_groups_send_request(self, broker_id):
+        kafka_version = self.kafka_client._matching_api_version(ListGroupsRequest)
+        if kafka_version <= 2:
+            request = ListGroupsRequest[kafka_version]()
+        else:
+            raise NotImplementedError(
+                "Support for ListGroupsRequest_v{} has not yet been added to KafkaAdminClient.".format(kafka_version)
+            )
+        # Disable wakeup when sending request to prevent blocking send requests
+        return self._send_request_to_node(broker_id, request, wakeup=False)
 
     def _list_groups_callback(self, broker_id, response):
         """Callback that takes a ListGroupsResponse and issues an OffsetFetchRequest for each group.
