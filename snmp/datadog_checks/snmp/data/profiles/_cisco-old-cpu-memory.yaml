@@ -1,0 +1,29 @@
+# CPU and memory metrics for Old Cisco devices in Percentage.
+
+metrics:
+  - MIB: OLD-CISCO-CPU-MIB
+    symbols:
+      - OID: 1.3.6.1.4.1.9.2.1.56
+        # CPU busy percentage in the last 5 second period
+        name: busyPer
+      - OID: 	1.3.6.1.4.1.9.2.1.57
+        # 1 minute exponentially-decayed moving average of the CPU busy percentage
+        name: avgBusy1
+      - OID: 		1.3.6.1.4.1.9.2.1.58
+        # 1 minute exponentially-decayed moving average of the CPU busy percentage
+        name: avgBusy5
+
+  - MIB: CISCO-MEMORY-POOL-MIB
+    table:
+      OID: 	1.3.6.1.4.1.9.9.48.1.2
+      name: ciscoMemoryPoolUtilizationTable
+    symbols:
+      - OID: 1.3.6.1.4.1.9.9.48.1.2.1.1
+        # This is the memory pool utilization for 1 minute.
+        name: ciscoMemoryPoolUtilization1Min
+      - OID: 1.3.6.1.4.1.9.9.48.1.2.1.2
+        # This is the memory pool utilization for 5 minutes.
+        name: ciscoMemoryPoolUtilization5Min
+    metric_tags:
+      - tag: mem
+        index: 1

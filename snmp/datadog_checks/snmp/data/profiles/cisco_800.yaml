@@ -1,0 +1,12 @@
+extends:
+  - _base.yaml
+  - _cisco-generic.yaml
+  - _cisco-old-cpu-memory.yaml
+
+device:
+  vendor: "cisco"
+
+sysobjectid: 
+  - 1.3.6.1.4.1.9.1.2057 #Cisco 881
+  - 1.3.6.1.4.1.9.1.2056 #Cisco 899
+

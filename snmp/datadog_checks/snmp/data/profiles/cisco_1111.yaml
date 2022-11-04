@@ -1,0 +1,10 @@
+extends:
+  - _base.yaml
+  - _cisco-generic.yaml
+
+device:
+  vendor: "cisco"
+
+sysobjectid: 
+  - 1.3.6.1.4.1.9.1.2506 #Cisco 1111
+
