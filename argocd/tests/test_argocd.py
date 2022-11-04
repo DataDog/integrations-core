@@ -20,7 +20,7 @@ from .utils import get_fixture_path
 
 
 @pytest.mark.parametrize(
-    'namespace, instance,metrics',
+    'namespace, instance, metrics',
     [
         ('app_controller', MOCKED_APP_CONTROLLER_INSTANCE, APP_CONTROLLER_METRICS),
         ('api_server', MOCKED_API_SERVER_INSTANCE, API_SERVER_METRICS),
