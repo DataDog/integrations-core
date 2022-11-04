@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2022-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from collections import defaultdict
+
 from six import PY2
 
 from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheckV2
@@ -79,14 +81,13 @@ class ArgocdCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         # OK if connected || OK if metric value is `1`
         # Critical if not connected || Critical if value is '0'
         # Unknown for everything else
-        status_map = {1: ServiceCheck.OK, 0: ServiceCheck.CRITICAL}
+        status_map = defaultdict(lambda: ServiceCheck.UNKNOWN)
+        status_map[0], status_map[1] = ServiceCheck.CRITICAL, ServiceCheck.OK
         service_check_method = self.service_check
 
         def argocd_cluster_connection_status_transformer(_metric, sample_data, _runtime_data):
             for sample, tags, hostname in sample_data:
-                service_check_method(
-                    metric_name, status_map.get(int(sample.value), ServiceCheck.UNKNOWN), hostname=hostname, tags=tags
-                )
+                service_check_method(metric_name, status_map[int(sample.value)], hostname=hostname, tags=tags)
 
         return argocd_cluster_connection_status_transformer
 
