@@ -4,6 +4,7 @@
 import win32pdh
 
 from .constants import COUNTER_VALUE_FORMAT
+from .utils_win32pdh_fix import GetFormattedCounterArray
 
 
 def format_instance(instance, index):
@@ -24,29 +25,20 @@ def get_counter_value(counter_handle):
     return win32pdh.GetFormattedCounterValue(counter_handle, COUNTER_VALUE_FORMAT)[1]
 
 
-def get_counter_values(counter_handle):
+def get_counter_values(counter_handle, duplicate_instances_exist):
     # https://learn.microsoft.com/en-us/windows/win32/api/pdh/nf-pdh-pdhgetformattedcounterarrayw
     # https://mhammond.github.io/pywin32/win32pdh__GetFormattedCounterValueArray_meth.html (link is broken)
     # http://timgolden.me.uk/pywin32-docs/win32pdh__GetFormattedCounterArray_meth.html
     # https://github.com/mhammond/pywin32/blob/main/win32/src/win32pdhmodule.cpp#L677
 
-    # TBD!!! win32pdh.GetFormattedCounterArray API cannot currently handle non-unique instance name
-    # (e.g. for Process object). Remove this comment after implementing Native C API call and
-    # raising github issues with mhammond.
-    #
-    # For reference from Branden slack
-    #   * ctypes.windll.pdh.PdhGetFormattedCounterArrayW()
-    #   * outbuf = (ctypes.c_byte*1000)() // allocate buffer 1k
-    #   * # declare the variable
-    #     lpdwBufferSize = ctypes.c_uint32(0)
-    #   * Pass to function with byref
-    #     ctypes.byref(lpdwBufferSize)
-    #   * # get the new value
-    #     lpdwBufferSize.value
-    #
-    #     for getting the values out of the output buf in the type PDH_FMT_COUNTERVALUE_ITEM
-    #     you have a few choices. You can define the structure with ctypes. I haven't done that
-    #     enough to be able to point you at anything concrete. You can also use python's struct
-    #     module and read the bytes yourself with struct.unpack_from
+    # Currently when duplicates are no concern call win32pdh.GetFormattedCounterArray()
+    # function is 5-10x slower then its alternative. See detailed comment for
+    # 'only_unique_instances' configuration
+    if not duplicate_instances_exist:
+        # This function cannot handle duplicate/non-unique instances (e.g. for "Process" counters)
+        # See its implementation at
+        #     https://github.com/mhammond/pywin32/blob/main/win32/src/win32pdhmodule.cpp#L677
+        return win32pdh.GetFormattedCounterArray(counter_handle, COUNTER_VALUE_FORMAT)
 
-    return win32pdh.GetFormattedCounterArray(counter_handle, COUNTER_VALUE_FORMAT)
+    # utils_win32pdh_fix.GetFormattedCounterArray
+    return GetFormattedCounterArray(counter_handle, COUNTER_VALUE_FORMAT)

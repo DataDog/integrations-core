@@ -2,12 +2,13 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
+import weakref
 
 import pywintypes
 import win32pdh
-import weakref
 
 from ....errors import ConfigTypeError, ConfigValueError
+from .constants import PDH_NO_DATA
 from .transform import NATIVE_TRANSFORMERS, TRANSFORMERS
 from .utils import construct_counter_path, get_counter_value, get_counter_values
 
@@ -110,6 +111,50 @@ class PerfObject:
             raise ConfigTypeError(f'Option `counters` for performance object `{self.name}` must be an array')
         elif not self.counters_config:
             raise ConfigValueError(f'Option `counters` for performance object `{self.name}` is required')
+
+        # Temporary and not documented, at least at this point, configuration value which controls which API
+        # will be invoked to get multiple instance values. If the configuration is `true`
+        # (duplicate_instances_exist: true), which is default, then we will invoke Windows
+        # PdhGetFormattedCounterArrayW() API and process its output in pure Python. If not, we will invoke
+        # win32pdh.GetFormattedCounterArray() which is 5-10x times faster than using
+        # PdhGetFormattedCounterArrayW(), but it will lose duplicate/non-unique instances. There are a few
+        # reasons for this configuration and its default value (true):
+        #
+        #     * This new multi-instance wildcard-based implementation is 2-10+x faster than preceding
+        #       per-instance based implementation (advantage is bigger the more instances and counters
+        #       are involved). Thus the slower API calls are effectively on par regarding overall
+        #       performance impact. It is true, its full performance advantage of wildcard-based
+        #       implementation will not be realized until we can switch to an enhanced version of
+        #       win32pdh.GetFormattedCounterArray().
+        #
+        #     * We plan to file a ticket and perhaps assist to enhance win32pdh.GetFormattedCounterArray()
+        #       function to handle non-unique instances. When it will be implemented we can remove slower
+        #       Python implementation and this configuration variable along with it.
+        #
+        #     * In general, these calls are relatively fast. Typically they take microseconds or lower
+        #       milliseconds (unless there are more than a few thousand instances). Multiplying by 10 will
+        #       not make a drastic impact on overall performance since it may be call only every 15 seconds.
+        #
+        #     * Microsoft requests counter provider developers to avoid using duplicates. It is required
+        #       for Performance Counters Provider V2 but it is not guaranteed in general for V1 counters.
+        #       Microsoft's own counters seem to not allow duplicates with well known exceptions for
+        #       "Process" performance objects. Even though it is a waste at this point in the virtual
+        #       majority of the performance counters, since most of them will not have duplicate instance
+        #       names to use the slower call which handles duplicates, still we would like to avoid changing
+        #       default behavior and lose duplicates.
+        #
+        #     * This configuration at this point is provided just in case to have a fallback route if
+        #       performance impact of the slower call could be problematic in some circumstances.
+        #       To activate faster call, which cannot handle duplicate, use duplicate_instances_exist: false
+        #
+        #     * Because we are planning to pull out this configuration after relevant changes in win32pdh
+        #       we are not planning at this time to make it public in the sense of adding it to configuration
+        #       sample file, or explicitly documenting it elsewhere except perhaps internal Kb articles.
+        self.duplicate_instances_exist = config.get('duplicate_instances_exist', True)
+        if not isinstance(self.duplicate_instances_exist, bool):
+            raise ConfigTypeError(
+                f'Option `duplicate_instances_exist` for performance object `{self.name}` must be an true or false'
+            )
 
         # We'll configure on the first run because it's necessary to figure out whether the
         # object contains single or multi-instance counters, see:
@@ -255,6 +300,7 @@ class PerfObject:
                         custom_transformers.get(counter_name),
                         tag_name,
                         self.include_wildcards,
+                        self.duplicate_instances_exist,
                         self,
                     )
 
@@ -285,7 +331,9 @@ class PerfObject:
 
                 # Check for single-instance counter path
                 possible_path = construct_counter_path(
-                    machine_name=self.connection.server, object_name=self.name, counter_name=counter_name,
+                    machine_name=self.connection.server,
+                    object_name=self.name,
+                    counter_name=counter_name,
                 )
                 if win32pdh.ValidatePath(possible_path) == 0:
                     return SingleCounter
@@ -373,8 +421,8 @@ class CounterBase:
         # Counter requires at least 2 data points to return a meaningful value, see:
         # https://docs.microsoft.com/en-us/windows/win32/api/pdh/nf-pdh-pdhgetformattedcountervalue#remarks
         #
-        # https://mhammond.github.io/pywin32/error.html
-        if error.strerror != 'The data is not valid.':
+        # https://github.com/mhammond/pywin32/blob/main/win32/src/PyWinTypesmodule.cpp#L278
+        if error.winerror != PDH_NO_DATA:
             raise
 
         if instance is None:
@@ -450,6 +498,7 @@ class MultiCounter(CounterBase):
         custom_transformer,
         tag_name,
         include_wildcards,
+        duplicate_instances_exist,
         perf_obj,
     ):
         super().__init__(
@@ -486,6 +535,7 @@ class MultiCounter(CounterBase):
                 self.aggregate_transformer = NATIVE_TRANSFORMERS[self.metric_type](check, metric_name, config)
 
         self.include_wildcards = include_wildcards
+        self.duplicate_instances_exist = duplicate_instances_exist
 
         self.total_instance_count = 0
         self.monitored_instance_count = 0
@@ -504,7 +554,7 @@ class MultiCounter(CounterBase):
         total = 0
         for counter_handle in self.instances:
             try:
-                instance_items = get_counter_values(counter_handle)
+                instance_items = get_counter_values(counter_handle, self.duplicate_instances_exist)
 
                 for instance, value in instance_items.items():
                     # Some instances may not have a value yet, so we only
