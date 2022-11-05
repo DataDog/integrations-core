@@ -298,18 +298,20 @@ def mock_performance_objects(mocker, dd_default_hostname):
                 if len(values) == 0:
                     continue
 
-                if instance_name == None:
+                if instance_name is None:
                     # Single counter
                     counters[
                         win32pdh.MakeCounterPath((server, object_name, None, None, 0, counter_name))
                     ] = values[0]
                 else:
-                    # Multiple instance counter                    
+                    # Multiple instance counter
                     counter_path_wildcard = win32pdh.MakeCounterPath((server, object_name, '*', None, 0, counter_name))
                     instance_values_wildcard = {}
                     for instance_name, index, value in zip(instances, instance_indices, values):
                         # Add single instance counter (in case like IIS is using exact per-instnace wildcard)
-                        counter_path_exact = win32pdh.MakeCounterPath((server, object_name, instance_name, None, 0, counter_name))
+                        counter_path_exact = win32pdh.MakeCounterPath(
+                            (server, object_name, instance_name, None, 0, counter_name)
+                        )
                         instance_values_exact = {}
                         instance_values_exact[instance_name] = value
                         counters[counter_path_exact] = instance_values_exact
@@ -328,10 +330,11 @@ def mock_performance_objects(mocker, dd_default_hostname):
                             instance_values_wildcard[instance_name] = non_unique_instance_value
 
                     counters[counter_path_wildcard] = instance_values_wildcard
-    
+
         mocker.patch('win32pdh.ValidatePath', side_effect=lambda path: 0 if path in counters else 1)
         mocker.patch('win32pdh.GetFormattedCounterValue', side_effect=lambda path, _: (None, counters[path]))
-        mocker.patch('datadog_checks.base.checks.windows.perf_counters.counter.get_counter_values', side_effect=lambda path, _: counters[path])
+        function_name = 'datadog_checks.base.checks.windows.perf_counters.counter.get_counter_values'
+        mocker.patch(function_name, side_effect=lambda path, _: counters[path])
 
     return mock_perf_objects
 
