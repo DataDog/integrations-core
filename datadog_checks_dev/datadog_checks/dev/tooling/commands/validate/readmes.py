@@ -100,7 +100,7 @@ def validate_readme(integration, repo, display_queue, files_failed, readme_count
     soup = BeautifulSoup(html, features="html.parser")
     readme_counter.add(readme_path)
 
-    # Check all required headers are present
+    # Check all required headers are present!
     h2s = [h2.text for h2 in soup.find_all("h2")]
     if "Overview" not in h2s or "Setup" not in h2s:
         files_failed[readme_path] = True
