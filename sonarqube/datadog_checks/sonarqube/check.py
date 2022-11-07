@@ -18,10 +18,8 @@ class SonarqubeCheck(AgentCheck):
     def __init__(self, name, init_config, instances):
         super(SonarqubeCheck, self).__init__(name, init_config, instances)
         self._validate_config()
-        if self._projects is None:
-            raise ConfigurationError('\'projects\' setting must be defined')
+        self._projects_discovery_matcher = DiscoveryMatcher('projects', self.log, self._projects)
         self._api = Api(self.log, self.http, self._web_endpoint)
-        self._projects_discovery_matcher = DiscoveryMatcher(self.log, self._projects)
 
     def _validate_config(self):
         self._validate_web_endpoint()
@@ -50,7 +48,7 @@ class SonarqubeCheck(AgentCheck):
         self._projects = None
         self.log.debug('validating \'projects\': %s', self.instance)
         projects = self.instance.get('projects', None)
-        if projects is not None:
+        if projects is not None and isinstance(projects, dict):
             self.log.debug('\'projects\' found in config: %s', projects)
             self._projects = {'keys': []}
             default_tag = projects.get('default_tag', 'component')
@@ -105,7 +103,7 @@ class SonarqubeCheck(AgentCheck):
     def _validate_components(self):
         self.log.debug('validating \'components\': %s', self.instance)
         components = self.instance.get('components', None)
-        if components is not None:
+        if components is not None and isinstance(components, dict):
             self.log.debug('\'components\' found in config: %s', components)
             self._projects = {'keys': []}
             default_tag = self.instance.get('default_tag', 'component')
@@ -120,9 +118,7 @@ class SonarqubeCheck(AgentCheck):
             self._default_metrics_exclude = [
                 self._normalize_pattern(item) for item in self.instance.get('default_exclude', [])
             ]
-            self._default_metrics_exclude = (
-                self._default_metrics_exclude if self._default_metrics_exclude else [r'^.*\.new_.*']
-            )
+            self._default_metrics_exclude = self._default_metrics_exclude + [r'^.*\.new_.*']
             self.log.debug('default_metrics_exclude: %s', self._default_metrics_exclude)
             for component_key, component_config in components.items():
                 self.log.debug('component_key: %s, component_config: %s', component_key, component_config)
@@ -183,6 +179,7 @@ class SonarqubeCheck(AgentCheck):
                     matched_project_config,
                 )
                 metrics_discovery_matcher = DiscoveryMatcher(
+                    'metrics',
                     self.log,
                     matched_project_config.get('metrics', None),
                     mandatory=False,

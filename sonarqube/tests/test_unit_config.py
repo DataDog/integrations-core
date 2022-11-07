@@ -45,3 +45,8 @@ def test_project_key_not_dict_or_string_raises_configuration_error(sonarqube_che
 def test_not_projects_not_components_raises_configuration_error(sonarqube_check):
     with pytest.raises(ConfigurationError, match='\'projects\' setting must be defined'):
         sonarqube_check({'web_endpoint': 'http://{}:{}'.format(HOST, PORT)})
+
+
+def test_projects_key_not_dict_raises_configuration_error(sonarqube_check):
+    with pytest.raises(ConfigurationError, match='\'projects\' setting must be defined'):
+        sonarqube_check({'web_endpoint': 'http://{}:{}'.format(HOST, PORT), 'projects': []})

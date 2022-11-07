@@ -7,6 +7,7 @@ from datadog_checks.base import ConfigurationError
 class DiscoveryMatcher:
     def __init__(
         self,
+        name: str,
         log,
         config: dict,
         mandatory: bool = True,
@@ -21,11 +22,9 @@ class DiscoveryMatcher:
         self._default_limit = default_limit
         self._default_include = [] if default_include is None else default_include
         self._default_exclude = [] if default_exclude is None else default_exclude
-        self._log.debug('DiscoveryMatcher config: %s', self._config)
+        self._log.debug('\'%s\' config: %s', name, self._config)
         if self._config is None and mandatory:
-            raise ConfigurationError('DiscoveryMatcher config must be defined')
-        if self._config is not None and not isinstance(self._config, dict):
-            raise ConfigurationError('DiscoveryMatcher config must be a mapping')
+            raise ConfigurationError(f'\'{name}\' setting must be defined')
 
     def match(self, items: List[str]) -> List[tuple]:
         self._log.debug('trying to match: %s', items)
@@ -37,7 +36,7 @@ class DiscoveryMatcher:
         matched_id = []
         self._log.debug('matching items')
         self._log.debug('self._config: %s', self._config)
-        if self._config:
+        if self._config is not None and isinstance(self._config, dict):
             config_items_id = self._config.get(self._items_id, None)
             self._log.debug('config_items_id: %s', config_items_id)
             if config_items_id:
@@ -65,7 +64,7 @@ class DiscoveryMatcher:
         self._log.debug('matching discovery')
         self._log.debug('self._config: %s', self._config)
         self._log.debug('items: %s', items)
-        if self._config is not None:
+        if self._config is not None and isinstance(self._config, dict):
             config_key_discovery = self._config.get('discovery', None)
             self._log.debug('config_key_discovery: %s', config_key_discovery)
             if config_key_discovery is None:

@@ -15,7 +15,7 @@ def test_service_check_critical(mock_api, aggregator, dd_run_check, sonarqube_ch
     # Given
     config = {
         'web_endpoint': 'http://{}:{}'.format(HOST, PORT),
-        'components': {},
+        'projects': {},
     }
     mock_api.return_value.get_version.side_effect = requests.exceptions.RequestException('Req Exception')
     check = sonarqube_check(config)
@@ -34,7 +34,7 @@ def test_version_none(mock_api, aggregator, dd_run_check, sonarqube_check):
     # Given
     config = {
         'web_endpoint': 'http://{}:{}'.format(HOST, PORT),
-        'components': {},
+        'projects': {},
     }
     mock_api.return_value.get_version.return_value = None
     check = sonarqube_check(config)
@@ -175,7 +175,7 @@ def test_default_metrics_limit(mock_api, aggregator, dd_run_check, sonarqube_che
     # Given
     config = {
         'web_endpoint': 'http://{}:{}'.format(HOST, PORT),
-        'projects': {'default_metrics_limit': 2, 'keys': [{'project1': {}}]},
+        'projects': {'default_metrics_limit': 2, 'keys': [{'project1': {}}, 'project1', 'project3']},
     }
     mock_api.return_value.get_projects.return_value = ['project1']
     mock_api.return_value.get_metrics.return_value = [metric for metric in METRICS]
