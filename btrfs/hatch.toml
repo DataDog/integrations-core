@@ -1,0 +1,11 @@
+[env.collectors.datadog-checks]
+
+[envs.default]
+e2e-env = false
+platforms = [
+  "linux",
+  "darwin",
+]
+
+[[envs.default.matrix]]
+python = ["27", "38"]
