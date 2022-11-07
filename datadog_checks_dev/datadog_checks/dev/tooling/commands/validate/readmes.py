@@ -110,7 +110,7 @@ def validate_readme(integration, repo, display_queue, files_failed, readme_count
         files_failed[readme_path] = True
         display_queue.append((echo_failure, "     readme is missing a Support H2 (##) section"))
     
-    if "Uninstallation" not in h2s:
+    if "Uninstallation" not in h2s and repo == 'marketplace':
         files_failed[readme_path] = True
         display_queue.append((echo_failure, "     readme is missing a Uninstallation H2 (##) section"))
 

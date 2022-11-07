@@ -67,7 +67,7 @@ The Active Directory check does not include any events.
 
 The Active Directory check does not include any service checks.
 
-## Troubleshooting 
+## Troubleshooting
 
 Need help? Contact [Datadog support][9].
 
