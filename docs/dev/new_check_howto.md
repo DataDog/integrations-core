@@ -1,106 +1,119 @@
 ---
-title: Create a New Integration
+title: Create an Agent integration
 kind: documentation
+further_reading:
+- link: "logs/processing/pipelines"
+  tag: "Documentation"
+  text: "Log processing pipelines"
 aliases:
   - /developers/integrations/integration_sdk/
   - /developers/integrations/testing/
   - /integrations/datadog_checks_dev/
   - /guides/new_integration/
+  - /developers/integrations/new_check_howto/
 ---
 
-To consider an Agent-based integration complete, and thus ready to be included in the core repository and bundled with the Agent package, several prerequisites must be met:
-
-- A `README.md` file with the correct format and contents
-- A battery of tests verifying metrics collection
-- A `metadata.csv` file listing all of the collected metrics
-- A complete `manifest.json` file
-- If the integration collects Service Checks, the `service_checks.json` must be complete as well
-
-These requirements are used during the code review process as a checklist. This documentation covers the requirements and implementation details for a brand new integration.
+This guide provides instructions for creating a Datadog Agent integration in the integrations-extras repo. For information on why you'd want to create an Agent integration, see [Creating your own solution][1].
 
 ## Prerequisites
 
-- Python 3.8+ needs to be available on your system; Python 2.7 is optional but recommended.
-- Docker to run the full test suite.
+The datadog Agent development tools require:
+- Python 3.8+.
+- [Docker][2] (to run the full test suite)
 
-Creating and activating [Python virtual environments][1] to isolate the development environment is good practice; however, it is not mandatory. For more information, see [Python for Agent Integration Development][2].
+### Install Python
 
-## Setup
+Many operating systems come with a pre-installed version of Python. However, the version of Python installed by default might be older than the version used in the Agent, and might lack required tools and dependencies. To ensure that you have everything you need to get an integration running. Install a dedicated Python interpreter.
 
-**Fork** and clone the [integrations-extras repository][3]. By default, the tooling expects you to be working in the `$HOME/dd/` directory. This is optional and can be adjusted with configuration later.
+Some options for installing Python on your operating system:
+- Follow the [official Python documentation][3] to download and install the Python interpreter.
+- Use a Python version manager like [pyenv][4].
 
-```shell
-mkdir $HOME/dd && cd $HOME/dd       # optional
-git clone https://github.com/DataDog/integrations-extras.git
-```
+On most operating systems, Python versions after 3.3 come with a pre-installed version manager called `venv`, which is used in this guide. Debian/Ubuntu installations do not come packaged with `venv`. You can install it by running `sudo apt-get install python3-venv`.
 
-If you intend on publishing the check or contributing to [integrations-extras repository][3], you must create a fork.
+## Set up your development environment
 
-### Developer toolkit
+1. Create the `dd` directory and clone the [`integrations-extras` repo][5].
 
-The [Developer Toolkit][4] is comprehensive and includes a lot of functionality. Here's what you need to get started:
+   **Note**: The Datadog development toolkit expects you to work in the `$HOME/dd/` directory. This is not mandatory, but working in a different directory necessitates more configuration steps.
 
-```bash
-pip3 install "datadog-checks-dev[cli]"
-```
+   To create the `dd` directory and clone the `datadog-extras` repo:
+   ```shell
+   mkdir $HOME/dd && cd $HOME/dd
+   git clone https://github.com/DataDog/integrations-extras.git
+   ```
 
-If you chose to clone this repository to somewhere other than `$HOME/dd/`, you need to adjust the configuration file:
+1. (Optional) It's good practice to set up a [Python virtual environment][6] to isolate your development environment:
 
-```bash
-ddev config set extras "/path/to/integrations-extras"
-```
+   ```shell
+   cd $HOME/dd/integrations-extras
+   python3 -m venv venv
+   . venv/bin/activate
+   ```
 
-If you intend to work primarily on `integrations-extras`, set it as the default working repository:
+   **Tip**: If you ever want to exit the virtual environment, run `deactivate`.
 
-```bash
-ddev config set repo extras
-```
+1. Make sure the python `wheel` package is installed and up-to-date:
+   ```shell
+   pip3 install wheel
+   ```
 
-**Note**: If you do not do this step, use `-e` for every invocation to ensure the context is `integrations-extras`:
+1. Install the [Developer Toolkit][7]:
+   ```bash
+   pip3 install "datadog-checks-dev[cli]"
+   ```
 
-```bash
-ddev -e COMMAND [OPTIONS]
-```
+1. (Optional) If you cloned the `integrations-extras` to somewhere other than `$HOME/dd/`, adjust the configuration file:
 
-## Scaffolding
+   ```shell
+   ddev config set extras "/path/to/integrations-extras"
+   ```
 
-One of the developer toolkit features is the `create` command, which creates the basic file and path structure (or "scaffolding") necessary for a new integration.
+1. Set `integrations-extras` as the default working repo:
 
-### Dry-run
+   ```shell
+   ddev config set repo extras
+   ```
 
-Try a dry-run using the `-n/--dry-run` flag, which doesn't write anything to disk.
+You're ready to create your integration!
 
-```bash
-ddev create -n Awesome
-```
+## Create your integration
 
-This displays the path where the files would have been written, as well as the structure itself. Make sure the path in the _first line_ of output matches your Extras repository.
+The instructions below use an example integration called Awesome. Follow along using the code from Awesome, or replace Awesome with your own integration code.
 
-### Interactive mode
+### Scaffolding
 
-The interactive mode is a wizard for creating new integrations. By answering a handful of questions, the scaffolding is set up and lightly pre-configured for you.
+The `ddev create` command runs an interactive tool that helps you to create the basic file and path structure (or "scaffolding") necessary for a new integration.
 
-```bash
-ddev create Awesome
-```
+1. Before you create your first integration directory, try a dry-run using the `-n/--dry-run` flag, which doesn't write anything to disk:
 
-After answering the questions, the output matches that of the dry-run above, except in this case the scaffolding for your new integration actually exists!
+   ```bash
+   ddev create -n Awesome
+   ```
 
-## Write the check
+   The command displays the path where the files would have been written, as well as the structure itself. Make sure the path in the first line of output matches your integrations-extras repository location.
 
-### Intro
+1. Now run the command without the `-n` flag. The tool asks you for an email and name and then creates the files you need to get started with an integration.
 
-A Check is a Python class with the following requirements:
+   ```shell
+   ddev create Awesome
+   ```
+
+## Write an Agent Check
+
+At the core of each integration is an Agent Check that periodically collects information and sends it to Datadog. Checks inherit their logic from the `AgentCheck` base class and have the the following requirements:
 
 - Integrations run on Agent v7+ must be Python 3 compatible; however, Agents v5 and v6 still use Python 2.7.
-- It must derive from `AgentCheck`
-- It must provide a method with this signature: `check(self, instance)`
+- Checks must derive from `AgentCheck`
+- Checks must provide a method with this signature: `check(self, instance)`
 
-Checks are organized in regular Python packages under the `datadog_checks` namespace, so your code should live under `awesome/datadog_checks/awesome`. The only requirement is that the name of the package has to be the same as the check name. There are no particular restrictions on the name of the Python modules within that package, nor on the name of the class implementing the check.
+Checks are organized in regular Python packages under the `datadog_checks` namespace. For example, the code for Awesome lives in the `awesome/datadog_checks/awesome/` directory.
+- The name of the package must be the same as the check name.
+- There are no restrictions on the name of the Python modules within that package, nor on the name of the class implementing the check.
 
 ### Implement check logic
 
-Let's say you want to create an Agent Check composed only of a Service Check named `awesome.search` that searches for a string on a web page. It results in `OK` if the string is present, `WARNING` if the page is accessible but the string was not found, and `CRITICAL` if the page is inaccessible. See the [Metric Submission: Custom Agent Check][5] if you want to learn how to submit metrics with your Agent Check.
+For Awesome, the Agent Check is composed only of a Service Check named `awesome.search` that searches for a string on a web page. It results in `OK` if the string is present, `WARNING` if the page is accessible but the string was not found, and `CRITICAL` if the page is inaccessible. See the [Metric Submission: Custom Agent Check][8] if you want to learn how to submit metrics with your Agent Check.
 
 The code contained within `awesome/datadog_checks/awesome/check.py` looks something like this:
 
@@ -139,22 +152,21 @@ class AwesomeCheck(AgentCheck):
                 self.service_check('awesome.search', self.WARNING)
 ```
 
-To learn more about the base Python class, see [Anatomy of a Python Check][6].
+To learn more about the base Python class, see [Anatomy of a Python Check][9].
 
-### Writing tests
+## Write tests
 
 There are two basic types of tests:
-
 - Unit tests for specific functionality.
 - Integration tests that execute the `check` method and verify proper metrics collection.
 
-Tests are _required_ if you want your integration to be included in `integrations-extras`. **Note**: [pytest][7] and [tox][8] are used to run the tests.
+Tests are required if you want your integration to be included in `integrations-extras`.
 
-For more information, see the [ddev installation guide][9].
+**Note**: [pytest][10] and [tox][11] are used to run the tests.
 
-#### Unit test
+### Write a unit test
 
-The first part of the `check` method retrieves and verifies two elements from the configuration file. This is a good candidate for a unit test. Open the file at `awesome/tests/test_awesome.py` and replace the contents with something like this:
+The first part of the `check` method for Awesome retrieves and verifies two elements from the configuration file. This is a good candidate for a unit test. Open the file at `awesome/tests/test_awesome.py` and replace the contents with something like this:
 
 ```python
 import pytest
@@ -185,17 +197,21 @@ def test_config():
     c.check({'url': 'http://foobar', 'search_string': 'foo'})
 ```
 
-`pytest` has the concept of _markers_ that can be used to group tests into categories. Notice that `test_config` is marked as a `unit` test.
+`pytest` has the concept of markers that can be used to group tests into categories. Notice that `test_config` is marked as a `unit` test.
 
-The scaffolding has already been set up to run all tests located in `awesome/tests`. Run the tests:
+The scaffolding is set up to run all tests located in `awesome/tests`. Run the tests:
 
 ```bash
 ddev test awesome
 ```
 
-#### Building an integration test
+### Write an integration test
 
-This test doesn't check the collection _logic_ though, so add an integration test. `docker` is used to spin up an Nginx container and let the check retrieve the welcome page. Create a compose file at `awesome/tests/docker-compose.yml` with the following contents:
+The unit test above doesn't check the collection logic. To test the logic, you need an integration test.
+
+#### Create an environment for the integration test
+
+ The toolchain uses `docker` to spin up an Nginx container and let the check retrieve the welcome page. Create a compose file at `awesome/tests/docker-compose.yml` with the following contents:
 
 ```yaml
 version: "3"
@@ -239,7 +255,7 @@ def instance():
     return INSTANCE.copy()
 ```
 
-#### Integration test
+#### Add an integration test
 
 Finally, add an integration test to the `awesome/tests/test_awesome.py` file:
 
@@ -259,35 +275,35 @@ def test_service_check(aggregator, instance):
     aggregator.assert_service_check('awesome.search', AwesomeCheck.WARNING)
 ```
 
-Run only integration tests for faster development using the `-m/--marker` option:
+To speed up development, use the `-m/--marker` option to run only integration tests:
 
 ```bash
 ddev test -m integration awesome
 ```
 
-The check is almost done. Let's add the final touches by adding the integration configurations.
+Your integration is almost done. Next, add the necessary check assets.
 
-### Create the check assets
+## Create the check assets
 
-The set of assets created by the ddev scaffolding must be populated in order for a check to be considered for inclusion:
+The set of assets created by the `ddev` scaffolding must be populated in order for a check to be considered for inclusion:
 
 `README.md`
-: This contains the documentation for your Check, how to set it up, which data it collects, etc…
+: This contains the documentation for your Agent Check, how to set it up, which data it collects, and so on.
 
 `spec.yaml`
-: This is used to generate `conf.yaml.example` using the `ddev` tooling (see the "Configuration template" tab below). See [Configuration specification][16] to learn more.
+: This is used to generate `conf.yaml.example` using the `ddev` tooling (see the "Configuration template" tab below). See [Configuration specification][12] to learn more.
 
 `conf.yaml.example`
-: This contains default (or example) configuration options for your Agent Check. Do not edit this file by hand! It is generated from the contents of `spec.yaml`. See the [Configuration file reference][10] to learn its logic.
+: This contains default (or example) configuration options for your Agent Check. Do not edit this file by hand! It is generated from the contents of `spec.yaml`. See the [Configuration file reference][13] to learn its logic.
 
 `manifest.json`
-: This contains the metadata for your Agent Check such as the title, categories, etc… See the [Manifest file reference][11] to learn more.
+: This contains the metadata for your Agent Check such as the title and categories. See the [Manifest file reference][14] to learn more.
 
 `metadata.csv`
-: This contains the list of all metrics collected by your Agent Check. See the [Metrics metadata file reference][12] to learn more.
+: This contains the list of all metrics collected by your Agent Check. See the [Metrics metadata file reference][15] to learn more.
 
 `service_check.json`
-: This contains the list of all Service Checks collected by your Agent Check. See the [Service check file reference][13] to learn more.
+: This contains the list of all Service Checks collected by your Agent Check. See the [ServiceAgent Check file reference][16] to learn more.
 
 For this example, those files would have the following form:
 
@@ -339,7 +355,9 @@ ddev validate config --sync awesome
 {{% /tab %}}
 {{% tab "Manifest" %}}
 
-The `awesome/manifest.json` for the Awesome Service Check. **Note**: The `guid` must be unique (and valid), so do _not_ use the one from this example (the tooling generates one for you):
+The `awesome/manifest.json` for the Awesome Service Check:
+
+**Note**: The `guid` must be unique (and valid), so do not use the one from this example (the tooling generates one for you):
 
 ```json
 {
@@ -378,7 +396,7 @@ The example integration doesn't send any metrics, so in this case the generated 
 {{% /tab %}}
 {{% tab "Service Check" %}}
 
-The example integration contains a service check, so you need to add it to the `awesome/assets/service_checks.json` file:
+The example integration contains a Service Check, so you need to add it to the `awesome/assets/service_checks.json` file:
 
 ```json
 [
@@ -397,9 +415,9 @@ The example integration contains a service check, so you need to add it to the `
 {{% /tab %}}
 {{< /tabs >}}
 
-## Building
+## Build the wheel
 
-The `pyproject.toml` file provides the metadata that is used to package and build the wheel. To learn more about Python packaging, see [Packaging Python Projects][14].
+The `pyproject.toml` file provides the metadata that is used to package and build the wheel. To learn more about Python packaging, see [Packaging Python Projects][17].
 
 Once your `pyproject.toml` is ready, create a wheel:
 
@@ -408,11 +426,11 @@ Once your `pyproject.toml` is ready, create a wheel:
 
 ### What's in the wheel?
 
-The wheel contains only the files necessary for the functioning of the integration itself. This includes the Check itself, the configuration example file, and some artifacts generated during the build of the wheel. All of the other elements, including the metadata files are _not_ meant to be contained within the wheel. These latter elements are used elsewhere by the greater Datadog platform and eco-system.
+The wheel contains only the files necessary for the functioning of the integration itself. This includes the Check, the configuration example file, and some artifacts generated during the build of the wheel. All of the other elements, including the metadata files are not meant to be contained within the wheel. These latter elements are used elsewhere by the greater Datadog platform and eco-system.
 
-## Installing
+## Install the wheel
 
-The wheel is installed using the Agent `integration` command, available in [Agent v6.10.0 and up][15]. Depending on your environment, you may need to execute this command as a specific user or with particular privileges:
+The wheel is installed using the Agent `integration` command, available in [Agent v6.10.0+][18]. Depending on your environment, you may need to execute this command as a specific user or with particular privileges:
 
 **Linux** (as `dd-agent`):
 
@@ -440,19 +458,33 @@ For Agent versions >= 6.12:
 "C:\Program Files\Datadog\Datadog Agent\bin\agent.exe" integration install -w /path/to/wheel.whl
 ```
 
-[1]: https://virtualenv.pypa.io/en/stable
-[2]: https://github.com/DataDog/integrations-core/blob/master/docs/dev/python.md
-[3]: https://github.com/DataDog/integrations-extras
-[4]: https://github.com/DataDog/integrations-core/tree/master/datadog_checks_dev
-[5]: https://docs.datadoghq.com/developers/metrics/agent_metrics_submission/
-[6]: https://github.com/DataDog/datadog-agent/blob/6.2.x/docs/dev/checks/python/check_api.md
-[7]: https://docs.pytest.org/en/latest
-[8]: https://tox.readthedocs.io/en/latest
-[9]: https://datadoghq.dev/integrations-core/setup/#ddev
-[10]: https://docs.datadoghq.com/developers/integrations/check_references/#configuration-file
-[11]: https://docs.datadoghq.com/developers/integrations/check_references/#manifest-file
-[12]: https://docs.datadoghq.com/developers/integrations/check_references/#metrics-metadata-file
-[13]: https://docs.datadoghq.com/developers/integrations/check_references/#service-check-file
-[14]: https://packaging.python.org/en/latest/tutorials/packaging-projects/
-[15]: https://docs.datadoghq.com/agent/
-[16]: https://datadoghq.dev/integrations-core/meta/config-specs/
+## Integration publishing checklist
+
+After you complete your integration, refer back to this list to make sure you've got everything you need.
+
+To consider an Agent-based integration complete, and thus ready to be included in the core repository and bundled with the Agent package, several prerequisites must be met:
+
+- A `README.md` file with the correct format and contents
+- A battery of tests verifying metrics collection
+- A `metadata.csv` file listing all of the collected metrics
+- A complete `manifest.json` file
+- If the integration collects Service Checks, the `service_checks.json` must be complete as well
+
+[1]: /developers/#creating-your-own-solution
+[2]: https://docs.docker.com/get-docker/
+[3]: https://wiki.python.org/moin/BeginnersGuide/Download
+[4]: https://github.com/pyenv/pyenv
+[5]: https://github.com/DataDog/integrations-extras
+[6]: https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/
+[7]: https://github.com/DataDog/integrations-core/tree/master/datadog_checks_dev
+[8]: https://docs.datadoghq.com/developers/metrics/agent_metrics_submission/
+[9]: https://github.com/DataDog/datadog-agent/blob/6.2.x/docs/dev/checks/python/check_api.md
+[10]: https://docs.pytest.org/en/latest
+[11]: https://tox.readthedocs.io/en/latest
+[12]: https://datadoghq.dev/integrations-core/meta/config-specs/
+[13]: https://docs.datadoghq.com/developers/integrations/check_references/#configuration-file
+[14]: https://docs.datadoghq.com/developers/integrations/check_references/#manifest-file
+[15]: https://docs.datadoghq.com/developers/integrations/check_references/#metrics-metadata-file
+[16]: https://docs.datadoghq.com/developers/integrations/check_references/#service-check-file
+[17]: https://packaging.python.org/en/latest/tutorials/packaging-projects/
+[18]: https://docs.datadoghq.com/agent/
