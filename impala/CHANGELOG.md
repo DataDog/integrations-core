@@ -1,6 +1,6 @@
 # CHANGELOG - Impala
 
-## 1.0.1 / 2022-09-22
+## 1.0.1 / 2022-09-22 / Agent 7.40.0
 
 * [Fixed] Change the path to the default log folder. See [#13001](https://github.com/DataDog/integrations-core/pull/13001).
 

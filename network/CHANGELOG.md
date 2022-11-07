@@ -6,7 +6,7 @@
 * [Fixed] Test & better document collect_cx_queues. See [#13117](https://github.com/DataDog/integrations-core/pull/13117).
 * [Fixed] Exclude loopback interface from ethtool. See [#13042](https://github.com/DataDog/integrations-core/pull/13042).
 
-## 2.9.1 / 2022-10-04
+## 2.9.1 / 2022-10-04 / Agent 7.40.0
 
 * [Fixed] Exclude loopback interface from ethtool. See [#13042](https://github.com/DataDog/integrations-core/pull/13042).
 

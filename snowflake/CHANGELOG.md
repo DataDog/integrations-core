@@ -1,6 +1,6 @@
 # CHANGELOG - Snowflake
 
-## 4.4.4 / 2022-09-19
+## 4.4.4 / 2022-09-19 / Agent 7.40.0
 
 * [Fixed] Bump dependencies for 7.40. See [#12896](https://github.com/DataDog/integrations-core/pull/12896).
 

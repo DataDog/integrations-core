@@ -1,6 +1,6 @@
 # CHANGELOG - Kube_apiserver_metrics
 
-## 3.3.0 / 2022-09-16
+## 3.3.0 / 2022-09-16 / Agent 7.40.0
 
 * [Added] Add new kube_apiserver_metric for deprecated API usage. See [#12887](https://github.com/DataDog/integrations-core/pull/12887). Thanks [alex-berger](https://github.com/alex-berger).
 * [Added] Update HTTP config spec templates. See [#12890](https://github.com/DataDog/integrations-core/pull/12890).

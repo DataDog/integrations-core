@@ -4,7 +4,7 @@
 
 * [Fixed] Ignore aberrant values for `kubernetes.memory.rss`. See [#13076](https://github.com/DataDog/integrations-core/pull/13076).
 
-## 7.5.0 / 2022-09-16
+## 7.5.0 / 2022-09-16 / Agent 7.40.0
 
 * [Added] Update HTTP config spec templates. See [#12890](https://github.com/DataDog/integrations-core/pull/12890).
 * [Added] Add `CreateContainerError` and `InvalidImageName` to waiting reasons. See [#12758](https://github.com/DataDog/integrations-core/pull/12758).

@@ -4,7 +4,7 @@
 
 * [Fixed] Remove metrics limit from legacy version of the integration. See [#13038](https://github.com/DataDog/integrations-core/pull/13038).
 
-## 2.4.0 / 2022-09-16
+## 2.4.0 / 2022-09-16 / Agent 7.40.0
 
 * [Added] Update HTTP config spec templates. See [#12890](https://github.com/DataDog/integrations-core/pull/12890).
 * [Added] Document Openmetrics V2 version of backup metrics. See [#12730](https://github.com/DataDog/integrations-core/pull/12730).

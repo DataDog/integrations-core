@@ -1,6 +1,6 @@
 # CHANGELOG - Cilium
 
-## 2.3.0 / 2022-09-16
+## 2.3.0 / 2022-09-16 / Agent 7.40.0
 
 * [Added] Refactor tooling for getting the current env name. See [#12939](https://github.com/DataDog/integrations-core/pull/12939).
 * [Added] Update HTTP config spec templates. See [#12890](https://github.com/DataDog/integrations-core/pull/12890).

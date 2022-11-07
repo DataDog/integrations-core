@@ -1,6 +1,6 @@
 # CHANGELOG - cert_manager
 
-## 3.0.0 / 2022-09-16
+## 3.0.0 / 2022-09-16 / Agent 7.40.0
 
 * [Changed] Migrate to OpenMetrics V2. See [#12344](https://github.com/DataDog/integrations-core/pull/12344).
 * [Added] Move cert_manager to core. See [#12344](https://github.com/DataDog/integrations-core/pull/12344).
