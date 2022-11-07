@@ -5,7 +5,7 @@ High level overview of what this integration does.
 
 Screenshots should be absent for this section, instead put them in the media carousel with captions.
 
-All `###` headers are optional to showcase what this integration includes
+All `###` headers are optional to showcase what this integration includes:
 
 ### Metrics
 
@@ -24,4 +24,4 @@ Screenshots are okay for this section, if they help demonstrate configuration st
 Specific step-by-step uninstallation instructions for this integration.
 
 ## Support
-Information about how and where to go for support for this integration
+Information about how and where to go for support for this integration.
