@@ -21,3 +21,6 @@ matrix.version.env-vars = [
   { key = "SONARQUBE_VERSION", value = "9.3", if = ["M1"] },
   { key = "DOCKERFILE_VERSION", value = "M1", if = ["M1"] },
 ]
+
+[envs.default.env-vars]
+COMPOSE_FILE = "docker-compose.yaml"
