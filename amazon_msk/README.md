@@ -45,7 +45,7 @@ Follow the instructions below to install and configure this check for an Agent r
 
 ### Metrics
 
-{{< get-metrics-from-git "amazon_msk" >}}
+See [metadata.csv][13] for a list of metrics provided by this check.
 
 ### Events
 
