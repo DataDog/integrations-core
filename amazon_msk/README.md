@@ -4,7 +4,7 @@
 
 Amazon Managed Streaming for Apache Kafka (MSK) is a fully managed service that makes it easy to build and run applications that use Apache Kafka to process streaming data.
 
-You can collect metrics from this integration in two ways—with the [Datadog Agent](#setup) or with a [Crawler][18] that collects metrics from CloudWatch. 
+You can collect metrics from this integration in two ways-with the [Datadog Agent](#setup) or with a [Crawler][18] that collects metrics from CloudWatch. 
 
 ## Setup
 
