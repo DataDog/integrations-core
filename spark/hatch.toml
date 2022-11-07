@@ -1,5 +1,10 @@
 [env.collectors.datadog-checks]
 
+[envs.default]
+dependencies = [
+  "datadog_checks_tests_helper @ {root:uri}/../datadog_checks_tests_helper",
+]
+
 [[envs.default.matrix]]
 python = ["27", "38"]
 version = ["2.4", "3.0"]
