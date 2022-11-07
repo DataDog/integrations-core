@@ -1,5 +1,9 @@
 # CHANGELOG - gitlab
 
+## 5.3.1 / 2022-11-07
+
+* [Fixed] Bump protobuf version to 3.20.1. See [#13269](https://github.com/DataDog/integrations-core/pull/13269).
+
 ## 5.3.0 / 2022-09-16
 
 * [Added] Update HTTP config spec templates. See [#12890](https://github.com/DataDog/integrations-core/pull/12890).
