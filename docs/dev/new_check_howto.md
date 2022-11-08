@@ -1,10 +1,6 @@
 ---
 title: Create an Agent integration
 kind: documentation
-further_reading:
-- link: "logs/processing/pipelines"
-  tag: "Documentation"
-  text: "Log processing pipelines"
 aliases:
   - /developers/integrations/integration_sdk/
   - /developers/integrations/testing/
