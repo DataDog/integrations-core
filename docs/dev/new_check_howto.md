@@ -356,29 +356,46 @@ The `awesome/manifest.json` for the Awesome Service Check:
 
 ```json
 {
-  "display_name": "awesome",
-  "maintainer": "email@example.org",
-  "manifest_version": "1.0.0",
-  "name": "awesome",
-  "metric_prefix": "awesome.",
-  "metric_to_check": "",
-  "creates_events": false,
-  "short_description": "",
-  "guid": "x16b8750-df1e-46c0-839a-2056461b604x",
-  "support": "contrib",
-  "supported_os": ["linux", "mac_os", "windows"],
-  "public_title": "Datadog-awesome Integration",
-  "categories": ["web"],
-  "type": "check",
-  "is_public": false,
-  "integration_id": "awesome",
+  "manifest_version": "2.0.0",
+  "app_uuid": "79eb6e54-2110-4d50-86c3-f7037d1a9daa",
+  "app_id": "awesome",
+  "classifier_tags": [
+    "Supported OS::Linux",
+    "Supported OS::Mac OS",
+    "Supported OS::Windows"
+  ],
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "",
+    "title": "Awesome",
+    "media": []
+  },
+  "author": {
+    "support_email": "email@example.org"
+  },
+  "oauth": {},
   "assets": {
-    "dashboards": {
-      "Awesome Overview": "assets/dashboards/overview.json",
-      "Awesome Investigation Dashboard": "assets/dashboards/investigation.json"
-    },
-    "monitors": {},
-    "service_checks": "assets/service_checks.json"
+    "integration": {
+      "source_type_name": "Awesome",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "awesome.",
+        "check": "",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    }
   }
 }
 ```
