@@ -382,14 +382,14 @@ spec:
      name: "<POD_NAME>"
    spec:
      serviceAccountName: datadog-agent
+     ## Enabling host pid namespace for origin detection with cgroup v2
+     hostPID: true
      containers:
      - name: "<APPLICATION_NAME>"
        image: "<APPLICATION_IMAGE>"
      ## Running the Agent as a side-car
      - image: datadog/agent
        name: datadog-agent
-       ## Enabling host pid namespace for origin detection with cgroup v2
-       hostPID: true
        ## Enabling port 8126 for Trace collection
        ports:
         - containerPort: 8126
