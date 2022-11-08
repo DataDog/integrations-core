@@ -12,13 +12,13 @@ This guide provides instructions for creating a Datadog Agent integration in the
 
 ## Prerequisites
 
-The datadog Agent development tools require:
+The required Datadog Agent integration development tools:
 - Python 3.8+.
 - [Docker][2] (to run the full test suite)
 
 ### Install Python
 
-Many operating systems come with a pre-installed version of Python. However, the version of Python installed by default might be older than the version used in the Agent, and might lack required tools and dependencies. To ensure that you have everything you need to get an integration running. Install a dedicated Python interpreter.
+Many operating systems come with a pre-installed version of Python. However, the version of Python installed by default might be older than the version used in the Agent, and might lack required tools and dependencies. To ensure that you have everything you need to get an integration running, install a dedicated Python interpreter.
 
 Some options for installing Python on your operating system:
 - Follow the [official Python documentation][3] to download and install the Python interpreter.
@@ -32,7 +32,7 @@ On most operating systems, Python versions after 3.3 come with a pre-installed v
 
    **Note**: The Datadog development toolkit expects you to work in the `$HOME/dd/` directory. This is not mandatory, but working in a different directory necessitates more configuration steps.
 
-   To create the `dd` directory and clone the `datadog-extras` repo:
+   To create the `dd` directory and clone the `integrations-extras` repo:
    ```shell
    mkdir $HOME/dd && cd $HOME/dd
    git clone https://github.com/DataDog/integrations-extras.git
@@ -206,7 +206,7 @@ The unit test above doesn't check the collection logic. To test the logic, you n
 
 #### Create an environment for the integration test
 
- The toolchain uses `docker` to spin up an Nginx container and let the check retrieve the welcome page. Create a compose file at `awesome/tests/docker-compose.yml` with the following contents:
+ The toolkit uses `docker` to spin up an Nginx container and let the check retrieve the welcome page. Create a docker-compose file at `awesome/tests/docker-compose.yml` with the following contents:
 
 ```yaml
 version: "3"
@@ -421,7 +421,7 @@ Once your `pyproject.toml` is ready, create a wheel:
 
 ### What's in the wheel?
 
-The wheel contains only the files necessary for the functioning of the integration itself. This includes the Check, the configuration example file, and some artifacts generated during the build of the wheel. All of the other elements, including the metadata files are not meant to be contained within the wheel. These latter elements are used elsewhere by the greater Datadog platform and eco-system.
+The wheel contains only the files necessary for the functioning of the integration itself. This includes the Check, the configuration example file, and some artifacts generated during the build of the wheel. All of the other elements, including the metadata files are not meant to be contained within the wheel. These latter elements are used elsewhere by the greater Datadog platform and ecosystem.
 
 ## Install the wheel
 
