@@ -76,6 +76,10 @@ files:
 
           Note: This is required for all project checks, whether `is_jmx` is set to `true`
           or `false.
+          The keys 'projects' and 'components' are mutually exclusive. 
+          'components' is kept for compatibility with older versions of the configuration. 
+          In the future it will be deprecated. 
+          It is recommended to use 'projects' which allows the new 'autodiscovery' feature
         value:
           type: object
           properties:
@@ -89,6 +93,55 @@ files:
             type: array
             items:
               type: string
+      - name: projects
+        description: |
+          The projects for which metrics should be collected. Each object may override the default
+          options. The following example gathers all default metrics for "some-project",
+          and only what is included/excluded for "another-project":
+          
+            projects:
+              keys:
+                - some-project:
+                - another-project:
+                    tag: project-2
+                    metrics:
+                      discovery:
+                        include:
+                        - issues\..*
+                        - maintainability\..*
+                        - security\..*
+                        exclude:
+                        - issues.(false_positive_issues|reopened_issues)
+              discovery:
+                exclude:
+                - tmp_project\..*
+          
+          Note: This is required for all project checks, whether `is_jmx` is set to `true`
+          or `false.
+          The keys 'projects' and 'components' are mutually exclusive. 
+          'components' is kept for compatibility with older versions of the configuration. 
+          In the future it will be deprecated. 
+          It is recommended to use 'projects' which allows the new 'autodiscovery' feature
+        value:
+          type: object
+          properties:
+          - name: keys
+            type: array
+            items:
+              type: object
+          - name: discovery
+            type: object
+            properties:
+              - name: limit
+                type: number
+              - name: include
+                type: array
+                items:
+                  type: string
+              - name: exclude
+                type: array
+                items:
+                  type: string
       - template: instances/http
         overrides:
           password.hidden: true
