@@ -1,0 +1,36 @@
+{
+  "name": "Pods in symptomatic phases by cluster/namespace",
+  "query": "Filter by: -pod_status:(running OR completed)",
+  "page": "container_orchestration_pods",
+  "type": "container",
+  "options": {
+    "palette": "hostmap_blues",
+    "tab": "overview",
+    "metric": "pod.uptime",
+    "showNogroupObjects": false,
+    "groups": [
+      {
+        "kind": "tag",
+        "value": "kube_cluster_name"
+      },
+      {
+        "kind": "tag",
+        "value": "kube_namespace"
+      }
+    ],
+    "query": "-tag#pod_status:(running OR completed)",
+    "view": "pod",
+    "columns": [
+      "name",
+      "status",
+      "cluster",
+      "namespace",
+      "age",
+      "ready",
+      "restarts",
+      "cpu_usage_percent",
+      "memory_usage_percent"
+    ],
+    "paletteFlip": false
+  }
+}
