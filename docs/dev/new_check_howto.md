@@ -10,7 +10,6 @@ aliases:
   - /developers/integrations/testing/
   - /integrations/datadog_checks_dev/
   - /guides/new_integration/
-  - /developers/integrations/new_check_howto/
 ---
 
 This guide provides instructions for creating a Datadog Agent integration in the integrations-extras repo. For information on why you'd want to create an Agent integration, see [Creating your own solution][1].
