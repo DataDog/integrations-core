@@ -617,7 +617,6 @@
                                         "storage": "hot",
                                         "indexes": []
                                     },
-                                    "response_format": "event_list",
                                     "columns": [
                                         {
                                             "field": "status_line",
@@ -627,18 +626,23 @@
                                             "field": "timestamp",
                                             "width": "auto"
                                         },
-                                        { "field": "host", "width": "auto" },
-                                        { "field": "service", "width": "auto" },
+                                        {
+                                            "field": "host",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "service",
+                                            "width": "auto"
+                                        },
                                         {
                                             "field": "content",
                                             "width": "compact"
                                         }
-                                    ]
+                                    ],
+                                    "response_format": "event_list"
                                 }
                             ],
-                            "show_date_column": true,
-                            "show_message_column": true,
-                            "message_display": "expanded-md"
+                            "type": "list_stream"
                         },
                         "layout": {
                             "x": 0,
@@ -744,8 +748,14 @@
                             "requests": [
                                 {
                                     "formulas": [
-                                        { "alias": "200", "formula": "query1" },
-                                        { "alias": "401", "formula": "query2" }
+                                        {
+                                            "alias": "200",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "401",
+                                            "formula": "query2"
+                                        }
                                     ],
                                     "response_format": "timeseries",
                                     "queries": [
@@ -758,7 +768,9 @@
                                                 "aggregation": "count"
                                             },
                                             "name": "query1",
-                                            "indexes": ["*"],
+                                            "indexes": [
+                                                "*"
+                                            ],
                                             "group_by": []
                                         },
                                         {
@@ -770,7 +782,9 @@
                                                 "aggregation": "count"
                                             },
                                             "name": "query2",
-                                            "indexes": ["*"],
+                                            "indexes": [
+                                                "*"
+                                            ],
                                             "group_by": []
                                         }
                                     ],
@@ -784,7 +798,12 @@
                             ],
                             "markers": []
                         },
-                        "layout": { "x": 0, "y": 8, "width": 6, "height": 4 }
+                        "layout": {
+                            "x": 0,
+                            "y": 8,
+                            "width": 6,
+                            "height": 4
+                        }
                     },
                     {
                         "id": 5352727391057996,
@@ -818,7 +837,9 @@
                                                 "aggregation": "count"
                                             },
                                             "name": "query1",
-                                            "indexes": ["*"],
+                                            "indexes": [
+                                                "*"
+                                            ],
                                             "group_by": [
                                                 {
                                                     "facet": "@_timestamp",
@@ -867,7 +888,12 @@
                             ],
                             "has_search_bar": "auto"
                         },
-                        "layout": { "x": 6, "y": 8, "width": 6, "height": 4 }
+                        "layout": {
+                            "x": 6,
+                            "y": 8,
+                            "width": 6,
+                            "height": 4
+                        }
                     },
                     {
                         "id": 3705246529984506,
@@ -875,10 +901,16 @@
                             "title": "Total Sessions per Month",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": { "live_span": "1mo" },
+                            "time": {
+                                "live_span": "1mo"
+                            },
                             "requests": [
                                 {
-                                    "formulas": [{ "formula": "query1" }],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
                                     "response_format": "scalar",
                                     "queries": [
                                         {
@@ -890,7 +922,9 @@
                                                 "aggregation": "count"
                                             },
                                             "name": "query1",
-                                            "indexes": ["*"],
+                                            "indexes": [
+                                                "*"
+                                            ],
                                             "group_by": [
                                                 {
                                                     "facet": "@http.status_code",
@@ -908,7 +942,12 @@
                             "type": "sunburst",
                             "hide_total": false
                         },
-                        "layout": { "x": 0, "y": 12, "width": 6, "height": 3 }
+                        "layout": {
+                            "x": 0,
+                            "y": 12,
+                            "width": 6,
+                            "height": 3
+                        }
                     },
                     {
                         "id": 8844205302808370,
@@ -940,7 +979,9 @@
                                                 "aggregation": "count"
                                             },
                                             "name": "query1",
-                                            "indexes": ["*"],
+                                            "indexes": [
+                                                "*"
+                                            ],
                                             "group_by": [
                                                 {
                                                     "facet": "@_timestamp",
@@ -964,7 +1005,12 @@
                                 }
                             ]
                         },
-                        "layout": { "x": 6, "y": 12, "width": 6, "height": 3 }
+                        "layout": {
+                            "x": 6,
+                            "y": 12,
+                            "width": 6,
+                            "height": 3
+                        }
                     },
                     {
                         "id": 5920543462074964,
@@ -984,7 +1030,11 @@
                             "type": "timeseries",
                             "requests": [
                                 {
-                                    "formulas": [{ "formula": "query1" }],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
                                     "response_format": "timeseries",
                                     "queries": [
                                         {
@@ -996,7 +1046,9 @@
                                                 "aggregation": "count"
                                             },
                                             "name": "query1",
-                                            "indexes": ["*"],
+                                            "indexes": [
+                                                "*"
+                                            ],
                                             "group_by": [
                                                 {
                                                     "facet": "@http.status_code",
@@ -1018,7 +1070,12 @@
                                 }
                             ]
                         },
-                        "layout": { "x": 0, "y": 15, "width": 6, "height": 3 }
+                        "layout": {
+                            "x": 0,
+                            "y": 15,
+                            "width": 6,
+                            "height": 3
+                        }
                     },
                     {
                         "id": 29411103993270,
@@ -1050,7 +1107,9 @@
                                                 "aggregation": "count"
                                             },
                                             "name": "query1",
-                                            "indexes": ["*"],
+                                            "indexes": [
+                                                "*"
+                                            ],
                                             "group_by": [
                                                 {
                                                     "facet": "@_timestamp",
@@ -1098,7 +1157,12 @@
                                 }
                             ]
                         },
-                        "layout": { "x": 6, "y": 15, "width": 6, "height": 3 }
+                        "layout": {
+                            "x": 6,
+                            "y": 15,
+                            "width": 6,
+                            "height": 3
+                        }
                     },
                     {
                         "id": 3071062606639386,
@@ -1118,7 +1182,11 @@
                             "type": "timeseries",
                             "requests": [
                                 {
-                                    "formulas": [{ "formula": "query1" }],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
                                     "response_format": "timeseries",
                                     "queries": [
                                         {
@@ -1130,7 +1198,9 @@
                                                 "aggregation": "count"
                                             },
                                             "name": "query1",
-                                            "indexes": ["*"],
+                                            "indexes": [
+                                                "*"
+                                            ],
                                             "group_by": [
                                                 {
                                                     "facet": "@http.status_code",
@@ -1152,7 +1222,12 @@
                                 }
                             ]
                         },
-                        "layout": { "x": 0, "y": 18, "width": 6, "height": 4 }
+                        "layout": {
+                            "x": 0,
+                            "y": 18,
+                            "width": 6,
+                            "height": 4
+                        }
                     },
                     {
                         "id": 4177711656659458,
@@ -1186,7 +1261,9 @@
                                                 "aggregation": "count"
                                             },
                                             "name": "query1",
-                                            "indexes": ["*"],
+                                            "indexes": [
+                                                "*"
+                                            ],
                                             "group_by": [
                                                 {
                                                     "facet": "@_timestamp",
@@ -1211,7 +1288,12 @@
                             ],
                             "has_search_bar": "auto"
                         },
-                        "layout": { "x": 6, "y": 18, "width": 6, "height": 4 }
+                        "layout": {
+                            "x": 6,
+                            "y": 18,
+                            "width": 6,
+                            "height": 4
+                        }
                     }
                 ],
                 "template_variables": []
@@ -1220,7 +1302,7 @@
                 "x": 0,
                 "y": 0,
                 "width": 12,
-                "height": 9,
+                "height": 23,
                 "is_column_break": true
             }
         }
@@ -1229,5 +1311,6 @@
     "layout_type": "ordered",
     "is_read_only": false,
     "notify_list": [],
-    "reflow_type": "fixed"
+    "reflow_type": "fixed",
+    "id": "83i-2r7-egb"
 }
