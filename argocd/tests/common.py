@@ -58,26 +58,30 @@ general_summaries = [
 ]
 
 app_controller_counters = [
+    'app.k8s.request.count',
+    'app.sync.count',
+    'cluster.events.count',
+    'kubectl.exec.count',
     'workqueue.adds.count',
     'workqueue.retries.count',
 ]
 
 app_controller_gauges = [
-    'app.k8s.request',
+    'app.info',
     'app.reconcile',
-    'app.sync',
     'cluster.api.resource_objects',
     'cluster.api.resources',
     'cluster.cache.age.seconds',
-    'cluster.events',
     'kubectl.exec.pending',
-    'kubectl.exec',
     'workqueue.depth',
     'workqueue.longest.running_processor.seconds',
     'workqueue.unfinished_work.seconds',
 ]
 
 app_controller_histograms = [
+    'app.reconcile.bucket',
+    'app.reconcile.count',
+    'app.reconcile.sum',
     'workqueue.queue.duration.seconds.bucket',
     'workqueue.queue.duration.seconds.count',
     'workqueue.queue.duration.seconds.sum',
@@ -124,9 +128,8 @@ NOT_EXPOSED_METRICS = [
     'argocd.api_server.redis.request.duration.count',
     'argocd.api_server.redis.request.duration.sum',
     'argocd.api_server.redis.request.count',
-    'argocd.app_controller.app.k8s.request',
     'argocd.app_controller.app.reconcile',
-    'argocd.app_controller.app.sync',
+    # 'argocd.app_controller.app.sync',
     'argocd.app_controller.cluster.api.resource_objects',
     'argocd.app_controller.cluster.api.resources',
     'argocd.app_controller.cluster.cache.age.seconds',

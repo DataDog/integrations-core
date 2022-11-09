@@ -71,3 +71,13 @@ def test_app_controller_service_check(dd_run_check, aggregator, mock_http_respon
         ServiceCheck.CRITICAL,
         tags=['endpoint:app_controller:8082', 'name:foo'],
     )
+    aggregator.assert_service_check(
+        'argocd.app_controller.cluster.connection.status',
+        ServiceCheck.UNKNOWN,
+        tags=['endpoint:app_controller:8082', 'name:baz'],
+    )
+    aggregator.assert_service_check(
+        'argocd.app_controller.cluster.connection.status',
+        ServiceCheck.UNKNOWN,
+        tags=['endpoint:app_controller:8082', 'name:faz'],
+    )
