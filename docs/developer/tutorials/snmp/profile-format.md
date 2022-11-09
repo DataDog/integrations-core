@@ -527,7 +527,7 @@ metrics:
 
 In the examples above, the OID value is a snmp OctetString value `22C` and we want `22` to be submitted as value for `snmp.temperature`.
 
-##### `extract_value` can be used to ignore surrounding non-printable characters
+##### `extract_value` can be used to trim surrounding non-printable characters
 
 If the raw SNMP OctetString value contains leading or trailing non-printable characters, you can use `extract_value` regex like `([a-zA-Z0-9_]+)` to ignore them.
 
