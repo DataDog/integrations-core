@@ -1,5 +1,11 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 17.3.2 / 2022-11-08
+
+* [Fixed] Update marketplace README template. See [#13249](https://github.com/DataDog/integrations-core/pull/13249).
+* [Fixed] [cli] Expand help text for --dev and --base options. See [#13235](https://github.com/DataDog/integrations-core/pull/13235).
+* [Fixed] Add the CHANGELOG.md template file to the new integration scaffolds. See [#13257](https://github.com/DataDog/integrations-core/pull/13257).
+
 ## 17.3.1 / 2022-10-28
 
 * [Fixed] Fix process signature report. See [#13226](https://github.com/DataDog/integrations-core/pull/13226).
