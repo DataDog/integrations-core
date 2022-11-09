@@ -753,50 +753,41 @@
                                 "value",
                                 "sum"
                             ],
+                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
                                     "formulas": [
                                         {
-                                            "alias": "200",
                                             "formula": "query1"
-                                        },
+                                        }
+                                    ],
+                                    "queries": [
                                         {
-                                            "alias": "401",
-                                            "formula": "query2"
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "search": {
+                                                "query": "source:boundary @http.url_details.path:*authenticate @duration:*"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@http.status_code",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc"
+                                                    }
+                                                }
+                                            ]
                                         }
                                     ],
                                     "response_format": "timeseries",
-                                    "queries": [
-                                        {
-                                            "search": {
-                                                "query": "source:boundary @http.url_details.path:*authenticate @http.status_code:200"
-                                            },
-                                            "data_source": "logs",
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "name": "query1",
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": []
-                                        },
-                                        {
-                                            "search": {
-                                                "query": "source:boundary @http.url_details.path:*authenticate status_code:401"
-                                            },
-                                            "data_source": "logs",
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "name": "query2",
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": []
-                                        }
-                                    ],
                                     "style": {
                                         "palette": "dog_classic",
                                         "line_type": "solid",
@@ -820,6 +811,7 @@
                             "title": "Logins",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "query_table",
                             "requests": [
                                 {
@@ -827,68 +819,68 @@
                                         {
                                             "alias": "Logins",
                                             "conditional_formats": [],
+                                            "cell_display_mode": "bar",
+                                            "formula": "query1",
                                             "limit": {
                                                 "count": 3125,
                                                 "order": "desc"
-                                            },
-                                            "cell_display_mode": "bar",
-                                            "formula": "query1"
+                                            }
                                         }
                                     ],
                                     "response_format": "scalar",
                                     "queries": [
                                         {
+                                            "data_source": "logs",
+                                            "name": "query1",
                                             "search": {
                                                 "query": "source:boundary @http.url_details.path:*authenticate"
                                             },
-                                            "data_source": "logs",
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "name": "query1",
                                             "indexes": [
                                                 "*"
                                             ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
                                             "group_by": [
                                                 {
                                                     "facet": "@_timestamp",
+                                                    "limit": 5,
                                                     "sort": {
                                                         "aggregation": "count",
                                                         "order": "desc"
-                                                    },
-                                                    "limit": 5
+                                                    }
                                                 },
                                                 {
                                                     "facet": "@data.auth.user_info.id",
+                                                    "limit": 5,
                                                     "sort": {
                                                         "aggregation": "count",
                                                         "order": "desc"
-                                                    },
-                                                    "limit": 5
+                                                    }
                                                 },
                                                 {
                                                     "facet": "@data.request.details.Attrs.PasswordLoginAttributes.login_name",
+                                                    "limit": 5,
                                                     "sort": {
                                                         "aggregation": "count",
                                                         "order": "desc"
-                                                    },
-                                                    "limit": 5
+                                                    }
                                                 },
                                                 {
                                                     "facet": "@data.request.details.auth_method_id",
+                                                    "limit": 5,
                                                     "sort": {
                                                         "aggregation": "count",
                                                         "order": "desc"
-                                                    },
-                                                    "limit": 5
+                                                    }
                                                 },
                                                 {
                                                     "facet": "@http.status_code",
+                                                    "limit": 5,
                                                     "sort": {
                                                         "aggregation": "count",
                                                         "order": "desc"
-                                                    },
-                                                    "limit": 5
+                                                    }
                                                 }
                                             ]
                                         }
@@ -923,25 +915,25 @@
                                     "response_format": "scalar",
                                     "queries": [
                                         {
-                                            "search": {
-                                                "query": "source:boundary @http.url_details.path:*authorize-session"
-                                            },
                                             "data_source": "logs",
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
                                             "name": "query1",
+                                            "search": {
+                                                "query": "source:boundary @http.url_details.path:*authorize-session @duration:*"
+                                            },
                                             "indexes": [
                                                 "*"
                                             ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
                                             "group_by": [
                                                 {
                                                     "facet": "@http.status_code",
+                                                    "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
                                                         "order": "desc"
-                                                    },
-                                                    "limit": 10
+                                                    }
                                                 }
                                             ]
                                         }
@@ -1036,6 +1028,7 @@
                                 "value",
                                 "sum"
                             ],
+                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -1044,32 +1037,32 @@
                                             "formula": "query1"
                                         }
                                     ],
-                                    "response_format": "timeseries",
                                     "queries": [
                                         {
-                                            "search": {
-                                                "query": "source:boundary @http.url_details.path:*authorize-session"
-                                            },
                                             "data_source": "logs",
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
                                             "name": "query1",
+                                            "search": {
+                                                "query": "source:boundary @http.url_details.path:*authorize-session @duration:*"
+                                            },
                                             "indexes": [
                                                 "*"
                                             ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
                                             "group_by": [
                                                 {
                                                     "facet": "@http.status_code",
+                                                    "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
                                                         "order": "desc"
-                                                    },
-                                                    "limit": 10
+                                                    }
                                                 }
                                             ]
                                         }
                                     ],
+                                    "response_format": "timeseries",
                                     "style": {
                                         "palette": "dog_classic",
                                         "line_type": "solid",
@@ -1188,6 +1181,7 @@
                                 "value",
                                 "sum"
                             ],
+                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -1196,32 +1190,32 @@
                                             "formula": "query1"
                                         }
                                     ],
-                                    "response_format": "timeseries",
                                     "queries": [
                                         {
-                                            "search": {
-                                                "query": "source:boundary @http.url_details.path:*authorize-session"
-                                            },
                                             "data_source": "logs",
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
                                             "name": "query1",
+                                            "search": {
+                                                "query": "source:boundary @http.url_details.path:*authorize-session @duration:*"
+                                            },
                                             "indexes": [
                                                 "*"
                                             ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
                                             "group_by": [
                                                 {
                                                     "facet": "@http.status_code",
+                                                    "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
                                                         "order": "desc"
-                                                    },
-                                                    "limit": 10
+                                                    }
                                                 }
                                             ]
                                         }
                                     ],
+                                    "response_format": "timeseries",
                                     "style": {
                                         "palette": "dog_classic",
                                         "line_type": "solid",
