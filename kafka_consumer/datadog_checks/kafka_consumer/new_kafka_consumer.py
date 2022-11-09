@@ -232,30 +232,48 @@ class NewKafkaConsumerCheck(object):
 
     def _report_highwater_offsets(self, contexts_limit):
         """Report the broker highwater offsets."""
-        reported_contexts = 0
-        for (topic, partition), highwater_offset in self._highwater_offsets.items():
-            broker_tags = ['topic:%s' % topic, 'partition:%s' % partition]
-            broker_tags.extend(self._custom_tags)
-            self.gauge('broker_offset', highwater_offset, tags=broker_tags)
-            reported_contexts += 1
-            if reported_contexts == contexts_limit:
-                return
+        if self._send_partitions_as_histogram:
+            reported_topics = set()
+            for (topic, _), highwater_offset in self._highwater_offsets.items():
+                broker_tags = ['topic:%s' % topic]
+                broker_tags.extend(self._custom_tags)
+                self.histogram('broker_offset_histogram', highwater_offset, tags=broker_tags)
+                reported_topics.add(topic)
+                if len(reported_topics) == contexts_limit:
+                    return
+        else:
+            reported_contexts = 0
+            for (topic, partition), highwater_offset in self._highwater_offsets.items():
+                broker_tags = ['topic:%s' % topic, 'partition:%s' % partition]
+                broker_tags.extend(self._custom_tags)
+                self.gauge('broker_offset', highwater_offset, tags=broker_tags)
+                reported_contexts += 1
+                if reported_contexts == contexts_limit:
+                    return
 
     def _report_consumer_offsets_and_lag(self, contexts_limit):
         """Report the consumer offsets and consumer lag."""
         reported_contexts = 0
+        reported_topics = set()
         for (consumer_group, topic, partition), consumer_offset in self._consumer_offsets.items():
             if reported_contexts >= contexts_limit:
                 return
-            consumer_group_tags = ['topic:%s' % topic, 'partition:%s' % partition, 'consumer_group:%s' % consumer_group]
+
+            consumer_group_tags = ['topic:%s' % topic, 'consumer_group:%s' % consumer_group]
+            if not self._send_partitions_as_histogram:
+                consumer_group_tags.append('partition:%s' % partition)
             consumer_group_tags.extend(self._custom_tags)
 
             partitions = self.kafka_client._client.cluster.partitions_for_topic(topic)
             if partitions is not None and partition in partitions:
                 # report consumer offset if the partition is valid because even if leaderless the consumer offset will
                 # be valid once the leader failover completes
-                self.gauge('consumer_offset', consumer_offset, tags=consumer_group_tags)
-                reported_contexts += 1
+                if self._send_partitions_as_histogram:
+                    self.histogram('consumer_offset_histogram', consumer_offset, tags=consumer_group_tags)
+                    reported_topics.add(topic)
+                else:
+                    self.gauge('consumer_offset', consumer_offset, tags=consumer_group_tags)
+                    reported_contexts += 1
 
                 if (topic, partition) not in self._highwater_offsets:
                     self.log.warning(
@@ -268,9 +286,14 @@ class NewKafkaConsumerCheck(object):
                     continue
                 producer_offset = self._highwater_offsets[(topic, partition)]
                 consumer_lag = producer_offset - consumer_offset
-                if reported_contexts < contexts_limit:
-                    self.gauge('consumer_lag', consumer_lag, tags=consumer_group_tags)
-                    reported_contexts += 1
+
+                if self._send_partitions_as_histogram:
+                    if len(reported_topics) < contexts_limit:
+                        self.histogram('consumer_lag_histogram', consumer_lag, tags=consumer_group_tags)
+                else:
+                    if reported_contexts < contexts_limit:
+                        self.gauge('consumer_lag', consumer_lag, tags=consumer_group_tags)
+                        reported_contexts += 1
 
                 if consumer_lag < 0:
                     # this will effectively result in data loss, so emit an event for max visibility
@@ -286,6 +309,8 @@ class NewKafkaConsumerCheck(object):
 
                 if reported_contexts >= contexts_limit:
                     continue
+                if len(reported_topics) > contexts_limit:
+                    continue
                 if not self._data_streams_enabled:
                     continue
                 timestamps = self._broker_timestamps["{}_{}".format(topic, partition)]
@@ -295,8 +320,11 @@ class NewKafkaConsumerCheck(object):
                 if consumer_timestamp is None or producer_timestamp is None:
                     continue
                 lag = producer_timestamp - consumer_timestamp
-                self.gauge('consumer_lag_seconds', lag, tags=consumer_group_tags)
-                reported_contexts += 1
+                if self._send_partitions_as_histogram:
+                    self.histogram('consumer_lag_seconds_histogram', lag, tags=consumer_group_tags)
+                else:
+                    self.gauge('consumer_lag_seconds', lag, tags=consumer_group_tags)
+                    reported_contexts += 1
             else:
                 if partitions is None:
                     msg = (

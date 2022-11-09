@@ -249,3 +249,11 @@ files:
           type: boolean
           example: false
         display_default: false
+      - name: send_partitions_as_histogram
+        description: |
+          By default statistics are sent for every partition as an individual metric. If you have many
+          partions the number of metrics can become very high. Setting send_partitions_as_histogram will
+          aggregeta the partions into a histogram, thus reducing the number of sent metrics.
+        value:
+          type: boolean
+          example: false

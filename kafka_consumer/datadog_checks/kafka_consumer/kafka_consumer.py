@@ -44,6 +44,7 @@ class KafkaCheck(AgentCheck):
         self._context_limit = int(self.init_config.get('max_partition_contexts', CONTEXT_UPPER_BOUND))
         self._data_streams_enabled = is_affirmative(self.instance.get('data_streams_enabled', False))
         self._custom_tags = self.instance.get('tags', [])
+        self._send_partitions_as_histogram = is_affirmative(self.instance.get('send_partitions_as_histogram', False))
         self._monitor_unlisted_consumer_groups = is_affirmative(
             self.instance.get('monitor_unlisted_consumer_groups', False)
         )

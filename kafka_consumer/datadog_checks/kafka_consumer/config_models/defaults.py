@@ -94,6 +94,10 @@ def instance_security_protocol(field, value):
     return 'PLAINTEXT'
 
 
+def instance_send_partitions_as_histogram(field, value):
+    return False
+
+
 def instance_service(field, value):
     return get_default_field_value(field, value)
 

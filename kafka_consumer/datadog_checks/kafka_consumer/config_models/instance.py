@@ -59,6 +59,7 @@ class InstanceConfig(BaseModel):
     sasl_plain_password: Optional[str]
     sasl_plain_username: Optional[str]
     security_protocol: Optional[str]
+    send_partitions_as_histogram: Optional[bool]
     service: Optional[str]
     tags: Optional[Sequence[str]]
     tls_ca_cert: Optional[str]

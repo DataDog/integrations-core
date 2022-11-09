@@ -300,3 +300,10 @@ instances:
     ## Beta feature to get a lag metric in Seconds. It's part of the Data Streams Monitoring Product
     #
     # data_streams_enabled: false
+
+    ## @param send_partitions_as_histogram - boolean - optional - default: false
+    ## By default statistics are sent for every partition as an individual metric. If you have many
+    ## partions the number of metrics can become very high. Setting send_partitions_as_histogram will
+    ## aggregeta the partions into a histogram, thus reducing the number of sent metrics.
+    #
+    # send_partitions_as_histogram: false
