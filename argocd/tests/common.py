@@ -68,7 +68,6 @@ app_controller_counters = [
 
 app_controller_gauges = [
     'app.info',
-    'app.reconcile',
     'cluster.api.resource_objects',
     'cluster.api.resources',
     'cluster.cache.age.seconds',
@@ -128,13 +127,9 @@ NOT_EXPOSED_METRICS = [
     'argocd.api_server.redis.request.duration.count',
     'argocd.api_server.redis.request.duration.sum',
     'argocd.api_server.redis.request.count',
-    'argocd.app_controller.app.reconcile',
-    # 'argocd.app_controller.app.sync',
     'argocd.app_controller.cluster.api.resource_objects',
     'argocd.app_controller.cluster.api.resources',
     'argocd.app_controller.cluster.cache.age.seconds',
-    'argocd.app_controller.cluster.events',
-    'argocd.app_controller.kubectl.exec',
     'argocd.app_controller.kubectl.exec.pending',
     'argocd.app_controller.redis.request.duration',
     'argocd.repo_server.redis.request.count',
