@@ -6,6 +6,7 @@ import os
 from datadog_checks.dev import get_docker_hostname, get_here
 from datadog_checks.sap_hana import SapHanaCheck
 
+
 HERE = get_here()
 COMPOSE_FILE = os.path.join(HERE, 'docker', 'docker-compose.yaml')
 SERVER = get_docker_hostname()
