@@ -424,7 +424,7 @@
                                             "query": "avg:boundary.worker.proxy.websocket.active_connections{*}",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "aggregator": "last"
+                                            "aggregator": "max"
                                         }
                                     ]
                                 }
