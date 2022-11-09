@@ -410,6 +410,7 @@
                             "title": "Active Connections",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "query_value",
                             "requests": [
                                 {
@@ -1235,9 +1236,10 @@
                     {
                         "id": 4177711656659458,
                         "definition": {
-                            "title": "Successful Target Access Count",
+                            "title": "Targets Accessed",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "query_table",
                             "requests": [
                                 {
@@ -1245,44 +1247,36 @@
                                         {
                                             "alias": "Times Accessed",
                                             "conditional_formats": [],
-                                            "limit": {
-                                                "count": 100,
-                                                "order": "desc"
-                                            },
                                             "cell_display_mode": "bar",
-                                            "formula": "query1"
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
                                         }
                                     ],
                                     "response_format": "scalar",
                                     "queries": [
                                         {
+                                            "data_source": "logs",
+                                            "name": "query1",
                                             "search": {
                                                 "query": "source:boundary @http.url_details.path:*authorize-session @http.status_code:200"
                                             },
-                                            "data_source": "logs",
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "name": "query1",
                                             "indexes": [
                                                 "*"
                                             ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
                                             "group_by": [
                                                 {
-                                                    "facet": "@_timestamp",
-                                                    "sort": {
-                                                        "aggregation": "count",
-                                                        "order": "desc"
-                                                    },
-                                                    "limit": 10
-                                                },
-                                                {
                                                     "facet": "@target.id",
+                                                    "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
                                                         "order": "desc"
-                                                    },
-                                                    "limit": 10
+                                                    }
                                                 }
                                             ]
                                         }
