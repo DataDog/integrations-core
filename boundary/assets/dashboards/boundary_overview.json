@@ -665,7 +665,7 @@
                                             "alias": "Duration",
                                             "conditional_formats": [],
                                             "limit": {
-                                                "count": 1000,
+                                                "count": 625,
                                                 "order": "desc"
                                             },
                                             "cell_display_mode": "number",
@@ -689,13 +689,13 @@
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@http.request_id",
+                                                    "facet": "@http.url_details.path",
                                                     "sort": {
                                                         "metric": "@duration",
                                                         "aggregation": "avg",
                                                         "order": "desc"
                                                     },
-                                                    "limit": 10
+                                                    "limit": 5
                                                 },
                                                 {
                                                     "facet": "@network.client.ip",
@@ -704,7 +704,7 @@
                                                         "aggregation": "avg",
                                                         "order": "desc"
                                                     },
-                                                    "limit": 10
+                                                    "limit": 5
                                                 },
                                                 {
                                                     "facet": "host",
@@ -713,7 +713,16 @@
                                                         "aggregation": "avg",
                                                         "order": "desc"
                                                     },
-                                                    "limit": 10
+                                                    "limit": 5
+                                                },
+                                                {
+                                                    "facet": "service",
+                                                    "sort": {
+                                                        "metric": "@duration",
+                                                        "aggregation": "avg",
+                                                        "order": "desc"
+                                                    },
+                                                    "limit": 5
                                                 }
                                             ]
                                         }
@@ -1300,7 +1309,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 0,
+                "y": 15,
                 "width": 12,
                 "height": 23,
                 "is_column_break": true
