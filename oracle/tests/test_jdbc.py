@@ -10,6 +10,7 @@ except ImportError:
     from contextlib2 import ExitStack
 
 import mock
+import pdb
 
 from datadog_checks.oracle import Oracle
 
@@ -80,6 +81,7 @@ def test__get_connection_jdbc(instance, dd_run_check, aggregator, expected_tags,
         for mock_call in mocks:
             stack.enter_context(mock.patch(*mock_call))
         dd_run_check(check)
+        pdb.set_trace()
         assert check._cached_connection == con
 
     jdb.connect.assert_called_with(

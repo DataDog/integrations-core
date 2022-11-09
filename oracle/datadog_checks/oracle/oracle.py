@@ -5,8 +5,13 @@ import itertools
 import threading
 from contextlib import closing
 
-import cx_Oracle
-from six import PY2
+from six import PY3
+if PY3:
+    import oracledb as cx_Oracle
+else:
+    import cx_Oracle
+
+import pdb
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.utils.db import QueryManager
@@ -81,7 +86,7 @@ class Oracle(AgentCheck):
         )
 
         # Runtime validations are only py3, so this is for manually validating config on py2
-        if PY2:
+        if not PY3:
             self.check_initializations.append(self.validate_config)
         self.check_initializations.append(self._query_manager.compile_queries)
 
@@ -166,6 +171,7 @@ class Oracle(AgentCheck):
     @property
     def _connection(self):
         """Creates a connection or raises an exception"""
+        pdb.set_trace()
         if self._cached_connection is None:
             if self.can_use_oracle_client():
                 self._cached_connection = self._oracle_client_connect()
@@ -184,7 +190,10 @@ class Oracle(AgentCheck):
     def can_use_oracle_client(self):
         try:
             # Check if the instantclient is available
-            cx_Oracle.clientversion()
+            if not PY3:
+                cx_Oracle.clientversion()            
+            else:
+                cx_Oracle.version
         except cx_Oracle.DatabaseError as e:
             # Fallback to JDBC
             self.log.debug('Oracle instant client unavailable, falling back to JDBC: %s', e)
@@ -195,7 +204,7 @@ class Oracle(AgentCheck):
 
     def _oracle_client_connect(self):
         dsn = self._get_dsn()
-        self.log.debug("Connecting via Oracle Instant Client with DSN: %s", dsn)
+        self.log.debug("Connecting to Oracle with DSN: %s", dsn)
         try:
             connection = cx_Oracle.connect(user=self._user, password=self._password, dsn=dsn)
             self.log.debug("Connected to Oracle DB using Oracle Instant Client")
