@@ -3,9 +3,11 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import pytest
+from mock import patch
 
 from datadog_checks.argocd import ArgocdCheck
 from datadog_checks.base.constants import ServiceCheck
+from datadog_checks.base.errors import ConfigurationError
 
 from .common import (
     API_SERVER_METRICS,
@@ -81,3 +83,13 @@ def test_app_controller_service_check(dd_run_check, aggregator, mock_http_respon
         ServiceCheck.UNKNOWN,
         tags=['endpoint:app_controller:8082', 'name:faz'],
     )
+
+
+@patch('datadog_checks.argocd.check.PY2', True)
+def test_py2(dd_run_check, aggregator):
+    try:
+        check = ArgocdCheck('argocd', {}, [MOCKED_APP_CONTROLLER_INSTANCE])
+        dd_run_check(check)
+    except Exception as e:
+        assert type(e) == ConfigurationError
+        assert "This version of the integration is only available when using py3" in str(e)
