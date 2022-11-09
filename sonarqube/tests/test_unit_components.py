@@ -12,7 +12,10 @@ pytestmark = [pytest.mark.unit]
 @mock.patch("datadog_checks.sonarqube.check.Api")
 def test_service_check_ok(mock_api, aggregator, dd_run_check, sonarqube_check):
     # Given
-    config = {'web_endpoint': 'http://{}:{}'.format(HOST, PORT), 'components': {}}
+    config = {
+        'web_endpoint': 'http://{}:{}'.format(HOST, PORT),
+        'components': {},
+    }
     check = sonarqube_check(config)
     # When
     dd_run_check(check)
@@ -23,7 +26,11 @@ def test_service_check_ok(mock_api, aggregator, dd_run_check, sonarqube_check):
 @mock.patch("datadog_checks.sonarqube.check.Api")
 def test_tags(mock_api, aggregator, dd_run_check, sonarqube_check):
     # Given
-    config = {'web_endpoint': 'http://{}:{}'.format(HOST, PORT), 'components': {}, 'tags': ['tag1:foo', 'tag2:bar']}
+    config = {
+        'web_endpoint': 'http://{}:{}'.format(HOST, PORT),
+        'components': {},
+        'tags': ['tag1:foo', 'tag2:bar'],
+    }
     check = sonarqube_check(config)
     # When
     dd_run_check(check)
@@ -36,7 +43,10 @@ def test_tags(mock_api, aggregator, dd_run_check, sonarqube_check):
 @mock.patch("datadog_checks.sonarqube.check.Api")
 def test_empty_components(mock_api, aggregator, dd_run_check, sonarqube_check):
     # Given
-    config = {'web_endpoint': 'http://{}:{}'.format(HOST, PORT), 'components': {}}
+    config = {
+        'web_endpoint': 'http://{}:{}'.format(HOST, PORT),
+        'components': {},
+    }
     mock_api.return_value.get_projects.return_value = []
     check = sonarqube_check(config)
     # When
@@ -200,6 +210,7 @@ def test_components_with_exclude(mock_api, aggregator, dd_run_check, sonarqube_c
     # Given
     config = {
         'web_endpoint': 'http://{}:{}'.format(HOST, PORT),
+        'default_exclude': ['category1.'],
         'components': {'project1': {'exclude': ['category2.']}},
     }
     mock_api.return_value.get_version.return_value = '1.2.3.12345'
@@ -263,6 +274,7 @@ def test_components_with_include(mock_api, aggregator, dd_run_check, sonarqube_c
     # Given
     config = {
         'web_endpoint': 'http://{}:{}'.format(HOST, PORT),
+        'default_include': ['category1.'],
         'components': {'project1': {'include': ['category2.']}},
     }
     mock_api.return_value.get_version.return_value = '1.2.3.12345'

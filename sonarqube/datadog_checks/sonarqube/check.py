@@ -50,9 +50,9 @@ class SonarqubeCheck(AgentCheck):
         projects = self.instance.get('projects', None)
         if projects is not None and isinstance(projects, dict):
             self.log.debug('\'projects\' found in config: %s', projects)
-            self._projects = {'keys': []}
-            default_tag = projects.get('default_tag', 'component')
-            self.log.debug('default_tag: %s', default_tag)
+            self._projects = {'keys': [], 'discovery': projects.get('discovery', {})}
+            self._default_tag = projects.get('default_tag', 'component')
+            self.log.debug('default_tag: %s', self._default_tag)
             self._default_metrics_limit = projects.get('default_metrics_limit', 100)
             self.log.debug('default_metrics_limit: %s', self._default_metrics_limit)
             self._default_metrics_include = projects.get('default_metrics_include', ['^.*'])
@@ -63,23 +63,9 @@ class SonarqubeCheck(AgentCheck):
             self.log.debug('keys: %s', keys)
             for keys_item in keys:
                 if isinstance(keys_item, dict):
-                    self._projects['keys'].append(
-                        {
-                            list(keys_item.keys())[0]: {
-                                'tag': list(keys_item.values())[0].get('tag', default_tag),
-                                'metrics': list(keys_item.values())[0].get('metrics', {'discovery': {}}),
-                            }
-                        }
-                    )
+                    self._projects['keys'].append({list(keys_item.keys())[0]: list(keys_item.values())[0]})
                 elif isinstance(keys_item, str):
-                    self._projects['keys'].append(
-                        {
-                            keys_item: {
-                                'tag': default_tag,
-                                'metrics': {'discovery': {}},
-                            }
-                        }
-                    )
+                    self._projects['keys'].append({keys_item: {}})
                 else:
                     self.log.warning('project key setting must be a string or a dict: %s', keys_item)
                     raise ConfigurationError('project key setting must be a string or a dict')
@@ -181,7 +167,7 @@ class SonarqubeCheck(AgentCheck):
                 metrics_discovery_matcher = DiscoveryMatcher(
                     'metrics',
                     self.log,
-                    matched_project_config.get('metrics', None),
+                    matched_project_config.get('metrics', {}) if matched_project_config else {},
                     mandatory=False,
                     default_limit=self._projects.get('default_metrics_limit', self._default_metrics_limit),
                     default_include=[f'({item})' for item in self._default_metrics_include],
@@ -206,7 +192,15 @@ class SonarqubeCheck(AgentCheck):
                         self.gauge(
                             mapped_measure,
                             measure_value,
-                            tags=self._tags + ['{}:{}'.format(matched_project_config['tag'], matched_project_key)],
+                            tags=self._tags
+                            + [
+                                '{}:{}'.format(
+                                    matched_project_config.get('tag', self._default_tag)
+                                    if matched_project_config
+                                    else self._default_tag,
+                                    matched_project_key,
+                                )
+                            ],
                         )
                     else:
                         self.log.warning('\'%s\' not found in matched metrics', measure_key)
