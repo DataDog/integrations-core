@@ -157,7 +157,7 @@ There are two basic types of tests:
 
 Tests are required if you want your integration to be included in `integrations-extras`.
 
-**Note**: [pytest][10] and [tox][11] are used to run the tests.
+**Note**: [pytest][10] and [hatch][11] are used to run the tests.
 
 ### Write a unit test
 
@@ -474,13 +474,12 @@ For Agent versions >= 6.12:
 
 After you complete your integration, refer back to this list to make sure you've got everything you need.
 
-To consider an Agent-based integration complete, and thus ready to be included in the core repository and bundled with the Agent package, several prerequisites must be met:
-
 - A `README.md` file with the correct format and contents
 - A battery of tests verifying metrics collection
 - A `metadata.csv` file listing all of the collected metrics
 - A complete `manifest.json` file
 - If the integration collects Service Checks, the `service_checks.json` must be complete as well
+- After you open your PR to the integrations-extras repo, CI validation tests run. These tests must be green before the integration can be merged into the repo.
 
 [1]: /developers/#creating-your-own-solution
 [2]: https://docs.docker.com/get-docker/
@@ -492,7 +491,7 @@ To consider an Agent-based integration complete, and thus ready to be included i
 [8]: https://docs.datadoghq.com/developers/metrics/agent_metrics_submission/
 [9]: https://github.com/DataDog/datadog-agent/blob/6.2.x/docs/dev/checks/python/check_api.md
 [10]: https://docs.pytest.org/en/latest
-[11]: https://tox.readthedocs.io/en/latest
+[11]: https://github.com/pypa/hatch
 [12]: https://datadoghq.dev/integrations-core/meta/config-specs/
 [13]: https://docs.datadoghq.com/developers/integrations/check_references/#configuration-file
 [14]: https://docs.datadoghq.com/developers/integrations/check_references/#manifest-file
