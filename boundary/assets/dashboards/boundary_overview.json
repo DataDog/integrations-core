@@ -617,6 +617,7 @@
                                         "storage": "hot",
                                         "indexes": []
                                     },
+                                    "response_format": "event_list",
                                     "columns": [
                                         {
                                             "field": "status_line",
@@ -638,8 +639,7 @@
                                             "field": "content",
                                             "width": "compact"
                                         }
-                                    ],
-                                    "response_format": "event_list"
+                                    ]
                                 }
                             ],
                             "type": "list_stream"
@@ -981,7 +981,7 @@
                                     "queries": [
                                         {
                                             "search": {
-                                                "query": "source:boundary @http.url_details.path:*authorize-session @http.status_code:401"
+                                                "query": "source:boundary @http.url_details.path:*authorize-session @http.status_code:401 @duration:*"
                                             },
                                             "data_source": "logs",
                                             "compute": {
