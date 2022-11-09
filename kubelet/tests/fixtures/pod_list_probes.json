@@ -1913,7 +1913,7 @@
                 "terminationGracePeriodSeconds": 30,
                 "dnsPolicy": "ClusterFirst",
                 "nodeSelector": {
-                    "beta.kubernetes.io/os": "linux",
+                    "kubernetes.io/os": "linux",
                     "node.kubernetes.io/masq-agent-ds-ready": "true"
                 },
                 "serviceAccountName": "ip-masq-agent",
@@ -2346,7 +2346,7 @@
                 "terminationGracePeriodSeconds": 0,
                 "dnsPolicy": "ClusterFirst",
                 "nodeSelector": {
-                    "beta.kubernetes.io/os": "linux",
+                    "kubernetes.io/os": "linux",
                     "projectcalico.org/ds-ready": "true"
                 },
                 "serviceAccountName": "calico-sa",
