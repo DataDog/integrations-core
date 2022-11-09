@@ -36,6 +36,23 @@ class Components(BaseModel):
     tag: Optional[str]
 
 
+class Discovery(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    exclude: Optional[Sequence[str]]
+    include: Optional[Sequence[str]]
+    limit: Optional[float]
+
+
+class Projects(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    discovery: Optional[Discovery]
+    keys: Optional[Sequence[Mapping[str, Any]]]
+
+
 class Proxy(BaseModel):
     class Config:
         allow_mutation = False
@@ -86,6 +103,7 @@ class InstanceConfig(BaseModel):
     persist_connections: Optional[bool]
     port: Optional[int]
     process_name_regex: Optional[str]
+    projects: Optional[Projects]
     proxy: Optional[Proxy]
     read_timeout: Optional[float]
     request_size: Optional[float]

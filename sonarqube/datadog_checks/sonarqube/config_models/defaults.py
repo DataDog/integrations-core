@@ -194,6 +194,10 @@ def instance_process_name_regex(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_projects(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_proxy(field, value):
     return get_default_field_value(field, value)
 
