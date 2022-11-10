@@ -133,7 +133,6 @@ NOT_EXPOSED_METRICS = [
     'argocd.app_controller.kubectl.exec.pending',
     'argocd.app_controller.redis.request.duration',
     'argocd.repo_server.redis.request.count',
-    'argocd.repo_server.repo.pending.request.total',
     'argocd.repo_server.git.request.count',
     'argocd.repo_server.git.request.duration.seconds.bucket',
     'argocd.repo_server.git.request.duration.seconds.count',
