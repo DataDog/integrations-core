@@ -1,0 +1,10 @@
+[env.collectors.datadog-checks]
+
+[[envs.default.matrix]]
+python = ["38"]
+version = ["2.9"]
+
+[envs.default.overrides]
+matrix.version.env-vars = [
+  { key = "PULSAR_VERSION", value = "2.9.1", if = ["2.9"] },
+]
