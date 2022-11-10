@@ -22,7 +22,6 @@ clickhouse-driver,PyPI,MIT,Konstantin Lebedev
 contextlib2,PyPI,PSF,Nick Coghlan
 cryptography,PyPI,Apache-2.0,The Python Cryptographic Authority and individual contributors | The cryptography developers
 cryptography,PyPI,BSD-3-Clause,The Python Cryptographic Authority and individual contributors | The cryptography developers
-cx-Oracle,PyPI,BSD-3-Clause,""Anthony Tuininga", | Anthony Tuininga"
 ddtrace,PyPI,BSD-3-Clause,"Datadog, Inc."
 dnspython,PyPI,ISC,Bob Halley
 enum34,PyPI,BSD-3-Clause,Ethan Furman
@@ -45,6 +44,8 @@ lz4,PyPI,BSD-3-Clause,Jonathan Underwood
 mmh3,PyPI,CC0-1.0,Hajime Senuma
 oauthlib,PyPI,BSD-3-Clause,The OAuthlib Community
 openstacksdk,PyPI,Apache-2.0,OpenStack
+oracledb,PyPI,Apache-2.0,Anthony Tuininga
+oracledb,PyPI,UPL,Anthony Tuininga
 orjson,PyPI,Apache-2.0,ijl <ijl@mailbox.org>
 orjson,PyPI,MIT,ijl <ijl@mailbox.org>
 packaging,PyPI,Apache-2.0,Donald Stufft and individual contributors
