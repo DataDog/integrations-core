@@ -283,7 +283,7 @@ def licenses(ctx, sync):
             package_license = package_license.strip('"')
 
             expanded_licenses = []
-            for separator in (' and/or ','/', ' OR ', ' or '):
+            for separator in (' and/or ', '/', ' OR ', ' or '):
                 if separator in package_license:
                     expanded_licenses.extend(package_license.split(separator))
                     break
