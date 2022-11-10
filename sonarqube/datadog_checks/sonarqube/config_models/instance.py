@@ -9,7 +9,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Mapping, Optional, Sequence
+from typing import Any, Mapping, Optional, Sequence, Union
 
 from pydantic import BaseModel, root_validator, validator
 
@@ -50,7 +50,7 @@ class Projects(BaseModel):
         allow_mutation = False
 
     discovery: Optional[Discovery]
-    keys: Optional[Sequence[Mapping[str, Any]]]
+    keys: Optional[Sequence[Union[Mapping[str, Any], str]]]
 
 
 class Proxy(BaseModel):

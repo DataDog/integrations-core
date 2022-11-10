@@ -128,7 +128,9 @@ files:
           - name: keys
             type: array
             items:
-              type: object
+              anyOf:
+                - type: object
+                - type: string
           - name: discovery
             type: object
             properties:
