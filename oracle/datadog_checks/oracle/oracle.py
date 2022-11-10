@@ -141,11 +141,6 @@ class Oracle(AgentCheck):
         else:
             self.service_check(self.SERVICE_CHECK_NAME, self.OK, tags=self._service_check_tags)
 
-    #1. Check if the cached connection
-    #2. Try JDBC first
-        # if import error log message and raise error
-        # if not error, connect using jdbc
-    #3.Try python-oracledb 
     @property
     def _connection(self):
         if self._cached_connection is None:
@@ -154,7 +149,7 @@ class Oracle(AgentCheck):
                     self._cached_connection = self._jdbc_connect()
                 except:
                     self.log.error(
-                    "The integration is unable to import JDBC libraries. You may not "
+                    "The integration is unable to import JDBC libraries. You might not "
                     "have the Microsoft Visual C++ Runtime 2015 installed on your system. Please double check your "
                     "installation and refer to the Datadog documentation for more information."
                 )
@@ -175,11 +170,11 @@ class Oracle(AgentCheck):
         self.log.debug("Connecting to Oracle with DSN: %s", dsn)
         try:
             connection = oracledb.connect(user=self._user, password=self._password, dsn=dsn)
-            self.log.debug("Connected to Oracle DB using Oracle Instant Client")
+            self.log.debug("Connected to Oracle DB using Python Oracle")
             return connection
         except oracledb.DatabaseError as e:
             self._connection_errors += 1
-            self.log.error("Failed to connect to Oracle DB using Oracle Instant Client, error: %s", str(e))
+            self.log.error("Failed to connect to Oracle DB using Python Oracle, error: %s", str(e))
             raise
 
     def _get_dsn(self):
