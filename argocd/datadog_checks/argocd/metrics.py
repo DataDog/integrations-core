@@ -72,7 +72,7 @@ REPO_SERVER = {
     'argocd_git_request_duration_seconds': 'git.request.duration.seconds',
     'argocd_git_request': 'git.request',
     'argocd_redis_request_duration_seconds': 'redis.request.duration.seconds',
-    'argocd_repo_pending_request': 'repo.pending.request',
+    'argocd_repo_pending_request_total': 'repo.pending.request.total',
 }
 
 APPLICATION_CONTROLLER_METRICS = [{**APPLICATION_CONTROLLER, **GENERAL_METRICS}]

@@ -59,6 +59,7 @@ def test_empty_instance(dd_run_check):
 
 def test_app_controller_service_check(dd_run_check, aggregator, mock_http_response):
     # Test for transformer. The prometheus source submits a 1 or 0. 1 being OK and 0 being CRITICAL.
+    # Anything else will be reported as UNKNOWN.
     mock_http_response(file_path=get_fixture_path('app_controller_metrics.txt'))
     check = ArgocdCheck('argocd', {}, [MOCKED_APP_CONTROLLER_INSTANCE])
     dd_run_check(check)
@@ -86,7 +87,8 @@ def test_app_controller_service_check(dd_run_check, aggregator, mock_http_respon
 
 
 @patch('datadog_checks.argocd.check.PY2', True)
-def test_py2(dd_run_check, aggregator):
+def test_py2(dd_run_check):
+    # Test to ensure that a ConfigurationError is raised when running with Python 2.
     try:
         check = ArgocdCheck('argocd', {}, [MOCKED_APP_CONTROLLER_INSTANCE])
         dd_run_check(check)

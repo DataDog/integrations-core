@@ -149,4 +149,4 @@ argocd.repo_server.redis.request.count,count,,request,,The number of kubernetes 
 argocd.repo_server.redis.request.duration.seconds.bucket,count,,second,,The Redis requests duration histogram buckets,0,argocd,repo_server redis request duration seconds bucket,
 argocd.repo_server.redis.request.duration.seconds.count,count,,second,,The count aggregation of the Redis requests duration histogram,0,argocd,repo_server redis request duration seconds count,
 argocd.repo_server.redis.request.duration.seconds.sum,count,,second,,The sum aggregation of the Redis requests duration histogram,0,argocd,repo_server redis request duration seconds sum,
-argocd.repo_server.repo.pending.request.count,count,,request,, The number of pending requests requiring repository lock,0,argocd,repo_server repo pending request,
+argocd.repo_server.repo.pending.request.total,gauge,,request,, The number of pending requests requiring repository lock,0,argocd,repo_server repo pending request,
