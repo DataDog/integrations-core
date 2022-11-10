@@ -29,7 +29,7 @@ classifiers = [
     "Private :: Do Not Upload",
 ]
 dependencies = [
-    "datadog-checks-base>=25.1.0",
+    "datadog-checks-base>25.1.0",
 ]
 dynamic = [
     "version",
@@ -40,8 +40,7 @@ text = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
-    "cx-oracle==7.3.0; python_version < '3.0'",
-    "cx-oracle==8.3.0; python_version > '3.0'",
+    "oracledb==1.1.1; python_version >= '3.6'",
     "jaydebeapi==1.2.3",
     "jpype1==0.7.0; python_version < '3.0'",
     "jpype1==1.4.0; python_version > '3.0'",

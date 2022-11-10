@@ -6,12 +6,8 @@ import threading
 from contextlib import closing
 
 from six import PY3
-if PY3:
-    import oracledb as cx_Oracle
-else:
-    import cx_Oracle
 
-import pdb
+import oracledb
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.utils.db import QueryManager
@@ -85,9 +81,6 @@ class Oracle(AgentCheck):
             tags=self._tags,
         )
 
-        # Runtime validations are only py3, so this is for manually validating config on py2
-        if not PY3:
-            self.check_initializations.append(self.validate_config)
         self.check_initializations.append(self._query_manager.compile_queries)
 
         self._query_errors = 0
@@ -108,26 +101,6 @@ class Oracle(AgentCheck):
                 for column in query.get('columns', []):
                     if column.get('type') != 'tag':
                         column['name'] = '{}.{}'.format(prefix, column['name'])
-
-    def validate_config(self):
-        if not self._server or not self._user:
-            raise ConfigurationError("Oracle host and user are needed")
-
-        if not self._protocol or self._protocol.upper() not in VALID_PROTOCOLS:
-            raise ConfigurationError("Protocol %s is not valid, must either be TCP or TCPS" % self._protocol)
-
-        if self._jdbc_driver and self._protocol.upper() == PROTOCOL_TCPS:
-            if not (self._jdbc_truststore_type and self._jdbc_truststore_path):
-                raise ConfigurationError(
-                    "TCPS connections to Oracle via JDBC requires both `jdbc_truststore_type` and "
-                    "`jdbc_truststore_path` configuration options "
-                )
-
-            if self._jdbc_truststore_type and self._jdbc_truststore_type.upper() not in VALID_TRUSTSTORE_TYPES:
-                raise ConfigurationError(
-                    "Truststore type %s is not valid, must be one of %s"
-                    % (self._jdbc_truststore_type, VALID_TRUSTSTORE_TYPES)
-                )
 
     def execute_query_raw(self, query):
         with closing(self._connection.cursor()) as cursor:
@@ -168,48 +141,43 @@ class Oracle(AgentCheck):
         else:
             self.service_check(self.SERVICE_CHECK_NAME, self.OK, tags=self._service_check_tags)
 
+    #1. Check if the cached connection
+    #2. Try JDBC first
+        # if import error log message and raise error
+        # if not error, connect using jdbc
+    #3.Try python-oracledb 
     @property
     def _connection(self):
-        """Creates a connection or raises an exception"""
-        pdb.set_trace()
         if self._cached_connection is None:
-            if self.can_use_oracle_client():
-                self._cached_connection = self._oracle_client_connect()
-            elif JDBC_IMPORT_ERROR:
-                self._connection_errors += 1
-                self.log.error(
-                    "Oracle client is unavailable and the integration is unable to import JDBC libraries. You may not "
+            if self.use_jdbc():
+                try:
+                    self._cached_connection = self._jdbc_connect()
+                except:
+                    self.log.error(
+                    "The integration is unable to import JDBC libraries. You may not "
                     "have the Microsoft Visual C++ Runtime 2015 installed on your system. Please double check your "
                     "installation and refer to the Datadog documentation for more information."
                 )
-                raise JDBC_IMPORT_ERROR
+                    raise JDBC_IMPORT_ERROR
             else:
-                self._cached_connection = self._jdbc_connect()
+                self._cached_connection = self._oracle_connect()
         return self._cached_connection
-
-    def can_use_oracle_client(self):
-        try:
-            # Check if the instantclient is available
-            if not PY3:
-                cx_Oracle.clientversion()            
-            else:
-                cx_Oracle.version
-        except cx_Oracle.DatabaseError as e:
-            # Fallback to JDBC
-            self.log.debug('Oracle instant client unavailable, falling back to JDBC: %s', e)
-            return False
-        else:
-            self.log.debug('Running cx_Oracle version %s', cx_Oracle.version)
+                    
+    def use_jdbc(self):
+        if self._jdbc_driver and not JDBC_IMPORT_ERROR:
             return True
+        else:
+            return False
 
-    def _oracle_client_connect(self):
+
+    def _oracle_connect(self):
         dsn = self._get_dsn()
         self.log.debug("Connecting to Oracle with DSN: %s", dsn)
         try:
-            connection = cx_Oracle.connect(user=self._user, password=self._password, dsn=dsn)
+            connection = oracledb.connect(user=self._user, password=self._password, dsn=dsn)
             self.log.debug("Connected to Oracle DB using Oracle Instant Client")
             return connection
-        except cx_Oracle.DatabaseError as e:
+        except oracledb.DatabaseError as e:
             self._connection_errors += 1
             self.log.error("Failed to connect to Oracle DB using Oracle Instant Client, error: %s", str(e))
             raise
@@ -231,7 +199,7 @@ class Oracle(AgentCheck):
             )
             return dsn
         else:
-            return cx_Oracle.makedsn(host, port, service_name=self._service)
+            return oracledb.makedsn(host, port, service_name=self._service)
 
     def _jdbc_connect(self):
         jdbc_connect_properties = {'user': self._user, 'password': self._password}
