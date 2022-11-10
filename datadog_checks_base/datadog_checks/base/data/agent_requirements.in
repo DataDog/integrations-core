@@ -18,8 +18,6 @@ clickhouse-driver==0.2.3; python_version > '3.0'
 contextlib2==0.6.0.post1; python_version < '3.0'
 cryptography==3.3.2; python_version < '3.0'
 cryptography==3.4.8; python_version > '3.0'
-cx-oracle==7.3.0; python_version < '3.0'
-cx-oracle==8.3.0; python_version > '3.0'
 ddtrace==0.32.2; sys_platform == 'win32' and python_version < '3.0'
 ddtrace==0.53.2; sys_platform != 'win32' or python_version > '3.0'
 dnspython==1.16.0
