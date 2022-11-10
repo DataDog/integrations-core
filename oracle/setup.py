@@ -67,7 +67,7 @@ setup(
         'Intended Audience :: Developers',
         'Intended Audience :: System Administrators',
         'Topic :: System :: Monitoring',
-        'License :: OSI Approved :: BSD License',,
+        'License :: OSI Approved :: BSD License',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.8',
     ],
