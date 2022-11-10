@@ -142,6 +142,20 @@ NOT_EXPOSED_METRICS = [
     'argocd.repo_server.redis.request.duration.seconds.sum',
 ]
 
+# Additional metrics that aren't exposed in the E2E environment
+E2E_NOT_EXPOSED_METRICS = [
+    'argocd.app_controller.app.k8s.request.count',
+    'argocd.app_controller.process.cpu.seconds.count',
+    'argocd.app_controller.app.sync.count',
+    'argocd.app_controller.cluster.events.count',
+    'argocd.app_controller.kubectl.exec.count',
+    'argocd.app_controller.app.info',
+    'argocd.app_controller.app.reconcile.bucket',
+    'argocd.app_controller.app.reconcile.count',
+    'argocd.app_controller.app.reconcile.sum',
+    'argocd.repo_server.repo.pending.request.total',
+]
+
 general = general_gauges + general_counters + general_summaries
 
 app_controller = app_controller_counters + app_controller_gauges + app_controller_histograms + general

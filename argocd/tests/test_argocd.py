@@ -95,3 +95,12 @@ def test_py2(dd_run_check):
     except Exception as e:
         assert type(e) == ConfigurationError
         assert "This version of the integration is only available when using py3" in str(e)
+
+
+
+def test_empty_scrapers(dd_run_check, aggregator, mock_http_response, mocker):
+    mock_http_response(file_path=get_fixture_path('app_controller_metrics.txt'))
+    check = ArgocdCheck('argocd', {}, [MOCKED_APP_CONTROLLER_INSTANCE])
+    # mocker.patch('datadog_checks.argocd.check.scrapers', return_value=[])
+    import pdb; pdb.set_trace()
+    check.configure_additional_transformers() 
