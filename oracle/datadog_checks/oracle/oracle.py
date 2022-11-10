@@ -145,7 +145,7 @@ class Oracle(AgentCheck):
             if self.use_jdbc():
                 try:
                     self._cached_connection = self._jdbc_connect()
-                except:
+                except Exception:
                     self.log.error(
                         "The integration is unable to import JDBC libraries. You might not "
                         "have the Microsoft Visual C++ Runtime 2015 installed on your system. Please double check your "
