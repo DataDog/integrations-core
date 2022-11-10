@@ -102,6 +102,7 @@ def tcps_instance():
 
 @pytest.fixture(scope='session')
 def dd_environment():
+    
     instance = {
         'server': '{}:{}'.format(HOST, PORT),
         'username': USER,

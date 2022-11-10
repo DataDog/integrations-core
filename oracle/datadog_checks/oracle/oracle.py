@@ -140,8 +140,6 @@ class Oracle(AgentCheck):
         else:
             self.service_check(self.SERVICE_CHECK_NAME, self.OK, tags=self._service_check_tags)
 
-    # check cached connection
-
     @property
     def _connection(self):
         if self._cached_connection is None:
@@ -163,7 +161,7 @@ class Oracle(AgentCheck):
                     "have the Microsoft Visual C++ Runtime 2015 installed on your system. Please double check your "
                     "installation and refer to the Datadog documentation for more information."
                 )
-                raise JDBC_IMPORT_ERROR
+                    raise JDBC_IMPORT_ERROR
             else:
                 return True
 

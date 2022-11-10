@@ -10,7 +10,6 @@ except ImportError:
     from contextlib2 import ExitStack
 
 import mock
-
 from datadog_checks.oracle import Oracle
 
 from .common import CHECK_NAME, mock_bad_executor
@@ -21,7 +20,7 @@ from .common import CHECK_NAME, mock_bad_executor
     [
         # TCP
         (
-            {
+            {   
                 'server': 'localhost:1521',
                 'username': 'system',
                 'password': 'oracle',
@@ -35,7 +34,7 @@ from .common import CHECK_NAME, mock_bad_executor
         ),
         # TCPS
         (
-            {
+            {   
                 'server': 'localhost:2484',
                 'username': 'system',
                 'password': 'oracle',
