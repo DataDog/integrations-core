@@ -120,9 +120,9 @@ def get_response(check, resource, **kwargs):
         if resource == 'build_config' or resource == 'teamcity_server_details':
             return json_payload
         elif not json_payload.get("count") or json_payload["count"] == 0:
-            check.log.trace("No results found for resource %s url: %s", resource_name, resource_url)
+            check.log.debug("No results found for resource %s url: %s", resource_name, resource_url)
         else:
-            check.log.trace("Results found for resource %s url: %s", resource_name, resource_url)
+            check.log.debug("Results found for resource %s url: %s", resource_name, resource_url)
             return json_payload
     except requests.exceptions.HTTPError:
         if resp.status_code == 401 or resp.status_code == 403:
