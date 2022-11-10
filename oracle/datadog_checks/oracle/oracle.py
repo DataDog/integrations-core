@@ -5,8 +5,6 @@ import itertools
 import threading
 from contextlib import closing
 
-from six import PY3
-
 import oracledb
 
 from datadog_checks.base import AgentCheck, ConfigurationError
@@ -149,21 +147,20 @@ class Oracle(AgentCheck):
                     self._cached_connection = self._jdbc_connect()
                 except:
                     self.log.error(
-                    "The integration is unable to import JDBC libraries. You might not "
-                    "have the Microsoft Visual C++ Runtime 2015 installed on your system. Please double check your "
-                    "installation and refer to the Datadog documentation for more information."
-                )
+                        "The integration is unable to import JDBC libraries. You might not "
+                        "have the Microsoft Visual C++ Runtime 2015 installed on your system. Please double check your "
+                        "installation and refer to the Datadog documentation for more information."
+                    )
                     raise JDBC_IMPORT_ERROR
             else:
                 self._cached_connection = self._oracle_connect()
         return self._cached_connection
-                    
+
     def use_jdbc(self):
         if self._jdbc_driver and not JDBC_IMPORT_ERROR:
             return True
         else:
             return False
-
 
     def _oracle_connect(self):
         dsn = self._get_dsn()
