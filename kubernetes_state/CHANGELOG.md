@@ -8,7 +8,7 @@
 
 * [Added] Add documentation for `kubernetes_state_core` core check. See [#12552](https://github.com/DataDog/integrations-core/pull/12552).
 
-## 7.3.1 / 2022-11-07
+## 7.3.1 / 2022-11-07 / Agent 7.40.1
 
 * [Fixed] Bump protobuf version to 3.20.2. See [#13269](https://github.com/DataDog/integrations-core/pull/13269).
 
