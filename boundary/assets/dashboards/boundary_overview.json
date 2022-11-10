@@ -410,7 +410,6 @@
                             "title": "Active Connections",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "query_value",
                             "requests": [
                                 {
@@ -594,151 +593,12 @@
         {
             "id": 5795964636204178,
             "definition": {
-                "title": "Logs",
+                "title": "Logins, Sessions and Target Audit Logs",
                 "type": "group",
                 "background_color": "vivid_green",
                 "show_title": true,
                 "layout_type": "ordered",
                 "widgets": [
-                    {
-                        "id": 2075404512063054,
-                        "definition": {
-                            "title": "",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "requests": [
-                                {
-                                    "query": {
-                                        "query_string": "source:boundary",
-                                        "sort": {
-                                            "column": "timestamp",
-                                            "order": "desc"
-                                        },
-                                        "data_source": "logs_stream",
-                                        "storage": "hot",
-                                        "indexes": []
-                                    },
-                                    "response_format": "event_list",
-                                    "columns": [
-                                        {
-                                            "field": "status_line",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "timestamp",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "host",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "service",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "content",
-                                            "width": "compact"
-                                        }
-                                    ]
-                                }
-                            ],
-                            "type": "list_stream"
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 0,
-                            "width": 12,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 8769239724627464,
-                        "definition": {
-                            "title": "Average Request Duration Time",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "query_table",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "alias": "Duration",
-                                            "conditional_formats": [],
-                                            "limit": {
-                                                "count": 625,
-                                                "order": "desc"
-                                            },
-                                            "cell_display_mode": "number",
-                                            "formula": "query3"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "queries": [
-                                        {
-                                            "search": {
-                                                "query": "source:boundary"
-                                            },
-                                            "data_source": "logs",
-                                            "compute": {
-                                                "metric": "@duration",
-                                                "aggregation": "avg"
-                                            },
-                                            "name": "query3",
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [
-                                                {
-                                                    "facet": "@http.url_details.path",
-                                                    "sort": {
-                                                        "metric": "@duration",
-                                                        "aggregation": "avg",
-                                                        "order": "desc"
-                                                    },
-                                                    "limit": 5
-                                                },
-                                                {
-                                                    "facet": "@network.client.ip",
-                                                    "sort": {
-                                                        "metric": "@duration",
-                                                        "aggregation": "avg",
-                                                        "order": "desc"
-                                                    },
-                                                    "limit": 5
-                                                },
-                                                {
-                                                    "facet": "host",
-                                                    "sort": {
-                                                        "metric": "@duration",
-                                                        "aggregation": "avg",
-                                                        "order": "desc"
-                                                    },
-                                                    "limit": 5
-                                                },
-                                                {
-                                                    "facet": "service",
-                                                    "sort": {
-                                                        "metric": "@duration",
-                                                        "aggregation": "avg",
-                                                        "order": "desc"
-                                                    },
-                                                    "limit": 5
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                }
-                            ],
-                            "has_search_bar": "auto"
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 4,
-                            "width": 12,
-                            "height": 4
-                        }
-                    },
                     {
                         "id": 8650733776619154,
                         "definition": {
@@ -754,7 +614,6 @@
                                 "value",
                                 "sum"
                             ],
-                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -763,32 +622,32 @@
                                             "formula": "query1"
                                         }
                                     ],
+                                    "response_format": "timeseries",
                                     "queries": [
                                         {
-                                            "data_source": "logs",
-                                            "name": "query1",
                                             "search": {
                                                 "query": "source:boundary @http.url_details.path:*authenticate @duration:*"
                                             },
-                                            "indexes": [
-                                                "*"
-                                            ],
+                                            "data_source": "logs",
                                             "compute": {
                                                 "aggregation": "count"
                                             },
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
                                             "group_by": [
                                                 {
                                                     "facet": "@http.status_code",
-                                                    "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
                                                         "order": "desc"
-                                                    }
+                                                    },
+                                                    "limit": 10
                                                 }
                                             ]
                                         }
                                     ],
-                                    "response_format": "timeseries",
                                     "style": {
                                         "palette": "dog_classic",
                                         "line_type": "solid",
@@ -801,7 +660,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 8,
+                            "y": 0,
                             "width": 6,
                             "height": 4
                         }
@@ -812,7 +671,6 @@
                             "title": "Logins",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "query_table",
                             "requests": [
                                 {
@@ -820,68 +678,68 @@
                                         {
                                             "alias": "Logins",
                                             "conditional_formats": [],
-                                            "cell_display_mode": "bar",
-                                            "formula": "query1",
                                             "limit": {
                                                 "count": 3125,
                                                 "order": "desc"
-                                            }
+                                            },
+                                            "cell_display_mode": "bar",
+                                            "formula": "query1"
                                         }
                                     ],
                                     "response_format": "scalar",
                                     "queries": [
                                         {
-                                            "data_source": "logs",
-                                            "name": "query1",
                                             "search": {
                                                 "query": "source:boundary @http.url_details.path:*authenticate"
                                             },
-                                            "indexes": [
-                                                "*"
-                                            ],
+                                            "data_source": "logs",
                                             "compute": {
                                                 "aggregation": "count"
                                             },
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
                                             "group_by": [
                                                 {
                                                     "facet": "@_timestamp",
-                                                    "limit": 5,
                                                     "sort": {
                                                         "aggregation": "count",
                                                         "order": "desc"
-                                                    }
+                                                    },
+                                                    "limit": 5
                                                 },
                                                 {
                                                     "facet": "@data.auth.user_info.id",
-                                                    "limit": 5,
                                                     "sort": {
                                                         "aggregation": "count",
                                                         "order": "desc"
-                                                    }
+                                                    },
+                                                    "limit": 5
                                                 },
                                                 {
                                                     "facet": "@data.request.details.Attrs.PasswordLoginAttributes.login_name",
-                                                    "limit": 5,
                                                     "sort": {
                                                         "aggregation": "count",
                                                         "order": "desc"
-                                                    }
+                                                    },
+                                                    "limit": 5
                                                 },
                                                 {
                                                     "facet": "@data.request.details.auth_method_id",
-                                                    "limit": 5,
                                                     "sort": {
                                                         "aggregation": "count",
                                                         "order": "desc"
-                                                    }
+                                                    },
+                                                    "limit": 5
                                                 },
                                                 {
                                                     "facet": "@http.status_code",
-                                                    "limit": 5,
                                                     "sort": {
                                                         "aggregation": "count",
                                                         "order": "desc"
-                                                    }
+                                                    },
+                                                    "limit": 5
                                                 }
                                             ]
                                         }
@@ -892,7 +750,7 @@
                         },
                         "layout": {
                             "x": 6,
-                            "y": 8,
+                            "y": 0,
                             "width": 6,
                             "height": 4
                         }
@@ -916,25 +774,25 @@
                                     "response_format": "scalar",
                                     "queries": [
                                         {
-                                            "data_source": "logs",
-                                            "name": "query1",
                                             "search": {
                                                 "query": "source:boundary @http.url_details.path:*authorize-session @duration:*"
                                             },
-                                            "indexes": [
-                                                "*"
-                                            ],
+                                            "data_source": "logs",
                                             "compute": {
                                                 "aggregation": "count"
                                             },
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
                                             "group_by": [
                                                 {
                                                     "facet": "@http.status_code",
-                                                    "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
                                                         "order": "desc"
-                                                    }
+                                                    },
+                                                    "limit": 10
                                                 }
                                             ]
                                         }
@@ -946,7 +804,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 12,
+                            "y": 4,
                             "width": 6,
                             "height": 3
                         }
@@ -1009,7 +867,7 @@
                         },
                         "layout": {
                             "x": 6,
-                            "y": 12,
+                            "y": 4,
                             "width": 6,
                             "height": 3
                         }
@@ -1029,7 +887,6 @@
                                 "value",
                                 "sum"
                             ],
-                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -1038,32 +895,32 @@
                                             "formula": "query1"
                                         }
                                     ],
+                                    "response_format": "timeseries",
                                     "queries": [
                                         {
-                                            "data_source": "logs",
-                                            "name": "query1",
                                             "search": {
                                                 "query": "source:boundary @http.url_details.path:*authorize-session @duration:*"
                                             },
-                                            "indexes": [
-                                                "*"
-                                            ],
+                                            "data_source": "logs",
                                             "compute": {
                                                 "aggregation": "count"
                                             },
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
                                             "group_by": [
                                                 {
                                                     "facet": "@http.status_code",
-                                                    "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
                                                         "order": "desc"
-                                                    }
+                                                    },
+                                                    "limit": 10
                                                 }
                                             ]
                                         }
                                     ],
-                                    "response_format": "timeseries",
                                     "style": {
                                         "palette": "dog_classic",
                                         "line_type": "solid",
@@ -1075,7 +932,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 15,
+                            "y": 7,
                             "width": 6,
                             "height": 3
                         }
@@ -1162,7 +1019,7 @@
                         },
                         "layout": {
                             "x": 6,
-                            "y": 15,
+                            "y": 7,
                             "width": 6,
                             "height": 3
                         }
@@ -1182,7 +1039,6 @@
                                 "value",
                                 "sum"
                             ],
-                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -1191,32 +1047,32 @@
                                             "formula": "query1"
                                         }
                                     ],
+                                    "response_format": "timeseries",
                                     "queries": [
                                         {
-                                            "data_source": "logs",
-                                            "name": "query1",
                                             "search": {
                                                 "query": "source:boundary @http.url_details.path:*authorize-session @duration:*"
                                             },
-                                            "indexes": [
-                                                "*"
-                                            ],
+                                            "data_source": "logs",
                                             "compute": {
                                                 "aggregation": "count"
                                             },
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
                                             "group_by": [
                                                 {
                                                     "facet": "@http.status_code",
-                                                    "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
                                                         "order": "desc"
-                                                    }
+                                                    },
+                                                    "limit": 10
                                                 }
                                             ]
                                         }
                                     ],
-                                    "response_format": "timeseries",
                                     "style": {
                                         "palette": "dog_classic",
                                         "line_type": "solid",
@@ -1228,9 +1084,9 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 18,
+                            "y": 10,
                             "width": 6,
-                            "height": 4
+                            "height": 3
                         }
                     },
                     {
@@ -1239,7 +1095,6 @@
                             "title": "Targets Accessed",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "query_table",
                             "requests": [
                                 {
@@ -1247,36 +1102,36 @@
                                         {
                                             "alias": "Times Accessed",
                                             "conditional_formats": [],
-                                            "cell_display_mode": "bar",
-                                            "formula": "query1",
                                             "limit": {
                                                 "count": 10,
                                                 "order": "desc"
-                                            }
+                                            },
+                                            "cell_display_mode": "bar",
+                                            "formula": "query1"
                                         }
                                     ],
                                     "response_format": "scalar",
                                     "queries": [
                                         {
-                                            "data_source": "logs",
-                                            "name": "query1",
                                             "search": {
                                                 "query": "source:boundary @http.url_details.path:*authorize-session @http.status_code:200"
                                             },
-                                            "indexes": [
-                                                "*"
-                                            ],
+                                            "data_source": "logs",
                                             "compute": {
                                                 "aggregation": "count"
                                             },
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
                                             "group_by": [
                                                 {
                                                     "facet": "@target.id",
-                                                    "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
                                                         "order": "desc"
-                                                    }
+                                                    },
+                                                    "limit": 10
                                                 }
                                             ]
                                         }
@@ -1287,9 +1142,9 @@
                         },
                         "layout": {
                             "x": 6,
-                            "y": 18,
+                            "y": 10,
                             "width": 6,
-                            "height": 4
+                            "height": 3
                         }
                     }
                 ],
@@ -1299,8 +1154,166 @@
                 "x": 0,
                 "y": 15,
                 "width": 12,
-                "height": 23,
+                "height": 14,
                 "is_column_break": true
+            }
+        },
+        {
+            "id": 6008605711045630,
+            "definition": {
+                "title": "Logs Stream",
+                "type": "group",
+                "background_color": "blue",
+                "show_title": true,
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 2075404512063054,
+                        "definition": {
+                            "title": "",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "query": {
+                                        "query_string": "source:boundary",
+                                        "sort": {
+                                            "column": "timestamp",
+                                            "order": "desc"
+                                        },
+                                        "data_source": "logs_stream",
+                                        "storage": "hot",
+                                        "indexes": []
+                                    },
+                                    "response_format": "event_list",
+                                    "columns": [
+                                        {
+                                            "field": "status_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "timestamp",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "host",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "service",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "content",
+                                            "width": "compact"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "type": "list_stream"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 12,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 8769239724627464,
+                        "definition": {
+                            "title": "Average Request Duration Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Duration",
+                                            "conditional_formats": [],
+                                            "limit": {
+                                                "count": 625,
+                                                "order": "desc"
+                                            },
+                                            "cell_display_mode": "number",
+                                            "formula": "query3"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "search": {
+                                                "query": "source:boundary"
+                                            },
+                                            "data_source": "logs",
+                                            "compute": {
+                                                "metric": "@duration",
+                                                "aggregation": "avg"
+                                            },
+                                            "name": "query3",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@http.url_details.path",
+                                                    "sort": {
+                                                        "metric": "@duration",
+                                                        "aggregation": "avg",
+                                                        "order": "desc"
+                                                    },
+                                                    "limit": 5
+                                                },
+                                                {
+                                                    "facet": "@network.client.ip",
+                                                    "sort": {
+                                                        "metric": "@duration",
+                                                        "aggregation": "avg",
+                                                        "order": "desc"
+                                                    },
+                                                    "limit": 5
+                                                },
+                                                {
+                                                    "facet": "host",
+                                                    "sort": {
+                                                        "metric": "@duration",
+                                                        "aggregation": "avg",
+                                                        "order": "desc"
+                                                    },
+                                                    "limit": 5
+                                                },
+                                                {
+                                                    "facet": "service",
+                                                    "sort": {
+                                                        "metric": "@duration",
+                                                        "aggregation": "avg",
+                                                        "order": "desc"
+                                                    },
+                                                    "limit": 5
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 3,
+                            "width": 12,
+                            "height": 4
+                        }
+                    }
+                ],
+                "template_variables": []
+            },
+            "layout": {
+                "x": 0,
+                "y": 29,
+                "width": 12,
+                "height": 8
             }
         }
     ],
