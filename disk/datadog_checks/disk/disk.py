@@ -173,11 +173,6 @@ class Disk(AgentCheck):
         device_specific_tags = self._get_device_specific_tags(device_name)
         tags.extend(device_specific_tags)
 
-        # apply device/mountpoint specific tags
-        for regex, device_tags in self._device_tag_re:
-            if regex.match(device_name):
-                tags.extend(device_tags)
-
         # apply device labels as tags (from blkid or lsblk).
         # we want to use the real device name and not the device_name (which can be the mountpoint)
         if self.devices_label.get(part.device):
