@@ -5,7 +5,13 @@ import pytest
 
 from datadog_checks.base.constants import ServiceCheck
 
-from .common import API_SERVER_METRICS, APP_CONTROLLER_METRICS, E2E_NOT_EXPOSED_METRICS ,NOT_EXPOSED_METRICS, REPO_SERVER_METRICS
+from .common import (
+    API_SERVER_METRICS,
+    APP_CONTROLLER_METRICS,
+    E2E_NOT_EXPOSED_METRICS,
+    NOT_EXPOSED_METRICS,
+    REPO_SERVER_METRICS,
+)
 
 
 @pytest.mark.e2e
