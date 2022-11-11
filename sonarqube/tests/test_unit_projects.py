@@ -10,7 +10,7 @@ from .common import HOST, METRICS, PORT
 pytestmark = [pytest.mark.unit]
 
 
-@mock.patch("datadog_checks.sonarqube.check.Api")
+@mock.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
 def test_service_check_critical(mock_api, aggregator, dd_run_check, sonarqube_check):
     # Given
     config = {
@@ -29,7 +29,7 @@ def test_service_check_critical(mock_api, aggregator, dd_run_check, sonarqube_ch
     )
 
 
-@mock.patch("datadog_checks.sonarqube.check.Api")
+@mock.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
 def test_version_none(mock_api, aggregator, dd_run_check, sonarqube_check):
     # Given
     config = {
@@ -50,7 +50,7 @@ def test_version_none(mock_api, aggregator, dd_run_check, sonarqube_check):
     )
 
 
-@mock.patch("datadog_checks.sonarqube.check.Api")
+@mock.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
 def test_service_check_ok(mock_api, aggregator, dd_run_check, sonarqube_check):
     # Given
     config = {
@@ -68,7 +68,7 @@ def test_service_check_ok(mock_api, aggregator, dd_run_check, sonarqube_check):
     )
 
 
-@mock.patch("datadog_checks.sonarqube.check.Api")
+@mock.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
 def test_tags(mock_api, aggregator, dd_run_check, sonarqube_check):
     # Given
     config = {
@@ -88,7 +88,7 @@ def test_tags(mock_api, aggregator, dd_run_check, sonarqube_check):
     )
 
 
-@mock.patch("datadog_checks.sonarqube.check.Api")
+@mock.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
 def test_empty_projects(mock_api, aggregator, dd_run_check, sonarqube_check):
     # Given
     config = {
@@ -111,7 +111,7 @@ def test_empty_projects(mock_api, aggregator, dd_run_check, sonarqube_check):
     )
 
 
-@mock.patch("datadog_checks.sonarqube.check.Api")
+@mock.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
 def test_default_tag_with_projects_type_dict(mock_api, aggregator, dd_run_check, sonarqube_check):
     # Given
     config = {
@@ -150,7 +150,7 @@ def test_default_tag_with_projects_type_dict(mock_api, aggregator, dd_run_check,
     )
 
 
-@mock.patch("datadog_checks.sonarqube.check.Api")
+@mock.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
 def test_default_tag_with_projects_type_str(mock_api, aggregator, dd_run_check, sonarqube_check):
     # Given
     config = {
@@ -187,7 +187,7 @@ def test_default_tag_with_projects_type_str(mock_api, aggregator, dd_run_check, 
     )
 
 
-@mock.patch("datadog_checks.sonarqube.check.Api")
+@mock.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
 def test_default_tag_overwritten(mock_api, aggregator, dd_run_check, sonarqube_check):
     # Given
     config = {
@@ -226,7 +226,7 @@ def test_default_tag_overwritten(mock_api, aggregator, dd_run_check, sonarqube_c
     )
 
 
-@mock.patch("datadog_checks.sonarqube.check.Api")
+@mock.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
 def test_project_tag(mock_api, aggregator, dd_run_check, sonarqube_check):
     # Given
     config = {
@@ -264,7 +264,7 @@ def test_project_tag(mock_api, aggregator, dd_run_check, sonarqube_check):
     )
 
 
-@mock.patch("datadog_checks.sonarqube.check.Api")
+@mock.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
 def test_default_metrics_limit(mock_api, aggregator, dd_run_check, sonarqube_check):
     # Given
     config = {
@@ -305,7 +305,7 @@ def test_default_metrics_limit(mock_api, aggregator, dd_run_check, sonarqube_che
     )
 
 
-@mock.patch("datadog_checks.sonarqube.check.Api")
+@mock.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
 def test_default_metrics_include(mock_api, aggregator, dd_run_check, sonarqube_check):
     # Given
     config = {
@@ -348,7 +348,7 @@ def test_default_metrics_include(mock_api, aggregator, dd_run_check, sonarqube_c
     )
 
 
-@mock.patch("datadog_checks.sonarqube.check.Api")
+@mock.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
 def test_default_metrics_exclude(mock_api, aggregator, dd_run_check, sonarqube_check):
     # Given
     config = {
@@ -389,7 +389,7 @@ def test_default_metrics_exclude(mock_api, aggregator, dd_run_check, sonarqube_c
     )
 
 
-@mock.patch("datadog_checks.sonarqube.check.Api")
+@mock.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
 def test_default_metrics_include_and_exclude(mock_api, aggregator, dd_run_check, sonarqube_check):
     # Given
     config = {
@@ -435,7 +435,7 @@ def test_default_metrics_include_and_exclude(mock_api, aggregator, dd_run_check,
     )
 
 
-@mock.patch("datadog_checks.sonarqube.check.Api")
+@mock.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
 def test_metrics_limit(mock_api, aggregator, dd_run_check, sonarqube_check):
     # Given
     config = {
@@ -477,7 +477,7 @@ def test_metrics_limit(mock_api, aggregator, dd_run_check, sonarqube_check):
     )
 
 
-@mock.patch("datadog_checks.sonarqube.check.Api")
+@mock.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
 def test_unexpected_measure(mock_api, aggregator, dd_run_check, sonarqube_check):
     # Given
     config = {
@@ -521,7 +521,7 @@ def test_unexpected_measure(mock_api, aggregator, dd_run_check, sonarqube_check)
     )
 
 
-@mock.patch("datadog_checks.sonarqube.check.Api")
+@mock.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
 def test_projects_discovery(mock_api, aggregator, dd_run_check, sonarqube_check):
     # Given
     config = {
@@ -579,7 +579,7 @@ def test_projects_discovery(mock_api, aggregator, dd_run_check, sonarqube_check)
     )
 
 
-@mock.patch("datadog_checks.sonarqube.check.Api")
+@mock.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
 def test_projects_discovery_with_include(mock_api, aggregator, dd_run_check, sonarqube_check):
     # Given
     config = {
@@ -639,7 +639,7 @@ def test_projects_discovery_with_include(mock_api, aggregator, dd_run_check, son
     )
 
 
-@mock.patch("datadog_checks.sonarqube.check.Api")
+@mock.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
 def test_projects_discovery_with_include_and_exclude(mock_api, aggregator, dd_run_check, sonarqube_check):
     # Given
     config = {
@@ -690,7 +690,7 @@ def test_projects_discovery_with_include_and_exclude(mock_api, aggregator, dd_ru
     )
 
 
-@mock.patch("datadog_checks.sonarqube.check.Api")
+@mock.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
 def test_projects_keys_and_discovery_with_exclude(mock_api, aggregator, dd_run_check, sonarqube_check):
     # Given
     config = {

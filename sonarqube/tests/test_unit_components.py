@@ -9,7 +9,7 @@ from .common import HOST, METRICS, PORT
 pytestmark = [pytest.mark.unit]
 
 
-@mock.patch("datadog_checks.sonarqube.check.Api")
+@mock.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
 def test_service_check_ok(mock_api, aggregator, dd_run_check, sonarqube_check):
     # Given
     config = {
@@ -23,7 +23,7 @@ def test_service_check_ok(mock_api, aggregator, dd_run_check, sonarqube_check):
     aggregator.assert_service_check('sonarqube.api_access', status=check.OK, tags=['endpoint:http://localhost:9000'])
 
 
-@mock.patch("datadog_checks.sonarqube.check.Api")
+@mock.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
 def test_tags(mock_api, aggregator, dd_run_check, sonarqube_check):
     # Given
     config = {
@@ -43,7 +43,7 @@ def test_tags(mock_api, aggregator, dd_run_check, sonarqube_check):
     )
 
 
-@mock.patch("datadog_checks.sonarqube.check.Api")
+@mock.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
 def test_empty_components(mock_api, aggregator, dd_run_check, sonarqube_check):
     # Given
     config = {
@@ -62,7 +62,7 @@ def test_empty_components(mock_api, aggregator, dd_run_check, sonarqube_check):
     aggregator.assert_service_check('sonarqube.api_access', status=check.OK, tags=['endpoint:http://localhost:9000'])
 
 
-@mock.patch("datadog_checks.sonarqube.check.Api")
+@mock.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
 def test_no_tag(mock_api, aggregator, dd_run_check, sonarqube_check):
     # Given
     config = {
@@ -92,7 +92,7 @@ def test_no_tag(mock_api, aggregator, dd_run_check, sonarqube_check):
     aggregator.assert_service_check('sonarqube.api_access', status=check.OK, tags=['endpoint:http://localhost:9000'])
 
 
-@mock.patch("datadog_checks.sonarqube.check.Api")
+@mock.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
 def test_default_tag(mock_api, aggregator, dd_run_check, sonarqube_check):
     # Given
     config = {
@@ -123,7 +123,7 @@ def test_default_tag(mock_api, aggregator, dd_run_check, sonarqube_check):
     aggregator.assert_service_check('sonarqube.api_access', status=check.OK, tags=['endpoint:http://localhost:9000'])
 
 
-@mock.patch("datadog_checks.sonarqube.check.Api")
+@mock.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
 def test_default_tag_overwritten(mock_api, aggregator, dd_run_check, sonarqube_check):
     # Given
     config = {
@@ -156,7 +156,7 @@ def test_default_tag_overwritten(mock_api, aggregator, dd_run_check, sonarqube_c
     aggregator.assert_service_check('sonarqube.api_access', status=check.OK, tags=['endpoint:http://localhost:9000'])
 
 
-@mock.patch("datadog_checks.sonarqube.check.Api")
+@mock.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
 def test_project_tag(mock_api, aggregator, dd_run_check, sonarqube_check):
     # Given
     config = {
@@ -188,7 +188,7 @@ def test_project_tag(mock_api, aggregator, dd_run_check, sonarqube_check):
     aggregator.assert_service_check('sonarqube.api_access', status=check.OK, tags=['endpoint:http://localhost:9000'])
 
 
-@mock.patch("datadog_checks.sonarqube.check.Api")
+@mock.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
 def test_components_with_default_exclude(mock_api, aggregator, dd_run_check, sonarqube_check):
     # Given
     config = {
@@ -224,7 +224,7 @@ def test_components_with_default_exclude(mock_api, aggregator, dd_run_check, son
     aggregator.assert_service_check('sonarqube.api_access', status=check.OK, tags=['endpoint:http://localhost:9000'])
 
 
-@mock.patch("datadog_checks.sonarqube.check.Api")
+@mock.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
 def test_components_with_exclude(mock_api, aggregator, dd_run_check, sonarqube_check):
     # Given
     config = {
@@ -264,7 +264,7 @@ def test_components_with_exclude(mock_api, aggregator, dd_run_check, sonarqube_c
     aggregator.assert_service_check('sonarqube.api_access', status=check.OK, tags=['endpoint:http://localhost:9000'])
 
 
-@mock.patch("datadog_checks.sonarqube.check.Api")
+@mock.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
 def test_components_with_default_include(mock_api, aggregator, dd_run_check, sonarqube_check):
     # Given
     config = {
@@ -300,7 +300,7 @@ def test_components_with_default_include(mock_api, aggregator, dd_run_check, son
     aggregator.assert_service_check('sonarqube.api_access', status=check.OK, tags=['endpoint:http://localhost:9000'])
 
 
-@mock.patch("datadog_checks.sonarqube.check.Api")
+@mock.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
 def test_components_with_include(mock_api, aggregator, dd_run_check, sonarqube_check):
     # Given
     config = {
@@ -340,7 +340,7 @@ def test_components_with_include(mock_api, aggregator, dd_run_check, sonarqube_c
     aggregator.assert_service_check('sonarqube.api_access', status=check.OK, tags=['endpoint:http://localhost:9000'])
 
 
-@mock.patch("datadog_checks.sonarqube.check.Api")
+@mock.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
 def test_components_with_include_and_exclude(mock_api, aggregator, dd_run_check, sonarqube_check):
     # Given
     config = {

@@ -1,7 +1,7 @@
 import inflection
 
 
-class Api:
+class SonarqubeAPI:
     def __init__(self, log, http, endpoint: str):
         self._log = log
         self._http = http
