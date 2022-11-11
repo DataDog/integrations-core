@@ -9,6 +9,7 @@ build-backend = "hatchling.build"
 name = "datadog-oracle"
 description = "The Oracle Database check"
 readme = "README.md"
+requires-python = ">=3.8"
 keywords = [
     "datadog",
     "datadog agent",
