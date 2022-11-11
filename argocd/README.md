@@ -146,7 +146,7 @@ Need help? Contact [Datadog support][9].
 [4]: https://docs.datadoghq.com/containers/kubernetes/integrations/?tab=kubernetesadv2
 [5]: https://docs.datadoghq.com/agent/kubernetes/log/
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[7]: https://github.com/DataDog/integrations-core/blob/master/check/metadata.csv
+[7]: https://github.com/DataDog/integrations-core/blob/master/argocd/metadata.csv
 [8]: https://github.com/DataDog/integrations-core/blob/master/check/assets/service_checks.json
 [9]: https://docs.datadoghq.com/help/
 [10]: https://argo-cd.readthedocs.io/en/stable/operator-manual/installation/
