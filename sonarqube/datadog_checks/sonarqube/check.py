@@ -7,8 +7,8 @@ from requests.exceptions import RequestException
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 
-from .sonarqube_api import SonarqubeAPI
 from .discovery_matcher import DiscoveryMatcher
+from .sonarqube_api import SonarqubeAPI
 
 
 class SonarqubeCheck(AgentCheck):
