@@ -1,6 +1,6 @@
 [
     {
-        "agent_version": "7.41.0",
+        "agent_version": "7.42.0",
         "integration": "ArgoCD",
         "check": "argocd.api_server.openmetrics.health",
         "statuses": [
