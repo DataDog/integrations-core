@@ -169,6 +169,10 @@ class Disk(AgentCheck):
         tags = [part.fstype, 'filesystem:{}'.format(part.fstype)] if self._tag_by_filesystem else []
         tags.extend(self._custom_tags)
 
+        # apply device-specific tags
+        device_specific_tags = self._get_device_specific_tags(device_name)
+        tags.extend(device_specific_tags)
+
         # apply device/mountpoint specific tags
         for regex, device_tags in self._device_tag_re:
             if regex.match(device_name):
@@ -321,6 +325,10 @@ class Disk(AgentCheck):
             self.log.debug('IO Counters: %s -> %s', disk_name, disk)
             try:
                 metric_tags = [] if self._custom_tags is None else self._custom_tags[:]
+
+                device_specific_tags = self._get_device_specific_tags(disk_name)
+                metric_tags.extend(device_specific_tags)
+
                 metric_tags.append('device:{}'.format(disk_name))
                 metric_tags.append('device_name:{}'.format(_base_device_name(disk_name)))
                 if self.devices_label.get(disk_name):
@@ -490,6 +498,15 @@ class Disk(AgentCheck):
                 )
 
         return devices_label
+
+    def _get_device_specific_tags(self, device_name):
+        device_specific_tags = []
+
+        # apply device/mountpoint specific tags
+        for regex, device_tags in self._device_tag_re:
+            if regex.match(device_name):
+                device_specific_tags.extend(device_tags)
+        return device_specific_tags
 
     def _create_manual_mounts(self):
         """
