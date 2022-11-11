@@ -29,7 +29,10 @@ def test_tags(mock_api, aggregator, dd_run_check, sonarqube_check):
     config = {
         'web_endpoint': 'http://{}:{}'.format(HOST, PORT),
         'components': {},
-        'tags': ['tag1:foo', 'tag2:bar'],
+        'tags': [
+            'tag1:foo',
+            'tag2:bar',
+        ],
     }
     check = sonarqube_check(config)
     # When
@@ -64,7 +67,9 @@ def test_no_tag(mock_api, aggregator, dd_run_check, sonarqube_check):
     # Given
     config = {
         'web_endpoint': 'http://{}:{}'.format(HOST, PORT),
-        'components': {'project1': {}},
+        'components': {
+            'project1': {},
+        },
     }
     mock_api.return_value.get_projects.return_value = ['project1']
     mock_api.return_value.get_metrics.return_value = [metric for metric in METRICS]
@@ -93,7 +98,9 @@ def test_default_tag(mock_api, aggregator, dd_run_check, sonarqube_check):
     config = {
         'web_endpoint': 'http://{}:{}'.format(HOST, PORT),
         'default_tag': 'project',
-        'components': {'project1': {}},
+        'components': {
+            'project1': {},
+        },
     }
     mock_api.return_value.get_projects.return_value = ['project1']
     mock_api.return_value.get_metrics.return_value = [metric for metric in METRICS]
@@ -122,7 +129,11 @@ def test_default_tag_overwritten(mock_api, aggregator, dd_run_check, sonarqube_c
     config = {
         'web_endpoint': 'http://{}:{}'.format(HOST, PORT),
         'default_tag': 'project',
-        'components': {'project1': {'tag': 'project1-tag'}},
+        'components': {
+            'project1': {
+                'tag': 'project1-tag',
+            },
+        },
     }
     mock_api.return_value.get_projects.return_value = ['project1']
     mock_api.return_value.get_metrics.return_value = [metric for metric in METRICS]
@@ -150,7 +161,11 @@ def test_project_tag(mock_api, aggregator, dd_run_check, sonarqube_check):
     # Given
     config = {
         'web_endpoint': 'http://{}:{}'.format(HOST, PORT),
-        'components': {'project1': {'tag': 'project1-tag'}},
+        'components': {
+            'project1': {
+                'tag': 'project1-tag',
+            },
+        },
     }
     mock_api.return_value.get_projects.return_value = ['project1']
     mock_api.return_value.get_metrics.return_value = [metric for metric in METRICS]
@@ -178,8 +193,12 @@ def test_components_with_default_exclude(mock_api, aggregator, dd_run_check, son
     # Given
     config = {
         'web_endpoint': 'http://{}:{}'.format(HOST, PORT),
-        'default_exclude': ['category2.'],
-        'components': {'project1': {}},
+        'default_exclude': [
+            'category2.',
+        ],
+        'components': {
+            'project1': {},
+        },
     }
     mock_api.return_value.get_version.return_value = '1.2.3.12345'
     mock_api.return_value.get_projects.return_value = ['project1']
@@ -210,8 +229,16 @@ def test_components_with_exclude(mock_api, aggregator, dd_run_check, sonarqube_c
     # Given
     config = {
         'web_endpoint': 'http://{}:{}'.format(HOST, PORT),
-        'default_exclude': ['category1.'],
-        'components': {'project1': {'exclude': ['category2.']}},
+        'default_exclude': [
+            'category1.',
+        ],
+        'components': {
+            'project1': {
+                'exclude': [
+                    'category2.',
+                ],
+            },
+        },
     }
     mock_api.return_value.get_version.return_value = '1.2.3.12345'
     mock_api.return_value.get_projects.return_value = ['project1']
@@ -242,8 +269,12 @@ def test_components_with_default_include(mock_api, aggregator, dd_run_check, son
     # Given
     config = {
         'web_endpoint': 'http://{}:{}'.format(HOST, PORT),
-        'default_include': ['category2.'],
-        'components': {'project1': {}},
+        'default_include': [
+            'category2.',
+        ],
+        'components': {
+            'project1': {},
+        },
     }
     mock_api.return_value.get_version.return_value = '1.2.3.12345'
     mock_api.return_value.get_projects.return_value = ['project1']
@@ -274,8 +305,16 @@ def test_components_with_include(mock_api, aggregator, dd_run_check, sonarqube_c
     # Given
     config = {
         'web_endpoint': 'http://{}:{}'.format(HOST, PORT),
-        'default_include': ['category1.'],
-        'components': {'project1': {'include': ['category2.']}},
+        'default_include': [
+            'category1.',
+        ],
+        'components': {
+            'project1': {
+                'include': [
+                    'category2.',
+                ],
+            },
+        },
     }
     mock_api.return_value.get_version.return_value = '1.2.3.12345'
     mock_api.return_value.get_projects.return_value = ['project1']
@@ -306,7 +345,16 @@ def test_components_with_include_and_exclude(mock_api, aggregator, dd_run_check,
     # Given
     config = {
         'web_endpoint': 'http://{}:{}'.format(HOST, PORT),
-        'components': {'project1': {'include': ['category1.'], 'exclude': ['category3.']}},
+        'components': {
+            'project1': {
+                'include': [
+                    'category1.',
+                ],
+                'exclude': [
+                    'category3.',
+                ],
+            },
+        },
     }
     mock_api.return_value.get_version.return_value = '1.2.3.12345'
     mock_api.return_value.get_projects.return_value = ['project1']
