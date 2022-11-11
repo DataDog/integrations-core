@@ -115,7 +115,7 @@ See the [Autodiscovery Integration Templates][3] for guidance on applying the pa
 
 | Parameter      | Value                                                |
 | -------------- | ---------------------------------------------------- |
-| `<LOG_CONFIG>` | `{"source": "istio", "service": "<SERVICE_NAME>"}`   |
+| `<LOG_CONFIG>` | `{"source": "argocd", "service": "<SERVICE_NAME>"}`   |
 
 ### Validation
 
