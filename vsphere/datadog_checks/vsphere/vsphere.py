@@ -108,23 +108,18 @@ class VSphereCheck(AgentCheck):
             raise
 
         if self._config.should_collect_tags:
-            try:
-                version_info = self.api.get_version()
-                major_version = int(version_info.version_str[0])
-                self.log.debug('Detected REST API version %s.', major_version)
+            version_info = self.api.get_version()
+            major_version = int(version_info.version_str[0])
+            self.log.debug('Detected REST API version %s.', major_version)
 
-                if major_version >= 7:
-                    try:
-                        # Try to connect to REST API vSphere v7
-                        self.api_rest = VSphereRestAPI(self._config, self.log, False)
-                        return
-                    except Exception as e:
-                        self.log.debug(
-                            "REST API of vSphere 7 not detected, falling back to the old API. Error: %s", str(e)
-                        )
-                self.api_rest = VSphereRestAPI(self._config, self.log, True)
-            except Exception as e:
-                self.log.error("Cannot connect to vCenter REST API. Tags won't be collected. Error: %s", e)
+            if major_version >= 7:
+                try:
+                    # Try to connect to REST API vSphere v7
+                    self.api_rest = VSphereRestAPI(self._config, self.log, False)
+                    return
+                except Exception as e:
+                    self.log.debug("REST API of vSphere 7 not detected, falling back to the old API. Error: %s", str(e))
+            self.api_rest = VSphereRestAPI(self._config, self.log, True)
 
     def refresh_metrics_metadata_cache(self):
         # type: () -> None
