@@ -1,4 +1,4 @@
-import inflection
+import re
 
 
 class SonarqubeAPI:
@@ -29,7 +29,16 @@ class SonarqubeAPI:
                 seen += 1
                 if not metric['hidden']:
                     if metric['type'] in ['INT', 'FLOAT', 'PERCENT', 'BOOL', 'MILLISEC', 'RATING']:
-                        metrics.append('{}.{}'.format(inflection.underscore(metric['domain']), metric['key']))
+                        snake_case_domain = (
+                            re.sub(
+                                r"([a-z\d])([A-Z])",
+                                r'\1_\2',
+                                re.sub(r"([A-Z]+)([A-Z][a-z])", r'\1_\2', metric['domain']),
+                            )
+                            .replace("-", "_")
+                            .lower()
+                        )
+                        metrics.append('{}.{}'.format(snake_case_domain, metric['key']))
                     else:
                         not_numeric += 1
                         self._log.debug("not_numeric metric: %s", metric)

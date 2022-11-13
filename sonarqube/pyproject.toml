@@ -40,7 +40,6 @@ text = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
-    "inflection==0.5.1; python_version > '3.0'",
 ]
 
 [project.urls]
