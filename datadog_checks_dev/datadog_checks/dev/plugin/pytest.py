@@ -300,9 +300,7 @@ def mock_performance_objects(mocker, dd_default_hostname):
 
                 if instance_name is None:
                     # Single counter
-                    counters[
-                        win32pdh.MakeCounterPath((server, object_name, None, None, 0, counter_name))
-                    ] = values[0]
+                    counters[win32pdh.MakeCounterPath((server, object_name, None, None, 0, counter_name))] = values[0]
                 else:
                     # Multiple instance counter
                     counter_path_wildcard = win32pdh.MakeCounterPath((server, object_name, '*', None, 0, counter_name))
