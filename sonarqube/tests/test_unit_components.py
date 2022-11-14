@@ -87,7 +87,7 @@ def test_no_tag(mock_api, aggregator, dd_run_check, sonarqube_check):
     )
     for metric, value in metrics_with_values:
         aggregator.assert_metric(
-            f'sonarqube.{metric}', value=value, tags=['endpoint:http://localhost:9000', 'component:project1']
+            'sonarqube.{}'.format(metric), value=value, tags=['endpoint:http://localhost:9000', 'component:project1']
         )
     aggregator.assert_service_check('sonarqube.api_access', status=check.OK, tags=['endpoint:http://localhost:9000'])
 
@@ -118,7 +118,7 @@ def test_default_tag(mock_api, aggregator, dd_run_check, sonarqube_check):
     )
     for metric, value in metrics_with_values:
         aggregator.assert_metric(
-            f'sonarqube.{metric}', value=value, tags=['endpoint:http://localhost:9000', 'project:project1']
+            'sonarqube.{}'.format(metric), value=value, tags=['endpoint:http://localhost:9000', 'project:project1']
         )
     aggregator.assert_service_check('sonarqube.api_access', status=check.OK, tags=['endpoint:http://localhost:9000'])
 
@@ -151,7 +151,7 @@ def test_default_tag_overwritten(mock_api, aggregator, dd_run_check, sonarqube_c
     )
     for metric, value in metrics_with_values:
         aggregator.assert_metric(
-            f'sonarqube.{metric}', value=value, tags=['endpoint:http://localhost:9000', 'project1-tag:project1']
+            'sonarqube.{}'.format(metric), value=value, tags=['endpoint:http://localhost:9000', 'project1-tag:project1']
         )
     aggregator.assert_service_check('sonarqube.api_access', status=check.OK, tags=['endpoint:http://localhost:9000'])
 
@@ -183,7 +183,7 @@ def test_project_tag(mock_api, aggregator, dd_run_check, sonarqube_check):
     )
     for metric, value in metrics_with_values:
         aggregator.assert_metric(
-            f'sonarqube.{metric}', value=value, tags=['endpoint:http://localhost:9000', 'project1-tag:project1']
+            'sonarqube.{}'.format(metric), value=value, tags=['endpoint:http://localhost:9000', 'project1-tag:project1']
         )
     aggregator.assert_service_check('sonarqube.api_access', status=check.OK, tags=['endpoint:http://localhost:9000'])
 
@@ -219,7 +219,7 @@ def test_components_with_default_exclude(mock_api, aggregator, dd_run_check, son
     )
     for metric, value in metrics_with_values:
         aggregator.assert_metric(
-            f'sonarqube.{metric}', value=value, tags=['endpoint:http://localhost:9000', 'component:project1']
+            'sonarqube.{}'.format(metric), value=value, tags=['endpoint:http://localhost:9000', 'component:project1']
         )
     aggregator.assert_service_check('sonarqube.api_access', status=check.OK, tags=['endpoint:http://localhost:9000'])
 
@@ -259,7 +259,7 @@ def test_components_with_exclude(mock_api, aggregator, dd_run_check, sonarqube_c
     )
     for metric, value in metrics_with_values:
         aggregator.assert_metric(
-            f'sonarqube.{metric}', value=value, tags=['endpoint:http://localhost:9000', 'component:project1']
+            'sonarqube.{}'.format(metric), value=value, tags=['endpoint:http://localhost:9000', 'component:project1']
         )
     aggregator.assert_service_check('sonarqube.api_access', status=check.OK, tags=['endpoint:http://localhost:9000'])
 
@@ -295,7 +295,7 @@ def test_components_with_default_include(mock_api, aggregator, dd_run_check, son
     )
     for metric, value in metrics_with_values:
         aggregator.assert_metric(
-            f'sonarqube.{metric}', value=value, tags=['endpoint:http://localhost:9000', 'component:project1']
+            'sonarqube.{}'.format(metric), value=value, tags=['endpoint:http://localhost:9000', 'component:project1']
         )
     aggregator.assert_service_check('sonarqube.api_access', status=check.OK, tags=['endpoint:http://localhost:9000'])
 
@@ -335,7 +335,7 @@ def test_components_with_include(mock_api, aggregator, dd_run_check, sonarqube_c
     )
     for metric, value in metrics_with_values:
         aggregator.assert_metric(
-            f'sonarqube.{metric}', value=value, tags=['endpoint:http://localhost:9000', 'component:project1']
+            'sonarqube.{}'.format(metric), value=value, tags=['endpoint:http://localhost:9000', 'component:project1']
         )
     aggregator.assert_service_check('sonarqube.api_access', status=check.OK, tags=['endpoint:http://localhost:9000'])
 
@@ -377,6 +377,6 @@ def test_components_with_include_and_exclude(mock_api, aggregator, dd_run_check,
     )
     for metric, value in metrics_with_values:
         aggregator.assert_metric(
-            f'sonarqube.{metric}', value=value, tags=['endpoint:http://localhost:9000', 'component:project1']
+            'sonarqube.{}'.format(metric), value=value, tags=['endpoint:http://localhost:9000', 'component:project1']
         )
     aggregator.assert_service_check('sonarqube.api_access', status=check.OK, tags=['endpoint:http://localhost:9000'])

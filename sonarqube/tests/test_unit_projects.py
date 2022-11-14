@@ -141,7 +141,7 @@ def test_default_tag_with_projects_type_dict(mock_api, aggregator, dd_run_check,
     )
     for metric, value in metrics_with_values:
         aggregator.assert_metric(
-            f'sonarqube.{metric}', value=value, tags=['endpoint:http://localhost:9000', 'project:project1']
+            'sonarqube.{}'.format(metric), value=value, tags=['endpoint:http://localhost:9000', 'project:project1']
         )
     aggregator.assert_service_check(
         'sonarqube.api_access',
@@ -178,7 +178,7 @@ def test_default_tag_with_projects_type_str(mock_api, aggregator, dd_run_check, 
     )
     for metric, value in metrics_with_values:
         aggregator.assert_metric(
-            f'sonarqube.{metric}', value=value, tags=['endpoint:http://localhost:9000', 'project:project1']
+            'sonarqube.{}'.format(metric), value=value, tags=['endpoint:http://localhost:9000', 'project:project1']
         )
     aggregator.assert_service_check(
         'sonarqube.api_access',
@@ -217,7 +217,7 @@ def test_default_tag_overwritten(mock_api, aggregator, dd_run_check, sonarqube_c
     )
     for metric, value in metrics_with_values:
         aggregator.assert_metric(
-            f'sonarqube.{metric}', value=value, tags=['endpoint:http://localhost:9000', 'project1-tag:project1']
+            'sonarqube.{}'.format(metric), value=value, tags=['endpoint:http://localhost:9000', 'project1-tag:project1']
         )
     aggregator.assert_service_check(
         'sonarqube.api_access',
@@ -255,7 +255,7 @@ def test_project_tag(mock_api, aggregator, dd_run_check, sonarqube_check):
     )
     for metric, value in metrics_with_values:
         aggregator.assert_metric(
-            f'sonarqube.{metric}', value=value, tags=['endpoint:http://localhost:9000', 'project1-tag:project1']
+            'sonarqube.{}'.format(metric), value=value, tags=['endpoint:http://localhost:9000', 'project1-tag:project1']
         )
     aggregator.assert_service_check(
         'sonarqube.api_access',
@@ -296,7 +296,7 @@ def test_default_metrics_limit(mock_api, aggregator, dd_run_check, sonarqube_che
     )
     for metric, value in metrics_with_values:
         aggregator.assert_metric(
-            f'sonarqube.{metric}', value=value, tags=['endpoint:http://localhost:9000', 'component:project1']
+            'sonarqube.{}'.format(metric), value=value, tags=['endpoint:http://localhost:9000', 'component:project1']
         )
     aggregator.assert_service_check(
         'sonarqube.api_access',
@@ -339,7 +339,7 @@ def test_default_metrics_include(mock_api, aggregator, dd_run_check, sonarqube_c
     )
     for metric, value in metrics_with_values:
         aggregator.assert_metric(
-            f'sonarqube.{metric}', value=value, tags=['endpoint:http://localhost:9000', 'component:project1']
+            'sonarqube.{}'.format(metric), value=value, tags=['endpoint:http://localhost:9000', 'component:project1']
         )
     aggregator.assert_service_check(
         'sonarqube.api_access',
@@ -380,7 +380,7 @@ def test_default_metrics_exclude(mock_api, aggregator, dd_run_check, sonarqube_c
     )
     for metric, value in metrics_with_values:
         aggregator.assert_metric(
-            f'sonarqube.{metric}', value=value, tags=['endpoint:http://localhost:9000', 'component:project1']
+            'sonarqube.{}'.format(metric), value=value, tags=['endpoint:http://localhost:9000', 'component:project1']
         )
     aggregator.assert_service_check(
         'sonarqube.api_access',
@@ -426,7 +426,7 @@ def test_default_metrics_include_and_exclude(mock_api, aggregator, dd_run_check,
     )
     for metric, value in metrics_with_values:
         aggregator.assert_metric(
-            f'sonarqube.{metric}', value=value, tags=['endpoint:http://localhost:9000', 'component:project1']
+            'sonarqube.{}'.format(metric), value=value, tags=['endpoint:http://localhost:9000', 'component:project1']
         )
     aggregator.assert_service_check(
         'sonarqube.api_access',
@@ -468,7 +468,7 @@ def test_metrics_limit(mock_api, aggregator, dd_run_check, sonarqube_check):
     )
     for metric, value in metrics_with_values:
         aggregator.assert_metric(
-            f'sonarqube.{metric}', value=value, tags=['endpoint:http://localhost:9000', 'component:project1']
+            'sonarqube.{}'.format(metric), value=value, tags=['endpoint:http://localhost:9000', 'component:project1']
         )
     aggregator.assert_service_check(
         'sonarqube.api_access',
@@ -512,7 +512,7 @@ def test_unexpected_measure(mock_api, aggregator, dd_run_check, sonarqube_check)
     )
     for metric, value in metrics_with_values:
         aggregator.assert_metric(
-            f'sonarqube.{metric}', value=value, tags=['endpoint:http://localhost:9000', 'component:project1']
+            'sonarqube.{}'.format(metric), value=value, tags=['endpoint:http://localhost:9000', 'component:project1']
         )
     aggregator.assert_service_check(
         'sonarqube.api_access',
@@ -557,7 +557,7 @@ def test_projects_discovery(mock_api, aggregator, dd_run_check, sonarqube_check)
     )
     for metric, value in metrics_with_values:
         aggregator.assert_metric(
-            f'sonarqube.{metric}',
+            'sonarqube.{}'.format(metric),
             value=value,
             tags=[
                 'endpoint:http://localhost:9000',
@@ -565,7 +565,7 @@ def test_projects_discovery(mock_api, aggregator, dd_run_check, sonarqube_check)
             ],
         )
         aggregator.assert_metric(
-            f'sonarqube.{metric}',
+            'sonarqube.{}'.format(metric),
             value=value,
             tags=[
                 'endpoint:http://localhost:9000',
@@ -617,7 +617,7 @@ def test_projects_discovery_with_include(mock_api, aggregator, dd_run_check, son
     )
     for metric, value in metrics_with_values:
         aggregator.assert_metric(
-            f'sonarqube.{metric}',
+            'sonarqube.{}'.format(metric),
             value=value,
             tags=[
                 'endpoint:http://localhost:9000',
@@ -625,7 +625,7 @@ def test_projects_discovery_with_include(mock_api, aggregator, dd_run_check, son
             ],
         )
         aggregator.assert_metric(
-            f'sonarqube.{metric}',
+            'sonarqube.{}'.format(metric),
             value=value,
             tags=[
                 'endpoint:http://localhost:9000',
@@ -676,7 +676,7 @@ def test_projects_discovery_with_include_and_exclude(mock_api, aggregator, dd_ru
     )
     for metric, value in metrics_with_values:
         aggregator.assert_metric(
-            f'sonarqube.{metric}',
+            'sonarqube.{}'.format(metric),
             value=value,
             tags=[
                 'endpoint:http://localhost:9000',
@@ -727,7 +727,7 @@ def test_projects_keys_and_discovery_with_exclude(mock_api, aggregator, dd_run_c
     )
     for metric, value in metrics_with_values:
         aggregator.assert_metric(
-            f'sonarqube.{metric}',
+            'sonarqube.{}'.format(metric),
             value=value,
             tags=[
                 'endpoint:http://localhost:9000',
