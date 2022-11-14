@@ -1,5 +1,4 @@
 import re
-from typing import List
 
 from datadog_checks.base import ConfigurationError
 
@@ -7,14 +6,14 @@ from datadog_checks.base import ConfigurationError
 class DiscoveryMatcher:
     def __init__(
         self,
-        name: str,
+        name,
         log,
-        config: dict,
-        mandatory: bool = True,
-        items_id: str = 'keys',
-        default_limit: int = 10,
-        default_include: list = None,
-        default_exclude: list = None,
+        config,
+        mandatory=True,
+        items_id='keys',
+        default_limit=10,
+        default_include=None,
+        default_exclude=None,
     ):
         self._log = log
         self._items_id = items_id
@@ -26,13 +25,13 @@ class DiscoveryMatcher:
         if self._config is None and mandatory:
             raise ConfigurationError('\'{}\' setting must be defined'.format(name))
 
-    def match(self, items: List[str]) -> List[tuple]:
+    def match(self, items):
         self._log.debug('trying to match: %s', items)
         matched_items = self._match_items(items)
         matched_items.extend(self._match_discovery(matched_items, items))
         return matched_items
 
-    def _match_items(self, items: List[str]) -> List[tuple]:
+    def _match_items(self, items):
         matched_id = []
         self._log.debug('matching items')
         self._log.debug('self._config: %s', self._config)
@@ -59,7 +58,7 @@ class DiscoveryMatcher:
                         self._log.debug('\'%s\' item was already matched', id_key)
         return matched_id
 
-    def _match_discovery(self, matched_items: List[tuple], items: List[str]):
+    def _match_discovery(self, matched_items, items):
         matched_discovery = []
         self._log.debug('matching discovery')
         self._log.debug('self._config: %s', self._config)
