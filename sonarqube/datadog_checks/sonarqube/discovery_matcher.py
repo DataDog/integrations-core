@@ -24,7 +24,7 @@ class DiscoveryMatcher:
         self._default_exclude = [] if default_exclude is None else default_exclude
         self._log.debug('\'%s\' config: %s', name, self._config)
         if self._config is None and mandatory:
-            raise ConfigurationError(f'\'{name}\' setting must be defined')
+            raise ConfigurationError('\'{}\' setting must be defined'.format(name))
 
     def match(self, items: List[str]) -> List[tuple]:
         self._log.debug('trying to match: %s', items)
