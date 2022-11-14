@@ -153,20 +153,11 @@ def test_device_tagging(aggregator, gauge_metrics, rate_metrics, count_metrics, 
         'device_label:mylab',
     ]
 
-    for name, value in iteritems(gauge_metrics):
-        aggregator.assert_metric(name, value=value, tags=tags)
-
-    for name, value in chain(iteritems(rate_metrics), iteritems(count_metrics)):
+    for name, value in chain(iteritems(gauge_metrics), iteritems(rate_metrics), iteritems(count_metrics)):
         aggregator.assert_metric(
             name,
             value=value,
-            tags=[
-                'device:{}'.format(DEFAULT_DEVICE_NAME),
-                'device_name:{}'.format(DEFAULT_DEVICE_BASE_NAME),
-                'optional:tags1',
-                'label:mylab',
-                'device_label:mylab',
-            ],
+            tags=tags,
         )
 
     aggregator.assert_all_metrics_covered()
