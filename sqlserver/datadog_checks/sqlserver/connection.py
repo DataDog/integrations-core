@@ -394,7 +394,7 @@ class Connection(object):
                 self.close_cursor(cursor)
 
         exists = False
-        if database.lower() in self.existing_databases:
+        if database and database.lower() in self.existing_databases:
             case_insensitive, cased_name = self.existing_databases[database.lower()]
             if case_insensitive or database == cased_name:
                 exists = True
@@ -465,16 +465,21 @@ class Connection(object):
         return dsn, host, username, password, database, driver
 
     def _get_host_with_port(self):
-        """Return a string with format host,port.
+        """Return a string with correctly formatted host and, if necessary, port.
         If the host string in the config contains a port, that port is used.
         If not, any port provided as a separate port config option is used.
         If the port is misconfigured or missing, default port is used.
+
+        In most cases, we return a string of host,port.
+        If the user provides a port value of 0, that indicates that they are
+        using a port autodiscovery service like Sql Server Browser Service. In
+        this case, we return just the host.
         """
         host = self.instance.get("host")
         if not host:
             return None
 
-        port = str(DEFAULT_CONN_PORT)
+        port = DEFAULT_CONN_PORT
         split_host, split_port = split_sqlserver_host_port(host)
         config_port = self.instance.get("port")
 
@@ -486,9 +491,15 @@ class Connection(object):
             int(port)
         except ValueError:
             self.log.warning("Invalid port %s; falling back to default 1433", port)
-            port = str(DEFAULT_CONN_PORT)
+            port = DEFAULT_CONN_PORT
 
-        return split_host + "," + port
+        # If the user provides a port of 0, they are indicating that they
+        # are using a port autodiscovery service, and we want their connection
+        # string to include just the host.
+        if int(port) == 0:
+            return split_host
+
+        return split_host + "," + str(port)
 
     def _conn_key(self, db_key, db_name=None, key_prefix=None):
         """Return a key to use for the connection cache"""

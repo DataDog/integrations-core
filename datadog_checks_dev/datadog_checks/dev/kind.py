@@ -19,7 +19,16 @@ else:
 
 
 @contextmanager
-def kind_run(sleep=None, endpoints=None, conditions=None, env_vars=None, wrappers=None, kind_config=None):
+def kind_run(
+    sleep=None,
+    endpoints=None,
+    conditions=None,
+    env_vars=None,
+    wrappers=None,
+    kind_config=None,
+    attempts=None,
+    attempts_wait=1,
+):
     """
     This utility provides a convenient way to safely set up and tear down Kind environments.
 
@@ -35,6 +44,10 @@ def kind_run(sleep=None, endpoints=None, conditions=None, env_vars=None, wrapper
     :param wrappers: A list of context managers to use during execution.
     :param kind_config: A path to a yaml file that contains the configuration for creating the kind cluster.
     :type kind_config: ``str``
+    :param attempts: Number of attempts to run `up` and the `conditions` successfully. Defaults to 2 in CI.
+    :type attempts: ``int``
+    :param attempts_wait: Time to wait between attempts.
+    :type attempts_wait: ``int``
     """
     if not which('kind'):
         pytest.skip('Kind not available')
@@ -63,6 +76,8 @@ def kind_run(sleep=None, endpoints=None, conditions=None, env_vars=None, wrapper
                 conditions=conditions,
                 env_vars=env_vars,
                 wrappers=wrappers,
+                attempts=attempts,
+                attempts_wait=attempts_wait,
             ):
                 yield kubeconfig_path
 

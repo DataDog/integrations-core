@@ -1,0 +1,14 @@
+[env.collectors.datadog-checks]
+
+[[envs.default.matrix]]
+python = ["27", "38"]
+version = ["4.13", "5.6"]
+
+[envs.default.overrides]
+matrix.version.env-vars = [
+  { key = "SQUID_VERSION", value = "4.13-21.04_beta", if = ["4.13"] },
+  { key = "SQUID_VERSION", value = "5.6-22.10_beta", if = ["5.6"] },
+]
+
+[envs.latest.env-vars]
+SQUID_VERSION = "latest"

@@ -26,6 +26,7 @@ classifiers = [
     "Programming Language :: Python :: 2.7",
     "Programming Language :: Python :: 3.8",
     "Topic :: System :: Monitoring",
+    "Private :: Do Not Upload",
 ]
 dependencies = [
     "datadog-checks-base>=27.1.0",
@@ -40,9 +41,9 @@ text = "BSD-3-Clause"
 [project.optional-dependencies]
 deps = [
     "gssapi==1.6.1; python_version < '3.0'",
-    "gssapi==1.8.1; python_version > '3.0'",
+    "gssapi==1.8.2; python_version > '3.0'",
     "kafka-python==2.0.2",
-    "kazoo==2.8.0",
+    "kazoo==2.9.0",
 ]
 
 [project.urls]

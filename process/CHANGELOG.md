@@ -1,5 +1,9 @@
 # CHANGELOG - process
 
+## 2.3.2 / 2022-10-28
+
+* [Fixed] Change log level to debug. See [#13080](https://github.com/DataDog/integrations-core/pull/13080). Thanks [rsafonseca](https://github.com/rsafonseca).
+
 ## 2.3.1 / 2022-08-05 / Agent 7.39.0
 
 * [Fixed] Dependency updates. See [#12653](https://github.com/DataDog/integrations-core/pull/12653).

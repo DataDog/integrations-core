@@ -89,8 +89,11 @@ def environment_run(
         attempts = 2
 
     if attempts is not None:
+        # This is only called in case the function failed
+        def after(retry_state):
+            down()
 
-        @retry(wait=wait_fixed(attempts_wait), stop=stop_after_attempt(attempts))
+        @retry(wait=wait_fixed(attempts_wait), stop=stop_after_attempt(attempts), after=after)
         def set_up_with_retry():
             return set_up()
 

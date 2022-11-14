@@ -51,15 +51,11 @@ SELECT
     waits_a.object_name,
     waits_a.index_name,
     waits_a.object_type,
-    waits_a.source,
-    socket.ip,
-    socket.port,
-    socket.event_name AS socket_event_name
+    waits_a.source
 FROM
     performance_schema.threads AS thread_a
     LEFT JOIN performance_schema.events_waits_current AS waits_a ON waits_a.thread_id = thread_a.thread_id
     LEFT JOIN performance_schema.events_statements_current AS statement ON statement.thread_id = thread_a.thread_id
-    LEFT JOIN performance_schema.socket_instances AS socket ON socket.thread_id = thread_a.thread_id
 WHERE
     thread_a.processlist_state IS NOT NULL
     AND thread_a.processlist_command != 'Sleep'
@@ -136,7 +132,8 @@ class MySQLActivity(DBMAsyncJob):
                     'Query activity and wait event collection is disabled on this host. To enable it, the setup '
                     'consumer `performance-schema-consumer-events-waits-current` must be enabled on the MySQL server. '
                     'Please refer to the troubleshooting documentation: '
-                    'https://docs.datadoghq.com/database_monitoring/setup_mysql/troubleshooting/',
+                    'https://docs.datadoghq.com/database_monitoring/setup_mysql/troubleshooting#%s',
+                    DatabaseConfigurationError.events_waits_current_not_enabled.value,
                     code=DatabaseConfigurationError.events_waits_current_not_enabled.value,
                     host=self._check.resolved_hostname,
                 ),

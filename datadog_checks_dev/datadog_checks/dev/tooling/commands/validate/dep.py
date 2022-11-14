@@ -198,7 +198,10 @@ def dep(check, require_base_check_version, min_base_check_version):
 
             if name not in agent_dependencies:
                 failed = True
-                message = f'Dependency needs to be synced: {name}'
+                message = (
+                    f'Dependency {name} found in the {check_name} integration requirements '
+                    'but not on the agent requirements, they should be synced.'
+                )
                 echo_failure(message)
                 annotate_error(req_source, message)
 

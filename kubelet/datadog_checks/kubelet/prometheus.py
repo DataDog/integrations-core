@@ -18,6 +18,9 @@ METRIC_TYPES = ['counter', 'gauge', 'summary']
 PRE_1_16_CONTAINER_LABELS = set(['namespace', 'name', 'image', 'id', 'container_name', 'pod_name'])
 POST_1_16_CONTAINER_LABELS = set(['namespace', 'name', 'image', 'id', 'container', 'pod'])
 
+# Value above which the figure can be discarded because it's an aberrant transient value
+MAX_MEMORY_RSS = 2**63
+
 
 class CadvisorPrometheusScraperMixin(object):
     """
@@ -553,6 +556,8 @@ class CadvisorPrometheusScraperMixin(object):
 
     def container_memory_rss(self, metric, scraper_config):
         metric_name = scraper_config['namespace'] + '.memory.rss'
+        # Filter out aberrant values
+        metric.samples = [sample for sample in metric.samples if sample[self.SAMPLE_VALUE] < MAX_MEMORY_RSS]
         self._process_container_metric('gauge', metric_name, metric, scraper_config)
 
     def container_memory_swap(self, metric, scraper_config):

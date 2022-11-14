@@ -37,9 +37,24 @@ class Path(_PathBase):
     def ensure_parent_dir_exists(self):
         self.parent.mkdir(parents=True, exist_ok=True)
 
+    def expand(self):
+        return Path(os.path.expanduser(os.path.expandvars(self)))
+
     def resolve(self, strict=False) -> Path:
         # https://bugs.python.org/issue38671
         return Path(os.path.realpath(self))
+
+    def read_text(self, **kwargs) -> str:
+        kwargs.setdefault('encoding', 'utf-8')
+        return super().read_text(**kwargs)
+
+    def write_text(self, *args, **kwargs) -> int:
+        kwargs.setdefault('encoding', 'utf-8')
+        return super().write_text(*args, **kwargs)
+
+    def open(self, **kwargs):
+        kwargs.setdefault('encoding', 'utf-8')
+        return super().open(**kwargs)
 
     def remove(self):
         if self.is_file():

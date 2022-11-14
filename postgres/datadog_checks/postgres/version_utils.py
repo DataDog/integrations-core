@@ -3,18 +3,17 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import re
 
-import semver
 from semver import VersionInfo
 
 from datadog_checks.base.log import get_check_logger
 
-V8_3 = VersionInfo(**semver.parse("8.3.0"))
-V9 = VersionInfo(**semver.parse("9.0.0"))
-V9_1 = VersionInfo(**semver.parse("9.1.0"))
-V9_2 = VersionInfo(**semver.parse("9.2.0"))
-V9_4 = VersionInfo(**semver.parse("9.4.0"))
-V9_6 = VersionInfo(**semver.parse("9.6.0"))
-V10 = VersionInfo(**semver.parse("10.0.0"))
+V8_3 = VersionInfo.parse("8.3.0")
+V9 = VersionInfo.parse("9.0.0")
+V9_1 = VersionInfo.parse("9.1.0")
+V9_2 = VersionInfo.parse("9.2.0")
+V9_4 = VersionInfo.parse("9.4.0")
+V9_6 = VersionInfo.parse("9.6.0")
+V10 = VersionInfo.parse("10.0.0")
 
 
 class VersionUtils(object):
@@ -43,7 +42,7 @@ class VersionUtils(object):
     def parse_version(raw_version):
         try:
             # Only works for MAJOR.MINOR.PATCH(-PRE_RELEASE)
-            return semver.parse_version_info(raw_version)
+            return VersionInfo.parse(raw_version)
         except ValueError:
             pass
         try:
@@ -58,7 +57,7 @@ class VersionUtils(object):
             match = re.match(r'(\d+)([a-zA-Z]+)(\d+)', raw_version)
             if match:
                 version = list(match.groups())
-                return semver.parse_version_info('{}.0.0-{}.{}'.format(*version))
+                return VersionInfo.parse('{}.0.0-{}.{}'.format(*version))
         raise Exception("Cannot determine which version is {}".format(raw_version))
 
     @staticmethod

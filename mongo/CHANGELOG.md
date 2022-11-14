@@ -1,5 +1,9 @@
 # CHANGELOG - mongo
 
+## 4.0.4 / 2022-10-28
+
+* [Fixed] Update dependencies. See [#13207](https://github.com/DataDog/integrations-core/pull/13207).
+
 ## 4.0.3 / 2022-09-29
 
 * [Fixed] Fix collection of `fsyncLocked` metric when configured database is not `admin`. See [#13020](https://github.com/DataDog/integrations-core/pull/13020).

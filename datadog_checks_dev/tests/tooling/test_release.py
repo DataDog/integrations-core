@@ -1,11 +1,19 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+
 import mock
 import pytest
+from click.testing import CliRunner
 
 from datadog_checks.dev.errors import ManifestError
-from datadog_checks.dev.tooling.release import get_agent_requirement_line, get_folder_name, get_package_name
+from datadog_checks.dev.fs import read_file_lines
+from datadog_checks.dev.tooling.release import (
+    get_agent_requirement_line,
+    get_folder_name,
+    get_package_name,
+    update_agent_requirements,
+)
 
 
 def test_get_package_name():
@@ -42,3 +50,40 @@ def test_get_agent_requirement_line():
         load.return_value = {"supported_os": ["linux", "mac_os"]}
         res = get_agent_requirement_line('foo', '1.2.3')
         assert res == "datadog-foo==1.2.3; sys_platform != 'win32'"
+
+
+@pytest.mark.parametrize(
+    'check,new_version,expected_result',
+    [
+        (
+            "activemq",
+            "2.4.0",
+            [
+                "datadog-activemq-xml==2.2.0\n",
+                "datadog-activemq==2.4.0\n",
+                "datadog-zk==1.0.0\n",
+            ],
+        ),
+        (
+            "impala",
+            "1.0.0",
+            [
+                "datadog-activemq-xml==2.2.0\n",
+                "datadog-activemq==2.3.1\n",
+                "datadog-impala==1.0.0\n",
+                "datadog-zk==1.0.0\n",
+            ],
+        ),
+    ],
+    ids=["existing_integration", "new_integration"],
+)
+def test_update_agent_requirements(check, new_version, expected_result):
+    with CliRunner().isolated_filesystem():
+        with open('requirements-agent-release.txt', 'w') as file:
+            file.write("datadog-activemq-xml==2.2.0\n")
+            file.write("datadog-activemq==2.3.1\n")
+            file.write("datadog-zk==1.0.0\n")
+
+        update_agent_requirements('requirements-agent-release.txt', check, "datadog-{}=={}".format(check, new_version))
+
+        assert read_file_lines('requirements-agent-release.txt') == expected_result

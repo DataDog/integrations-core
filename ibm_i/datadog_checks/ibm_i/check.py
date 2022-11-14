@@ -37,12 +37,15 @@ class IbmICheck(AgentCheck, ConfigMixin):
         try:
             self.query_manager.execute()
             check_status = AgentCheck.OK
+            hostname = self._query_manager.hostname
         except AttributeError as e:
             self.warning('Could not set up query manager, skipping check run: %s', e)
-            check_status = None
+            check_status = AgentCheck.CRITICAL
+            hostname = self.config.hostname if self.config else None
         except Exception as e:
             self._delete_connection_subprocess(e)
             check_status = AgentCheck.CRITICAL
+            hostname = self.config.hostname if self.config else None
 
         # At least one query failed, set the service check as failing
         if self._current_errors:
@@ -52,8 +55,8 @@ class IbmICheck(AgentCheck, ConfigMixin):
             self.service_check(
                 self.SERVICE_CHECK_NAME,
                 check_status,
-                tags=self.config.tags,
-                hostname=self._query_manager.hostname,
+                tags=self.config.tags if self.config else [],
+                hostname=hostname,
             )
 
     def cancel(self):

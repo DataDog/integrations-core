@@ -2,23 +2,36 @@
 
 ## Overview
 
-This check monitors Amazon Managed Streaming for Apache Kafka ([Amazon MSK][1]) through the Datadog Agent.
+Amazon Managed Streaming for Apache Kafka (MSK) is a fully managed service that makes it easy to build and run applications that use Apache Kafka to process streaming data.
+
+You can collect metrics from this integration in two ways-with the [Datadog Agent](#setup) or with a [Crawler][18] that collects metrics from CloudWatch. 
 
 ## Setup
+
+The Agent check monitors Amazon Managed Streaming for Apache Kafka ([Amazon MSK][1]) through the Datadog Agent.
 
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying these instructions.
 
 ### Installation
 
-1. [Create a client machine][3] if one does not already exist
-2. Ensure the client machine has been [granted][4] the permission policy [arn:aws:iam::aws:policy/AmazonMSKReadOnlyAccess][5] or equivalent [credentials][6] are available
+1. [Create a client machine][3] if one does not already exist.
+2. Ensure the client machine has been [granted][4] the permission policy [arn:aws:iam::aws:policy/AmazonMSKReadOnlyAccess][5] or equivalent [credentials][6] are available.
 3. Enable [open monitoring with Prometheus][7] on the MSK side to enable the JmxExporter and the NodeExporter.
-4. Install the [Datadog Agent][8] on the client machine just created
+4. Install the [Datadog Agent][8] on the client machine just created.
 
 ### Configuration
 
+1. Edit the `amazon_msk.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Amazon MSK performance data. 
 
-1. Edit the `amazon_msk.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Amazon MSK performance data. See the [sample amazon_msk.d/conf.yaml][9] for all available configuration options.
+   Include custom [tags][17] that attach to every metric and service check provided by this integration.
+
+   ```
+   tags:
+     - <KEY_1>:<VALUE_1>
+     - <KEY_2>:<VALUE_2>
+   ```
+   
+   See the [sample amazon_msk.d/conf.yaml][9] for all available configuration options.
 
    **Note**: This is the default OpenMetrics check example. If you previously implemented this integration, see the [legacy example][10].
 
@@ -46,6 +59,12 @@ See [service_checks.json][14] for a list of service checks provided by this inte
 
 Need help? Contact [Datadog support][15].
 
+## Further Reading
+
+Additional helpful documentation, links, and articles:
+
+- [Monitor Amazon Managed Streaming for Apache Kafka with Datadog][16]
+
 [1]: https://aws.amazon.com/msk
 [2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [3]: https://docs.aws.amazon.com/msk/latest/developerguide/create-client-machine.html
@@ -61,3 +80,6 @@ Need help? Contact [Datadog support][15].
 [13]: https://github.com/DataDog/integrations-core/blob/master/amazon_msk/metadata.csv
 [14]: https://github.com/DataDog/integrations-core/blob/master/amazon_msk/assets/service_checks.json
 [15]: https://docs.datadoghq.com/help/
+[16]: https://www.datadoghq.com/blog/monitor-amazon-msk/
+[17]: https://docs.datadoghq.com/getting_started/tagging/
+[18]: https://docs.datadoghq.com/integrations/amazon_msk

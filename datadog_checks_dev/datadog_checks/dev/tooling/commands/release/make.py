@@ -5,7 +5,7 @@ import os
 from contextlib import suppress
 
 import click
-from semver import finalize_version, parse_version_info
+from semver import VersionInfo, finalize_version
 
 from ...constants import BETA_PACKAGES, NOT_CHECKS, VERSION_BUMP, get_agent_release_requirements
 from ...git import get_current_branch, git_commit
@@ -110,8 +110,8 @@ def make(ctx, checks, version, end, initial_release, skip_sign, sign_only, exclu
                         version = VERSION_BUMP[method](prev_version)
                         prev_version = version
 
-            p_version = parse_version_info(version)
-            p_current = parse_version_info(cur_version)
+            p_version = VersionInfo.parse(version)
+            p_current = VersionInfo.parse(cur_version)
             if p_version <= p_current:
                 if initial_release:
                     continue

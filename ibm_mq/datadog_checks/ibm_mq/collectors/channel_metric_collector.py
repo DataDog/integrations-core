@@ -76,7 +76,7 @@ class ChannelMetricCollector(object):
 
         # Grab all the discoverable channels
         if self.config.auto_discover_channels:
-            self._submit_channel_status(queue_manager, '*', self.config.tags_no_channel)
+            self._submit_channel_status(queue_manager, '*', self.config.tags_no_channel, self.config.channels)
 
     def _discover_channels(self, queue_manager):
         """Discover all channels"""

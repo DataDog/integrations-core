@@ -1,6 +1,6 @@
 # CHANGELOG - rabbitmq
 
-## 3.2.0 / 2022-09-16
+## 3.2.0 / 2022-09-16 / Agent 7.40.0
 
 * [Added] Add new metric to track size of queues in bytes. See [#12869](https://github.com/DataDog/integrations-core/pull/12869).
 * [Added] Update HTTP config spec templates. See [#12890](https://github.com/DataDog/integrations-core/pull/12890).

@@ -166,7 +166,12 @@ def test_will_fail_for_wrong_parameters_in_the_connection_string(instance_minima
 @pytest.mark.parametrize(
     'host, port, expected_host',
     [
-        pytest.param('1.2.3.4', '22', '1.2.3.4,22', id='if port provided as a config option, it should be recognized'),
+        pytest.param(
+            '1.2.3.4', 22, '1.2.3.4,22', id='if port provided as a config option as an int, it should be recognized'
+        ),
+        pytest.param(
+            '1.2.3.4', '22', '1.2.3.4,22', id='if port provided as a config option as a string, it should be recognized'
+        ),
         pytest.param('1.2.3.4', 'mcnugget', '1.2.3.4,1433', id='if port is not numeric, it should use default port'),
         pytest.param(
             '1.2.3.4,mcnugget',
@@ -180,12 +185,29 @@ def test_will_fail_for_wrong_parameters_in_the_connection_string(instance_minima
             '1.2.3.4,22',
             id='if port is provided as part of host, it should be recognized',
         ),
-        pytest.param('1.2.3.4', None, '1.2.3.4,1433', id='if no port is provided anywhere, should default to 1433'),
+        pytest.param(
+            '1.2.3.4',
+            None,
+            '1.2.3.4,1433',
+            id='if no port is provided anywhere, should default to 1433',
+        ),
         pytest.param(
             '1.2.3.4,35',
             22,
             '1.2.3.4,35',
             id='if port is provided and included in host string, host port is used',
+        ),
+        pytest.param(
+            '1.2.3.4,0',
+            None,
+            '1.2.3.4',
+            id='if port provided in host string is 0, return a string with only host',
+        ),
+        pytest.param(
+            '1.2.3.4',
+            0,
+            '1.2.3.4',
+            id='if port provided via port config option is 0, return a string with only host',
         ),
     ],
 )

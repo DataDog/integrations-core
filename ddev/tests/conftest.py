@@ -1,13 +1,18 @@
 # (C) Datadog, Inc. 2022-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from __future__ import annotations
+
 import os
+import random
 from typing import Generator
 
 import pytest
+from click.testing import CliRunner as __CliRunner
 
-from ddev.config.constants import ConfigEnvVars
+from ddev.config.constants import AppEnvVars, ConfigEnvVars
 from ddev.config.file import ConfigFile
+from ddev.repo.core import Repository
 from ddev.utils.ci import running_in_ci
 from ddev.utils.fs import Path, temp_directory
 from ddev.utils.platform import Platform
@@ -15,9 +20,63 @@ from ddev.utils.platform import Platform
 PLATFORM = Platform()
 
 
+class ClonedRepo:
+    def __init__(self, path: Path, original_branch: str, testing_branch: str):
+        self.path = path
+        self.original_branch = original_branch
+        self.testing_branch = testing_branch
+
+    def reset_branch(self):
+        with self.path.as_cwd():
+            # Hard reset
+            PLATFORM.check_command_output(['git', 'checkout', '-fB', self.testing_branch, self.original_branch])
+
+            # Remove untracked files
+            PLATFORM.check_command_output(['git', 'clean', '-fd'])
+
+    @staticmethod
+    def new_branch():
+        return os.urandom(10).hex()
+
+
+class CliRunner(__CliRunner):
+    def __init__(self, command):
+        super().__init__()
+        self._command = command
+
+    def __call__(self, *args, **kwargs):
+        # Exceptions should always be handled
+        kwargs.setdefault('catch_exceptions', False)
+
+        return self.invoke(self._command, args, **kwargs)
+
+
+@pytest.fixture(scope='session')
+def ddev():
+    from ddev import cli
+
+    return CliRunner(cli.ddev)
+
+
+@pytest.fixture(scope='session')
+def platform() -> Platform:
+    return PLATFORM
+
+
 @pytest.fixture(scope='session')
 def local_repo() -> Path:
     return Path(__file__).resolve().parent.parent.parent
+
+
+@pytest.fixture(scope='session')
+def valid_integrations(local_repo) -> list[str]:
+    repo = Repository(local_repo.name, str(local_repo))
+    return [path.name for path in repo.integrations.iter_all()]
+
+
+@pytest.fixture
+def valid_integration(valid_integrations) -> str:
+    return random.choice(valid_integrations)
 
 
 @pytest.fixture(autouse=True)
@@ -32,29 +91,35 @@ def config_file(tmp_path) -> ConfigFile:
 @pytest.fixture(scope='session', autouse=True)
 def isolation() -> Generator[Path, None, None]:
     with temp_directory() as d:
-        with d.as_cwd():
+        default_env_vars = {AppEnvVars.NO_COLOR: '1'}
+        with d.as_cwd(default_env_vars):
             yield d
 
 
 @pytest.fixture(scope='session')
-def local_clone(isolation, local_repo) -> Generator[Path, None, None]:
-    cloned_repo = isolation / local_repo.name
+def local_clone(isolation, local_repo) -> Generator[ClonedRepo, None, None]:
+    cloned_repo_path = isolation / local_repo.name
 
-    PLATFORM.check_command_output(['git', 'clone', '--local', '--shared', str(local_repo), str(cloned_repo)])
+    PLATFORM.check_command_output(['git', 'clone', '--local', '--shared', str(local_repo), str(cloned_repo_path)])
+    with cloned_repo_path.as_cwd():
+        PLATFORM.check_command_output(['git', 'config', 'user.name', 'Foo Bar'])
+        PLATFORM.check_command_output(['git', 'config', 'user.email', 'foo@bar.baz'])
+
+    cloned_repo = ClonedRepo(cloned_repo_path, 'origin/master', 'ddev-testing')
+    cloned_repo.reset_branch()
 
     yield cloned_repo
 
 
 @pytest.fixture
-def repository(local_clone, config_file) -> Generator[Path, None, None]:
-    config_file.model.repos['core'] = str(local_clone)
+def repository(local_clone, config_file) -> Generator[ClonedRepo, None, None]:
+    config_file.model.repos['core'] = str(local_clone.path)
     config_file.save()
 
-    with local_clone.as_cwd():
-        try:
-            yield local_clone
-        finally:
-            PLATFORM.check_command_output(['git', 'reset', '--hard'])
+    try:
+        yield local_clone
+    finally:
+        local_clone.reset_branch()
 
 
 @pytest.fixture(scope='session')

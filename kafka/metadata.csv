@@ -6,15 +6,18 @@ kafka.net.processor.avg.idle.pct.rate,gauge,10,fraction,,Average fraction of tim
 kafka.messages_in.rate,gauge,10,message,,Incoming message rate.,0,kafka,messages in,cpu
 kafka.request.channel.queue.size,gauge,10,request,,Number of queued requests.,-1,kafka,req channel queue size,
 kafka.request.fetch_consumer.time.avg,gauge,10,millisecond,,Total time in ms to serve the specified request.,0,kafka,req fetch time avg,memory
+kafka.request.fetch_consumer.rate,gauge,10,request,,Fetch consumer requests rate.,0,kafka,req fetch consumer,
 kafka.request.fetch_consumer.time.99percentile,gauge,10,millisecond,,Total time in ms to serve the specified request.,0,kafka,req fetch time 99,
-kafka.request.fetch.failed.rate,gauge,10,request,,Number of client fetch request failures.,-1,kafka,req fetch fail,
+kafka.request.fetch.failed.rate,gauge,10,request,,Client fetch request failures rate.,-1,kafka,req fetch fail,
 kafka.request.fetch_follower.time.avg,gauge,10,millisecond,,Total time in ms to serve the specified request.,-1,kafka,req fetch follower avg,
 kafka.request.fetch_follower.time.99percentile,gauge,10,millisecond,,Total time in ms to serve the specified request.,-1,kafka,req fetch follower 99,
+kafka.request.fetch_follower.rate,gauge,10,request,,Fetch follower requests rate.,0,kafka,req fetch follower,
 kafka.request.fetch_request_purgatory.size,gauge,10,request,,Number of requests waiting in the producer purgatory.,0,kafka,req fetch purgatory,
 kafka.request.handler.avg.idle.pct.rate,gauge,10,fraction,,Average fraction of time the request handler threads are idle.,1,kafka,req handle avg idle,
 kafka.request.produce.time.avg,gauge,10,millisecond,,Average time for a produce request.,0,kafka,req prod time avg,cpu
 kafka.request.produce.time.99percentile,gauge,10,millisecond,,Time for produce requests for 99th percentile.,0,kafka,req prod time 99,cpu
-kafka.request.produce.failed.rate,gauge,10,request,,Number of failed produce requests.,-1,kafka,req prod fail,
+kafka.request.produce.failed.rate,gauge,10,request,,Failed produce requests rate.,-1,kafka,req prod fail,
+kafka.request.produce.rate,gauge,10,request,,Produce requests rate.,0,kafka,req prod,
 kafka.request.producer_request_purgatory.size,gauge,10,request,,Number of requests waiting in the producer purgatory,0,kafka,req prod purgatory,
 kafka.request.update_metadata.time.avg,gauge,10,millisecond,,Average time for a request to update metadata.,0,kafka,req update meta time avg,
 kafka.request.update_metadata.time.99percentile,gauge,10,millisecond,,Time for update metadata requests for 99th percentile.,0,kafka,req update meta time 99,

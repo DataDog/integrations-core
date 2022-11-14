@@ -411,7 +411,7 @@ jmx_metrics:
             alias: kafka.request.produce.failed.rate
     - include:
         domain: 'kafka.network'
-        bean: 'kafka.network:type=RequestMetrics,name=RequestsPerSec,request=Produce'
+        bean_regex: 'kafka.network:type=RequestMetrics,name=RequestsPerSec,request=Produce(?:,version=.*)?'
         attribute:
           Count:
             metric_type: rate
@@ -428,14 +428,14 @@ jmx_metrics:
             alias: kafka.request.produce.time.99percentile
     - include:
         domain: 'kafka.network'
-        bean: 'kafka.network:type=RequestMetrics,name=RequestsPerSec,request=FetchConsumer'
+        bean_regex: 'kafka.network:type=RequestMetrics,name=RequestsPerSec,request=FetchConsumer(?:,version=.*)?'
         attribute:
           Count:
             metric_type: rate
             alias: kafka.request.fetch_consumer.rate
     - include:
         domain: 'kafka.network'
-        bean: 'kafka.network:type=RequestMetrics,name=RequestsPerSec,request=FetchFollower'
+        bean_regex: 'kafka.network:type=RequestMetrics,name=RequestsPerSec,request=FetchFollower(?:,version=.*)?'
         attribute:
           Count:
             metric_type: rate

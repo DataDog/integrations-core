@@ -1,6 +1,6 @@
 # CHANGELOG - snmp
 
-## 5.10.0 / 2022-09-16
+## 5.10.0 / 2022-09-16 / Agent 7.40.0
 
 * [Added] Refactor tooling for getting the current env name. See [#12939](https://github.com/DataDog/integrations-core/pull/12939).
 * [Fixed] Add virtualdomain_index tag to fgFwPolStatsTable. See [#12760](https://github.com/DataDog/integrations-core/pull/12760).
