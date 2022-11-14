@@ -101,7 +101,7 @@ class ZookeeperCheck(AgentCheck):
     # example match:
     # "Zookeeper version: 3.4.10-39d3a4f269333c922ed3db283be479f9deacaa0f, built on 03/23/2017 10:13 GMT"
     # This regex matches the entire version rather than <major>.<minor>.<patch>
-    METADATA_VERSION_PATTERN = re.compile('Zookeeper version: ([^,]+)')
+    METADATA_VERSION_PATTERN = re.compile(r'\w+ version: v?([^,]+)')
     METRIC_TAGGED_PATTERN = re.compile(r'(\w+){(\w+)="(.+)"}\s+(\S+)')
 
     SOURCE_TYPE_NAME = 'zookeeper'
