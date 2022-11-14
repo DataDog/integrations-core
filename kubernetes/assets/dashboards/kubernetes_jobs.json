@@ -215,7 +215,7 @@
                             "precision": 0,
                             "requests": [
                                 {
-                                    "aggregator": "sum",
+                                    "aggregator": "avg",
                                     "conditional_formats": [
                                         {
                                             "comparator": ">",

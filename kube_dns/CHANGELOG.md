@@ -1,6 +1,10 @@
 # CHANGELOG - Kube-dns
 
-## 3.3.0 / 2022-09-16
+## 3.3.1 / 2022-11-07 / Agent 7.40.1
+
+* [Fixed] Bump protobuf version to 3.20.2. See [#13269](https://github.com/DataDog/integrations-core/pull/13269).
+
+## 3.3.0 / 2022-09-16 / Agent 7.40.0
 
 * [Added] Update HTTP config spec templates. See [#12890](https://github.com/DataDog/integrations-core/pull/12890).
 

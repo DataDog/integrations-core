@@ -1,6 +1,6 @@
 # CHANGELOG - Datadog-Cluster-Agent
 
-## 2.4.0 / 2022-09-16
+## 2.4.0 / 2022-09-16 / Agent 7.40.0
 
 * [Added] [datadog_cluster_agent] Add kubernetes_apiserver metrics. See [#12935](https://github.com/DataDog/integrations-core/pull/12935).
 * [Added] Update HTTP config spec templates. See [#12890](https://github.com/DataDog/integrations-core/pull/12890).

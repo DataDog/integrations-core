@@ -9,7 +9,7 @@ from ...e2e.agent import DEFAULT_PYTHON_VERSION
 from ...testing import complete_active_checks, get_test_envs
 from ..console import CONTEXT_SETTINGS, DEBUG_OUTPUT, echo_info, echo_warning
 from ..test import test as test_command
-from .start import start
+from .start import base_option, dev_option, start
 from .stop import stop
 
 
@@ -29,8 +29,8 @@ from .stop import stop
     type=click.INT,
     help=f'The version of Python to use. Defaults to {DEFAULT_PYTHON_VERSION} if no tox Python is specified.',
 )
-@click.option('--dev/--prod', default=None, help='Whether to use the latest version of a check or what is shipped')
-@click.option('--base', is_flag=True, help='Whether to use the latest version of the base check or what is shipped')
+@dev_option
+@base_option
 @click.option(
     '--env-vars',
     '-e',

@@ -39,6 +39,7 @@ assets/               @DataDog/agent-integrations
 /datadog_cluster_agent/*.md               @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 /docker_daemon/                           @DataDog/container-integrations @DataDog/agent-integrations
 /docker_daemon/*.md                       @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
+/docker_daemon/metadata.csv               @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 /docker_daemon/manifest.json              @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 /ecs_fargate/                             @DataDog/container-integrations @DataDog/agent-integrations
 /ecs_fargate/*.md                         @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation

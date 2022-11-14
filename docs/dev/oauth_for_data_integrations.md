@@ -79,7 +79,7 @@ In order to publish an OAuth client, you first need to open a pull request for y
 
 As a part of your pull request, update your README file with an **uninstallation** section under `## Setup` that includes the following instructions (along with any custom instructions you would like to add):
 
-- To ensure this integration is fully uninstalled, revoke authorization in the **Configure** tab on this tile or in [**OAuth Apps**][9] within your **Organization Settings** in Datadog. 
+- Once this integration has been uninstalled, any previous authorizations are revoked. 
 - Additionally, ensure that all API keys associated with this integration have been disabled by searching for the integration name on the [API Keys page][10].
 
 
@@ -124,6 +124,7 @@ Open a pull request to update your existing tile with additional information abo
 Additional helpful documentation, links, and articles:
 
 - [OAuth 2.0 in Datadog][1]
+- [Streamline and secure data integrations with OAuth][11]
 
 [1]: https://docs.datadoghq.com/developers/authorization/oauth2_in_datadog/
 [2]: https://app.datadoghq.com/marketplace
@@ -135,3 +136,4 @@ Additional helpful documentation, links, and articles:
 [8]: https://docs.datadoghq.com/getting_started/site/
 [9]: https://app.datadoghq.com/organization-settings/oauth-applications
 [10]: https://app.datadoghq.com/organization-settings/api-keys
+[11]: https://www.datadoghq.com/blog/oauth/
