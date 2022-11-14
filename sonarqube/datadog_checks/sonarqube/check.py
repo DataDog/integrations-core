@@ -170,8 +170,8 @@ class SonarqubeCheck(AgentCheck):
                     matched_project_config.get('metrics', {}) if matched_project_config else {},
                     mandatory=False,
                     default_limit=self._projects.get('default_metrics_limit', self._default_metrics_limit),
-                    default_include=[f'({item})' for item in self._default_metrics_include],
-                    default_exclude=[f'({item})' for item in self._default_metrics_exclude],
+                    default_include=['({})'.format(item) for item in self._default_metrics_include],
+                    default_exclude=['({})'.format(item) for item in self._default_metrics_exclude],
                 )
                 matched_metrics = metrics_discovery_matcher.match(all_metrics)
                 self.log.debug('%d matched_metrics: %s', len(matched_metrics), matched_metrics)
