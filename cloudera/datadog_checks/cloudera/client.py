@@ -14,6 +14,8 @@ class ClouderaClient:
 
     def query_time_series(self, query, from_time, to_time):
         api_instance = cm_client.TimeSeriesResourceApi(self.api_client)
-        result = api_instance.query_time_series(_from=from_time, query=query, to=to_time)
+        response = api_instance.query_time_series(_from=from_time, query=query, to=to_time)
 
-        raise NotImplemented
+        timeseries = response.items[0].time_series
+
+        return timeseries
