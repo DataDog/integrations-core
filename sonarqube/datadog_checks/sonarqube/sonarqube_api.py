@@ -2,7 +2,7 @@ import re
 
 
 class SonarqubeAPI:
-    def __init__(self, log, http, endpoint: str):
+    def __init__(self, log, http, endpoint):
         self._log = log
         self._http = http
         self._endpoint = endpoint
@@ -57,7 +57,7 @@ class SonarqubeAPI:
         )
         return [(measure['metric'], measure['value']) for measure in response.json()['component']['measures']]
 
-    def _make_request(self, url: str, params: dict):
+    def _make_request(self, url, params):
         endpoint = '{}{}'.format(self._endpoint, url)
         self._log.debug("calling: %s with params: %s", endpoint, params)
         response = self._http.get(endpoint, params=params)
