@@ -108,6 +108,7 @@ def test_custom_queries_multiple_results(aggregator, check):
         "oracle.test1.metric", value=2, count=1, tags=["tag_name:tag_value2", "query_tags1", "custom_tag"]
     )
 
+
 def test_custom_queries_metric_prefix_skip_column(aggregator, check):
     con = mock.MagicMock()
     cursor = mock.MagicMock()
