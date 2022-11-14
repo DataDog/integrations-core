@@ -18,7 +18,7 @@ kong.nginx.http.current_connections,gauge,,connection,, [OpenMetrics V2] (Kong v
 kong.nginx.stream.current_connections,gauge,,connection,,[OpenMetrics V2] (Kong v2<) The number of stream connections,0,kong,,
 kong.nginx.hconnections.total,gauge,,connection,,[OpenMetrics V2] (Kong v3+) The number of HTTP and stream connections,0,kong,,
 kong.stream.status.count,count,,request,,[OpenMetrics V2] The stream status codes per service/route in Kong,0,kong,,
-kong.nginx.timers, gauge,,,, [OpenMetrics v2] (Kong v2.8+) Total number of Nginx timers, in Running or Pending state,
+kong.nginx.timers, gauge,,,, [OpenMetrics v2] (Kong v2.8+) Total number of Nginx timers, in Running or Pending state, 0, kong,,
 kong.connections_accepted,gauge,,connection,,[Legacy] Total number of accepted client connections.,-1,kong,srvr conn accepted,
 kong.connections_active,gauge,,connection,,[Legacy] Current number of active client connections including Waiting connections.,-1,kong,srvr conn active,
 kong.connections_handled,gauge,,connection,,[Legacy] Total number of handled connections. (Same as accepts unless resource limits were reached).,-1,kong,srvr conn handled,
