@@ -76,14 +76,14 @@ def test_no_tag(mock_api, aggregator, dd_run_check, sonarqube_check):
     excluded_metrics = [metric for metric in METRICS if re.search('^.*\\.new_.*', metric)]
     included_metrics = [metric for metric in METRICS if metric not in excluded_metrics]
     metrics_with_values = [(metric, randrange(0, 100)) for metric in included_metrics]
-    measures = [(f"{metric.split('.')[1]}", value) for metric, value in metrics_with_values]
+    measures = [("{}".format(metric.split('.')[1]), value) for metric, value in metrics_with_values]
     mock_api.return_value.get_measures.return_value = measures
     check = sonarqube_check(config)
     # When
     dd_run_check(check)
     # Then
     mock_api.return_value.get_measures.assert_called_with(
-        'project1', [f"{metric.split('.')[1]}" for metric, _ in metrics_with_values]
+        'project1', ["{}".format(metric.split('.')[1]) for metric, _ in metrics_with_values]
     )
     for metric, value in metrics_with_values:
         aggregator.assert_metric(
@@ -107,14 +107,14 @@ def test_default_tag(mock_api, aggregator, dd_run_check, sonarqube_check):
     excluded_metrics = [metric for metric in METRICS if re.search('^.*\\.new_.*', metric)]
     included_metrics = [metric for metric in METRICS if metric not in excluded_metrics]
     metrics_with_values = [(metric, randrange(0, 100)) for metric in included_metrics]
-    measures = [(f"{metric.split('.')[1]}", value) for metric, value in metrics_with_values]
+    measures = [("{}".format(metric.split('.')[1]), value) for metric, value in metrics_with_values]
     mock_api.return_value.get_measures.return_value = measures
     check = sonarqube_check(config)
     # When
     dd_run_check(check)
     # Then
     mock_api.return_value.get_measures.assert_called_with(
-        'project1', [f"{metric.split('.')[1]}" for metric, _ in metrics_with_values]
+        'project1', ["{}".format(metric.split('.')[1]) for metric, _ in metrics_with_values]
     )
     for metric, value in metrics_with_values:
         aggregator.assert_metric(
@@ -140,14 +140,14 @@ def test_default_tag_overwritten(mock_api, aggregator, dd_run_check, sonarqube_c
     excluded_metrics = [metric for metric in METRICS if re.search('^.*\\.new_.*', metric)]
     included_metrics = [metric for metric in METRICS if metric not in excluded_metrics]
     metrics_with_values = [(metric, randrange(0, 100)) for metric in included_metrics]
-    measures = [(f"{metric.split('.')[1]}", value) for metric, value in metrics_with_values]
+    measures = [("{}".format(metric.split('.')[1]), value) for metric, value in metrics_with_values]
     mock_api.return_value.get_measures.return_value = measures
     check = sonarqube_check(config)
     # When
     dd_run_check(check)
     # Then
     mock_api.return_value.get_measures.assert_called_with(
-        'project1', [f"{metric.split('.')[1]}" for metric, _ in metrics_with_values]
+        'project1', ["{}".format(metric.split('.')[1]) for metric, _ in metrics_with_values]
     )
     for metric, value in metrics_with_values:
         aggregator.assert_metric(
@@ -172,14 +172,14 @@ def test_project_tag(mock_api, aggregator, dd_run_check, sonarqube_check):
     excluded_metrics = [metric for metric in METRICS if re.search('^.*\\.new_.*', metric)]
     included_metrics = [metric for metric in METRICS if metric not in excluded_metrics]
     metrics_with_values = [(metric, randrange(0, 100)) for metric in included_metrics]
-    measures = [(f"{metric.split('.')[1]}", value) for metric, value in metrics_with_values]
+    measures = [("{}".format(metric.split('.')[1]), value) for metric, value in metrics_with_values]
     mock_api.return_value.get_measures.return_value = measures
     check = sonarqube_check(config)
     # When
     dd_run_check(check)
     # Then
     mock_api.return_value.get_measures.assert_called_with(
-        'project1', [f"{metric.split('.')[1]}" for metric, _ in metrics_with_values]
+        'project1', ["{}".format(metric.split('.')[1]) for metric, _ in metrics_with_values]
     )
     for metric, value in metrics_with_values:
         aggregator.assert_metric(
@@ -208,14 +208,14 @@ def test_components_with_default_exclude(mock_api, aggregator, dd_run_check, son
     ]
     included_metrics = [metric for metric in METRICS if metric not in excluded_metrics]
     metrics_with_values = [(metric, randrange(0, 100)) for metric in included_metrics]
-    measures = [(f"{metric.split('.')[1]}", value) for metric, value in metrics_with_values]
+    measures = [("{}".format(metric.split('.')[1]), value) for metric, value in metrics_with_values]
     mock_api.return_value.get_measures.return_value = measures
     check = sonarqube_check(config)
     # When
     dd_run_check(check)
     # Then
     mock_api.return_value.get_measures.assert_called_with(
-        'project1', [f"{metric.split('.')[1]}" for metric, _ in metrics_with_values]
+        'project1', ["{}".format(metric.split('.')[1]) for metric, _ in metrics_with_values]
     )
     for metric, value in metrics_with_values:
         aggregator.assert_metric(
@@ -248,14 +248,14 @@ def test_components_with_exclude(mock_api, aggregator, dd_run_check, sonarqube_c
     ]
     included_metrics = [metric for metric in METRICS if metric not in excluded_metrics]
     metrics_with_values = [(metric, randrange(0, 100)) for metric in included_metrics]
-    measures = [(f"{metric.split('.')[1]}", value) for metric, value in metrics_with_values]
+    measures = [("{}".format(metric.split('.')[1]), value) for metric, value in metrics_with_values]
     mock_api.return_value.get_measures.return_value = measures
     check = sonarqube_check(config)
     # When
     dd_run_check(check)
     # Then
     mock_api.return_value.get_measures.assert_called_with(
-        'project1', [f"{metric.split('.')[1]}" for metric, _ in metrics_with_values]
+        'project1', ["{}".format(metric.split('.')[1]) for metric, _ in metrics_with_values]
     )
     for metric, value in metrics_with_values:
         aggregator.assert_metric(
@@ -284,14 +284,14 @@ def test_components_with_default_include(mock_api, aggregator, dd_run_check, son
         metric for metric in METRICS if re.search('^category2\\.', metric) and metric not in excluded_metrics
     ]
     metrics_with_values = [(metric, randrange(0, 100)) for metric in included_metrics]
-    measures = [(f"{metric.split('.')[1]}", value) for metric, value in metrics_with_values]
+    measures = [("{}".format(metric.split('.')[1]), value) for metric, value in metrics_with_values]
     mock_api.return_value.get_measures.return_value = measures
     check = sonarqube_check(config)
     # When
     dd_run_check(check)
     # Then
     mock_api.return_value.get_measures.assert_called_with(
-        'project1', [f"{metric.split('.')[1]}" for metric, _ in metrics_with_values]
+        'project1', ["{}".format(metric.split('.')[1]) for metric, _ in metrics_with_values]
     )
     for metric, value in metrics_with_values:
         aggregator.assert_metric(
@@ -324,14 +324,14 @@ def test_components_with_include(mock_api, aggregator, dd_run_check, sonarqube_c
         metric for metric in METRICS if re.search('^category2\\.', metric) and metric not in excluded_metrics
     ]
     metrics_with_values = [(metric, randrange(0, 100)) for metric in included_metrics]
-    measures = [(f"{metric.split('.')[1]}", value) for metric, value in metrics_with_values]
+    measures = [("{}".format(metric.split('.')[1]), value) for metric, value in metrics_with_values]
     mock_api.return_value.get_measures.return_value = measures
     check = sonarqube_check(config)
     # When
     dd_run_check(check)
     # Then
     mock_api.return_value.get_measures.assert_called_with(
-        'project1', [f"{metric.split('.')[1]}" for metric, _ in metrics_with_values]
+        'project1', ["{}".format(metric.split('.')[1]) for metric, _ in metrics_with_values]
     )
     for metric, value in metrics_with_values:
         aggregator.assert_metric(
@@ -366,14 +366,14 @@ def test_components_with_include_and_exclude(mock_api, aggregator, dd_run_check,
         metric for metric in METRICS if re.search('^category1\\.', metric) and metric not in excluded_metrics
     ]
     metrics_with_values = [(metric, randrange(0, 100)) for metric in included_metrics]
-    measures = [(f"{metric.split('.')[1]}", value) for metric, value in metrics_with_values]
+    measures = [("{}".format(metric.split('.')[1]), value) for metric, value in metrics_with_values]
     mock_api.return_value.get_measures.return_value = measures
     check = sonarqube_check(config)
     # When
     dd_run_check(check)
     # Then
     mock_api.return_value.get_measures.assert_called_with(
-        'project1', [f"{metric.split('.')[1]}" for metric, _ in metrics_with_values]
+        'project1', ["{}".format(metric.split('.')[1]) for metric, _ in metrics_with_values]
     )
     for metric, value in metrics_with_values:
         aggregator.assert_metric(
