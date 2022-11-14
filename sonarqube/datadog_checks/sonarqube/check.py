@@ -138,7 +138,7 @@ class SonarqubeCheck(AgentCheck):
     def collect_metadata(self):
         self.collect_version()
 
-    def _normalize_pattern(self, pattern: str) -> str:
+    def _normalize_pattern(self, pattern):
         # Ensure dots are treated as literal
         pattern = pattern.replace('\\.', '.').replace('.', '\\.')
         # Get rid of any explicit start modifiers
