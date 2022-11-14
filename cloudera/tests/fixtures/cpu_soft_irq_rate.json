@@ -1,0 +1,325 @@
+{
+  "items": [
+    {
+      "timeSeries": [
+        {
+          "metadata": {
+            "metricName": "last(cpu_soft_irq_rate)",
+            "entityName": "cod--qfdcinkqrzw-leader0.agent-in.jfha-h5rc.a0.cloudera.site",
+            "startTime": "2022-11-14T20:57:10.033Z",
+            "endTime": "2022-11-14T21:02:10.033Z",
+            "attributes": {
+              "hostname": "cod--qfdcinkqrzw-leader0.agent-in.jfha-h5rc.a0.cloudera.site",
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "entityName": "96efbf3e7279bf25ae44fe0a6398ee97",
+              "clusterName": "cod--qfdcinkqrzw",
+              "hostId": "96efbf3e7279bf25ae44fe0a6398ee97",
+              "active": "true",
+              "category": "HOST",
+              "version": "CDH 7.2.15",
+              "rackId": "/ap-northeast-1a"
+            },
+            "unitNumerators": [
+              "seconds"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT last(cpu_soft_irq_rate) WHERE entityName = \"96efbf3e7279bf25ae44fe0a6398ee97\" AND category = HOST",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2022-11-14T21:01:13.000Z",
+              "value": 0,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "last(cpu_soft_irq_rate)",
+            "entityName": "cod--qfdcinkqrzw-worker3.agent-in.jfha-h5rc.a0.cloudera.site",
+            "startTime": "2022-11-14T20:57:10.033Z",
+            "endTime": "2022-11-14T21:02:10.033Z",
+            "attributes": {
+              "hostname": "cod--qfdcinkqrzw-worker3.agent-in.jfha-h5rc.a0.cloudera.site",
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "entityName": "88ae2611748383b5628d4aec94873da9",
+              "clusterName": "cod--qfdcinkqrzw",
+              "hostId": "88ae2611748383b5628d4aec94873da9",
+              "active": "true",
+              "category": "HOST",
+              "version": "CDH 7.2.15",
+              "rackId": "/ap-northeast-1a"
+            },
+            "unitNumerators": [
+              "seconds"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT last(cpu_soft_irq_rate) WHERE entityName = \"88ae2611748383b5628d4aec94873da9\" AND category = HOST",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2022-11-14T21:01:11.000Z",
+              "value": 0,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "last(cpu_soft_irq_rate)",
+            "entityName": "cod--qfdcinkqrzw-gateway0.agent-in.jfha-h5rc.a0.cloudera.site",
+            "startTime": "2022-11-14T20:57:10.033Z",
+            "endTime": "2022-11-14T21:02:10.033Z",
+            "attributes": {
+              "hostname": "cod--qfdcinkqrzw-gateway0.agent-in.jfha-h5rc.a0.cloudera.site",
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "entityName": "d8623d9457f4db06c5637c4fd4c02f5d",
+              "clusterName": "cod--qfdcinkqrzw",
+              "hostId": "d8623d9457f4db06c5637c4fd4c02f5d",
+              "active": "true",
+              "category": "HOST",
+              "version": "CDH 7.2.15",
+              "rackId": "/ap-northeast-1d"
+            },
+            "unitNumerators": [
+              "seconds"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT last(cpu_soft_irq_rate) WHERE entityName = \"d8623d9457f4db06c5637c4fd4c02f5d\" AND category = HOST",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2022-11-14T21:01:13.000Z",
+              "value": 0.0015000000000024254,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "last(cpu_soft_irq_rate)",
+            "entityName": "cod--qfdcinkqrzw-worker1.agent-in.jfha-h5rc.a0.cloudera.site",
+            "startTime": "2022-11-14T20:57:10.033Z",
+            "endTime": "2022-11-14T21:02:10.033Z",
+            "attributes": {
+              "hostname": "cod--qfdcinkqrzw-worker1.agent-in.jfha-h5rc.a0.cloudera.site",
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "entityName": "22f6ab659c835d47bc13d6c8f3370110",
+              "clusterName": "cod--qfdcinkqrzw",
+              "hostId": "22f6ab659c835d47bc13d6c8f3370110",
+              "active": "true",
+              "category": "HOST",
+              "version": "CDH 7.2.15",
+              "rackId": "/ap-northeast-1c"
+            },
+            "unitNumerators": [
+              "seconds"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT last(cpu_soft_irq_rate) WHERE entityName = \"22f6ab659c835d47bc13d6c8f3370110\" AND category = HOST",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2022-11-14T21:01:12.000Z",
+              "value": 0,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "last(cpu_soft_irq_rate)",
+            "entityName": "cod--qfdcinkqrzw-worker2.agent-in.jfha-h5rc.a0.cloudera.site",
+            "startTime": "2022-11-14T20:57:10.033Z",
+            "endTime": "2022-11-14T21:02:10.033Z",
+            "attributes": {
+              "hostname": "cod--qfdcinkqrzw-worker2.agent-in.jfha-h5rc.a0.cloudera.site",
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "entityName": "49adda80d1b98e9262ee146fd7fd798b",
+              "clusterName": "cod--qfdcinkqrzw",
+              "hostId": "49adda80d1b98e9262ee146fd7fd798b",
+              "active": "true",
+              "category": "HOST",
+              "version": "CDH 7.2.15",
+              "rackId": "/ap-northeast-1c"
+            },
+            "unitNumerators": [
+              "seconds"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT last(cpu_soft_irq_rate) WHERE entityName = \"49adda80d1b98e9262ee146fd7fd798b\" AND category = HOST",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2022-11-14T21:01:12.000Z",
+              "value": 0,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "last(cpu_soft_irq_rate)",
+            "entityName": "cod--qfdcinkqrzw-worker4.agent-in.jfha-h5rc.a0.cloudera.site",
+            "startTime": "2022-11-14T20:57:10.033Z",
+            "endTime": "2022-11-14T21:02:10.033Z",
+            "attributes": {
+              "hostname": "cod--qfdcinkqrzw-worker4.agent-in.jfha-h5rc.a0.cloudera.site",
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "entityName": "9784d85849c7179b790d476c483fd905",
+              "clusterName": "cod--qfdcinkqrzw",
+              "hostId": "9784d85849c7179b790d476c483fd905",
+              "active": "true",
+              "category": "HOST",
+              "version": "CDH 7.2.15",
+              "rackId": "/ap-northeast-1d"
+            },
+            "unitNumerators": [
+              "seconds"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT last(cpu_soft_irq_rate) WHERE entityName = \"9784d85849c7179b790d476c483fd905\" AND category = HOST",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2022-11-14T21:01:11.000Z",
+              "value": 0.0001666666666665151,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "last(cpu_soft_irq_rate)",
+            "entityName": "cod--qfdcinkqrzw-master1.agent-in.jfha-h5rc.a0.cloudera.site",
+            "startTime": "2022-11-14T20:57:10.033Z",
+            "endTime": "2022-11-14T21:02:10.033Z",
+            "attributes": {
+              "hostname": "cod--qfdcinkqrzw-master1.agent-in.jfha-h5rc.a0.cloudera.site",
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "entityName": "119115ab851aefe1429860d4255b3fab",
+              "clusterName": "cod--qfdcinkqrzw",
+              "hostId": "119115ab851aefe1429860d4255b3fab",
+              "active": "true",
+              "category": "HOST",
+              "version": "CDH 7.2.15",
+              "rackId": "/ap-northeast-1c"
+            },
+            "unitNumerators": [
+              "seconds"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT last(cpu_soft_irq_rate) WHERE entityName = \"119115ab851aefe1429860d4255b3fab\" AND category = HOST",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2022-11-14T21:01:14.000Z",
+              "value": 0.0001666666666665151,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "last(cpu_soft_irq_rate)",
+            "entityName": "cod--qfdcinkqrzw-worker0.agent-in.jfha-h5rc.a0.cloudera.site",
+            "startTime": "2022-11-14T20:57:10.033Z",
+            "endTime": "2022-11-14T21:02:10.033Z",
+            "attributes": {
+              "hostname": "cod--qfdcinkqrzw-worker0.agent-in.jfha-h5rc.a0.cloudera.site",
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "entityName": "ed528836ae33e47e6657b95373571c33",
+              "clusterName": "cod--qfdcinkqrzw",
+              "hostId": "ed528836ae33e47e6657b95373571c33",
+              "active": "true",
+              "category": "HOST",
+              "version": "CDH 7.2.15",
+              "rackId": "/ap-northeast-1d"
+            },
+            "unitNumerators": [
+              "seconds"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT last(cpu_soft_irq_rate) WHERE entityName = \"ed528836ae33e47e6657b95373571c33\" AND category = HOST",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2022-11-14T21:01:11.000Z",
+              "value": 0,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "last(cpu_soft_irq_rate)",
+            "entityName": "cod--qfdcinkqrzw-master0.agent-in.jfha-h5rc.a0.cloudera.site",
+            "startTime": "2022-11-14T20:57:10.033Z",
+            "endTime": "2022-11-14T21:02:10.033Z",
+            "attributes": {
+              "hostname": "cod--qfdcinkqrzw-master0.agent-in.jfha-h5rc.a0.cloudera.site",
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "entityName": "759451867dfde961d6adbeb21d9c13f9",
+              "clusterName": "cod--qfdcinkqrzw",
+              "hostId": "759451867dfde961d6adbeb21d9c13f9",
+              "active": "true",
+              "category": "HOST",
+              "version": "CDH 7.2.15",
+              "rackId": "/ap-northeast-1d"
+            },
+            "unitNumerators": [
+              "seconds"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT last(cpu_soft_irq_rate) WHERE entityName = \"759451867dfde961d6adbeb21d9c13f9\" AND category = HOST",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2022-11-14T21:01:14.000Z",
+              "value": 0,
+              "type": "SAMPLE"
+            }
+          ]
+        }
+      ],
+      "warnings": [],
+      "timeSeriesQuery": "select last(cpu_soft_irq_rate)"
+    }
+  ]
+}

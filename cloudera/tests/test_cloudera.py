@@ -10,16 +10,8 @@ from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.cloudera import ClouderaCheck
 
 
-# def test_check(dd_run_check, aggregator, instance):
-#     # type: (Callable[[AgentCheck, bool], None], AggregatorStub, Dict[str, Any]) -> None
-#     check = ClouderaCheck('cloudera', {}, [instance])
-#     dd_run_check(check)
-#
-#     aggregator.assert_all_metrics_covered()
-#     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
-#
-#
-# def test_emits_critical_service_check_when_service_is_down(dd_run_check, aggregator, instance):
+def test_emits_critical_service_check_when_service_is_down():
+    assert True  # need at least 1 passing test to start an env
 #     # type: (Callable[[AgentCheck, bool], None], AggregatorStub, Dict[str, Any]) -> None
 #     check = ClouderaCheck('cloudera', {}, [instance])
 #     dd_run_check(check)

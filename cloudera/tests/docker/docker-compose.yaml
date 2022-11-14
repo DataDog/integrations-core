@@ -1,0 +1,8 @@
+version: "3"
+
+services:
+  cloudera:
+    image: caddy:2.1.1-alpine
+    container_name: cloudera
+    ports:
+      - 80:80

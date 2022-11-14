@@ -1,4 +1,4 @@
-from .cloudera.client import ClouderaClient
+from .client import ClouderaClient
 
 
 def make_api_client(check, instance):
