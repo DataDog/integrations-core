@@ -17,28 +17,28 @@ PSQL_ARGS=$*
 export PATH=/usr/local/bin:$PATH
 
 PSQL="psql $PSQL_ARGS"
-psql $PSQL << EOD > /dev/null
+$PSQL << EOD > /dev/null
 create table t ( id integer, data integer ) ;
 insert into t values (1, null);
 insert into t values (2, null);
 EOD
 
-psql $PSQL << EOD
+$PSQL << EOD
 select sum(deadlocks) "deadlocks before" from pg_stat_database ;
 EOD
 
-psql $PSQL << EOD > /dev/null 2>&1 &
+$PSQL << EOD > /dev/null 2>&1 &
 begin transaction;
 update t set data = 1000 where id = 1 ;
 
 -- wait for the other session to update the rows
-select pg_sleep(1);
+select pg_sleep(2);
 
 update t set data = 1000 where id = 2 ;
 commit ;
 EOD
 
-psql $PSQL << EOD > /dev/null 2>&1
+$PSQL << EOD > /dev/null 2>&1
 begin transaction;
 update t set data = 1000 where id = 2 ;
 update t set data = 1000 where id = 1 ;
@@ -48,10 +48,10 @@ EOD
 # wait some time until the deadlock statistic is updated
 sleep 2
 
-psql $PSQL << EOD
+$PSQL << EOD
 select sum(deadlocks) "deadlocks after" from pg_stat_database ;
 EOD
 
-psql $PSQL << EOD > /dev/null
+$PSQL << EOD > /dev/null
 drop table t;
 EOD
