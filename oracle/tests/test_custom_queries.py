@@ -107,3 +107,32 @@ def test_custom_queries_multiple_results(aggregator, check):
     aggregator.assert_metric(
         "oracle.test1.metric", value=2, count=1, tags=["tag_name:tag_value2", "query_tags1", "custom_tag"]
     )
+
+def test_custom_queries_metric_prefix_skip_column(aggregator, check):
+    con = mock.MagicMock()
+    cursor = mock.MagicMock()
+    data = [[["tag_value1", "1"]], [[1, 2, "tag_value2"]]]
+    cursor.fetchall.side_effect = lambda: iter(data.pop(0))
+    con.cursor.return_value = cursor
+
+    custom_queries = [
+        {
+            "metric_prefix": "oracle.test1",
+            "query": "mocked",
+            "columns": [{},  # skip `tag_value1` column
+                        {"name": "metric", "type": "gauge"}
+                        ],
+            "tags": ["query_tags1"],
+        },
+    ]
+    check.instance['custom_queries'] = custom_queries
+    check._fix_custom_queries()
+    check._cached_connection = con
+    query_manager = QueryManager(check, check.execute_query_raw, tags=['custom_tag'])
+    query_manager.compile_queries()
+
+    query_manager.execute()
+
+    aggregator.assert_metric(
+        "oracle.test1.metric", value=1, count=1, tags=["query_tags1", "custom_tag"]
+    )

@@ -137,20 +137,3 @@ def test_handle_query_error_when_connected_disconnects_and_resets_connection(ins
     assert error == 'foo'
     assert oracle_check._cached_connection is None
     cached_connection.assert_has_calls([mock.call.close()])
-
-
-def test_custom_query_metric_prefix_skip_column():
-    instance = {
-        'custom_queries': [
-            {
-                'metric_prefix': 'test',
-                'query': 'select foo',
-                'columns': [
-                    {'name': "test", 'type': 'test'},
-                    {},  # empty entry
-                ],
-            }
-        ]
-    }
-    c = Oracle(CHECK_NAME, {}, [instance])
-    c._fix_custom_queries()

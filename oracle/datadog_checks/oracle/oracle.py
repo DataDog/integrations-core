@@ -102,7 +102,7 @@ class Oracle(AgentCheck):
                     prefix = prefix[len(self.__NAMESPACE__) + 1 :]
                 for column in query.get('columns', []):
                     # if the column is supposed to be skipped
-                    if not column.get('type') and not column.get('name'):
+                    if not (column.get('type') or column.get('name')):
                         continue
 
                     elif column.get('type') != 'tag':
