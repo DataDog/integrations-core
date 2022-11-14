@@ -7,6 +7,7 @@ import pytest
 from six import PY2
 
 from datadog_checks.kong import Kong
+from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import HERE, METRICS_URL
 
@@ -66,6 +67,8 @@ def test_check_v3(aggregator, dd_run_check, mock_http_response):
         aggregator.assert_metric(metric_name, metric_type=getattr(aggregator, metric_type.upper()))
 
     aggregator.assert_all_metrics_covered()
+
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
     aggregator.assert_service_check(
         'kong.datastore.reachable', status=Kong.OK, tags=['endpoint:{}'.format(METRICS_URL)], count=1
