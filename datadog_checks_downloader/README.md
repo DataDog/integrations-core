@@ -77,6 +77,14 @@ To run checks against content served from own local directory where TUF, in-toto
 pytest -vvvv --local-dir=/path/to/dir --distribution-name datadog-active-directory --distribution-version 1.10.0
 ```
 
+Data used for offline tests can be used by running:
+```shell
+tox -e make-test-data
+```
+
+This will run the script under `tests/scripts/download_test_data.py`, which will get a partial copy from
+the actual repository.
+
 ## Troubleshooting
 
 Need help? Contact [Datadog support][9].
