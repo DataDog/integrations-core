@@ -23,7 +23,7 @@ def ss_subprocess_mock(*args, **kwargs):
     if ['netstat', '-i', '-b'] == args[0]:
         fixture = os.path.join(FIXTURE_DIR, 'bsd', 'netstat_i_b')
     elif ["netstat", "-s", "-ptcp"] == args[0]:
-        fixture = os.path.join(FIXTURE_DIR, 'bsd', 'netstat_s_ptcp')
+        fixture = os.path.join(FIXTURE_DIR, 'bsd', 'kstat_p_link0')
     elif ["netstat", "-n", "-a", "-p", "tcp"] == args[0]:
         fixture = os.path.join(FIXTURE_DIR, 'bsd', 'netstat_n_a_p_tcp')
     elif ["netstat", "-n", "-a", "-p", "udp"] == args[0]:
