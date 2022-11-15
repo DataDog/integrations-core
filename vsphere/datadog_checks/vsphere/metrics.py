@@ -96,6 +96,7 @@ VM_METRICS = {
     'disk.read.avg',
     'disk.usage.avg',
     'disk.write.avg',
+    'disk.used.latest',
     'hbr.hbrNetRx.avg',
     'hbr.hbrNetTx.avg',
     'mem.active.avg',

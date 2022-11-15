@@ -153,6 +153,10 @@ class VSphereCheck(AgentCheck):
                     allowed_counters.append(c)
             metadata = {c.key: format_metric_name(c) for c in allowed_counters}  # type: Dict[CounterId, MetricName]
             self.metrics_metadata_cache.set_metadata(mor_type, metadata)
+            test_metadata = {
+                [c.key, c.rollupType, c.groupInfo.key, c.nameInfo.key]: format_metric_name(c) for c in allowed_counters
+            }
+            self.log.debug("Metadata: %s", str(test_metadata))
             self.log.debug(
                 "Set metadata for mor_type %s: %s",
                 mor_type,
@@ -313,6 +317,7 @@ class VSphereCheck(AgentCheck):
             metadata = self.metrics_metadata_cache.get_metadata(resource_type)
             for result in results_per_mor.value:
                 if result.id.instance:
+                    self.log.debug("Instance (%s) detected in counter: %s", result.id.instance, result.id.counterId)
                     have_instance_value[resource_type].add(metadata[result.id.counterId])
 
         for results_per_mor in query_results:
