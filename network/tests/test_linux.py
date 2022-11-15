@@ -187,7 +187,7 @@ def test_collect_cx_queues(check, aggregator):
 
     check_instance.check({})
 
-    for metric in CONNECTION_QUEUES_METRICS + common.EXPECTED_METRICS:
+    for metric in CONNECTION_QUEUES_METRICS + common.EXPECTED_METRICS + common.EXPECTED_WINDOWS_LINUX_METRICS:
         aggregator.assert_metric(metric)
 
 
@@ -201,7 +201,7 @@ def test_collect_cx_queues_when_ss_fails(check, aggregator):
         out.side_effect = ss_subprocess_mock_fails
         check_instance.check({})
 
-    for metric in CONNECTION_QUEUES_METRICS + common.EXPECTED_METRICS:
+    for metric in CONNECTION_QUEUES_METRICS + common.EXPECTED_METRICS + common.EXPECTED_WINDOWS_LINUX_METRICS:
         aggregator.assert_metric(metric)
 
 
