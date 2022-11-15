@@ -113,7 +113,7 @@ The GitLab check does not include any events.
 
 See [service_checks.json][13] for a list of service checks provided by this integration.
 
-## Testing
+## Uninstallation
 
 Words
 
