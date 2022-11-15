@@ -40,7 +40,7 @@ text = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
-    "pyodbc==4.0.32",
+    "pyodbc==4.0.32; sys_platform != 'darwin' or platform_machine != 'arm64'",
 ]
 
 [project.urls]
