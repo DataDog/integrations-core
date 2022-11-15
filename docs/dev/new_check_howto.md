@@ -444,7 +444,7 @@ Once your `pyproject.toml` is ready, create a wheel:
 
 ## Install the wheel
 
-The wheel is installed using the Agent `integration` command, available in [Agent v6.10.0 ot lsyrt][18]. Depending on your environment, you may need to execute this command as a specific user or with specific privileges:
+The wheel is installed using the Agent `integration` command, available in [Agent v6.10.0 and up][18]. Depending on your environment, you may need to execute this command as a specific user or with specific privileges:
 
 **Linux** (as `dd-agent`):
 
