@@ -5,6 +5,8 @@ import platform
 
 import pytest
 
+from datadog_checks.base.utils.platform import Platform
+
 from . import common
 
 pytestmark = pytest.mark.integration
@@ -15,7 +17,10 @@ def test_check(aggregator, check, instance):
     check_instance = check(instance)
     check_instance.check({})
 
-    for metric in common.EXPECTED_METRICS:
+    expected_metrics = common.EXPECTED_METRICS
+    if Platform.is_windows() or Platform.is_linux():
+        expected_metrics += common.EXPECTED_WINDOWS_LINUX_METRICS
+    for metric in expected_metrics:
         aggregator.assert_metric(metric)
 
 
