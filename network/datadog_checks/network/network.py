@@ -92,10 +92,7 @@ class Network(AgentCheck):
                 )
 
     def check(self, _):
-        if Platform.is_solaris():
-            self._check_solaris(self.instance)
-        else:
-            raise CheckException("Not implemented")
+        raise CheckException("Not implemented")
 
     def _setup_metrics(self, instance):
         self._combine_connection_states = instance.get('combine_connection_states', True)
