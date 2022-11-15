@@ -6,5 +6,3 @@ version = ["2.4.27"]
 
 [envs.default.overrides]
 matrix.version.env-vars = "APACHE_VERSION"
-
-[envs.bench]
