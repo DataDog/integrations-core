@@ -124,7 +124,7 @@ Open a pull request to update your existing tile with additional information abo
 Additional helpful documentation, links, and articles:
 
 - [OAuth 2.0 in Datadog][1]
-- [Streamline and secure integrations with OAuth][11]
+- [Authorize your Datadog integrations with OAuth][11]
 
 [1]: https://docs.datadoghq.com/developers/authorization/oauth2_in_datadog/
 [2]: https://app.datadoghq.com/marketplace
