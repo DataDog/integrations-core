@@ -42,7 +42,7 @@ def test_server_normalization():
 
 
 @pytest.mark.parametrize(
-    "list_to_filter, key, config, global_include, global_exclude, expected_filtered_list",
+    "to_filter, key, config, global_include, global_exclude, expected_result",
     [
         pytest.param(
             ['build_config1.prod', 'build_config1.tmp', 'build_config1.dev'],
@@ -223,11 +223,6 @@ def test_server_normalization():
         ),
     ],
 )
-def test_filter_projects(list_to_filter, key, config, global_include, global_exclude, expected_filtered_list):
-    if PY2:
-        filtered_list, reached_limit = filter_items(list_to_filter, key, 5, global_include, global_exclude, config)
-        expected_filtered_list, expected_reached_limit = expected_filtered_list
-
-        assert sorted(filtered_list.items()) == sorted(expected_filtered_list.items())
-    else:
-        assert filter_items(list_to_filter, key, 5, global_include, global_exclude, config) == expected_filtered_list
+def test_filter_projects(to_filter, key, config, global_include, global_exclude, expected_result):
+    filtered = filter_items(to_filter, key, 5, global_include, global_exclude, config)
+    assert filtered == expected_result

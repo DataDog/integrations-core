@@ -38,10 +38,6 @@ def instance_aws_service(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_basic_http_authentication(field, value):
-    return False
-
-
 def instance_build_config_metrics(field, value):
     return True
 
@@ -138,10 +134,6 @@ def instance_histogram_buckets_as_distributions(field, value):
     return False
 
 
-def instance_host_affected(field, value):
-    return get_default_field_value(field, value)
-
-
 def instance_hostname_format(field, value):
     return get_default_field_value(field, value)
 
@@ -156,10 +148,6 @@ def instance_ignore_tags(field, value):
 
 def instance_include_labels(field, value):
     return get_default_field_value(field, value)
-
-
-def instance_is_deployment(field, value):
-    return False
 
 
 def instance_kerberos_auth(field, value):
@@ -204,10 +192,6 @@ def instance_metrics(field, value):
 
 def instance_min_collection_interval(field, value):
     return 15
-
-
-def instance_name(field, value):
-    return get_default_field_value(field, value)
 
 
 def instance_namespace(field, value):

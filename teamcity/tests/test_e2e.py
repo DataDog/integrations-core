@@ -13,16 +13,16 @@ from .common import OPENMETRICS_INSTANCE, REST_INSTANCE, USE_OPENMETRICS
 @pytest.mark.e2e
 def test_e2e(aggregator, dd_agent_check):
     # Prevent the integration from failing before even running the check
-    with pytest.raises(Exception):
+    with pytest.raises(Exception, match='503 Server Error'):
         dd_agent_check(REST_INSTANCE, rate=True)
 
-    assert len(aggregator.service_check_names) == 0
+    assert not aggregator.service_check_names
 
 
 @pytest.mark.skipif(not USE_OPENMETRICS, reason="Not available in REST check")
 @pytest.mark.e2e
 def test_e2e_openmetrics(aggregator, dd_agent_check):
-    with pytest.raises(Exception):
+    with pytest.raises(Exception, match='There was an error scraping endpoint'):
         dd_agent_check(OPENMETRICS_INSTANCE, rate=True)
 
     aggregator.assert_service_check(SERVICE_CHECK_OPENMETRICS, status=AgentCheck.CRITICAL)

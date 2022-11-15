@@ -69,9 +69,8 @@ files:
           
           Configure only one of `projects` or `build_configuration` per instance.
           
-          Requires Python version 3. 
-          Note: For Python version 2, use the `build_configuration` option to configure 
-          one build configuration ID per instance
+          Requires Python version 3. For Python version 2, use the `build_configuration` option to configure 
+          one build configuration ID per instance.
 
           Configure each Project ID or Project ID RegEx pattern as the top-level keys or nested under the optional
           `include` or `exclude` keys to filter your TeamCity projects more granularly.
@@ -242,38 +241,6 @@ files:
         value:
           type: boolean
           example: true
-      - name: basic_http_authentication
-        description: |
-          [DEPRECATED] Set to `true` to turn on basic HTTP authentication. Starting in Datadog Agent v7.41.0,
-          `basic_http_authentication` is inherently enabled if `username` and `password` are specified.
-        value:
-          type: boolean
-          example: false
-      - name: name
-        description: |
-          [DEPRECATED] An optional custom unique name per instance that is shown in the events.
-          If omitted, the build configuration ID is used.
-          Not available with `use_openmetrics: true`.
-        value:
-          type: string
-          example: <BUILD_NAME>
-      - name: is_deployment
-        description: |
-          [DEPRECATED] Set to `true` to modify the event message to indicate that the TeamCity build configuration
-          is a deployment rather than a build run. For use with the `build_configuration` option only.
-          If used with the `projects` option, all events from collected build configurations are affected.
-          Not available with `use_openmetrics: true`.
-        value:
-          type: boolean
-          example: false
-      - name: host_affected
-        description: |
-          [DEPRECATED] Use this parameter to override the hostname that is affected by the build configuration(s)
-          in the event message. Defaults to the host that the agent is running on.
-          Not available with `use_openmetrics: true`.
-        value:
-          type: string
-
   - template: logs
     example:
     - type: file

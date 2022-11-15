@@ -67,8 +67,7 @@ def test_build_event(dd_run_check, aggregator, rest_instance):
         mock_resp.json.side_effect = json_responses
         req.get.return_value = mock_resp
         teamcity.check(rest_instance)
-
-    assert len(aggregator.metric_names) == 0
+    assert not len(aggregator.metric_names)
     aggregator.assert_event(
         event_type='build',
         host='buildhost42.dtdg.co',
@@ -155,16 +154,14 @@ def test_validate_config(dd_run_check, build_config, expected_error, caplog):
 
     check = TeamCityRest('teamcity', {}, [instance])
 
-    with pytest.raises(Exception) as e:
-        dd_run_check(check)
-
-    if PY2 and build_config.get('projects'):
-        assert (
+    if PY2:
+        expected_error = (
             '`projects` option is not supported for Python 2. '
-            'Use the `build_configuration` option or upgrade to Python 3.' in str(e.value)
+            'Use the `build_configuration` option or upgrade to Python 3.'
         )
-    else:
-        assert expected_error in str(e.value)
+
+    with pytest.raises(Exception, match=expected_error):
+        dd_run_check(check)
 
 
 def test_collect_build_stats(aggregator, mock_http_response, rest_instance, teamcity_rest_check):
@@ -220,5 +217,3 @@ def test_handle_empty_builds(aggregator, mock_http_response, rest_instance, team
     mock_http_response(file_path=get_fixture_path("init_no_builds.json"))
     check.check(rest_instance)
     aggregator.assert_service_check('teamcity.{}'.format(SERVICE_CHECK_BUILD_STATUS), count=0)
-
-    aggregator.reset()

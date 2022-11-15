@@ -1,5 +1,4 @@
 # (C) Datadog, Inc. 2014-present
-# (C) Paul Kirby <pkirby@matrix-solutions.com> 2014
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from six import PY2
@@ -28,6 +27,3 @@ class TeamCityCheck(AgentCheck):
             from .teamcity_rest import TeamCityRest
 
             return TeamCityRest(name, init_config, instances)
-
-    def __init__(self, name, init_config, instances):
-        super(TeamCityCheck, self).__init__(name, init_config, instances)

@@ -1,5 +1,4 @@
 # (C) Datadog, Inc. 2014-present
-# (C) Paul Kirby <pkirby@matrix-solutions.com> 2014
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from copy import deepcopy
@@ -204,7 +203,6 @@ class TeamCityRest(AgentCheck):
                 metric_name, additional_tags, metric_type = build_metric(stat_property_name)
                 if not metric_name or not metric_type:
                     self.log.debug('Found unknown build configuration statistic: %s, skipping.', stat_property_name)
-                    continue
                 else:
                     metric_value = stat_property['value']
                     method = getattr(self, metric_type)

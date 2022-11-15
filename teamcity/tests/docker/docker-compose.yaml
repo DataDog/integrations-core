@@ -3,7 +3,7 @@ version: '3'
 services:
   teamcity-server:
     container_name: teamcity-server
-    image: jetbrains/teamcity-server:latest
+    image: jetbrains/teamcity-server:2022.10
     platform: linux/amd64
     ports:
       - "8111:8111"
