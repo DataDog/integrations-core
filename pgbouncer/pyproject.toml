@@ -9,7 +9,6 @@ build-backend = "hatchling.build"
 name = "datadog-pgbouncer"
 description = "The PGBouncer check"
 readme = "README.md"
-license = {text = "BSD-3-Clause"}
 keywords = [
     "datadog",
     "datadog agent",
@@ -36,9 +35,13 @@ dynamic = [
     "version",
 ]
 
+[project.license]
+text = "BSD-3-Clause"
+
 [project.optional-dependencies]
 deps = [
-    "psycopg2-binary==2.8.6",
+    "psycopg2-binary==2.8.6; python_version < '3.0'",
+    "psycopg2-binary==2.9.5; python_version > '3.0'",
 ]
 
 [project.urls]
