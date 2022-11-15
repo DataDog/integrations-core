@@ -1,6 +1,6 @@
 # GitLab Integration
 
-## Overview
+## Overview 
 
 Integration that allows to:
 
