@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import copy
 import platform
 
 import pytest
@@ -17,7 +18,7 @@ def test_check(aggregator, check, instance):
     check_instance = check(instance)
     check_instance.check({})
 
-    expected_metrics = common.EXPECTED_METRICS
+    expected_metrics = copy.deepcopy(common.EXPECTED_METRICS)
     if Platform.is_windows() or Platform.is_linux():
         expected_metrics += common.EXPECTED_WINDOWS_LINUX_METRICS
     for metric in expected_metrics:
