@@ -273,7 +273,7 @@ def select_hatch_envs(
         envs_selected[:] = [
             env_name
             for env_name, config in get_available_hatch_envs(check, e2e_tests_only=e2e_tests_only).items()
-            if config.get('benchmark-env', False)
+            if env_name == 'bench' or config.get('benchmark-env', False)
         ]
     elif latest:
         envs_selected[:] = [
