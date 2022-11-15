@@ -114,7 +114,7 @@ class BSDNetwork(Network):
             #         165400 duplicate acks
             #         ...
 
-            self._submit_regexed_values(netstat, BSD_TCP_METRICS, custom_tags)
+            self.submit_regexed_values(netstat, BSD_TCP_METRICS, custom_tags)
         except SubprocessOutputEmptyError:
             self.log.exception("Error collecting TCP stats.")
 

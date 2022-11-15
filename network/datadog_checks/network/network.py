@@ -270,7 +270,7 @@ class Network(AgentCheck):
         except ValueError:
             return 0
 
-    def _submit_regexed_values(self, output, regex_list, tags):
+    def submit_regexed_values(self, output, regex_list, tags):
         lines = output.splitlines()
         for line in lines:
             for regex, metric in regex_list:
@@ -357,7 +357,7 @@ class Network(AgentCheck):
             # tcpRetransSegs      =     0 tcpRetransBytes     =     0
             # tcpOutAck           =   185 tcpOutAckDelayed    =     4
             # ...
-            self._submit_regexed_values(netstat, SOLARIS_TCP_METRICS, custom_tags)
+            self.submit_regexed_values(netstat, SOLARIS_TCP_METRICS, custom_tags)
         except SubprocessOutputEmptyError:
             self.log.exception("Error collecting TCP stats.")
 
