@@ -1,5 +1,5 @@
 ---
-title: Create An Agent Integration
+title: Create an Agent Integration
 kind: documentation
 aliases:
   - /developers/integrations/integration_sdk/
@@ -458,13 +458,13 @@ sudo -u dd-agent datadog-agent integration install -w /path/to/wheel.whl
 sudo datadog-agent integration install -w /path/to/wheel.whl
 ```
 
-**Windows** (Ensure that your shell session has _administrator_ privileges):
+**Windows Powershell** (Ensure that your shell session has _administrator_ privileges):
 
 <details>
   <summary>Agent <code>v6.11</code> or earlier</summary>
   
   ```ps
-  "C:\Program Files\Datadog\Datadog Agent\embedded\agent.exe" integration install -w /path/to/wheel.whl
+  & "C:\Program Files\Datadog\Datadog Agent\embedded\agent.exe" integration install -w /path/to/wheel.whl
   ```
 
 </details>
@@ -473,7 +473,7 @@ sudo datadog-agent integration install -w /path/to/wheel.whl
   <summary>Agent<code>v6.12</code> or later</summary>
 
   ```ps
-  "C:\Program Files\Datadog\Datadog Agent\bin\agent.exe" integration install -w /path/to/wheel.whl
+  & "C:\Program Files\Datadog\Datadog Agent\bin\agent.exe" integration install -w /path/to/wheel.whl
   ```
 </details>
 
