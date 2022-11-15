@@ -13,7 +13,7 @@ OAuth enables users to authorize third-party integrations with access to specifi
 
 For more information on Datadog’s OAuth implementation, see the [Datadog OAuth2 documentation][1].
 
-## Use OAuth in a integration 
+## Use OAuth in an integration 
 
 OAuth allows Datadog customers to easily and securely authorize third-party platforms through a couple of clicks—without having to directly input API or app keys anywhere. You can use OAuth with existing integrations or configure OAuth as a part of developing new integrations.  
 
