@@ -1,6 +1,6 @@
 # GitLab Integration
 
-## Overview 
+## Overview
 
 Integration that allows to:
 
@@ -112,6 +112,8 @@ The GitLab check does not include any events.
 ### Service Checks
 
 See [service_checks.json][13] for a list of service checks provided by this integration.
+
+## Uninstallation
 
 ## Troubleshooting
 
