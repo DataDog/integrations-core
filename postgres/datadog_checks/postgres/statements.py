@@ -15,6 +15,7 @@ from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.statement_metrics import StatementMetrics
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding, obfuscate_sql_with_metadata
+from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.base.utils.serialization import json
 
 from .util import DatabaseConfigurationError, warning_with_tags
@@ -91,6 +92,10 @@ PG_STAT_ALL_DESIRED_COLUMNS = (
 )
 
 
+def agent_check_getter(self):
+    return self._check
+
+
 def _row_key(row):
     """
     :param row: a normalized row from pg_stat_statements
@@ -122,6 +127,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
             job_name="query-metrics",
             shutdown_callback=shutdown_callback,
         )
+        self._check = check
         self._metrics_collection_interval = collection_interval
         self._config = config
         self._state = StatementMetrics()
@@ -145,6 +151,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
             self._stat_column_cache = []
             raise e
 
+    @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _get_pg_stat_statements_columns(self):
         """
         Load the list of the columns available under the `pg_stat_statements` table. This must be queried because
@@ -174,6 +181,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
             return ""
         return 'v{major}.{minor}.{patch}'.format(major=version.major, minor=version.minor, patch=version.patch)
 
+    @tracked_method(agent_check_getter=agent_check_getter)
     def collect_per_statement_metrics(self):
         # exclude the default "db" tag from statement metrics & FQT events because this data is collected from
         # all databases on the host. For metrics the "db" tag is added during ingestion based on which database
@@ -200,6 +208,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
             self._log.exception('Unable to collect statement metrics due to an error')
             return []
 
+    @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _load_pg_stat_statements(self):
         try:
             available_columns = set(self._get_pg_stat_statements_columns())
@@ -309,6 +318,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
 
             return []
 
+    @tracked_method(agent_check_getter=agent_check_getter)
     def _emit_pg_stat_statements_metrics(self):
         query = PG_STAT_STATEMENTS_COUNT_QUERY_LT_9_4 if self._check.version < V9_4 else PG_STAT_STATEMENTS_COUNT_QUERY
         try:
@@ -334,10 +344,10 @@ class PostgresStatementMetrics(DBMAsyncJob):
         except psycopg2.Error as e:
             self._log.warning("Failed to query for pg_stat_statements count: %s", e)
 
+    @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _collect_metrics_rows(self):
+        self._emit_pg_stat_statements_metrics()
         rows = self._load_pg_stat_statements()
-        if rows:
-            self._emit_pg_stat_statements_metrics()
 
         rows = self._normalize_queries(rows)
         if not rows:
