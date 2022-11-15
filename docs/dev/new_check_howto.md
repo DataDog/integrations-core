@@ -458,7 +458,7 @@ sudo -u dd-agent datadog-agent integration install -w /path/to/wheel.whl
 sudo datadog-agent integration install -w /path/to/wheel.whl
 ```
 
-**Windows Powershell** (Ensure that your shell session has _administrator_ privileges):
+**Windows PowerShell** (Ensure that your shell session has _administrator_ privileges):
 
 <details>
   <summary>Agent <code>v6.11</code> or earlier</summary>
