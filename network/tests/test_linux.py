@@ -14,23 +14,7 @@ from datadog_checks.base.utils.subprocess_output import get_subprocess_output
 from datadog_checks.network.check_linux import LinuxNetwork
 
 from . import common
-
-if PY3:
-    long = int
-    ESCAPE_ENCODING = 'unicode-escape'
-
-    def decode_string(s):
-        return s.decode(ESCAPE_ENCODING)
-
-else:
-    ESCAPE_ENCODING = 'string-escape'
-
-    def decode_string(s):
-        s.decode(ESCAPE_ENCODING)
-        return s.decode("utf-8")
-
-
-FIXTURE_DIR = os.path.join(common.HERE, 'fixtures')
+from .common import FIXTURE_DIR, decode_string
 
 LINUX_SYS_NET_STATS = {
     'system.net.iface.mtu': (65536, 9001),
