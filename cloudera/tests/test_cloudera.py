@@ -16,3 +16,9 @@ def test_emits_critical_service_check_when_service_is_down():
 #     check = ClouderaCheck('cloudera', {}, [instance])
 #     dd_run_check(check)
 #     aggregator.assert_service_check('cloudera.can_connect', ClouderaCheck.CRITICAL)
+
+
+# Tests to add:
+# happy path
+# emit critical when can't connect (incorrect credentials)
+# emit critical when cm-client is missing

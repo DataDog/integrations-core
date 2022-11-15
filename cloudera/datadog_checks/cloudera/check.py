@@ -7,6 +7,7 @@ import time
 from datadog_checks.base import AgentCheck
 
 from .client_factory import make_api_client
+from .queries import TIMESERIES_QUERIES
 
 
 class ClouderaCheck(AgentCheck):
@@ -22,32 +23,24 @@ class ClouderaCheck(AgentCheck):
 
     def run_timeseries_checks(self):
         to_time = datetime.datetime.fromtimestamp(time.time())
-        from_time = datetime.datetime.fromtimestamp(time.time() - 1000)
-        query = "select last(cpu_soft_irq_rate)"
-        response = self.client.query_time_series(query=query, from_time=from_time, to_time=to_time)
+        from_time = datetime.datetime.fromtimestamp(time.time() - 6000)
 
-        for entry in response:
-            value = entry.data[0].value
-            attributes = entry.metadata.attributes
-            tags = [
-                f'cloudera_hostname:{attributes["hostname"]}',
-                f'cluster_display_name:{attributes["clusterDisplayName"]}',
-                f'entity_name:{attributes["entityName"]}',
-                f'cluster_name:{attributes["clusterName"]}',
-                f'host_id:{attributes["hostId"]}',
-                f'category:{attributes["category"]}',
-                f'rack_id:{attributes["rackId"]}',
-            ]
-            self.gauge("host.cpu_soft_irq_rate", value, tags=tags)
+        # For each timeseries query, get the metrics
+        for query in TIMESERIES_QUERIES:
+            responses = self.client.query_time_series(query=query['query_string'], from_time=from_time, to_time=to_time)
+
+            for response in responses:
+                value = response.data[0].value
+                attributes = response.metadata.attributes
+
+                # TODO: make this compatible with Py2
+                tags = [f"{datadog_tag}:{attributes[attribute]}" for datadog_tag, attribute in query['tags']]
+
+                category = attributes['category'].lower()
+                self.gauge(f"{category}.{query['metric_name']}", value, tags=tags)
+    # https://cod--qfdcinkqrzw-gateway.agent-in.jfha-h5rc.a0.cloudera.site/cod--qfdcinkqrzw/cdp-proxy/hbase/webui/logs/hbase-cmf-hbase-MASTER-cod--qfdcinkqrzw-master1.agent-in.jfha-h5rc.a0.cloudera.site.log.out?host=cod--qfdcinkqrzw-master1.agent-in.jfha-h5rc.a0.cloudera.site&port=16010
 
     def run_service_checks(self):
-        self.service_check("can_connect", ClouderaCheck.OK)
-
-
-    def check(self, _):
-        # Run through the list of default timeseries metrics first
-        self.run_timeseries_checks()
-
         # Get the clusters
         # ClustersResourceApi
 
@@ -73,9 +66,16 @@ class ClouderaCheck(AgentCheck):
         # get service metrics
         # ServicesResourceApi
 
-        # Next steps: try to get cluster metrics and see how to structure hierarchy
-        self.run_service_checks()
+        self.service_check("can_connect", ClouderaCheck.OK)
 
+    def check(self, _):
+        # Run through the list of default timeseries metrics first
+        self.run_timeseries_checks()
+
+        # Next steps: try to get cluster metrics and see how to structure hierarchy
+
+        # Get the service checks of cluster, service, nameservice, role, and host
+        self.run_service_checks()
 
         # Run any custom queries
 
