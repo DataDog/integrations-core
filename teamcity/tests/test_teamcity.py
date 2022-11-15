@@ -154,7 +154,7 @@ def test_validate_config(dd_run_check, build_config, expected_error, caplog):
 
     check = TeamCityRest('teamcity', {}, [instance])
 
-    if PY2:
+    if PY2 and check.get('projects'):
         expected_error = (
             '`projects` option is not supported for Python 2. '
             'Use the `build_configuration` option or upgrade to Python 3.'
