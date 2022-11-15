@@ -113,6 +113,8 @@ def validate_readme(integration, repo, display_queue, files_failed, readme_count
     if "Uninstallation" not in h2s:
         files_failed[readme_path] = True
         display_queue.append((echo_failure, "     readme is missing an Uninstallation H2 (##) section"))
+        display_queue.append(soup)
+        display_queue.append(soup.find_next("p").text)
 
     # Check all referenced images are in the `images` folder and that
     # they use the `raw.githubusercontent` format or relative paths to the `images` folder
