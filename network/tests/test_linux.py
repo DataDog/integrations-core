@@ -261,7 +261,6 @@ def test_cx_state_mocked(aggregator):
     check_instance = LinuxNetwork('network', {}, [instance])
     with mock.patch('datadog_checks.network.check_linux.get_subprocess_output') as out:
         out.side_effect = ss_subprocess_mock
-        check_instance._get_linux_sys_net = lambda x: True
         check_instance.is_collect_cx_state_runnable = lambda x: True
         check_instance.get_net_proc_base_location = lambda x: FIXTURE_DIR
 
@@ -314,7 +313,6 @@ def test_ss_with_custom_procfs(aggregator):
     instance = copy.deepcopy(common.INSTANCE)
     instance['collect_connection_state'] = True
     check_instance = LinuxNetwork('network', {}, [instance])
-    check_instance._get_linux_sys_net = lambda x: True
     with mock.patch(
         'datadog_checks.network.check_linux.get_subprocess_output', side_effect=ss_subprocess_mock
     ) as get_subprocess_output:
