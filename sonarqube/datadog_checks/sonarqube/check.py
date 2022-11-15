@@ -67,8 +67,8 @@ class SonarqubeCheck(AgentCheck):
                 elif isinstance(keys_item, str):
                     self._projects['keys'].append({keys_item: {}})
                 else:
-                    self.log.warning('project key setting must be a string or a dict: %s', keys_item)
-                    raise ConfigurationError('project key setting must be a string or a dict')
+                    self.log.warning('\'project\' key setting must be a string or a dict: %s', keys_item)
+                    raise ConfigurationError('\'project\' key setting must be a string or a dict')
             self.log.debug(self._projects)
 
     def _validate_default_tag(self):
