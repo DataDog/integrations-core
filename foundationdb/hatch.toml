@@ -1,0 +1,13 @@
+[env.collectors.datadog-checks]
+
+[envs.default]
+dependencies = [
+  "foundationdb==6.3.24",
+]
+
+[[envs.default.matrix]]
+python = ["38"]
+tls = ["true", "false"]
+
+[envs.default.overrides]
+matrix.tls.env-vars = "TLS"
