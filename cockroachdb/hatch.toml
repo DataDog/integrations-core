@@ -10,4 +10,5 @@ matrix.version.env-vars = [
   { key = "COCKROACHDB_VERSION", value = "latest", if = ["latest"] },
 ]
 
-[envs.bench]
+[envs.bench.env-vars]
+COCKROACHDB_VERSION = "latest"
