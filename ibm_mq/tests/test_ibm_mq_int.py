@@ -468,3 +468,11 @@ def test_queue_manager_process_found_cleanup(get_check, instance, dd_run_check):
     assert check.process_matcher.limit_reached()
     check.cancel()
     assert not check.process_matcher.limit_reached()
+
+
+@pytest.mark.usefixtures('dd_environment')
+def test_run(dd_run_check, get_check, instance_ssl):
+    instance_ssl['try_basic_auth'] = False
+    check = get_check(instance_ssl)
+    dd_run_check(check)
+    aggregator.assert_service_check("ibm_mq.channel.status", check.OK, tags=tags, count=1)
