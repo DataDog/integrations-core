@@ -113,9 +113,6 @@ The GitLab check does not include any events.
 
 See [service_checks.json][13] for a list of service checks provided by this integration.
 
-## Uninstallation
-
-Words words and words
 ## Troubleshooting
 
 Need help? Contact [Datadog support][14].
