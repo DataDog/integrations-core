@@ -64,8 +64,8 @@ class IbmWasCheck(AgentCheck):
                 server_tags.extend(node_tags)
 
                 for category, prefix in iteritems(self.metric_categories):
-                    self.log.debug("Collecting %s stats", category)
                     if self.collect_stats.get(category):
+                        self.log.debug("Collecting %s stats", category)
                         stats = self.get_node_from_name(server, category)
                         self.process_stats(stats, prefix, server_tags)
 
