@@ -159,51 +159,7 @@ class SonarqubeCheck(AgentCheck):
             all_metrics = self._api.get_metrics()
             self.log.debug('%d metrics obtained from Sonarqube: %s', len(all_metrics), all_metrics)
             for matched_project_key, matched_project_config in matched_projects:
-                self.log.debug(
-                    'processing matched project \'%s\' with config \'%s\'',
-                    matched_project_key,
-                    matched_project_config,
-                )
-                metrics_discovery_matcher = DiscoveryFilter(
-                    'metrics',
-                    self.log,
-                    matched_project_config.get('metrics', {}) if matched_project_config else {},
-                    mandatory=False,
-                    default_limit=self._projects.get('default_metrics_limit', self._default_metrics_limit),
-                    default_include=['({})'.format(item) for item in self._default_metrics_include],
-                    default_exclude=['({})'.format(item) for item in self._default_metrics_exclude],
-                )
-                matched_metrics = metrics_discovery_matcher.match(all_metrics)
-                self.log.debug('%d matched_metrics: %s', len(matched_metrics), matched_metrics)
-                map_metrics_measures = {key.split('.')[1]: key for key, _ in matched_metrics}
-                self.log.debug('%d map_metrics_measures: %s', len(map_metrics_measures), map_metrics_measures)
-                measures = self._api.get_measures(
-                    matched_project_key, [key.split('.')[1] for key, _ in matched_metrics]
-                )
-                self.log.debug(
-                    '%d measures from project \'%s\' obtained from Sonarqube: %s',
-                    len(measures),
-                    matched_project_key,
-                    measures,
-                )
-                for measure_key, measure_value in measures:
-                    mapped_measure = map_metrics_measures.get(measure_key, None)
-                    if mapped_measure:
-                        self.gauge(
-                            mapped_measure,
-                            measure_value,
-                            tags=self._tags
-                            + [
-                                '{}:{}'.format(
-                                    matched_project_config.get('tag', self._default_tag)
-                                    if matched_project_config
-                                    else self._default_tag,
-                                    matched_project_key,
-                                )
-                            ],
-                        )
-                    else:
-                        self.log.warning('\'%s\' not found in matched metrics', measure_key)
+                self._process_project(matched_project_key, matched_project_config, all_metrics)
 
     def collect_version(self):
         self.log.debug('Collecting version')
@@ -216,3 +172,50 @@ class SonarqubeCheck(AgentCheck):
         version_parts = {name: part for name, part in zip(('major', 'minor', 'patch', 'build'), version.split('.'))}
         self.log.debug('Sonarqube version: %s', version_parts)
         self.set_metadata('version', version, scheme='parts', final_scheme='semver', part_map=version_parts)
+
+    def _process_project(self, project_key, project_config, all_metrics):
+        self.log.debug(
+            'processing matched project \'%s\' with config \'%s\'',
+            project_key,
+            project_config,
+        )
+        metrics_discovery_matcher = DiscoveryFilter(
+            'metrics',
+            self.log,
+            project_config.get('metrics', {}) if project_config else {},
+            mandatory=False,
+            default_limit=self._projects.get('default_metrics_limit', self._default_metrics_limit),
+            default_include=['({})'.format(item) for item in self._default_metrics_include],
+            default_exclude=['({})'.format(item) for item in self._default_metrics_exclude],
+        )
+        matched_metrics = metrics_discovery_matcher.match(all_metrics)
+        self.log.debug('%d matched_metrics: %s', len(matched_metrics), matched_metrics)
+        map_metrics_measures = {key.split('.')[1]: key for key, _ in matched_metrics}
+        self.log.debug('%d map_metrics_measures: %s', len(map_metrics_measures), map_metrics_measures)
+        measures = self._api.get_measures(
+            project_key, [key.split('.')[1] for key, _ in matched_metrics]
+        )
+        self.log.debug(
+            '%d measures from project \'%s\' obtained from Sonarqube: %s',
+            len(measures),
+            project_key,
+            measures,
+        )
+        for measure_key, measure_value in measures:
+            mapped_measure = map_metrics_measures.get(measure_key, None)
+            if mapped_measure:
+                self.gauge(
+                    mapped_measure,
+                    measure_value,
+                    tags=self._tags
+                         + [
+                             '{}:{}'.format(
+                                 project_config.get('tag', self._default_tag)
+                                 if project_config
+                                 else self._default_tag,
+                                 project_key,
+                             )
+                         ],
+                )
+            else:
+                self.log.warning('\'%s\' not found in matched metrics', measure_key)
