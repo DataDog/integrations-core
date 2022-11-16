@@ -517,3 +517,9 @@ cockroachdb.admission.wait.sum.sql.root.start.count,count
 cockroachdb.changefeed.admit.latency.bucket,count
 cockroachdb.changefeed.admit.latency.count,count
 cockroachdb.changefeed.admit.latency.sum,count
+cockroachdb.jobs.backup.currently.idle,gauge
+cockroachdb.jobs.backup.currently.running,gauge
+cockroachdb.jobs.backup.fail.or.cancel.failed.count,count
+cockroachdb.jobs.backup.fail.or.cancel.retry.error.count,count
+cockroachdb.jobs.backup.resume.failed.count,count
+cockroachdb.jobs.backup.resume.retry.error.count,count

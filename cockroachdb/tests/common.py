@@ -189,6 +189,12 @@ KNOWN_COUNTERS = {
     'admission_wait_sum_sql_kv_response',
     'admission_errored_sql_sql_response',
     'admission_admitted_kv_stores',
+    'jobs_backup_fail_or_cancel_completed',
+    'jobs_backup_fail_or_cancel_retry_error',
+    'jobs_backup_fail_or_cancel_failed',
+    'jobs_backup_resume_failed',
+    'jobs_backup_resume_retry_error',
+    'jobs_backup_resume_completed',
 }
 
 EXPECTED_METRICS = []

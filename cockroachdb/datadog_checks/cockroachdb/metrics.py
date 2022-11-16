@@ -329,6 +329,14 @@ METRIC_MAP = {
     'admission_admitted_kv_stores': 'admission.admitted.kv.stores',
     'changefeed_admit_latency': 'changefeed.admit.latency',
     'admission_wait_queue_length_kv_stores': 'admission.wait.queue.length.kv.stores',
+    'jobs_backup_fail_or_cancel_completed ': 'jobs.backup.fail.or.cancel.completed',
+    'jobs_backup_currently_running': 'jobs.backup.currently.running',
+    'jobs_backup_currently_idle': 'jobs.backup.currently.idle',
+    'jobs_backup_fail_or_cancel_retry_error': 'jobs.backup.fail.or.cancel.retry.error',
+    'jobs_backup_fail_or_cancel_failed': 'jobs.backup.fail.or.cancel.failed',
+    'jobs_backup_resume_failed': 'jobs.backup.resume.failed',
+    'jobs_backup_resume_retry_error': 'jobs.backup.resume.retry.error',
+    'jobs_backup_resume_completed ': 'jobs.backup.resume.completed',
 }
 
 
