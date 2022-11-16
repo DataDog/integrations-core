@@ -271,6 +271,14 @@ PROMETHEUS_METRICS = [
     'teamcity.full_agent_wait_time.quantile',
     'teamcity.node.events.processing.count',
     'teamcity.node.events.publishing.count',
+    'teamcity.http.requests.duration.milliseconds.bucket',
+    'teamcity.http.requests.duration.milliseconds.count',
+    'teamcity.process.queue.milliseconds.count',
+    'teamcity.process.queue.parts.milliseconds.count',
+    'teamcity.process.websocket.send.pending.messages.milliseconds.count',
+    'teamcity.pullRequests.batch.time.milliseconds.count',
+    'teamcity.pullRequests.single.time.milliseconds.count',
+    'teamcity.vcsChangesCollection.delay.milliseconds.count',
 ]
 
 

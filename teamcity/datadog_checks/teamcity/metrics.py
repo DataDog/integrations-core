@@ -2,8 +2,9 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
+from copy import deepcopy
 
-METRIC_MAP = {
+STANDARD_PROMETHEUS_METRICS = {
     'agents_connected_authorized_number': 'agents.connected.authorized',
     'agents_running_builds_number': 'agents.running.builds',
     'buildConfigurations_active_number': 'build.configs.active',
@@ -129,6 +130,20 @@ METRIC_MAP = {
     'vcs_get_current_state_calls_number': 'vcs.get.current.state.calls',
 }
 
+HISTOGRAM_METRICS = {'http_requests_duration_milliseconds': 'http.requests.duration.milliseconds'}
+
+SUMMARY_METRICS = {
+    'process_queue_milliseconds': 'process.queue.milliseconds',
+    'process_queue_parts_milliseconds': 'process.queue.parts.milliseconds',
+    'process_websocket_send_pending_messages_milliseconds': 'process.websocket.send.pending.messages.milliseconds',
+    'pullRequests_batch_time_milliseconds': 'pullRequests.batch.time.milliseconds',
+    'pullRequests_single_time_milliseconds': 'pullRequests.single.time.milliseconds',
+    'vcsChangesCollection_delay_milliseconds': 'vcsChangesCollection.delay.milliseconds',
+}
+
+METRIC_MAP = deepcopy(STANDARD_PROMETHEUS_METRICS)
+METRIC_MAP.update(HISTOGRAM_METRICS)
+METRIC_MAP.update(SUMMARY_METRICS)
 
 SIMPLE_BUILD_STATS_METRICS = {
     'ArtifactsSize': {'name': 'artifacts_size', 'metric_type': 'gauge'},
