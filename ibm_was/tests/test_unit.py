@@ -42,18 +42,6 @@ def test_custom_query(aggregator, instance, check):
     )
 
 
-def test_thread_pools_percent_used(aggregator, instance, check):
-    """Prove that we already collect the thread_pools.percent_used metric, satisfying AI-2672."""
-    with mock.patch('datadog_checks.ibm_was.IbmWasCheck.make_request', return_value=mock_data('server.xml')):
-        check = check(instance)
-        check.check(instance)
-
-    aggregator.assert_metric(
-        'ibm_was.thread_pools.percent_used',
-        tags=['server:server1', 'key1:value1', 'node:ibmwasNode01', 'thread_pool:Default'],
-    )
-
-
 def test_custom_queries_missing_stat_in_payload(instance, check):
     with mock.patch('datadog_checks.ibm_was.IbmWasCheck.make_request', return_value=mock_data('server.xml')):
         check = check(instance)

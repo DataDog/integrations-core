@@ -30,6 +30,7 @@ METRICS_ALWAYS_PRESENT = [
     'ibm_was.jvm.heap_size',
     'ibm_was.servlet_session.live_count',
     'ibm_was.thread_pools.pool_size',
+    'ibm_was.thread_pools.percent_used',
 ]
 
 DEFAULT_SERVICE_CHECK_TAGS = ['url:{}'.format(INSTANCE.get('servlet_url')), 'key1:value1']
