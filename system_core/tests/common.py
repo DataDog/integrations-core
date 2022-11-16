@@ -11,6 +11,9 @@ CHECK_NAME = "system_core"
 
 INSTANCE = {"tags": ["tag1:value1"]}
 
+MOCK_PSUTIL_CPU_COUNT = 4
+MOCK_PSUTIL_CPU_FREQ = [psutil._common.scpufreq(current=2500, min=0.0, max=0.0)]
+
 if Platform.is_mac():
     CHECK_RATES = ['system.core.idle', 'system.core.nice', 'system.core.system', 'system.core.user']
     MOCK_PSUTIL_CPU_TIMES = [
