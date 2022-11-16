@@ -12,13 +12,12 @@ import subprocess
 import sys
 from collections import defaultdict, namedtuple
 from datetime import datetime
+from urllib.parse import urljoin
 
 import pytest
 import requests
 from freezegun import freeze_time
 from packaging.version import parse as parse_version
-from six import PY2, iteritems
-from six.moves.urllib_parse import urljoin
 from tenacity import retry, stop_after_attempt, wait_exponential
 from tests.local_http import local_http_server, local_http_server_local_dir
 from tuf.api.exceptions import DownloadError, ExpiredMetadataError, UnsignedMetadataError
@@ -89,7 +88,6 @@ def test_download(capfd, distribution_name, distribution_version, temporary_loca
 
 
 @pytest.mark.online
-@pytest.mark.skipif(PY2, reason="tuf builds for Python 2 do not provide required information in exception")
 def test_expired_metadata_error(distribution_name, distribution_version):
     """Test expiration of metadata raises an exception."""
     argv = [distribution_name, "--version", distribution_version]
@@ -119,7 +117,6 @@ def test_non_datadog_distribution():
         ),
     ],
 )
-@pytest.mark.skipif(PY2, reason="tuf builds for Python 2 do not provide required information in exception")
 @freeze_time(_LOCAL_TESTS_DATA_TIMESTAMP)
 def test_local_download(capfd, distribution_name, distribution_version, target):
     """Test local verification of a wheel file."""
@@ -173,7 +170,6 @@ def test_local_dir_download(capfd, local_dir, distribution_name, distribution_ve
         ("datadog-active-directory", "1.10.0"),
     ],
 )
-@pytest.mark.skipif(PY2, reason="tuf builds for Python 2 do not provide required information in exception")
 def test_local_expired_metadata_error(distribution_name, distribution_version):
     """Test expiration of metadata raises an exception."""
     with local_http_server("{}-{}".format(distribution_name, distribution_version)) as http_url:
@@ -191,7 +187,6 @@ def test_local_expired_metadata_error(distribution_name, distribution_version):
 
 
 @pytest.mark.offline
-@pytest.mark.skipif(PY2, reason="tuf builds for Python 2 do not provide required information in exception")
 def test_local_unreachable_repository():
     """Test unreachable repository raises an exception."""
     argv = [
@@ -213,7 +208,6 @@ def test_local_unreachable_repository():
         ("datadog-active-directory", "1.10.0"),
     ],
 )
-@pytest.mark.skipif(PY2, reason="tuf builds for Python 2 do not provide required information in exception")
 @freeze_time(_LOCAL_TESTS_DATA_TIMESTAMP)
 def test_local_wheels_signer_signature_leaf_error(distribution_name, distribution_version):
     """Test failure in verifying wheels-signer signature.
@@ -322,7 +316,7 @@ def get_all_integrations_metadata():
     PATTERN = r"simple/(datadog-[\w-]+?)/datadog_[\w-]+?-(.*)-py\d.*.whl"
     results = defaultdict(lambda: IntegrationMetadata("0.0.0", "root"))
     targets = fetch_all_targets()
-    for target, metadata in iteritems(targets):
+    for target, metadata in targets.items():
         match = re.match(PATTERN, target)
         if not match:
             # An html file, safe to ignore

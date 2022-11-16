@@ -10,20 +10,12 @@ import tempfile
 import time
 import zipfile
 from functools import partial
+from http.server import SimpleHTTPRequestHandler
+from queue import Queue
+from socketserver import TCPServer
 from threading import Thread
 
 import requests
-import six
-
-if six.PY3:
-    from http.server import SimpleHTTPRequestHandler
-    from queue import Queue
-    from socketserver import TCPServer
-
-else:
-    from Queue import Queue
-    from SimpleHTTPServer import SimpleHTTPRequestHandler
-    from SocketServer import TCPServer
 
 _LOGGER = logging.getLogger(__name__)
 _E2E_TESTS_DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
