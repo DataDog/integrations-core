@@ -115,7 +115,7 @@ See [service_checks.json][13] for a list of service checks provided by this inte
 
 ## Uninstallation
 
-Words
+Words words and words
 
 ## Troubleshooting
 
