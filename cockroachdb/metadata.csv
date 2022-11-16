@@ -8,6 +8,7 @@ cockroachdb.addsstable.proposals.count,count,,operation,,[OpenMetrics v2] Number
 cockroachdb.build.timestamp,gauge,,time,,[OpenMetrics v1 & v2] Build information,0,cockroachdb,,
 cockroachdb.capacity.available,gauge,,byte,,[OpenMetrics v1 & v2] Available storage capacity,0,cockroachdb,,
 cockroachdb.capacity.reserved,gauge,,byte,,[OpenMetrics v1 & v2] Capacity reserved for snapshots,0,cockroachdb,,
+cockroachdb.capacity,gauge
 cockroachdb.capacity.total,gauge,,byte,,[OpenMetrics v1 & v2] Total storage capacity,0,cockroachdb,,
 cockroachdb.capacity.used,gauge,,byte,,[OpenMetrics v1 & v2] Used storage capacity,0,cockroachdb,,
 cockroachdb.clock.offset.meannanos,gauge,,nanosecond,,[OpenMetrics v1 & v2] Mean clock offset with other nodes in nanoseconds,0,cockroachdb,,
@@ -25,6 +26,7 @@ cockroachdb.compactor.suggestionbytes.skipped,count,,byte,,[OpenMetrics v1] Numb
 cockroachdb.compactor.suggestionbytes.skipped.count,count,,byte,,[OpenMetrics v2] Number of logical bytes in suggested compactions which were not compacted,0,cockroachdb,,
 cockroachdb.distsender.batches.partial,count,,,,[OpenMetrics v1] Number of partial batches processed,0,cockroachdb,,
 cockroachdb.distsender.batches.partial.count,count,,,,[OpenMetrics v2] Number of partial batches processed,0,cockroachdb,,
+cockroachdb.distsender.batches.total.count,count
 cockroachdb.distsender.batches.total,count,,,,[OpenMetrics v1 & v2] Number of batches processed,0,cockroachdb,,
 cockroachdb.distsender.errors.notleaseholder,count,,error,,[OpenMetrics v1] Number of NotLeaseHolderErrors encountered,0,cockroachdb,,
 cockroachdb.distsender.errors.notleaseholder.count,count,,error,,[OpenMetrics v2] Number of NotLeaseHolderErrors encountered,0,cockroachdb,,
@@ -33,10 +35,13 @@ cockroachdb.distsender.rpc.sent.local.count,count,,,,[OpenMetrics v2] Number of 
 cockroachdb.distsender.rpc.sent.nextreplicaerror,count,,error,,[OpenMetrics v1] Number of RPCs sent due to per-replica errors,0,cockroachdb,,
 cockroachdb.distsender.rpc.sent.nextreplicaerror.count,count,,error,,[OpenMetrics v2] Number of RPCs sent due to per-replica errors,0,cockroachdb,,
 cockroachdb.distsender.rpc.sent.total,count,,,,[OpenMetrics v1 & v2] Number of RPCs sent,0,cockroachdb,,
-cockroachdb.exec.error,count,,request,,[OpenMetrics v1] Number of batch KV requests that failed to execute on this node,0,cockroachdb,,
-cockroachdb.exec.error.count,count,,request,,[OpenMetrics v2] Number of batch KV requests that failed to execute on this node,0,cockroachdb,,
+cockroachdb.distsender.rpc.sent.total.count,count
+cockroachdb.exec.error,count,,request,,"[OpenMetrics v1] Number of batch KV requests that failed to execute on this node. These are warnings denoting cleanup rather than errors, and can be disregarded as part of operation.",0,cockroachdb,,
+cockroachdb.exec.error.count,count,,request,,"[OpenMetrics v2] Number of batch KV requests that failed to execute on this node. These are warnings denoting cleanup rather than errors, and can be disregarded as part of operation.",0,cockroachdb,,
 cockroachdb.exec.latency,gauge,,nanosecond,,[OpenMetrics v1] Latency in nanoseconds of batch KV requests executed on this node,0,cockroachdb,,
 cockroachdb.exec.latency.bucket,count,,nanosecond,,[OpenMetrics v2] Latency in nanoseconds of batch KV requests executed on this node,0,cockroachdb,,
+cockroachdb.exec.latency.count,count
+cockroachdb.exec.latency.sum,count
 cockroachdb.exec.success,count,,request,,[OpenMetrics v1] Number of batch KV requests executed successfully on this node,0,cockroachdb,,
 cockroachdb.exec.success.count,count,,request,,[OpenMetrics v2] Number of batch KV requests executed successfully on this node,0,cockroachdb,,
 cockroachdb.gcbytesage,gauge,,second,,[OpenMetrics v1 & v2] Cumulative age of non-live data in seconds,0,cockroachdb,,
@@ -76,6 +81,8 @@ cockroachdb.liveness.heartbeatfailures,count,,,,[OpenMetrics v1] Number of faile
 cockroachdb.liveness.heartbeatfailures.count,count,,,,[OpenMetrics v2] Number of failed node liveness heartbeats from this node,0,cockroachdb,,
 cockroachdb.liveness.heartbeatlatency,gauge,,nanosecond,,[OpenMetrics v1] Node liveness heartbeat latency in nanoseconds,0,cockroachdb,,
 cockroachdb.liveness.heartbeatlatency.bucket,count,,nanosecond,,[OpenMetrics v2] Node liveness heartbeat latency in nanoseconds,0,cockroachdb,,
+cockroachdb.liveness.heartbeatlatency.count,count
+cockroachdb.liveness.heartbeatlatency.sum,count
 cockroachdb.liveness.heartbeatsuccesses,count,,,,[OpenMetrics v1] Number of successful node liveness heartbeats from this node,0,cockroachdb,,
 cockroachdb.liveness.heartbeatsuccesses.count,count,,,,[OpenMetrics v2] Number of successful node liveness heartbeats from this node,0,cockroachdb,,
 cockroachdb.liveness.livenodes,gauge,,,,[OpenMetrics v1 & v2] Number of live nodes in the cluster (will be 0 if this node is not itself live),0,cockroachdb,,
@@ -181,8 +188,12 @@ cockroachdb.raft.enqueued.pending,gauge,,,,[OpenMetrics v1 & v2] Number of pendi
 cockroachdb.raft.heartbeats.pending,gauge,,,,[OpenMetrics v1 & v2] Number of pending heartbeats and responses waiting to be coalesced,0,cockroachdb,,
 cockroachdb.raft.process.commandcommit.latency,gauge,,nanosecond,,[OpenMetrics v1] Latency histogram in nanoseconds for committing Raft commands,0,cockroachdb,,
 cockroachdb.raft.process.commandcommit.latency.bucket,count,,nanosecond,,[OpenMetrics v2] Latency histogram in nanoseconds for committing Raft commands,0,cockroachdb,,
+cockroachdb.raft.process.commandcommit.latency.count,count
+cockroachdb.raft.process.commandcommit.latency.sum,count
 cockroachdb.raft.process.logcommit.latency,gauge,,nanosecond,,[OpenMetrics v1] Latency histogram in nanoseconds for committing Raft log entries,0,cockroachdb,,
 cockroachdb.raft.process.logcommit.latency.bucket,count,,nanosecond,,[OpenMetrics v2] Latency histogram in nanoseconds for committing Raft log entries,0,cockroachdb,,
+cockroachdb.raft.process.logcommit.latency.count,count
+cockroachdb.raft.process.logcommit.latency.sum,count
 cockroachdb.raft.process.tickingnanos,count,,nanosecond,,[OpenMetrics v1] Nanoseconds spent in store.processRaft() processing replica.Tick(),0,cockroachdb,,
 cockroachdb.raft.process.tickingnanos.count,count,,nanosecond,,[OpenMetrics v2] Nanoseconds spent in store.processRaft() processing replica.Tick(),0,cockroachdb,,
 cockroachdb.raft.process.workingnanos,count,,nanosecond,,[OpenMetrics v1] Nanoseconds spent in store.processRaft() working,0,cockroachdb,,
@@ -231,6 +242,7 @@ cockroachdb.range.snapshots.normal_applied.count,count,,,,[OpenMetrics v2] Numbe
 cockroachdb.range.snapshots.preemptive_applied,count,,,,[OpenMetrics v1] Number of applied pre-emptive snapshots,0,cockroachdb,,
 cockroachdb.range.snapshots.preemptive_applied.count,count,,,,[OpenMetrics v2] Number of applied pre-emptive snapshots,0,cockroachdb,,
 cockroachdb.range.splits.total,count,,,,[OpenMetrics v1 & v2] Number of range splits,0,cockroachdb,,
+cockroachdb.range.splits.total.count,count
 cockroachdb.ranges,gauge,,,,[OpenMetrics v1 & v2] Number of ranges,0,cockroachdb,,
 cockroachdb.ranges.unavailable,gauge,,,,[OpenMetrics v1 & v2] Number of ranges with fewer live replicas than needed for quorum,0,cockroachdb,,
 cockroachdb.ranges.underreplicated,gauge,,,,[OpenMetrics v1 & v2] Number of ranges with fewer live replicas than the replication target,0,cockroachdb,,
@@ -249,6 +261,7 @@ cockroachdb.replicas.leaseholders,gauge,,,,[OpenMetrics v1 & v2] Number of lease
 cockroachdb.replicas.quiescent,gauge,,,,[OpenMetrics v1 & v2] Number of quiesced replicas,0,cockroachdb,,
 cockroachdb.replicas.reserved,gauge,,,,[OpenMetrics v1 & v2] Number of replicas reserved for snapshots,0,cockroachdb,,
 cockroachdb.replicas.total,gauge,,,,[OpenMetrics v1 & v2] Number of replicas,0,cockroachdb,,
+cockroachdb.replicas,gauge
 cockroachdb.requests.backpressure.split,gauge,,,,[OpenMetrics v1 & v2] Number of backpressured writes waiting on a Range split,0,cockroachdb,,
 cockroachdb.requests.slow.commandqueue,gauge,,request,,[OpenMetrics v1 & v2] Number of requests that have been stuck for a long time in the command queue,0,cockroachdb,,
 cockroachdb.requests.slow.distsender,gauge,,request,,[OpenMetrics v1 & v2] Number of requests that have been stuck for a long time in the dist sender,0,cockroachdb,,
@@ -261,6 +274,8 @@ cockroachdb.rocksdb.block.cache.usage,gauge,,byte,,[OpenMetrics v1 & v2] Bytes u
 cockroachdb.rocksdb.bloom_filter.prefix.checked,gauge,,,,[OpenMetrics v1 & v2] Number of times the bloom filter was checked,0,cockroachdb,,
 cockroachdb.rocksdb.bloom_filter.prefix.useful,gauge,,,,[OpenMetrics v1 & v2] Number of times the bloom filter helped avoid iterator creation,0,cockroachdb,,
 cockroachdb.rocksdb.compactions.total,gauge,,,,[OpenMetrics v1 & v2] Number of table compactions,0,cockroachdb,,
+cockroachdb.rocksdb.compactions,gauge
+cockroachdb.rocksdb.flushes,gauge
 cockroachdb.rocksdb.flushes.total,gauge,,,,[OpenMetrics v1 & v2] Number of table flushes,0,cockroachdb,,
 cockroachdb.rocksdb.memtable.total.size,gauge,,byte,,[OpenMetrics v1 & v2] Current size of memtable in bytes,0,cockroachdb,,
 cockroachdb.rocksdb.num_sstables,gauge,,table,,[OpenMetrics v1 & v2] Number of rocksdb SSTables,0,cockroachdb,,
@@ -268,6 +283,8 @@ cockroachdb.rocksdb.read.amplification,gauge,,read,,[OpenMetrics v1 & v2] Number
 cockroachdb.rocksdb.table.readers.mem.estimate,gauge,,,,[OpenMetrics v1 & v2] Memory used by index and filter blocks,0,cockroachdb,,
 cockroachdb.round_trip.latency,gauge,,nanosecond,,[OpenMetrics v1] Distribution of round-trip latencies with other nodes in nanoseconds,0,cockroachdb,,
 cockroachdb.round_trip.latency.bucket,count,,nanosecond,,[OpenMetrics v2] Distribution of round-trip latencies with other nodes in nanoseconds,0,cockroachdb,,
+cockroachdb.round_trip.latency.count,count
+cockroachdb.round_trip.latency.sum,count
 cockroachdb.schedules.backup.failed,count,,,,[OpenMetrics v1] Number of BACKUP jobs failed,0,cockroachdb,,
 cockroachdb.schedules.backup.failed.count,count,,,,[OpenMetrics v2] Number of BACKUP jobs failed,0,cockroachdb,,
 cockroachdb.schedules.backup.started,count,,,,[OpenMetrics v1] Number of BACKUP jobs started,0,cockroachdb,,
@@ -283,7 +300,10 @@ cockroachdb.sql.ddl.count,count,,,,[OpenMetrics v1 & v2] Number of SQL DDL state
 cockroachdb.sql.delete.count,count,,,,[OpenMetrics v1 & v2] Number of SQL DELETE statements,0,cockroachdb,,
 cockroachdb.sql.distsql.exec.latency,gauge,,nanosecond,,[OpenMetrics v1] Latency in nanoseconds of DistSQL statement execution,0,cockroachdb,,
 cockroachdb.sql.distsql.exec.latency.bucket,count,,nanosecond,,[OpenMetrics v2] Latency in nanoseconds of DistSQL statement execution,0,cockroachdb,,
+cockroachdb.sql.distsql.exec.latency.count,count
+cockroachdb.sql.distsql.exec.latency.sum,count
 cockroachdb.sql.distsql.flows.active,gauge,,,,[OpenMetrics v1 & v2] Number of distributed SQL flows currently active,0,cockroachdb,,
+cockroachdb.sql.distsql.flows.count,count
 cockroachdb.sql.distsql.flows.total,count,,,,[OpenMetrics v1] Number of distributed SQL flows executed,0,cockroachdb,,
 cockroachdb.sql.distsql.flows.total.count,count,,,,[OpenMetrics v2] Number of distributed SQL flows executed,0,cockroachdb,,
 cockroachdb.sql.distsql.queries.active,gauge,,,,[OpenMetrics v1 & v2] Number of distributed SQL queries currently active,0,cockroachdb,,
@@ -292,8 +312,12 @@ cockroachdb.sql.distsql.queries.total.count,count,,,,[OpenMetrics v2] Number of 
 cockroachdb.sql.distsql.select.count,count,,,,[OpenMetrics v1 & v2] Number of DistSQL SELECT statements,0,cockroachdb,,
 cockroachdb.sql.distsql.service.latency,gauge,,nanosecond,,[OpenMetrics v1] Latency in nanoseconds of DistSQL request execution,0,cockroachdb,,
 cockroachdb.sql.distsql.service.latency.bucket,count,,nanosecond,,[OpenMetrics v2] Latency in nanoseconds of DistSQL request execution,0,cockroachdb,,
+cockroachdb.sql.distsql.service.latency.count,count
+cockroachdb.sql.distsql.service.latency.sum,count
 cockroachdb.sql.exec.latency,gauge,,nanosecond,,[OpenMetrics v1] Latency in nanoseconds of SQL statement execution,0,cockroachdb,,
 cockroachdb.sql.exec.latency.bucket,count,,nanosecond,,[OpenMetrics v2] Latency in nanoseconds of SQL statement execution,0,cockroachdb,,
+cockroachdb.sql.exec.latency.count,count
+cockroachdb.sql.exec.latency.sum,count
 cockroachdb.sql.insert.count,count,,,,[OpenMetrics v1 & v2] Number of SQL INSERT statements,0,cockroachdb,,
 cockroachdb.sql.mem.admin.current,gauge,,,,[OpenMetrics v1 & v2] Current sql statement memory usage for admin,0,cockroachdb,,
 cockroachdb.sql.mem.admin.max,gauge,,,,[OpenMetrics v1] Memory usage per sql statement for admin,0,cockroachdb,,
@@ -325,20 +349,28 @@ cockroachdb.sql.mem.conns.txn.max.bucket,count,,,,[OpenMetrics v2] Memory usage 
 cockroachdb.sql.mem.distsql.current,gauge,,,,[OpenMetrics v1 & v2] Current sql statement memory usage for distsql,0,cockroachdb,,
 cockroachdb.sql.mem.distsql.max,gauge,,,,[OpenMetrics v1] Memory usage per sql statement for distsql,0,cockroachdb,,
 cockroachdb.sql.mem.distsql.max.bucket,count,,,,[OpenMetrics v2] Memory usage per sql statement for distsql,0,cockroachdb,,
+cockroachdb.sql.mem.distsql.max.count,count
+cockroachdb.sql.mem.distsql.max.sum,count
 cockroachdb.sql.mem.internal.current,gauge,,,,[OpenMetrics v1 & v2] Current sql statement memory usage for internal,0,cockroachdb,,
 cockroachdb.sql.mem.internal.max,gauge,,,,[OpenMetrics v1] Memory usage per sql statement for internal,0,cockroachdb,,
 cockroachdb.sql.mem.internal.max.bucket,count,,,,[OpenMetrics v2] Memory usage per sql statement for internal,0,cockroachdb,,
 cockroachdb.sql.mem.internal.session.current,gauge,,,,[OpenMetrics v1 & v2] Current sql session memory usage for internal,0,cockroachdb,,
 cockroachdb.sql.mem.internal.session.max,gauge,,,,[OpenMetrics v1] Memory usage per sql session for internal,0,cockroachdb,,
 cockroachdb.sql.mem.internal.session.max.bucket,count,,,,[OpenMetrics v2] Memory usage per sql session for internal,0,cockroachdb,,
+cockroachdb.sql.mem.internal.session.max.count,count
+cockroachdb.sql.mem.internal.session.max.sum,count
 cockroachdb.sql.mem.internal.txn.current,gauge,,,,[OpenMetrics v1 & v2] Current sql transaction memory usage for internal,0,cockroachdb,,
 cockroachdb.sql.mem.internal.txn.max,gauge,,,,[OpenMetrics v1] Memory usage per sql transaction for internal,0,cockroachdb,,
 cockroachdb.sql.mem.internal.txn.max.bucket,count,,,,[OpenMetrics v2] Memory usage per sql transaction for internal,0,cockroachdb,,
+cockroachdb.sql.mem.internal.txn.max.count,count
+cockroachdb.sql.mem.internal.txn.max.sum,count
 cockroachdb.sql.misc.count,count,,,,[OpenMetrics v1 & v2] Number of other SQL statements,0,cockroachdb,,
 cockroachdb.sql.query.count,count,,,,[OpenMetrics v1 & v2] Number of SQL queries,0,cockroachdb,,
 cockroachdb.sql.select.count,count,,,,[OpenMetrics v1 & v2] Number of SQL SELECT statements,0,cockroachdb,,
 cockroachdb.sql.service.latency,gauge,,nanosecond,,[OpenMetrics v1] Latency in nanoseconds of SQL request execution,0,cockroachdb,,
 cockroachdb.sql.service.latency.bucket,count,,nanosecond,,[OpenMetrics v2] Latency in nanoseconds of SQL request execution,0,cockroachdb,,
+cockroachdb.sql.service.latency.count,count
+cockroachdb.sql.service.latency.sum,count
 cockroachdb.sql.txn.abort.count,count,,,,[OpenMetrics v1 & v2] Number of SQL transaction ABORT statements,0,cockroachdb,,
 cockroachdb.sql.txn.begin.count,count,,,,[OpenMetrics v1 & v2] Number of SQL transaction BEGIN statements,0,cockroachdb,,
 cockroachdb.sql.txn.commit.count,count,,,,[OpenMetrics v1 & v2] Number of SQL transaction COMMIT statements,0,cockroachdb,,
@@ -388,8 +420,12 @@ cockroachdb.txn.commits1PC,count,,,,[OpenMetrics v1] Number of committed one-pha
 cockroachdb.txn.commits1PC.count,count,,,,[OpenMetrics v2] Number of committed one-phase KV transactions,0,cockroachdb,,
 cockroachdb.txn.durations,gauge,,,,[OpenMetrics v1] KV transaction durations in nanoseconds,0,cockroachdb,,
 cockroachdb.txn.durations.bucket,count,,,,[OpenMetrics v2] KV transaction durations in nanoseconds,0,cockroachdb,,
+cockroachdb.txn.durations.count,count
+cockroachdb.txn.durations.sum,count
 cockroachdb.txn.restarts,gauge,,,,[OpenMetrics v1] Number of restarted KV transactions,0,cockroachdb,,
 cockroachdb.txn.restarts.bucket,count,,,,[OpenMetrics v2] Number of restarted KV transactions,0,cockroachdb,,
+cockroachdb.txn.restarts.count,count
+cockroachdb.txn.restarts.sum,count
 cockroachdb.txn.restarts.deleterange,count,,,,[OpenMetrics v1] Number of restarts due to a forwarded commit timestamp and a DeleteRange command,0,cockroachdb,,
 cockroachdb.txn.restarts.deleterange.count,count,,,,[OpenMetrics v2] Number of restarts due to a forwarded commit timestamp and a DeleteRange command,0,cockroachdb,,
 cockroachdb.txn.restarts.possiblereplay,count,,,,[OpenMetrics v1] Number of restarts due to possible replays of command batches at the storage layer,0,cockroachdb,,
@@ -400,3 +436,39 @@ cockroachdb.txn.restarts.writetooold,count,,,,[OpenMetrics v1] Number of restart
 cockroachdb.txn.restarts.writetooold.count,count,,,,[OpenMetrics v2] Number of restarts due to a concurrent writer committing first,0,cockroachdb,,
 cockroachdb.valbytes,gauge,,byte,,[OpenMetrics v1 & v2] Number of bytes taken up by values,0,cockroachdb,,
 cockroachdb.valcount,gauge,,,,[OpenMetrics v1 & v2] Count of all values,0,cockroachdb,,
+cockroachdb.admission.wait.sum.kv.count,count
+cockroachdb.admission.wait.sum.kv.stores.count,count
+cockroachdb.admission.wait.sum.sql.kv.response.count,count
+cockroachdb.admission.wait.sum.sql.sql.response.count,count
+cockroachdb.changefeed.backfill.pending.ranges,gauge
+cockroachdb.changefeed.backfill,gauge
+cockroachdb.changefeed.commit.latency.count,count
+cockroachdb.changefeed.commit.latency.sum,count
+cockroachdb.changefeed.emitted.messages.count,count
+cockroachdb.changefeed.error.retries.count,count
+cockroachdb.changefeed.failures.count,count
+cockroachdb.changefeed.max.behind.nanos,gauge
+cockroachdb.changefeed.message.size.hist.bucket,count
+cockroachdb.changefeed.message.size.hist.count,count
+cockroachdb.changefeed.message.size.hist.sum,count
+cockroachdb.changefeed.running,gauge
+cockroachdb.jobs.changefeed.resume.retry.error.count,count
+cockroachdb.ranges.overreplicated,gauge
+cockroachdb.sql.conn.latency.bucket,count
+cockroachdb.sql.conn.latency.count,count
+cockroachdb.sql.conn.latency.sum,count
+cockroachdb.sql.distsql.contended.queries.count,count
+cockroachdb.sql.distsql.queries.count,count
+cockroachdb.sql.failure.count,count
+cockroachdb.sql.full.scan.count,count
+cockroachdb.sql.statements.active,gauge
+cockroachdb.sql.txn.latency.bucket,count
+cockroachdb.sql.txn.latency.count,count
+cockroachdb.sql.txn.latency.sum,count
+cockroachdb.sql.txns.open,gauge
+cockroachdb.sys.cpu.combined.percent.normalized,gauge
+cockroachdb.sys.gc,gauge
+cockroachdb.sys.host.net.recv.bytes,gauge
+cockroachdb.sys.host.net.send.bytes,gauge
+cockroachdb.sys.host.disk.read.bytes,gauge
+cockroachdb.sys.host.disk.write.bytes,gauge

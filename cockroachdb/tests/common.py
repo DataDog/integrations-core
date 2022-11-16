@@ -11,7 +11,12 @@ PORT = '8080'
 
 COCKROACHDB_VERSION = os.getenv('COCKROACHDB_VERSION')
 
-KNOWN_HISTOGRAMS = {'liveness_heartbeatlatency'}
+KNOWN_HISTOGRAMS = {
+    'liveness_heartbeatlatency',
+    'sql.conn.latency',
+    'sql.txn.latency',
+}
+
 KNOWN_COUNTERS = {
     'addsstable_applications',
     'addsstable_copies',
@@ -142,6 +147,17 @@ KNOWN_COUNTERS = {
     'txn_restarts_possiblereplay',
     'txn_restarts_serializable',
     'txn_restarts_writetooold',
+    'admission_wait_sum_kv',
+    'admission_wait_sum_kv_stores',
+    'admission_wait_sum_sql_kv_response',
+    'admission_wait_sum_sql_sql_response',
+    'changefeed_emitted_messages',
+    'changefeed_error_retries',
+    'changefeed_failures',
+    'jobs_changefeed_resume_retry_error',
+    'sql_distsql_contended_queries_count',
+    'sql_failure_count',
+    'sql_full_scan_count',
 }
 
 EXPECTED_METRICS = []
