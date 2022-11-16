@@ -106,19 +106,20 @@ def validate_readme(integration, repo, display_queue, files_failed, readme_count
         files_failed[readme_path] = True
         display_queue.append((echo_failure, "     readme is missing either an Overview or Setup H2 (##) section"))
 
-    if "Support" not in h2s and repo == 'marketplace':
-        files_failed[readme_path] = True
-        display_queue.append((echo_failure, "     readme is missing a Support H2 (##) section"))
-    
-    if "Uninstallation" not in h2s:
-        files_failed[readme_path] = True
-        display_queue.append((echo_failure, "     readme is missing an Uninstallation H2 (##) section"))
-    else:
-        current = soup.find('h2', text='Uninstallation')
-        check = current.find_next()
-        if check.name != "p":
+    if repo == 'marketplace':
+        if "Support" not in h2s:
             files_failed[readme_path] = True
-            display_queue.append((echo_failure, "     readme has an empty Uninstallation H2 (##) section"))
+            display_queue.append((echo_failure, "     readme is missing a Support H2 (##) section"))
+
+        if "Uninstallation" not in h2s:
+            files_failed[readme_path] = True
+            display_queue.append((echo_failure, "     readme is missing an Uninstallation H2 (##) section"))
+        else:
+            current = soup.find('h2', text='Uninstallation')
+            check = current.find_next()
+            if check.name != "p":
+                files_failed[readme_path] = True
+                display_queue.append((echo_failure, "     readme has an empty Uninstallation H2 (##) section"))
 
     # Check all referenced images are in the `images` folder and that
     # they use the `raw.githubusercontent` format or relative paths to the `images` folder
