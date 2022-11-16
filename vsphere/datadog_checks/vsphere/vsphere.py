@@ -154,7 +154,13 @@ class VSphereCheck(AgentCheck):
             metadata = {c.key: format_metric_name(c) for c in allowed_counters}  # type: Dict[CounterId, MetricName]
             self.metrics_metadata_cache.set_metadata(mor_type, metadata)
             test_metadata = {
-                [c.key, c.rollupType, c.groupInfo.key, c.nameInfo.key]: format_metric_name(c) for c in allowed_counters
+                format_metric_name(c): [
+                    c.key,
+                    c.rollupType,
+                    c.groupInfo.key,
+                    c.nameInfo.key,
+                ]
+                for c in allowed_counters
             }
             self.log.debug("Metadata: %s", str(test_metadata))
             self.log.debug(
