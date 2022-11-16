@@ -115,7 +115,7 @@ def validate_readme(integration, repo, display_queue, files_failed, readme_count
         display_queue.append((echo_failure, "     readme is missing an Uninstallation H2 (##) section"))
     else:
         current = soup.find('h2', text='Uninstallation')
-        check = current.find_next("p")
+        check = current.find_next()
         print(check)
         if not check:
             files_failed[readme_path] = True
