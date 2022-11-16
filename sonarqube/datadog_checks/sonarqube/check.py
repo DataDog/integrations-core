@@ -7,7 +7,7 @@ from requests.exceptions import RequestException
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 
-from .discovery_matcher import DiscoveryMatcher
+from .discovery_filter import DiscoveryFilter
 from .sonarqube_api import SonarqubeAPI
 
 
@@ -18,7 +18,7 @@ class SonarqubeCheck(AgentCheck):
     def __init__(self, name, init_config, instances):
         super(SonarqubeCheck, self).__init__(name, init_config, instances)
         self._validate_config()
-        self._projects_discovery_matcher = DiscoveryMatcher('projects', self.log, self._projects)
+        self._projects_discovery_matcher = DiscoveryFilter('projects', self.log, self._projects)
         self._api = SonarqubeAPI(self.log, self.http, self._web_endpoint)
 
     def _validate_config(self):
@@ -164,7 +164,7 @@ class SonarqubeCheck(AgentCheck):
                     matched_project_key,
                     matched_project_config,
                 )
-                metrics_discovery_matcher = DiscoveryMatcher(
+                metrics_discovery_matcher = DiscoveryFilter(
                     'metrics',
                     self.log,
                     matched_project_config.get('metrics', {}) if matched_project_config else {},

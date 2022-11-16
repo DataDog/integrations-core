@@ -3,7 +3,24 @@ import re
 from datadog_checks.base import ConfigurationError
 
 
-class DiscoveryMatcher:
+# The DiscoveryFilter class allows to filter a list of values or identifiers passed to the 'match' method
+# by obtaining the subset of values from that list that match the specified configuration.
+# The config has two main parts:
+# 'keys' (string value configurable by parameter): List of values that will be searched for in the list of items
+# to be filtered and will be included in the list of matches returned if they match (simple string comparison).
+# They may be of type string or key/value.
+# If its key is found in the list, the tuple formed by the key/value or
+# key/None in the case of being a string type will be returned.
+# 'discovery': It is the part of the configuration that will allow the 'autodiscover' feature within a list of values.
+# It works by comparing patterns following the following criteria:
+# The elements of the list to be filtered that match any regular expression included in the 'include' key of 'discovery'
+# (or default_include list) and do not match any of the regular expressions of the 'exclude' key of 'discovery'
+# (or default_exclude list).
+# The include patterns will be processed in order
+# The maximum number of elements to be returned by the 'autodiscovery' part will be the one indicated in the 'limit' key
+# (or default_limit)
+# Different examples of these configurations can be seen in test_unit_projects.py inside tests
+class DiscoveryFilter:
     def __init__(
         self,
         name,
@@ -27,6 +44,7 @@ class DiscoveryMatcher:
 
     def match(self, items):
         self._log.debug('trying to match: %s', items)
+        self._log.debug('self._config: %s', self._config)
         matched_items = self._match_items(items)
         matched_items.extend(self._match_discovery(matched_items, items))
         return matched_items
@@ -34,7 +52,7 @@ class DiscoveryMatcher:
     def _match_items(self, items):
         matched_id = []
         self._log.debug('matching items')
-        self._log.debug('self._config: %s', self._config)
+        self._log.debug('items: %s', items)
         if self._config is not None and isinstance(self._config, dict):
             config_items_id = self._config.get(self._items_id, None)
             self._log.debug('config_items_id: %s', config_items_id)
@@ -61,7 +79,7 @@ class DiscoveryMatcher:
     def _match_discovery(self, matched_items, items):
         matched_discovery = []
         self._log.debug('matching discovery')
-        self._log.debug('self._config: %s', self._config)
+        self._log.debug('matched_items: %s', matched_items)
         self._log.debug('items: %s', items)
         if self._config is not None and isinstance(self._config, dict):
             config_key_discovery = self._config.get('discovery', None)
