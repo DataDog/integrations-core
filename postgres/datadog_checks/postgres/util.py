@@ -82,6 +82,7 @@ DATABASE_SIZE_METRICS = {
 NEWER_92_METRICS = {
     'deadlocks': ('postgresql.deadlocks', AgentCheck.rate),
     'deadlocks deadlocks_count': ('postgresql.deadlocks.count', AgentCheck.monotonic_count),
+    'deadlocks deadlocks_total': ('postgresql.deadlocks.total', AgentCheck.count),
     'temp_bytes': ('postgresql.temp_bytes', AgentCheck.rate),
     'temp_files': ('postgresql.temp_files', AgentCheck.rate),
 }

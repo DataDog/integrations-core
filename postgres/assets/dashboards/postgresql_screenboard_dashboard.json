@@ -586,7 +586,7 @@
           {
             "id": 7487114663198344,
             "definition": {
-              "title": "Deadlocks per database",
+              "title": "Deadlocks per second",
               "title_size": "16",
               "title_align": "left",
               "show_legend": false,
@@ -598,23 +598,24 @@
                 "value",
                 "sum"
               ],
+              "time": {},
               "type": "timeseries",
               "requests": [
                 {
                   "formulas": [
                     {
-                      "formula": "query1",
-                      "alias": "Deadlocks"
+                      "alias": "Deadlocks",
+                      "formula": "query1"
                     }
                   ],
-                  "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "sum:postgresql.deadlocks{$scope}",
+                      "query": "sum:postgresql.deadlocks{$scope} by {db}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
                   ],
+                  "response_format": "timeseries",
                   "style": {
                     "palette": "warm"
                   },
@@ -622,17 +623,72 @@
                 }
               ],
               "yaxis": {
+                "include_zero": true,
                 "scale": "linear",
                 "label": "",
-                "include_zero": true,
                 "min": "auto",
                 "max": "auto"
               },
               "markers": []
             },
             "layout": {
-              "x": 8,
-              "y": 0,
+              "x": 0,
+              "y": 3,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 5434236597220168,
+            "definition": {
+              "title": "Deadlocks count",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "time": {},
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Deadlocks",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "query": "sum:postgresql.deadlocks.count{$scope} by {db}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "warm"
+                  },
+                  "display_type": "bars"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "label": "",
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 4,
+              "y": 3,
               "width": 4,
               "height": 3
             }

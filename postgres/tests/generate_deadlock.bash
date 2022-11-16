@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 
-# This is a stand-alone helper script that generates a deadlock
+# This is a stand-alone helper script for generating deadlocks
 #
 # Usage: generate_deadlock.bash [ PSQL_ARGUMENTS ]
 #
@@ -16,7 +16,7 @@ USAGE='USAGE:
     generate_deadlocks.bash
 
 	OPTIONS:
-	-c N         	count of deadlocks. Defaul is 1.
+	-c N         	count of deadlocks. Default is 1.
 	-p PSQL_ARGS	any psql arguments 
 
 USAGE EXAMPLES:
