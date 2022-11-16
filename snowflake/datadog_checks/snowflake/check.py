@@ -4,7 +4,6 @@
 from contextlib import closing
 
 import snowflake.connector as sf
-from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
 
 from datadog_checks.base import AgentCheck, ConfigurationError, ensure_bytes, to_native_string
@@ -119,7 +118,7 @@ class SnowflakeCheck(AgentCheck):
             # https://docs.snowflake.com/en/user-guide/python-connector-example.html#using-key-pair-authentication-key-pair-rotation
             with open(self._config.private_key_path, "rb") as key:
                 p_key = serialization.load_pem_private_key(
-                    key.read(), password=ensure_bytes(self._config.private_key_password), backend=default_backend()
+                    key.read(), password=ensure_bytes(self._config.private_key_password)
                 )
 
                 pkb = p_key.private_bytes(
