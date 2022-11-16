@@ -24,3 +24,4 @@ system.core.interrupt,gauge,,second,,[Windows] The time in seconds a given CPU c
 system.core.interrupt.total,gauge,,second,,[Windows] The time in seconds the whole CPU has spent servicing hardware interrupts,0,system,cpu interrupt total,
 system.core.dpc,gauge,,second,,[Windows] The time in seconds a given CPU core has spent servicing deferred procedure calls (DPCs),0,system,cpu dpc,
 system.core.dpc.total,gauge,,second,,[Windows] The time in seconds the whole CPU has spent servicing deferred procedure calls (DPCs),0,system,cpu dpc total,
+system.core.frequency,gauge,,megahertz,,The frequency or clock speed a given CPU,0,system,cpu frequency,

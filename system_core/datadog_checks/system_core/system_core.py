@@ -4,6 +4,7 @@
 import psutil
 from six import iteritems
 
+from datadog_checks.base.utils.platform import Platform
 from datadog_checks.base import AgentCheck
 
 
@@ -27,3 +28,12 @@ class SystemCore(AgentCheck):
         for key, value in iteritems(cpu_times_total._asdict()):
             self.rate('system.core.{0}.total'.format(key), value, tags=instance_tags)
 
+        # https://psutil.readthedocs.io/en/latest/#psutil.cpu_freq
+        # scpufreq(current=2236.812, min=800.0, max=3500.0)
+        # Ignore min/max as they are often reported as 0.0 if undetermined.
+        cpu_freq = psutil.cpu_freq(percpu=True)
+        for i, cpu in enumerate(cpu_freq):
+            if Platform.is_unix():
+                # Per-cpu frequency retrieval (Linux only)
+                tags = instance_tags + ['core:{0}'.format(i)]
+            self.gauge('system.core.frequency', cpu._asdict().get('current'), tags=tags)
