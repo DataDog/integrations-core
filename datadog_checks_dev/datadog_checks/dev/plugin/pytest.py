@@ -329,10 +329,11 @@ def mock_performance_objects(mocker, dd_default_hostname):
 
                     counters[counter_path_wildcard] = instance_values_wildcard
 
-        mocker.patch('win32pdh.ValidatePath', side_effect=lambda path: 0 if path in counters else 1)
+        validate_path_fn_name = 'datadog_checks.base.checks.windows.perf_counters.counter.validate_path'
+        mocker.patch(validate_path_fn_name, side_effect=lambda x, y, path: True if path in counters else False)
         mocker.patch('win32pdh.GetFormattedCounterValue', side_effect=lambda path, _: (None, counters[path]))
-        function_name = 'datadog_checks.base.checks.windows.perf_counters.counter.get_counter_values'
-        mocker.patch(function_name, side_effect=lambda path, _: counters[path])
+        get_counter_values_fn_name = 'datadog_checks.base.checks.windows.perf_counters.counter.get_counter_values'
+        mocker.patch(get_counter_values_fn_name, side_effect=lambda path, _: counters[path])
 
     return mock_perf_objects
 

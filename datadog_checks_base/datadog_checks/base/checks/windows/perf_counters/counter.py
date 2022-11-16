@@ -10,7 +10,7 @@ import win32pdh
 from ....errors import ConfigTypeError, ConfigValueError
 from .constants import PDH_NO_DATA
 from .transform import NATIVE_TRANSFORMERS, TRANSFORMERS
-from .utils import construct_counter_path, get_counter_value, get_counter_values
+from .utils import construct_counter_path, get_counter_value, get_counter_values, validate_path
 
 
 class PerfObject:
@@ -229,13 +229,16 @@ class PerfObject:
         # If they are not installed yet (see comment in refresh() method) counter type determination
         # will fail. Moreover, it will continue to fail no matter how many times it is called even after
         # the missing performance object and its counters have been installed.
-        counter_type = self._get_counters_type()
+        counter_type = self._get_counters_type(counter_selector)
         if counter_type == MultiCounter:
             self.has_multiple_instances = True
         elif counter_type == SingleCounter:
             self.has_multiple_instances = False
         else:
-            raise Exception(f'None of the specified counters for performance object `{self.name}` are installed')
+            raise Exception(
+                f'None of the specified counters for performance object `{self.name}` are installed.'
+                'If the object name is localized make sure `use_localized_counters` is true'
+            )
 
         tag_name = self.tag_name
         if self.has_multiple_instances:
@@ -306,7 +309,7 @@ class PerfObject:
 
         self.counters.extend(counters.values())
 
-    def _get_counters_type(self):
+    def _get_counters_type(self, counter_selector):
         # Enumerate all counter to find if it is single or multiple instance counter
         # The very virst iteration should be sufficienmt, just in case enumerate all
         for i, entry in enumerate(self.counters_config, 1):
@@ -316,9 +319,6 @@ class PerfObject:
                 )
 
             for counter_name, _ in entry.items():
-                # https://docs.microsoft.com/en-us/windows/win32/api/pdh/nf-pdh-pdhvalidatepatha
-                # https://mhammond.github.io/pywin32/win32pdh__ValidatePath_meth.html
-
                 # Check for multi-instance counter path
                 possible_path = construct_counter_path(
                     machine_name=self.connection.server,
@@ -326,7 +326,7 @@ class PerfObject:
                     counter_name=counter_name,
                     instance_name='*',
                 )
-                if win32pdh.ValidatePath(possible_path) == 0:
+                if validate_path(self.connection.query_handle, counter_selector, possible_path):
                     return MultiCounter
 
                 # Check for single-instance counter path
@@ -335,7 +335,7 @@ class PerfObject:
                     object_name=self.name,
                     counter_name=counter_name,
                 )
-                if win32pdh.ValidatePath(possible_path) == 0:
+                if validate_path(self.connection.query_handle, counter_selector, possible_path):
                     return SingleCounter
 
         return None
@@ -542,7 +542,7 @@ class MultiCounter(CounterBase):
         self.unique_instance_count = 0
 
         # All monitored counter handles keyed by the instance name
-        self.instances = {}
+        self.instances = []
 
     def collect(self):
         # Instance tracking is conducted for each counter although collected only from one.

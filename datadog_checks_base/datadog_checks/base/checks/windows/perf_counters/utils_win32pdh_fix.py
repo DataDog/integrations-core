@@ -114,6 +114,10 @@ def GetFormattedCounterArray(counter_handle, format):
             item_ptr = ctypes.byref(items_buffer, offset)
             item = ctypes.cast(item_ptr, ctypes.POINTER(PDH_FMT_COUNTERVALUE_ITEM_W))
 
+            # Typically errored instances are not reported but Microsoft docs implies validation
+            if item.contents.FmtValue.CStatus != PDH_CSTATUS_VALID_DATA:
+                continue
+
             # Get instance value pair
             if format & win32pdh.PDH_FMT_LONG:
                 instance_value = item.contents.FmtValue.value.longValue
@@ -128,7 +132,7 @@ def GetFormattedCounterArray(counter_handle, format):
             # For performance and to support non-unique instance names do not immedeatly store valuethem
             # in the instance_values but accumulate them over few iterations. Order of instances is
             # sequential
-            if idx == 0:
+            if len(previous_instance_name) == 0:
                 # Very first iteration
                 previous_instance_name = instance_name
                 previous_instance_value = instance_value

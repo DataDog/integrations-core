@@ -31,9 +31,9 @@ def get_counter_values(counter_handle, duplicate_instances_exist):
     # http://timgolden.me.uk/pywin32-docs/win32pdh__GetFormattedCounterArray_meth.html
     # https://github.com/mhammond/pywin32/blob/main/win32/src/win32pdhmodule.cpp#L677
 
-    # Currently when duplicates are no concern call win32pdh.GetFormattedCounterArray()
-    # function is 5-10x slower then its alternative. See detailed comment for
-    # 'only_unique_instances' configuration
+    # Currently when duplicates are no concern, calla  win32pdh.GetFormattedCounterArray()
+    # function is 5-10x slower faster than pure python wrapper over Windows PdhGetFormattedCounterArray()
+    # API call. See detailed comment for 'only_unique_instances' configuration
     if not duplicate_instances_exist:
         # This function cannot handle duplicate/non-unique instances (e.g. for "Process" counters)
         # See its implementation at
@@ -42,3 +42,26 @@ def get_counter_values(counter_handle, duplicate_instances_exist):
 
     # utils_win32pdh_fix.GetFormattedCounterArray
     return GetFormattedCounterArray(counter_handle, COUNTER_VALUE_FORMAT)
+
+
+# Validate path function is using one of the very few localization-aware PDH functions
+# PdhAdd[English]Counter. Also is put some responsobility on the user configuration.
+# If specified object and counter is using localized name then a user should configure
+# the check using `use_localized_counters` set to true. No mixing objecty and counters
+# as localized and English is allowed (and not possible in principle).
+def validate_path(query_handle, counter_selector, path):
+    try:
+        counter_handle = counter_selector(query_handle, path)
+        if counter_handle is not None:
+            try:
+                # https://docs.microsoft.com/en-us/windows/win32/api/pdh/nf-pdh-pdhremovecounter
+                # https://mhammond.github.io/pywin32/win32pdh__RemoveCounter_meth.html
+                win32pdh.RemoveCounter(counter_handle)
+                return True
+
+            except Exception:
+                pass
+    except Exception:
+        pass
+
+    return False
