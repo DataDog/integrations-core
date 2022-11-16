@@ -120,9 +120,7 @@ def test_custom_queries_metric_prefix_skip_column(aggregator, check, dd_run_chec
         {
             "metric_prefix": "oracle.test1",
             "query": "mocked",
-            "columns": [{},  # skip `tag_value1` column
-                        {"name": "metric", "type": "gauge"}
-                        ],
+            "columns": [{}, {"name": "metric", "type": "gauge"}],  # skip `tag_value1` column
             "tags": ["query_tags1"],
         },
     ]
@@ -134,6 +132,4 @@ def test_custom_queries_metric_prefix_skip_column(aggregator, check, dd_run_chec
         connection.return_value = con
         dd_run_check(check)
 
-    aggregator.assert_metric(
-        "oracle.test1.metric", value=1, count=1, tags=["query_tags1", "optional:tag1"]
-    )
+    aggregator.assert_metric("oracle.test1.metric", value=1, count=1, tags=["query_tags1", "optional:tag1"])
