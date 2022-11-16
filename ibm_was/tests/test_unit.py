@@ -40,6 +40,11 @@ def test_custom_query(aggregator, instance, check):
         'ibm_was.object_pool.objects_created_count',
         'implementations:ObjectPool_ibm.system.objectpool_com.ibm.ws.webcontainer.srt.SRTConnectionContextImpl',
     )
+    # Prove that we already collect the thread_pools.percent_used metric, satisfying AI-2672.
+    aggregator.assert_metric(
+        'ibm_was.thread_pools.percent_used',
+        tags=['server:server1', 'key1:value1', 'node:ibmwasNode01', 'thread_pool:Default'],
+    )
 
 
 def test_custom_queries_missing_stat_in_payload(instance, check):
