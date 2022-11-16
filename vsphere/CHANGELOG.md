@@ -1,5 +1,8 @@
 # CHANGELOG - vsphere
 
+## 6.3.0-alpha.1 / 2022-11-16
+
+
 ## 6.2.0 / 2022-09-16 / Agent 7.40.0
 
 * [Added] Add connection refresh option. See [#11507](https://github.com/DataDog/integrations-core/pull/11507).
