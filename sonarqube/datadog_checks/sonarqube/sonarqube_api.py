@@ -22,7 +22,7 @@ class SonarqubeAPI:
         total = -1
         not_numeric = 0
         hidden_metrics = 0
-        while seen != total:
+        while seen < total:
             response = self._make_request('/api/metrics/search', {'p': page})
             total = response.json()['total']
             for metric in response.json()['metrics']:
