@@ -3210,7 +3210,7 @@
                                             "value": 24
                                         }
                                     ],
-                                    "q": "top(sum:kubernetes_state.pod.ready{*,$cluster,condition:true,$scope} by {kubernetes_cluster,host,nodepool}, 10, 'last', 'desc')"
+                                    "q": "top(sum:kubernetes_state.pod.ready{*,$cluster,condition:true,$scope} by {kube_cluster_name,host,nodepool}, 10, 'last', 'desc')"
                                 }
                             ],
                             "title": "Pods in ready state by node",
