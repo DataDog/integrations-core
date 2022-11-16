@@ -11,15 +11,19 @@ class SystemCore(AgentCheck):
     def check(self, instance):
         instance_tags = instance.get('tags', [])
 
+        # https://psutil.readthedocs.io/en/latest/#psutil.cpu_count
+        n_cpus = psutil.cpu_count()
+        self.gauge('system.core.count', n_cpus, tags=instance_tags)
+
+        # https://psutil.readthedocs.io/en/latest/#psutil.cpu_times
         cpu_times = psutil.cpu_times(percpu=True)
-        self.gauge('system.core.count', len(cpu_times), tags=instance_tags)
 
         for i, cpu in enumerate(cpu_times):
             tags = instance_tags + ['core:{0}'.format(i)]
             for key, value in iteritems(cpu._asdict()):
-                self.rate('system.core.{0}'.format(key), 100.0 * value, tags=tags)
+                self.rate('system.core.{0}'.format(key), value, tags=tags)
 
-        total_cpu_times = psutil.cpu_times()
-        n_cpus = psutil.cpu_count()
-        for key, value in iteritems(total_cpu_times._asdict()):
-            self.rate('system.core.{0}.total'.format(key), 100.0 * value / n_cpus, tags=instance_tags)
+        cpu_times_total = psutil.cpu_times()
+        for key, value in iteritems(cpu_times_total._asdict()):
+            self.rate('system.core.{0}.total'.format(key), value, tags=instance_tags)
+
