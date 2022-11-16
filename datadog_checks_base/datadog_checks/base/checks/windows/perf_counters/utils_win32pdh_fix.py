@@ -7,7 +7,7 @@ import ctypes
 import pywintypes
 import win32pdh
 
-from .constants import PDH_CSTATUS_VALID_DATA, PDH_MORE_DATA, PDH_NO_DATA
+from .constants import PDH_CSTATUS_NEW_DATA, PDH_CSTATUS_VALID_DATA, PDH_MORE_DATA, PDH_NO_DATA
 
 #  If the PERF_TYPE_COUNTER value was selected then select one of the
 #  following to indicate the type of counter
@@ -114,8 +114,9 @@ def GetFormattedCounterArray(counter_handle, format):
             item_ptr = ctypes.byref(items_buffer, offset)
             item = ctypes.cast(item_ptr, ctypes.POINTER(PDH_FMT_COUNTERVALUE_ITEM_W))
 
-            # Typically errored instances are not reported but Microsoft docs implies validation
-            if item.contents.FmtValue.CStatus != PDH_CSTATUS_VALID_DATA:
+            # Typically errored instances are not reported but Microsoft docs implies a stricter validation
+            instance_status = item.contents.FmtValue.CStatus
+            if instance_status != PDH_CSTATUS_VALID_DATA and instance_status != PDH_CSTATUS_NEW_DATA:
                 continue
 
             # Get instance value pair
