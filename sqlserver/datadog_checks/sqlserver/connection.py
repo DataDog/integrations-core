@@ -4,6 +4,7 @@
 import logging
 import socket
 from contextlib import closing, contextmanager
+from enum import Enum
 
 from six import raise_from
 
@@ -30,8 +31,20 @@ DEFAULT_CONN_PORT = 1433
 
 class SQLConnectionError(Exception):
     """Exception raised for SQL instance connection issues"""
-
     pass
+
+class ConnectionError(Enum):
+    """
+    Denotes the various reasons a connection might fail.
+    """
+    # TODO: write words about each one of these things -> ->
+    # TODO: disginuish between TCP issues? is there a way to check specifically what is going on?
+    tcp_connection_failed = 'tcp_connection_failed'  # error code -2147467259 -> couldn't open database
+    login_failed = 'login_failed'
+    unable_to_connect = 'unable_to_connect' # error code -2147352567 .. gen connection issue
+    ssl_security_error = 'ssl_security_error'
+    driver_not_found = 'driver_not_found'
+    cert_authority_not_trusted = 'cert_authority_not_trusted'
 
 
 def split_sqlserver_host_port(host):
@@ -134,14 +147,16 @@ def parse_connection_string_properties(cs):
 known_hresult_codes = {
     -2147352567: "unable to connect",
     -2147217843: "login failed for user",
-    # this error can also be caused by a failed TCP connection but we are already reporting on the TCP
-    # connection status via test_network_connectivity so we don't need to explicitly state that
+    -2146824582: {ConnectionError.driver_not_found: "driver not installed on host"},
+    # this error can also be caused by a failed TCP connection, but we are already reporting on the TCP
+    # connection status via test_network_connectivity, so we don't need to explicitly state that
     # as an error condition in this message
-    -2147467259: "could not open database requested by login",
+    -2147467259: {ConnectionError.tcp_connection_failed: "could not open database requested by login"},
 }
-
-
+# TODO: change name of this to something better
 def _format_connection_exception(e):
+    # type: (Exception) -> Tuple[Optional[ConnectionErrorMessage], Optional[str]]
+
     """
     Formats the provided database connection exception.
     If the exception comes from an ADO Provider and contains a misleading 'Invalid connection string attribute' message
@@ -171,14 +186,14 @@ class Connection(object):
 
     DEFAULT_COMMAND_TIMEOUT = 5
     DEFAULT_DATABASE = 'master'
-    DEFAULT_DRIVER = 'SQL Server'
+    DEFAULT_DRIVER = '{ODBC Driver 18 for SQL Server}'
     DEFAULT_DB_KEY = 'database'
     DEFAULT_SQLSERVER_VERSION = 1e9
     SQLSERVER_2014 = 2014
     PROC_GUARD_DB_KEY = 'proc_only_if_database'
 
     valid_adoproviders = ['SQLOLEDB', 'MSOLEDBSQL', 'MSOLEDBSQL19', 'SQLNCLI11']
-    default_adoprovider = 'SQLOLEDB'
+    default_adoprovider = 'MSOLEDBSQL'
 
     def __init__(self, init_config, instance_config, service_check_handler):
         self.instance = instance_config
