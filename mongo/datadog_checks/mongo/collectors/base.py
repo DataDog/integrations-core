@@ -110,10 +110,10 @@ class MongoCollector(object):
 
             # This is because https://datadoghq.atlassian.net/browse/AGENT-9001
             # Delete this code when the metrics are definitely deprecated
-            if (
-                metric_name_alias == 'opLatencies.reads.latency'
-                or metric_name_alias == 'opLatencies.writes.latency'
-                or metric_name_alias == 'opLatencies.commands.latency'
+            if metric_name_alias in (
+                'opLatencies.reads.latency',
+                'opLatencies.writes.latency',
+                'opLatencies.commands.latency',
             ):
                 deprecated_metric_name_alias = self._normalize(metric_name_alias, AgentCheck.rate, prefix)
                 AgentCheck.rate(self.check, deprecated_metric_name_alias, value, tags=tags)
