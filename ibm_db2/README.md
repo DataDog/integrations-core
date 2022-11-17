@@ -45,9 +45,10 @@ For Agent versions >= 7.0:
 On Linux there may be need for XML functionality. If you encounter errors during
 the build process, install `libxslt-dev` (or `libxslt-devel` for RPM).
 
-#### Privileges
+#### Enable monitoring
 
-To query metrics from certain tables, specific privileges must be granted to the chosen Db2 user.
+To monitor an instance, its associated databases, and database objects according to various health indicators and turn on some default database system monitor switches (snapshot monitor's statement, lock, table and buffer pool) 
+
 Switch to the instance master user and run these commands at the `db2` prompt:
 
 ```text
