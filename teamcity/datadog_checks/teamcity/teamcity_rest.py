@@ -134,7 +134,7 @@ class TeamCityRest(AgentCheck):
                     #   project_regex:
                     #     include:
                     #       - build_config_regex
-    
+
                     `build_config_regex` == `build_config_regex: {}`
                     """
                     build_config_filter_config = (

@@ -6,7 +6,7 @@ from collections import OrderedDict
 import pytest
 from six import PY2, iteritems
 
-from datadog_checks.teamcity.common import filter_items, normalize_server_url
+from datadog_checks.teamcity.common import filter_build_configs, filter_items, filter_projects, normalize_server_url
 
 from .common import (
     CONFIG_ALL_BUILD_CONFIGS,
@@ -223,6 +223,63 @@ def test_server_normalization():
         ),
     ],
 )
-def test_filter_projects(to_filter, key, config, global_include, global_exclude, expected_result):
+def test_filter_items(to_filter, key, config, global_include, global_exclude, expected_result):
     filtered = filter_items(to_filter, key, 5, global_include, global_exclude, config)
+    assert filtered == expected_result
+
+
+@pytest.mark.parametrize(
+    "projects_config, projects_to_filter, expected_result",
+    [
+        pytest.param(
+            {'include': [{'Project1': {}}, {'ProjectB': {}}, {'ProjectX': {}}]},
+            ['_Root', 'Project1', 'Project2', 'ProjectB'],
+            (OrderedDict([('Project1', {'Project1': {}}), ('ProjectB', {'ProjectB': {}})]), False),
+            id="Filter projects, only include",
+        )
+    ],
+)
+def test_filter_projects(projects_config, projects_to_filter, expected_result, rest_instance, teamcity_rest_check):
+    rest_instance['projects'] = projects_config
+    check = teamcity_rest_check(rest_instance)
+    filtered = filter_projects(check, projects_to_filter)
+
+    assert filtered == expected_result
+
+
+@pytest.mark.parametrize(
+    "build_configs_to_filter, project_id_pattern, filter_config, expected_result",
+    [
+        pytest.param(
+            [
+                'ProjectA_BuildStep1',
+                'ProjectA_BuildStep2',
+                'ProjectA_BuildStep3',
+                'ProjectA_BuildStep4',
+                'ProjectA_Deployment'
+            ],
+            'SampleProject',
+            {'SampleProject': {}},
+            (
+                OrderedDict(
+                    [
+                        ('ProjectA_BuildStep1', None),
+                        ('ProjectA_BuildStep2', None),
+                        ('ProjectA_BuildStep3', None),
+                        ('ProjectA_BuildStep4', None),
+                        ('ProjectA_Deployment', None),
+                    ]
+                ),
+                False,
+            ),
+            id="Filter build configs, only include",
+        )
+    ],
+)
+def test_filter_build_configs(
+    build_configs_to_filter, project_id_pattern, filter_config, expected_result, rest_instance, teamcity_rest_check
+):
+    check = teamcity_rest_check(rest_instance)
+    filtered = filter_build_configs(check, build_configs_to_filter, project_id_pattern, filter_config)
+
     assert filtered == expected_result
