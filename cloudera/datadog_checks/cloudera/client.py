@@ -7,15 +7,22 @@ class ClouderaClient:
         cm_client.configuration.password = password
         self.api_client = cm_client.ApiClient(api_url)
 
-    def query(self, cloudera_api):
-        # api_instance = cm_client.cloudera_api(self.api_client)
+    def run_query(self, cloudera_api_class, cloudera_api_method, **kwargs):
+        # Create an instance of cloudera_api_class
+        api_instance = getattr(cm_client, cloudera_api_class)(self.api_client)
 
-        raise NotImplemented
+        # Run cloudera_api_method to query for metrics and service checks
+        response = getattr(api_instance, cloudera_api_method)(**kwargs)
 
-    def query_time_series(self, query, from_time, to_time):
+        return response.items
+
+    def run_timeseries_query(self, query, from_time, to_time):
         api_instance = cm_client.TimeSeriesResourceApi(self.api_client)
         response = api_instance.query_time_series(_from=from_time, query=query, to=to_time)
 
-        timeseries = response.items[0].time_series
+        # There is always only one item in list `items`
+        return response.items[0].time_series
 
-        return timeseries
+    def get_cluster_tags(self):
+
+        raise NotImplemented
