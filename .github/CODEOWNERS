@@ -184,10 +184,10 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /wmi_check/manifest.json                                             @DataDog/windows-agent @DataDog/agent-integrations @DataDog/documentation
 
 # To keep Security up-to-date with changes to the signing tool.
-/datadog_checks_dev/datadog_checks/dev/tooling/signing.py             @DataDog/software-integrity-and-trust @DataDog/agent-integrations
+/datadog_checks_dev/datadog_checks/dev/tooling/signing.py             @DataDog/software-integrity-and-trust @DataDog/agent-integrations @trishankatdatadog
 # As well as the secure downloader.
-/datadog_checks_downloader/                                           @DataDog/software-integrity-and-trust @DataDog/agent-integrations
-docs/developer/process/integration-release.md                         @DataDog/software-integrity-and-trust @DataDog/agent-integrations
+/datadog_checks_downloader/                                           @DataDog/software-integrity-and-trust @DataDog/agent-integrations @trishankatdatadog
+docs/developer/process/integration-release.md                         @DataDog/software-integrity-and-trust @DataDog/agent-integrations @trishankatdatadog
 # As well as the pipelines.
-/.github/workflows/                                                   @DataDog/software-integrity-and-trust @DataDog/agent-integrations
-/.gitlab-ci.yml                                                       @DataDog/software-integrity-and-trust @DataDog/agent-integrations
+/.github/workflows/                                                   @DataDog/software-integrity-and-trust @DataDog/agent-integrations @trishankatdatadog
+/.gitlab-ci.yml                                                       @DataDog/software-integrity-and-trust @DataDog/agent-integrations @trishankatdatadog
