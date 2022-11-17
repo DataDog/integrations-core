@@ -74,7 +74,7 @@ qstats_aggr_split as (select TOP {limit}
     convert(int, convert(varbinary(4), substring(plan_handle_and_offsets, 64+1, 4))) as statement_start_offset,
     convert(int, convert(varbinary(4), substring(plan_handle_and_offsets, 64+6, 4))) as statement_end_offset,
     * from qstats_aggr
-    where (last_execution_time + last_elapsed_time / 1000000) > dateadd(second, -?, getdate())
+    where DATEADD(ms, last_elapsed_time / 1000, last_execution_time) > dateadd(second, -?, getdate())
 )
 select
     SUBSTRING(text, (statement_start_offset / 2) + 1,
