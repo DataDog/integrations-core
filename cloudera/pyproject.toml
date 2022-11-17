@@ -38,7 +38,7 @@ dynamic = [
 
 [project.optional-dependencies]
 deps = [
-    "cm-client>=45.0.4",
+    "cm-client==45.0.4",
 ]
 
 [project.urls]
