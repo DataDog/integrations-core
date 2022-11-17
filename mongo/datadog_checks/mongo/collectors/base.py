@@ -108,6 +108,8 @@ class MongoCollector(object):
                 else metric_name
             )
 
+            # This is because https://datadoghq.atlassian.net/browse/AGENT-9001
+            # Delete this code when the metrics are definitely deprecated
             if (
                 metric_name_alias == 'opLatencies.reads.latency'
                 or metric_name_alias == 'opLatencies.writes.latency'
