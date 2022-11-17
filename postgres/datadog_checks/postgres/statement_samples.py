@@ -24,6 +24,7 @@ from datadog_checks.base.utils.db.utils import (
 )
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.time import get_timestamp
+from datadog_checks.postgres.explain_parameterized_queries import ExplainParameterizedQueries
 
 from .util import DatabaseConfigurationError, warning_with_tags
 from .version_utils import V9_6
@@ -183,6 +184,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         self._activity_last_query_start = None
         # The value is loaded when connecting to the main database
         self._explain_function = config.statement_samples_config.get('explain_function', 'datadog.explain_statement')
+        self._explain_parameterized_queries = ExplainParameterizedQueries(check, config)
         self._obfuscate_options = to_native_string(json.dumps(self._config.obfuscator_options))
 
         self._collection_strategy_cache = TTLCache(
@@ -591,6 +593,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                 " can't be explained due to the separation of the parsed query and raw bind parameters: %s",
                 repr(e),
             )
+            self._explain_parameterized_queries.explain_statement(statement, obfuscated_statement)
             error_response = None, DBExplainError.parameterized_query, '{}'.format(type(e))
             self._explain_errors_cache[query_signature] = error_response
             self._emit_run_explain_error(dbname, DBExplainError.parameterized_query, e)
