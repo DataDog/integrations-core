@@ -5,7 +5,6 @@
 import mock
 import pytest
 
-from datadog_checks.base.utils.db import QueryManager
 from datadog_checks.oracle import Oracle
 
 from .common import CHECK_NAME
