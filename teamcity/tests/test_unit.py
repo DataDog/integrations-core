@@ -256,7 +256,7 @@ def test_filter_projects(projects_config, projects_to_filter, expected_result, r
                 'ProjectA_BuildStep2',
                 'ProjectA_BuildStep3',
                 'ProjectA_BuildStep4',
-                'ProjectA_Deployment'
+                'ProjectA_Deployment',
             ],
             'SampleProject',
             {'SampleProject': {}},
