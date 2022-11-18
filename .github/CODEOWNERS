@@ -9,15 +9,15 @@
 /docs/                @DataDog/documentation @DataDog/agent-integrations
 *.md                  @DataDog/documentation @DataDog/agent-integrations
 conf.yaml.example     @DataDog/documentation @DataDog/agent-integrations
-conf.yaml.default     @DataDog/documentation @DataDog/agent-integrations @DataDog/agent-core
+conf.yaml.default     @DataDog/documentation @DataDog/agent-integrations @DataDog/agent-metrics-logs
 auto_conf.yaml        @DataDog/documentation @DataDog/agent-integrations @DataDog/container-integrations
 manifest.json         @DataDog/documentation @DataDog/agent-integrations
 assets/               @DataDog/agent-integrations
 
 # Checks base
-/datadog_checks_base/                                          @DataDog/agent-core @DataDog/agent-integrations
-/datadog_checks_base/datadog_checks/base/checks/openmetrics/   @DataDog/agent-core @DataDog/agent-integrations @DataDog/container-integrations
-/datadog_checks_base/datadog_checks/base/checks/kube_leader/   @DataDog/agent-core @DataDog/agent-integrations @DataDog/container-integrations
+/datadog_checks_base/                                          @DataDog/agent-integrations
+/datadog_checks_base/datadog_checks/base/checks/openmetrics/   @DataDog/agent-integrations @DataDog/container-integrations
+/datadog_checks_base/datadog_checks/base/checks/kube_leader/   @DataDog/agent-integrations @DataDog/container-integrations
 
 # Container monitoring
 /cert_manager/                            @DataDog/container-integrations @DataDog/agent-integrations
