@@ -651,7 +651,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         collection_errors = None
         if explain_err_code:
             collection_errors = [{'code': explain_err_code.value, 'message': err_msg if err_msg else None}]
-        
+
         plan, normalized_plan, obfuscated_plan, plan_signature = None, None, None, None
         if plan_dict:
             plan = json.dumps(plan_dict)

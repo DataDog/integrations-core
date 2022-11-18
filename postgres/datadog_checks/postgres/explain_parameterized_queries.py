@@ -6,28 +6,31 @@ from datadog_checks.base.utils.db.sql import compute_sql_signature
 
 logger = logging.getLogger(__name__)
 
-PREPARE_STATEMENT_QUERY = "PREPARE dd_{query_signature} AS {statement}"
-
-PREPARED_STATEMENT_EXISTS_QUERY = """\
+PREPARED_STATEMENT_EXISTS_QUERY = '''\
 SELECT * FROM pg_prepared_statements WHERE name = 'dd_{query_signature}'
-"""
+'''
 
-PARAM_TYPES_FOR_PREPARED_STATEMENT_QUERY = """\
+PREPARE_STATEMENT_QUERY = 'PREPARE dd_{query_signature} AS {statement}'
+
+PARAM_TYPES_FOR_PREPARED_STATEMENT_QUERY = '''\
 SELECT parameter_types FROM pg_prepared_statements WHERE name = 'dd_{query_signature}'
-"""
+'''
 
-EXECUTE_PREPARED_STATEMENT_QUERY = "EXECUTE dd_{prepared_statement}({null_parameter})"
+EXECUTE_PREPARED_STATEMENT_QUERY = 'EXECUTE dd_{prepared_statement}({null_parameter})'
 
 # TODO: Get from statement_samples file
-EXPLAIN_QUERY = "SELECT {explain_function}($stmt${statement}$stmt$)"
+EXPLAIN_QUERY = 'SELECT {explain_function}($stmt${statement}$stmt$)'
 
 
 class ExplainParameterizedQueries:
+    # TODO: Docstring on how this works
     def __init__(self, check, config):
         self._check = check
         self._config = config
 
     def explain_statement(self, dbname, statement, obfuscated_statement):
+        self._set_plan_cache_mode(dbname)
+
         query_signature = compute_sql_signature(obfuscated_statement)
         if not self._create_prepared_statement(dbname, statement, obfuscated_statement, query_signature):
             return None
@@ -36,14 +39,15 @@ class ExplainParameterizedQueries:
             return result[0][0][0]
         return None
 
+    def _set_plan_cache_mode(self, dbname):
+        self._execute_query(dbname, "SET plan_cache_mode = force_generic_plan")
 
     def _prepared_statement_exists(self, dbname, statement, obfuscated_statement, query_signature):
         try:
             return (
                 len(
                     self._execute_query_and_fetch_rows(
-                        dbname,
-                        PREPARED_STATEMENT_EXISTS_QUERY.format(query_signature=query_signature)
+                        dbname, PREPARED_STATEMENT_EXISTS_QUERY.format(query_signature=query_signature)
                     )
                 )
                 > 0
@@ -70,7 +74,10 @@ class ExplainParameterizedQueries:
         if self._prepared_statement_exists(dbname, statement, obfuscated_statement, query_signature):
             return True
         try:
-            self._execute_query(dbname, PREPARE_STATEMENT_QUERY.format(query_signature=query_signature, statement=statement))
+            self._execute_query(
+                dbname,
+                PREPARE_STATEMENT_QUERY.format(query_signature=query_signature, statement=statement),
+            )
             return True
         except Exception as e:
             if self._config.log_unobfuscated_plans:
@@ -91,8 +98,7 @@ class ExplainParameterizedQueries:
 
     def _get_number_of_parameters_for_prepared_statement(self, dbname, query_signature):
         rows = self._execute_query_and_fetch_rows(
-            dbname,
-            PARAM_TYPES_FOR_PREPARED_STATEMENT_QUERY.format(query_signature=query_signature)
+            dbname, PARAM_TYPES_FOR_PREPARED_STATEMENT_QUERY.format(query_signature=query_signature)
         )
         if rows:
             # e.g. [['{integer,record,text,text}']] -> '{integer,record,text,text}'
