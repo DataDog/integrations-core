@@ -13,12 +13,12 @@ pytestmark = [pytest.mark.unit]
 @mock.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
 def test_service_check_critical(mock_api, aggregator, dd_run_check, sonarqube_check):
     # Given
-    config = {
+    instance = {
         'web_endpoint': 'http://{}:{}'.format(HOST, PORT),
         'projects': {},
     }
     mock_api.return_value.get_version.side_effect = requests.exceptions.RequestException('Req Exception')
-    check = sonarqube_check(config)
+    check = sonarqube_check(instance)
     # When
     dd_run_check(check)
     # Then
@@ -32,12 +32,12 @@ def test_service_check_critical(mock_api, aggregator, dd_run_check, sonarqube_ch
 @mock.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
 def test_version_none(mock_api, aggregator, dd_run_check, sonarqube_check):
     # Given
-    config = {
+    instance = {
         'web_endpoint': 'http://{}:{}'.format(HOST, PORT),
         'projects': {},
     }
     mock_api.return_value.get_version.return_value = None
-    check = sonarqube_check(config)
+    check = sonarqube_check(instance)
     # When
     dd_run_check(check)
     # Then
@@ -53,11 +53,11 @@ def test_version_none(mock_api, aggregator, dd_run_check, sonarqube_check):
 @mock.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
 def test_service_check_ok(mock_api, aggregator, dd_run_check, sonarqube_check):
     # Given
-    config = {
+    instance = {
         'web_endpoint': 'http://{}:{}'.format(HOST, PORT),
         'projects': {},
     }
-    check = sonarqube_check(config)
+    check = sonarqube_check(instance)
     # When
     dd_run_check(check)
     # Then
@@ -71,7 +71,7 @@ def test_service_check_ok(mock_api, aggregator, dd_run_check, sonarqube_check):
 @mock.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
 def test_tags(mock_api, aggregator, dd_run_check, sonarqube_check):
     # Given
-    config = {
+    instance = {
         'web_endpoint': 'http://{}:{}'.format(HOST, PORT),
         'projects': {},
         'tags': [
@@ -79,7 +79,7 @@ def test_tags(mock_api, aggregator, dd_run_check, sonarqube_check):
             'tag2:bar',
         ],
     }
-    check = sonarqube_check(config)
+    check = sonarqube_check(instance)
     # When
     dd_run_check(check)
     # Then
@@ -91,12 +91,12 @@ def test_tags(mock_api, aggregator, dd_run_check, sonarqube_check):
 @mock.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
 def test_empty_projects(mock_api, aggregator, dd_run_check, sonarqube_check):
     # Given
-    config = {
+    instance = {
         'web_endpoint': 'http://{}:{}'.format(HOST, PORT),
         'projects': {},
     }
     mock_api.return_value.get_projects.return_value = []
-    check = sonarqube_check(config)
+    check = sonarqube_check(instance)
     # When
     dd_run_check(check)
     # Then
@@ -114,7 +114,7 @@ def test_empty_projects(mock_api, aggregator, dd_run_check, sonarqube_check):
 @mock.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
 def test_default_tag_with_projects_type_dict(mock_api, aggregator, dd_run_check, sonarqube_check):
     # Given
-    config = {
+    instance = {
         'web_endpoint': 'http://{}:{}'.format(HOST, PORT),
         'projects': {
             'default_tag': 'project',
@@ -132,7 +132,7 @@ def test_default_tag_with_projects_type_dict(mock_api, aggregator, dd_run_check,
     metrics_with_values = [(metric, randrange(0, 100)) for metric in included_metrics]
     measures = [("{}".format(metric.split('.')[1]), value) for metric, value in metrics_with_values]
     mock_api.return_value.get_measures.return_value = measures
-    check = sonarqube_check(config)
+    check = sonarqube_check(instance)
     # When
     dd_run_check(check)
     # Then
@@ -153,7 +153,7 @@ def test_default_tag_with_projects_type_dict(mock_api, aggregator, dd_run_check,
 @mock.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
 def test_default_tag_with_projects_type_str(mock_api, aggregator, dd_run_check, sonarqube_check):
     # Given
-    config = {
+    instance = {
         'web_endpoint': 'http://{}:{}'.format(HOST, PORT),
         'projects': {
             'default_tag': 'project',
@@ -169,7 +169,7 @@ def test_default_tag_with_projects_type_str(mock_api, aggregator, dd_run_check, 
     metrics_with_values = [(metric, randrange(0, 100)) for metric in included_metrics]
     measures = [("{}".format(metric.split('.')[1]), value) for metric, value in metrics_with_values]
     mock_api.return_value.get_measures.return_value = measures
-    check = sonarqube_check(config)
+    check = sonarqube_check(instance)
     # When
     dd_run_check(check)
     # Then
@@ -190,7 +190,7 @@ def test_default_tag_with_projects_type_str(mock_api, aggregator, dd_run_check, 
 @mock.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
 def test_default_tag_overwritten(mock_api, aggregator, dd_run_check, sonarqube_check):
     # Given
-    config = {
+    instance = {
         'web_endpoint': 'http://{}:{}'.format(HOST, PORT),
         'projects': {
             'default_tag': 'project',
@@ -208,7 +208,7 @@ def test_default_tag_overwritten(mock_api, aggregator, dd_run_check, sonarqube_c
     metrics_with_values = [(metric, randrange(0, 100)) for metric in included_metrics]
     measures = [("{}".format(metric.split('.')[1]), value) for metric, value in metrics_with_values]
     mock_api.return_value.get_measures.return_value = measures
-    check = sonarqube_check(config)
+    check = sonarqube_check(instance)
     # When
     dd_run_check(check)
     # Then
@@ -229,7 +229,7 @@ def test_default_tag_overwritten(mock_api, aggregator, dd_run_check, sonarqube_c
 @mock.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
 def test_project_tag(mock_api, aggregator, dd_run_check, sonarqube_check):
     # Given
-    config = {
+    instance = {
         'web_endpoint': 'http://{}:{}'.format(HOST, PORT),
         'projects': {
             'keys': [
@@ -246,7 +246,7 @@ def test_project_tag(mock_api, aggregator, dd_run_check, sonarqube_check):
     metrics_with_values = [(metric, randrange(0, 100)) for metric in included_metrics]
     measures = [("{}".format(metric.split('.')[1]), value) for metric, value in metrics_with_values]
     mock_api.return_value.get_measures.return_value = measures
-    check = sonarqube_check(config)
+    check = sonarqube_check(instance)
     # When
     dd_run_check(check)
     # Then
@@ -267,7 +267,7 @@ def test_project_tag(mock_api, aggregator, dd_run_check, sonarqube_check):
 @mock.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
 def test_default_metrics_limit(mock_api, aggregator, dd_run_check, sonarqube_check):
     # Given
-    config = {
+    instance = {
         'web_endpoint': 'http://{}:{}'.format(HOST, PORT),
         'projects': {
             'default_metrics_limit': 2,
@@ -287,7 +287,7 @@ def test_default_metrics_limit(mock_api, aggregator, dd_run_check, sonarqube_che
     metrics_with_values = [(metric, randrange(0, 100)) for metric in included_metrics][0:2]
     measures = [("{}".format(metric.split('.')[1]), value) for metric, value in metrics_with_values]
     mock_api.return_value.get_measures.return_value = measures
-    check = sonarqube_check(config)
+    check = sonarqube_check(instance)
     # When
     dd_run_check(check)
     # Then
@@ -308,7 +308,7 @@ def test_default_metrics_limit(mock_api, aggregator, dd_run_check, sonarqube_che
 @mock.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
 def test_default_metrics_include(mock_api, aggregator, dd_run_check, sonarqube_check):
     # Given
-    config = {
+    instance = {
         'web_endpoint': 'http://{}:{}'.format(HOST, PORT),
         'projects': {
             'default_metrics_include': [
@@ -330,7 +330,7 @@ def test_default_metrics_include(mock_api, aggregator, dd_run_check, sonarqube_c
     metrics_with_values = [(metric, randrange(0, 100)) for metric in included_metrics]
     measures = [("{}".format(metric.split('.')[1]), value) for metric, value in metrics_with_values]
     mock_api.return_value.get_measures.return_value = measures
-    check = sonarqube_check(config)
+    check = sonarqube_check(instance)
     # When
     dd_run_check(check)
     # Then
@@ -351,7 +351,7 @@ def test_default_metrics_include(mock_api, aggregator, dd_run_check, sonarqube_c
 @mock.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
 def test_default_metrics_exclude(mock_api, aggregator, dd_run_check, sonarqube_check):
     # Given
-    config = {
+    instance = {
         'web_endpoint': 'http://{}:{}'.format(HOST, PORT),
         'projects': {
             'default_metrics_exclude': [
@@ -371,7 +371,7 @@ def test_default_metrics_exclude(mock_api, aggregator, dd_run_check, sonarqube_c
     metrics_with_values = [(metric, randrange(0, 100)) for metric in included_metrics]
     measures = [("{}".format(metric.split('.')[1]), value) for metric, value in metrics_with_values]
     mock_api.return_value.get_measures.return_value = measures
-    check = sonarqube_check(config)
+    check = sonarqube_check(instance)
     # When
     dd_run_check(check)
     # Then
@@ -392,7 +392,7 @@ def test_default_metrics_exclude(mock_api, aggregator, dd_run_check, sonarqube_c
 @mock.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
 def test_default_metrics_include_and_exclude(mock_api, aggregator, dd_run_check, sonarqube_check):
     # Given
-    config = {
+    instance = {
         'web_endpoint': 'http://{}:{}'.format(HOST, PORT),
         'projects': {
             'default_metrics_include': [
@@ -417,7 +417,7 @@ def test_default_metrics_include_and_exclude(mock_api, aggregator, dd_run_check,
     metrics_with_values = [(metric, randrange(0, 100)) for metric in included_metrics]
     measures = [("{}".format(metric.split('.')[1]), value) for metric, value in metrics_with_values]
     mock_api.return_value.get_measures.return_value = measures
-    check = sonarqube_check(config)
+    check = sonarqube_check(instance)
     # When
     dd_run_check(check)
     # Then
@@ -438,7 +438,7 @@ def test_default_metrics_include_and_exclude(mock_api, aggregator, dd_run_check,
 @mock.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
 def test_metrics_limit(mock_api, aggregator, dd_run_check, sonarqube_check):
     # Given
-    config = {
+    instance = {
         'web_endpoint': 'http://{}:{}'.format(HOST, PORT),
         'projects': {
             'keys': [
@@ -459,7 +459,7 @@ def test_metrics_limit(mock_api, aggregator, dd_run_check, sonarqube_check):
     metrics_with_values = [(metric, randrange(0, 100)) for metric in included_metrics][0:2]
     measures = [("{}".format(metric.split('.')[1]), value) for metric, value in metrics_with_values]
     mock_api.return_value.get_measures.return_value = measures
-    check = sonarqube_check(config)
+    check = sonarqube_check(instance)
     # When
     dd_run_check(check)
     # Then
@@ -480,7 +480,7 @@ def test_metrics_limit(mock_api, aggregator, dd_run_check, sonarqube_check):
 @mock.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
 def test_unexpected_measure(mock_api, aggregator, dd_run_check, sonarqube_check):
     # Given
-    config = {
+    instance = {
         'web_endpoint': 'http://{}:{}'.format(HOST, PORT),
         'projects': {
             'keys': [
@@ -503,7 +503,7 @@ def test_unexpected_measure(mock_api, aggregator, dd_run_check, sonarqube_check)
         ('unexpected_measure', 99)
     ]
     mock_api.return_value.get_measures.return_value = measures
-    check = sonarqube_check(config)
+    check = sonarqube_check(instance)
     # When
     dd_run_check(check)
     # Then
@@ -524,7 +524,7 @@ def test_unexpected_measure(mock_api, aggregator, dd_run_check, sonarqube_check)
 @mock.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
 def test_projects_discovery(mock_api, aggregator, dd_run_check, sonarqube_check):
     # Given
-    config = {
+    instance = {
         'web_endpoint': 'http://{}:{}'.format(HOST, PORT),
         'projects': {
             'discovery': {
@@ -539,7 +539,7 @@ def test_projects_discovery(mock_api, aggregator, dd_run_check, sonarqube_check)
     metrics_with_values = [(metric, randrange(0, 100)) for metric in included_metrics]
     measures = [("{}".format(metric.split('.')[1]), value) for metric, value in metrics_with_values]
     mock_api.return_value.get_measures.return_value = measures
-    check = sonarqube_check(config)
+    check = sonarqube_check(instance)
     # When
     dd_run_check(check)
     # Then
@@ -582,7 +582,7 @@ def test_projects_discovery(mock_api, aggregator, dd_run_check, sonarqube_check)
 @mock.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
 def test_projects_discovery_with_include(mock_api, aggregator, dd_run_check, sonarqube_check):
     # Given
-    config = {
+    instance = {
         'web_endpoint': 'http://{}:{}'.format(HOST, PORT),
         'projects': {
             'discovery': {
@@ -599,7 +599,7 @@ def test_projects_discovery_with_include(mock_api, aggregator, dd_run_check, son
     metrics_with_values = [(metric, randrange(0, 100)) for metric in included_metrics]
     measures = [("{}".format(metric.split('.')[1]), value) for metric, value in metrics_with_values]
     mock_api.return_value.get_measures.return_value = measures
-    check = sonarqube_check(config)
+    check = sonarqube_check(instance)
     # When
     dd_run_check(check)
     # Then
@@ -642,7 +642,7 @@ def test_projects_discovery_with_include(mock_api, aggregator, dd_run_check, son
 @mock.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
 def test_projects_discovery_with_include_and_exclude(mock_api, aggregator, dd_run_check, sonarqube_check):
     # Given
-    config = {
+    instance = {
         'web_endpoint': 'http://{}:{}'.format(HOST, PORT),
         'projects': {
             'discovery': {
@@ -662,7 +662,7 @@ def test_projects_discovery_with_include_and_exclude(mock_api, aggregator, dd_ru
     metrics_with_values = [(metric, randrange(0, 100)) for metric in included_metrics]
     measures = [("{}".format(metric.split('.')[1]), value) for metric, value in metrics_with_values]
     mock_api.return_value.get_measures.return_value = measures
-    check = sonarqube_check(config)
+    check = sonarqube_check(instance)
     # When
     dd_run_check(check)
     # Then
@@ -693,7 +693,7 @@ def test_projects_discovery_with_include_and_exclude(mock_api, aggregator, dd_ru
 @mock.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
 def test_projects_keys_and_discovery_with_exclude(mock_api, aggregator, dd_run_check, sonarqube_check):
     # Given
-    config = {
+    instance = {
         'web_endpoint': 'http://{}:{}'.format(HOST, PORT),
         'projects': {
             'keys': [
@@ -713,7 +713,7 @@ def test_projects_keys_and_discovery_with_exclude(mock_api, aggregator, dd_run_c
     metrics_with_values = [(metric, randrange(0, 100)) for metric in included_metrics]
     measures = [("{}".format(metric.split('.')[1]), value) for metric, value in metrics_with_values]
     mock_api.return_value.get_measures.return_value = measures
-    check = sonarqube_check(config)
+    check = sonarqube_check(instance)
     # When
     dd_run_check(check)
     # Then

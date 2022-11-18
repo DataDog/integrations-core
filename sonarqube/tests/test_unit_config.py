@@ -8,7 +8,7 @@ pytestmark = [pytest.mark.unit]
 
 
 @pytest.mark.parametrize(
-    "config,message",
+    "instance,message",
     [
         (
             {},
@@ -48,6 +48,6 @@ pytestmark = [pytest.mark.unit]
         ),
     ],
 )
-def test_configuration_error(config, message, sonarqube_check):
+def test_configuration_error(instance, message, sonarqube_check):
     with pytest.raises(ConfigurationError, match=message):
-        sonarqube_check(config)
+        sonarqube_check(instance)
