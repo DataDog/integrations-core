@@ -170,7 +170,7 @@ class SonarqubeCheck(AgentCheck):
             return
         # The version comes in like `8.5.0.37579` though sometimes there is no build part
         version_parts = {name: part for name, part in zip(('major', 'minor', 'patch', 'build'), version.split('.'))}
-        self.log.debug('Sonarqube version: %s', version_parts)
+        self.log.debug('Sonarqube version parts: %s', version_parts)
         self.set_metadata('version', version, scheme='parts', final_scheme='semver', part_map=version_parts)
 
     def _process_project(self, project_key, project_config, all_metrics):
