@@ -31,7 +31,11 @@ class ExplainParameterizedQueries:
         query_signature = compute_sql_signature(obfuscated_statement)
         if not self._create_prepared_statement(dbname, statement, obfuscated_statement, query_signature):
             return None
-        return self._explain_prepared_statement(dbname, statement, obfuscated_statement, query_signature)
+        result = self._explain_prepared_statement(dbname, statement, obfuscated_statement, query_signature)
+        if result:
+            return result[0][0][0]
+        return None
+
 
     def _prepared_statement_exists(self, dbname, statement, obfuscated_statement, query_signature):
         try:
@@ -116,7 +120,6 @@ class ExplainParameterizedQueries:
                     statement=execute_prepared_statement_query,
                 ),
             )
-            logger.warning('EXPLAINED PREPARED STATEMENT=[%s]', rows)
             return rows
         except Exception as e:
             if self._config.log_unobfuscated_plans:
@@ -145,8 +148,3 @@ class ExplainParameterizedQueries:
             logger.debug('Executing query=[%s] and fetching rows', query)
             cursor.execute(query)
             return cursor.fetchall()
-
-    def _log_all_prepared_statements_for_sessions(self, dbname):
-        with self._check._get_db(dbname).cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
-            cursor.execute("SELECT * FROM pg_prepared_statements")
-            logger.warning("ALL PREPARED STATEMENTS: %s", cursor.fetchall())

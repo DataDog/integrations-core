@@ -151,6 +151,9 @@ class DBExplainError(Enum):
     # search path may be different when the client executed a query from where we executed it.
     undefined_table = 'undefined_table'
 
+    # the statement was explained with the prepared statement workaround
+    explained_with_prepared_statement = 'explained_with_prepared_statement'
+
 
 DEFAULT_COLLECTION_INTERVAL = 1
 DEFAULT_ACTIVITY_COLLECTION_INTERVAL = 10
@@ -552,15 +555,16 @@ class PostgresStatementSamples(DBMAsyncJob):
         plan_dict, explain_err_code, err_msg = self._run_explain_safe(
             dbname, statement, obfuscated_statement, query_signature
         )
-        err_tag = "error:explain-{}".format(explain_err_code.value if explain_err_code else None)
-        if err_msg:
-            err_tag = err_tag + "-" + err_msg
-        self._check.count(
-            "dd.postgres.statement_samples.error",
-            1,
-            tags=self._dbtags(dbname, err_tag) + self._check._get_debug_tags(),
-            hostname=self._check.resolved_hostname,
-        )
+        if explain_err_code and explain_err_code != DBExplainError.explained_with_prepared_statement:
+            err_tag = "error:explain-{}".format(explain_err_code.value if explain_err_code else None)
+            if err_msg:
+                err_tag = err_tag + "-" + err_msg
+            self._check.count(
+                "dd.postgres.statement_samples.error",
+                1,
+                tags=self._dbtags(dbname, err_tag) + self._check._get_debug_tags(),
+                hostname=self._check.resolved_hostname,
+            )
         return plan_dict, explain_err_code, err_msg
 
     def _run_explain_safe(self, dbname, statement, obfuscated_statement, query_signature):
@@ -593,7 +597,9 @@ class PostgresStatementSamples(DBMAsyncJob):
                 " can't be explained due to the separation of the parsed query and raw bind parameters: %s",
                 repr(e),
             )
-            self._explain_parameterized_queries.explain_statement(dbname, statement, obfuscated_statement)
+            result = self._explain_parameterized_queries.explain_statement(dbname, statement, obfuscated_statement)
+            if result:
+                return result, DBExplainError.explained_with_prepared_statement, None
             error_response = None, DBExplainError.parameterized_query, '{}'.format(type(e))
             self._explain_errors_cache[query_signature] = error_response
             self._emit_run_explain_error(dbname, DBExplainError.parameterized_query, e)
@@ -645,7 +651,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         collection_errors = None
         if explain_err_code:
             collection_errors = [{'code': explain_err_code.value, 'message': err_msg if err_msg else None}]
-
+        
         plan, normalized_plan, obfuscated_plan, plan_signature = None, None, None, None
         if plan_dict:
             plan = json.dumps(plan_dict)
