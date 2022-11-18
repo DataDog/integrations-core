@@ -56,7 +56,9 @@ class PDH_FMT_COUNTERVALUE_ITEM_W(ctypes.Structure):
 # dictionary of name to values. See for details
 #        https://github.com/mhammond/pywin32/blob/main/win32/src/win32pdhmodule.cpp#L677
 # This function is 4-10x slower than CPython's native implementation - the reason is
-# significantly less efficient facilities to parse compact layout of PDH Item Array
+# significantly less efficient facilities to parse compact layout of PDH Item Array.
+# On the other hand a contribution to overall performance overhead from  this or other PDH
+# function calls are very small - around 1% or less.
 #
 def GetFormattedCounterArray(counter_handle, format):
     # Define PdhGetFormattedCounterArrayW prototype

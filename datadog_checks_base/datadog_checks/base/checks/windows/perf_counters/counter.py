@@ -118,14 +118,18 @@ class PerfObject:
         # PdhGetFormattedCounterArrayW() API and process its output in pure Python. If not, we will invoke
         # win32pdh.GetFormattedCounterArray() which is 5-10x times faster than using
         # PdhGetFormattedCounterArrayW(), but it will lose duplicate/non-unique instances. There are a few
-        # reasons for this configuration and its default value (true):
+        # reasons for this configuration and its default value (true). Please note that PDH API calls
+        # contribute only ~1% of overall performance overhead and making them 5-10x faster will not make
+        # overall that much faster and most likely the gain will be lost in the non-deterministic noise. Still
+        # these kind improvements are not wasteful:
         #
         #     * This new multi-instance wildcard-based implementation is 2-10+x faster than preceding
         #       per-instance based implementation (advantage is bigger the more instances and counters
         #       are involved). Thus the slower API calls are effectively on par regarding overall
         #       performance impact. It is true, its full performance advantage of wildcard-based
         #       implementation will not be realized until we can switch to an enhanced version of
-        #       win32pdh.GetFormattedCounterArray().
+        #       win32pdh.GetFormattedCounterArray(). Again, in overall performance overhead the gain
+        #       will be small peanuts.
         #
         #     * We plan to file a ticket and perhaps assist to enhance win32pdh.GetFormattedCounterArray()
         #       function to handle non-unique instances. When it will be implemented we can remove slower

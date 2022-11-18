@@ -45,6 +45,9 @@ class IISCheckV2(PerfCountersBaseCheckWithLegacySupport):
             if include_fast:
                 new_config['include_fast'] = include_fast
 
+            # No duplicate Sites or Pools can be created
+            new_config['duplicate_instances_exist'] = False
+             
             metrics_config[object_name] = new_config
 
         return {'server_tag': 'iis_host', 'metrics': metrics_config}
