@@ -34,6 +34,10 @@ E2E_METADATA_ORACLE_CLIENT = {
     ],
     'start_commands': [
         'bash /tmp/install_instant_client.sh',
+        # 'mkdir -p /usr/local/share/ca-certificates',
+        # 'touch /usr/local/share/ca-certificates/ca-cert.crt',
+        # 'cp /opt/oracle/instantclient_19_3/client_wallet/ewallet.pem /usr/local/share/ca-certificates/ca-cert.crt',
+        # 'update-ca-certificates'
     ],
     'env_vars': {'LD_LIBRARY_PATH': '/opt/oracle/instantclient_19_3', 'TNS_ADMIN': '/opt/oracle/instantclient_19_3'},
 }

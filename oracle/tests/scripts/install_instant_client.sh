@@ -6,7 +6,7 @@ INSTANT_CLIENT_URL="https://ddintegrations.blob.core.windows.net/oracle/instantc
 
 mkdir -p /opt/oracle
 apt-get update
-DEBIAN_FRONTEND=noninteractive apt-get install -yq unzip libaio1 gcc g++
+DEBIAN_FRONTEND=noninteractive apt-get install -yq unzip libaio1 gcc g++ ca-certificates
 
 # Retry necessary due to flaky download that might trigger:
 # curl: (56) OpenSSL SSL_read: SSL_ERROR_SYSCALL, errno 110
@@ -14,6 +14,11 @@ for i in 2 4 8 16 32; do
   curl -o /opt/oracle/instantclient.zip $INSTANT_CLIENT_URL && break
   sleep $i
 done
+
+mkdir -p /usr/local/share/ca-certificates
+touch /usr/local/share/ca-certificates/ca-cert.crt
+cp /opt/oracle/instantclient_19_3/client_wallet/ewallet.pem /usr/local/share/ca-certificates/ca-cert.crt
+update-ca-certificates
 
 unzip /opt/oracle/instantclient.zip -d /opt/oracle
 ls /opt/oracle

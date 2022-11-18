@@ -41,7 +41,7 @@ text = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
-    "oracledb==1.1.1; python_version >= '3.6'",
+    "oracledb==1.2.0; python_version >= '3.8'",
     "jaydebeapi==1.2.3",
     "jpype1==0.7.0; python_version < '3.0'",
     "jpype1==1.4.0; python_version > '3.0'",
