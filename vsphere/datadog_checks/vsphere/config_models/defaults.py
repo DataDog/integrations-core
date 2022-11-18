@@ -34,6 +34,10 @@ def instance_collect_attributes(field, value):
     return False
 
 
+def instance_collect_delayed_realtime_metrics(field, value):
+    return False
+
+
 def instance_collect_events(field, value):
     return get_default_field_value(field, value)
 

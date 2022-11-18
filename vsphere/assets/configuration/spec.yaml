@@ -436,6 +436,13 @@ files:
         value:
           type: integer
           example: 900
+      - name: collect_delayed_realtime_metrics
+        description: |
+          Collect delayed metrics such as disk.used.latest when collecting relatime metrics.
+          Note: This may have performance implications.
+        value:
+          type: integer
+          example: false
       - template: instances/default
         overrides:
           empty_default_hostname.display_priority: 1

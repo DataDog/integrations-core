@@ -79,6 +79,7 @@ class VSphereConfig(object):
             'refresh_metrics_metadata_cache_interval', DEFAULT_REFRESH_METRICS_METADATA_CACHE_INTERVAL
         )
         self.connection_reset_timeout = instance.get("connection_reset_timeout", 900)
+        self.collect_delayed_realtime_metrics = is_affirmative(instance.get("collect_delayed_realtime_metrics", False))
 
         # Always collect events if `collect_events_only` is true
         if self.collect_events_only:
@@ -129,6 +130,9 @@ class VSphereConfig(object):
                 "set the collection_level to something different than a "
                 "integer between 1 and 4."
             )
+
+        if self.collect_delayed_realtime_metrics and self.collection_type == 'historical':
+            self.log.warning("Ignoring option `collect_delayed_realtime_metrics` as realtime metrics are not collected")
 
     def _parse_resource_filters(self, all_resource_filters):
         # type: (List[ResourceFilterConfig]) -> List[ResourceFilter]

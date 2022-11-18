@@ -22,6 +22,8 @@ from datadog_checks.vsphere.cache import InfrastructureCache, MetricsMetadataCac
 from datadog_checks.vsphere.config import VSphereConfig
 from datadog_checks.vsphere.constants import (
     DEFAULT_MAX_QUERY_METRICS,
+    DELAYED_REALTIME_METRIC,
+    DELAYED_REALTIME_METRIC_INTERVAL_ID,
     HISTORICAL_RESOURCES,
     MAX_QUERY_METRICS_OPTION,
     REALTIME_METRICS_INTERVAL_ID,
@@ -439,6 +441,7 @@ class VSphereCheck(AgentCheck):
         """
         Build query specs using MORs and metrics metadata.
         """
+        vm_datastore_counter_id = None
         server_current_time = self.api.get_current_time()
         self.log.debug("Server current datetime: %s", server_current_time)
         for resource_type in self._config.collected_resource_types:
@@ -450,21 +453,35 @@ class VSphereCheck(AgentCheck):
                 # - An asterisk (*) to specify all instances of the metric for the specified counterId
                 # - Double-quotes ("") to specify aggregated statistics
                 # More info https://code.vmware.com/apis/704/vsphere/vim.PerformanceManager.MetricId.html
+                if (
+                    self._config.collect_delayed_realtime_metrics
+                    and metric_name == DELAYED_REALTIME_METRIC
+                    and resource_type in REALTIME_RESOURCES
+                ):
+                    vm_datastore_counter_id = counter_key
                 if should_collect_per_instance_values(self._config, metric_name, resource_type):
                     instance = "*"
                 else:
                     instance = ''
 
                 metric_ids.append(vim.PerformanceManager.MetricId(counterId=counter_key, instance=instance))
-
-            for batch in self.make_batch(mors, metric_ids, resource_type):
+            for batch in self.make_batch(mors, metric_ids, resource_type, vm_datastore_counter_id):
                 query_specs = []
                 for mor, metrics in iteritems(batch):
                     query_spec = vim.PerformanceManager.QuerySpec()  # type: vim.PerformanceManager.QuerySpec
                     query_spec.entity = mor
                     query_spec.metricId = metrics
+
                     if resource_type in REALTIME_RESOURCES:
-                        query_spec.intervalId = REALTIME_METRICS_INTERVAL_ID
+                        if (
+                            self._config.collect_delayed_realtime_metrics
+                            and len(query_spec.metricId) > 0
+                            and vm_datastore_counter_id is not None
+                            and query_spec.metricId[0].counterId == vm_datastore_counter_id
+                        ):
+                            query_spec.intervalId = DELAYED_REALTIME_METRIC_INTERVAL_ID
+                        else:
+                            query_spec.intervalId = REALTIME_METRICS_INTERVAL_ID
                         query_spec.maxSample = 1  # Request a single datapoint
                     else:
                         # We cannot use `maxSample` for historical metrics, let's specify a timewindow that will
@@ -514,6 +531,7 @@ class VSphereCheck(AgentCheck):
         mors,  # type: Iterable[vim.ManagedEntity]
         metric_ids,  # type: List[vim.PerformanceManager.MetricId]
         resource_type,  # type: Type[vim.ManagedEntity]
+        vm_datastore_counter_id,  # type: int
     ):  # type: (...) -> Generator[MorBatch, None, None]
         """Iterates over mor and generate batches with a fixed number of metrics to query.
         Querying multiple resource types in the same call is error prone if we query a cluster metric. Indeed,
@@ -541,6 +559,12 @@ class VSphereCheck(AgentCheck):
         batch_size = 0
         for m in mors_filtered:
             for metric_id in metric_ids:
+                if self._config.collect_delayed_realtime_metrics and metric_id.counterId == vm_datastore_counter_id:
+                    new_batch = defaultdict(list)
+                    new_batch[m].append(metric_id)
+                    yield new_batch
+                    batch = defaultdict(list)
+                    batch_size = 0
                 if batch_size == max_batch_size:
                     yield batch
                     batch = defaultdict(list)

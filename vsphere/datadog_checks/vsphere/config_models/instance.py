@@ -123,6 +123,7 @@ class InstanceConfig(BaseModel):
     batch_property_collector_size: Optional[int]
     batch_tags_collector_size: Optional[int]
     collect_attributes: Optional[bool]
+    collect_delayed_realtime_metrics: Optional[int]
     collect_events: Optional[bool]
     collect_events_only: Optional[bool]
     collect_per_instance_filters: Optional[CollectPerInstanceFilters]

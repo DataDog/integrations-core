@@ -694,6 +694,12 @@ instances:
     #
     # connection_reset_timeout: 900
 
+    ## @param collect_delayed_realtime_metrics - integer - optional - default: false
+    ## Collect delayed metrics such as disk.used.latest when collecting relatime metrics.
+    ## Note: This may have performance implications.
+    #
+    # collect_delayed_realtime_metrics: false
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
