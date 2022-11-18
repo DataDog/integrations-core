@@ -48,10 +48,10 @@ the build process, install `libxslt-dev` (or `libxslt-devel` for RPM).
 #### Enable monitoring
 
 To monitor the health of an instance, its associated databases, and database objects, enable the database system monitor switches for each of the objects you want to monitor: 
-* statement
-* lock
-* tables
-* buffer pool
+* Statement
+* Lock
+* Tables
+* Buffer pool
 
 Switch to the instance master user and run these commands at the `db2` prompt:
 
