@@ -232,11 +232,40 @@ def test_filter_items(to_filter, key, config, global_include, global_exclude, ex
     "projects_config, projects_to_filter, expected_result",
     [
         pytest.param(
+            {},
+            ['Project1', 'Project2', 'ProjectB'],
+            (OrderedDict([('Project1', None), ('Project2', None), ('ProjectB', None)]), False),
+            id="Filter projects, default include all",
+        ),
+        pytest.param(
             {'include': [{'Project1': {}}, {'ProjectB': {}}, {'ProjectX': {}}]},
-            ['_Root', 'Project1', 'Project2', 'ProjectB'],
+            ['Project1', 'Project2', 'ProjectB'],
             (OrderedDict([('Project1', {'Project1': {}}), ('ProjectB', {'ProjectB': {}})]), False),
             id="Filter projects, only include",
-        )
+        ),
+        pytest.param(
+            {'exclude': [{'ProjectA': {}}, {'ProjectB': {}}]},
+            ['Project1', 'Project2', 'ProjectB'],
+            (OrderedDict([('Project1', None), ('Project2', None)]), False),
+            id="Filter projects, only exclude",
+        ),
+        pytest.param(
+            {'include': [{'Project1': {}}, {'Project2': {}}], 'exclude': [{'ProjectA': {}}, {'ProjectB': {}}]},
+            ['Project1', 'Project2', 'ProjectA', 'ProjectB', 'ProjectC'],
+            (OrderedDict([('Project1', {'Project1': {}}), ('Project2', {'Project2': {}})]), False),
+            id="Filter projects, include and exclude",
+        ),
+        pytest.param(
+            {'include': [{'Project(.*)_Prod.*': {}}], 'exclude': [{'Project(.*)_Dev': {}}, {'Project(.*)_Test': {}}]},
+            ['ProjectA_Test.1', 'ProjectA_Prod.2', 'ProjectA_Dev.1', 'ProjectB_Prod.3', 'ProjectC'],
+            (
+                OrderedDict(
+                    [('ProjectA_Prod.2', {'Project(.*)_Prod.*': {}}), ('ProjectB_Prod.3', {'Project(.*)_Prod.*': {}})]
+                ),
+                False,
+            ),
+            id="Filter projects, include and exclude regex",
+        ),
     ],
 )
 def test_filter_projects(projects_config, projects_to_filter, expected_result, rest_instance, teamcity_rest_check):
@@ -248,38 +277,76 @@ def test_filter_projects(projects_config, projects_to_filter, expected_result, r
 
 
 @pytest.mark.parametrize(
-    "build_configs_to_filter, project_id_pattern, filter_config, expected_result",
+    "build_configs_to_filter, filter_config, expected_result",
     [
         pytest.param(
-            [
-                'ProjectA_BuildStep1',
-                'ProjectA_BuildStep2',
-                'ProjectA_BuildStep3',
-                'ProjectA_BuildStep4',
-                'ProjectA_Deployment',
-            ],
-            'SampleProject',
-            {'SampleProject': {}},
+            ['BuildStep1', 'BuildStep2', 'BuildStep3', 'DeploymentA'],
+            {},
             (
                 OrderedDict(
                     [
-                        ('ProjectA_BuildStep1', None),
-                        ('ProjectA_BuildStep2', None),
-                        ('ProjectA_BuildStep3', None),
-                        ('ProjectA_BuildStep4', None),
-                        ('ProjectA_Deployment', None),
+                        ('BuildStep1', None),
+                        ('BuildStep2', None),
+                        ('BuildStep3', None),
+                        ('DeploymentA', None),
+                    ]
+                ),
+                False,
+            ),
+            id="Filter build configs, default include all",
+        ),
+        pytest.param(
+            ['BuildStep1', 'BuildStep2', 'BuildStep3', 'DeploymentA'],
+            {'include': ['BuildStep.*']},
+            (
+                OrderedDict(
+                    [
+                        ('BuildStep1', 'BuildStep.*'),
+                        ('BuildStep2', 'BuildStep.*'),
+                        ('BuildStep3', 'BuildStep.*'),
                     ]
                 ),
                 False,
             ),
             id="Filter build configs, only include",
-        )
+        ),
+        pytest.param(
+            ['BuildStep1', 'BuildStep2', 'Deployment.prod.1', 'Deployment.dev.1', 'Deployment.dev.5'],
+            {'exclude': ['Deployment.dev.*']},
+            (
+                OrderedDict(
+                    [
+                        ('BuildStep1', None),
+                        ('BuildStep2', None),
+                        ('Deployment.prod.1', None),
+                    ]
+                ),
+                False,
+            ),
+            id="Filter build configs, only exclude",
+        ),
+        pytest.param(
+            ['BuildStep1', 'BuildStep2', 'Deployment.dev.1', 'Deployment.prod.1', 'Deployment.prod.2'],
+            {'include': ['BuildStep.*', 'Deployment.prod.*'], 'exclude': ['Deployment.dev.*']},
+            (
+                OrderedDict(
+                    [
+                        ('BuildStep1', 'BuildStep.*'),
+                        ('BuildStep2', 'BuildStep.*'),
+                        ('Deployment.prod.1', 'Deployment.prod.*'),
+                        ('Deployment.prod.2', 'Deployment.prod.*'),
+                    ]
+                ),
+                False,
+            ),
+            id="Filter build configs, include and exclude regex",
+        ),
     ],
 )
 def test_filter_build_configs(
-    build_configs_to_filter, project_id_pattern, filter_config, expected_result, rest_instance, teamcity_rest_check
+    build_configs_to_filter, filter_config, expected_result, rest_instance, teamcity_rest_check
 ):
     check = teamcity_rest_check(rest_instance)
-    filtered = filter_build_configs(check, build_configs_to_filter, project_id_pattern, filter_config)
+    filtered = filter_build_configs(check, build_configs_to_filter, 'ProjectID', {'ProjectID': filter_config})
 
     assert filtered == expected_result
