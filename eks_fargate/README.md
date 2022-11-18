@@ -382,8 +382,8 @@ spec:
      name: "<POD_NAME>"
    spec:
      serviceAccountName: datadog-agent
-     ## Enabling host pid namespace for origin detection with cgroup v2
-     hostPID: true
+     ## Putting the agent in the same namespace as the application for origin detection with cgroup v2
+     shareProcessNamespace: true
      containers:
      - name: "<APPLICATION_NAME>"
        image: "<APPLICATION_IMAGE>"
