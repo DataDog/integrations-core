@@ -69,7 +69,7 @@ class SonarqubeCheck(AgentCheck):
                 else:
                     self.log.warning('\'project\' key setting must be a string or a dict: %s', keys_item)
                     raise ConfigurationError('\'project\' key setting must be a string or a dict')
-            self.log.debug(self._projects)
+            self.log.debug("projects: %s", self._projects)
 
     def _validate_default_tag(self):
         self._default_tag = self.instance.get('default_tag', 'component')
