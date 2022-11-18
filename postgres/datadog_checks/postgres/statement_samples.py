@@ -593,7 +593,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                 " can't be explained due to the separation of the parsed query and raw bind parameters: %s",
                 repr(e),
             )
-            self._explain_parameterized_queries.explain_statement(statement, obfuscated_statement)
+            self._explain_parameterized_queries.explain_statement(dbname, statement, obfuscated_statement)
             error_response = None, DBExplainError.parameterized_query, '{}'.format(type(e))
             self._explain_errors_cache[query_signature] = error_response
             self._emit_run_explain_error(dbname, DBExplainError.parameterized_query, e)
