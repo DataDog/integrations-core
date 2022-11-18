@@ -58,15 +58,13 @@ class DiscoveryFilter:
             self._log.debug('config_items_id: %s', config_items_id)
             if config_items_id:
                 for id_item in config_items_id:
-                    id_key = (
-                        id_item
-                        if isinstance(id_item, str)
-                        else list(id_item.keys())[0]
-                        if isinstance(id_item, dict) and len(id_item) == 1
-                        else None
-                    )
-                    id_value = list(id_item.values())[0] if isinstance(id_item, dict) and len(id_item) == 1 else None
-                    if id_key not in [key for key, value in matched_id]:
+                    id_key, id_value = None, None
+                    if isinstance(id_item, dict):
+                        id_key = list(id_item)[0]  # iterating over a dictionary implicitly iterates only over its keys
+                        id_value = list(id_item.values())[0]
+                    elif isinstance(id_item, str):
+                        id_key = id_item
+                    if id_key not in [key for key, _ in matched_id]:
                         if id_key in items:
                             self._log.debug('\'%s\' item matched', id_key)
                             matched_id.append(tuple([id_key, id_value]))
@@ -103,28 +101,35 @@ class DiscoveryFilter:
             self._log.debug('include_patterns: %s', include_patterns)
             self._log.debug('excluded_items: %s', excluded_items)
             for include_pattern in include_patterns:
-                for item in items:
-                    if len(matched_discovery) == limit:
-                        return matched_discovery
-                    if (
-                        item not in [key for key, _ in matched_items]
-                        and item not in [key for key, _ in matched_discovery]
-                        and item not in excluded_items
-                        and re.search(
-                            include_pattern
-                            if isinstance(include_pattern, str)
-                            else list(include_pattern.keys())[0]
-                            if isinstance(include_pattern, dict) and len(include_pattern) == 1
-                            else None,
-                            item,
-                        )
-                    ):
-                        matched_discovery.append(
-                            (
+                pattern = (
+                    include_pattern
+                    if isinstance(include_pattern, str)
+                    else list(include_pattern.keys())[0]
+                    if isinstance(include_pattern, dict) and len(include_pattern) == 1
+                    else None
+                )
+                if pattern:
+                    pattern_config = (
+                        list(include_pattern.values())[0]
+                        if isinstance(include_pattern, dict) and len(include_pattern) == 1
+                        else None
+                    )
+                    for item in items:
+                        if len(matched_discovery) == limit:
+                            return matched_discovery
+                        if (
+                            item not in [key for key, _ in matched_items]
+                            and item not in [key for key, _ in matched_discovery]
+                            and item not in excluded_items
+                            and re.search(
+                                pattern,
                                 item,
-                                list(include_pattern.values())[0]
-                                if isinstance(include_pattern, dict) and len(include_pattern) == 1
-                                else None,
                             )
-                        )
+                        ):
+                            matched_discovery.append(
+                                (
+                                    item,
+                                    pattern_config,
+                                )
+                            )
         return matched_discovery
