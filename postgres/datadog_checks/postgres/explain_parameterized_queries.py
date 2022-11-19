@@ -3,6 +3,7 @@ import logging
 import psycopg2
 
 from datadog_checks.base.utils.db.sql import compute_sql_signature
+from .version_utils import V12
 
 logger = logging.getLogger(__name__)
 
@@ -29,6 +30,8 @@ class ExplainParameterizedQueries:
         self._config = config
 
     def explain_statement(self, dbname, statement, obfuscated_statement):
+        if self._check.version < V12:
+            return None
         self._set_plan_cache_mode(dbname)
 
         query_signature = compute_sql_signature(obfuscated_statement)
