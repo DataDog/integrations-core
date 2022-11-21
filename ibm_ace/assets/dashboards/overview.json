@@ -76,7 +76,7 @@
             "id": 8403527757465156,
             "definition": {
               "type": "note",
-              "content": "This overview provides relevant information on health at the Message Flow Level as well as a status check on the connection health at the server process level. It is a good place to start  investigating system health\n",
+              "content": "This overview provides relevant information on health at the Message Flow Level as well as a status check on the connection health at the server process level. It is a good place to start investigating system health.\n",
               "background_color": "green",
               "font_size": "14",
               "text_align": "center",
