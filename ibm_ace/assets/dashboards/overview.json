@@ -15,7 +15,7 @@
             "id": 2091206377392818,
             "definition": {
               "type": "note",
-              "content": "## IBM ACE\n\nIBM App Connect Enterprise (ACE) enables the communication of business information accross different applications and platforms. \n\nThis dashboard enables you to gain insights into the health and performance of your IBM ACE system at different levels of abstraction. It provides information on error rates of message flows and Integration server connections, as well as overall health insights via log data and a Server-to-MQ Connections service check. \n",
+              "content": "## IBM ACE\n\nIBM App Connect Enterprise (ACE) enables the communication of business information across different applications and platforms. \n\nThis dashboard enables you to gain insights into the health and performance of your IBM ACE system at different levels of abstraction. It provides information on error rates of message flows and integration server connections, overall health insights from log data, and a Server-to-MQ Connections service check. \n",
               "background_color": "white",
               "font_size": "14",
               "text_align": "left",
