@@ -1,5 +1,8 @@
 # CHANGELOG - IBM MQ
 
+## 3.23.0-rc.9 / 2022-11-21
+
+
 ## 3.23.0-rc.8 / 2022-10-14
 
 * [Fixed] Add back channels_to_skip for channel status metrics. See [#13113](https://github.com/DataDog/integrations-core/pull/13113).
