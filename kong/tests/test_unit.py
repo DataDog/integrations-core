@@ -6,8 +6,8 @@ import os
 import pytest
 from six import PY2
 
-from datadog_checks.kong import Kong
 from datadog_checks.dev.utils import get_metadata_metrics
+from datadog_checks.kong import Kong
 
 from .common import HERE, METRICS_URL
 
