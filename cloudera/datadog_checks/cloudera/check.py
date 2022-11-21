@@ -36,7 +36,6 @@ class ClouderaCheck(AgentCheck):
                 value = item.data[0].value
                 attributes = item.metadata.attributes
 
-                # TODO: make this compatible with Py2
                 tags = [f"{datadog_tag}:{attributes[attribute]}" for datadog_tag, attribute in query['tags']]
 
                 category = attributes['category'].lower()
