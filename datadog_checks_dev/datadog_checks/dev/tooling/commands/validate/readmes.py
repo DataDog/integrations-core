@@ -109,7 +109,7 @@ def validate_readme(integration, repo, display_queue, files_failed, readme_count
     else:
         overview_header = soup.find('h2', text='Overview')
         overview_information = overview_header.find_next()
-        if overview_information.name != "p":
+        if overview_information.name == "h2":
             files_failed[readme_path] = True
             display_queue.append((echo_failure, "     readme has an empty Overview H2 (##) section"))
 
@@ -119,8 +119,7 @@ def validate_readme(integration, repo, display_queue, files_failed, readme_count
     else:
         setup_header = soup.find('h2', text='Setup')
         setup_instructions = setup_header.find_next()
-        if setup_instructions.name != "p" or setup_instructions.name != "h3":
-            print(setup_instructions.name=="h3")
+        if setup_instructions.name == "h2":
             files_failed[readme_path] = True
             display_queue.append((echo_failure, "     readme has an empty Setup H2 (##) section"))
 
@@ -131,7 +130,7 @@ def validate_readme(integration, repo, display_queue, files_failed, readme_count
         else:
             support_header = soup.find('h2', text='Support')
             support_information = support_header.find_next()
-            if support_information.name != "p":
+            if support_information.name == "h2":
                 files_failed[readme_path] = True
                 display_queue.append((echo_failure, "     readme has an empty Support H2 (##) section"))
 
@@ -141,7 +140,7 @@ def validate_readme(integration, repo, display_queue, files_failed, readme_count
         else:
             uninstallation_header = soup.find('h2', text='Uninstallation')
             uninstallation_instructions = uninstallation_header.find_next()
-            if uninstallation_instructions.name != "p":
+            if uninstallation_instructions.name == "h2":
                 files_failed[readme_path] = True
                 display_queue.append((echo_failure, "     readme has an empty Uninstallation H2 (##) section"))
 
