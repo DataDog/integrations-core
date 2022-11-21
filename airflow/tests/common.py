@@ -19,5 +19,4 @@ FULL_CONFIG = {
     'init_config': {},
 }
 
-
 INSTANCE_WRONG_URL = {'url': 'http://localhost:5555', 'tags': ['key:my-tag']}
