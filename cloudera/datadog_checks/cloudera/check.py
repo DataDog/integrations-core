@@ -26,26 +26,34 @@ class ClouderaCheck(AgentCheck):
 
         self.client, self._error = make_api_client(self, self.instance)
         if self.client is None:
-            self.error("API Client is none: %s", self._error)
+            self.log.error(f"Cloudera API Client is none: {self._error}")
             self.service_check(CAN_CONNECT, AgentCheck.CRITICAL)
 
         self.custom_tags = self.instance.get("tags", [])
 
     def run_timeseries_checks(self):
         # For each timeseries query, get the metrics
+        # TODO: Running these metrics cause the execution time to be high, run async?
         for query in TIMESERIES_QUERIES:
             items = self.client.run_timeseries_query(query=query['query_string'])
             for item in items:
                 if not item.data:
-                    self.log.info(f"Data for entity {item.metadata.entity_name} is empty")
+                    self.log.debug(f"Data for entity {item.metadata.entity_name} is empty")
                     continue
 
                 value = item.data[0].value
                 attributes = item.metadata.attributes
-                tags = [f"{datadog_tag}:{attributes[attribute]}" for datadog_tag, attribute in query['tags']]
+
+                # TODO: Add custom tags to this
+                tags = []
+                for datadog_tag, attribute in query['tags']:
+                    try:
+                        tags.append(f"{datadog_tag}:{attributes[attribute]}")
+                    except:
+                        self.log.debug(f"no {datadog_tag} tag for metric {item.metadata.entity_name}")
+
                 category = attributes['category'].lower()
                 self.gauge(f"{category}.{query['metric_name']}", value, tags=tags)
-
 
     def run_service_checks(self):
         # Structure:
