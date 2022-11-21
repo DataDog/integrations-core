@@ -11,6 +11,7 @@ parameters:
   benchmark: true
   latest: false
   ddtrace_flag: ''
+  memray: true
 jobs:
 - template: ./test-all.yml
   parameters:

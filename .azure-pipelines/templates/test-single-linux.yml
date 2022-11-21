@@ -18,6 +18,7 @@ parameters:
   pip_cache_config: null
   coverage: true
   dd_url: https://app.datadoghq.com
+  memray: true
 
 jobs:
 - job: '${{ coalesce(parameters.job_name, parameters.check) }}_Linux'
@@ -35,7 +36,7 @@ jobs:
     ${{ if not(eq(parameters.run_py2_tests, 'true')) }}:
       TOX_SKIP_ENV: py27.*  # Don't run py2 tests
     ${{ if not(eq(parameters.run_py3_tests, 'true')) }}:
-      TOX_SKIP_ENV: py3.*  # Don't run py2 tests
+      TOX_SKIP_ENV: py3.*  # Don't run py3 tests
     ${{ if eq(parameters.ddtrace_flag, '--ddtrace') }}:
       DD_ENV: ci
       DD_SERVICE: ddev-integrations-${{ parameters.repo }}
@@ -77,6 +78,7 @@ jobs:
       repo: ${{ parameters.repo }}
       coverage: ${{ parameters.coverage }}
       force_base_package: ${{ parameters.force_base_package }}
+      memray: ${{ parameters.memray }}
 
   - ${{ if and(eq(parameters.repo, 'core'), eq(parameters.test, 'true'), eq(parameters.coverage, 'true'), eq(parameters.force_base_package, 'false')) }}:
     # https://docs.codecov.com/docs/codecov-uploader

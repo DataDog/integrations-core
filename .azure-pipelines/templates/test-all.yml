@@ -15,6 +15,7 @@ parameters:
   latest: false
   ddtrace_flag: ''
   dd_url: https://app.datadoghq.com
+  memray: true
 
 jobs:
 - ${{ each check in parameters.checks }}:
@@ -36,6 +37,7 @@ jobs:
       ddtrace_flag: ${{ parameters.ddtrace_flag }}
       validate_codeowners: ${{ parameters.validate_codeowners }}
       dd_url: ${{ parameters.dd_url }}
+      memray: ${{ parameters.memray }}
 
       # Setup windows images
       ${{ if eq(check.os, 'windows')}}:
