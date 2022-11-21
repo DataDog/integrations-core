@@ -459,7 +459,7 @@
             "id": 512201691665470,
             "definition": {
               "type": "note",
-              "content": "The Integration Server are processes that enable encapsulated orchestration of message flows. The ratio of closed vs. failed connections of a server to a message broker can provide insights into the health of each server within a node (instance)",
+              "content": "The Integration Server is processes that enable encapsulated orchestration of message flows. The ratio of closed to failed connections of a server to a message broker can provide insights into the health of each server within a node (instance).",
               "background_color": "green",
               "font_size": "14",
               "text_align": "center",
