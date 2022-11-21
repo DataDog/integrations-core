@@ -376,7 +376,7 @@
           {
             "id": 5220674376155750,
             "definition": {
-              "title": "Number of MQ Messages vs Number with Errors",
+              "title": "Number of MQ Messages vs. Number with Errors",
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
