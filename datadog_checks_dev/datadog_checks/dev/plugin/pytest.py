@@ -333,7 +333,7 @@ def pytest_collection_modifyitems(config, items):
         return
 
     if PY2 and config.getoption("--memray"):
-        warnings.warn("The --memray option can't be used with py2 environments.")
+        warnings.warn("--memray option ignored as it's not supported for py2 environments.")
 
     skip_latest_metrics = pytest.mark.skip(reason="need --run-latest-metrics option to run")
     for item in items:
