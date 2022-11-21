@@ -102,14 +102,37 @@ def validate_readme(integration, repo, display_queue, files_failed, readme_count
 
     # Check all required headers are present
     h2s = [h2.text for h2 in soup.find_all("h2")]
-    if "Overview" not in h2s or "Setup" not in h2s:
+
+    if "Overview" not in h2s:
         files_failed[readme_path] = True
-        display_queue.append((echo_failure, "     readme is missing either an Overview or Setup H2 (##) section"))
+        display_queue.append((echo_failure, "     readme is missing an Overview H2 (##) section"))
+    else:
+        overview_header = soup.find('h2', text='Overview')
+        overview_information = overview_header.find_next()
+        if overview_information.name != "p":
+                files_failed[readme_path] = True
+                display_queue.append((echo_failure, "     readme has an empty Overview H2 (##) section"))
+
+    if "Setup" not in h2s:
+        files_failed[readme_path] = True
+        display_queue.append((echo_failure, "     readme is missing a Setup H2 (##) section"))
+    else:
+        setup_header = soup.find('h2', text='Setup')
+        setup_instructions = setup_header.find_next()
+        if setup_instructions.name != "p":
+                files_failed[readme_path] = True
+                display_queue.append((echo_failure, "     readme has an empty Setup H2 (##) section"))
 
     if repo == 'marketplace':
         if "Support" not in h2s:
             files_failed[readme_path] = True
             display_queue.append((echo_failure, "     readme is missing a Support H2 (##) section"))
+        else:
+            support_header = soup.find('h2', text='Support')
+            support_information = support_header.find_next()
+            if support_information.name != "p":
+                files_failed[readme_path] = True
+                display_queue.append((echo_failure, "     readme has an empty Support H2 (##) section"))
 
         if "Uninstallation" not in h2s:
             files_failed[readme_path] = True
