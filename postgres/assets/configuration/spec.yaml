@@ -65,12 +65,10 @@ files:
           - 'template%'
           - rdsadmin
           - azure_maintenance
-          - postgres
         default:
           - 'template%'
           - rdsadmin
           - azure_maintenance
-          - postgres
     - name: ssl
       description: |
         This option determines whether or not and with what priority a secure SSL TCP/IP connection
@@ -227,7 +225,7 @@ files:
       description: Include statistics from the default database 'postgres' in the check metrics.
       value:
         type: boolean
-        example: false
+        example: true
     - name: collect_bloat_metrics
       description: Collect metrics about table bloat. Only available when `relation` metrics are enabled.
       enabled: true
@@ -533,6 +531,26 @@ files:
             type: boolean
             example: true
             display_default: true
+    - name: log_unobfuscated_queries
+      hidden: true
+      description: |
+        Set to `true` to enable logging of original unobfuscated SQL queries when obfuscation errors occur.
+        For security purposes, it is recommended to use this option for debugging only when requested by Datadog Support.
+        Note: This option only applies when `dbm` is enabled.
+      value:
+        type: boolean
+        example: false
+        display_default: false
+    - name: log_unobfuscated_plans
+      hidden: true
+      description: |
+        Set to `true` to enable logging of original unobfuscated SQL plans when obfuscation errors occur.
+        For security purposes, it is recommended to use this option for debugging only when requested by Datadog Support.
+        Note: This option only applies when `dbm` is enabled.
+      value:
+        type: boolean
+        example: false
+        display_default: false
     - template: instances/default
       overrides:
         disable_generic_tags.hidden: False

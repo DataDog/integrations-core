@@ -1,8 +1,13 @@
 # CHANGELOG - mongo
 
+## 4.0.3 / 2022-09-29
+
+* [Fixed] Fix collection of `fsyncLocked` metric when configured database is not `admin`. See [#13020](https://github.com/DataDog/integrations-core/pull/13020).
+
 ## 4.0.2 / 2022-09-02 / Agent 7.39.0
 
 * [Fixed] Solve issue after migration to pymongo 4. See [#12860](https://github.com/DataDog/integrations-core/pull/12860).
+* [Fixed] Refactor Mongo connection process. See [#12767](https://github.com/DataDog/integrations-core/pull/12767).
 
 ## 4.0.1 / 2022-08-15
 

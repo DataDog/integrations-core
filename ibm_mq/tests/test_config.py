@@ -113,3 +113,56 @@ def test_min_properties_queue_tags_channel_status(instance, get_check, dd_run_ch
             dd_run_check(check)
         except Exception as e:
             AssertionError("`{}` contains empty mapping. Error is: {}".format(param, e))
+
+
+@pytest.mark.parametrize(
+    'ssl_explicit_disable, ssl_option, expected_ssl',
+    [
+        pytest.param(
+            False,
+            'ssl_cipher_spec',
+            True,
+            id="ssl_cipher_spec enabled, SSL implicitly enabled",
+        ),
+        pytest.param(
+            False,
+            'ssl_key_repository_location',
+            True,
+            id="ssl_key_repository_location enabled, SSL implicitly enabled",
+        ),
+        pytest.param(
+            False,
+            'ssl_certificate_label',
+            True,
+            id="ssl_certificate_label enabled, SSL implicitly enabled",
+        ),
+        pytest.param(
+            True,
+            'ssl_cipher_spec',
+            False,
+            id="ssl_cipher_spec enabled but ssl_auth disabled, SSL explicitly disabled",
+        ),
+        pytest.param(
+            True,
+            'ssl_key_repository_location',
+            False,
+            id="ssl_key_repository_location enabled but ssl_auth disabled, SSL explicitly disabled",
+        ),
+        pytest.param(
+            True,
+            'ssl_certificate_label',
+            False,
+            id="ssl_certificate_label enabled but ssl_auth disabled, SSL explicitly disabled",
+        ),
+    ],
+)
+def test_ssl_auth_implicit_enable(instance, ssl_explicit_disable, ssl_option, expected_ssl):
+    if ssl_explicit_disable:
+        instance['ssl_auth'] = False
+
+    # We only care that the option is enabled
+    instance[ssl_option] = "dummy_value"
+
+    config = IBMMQConfig(instance)
+
+    assert config.ssl == expected_ssl

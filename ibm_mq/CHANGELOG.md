@@ -1,22 +1,10 @@
 # CHANGELOG - IBM MQ
 
-## 3.23.0-rc.6 / 2022-10-03
+## 3.23.0-rc.8 / 2022-10-14
 
-
-## 3.23.0-rc.5 / 2022-09-26
-
-
-## 3.23.0-rc.4 / 2022-09-22
-
-
-## 3.23.0-rc.3 / 2022-09-22
-
-
-## 3.23.0-rc.2 / 2022-09-22
-
-
-## 3.23.0-rc.1 / 2022-09-20
-
+* [Fixed] Add back channels_to_skip for channel status metrics. See [#13113](https://github.com/DataDog/integrations-core/pull/13113).
+* [Fixed] Update SSL connection configs used for determining SSL auth. See [#12974](https://github.com/DataDog/integrations-core/pull/12974).
+* [Changed] Don't set any default algorithm for `ssl_cipher_spec`. See [#13013](https://github.com/DataDog/integrations-core/pull/13013).
 
 ## 3.22.1 / 2022-08-05 / Agent 7.39.0
 

@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2010-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import logging
 import os
 import shutil
 import tempfile
@@ -315,6 +316,31 @@ def test_non_existent_directory_ignore_missing(aggregator):
 
     expected_tags = ['dir_name:/non-existent/directory', 'foo:bar']
     aggregator.assert_service_check('system.disk.directory.exists', DirectoryCheck.WARNING, tags=expected_tags)
+
+
+def test_os_error_mid_walk_emits_error_and_continues(aggregator, monkeypatch, caplog):
+    caplog.set_level(logging.WARNING)
+
+    def mock_walk(folder, *args, **kwargs):
+        from datadog_checks.directory.traverse import walk
+
+        walker = walk(folder, *args, **kwargs)
+        yield next(walker)
+        raise OSError('Permission denied')
+
+    monkeypatch.setattr('datadog_checks.directory.directory.walk', mock_walk)
+
+    with temp_directory() as tdir:
+
+        # Create folder
+        mkdir(os.path.join(tdir, 'a_folder'))
+
+        # Run Check
+        instance = {'directory': tdir, 'recursive': True}
+        check = DirectoryCheck('directory', {}, [instance])
+        check.check(instance)
+
+    assert 'Permission denied' in caplog.text
 
 
 def test_no_recursive_symlink_loop(aggregator):

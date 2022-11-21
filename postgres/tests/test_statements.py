@@ -101,7 +101,7 @@ def test_statement_metrics_version(integration_check, dbm_instance, version, exp
             assert check.statement_metrics._payload_pg_version() == expected_payload_version
 
 
-@pytest.mark.parametrize("dbstrict", [True, False])
+@pytest.mark.parametrize("dbstrict,ignore_databases", [(True, []), (False, ['dogs']), (False, [])])
 @pytest.mark.parametrize("pg_stat_statements_view", ["pg_stat_statements", "datadog.pg_stat_statements()"])
 @pytest.mark.parametrize("track_io_timing_enabled", [True, False])
 def test_statement_metrics(
@@ -109,11 +109,13 @@ def test_statement_metrics(
     integration_check,
     dbm_instance,
     dbstrict,
+    ignore_databases,
     pg_stat_statements_view,
     datadog_agent,
     track_io_timing_enabled,
 ):
     dbm_instance['dbstrict'] = dbstrict
+    dbm_instance['ignore_databases'] = ignore_databases
     dbm_instance['pg_stat_statements_view'] = pg_stat_statements_view
     # don't need samples for this test
     dbm_instance['query_samples'] = {'enabled': False}
@@ -148,7 +150,7 @@ def test_statement_metrics(
             # cannot catch any queries from other users
             # only can see own queries
             return False
-        if dbstrict and dbname != dbm_instance['dbname']:
+        if dbstrict and dbname != dbm_instance['dbname'] or dbname in ignore_databases:
             return False
         return True
 

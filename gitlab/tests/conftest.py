@@ -39,7 +39,10 @@ def dd_environment():
     with docker_run(
         compose_file=os.path.join(HERE, 'compose', 'docker-compose.yml'),
         env_vars=env,
-        conditions=[CheckEndpoints(GITLAB_URL, attempts=200), CheckEndpoints(GITLAB_PROMETHEUS_ENDPOINT)],
+        conditions=[
+            CheckEndpoints(GITLAB_URL, attempts=100, wait=6),
+            CheckEndpoints(GITLAB_PROMETHEUS_ENDPOINT, attempts=100, wait=6),
+        ],
     ):
         # run pre-test commands
         for _ in range(100):

@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+from copy import deepcopy
 
 import pytest
 
@@ -152,3 +153,13 @@ INSTANCE = {'timeout': '2', 'tags': INSTANCE_TAGS}
 @pytest.fixture
 def check():
     return FargateCheck('ecs_fargate', {}, [INSTANCE])
+
+
+@pytest.fixture(scope="session")
+def dd_environment():
+    yield INSTANCE
+
+
+@pytest.fixture
+def instance():
+    return deepcopy(INSTANCE)

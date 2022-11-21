@@ -12,7 +12,7 @@ from .....subprocess import SubprocessError, run_command
 from .....utils import get_next
 from ....config import APP_DIR
 from ....constants import CHANGELOG_LABEL_PREFIX, CHANGELOG_TYPE_NONE, get_root
-from ....github import get_pr, get_pr_from_hash, get_pr_labels, get_pr_milestone, parse_pr_number
+from ....github import get_pr, get_pr_approvers, get_pr_from_hash, get_pr_labels, get_pr_milestone, parse_pr_number
 from ....trello import TrelloClient
 from ....utils import format_commit_id
 from ...console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_waiting, echo_warning
@@ -34,6 +34,7 @@ def create_trello_card(
     pr_author: str,
     config: dict,
     card_assignments: dict,
+    pr_approvers: Optional[List[str]] = None,
 ) -> None:
     labels = ', '.join(f'`{label}`' for label in sorted(pr_labels))
     body = f'''\
@@ -43,7 +44,7 @@ Labels: {labels}
 
 {pr_body}'''
     for team in teams:
-        tester_name, member = pick_card_member(config, pr_author, team.lower(), card_assignments)
+        tester_name, member = pick_card_member(config, pr_author, team.lower(), card_assignments, pr_approvers)
         if member is None:
             tester = _select_trello_tester(client, testerSelector, team, pr_author, pr_num, pr_url)
             if tester:
@@ -154,9 +155,11 @@ def get_commits_between(base_ref: str, target_ref: str, *, root: str) -> List[Tu
             raise click.Abort
 
 
-def pick_card_member(config: dict, author: str, team: str, card_assignments: dict) -> Tuple[Any, Any]:
+def pick_card_member(
+    config: dict, author: str, team: str, card_assignments: dict, approvers: Optional[List[str]] = None
+) -> Tuple[Any, Any]:
     """Return a member to assign to the created issue.
-    In practice, it returns one trello user which is not the PR author, for the given team.
+    In practice, it returns one trello user which is not the PR author or an approver, for the given team.
     For it to work, you need a `trello_users_$team` table in your ddev configuration,
     with keys being github users and values being their corresponding trello IDs (not names).
 
@@ -165,6 +168,10 @@ def pick_card_member(config: dict, author: str, team: str, card_assignments: dic
         john = "xxxxxxxxxxxxxxxxxxxxx"
         alice = "yyyyyyyyyyyyyyyyyyyy"
     """
+
+    if approvers is None:
+        approvers = []
+
     users = config.get(f'trello_users_{team}')
     if not users:
         return None, None
@@ -174,7 +181,17 @@ def pick_card_member(config: dict, author: str, team: str, card_assignments: dic
         random.shuffle(team_members)
         card_assignments[team] = dict.fromkeys(team_members, 0)
 
-    member = min([member for member in card_assignments[team] if member != author], key=card_assignments[team].get)
+    # try to find someone who did not approve the PR
+    potential_testers = [member for member in card_assignments[team] if member != author and member not in approvers]
+
+    if not potential_testers:
+        # try to find someone in the team, even if they approve
+        potential_testers = [member for member in card_assignments[team] if member != author]
+
+        if not potential_testers:
+            return None, None
+
+    member = min(potential_testers, key=card_assignments[team].get)
     card_assignments[team][member] += 1
     return member, users[member]
 
@@ -270,6 +287,7 @@ def testable(
             '5': 'Platform',
             '6': 'Tools and Libraries',
             '7': 'Database Monitoring',
+            '8': 'Windows-Agent',
             's': 'Skip',
             'q': 'Quit',
         }
@@ -286,6 +304,10 @@ def testable(
             '9': 'Infra-Integrations',
             '10': 'Tools and Libraries',
             '11': 'Database Monitoring',
+            '12': 'Windows-Agent',
+            '13': 'eBPF Platform',
+            '14': 'Universal Service Monitoring',
+            '15': 'Windows Kernel Integrations',
             's': 'Skip',
             'q': 'Quit',
         }
@@ -388,6 +410,7 @@ def testable(
         pr_author = pr_data.get('user', {}).get('login', '')
         pr_body = pr_data.get('body', '')
         pr_num = pr_data.get('number', 0)
+        pr_approvers = get_pr_approvers(repo, pr_num, user_config)
 
         trello_config = user_config['trello']
         if not (trello_config['key'] and trello_config['token']):
@@ -410,6 +433,7 @@ def testable(
                 pr_author,
                 user_config,
                 card_assignments,
+                pr_approvers,
             )
             continue
 
@@ -483,6 +507,7 @@ def testable(
                     pr_author,
                     user_config,
                     card_assignments,
+                    pr_approvers,
                 )
 
             finished = True

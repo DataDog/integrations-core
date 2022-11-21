@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2022-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from collections import OrderedDict
+
 import mock
 import pytest
 from requests.exceptions import ConnectTimeout, ProxyError
@@ -157,3 +159,64 @@ def test_no_proxy_uris_coverage():
     http.no_proxy_uris.__nonzero__ = lambda self, *args, **kwargs: True
 
     http.get('https://www.google.com')
+
+
+@pytest.mark.parametrize(
+    'proxy,expected_proxy,url',
+    [
+        ({'http': 'socks5h://myproxy'}, {'http': 'socks5h://myproxy'}, 'http://www.example.org'),
+        (
+            {'http': 'http://1.2.3.4:567', 'no_proxy': '.foo,bar'},
+            {
+                'http': 'http://1.2.3.4:567',
+            },
+            'http://www.example.org',
+        ),
+        ({'http': 'http://1.2.3.4:567', 'no_proxy': '.foo,bar,*'}, {'http': '', 'https': ''}, 'http://www.example.org'),
+        (
+            {'http': 'http://1.2.3.4:567', 'no_proxy': '.google.com,*.example.org,example.com,9'},
+            {'http': '', 'https': ''},
+            'http://www.example.org',
+        ),
+        (
+            {'http': 'http://1.2.3.4:567', 'no_proxy': '.google.com,*.example.org,example.com,9'},
+            {'http': '', 'https': ''},
+            'http://www.google.com',
+        ),
+        (
+            {'http': 'http://1.2.3.4:567', 'no_proxy': '.google.com,*.example.org,example.com,9'},
+            {'http': '', 'https': ''},
+            'http://example.com',
+        ),
+        (
+            {
+                'http': 'http://1.2.3.4:567',
+                'no_proxy': '127.0.0.1,127.0.0.2/32,127.1.0.0/25,127.1.1.0/255.255.255.128,127.1.2.0/0.0.0.127',
+            },
+            {
+                'http': 'http://1.2.3.4:567',
+            },
+            'http://www.example.org',
+        ),
+    ],
+)
+@mock.patch('datadog_checks.base.utils.http.requests')
+def test_proxy_passes_right_params_to_requests(requests, proxy, expected_proxy, url):
+    instance = {'proxy': proxy}
+    init_config = {}
+
+    http = RequestsWrapper(instance, init_config)
+    http.get(url)
+
+    call_args = {
+        'auth': None,
+        'cert': None,
+        'headers': OrderedDict(
+            [('User-Agent', 'Datadog Agent/0.0.0'), ('Accept', '*/*'), ('Accept-Encoding', 'gzip, deflate')]
+        ),
+        'proxies': expected_proxy,
+        'timeout': (10.0, 10.0),
+        'verify': True,
+        'allow_redirects': True,
+    }
+    requests.get.assert_called_with(url, **call_args)

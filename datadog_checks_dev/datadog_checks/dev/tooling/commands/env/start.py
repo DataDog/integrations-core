@@ -100,6 +100,9 @@ def start(ctx, check, env, agent, python, dev, base, env_vars, org_name, profile
     echo_success(config_message, nl=False)
     echo_info(environment.config_file)
 
+    echo_success('To reload the config file, do: ', nl=False)
+    echo_info(f'ddev env reload {check} {env}')
+
     echo_success('To run this check, do: ', nl=False)
     echo_info(f'ddev env check {check} {env}')
 

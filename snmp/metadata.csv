@@ -520,7 +520,7 @@ snmp.ltmVirtualServConnLimit,gauge,,,,[F5 BIG-IP] The maximum number of connecti
 snmp.ltmVirtualServStatClientPktsIn,rate,,,,[F5 BIG-IP] The number of packets received per second by a given virtual server.,0,snmp,,
 snmp.ltmVirtualServStatClientBytesIn,rate,,,,[F5 BIG-IP] The number of bytes received per second by a given virtual server.,0,snmp,,
 snmp.ltmVirtualServStatClientPktsOut,rate,,,,[F5 BIG-IP] The number of packets sent per second by a given virtual server.,0,snmp,,
-snmp.ltmVirtualServStatClientBytesOut,rate,,,,[F5 BIG-IP The number of bytes sent per second by a given virtual server.,0,snmp,,
+snmp.ltmVirtualServStatClientBytesOut,rate,,,,[F5 BIG-IP] The number of bytes sent per second by a given virtual server.,0,snmp,,
 snmp.ltmVirtualServStatNoNodesErrors,count,,,,[F5 BIG-IP] The total number of times the number of active nodes went to zero.,0,snmp,,
 snmp.ltmVirtualServStatClientTotConns,count,,,,[F5 BIG-IP] The total number of client connections on a given virtual server.,0,snmp,,
 snmp.ltmVirtualServStatTotRequests,count,,,,[F5 BIG-IP] The total number of requests on a given virtual server.,0,snmp,,

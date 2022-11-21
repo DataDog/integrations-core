@@ -69,6 +69,8 @@ class MySQLConfig(object):
             'collect_commands': is_affirmative(obfuscator_options_config.get('collect_commands', True)),
             'collect_comments': is_affirmative(obfuscator_options_config.get('collect_comments', True)),
         }
+        self.log_unobfuscated_queries = is_affirmative(instance.get('log_unobfuscated_queries', False))
+        self.log_unobfuscated_plans = is_affirmative(instance.get('log_unobfuscated_plans', False))
         self.configuration_checks()
 
     def _build_tags(self, custom_tags):

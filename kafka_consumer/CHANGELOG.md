@@ -2,7 +2,8 @@
 
 ## 2.16.0 / 2022-09-16
 
-* [Added] [kafka consumer integration] Put lag in seconds behind a feature flag. See [#12942](https://github.com/DataDog/integrations-core/pull/12942).
+* [Added] Put lag in seconds behind a feature flag. See [#12942](https://github.com/DataDog/integrations-core/pull/12942).
+* [Fixed] Bump dependencies for 7.40. See [#12896](https://github.com/DataDog/integrations-core/pull/12896).
 
 ## 2.15.4 / 2022-09-09
 

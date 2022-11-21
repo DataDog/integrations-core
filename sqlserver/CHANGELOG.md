@@ -1,8 +1,12 @@
 # CHANGELOG - sqlserver
 
+## 9.0.1 / 2022-10-10
+
+* [Fixed] Allow users to configure the port as a int or as a string. See [#13061](https://github.com/DataDog/integrations-core/pull/13061).
+
 ## 9.0.0 / 2022-09-16
 
-* [Changed] SQL Server: Use statement_start_offset to extract SQL text being run from Procedure text. See [#12613](https://github.com/DataDog/integrations-core/pull/12613).
+* [Changed] Use statement_start_offset to extract SQL text being run from Procedure text. See [#12613](https://github.com/DataDog/integrations-core/pull/12613).
 
 ## 8.1.0 / 2022-08-05 / Agent 7.39.0
 

@@ -94,7 +94,6 @@ def test(
     root = get_root()
     testing_on_ci = running_on_ci()
     color = ctx.obj['color']
-    repo = ctx.obj['repo_name']
 
     # Implicitly track coverage
     if cov_missing:
@@ -263,8 +262,6 @@ def test(
 
                     fix_coverage_report(check, 'coverage.xml')
 
-                    if repo == 'integrations-core':
-                        run_command(['codecov', '-X', 'gcov', '--root', root, '-F', check, '-f', 'coverage.xml'])
                 else:
                     if not cov_keep:
                         remove_path('.coverage')

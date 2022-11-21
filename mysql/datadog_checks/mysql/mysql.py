@@ -168,6 +168,9 @@ class MySql(AgentCheck):
         return self.userstat_enabled
 
     def _check_events_wait_current_enabled(self, db):
+        if not self._config.dbm_enabled or not self._config.activity_config.get("enabled", True):
+            self.log.debug("skipping _check_events_wait_current_enabled because dbm activity collection is not enabled")
+            return
         if not self._check_performance_schema_enabled(db):
             self.log.debug('`performance_schema` is required to enable `events_waits_current`')
             return

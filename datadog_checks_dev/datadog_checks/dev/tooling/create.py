@@ -68,6 +68,17 @@ To install the {integration_name} check on your host:
         integration_links = integration_type_links.get(integration_type).format(
             name=normalized_integration_name, repository="integrations-core"
         )
+    elif repo_choice == 'integrations':
+        check_name = normalized_integration_name
+        author = 'Datadog'
+        email = 'help@datadoghq.com'
+        email_packages = ''
+        install_info = ''
+        license_header = ''
+        support_type = 'core'
+        integration_links = integration_type_links.get(integration_type).format(
+            name=normalized_integration_name, repository="integrations"
+        )
     elif repo_choice == 'marketplace':
         check_name = normalize_package_name(f"{kwargs.get('author')}_{normalized_integration_name}")
         # Updated by the kwargs passed in
@@ -111,7 +122,7 @@ To install the {integration_name} check on your host:
         'license_header': license_header,
         'install_info': install_info,
         'repo_choice': repo_choice,
-        'repo_name': REPO_CHOICES[repo_choice],
+        'repo_name': REPO_CHOICES.get(repo_choice, ''),
         'support_type': support_type,
         'integration_links': integration_links,
     }

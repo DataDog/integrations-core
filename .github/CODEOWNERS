@@ -93,33 +93,33 @@ assets/               @DataDog/agent-integrations
 /tcp_queue_length/manifest.json           @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 
 # Infrastructure integrations
-/snmp/                                                             @DataDog/infrastructure-integrations @DataDog/agent-integrations
-/snmp/*.md                                                         @DataDog/infrastructure-integrations @DataDog/agent-integrations @DataDog/documentation
-/snmp_*/                                                           @DataDog/infrastructure-integrations @DataDog/agent-integrations
-/snmp_*/*.md                                                       @DataDog/infrastructure-integrations @DataDog/agent-integrations @DataDog/documentation
-/datadog_checks_dev/datadog_checks/dev/tooling/commands/meta/snmp/ @DataDog/infrastructure-integrations @DataDog/agent-integrations
-/docs/developer/tutorials/snmp/                                    @DataDog/infrastructure-integrations @DataDog/agent-integrations @DataDog/documentation
+/snmp/                                                             @DataDog/network-device-monitoring @DataDog/agent-integrations
+/snmp/*.md                                                         @DataDog/network-device-monitoring @DataDog/agent-integrations @DataDog/documentation
+/snmp_*/                                                           @DataDog/network-device-monitoring @DataDog/agent-integrations
+/snmp_*/*.md                                                       @DataDog/network-device-monitoring @DataDog/agent-integrations @DataDog/documentation
+/datadog_checks_dev/datadog_checks/dev/tooling/commands/meta/snmp/ @DataDog/network-device-monitoring @DataDog/agent-integrations
+/docs/developer/tutorials/snmp/                                    @DataDog/network-device-monitoring @DataDog/agent-integrations @DataDog/documentation
+
+# System checks
+/disk/                                    @DataDog/agent-integrations @DataDog/windows-agent
+/disk/*.md                                @DataDog/agent-integrations @DataDog/windows-agent @DataDog/documentation
+/disk/manifest.json                       @DataDog/agent-integrations @DataDog/windows-agent @DataDog/documentation
+/network/                                 @DataDog/agent-integrations @DataDog/windows-agent
+/network/*.md                             @DataDog/agent-integrations @DataDog/windows-agent @DataDog/documentation
+/network/manifest.json                    @DataDog/agent-integrations @DataDog/windows-agent @DataDog/documentation
+/process/                                 @DataDog/agent-integrations @DataDog/windows-agent
+/process/*.md                             @DataDog/agent-integrations @DataDog/windows-agent @DataDog/documentation
+/process/manifest.json                    @DataDog/agent-integrations @DataDog/windows-agent @DataDog/documentation
+
+# OpenTelemetry
+/otel/                                    @DataDog/opentelemetry @DataDog/agent-integrations
+/otel/*.md                                @DataDog/opentelemetry @DataDog/agent-integrations @DataDog/documentation
+/otel/manifest.json                       @DataDog/opentelemetry @DataDog/agent-integrations @DataDog/documentation
 
 # Agent Platform
-/disk/                                    @DataDog/agent-platform @DataDog/agent-integrations
-/disk/*.md                                @DataDog/agent-platform @DataDog/agent-integrations @DataDog/documentation
-/disk/manifest.json                       @DataDog/agent-platform @DataDog/agent-integrations @DataDog/documentation
-/network/                                 @DataDog/agent-platform @DataDog/agent-integrations
-/network/*.md                             @DataDog/agent-platform @DataDog/agent-integrations @DataDog/documentation
-/network/manifest.json                    @DataDog/agent-platform @DataDog/agent-integrations @DataDog/documentation
-/process/                                 @DataDog/agent-platform @DataDog/agent-integrations
-/process/*.md                             @DataDog/agent-platform @DataDog/agent-integrations @DataDog/documentation
-/process/manifest.json                    @DataDog/agent-platform @DataDog/agent-integrations @DataDog/documentation
-/otel/                                    @DataDog/agent-platform @DataDog/agent-integrations
-/otel/*.md                                @DataDog/agent-platform @DataDog/agent-integrations @DataDog/documentation
-/otel/manifest.json                       @DataDog/agent-platform @DataDog/agent-integrations @DataDog/documentation
 /nvidia_jetson/                           @DataDog/agent-platform @DataDog/agent-integrations
 /nvidia_jetson/*.md                       @DataDog/agent-platform @DataDog/agent-integrations @DataDog/documentation
 /nvidia_jetson/manifest.json              @DataDog/agent-platform @DataDog/agent-integrations @DataDog/documentation
-/ibm_i/                                   @DataDog/agent-platform @DataDog/agent-integrations
-/ibm_i/*.md                               @DataDog/agent-platform @DataDog/agent-integrations @DataDog/documentation
-/ibm_i/manifest.json                      @DataDog/agent-platform @DataDog/agent-integrations @DataDog/documentation
-
 
 # Database monitoring
 **/base/utils/db/utils.py                           @DataDog/agent-integrations @DataDog/database-monitoring

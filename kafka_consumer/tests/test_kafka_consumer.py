@@ -10,6 +10,7 @@ import mock
 import pytest
 
 from datadog_checks.kafka_consumer import KafkaCheck
+from datadog_checks.kafka_consumer.kafka_consumer import OAuthTokenProvider
 from datadog_checks.kafka_consumer.legacy_0_10_2 import LegacyKafkaCheck_0_10_2
 from datadog_checks.kafka_consumer.new_kafka_consumer import NewKafkaConsumerCheck
 
@@ -104,6 +105,29 @@ def test_tls_config_ok(kafka_instance_tls):
             assert tls_context.tls_cert is not None
             assert tls_context.check_hostname is True
             assert kafka_consumer_check.create_kafka_client is not None
+
+
+@pytest.mark.unit
+def test_oauth_token_client_config(kafka_instance):
+    instance = copy.deepcopy(kafka_instance)
+    instance['kafka_client_api_version'] = "0.10.2"
+    instance['security_protocol'] = "SASL_PLAINTEXT"
+    instance['sasl_mechanism'] = "OAUTHBEARER"
+    instance['sasl_oauth_token_provider'] = {
+        "url": "http://fake.url",
+        "client_id": "id",
+        "client_secret": "secret",
+    }
+
+    kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [instance])
+    client = kafka_consumer_check.create_kafka_client()
+
+    assert client.config['security_protocol'] == 'SASL_PLAINTEXT'
+    assert client.config['sasl_mechanism'] == 'OAUTHBEARER'
+    assert isinstance(client.config['sasl_oauth_token_provider'], OAuthTokenProvider)
+    assert client.config['sasl_oauth_token_provider'].reader._client_id == "id"
+    assert client.config['sasl_oauth_token_provider'].reader._client_secret == "secret"
+    assert client.config['sasl_oauth_token_provider'].reader._url == "http://fake.url"
 
 
 @pytest.mark.parametrize(

@@ -26,6 +26,7 @@ classifiers = [
     "Programming Language :: Python :: 2.7",
     "Programming Language :: Python :: 3.8",
     "Topic :: System :: Monitoring",
+    "Private :: Do Not Upload",
 ]
 dependencies = [
     "datadog-checks-base>=25.1.0",
@@ -39,6 +40,7 @@ text = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
+    "psutil==5.9.0",
     "pymqi==1.12.8",
 ]
 

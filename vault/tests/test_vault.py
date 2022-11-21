@@ -785,3 +785,23 @@ class TestVault:
             aggregator.assert_metric('{}.count'.format(metric), tags=global_tags)
 
         aggregator.assert_all_metrics_covered()
+
+
+@pytest.mark.parametrize('use_openmetrics', [False, True], indirect=True)
+def test_x_vault_request_header_is_set(monkeypatch, instance, dd_run_check, use_openmetrics):
+    instance = instance()
+    instance['use_openmetrics'] = use_openmetrics
+
+    c = Vault(Vault.CHECK_NAME, {}, [instance])
+
+    requests_get = requests.get
+    mock_get = mock.Mock(side_effect=requests_get)
+    monkeypatch.setattr(requests, 'get', mock_get)
+
+    dd_run_check(c)
+
+    assert mock_get.call_count > 0
+    for call in mock_get.call_args_list:
+        headers = dict(call.kwargs['headers'])
+        assert 'X-Vault-Request' in headers
+        assert headers['X-Vault-Request'] == 'true'

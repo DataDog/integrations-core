@@ -45,7 +45,8 @@
       }
     },
     "dashboards": {
-      "OpenTelemetry Dashboard": "assets/dashboards/dashboard.json"
+      "OpenTelemetry Dashboard": "assets/dashboards/otel_host_metrics_dashboard.json",
+      "OpenTelemetry Collector Metrics Dashboard": "assets/dashboards/otel_collector_metrics_dashboard.json"
     }
   }
 }

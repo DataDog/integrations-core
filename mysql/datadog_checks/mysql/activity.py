@@ -205,8 +205,11 @@ class MySQLActivity(DBMAsyncJob):
         try:
             self._finalize_row(row, obfuscate_sql_with_metadata(row["sql_text"], self._obfuscator_options))
         except Exception as e:
+            if self._config.log_unobfuscated_queries:
+                self._log.warning("Failed to obfuscate query=[%s] | err=[%s]", row["sql_text"], e)
+            else:
+                self._log.debug("Failed to obfuscate query | err=[%s]", e)
             row["sql_text"] = "ERROR: failed to obfuscate"
-            self._log.debug("Failed to obfuscate | err=[%s]", e)
         return row
 
     @staticmethod

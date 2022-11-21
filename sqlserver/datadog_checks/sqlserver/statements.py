@@ -50,7 +50,7 @@ SQL_SERVER_QUERY_METRICS_COLUMNS = [
 
 STATEMENT_METRICS_QUERY = """\
 with qstats as (
-    select TOP {limit} query_hash, query_plan_hash, last_execution_time,
+    select query_hash, query_plan_hash, last_execution_time,
             CONCAT(
                 CONVERT(binary(64), plan_handle),
                 CONVERT(binary(4), statement_start_offset),
@@ -58,21 +58,22 @@ with qstats as (
            (select value from sys.dm_exec_plan_attributes(plan_handle) where attribute = 'dbid') as dbid,
            {query_metrics_columns}
     from sys.dm_exec_query_stats
-    where last_execution_time > dateadd(second, -?, getdate())
 ),
 qstats_aggr as (
     select query_hash, query_plan_hash, CAST(S.dbid as int) as dbid,
        D.name as database_name, max(plan_handle_and_offsets) as plan_handle_and_offsets,
+       max(last_execution_time) as last_execution_time,
     {query_metrics_column_sums}
     from qstats S
     left join sys.databases D on S.dbid = D.database_id
     group by query_hash, query_plan_hash, S.dbid, D.name
 ),
-qstats_aggr_split as (select
+qstats_aggr_split as (select TOP {limit}
     convert(varbinary(64), substring(plan_handle_and_offsets, 1, 64)) as plan_handle,
     convert(int, convert(varbinary(4), substring(plan_handle_and_offsets, 64+1, 4))) as statement_start_offset,
     convert(int, convert(varbinary(4), substring(plan_handle_and_offsets, 64+6, 4))) as statement_end_offset,
     * from qstats_aggr
+    where last_execution_time > dateadd(second, -?, getdate())
 )
 select
     SUBSTRING(text, (statement_start_offset / 2) + 1,
@@ -287,8 +288,11 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                 if row['is_proc']:
                     procedure_statement = obfuscate_sql_with_metadata(row['text'], self.check.obfuscator_options)
             except Exception as e:
-                # obfuscation errors are relatively common so only log them during debugging
-                self.log.debug("Failed to obfuscate query: %s", e)
+                if self.check.log_unobfuscated_queries:
+                    raw_query_text = row['text'] if row.get('is_proc', False) else row['statement_text']
+                    self.log.warning("Failed to obfuscate query=[%s] | err=[%s]", raw_query_text, e)
+                else:
+                    self.log.debug("Failed to obfuscate query | err=[%s]", e)
                 self.check.count(
                     "dd.sqlserver.statements.error",
                     1,
@@ -453,17 +457,13 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                     if raw_plan:
                         obfuscated_plan = obfuscate_xml_plan(raw_plan, self.check.obfuscator_options)
                 except Exception as e:
-                    self.log.debug(
-                        (
-                            "failed to obfuscate XML Plan query_signature=%s query_hash=%s "
-                            "query_plan_hash=%s plan_handle=%s: %s"
-                        ),
-                        row['query_signature'],
-                        row['query_hash'],
-                        row['query_plan_hash'],
-                        row['plan_handle'],
-                        e,
-                    )
+                    context = (
+                        "query_signature=[{0}] query_hash=[{1}] query_plan_hash=[{2}] plan_handle=[{3}] err=[{4}]"
+                    ).format(row['query_signature'], row['query_hash'], row['query_plan_hash'], row['plan_handle'], e)
+                    if self.check.log_unobfuscated_plans:
+                        self.log.warning("Failed to obfuscate plan=[%s] | %s", raw_plan, context)
+                    else:
+                        self.log.debug("Failed to obfuscate plan | %s", context)
                     collection_errors = [{'code': "obfuscate_xml_plan_error", 'message': str(e)}]
                     self.check.count(
                         "dd.sqlserver.statements.error",

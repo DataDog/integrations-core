@@ -126,6 +126,8 @@ instances:
     ## The queue and cpu will be used as a tag when submitting metrics.
     ## For example, 'queue_0_tx_cnt' will be submitted as 'system.net.ena.queue.tx_cnt' with tag 'queue:0'
     ##
+    ## Loopback interfaces 'lo' and 'lo0' are excluded as they don't support SIOCETHTOOL.
+    ##
     ## Currently supported drivers:
     ## - ena
     ## - virtio_net

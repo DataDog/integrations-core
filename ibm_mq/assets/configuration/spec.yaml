@@ -7,12 +7,21 @@ files:
       - name: queue_manager_process
         description: |
           A regular expression that must match the command line of a running process in
-          order for the check to run. A `<queue_manager>` placeholder is supported which
-          represents the value of the `queue_manager` option.
+          order for the check to run, which is useful if running MQ in a failover mode.
+          A `<queue_manager>` placeholder is supported which represents the value of
+          the `queue_manager` option defined in each check instance.
+
+          This option is only available on Agent 7+.
         value:
           display_default: null
           example: amqpcsea <queue_manager>
           type: string
+      - name: queue_manager_process_limit
+        description: What is the maximun number of active queue managers in the failover set up.
+        value:
+          display_default: 1
+          example: 1
+          type: integer
       - template: init_config/default
   - template: instances
     options:
@@ -260,22 +269,17 @@ files:
       - name: queue_manager_process
         description: |
           A regular expression that must match the command line of a running process in
-          order for the check to run. A `<queue_manager>` placeholder is supported which
-          represents the value of the `queue_manager` option.
+          order for the check to run, which is useful if running MQ in a failover mode.
+          A `<queue_manager>` placeholder is supported which represents the value of
+          the `queue_manager` option.
+
+          This option is only available on Agent 7+.
 
           This overrides the `queue_manager_process` option in the `init_config` section.
         value:
           display_default: null
           example: amqpcsea <queue_manager>
           type: string
-      - name: process_isolation
-        description: |
-          Whether to run the check in a separate process.
-
-          WARNING: In this mode, connection persistence is disabled.
-        value:
-          example: false
-          type: boolean
       - template: instances/default
   - template: logs
     example:

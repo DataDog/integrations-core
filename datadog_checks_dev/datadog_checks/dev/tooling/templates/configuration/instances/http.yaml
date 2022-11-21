@@ -194,7 +194,7 @@
       - type: header
         name (required): The name of the field, for example: Authorization
         value: The template value, for example `Bearer <TOKEN>`. The default is: <TOKEN>
-        placeholder: The substring in `value` to replace by the token, defaults to: <TOKEN>
+        placeholder: The substring in `value` to replace with the token, defaults to: <TOKEN>
 - name: aws_region
   value:
     type: string
@@ -332,7 +332,7 @@
   value:
     example: false
     type: boolean
-  description: Whether or not to persist cookies and use connection pooling for increased performance.
+  description: Whether or not to persist cookies and use connection pooling for improved performance.
 - name: allow_redirects
   value:
     example: true

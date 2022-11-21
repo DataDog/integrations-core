@@ -2,36 +2,48 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
-from functools import cached_property
+import threading
 
-from six import iteritems
+from six import PY2, iteritems
 
-from datadog_checks.base import AgentCheck
+from datadog_checks.base import AgentCheck, ConfigurationError
+from datadog_checks.ibm_mq.collectors.stats_collector import StatsCollector
+from datadog_checks.ibm_mq.metrics import COUNT, GAUGE
 
-from .process import QueueManagerProcessFinder
+from . import connection, errors
+from .collectors import ChannelMetricCollector, MetadataCollector, QueueMetricCollector
+from .config import IBMMQConfig
+from .process_matcher import QueueManagerProcessMatcher
 
 try:
-    from typing import Any, Dict, List
+    from typing import Dict, List
 except ImportError:
     pass
 
+try:
+    import pymqi
+except ImportError as e:
+    pymqiException = e
+    pymqi = None
+
+
+init_lock = threading.Lock()
+
 
 class IbmMqCheck(AgentCheck):
-    process_finder = QueueManagerProcessFinder()
+    process_matcher = None
 
     SERVICE_CHECK = 'ibm_mq.can_connect'
 
-    @cached_property
-    def _config(self):
-        from .config import IBMMQConfig
+    def __init__(self, name, init_config, instances):
+        super(IbmMqCheck, self).__init__(name, init_config, instances)
+        if not pymqi:
+            self.log.error("You need to install pymqi: %s", pymqiException)
+            raise errors.PymqiException("You need to install pymqi: {}".format(pymqiException))
 
-        return IBMMQConfig(self.instance)
+        self._config = IBMMQConfig(self.instance)
 
-    @cached_property
-    def queue_metric_collector(self):
-        from .collectors import QueueMetricCollector
-
-        return QueueMetricCollector(
+        self.queue_metric_collector = QueueMetricCollector(
             self._config,
             self.service_check,
             self.warning,
@@ -39,44 +51,26 @@ class IbmMqCheck(AgentCheck):
             self.send_metrics_from_properties,
             self.log,
         )
+        self.channel_metric_collector = ChannelMetricCollector(self._config, self.service_check, self.gauge, self.log)
+        self.metadata_collector = MetadataCollector(self._config, self.log)
+        self.stats_collector = StatsCollector(self._config, self.send_metrics_from_properties, self.log)
 
-    @cached_property
-    def channel_metric_collector(self):
-        from .collectors import ChannelMetricCollector
+        self.queue_manager_process_pattern = None
+        if 'queue_manager_process' in init_config or 'queue_manager_process' in self.instance:
+            with init_lock:
+                if self.process_matcher is None:
+                    limit = int(init_config.get('queue_manager_process_limit', 1))
+                    self.process_matcher = QueueManagerProcessMatcher(limit)
 
-        return ChannelMetricCollector(self._config, self.service_check, self.gauge, self.log)
-
-    @cached_property
-    def metadata_collector(self):
-        from .collectors import MetadataCollector
-
-        return MetadataCollector(self._config, self.log)
-
-    @cached_property
-    def stats_collector(self):
-        from .collectors.stats_collector import StatsCollector
-
-        return StatsCollector(self._config, self.send_metrics_from_properties, self.log)
-
-    @cached_property
-    def queue_manager_process_pattern(self):
-        pattern = self.instance.get('queue_manager_process', self.init_config.get('queue_manager_process', ''))
-        if not pattern:
-            return None
-
-        pattern = pattern.replace('<queue_manager>', re.escape(self.instance['queue_manager']))
-        return re.compile(pattern)
+        self.check_initializations.append(self.parse_config)
 
     def check(self, _):
-        if self.instance.get('process_isolation', self.init_config.get('process_isolation', False)):
-            self.run_with_isolation()
-            return
+        if not self.check_queue_manager_process():
+            self.log.debug('Process not found, skipping check run')
+            for sc_name in (self.SERVICE_CHECK, QueueMetricCollector.QUEUE_MANAGER_SERVICE_CHECK):
+                self.service_check(sc_name, self.UNKNOWN, self._config.tags, hostname=self._config.hostname)
 
-        if not self.check_process_indicator():
             return
-
-        from . import connection
-        from .collectors import QueueMetricCollector
 
         try:
             queue_manager = connection.get_queue_manager_connection(self._config, self.log)
@@ -92,7 +86,7 @@ class IbmMqCheck(AgentCheck):
                 self._config.tags,
                 hostname=self._config.hostname,
             )
-            self.remove_process_indication()
+            self.reset_queue_manager_process_match()
             raise
 
         self._collect_metadata(queue_manager)
@@ -106,8 +100,6 @@ class IbmMqCheck(AgentCheck):
             queue_manager.disconnect()
 
     def send_metric(self, metric_type, metric_name, metric_value, tags):
-        from .metrics import COUNT, GAUGE
-
         if metric_type in [GAUGE, COUNT]:
             getattr(self, metric_type)(metric_name, metric_value, tags=tags, hostname=self._config.hostname)
         else:
@@ -161,82 +153,25 @@ class IbmMqCheck(AgentCheck):
                     return
                 self.send_metric(metric_type, metric_full_name, metric_value, new_tags)
 
-    def check_process_indicator(self):
+    def check_queue_manager_process(self):
         if self.queue_manager_process_pattern is None:
             return True
 
-        return self.process_finder.check_condition(self.check_id, self.queue_manager_process_pattern, self.log)
+        return self.process_matcher.check_condition(self.check_id, self.queue_manager_process_pattern, self.log)
 
-    def remove_process_indication(self):
+    def reset_queue_manager_process_match(self):
         if self.queue_manager_process_pattern is not None:
-            return self.process_finder.remove(self.check_id)
+            self.log.debug('Resetting queue manager process match')
+            return self.process_matcher.remove(self.check_id)
 
-    def run_with_isolation(self):
-        import os
-        import subprocess
-        import sys
+    def parse_config(self):
+        pattern = self.instance.get('queue_manager_process', self.init_config.get('queue_manager_process', ''))
+        if pattern:
+            if PY2:
+                raise ConfigurationError('The `queue_manager_process` option is only supported on Agent 7')
 
-        from datadog_checks.base.checks.base import aggregator, datadog_agent
-        from datadog_checks.base.utils.common import ensure_bytes
-        from datadog_checks.base.utils.serialization import json
+            pattern = pattern.replace('<queue_manager>', re.escape(self.instance['queue_manager']))
+            self.queue_manager_process_pattern = re.compile(pattern)
 
-        from .constants import KNOWN_DATADOG_AGENT_SETTER_METHODS
-
-        message_indicator = os.urandom(8).hex()
-        instance = dict(self.instance)
-
-        # Prevent fork bomb
-        instance['process_isolation'] = False
-
-        env_vars = dict(os.environ)
-        env_vars['REPLAY_MESSAGE_INDICATOR'] = message_indicator
-        env_vars['REPLAY_INSTANCE'] = json.dumps(instance)
-        env_vars['REPLAY_INIT_CONFIG'] = json.dumps(self.init_config)
-        env_vars['REPLAY_CHECK_ID'] = self.check_id
-
-        process = subprocess.Popen(
-            [
-                sys.executable,
-                '-u',
-                '-c',
-                'from datadog_checks.ibm_mq.replay import main;main()',
-            ],
-            stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            env=env_vars,
-        )
-        with process:
-            self.log.info('Running check in a separate process')
-
-            # To avoid blocking never use a pipe's file descriptor iterator. See https://bugs.python.org/issue3907
-            for line in iter(process.stdout.readline, b''):
-                line = line.rstrip().decode('utf-8')
-                indicator, _, procedure = line.partition(':')
-                if indicator != message_indicator:
-                    self.log.debug(line)
-                    continue
-
-                self.log.trace(line)
-
-                message_type, _, message = procedure.partition(':')
-                message = json.loads(message)
-                if message_type == 'aggregator':
-                    getattr(aggregator, message['method'])(self, *message['args'], **message['kwargs'])
-                elif message_type == 'log':
-                    getattr(self.log, message['method'])(*message['args'])
-                elif message_type == 'datadog_agent':
-                    method = message['method']
-                    value = getattr(datadog_agent, method)(*message['args'], **message['kwargs'])
-                    if method not in KNOWN_DATADOG_AGENT_SETTER_METHODS:
-                        process.stdin.write(b'%s\n' % ensure_bytes(json.dumps({'value': value})))
-                        process.stdin.flush()
-                elif message_type == 'error':
-                    self.log.error(message[0]['traceback'])
-                    break
-                else:
-                    self.log.error(
-                        'Unknown message type encountered during communication with the isolated process: %s',
-                        message_type,
-                    )
-                    break
+    def cancel(self):
+        self.reset_queue_manager_process_match()

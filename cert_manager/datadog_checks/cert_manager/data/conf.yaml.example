@@ -41,7 +41,7 @@ init_config:
     #
     # service: <SERVICE>
 
-## Every instance is scheduled independent of the others.
+## Every instance is scheduled independently of the others.
 #
 instances:
 
@@ -117,7 +117,7 @@ instances:
     ## A mapping of labels where metrics with matching label name and values are ignored. To match
     ## all values of a label, set it to `true`.
     ##
-    ## Note: Labels filtering happens before `rename_labels`.
+    ## Note: Label filtering happens before `rename_labels`.
     ##
     ## For example, the following configuration instructs the check to exclude all metrics with
     ## a label `worker` or a label `pid` with the value of either `23` or `42`.
@@ -133,17 +133,17 @@ instances:
     ## @param exclude_labels - list of strings - optional
     ## A list of labels to exclude, useful for high cardinality values like timestamps or UUIDs.
     ## May be used in conjunction with `include_labels`.
-    ## Labels defined in `excluded labels` will take precedence in case of overlap.
+    ## Labels defined in `exclude_labels` will take precedence in case of overlap.
     ##
-    ## Note: Labels filtering happens before `rename_labels`.
+    ## Note: Label filtering happens before `rename_labels`.
     #
     # exclude_labels: []
 
     ## @param include_labels - list of strings - optional
     ## A list of labels to include. May be used in conjunction with `exclude_labels`.
-    ## Labels defined in `excluded labels` will take precedence in case of overlap.
+    ## Labels defined in `exclude_labels` will take precedence in case of overlap.
     ##
-    ## Note: Labels filtering happens before `rename_labels`.
+    ## Note: Label filtering happens before `rename_labels`.
     #
     # include_labels: []
 
@@ -237,7 +237,7 @@ instances:
 
     ## @param cache_shared_labels - boolean - optional - default: true
     ## When `share_labels` is set, it instructs the check to cache labels collected from the first payload
-    ## for increased performance.
+    ## for improved performance.
     ##
     ## Set this to `false` to compute label sharing for every payload at the risk of potentially increased memory usage.
     #
@@ -433,7 +433,7 @@ instances:
     ##   - type: header
     ##     name (required): The name of the field, for example: Authorization
     ##     value: The template value, for example `Bearer <TOKEN>`. The default is: <TOKEN>
-    ##     placeholder: The substring in `value` to replace by the token, defaults to: <TOKEN>
+    ##     placeholder: The substring in `value` to replace with the token, defaults to: <TOKEN>
     #
     # auth_token:
     #   reader:
@@ -570,7 +570,7 @@ instances:
     # log_requests: false
 
     ## @param persist_connections - boolean - optional - default: false
-    ## Whether or not to persist cookies and use connection pooling for increased performance.
+    ## Whether or not to persist cookies and use connection pooling for improved performance.
     #
     # persist_connections: false
 

@@ -142,7 +142,7 @@ Need help? Contact [Datadog support][12].
 [4]: https://github.com/DataDog/integrations-core/blob/master/teamcity/datadog_checks/teamcity/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [6]: https://www.jetbrains.com/help/teamcity/teamcity-server-logs.html
-[7]: https://docs.datadoghq.com/logs/processing/#integration-pipelines
+[7]: https://docs.datadoghq.com/logs/log_configuration/pipelines/#integration-pipelines
 [8]: https://logging.apache.org/log4j/2.x/manual/layouts.html#Patterns
 [9]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [10]: https://docs.datadoghq.com/agent/kubernetes/log/

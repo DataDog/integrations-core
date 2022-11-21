@@ -1,0 +1,11 @@
+[env.collectors.datadog-checks]
+
+[[envs.default.matrix]]
+python = ["27", "38"]
+version = ["12", "14"]
+
+[envs.default.overrides]
+matrix.version.env-vars = [
+  { key = "WEBLOGIC_VERSION", value = "12.2.1.4", if = ["12"] },
+  { key = "WEBLOGIC_VERSION", value = "14.1.1.0-11", if = ["14"] },
+]

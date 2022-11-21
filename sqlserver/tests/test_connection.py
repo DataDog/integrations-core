@@ -166,7 +166,12 @@ def test_will_fail_for_wrong_parameters_in_the_connection_string(instance_minima
 @pytest.mark.parametrize(
     'host, port, expected_host',
     [
-        pytest.param('1.2.3.4', '22', '1.2.3.4,22', id='if port provided as a config option, it should be recognized'),
+        pytest.param(
+            '1.2.3.4', 22, '1.2.3.4,22', id='if port provided as a config option as an int, it should be recognized'
+        ),
+        pytest.param(
+            '1.2.3.4', '22', '1.2.3.4,22', id='if port provided as a config option as a string, it should be recognized'
+        ),
         pytest.param('1.2.3.4', 'mcnugget', '1.2.3.4,1433', id='if port is not numeric, it should use default port'),
         pytest.param(
             '1.2.3.4,mcnugget',

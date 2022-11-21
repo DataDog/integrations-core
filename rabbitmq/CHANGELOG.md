@@ -2,7 +2,7 @@
 
 ## 3.2.0 / 2022-09-16
 
-* [Added] [rabbitmq] Add new metric to track size of queues in bytes. See [#12869](https://github.com/DataDog/integrations-core/pull/12869).
+* [Added] Add new metric to track size of queues in bytes. See [#12869](https://github.com/DataDog/integrations-core/pull/12869).
 * [Added] Update HTTP config spec templates. See [#12890](https://github.com/DataDog/integrations-core/pull/12890).
 
 ## 3.1.0 / 2022-04-05 / Agent 7.36.0

@@ -474,7 +474,7 @@ class Connection(object):
         if not host:
             return None
 
-        port = str(DEFAULT_CONN_PORT)
+        port = DEFAULT_CONN_PORT
         split_host, split_port = split_sqlserver_host_port(host)
         config_port = self.instance.get("port")
 
@@ -486,9 +486,9 @@ class Connection(object):
             int(port)
         except ValueError:
             self.log.warning("Invalid port %s; falling back to default 1433", port)
-            port = str(DEFAULT_CONN_PORT)
+            port = DEFAULT_CONN_PORT
 
-        return split_host + "," + port
+        return split_host + "," + str(port)
 
     def _conn_key(self, db_key, db_name=None, key_prefix=None):
         """Return a key to use for the connection cache"""

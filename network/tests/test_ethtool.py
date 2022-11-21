@@ -3,6 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 import array
+import copy
 import logging
 import platform
 
@@ -452,9 +453,12 @@ def send_ethtool_ioctl_mock(iface, sckt, data):
 
 @pytest.mark.skipif(platform.system() == 'Windows', reason="Only runs on Unix systems")
 @mock.patch('datadog_checks.network.ethtool._send_ethtool_ioctl')
-def test_collect_ena(send_ethtool_ioctl, check):
+@mock.patch('datadog_checks.network.network.Platform.is_bsd', return_value=False)
+@mock.patch('datadog_checks.network.network.Platform.is_linux', return_value=True)
+def test_collect_ena(is_linux, is_bsd, send_ethtool_ioctl, check):
+    check_instance = check(common.INSTANCE)
     send_ethtool_ioctl.side_effect = send_ethtool_ioctl_mock
-    driver_name, driver_version, stats_names, stats = check._fetch_ethtool_stats('eth0')
+    driver_name, driver_version, stats_names, stats = check_instance._fetch_ethtool_stats('eth0')
     assert (driver_name, driver_version) == ('ena', '5.11.0-1022-aws')
     assert ethtool.get_ena_metrics(stats_names, stats) == {
         'aws.ec2.bw_in_allowance_exceeded': 0,
@@ -467,50 +471,63 @@ def test_collect_ena(send_ethtool_ioctl, check):
 
 @pytest.mark.skipif(platform.system() == 'Windows', reason="Only runs on Unix systems")
 @mock.patch('datadog_checks.network.ethtool._send_ethtool_ioctl')
-def test_collect_ethtool_metrics_ena(send_ethtool_ioctl, check):
+@mock.patch('datadog_checks.network.network.Platform.is_bsd', return_value=False)
+@mock.patch('datadog_checks.network.network.Platform.is_linux', return_value=True)
+def test_collect_ethtool_metrics_ena(is_linux, is_bsd, send_ethtool_ioctl, check):
+    check_instance = check(common.INSTANCE)
     send_ethtool_ioctl.side_effect = send_ethtool_ioctl_mock
-    driver_name, driver_version, stats_names, stats = check._fetch_ethtool_stats('eth0')
+    driver_name, driver_version, stats_names, stats = check_instance._fetch_ethtool_stats('eth0')
     assert (driver_name, driver_version) == ('ena', '5.11.0-1022-aws')
     assert ethtool.get_ethtool_metrics(driver_name, stats_names, stats) == ENA_ETHTOOL_VALUES
 
 
 @pytest.mark.skipif(platform.system() == 'Windows', reason="Only runs on Unix systems")
 @mock.patch('datadog_checks.network.ethtool._send_ethtool_ioctl')
-def test_collect_ethtool_metrics_virtio(send_ethtool_ioctl, check):
+@mock.patch('datadog_checks.network.network.Platform.is_bsd', return_value=False)
+@mock.patch('datadog_checks.network.network.Platform.is_linux', return_value=True)
+def test_collect_ethtool_metrics_virtio(is_linux, is_bsd, send_ethtool_ioctl, check):
+    check_instance = check(common.INSTANCE)
     send_ethtool_ioctl.side_effect = send_ethtool_ioctl_mock
-    driver_name, driver_version, stats_names, stats = check._fetch_ethtool_stats('virtio')
+    driver_name, driver_version, stats_names, stats = check_instance._fetch_ethtool_stats('virtio')
     assert (driver_name, driver_version) == ('virtio_net', '1.0.0')
     assert ethtool.get_ethtool_metrics(driver_name, stats_names, stats) == VIRTIO_ETHTOOL_VALUES
 
 
 @pytest.mark.skipif(platform.system() == 'Windows', reason="Only runs on Unix systems")
 @mock.patch('datadog_checks.network.ethtool._send_ethtool_ioctl')
-def test_collect_ethtool_metrics_hv_netvsc(send_ethtool_ioctl, check):
+@mock.patch('datadog_checks.network.network.Platform.is_bsd', return_value=False)
+@mock.patch('datadog_checks.network.network.Platform.is_linux', return_value=True)
+def test_collect_ethtool_metrics_hv_netvsc(is_linu, is_bsd, send_ethtool_ioctl, check):
+    check_instance = check(common.INSTANCE)
     send_ethtool_ioctl.side_effect = send_ethtool_ioctl_mock
-    driver_name, driver_version, stats_names, stats = check._fetch_ethtool_stats('hv_netvsc')
+    driver_name, driver_version, stats_names, stats = check_instance._fetch_ethtool_stats('hv_netvsc')
     assert (driver_name, driver_version) == ('hv_netvsc', '5.8.0-1042-azure')
     assert ethtool.get_ethtool_metrics(driver_name, stats_names, stats) == HV_NETVSC_ETHTOOL_VALUES
 
 
 @pytest.mark.skipif(platform.system() == 'Windows', reason="Only runs on Unix systems")
 @mock.patch('datadog_checks.network.ethtool._send_ethtool_ioctl')
-def test_collect_ethtool_metrics_gve(send_ethtool_ioctl, check):
+@mock.patch('datadog_checks.network.network.Platform.is_bsd', return_value=False)
+@mock.patch('datadog_checks.network.network.Platform.is_linux', return_value=True)
+def test_collect_ethtool_metrics_gve(is_linux, is_bsd, send_ethtool_ioctl, check):
+    check_instance = check(common.INSTANCE)
     send_ethtool_ioctl.side_effect = send_ethtool_ioctl_mock
-    driver_name, driver_version, stats_names, stats = check._fetch_ethtool_stats('gve')
+    driver_name, driver_version, stats_names, stats = check_instance._fetch_ethtool_stats('gve')
     assert (driver_name, driver_version) == ('gve', '1.0.0')
     assert ethtool.get_ethtool_metrics(driver_name, stats_names, stats) == GVE_ETHTOOL_VALUES
 
 
 @pytest.mark.skipif(platform.system() == 'Windows', reason="Only runs on Unix systems")
 @mock.patch('datadog_checks.network.ethtool._send_ethtool_ioctl')
-def test_submit_ena(send_ethtool_ioctl, check, aggregator):
+@mock.patch('datadog_checks.network.network.Platform.is_bsd', return_value=False)
+@mock.patch('datadog_checks.network.network.Platform.is_linux', return_value=True)
+def test_submit_ena(is_linux, is_bsd, send_ethtool_ioctl, check, aggregator):
+    instance = copy.deepcopy(common.INSTANCE)
+    instance['collect_aws_ena_metrics'] = True
+    check_instance = check(instance)
+
     send_ethtool_ioctl.side_effect = send_ethtool_ioctl_mock
-    check._collect_ethtool_stats = True
-    check._collect_ena_metrics = True
-    check._collect_ethtool_metrics = False
-    check._excluded_ifaces = []
-    check._exclude_iface_re = ''
-    check._handle_ethtool_stats('eth0', [])
+    check_instance._handle_ethtool_stats('eth0', [])
 
     expected_metrics = [
         'system.net.aws.ec2.bw_in_allowance_exceeded',
@@ -519,7 +536,6 @@ def test_submit_ena(send_ethtool_ioctl, check, aggregator):
         'system.net.aws.ec2.linklocal_allowance_exceeded',
         'system.net.aws.ec2.pps_allowance_exceeded',
     ]
-
     for m in expected_metrics:
         aggregator.assert_metric(
             m, count=1, value=0, tags=['device:eth0', 'driver_name:ena', 'driver_version:5.11.0-1022-aws']
@@ -528,14 +544,15 @@ def test_submit_ena(send_ethtool_ioctl, check, aggregator):
 
 @pytest.mark.skipif(platform.system() == 'Windows', reason="Only runs on Unix systems")
 @mock.patch('datadog_checks.network.ethtool._send_ethtool_ioctl')
-def test_submit_ena_ethtool_metrics(send_ethtool_ioctl, check, aggregator):
+@mock.patch('datadog_checks.network.network.Platform.is_bsd', return_value=False)
+@mock.patch('datadog_checks.network.network.Platform.is_linux', return_value=True)
+def test_submit_ena_ethtool_metrics(is_linux, is_bsd, send_ethtool_ioctl, check, aggregator):
+    instance = copy.deepcopy(common.INSTANCE)
+    instance['collect_ethtool_metrics'] = True
+    check_instance = check(instance)
+
     send_ethtool_ioctl.side_effect = send_ethtool_ioctl_mock
-    check._collect_ethtool_stats = True
-    check._collect_ena_metrics = False
-    check._collect_ethtool_metrics = True
-    check._excluded_ifaces = []
-    check._exclude_iface_re = ''
-    check._handle_ethtool_stats('eth0', [])
+    check_instance._handle_ethtool_stats('eth0', [])
 
     for tag, metrics in iteritems(ENA_ETHTOOL_VALUES):
         for metric_suffix, value in iteritems(metrics):
@@ -549,14 +566,15 @@ def test_submit_ena_ethtool_metrics(send_ethtool_ioctl, check, aggregator):
 
 @pytest.mark.skipif(platform.system() == 'Windows', reason="Only runs on Unix systems")
 @mock.patch('datadog_checks.network.ethtool._send_ethtool_ioctl')
-def test_submit_hv_netvsc_ethtool_metrics(send_ethtool_ioctl, check, aggregator):
+@mock.patch('datadog_checks.network.network.Platform.is_bsd', return_value=False)
+@mock.patch('datadog_checks.network.network.Platform.is_linux', return_value=True)
+def test_submit_hv_netvsc_ethtool_metrics(is_linux, is_bsd, send_ethtool_ioctl, check, aggregator):
+    instance = copy.deepcopy(common.INSTANCE)
+    instance['collect_ethtool_metrics'] = True
+    check_instance = check(instance)
+
     send_ethtool_ioctl.side_effect = send_ethtool_ioctl_mock
-    check._collect_ethtool_stats = True
-    check._collect_ena_metrics = False
-    check._collect_ethtool_metrics = True
-    check._excluded_ifaces = []
-    check._exclude_iface_re = ''
-    check._handle_ethtool_stats('hv_netvsc', [])
+    check_instance._handle_ethtool_stats('hv_netvsc', [])
 
     for tag, metrics in iteritems(HV_NETVSC_ETHTOOL_VALUES):
         for metric_suffix, value in iteritems(metrics):
@@ -570,14 +588,15 @@ def test_submit_hv_netvsc_ethtool_metrics(send_ethtool_ioctl, check, aggregator)
 
 @pytest.mark.skipif(platform.system() == 'Windows', reason="Only runs on Unix systems")
 @mock.patch('datadog_checks.network.ethtool._send_ethtool_ioctl')
-def test_submit_gve_ethtool_metrics(send_ethtool_ioctl, check, aggregator):
+@mock.patch('datadog_checks.network.network.Platform.is_bsd', return_value=False)
+@mock.patch('datadog_checks.network.network.Platform.is_linux', return_value=True)
+def test_submit_gve_ethtool_metrics(is_linux, is_bsd, send_ethtool_ioctl, check, aggregator):
+    instance = copy.deepcopy(common.INSTANCE)
+    instance['collect_ethtool_metrics'] = True
+    check_instance = check(instance)
+
     send_ethtool_ioctl.side_effect = send_ethtool_ioctl_mock
-    check._collect_ethtool_stats = True
-    check._collect_ena_metrics = False
-    check._collect_ethtool_metrics = True
-    check._excluded_ifaces = []
-    check._exclude_iface_re = ''
-    check._handle_ethtool_stats('gve', [])
+    check_instance._handle_ethtool_stats('gve', [])
 
     for tag, metrics in iteritems(GVE_ETHTOOL_VALUES):
         for metric_suffix, value in iteritems(metrics):
@@ -591,24 +610,33 @@ def test_submit_gve_ethtool_metrics(send_ethtool_ioctl, check, aggregator):
 
 @pytest.mark.skipif(platform.system() == 'Windows', reason="Only runs on Unix systems")
 @mock.patch('datadog_checks.network.ethtool._send_ethtool_ioctl')
-def test_collect_ena_values_not_present(send_ethtool_ioctl, check):
+@mock.patch('datadog_checks.network.network.Platform.is_bsd', return_value=False)
+@mock.patch('datadog_checks.network.network.Platform.is_linux', return_value=True)
+def test_collect_ena_values_not_present(is_linux, is_bsd, send_ethtool_ioctl, check):
+    check_instance = check(common.INSTANCE)
+
     send_ethtool_ioctl.side_effect = send_ethtool_ioctl_mock
-    driver_name, driver_version, stats_names, stats = check._fetch_ethtool_stats('enp0s3')
+    driver_name, driver_version, stats_names, stats = check_instance._fetch_ethtool_stats('enp0s3')
     assert (driver_name, driver_version) == (None, None)
     assert ethtool.get_ena_metrics(stats_names, stats) == {}
 
 
 @pytest.mark.skipif(platform.system() == 'Windows', reason="Only runs on Unix systems")
 @mock.patch('fcntl.ioctl')
-def test_collect_ena_unsupported_on_iface(ioctl_mock, check, caplog):
+@mock.patch('datadog_checks.network.network.Platform.is_bsd', return_value=False)
+@mock.patch('datadog_checks.network.network.Platform.is_linux', return_value=True)
+def test_collect_ena_unsupported_on_iface(is_linux, is_bsd, ioctl_mock, check, caplog):
+    check_instance = check(common.INSTANCE)
     caplog.set_level(logging.DEBUG)
     ioctl_mock.side_effect = OSError('mock error')
-    _, _, _, _ = check._fetch_ethtool_stats('eth0')
+
+    _, _, _, _ = check_instance._fetch_ethtool_stats('eth0')
+
     assert 'OSError while trying to collect ethtool metrics for interface eth0: mock error' in caplog.text
 
 
 @pytest.mark.skipif(platform.system() == 'Windows', reason="Only runs on Unix systems")
-def test_parse_queue_num(check):
+def test_parse_queue_num():
     queue_name, metric_name = ethtool._parse_ethtool_queue_num('queue_0_tx_cnt')
     assert queue_name == 'queue:0'
     assert metric_name == 'tx_cnt'
@@ -643,7 +671,7 @@ def test_parse_queue_num(check):
 
 
 @pytest.mark.skipif(platform.system() == 'Windows', reason="Only runs on Unix systems")
-def test_parse_cpu_num(check):
+def test_parse_cpu_num():
     cpu_name, metric_name = ethtool._parse_ethtool_cpu_num('cpu0_rx_bytes')
     assert cpu_name == 'cpu:0'
     assert metric_name == 'rx_bytes'
@@ -666,7 +694,7 @@ def test_parse_cpu_num(check):
 
 
 @pytest.mark.skipif(platform.system() == 'Windows', reason="Only runs on Unix systems")
-def test_parse_queue_array(check):
+def test_parse_queue_array():
     queue_name, metric_name = ethtool._parse_ethtool_queue_array('tx_wake[0]')
     assert queue_name == 'queue:0'
     assert metric_name == 'tx_wake'

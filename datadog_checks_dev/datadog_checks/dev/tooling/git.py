@@ -4,7 +4,7 @@
 import os
 import re
 
-from semver import parse_version_info
+from semver import VersionInfo
 
 from ..fs import chdir
 from ..subprocess import run_command
@@ -171,7 +171,7 @@ def get_latest_tag(pattern=None, tag_prefix='v'):
     """
     if not pattern:
         pattern = rf'^({tag_prefix})?\d+\.\d+\.\d+.*'
-    all_tags = sorted((parse_version_info(t.replace(tag_prefix, '', 1)), t) for t in git_tag_list(pattern))
+    all_tags = sorted((VersionInfo.parse(t.replace(tag_prefix, '', 1)), t) for t in git_tag_list(pattern))
     if not all_tags:
         return
     else:

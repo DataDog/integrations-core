@@ -24,6 +24,7 @@ class SharedConfig(BaseModel):
         allow_mutation = False
 
     queue_manager_process: Optional[str]
+    queue_manager_process_limit: Optional[int]
     service: Optional[str]
 
     @root_validator(pre=True)

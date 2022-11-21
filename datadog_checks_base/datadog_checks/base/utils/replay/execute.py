@@ -13,15 +13,17 @@ from .constants import KNOWN_DATADOG_AGENT_SETTER_METHODS, EnvVars
 def run_with_isolation(check, aggregator, datadog_agent):
     message_indicator = os.urandom(8).hex()
     instance = dict(check.instance)
+    init_config = dict(check.init_config)
 
     # Prevent fork bomb
     instance.pop('process_isolation', None)
+    init_config.pop('process_isolation', None)
 
     env_vars = dict(os.environ)
     env_vars[EnvVars.MESSAGE_INDICATOR] = message_indicator
     env_vars[EnvVars.CHECK_NAME] = check.name
     env_vars[EnvVars.CHECK_ID] = check.check_id
-    env_vars[EnvVars.INIT_CONFIG] = to_native_string(json.dumps(check.init_config))
+    env_vars[EnvVars.INIT_CONFIG] = to_native_string(json.dumps(init_config))
     env_vars[EnvVars.INSTANCE] = to_native_string(json.dumps(instance))
 
     check_module = check.__module__

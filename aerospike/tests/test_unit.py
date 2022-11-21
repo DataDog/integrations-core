@@ -109,6 +109,7 @@ def test_connection_uses_tls():
                 '11:53:57,0.0,0.00,0.00,0.00',
                 '{ns-1}-write:11:53:47-GMT,ops/sec,>1ms,>8ms,>64ms',
                 '11:53:57,0.0,0.00,0.00,0.00',
+                'BAD_LINE',
                 '{ns-2_foo}-read:11:53:47-GMT,ops/sec,>1ms,>8ms,>64ms',
                 '11:53:57,0.0,0.00,0.00,0.00',
                 '{ns-2_foo}-write:11:53:47-GMT,ops/sec,>1ms,>8ms,>64ms',
@@ -125,6 +126,7 @@ def test_connection_uses_tls():
                 '11:53:57,0.0,0.00,0.00,0.00',
                 '{ns-1}-read:11:53:47-GMT,ops/sec,>1ms,>8ms,>64ms',
                 '11:53:57,0.0,0.00,0.00,0.00',
+                'BAD_LINE',
                 '{ns-1}-write:11:53:47-GMT,ops/sec,>1ms,>8ms,>64ms',
                 '11:53:57,0.0,0.00,0.00,0.00',
                 '{ns-2_foo}-read:11:53:47-GMT,ops/sec,>1ms,>8ms,>64ms',
@@ -169,6 +171,9 @@ def test_collect_latency_invalid_data(aggregator):
         'xxxread:11:53:47-GMT,ops/sec,>1ms,>8ms,>64ms',
     )
 
+    for metric in (m for m in common.LAZY_METRICS if "write" in m):
+        aggregator.assert_metric(metric, tags=['namespace:ns-2', 'tag:value'])
+
     aggregator.assert_all_metrics_covered()  # no metric
 
 
@@ -190,6 +195,10 @@ def test_collect_empty_data(aggregator):
                 '{test}-read:msec,1.5,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,'
                 '0.00',
                 '{test}-write:',
+                '{test}-pi-query:msec,1.5,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,'
+                '0.00,0.00',
+                '{test}-si-query:',
+                'BAD_LINE',
                 '{test}-udf:msec,1.7,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,'
                 '0.00',
                 '{test}-query:',
@@ -202,7 +211,10 @@ def test_collect_empty_data(aggregator):
                 '{test}-read:msec,1.5,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,'
                 '0.00',
                 '{test}-write:',
-                '{test}-query:',
+                '{test}-pi-query:msec,1.5,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,'
+                '0.00,0.00',
+                '{test}-si-query:',
+                'bad-line',
                 '{test}-udf:msec,1.7,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,'
                 '0.00',
             ],
@@ -216,7 +228,7 @@ def test_collect_latencies_parser(aggregator, return_vals):
 
     check.collect_latencies(None)
 
-    for metric_type in ['read', 'udf']:
+    for metric_type in ['read', 'udf', 'pi_query']:
         for i in range(17):
             bucket = 2**i
             aggregator.assert_metric(

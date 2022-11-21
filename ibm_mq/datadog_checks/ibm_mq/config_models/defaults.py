@@ -14,6 +14,10 @@ def shared_queue_manager_process(field, value):
     return get_default_field_value(field, value)
 
 
+def shared_queue_manager_process_limit(field, value):
+    return 1
+
+
 def shared_service(field, value):
     return get_default_field_value(field, value)
 
@@ -84,10 +88,6 @@ def instance_password(field, value):
 
 def instance_port(field, value):
     return 1414
-
-
-def instance_process_isolation(field, value):
-    return False
 
 
 def instance_queue_manager_process(field, value):

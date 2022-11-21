@@ -18,4 +18,5 @@ jobs:
         with:
           configuration-path: .github/workflows/config/labeler.yml
           repo-token: "${{ secrets.repo-token }}"
-          sync-labels: "false"
+          sync-labels: ""   # workaround for sync-labels bug:
+                            # https://github.com/actions/labeler/issues/112#issuecomment-1000491676

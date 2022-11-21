@@ -4,10 +4,18 @@ init_config:
 
     ## @param queue_manager_process - string - optional
     ## A regular expression that must match the command line of a running process in
-    ## order for the check to run. A `<queue_manager>` placeholder is supported which
-    ## represents the value of the `queue_manager` option.
+    ## order for the check to run, which is useful if running MQ in a failover mode.
+    ## A `<queue_manager>` placeholder is supported which represents the value of
+    ## the `queue_manager` option defined in each check instance.
+    ##
+    ## This option is only available on Agent 7+.
     #
     # queue_manager_process: amqpcsea <queue_manager>
+
+    ## @param queue_manager_process_limit - integer - optional - default: 1
+    ## What is the maximun number of active queue managers in the failover set up.
+    #
+    # queue_manager_process_limit: 1
 
     ## @param service - string - optional
     ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
@@ -16,7 +24,7 @@ init_config:
     #
     # service: <SERVICE>
 
-## Every instance is scheduled independent of the others.
+## Every instance is scheduled independently of the others.
 #
 instances:
 
@@ -230,19 +238,15 @@ instances:
 
     ## @param queue_manager_process - string - optional
     ## A regular expression that must match the command line of a running process in
-    ## order for the check to run. A `<queue_manager>` placeholder is supported which
-    ## represents the value of the `queue_manager` option.
+    ## order for the check to run, which is useful if running MQ in a failover mode.
+    ## A `<queue_manager>` placeholder is supported which represents the value of
+    ## the `queue_manager` option.
+    ##
+    ## This option is only available on Agent 7+.
     ##
     ## This overrides the `queue_manager_process` option in the `init_config` section.
     #
     # queue_manager_process: amqpcsea <queue_manager>
-
-    ## @param process_isolation - boolean - optional - default: false
-    ## Whether to run the check in a separate process.
-    ##
-    ## WARNING: In this mode, connection persistence is disabled.
-    #
-    # process_isolation: false
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
@@ -286,12 +290,12 @@ instances:
 
 ## Log Section
 ##
-## type - required - Type of log input source (tcp / udp / file / windows_event)
+## type - required - Type of log input source (tcp / udp / file / windows_event).
 ## port / path / channel_path - required - Set port if type is tcp or udp.
 ##                                         Set path if type is file.
 ##                                         Set channel_path if type is windows_event.
 ## source  - required - Attribute that defines which integration sent the logs.
-## encoding - optional - For file specifies the file encoding, default is utf-8, other
+## encoding - optional - For file specifies the file encoding. Default is utf-8. Other
 ##                       possible values are utf-16-le and utf-16-be.
 ## service - optional - The name of the service that generates the log.
 ##                      Overrides any `service` defined in the `init_config` section.

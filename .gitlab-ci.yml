@@ -1,7 +1,6 @@
 variables:
   REMINDER_IMAGE: 486234852809.dkr.ecr.us-east-1.amazonaws.com/ci/integrations-core:reminder
   TAGGER_IMAGE: 486234852809.dkr.ecr.us-east-1.amazonaws.com/ci/integrations-core:tagger
-  TAGGER_IMAGE_SHA: 486234852809.dkr.ecr.us-east-1.amazonaws.com/ci/integrations-core:tagger@sha256:5f9cd17c4af0007cf8e9a72dd8880b65a43d3948dec59ccdc87df437b133bd18
   VALIDATE_LOG_INTGS: 486234852809.dkr.ecr.us-east-1.amazonaws.com/ci/integrations-core:validate_log_intgs
   VALIDATE_AGENT_BUILD: 486234852809.dkr.ecr.us-east-1.amazonaws.com/ci/integrations-core:validate_agent_build
   NOTIFIER_IMAGE: 486234852809.dkr.ecr.us-east-1.amazonaws.com/slack-notifier:latest
@@ -177,7 +176,7 @@ notify-failed-pipeline:
 
 release-auto:
   stage: release
-  image: $TAGGER_IMAGE_SHA
+  image: $TAGGER_IMAGE
   only:
     - master
   except:
@@ -191,7 +190,7 @@ release-auto:
 
 release-manual:
   stage: release
-  image: $TAGGER_IMAGE_SHA
+  image: $TAGGER_IMAGE
   only:
     # Integration release tags e.g. any_check-X.Y.Z-rc.N
     - /.*-\d+\.\d+\.\d+(-(rc|pre|alpha|beta)\.\d+)?$/
