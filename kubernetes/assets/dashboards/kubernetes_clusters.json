@@ -3790,7 +3790,7 @@
                                     "display_type": "line",
                                     "metadata": [
                                         {
-                                            "alias_name": "disk writes per node ",
+                                            "alias_name": "IO writes per node ",
                                             "expression": "sum:kubernetes.io.write_bytes{$scope,$cluster} by {kube_replica_set,host}"
                                         }
                                     ],
