@@ -179,15 +179,6 @@ def test(
             )
             ddtrace_check = False
 
-        # TODO: remove this when we drop PY2 support. We could also find a way to enable it only for py3 envs.
-        if any('py2' in env for env in env_names):
-            # The pytest flag --ddtrace is not available for py2 env.
-            # Removing it so it does not fail.
-            echo_warning(
-                'memray flag is not available for py2 environments ; disabling the flag for this check.'
-            )
-            memray = False
-
         # This is for ensuring proper spacing between output of multiple checks' tests.
         # Basically this avoids printing a new line before the first check's tests.
         output_separator = '\n' if tests_ran else ''
