@@ -479,7 +479,7 @@
           {
             "id": 4829285376640556,
             "definition": {
-              "title": "Closed vs Failed Connections in a Server",
+              "title": "Closed vs. Failed Connections in a Server",
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
