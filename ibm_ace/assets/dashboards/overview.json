@@ -169,7 +169,7 @@
           {
             "id": 1697148221776484,
             "definition": {
-              "title": "Server to MQ System Check",
+              "title": "Server-to-MQ System Check",
               "title_size": "16",
               "title_align": "left",
               "type": "check_status",
