@@ -529,6 +529,7 @@ Need help? Contact [Datadog support][16].
 
 
 
+
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/oracle/images/oracle_dashboard.png
 [2]: https://docs.oracle.com/en/database/oracle/oracle-database/21/lacli/install-instant-client-using-zip.html
 [3]: https://www.oracle.com/technetwork/database/features/instant-client/index.htm
