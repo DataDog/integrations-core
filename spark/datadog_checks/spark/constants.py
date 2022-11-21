@@ -37,7 +37,7 @@ MESOS_MASTER_APP_PATH = '/frameworks'
 
 # Extract the application name and the dd metric name from the structured streams metrics.
 STRUCTURED_STREAMS_METRICS_REGEX = re.compile(
-    r"^[\w-]+\.driver\.spark\.streaming\.(?P<query_name>[\w/\\|!.,@-]+)\.(?P<metric_name>[\w-]+)$"
+    r"^[\w-]+\.driver\.spark\.streaming\.(?P<query_name>.+)\.(?P<metric_name>[\w-]+)$"
 )
 
 # Tests if the query_name is a UUID to determine whether to add it as a tag
