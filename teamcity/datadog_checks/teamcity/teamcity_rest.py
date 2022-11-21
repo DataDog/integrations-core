@@ -8,6 +8,7 @@ from six import PY2
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.utils.time import get_precise_time
 
+from .build_configs import BuildConfigs
 from .common import (
     construct_event,
     filter_build_configs,
@@ -24,7 +25,6 @@ from .constants import (
     SERVICE_CHECK_BUILD_STATUS,
     SERVICE_CHECK_TEST_RESULTS,
     STATUS_MAP,
-    BuildConfigs,
 )
 from .metrics import build_metric
 

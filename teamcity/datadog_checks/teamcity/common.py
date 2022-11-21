@@ -31,12 +31,16 @@ def match(item, pattern_model):
 def filter_list(items, include_patterns, exclude_patterns):
     excluded_items = [item for item in items if match(item, exclude_patterns) if exclude_patterns]
     if not include_patterns:
-        return {item: None for item in items if item not in excluded_items}
+        return dict.fromkeys((item for item in items if item not in excluded_items), None)
     else:
+
         filtered_items = {}
         for include_pattern in include_patterns:
             filtered_items.update(
-                {item: include_pattern for item in items if item not in excluded_items and match(item, include_pattern)}
+                dict.fromkeys(
+                    (item for item in items if item not in excluded_items and match(item, include_pattern)),
+                    include_pattern,
+                )
             )
         return filtered_items
 
@@ -48,8 +52,9 @@ def filter_items(items, key, default_limit, default_include, default_exclude, co
     include_patterns = config_key.get('include', default_include)
     exclude_patterns = config_key.get('exclude', default_exclude)
     filtered_items = filter_list(items, include_patterns, exclude_patterns)
-    reached_limit = len(OrderedDict(list(filtered_items.items())[0:limit])) < len(list(filtered_items.items()))
-    return OrderedDict(list(filtered_items.items())[0:limit]), reached_limit
+    ordered_items = OrderedDict(list(filtered_items.items())[0:limit])
+    reached_limit = len(ordered_items) < len(list(filtered_items.items()))
+    return ordered_items, reached_limit
 
 
 def filter_projects(check, projects_list):
@@ -119,13 +124,13 @@ def get_response(check, resource, **kwargs):
         json_payload = resp.json()
         if resource == 'build_config' or resource == 'teamcity_server_details':
             return json_payload
-        elif not json_payload.get("count") or json_payload["count"] == 0:
+        elif json_payload.get("count", 0) == 0:
             check.log.debug("No results found for resource %s url: %s", resource_name, resource_url)
         else:
             check.log.debug("Results found for resource %s url: %s", resource_name, resource_url)
             return json_payload
     except requests.exceptions.HTTPError:
-        if resp.status_code == 401 or resp.status_code == 403:
+        if resp.status_code in (401, 403):
             check.log.error("Access denied. Enable guest authentication or check user permissions.")
         check.log.exception("Couldn't fetch resource %s, got code %s", resource_name, resp.status_code)
         raise
@@ -148,5 +153,4 @@ def normalize_server_url(server):
     """
     Check if the server URL starts with an HTTP or HTTPS scheme, fall back to http if not present
     """
-    server = server if server.startswith(("http://", "https://")) else "http://{}".format(server)
-    return server
+    return server if server.startswith(("http://", "https://")) else "http://{}".format(server)
