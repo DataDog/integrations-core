@@ -16,11 +16,14 @@ class ClouderaClient:
 
         return response.items
 
-    def run_timeseries_query(self, query, from_time, to_time):
+    def run_timeseries_query(self, query):
         api_instance = cm_client.TimeSeriesResourceApi(self.api_client)
-        response = api_instance.query_time_series(_from=from_time, query=query, to=to_time)
 
-        # There is always only one item in list `items`
+        # Note: by default query_time_series() sets the optional `to_time` 
+        # param to `now` and `_from_time` param to 5 minutes before now.
+        response = api_instance.query_time_series(query=query)
+
+        # There is always only one item in response list `items`
         return response.items[0].time_series
 
     def get_cluster_tags(self):
