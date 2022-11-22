@@ -1,5 +1,9 @@
 # CHANGELOG - datadog_checks_base
 
+## 27.5.0-beta.1 / 2022-11-22
+
+* [Fixed] Update protobuf. See [#13262](https://github.com/DataDog/integrations-core/pull/13262).
+
 ## 27.4.2 / 2022-10-28
 
 * [Fixed] Update dependencies. See [#13205](https://github.com/DataDog/integrations-core/pull/13205) and [#13207](https://github.com/DataDog/integrations-core/pull/13207).
