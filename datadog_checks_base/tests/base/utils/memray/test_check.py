@@ -49,7 +49,7 @@ def test_memray_windows(caplog, dd_run_check, aggregator, datadog_agent, init_co
         pytest.param({'tags': ['bar:baz'], 'enable_memray': True}, {'tags': ['foo:bar']}, id='Init-level config'),
     ],
 )
-@pytest.mark.skipif(not PY2, reason='Memray is not supported on py2 environments')
+@pytest.mark.skipif(ON_WINDOWS or not PY2, reason='Memray is not supported on py2 environments')
 def test_memray_py2(caplog, dd_run_check, aggregator, datadog_agent, init_config, instance_config):
     check = MemrayCheck('memory', init_config, [instance_config])
     check.check_id = 'test:123'
