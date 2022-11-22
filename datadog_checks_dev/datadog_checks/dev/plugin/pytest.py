@@ -320,8 +320,15 @@ def pytest_addoption(parser):
     parser.addoption("--run-latest-metrics", action="store_true", default=False, help="run check_metrics tests")
 
     if PY2:
-        # Add a dummy memray option to make it possible to run memray with `ddev test --memray <integration>` only on py3 environments
+        # Add a dummy memray options to make it possible to run memray with `ddev test --memray <integration>`
+        # only on py3 environments
         parser.addoption("--memray", action="store_true", default=False, help="Dummy parameter for memray")
+        parser.addoption(
+            "--hide-memray-summary",
+            action="store_true",
+            default=False,
+            help="Dummy parameter for memray to hide the summary",
+        )
 
 
 def pytest_collection_modifyitems(config, items):
@@ -332,8 +339,10 @@ def pytest_collection_modifyitems(config, items):
         # --run-check-metrics given in cli: do not skip slow tests
         return
 
-    if PY2 and config.getoption("--memray"):
-        warnings.warn("--memray option ignored as it's not supported for py2 environments.")
+    if PY2:
+        for option in ("--memray", "--hide-memray-summary"):
+            if config.getoption(option):
+                warnings.warn("`{}` option ignored as it's not supported for py2 environments.".format(option))
 
     skip_latest_metrics = pytest.mark.skip(reason="need --run-latest-metrics option to run")
     for item in items:
