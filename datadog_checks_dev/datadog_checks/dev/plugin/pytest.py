@@ -320,7 +320,8 @@ def pytest_addoption(parser):
     parser.addoption("--run-latest-metrics", action="store_true", default=False, help="run check_metrics tests")
 
     if PY2:
-        # Add a dummy memray options to make it possible to run memray with `ddev test --memray <integration>` only on py3 environments
+        # Add a dummy memray options to make it possible to run memray with `ddev test --memray <integration>`
+        # only on py3 environments
         parser.addoption("--memray", action="store_true", default=False, help="Dummy parameter for memray")
         parser.addoption(
             "--hide-memray-summary",
