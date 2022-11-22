@@ -18,6 +18,7 @@ API_ENTITY_STATUS = {
 
 CAN_CONNECT = "can_connect"
 CLUSTER_HEALTH = "cluster.health"
-SERVICE_HEALTH = "service.health"
+ROLE_HEALTH = "role.health"
+HOST_HEALTH = "host.health"
 CLUSTERS_RESOURCE_API = "ClustersResourceApi"
 SERVICES_RESOURCE_API = "ServicesResourceApi"

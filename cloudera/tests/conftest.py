@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
+
 from datadog_checks.dev import docker_run
 
 from . import common
@@ -11,6 +12,7 @@ from . import common
 def dd_environment():
     with docker_run(common.COMPOSE_FILE):
         yield common.INSTANCE
+
 
 @pytest.fixture
 def instance():
