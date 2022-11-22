@@ -123,17 +123,29 @@ class ChannelMetricCollector(object):
         except pymqi.MQMIError as e:
             if e.comp == pymqi.CMQC.MQCC_FAILED and e.reason == pymqi.CMQCFC.MQRCCF_CHL_STATUS_NOT_FOUND:
                 self.service_check(
-                    self.CHANNEL_SERVICE_CHECK, AgentCheck.CRITICAL, search_channel_tags, hostname=self.config.hostname
+                    self.CHANNEL_SERVICE_CHECK,
+                    AgentCheck.CRITICAL,
+                    search_channel_tags,
+                    message=str(e),
+                    hostname=self.config.hostname,
                 )
                 self.log.debug("Channel status not found for channel %s: %s", search_channel_name, e)
             elif e.comp == pymqi.CMQC.MQCC_FAILED and e.reason == pymqi.CMQC.MQRC_NO_MSG_AVAILABLE:
                 self.service_check(
-                    self.CHANNEL_SERVICE_CHECK, AgentCheck.UNKNOWN, search_channel_tags, hostname=self.config.hostname
+                    self.CHANNEL_SERVICE_CHECK,
+                    AgentCheck.UNKNOWN,
+                    search_channel_tags,
+                    message=str(e),
+                    hostname=self.config.hostname,
                 )
                 self.log.debug("There are no messages available for channel %s", search_channel_name)
             else:
                 self.service_check(
-                    self.CHANNEL_SERVICE_CHECK, AgentCheck.CRITICAL, search_channel_tags, hostname=self.config.hostname
+                    self.CHANNEL_SERVICE_CHECK,
+                    AgentCheck.CRITICAL,
+                    search_channel_tags,
+                    message=str(e),
+                    hostname=self.config.hostname,
                 )
                 self.log.warning("Error getting CHANNEL status for channel %s: %s", search_channel_name, e)
         else:
