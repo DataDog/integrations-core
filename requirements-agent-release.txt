@@ -77,7 +77,7 @@ datadog-impala==1.0.1
 datadog-istio==4.3.0
 datadog-jboss-wildfly==2.0.1
 datadog-journald==1.1.0
-datadog-kafka-consumer==2.16.1
+datadog-kafka-consumer==2.16.2
 datadog-kafka==2.13.0
 datadog-kong==2.2.0
 datadog-kube-apiserver-metrics==3.3.0
