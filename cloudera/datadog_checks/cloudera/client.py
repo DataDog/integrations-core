@@ -19,7 +19,7 @@ class ClouderaClient:
     def run_timeseries_query(self, query):
         api_instance = cm_client.TimeSeriesResourceApi(self.api_client)
 
-        # Note: by default query_time_series() sets the optional `to_time` 
+        # Note: by default query_time_series() sets the optional `to_time`
         # param to `now` and `_from_time` param to 5 minutes before now.
         response = api_instance.query_time_series(query=query)
 
