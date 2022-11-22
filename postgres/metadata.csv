@@ -12,6 +12,7 @@ postgresql.rows_deleted,gauge,,row,second,The number of rows deleted by queries 
 postgresql.database_size,gauge,,byte,,The disk space used by this database.,0,postgres,db size,
 postgresql.db.count,gauge,,item,,The number of available databases.,0,postgres,db cnt,
 postgresql.deadlocks,gauge,,lock,second,The rate of deadlocks detected in this database,-1,postgres,deadlocks,
+postgresql.deadlocks.count,count,,lock,,The number of deadlocks detected in this database,-1,postgres,deadlocks.count,
 postgresql.temp_bytes,gauge,,byte,second,The amount of data written to temporary files by queries in this database.,0,postgres,temp bytes,
 postgresql.temp_files,gauge,,file,second,The number of temporary files created by queries in this database.,0,postgres,temp files,
 postgresql.bgwriter.checkpoints_timed,count,,,,The number of scheduled checkpoints that were performed.,0,postgres,bgw cp timed,
