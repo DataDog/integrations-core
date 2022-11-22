@@ -42,6 +42,7 @@ kubernetes,PyPI,Apache-2.0,Kubernetes
 ldap3,PyPI,LGPL-3.0-only,Giovanni Cannata
 lxml,PyPI,BSD-3-Clause,lxml dev team
 lz4,PyPI,BSD-3-Clause,Jonathan Underwood
+memray,PyPI,Apache-2.0,Pablo Galindo Salgado
 mmh3,PyPI,CC0-1.0,Hajime Senuma
 oauthlib,PyPI,BSD-3-Clause,The OAuthlib Community
 openstacksdk,PyPI,Apache-2.0,OpenStack
