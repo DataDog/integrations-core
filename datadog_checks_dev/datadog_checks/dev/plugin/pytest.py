@@ -6,10 +6,12 @@ from __future__ import absolute_import
 import json
 import os
 import re
+import warnings
 from base64 import urlsafe_b64encode
 from typing import Dict, List, Optional, Tuple
 
 import pytest
+from six import PY2
 
 from .._env import (
     E2E_FIXTURE_NAME,
@@ -317,6 +319,10 @@ def pytest_configure(config):
 def pytest_addoption(parser):
     parser.addoption("--run-latest-metrics", action="store_true", default=False, help="run check_metrics tests")
 
+    if PY2:
+        # Add a dummy memray option to make it possible to run memray with `ddev test --memray <integration>` only on py3 environments
+        parser.addoption("--memray", action="store_true", default=False, help="Dummy parameter for memray")
+
 
 def pytest_collection_modifyitems(config, items):
     # at test collection time, this function gets called by pytest, see:
@@ -325,6 +331,10 @@ def pytest_collection_modifyitems(config, items):
     if config.getoption("--run-latest-metrics"):
         # --run-check-metrics given in cli: do not skip slow tests
         return
+
+    if PY2 and config.getoption("--memray"):
+        warnings.warn("--memray option ignored as it's not supported for py2 environments.")
+
     skip_latest_metrics = pytest.mark.skip(reason="need --run-latest-metrics option to run")
     for item in items:
         if "latest_metrics" in item.keywords:
