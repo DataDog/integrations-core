@@ -123,6 +123,8 @@ class PostgresStatementMetrics(DBMAsyncJob):
             shutdown_callback=shutdown_callback,
         )
         self._metrics_collection_interval = collection_interval
+        self._pg_stat_statements_limit = config.statement_metrics_config.get('pg_stat_statements_limit',
+                                                                             DEFAULT_STATEMENTS_LIMIT)
         self._config = config
         self._state = StatementMetrics()
         self._stat_column_cache = []
@@ -247,7 +249,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
                     cols=', '.join(query_columns),
                     pg_stat_statements_view=self._config.pg_stat_statements_view,
                     filters=filters,
-                    limit=DEFAULT_STATEMENTS_LIMIT,
+                    limit=self._pg_stat_statements_limit,
                 ),
                 params=params,
             )

@@ -265,6 +265,12 @@ instances:
         #
         # collection_interval: 10
 
+        ## @param pg_stat_statements_limit - number - optional - default: 10000
+        ## Limit of rows to fetch from pg_stat_statements. The value should match the value of `pg_stat_statements.max` 
+        ## on the postgres host.
+        #
+        # pg_stat_statements_limit: 10000
+
     ## Configure collection of query samples
     #
     # query_samples:

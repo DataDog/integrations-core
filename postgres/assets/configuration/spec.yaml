@@ -317,6 +317,14 @@ files:
           value:
             type: number
             example: 10
+        - name: pg_stat_statements_limit
+          description: |
+            Limit of rows to fetch from pg_stat_statements. The value should match the value of `pg_stat_statements.max` 
+            on the postgres host.
+          value:
+            type: number
+            example: 10000
+            hidden: true
     - name: query_samples
       description: Configure collection of query samples
       options:
