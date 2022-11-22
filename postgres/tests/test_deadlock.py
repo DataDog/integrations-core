@@ -25,9 +25,8 @@ def wait_on_result(cursor = None, sql = None, binds = None, expected_value = Non
 
 @pytest.mark.e2e
 def test_deadlock(aggregator, dd_run_check, integration_check, pg_instance):
-    #aggregator = dd_agent_check(pg_instance, rate=True)
     check = integration_check(pg_instance)
-    #dd_run_check(check)
+
     check._connect()
  
     cursor = check.db.cursor()

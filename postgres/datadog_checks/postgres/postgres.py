@@ -11,6 +11,7 @@ import psycopg2
 from six import iteritems
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.utils.db import QueryExecutor
 from datadog_checks.base.utils.db.utils import resolve_db_host as agent_host_resolver
 from datadog_checks.postgres.metrics_cache import PostgresMetricsCache
 from datadog_checks.postgres.relationsmanager import INDEX_BLOAT, RELATION_METRICS, TABLE_BLOAT, RelationsManager
@@ -21,12 +22,13 @@ from .config import PostgresConfig
 from .util import (
     CONNECTION_METRICS,
     FUNCTION_METRICS,
+    QUERY_PG_STAT_DATABASE,
     REPLICATION_METRICS,
     DatabaseConfigurationError,
     fmt,
     get_schema_field,
 )
-from .version_utils import V9, V10, VersionUtils
+from .version_utils import V9, V9_2, V10, VersionUtils
 
 try:
     import datadog_agent
@@ -71,6 +73,53 @@ class PostgreSql(AgentCheck):
         # map[dbname -> psycopg connection]
         self._db_pool = {}
         self._db_pool_lock = threading.Lock()
+
+        self.tags = copy.copy(self._config.tags)
+        self.tags=[t for t in self.tags if not t.startswith("db:")]
+        if self._config.tag_replication_role:
+            self.tags.extend(["replication_role:{}".format(self._get_replication_role())])
+
+        self._dynamic_queries = None
+
+    def _new_query_executor(self, queries):
+        return QueryExecutor(
+            self.execute_query_raw,
+            self,
+            queries=queries,
+            tags=self.tags,
+            hostname=self.resolved_hostname,
+        )
+
+    def execute_query_raw(self, query):
+        with self.db.cursor() as cursor:
+            cursor.execute(query)
+            return cursor.fetchall()
+
+    @property
+    def dynamic_queries(self):
+        if self._dynamic_queries:
+            return self._dynamic_queries
+
+        queries = []
+        if self.version >= V9_2:
+            QUERY_PG_STAT_DATABASE["query"] += " WHERE " + " AND ".join(
+                "datname not ilike '{}'".format(db) for db in self._config.ignore_databases
+            )
+
+            if self._config.dbstrict:
+                QUERY_PG_STAT_DATABASE["query"] += " AND datname in('{}')".format(self._config.dbname)
+
+            queries.extend([QUERY_PG_STAT_DATABASE])
+
+        if not queries:
+            self.log.debug("no dynamic queries defined")
+            return None
+
+        self._dynamic_queries = self._new_query_executor(queries)
+        self._dynamic_queries.compile_queries()
+        self.log.debug("initialized dynamic queries")
+        
+        return self._dynamic_queries
 
     def cancel(self):
         self.statement_samples.cancel()
@@ -357,6 +406,9 @@ class PostgreSql(AgentCheck):
 
         for scope in list(metric_scope) + self._config.custom_metrics:
             self._query_scope(cursor, scope, instance_tags, scope in self._config.custom_metrics)
+
+        if self.dynamic_queries:
+            self.dynamic_queries.execute()
 
         cursor.close()
 
