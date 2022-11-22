@@ -8,6 +8,7 @@ import inspect
 import json
 import logging
 import re
+import sys
 import traceback
 import unicodedata
 from collections import deque
@@ -280,8 +281,12 @@ class AgentCheck(object):
         self._config_model_instance = None  # type: Any
         self._config_model_shared = None  # type: Any
 
+        # Memray context manager
+        self._memray = None
+
         # Functions that will be called exactly once (if successful) before the first check run
         self.check_initializations = deque()  # type: Deque[Callable[[], None]]
+        self.check_initializations.append(self.load_memray_context_manager)
 
         if not PY2:
             self.check_initializations.append(self.load_configuration_models)
@@ -496,6 +501,27 @@ class AgentCheck(object):
                 self.log.debug("Failed to detect typos in `instances` section: %s", e)
             if instance_config is not None:
                 self._config_model_instance = instance_config
+
+    def load_memray_context_manager(self):
+        enable_memray = is_affirmative(self.instance.get('enable_memray', self.init_config.get('enable_memray', False)))
+
+        if enable_memray:
+            if PY2:
+                raise ConfigurationError("`enable_memray` option is not supported for py2 environments.")
+
+            if sys.platform not in ("linux", "darwin"):
+                raise ConfigurationError("`enable_memray` option is only supported on Linux and macOS.")
+
+            output_file = self.instance.get('memray_file', self.init_config.get('memray_file'))
+            native_mode = self.instance.get('memray_native_mode', self.init_config.get('memray_native_mode', False))
+
+            if output_file is None:
+                raise ConfigurationError('Setting `memray_file` must be provided to use memray.')
+
+            import memray
+
+            self._memray = memray.Tracker(output_file, native_traces=native_mode)
+            self._memray.__enter__()
 
     @staticmethod
     def load_configuration_model(import_path, model_name, config):
@@ -1080,7 +1106,8 @@ class AgentCheck(object):
         the check is running. It's up to the python implementation to make sure
         cancel is thread safe and won't block.
         """
-        pass
+        if self._memray:
+            self._memray.__exit__()
 
     def run(self):
         # type: () -> str
