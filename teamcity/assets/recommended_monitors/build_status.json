@@ -1,5 +1,4 @@
 {
-	"id": 8999622,
 	"name": "TeamCity Build Status",
 	"type": "service check",
 	"query": "\"teamcity.build.status\".over(\"*\").by(\"build_config\").last(3).count_by_status()",
@@ -26,5 +25,8 @@
 		}
 	},
 	"priority": null,
-	"restricted_roles": null
+	"restricted_roles": null,
+	"recommended_monitor_metadata": {
+		"description": "Notify your team when your Build Configuration is not healthy."
+	}
 }
