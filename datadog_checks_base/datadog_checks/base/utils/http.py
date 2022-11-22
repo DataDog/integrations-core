@@ -820,12 +820,17 @@ class AuthTokenOAuthReader(object):
         if not isinstance(self._basic_auth, bool):
             raise ConfigurationError('The `basic_auth` setting of `auth_token` reader must be a boolean')
 
+        self._audience = config.get('audience', '')
+        if not isinstance(self._audience, str):
+            raise ConfigurationError('The `audience` setting of `auth_token` reader must be a string')
+
         self._fetch_options = {'token_url': self._url}
         if self._basic_auth:
             self._fetch_options['auth'] = requests_auth.HTTPBasicAuth(self._client_id, self._client_secret)
         else:
             self._fetch_options['client_id'] = self._client_id
             self._fetch_options['client_secret'] = self._client_secret
+            self._fetch_options['audience'] = self._audience
 
         self._token = None
         self._expiration = None
