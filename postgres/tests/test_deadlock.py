@@ -7,7 +7,9 @@ import pytest
 import select
 import time
 
-from .common import DB_NAME, HOST, PORT
+import sys
+
+from .common import DB_NAME, HOST, PORT, POSTGRES_VERSION
 
 def wait_on_result(cursor = None, sql = None, binds = None, expected_value = None):
     for i in range (100):
@@ -24,12 +26,15 @@ def wait_on_result(cursor = None, sql = None, binds = None, expected_value = Non
 
 
 @pytest.mark.e2e
+@pytest.mark.skipif(
+    POSTGRES_VERSION is None or float(POSTGRES_VERSION) < 9.2,
+    reason='Deadlock test requires version 9.2 or higher (make sure POSTGRES_VERSION is set)',
+)
 def test_deadlock(aggregator, dd_run_check, integration_check, pg_instance):
     check = integration_check(pg_instance)
-
     check._connect()
- 
     cursor = check.db.cursor()
+
     def wait(conn):
         while True:
             state = conn.poll()

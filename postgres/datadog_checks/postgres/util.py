@@ -95,7 +95,7 @@ QUERY_PG_STAT_DATABASE = {
     """.strip(),
     'columns': [
         {'name': 'db', 'type': 'tag'},
-        {'name': 'postgres.deadlocks.count', 'type': 'monotonic_count'},
+        {'name': 'postgresql.deadlocks.count', 'type': 'monotonic_count'},
     ],
 }
 
