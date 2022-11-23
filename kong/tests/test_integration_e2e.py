@@ -31,7 +31,7 @@ EXPECTED_METRICS = [
 EXPECTED_METRICS_V3 = [
     'kong.memory.lua.shared_dict.bytes',
     'kong.memory.lua.shared_dict.total_bytes',
-    'kong.nginx.http.connections.total',
+    'kong.nginx.connections.total',
 ]
 
 DATABASES = ['reachable']
