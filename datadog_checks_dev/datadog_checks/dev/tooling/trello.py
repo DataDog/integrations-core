@@ -59,7 +59,7 @@ class TrelloClient:
             'team/container-app': 'Container App',
             'team/integrations': 'Integrations',
             'team/database-monitoring': 'Database Monitoring',
-            'team/plaftorm-integrations': 'Platform Integrations',
+            'team/platform-integrations': 'Platform Integrations',
             'team/agent-security': 'Runtime-Security',
             'team/network-device-monitoring': 'Network Device Monitoring',
             'team/remote-config': 'Remote-Config',
