@@ -6,7 +6,7 @@ from mock import MagicMock, patch
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.constants import ServiceCheck
-from datadog_checks.dev.testing import requires_py2, requires_py3
+from datadog_checks.dev.testing import requires_py2, requires_py3, requires_unix
 
 
 class MemrayCheck(AgentCheck):
@@ -35,6 +35,7 @@ class MemrayCheck(AgentCheck):
     ],
 )
 @requires_py3
+@requires_unix
 def test_memray_windows(caplog, dd_run_check, aggregator, datadog_agent, init_config, instance_config):
     check = MemrayCheck('memory', init_config, [instance_config])
 
@@ -53,6 +54,7 @@ def test_memray_windows(caplog, dd_run_check, aggregator, datadog_agent, init_co
     ],
 )
 @requires_py2
+@requires_unix
 def test_memray_py2(caplog, dd_run_check, aggregator, datadog_agent, init_config, instance_config):
     check = MemrayCheck('memory', init_config, [instance_config])
 
@@ -87,6 +89,7 @@ def test_memray_py2(caplog, dd_run_check, aggregator, datadog_agent, init_config
     ],
 )
 @requires_py3
+@requires_unix
 def test_memray(caplog, dd_run_check, aggregator, datadog_agent, init_config, instance_config, native_traces):
     check = MemrayCheck('memory', init_config, [instance_config])
     tracker_mock = MagicMock()
