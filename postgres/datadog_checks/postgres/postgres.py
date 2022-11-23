@@ -76,8 +76,6 @@ class PostgreSql(AgentCheck):
 
         self.tags = copy.copy(self._config.tags)
         self.tags=[t for t in self.tags if not t.startswith("db:")]
-        if self._config.tag_replication_role:
-            self.tags.extend(["replication_role:{}".format(self._get_replication_role())])
 
         self._dynamic_queries = None
 
@@ -102,14 +100,15 @@ class PostgreSql(AgentCheck):
 
         queries = []
         if self.version >= V9_2:
-            QUERY_PG_STAT_DATABASE["query"] += " WHERE " + " AND ".join(
+            q_pg_stat_database = copy.deepcopy(QUERY_PG_STAT_DATABASE)
+            q_pg_stat_database["query"] += " WHERE " + " AND ".join(
                 "datname not ilike '{}'".format(db) for db in self._config.ignore_databases
             )
 
             if self._config.dbstrict:
-                QUERY_PG_STAT_DATABASE["query"] += " AND datname in('{}')".format(self._config.dbname)
+                q_pg_stat_database["query"] += " AND datname in('{}')".format(self._config.dbname)
 
-            queries.extend([QUERY_PG_STAT_DATABASE])
+            queries.extend([q_pg_stat_database])
 
         if not queries:
             self.log.debug("no dynamic queries defined")

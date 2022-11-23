@@ -116,4 +116,4 @@ commit;
         cursor = cursor, sql = deadlock_count_sql, binds = (DB_NAME, ), 
         expected_value = deadlocks_before + 1)
     
-    aggregator.assert_metric('postgresql.deadlocks.count', value = deadlocks_before + 1, tags = pg_instance["tags"] + [ "db:{}".format(DB_NAME), "port:{}".format(PORT)] )
+    aggregator.assert_metric('postgresql.deadlocks.count', value = deadlocks_before + 1, tags = pg_instance["tags"] + [ "db:{}".format(DB_NAME), "port:{}".format(PORT)], hostname = 'stubbed.hostname')
