@@ -2,12 +2,13 @@ import time
 from datetime import datetime, timedelta, timezone
 
 import jwt
+from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
 
 
 def main():
     with open('/home/run/priv.pem', 'rb') as f:
-        private_key = serialization.load_pem_private_key(f.read(), password=None)
+        private_key = serialization.load_pem_private_key(f.read(), password=None, backend=default_backend())
 
     serialized_private = private_key.private_bytes(
         encoding=serialization.Encoding.PEM,
