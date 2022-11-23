@@ -22,3 +22,5 @@ ROLE_HEALTH = "role.health"
 HOST_HEALTH = "host.health"
 CLUSTERS_RESOURCE_API = "ClustersResourceApi"
 SERVICES_RESOURCE_API = "ServicesResourceApi"
+
+# mock all of the methods and classes of the cloudera client
