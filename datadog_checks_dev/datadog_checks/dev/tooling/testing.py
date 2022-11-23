@@ -5,6 +5,7 @@ import json
 import os
 import platform
 import re
+import sys
 from fnmatch import fnmatch
 
 from ..fs import chdir, file_exists, path_join, read_file_binary, write_file_binary
@@ -125,11 +126,11 @@ def get_available_envs(check, sort=False, e2e_only=False, e2e_tests_only=False):
 
 def get_available_tox_envs(check, sort=False, e2e_only=False, e2e_tests_only=False):
     if e2e_tests_only:
-        tox_command = 'tox --listenvs-all -v'
+        tox_command = f'"{sys.executable}" -m tox --listenvs-all -v'
     elif e2e_only:
-        tox_command = 'tox --listenvs-all'
+        tox_command = f'"{sys.executable}" -m tox --listenvs-all'
     else:
-        tox_command = 'tox --listenvs'
+        tox_command = f'"{sys.executable}" -m tox --listenvs'
 
     with chdir(path_join(get_root(), check)):
         output = run_command(tox_command, capture='out')
@@ -238,7 +239,7 @@ def select_tox_envs(
 
 def get_hatch_env_data(check):
     with chdir(path_join(get_root(), check), env_vars=EnvVars({'NO_COLOR': '1'})):
-        return json.loads(run_command(['hatch', 'env', 'show', '--json'], capture='out').stdout)
+        return json.loads(run_command([sys.executable, '-m', 'hatch', 'env', 'show', '--json'], capture='out').stdout)
 
 
 def get_available_hatch_envs(check, sort=False, e2e_only=False, e2e_tests_only=False):
@@ -313,7 +314,7 @@ def display_check_envs(checks, changed_only):
     if hatch_checks:
         for check in checks:
             with chdir(path_join(get_root(), check)):
-                run_command(['hatch', 'env', 'show'])
+                run_command([sys.executable, '-m', 'hatch', 'env', 'show'])
 
 
 def prepare_test_commands(
@@ -369,6 +370,8 @@ def prepare_tox_test_commands(
     benchmark,
 ):
     command = [
+        sys.executable,
+        '-m',
         'tox',
         # so users won't get failures for our possibly strict CI requirements
         '--skip-missing-interpreters',
@@ -422,10 +425,12 @@ def prepare_hatch_test_commands(
     commands = []
     if 'lint' in env_names:
         env_names.remove('lint')
-        commands.append(['hatch', 'env', 'run', '--env', 'lint', '--', 'fmt' if format_style else 'all'])
+        commands.append(
+            [sys.executable, '-m', 'hatch', 'env', 'run', '--env', 'lint', '--', 'fmt' if format_style else 'all']
+        )
 
     if env_names:
-        command = ['hatch', '-v', 'env', 'run', '--ignore-compat']
+        command = [sys.executable, '-m', 'hatch', '-v', 'env', 'run', '--ignore-compat']
         for env_name in env_names:
             command.append('--env')
             command.append(env_name)
@@ -454,7 +459,7 @@ def prepare_hatch_test_commands(
         echo_info(f'Skipping forcing base dependency for check {check}')
 
     if force_env_rebuild:
-        commands.insert(0, ['hatch', 'env', 'prune'])
+        commands.insert(0, [sys.executable, '-m', 'hatch', 'env', 'prune'])
 
     if verbose:
         env_vars['HATCH_VERBOSE'] = str(verbose)

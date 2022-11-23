@@ -280,6 +280,7 @@ def test(
             break
 
     if not tests_ran:
+        # TODO: remove branch when tox is replaced by Hatch
         if format_style:
             echo_warning('Code formatting is not enabled!')
             echo_info('To enable it, set `dd_check_style = true` under the `[testenv]` section of `tox.ini`.')
