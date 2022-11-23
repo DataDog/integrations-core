@@ -1114,7 +1114,8 @@ class AgentCheck(object):
         the check is running. It's up to the python implementation to make sure
         cancel is thread safe and won't block.
         """
-        pass
+        self.log.info("Stopping memray.")
+        self._memray.__exit__(None, None, None)
 
     def run(self):
         # type: () -> str
