@@ -1,8 +1,6 @@
 # (C) Datadog, Inc. 2022-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from unittest import mock
-
 import pytest
 from mock import MagicMock, patch
 
@@ -40,7 +38,7 @@ class MemrayCheck(AgentCheck):
 def test_memray_windows(caplog, dd_run_check, aggregator, datadog_agent, init_config, instance_config):
     check = MemrayCheck('memory', init_config, [instance_config])
 
-    with mock.patch('sys.platform', 'windows'):
+    with patch('sys.platform', 'windows'):
         with pytest.raises(
             ConfigurationError, match='^`enable_memray` option is only supported on Linux and macOS\\.$'
         ):
