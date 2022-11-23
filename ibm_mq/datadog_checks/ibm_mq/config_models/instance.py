@@ -49,7 +49,6 @@ class InstanceConfig(BaseModel):
     override_hostname: Optional[bool]
     password: Optional[str] = Field(None, min_length=1)
     port: Optional[int]
-    process_isolation: Optional[bool]
     queue_manager: str = Field(..., min_length=1)
     queue_manager_process: Optional[str]
     queue_manager_timezone: Optional[str] = Field(None, min_length=1)
