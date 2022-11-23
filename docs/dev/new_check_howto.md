@@ -483,7 +483,7 @@ After you've created your Agent-based integration, refer to this list to make su
 
 - A `README.md` file with the correct format and contents.
 - A battery of tests verifying metrics collection.
-- A `metadata.csv` file listing all of the collected metrics
+- A `metadata.csv` file listing all of the collected metrics.
 - A complete `manifest.json` file.
 - If the integration collects Service Checks, the `service_checks.json` must be complete as well.
 
