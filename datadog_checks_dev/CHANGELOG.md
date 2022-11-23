@@ -5,9 +5,8 @@
 * [Added] Add a dummy --hide-memray-summary option to the pytest plugin. See [#13358](https://github.com/DataDog/integrations-core/pull/13358).
 * [Added] Add an option to show the memray report. See [#13351](https://github.com/DataDog/integrations-core/pull/13351).
 * [Fixed] Support isolated installation. See [#13366](https://github.com/DataDog/integrations-core/pull/13366).
-* [Fixed] Add a dummy --memray option to the pytest plugin. See [#13352](https://github.com/DataDog/integrations-core/pull/13352).
 * [Fixed] Allow `bench` as an env name for running benchmarks with hatch. See [#13316](https://github.com/DataDog/integrations-core/pull/13316).
-* [Fixed] Add py2 tests for sonarqube. See [#13303](https://github.com/DataDog/integrations-core/pull/13303).
+* [Fixed] Consider `hatch.toml` file in testable files for PR tests to run. See [#13303](https://github.com/DataDog/integrations-core/pull/13303).
 
 ## 17.3.2 / 2022-11-08
 
