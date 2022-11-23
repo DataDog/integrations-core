@@ -520,7 +520,7 @@ class AgentCheck(object):
 
             import memray
 
-            self._memray = memray.Tracker(output_file, native_traces=native_mode)
+            self._memray = memray.Tracker(file_name=output_file, native_traces=native_mode)
             self._memray.__enter__()
 
     @staticmethod
