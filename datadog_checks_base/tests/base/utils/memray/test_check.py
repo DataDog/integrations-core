@@ -93,6 +93,7 @@ def test_memray(caplog, dd_run_check, aggregator, datadog_agent, init_config, in
 
     with patch("memray.Tracker", return_value=tracker_mock) as mock:
         dd_run_check(check)
+        dd_run_check(check)
 
     mock.assert_called_with(file_name="my-file", native_traces=native_traces)
     tracker_mock.__enter__.assert_called_once()
