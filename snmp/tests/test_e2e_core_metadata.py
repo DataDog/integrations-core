@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import json
 import pprint
 
 import pytest
@@ -23,7 +24,8 @@ def get_events(aggregator):
 
 
 def assert_metadata_events(aggregator, events):
-    assert events == get_events(aggregator)
+    actual_events = get_events(aggregator)
+    assert events == actual_events, "ACTUAL EVENTS: " + json.dumps(actual_events, indent=4)
 
 
 def assert_device_metadata(aggregator, device_metadata):
@@ -59,8 +61,8 @@ def test_e2e_core_metadata_f5(dd_agent_check):
             u'devices': [
                 {
                     u'description': u'BIG-IP Virtual Edition : Linux '
-                    u'3.10.0-862.14.4.el7.ve.x86_64 : BIG-IP software '
-                    u'release 15.0.1, build 0.0.11',
+                                    u'3.10.0-862.14.4.el7.ve.x86_64 : BIG-IP software '
+                                    u'release 15.0.1, build 0.0.11',
                     u'id': device_id,
                     u'id_tags': [
                         u'device_namespace:default',
@@ -178,10 +180,10 @@ def test_e2e_core_metadata_cisco_3850(dd_agent_check):
     actual_device = event1['devices'][0]
     device = {
         u'description': u'Cisco IOS Software, IOS-XE Software, Catalyst L3 Switch '
-        u'Software (CAT3K_CAA-UNIVERSALK9-M), Version 03.06.06E RELEASE '
-        u'SOFTWARE (fc1) Technical Support: '
-        u'http://www.cisco.com/techsupport Copyright (c) 1986-2016 by '
-        u'Cisco Systems, Inc. Compiled Sat 17-Dec-',
+                        u'Software (CAT3K_CAA-UNIVERSALK9-M), Version 03.06.06E RELEASE '
+                        u'SOFTWARE (fc1) Technical Support: '
+                        u'http://www.cisco.com/techsupport Copyright (c) 1986-2016 by '
+                        u'Cisco Systems, Inc. Compiled Sat 17-Dec-',
         u'id': u'default:' + device_ip,
         u'id_tags': [u'device_namespace:default', u'snmp_device:' + device_ip],
         u'ip_address': device_ip,
@@ -362,9 +364,9 @@ def test_e2e_core_metadata_apc_ups(dd_agent_check):
 
     device = {
         'description': 'APC Web/SNMP Management Card (MB:v3.9.2 PF:v3.9.2 '
-        'PN:apc_hw02_aos_392.bin AF1:v3.7.2 AN1:apc_hw02_sumx_372.bin '
-        'MN:AP9619 HR:A10 SN: 5A1827E00000 MD:12/04/2007) (Embedded '
-        'PowerNet SNMP Agent SW v2.2 compatible)',
+                       'PN:apc_hw02_aos_392.bin AF1:v3.7.2 AN1:apc_hw02_sumx_372.bin '
+                       'MN:AP9619 HR:A10 SN: 5A1827E00000 MD:12/04/2007) (Embedded '
+                       'PowerNet SNMP Agent SW v2.2 compatible)',
         'id': 'default:' + device_ip,
         'id_tags': [
             'device_namespace:default',
@@ -412,7 +414,7 @@ def test_e2e_core_metadata_juniper_ex(dd_agent_check):
 
     expected_device = {
         u'description': u'Juniper Networks, Inc. ex2200-24t-4g internet router, kernel '
-        + u'JUNOS 10.2R1.8 #0: 2010-05-27 20:13:49 UTC',
+                        + u'JUNOS 10.2R1.8 #0: 2010-05-27 20:13:49 UTC',
         u'id': u'default:' + device_ip,
         u'id_tags': [
             u'device_namespace:default',
@@ -456,7 +458,7 @@ def test_e2e_core_metadata_juniper_mx(dd_agent_check):
 
     expected_device = {
         u'description': u'Juniper Networks, Inc. mx480 internet router, kernel JUNOS 11.2R1.10 '
-        + u'#0: 2011-07-29 07:15:34 UTC',
+                        + u'#0: 2011-07-29 07:15:34 UTC',
         u'id': u'default:' + device_ip,
         u'id_tags': [
             u'device_namespace:default',
@@ -500,7 +502,7 @@ def test_e2e_core_metadata_juniper_srx(dd_agent_check):
 
     expected_device = {
         u'description': u'Juniper Networks, Inc. srx3400 internet router, kernel JUNOS '
-        + u'10.4R3.4 #0: 2011-03-19 22:06:23 UTC',
+                        + u'10.4R3.4 #0: 2011-03-19 22:06:23 UTC',
         u'id': u'default:' + device_ip,
         u'id_tags': [
             u'device_namespace:default',
@@ -910,3 +912,68 @@ def test_e2e_core_metadata_isilon(dd_agent_check):
         'version': '8.2.0.0',
     }
     assert_device_metadata(aggregator, device)
+
+
+def test_e2e_core_metadata_aos_lldp(dd_agent_check):
+    config = common.generate_container_instance_config([])
+    instance = config['instances'][0]
+    instance.update(
+        {
+            'community_string': 'aos-lldp',
+            'loader': 'core',
+            'collect_topology': True,
+        }
+    )
+
+    aggregator = dd_agent_check(config, rate=False)
+
+    device_ip = instance['ip_address']
+    device_id = u'default:' + device_ip
+
+    topology_link1 = {
+        "local": {
+            "device": {
+                "id": "default:172.18.0.2",
+                "id_type": "ndm"
+            },
+            "interface": {
+                "id": "e1"
+            }
+        },
+        "remote": {
+            "device": {
+                "id": "00:80:9f:85:78:8e",
+                "id_type": "mac_address"
+            },
+            "interface": {
+                "id": "00:80:9f:85:78:8e",
+                "id_type": "mac_address"
+            }
+        }
+    }
+    topology_link2 = {
+        "local": {
+            "device": {
+                "id": "default:172.18.0.2",
+                "id_type": "ndm"
+            },
+            "interface": {
+                "id": "e11"
+            }
+        },
+        "remote": {
+            "device": {
+                "id": "00:80:9f:86:0d:d8",
+                "id_type": "mac_address"
+            },
+            "interface": {
+                "id": "00:80:9f:86:0d:d8",
+                "id_type": "mac_address"
+            }
+        }
+    }
+    events = get_events(aggregator)
+    pprint.pprint("TOPOLOGY LINKS: " + json.dumps(events[0]['links'], indent=4))
+
+    assert events[0]['links'][0] == topology_link1
+    assert events[0]['links'][1] == topology_link2
