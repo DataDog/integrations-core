@@ -2,10 +2,10 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from six import PY2
+from datadog_checks.cloudera.client import ClouderaClient
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 
-from .client_factory import make_api_client
 from .common import (
     API_ENTITY_STATUS,
     CAN_CONNECT,
@@ -16,9 +16,10 @@ from .common import (
     SERVICES_RESOURCE_API,
 )
 from .queries import TIMESERIES_QUERIES
+from .config_models import ConfigMixin
 
 
-class ClouderaCheck(AgentCheck):
+class ClouderaCheck(AgentCheck, ConfigMixin):
     __NAMESPACE__ = 'cloudera'
 
     def __init__(self, name, init_config, instances):
@@ -30,13 +31,21 @@ class ClouderaCheck(AgentCheck):
             )
 
         super(ClouderaCheck, self).__init__(name, init_config, instances)
+        self.client = None
 
-        self.client, self._error = make_api_client(self, self.instance)
-        if self.client is None:
-            self.log.error(f"Cloudera API Client is none: {self._error}")
+        self.check_initializations.append(self._create_client)
+
+    def _create_client(self):
+        try:
+            client = ClouderaClient(username=self.config.workload_username, password=self.config.workload_password, api_url=self.config.api_url)
+        except Exception as e:
+            self.log.error(f"Cloudera API Client is none: {e}")
             self.service_check(CAN_CONNECT, AgentCheck.CRITICAL)
+            raise
+        
+        self.client = client
+        self.custom_tags = self.config.tags  # TODO: Don't need self.custom_tags
 
-        self.custom_tags = self.instance.get("tags", [])
 
     def run_timeseries_checks(self):
         # For each timeseries query, get the metrics
