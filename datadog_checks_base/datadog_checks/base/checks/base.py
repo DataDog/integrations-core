@@ -1176,7 +1176,7 @@ class AgentCheck(object):
 
                 if self._memray_remaining_iterations <= 0:
                     self.log.info("Stopping memray.")
-                    self._memray.__exit__()
+                    self._memray.__exit__(None, None, None)
                     self._memray = None
 
         return error_report
