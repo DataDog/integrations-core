@@ -1,0 +1,1411 @@
+{
+  "items": [
+    {
+      "healthChecks": [
+        {
+          "name": "HOST_AGENT_CERTIFICATE_EXPIRY",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_AGENT_LOG_DIRECTORY_FREE_SPACE",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_AGENT_PARCEL_DIRECTORY_FREE_SPACE",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_AGENT_PROCESS_DIRECTORY_FREE_SPACE",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_AVAILABLE_ENTROPY",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_CLOCK_OFFSET",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_DNS_RESOLUTION",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_MEMORY_SWAPPING",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_NETWORK_FRAME_ERRORS",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_NETWORK_INTERFACES_SLOW_MODE",
+          "summary": "DISABLED",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_SCM_HEALTH",
+          "summary": "GOOD",
+          "suppressed": false
+        }
+      ],
+      "roleRefs": [
+        {
+          "serviceName": "MGMT",
+          "roleName": "EVENTSERVER",
+          "healthSummary": "GOOD",
+          "roleStatus": "STARTED"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "hue",
+          "roleName": "hue-HUE_SERVER-7d0b6bba5cf23b4729586ee8d35ab766",
+          "healthSummary": "GOOD",
+          "roleStatus": "STARTED"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "data_context_connector-8617",
+          "roleName": "datadefdc267-GATEWAY-7d0b6bba5cf23b4729586ee8d35ab766",
+          "healthSummary": "GOOD",
+          "roleStatus": "NA"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "hue",
+          "roleName": "hue-KT_RENEWER-7d0b6bba5cf23b4729586ee8d35ab766",
+          "healthSummary": "GOOD",
+          "roleStatus": "STARTED"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "queuemanager",
+          "roleName": "queuc8af8526-QUEUEMANAGER_WEBAPP-7d0b6bba5cf23b4729586ee8d35ab76",
+          "healthSummary": "GOOD",
+          "roleStatus": "STARTED"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "hdfs",
+          "roleName": "hdfs-GATEWAY-7d0b6bba5cf23b4729586ee8d35ab766",
+          "healthSummary": "GOOD",
+          "roleStatus": "NA"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "hbase",
+          "roleName": "hbase-GATEWAY-7d0b6bba5cf23b4729586ee8d35ab766",
+          "healthSummary": "GOOD",
+          "roleStatus": "NA"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "hue",
+          "roleName": "hue-HUE_LOAD_BALANCER-7d0b6bba5cf23b4729586ee8d35ab766",
+          "healthSummary": "GOOD",
+          "roleStatus": "STARTED"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "knox-e428",
+          "roleName": "knox-e428-KNOX_GATEWAY-7d0b6bba5cf23b4729586ee8d35ab766",
+          "healthSummary": "GOOD",
+          "roleStatus": "STARTED"
+        },
+        {
+          "serviceName": "MGMT",
+          "roleName": "ALERTPUBLISHER",
+          "healthSummary": "GOOD",
+          "roleStatus": "STARTED"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "yarn",
+          "roleName": "yarn-GATEWAY-7d0b6bba5cf23b4729586ee8d35ab766",
+          "healthSummary": "GOOD",
+          "roleStatus": "NA"
+        },
+        {
+          "serviceName": "MGMT",
+          "roleName": "TELEMETRYPUBLISHER",
+          "healthSummary": "GOOD",
+          "roleStatus": "STARTED"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "queuemanager",
+          "roleName": "queuemanager-QUEUEMANAGER_STORE-7d0b6bba5cf23b4729586ee8d35ab766",
+          "healthSummary": "GOOD",
+          "roleStatus": "STARTED"
+        },
+        {
+          "serviceName": "MGMT",
+          "roleName": "HOSTMONITOR",
+          "healthSummary": "GOOD",
+          "roleStatus": "STARTED"
+        },
+        {
+          "serviceName": "MGMT",
+          "roleName": "SERVICEMONITOR",
+          "healthSummary": "GOOD",
+          "roleStatus": "STARTED"
+        }
+      ],
+      "maintenanceOwners": [],
+      "hostId": "d8623d9457f4db06c5637c4fd4c02f5d",
+      "ipAddress": "10.10.0.14",
+      "hostname": "cod--qfdcinkqrzw-gateway0.agent-in.jfha-h5rc.a0.cloudera.site",
+      "rackId": "/ap-northeast-1d",
+      "hostUrl": "https://cod--qfdcinkqrzw-gateway.agent-in.jfha-h5rc.a0.cloudera.site/cmf/hostRedirect/d8623d9457f4db06c5637c4fd4c02f5d",
+      "lastHeartbeat": "2022-11-23T22:24:34.308Z",
+      "healthSummary": "GOOD",
+      "maintenanceMode": false,
+      "commissionState": "COMMISSIONED",
+      "numCores": 8,
+      "numPhysicalCores": 4,
+      "totalPhysMemBytes": 33079799808,
+      "entityStatus": "GOOD_HEALTH",
+      "clusterRef": {
+        "clusterName": "cod--qfdcinkqrzw",
+        "displayName": "cod--qfdcinkqrzw"
+      },
+      "distribution": {
+        "distributionType": "RHEL7",
+        "name": "centos",
+        "version": "7.9.2009"
+      },
+      "tags": [
+        {
+          "name": "_cldr_cm_host_template_name",
+          "value": "gateway"
+        }
+      ]
+    },
+    {
+      "healthChecks": [
+        {
+          "name": "HOST_AGENT_CERTIFICATE_EXPIRY",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_AGENT_LOG_DIRECTORY_FREE_SPACE",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_AGENT_PARCEL_DIRECTORY_FREE_SPACE",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_AGENT_PROCESS_DIRECTORY_FREE_SPACE",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_AVAILABLE_ENTROPY",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_CLOCK_OFFSET",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_DNS_RESOLUTION",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_MEMORY_SWAPPING",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_NETWORK_FRAME_ERRORS",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_NETWORK_INTERFACES_SLOW_MODE",
+          "summary": "DISABLED",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_SCM_HEALTH",
+          "summary": "GOOD",
+          "suppressed": false
+        }
+      ],
+      "roleRefs": [
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "hdfs",
+          "roleName": "hdfs-BALANCER-3bc8f544ef0c15a373bbe9f9790fefba",
+          "healthSummary": "GOOD",
+          "roleStatus": "NA"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "yarn",
+          "roleName": "yarn-JOBHISTORY-3bc8f544ef0c15a373bbe9f9790fefba",
+          "healthSummary": "GOOD",
+          "roleStatus": "STARTED"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "hdfs",
+          "roleName": "hdfs-JOURNALNODE-3bc8f544ef0c15a373bbe9f9790fefba",
+          "healthSummary": "GOOD",
+          "roleStatus": "STARTED"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "data_context_connector-8617",
+          "roleName": "datadefdc267-GATEWAY-3bc8f544ef0c15a373bbe9f9790fefba",
+          "healthSummary": "GOOD",
+          "roleStatus": "NA"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "zookeeper-e52d",
+          "roleName": "zookeeper-e52d-SERVER-3bc8f544ef0c15a373bbe9f9790fefba",
+          "healthSummary": "GOOD",
+          "roleStatus": "STARTED"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "hdfs",
+          "roleName": "hdfs-GATEWAY-3bc8f544ef0c15a373bbe9f9790fefba",
+          "healthSummary": "GOOD",
+          "roleStatus": "NA"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "hbase",
+          "roleName": "hbase-HBASERESTSERVER-3bc8f544ef0c15a373bbe9f9790fefba",
+          "healthSummary": "GOOD",
+          "roleStatus": "STARTED"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "hbase",
+          "roleName": "hbase-GATEWAY-3bc8f544ef0c15a373bbe9f9790fefba",
+          "healthSummary": "GOOD",
+          "roleStatus": "NA"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "yarn",
+          "roleName": "yarn-GATEWAY-3bc8f544ef0c15a373bbe9f9790fefba",
+          "healthSummary": "GOOD",
+          "roleStatus": "NA"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "omid",
+          "roleName": "omid-OMID_TSO-3bc8f544ef0c15a373bbe9f9790fefba",
+          "healthSummary": "GOOD",
+          "roleStatus": "STARTED"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "hbase",
+          "roleName": "hbase-HBASETHRIFTSERVER-3bc8f544ef0c15a373bbe9f9790fefba",
+          "healthSummary": "GOOD",
+          "roleStatus": "STARTED"
+        }
+      ],
+      "maintenanceOwners": [],
+      "hostId": "96efbf3e7279bf25ae44fe0a6398ee97",
+      "ipAddress": "10.10.1.14",
+      "hostname": "cod--qfdcinkqrzw-leader0.agent-in.jfha-h5rc.a0.cloudera.site",
+      "rackId": "/ap-northeast-1a",
+      "hostUrl": "https://cod--qfdcinkqrzw-gateway.agent-in.jfha-h5rc.a0.cloudera.site/cmf/hostRedirect/96efbf3e7279bf25ae44fe0a6398ee97",
+      "lastHeartbeat": "2022-11-23T22:24:34.957Z",
+      "healthSummary": "GOOD",
+      "maintenanceMode": false,
+      "commissionState": "COMMISSIONED",
+      "numCores": 8,
+      "numPhysicalCores": 4,
+      "totalPhysMemBytes": 33079799808,
+      "entityStatus": "GOOD_HEALTH",
+      "clusterRef": {
+        "clusterName": "cod--qfdcinkqrzw",
+        "displayName": "cod--qfdcinkqrzw"
+      },
+      "distribution": {
+        "distributionType": "RHEL7",
+        "name": "centos",
+        "version": "7.9.2009"
+      },
+      "tags": [
+        {
+          "name": "_cldr_cm_host_template_name",
+          "value": "leader"
+        }
+      ]
+    },
+    {
+      "healthChecks": [
+        {
+          "name": "HOST_AGENT_CERTIFICATE_EXPIRY",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_AGENT_LOG_DIRECTORY_FREE_SPACE",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_AGENT_PARCEL_DIRECTORY_FREE_SPACE",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_AGENT_PROCESS_DIRECTORY_FREE_SPACE",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_AVAILABLE_ENTROPY",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_CLOCK_OFFSET",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_DNS_RESOLUTION",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_MEMORY_SWAPPING",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_NETWORK_FRAME_ERRORS",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_NETWORK_INTERFACES_SLOW_MODE",
+          "summary": "DISABLED",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_SCM_HEALTH",
+          "summary": "GOOD",
+          "suppressed": false
+        }
+      ],
+      "roleRefs": [
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "yarn",
+          "roleName": "yarn-RESOURCEMANAGER-6e88fa1a7ad969e10ea41365cba9abc5",
+          "healthSummary": "BAD",
+          "roleStatus": "BUSY"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "yarn",
+          "roleName": "yarn-GATEWAY-6e88fa1a7ad969e10ea41365cba9abc5",
+          "healthSummary": "GOOD",
+          "roleStatus": "NA"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "hbase",
+          "roleName": "hbase-GATEWAY-6e88fa1a7ad969e10ea41365cba9abc5",
+          "healthSummary": "GOOD",
+          "roleStatus": "NA"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "hdfs",
+          "roleName": "hdfs-GATEWAY-6e88fa1a7ad969e10ea41365cba9abc5",
+          "healthSummary": "GOOD",
+          "roleStatus": "NA"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "hdfs",
+          "roleName": "hdfs-NAMENODE-6e88fa1a7ad969e10ea41365cba9abc5",
+          "healthSummary": "GOOD",
+          "roleStatus": "STARTED"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "data_context_connector-8617",
+          "roleName": "datadefdc267-GATEWAY-6e88fa1a7ad969e10ea41365cba9abc5",
+          "healthSummary": "GOOD",
+          "roleStatus": "NA"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "hbase",
+          "roleName": "hbase-MASTER-6e88fa1a7ad969e10ea41365cba9abc5",
+          "healthSummary": "BAD",
+          "roleStatus": "STARTED"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "zookeeper-e52d",
+          "roleName": "zookeeper-e52d-SERVER-6e88fa1a7ad969e10ea41365cba9abc5",
+          "healthSummary": "GOOD",
+          "roleStatus": "STARTED"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "hdfs",
+          "roleName": "hdfs-FAILOVERCONTROLLER-6e88fa1a7ad969e10ea41365cba9abc5",
+          "healthSummary": "GOOD",
+          "roleStatus": "STOPPED"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "hdfs",
+          "roleName": "hdfs-JOURNALNODE-6e88fa1a7ad969e10ea41365cba9abc5",
+          "healthSummary": "GOOD",
+          "roleStatus": "STARTED"
+        }
+      ],
+      "maintenanceOwners": [],
+      "hostId": "759451867dfde961d6adbeb21d9c13f9",
+      "ipAddress": "10.10.0.138",
+      "hostname": "cod--qfdcinkqrzw-master0.agent-in.jfha-h5rc.a0.cloudera.site",
+      "rackId": "/ap-northeast-1d",
+      "hostUrl": "https://cod--qfdcinkqrzw-gateway.agent-in.jfha-h5rc.a0.cloudera.site/cmf/hostRedirect/759451867dfde961d6adbeb21d9c13f9",
+      "lastHeartbeat": "2022-11-23T22:24:33.778Z",
+      "healthSummary": "GOOD",
+      "maintenanceMode": false,
+      "commissionState": "COMMISSIONED",
+      "numCores": 8,
+      "numPhysicalCores": 4,
+      "totalPhysMemBytes": 33079799808,
+      "entityStatus": "GOOD_HEALTH",
+      "clusterRef": {
+        "clusterName": "cod--qfdcinkqrzw",
+        "displayName": "cod--qfdcinkqrzw"
+      },
+      "distribution": {
+        "distributionType": "RHEL7",
+        "name": "centos",
+        "version": "7.9.2009"
+      },
+      "tags": [
+        {
+          "name": "_cldr_cm_host_template_name",
+          "value": "master"
+        }
+      ]
+    },
+    {
+      "healthChecks": [
+        {
+          "name": "HOST_AGENT_CERTIFICATE_EXPIRY",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_AGENT_LOG_DIRECTORY_FREE_SPACE",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_AGENT_PARCEL_DIRECTORY_FREE_SPACE",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_AGENT_PROCESS_DIRECTORY_FREE_SPACE",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_AVAILABLE_ENTROPY",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_CLOCK_OFFSET",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_DNS_RESOLUTION",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_MEMORY_SWAPPING",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_NETWORK_FRAME_ERRORS",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_NETWORK_INTERFACES_SLOW_MODE",
+          "summary": "DISABLED",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_SCM_HEALTH",
+          "summary": "GOOD",
+          "suppressed": false
+        }
+      ],
+      "roleRefs": [
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "hbase",
+          "roleName": "hbase-MASTER-dbb26169f4e1fe9a387fcc5bd5bfd6af",
+          "healthSummary": "BAD",
+          "roleStatus": "STARTED"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "hdfs",
+          "roleName": "hdfs-JOURNALNODE-dbb26169f4e1fe9a387fcc5bd5bfd6af",
+          "healthSummary": "GOOD",
+          "roleStatus": "STARTED"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "zookeeper-e52d",
+          "roleName": "zookeeper-e52d-SERVER-dbb26169f4e1fe9a387fcc5bd5bfd6af",
+          "healthSummary": "BAD",
+          "roleStatus": "STARTED"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "hdfs",
+          "roleName": "hdfs-FAILOVERCONTROLLER-dbb26169f4e1fe9a387fcc5bd5bfd6af",
+          "healthSummary": "GOOD",
+          "roleStatus": "STOPPED"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "yarn",
+          "roleName": "yarn-RESOURCEMANAGER-dbb26169f4e1fe9a387fcc5bd5bfd6af",
+          "healthSummary": "BAD",
+          "roleStatus": "STARTED"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "yarn",
+          "roleName": "yarn-GATEWAY-dbb26169f4e1fe9a387fcc5bd5bfd6af",
+          "healthSummary": "GOOD",
+          "roleStatus": "NA"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "data_context_connector-8617",
+          "roleName": "datadefdc267-GATEWAY-dbb26169f4e1fe9a387fcc5bd5bfd6af",
+          "healthSummary": "GOOD",
+          "roleStatus": "NA"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "hdfs",
+          "roleName": "hdfs-GATEWAY-dbb26169f4e1fe9a387fcc5bd5bfd6af",
+          "healthSummary": "GOOD",
+          "roleStatus": "NA"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "hdfs",
+          "roleName": "hdfs-NAMENODE-dbb26169f4e1fe9a387fcc5bd5bfd6af",
+          "healthSummary": "GOOD",
+          "roleStatus": "STARTED"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "hbase",
+          "roleName": "hbase-GATEWAY-dbb26169f4e1fe9a387fcc5bd5bfd6af",
+          "healthSummary": "GOOD",
+          "roleStatus": "NA"
+        }
+      ],
+      "maintenanceOwners": [],
+      "hostId": "119115ab851aefe1429860d4255b3fab",
+      "ipAddress": "10.10.2.182",
+      "hostname": "cod--qfdcinkqrzw-master1.agent-in.jfha-h5rc.a0.cloudera.site",
+      "rackId": "/ap-northeast-1c",
+      "hostUrl": "https://cod--qfdcinkqrzw-gateway.agent-in.jfha-h5rc.a0.cloudera.site/cmf/hostRedirect/119115ab851aefe1429860d4255b3fab",
+      "lastHeartbeat": "2022-11-23T22:24:33.786Z",
+      "healthSummary": "GOOD",
+      "maintenanceMode": false,
+      "commissionState": "COMMISSIONED",
+      "numCores": 8,
+      "numPhysicalCores": 4,
+      "totalPhysMemBytes": 33079799808,
+      "entityStatus": "GOOD_HEALTH",
+      "clusterRef": {
+        "clusterName": "cod--qfdcinkqrzw",
+        "displayName": "cod--qfdcinkqrzw"
+      },
+      "distribution": {
+        "distributionType": "RHEL7",
+        "name": "centos",
+        "version": "7.9.2009"
+      },
+      "tags": [
+        {
+          "name": "_cldr_cm_host_template_name",
+          "value": "master"
+        }
+      ]
+    },
+    {
+      "healthChecks": [
+        {
+          "name": "HOST_AGENT_CERTIFICATE_EXPIRY",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_AGENT_LOG_DIRECTORY_FREE_SPACE",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_AGENT_PARCEL_DIRECTORY_FREE_SPACE",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_AGENT_PROCESS_DIRECTORY_FREE_SPACE",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_AVAILABLE_ENTROPY",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_CLOCK_OFFSET",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_DNS_RESOLUTION",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_MEMORY_SWAPPING",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_NETWORK_FRAME_ERRORS",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_NETWORK_INTERFACES_SLOW_MODE",
+          "summary": "DISABLED",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_SCM_HEALTH",
+          "summary": "GOOD",
+          "suppressed": false
+        }
+      ],
+      "roleRefs": [
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "hbase",
+          "roleName": "hbase-REGIONSERVER-145da1565b8e2c4165145d9ecc0c784e",
+          "healthSummary": "GOOD",
+          "roleStatus": "STARTED"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "phoenix",
+          "roleName": "phoenix-PHOENIX_QUERY_SERVER-145da1565b8e2c4165145d9ecc0c784e",
+          "healthSummary": "GOOD",
+          "roleStatus": "STARTED"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "hdfs",
+          "roleName": "hdfs-DATANODE-145da1565b8e2c4165145d9ecc0c784e",
+          "healthSummary": "BAD",
+          "roleStatus": "STARTED"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "yarn",
+          "roleName": "yarn-NODEMANAGER-145da1565b8e2c4165145d9ecc0c784e",
+          "healthSummary": "BAD",
+          "roleStatus": "STARTED"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "hdfs",
+          "roleName": "hdfs-GATEWAY-145da1565b8e2c4165145d9ecc0c784e",
+          "healthSummary": "GOOD",
+          "roleStatus": "NA"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "yarn",
+          "roleName": "yarn-GATEWAY-145da1565b8e2c4165145d9ecc0c784e",
+          "healthSummary": "GOOD",
+          "roleStatus": "NA"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "hbase",
+          "roleName": "hbase-GATEWAY-145da1565b8e2c4165145d9ecc0c784e",
+          "healthSummary": "GOOD",
+          "roleStatus": "NA"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "data_context_connector-8617",
+          "roleName": "datadefdc267-GATEWAY-145da1565b8e2c4165145d9ecc0c784e",
+          "healthSummary": "GOOD",
+          "roleStatus": "NA"
+        }
+      ],
+      "maintenanceOwners": [],
+      "hostId": "ed528836ae33e47e6657b95373571c33",
+      "ipAddress": "10.10.0.193",
+      "hostname": "cod--qfdcinkqrzw-worker0.agent-in.jfha-h5rc.a0.cloudera.site",
+      "rackId": "/ap-northeast-1d",
+      "hostUrl": "https://cod--qfdcinkqrzw-gateway.agent-in.jfha-h5rc.a0.cloudera.site/cmf/hostRedirect/ed528836ae33e47e6657b95373571c33",
+      "lastHeartbeat": "2022-11-23T22:24:33.699Z",
+      "healthSummary": "GOOD",
+      "maintenanceMode": false,
+      "commissionState": "COMMISSIONED",
+      "numCores": 8,
+      "numPhysicalCores": 4,
+      "totalPhysMemBytes": 33079799808,
+      "entityStatus": "GOOD_HEALTH",
+      "clusterRef": {
+        "clusterName": "cod--qfdcinkqrzw",
+        "displayName": "cod--qfdcinkqrzw"
+      },
+      "distribution": {
+        "distributionType": "RHEL7",
+        "name": "centos",
+        "version": "7.9.2009"
+      },
+      "tags": [
+        {
+          "name": "_cldr_cm_host_template_name",
+          "value": "worker"
+        }
+      ]
+    },
+    {
+      "healthChecks": [
+        {
+          "name": "HOST_AGENT_CERTIFICATE_EXPIRY",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_AGENT_LOG_DIRECTORY_FREE_SPACE",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_AGENT_PARCEL_DIRECTORY_FREE_SPACE",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_AGENT_PROCESS_DIRECTORY_FREE_SPACE",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_AVAILABLE_ENTROPY",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_CLOCK_OFFSET",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_DNS_RESOLUTION",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_MEMORY_SWAPPING",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_NETWORK_FRAME_ERRORS",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_NETWORK_INTERFACES_SLOW_MODE",
+          "summary": "DISABLED",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_SCM_HEALTH",
+          "summary": "GOOD",
+          "suppressed": false
+        }
+      ],
+      "roleRefs": [
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "hbase",
+          "roleName": "hbase-GATEWAY-7e9a53b768c95833df424c7d7b0ae857",
+          "healthSummary": "GOOD",
+          "roleStatus": "NA"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "hdfs",
+          "roleName": "hdfs-GATEWAY-7e9a53b768c95833df424c7d7b0ae857",
+          "healthSummary": "GOOD",
+          "roleStatus": "NA"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "hbase",
+          "roleName": "hbase-REGIONSERVER-7e9a53b768c95833df424c7d7b0ae857",
+          "healthSummary": "GOOD",
+          "roleStatus": "STARTED"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "yarn",
+          "roleName": "yarn-GATEWAY-7e9a53b768c95833df424c7d7b0ae857",
+          "healthSummary": "GOOD",
+          "roleStatus": "NA"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "hdfs",
+          "roleName": "hdfs-DATANODE-7e9a53b768c95833df424c7d7b0ae857",
+          "healthSummary": "GOOD",
+          "roleStatus": "STARTED"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "yarn",
+          "roleName": "yarn-NODEMANAGER-7e9a53b768c95833df424c7d7b0ae857",
+          "healthSummary": "GOOD",
+          "roleStatus": "STARTED"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "data_context_connector-8617",
+          "roleName": "datadefdc267-GATEWAY-7e9a53b768c95833df424c7d7b0ae857",
+          "healthSummary": "GOOD",
+          "roleStatus": "NA"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "phoenix",
+          "roleName": "phoenix-PHOENIX_QUERY_SERVER-7e9a53b768c95833df424c7d7b0ae857",
+          "healthSummary": "GOOD",
+          "roleStatus": "STARTED"
+        }
+      ],
+      "maintenanceOwners": [],
+      "hostId": "22f6ab659c835d47bc13d6c8f3370110",
+      "ipAddress": "10.10.2.176",
+      "hostname": "cod--qfdcinkqrzw-worker1.agent-in.jfha-h5rc.a0.cloudera.site",
+      "rackId": "/ap-northeast-1c",
+      "hostUrl": "https://cod--qfdcinkqrzw-gateway.agent-in.jfha-h5rc.a0.cloudera.site/cmf/hostRedirect/22f6ab659c835d47bc13d6c8f3370110",
+      "lastHeartbeat": "2022-11-23T22:24:34.430Z",
+      "healthSummary": "GOOD",
+      "maintenanceMode": false,
+      "commissionState": "COMMISSIONED",
+      "numCores": 8,
+      "numPhysicalCores": 4,
+      "totalPhysMemBytes": 32727478272,
+      "entityStatus": "GOOD_HEALTH",
+      "clusterRef": {
+        "clusterName": "cod--qfdcinkqrzw",
+        "displayName": "cod--qfdcinkqrzw"
+      },
+      "distribution": {
+        "distributionType": "RHEL7",
+        "name": "centos",
+        "version": "7.9.2009"
+      },
+      "tags": [
+        {
+          "name": "_cldr_cm_host_template_name",
+          "value": "worker"
+        }
+      ]
+    },
+    {
+      "healthChecks": [
+        {
+          "name": "HOST_AGENT_CERTIFICATE_EXPIRY",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_AGENT_LOG_DIRECTORY_FREE_SPACE",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_AGENT_PARCEL_DIRECTORY_FREE_SPACE",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_AGENT_PROCESS_DIRECTORY_FREE_SPACE",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_AVAILABLE_ENTROPY",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_CLOCK_OFFSET",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_DNS_RESOLUTION",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_MEMORY_SWAPPING",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_NETWORK_FRAME_ERRORS",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_NETWORK_INTERFACES_SLOW_MODE",
+          "summary": "DISABLED",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_SCM_HEALTH",
+          "summary": "GOOD",
+          "suppressed": false
+        }
+      ],
+      "roleRefs": [
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "hbase",
+          "roleName": "hbase-REGIONSERVER-3c658ac6009daca54192736b1502fae1",
+          "healthSummary": "GOOD",
+          "roleStatus": "STARTED"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "hbase",
+          "roleName": "hbase-GATEWAY-3c658ac6009daca54192736b1502fae1",
+          "healthSummary": "GOOD",
+          "roleStatus": "NA"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "hdfs",
+          "roleName": "hdfs-GATEWAY-3c658ac6009daca54192736b1502fae1",
+          "healthSummary": "GOOD",
+          "roleStatus": "NA"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "phoenix",
+          "roleName": "phoenix-PHOENIX_QUERY_SERVER-3c658ac6009daca54192736b1502fae1",
+          "healthSummary": "GOOD",
+          "roleStatus": "STARTED"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "yarn",
+          "roleName": "yarn-GATEWAY-3c658ac6009daca54192736b1502fae1",
+          "healthSummary": "GOOD",
+          "roleStatus": "NA"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "data_context_connector-8617",
+          "roleName": "datadefdc267-GATEWAY-3c658ac6009daca54192736b1502fae1",
+          "healthSummary": "GOOD",
+          "roleStatus": "NA"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "hdfs",
+          "roleName": "hdfs-DATANODE-3c658ac6009daca54192736b1502fae1",
+          "healthSummary": "GOOD",
+          "roleStatus": "STARTED"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "yarn",
+          "roleName": "yarn-NODEMANAGER-3c658ac6009daca54192736b1502fae1",
+          "healthSummary": "GOOD",
+          "roleStatus": "STARTED"
+        }
+      ],
+      "maintenanceOwners": [],
+      "hostId": "49adda80d1b98e9262ee146fd7fd798b",
+      "ipAddress": "10.10.212.157",
+      "hostname": "cod--qfdcinkqrzw-worker2.agent-in.jfha-h5rc.a0.cloudera.site",
+      "rackId": "/ap-northeast-1c",
+      "hostUrl": "https://cod--qfdcinkqrzw-gateway.agent-in.jfha-h5rc.a0.cloudera.site/cmf/hostRedirect/49adda80d1b98e9262ee146fd7fd798b",
+      "lastHeartbeat": "2022-11-23T22:24:35.255Z",
+      "healthSummary": "GOOD",
+      "maintenanceMode": false,
+      "commissionState": "COMMISSIONED",
+      "numCores": 8,
+      "numPhysicalCores": 4,
+      "totalPhysMemBytes": 32727470080,
+      "entityStatus": "GOOD_HEALTH",
+      "clusterRef": {
+        "clusterName": "cod--qfdcinkqrzw",
+        "displayName": "cod--qfdcinkqrzw"
+      },
+      "distribution": {
+        "distributionType": "RHEL7",
+        "name": "centos",
+        "version": "7.9.2009"
+      },
+      "tags": [
+        {
+          "name": "_cldr_cm_host_template_name",
+          "value": "worker"
+        }
+      ]
+    },
+    {
+      "healthChecks": [
+        {
+          "name": "HOST_AGENT_CERTIFICATE_EXPIRY",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_AGENT_LOG_DIRECTORY_FREE_SPACE",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_AGENT_PARCEL_DIRECTORY_FREE_SPACE",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_AGENT_PROCESS_DIRECTORY_FREE_SPACE",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_AVAILABLE_ENTROPY",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_CLOCK_OFFSET",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_DNS_RESOLUTION",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_MEMORY_SWAPPING",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_NETWORK_FRAME_ERRORS",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_NETWORK_INTERFACES_SLOW_MODE",
+          "summary": "DISABLED",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_SCM_HEALTH",
+          "summary": "GOOD",
+          "suppressed": false
+        }
+      ],
+      "roleRefs": [
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "yarn",
+          "roleName": "yarn-NODEMANAGER-d51d3a03fc3294039de9c160b1013676",
+          "healthSummary": "GOOD",
+          "roleStatus": "STARTED"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "hdfs",
+          "roleName": "hdfs-GATEWAY-d51d3a03fc3294039de9c160b1013676",
+          "healthSummary": "GOOD",
+          "roleStatus": "NA"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "hdfs",
+          "roleName": "hdfs-DATANODE-d51d3a03fc3294039de9c160b1013676",
+          "healthSummary": "GOOD",
+          "roleStatus": "STARTED"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "data_context_connector-8617",
+          "roleName": "datadefdc267-GATEWAY-d51d3a03fc3294039de9c160b1013676",
+          "healthSummary": "GOOD",
+          "roleStatus": "NA"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "hbase",
+          "roleName": "hbase-REGIONSERVER-d51d3a03fc3294039de9c160b1013676",
+          "healthSummary": "GOOD",
+          "roleStatus": "STARTED"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "phoenix",
+          "roleName": "phoenix-PHOENIX_QUERY_SERVER-d51d3a03fc3294039de9c160b1013676",
+          "healthSummary": "GOOD",
+          "roleStatus": "STARTED"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "hbase",
+          "roleName": "hbase-GATEWAY-d51d3a03fc3294039de9c160b1013676",
+          "healthSummary": "GOOD",
+          "roleStatus": "NA"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "yarn",
+          "roleName": "yarn-GATEWAY-d51d3a03fc3294039de9c160b1013676",
+          "healthSummary": "GOOD",
+          "roleStatus": "NA"
+        }
+      ],
+      "maintenanceOwners": [],
+      "hostId": "88ae2611748383b5628d4aec94873da9",
+      "ipAddress": "10.10.1.177",
+      "hostname": "cod--qfdcinkqrzw-worker3.agent-in.jfha-h5rc.a0.cloudera.site",
+      "rackId": "/ap-northeast-1a",
+      "hostUrl": "https://cod--qfdcinkqrzw-gateway.agent-in.jfha-h5rc.a0.cloudera.site/cmf/hostRedirect/88ae2611748383b5628d4aec94873da9",
+      "lastHeartbeat": "2022-11-23T22:24:33.808Z",
+      "healthSummary": "GOOD",
+      "maintenanceMode": false,
+      "commissionState": "COMMISSIONED",
+      "numCores": 8,
+      "numPhysicalCores": 4,
+      "totalPhysMemBytes": 33079799808,
+      "entityStatus": "GOOD_HEALTH",
+      "clusterRef": {
+        "clusterName": "cod--qfdcinkqrzw",
+        "displayName": "cod--qfdcinkqrzw"
+      },
+      "distribution": {
+        "distributionType": "RHEL7",
+        "name": "centos",
+        "version": "7.9.2009"
+      },
+      "tags": [
+        {
+          "name": "_cldr_cm_host_template_name",
+          "value": "worker"
+        }
+      ]
+    },
+    {
+      "healthChecks": [
+        {
+          "name": "HOST_AGENT_CERTIFICATE_EXPIRY",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_AGENT_LOG_DIRECTORY_FREE_SPACE",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_AGENT_PARCEL_DIRECTORY_FREE_SPACE",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_AGENT_PROCESS_DIRECTORY_FREE_SPACE",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_AVAILABLE_ENTROPY",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_CLOCK_OFFSET",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_DNS_RESOLUTION",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_MEMORY_SWAPPING",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_NETWORK_FRAME_ERRORS",
+          "summary": "GOOD",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_NETWORK_INTERFACES_SLOW_MODE",
+          "summary": "DISABLED",
+          "suppressed": false
+        },
+        {
+          "name": "HOST_SCM_HEALTH",
+          "summary": "GOOD",
+          "suppressed": false
+        }
+      ],
+      "roleRefs": [
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "phoenix",
+          "roleName": "phoenix-PHOENIX_QUERY_SERVER-bf4b8e304dd0b549bcad6614d3129033",
+          "healthSummary": "GOOD",
+          "roleStatus": "STARTED"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "data_context_connector-8617",
+          "roleName": "datadefdc267-GATEWAY-bf4b8e304dd0b549bcad6614d3129033",
+          "healthSummary": "GOOD",
+          "roleStatus": "NA"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "hbase",
+          "roleName": "hbase-REGIONSERVER-bf4b8e304dd0b549bcad6614d3129033",
+          "healthSummary": "GOOD",
+          "roleStatus": "STARTED"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "yarn",
+          "roleName": "yarn-NODEMANAGER-bf4b8e304dd0b549bcad6614d3129033",
+          "healthSummary": "GOOD",
+          "roleStatus": "STARTED"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "hdfs",
+          "roleName": "hdfs-DATANODE-bf4b8e304dd0b549bcad6614d3129033",
+          "healthSummary": "GOOD",
+          "roleStatus": "STARTED"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "hdfs",
+          "roleName": "hdfs-GATEWAY-bf4b8e304dd0b549bcad6614d3129033",
+          "healthSummary": "GOOD",
+          "roleStatus": "NA"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "yarn",
+          "roleName": "yarn-GATEWAY-bf4b8e304dd0b549bcad6614d3129033",
+          "healthSummary": "GOOD",
+          "roleStatus": "NA"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "hbase",
+          "roleName": "hbase-GATEWAY-bf4b8e304dd0b549bcad6614d3129033",
+          "healthSummary": "GOOD",
+          "roleStatus": "NA"
+        }
+      ],
+      "maintenanceOwners": [],
+      "hostId": "9784d85849c7179b790d476c483fd905",
+      "ipAddress": "10.10.188.72",
+      "hostname": "cod--qfdcinkqrzw-worker4.agent-in.jfha-h5rc.a0.cloudera.site",
+      "rackId": "/ap-northeast-1d",
+      "hostUrl": "https://cod--qfdcinkqrzw-gateway.agent-in.jfha-h5rc.a0.cloudera.site/cmf/hostRedirect/9784d85849c7179b790d476c483fd905",
+      "lastHeartbeat": "2022-11-23T22:24:34.092Z",
+      "healthSummary": "GOOD",
+      "maintenanceMode": false,
+      "commissionState": "COMMISSIONED",
+      "numCores": 8,
+      "numPhysicalCores": 4,
+      "totalPhysMemBytes": 33079799808,
+      "entityStatus": "GOOD_HEALTH",
+      "clusterRef": {
+        "clusterName": "cod--qfdcinkqrzw",
+        "displayName": "cod--qfdcinkqrzw"
+      },
+      "distribution": {
+        "distributionType": "RHEL7",
+        "name": "centos",
+        "version": "7.9.2009"
+      },
+      "tags": [
+        {
+          "name": "_cldr_cm_host_template_name",
+          "value": "worker"
+        }
+      ]
+    }
+  ]
+}
