@@ -2,7 +2,8 @@
 
 ## 17.4.0 / 2022-11-23
 
-* [Added] Add a dummy --hide-memray-summary option to the pytest plugin. See [#13358](https://github.com/DataDog/integrations-core/pull/13358).
+* [Added] Add a dummy `--memray` option to the pytest plugin. See [#13352](https://github.com/DataDog/integrations-core/pull/13352).
+* [Added] Add a dummy `--hide-memray-summary` option to the pytest plugin. See [#13358](https://github.com/DataDog/integrations-core/pull/13358).
 * [Added] Add an option to show the memray report. See [#13351](https://github.com/DataDog/integrations-core/pull/13351).
 * [Fixed] Support isolated installation. See [#13366](https://github.com/DataDog/integrations-core/pull/13366).
 * [Fixed] Allow `bench` as an env name for running benchmarks with hatch. See [#13316](https://github.com/DataDog/integrations-core/pull/13316).
