@@ -16,14 +16,15 @@ class MemrayCheck(AgentCheck):
         super(MemrayCheck, self).__init__(*args, **kwargs)
         self.check_id = "test:123"
         self.tags = ['bar:baz']
+        self.metric = 0
         self.check_initializations.append(self.initialize)
 
     def initialize(self):
-        self.gauge('initialize', 0, tags=self.tags)
         self.log.debug('Initializing - %s - %s', self.name, self.check_id)
 
     def check(self, _):
-        self.gauge('metric', 0, tags=self.tags)
+        self.gauge('metric', self.metric, tags=self.tags)
+        self.metric += 1
         self.service_check('sc', ServiceCheck.OK, tags=self.tags)
 
 
@@ -67,21 +68,21 @@ def test_memray_py2(caplog, dd_run_check, aggregator, datadog_agent, init_config
     [
         pytest.param(
             {},
-            {'enable_memray': True, 'memray_file': 'my-file'},
+            {'enable_memray': True, 'memray_file': 'my-file', 'memray_iteration_count': 3},
             False,
             id='Instance-level config without native traces',
         ),
         pytest.param(
-            {'enable_memray': True, 'memray_file': 'my-file'}, {}, False, id='Init-level config without native traces'
+            {'enable_memray': True, 'memray_file': 'my-file', 'memray_iteration_count': 3}, {}, False, id='Init-level config without native traces'
         ),
         pytest.param(
             {},
-            {'enable_memray': True, 'memray_file': 'my-file', 'memray_native_mode': True},
+            {'enable_memray': True, 'memray_file': 'my-file', 'memray_native_mode': True, 'memray_iteration_count': 3},
             True,
             id='Instance-level config with native traces',
         ),
         pytest.param(
-            {'enable_memray': True, 'memray_file': 'my-file', 'memray_native_mode': True},
+            {'enable_memray': True, 'memray_file': 'my-file', 'memray_native_mode': True, 'memray_iteration_count': 3},
             {},
             True,
             id='Init-level config with native traces',
@@ -100,3 +101,14 @@ def test_memray(caplog, dd_run_check, aggregator, datadog_agent, init_config, in
 
     mock.assert_called_with(file_name="my-file", native_traces=native_traces)
     tracker_mock.__enter__.assert_called_once()
+    tracker_mock.__exit__.assert_not_called()
+
+    dd_run_check(check)
+
+    tracker_mock.__enter__.assert_called_once()
+    tracker_mock.__exit__.assert_called_once()
+
+    aggregator.assert_metric('memray.metric', value=0, tags=['bar:baz'])
+    aggregator.assert_metric('memray.metric', value=1, tags=['bar:baz'])
+    aggregator.assert_metric('memray.metric', value=2, tags=['bar:baz'])
+    aggregator.assert_all_metrics_covered()

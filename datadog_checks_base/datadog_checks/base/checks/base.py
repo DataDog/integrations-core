@@ -281,8 +281,9 @@ class AgentCheck(object):
         self._config_model_instance = None  # type: Any
         self._config_model_shared = None  # type: Any
 
-        # Memray context manager
+        # Memray
         self._memray = None
+        self._memray_remaining_iterations = None
 
         # Functions that will be called exactly once (if successful) before the first check run
         self.check_initializations = deque()  # type: Deque[Callable[[], None]]
@@ -519,9 +520,13 @@ class AgentCheck(object):
                 raise ConfigurationError('Setting `memray_file` must be provided to use memray.')
 
             import memray
-
+            # Default to 1h if min_collection_interval is set to 15s (the default value)
+            self._memray_remaining_iterations = self.instance.get('memray_iteration_count',
+                                                                  self.init_config.get('memray_iteration_count', 240))
             self._memray = memray.Tracker(file_name=output_file, native_traces=native_mode)
+            self.log.info("Enabling memray for {} iterations.".format(self._memray_remaining_iterations))
             self._memray.__enter__()
+
 
     @staticmethod
     def load_configuration_model(import_path, model_name, config):
@@ -1106,8 +1111,7 @@ class AgentCheck(object):
         the check is running. It's up to the python implementation to make sure
         cancel is thread safe and won't block.
         """
-        if self._memray:
-            self._memray.__exit__()
+        pass
 
     def run(self):
         # type: () -> str
@@ -1166,6 +1170,14 @@ class AgentCheck(object):
                         self.gauge(metric_name, value, tags=tags, raw=True)
 
                 self.metric_limiter.reset()
+
+            if self._memray:
+                self._memray_remaining_iterations -= 1
+
+                if self._memray_remaining_iterations <= 0:
+                    self.log.info("Stopping memray.")
+                    self._memray.__exit__()
+                    self._memray = None
 
         return error_report
 
