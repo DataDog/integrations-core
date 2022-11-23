@@ -973,7 +973,9 @@ def test_e2e_core_metadata_aos_lldp(dd_agent_check):
         }
     }
     events = get_events(aggregator)
-    pprint.pprint("TOPOLOGY LINKS: " + json.dumps(events[0]['links'], indent=4))
+
+    print("TOPOLOGY LINKS: " + json.dumps(events[0]['links'], indent=4))
 
     assert events[0]['links'][0] == topology_link1
     assert events[0]['links'][1] == topology_link2
+    assert len(events[0]['links']) == 13
