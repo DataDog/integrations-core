@@ -513,20 +513,23 @@ class AgentCheck(object):
             if sys.platform not in ("linux", "darwin"):
                 raise ConfigurationError("`enable_memray` option is only supported on Linux and macOS.")
 
-            output_file = self.instance.get('memray_file', self.init_config.get('memray_file'))
+            output_file = self.instance.get(
+                'memray_file', self.init_config.get('memray_file') + ".{}".format(self.check_id)
+            )
             native_mode = self.instance.get('memray_native_mode', self.init_config.get('memray_native_mode', False))
 
             if output_file is None:
                 raise ConfigurationError('Setting `memray_file` must be provided to use memray.')
 
             import memray
+
             # Default to 1h if min_collection_interval is set to 15s (the default value)
-            self._memray_remaining_iterations = self.instance.get('memray_iteration_count',
-                                                                  self.init_config.get('memray_iteration_count', 240))
+            self._memray_remaining_iterations = self.instance.get(
+                'memray_iteration_count', self.init_config.get('memray_iteration_count', 240)
+            )
             self._memray = memray.Tracker(file_name=output_file, native_traces=native_mode)
             self.log.info("Enabling memray for {} iterations.".format(self._memray_remaining_iterations))
             self._memray.__enter__()
-
 
     @staticmethod
     def load_configuration_model(import_path, model_name, config):

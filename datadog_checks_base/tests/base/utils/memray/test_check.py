@@ -73,7 +73,10 @@ def test_memray_py2(caplog, dd_run_check, aggregator, datadog_agent, init_config
             id='Instance-level config without native traces',
         ),
         pytest.param(
-            {'enable_memray': True, 'memray_file': 'my-file', 'memray_iteration_count': 3}, {}, False, id='Init-level config without native traces'
+            {'enable_memray': True, 'memray_file': 'my-file', 'memray_iteration_count': 3},
+            {},
+            False,
+            id='Init-level config without native traces',
         ),
         pytest.param(
             {},
