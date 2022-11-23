@@ -13,7 +13,7 @@ class MemrayCheck(AgentCheck):
     __NAMESPACE__ = 'memray'
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super(MemrayCheck, self).__init__(*args, **kwargs)
         self.check_id = "test:123"
         self.tags = ['bar:baz']
         self.check_initializations.append(self.initialize)
