@@ -395,7 +395,8 @@ class SnmpCheck(AgentCheck):
             tags.extend(config.tags)
             self.gauge('snmp.discovered_devices_count', len(config.discovered_instances), tags=tags)
         else:
-            _, tags = self._check_device(config)
+            error, tags = self._check_device(config)
+            # no need to handle error here since it's already handled inside `self._check_device`
 
         self.submit_telemetry_metrics(start_time, tags)
 
