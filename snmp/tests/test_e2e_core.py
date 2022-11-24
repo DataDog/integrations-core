@@ -311,7 +311,35 @@ def test_e2e_core_detect_metrics(dd_agent_check):
         {
             'snmp_version': 1,
             'community_string': 'apc_ups',
+            'detect_metrics_enabled': True,
         }
     )
-    assert_apc_ups_metrics(dd_agent_check, config)
+    config['init_config']['loader'] = 'core'
+    instance = config['instances'][0]
+    aggregator = common.dd_agent_check_wrapper(dd_agent_check, config, rate=True)
+
+    profile_tags = [
+        # 'snmp_profile:apc_ups',
+        # 'model:APC Smart-UPS 600',
+        # 'firmware_version:2.0.3-test',
+        # 'serial_num:test_serial',
+        # 'ups_name:testIdentName',
+        # 'device_vendor:apc',
+        'device_namespace:default',
+    ]
+    tags = profile_tags + ["snmp_device:{}".format(instance['ip_address'])]
+
+    common.assert_common_metrics(aggregator, tags, is_e2e=True, loader='core')
+
+    for metric in metrics.APC_UPS_METRICS:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=2)
+    aggregator.assert_metric(
+        'snmp.upsOutletGroupStatusGroupState',
+        metric_type=aggregator.GAUGE,
+        tags=['outlet_group_name:test_outlet'] + tags,
+    )
+    for metric, value in metrics.APC_UPS_UPS_BASIC_STATE_OUTPUT_STATE_METRICS:
+        aggregator.assert_metric(metric, value=value, metric_type=aggregator.GAUGE, count=2, tags=tags)
+
+    aggregator.assert_all_metrics_covered()
 
