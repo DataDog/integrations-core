@@ -319,6 +319,7 @@ def test_e2e_core_detect_metrics_using_apc_ups_metrics(dd_agent_check):
 
     tags = [
         'device_namespace:default',
+        'snmp_host:APC_UPS_NAME',
         "snmp_device:{}".format(instance['ip_address'])
     ]
 
