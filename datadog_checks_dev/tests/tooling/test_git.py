@@ -99,7 +99,7 @@ def test_git_show_file():
             set_root('/foo/')
             git_show_file('path-string', 'git-ref-string')
             chdir.assert_called_once_with('/foo/')
-            run.assert_called_once_with('git show git-ref-string:path-string', capture=True)
+            run.assert_called_once_with('git show git-ref-string:path-string', capture=True, check=True)
 
 
 def test_git_commit():
