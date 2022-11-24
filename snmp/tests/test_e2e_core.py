@@ -303,8 +303,7 @@ def test_e2e_meraki_cloud_controller(dd_agent_check):
     aggregator.assert_all_metrics_covered()
 
 
-def test_e2e_core_detect_metrics(dd_agent_check):
-    # TODO: IMPLEMENT
+def test_e2e_core_detect_metrics_using_apc_ups_metrics(dd_agent_check):
     config = common.generate_container_instance_config([])
     instance = config['instances'][0]
     instance.update(
