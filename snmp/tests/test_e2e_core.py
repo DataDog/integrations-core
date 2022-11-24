@@ -301,3 +301,17 @@ def test_e2e_meraki_cloud_controller(dd_agent_check):
 
     aggregator.assert_metric('snmp.sysUpTimeInstance', count=2, tags=common_tags)
     aggregator.assert_all_metrics_covered()
+
+
+def test_e2e_core_detect_metrics(dd_agent_check):
+    # TODO: IMPLEMENT
+    config = common.generate_container_instance_config([])
+    instance = config['instances'][0]
+    instance.update(
+        {
+            'snmp_version': 1,
+            'community_string': 'apc_ups',
+        }
+    )
+    assert_apc_ups_metrics(dd_agent_check, config)
+
