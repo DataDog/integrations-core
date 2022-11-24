@@ -513,9 +513,12 @@ class AgentCheck(object):
             if sys.platform not in ("linux", "darwin"):
                 raise ConfigurationError("`enable_memray` option is only supported on Linux and macOS.")
 
-            output_file = self.instance.get(
-                'memray_file', self.init_config.get('memray_file') + ".{}".format(self.check_id)
-            )
+            output_file = self.instance.get('memray_file', self.init_config.get('memray_file'))
+
+            # Append the check_id if the name if globally specified
+            if self.init_config.get('memray_file') and not self.instance.get('memray_file'):
+                output_file += ".{}".format(self.check_id)
+
             native_mode = self.instance.get('memray_native_mode', self.init_config.get('memray_native_mode', False))
 
             if output_file is None:
@@ -528,7 +531,7 @@ class AgentCheck(object):
                 'memray_iteration_count', self.init_config.get('memray_iteration_count', 240)
             )
             self._memray = memray.Tracker(file_name=output_file, native_traces=native_mode)
-            self.log.info("Enabling memray for {} iterations.".format(self._memray_remaining_iterations))
+            self.log.info("Enabling memray for %s iterations.", self._memray_remaining_iterations)
             self._memray.__enter__()
 
     @staticmethod
@@ -1114,8 +1117,9 @@ class AgentCheck(object):
         the check is running. It's up to the python implementation to make sure
         cancel is thread safe and won't block.
         """
-        self.log.info("Stopping memray.")
-        self._memray.__exit__(None, None, None)
+        if self._memray:
+            self.log.info("Stopping memray.")
+            self._memray.__exit__(None, None, None)
 
     def run(self):
         # type: () -> str

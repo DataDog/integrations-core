@@ -64,37 +64,41 @@ def test_memray_py2(caplog, dd_run_check, aggregator, datadog_agent, init_config
 
 
 @pytest.mark.parametrize(
-    'init_config, instance_config, native_traces',
+    'init_config, instance_config, native_traces, filename',
     [
         pytest.param(
             {},
             {'enable_memray': True, 'memray_file': 'my-file', 'memray_iteration_count': 3},
             False,
+            'my-file',
             id='Instance-level config without native traces',
         ),
         pytest.param(
             {'enable_memray': True, 'memray_file': 'my-file', 'memray_iteration_count': 3},
             {},
             False,
+            'my-file.test:123',
             id='Init-level config without native traces',
         ),
         pytest.param(
             {},
             {'enable_memray': True, 'memray_file': 'my-file', 'memray_native_mode': True, 'memray_iteration_count': 3},
             True,
+            'my-file',
             id='Instance-level config with native traces',
         ),
         pytest.param(
             {'enable_memray': True, 'memray_file': 'my-file', 'memray_native_mode': True, 'memray_iteration_count': 3},
             {},
             True,
+            'my-file.test:123',
             id='Init-level config with native traces',
         ),
     ],
 )
 @requires_py3
 @requires_unix
-def test_memray(caplog, dd_run_check, aggregator, datadog_agent, init_config, instance_config, native_traces):
+def test_memray(caplog, dd_run_check, aggregator, datadog_agent, init_config, instance_config, native_traces, filename):
     check = MemrayCheck('memory', init_config, [instance_config])
     tracker_mock = MagicMock()
 
@@ -102,7 +106,7 @@ def test_memray(caplog, dd_run_check, aggregator, datadog_agent, init_config, in
         dd_run_check(check)
         dd_run_check(check)
 
-    mock.assert_called_with(file_name="my-file", native_traces=native_traces)
+    mock.assert_called_with(file_name=filename, native_traces=native_traces)
     tracker_mock.__enter__.assert_called_once()
     tracker_mock.__exit__.assert_not_called()
 
