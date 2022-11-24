@@ -14,6 +14,7 @@ mypy-deps = [
 
 [[envs.default.matrix]]
 python = ["27", "38"]
+# Can't support lower 2.3 patch versions due to: https://github.com/rethinkdb/rethinkdb/issues/6108
 version = ["2.3", "2.4"]
 
 [envs.default.env-vars]
