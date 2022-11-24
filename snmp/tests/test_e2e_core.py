@@ -309,7 +309,7 @@ def test_e2e_core_detect_metrics_using_apc_ups_metrics(dd_agent_check):
     instance.update(
         {
             'snmp_version': 1,
-            'community_string': 'apc_ups',
+            'community_string': 'apc_ups_no_sysobjectid',
             'detect_metrics_enabled': True,
         }
     )
