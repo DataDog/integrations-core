@@ -1,0 +1,33 @@
+[env.collectors.datadog-checks]
+check-types = true
+mypy-args = [
+    "--py2",
+    "--disallow-untyped-defs",
+    "--install-types",
+    "--non-interactive",
+    "datadog_checks/",
+    "tests/",
+]
+mypy-deps = [
+  "types-mock==0.1.5",
+]
+
+[[envs.default.matrix]]
+python = ["27", "38"]
+version = ["2.3", "2.4"]
+
+[envs.default.env-vars]
+DDEV_SKIP_GENERIC_TAGS_CHECK = "true"
+
+[envs.default.overrides]
+matrix.version.env-vars = [
+  { key = "RETHINKDB_RAW_VERSION", value = "2.3.6", if = ["2.3"] },
+  { key = "RETHINKDB_IMAGE", value = "rethinkdb:2.3.6", if = ["2.3"] },
+  { key = "RETHINKDB_RAW_VERSION", value = "2.4.2", if = ["2.4"] },
+  { key = "RETHINKDB_IMAGE", value = "rethinkdb:2.4.2", if = ["2.4"] },
+]
+
+[envs.latest.env-vars]
+RETHINKDB_IMAGE = "rethinkdb:latest"
+RETHINKDB_RAW_VERSION = ""
+DDEV_SKIP_GENERIC_TAGS_CHECK = "true"
