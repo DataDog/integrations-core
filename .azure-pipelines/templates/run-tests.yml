@@ -25,7 +25,7 @@ steps:
 #      displayName: 'Run Unit/Integration tests (forced install of minimum datadog_checks_base package)'
 
 - ${{ if and(eq(parameters.test_e2e, 'true'), eq(parameters.repo, 'core'))}}:
-  - script: ddev env test --new-env --junit ${{ parameters.check }} -k test_e2e_core --agent datadog/agent-dev:alex-snmp-detect-metrics-to-collect-new-py3
+  - script: ddev env test --new-env --junit ${{ parameters.check }} -k test_e2e_core --agent datadog/agent-dev:alex-snmp-detect-metrics-to-collect-new-handle-metric-tags-py3
     displayName: 'Run E2E tests against latest base package'
     env:
       DD_API_KEY: $(DD_API_KEY)
