@@ -1,0 +1,25 @@
+[env.collectors.datadog-checks]
+check-types = true
+mypy-args = [
+    "--disallow-untyped-defs",
+    "--py2",
+    "--install-types",
+    "--non-interactive",
+    "datadog_checks/",
+    "tests/",
+]
+mypy-deps = [
+    "types-mock==0.1.5",
+]
+
+[[envs.default.matrix]]
+python = ["38"]
+version = ["9.0", "10.0"]
+
+[envs.default.overrides]
+matrix.version.env-vars = [
+    { key = "MARKLOGIC_VERSION", value = "9.0-12", if = ["9.0"] },
+    { key = "MARKLOGIC_IMAGE", value = "9.0-12-dev-centos", if = ["9.0"] },
+    { key = "MARKLOGIC_VERSION", value = "10.0-4", if = ["10.0"] },
+    { key = "MARKLOGIC_IMAGE", value = "10.0-4-dev-centos", if = ["10.0"] },
+]
