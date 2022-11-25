@@ -26,6 +26,9 @@ ddev meta dash export <URL_OF_DASHBOARD> <INTEGRATION>
 The command will add the dashboard definition to the `manifest.json` file of the integration.
 The dashboard JSON payload will be available in `/assets/dashboards/<DASHBOARD_TITLE>.json`.
 
+!!! tip
+    The dashboard will be available at the following address `/dash/integration/<DASHBOARD_KEY>` in each region, where `<DASHBOARD_KEY>` is the one you have in the `manifest.json` file of the integration for this dashboard. This can be useful when you want to add a link to another dashboard inside your dashboard.
+
 Commit the changes and create a pull request.
 
 ### Verify the Preset Dashboard
