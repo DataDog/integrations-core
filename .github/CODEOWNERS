@@ -189,5 +189,5 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /datadog_checks_downloader/                                           @DataDog/software-integrity-and-trust @DataDog/agent-integrations @trishankatdatadog
 docs/developer/process/integration-release.md                         @DataDog/software-integrity-and-trust @DataDog/agent-integrations @trishankatdatadog
 # As well as the pipelines.
-/.github/workflows/                                                   @DataDog/software-integrity-and-trust @DataDog/agent-integrations @trishankatdatadog
-/.gitlab-ci.yml                                                       @DataDog/software-integrity-and-trust @DataDog/agent-integrations @trishankatdatadog
+/.github/workflows/                                                   @DataDog/agent-integrations @trishankatdatadog
+/.gitlab-ci.yml                                                       @DataDog/agent-integrations @trishankatdatadog
