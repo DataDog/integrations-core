@@ -116,49 +116,31 @@ def test_min_properties_queue_tags_channel_status(instance, get_check, dd_run_ch
 
 
 @pytest.mark.parametrize(
-    'ssl_explicit_disable, ssl_option, expected_ssl',
+    'ssl_option',
     [
-        pytest.param(
-            False,
-            'ssl_cipher_spec',
-            True,
-            id="ssl_cipher_spec enabled, SSL implicitly enabled",
-        ),
-        pytest.param(
-            False,
-            'ssl_key_repository_location',
-            True,
-            id="ssl_key_repository_location enabled, SSL implicitly enabled",
-        ),
-        pytest.param(
-            False,
-            'ssl_certificate_label',
-            True,
-            id="ssl_certificate_label enabled, SSL implicitly enabled",
-        ),
-        pytest.param(
-            True,
-            'ssl_cipher_spec',
-            False,
-            id="ssl_cipher_spec enabled but ssl_auth disabled, SSL explicitly disabled",
-        ),
-        pytest.param(
-            True,
-            'ssl_key_repository_location',
-            False,
-            id="ssl_key_repository_location enabled but ssl_auth disabled, SSL explicitly disabled",
-        ),
-        pytest.param(
-            True,
-            'ssl_certificate_label',
-            False,
-            id="ssl_certificate_label enabled but ssl_auth disabled, SSL explicitly disabled",
-        ),
+        'ssl_cipher_spec',
+        'ssl_key_repository_location',
+        'ssl_certificate_label',
     ],
 )
-def test_ssl_auth_implicit_enable(instance, ssl_explicit_disable, ssl_option, expected_ssl):
-    if ssl_explicit_disable:
-        instance['ssl_auth'] = False
+@pytest.mark.parametrize(
+    'ssl_auth, expected_ssl',
+    [
+        pytest.param(
+            True,
+            True,
+            id="SSL explicitly enabled",
+        ),
+        pytest.param(
+            False,
+            False,
+            id="SSL explicitly disabled",
+        ),
+        pytest.param(None, True, id="SSL implicitly enabled"),
+    ],
+)
+def test_ssl_auth_with_ssl_options(instance, ssl_auth, expected_ssl, ssl_option):
+    instance['ssl_auth'] = ssl_auth
 
     # We only care that the option is enabled
     instance[ssl_option] = "dummy_value"
@@ -166,3 +148,10 @@ def test_ssl_auth_implicit_enable(instance, ssl_explicit_disable, ssl_option, ex
     config = IBMMQConfig(instance, {})
 
     assert config.ssl == expected_ssl
+
+
+@pytest.mark.parametrize('ssl_auth', [True, False, None])
+def test_ssl_auth_without_ssl_options(instance, ssl_auth):
+    instance['ssl_auth'] = ssl_auth
+    config = IBMMQConfig(instance, {})
+    assert config.ssl == bool(ssl_auth)

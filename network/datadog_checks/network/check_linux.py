@@ -250,7 +250,7 @@ class LinuxNetwork(Network):
         for k in nstat_metrics_names:
             for met in nstat_metrics_names[k]:
                 if met in netstat_data.get(k, {}):
-                    self._submit_netmetric(
+                    self.submit_netmetric(
                         nstat_metrics_names[k][met], self.parse_long(netstat_data[k][met]), tags=custom_tags
                     )
 
@@ -308,12 +308,6 @@ class LinuxNetwork(Network):
             ]
         )
         return expected_metrics
-
-    def _submit_netmetric(self, metric, value, tags=None):
-        if self._collect_rate_metrics:
-            self.rate(metric, value, tags=tags)
-        if self._collect_count_metrics:
-            self.monotonic_count('{}.count'.format(metric), value, tags=tags)
 
     def _submit_netmetric_gauge(self, metric, value, tags=None):
         self.gauge(metric, value, tags=tags)

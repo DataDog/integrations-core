@@ -23,7 +23,7 @@
 		}
 	},
 	"recommended_monitor_metadata": {
-		"description": "Get notified when more than 10 pods are failing for a given Kubernetes cluster. "
+		"description": "Get notified when more than 10 pods are failing for a given Kubernetes cluster."
 	}
 
 }

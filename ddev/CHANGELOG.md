@@ -1,5 +1,9 @@
 # CHANGELOG - ddev
 
+## 1.2.0 / 2022-11-23
+
+* [Added] Upgrade dependencies. See [#13375](https://github.com/DataDog/integrations-core/pull/13375).
+
 ## 1.1.0 / 2022-10-28
 
 * [Added] Add `status` command. See [#13197](https://github.com/DataDog/integrations-core/pull/13197).

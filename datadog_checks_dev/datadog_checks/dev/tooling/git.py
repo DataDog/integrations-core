@@ -100,7 +100,7 @@ def git_show_file(path, ref):
     command = f'git show {ref}:{path}'
 
     with chdir(root):
-        return run_command(command, capture=True).stdout
+        return run_command(command, capture=True, check=True).stdout
 
 
 def git_commit(targets, message, force=False, sign=False, update=False):

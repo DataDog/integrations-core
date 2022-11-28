@@ -1,0 +1,34 @@
+[env.collectors.datadog-checks]
+check-types = true
+mypy-args = [
+    "--py2",
+    "--install-types",
+    "--non-interactive",
+    "datadog_checks/",
+    "tests/",
+]
+mypy-deps = [
+  "types-mock==0.1.5",
+]
+
+[envs.default.env-vars]
+DDEV_SKIP_GENERIC_TAGS_CHECK = "true"
+
+[[envs.default.matrix]]
+python = ["27", "38"]
+version = ["8.4", "10.0"]
+tls = ["false"]
+
+[[envs.default.matrix]]
+python = ["27", "38"]
+version = ["8.4"]
+tls = ["true"]
+
+[envs.default.overrides]
+matrix.version.env-vars = [
+    { key = "VOLTDB_VERSION", value = "8.4.2", if = ["8.4"] },
+    { key = "VOLTDB_IMAGE", value = "voltdb/voltdb-community:8.4.2", if = ["8.4"] },
+    { key = "VOLTDB_VERSION", value = "10.0.0", if = ["10.0"] },
+    { key = "VOLTDB_IMAGE", value = "datadog/docker-library:voltdb_10_0", if = ["10.0"] }
+]
+matrix.tls.env-vars = "TLS_ENABLED"

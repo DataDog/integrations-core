@@ -301,3 +301,44 @@ def test_e2e_meraki_cloud_controller(dd_agent_check):
 
     aggregator.assert_metric('snmp.sysUpTimeInstance', count=2, tags=common_tags)
     aggregator.assert_all_metrics_covered()
+
+
+def test_e2e_core_detect_metrics_using_apc_ups_metrics(dd_agent_check):
+    config = common.generate_container_instance_config([])
+    instance = config['instances'][0]
+    instance.update(
+        {
+            'snmp_version': 1,
+            'community_string': 'apc_ups_no_sysobjectid',
+            'experimental_detect_metrics_enabled': True,
+        }
+    )
+    config['init_config']['loader'] = 'core'
+    instance = config['instances'][0]
+    aggregator = common.dd_agent_check_wrapper(dd_agent_check, config, rate=True)
+
+    global_metric_tags = [
+        # metric_tags from apc_ups.yaml
+        'model:APC Smart-UPS 600',
+        'firmware_version:2.0.3-test',
+        'serial_num:test_serial',
+        'ups_name:testIdentName',
+        # metric_tags from _base.yaml
+        'snmp_host:APC_UPS_NAME',
+    ]
+
+    tags = global_metric_tags + ['device_namespace:default', "snmp_device:{}".format(instance['ip_address'])]
+
+    common.assert_common_metrics(aggregator, tags, is_e2e=True, loader='core')
+
+    for metric in metrics.APC_UPS_METRICS:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=2)
+    aggregator.assert_metric(
+        'snmp.upsOutletGroupStatusGroupState',
+        metric_type=aggregator.GAUGE,
+        tags=['outlet_group_name:test_outlet'] + tags,
+    )
+    for metric, value in metrics.APC_UPS_UPS_BASIC_STATE_OUTPUT_STATE_METRICS:
+        aggregator.assert_metric(metric, value=value, metric_type=aggregator.GAUGE, count=2, tags=tags)
+
+    aggregator.assert_all_metrics_covered()

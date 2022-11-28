@@ -98,7 +98,7 @@ class Oracle(AgentCheck):
                 if prefix.startswith(self.__NAMESPACE__ + '.'):
                     prefix = prefix[len(self.__NAMESPACE__) + 1 :]
                 for column in query.get('columns', []):
-                    if column.get('type') != 'tag':
+                    if column.get('type') != 'tag' and column.get('name'):
                         column['name'] = '{}.{}'.format(prefix, column['name'])
 
     def execute_query_raw(self, query):
