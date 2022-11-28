@@ -80,6 +80,7 @@ class Oracle(AgentCheck):
         )
 
         self.check_initializations.append(self._query_manager.compile_queries)
+        self.check_initializations.append(self.can_use_jdbc)
 
         self._query_errors = 0
         self._connection_errors = 0
@@ -139,28 +140,32 @@ class Oracle(AgentCheck):
         else:
             self.service_check(self.SERVICE_CHECK_NAME, self.OK, tags=self._service_check_tags)
 
+    # check cached connection
+
     @property
     def _connection(self):
         if self._cached_connection is None:
-            if self.use_jdbc():
+            if self.can_use_jdbc():
                 try:
                     self._cached_connection = self._jdbc_connect()
-                except Exception:
-                    self.log.error(
-                        "The integration is unable to import JDBC libraries. You might not "
-                        "have the Microsoft Visual C++ Runtime 2015 installed on your system. Please double check your "
-                        "installation and refer to the Datadog documentation for more information."
-                    )
-                    raise JDBC_IMPORT_ERROR
+                except Exception as e:
+                    self.log.error('The JDBC connection failed with the following error: {}'.format(e))
+                    self._connection_errors += 1
             else:
                 self._cached_connection = self._oracle_connect()
         return self._cached_connection
 
-    def use_jdbc(self):
-        if self._jdbc_driver and not JDBC_IMPORT_ERROR:
-            return True
-        else:
-            return False
+    def can_use_jdbc(self):
+        if self._jdbc_driver:
+            if JDBC_IMPORT_ERROR is not None:
+                self.log.error(
+                    "The integration is unable to import JDBC libraries. You might not "
+                    "have the Microsoft Visual C++ Runtime 2015 installed on your system. Please double check your "
+                    "installation and refer to the Datadog documentation for more information."
+                )
+                raise JDBC_IMPORT_ERROR
+            else:
+                return True
 
     def _oracle_connect(self):
         dsn = self._get_dsn()

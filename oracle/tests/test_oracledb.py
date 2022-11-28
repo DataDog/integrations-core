@@ -44,7 +44,6 @@ def test__get_connection_oracledb(instance, dd_run_check, aggregator, expected_t
     Test the _get_connection method using the instant client
     """
     check = Oracle(CHECK_NAME, {}, [instance])
-    check.use_jdbc = mock.Mock(return_value=False)
     con = mock.MagicMock()
     with mock.patch('datadog_checks.oracle.oracle.oracledb') as pyoradb:
         pyoradb.connect.return_value = con
@@ -59,7 +58,6 @@ def test__get_connection_oracldb_query_fail(check, dd_run_check, aggregator):
     """
     Test the _get_connection method using the oracle client and unsuccessfully query DB
     """
-    check.use_jdbc = mock.Mock(return_value=False)
     con = mock.MagicMock()
 
     check._query_manager.executor = mock_bad_executor()
@@ -79,7 +77,6 @@ def test__get_connection_oracledb_server_incorrect_formatting(instance, dd_run_c
     con = mock.MagicMock()
     instance['server'] = 'localhost:1521a'
     check = Oracle(CHECK_NAME, {}, [instance])
-    check.use_jdbc = mock.Mock(return_value=False)
     expected_tags = ['server:localhost:1521a', 'optional:tag1']
     with mock.patch('datadog_checks.oracle.oracle.oracledb') as pyoradb:
         pyoradb.connect.return_value = con
