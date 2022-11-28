@@ -54,6 +54,10 @@ coverage:
         target: 75
         flags:
         - arangodb
+      ArgoCD:
+        target: 75
+        flags:
+        - argocd
       Avi_Vantage:
         target: 75
         flags:
@@ -261,7 +265,7 @@ coverage:
       Impala:
         target: 75
         flags:
-          - impala
+        - impala
       Istio:
         target: 75
         flags:
@@ -652,6 +656,11 @@ flags:
     paths:
     - arangodb/datadog_checks/arangodb
     - arangodb/tests
+  argocd:
+    carryforward: true
+    paths:
+    - argocd/datadog_checks/argocd
+    - argocd/tests
   aspdotnet:
     carryforward: true
     paths:

@@ -1,0 +1,62 @@
+[
+    {
+        "agent_version": "7.42.0",
+        "integration": "ArgoCD",
+        "check": "argocd.api_server.openmetrics.health",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "groups": [
+            "host",
+            "endpoint"
+        ],
+        "name": "API Server OpenMetrics endpoint health",
+        "description": "Returns `CRITICAL` if the Agent is unable to connect to the API Server OpenMetrics endpoint, otherwise returns `OK`."
+    },
+    {
+        "agent_version": "7.42.0",
+        "integration": "ArgoCD",
+        "check": "argocd.app_controller.openmetrics.health",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "groups": [
+            "host",
+            "endpoint"
+        ],
+        "name": "Application Controller OpenMetrics endpoint health",
+        "description": "Returns `CRITICAL` if the Agent is unable to connect to the Application Controller OpenMetrics endpoint, otherwise returns `OK`."
+    },
+    {
+        "agent_version": "7.42.0",
+        "integration": "ArgoCD",
+        "check": "argocd.repo_server.openmetrics.health",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "groups": [
+            "host",
+            "endpoint"
+        ],
+        "name": "Repo Server OpenMetrics endpoint health",
+        "description": "Returns `CRITICAL` if the Agent is unable to connect to the Repo Server OpenMetrics endpoint, otherwise returns `OK`."
+    },
+    {
+        "agent_version": "7.42.0",
+        "integration": "ArgoCD",
+        "check": "argocd.app_controller.cluster.connection.status",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "groups": [
+            "host",
+            "endpoint"
+        ],
+        "name": "Application Controller cluster connection status",
+        "description": "Returns `CRITICAL` if not connected to the cluster, otherwise returns `OK`."
+    }
+]
