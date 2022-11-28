@@ -318,10 +318,13 @@ def test_e2e_core_detect_metrics_using_apc_ups_metrics(dd_agent_check):
     aggregator = common.dd_agent_check_wrapper(dd_agent_check, config, rate=True)
 
     global_metric_tags = [
+        # metric_tags from apc_ups.yaml
         'model:APC Smart-UPS 600',
         'firmware_version:2.0.3-test',
         'serial_num:test_serial',
         'ups_name:testIdentName',
+        # metric_tags from _base.yaml
+        'snmp_host:APC_UPS_NAME',
     ]
 
     tags = global_metric_tags + ['device_namespace:default', "snmp_device:{}".format(instance['ip_address'])]
