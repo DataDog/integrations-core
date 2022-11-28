@@ -67,9 +67,9 @@ pydantic==1.10.2; python_version > '3.0'
 pyjwt==1.7.1; python_version < '3.0'
 pyjwt==2.6.0; python_version > '3.0'
 pymongo[srv]==4.3.2; python_version >= '3.8'
-pymqi==1.12.8
+pymqi==1.12.8; sys_platform != 'darwin' or platform_machine != 'arm64'
 pymysql==0.10.1
-pyodbc==4.0.32
+pyodbc==4.0.32; sys_platform != 'darwin' or platform_machine != 'arm64'
 pyro4==4.82; sys_platform == 'win32'
 pysmi==0.3.4
 pysnmp-mibs==0.1.6
