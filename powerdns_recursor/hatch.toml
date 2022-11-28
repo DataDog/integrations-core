@@ -1,0 +1,20 @@
+[env.collectors.datadog-checks]
+
+[[envs.default.matrix]]
+python = ["27", "38"]
+version = ["3.7", "4.0"]
+
+[envs.default.overrides]
+matrix.version.env-vars = [
+  { key = "POWERDNS_RECURSOR_VERSION", value = "3.7.3", if = ["3.7"] },
+  { key = "POWERDNS_IMAGE", value = "datadog/docker-library:powerdns_recursor_3_7_3", if = ["3.7"] },
+  { key = "POWERDNS_HOST_PORT_0", value = "18082", if = ["3.7"] },
+  { key = "POWERDNS_HOST_PORT_1", value = "15353", if = ["3.7"] },
+  { key = "POWERDNS_RECURSOR_VERSION", value = "4.0.9", if = ["4.0"] },
+  { key = "POWERDNS_IMAGE", value = "datadog/docker-library:powerdns_recursor_4_0_9", if = ["4.0"] },
+  { key = "POWERDNS_HOST_PORT_0", value = "28082", if = ["4.0"] },
+  { key = "POWERDNS_HOST_PORT_1", value = "25353", if = ["4.0"] },
+]
+
+[envs.latest.env-vars]
+POSTGRES_VERSION = "latest"
