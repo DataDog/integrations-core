@@ -14,6 +14,7 @@ OpenMetrics is used for collecting metrics using the CNCF-backed OpenMetrics for
         - __init__
         - check
         - configure_scrapers
+        - create_scraper
 
 ## Scrapers
 
@@ -41,12 +42,11 @@ OpenMetrics is used for collecting metrics using the CNCF-backed OpenMetrics for
 
 ## Options
 
-For complete documentation on every option, see the associated templates for the 
+For complete documentation on every option, see the associated templates for the
 [instance][config-spec-template-instances-openmetrics] and [init_config][config-spec-template-init-config-openmetrics]
- sections. 
+ sections.
 
 ## Legacy
 
-This OpenMetrics implementation is the updated version of the original Prometheus/OpenMetrics implementation. 
+This OpenMetrics implementation is the updated version of the original Prometheus/OpenMetrics implementation.
 The [docs for the deprecated implementation](../legacy/prometheus.md) are still available as a reference.
-

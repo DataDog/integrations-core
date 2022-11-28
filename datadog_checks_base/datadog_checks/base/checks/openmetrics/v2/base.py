@@ -54,6 +54,12 @@ class OpenMetricsBaseCheckV2(AgentCheck):
         self.check_initializations.append(self.configure_scrapers)
 
     def check(self, _):
+        """
+        Perform an openmetrics-based check.
+
+        Subclasses should not need to override this, add custom scrapers instead.
+        Another thing to note is that this check ignores its instance argument completely. We take care of instance-level customization at initialization time.
+        """
         self.refresh_scrapers()
 
         for endpoint, scraper in self.scrapers.items():
@@ -86,7 +92,9 @@ class OpenMetricsBaseCheckV2(AgentCheck):
         self.scrapers.update(scrapers)
 
     def create_scraper(self, config):
-        # Subclasses can override to return a custom scraper based on configuration
+        """
+        Subclasses can override to return a custom scraper based on instance configuration.
+        """
         return OpenMetricsScraper(self, self.get_config_with_defaults(config))
 
     def set_dynamic_tags(self, *tags):
