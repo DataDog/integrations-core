@@ -38,7 +38,7 @@ E2E_METADATA_JDBC_CLIENT = {
         '{}/docker/client/osdt_core.jar:/opt/oracle/instantclient_19_3/osdt_core.jar'.format(HERE),
     ],
     'start_commands': [
-        'bash /tmp/install_instant_client.sh',  # Still needed to set up the database
+        'bash /tmp/install_jdbc_client.sh',  # Still needed to set up the database
     ],
     'env_vars': {'TNS_ADMIN': '/opt/oracle/instantclient_19_3'},
 }
