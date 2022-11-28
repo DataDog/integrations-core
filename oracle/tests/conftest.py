@@ -28,7 +28,7 @@ E2E_METADATA_JDBC_CLIENT = {
     # The integration will use to JDBC client
     'use_jmx': True,  # Using jmx to have a ready to use java runtime
     'docker_volumes': [
-        '{}/scripts/install_instant_client.sh:/tmp/install_instant_client.sh'.format(HERE),
+        '{}/scripts/install_jdbc_client.sh:/tmp/install_jdbc_client.sh'.format(HERE),
         '{}/docker/client/client_wallet:/opt/oracle/instantclient_19_3/client_wallet'.format(HERE),
         '{}/docker/client/sqlnet.ora:/opt/oracle/instantclient_19_3/sqlnet.ora'.format(HERE),
         '{}/docker/client/tnsnames.ora:/opt/oracle/instantclient_19_3/tnsnames.ora'.format(HERE),
@@ -46,14 +46,14 @@ E2E_METADATA_JDBC_CLIENT = {
 E2E_METADATA_ORACLE_CLIENT = {
     'use_jmx': True,  # update-ca-certificates fails without this
     'docker_volumes': [
-        '{}/scripts/install_instant_client.sh:/tmp/install_instant_client.sh'.format(HERE),
+        '{}/scripts/install_jdbc_client.sh:/tmp/install_jdbc_client.sh'.format(HERE),
         '{}/docker/client/client_wallet:/opt/oracle/instantclient_19_3/client_wallet'.format(HERE),
         '{}/docker/client/sqlnet.ora:/opt/oracle/instantclient_19_3/sqlnet.ora'.format(HERE),
         '{}/docker/client/tnsnames.ora:/opt/oracle/instantclient_19_3/tnsnames.ora'.format(HERE),
         '{}/docker/client/listener.ora:/opt/oracle/instantclient_19_3/listener.ora'.format(HERE),
     ],
     'start_commands': [
-        'bash /tmp/install_instant_client.sh',
+        'bash /tmp/install_jdbc_client.sh',
         'mkdir -p /usr/local/share/ca-certificates',
         'touch /usr/local/share/ca-certificates/ca-cert.crt',
         'cp /opt/oracle/instantclient_19_3/client_wallet/cert.pem /usr/local/share/ca-certificates/ca-certificate.crt',
