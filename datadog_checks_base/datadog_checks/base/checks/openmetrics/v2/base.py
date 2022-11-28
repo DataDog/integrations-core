@@ -42,6 +42,9 @@ class OpenMetricsBaseCheckV2(AgentCheck):
     def __init__(self, name, init_config, instances):
         """
         The base class for any OpenMetrics-based integration.
+
+        Subclasses are expected to override this to add their custom scrapers or transformers.
+        When overriding, make sure to call this (the parent's) __init__ first!
         """
         super(OpenMetricsBaseCheckV2, self).__init__(name, init_config, instances)
 
