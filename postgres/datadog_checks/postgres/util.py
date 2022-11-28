@@ -184,6 +184,10 @@ REPLICATION_STATS_METRICS = {
             'postgresql.replication.wal_replay_lag',
             AgentCheck.gauge,
         ),
+        'max(age(backend_xmin))': (
+            'postgresql.replication.backend_xmin_age',
+            AgentCheck.gauge,
+        ),
     },
     'relation': False,
     'query': """
