@@ -68,7 +68,7 @@ KNOWN_LICENSES = {
     'psf': 'PSF',
     'psf license': 'PSF',
     'python software foundation license': 'PSF',
-    'upl': 'UPL'
+    'upl': 'UPL',
 }
 KNOWN_CLASSIFIERS = {'Python Software Foundation License': 'PSF'}
 CLASSIFIER_TO_HIGHEST_SPDX = {
