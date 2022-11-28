@@ -247,7 +247,7 @@ def test_replication_stats(aggregator, integration_check, pg_instance):
     app2_tags = base_tags + ['wal_sync_state:sync', 'wal_state:backup', 'wal_app_name:app2']
 
     aggregator.assert_metric('postgresql.db.count', 0, base_tags)
-    for suffix in ('wal_write_lag', 'wal_flush_lag', 'wal_replay_lag'):
+    for suffix in ('wal_write_lag', 'wal_flush_lag', 'wal_replay_lag', 'backend_xmin_age'):
         metric_name = 'postgresql.replication.{}'.format(suffix)
         aggregator.assert_metric(metric_name, 12, app1_tags)
         aggregator.assert_metric(metric_name, 13, app2_tags)
