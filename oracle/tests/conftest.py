@@ -44,7 +44,7 @@ E2E_METADATA_JDBC_CLIENT = {
 }
 
 E2E_METADATA_ORACLE_CLIENT = {
-    'use_jmx': True,
+    'use_jmx': True, # update-ca-certificates fails without this
     'docker_volumes': [
         '{}/scripts/install_instant_client.sh:/tmp/install_instant_client.sh'.format(HERE),
         '{}/docker/client/client_wallet:/opt/oracle/instantclient_19_3/client_wallet'.format(HERE),
