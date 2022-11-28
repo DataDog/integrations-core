@@ -317,10 +317,7 @@ def test_e2e_core_detect_metrics_using_apc_ups_metrics(dd_agent_check):
     instance = config['instances'][0]
     aggregator = common.dd_agent_check_wrapper(dd_agent_check, config, rate=True)
 
-    tags = [
-        'device_namespace:default',
-        "snmp_device:{}".format(instance['ip_address'])
-    ]
+    tags = ['device_namespace:default', "snmp_device:{}".format(instance['ip_address'])]
 
     common.assert_common_metrics(aggregator, tags, is_e2e=True, loader='core')
 
@@ -335,4 +332,3 @@ def test_e2e_core_detect_metrics_using_apc_ups_metrics(dd_agent_check):
         aggregator.assert_metric(metric, value=value, metric_type=aggregator.GAUGE, count=2, tags=tags)
 
     aggregator.assert_all_metrics_covered()
-
