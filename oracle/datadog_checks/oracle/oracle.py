@@ -149,7 +149,7 @@ class Oracle(AgentCheck):
                 try:
                     self._cached_connection = self._jdbc_connect()
                 except Exception as e:
-                    self.log.error('The JDBC connection failed with the following error: {}'.format(e))
+                    self.log.error("The JDBC connection failed with the following error: %s", str(e))
                     self._connection_errors += 1
             else:
                 self._cached_connection = self._oracle_connect()
