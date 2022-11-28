@@ -310,14 +310,21 @@ def test_e2e_core_detect_metrics_using_apc_ups_metrics(dd_agent_check):
         {
             'snmp_version': 1,
             'community_string': 'apc_ups_no_sysobjectid',
-            'detect_metrics_enabled': True,
+            'experimental_detect_metrics_enabled': True,
         }
     )
     config['init_config']['loader'] = 'core'
     instance = config['instances'][0]
     aggregator = common.dd_agent_check_wrapper(dd_agent_check, config, rate=True)
 
-    tags = ['device_namespace:default', "snmp_device:{}".format(instance['ip_address'])]
+    global_metric_tags = [
+        'model:APC Smart-UPS 600',
+        'firmware_version:2.0.3-test',
+        'serial_num:test_serial',
+        'ups_name:testIdentName',
+    ]
+
+    tags = global_metric_tags + ['device_namespace:default', "snmp_device:{}".format(instance['ip_address'])]
 
     common.assert_common_metrics(aggregator, tags, is_e2e=True, loader='core')
 
