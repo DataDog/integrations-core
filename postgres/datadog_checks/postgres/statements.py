@@ -35,7 +35,7 @@ SELECT {cols}
   WHERE query != '<insufficient privilege>'
   AND query NOT LIKE 'EXPLAIN %%'
   {filters}
-  LIMIT {limit}
+  {extra_clauses}
 """
 
 # Use pg_stat_statements(false) when available as an optimization to avoid pulling SQL text from disk
@@ -123,6 +123,8 @@ class PostgresStatementMetrics(DBMAsyncJob):
             shutdown_callback=shutdown_callback,
         )
         self._metrics_collection_interval = collection_interval
+        self._ignore_pg_stat_statements_max_warning = is_affirmative(
+            config.statement_metrics_config.get('ignore_pg_stat_statements_max_warning', False)),
         self._config = config
         self._state = StatementMetrics()
         self._stat_column_cache = []
@@ -156,7 +158,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
 
         # Querying over '*' with limit 0 allows fetching only the column names from the cursor without data
         query = STATEMENTS_QUERY.format(
-            cols='*', pg_stat_statements_view=self._config.pg_stat_statements_view, limit=0, filters=""
+            cols='*', pg_stat_statements_view=self._config.pg_stat_statements_view, extra_clauses="LIMIT 0", filters=""
         )
         cursor = self._check._get_db(self._config.dbname).cursor()
         self._execute_query(cursor, query, params=(self._config.dbname,))
@@ -230,6 +232,27 @@ class PostgresStatementMetrics(DBMAsyncJob):
             if self._check.pg_settings.get("track_io_timing") != "on":
                 desired_columns -= PG_STAT_STATEMENTS_TIMING_COLUMNS
 
+            pg_stat_statements_max = self._check.pg_settings.get("pg_stat_statements.max")
+            if not self._ignore_pg_stat_statements_max_warning and \
+                    self._config.query_metrics.pg_stat_statements_max > 10000:
+                self._check.record_warning(
+                    DatabaseConfigurationError.high_pg_stat_statements_max,
+                    warning_with_tags(
+                        "pg_stat_statements.max is set to %d which is higher to the supported"
+                        "limit of %d. This can have a negative impact on database and collection of "
+                        "query metrics performance. Consider updating pg_stat_statements.max to %d"
+                        "or set query_metrics.ignore_pg_stat_statements_max_warning to true."
+                        "See https://docs.datadoghq.com/database_monitoring/setup_postgres/"
+                        "troubleshooting#%s for more details",
+                        pg_stat_statements_max,
+                        DEFAULT_STATEMENTS_LIMIT,
+                        DatabaseConfigurationError.high_pg_stat_statements_max.value,
+                        host=self._check.resolved_hostname,
+                        dbname=self._config.dbname,
+                        code=DatabaseConfigurationError.pg_stat_statements_not_loaded.value,
+                    ),
+                )
+
             query_columns = sorted(list(available_columns & desired_columns))
             params = ()
             filters = ""
@@ -247,7 +270,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
                     cols=', '.join(query_columns),
                     pg_stat_statements_view=self._config.pg_stat_statements_view,
                     filters=filters,
-                    limit=DEFAULT_STATEMENTS_LIMIT,
+                    extra_clauses="",
                 ),
                 params=params,
             )

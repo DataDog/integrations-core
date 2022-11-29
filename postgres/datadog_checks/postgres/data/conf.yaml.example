@@ -265,6 +265,11 @@ instances:
         #
         # collection_interval: 10
 
+        ## @param ignore_pg_stat_statements_max_warning - boolean - optional - default: false
+        ## Disable emission of warnings for `pg_stat_statements.max` being set higher than 10000.
+        #
+        # ignore_pg_stat_statements_max_warning: false
+
     ## Configure collection of query samples
     #
     # query_samples:
