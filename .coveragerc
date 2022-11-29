@@ -54,3 +54,6 @@ exclude_lines =
 
     # Ignore non-runnable code
     if __name__ == .__main__.:
+
+    # Don't complain about abstract methods, they aren't run:
+    @abstractmethod

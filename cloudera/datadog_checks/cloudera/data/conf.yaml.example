@@ -54,17 +54,17 @@ instances:
     #   exclude:
     #   - <EXCLUDE_REGEX>
 
-    ## @param api_url - string - required
+    ## @param api_url - string - optional
     ## The Swagger API Url
     #
-    api_url: <API_URL>
+    # api_url: <API_URL>
 
-    ## @param workload_username - string - required
+    ## @param workload_username - string - optional
     ## The workload username
     #
-    workload_username: <WORKLOAD_USERNAME>
+    # workload_username: <WORKLOAD_USERNAME>
 
-    ## @param workload_password - string - required
+    ## @param workload_password - string - optional
     ## The workload password
     #
-    workload_password: <WORKLOAD_PASSWORD>
+    # workload_password: <WORKLOAD_PASSWORD>

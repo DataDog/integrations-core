@@ -28,4 +28,4 @@ class ClouderaClient:
 
     def get_cluster_tags(self):
 
-        raise NotImplemented
+        raise NotImplementedError
