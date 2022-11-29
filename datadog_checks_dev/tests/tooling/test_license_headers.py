@@ -144,6 +144,18 @@ def test_validate_license_headers_skips_blacklisted_folders(tmp_path, relpath):
     assert validate_license_headers(check_path) == []
 
 
+def test_validate_license_headers_skips_explicitly_ignored_folders(tmp_path):
+    check_path = tmp_path / "check"
+    path_to_ignore = pathlib.Path("path/to/ignore")
+    target_path = check_path / path_to_ignore
+    target_path.mkdir(parents=True)
+
+    with open(target_path / "some.py", "w") as f:
+        f.write("import os\n")
+
+    assert validate_license_headers(check_path, extra_ignore=[path_to_ignore]) == []
+
+
 def test_validate_license_headers_returns_error_on_new_file_with_header_not_matching_template(tmp_path):
     check_path = tmp_path / "check"
     check_path.mkdir()

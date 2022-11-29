@@ -5,7 +5,7 @@
 import pathlib
 import re
 from collections import namedtuple
-from typing import Callable, List, Optional
+from typing import Callable, Iterable, List, Optional
 
 from ..errors import SubprocessError
 from .constants import get_root
@@ -36,10 +36,15 @@ def _get_previous(path):
 
 
 def validate_license_headers(
-    check_path: pathlib.Path, *, get_previous: Callable[[pathlib.Path], Optional[str]] = _get_previous
+    check_path: pathlib.Path,
+    extra_ignore: Optional[Iterable[pathlib.Path]] = None,
+    *,
+    get_previous: Callable[[pathlib.Path], Optional[str]] = _get_previous,
 ) -> List[LicenseHeaderError]:
     """
     Validate license headers under `check_path` and return a list of validation errors.
+
+    Paths on `extra_ignore` will be ignored.
 
     Assumptions regarding which files require license header validation:
     - Only python (*.py) files need a license header
@@ -50,6 +55,8 @@ def validate_license_headers(
       - tests/compose
     """
     root = check_path
+    default_ignore = {pathlib.Path("tests/docker"), pathlib.Path("tests/compose")}
+    ignoreset = frozenset(default_ignore.union(extra_ignore or set()))
 
     def walk_recursively(path):
         for child in path.iterdir():
@@ -61,7 +68,7 @@ def validate_license_headers(
 
                 # Skip blacklisted folders
                 relpath = child.relative_to(root)
-                if relpath.as_posix() in ("tests/docker", "tests/compose"):
+                if relpath in ignoreset:
                     continue
 
                 yield from walk_recursively(child)
