@@ -4,4 +4,4 @@
 python = ["27", "38"]
 
 [envs.default]
-e2e-env = false
+e2e-env = true
