@@ -199,7 +199,7 @@ instances:
 
 ##### TCPS through the Oracle
 
-If you are connecting to Oracle Database using the Oracle, verify that the Datadog Agent is able to connect to your database. Use the `sqlplus` command line tool with the information inputted in your configuration options:
+If you are connecting to Oracle Database through Oracle, verify that the Datadog Agent is able to connect to your database. Use the `sqlplus` command line tool with the information inputted in your configuration options:
 
 ```shell
 sqlplus <USER>/<PASSWORD>@(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCPS)(HOST=<HOST>)(PORT=<PORT>))(SERVICE_NAME=<SERVICE_NAME>)))
