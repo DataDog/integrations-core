@@ -1,11 +1,10 @@
 import cm_client
-from cm_client.rest import ApiException
 
-from datadog_checks.base import AgentCheck
 from datadog_checks.cloudera.api_client import ApiClient
 from datadog_checks.cloudera.entity_status import ENTITY_STATUS
-from datadog_checks.cloudera.health_summary import HEALTH_SUMMARY
 from datadog_checks.cloudera.metrics import METRICS
+
+from .common import CLUSTER_HEALTH, HOST_HEALTH
 
 
 class ApiClientV7(ApiClient):
@@ -13,18 +12,11 @@ class ApiClientV7(ApiClient):
         super(ApiClientV7, self).__init__(check, api_client)
 
     def collect_data(self):
-        try:
-            self._collect_clusters()
-            service_check = AgentCheck.OK
-        except ApiException as e:
-            self._log.error('Exception: %s', e)
-            service_check = AgentCheck.CRITICAL
-        self._check.service_check("can_connect", service_check)
+        self._collect_clusters()
 
     def _collect_clusters(self):
         clusters_resource_api = cm_client.ClustersResourceApi(self._api_client)
         read_clusters_response = clusters_resource_api.read_clusters(cluster_type='any', view='full')
-        self._log.debug('read_clusters_response: %s', read_clusters_response)
         for cluster in read_clusters_response.items:
             self._collect_cluster(cluster)
 
@@ -36,12 +28,15 @@ class ApiClientV7(ApiClient):
         self._log.debug('cluster_entity_status: %s', cluster_entity_status)
         self._log.debug('cluster_name: %s', cluster_name)
         self._log.debug('cluster_tags: %s', cluster_tags)
+
         if cluster_name:
             tags = [f'cloudera_cluster:{cluster_name}']
+
         if cluster_tags:
             for cluster_tag in cluster_tags:
                 tags.append(f"{cluster_tag.name}:{cluster_tag.value}")
-        self._check.service_check("cluster_status", cluster_entity_status, tags=tags)
+        self._check.service_check(CLUSTER_HEALTH, cluster_entity_status, tags=tags)
+
         if cluster_name:
             self._collect_cluster_metrics(cluster_name, tags)
             self._collect_cluster_hosts(cluster_name)
@@ -52,7 +47,6 @@ class ApiClientV7(ApiClient):
         query = f'SELECT {metric_names} WHERE clusterName="{cluster_name}" AND category=CLUSTER'
         self._log.debug('query: %s', query)
         query_time_series_response = time_series_resource_api.query_time_series(query=query)
-        self._log.debug('query_time_series_response: %s', query_time_series_response)
         index = 0
         while index < len(query_time_series_response.items[0].time_series):
             metric_name = METRICS['cluster'][index]
@@ -66,13 +60,13 @@ class ApiClientV7(ApiClient):
     def _collect_cluster_hosts(self, cluster_name):
         clusters_resource_api = cm_client.ClustersResourceApi(self._api_client)
         list_hosts_response = clusters_resource_api.list_hosts(cluster_name, view='full')
-        self._log.debug('list_hosts_response: %s', list_hosts_response)
         for host in list_hosts_response.items:
             self._collect_cluster_host(host)
 
     def _collect_cluster_host(self, host):
         self._log.debug('host: %s', host)
-        host_health_summary = HEALTH_SUMMARY[host.health_summary] if host.health_summary else None
+        host_health_summary = ENTITY_STATUS[host.entity_status] if host.entity_status else None
+
         host_id = host.host_id
         host_name = host.hostname
         host_ip_address = host.ip_address
@@ -81,16 +75,18 @@ class ApiClientV7(ApiClient):
         self._log.debug('host_id: %s', host_id)
         self._log.debug('host_tags: %s', host_tags)
         tags = []
+
         if host_id:
             tags.append(f'cloudera_host_id:{host_id}')
         if host_name:
-            tags.append(f'cloudera_host_id:{host_name}')
+            tags.append(f'cloudera_host_name:{host_name}')
         if host_ip_address:
-            tags.append(f'cloudera_host_id:{host_ip_address}')
+            tags.append(f'cloudera_host_ip_address:{host_ip_address}')
         if host_tags:
             tags.extend([f"{host_tag.name}:{host_tag.value}" for host_tag in host_tags])
+
         self._log.debug('host_tags: %s', tags)
-        self._check.service_check("host_status", host_health_summary, tags=tags)
+        self._check.service_check(HOST_HEALTH, host_health_summary, tags=tags)
         if host_id:
             self._collect_host_metrics(host_id, tags)
 

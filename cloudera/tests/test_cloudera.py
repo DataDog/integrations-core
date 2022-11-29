@@ -13,14 +13,18 @@ from datadog_checks.dev.utils import get_metadata_metrics
 def test_emits_critical_service_check_when_api_is_none():
     assert True
 
+
 def test_emits_critical_service_check_when_credentials_incorrect():
     assert True
+
 
 def test_py2_not_supported():
     assert True
 
+
 def test_timeseries_item_no_data():
     assert True
+
 
 def test_check():
     assert True
