@@ -19,7 +19,8 @@
     type: string
     example: <PREFIX>_
     display_default: null
-- name: metrics  # Only shown for the `openmetrics` provider integration
+# Only shown for the generic `openmetrics` integration. Lets a user define which metrics they want to collect.
+- name: metrics
   hidden: true
   description: |
     This list defines which metrics to collect from the `openmetrics_endpoint`.
@@ -81,7 +82,9 @@
             - name: type
               type: string
             additionalProperties: true
-- name: extra_metrics  # Hidden for the `openmetrics` provider integration
+# Hidden for the generic `openmetrics` integration, which uses the `metrics` field.
+# For custom openmetrics-based integrations this allows users to specify metrics in addition to the built-in ones.
+- name: extra_metrics
   description: |
     This list defines metrics to collect from the `openmetrics_endpoint`, in addition to
     what the check collects by default. If the check already collects a metric, then
@@ -120,7 +123,7 @@
     `promhttp_metric_handler_requests`. This submits to Datadog the metric name appended with `.count`.
     For more information, see:
     https://github.com/OpenObservability/OpenMetrics/blob/main/specification/OpenMetrics.md#suffixes
-    
+
     Regular expressions may be used to match the exposed metric names, for example:
 
       extra_metrics:
