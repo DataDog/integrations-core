@@ -161,7 +161,7 @@ class Oracle(AgentCheck):
                     "have the Microsoft Visual C++ Runtime 2015 installed on your system. Please double check your "
                     "installation and refer to the Datadog documentation for more information."
                 )
-                    raise JDBC_IMPORT_ERROR
+                raise JDBC_IMPORT_ERROR
             else:
                 return True
 
