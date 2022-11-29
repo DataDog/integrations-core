@@ -17,7 +17,7 @@ class SonarqubeCheck(AgentCheck):
     def __init__(self, name, init_config, instances):
         super(SonarqubeCheck, self).__init__(name, init_config, instances)
         self._config = SonarqubeConfig(self.instance, self.log)
-        self._projects_discovery_matcher = DiscoveryFilter('projects', self.log, self._config.projects)
+        self._projects_discovery_filter = DiscoveryFilter('projects', self.log, self._config.projects)
         self._api = SonarqubeAPI(self.log, self.http, self._config.web_endpoint)
 
     def check(self, _):
@@ -37,7 +37,7 @@ class SonarqubeCheck(AgentCheck):
         self.log.debug('collecting metrics')
         projects = self._api.get_projects()
         self.log.debug('%d projects obtained from Sonarqube: %s', len(projects), projects)
-        matched_projects = self._projects_discovery_matcher.match(projects)
+        matched_projects = self._projects_discovery_filter.match(projects)
         self.log.debug('matched_projects: %s', matched_projects)
         if matched_projects:
             all_metrics = self._api.get_metrics()
@@ -63,7 +63,7 @@ class SonarqubeCheck(AgentCheck):
             project_key,
             project_config,
         )
-        metrics_discovery_matcher = DiscoveryFilter(
+        metrics_discovery_filter = DiscoveryFilter(
             'metrics',
             self.log,
             project_config.get('metrics', {}) if project_config else {},
@@ -72,7 +72,7 @@ class SonarqubeCheck(AgentCheck):
             default_include=['({})'.format(item) for item in self._config.default_metrics_include],
             default_exclude=['({})'.format(item) for item in self._config.default_metrics_exclude],
         )
-        matched_metrics = metrics_discovery_matcher.match(all_metrics)
+        matched_metrics = metrics_discovery_filter.match(all_metrics)
         self.log.debug('%d matched_metrics: %s', len(matched_metrics), matched_metrics)
         map_metrics_measures = {key.split('.')[1]: key for key, _ in matched_metrics}
         self.log.debug('%d map_metrics_measures: %s', len(map_metrics_measures), map_metrics_measures)
