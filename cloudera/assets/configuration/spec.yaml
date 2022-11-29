@@ -23,4 +23,3 @@ files:
       required: true
       value:
         type: string
-        
