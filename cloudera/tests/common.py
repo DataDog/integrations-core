@@ -1,9 +1,6 @@
 import os
 
-from datadog_checks.dev import get_docker_hostname, get_here
-
-HOST = get_docker_hostname()
-PORT = 7180
+from datadog_checks.dev import get_here
 
 INSTANCE = {
     'workload_username': '~',

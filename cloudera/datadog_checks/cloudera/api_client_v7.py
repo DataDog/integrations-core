@@ -9,8 +9,8 @@ from datadog_checks.cloudera.metrics import METRICS
 
 
 class ApiClientV7(ApiClient):
-    def __init__(self, check, instance, api_client):
-        super(ApiClientV7, self).__init__(check, instance, api_client)
+    def __init__(self, check, api_client):
+        super(ApiClientV7, self).__init__(check, api_client)
 
     def collect_data(self):
         try:

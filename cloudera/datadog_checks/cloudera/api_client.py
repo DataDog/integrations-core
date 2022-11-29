@@ -4,10 +4,9 @@ import cm_client
 
 
 class ApiClient:
-    def __init__(self, check, instance, api_client):
+    def __init__(self, check, api_client):
         self._check = check
         self._log = check.log
-        self._instance = instance
         self._api_client = api_client
 
     @abstractmethod

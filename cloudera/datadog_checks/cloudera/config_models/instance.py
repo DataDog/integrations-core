@@ -31,17 +31,15 @@ class InstanceConfig(BaseModel):
     class Config:
         allow_mutation = False
 
-    api_host: Optional[str]
-    api_port: Optional[float]
-    api_version: Optional[str]
+    api_url: str
     disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
     metric_patterns: Optional[MetricPatterns]
     min_collection_interval: Optional[float]
-    password: Optional[str]
     service: Optional[str]
     tags: Optional[Sequence[str]]
-    username: Optional[str]
+    workload_password: str
+    workload_username: str
 
     @root_validator(pre=True)
     def _initial_validation(cls, values):

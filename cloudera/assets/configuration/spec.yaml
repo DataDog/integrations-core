@@ -8,23 +8,18 @@ files:
   - template: instances
     options:
     - template: instances/default
-    - name: api_host
-      description: The Swagger API host
+    - name: api_url
+      required: true
+      description: The Swagger API Url
       value:
         type: string
-    - name: api_port
-      description: The Swagger API port
-      value:
-        type: number
-    - name: api_version
-      description: The Swagger API version
+    - name: workload_username
+      description: The workload username
+      required: true
       value:
         type: string
-    - name: username
-      description: The username
-      value:
-        type: string
-    - name: password
-      description: The password
+    - name: workload_password
+      description: The workload password
+      required: true
       value:
         type: string
