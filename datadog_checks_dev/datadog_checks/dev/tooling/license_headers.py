@@ -32,7 +32,7 @@ def _get_previous(path):
 
 
 def validate_license_headers(
-    check_path: pathlib.Path, get_previous: Callable[[pathlib.Path], Optional[str]] = _get_previous
+    check_path: pathlib.Path, *, get_previous: Callable[[pathlib.Path], Optional[str]] = _get_previous
 ) -> List[LicenseHeaderError]:
     """
     Validate license headers under `check_path` and return a list of validation errors.
@@ -47,8 +47,9 @@ def validate_license_headers(
     """
     root = check_path
 
-    def _validate_license_headers_recur(path):
+    def walk_recursively(path):
         for child in path.iterdir():
+            # For directories, keep recursing unless folder is blacklisted
             if child.is_dir():
                 # Skip hidden folders
                 if child.relative_to(child.parent).as_posix().startswith('.'):
@@ -59,34 +60,39 @@ def validate_license_headers(
                 if relpath.as_posix() in ("tests/docker", "tests/compose"):
                     continue
 
-                yield from _validate_license_headers_recur(child)
+                yield from walk_recursively(child)
                 continue
 
             # Skip non-python files
-            if child.suffix != '.py':
-                continue
+            if child.suffix == '.py':
+                yield child
 
-            with open(child) as f:
-                contents = f.read()
+    def validate_license_header(path):
+        with open(path) as f:
+            contents = f.read()
 
-            license_header = parse_license_header(contents)
-            relpath = child.relative_to(root).as_posix()
+        license_header = parse_license_header(contents)
+        relpath = path.relative_to(root).as_posix()
 
-            # License is missing altogether
-            if not license_header:
-                yield LicenseHeaderError("missing", relpath)
-                continue
+        # License is missing altogether
+        if not license_header:
+            return LicenseHeaderError("missing", relpath)
 
-            # When file already existed, check whether the license has changed
-            previous = get_previous(child)
-            if previous:
-                if license_header != parse_license_header(previous):
-                    yield LicenseHeaderError("existing file has changed license", relpath)
-            # When it's a new file, compare it to the current header template
-            elif license_header != get_default_license_header():
-                yield LicenseHeaderError("new file does not match template", relpath)
+        # When file already existed, check whether the license has changed
+        previous = get_previous(path)
+        if previous:
+            if license_header != parse_license_header(previous):
+                return LicenseHeaderError("existing file has changed license", relpath)
+        # When it's a new file, compare it to the current header template
+        elif license_header != get_default_license_header():
+            return LicenseHeaderError("new file does not match template", relpath)
 
-    return list(_validate_license_headers_recur(check_path))
+    errors = []
+    for candidate in walk_recursively(root):
+        if error := validate_license_header(candidate):
+            errors.append(error)
+
+    return errors
 
 
 def parse_license_header(contents):
