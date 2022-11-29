@@ -8,7 +8,6 @@ from datadog_checks.base import AgentCheck, ConfigurationError
 from .api_client_factory import make_api_client
 from .common import CAN_CONNECT
 from .config_models import ConfigMixin
-from .queries import TIMESERIES_QUERIES
 
 
 class ClouderaCheck(AgentCheck, ConfigMixin):
@@ -38,10 +37,5 @@ class ClouderaCheck(AgentCheck, ConfigMixin):
         self.custom_tags = self.config.tags  # TODO: Don't need self.custom_tags
 
     def check(self, _):
-        if self.instance.get('run_timeseries', False):
-            for query in TIMESERIES_QUERIES:
-                self.client.run_timeseries_query(query=query['query_string'])
-        else:
-            self.client.collect_data()
-
+        self.client.collect_data()
         self.service_check(CAN_CONNECT, AgentCheck.OK)

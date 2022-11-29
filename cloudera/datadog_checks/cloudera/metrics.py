@@ -1,4 +1,4 @@
-METRICS = {
+TIMESERIES_METRICS = {
     'cluster': [
         'cpu_percent_across_hosts',
         'total_read_bytes_rate_across_disks',
@@ -14,10 +14,21 @@ METRICS = {
         'cpu_irq_rate',
         'cpu_soft_irq_rate',
         'cpu_steal_rate',
+        'load_1',
+        'load_5',
+        'load_15',
         'swap_used',
+        'swap_out_rate',
         'physical_memory_used',
         'physical_memory_total',
         'physical_memory_cached',
         'physical_memory_buffers',
     ],
+    'role': [
+        'mem_rss',
+    ],
 }
+
+NATIVE_METRICS = {}
+
+METRICS = {**NATIVE_METRICS, **TIMESERIES_METRICS}

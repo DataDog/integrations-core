@@ -28,9 +28,3 @@ def test_timeseries_item_no_data():
 
 def test_check():
     assert True
-
-
-#     # type: (Callable[[AgentCheck, bool], None], AggregatorStub, Dict[str, Any]) -> None
-#     check = ClouderaCheck('cloudera', {}, [instance])
-#     dd_run_check(check)
-#     aggregator.assert_service_check('cloudera.can_connect', ClouderaCheck.CRITICAL)
