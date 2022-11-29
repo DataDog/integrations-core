@@ -547,7 +547,7 @@ def construct_pytest_options(
             # Use the same .coverage file to aggregate results
             ' --cov-append'
             # Show no coverage report until the end
-            ' --cov-report=html'
+            ' --cov-report='
             # This will be formatted to the appropriate coverage paths for each package
             ' {}'
         )
