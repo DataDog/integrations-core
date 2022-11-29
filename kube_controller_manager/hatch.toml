@@ -5,7 +5,7 @@ base-package-features = [
 ]
 
 [envs.default]
-e2e-env = false
+e2e-env = true
 
 [[envs.default.matrix]]
 python = ["27", "38"]
