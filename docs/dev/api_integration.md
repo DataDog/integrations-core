@@ -9,31 +9,31 @@ Use an [Datadog API endpoint][1] to enrich and submit data from your backend, or
 
 API integrations send the following types of data to Datadog:
 
-- [Metrics][12]
-- [Logs & Log Pipelines][13]
-- [Events][14]
-- [Service Checks][15]
-- [Traces][16]
-- [Incidents][17]
-- [Security Events][18]
+- [Metrics][2]
+- [Logs & Log Pipelines][3]
+- [Events][4]
+- [Service Checks][5]
+- [Traces][6]
+- [Incidents][7]
+- [Security Events][8]
 
-This page provides instructions for creating an API integration in the `integrations-extras` repository. For more information about why you would want to create an API-based integration, see [Creating your own solution][2]. Since API integrations do not use the Datadog Agent to collect data, you need to create an informational tile-only listing once your development work is complete. 
+This page provides instructions for creating an API integration in the `integrations-extras` repository. For more information about why you would want to create an API-based integration, see [Creating your own solution][9]. Since API integrations do not use the Datadog Agent to collect data, you need to create an informational tile-only listing once your development work is complete. 
 
 ## Setup
 
 ### Prerequisites
 
-- You must have an [API key][3] and [application key][4].
-- Determine which [Datadog site][5] you want to use.
+- You must have an [API key][10] and [application key][11].
+- Determine which [Datadog site][12] you want to use.
 
-An API key is required to submit data to a Datadog API endpoint. An application key is required to query data from Datadog or to create resources within the Datadog site. For more information, see [API and Application Key][6].
+An API key is required to submit data to a Datadog API endpoint. An application key is required to query data from Datadog or to create resources within the Datadog site. For more information, see [API and Application Key][13].
 
 Create a connection to Datadog in your company's platform using the API key, application key, and site URL. 
 
 ### Create an OAuth client
-Instead of requesting these credentials directly from a user, Datadog recommends using an [OAuth client][7] to handle authorization and access for API-based integrations. For more information, see [OAuth for Integrations][8] and [Authorization Endpoints][9]
+Instead of requesting these credentials directly from a user, Datadog recommends using an [OAuth client][14] to handle authorization and access for API-based integrations. For more information, see [OAuth for Integrations][15] and [Authorization Endpoints][16]
 
-You can explore examples of existing API integrations in the `integrations-extras` repository such as [Vantage][23].
+You can explore examples of existing API integrations in the `integrations-extras` repository such as [Vantage][17].
 
 ## Set up a directory and fork the Integrations Extras repository
 
@@ -53,7 +53,7 @@ The Datadog Development Toolkit command (`ddev`) allows you to create scaffoldin
 
 Before you begin, make sure you meet the following prerequisites:
 
-- [Python v3.8 or later][19]
+- [Python v3.8 or later][18]
 - A Python virtual environment is recommended to avoid potential environment conflicts. The instructions below use `venv`, which comes packaged with Python v3.3 and later on most operating systems.
 
 Install and configure the development toolkit:
@@ -68,7 +68,7 @@ Install and configure the development toolkit:
 
    You can exit the virtual environment at any time by running `deactivate`.
 
-3. Install the [Developer Toolkit][20]:
+3. Install the [Developer Toolkit][19]:
    {{< code-block lang="shell" >}}pip3 install "datadog-checks-dev[cli]"{{< /code-block >}}
 
    If you are using the Z Shell, you may need to use escaped characters by running `pip3 install datadog-checks-dev\[cli\]`.
@@ -86,7 +86,7 @@ Install and configure the development toolkit:
 
 ## Populate the integration tile scaffolding
 
-Run the `ddev` command to generate a skeleton of the folders and files needed for your integration. The options you use with the command are different depending on what type of integration you are developing. For a full list of the files created by the `ddev` command, see [Integrations assets][21].
+Run the `ddev` command to generate a skeleton of the folders and files needed for your integration. The options you use with the command are different depending on what type of integration you are developing. For a full list of the files created by the `ddev` command, see [Integrations assets][20].
 
 ### Create an informational tile only listing
 
@@ -162,11 +162,11 @@ Follow this template to define the `media` object in the media carousel which in
     ],
 {{< /code-block >}}
 
-For more information, see [Integrations Assets Reference][21].
+For more information, see [Integrations Assets Reference][20].
 
 ## Open a pull request
 
-Open a pull request in the [`integrations-extras` repository][10] that adds images (such as logos and images) and asset files (such as `Changelog.md`, `README.md`, and `manifest.json`) to your API integration's tile-only listing in the [Integrations page][11]. Automatic tests run checks to verify that your pull request is in good shape and contains all the required content to be updated.
+Open a pull request in the [`integrations-extras` repository][21] that adds images (such as logos and images) and asset files (such as `Changelog.md`, `README.md`, and `manifest.json`) to your API integration's tile-only listing in the [Integrations page][22]. Automatic tests run checks to verify that your pull request is in good shape and contains all the required content to be updated.
 
 ## Review process
 
@@ -180,28 +180,27 @@ Once you have addressed the feedback and re-requested reviews, these reviewers a
 Additional helpful documentation, links, and articles:
 
 - [Using the Datadog API][1]
-- [OAuth for Integrations][7]
+- [OAuth for Integrations][14]
 
 [1]: https://docs.datadoghq.com/api/latest/using-the-api/
-[2]: https://docs.datadoghq.com/developers/#creating-your-own-solution
-[3]: https://docs.datadoghq.com/account_management/api-app-keys/#api-keys
-[4]: https://docs.datadoghq.com/account_management/api-app-keys/#application-keys
-[5]: https://docs.datadoghq.com/getting_started/site
-[6]: https://docs.datadoghq.com/account_management/api-app-keys/
-[7]: https://docs.datadoghq.com/developers/authorization/
-[8]: https://docs.datadoghq.com/developers/integrations/oauth_for_integrations/
-[9]: https://docs.datadoghq.com/developers/authorization/oauth2_endpoints/
-[10]: https://github.com/DataDog/integrations-extras/
-[11]: https://app.datadoghq.com/integrations
-[12]: https://docs.datadoghq.com/api/latest/metrics/
-[13]: https://docs.datadoghq.com/logs/faq/partner_log_integration/
-[14]: https://docs.datadoghq.com/api/latest/events/
-[15]: https://docs.datadoghq.com/api/latest/service-checks/
-[16]: https://docs.datadoghq.com/tracing/guide/send_traces_to_agent_by_api/
-[17]: https://docs.datadoghq.com/api/latest/incidents/
-[18]: https://docs.datadoghq.com/api/latest/security-monitoring/
-[19]: https://www.python.org/downloads/
-[20]: https://pypi.org/project/datadog-checks-dev/
-[21]: https://docs.datadoghq.com/developers/integrations/check_references/#manifest-file
-[22]: https://datadoghq.com/blog/
-[23]: https://github.com/DataDog/integrations-extras/tree/master/vantage
+[2]: https://docs.datadoghq.com/api/latest/metrics/
+[3]: https://docs.datadoghq.com/logs/faq/partner_log_integration/
+[4]: https://docs.datadoghq.com/api/latest/events/
+[5]: https://docs.datadoghq.com/api/latest/service-checks/
+[6]: https://docs.datadoghq.com/tracing/guide/send_traces_to_agent_by_api/
+[7]: https://docs.datadoghq.com/api/latest/incidents/
+[8]: https://docs.datadoghq.com/api/latest/security-monitoring/
+[9]: https://docs.datadoghq.com/developers/#creating-your-own-solution
+[10]: https://docs.datadoghq.com/account_management/api-app-keys/#api-keys
+[11]: https://docs.datadoghq.com/account_management/api-app-keys/#application-keys
+[12]: https://docs.datadoghq.com/getting_started/site
+[13]: https://docs.datadoghq.com/account_management/api-app-keys/
+[14]: https://docs.datadoghq.com/developers/authorization/
+[15]: https://docs.datadoghq.com/developers/integrations/oauth_for_integrations/
+[16]: https://docs.datadoghq.com/developers/authorization/oauth2_endpoints/
+[17]: https://github.com/DataDog/integrations-extras/tree/master/vantage
+[18]: https://www.python.org/downloads/
+[19]: https://pypi.org/project/datadog-checks-dev/
+[20]: https://docs.datadoghq.com/developers/integrations/check_references/#manifest-file
+[21]: https://github.com/DataDog/integrations-extras/
+[22]: https://app.datadoghq.com/integrations
