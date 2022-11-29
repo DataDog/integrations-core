@@ -1,0 +1,955 @@
+{
+  "items": [
+    {
+      "timeSeries": [
+        {
+          "metadata": {
+            "metricName": "last(await_time)",
+            "entityName": "nvme0n1p1 (cod--qfdcinkqrzw-leader0.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2022-11-29T04:49:47.846Z",
+            "endTime": "2022-11-29T04:54:47.846Z",
+            "attributes": {
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "hostname": "cod--qfdcinkqrzw-leader0.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "96efbf3e7279bf25ae44fe0a6398ee97:nvme0n1p1",
+              "clusterName": "cod--qfdcinkqrzw",
+              "logicalPartition": "true",
+              "hostId": "96efbf3e7279bf25ae44fe0a6398ee97",
+              "active": "true",
+              "category": "DISK",
+              "device": "nvme0n1p1",
+              "version": "CDH 7.2.15",
+              "rackId": "/ap-northeast-1a"
+            },
+            "unitNumerators": [
+              "ms"
+            ],
+            "unitDenominators": [],
+            "expression": "SELECT last(await_time) WHERE entityName = \"96efbf3e7279bf25ae44fe0a6398ee97:nvme0n1p1\" AND category = DISK",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2022-11-29T04:54:09.000Z",
+              "value": 0.3150684931506849,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "last(await_time)",
+            "entityName": "nvme0n1p1 (cod--qfdcinkqrzw-master0.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2022-11-29T04:49:47.846Z",
+            "endTime": "2022-11-29T04:54:47.846Z",
+            "attributes": {
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "hostname": "cod--qfdcinkqrzw-master0.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "759451867dfde961d6adbeb21d9c13f9:nvme0n1p1",
+              "clusterName": "cod--qfdcinkqrzw",
+              "logicalPartition": "true",
+              "hostId": "759451867dfde961d6adbeb21d9c13f9",
+              "active": "true",
+              "category": "DISK",
+              "device": "nvme0n1p1",
+              "version": "CDH 7.2.15",
+              "rackId": "/ap-northeast-1d"
+            },
+            "unitNumerators": [
+              "ms"
+            ],
+            "unitDenominators": [],
+            "expression": "SELECT last(await_time) WHERE entityName = \"759451867dfde961d6adbeb21d9c13f9:nvme0n1p1\" AND category = DISK",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2022-11-29T04:54:43.000Z",
+              "value": 0.15789473684210525,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "last(await_time)",
+            "entityName": "nvme0n1p1 (cod--qfdcinkqrzw-worker2.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2022-11-29T04:49:47.846Z",
+            "endTime": "2022-11-29T04:54:47.846Z",
+            "attributes": {
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "hostname": "cod--qfdcinkqrzw-worker2.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "49adda80d1b98e9262ee146fd7fd798b:nvme0n1p1",
+              "clusterName": "cod--qfdcinkqrzw",
+              "logicalPartition": "true",
+              "hostId": "49adda80d1b98e9262ee146fd7fd798b",
+              "active": "true",
+              "category": "DISK",
+              "device": "nvme0n1p1",
+              "version": "CDH 7.2.15",
+              "rackId": "/ap-northeast-1c"
+            },
+            "unitNumerators": [
+              "ms"
+            ],
+            "unitDenominators": [],
+            "expression": "SELECT last(await_time) WHERE entityName = \"49adda80d1b98e9262ee146fd7fd798b:nvme0n1p1\" AND category = DISK",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2022-11-29T04:54:23.000Z",
+              "value": 0.46774193548387094,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "last(await_time)",
+            "entityName": "nvme0n1 (cod--qfdcinkqrzw-worker1.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2022-11-29T04:49:47.846Z",
+            "endTime": "2022-11-29T04:54:47.846Z",
+            "attributes": {
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "hostname": "cod--qfdcinkqrzw-worker1.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "22f6ab659c835d47bc13d6c8f3370110:nvme0n1",
+              "clusterName": "cod--qfdcinkqrzw",
+              "logicalPartition": "false",
+              "hostId": "22f6ab659c835d47bc13d6c8f3370110",
+              "active": "true",
+              "category": "DISK",
+              "device": "nvme0n1",
+              "version": "CDH 7.2.15",
+              "rackId": "/ap-northeast-1c"
+            },
+            "unitNumerators": [
+              "ms"
+            ],
+            "unitDenominators": [],
+            "expression": "SELECT last(await_time) WHERE entityName = \"22f6ab659c835d47bc13d6c8f3370110:nvme0n1\" AND category = DISK",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2022-11-29T04:54:24.000Z",
+              "value": 0.12,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "last(await_time)",
+            "entityName": "nvme0n1 (cod--qfdcinkqrzw-worker0.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2022-11-29T04:49:47.846Z",
+            "endTime": "2022-11-29T04:54:47.846Z",
+            "attributes": {
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "hostname": "cod--qfdcinkqrzw-worker0.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "ed528836ae33e47e6657b95373571c33:nvme0n1",
+              "clusterName": "cod--qfdcinkqrzw",
+              "logicalPartition": "false",
+              "hostId": "ed528836ae33e47e6657b95373571c33",
+              "active": "true",
+              "category": "DISK",
+              "device": "nvme0n1",
+              "version": "CDH 7.2.15",
+              "rackId": "/ap-northeast-1d"
+            },
+            "unitNumerators": [
+              "ms"
+            ],
+            "unitDenominators": [],
+            "expression": "SELECT last(await_time) WHERE entityName = \"ed528836ae33e47e6657b95373571c33:nvme0n1\" AND category = DISK",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2022-11-29T04:54:22.000Z",
+              "value": 0.48148148148148145,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "last(await_time)",
+            "entityName": "nvme1n1 (cod--qfdcinkqrzw-worker0.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2022-11-29T04:49:47.846Z",
+            "endTime": "2022-11-29T04:54:47.846Z",
+            "attributes": {
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "hostname": "cod--qfdcinkqrzw-worker0.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "ed528836ae33e47e6657b95373571c33:nvme1n1",
+              "clusterName": "cod--qfdcinkqrzw",
+              "logicalPartition": "false",
+              "hostId": "ed528836ae33e47e6657b95373571c33",
+              "active": "true",
+              "category": "DISK",
+              "device": "nvme1n1",
+              "version": "CDH 7.2.15",
+              "rackId": "/ap-northeast-1d"
+            },
+            "unitNumerators": [
+              "ms"
+            ],
+            "unitDenominators": [],
+            "expression": "SELECT last(await_time) WHERE entityName = \"ed528836ae33e47e6657b95373571c33:nvme1n1\" AND category = DISK",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2022-11-29T04:54:22.000Z",
+              "value": 0,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "last(await_time)",
+            "entityName": "nvme0n1 (cod--qfdcinkqrzw-leader0.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2022-11-29T04:49:47.846Z",
+            "endTime": "2022-11-29T04:54:47.846Z",
+            "attributes": {
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "hostname": "cod--qfdcinkqrzw-leader0.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "96efbf3e7279bf25ae44fe0a6398ee97:nvme0n1",
+              "clusterName": "cod--qfdcinkqrzw",
+              "logicalPartition": "false",
+              "hostId": "96efbf3e7279bf25ae44fe0a6398ee97",
+              "active": "true",
+              "category": "DISK",
+              "device": "nvme0n1",
+              "version": "CDH 7.2.15",
+              "rackId": "/ap-northeast-1a"
+            },
+            "unitNumerators": [
+              "ms"
+            ],
+            "unitDenominators": [],
+            "expression": "SELECT last(await_time) WHERE entityName = \"96efbf3e7279bf25ae44fe0a6398ee97:nvme0n1\" AND category = DISK",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2022-11-29T04:54:09.000Z",
+              "value": 0.3150684931506849,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "last(await_time)",
+            "entityName": "nvme0n1p1 (cod--qfdcinkqrzw-master1.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2022-11-29T04:49:47.846Z",
+            "endTime": "2022-11-29T04:54:47.846Z",
+            "attributes": {
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "hostname": "cod--qfdcinkqrzw-master1.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "119115ab851aefe1429860d4255b3fab:nvme0n1p1",
+              "clusterName": "cod--qfdcinkqrzw",
+              "logicalPartition": "true",
+              "hostId": "119115ab851aefe1429860d4255b3fab",
+              "active": "true",
+              "category": "DISK",
+              "device": "nvme0n1p1",
+              "version": "CDH 7.2.15",
+              "rackId": "/ap-northeast-1c"
+            },
+            "unitNumerators": [
+              "ms"
+            ],
+            "unitDenominators": [],
+            "expression": "SELECT last(await_time) WHERE entityName = \"119115ab851aefe1429860d4255b3fab:nvme0n1p1\" AND category = DISK",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2022-11-29T04:53:50.000Z",
+              "value": 0.40540540540540543,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "last(await_time)",
+            "entityName": "nvme0n1p1 (cod--qfdcinkqrzw-worker4.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2022-11-29T04:49:47.846Z",
+            "endTime": "2022-11-29T04:54:47.846Z",
+            "attributes": {
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "hostname": "cod--qfdcinkqrzw-worker4.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "9784d85849c7179b790d476c483fd905:nvme0n1p1",
+              "clusterName": "cod--qfdcinkqrzw",
+              "logicalPartition": "true",
+              "hostId": "9784d85849c7179b790d476c483fd905",
+              "active": "true",
+              "category": "DISK",
+              "device": "nvme0n1p1",
+              "version": "CDH 7.2.15",
+              "rackId": "/ap-northeast-1d"
+            },
+            "unitNumerators": [
+              "ms"
+            ],
+            "unitDenominators": [],
+            "expression": "SELECT last(await_time) WHERE entityName = \"9784d85849c7179b790d476c483fd905:nvme0n1p1\" AND category = DISK",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2022-11-29T04:54:22.000Z",
+              "value": 0.4107142857142857,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "last(await_time)",
+            "entityName": "nvme1n1 (cod--qfdcinkqrzw-worker1.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2022-11-29T04:49:47.846Z",
+            "endTime": "2022-11-29T04:54:47.846Z",
+            "attributes": {
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "hostname": "cod--qfdcinkqrzw-worker1.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "22f6ab659c835d47bc13d6c8f3370110:nvme1n1",
+              "clusterName": "cod--qfdcinkqrzw",
+              "logicalPartition": "false",
+              "hostId": "22f6ab659c835d47bc13d6c8f3370110",
+              "active": "true",
+              "category": "DISK",
+              "device": "nvme1n1",
+              "version": "CDH 7.2.15",
+              "rackId": "/ap-northeast-1c"
+            },
+            "unitNumerators": [
+              "ms"
+            ],
+            "unitDenominators": [],
+            "expression": "SELECT last(await_time) WHERE entityName = \"22f6ab659c835d47bc13d6c8f3370110:nvme1n1\" AND category = DISK",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2022-11-29T04:54:24.000Z",
+              "value": 1,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "last(await_time)",
+            "entityName": "nvme1n1 (cod--qfdcinkqrzw-worker3.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2022-11-29T04:49:47.846Z",
+            "endTime": "2022-11-29T04:54:47.846Z",
+            "attributes": {
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "hostname": "cod--qfdcinkqrzw-worker3.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "88ae2611748383b5628d4aec94873da9:nvme1n1",
+              "clusterName": "cod--qfdcinkqrzw",
+              "logicalPartition": "false",
+              "hostId": "88ae2611748383b5628d4aec94873da9",
+              "active": "true",
+              "category": "DISK",
+              "device": "nvme1n1",
+              "version": "CDH 7.2.15",
+              "rackId": "/ap-northeast-1a"
+            },
+            "unitNumerators": [
+              "ms"
+            ],
+            "unitDenominators": [],
+            "expression": "SELECT last(await_time) WHERE entityName = \"88ae2611748383b5628d4aec94873da9:nvme1n1\" AND category = DISK",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2022-11-29T04:54:23.000Z",
+              "value": 0.6666666666666666,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "last(await_time)",
+            "entityName": "nvme0n1 (cod--qfdcinkqrzw-worker3.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2022-11-29T04:49:47.846Z",
+            "endTime": "2022-11-29T04:54:47.846Z",
+            "attributes": {
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "hostname": "cod--qfdcinkqrzw-worker3.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "88ae2611748383b5628d4aec94873da9:nvme0n1",
+              "clusterName": "cod--qfdcinkqrzw",
+              "logicalPartition": "false",
+              "hostId": "88ae2611748383b5628d4aec94873da9",
+              "active": "true",
+              "category": "DISK",
+              "device": "nvme0n1",
+              "version": "CDH 7.2.15",
+              "rackId": "/ap-northeast-1a"
+            },
+            "unitNumerators": [
+              "ms"
+            ],
+            "unitDenominators": [],
+            "expression": "SELECT last(await_time) WHERE entityName = \"88ae2611748383b5628d4aec94873da9:nvme0n1\" AND category = DISK",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2022-11-29T04:54:23.000Z",
+              "value": 0.3157894736842105,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "last(await_time)",
+            "entityName": "nvme1n1 (cod--qfdcinkqrzw-leader0.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2022-11-29T04:49:47.846Z",
+            "endTime": "2022-11-29T04:54:47.846Z",
+            "attributes": {
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "hostname": "cod--qfdcinkqrzw-leader0.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "96efbf3e7279bf25ae44fe0a6398ee97:nvme1n1",
+              "clusterName": "cod--qfdcinkqrzw",
+              "logicalPartition": "false",
+              "hostId": "96efbf3e7279bf25ae44fe0a6398ee97",
+              "active": "true",
+              "category": "DISK",
+              "device": "nvme1n1",
+              "version": "CDH 7.2.15",
+              "rackId": "/ap-northeast-1a"
+            },
+            "unitNumerators": [
+              "ms"
+            ],
+            "unitDenominators": [],
+            "expression": "SELECT last(await_time) WHERE entityName = \"96efbf3e7279bf25ae44fe0a6398ee97:nvme1n1\" AND category = DISK",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2022-11-29T04:54:09.000Z",
+              "value": 0.8947368421052632,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "last(await_time)",
+            "entityName": "nvme0n1p1 (cod--qfdcinkqrzw-gateway0.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2022-11-29T04:49:47.846Z",
+            "endTime": "2022-11-29T04:54:47.846Z",
+            "attributes": {
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "hostname": "cod--qfdcinkqrzw-gateway0.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "d8623d9457f4db06c5637c4fd4c02f5d:nvme0n1p1",
+              "clusterName": "cod--qfdcinkqrzw",
+              "logicalPartition": "true",
+              "hostId": "d8623d9457f4db06c5637c4fd4c02f5d",
+              "active": "true",
+              "category": "DISK",
+              "device": "nvme0n1p1",
+              "version": "CDH 7.2.15",
+              "rackId": "/ap-northeast-1d"
+            },
+            "unitNumerators": [
+              "ms"
+            ],
+            "unitDenominators": [],
+            "expression": "SELECT last(await_time) WHERE entityName = \"d8623d9457f4db06c5637c4fd4c02f5d:nvme0n1p1\" AND category = DISK",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2022-11-29T04:54:25.000Z",
+              "value": 0.9731543624161074,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "last(await_time)",
+            "entityName": "nvme1n1 (cod--qfdcinkqrzw-worker4.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2022-11-29T04:49:47.846Z",
+            "endTime": "2022-11-29T04:54:47.846Z",
+            "attributes": {
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "hostname": "cod--qfdcinkqrzw-worker4.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "9784d85849c7179b790d476c483fd905:nvme1n1",
+              "clusterName": "cod--qfdcinkqrzw",
+              "logicalPartition": "false",
+              "hostId": "9784d85849c7179b790d476c483fd905",
+              "active": "true",
+              "category": "DISK",
+              "device": "nvme1n1",
+              "version": "CDH 7.2.15",
+              "rackId": "/ap-northeast-1d"
+            },
+            "unitNumerators": [
+              "ms"
+            ],
+            "unitDenominators": [],
+            "expression": "SELECT last(await_time) WHERE entityName = \"9784d85849c7179b790d476c483fd905:nvme1n1\" AND category = DISK",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2022-11-29T04:54:22.000Z",
+              "value": 0.8333333333333334,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "last(await_time)",
+            "entityName": "nvme1n1 (cod--qfdcinkqrzw-gateway0.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2022-11-29T04:49:47.846Z",
+            "endTime": "2022-11-29T04:54:47.846Z",
+            "attributes": {
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "hostname": "cod--qfdcinkqrzw-gateway0.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "d8623d9457f4db06c5637c4fd4c02f5d:nvme1n1",
+              "clusterName": "cod--qfdcinkqrzw",
+              "logicalPartition": "false",
+              "hostId": "d8623d9457f4db06c5637c4fd4c02f5d",
+              "active": "true",
+              "category": "DISK",
+              "device": "nvme1n1",
+              "version": "CDH 7.2.15",
+              "rackId": "/ap-northeast-1d"
+            },
+            "unitNumerators": [
+              "ms"
+            ],
+            "unitDenominators": [],
+            "expression": "SELECT last(await_time) WHERE entityName = \"d8623d9457f4db06c5637c4fd4c02f5d:nvme1n1\" AND category = DISK",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2022-11-29T04:54:25.000Z",
+              "value": 1.8879310344827587,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "last(await_time)",
+            "entityName": "nvme0n1 (cod--qfdcinkqrzw-worker4.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2022-11-29T04:49:47.846Z",
+            "endTime": "2022-11-29T04:54:47.846Z",
+            "attributes": {
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "hostname": "cod--qfdcinkqrzw-worker4.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "9784d85849c7179b790d476c483fd905:nvme0n1",
+              "clusterName": "cod--qfdcinkqrzw",
+              "logicalPartition": "false",
+              "hostId": "9784d85849c7179b790d476c483fd905",
+              "active": "true",
+              "category": "DISK",
+              "device": "nvme0n1",
+              "version": "CDH 7.2.15",
+              "rackId": "/ap-northeast-1d"
+            },
+            "unitNumerators": [
+              "ms"
+            ],
+            "unitDenominators": [],
+            "expression": "SELECT last(await_time) WHERE entityName = \"9784d85849c7179b790d476c483fd905:nvme0n1\" AND category = DISK",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2022-11-29T04:54:22.000Z",
+              "value": 0.4107142857142857,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "last(await_time)",
+            "entityName": "nvme0n1 (cod--qfdcinkqrzw-gateway0.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2022-11-29T04:49:47.846Z",
+            "endTime": "2022-11-29T04:54:47.846Z",
+            "attributes": {
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "hostname": "cod--qfdcinkqrzw-gateway0.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "d8623d9457f4db06c5637c4fd4c02f5d:nvme0n1",
+              "clusterName": "cod--qfdcinkqrzw",
+              "logicalPartition": "false",
+              "hostId": "d8623d9457f4db06c5637c4fd4c02f5d",
+              "active": "true",
+              "category": "DISK",
+              "device": "nvme0n1",
+              "version": "CDH 7.2.15",
+              "rackId": "/ap-northeast-1d"
+            },
+            "unitNumerators": [
+              "ms"
+            ],
+            "unitDenominators": [],
+            "expression": "SELECT last(await_time) WHERE entityName = \"d8623d9457f4db06c5637c4fd4c02f5d:nvme0n1\" AND category = DISK",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2022-11-29T04:54:25.000Z",
+              "value": 0.9731543624161074,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "last(await_time)",
+            "entityName": "nvme1n1 (cod--qfdcinkqrzw-master0.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2022-11-29T04:49:47.846Z",
+            "endTime": "2022-11-29T04:54:47.846Z",
+            "attributes": {
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "hostname": "cod--qfdcinkqrzw-master0.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "759451867dfde961d6adbeb21d9c13f9:nvme1n1",
+              "clusterName": "cod--qfdcinkqrzw",
+              "logicalPartition": "false",
+              "hostId": "759451867dfde961d6adbeb21d9c13f9",
+              "active": "true",
+              "category": "DISK",
+              "device": "nvme1n1",
+              "version": "CDH 7.2.15",
+              "rackId": "/ap-northeast-1d"
+            },
+            "unitNumerators": [
+              "ms"
+            ],
+            "unitDenominators": [],
+            "expression": "SELECT last(await_time) WHERE entityName = \"759451867dfde961d6adbeb21d9c13f9:nvme1n1\" AND category = DISK",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2022-11-29T04:54:43.000Z",
+              "value": 0.8095238095238095,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "last(await_time)",
+            "entityName": "nvme0n1 (cod--qfdcinkqrzw-master0.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2022-11-29T04:49:47.846Z",
+            "endTime": "2022-11-29T04:54:47.846Z",
+            "attributes": {
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "hostname": "cod--qfdcinkqrzw-master0.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "759451867dfde961d6adbeb21d9c13f9:nvme0n1",
+              "clusterName": "cod--qfdcinkqrzw",
+              "logicalPartition": "false",
+              "hostId": "759451867dfde961d6adbeb21d9c13f9",
+              "active": "true",
+              "category": "DISK",
+              "device": "nvme0n1",
+              "version": "CDH 7.2.15",
+              "rackId": "/ap-northeast-1d"
+            },
+            "unitNumerators": [
+              "ms"
+            ],
+            "unitDenominators": [],
+            "expression": "SELECT last(await_time) WHERE entityName = \"759451867dfde961d6adbeb21d9c13f9:nvme0n1\" AND category = DISK",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2022-11-29T04:54:43.000Z",
+              "value": 0.15789473684210525,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "last(await_time)",
+            "entityName": "nvme0n1p1 (cod--qfdcinkqrzw-worker1.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2022-11-29T04:49:47.846Z",
+            "endTime": "2022-11-29T04:54:47.846Z",
+            "attributes": {
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "hostname": "cod--qfdcinkqrzw-worker1.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "22f6ab659c835d47bc13d6c8f3370110:nvme0n1p1",
+              "clusterName": "cod--qfdcinkqrzw",
+              "logicalPartition": "true",
+              "hostId": "22f6ab659c835d47bc13d6c8f3370110",
+              "active": "true",
+              "category": "DISK",
+              "device": "nvme0n1p1",
+              "version": "CDH 7.2.15",
+              "rackId": "/ap-northeast-1c"
+            },
+            "unitNumerators": [
+              "ms"
+            ],
+            "unitDenominators": [],
+            "expression": "SELECT last(await_time) WHERE entityName = \"22f6ab659c835d47bc13d6c8f3370110:nvme0n1p1\" AND category = DISK",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2022-11-29T04:54:24.000Z",
+              "value": 0.12,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "last(await_time)",
+            "entityName": "nvme0n1p1 (cod--qfdcinkqrzw-worker3.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2022-11-29T04:49:47.846Z",
+            "endTime": "2022-11-29T04:54:47.846Z",
+            "attributes": {
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "hostname": "cod--qfdcinkqrzw-worker3.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "88ae2611748383b5628d4aec94873da9:nvme0n1p1",
+              "clusterName": "cod--qfdcinkqrzw",
+              "logicalPartition": "true",
+              "hostId": "88ae2611748383b5628d4aec94873da9",
+              "active": "true",
+              "category": "DISK",
+              "device": "nvme0n1p1",
+              "version": "CDH 7.2.15",
+              "rackId": "/ap-northeast-1a"
+            },
+            "unitNumerators": [
+              "ms"
+            ],
+            "unitDenominators": [],
+            "expression": "SELECT last(await_time) WHERE entityName = \"88ae2611748383b5628d4aec94873da9:nvme0n1p1\" AND category = DISK",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2022-11-29T04:54:23.000Z",
+              "value": 0.3157894736842105,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "last(await_time)",
+            "entityName": "nvme1n1 (cod--qfdcinkqrzw-master1.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2022-11-29T04:49:47.846Z",
+            "endTime": "2022-11-29T04:54:47.846Z",
+            "attributes": {
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "hostname": "cod--qfdcinkqrzw-master1.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "119115ab851aefe1429860d4255b3fab:nvme1n1",
+              "clusterName": "cod--qfdcinkqrzw",
+              "logicalPartition": "false",
+              "hostId": "119115ab851aefe1429860d4255b3fab",
+              "active": "true",
+              "category": "DISK",
+              "device": "nvme1n1",
+              "version": "CDH 7.2.15",
+              "rackId": "/ap-northeast-1c"
+            },
+            "unitNumerators": [
+              "ms"
+            ],
+            "unitDenominators": [],
+            "expression": "SELECT last(await_time) WHERE entityName = \"119115ab851aefe1429860d4255b3fab:nvme1n1\" AND category = DISK",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2022-11-29T04:53:50.000Z",
+              "value": 1.0952380952380953,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "last(await_time)",
+            "entityName": "nvme0n1 (cod--qfdcinkqrzw-worker2.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2022-11-29T04:49:47.846Z",
+            "endTime": "2022-11-29T04:54:47.846Z",
+            "attributes": {
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "hostname": "cod--qfdcinkqrzw-worker2.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "49adda80d1b98e9262ee146fd7fd798b:nvme0n1",
+              "clusterName": "cod--qfdcinkqrzw",
+              "logicalPartition": "false",
+              "hostId": "49adda80d1b98e9262ee146fd7fd798b",
+              "active": "true",
+              "category": "DISK",
+              "device": "nvme0n1",
+              "version": "CDH 7.2.15",
+              "rackId": "/ap-northeast-1c"
+            },
+            "unitNumerators": [
+              "ms"
+            ],
+            "unitDenominators": [],
+            "expression": "SELECT last(await_time) WHERE entityName = \"49adda80d1b98e9262ee146fd7fd798b:nvme0n1\" AND category = DISK",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2022-11-29T04:54:23.000Z",
+              "value": 0.46774193548387094,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "last(await_time)",
+            "entityName": "nvme1n1 (cod--qfdcinkqrzw-worker2.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2022-11-29T04:49:47.846Z",
+            "endTime": "2022-11-29T04:54:47.846Z",
+            "attributes": {
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "hostname": "cod--qfdcinkqrzw-worker2.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "49adda80d1b98e9262ee146fd7fd798b:nvme1n1",
+              "clusterName": "cod--qfdcinkqrzw",
+              "logicalPartition": "false",
+              "hostId": "49adda80d1b98e9262ee146fd7fd798b",
+              "active": "true",
+              "category": "DISK",
+              "device": "nvme1n1",
+              "version": "CDH 7.2.15",
+              "rackId": "/ap-northeast-1c"
+            },
+            "unitNumerators": [
+              "ms"
+            ],
+            "unitDenominators": [],
+            "expression": "SELECT last(await_time) WHERE entityName = \"49adda80d1b98e9262ee146fd7fd798b:nvme1n1\" AND category = DISK",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2022-11-29T04:54:23.000Z",
+              "value": 0,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "last(await_time)",
+            "entityName": "nvme0n1p1 (cod--qfdcinkqrzw-worker0.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2022-11-29T04:49:47.846Z",
+            "endTime": "2022-11-29T04:54:47.846Z",
+            "attributes": {
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "hostname": "cod--qfdcinkqrzw-worker0.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "ed528836ae33e47e6657b95373571c33:nvme0n1p1",
+              "clusterName": "cod--qfdcinkqrzw",
+              "logicalPartition": "true",
+              "hostId": "ed528836ae33e47e6657b95373571c33",
+              "active": "true",
+              "category": "DISK",
+              "device": "nvme0n1p1",
+              "version": "CDH 7.2.15",
+              "rackId": "/ap-northeast-1d"
+            },
+            "unitNumerators": [
+              "ms"
+            ],
+            "unitDenominators": [],
+            "expression": "SELECT last(await_time) WHERE entityName = \"ed528836ae33e47e6657b95373571c33:nvme0n1p1\" AND category = DISK",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2022-11-29T04:54:22.000Z",
+              "value": 0.48148148148148145,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "last(await_time)",
+            "entityName": "nvme0n1 (cod--qfdcinkqrzw-master1.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2022-11-29T04:49:47.846Z",
+            "endTime": "2022-11-29T04:54:47.846Z",
+            "attributes": {
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "hostname": "cod--qfdcinkqrzw-master1.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "119115ab851aefe1429860d4255b3fab:nvme0n1",
+              "clusterName": "cod--qfdcinkqrzw",
+              "logicalPartition": "false",
+              "hostId": "119115ab851aefe1429860d4255b3fab",
+              "active": "true",
+              "category": "DISK",
+              "device": "nvme0n1",
+              "version": "CDH 7.2.15",
+              "rackId": "/ap-northeast-1c"
+            },
+            "unitNumerators": [
+              "ms"
+            ],
+            "unitDenominators": [],
+            "expression": "SELECT last(await_time) WHERE entityName = \"119115ab851aefe1429860d4255b3fab:nvme0n1\" AND category = DISK",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2022-11-29T04:53:50.000Z",
+              "value": 0.40540540540540543,
+              "type": "SAMPLE"
+            }
+          ]
+        }
+      ],
+      "warnings": [],
+      "timeSeriesQuery": "select last(await_time)"
+    }
+  ]
+}

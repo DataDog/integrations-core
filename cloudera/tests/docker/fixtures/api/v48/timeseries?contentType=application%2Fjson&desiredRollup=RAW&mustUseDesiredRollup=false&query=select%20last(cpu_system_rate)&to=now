@@ -1,0 +1,2175 @@
+{
+  "items": [
+    {
+      "timeSeries": [
+        {
+          "metadata": {
+            "metricName": "last(cpu_system_rate)",
+            "entityName": "cod--qfdcinkqrzw-leader0.agent-in.jfha-h5rc.a0.cloudera.site",
+            "startTime": "2022-11-29T04:43:40.462Z",
+            "endTime": "2022-11-29T04:48:40.462Z",
+            "attributes": {
+              "hostname": "cod--qfdcinkqrzw-leader0.agent-in.jfha-h5rc.a0.cloudera.site",
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "entityName": "96efbf3e7279bf25ae44fe0a6398ee97",
+              "clusterName": "cod--qfdcinkqrzw",
+              "hostId": "96efbf3e7279bf25ae44fe0a6398ee97",
+              "active": "true",
+              "category": "HOST",
+              "version": "CDH 7.2.15",
+              "rackId": "/ap-northeast-1a"
+            },
+            "unitNumerators": [
+              "seconds"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT last(cpu_system_rate) WHERE entityName = \"96efbf3e7279bf25ae44fe0a6398ee97\" AND category = HOST",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2022-11-29T04:48:09.000Z",
+              "value": 0.008166666666632712,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "last(cpu_system_rate)",
+            "entityName": "cod--qfdcinkqrzw-worker3.agent-in.jfha-h5rc.a0.cloudera.site",
+            "startTime": "2022-11-29T04:43:40.462Z",
+            "endTime": "2022-11-29T04:48:40.462Z",
+            "attributes": {
+              "hostname": "cod--qfdcinkqrzw-worker3.agent-in.jfha-h5rc.a0.cloudera.site",
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "entityName": "88ae2611748383b5628d4aec94873da9",
+              "clusterName": "cod--qfdcinkqrzw",
+              "hostId": "88ae2611748383b5628d4aec94873da9",
+              "active": "true",
+              "category": "HOST",
+              "version": "CDH 7.2.15",
+              "rackId": "/ap-northeast-1a"
+            },
+            "unitNumerators": [
+              "seconds"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT last(cpu_system_rate) WHERE entityName = \"88ae2611748383b5628d4aec94873da9\" AND category = HOST",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2022-11-29T04:48:23.000Z",
+              "value": 0.00850000000015522,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "last(cpu_system_rate)",
+            "entityName": "cod--qfdcinkqrzw-gateway0.agent-in.jfha-h5rc.a0.cloudera.site",
+            "startTime": "2022-11-29T04:43:40.462Z",
+            "endTime": "2022-11-29T04:48:40.462Z",
+            "attributes": {
+              "hostname": "cod--qfdcinkqrzw-gateway0.agent-in.jfha-h5rc.a0.cloudera.site",
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "entityName": "d8623d9457f4db06c5637c4fd4c02f5d",
+              "clusterName": "cod--qfdcinkqrzw",
+              "hostId": "d8623d9457f4db06c5637c4fd4c02f5d",
+              "active": "true",
+              "category": "HOST",
+              "version": "CDH 7.2.15",
+              "rackId": "/ap-northeast-1d"
+            },
+            "unitNumerators": [
+              "seconds"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT last(cpu_system_rate) WHERE entityName = \"d8623d9457f4db06c5637c4fd4c02f5d\" AND category = HOST",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2022-11-29T04:48:25.000Z",
+              "value": 0.03377049180324052,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "last(cpu_system_rate)",
+            "entityName": "cod--qfdcinkqrzw-worker1.agent-in.jfha-h5rc.a0.cloudera.site",
+            "startTime": "2022-11-29T04:43:40.462Z",
+            "endTime": "2022-11-29T04:48:40.462Z",
+            "attributes": {
+              "hostname": "cod--qfdcinkqrzw-worker1.agent-in.jfha-h5rc.a0.cloudera.site",
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "entityName": "22f6ab659c835d47bc13d6c8f3370110",
+              "clusterName": "cod--qfdcinkqrzw",
+              "hostId": "22f6ab659c835d47bc13d6c8f3370110",
+              "active": "true",
+              "category": "HOST",
+              "version": "CDH 7.2.15",
+              "rackId": "/ap-northeast-1c"
+            },
+            "unitNumerators": [
+              "seconds"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT last(cpu_system_rate) WHERE entityName = \"22f6ab659c835d47bc13d6c8f3370110\" AND category = HOST",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2022-11-29T04:48:24.000Z",
+              "value": 0.008166666666753978,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "last(cpu_system_rate)",
+            "entityName": "cod--qfdcinkqrzw-worker2.agent-in.jfha-h5rc.a0.cloudera.site",
+            "startTime": "2022-11-29T04:43:40.462Z",
+            "endTime": "2022-11-29T04:48:40.462Z",
+            "attributes": {
+              "hostname": "cod--qfdcinkqrzw-worker2.agent-in.jfha-h5rc.a0.cloudera.site",
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "entityName": "49adda80d1b98e9262ee146fd7fd798b",
+              "clusterName": "cod--qfdcinkqrzw",
+              "hostId": "49adda80d1b98e9262ee146fd7fd798b",
+              "active": "true",
+              "category": "HOST",
+              "version": "CDH 7.2.15",
+              "rackId": "/ap-northeast-1c"
+            },
+            "unitNumerators": [
+              "seconds"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT last(cpu_system_rate) WHERE entityName = \"49adda80d1b98e9262ee146fd7fd798b\" AND category = HOST",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2022-11-29T04:48:23.000Z",
+              "value": 0.008499999999912689,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "last(cpu_system_rate)",
+            "entityName": "cod--qfdcinkqrzw-worker4.agent-in.jfha-h5rc.a0.cloudera.site",
+            "startTime": "2022-11-29T04:43:40.462Z",
+            "endTime": "2022-11-29T04:48:40.462Z",
+            "attributes": {
+              "hostname": "cod--qfdcinkqrzw-worker4.agent-in.jfha-h5rc.a0.cloudera.site",
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "entityName": "9784d85849c7179b790d476c483fd905",
+              "clusterName": "cod--qfdcinkqrzw",
+              "hostId": "9784d85849c7179b790d476c483fd905",
+              "active": "true",
+              "category": "HOST",
+              "version": "CDH 7.2.15",
+              "rackId": "/ap-northeast-1d"
+            },
+            "unitNumerators": [
+              "seconds"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT last(cpu_system_rate) WHERE entityName = \"9784d85849c7179b790d476c483fd905\" AND category = HOST",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2022-11-29T04:48:22.000Z",
+              "value": 0.009000000000135818,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "last(cpu_system_rate)",
+            "entityName": "cod--qfdcinkqrzw-master1.agent-in.jfha-h5rc.a0.cloudera.site",
+            "startTime": "2022-11-29T04:43:40.462Z",
+            "endTime": "2022-11-29T04:48:40.462Z",
+            "attributes": {
+              "hostname": "cod--qfdcinkqrzw-master1.agent-in.jfha-h5rc.a0.cloudera.site",
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "entityName": "119115ab851aefe1429860d4255b3fab",
+              "clusterName": "cod--qfdcinkqrzw",
+              "hostId": "119115ab851aefe1429860d4255b3fab",
+              "active": "true",
+              "category": "HOST",
+              "version": "CDH 7.2.15",
+              "rackId": "/ap-northeast-1c"
+            },
+            "unitNumerators": [
+              "seconds"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT last(cpu_system_rate) WHERE entityName = \"119115ab851aefe1429860d4255b3fab\" AND category = HOST",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2022-11-29T04:47:50.000Z",
+              "value": 0.020833333333333332,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "last(cpu_system_rate)",
+            "entityName": "cod--qfdcinkqrzw-worker0.agent-in.jfha-h5rc.a0.cloudera.site",
+            "startTime": "2022-11-29T04:43:40.462Z",
+            "endTime": "2022-11-29T04:48:40.462Z",
+            "attributes": {
+              "hostname": "cod--qfdcinkqrzw-worker0.agent-in.jfha-h5rc.a0.cloudera.site",
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "entityName": "ed528836ae33e47e6657b95373571c33",
+              "clusterName": "cod--qfdcinkqrzw",
+              "hostId": "ed528836ae33e47e6657b95373571c33",
+              "active": "true",
+              "category": "HOST",
+              "version": "CDH 7.2.15",
+              "rackId": "/ap-northeast-1d"
+            },
+            "unitNumerators": [
+              "seconds"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT last(cpu_system_rate) WHERE entityName = \"ed528836ae33e47e6657b95373571c33\" AND category = HOST",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2022-11-29T04:48:22.000Z",
+              "value": 0.010166666666676368,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "last(cpu_system_rate)",
+            "entityName": "cod--qfdcinkqrzw-master0.agent-in.jfha-h5rc.a0.cloudera.site",
+            "startTime": "2022-11-29T04:43:40.462Z",
+            "endTime": "2022-11-29T04:48:40.462Z",
+            "attributes": {
+              "hostname": "cod--qfdcinkqrzw-master0.agent-in.jfha-h5rc.a0.cloudera.site",
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "entityName": "759451867dfde961d6adbeb21d9c13f9",
+              "clusterName": "cod--qfdcinkqrzw",
+              "hostId": "759451867dfde961d6adbeb21d9c13f9",
+              "active": "true",
+              "category": "HOST",
+              "version": "CDH 7.2.15",
+              "rackId": "/ap-northeast-1d"
+            },
+            "unitNumerators": [
+              "seconds"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT last(cpu_system_rate) WHERE entityName = \"759451867dfde961d6adbeb21d9c13f9\" AND category = HOST",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2022-11-29T04:47:43.000Z",
+              "value": 0.01916666666669092,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "last(cpu_system_rate)",
+            "entityName": "DataNode (cod--qfdcinkqrzw-worker4.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2022-11-29T04:43:40.462Z",
+            "endTime": "2022-11-29T04:48:40.462Z",
+            "attributes": {
+              "serviceType": "HDFS",
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "hostId": "9784d85849c7179b790d476c483fd905",
+              "active": "true",
+              "serviceName": "hdfs",
+              "roleType": "DATANODE",
+              "version": "CDH 7.2.15",
+              "hostname": "cod--qfdcinkqrzw-worker4.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "hdfs-DATANODE-bf4b8e304dd0b549bcad6614d3129033",
+              "clusterName": "cod--qfdcinkqrzw",
+              "roleName": "hdfs-DATANODE-bf4b8e304dd0b549bcad6614d3129033",
+              "roleConfigGroup": "DataNode Default Group",
+              "category": "ROLE",
+              "rackId": "/ap-northeast-1d"
+            },
+            "unitNumerators": [
+              "seconds"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT last(cpu_system_rate) WHERE entityName = \"hdfs-DATANODE-bf4b8e304dd0b549bcad6614d3129033\" AND category = ROLE",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2022-11-29T04:48:21.000Z",
+              "value": 0.0005084745762712057,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "last(cpu_system_rate)",
+            "entityName": "Master (cod--qfdcinkqrzw-master1.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2022-11-29T04:43:40.462Z",
+            "endTime": "2022-11-29T04:48:40.462Z",
+            "attributes": {
+              "serviceType": "HBASE",
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "hostId": "119115ab851aefe1429860d4255b3fab",
+              "active": "true",
+              "serviceDisplayName": "hbase",
+              "serviceName": "hbase",
+              "roleType": "MASTER",
+              "version": "CDH 7.2.15",
+              "hostname": "cod--qfdcinkqrzw-master1.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "hbase-MASTER-dbb26169f4e1fe9a387fcc5bd5bfd6af",
+              "clusterName": "cod--qfdcinkqrzw",
+              "roleName": "hbase-MASTER-dbb26169f4e1fe9a387fcc5bd5bfd6af",
+              "roleConfigGroup": "Master Default Group",
+              "category": "ROLE",
+              "rackId": "/ap-northeast-1c"
+            },
+            "unitNumerators": [
+              "seconds"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT last(cpu_system_rate) WHERE entityName = \"hbase-MASTER-dbb26169f4e1fe9a387fcc5bd5bfd6af\" AND category = ROLE",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": []
+        },
+        {
+          "metadata": {
+            "metricName": "last(cpu_system_rate)",
+            "entityName": "Server (cod--qfdcinkqrzw-leader0.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2022-11-29T04:43:40.462Z",
+            "endTime": "2022-11-29T04:48:40.462Z",
+            "attributes": {
+              "serviceType": "ZOOKEEPER",
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "hostId": "96efbf3e7279bf25ae44fe0a6398ee97",
+              "active": "true",
+              "serviceDisplayName": "ZooKeeper",
+              "serviceName": "zookeeper-e52d",
+              "roleType": "SERVER",
+              "version": "CDH 7.2.15",
+              "hostname": "cod--qfdcinkqrzw-leader0.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "zookeeper-e52d-SERVER-3bc8f544ef0c15a373bbe9f9790fefba",
+              "clusterName": "cod--qfdcinkqrzw",
+              "roleName": "zookeeper-e52d-SERVER-3bc8f544ef0c15a373bbe9f9790fefba",
+              "roleConfigGroup": "Server Default Group",
+              "category": "ROLE",
+              "rackId": "/ap-northeast-1a"
+            },
+            "unitNumerators": [
+              "seconds"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT last(cpu_system_rate) WHERE entityName = \"zookeeper-e52d-SERVER-3bc8f544ef0c15a373bbe9f9790fefba\" AND category = ROLE",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2022-11-29T04:48:09.000Z",
+              "value": 0.000500000000000019,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "last(cpu_system_rate)",
+            "entityName": "JournalNode (cod--qfdcinkqrzw-master1.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2022-11-29T04:43:40.462Z",
+            "endTime": "2022-11-29T04:48:40.462Z",
+            "attributes": {
+              "serviceType": "HDFS",
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "hostId": "119115ab851aefe1429860d4255b3fab",
+              "active": "true",
+              "serviceName": "hdfs",
+              "roleType": "JOURNALNODE",
+              "version": "CDH 7.2.15",
+              "hostname": "cod--qfdcinkqrzw-master1.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "hdfs-JOURNALNODE-dbb26169f4e1fe9a387fcc5bd5bfd6af",
+              "clusterName": "cod--qfdcinkqrzw",
+              "roleName": "hdfs-JOURNALNODE-dbb26169f4e1fe9a387fcc5bd5bfd6af",
+              "roleConfigGroup": "JournalNode Default Group",
+              "category": "ROLE",
+              "rackId": "/ap-northeast-1c"
+            },
+            "unitNumerators": [
+              "seconds"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT last(cpu_system_rate) WHERE entityName = \"hdfs-JOURNALNODE-dbb26169f4e1fe9a387fcc5bd5bfd6af\" AND category = ROLE",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2022-11-29T04:47:49.000Z",
+              "value": 0.00033333333333350387,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "last(cpu_system_rate)",
+            "entityName": "NameNode (cod--qfdcinkqrzw-master0.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2022-11-29T04:43:40.462Z",
+            "endTime": "2022-11-29T04:48:40.462Z",
+            "attributes": {
+              "serviceType": "HDFS",
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "hostId": "759451867dfde961d6adbeb21d9c13f9",
+              "active": "true",
+              "serviceName": "hdfs",
+              "roleType": "NAMENODE",
+              "version": "CDH 7.2.15",
+              "hostname": "cod--qfdcinkqrzw-master0.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "hdfs-NAMENODE-6e88fa1a7ad969e10ea41365cba9abc5",
+              "clusterName": "cod--qfdcinkqrzw",
+              "roleName": "hdfs-NAMENODE-6e88fa1a7ad969e10ea41365cba9abc5",
+              "roleConfigGroup": "NameNode Default Group",
+              "category": "ROLE",
+              "rackId": "/ap-northeast-1d"
+            },
+            "unitNumerators": [
+              "seconds"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT last(cpu_system_rate) WHERE entityName = \"hdfs-NAMENODE-6e88fa1a7ad969e10ea41365cba9abc5\" AND category = ROLE",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2022-11-29T04:47:43.000Z",
+              "value": 0.0014999999999986357,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "last(cpu_system_rate)",
+            "entityName": "RegionServer (cod--qfdcinkqrzw-worker4.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2022-11-29T04:43:40.462Z",
+            "endTime": "2022-11-29T04:48:40.462Z",
+            "attributes": {
+              "serviceType": "HBASE",
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "hostId": "9784d85849c7179b790d476c483fd905",
+              "active": "true",
+              "serviceDisplayName": "hbase",
+              "serviceName": "hbase",
+              "roleType": "REGIONSERVER",
+              "version": "CDH 7.2.15",
+              "hostname": "cod--qfdcinkqrzw-worker4.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "hbase-REGIONSERVER-bf4b8e304dd0b549bcad6614d3129033",
+              "clusterName": "cod--qfdcinkqrzw",
+              "roleName": "hbase-REGIONSERVER-bf4b8e304dd0b549bcad6614d3129033",
+              "roleConfigGroup": "RegionServer Default Group",
+              "category": "ROLE",
+              "rackId": "/ap-northeast-1d"
+            },
+            "unitNumerators": [
+              "seconds"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT last(cpu_system_rate) WHERE entityName = \"hbase-REGIONSERVER-bf4b8e304dd0b549bcad6614d3129033\" AND category = ROLE",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": []
+        },
+        {
+          "metadata": {
+            "metricName": "last(cpu_system_rate)",
+            "entityName": "PHOENIX_QUERY_SERVER (cod--qfdcinkqrzw-worker2.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2022-11-29T04:43:40.462Z",
+            "endTime": "2022-11-29T04:48:40.462Z",
+            "attributes": {
+              "serviceType": "PHOENIX",
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "hostId": "49adda80d1b98e9262ee146fd7fd798b",
+              "active": "true",
+              "serviceDisplayName": "phoenix",
+              "serviceName": "phoenix",
+              "roleType": "PHOENIX_QUERY_SERVER",
+              "version": "CDH 7.2.15",
+              "hostname": "cod--qfdcinkqrzw-worker2.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "phoenix-PHOENIX_QUERY_SERVER-3c658ac6009daca54192736b1502fae1",
+              "clusterName": "cod--qfdcinkqrzw",
+              "roleName": "phoenix-PHOENIX_QUERY_SERVER-3c658ac6009daca54192736b1502fae1",
+              "roleConfigGroup": "Query Server Default Group",
+              "category": "ROLE",
+              "rackId": "/ap-northeast-1c"
+            },
+            "unitNumerators": [
+              "seconds"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT last(cpu_system_rate) WHERE entityName = \"phoenix-PHOENIX_QUERY_SERVER-3c658ac6009daca54192736b1502fae1\" AND category = ROLE",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": []
+        },
+        {
+          "metadata": {
+            "metricName": "last(cpu_system_rate)",
+            "entityName": "PHOENIX_QUERY_SERVER (cod--qfdcinkqrzw-worker0.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2022-11-29T04:43:40.462Z",
+            "endTime": "2022-11-29T04:48:40.462Z",
+            "attributes": {
+              "serviceType": "PHOENIX",
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "hostId": "ed528836ae33e47e6657b95373571c33",
+              "active": "true",
+              "serviceDisplayName": "phoenix",
+              "serviceName": "phoenix",
+              "roleType": "PHOENIX_QUERY_SERVER",
+              "version": "CDH 7.2.15",
+              "hostname": "cod--qfdcinkqrzw-worker0.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "phoenix-PHOENIX_QUERY_SERVER-145da1565b8e2c4165145d9ecc0c784e",
+              "clusterName": "cod--qfdcinkqrzw",
+              "roleName": "phoenix-PHOENIX_QUERY_SERVER-145da1565b8e2c4165145d9ecc0c784e",
+              "roleConfigGroup": "Query Server Default Group",
+              "category": "ROLE",
+              "rackId": "/ap-northeast-1d"
+            },
+            "unitNumerators": [
+              "seconds"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT last(cpu_system_rate) WHERE entityName = \"phoenix-PHOENIX_QUERY_SERVER-145da1565b8e2c4165145d9ecc0c784e\" AND category = ROLE",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": []
+        },
+        {
+          "metadata": {
+            "metricName": "last(cpu_system_rate)",
+            "entityName": "NodeManager (cod--qfdcinkqrzw-worker3.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2022-11-29T04:43:40.462Z",
+            "endTime": "2022-11-29T04:48:40.462Z",
+            "attributes": {
+              "serviceType": "YARN",
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "hostId": "88ae2611748383b5628d4aec94873da9",
+              "active": "true",
+              "serviceDisplayName": "yarn",
+              "serviceName": "yarn",
+              "roleType": "NODEMANAGER",
+              "version": "CDH 7.2.15",
+              "hostname": "cod--qfdcinkqrzw-worker3.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "yarn-NODEMANAGER-d51d3a03fc3294039de9c160b1013676",
+              "clusterName": "cod--qfdcinkqrzw",
+              "roleName": "yarn-NODEMANAGER-d51d3a03fc3294039de9c160b1013676",
+              "roleConfigGroup": "NodeManager Default Group",
+              "category": "ROLE",
+              "rackId": "/ap-northeast-1a"
+            },
+            "unitNumerators": [
+              "seconds"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT last(cpu_system_rate) WHERE entityName = \"yarn-NODEMANAGER-d51d3a03fc3294039de9c160b1013676\" AND category = ROLE",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2022-11-29T04:48:23.000Z",
+              "value": 0.0005000000000000004,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "last(cpu_system_rate)",
+            "entityName": "Server (cod--qfdcinkqrzw-master1.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2022-11-29T04:43:40.462Z",
+            "endTime": "2022-11-29T04:48:40.462Z",
+            "attributes": {
+              "serviceType": "ZOOKEEPER",
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "hostId": "119115ab851aefe1429860d4255b3fab",
+              "active": "true",
+              "serviceDisplayName": "ZooKeeper",
+              "serviceName": "zookeeper-e52d",
+              "roleType": "SERVER",
+              "version": "CDH 7.2.15",
+              "hostname": "cod--qfdcinkqrzw-master1.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "zookeeper-e52d-SERVER-dbb26169f4e1fe9a387fcc5bd5bfd6af",
+              "clusterName": "cod--qfdcinkqrzw",
+              "roleName": "zookeeper-e52d-SERVER-dbb26169f4e1fe9a387fcc5bd5bfd6af",
+              "roleConfigGroup": "Server Default Group",
+              "category": "ROLE",
+              "rackId": "/ap-northeast-1c"
+            },
+            "unitNumerators": [
+              "seconds"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT last(cpu_system_rate) WHERE entityName = \"zookeeper-e52d-SERVER-dbb26169f4e1fe9a387fcc5bd5bfd6af\" AND category = ROLE",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2022-11-29T04:47:50.000Z",
+              "value": 0.000333333333333267,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "last(cpu_system_rate)",
+            "entityName": "RegionServer (cod--qfdcinkqrzw-worker1.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2022-11-29T04:43:40.462Z",
+            "endTime": "2022-11-29T04:48:40.462Z",
+            "attributes": {
+              "serviceType": "HBASE",
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "hostId": "22f6ab659c835d47bc13d6c8f3370110",
+              "active": "true",
+              "serviceDisplayName": "hbase",
+              "serviceName": "hbase",
+              "roleType": "REGIONSERVER",
+              "version": "CDH 7.2.15",
+              "hostname": "cod--qfdcinkqrzw-worker1.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "hbase-REGIONSERVER-7e9a53b768c95833df424c7d7b0ae857",
+              "clusterName": "cod--qfdcinkqrzw",
+              "roleName": "hbase-REGIONSERVER-7e9a53b768c95833df424c7d7b0ae857",
+              "roleConfigGroup": "hbase-REGIONSERVER",
+              "category": "ROLE",
+              "rackId": "/ap-northeast-1c"
+            },
+            "unitNumerators": [
+              "seconds"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT last(cpu_system_rate) WHERE entityName = \"hbase-REGIONSERVER-7e9a53b768c95833df424c7d7b0ae857\" AND category = ROLE",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": []
+        },
+        {
+          "metadata": {
+            "metricName": "last(cpu_system_rate)",
+            "entityName": "DataNode (cod--qfdcinkqrzw-worker0.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2022-11-29T04:43:40.462Z",
+            "endTime": "2022-11-29T04:48:40.462Z",
+            "attributes": {
+              "serviceType": "HDFS",
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "hostId": "ed528836ae33e47e6657b95373571c33",
+              "active": "true",
+              "serviceName": "hdfs",
+              "roleType": "DATANODE",
+              "version": "CDH 7.2.15",
+              "hostname": "cod--qfdcinkqrzw-worker0.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "hdfs-DATANODE-145da1565b8e2c4165145d9ecc0c784e",
+              "clusterName": "cod--qfdcinkqrzw",
+              "roleName": "hdfs-DATANODE-145da1565b8e2c4165145d9ecc0c784e",
+              "roleConfigGroup": "DataNode Default Group",
+              "category": "ROLE",
+              "rackId": "/ap-northeast-1d"
+            },
+            "unitNumerators": [
+              "seconds"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT last(cpu_system_rate) WHERE entityName = \"hdfs-DATANODE-145da1565b8e2c4165145d9ecc0c784e\" AND category = ROLE",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2022-11-29T04:48:22.000Z",
+              "value": 0.000666666666666534,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "last(cpu_system_rate)",
+            "entityName": "Host Monitor (cod--qfdcinkqrzw-gateway0.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2022-11-29T04:43:40.462Z",
+            "endTime": "2022-11-29T04:48:40.462Z",
+            "attributes": {
+              "serviceType": "MGMT",
+              "hostname": "cod--qfdcinkqrzw-gateway0.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "HOSTMONITOR",
+              "roleName": "HOSTMONITOR",
+              "hostId": "d8623d9457f4db06c5637c4fd4c02f5d",
+              "roleConfigGroup": "Host Monitor Default Group",
+              "active": "true",
+              "serviceDisplayName": "MGMT",
+              "serviceName": "MGMT",
+              "roleType": "HOSTMONITOR",
+              "category": "ROLE",
+              "rackId": "/ap-northeast-1d"
+            },
+            "unitNumerators": [
+              "seconds"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT last(cpu_system_rate) WHERE entityName = \"HOSTMONITOR\" AND category = ROLE",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2022-11-29T04:48:24.000Z",
+              "value": 0.0024999999999939368,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "last(cpu_system_rate)",
+            "entityName": "ResourceManager (cod--qfdcinkqrzw-master0.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2022-11-29T04:43:40.462Z",
+            "endTime": "2022-11-29T04:48:40.462Z",
+            "attributes": {
+              "serviceType": "YARN",
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "hostId": "759451867dfde961d6adbeb21d9c13f9",
+              "active": "true",
+              "serviceDisplayName": "yarn",
+              "serviceName": "yarn",
+              "roleType": "RESOURCEMANAGER",
+              "version": "CDH 7.2.15",
+              "hostname": "cod--qfdcinkqrzw-master0.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "yarn-RESOURCEMANAGER-6e88fa1a7ad969e10ea41365cba9abc5",
+              "clusterName": "cod--qfdcinkqrzw",
+              "roleName": "yarn-RESOURCEMANAGER-6e88fa1a7ad969e10ea41365cba9abc5",
+              "roleConfigGroup": "ResourceManager Default Group",
+              "category": "ROLE",
+              "rackId": "/ap-northeast-1d"
+            },
+            "unitNumerators": [
+              "seconds"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT last(cpu_system_rate) WHERE entityName = \"yarn-RESOURCEMANAGER-6e88fa1a7ad969e10ea41365cba9abc5\" AND category = ROLE",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": []
+        },
+        {
+          "metadata": {
+            "metricName": "last(cpu_system_rate)",
+            "entityName": "PHOENIX_QUERY_SERVER (cod--qfdcinkqrzw-worker4.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2022-11-29T04:43:40.462Z",
+            "endTime": "2022-11-29T04:48:40.462Z",
+            "attributes": {
+              "serviceType": "PHOENIX",
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "hostId": "9784d85849c7179b790d476c483fd905",
+              "active": "true",
+              "serviceDisplayName": "phoenix",
+              "serviceName": "phoenix",
+              "roleType": "PHOENIX_QUERY_SERVER",
+              "version": "CDH 7.2.15",
+              "hostname": "cod--qfdcinkqrzw-worker4.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "phoenix-PHOENIX_QUERY_SERVER-bf4b8e304dd0b549bcad6614d3129033",
+              "clusterName": "cod--qfdcinkqrzw",
+              "roleName": "phoenix-PHOENIX_QUERY_SERVER-bf4b8e304dd0b549bcad6614d3129033",
+              "roleConfigGroup": "Query Server Default Group",
+              "category": "ROLE",
+              "rackId": "/ap-northeast-1d"
+            },
+            "unitNumerators": [
+              "seconds"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT last(cpu_system_rate) WHERE entityName = \"phoenix-PHOENIX_QUERY_SERVER-bf4b8e304dd0b549bcad6614d3129033\" AND category = ROLE",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": []
+        },
+        {
+          "metadata": {
+            "metricName": "last(cpu_system_rate)",
+            "entityName": "RegionServer (cod--qfdcinkqrzw-worker0.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2022-11-29T04:43:40.462Z",
+            "endTime": "2022-11-29T04:48:40.462Z",
+            "attributes": {
+              "serviceType": "HBASE",
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "hostId": "ed528836ae33e47e6657b95373571c33",
+              "active": "true",
+              "serviceDisplayName": "hbase",
+              "serviceName": "hbase",
+              "roleType": "REGIONSERVER",
+              "version": "CDH 7.2.15",
+              "hostname": "cod--qfdcinkqrzw-worker0.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "hbase-REGIONSERVER-145da1565b8e2c4165145d9ecc0c784e",
+              "clusterName": "cod--qfdcinkqrzw",
+              "roleName": "hbase-REGIONSERVER-145da1565b8e2c4165145d9ecc0c784e",
+              "roleConfigGroup": "RegionServer Default Group",
+              "category": "ROLE",
+              "rackId": "/ap-northeast-1d"
+            },
+            "unitNumerators": [
+              "seconds"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT last(cpu_system_rate) WHERE entityName = \"hbase-REGIONSERVER-145da1565b8e2c4165145d9ecc0c784e\" AND category = ROLE",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": []
+        },
+        {
+          "metadata": {
+            "metricName": "last(cpu_system_rate)",
+            "entityName": "RegionServer (cod--qfdcinkqrzw-worker3.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2022-11-29T04:43:40.462Z",
+            "endTime": "2022-11-29T04:48:40.462Z",
+            "attributes": {
+              "serviceType": "HBASE",
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "hostId": "88ae2611748383b5628d4aec94873da9",
+              "active": "true",
+              "serviceDisplayName": "hbase",
+              "serviceName": "hbase",
+              "roleType": "REGIONSERVER",
+              "version": "CDH 7.2.15",
+              "hostname": "cod--qfdcinkqrzw-worker3.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "hbase-REGIONSERVER-d51d3a03fc3294039de9c160b1013676",
+              "clusterName": "cod--qfdcinkqrzw",
+              "roleName": "hbase-REGIONSERVER-d51d3a03fc3294039de9c160b1013676",
+              "roleConfigGroup": "RegionServer Default Group",
+              "category": "ROLE",
+              "rackId": "/ap-northeast-1a"
+            },
+            "unitNumerators": [
+              "seconds"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT last(cpu_system_rate) WHERE entityName = \"hbase-REGIONSERVER-d51d3a03fc3294039de9c160b1013676\" AND category = ROLE",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": []
+        },
+        {
+          "metadata": {
+            "metricName": "last(cpu_system_rate)",
+            "entityName": "Load Balancer (cod--qfdcinkqrzw-gateway0.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2022-11-29T04:43:40.462Z",
+            "endTime": "2022-11-29T04:48:40.462Z",
+            "attributes": {
+              "serviceType": "HUE",
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "hostId": "d8623d9457f4db06c5637c4fd4c02f5d",
+              "active": "true",
+              "serviceDisplayName": "hue",
+              "serviceName": "hue",
+              "roleType": "HUE_LOAD_BALANCER",
+              "version": "CDH 7.2.15",
+              "hostname": "cod--qfdcinkqrzw-gateway0.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "hue-HUE_LOAD_BALANCER-7d0b6bba5cf23b4729586ee8d35ab766",
+              "clusterName": "cod--qfdcinkqrzw",
+              "roleName": "hue-HUE_LOAD_BALANCER-7d0b6bba5cf23b4729586ee8d35ab766",
+              "roleConfigGroup": "Load Balancer Default Group",
+              "category": "ROLE",
+              "rackId": "/ap-northeast-1d"
+            },
+            "unitNumerators": [
+              "seconds"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT last(cpu_system_rate) WHERE entityName = \"hue-HUE_LOAD_BALANCER-7d0b6bba5cf23b4729586ee8d35ab766\" AND category = ROLE",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": []
+        },
+        {
+          "metadata": {
+            "metricName": "last(cpu_system_rate)",
+            "entityName": "Kerberos Ticket Renewer (cod--qfdcinkqrzw-gateway0.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2022-11-29T04:43:40.462Z",
+            "endTime": "2022-11-29T04:48:40.462Z",
+            "attributes": {
+              "serviceType": "HUE",
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "hostId": "d8623d9457f4db06c5637c4fd4c02f5d",
+              "active": "true",
+              "serviceDisplayName": "hue",
+              "serviceName": "hue",
+              "roleType": "KT_RENEWER",
+              "version": "CDH 7.2.15",
+              "hostname": "cod--qfdcinkqrzw-gateway0.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "hue-KT_RENEWER-7d0b6bba5cf23b4729586ee8d35ab766",
+              "clusterName": "cod--qfdcinkqrzw",
+              "roleName": "hue-KT_RENEWER-7d0b6bba5cf23b4729586ee8d35ab766",
+              "roleConfigGroup": "Kerberos Ticket Renewer Default Group",
+              "category": "ROLE",
+              "rackId": "/ap-northeast-1d"
+            },
+            "unitNumerators": [
+              "seconds"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT last(cpu_system_rate) WHERE entityName = \"hue-KT_RENEWER-7d0b6bba5cf23b4729586ee8d35ab766\" AND category = ROLE",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": []
+        },
+        {
+          "metadata": {
+            "metricName": "last(cpu_system_rate)",
+            "entityName": "HBase REST Server (cod--qfdcinkqrzw-leader0.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2022-11-29T04:43:40.462Z",
+            "endTime": "2022-11-29T04:48:40.462Z",
+            "attributes": {
+              "serviceType": "HBASE",
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "hostId": "96efbf3e7279bf25ae44fe0a6398ee97",
+              "active": "true",
+              "serviceDisplayName": "hbase",
+              "serviceName": "hbase",
+              "roleType": "HBASERESTSERVER",
+              "version": "CDH 7.2.15",
+              "hostname": "cod--qfdcinkqrzw-leader0.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "hbase-HBASERESTSERVER-3bc8f544ef0c15a373bbe9f9790fefba",
+              "clusterName": "cod--qfdcinkqrzw",
+              "roleName": "hbase-HBASERESTSERVER-3bc8f544ef0c15a373bbe9f9790fefba",
+              "roleConfigGroup": "HBase REST Server Default Group",
+              "category": "ROLE",
+              "rackId": "/ap-northeast-1a"
+            },
+            "unitNumerators": [
+              "seconds"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT last(cpu_system_rate) WHERE entityName = \"hbase-HBASERESTSERVER-3bc8f544ef0c15a373bbe9f9790fefba\" AND category = ROLE",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": []
+        },
+        {
+          "metadata": {
+            "metricName": "last(cpu_system_rate)",
+            "entityName": "OMID_TSO (cod--qfdcinkqrzw-leader0.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2022-11-29T04:43:40.462Z",
+            "endTime": "2022-11-29T04:48:40.462Z",
+            "attributes": {
+              "serviceType": "OMID",
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "hostId": "96efbf3e7279bf25ae44fe0a6398ee97",
+              "active": "true",
+              "serviceDisplayName": "omid",
+              "serviceName": "omid",
+              "roleType": "OMID_TSO",
+              "version": "CDH 7.2.15",
+              "hostname": "cod--qfdcinkqrzw-leader0.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "omid-OMID_TSO-3bc8f544ef0c15a373bbe9f9790fefba",
+              "clusterName": "cod--qfdcinkqrzw",
+              "roleName": "omid-OMID_TSO-3bc8f544ef0c15a373bbe9f9790fefba",
+              "roleConfigGroup": "Omid tso server Default Group",
+              "category": "ROLE",
+              "rackId": "/ap-northeast-1a"
+            },
+            "unitNumerators": [
+              "seconds"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT last(cpu_system_rate) WHERE entityName = \"omid-OMID_TSO-3bc8f544ef0c15a373bbe9f9790fefba\" AND category = ROLE",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": []
+        },
+        {
+          "metadata": {
+            "metricName": "last(cpu_system_rate)",
+            "entityName": "JournalNode (cod--qfdcinkqrzw-master0.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2022-11-29T04:43:40.462Z",
+            "endTime": "2022-11-29T04:48:40.462Z",
+            "attributes": {
+              "serviceType": "HDFS",
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "hostId": "759451867dfde961d6adbeb21d9c13f9",
+              "active": "true",
+              "serviceName": "hdfs",
+              "roleType": "JOURNALNODE",
+              "version": "CDH 7.2.15",
+              "hostname": "cod--qfdcinkqrzw-master0.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "hdfs-JOURNALNODE-6e88fa1a7ad969e10ea41365cba9abc5",
+              "clusterName": "cod--qfdcinkqrzw",
+              "roleName": "hdfs-JOURNALNODE-6e88fa1a7ad969e10ea41365cba9abc5",
+              "roleConfigGroup": "JournalNode Default Group",
+              "category": "ROLE",
+              "rackId": "/ap-northeast-1d"
+            },
+            "unitNumerators": [
+              "seconds"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT last(cpu_system_rate) WHERE entityName = \"hdfs-JOURNALNODE-6e88fa1a7ad969e10ea41365cba9abc5\" AND category = ROLE",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2022-11-29T04:47:43.000Z",
+              "value": 0.000500000000000019,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "last(cpu_system_rate)",
+            "entityName": "JournalNode (cod--qfdcinkqrzw-leader0.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2022-11-29T04:43:40.462Z",
+            "endTime": "2022-11-29T04:48:40.462Z",
+            "attributes": {
+              "serviceType": "HDFS",
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "hostId": "96efbf3e7279bf25ae44fe0a6398ee97",
+              "active": "true",
+              "serviceName": "hdfs",
+              "roleType": "JOURNALNODE",
+              "version": "CDH 7.2.15",
+              "hostname": "cod--qfdcinkqrzw-leader0.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "hdfs-JOURNALNODE-3bc8f544ef0c15a373bbe9f9790fefba",
+              "clusterName": "cod--qfdcinkqrzw",
+              "roleName": "hdfs-JOURNALNODE-3bc8f544ef0c15a373bbe9f9790fefba",
+              "roleConfigGroup": "JournalNode Default Group",
+              "category": "ROLE",
+              "rackId": "/ap-northeast-1a"
+            },
+            "unitNumerators": [
+              "seconds"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT last(cpu_system_rate) WHERE entityName = \"hdfs-JOURNALNODE-3bc8f544ef0c15a373bbe9f9790fefba\" AND category = ROLE",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2022-11-29T04:48:09.000Z",
+              "value": 0.00033333333333350387,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "last(cpu_system_rate)",
+            "entityName": "Server (cod--qfdcinkqrzw-master0.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2022-11-29T04:43:40.462Z",
+            "endTime": "2022-11-29T04:48:40.462Z",
+            "attributes": {
+              "serviceType": "ZOOKEEPER",
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "hostId": "759451867dfde961d6adbeb21d9c13f9",
+              "active": "true",
+              "serviceDisplayName": "ZooKeeper",
+              "serviceName": "zookeeper-e52d",
+              "roleType": "SERVER",
+              "version": "CDH 7.2.15",
+              "hostname": "cod--qfdcinkqrzw-master0.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "zookeeper-e52d-SERVER-6e88fa1a7ad969e10ea41365cba9abc5",
+              "clusterName": "cod--qfdcinkqrzw",
+              "roleName": "zookeeper-e52d-SERVER-6e88fa1a7ad969e10ea41365cba9abc5",
+              "roleConfigGroup": "Server Default Group",
+              "category": "ROLE",
+              "rackId": "/ap-northeast-1d"
+            },
+            "unitNumerators": [
+              "seconds"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT last(cpu_system_rate) WHERE entityName = \"zookeeper-e52d-SERVER-6e88fa1a7ad969e10ea41365cba9abc5\" AND category = ROLE",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2022-11-29T04:47:43.000Z",
+              "value": 0.000333333333333267,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "last(cpu_system_rate)",
+            "entityName": "PHOENIX_QUERY_SERVER (cod--qfdcinkqrzw-worker3.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2022-11-29T04:43:40.462Z",
+            "endTime": "2022-11-29T04:48:40.462Z",
+            "attributes": {
+              "serviceType": "PHOENIX",
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "hostId": "88ae2611748383b5628d4aec94873da9",
+              "active": "true",
+              "serviceDisplayName": "phoenix",
+              "serviceName": "phoenix",
+              "roleType": "PHOENIX_QUERY_SERVER",
+              "version": "CDH 7.2.15",
+              "hostname": "cod--qfdcinkqrzw-worker3.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "phoenix-PHOENIX_QUERY_SERVER-d51d3a03fc3294039de9c160b1013676",
+              "clusterName": "cod--qfdcinkqrzw",
+              "roleName": "phoenix-PHOENIX_QUERY_SERVER-d51d3a03fc3294039de9c160b1013676",
+              "roleConfigGroup": "Query Server Default Group",
+              "category": "ROLE",
+              "rackId": "/ap-northeast-1a"
+            },
+            "unitNumerators": [
+              "seconds"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT last(cpu_system_rate) WHERE entityName = \"phoenix-PHOENIX_QUERY_SERVER-d51d3a03fc3294039de9c160b1013676\" AND category = ROLE",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": []
+        },
+        {
+          "metadata": {
+            "metricName": "last(cpu_system_rate)",
+            "entityName": "Hue Server (cod--qfdcinkqrzw-gateway0.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2022-11-29T04:43:40.462Z",
+            "endTime": "2022-11-29T04:48:40.462Z",
+            "attributes": {
+              "serviceType": "HUE",
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "hostId": "d8623d9457f4db06c5637c4fd4c02f5d",
+              "active": "true",
+              "serviceDisplayName": "hue",
+              "serviceName": "hue",
+              "roleType": "HUE_SERVER",
+              "version": "CDH 7.2.15",
+              "hostname": "cod--qfdcinkqrzw-gateway0.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "hue-HUE_SERVER-7d0b6bba5cf23b4729586ee8d35ab766",
+              "clusterName": "cod--qfdcinkqrzw",
+              "roleName": "hue-HUE_SERVER-7d0b6bba5cf23b4729586ee8d35ab766",
+              "roleConfigGroup": "Hue Server Default Group",
+              "category": "ROLE",
+              "rackId": "/ap-northeast-1d"
+            },
+            "unitNumerators": [
+              "seconds"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT last(cpu_system_rate) WHERE entityName = \"hue-HUE_SERVER-7d0b6bba5cf23b4729586ee8d35ab766\" AND category = ROLE",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": []
+        },
+        {
+          "metadata": {
+            "metricName": "last(cpu_system_rate)",
+            "entityName": "Master (cod--qfdcinkqrzw-master0.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2022-11-29T04:43:40.462Z",
+            "endTime": "2022-11-29T04:48:40.462Z",
+            "attributes": {
+              "serviceType": "HBASE",
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "hostId": "759451867dfde961d6adbeb21d9c13f9",
+              "active": "true",
+              "serviceDisplayName": "hbase",
+              "serviceName": "hbase",
+              "roleType": "MASTER",
+              "version": "CDH 7.2.15",
+              "hostname": "cod--qfdcinkqrzw-master0.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "hbase-MASTER-6e88fa1a7ad969e10ea41365cba9abc5",
+              "clusterName": "cod--qfdcinkqrzw",
+              "roleName": "hbase-MASTER-6e88fa1a7ad969e10ea41365cba9abc5",
+              "roleConfigGroup": "Master Default Group",
+              "category": "ROLE",
+              "rackId": "/ap-northeast-1d"
+            },
+            "unitNumerators": [
+              "seconds"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT last(cpu_system_rate) WHERE entityName = \"hbase-MASTER-6e88fa1a7ad969e10ea41365cba9abc5\" AND category = ROLE",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": []
+        },
+        {
+          "metadata": {
+            "metricName": "last(cpu_system_rate)",
+            "entityName": "Event Server (cod--qfdcinkqrzw-gateway0.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2022-11-29T04:43:40.462Z",
+            "endTime": "2022-11-29T04:48:40.462Z",
+            "attributes": {
+              "serviceType": "MGMT",
+              "hostname": "cod--qfdcinkqrzw-gateway0.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "EVENTSERVER",
+              "roleName": "EVENTSERVER",
+              "hostId": "d8623d9457f4db06c5637c4fd4c02f5d",
+              "roleConfigGroup": "Event Server Default Group",
+              "active": "true",
+              "serviceDisplayName": "MGMT",
+              "serviceName": "MGMT",
+              "roleType": "EVENTSERVER",
+              "category": "ROLE",
+              "rackId": "/ap-northeast-1d"
+            },
+            "unitNumerators": [
+              "seconds"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT last(cpu_system_rate) WHERE entityName = \"EVENTSERVER\" AND category = ROLE",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2022-11-29T04:48:24.000Z",
+              "value": 0.001166666666661816,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "last(cpu_system_rate)",
+            "entityName": "QUEUEMANAGER_STORE (cod--qfdcinkqrzw-gateway0.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2022-11-29T04:43:40.462Z",
+            "endTime": "2022-11-29T04:48:40.462Z",
+            "attributes": {
+              "serviceType": "QUEUEMANAGER",
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "hostId": "d8623d9457f4db06c5637c4fd4c02f5d",
+              "active": "true",
+              "serviceDisplayName": "queuemanager",
+              "serviceName": "queuemanager",
+              "roleType": "QUEUEMANAGER_STORE",
+              "version": "CDH 7.2.15",
+              "hostname": "cod--qfdcinkqrzw-gateway0.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "queuemanager-QUEUEMANAGER_STORE-7d0b6bba5cf23b4729586ee8d35ab766",
+              "clusterName": "cod--qfdcinkqrzw",
+              "roleName": "queuemanager-QUEUEMANAGER_STORE-7d0b6bba5cf23b4729586ee8d35ab766",
+              "roleConfigGroup": "YARN Queue Manager Store Default Group",
+              "category": "ROLE",
+              "rackId": "/ap-northeast-1d"
+            },
+            "unitNumerators": [
+              "seconds"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT last(cpu_system_rate) WHERE entityName = \"queuemanager-QUEUEMANAGER_STORE-7d0b6bba5cf23b4729586ee8d35ab766\" AND category = ROLE",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2022-11-29T04:48:25.000Z",
+              "value": 0.000333333333333267,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "last(cpu_system_rate)",
+            "entityName": "PHOENIX_QUERY_SERVER (cod--qfdcinkqrzw-worker1.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2022-11-29T04:43:40.462Z",
+            "endTime": "2022-11-29T04:48:40.462Z",
+            "attributes": {
+              "serviceType": "PHOENIX",
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "hostId": "22f6ab659c835d47bc13d6c8f3370110",
+              "active": "true",
+              "serviceDisplayName": "phoenix",
+              "serviceName": "phoenix",
+              "roleType": "PHOENIX_QUERY_SERVER",
+              "version": "CDH 7.2.15",
+              "hostname": "cod--qfdcinkqrzw-worker1.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "phoenix-PHOENIX_QUERY_SERVER-7e9a53b768c95833df424c7d7b0ae857",
+              "clusterName": "cod--qfdcinkqrzw",
+              "roleName": "phoenix-PHOENIX_QUERY_SERVER-7e9a53b768c95833df424c7d7b0ae857",
+              "roleConfigGroup": "Query Server Default Group",
+              "category": "ROLE",
+              "rackId": "/ap-northeast-1c"
+            },
+            "unitNumerators": [
+              "seconds"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT last(cpu_system_rate) WHERE entityName = \"phoenix-PHOENIX_QUERY_SERVER-7e9a53b768c95833df424c7d7b0ae857\" AND category = ROLE",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": []
+        },
+        {
+          "metadata": {
+            "metricName": "last(cpu_system_rate)",
+            "entityName": "DataNode (cod--qfdcinkqrzw-worker3.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2022-11-29T04:43:40.462Z",
+            "endTime": "2022-11-29T04:48:40.462Z",
+            "attributes": {
+              "serviceType": "HDFS",
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "hostId": "88ae2611748383b5628d4aec94873da9",
+              "active": "true",
+              "serviceName": "hdfs",
+              "roleType": "DATANODE",
+              "version": "CDH 7.2.15",
+              "hostname": "cod--qfdcinkqrzw-worker3.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "hdfs-DATANODE-d51d3a03fc3294039de9c160b1013676",
+              "clusterName": "cod--qfdcinkqrzw",
+              "roleName": "hdfs-DATANODE-d51d3a03fc3294039de9c160b1013676",
+              "roleConfigGroup": "DataNode Default Group",
+              "category": "ROLE",
+              "rackId": "/ap-northeast-1a"
+            },
+            "unitNumerators": [
+              "seconds"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT last(cpu_system_rate) WHERE entityName = \"hdfs-DATANODE-d51d3a03fc3294039de9c160b1013676\" AND category = ROLE",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2022-11-29T04:48:23.000Z",
+              "value": 0.000500000000000019,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "last(cpu_system_rate)",
+            "entityName": "NodeManager (cod--qfdcinkqrzw-worker0.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2022-11-29T04:43:40.462Z",
+            "endTime": "2022-11-29T04:48:40.462Z",
+            "attributes": {
+              "serviceType": "YARN",
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "hostId": "ed528836ae33e47e6657b95373571c33",
+              "active": "true",
+              "serviceDisplayName": "yarn",
+              "serviceName": "yarn",
+              "roleType": "NODEMANAGER",
+              "version": "CDH 7.2.15",
+              "hostname": "cod--qfdcinkqrzw-worker0.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "yarn-NODEMANAGER-145da1565b8e2c4165145d9ecc0c784e",
+              "clusterName": "cod--qfdcinkqrzw",
+              "roleName": "yarn-NODEMANAGER-145da1565b8e2c4165145d9ecc0c784e",
+              "roleConfigGroup": "NodeManager Default Group",
+              "category": "ROLE",
+              "rackId": "/ap-northeast-1d"
+            },
+            "unitNumerators": [
+              "seconds"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT last(cpu_system_rate) WHERE entityName = \"yarn-NODEMANAGER-145da1565b8e2c4165145d9ecc0c784e\" AND category = ROLE",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2022-11-29T04:48:22.000Z",
+              "value": 0.0008333333333333377,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "last(cpu_system_rate)",
+            "entityName": "Failover Controller (cod--qfdcinkqrzw-master0.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2022-11-29T04:43:40.462Z",
+            "endTime": "2022-11-29T04:48:40.462Z",
+            "attributes": {
+              "serviceType": "HDFS",
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "hostId": "759451867dfde961d6adbeb21d9c13f9",
+              "active": "true",
+              "serviceName": "hdfs",
+              "roleType": "FAILOVERCONTROLLER",
+              "version": "CDH 7.2.15",
+              "hostname": "cod--qfdcinkqrzw-master0.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "hdfs-FAILOVERCONTROLLER-6e88fa1a7ad969e10ea41365cba9abc5",
+              "clusterName": "cod--qfdcinkqrzw",
+              "roleName": "hdfs-FAILOVERCONTROLLER-6e88fa1a7ad969e10ea41365cba9abc5",
+              "roleConfigGroup": "Failover Controller Default Group",
+              "category": "ROLE",
+              "rackId": "/ap-northeast-1d"
+            },
+            "unitNumerators": [
+              "seconds"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT last(cpu_system_rate) WHERE entityName = \"hdfs-FAILOVERCONTROLLER-6e88fa1a7ad969e10ea41365cba9abc5\" AND category = ROLE",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": []
+        },
+        {
+          "metadata": {
+            "metricName": "last(cpu_system_rate)",
+            "entityName": "HBase Thrift Server (cod--qfdcinkqrzw-leader0.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2022-11-29T04:43:40.462Z",
+            "endTime": "2022-11-29T04:48:40.462Z",
+            "attributes": {
+              "serviceType": "HBASE",
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "hostId": "96efbf3e7279bf25ae44fe0a6398ee97",
+              "active": "true",
+              "serviceDisplayName": "hbase",
+              "serviceName": "hbase",
+              "roleType": "HBASETHRIFTSERVER",
+              "version": "CDH 7.2.15",
+              "hostname": "cod--qfdcinkqrzw-leader0.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "hbase-HBASETHRIFTSERVER-3bc8f544ef0c15a373bbe9f9790fefba",
+              "clusterName": "cod--qfdcinkqrzw",
+              "roleName": "hbase-HBASETHRIFTSERVER-3bc8f544ef0c15a373bbe9f9790fefba",
+              "roleConfigGroup": "HBase Thrift Server Default Group",
+              "category": "ROLE",
+              "rackId": "/ap-northeast-1a"
+            },
+            "unitNumerators": [
+              "seconds"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT last(cpu_system_rate) WHERE entityName = \"hbase-HBASETHRIFTSERVER-3bc8f544ef0c15a373bbe9f9790fefba\" AND category = ROLE",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": []
+        },
+        {
+          "metadata": {
+            "metricName": "last(cpu_system_rate)",
+            "entityName": "NameNode (cod--qfdcinkqrzw-master1.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2022-11-29T04:43:40.462Z",
+            "endTime": "2022-11-29T04:48:40.462Z",
+            "attributes": {
+              "serviceType": "HDFS",
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "hostId": "119115ab851aefe1429860d4255b3fab",
+              "active": "true",
+              "serviceName": "hdfs",
+              "roleType": "NAMENODE",
+              "version": "CDH 7.2.15",
+              "hostname": "cod--qfdcinkqrzw-master1.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "hdfs-NAMENODE-dbb26169f4e1fe9a387fcc5bd5bfd6af",
+              "clusterName": "cod--qfdcinkqrzw",
+              "roleName": "hdfs-NAMENODE-dbb26169f4e1fe9a387fcc5bd5bfd6af",
+              "roleConfigGroup": "NameNode Default Group",
+              "category": "ROLE",
+              "rackId": "/ap-northeast-1c"
+            },
+            "unitNumerators": [
+              "seconds"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT last(cpu_system_rate) WHERE entityName = \"hdfs-NAMENODE-dbb26169f4e1fe9a387fcc5bd5bfd6af\" AND category = ROLE",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2022-11-29T04:47:49.000Z",
+              "value": 0.001166666666666553,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "last(cpu_system_rate)",
+            "entityName": "JobHistory Server (cod--qfdcinkqrzw-leader0.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2022-11-29T04:43:40.462Z",
+            "endTime": "2022-11-29T04:48:40.462Z",
+            "attributes": {
+              "serviceType": "YARN",
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "hostId": "96efbf3e7279bf25ae44fe0a6398ee97",
+              "active": "true",
+              "serviceDisplayName": "yarn",
+              "serviceName": "yarn",
+              "roleType": "JOBHISTORY",
+              "version": "CDH 7.2.15",
+              "hostname": "cod--qfdcinkqrzw-leader0.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "yarn-JOBHISTORY-3bc8f544ef0c15a373bbe9f9790fefba",
+              "clusterName": "cod--qfdcinkqrzw",
+              "roleName": "yarn-JOBHISTORY-3bc8f544ef0c15a373bbe9f9790fefba",
+              "roleConfigGroup": "JobHistory Server Default Group",
+              "category": "ROLE",
+              "rackId": "/ap-northeast-1a"
+            },
+            "unitNumerators": [
+              "seconds"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT last(cpu_system_rate) WHERE entityName = \"yarn-JOBHISTORY-3bc8f544ef0c15a373bbe9f9790fefba\" AND category = ROLE",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2022-11-29T04:48:09.000Z",
+              "value": 0.00016666666666666682,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "last(cpu_system_rate)",
+            "entityName": "RegionServer (cod--qfdcinkqrzw-worker2.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2022-11-29T04:43:40.462Z",
+            "endTime": "2022-11-29T04:48:40.462Z",
+            "attributes": {
+              "serviceType": "HBASE",
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "hostId": "49adda80d1b98e9262ee146fd7fd798b",
+              "active": "true",
+              "serviceDisplayName": "hbase",
+              "serviceName": "hbase",
+              "roleType": "REGIONSERVER",
+              "version": "CDH 7.2.15",
+              "hostname": "cod--qfdcinkqrzw-worker2.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "hbase-REGIONSERVER-3c658ac6009daca54192736b1502fae1",
+              "clusterName": "cod--qfdcinkqrzw",
+              "roleName": "hbase-REGIONSERVER-3c658ac6009daca54192736b1502fae1",
+              "roleConfigGroup": "hbase-REGIONSERVER",
+              "category": "ROLE",
+              "rackId": "/ap-northeast-1c"
+            },
+            "unitNumerators": [
+              "seconds"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT last(cpu_system_rate) WHERE entityName = \"hbase-REGIONSERVER-3c658ac6009daca54192736b1502fae1\" AND category = ROLE",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": []
+        },
+        {
+          "metadata": {
+            "metricName": "last(cpu_system_rate)",
+            "entityName": "NodeManager (cod--qfdcinkqrzw-worker4.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2022-11-29T04:43:40.462Z",
+            "endTime": "2022-11-29T04:48:40.462Z",
+            "attributes": {
+              "serviceType": "YARN",
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "hostId": "9784d85849c7179b790d476c483fd905",
+              "active": "true",
+              "serviceDisplayName": "yarn",
+              "serviceName": "yarn",
+              "roleType": "NODEMANAGER",
+              "version": "CDH 7.2.15",
+              "hostname": "cod--qfdcinkqrzw-worker4.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "yarn-NODEMANAGER-bf4b8e304dd0b549bcad6614d3129033",
+              "clusterName": "cod--qfdcinkqrzw",
+              "roleName": "yarn-NODEMANAGER-bf4b8e304dd0b549bcad6614d3129033",
+              "roleConfigGroup": "NodeManager Default Group",
+              "category": "ROLE",
+              "rackId": "/ap-northeast-1d"
+            },
+            "unitNumerators": [
+              "seconds"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT last(cpu_system_rate) WHERE entityName = \"yarn-NODEMANAGER-bf4b8e304dd0b549bcad6614d3129033\" AND category = ROLE",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2022-11-29T04:48:21.000Z",
+              "value": 0.0008474576271186486,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "last(cpu_system_rate)",
+            "entityName": "QUEUEMANAGER_WEBAPP (cod--qfdcinkqrzw-gateway0.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2022-11-29T04:43:40.462Z",
+            "endTime": "2022-11-29T04:48:40.462Z",
+            "attributes": {
+              "serviceType": "QUEUEMANAGER",
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "hostId": "d8623d9457f4db06c5637c4fd4c02f5d",
+              "active": "true",
+              "serviceDisplayName": "queuemanager",
+              "serviceName": "queuemanager",
+              "roleType": "QUEUEMANAGER_WEBAPP",
+              "version": "CDH 7.2.15",
+              "hostname": "cod--qfdcinkqrzw-gateway0.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "queuc8af8526-QUEUEMANAGER_WEBAPP-7d0b6bba5cf23b4729586ee8d35ab76",
+              "clusterName": "cod--qfdcinkqrzw",
+              "roleName": "queuc8af8526-QUEUEMANAGER_WEBAPP-7d0b6bba5cf23b4729586ee8d35ab76",
+              "roleConfigGroup": "YARN Queue Manager Webapp Default Group",
+              "category": "ROLE",
+              "rackId": "/ap-northeast-1d"
+            },
+            "unitNumerators": [
+              "seconds"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT last(cpu_system_rate) WHERE entityName = \"queuc8af8526-QUEUEMANAGER_WEBAPP-7d0b6bba5cf23b4729586ee8d35ab76\" AND category = ROLE",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2022-11-29T04:48:25.000Z",
+              "value": 0.0001666666666666335,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "last(cpu_system_rate)",
+            "entityName": "KNOX_GATEWAY (cod--qfdcinkqrzw-gateway0.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2022-11-29T04:43:40.462Z",
+            "endTime": "2022-11-29T04:48:40.462Z",
+            "attributes": {
+              "serviceType": "KNOX",
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "hostId": "d8623d9457f4db06c5637c4fd4c02f5d",
+              "active": "true",
+              "serviceDisplayName": "Knox",
+              "serviceName": "knox-e428",
+              "roleType": "KNOX_GATEWAY",
+              "version": "CDH 7.2.15",
+              "hostname": "cod--qfdcinkqrzw-gateway0.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "knox-e428-KNOX_GATEWAY-7d0b6bba5cf23b4729586ee8d35ab766",
+              "clusterName": "cod--qfdcinkqrzw",
+              "roleName": "knox-e428-KNOX_GATEWAY-7d0b6bba5cf23b4729586ee8d35ab766",
+              "roleConfigGroup": "Knox Gateway Default Group",
+              "category": "ROLE",
+              "rackId": "/ap-northeast-1d"
+            },
+            "unitNumerators": [
+              "seconds"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT last(cpu_system_rate) WHERE entityName = \"knox-e428-KNOX_GATEWAY-7d0b6bba5cf23b4729586ee8d35ab766\" AND category = ROLE",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2022-11-29T04:48:25.000Z",
+              "value": 0.0006666666666670077,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "last(cpu_system_rate)",
+            "entityName": "Failover Controller (cod--qfdcinkqrzw-master1.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2022-11-29T04:43:40.462Z",
+            "endTime": "2022-11-29T04:48:40.462Z",
+            "attributes": {
+              "serviceType": "HDFS",
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "hostId": "119115ab851aefe1429860d4255b3fab",
+              "active": "true",
+              "serviceName": "hdfs",
+              "roleType": "FAILOVERCONTROLLER",
+              "version": "CDH 7.2.15",
+              "hostname": "cod--qfdcinkqrzw-master1.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "hdfs-FAILOVERCONTROLLER-dbb26169f4e1fe9a387fcc5bd5bfd6af",
+              "clusterName": "cod--qfdcinkqrzw",
+              "roleName": "hdfs-FAILOVERCONTROLLER-dbb26169f4e1fe9a387fcc5bd5bfd6af",
+              "roleConfigGroup": "Failover Controller Default Group",
+              "category": "ROLE",
+              "rackId": "/ap-northeast-1c"
+            },
+            "unitNumerators": [
+              "seconds"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT last(cpu_system_rate) WHERE entityName = \"hdfs-FAILOVERCONTROLLER-dbb26169f4e1fe9a387fcc5bd5bfd6af\" AND category = ROLE",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": []
+        },
+        {
+          "metadata": {
+            "metricName": "last(cpu_system_rate)",
+            "entityName": "Alert Publisher (cod--qfdcinkqrzw-gateway0.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2022-11-29T04:43:40.462Z",
+            "endTime": "2022-11-29T04:48:40.462Z",
+            "attributes": {
+              "serviceType": "MGMT",
+              "hostname": "cod--qfdcinkqrzw-gateway0.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "ALERTPUBLISHER",
+              "roleName": "ALERTPUBLISHER",
+              "hostId": "d8623d9457f4db06c5637c4fd4c02f5d",
+              "roleConfigGroup": "Alert Publisher Default Group",
+              "active": "true",
+              "serviceDisplayName": "MGMT",
+              "serviceName": "MGMT",
+              "roleType": "ALERTPUBLISHER",
+              "category": "ROLE",
+              "rackId": "/ap-northeast-1d"
+            },
+            "unitNumerators": [
+              "seconds"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT last(cpu_system_rate) WHERE entityName = \"ALERTPUBLISHER\" AND category = ROLE",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2022-11-29T04:48:25.000Z",
+              "value": 0.0003333333333330302,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "last(cpu_system_rate)",
+            "entityName": "ResourceManager (cod--qfdcinkqrzw-master1.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2022-11-29T04:43:40.462Z",
+            "endTime": "2022-11-29T04:48:40.462Z",
+            "attributes": {
+              "serviceType": "YARN",
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "hostId": "119115ab851aefe1429860d4255b3fab",
+              "active": "true",
+              "serviceDisplayName": "yarn",
+              "serviceName": "yarn",
+              "roleType": "RESOURCEMANAGER",
+              "version": "CDH 7.2.15",
+              "hostname": "cod--qfdcinkqrzw-master1.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "yarn-RESOURCEMANAGER-dbb26169f4e1fe9a387fcc5bd5bfd6af",
+              "clusterName": "cod--qfdcinkqrzw",
+              "roleName": "yarn-RESOURCEMANAGER-dbb26169f4e1fe9a387fcc5bd5bfd6af",
+              "roleConfigGroup": "ResourceManager Default Group",
+              "category": "ROLE",
+              "rackId": "/ap-northeast-1c"
+            },
+            "unitNumerators": [
+              "seconds"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT last(cpu_system_rate) WHERE entityName = \"yarn-RESOURCEMANAGER-dbb26169f4e1fe9a387fcc5bd5bfd6af\" AND category = ROLE",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": []
+        },
+        {
+          "metadata": {
+            "metricName": "last(cpu_system_rate)",
+            "entityName": "Telemetry Publisher (cod--qfdcinkqrzw-gateway0.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2022-11-29T04:43:40.462Z",
+            "endTime": "2022-11-29T04:48:40.462Z",
+            "attributes": {
+              "serviceType": "MGMT",
+              "hostname": "cod--qfdcinkqrzw-gateway0.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "TELEMETRYPUBLISHER",
+              "roleName": "TELEMETRYPUBLISHER",
+              "hostId": "d8623d9457f4db06c5637c4fd4c02f5d",
+              "roleConfigGroup": "Telemetry Publisher Default Group",
+              "active": "true",
+              "serviceDisplayName": "MGMT",
+              "serviceName": "MGMT",
+              "roleType": "TELEMETRYPUBLISHER",
+              "category": "ROLE",
+              "rackId": "/ap-northeast-1d"
+            },
+            "unitNumerators": [
+              "seconds"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT last(cpu_system_rate) WHERE entityName = \"TELEMETRYPUBLISHER\" AND category = ROLE",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2022-11-29T04:48:24.000Z",
+              "value": 0.00233333333333879,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "last(cpu_system_rate)",
+            "entityName": "DataNode (cod--qfdcinkqrzw-worker1.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2022-11-29T04:43:40.462Z",
+            "endTime": "2022-11-29T04:48:40.462Z",
+            "attributes": {
+              "serviceType": "HDFS",
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "hostId": "22f6ab659c835d47bc13d6c8f3370110",
+              "active": "true",
+              "serviceName": "hdfs",
+              "roleType": "DATANODE",
+              "version": "CDH 7.2.15",
+              "hostname": "cod--qfdcinkqrzw-worker1.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "hdfs-DATANODE-7e9a53b768c95833df424c7d7b0ae857",
+              "clusterName": "cod--qfdcinkqrzw",
+              "roleName": "hdfs-DATANODE-7e9a53b768c95833df424c7d7b0ae857",
+              "roleConfigGroup": "DataNode Default Group",
+              "category": "ROLE",
+              "rackId": "/ap-northeast-1c"
+            },
+            "unitNumerators": [
+              "seconds"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT last(cpu_system_rate) WHERE entityName = \"hdfs-DATANODE-7e9a53b768c95833df424c7d7b0ae857\" AND category = ROLE",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2022-11-29T04:48:24.000Z",
+              "value": 0.000500000000000019,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "last(cpu_system_rate)",
+            "entityName": "DataNode (cod--qfdcinkqrzw-worker2.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2022-11-29T04:43:40.462Z",
+            "endTime": "2022-11-29T04:48:40.462Z",
+            "attributes": {
+              "serviceType": "HDFS",
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "hostId": "49adda80d1b98e9262ee146fd7fd798b",
+              "active": "true",
+              "serviceName": "hdfs",
+              "roleType": "DATANODE",
+              "version": "CDH 7.2.15",
+              "hostname": "cod--qfdcinkqrzw-worker2.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "hdfs-DATANODE-3c658ac6009daca54192736b1502fae1",
+              "clusterName": "cod--qfdcinkqrzw",
+              "roleName": "hdfs-DATANODE-3c658ac6009daca54192736b1502fae1",
+              "roleConfigGroup": "DataNode Default Group",
+              "category": "ROLE",
+              "rackId": "/ap-northeast-1c"
+            },
+            "unitNumerators": [
+              "seconds"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT last(cpu_system_rate) WHERE entityName = \"hdfs-DATANODE-3c658ac6009daca54192736b1502fae1\" AND category = ROLE",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2022-11-29T04:48:23.000Z",
+              "value": 0.000666666666666534,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "last(cpu_system_rate)",
+            "entityName": "NodeManager (cod--qfdcinkqrzw-worker1.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2022-11-29T04:43:40.462Z",
+            "endTime": "2022-11-29T04:48:40.462Z",
+            "attributes": {
+              "serviceType": "YARN",
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "hostId": "22f6ab659c835d47bc13d6c8f3370110",
+              "active": "true",
+              "serviceDisplayName": "yarn",
+              "serviceName": "yarn",
+              "roleType": "NODEMANAGER",
+              "version": "CDH 7.2.15",
+              "hostname": "cod--qfdcinkqrzw-worker1.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "yarn-NODEMANAGER-7e9a53b768c95833df424c7d7b0ae857",
+              "clusterName": "cod--qfdcinkqrzw",
+              "roleName": "yarn-NODEMANAGER-7e9a53b768c95833df424c7d7b0ae857",
+              "roleConfigGroup": "yarn-NODEMANAGER",
+              "category": "ROLE",
+              "rackId": "/ap-northeast-1c"
+            },
+            "unitNumerators": [
+              "seconds"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT last(cpu_system_rate) WHERE entityName = \"yarn-NODEMANAGER-7e9a53b768c95833df424c7d7b0ae857\" AND category = ROLE",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2022-11-29T04:48:24.000Z",
+              "value": 0.0005000000000000041,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "last(cpu_system_rate)",
+            "entityName": "NodeManager (cod--qfdcinkqrzw-worker2.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2022-11-29T04:43:40.462Z",
+            "endTime": "2022-11-29T04:48:40.462Z",
+            "attributes": {
+              "serviceType": "YARN",
+              "clusterDisplayName": "cod--qfdcinkqrzw",
+              "hostId": "49adda80d1b98e9262ee146fd7fd798b",
+              "active": "true",
+              "serviceDisplayName": "yarn",
+              "serviceName": "yarn",
+              "roleType": "NODEMANAGER",
+              "version": "CDH 7.2.15",
+              "hostname": "cod--qfdcinkqrzw-worker2.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "yarn-NODEMANAGER-3c658ac6009daca54192736b1502fae1",
+              "clusterName": "cod--qfdcinkqrzw",
+              "roleName": "yarn-NODEMANAGER-3c658ac6009daca54192736b1502fae1",
+              "roleConfigGroup": "yarn-NODEMANAGER",
+              "category": "ROLE",
+              "rackId": "/ap-northeast-1c"
+            },
+            "unitNumerators": [
+              "seconds"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT last(cpu_system_rate) WHERE entityName = \"yarn-NODEMANAGER-3c658ac6009daca54192736b1502fae1\" AND category = ROLE",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2022-11-29T04:48:23.000Z",
+              "value": 0.0006666666666666673,
+              "type": "SAMPLE"
+            }
+          ]
+        },
+        {
+          "metadata": {
+            "metricName": "last(cpu_system_rate)",
+            "entityName": "Service Monitor (cod--qfdcinkqrzw-gateway0.agent-in.jfha-h5rc.a0.cloudera.site)",
+            "startTime": "2022-11-29T04:43:40.462Z",
+            "endTime": "2022-11-29T04:48:40.462Z",
+            "attributes": {
+              "serviceType": "MGMT",
+              "hostname": "cod--qfdcinkqrzw-gateway0.agent-in.jfha-h5rc.a0.cloudera.site",
+              "entityName": "SERVICEMONITOR",
+              "roleName": "SERVICEMONITOR",
+              "hostId": "d8623d9457f4db06c5637c4fd4c02f5d",
+              "roleConfigGroup": "Service Monitor Default Group",
+              "active": "true",
+              "serviceDisplayName": "MGMT",
+              "serviceName": "MGMT",
+              "roleType": "SERVICEMONITOR",
+              "category": "ROLE",
+              "rackId": "/ap-northeast-1d"
+            },
+            "unitNumerators": [
+              "seconds"
+            ],
+            "unitDenominators": [
+              "seconds"
+            ],
+            "expression": "SELECT last(cpu_system_rate) WHERE entityName = \"SERVICEMONITOR\" AND category = ROLE",
+            "metricCollectionFrequencyMs": 0,
+            "rollupUsed": "RAW"
+          },
+          "data": [
+            {
+              "timestamp": "2022-11-29T04:48:24.000Z",
+              "value": 0.004000000000026678,
+              "type": "SAMPLE"
+            }
+          ]
+        }
+      ],
+      "warnings": [],
+      "timeSeriesQuery": "select last(cpu_system_rate)"
+    }
+  ]
+}
