@@ -1,4 +1,8 @@
 [env.collectors.datadog-checks]
+check-types = true
+mypy-args = [
+    "src/ddev",
+]
 
 [envs.default]
 python = "38"
