@@ -374,7 +374,7 @@ The Oracle Database check does not include any events.
 
 See [service_checks.json][12] for a list of service checks provided by this integration.
 
-#### JDBC driver (Linux only)
+### JDBC driver (Linux only)
 - If you encounter a `JVMNotFoundException`:
 
     ```text
