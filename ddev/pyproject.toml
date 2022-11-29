@@ -30,7 +30,9 @@ classifiers = [
 dependencies = [
     "datadog-checks-dev[cli]>=17.4.0",
     "hatch>=1.6.3",
+    "pyperclip",
     "rich>=12.5.1",
+    "tomlkit",
 ]
 dynamic = ["version"]
 
