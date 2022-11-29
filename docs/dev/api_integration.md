@@ -5,7 +5,7 @@ type: documentation
 
 ## Overview
 
-You can use [Datadog API endpoints][1] to programmatically send data to Datadog, manage your account, and visualize data collected from an API integration. 
+Use an [Datadog API endpoint][1] to enrich and submit data from your backend, or pull data directly out of Datadog. API integrations work well in building a connector between Datadog and another SaaS platform. This method is ideal for Technology Partners that are SaaS based, and have an existing website for users to log into for authorization purposes.
 
 API integrations send the following types of data to Datadog:
 
@@ -17,7 +17,7 @@ API integrations send the following types of data to Datadog:
 - [Incidents][17]
 - [Security Events][18]
 
-This page provides instructions for creating an API integration in the `integrations-extras` repository. For more information about why you would want to create an API-based integration, see [Creating your own solution][2].
+This page provides instructions for creating an API integration in the `integrations-extras` repository. For more information about why you would want to create an API-based integration, see [Creating your own solution][2]. Since API integrations do not use the Datadog Agent to collect data, you need to create an informational tile-only listing once your development work is complete. 
 
 ## Setup
 
@@ -31,10 +31,11 @@ An API key is required to submit data to a Datadog API endpoint. An application 
 Create a connection to Datadog in your company's platform using the API key, application key, and site URL. 
 
 ### Create an OAuth client
+Instead of requesting these credentials directly from a user, Datadog recommends using an [OAuth client][7] to handle authorization and access for API-based integrations. For more information, see [OAuth for Integrations][8] and [Authorization Endpoints][9]
 
-Datadog recommends setting up an [OAuth client][7] to securely authorize third-party application access in your integrations. For more information, see [OAuth for Integrations][8] and [Authorization Endpoints][9].
+You can explore examples of existing API integrations in the `integrations-extras` repository such as [Vantage][23].
 
-## Set up a directory and clone the Integrations Extras repository
+## Set up a directory and fork the Integrations Extras repository
 
 1. Create a `dd` directory:
 
@@ -169,7 +170,7 @@ Open a pull request in the [`integrations-extras` repository][10] that adds imag
 
 ## Review process
 
-Once your pull request passes all the checks, reviewers from the `Datadog/agent-integrations` and `Datadog/documentation` teams provide suggestions and feedback on best practices.
+Once your pull request passes all the checks, reviewers from the `Datadog/agent-integrations`, `Datadog/marketplace`, and `Datadog/documentation` teams provide suggestions and feedback on best practices.
 
 Once you have addressed the feedback and re-requested reviews, these reviewers approve your pull request.
 
@@ -210,3 +211,4 @@ Additional helpful documentation, links, and articles:
 [20]: https://pypi.org/project/datadog-checks-dev/
 [21]: https://docs.datadoghq.com/developers/integrations/check_references/#manifest-file
 [22]: https://datadoghq.com/blog/
+[23]: https://github.com/DataDog/integrations-extras/tree/master/vantage
