@@ -22,14 +22,15 @@ def license_headers(ctx, check):
     """Validate license headers in python code files.
 
     If `check` is specified, only the check will be validated, if check value is 'changed' will only apply to changed
-    checks, an 'all' or empty `check` value will validate all README files.
+    checks, an 'all' or empty `check` value will validate all python files.
     """
     root = pathlib.Path(get_root())
     is_extras = ctx.obj['repo_choice'] == 'extras'
     is_marketplace = ctx.obj['repo_choice'] == 'marketplace'
 
     if is_extras or is_marketplace:
-        echo_info('License header is not implemented for `extras` or `marketplace`.')
+        echo_info('License header validation is not implemented for `extras` or `marketplace`.')
+        return
 
     checks = process_checks_option(check, source='integrations')
 
