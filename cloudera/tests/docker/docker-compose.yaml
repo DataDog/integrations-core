@@ -1,10 +1,31 @@
-version: "3"
-
+version: '2'
 services:
   cloudera:
-    image: caddy:2.1.1-alpine
     container_name: cloudera
-    volumes:
-      - ./fixtures:/usr/share/caddy
+    build: .
+    privileged: true
+    hostname: quickstart.cloudera
     ports:
-      - 80:80
+      - "8020:8020"   # HDFS
+      - "8022:22"     # SSH
+      - "7180:7180"   # Cloudera Manager
+      - "8888:8888"   # Hue
+      - "11000:11000" # Oozie
+      - "50070:50070" # HDFS Rest Namenode
+      - "50075:50075" # HDFS Rest Datanode
+      - "2181:2181"   # Zookeeper
+      - "8088:8088"   # YARN Resource Manager
+      - "19888:19888" # MapReduce Job History
+      - "50030:50030" # MapReduce Job Tracker
+      - "8983:8983"   # Solr
+      - "16000:16000" # Sqoop Metastore
+      - "8042:8042"   # YARN Node Manager
+      - "60010:60010" # HBase Master
+      - "60030:60030" # HBase Region
+      - "9090:9090"   # HBase Thrift
+      - "8080:8080"   # HBase Rest
+      - "7077:7077"   # Spark Master
+    tty: true
+    stdin_open: true
+    volumes:
+      - /var/shared_cloudera_quickstart:/media/shared_from_local
