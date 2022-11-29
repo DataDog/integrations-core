@@ -17,6 +17,7 @@ from .http import http
 from .imports import imports
 from .integration_style import integration_style
 from .jmx_metrics import jmx_metrics
+from .license_headers import license_headers
 from .licenses import licenses
 from .manifest import manifest
 from .metadata import metadata
@@ -42,6 +43,7 @@ ALL_COMMANDS = (
     integration_style,
     jmx_metrics,
     legacy_signature,
+    license_headers,
     licenses,
     manifest,
     metadata,
