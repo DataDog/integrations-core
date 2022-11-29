@@ -8,6 +8,7 @@ from collections import namedtuple
 from typing import Callable, List, Optional
 
 from ..errors import SubprocessError
+from .constants import get_root
 from .git import git_show_file
 from .utils import get_license_header as get_default_license_header
 
@@ -25,8 +26,11 @@ LicenseHeaderError = namedtuple("LicenseHeaderError", ["message", "path"])
 
 def _get_previous(path):
     """Returns contents of previous (origin/master) version of file at `path` if it exists, and `None` otherwise."""
+    # git_show_file relies on global context to compute the final path from a relative one,
+    # so we need to pass it the relative path it expects
+    relpath = path.relative_to(get_root())
     try:
-        return git_show_file(str(path), "origin/master")
+        return git_show_file(str(relpath), "origin/master")
     except SubprocessError:
         return None
 
