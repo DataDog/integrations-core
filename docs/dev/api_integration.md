@@ -174,13 +174,6 @@ Once your pull request passes all the checks, reviewers from the `Datadog/agent-
 
 Once you have addressed the feedback and re-requested reviews, these reviewers approve your pull request.
 
-## Coordinate GTM opportunities
-
-Once an Integrations tile is live, Technology Partners can meet with Datadog's Partner Marketing team to coordinate a joint go-to-market (GTM) strategy, which includes the following:
-
-- A Datadog quote for partner press releases
-- A blog post on the [Datadog Monitor][22]
-- Amplification of social media posts
 
 ## Further Reading
 
