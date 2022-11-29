@@ -24,7 +24,6 @@ def wait_on_result(cursor = None, sql = None, binds = None, expected_value = Non
     
     return True
 
-
 @pytest.mark.e2e
 @pytest.mark.skipif(
     POSTGRES_VERSION is None or float(POSTGRES_VERSION) < 9.2,

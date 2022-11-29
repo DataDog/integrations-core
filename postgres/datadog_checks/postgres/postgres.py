@@ -116,7 +116,7 @@ class PostgreSql(AgentCheck):
 
         self._dynamic_queries = self._new_query_executor(queries)
         self._dynamic_queries.compile_queries()
-        self.log.debug("initialized dynamic queries")
+        self.log.debug("initialized {} dynamic querie(s)".format(str(len(queries))))
         
         return self._dynamic_queries
 
