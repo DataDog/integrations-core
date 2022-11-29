@@ -83,7 +83,7 @@ class PostgreSql(AgentCheck):
             self.execute_query_raw,
             self,
             queries=queries,
-            tags=self.tags,
+            tags=self.tags_without_db,
             hostname=self.resolved_hostname,
         )
 
@@ -150,7 +150,7 @@ class PostgreSql(AgentCheck):
             self.gauge(
                 "postgresql.wal_age",
                 wal_file_age,
-                tags=[t for t in instance_tags if not t.startswith("db:")],
+                tags=copy.copy(self.tags_without_db),
                 hostname=self.resolved_hostname,
             )
 
@@ -336,7 +336,7 @@ class PostgreSql(AgentCheck):
             # The reason is that pg_stat_database returns all databases regardless of the
             # connection.
             if not scope['relation'] and not scope.get('use_global_db_tag', False):
-                tags = [t for t in instance_tags if not t.startswith("db:")]
+                tags = copy.copy(self.tags_without_db)
             else:
                 tags = copy.copy(instance_tags)
 
@@ -391,7 +391,7 @@ class PostgreSql(AgentCheck):
             self.gauge(
                 "postgresql.db.count",
                 results_len,
-                tags=[t for t in instance_tags if not t.startswith("db:")],
+                tags=copy.copy(self.tags_without_db),
                 hostname=self.resolved_hostname,
             )
 
