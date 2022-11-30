@@ -42,7 +42,8 @@ class Discovery(BaseModel):
 
     exclude: Optional[Sequence[str]] = Field(
         None,
-        description='List of regular expressions with the patterns of elements that will not be included\nin the autodiscovery\n',
+        description='List of regular expressions with the patterns of elements that will not be included\n'
+        'in the autodiscovery\n',
     )
     include: Optional[Sequence[str]] = Field(
         None, description='List of regular expressions that will be able to match autodiscovered elements\n'
@@ -56,7 +57,8 @@ class Projects(BaseModel):
 
     discovery: Optional[Discovery] = Field(
         None,
-        description="It allows the 'autodiscovery' functionality in the list of projects so that the user does not have to\ninclude them one by one.\n",
+        description="It allows the 'autodiscovery' functionality in the list of projects so that the user "
+        "does not have to\ninclude them one by one.\n",
     )
     keys: Optional[Sequence[Union[Mapping[str, Any], str]]]
 
