@@ -74,7 +74,7 @@ class PostgreSql(AgentCheck):
         self._db_pool = {}
         self._db_pool_lock = threading.Lock()
 
-        self.tags_without_db=[t for t in copy.copy(self._config.tags) if not t.startswith("db:")]
+        self.tags_without_db = [t for t in copy.copy(self._config.tags) if not t.startswith("db:")]
 
         self._dynamic_queries = None
 
@@ -115,8 +115,8 @@ class PostgreSql(AgentCheck):
 
         self._dynamic_queries = self._new_query_executor(queries)
         self._dynamic_queries.compile_queries()
-        self.log.debug("initialized {} dynamic querie(s)".format(str(len(queries))))
-        
+        self.log.debug("initialized {cnt} dynamic querie(s)",extra=dict(cnt=str(len(queries))))
+
         return self._dynamic_queries
 
     def cancel(self):

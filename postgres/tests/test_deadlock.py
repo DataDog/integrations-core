@@ -98,13 +98,13 @@ commit;
 
     is_locked = wait_on_result(
         cursor = cursor, sql = lock_count_sql, binds = (appname1, appname2), 
-        expected_value = 1 )
+        expected_value=1)
 
     if not is_locked:
         raise Exception("ERROR: Couldn't reproduce a deadlock. That can happen on an extremely overloaded system.")
 
     try:
-        cur1.execute(update_sql, (2,) )
+        cur1.execute(update_sql, (2,))
         cur1.execute("commit")
     except psycopg2.errors.DeadlockDetected:
         pass
@@ -112,7 +112,7 @@ commit;
     dd_run_check(check)
 
     wait_on_result(
-        cursor = cursor, sql = deadlock_count_sql, binds = (DB_NAME, ), 
+        cursor = cursor,sql=deadlock_count_sql,binds=(DB_NAME,),
         expected_value = deadlocks_before + 1)
-    
-    aggregator.assert_metric('postgresql.deadlocks.count', value = deadlocks_before + 1, tags = pg_instance["tags"] + [ "db:{}".format(DB_NAME), "port:{}".format(PORT)], hostname = 'stubbed.hostname')
+
+    aggregator.assert_metric('postgresql.deadlocks.count',value=deadlocks_before+1,tags = pg_instance["tags"]+["db:{}".format(DB_NAME),"port:{}".format(PORT)],hostname='stubbed.hostname')
