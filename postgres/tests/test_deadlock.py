@@ -12,7 +12,7 @@ from .common import DB_NAME, HOST, PORT, POSTGRES_VERSION
 
 
 def wait_on_result(cursor=None, sql=None, binds=None, expected_value=None):
-    for _i in range (100):
+    for _i in range(100):
         cursor.execute(sql, binds)
         result = cursor.fetchone()[0]
         if (result == expected_value):
@@ -96,7 +96,7 @@ commit;
         AND blocking_locks.pid != blocked_locks.pid
     JOIN pg_catalog.pg_stat_activity blocking_activity ON blocking_activity.pid = blocking_locks.pid
    WHERE NOT blocked_locks.GRANTED
-   	AND blocking_activity.application_name = %s
+    AND blocking_activity.application_name = %s
     AND blocked_activity.application_name = %s """
 
     is_locked = wait_on_result(
@@ -120,4 +120,4 @@ commit;
 
     aggregator.assert_metric(
         'postgresql.deadlocks.count', value=deadlocks_before + 1,
-        tags=pg_instance["tags"]+["db:{}".format(DB_NAME), "port:{}".format(PORT)])
+        tags=pg_instance["tags"] + ["db:{}".format(DB_NAME), "port:{}".format(PORT)])
