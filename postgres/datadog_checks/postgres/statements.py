@@ -27,7 +27,7 @@ except ImportError:
 
 STATEMENTS_QUERY = """
 SELECT {cols}
-  FROM {pg_stat_hstatements_view} as pg_stat_statements
+  FROM {pg_stat_statements_view} as pg_stat_statements
   LEFT JOIN pg_roles
          ON pg_stat_statements.userid = pg_roles.oid
   LEFT JOIN pg_database
