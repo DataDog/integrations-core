@@ -42,8 +42,6 @@ SELECT {cols}
 PG_STAT_STATEMENTS_COUNT_QUERY = "SELECT COUNT(*) FROM pg_stat_statements(false)"
 PG_STAT_STATEMENTS_COUNT_QUERY_LT_9_4 = "SELECT COUNT(*) FROM pg_stat_statements"
 
-DEFAULT_STATEMENTS_LIMIT = 10000
-
 # Required columns for the check to run
 PG_STAT_STATEMENTS_REQUIRED_COLUMNS = frozenset({'calls', 'query', 'rows'})
 
@@ -123,8 +121,8 @@ class PostgresStatementMetrics(DBMAsyncJob):
             shutdown_callback=shutdown_callback,
         )
         self._metrics_collection_interval = collection_interval
-        self._ignore_pg_stat_statements_max_warning = is_affirmative(
-            config.statement_metrics_config.get('ignore_pg_stat_statements_max_warning', False)),
+        self._pg_stat_statements_max_warning_threshold = \
+            config.statement_metrics_config.get('pg_stat_statements_max_warning_threshold', 10000)
         self._config = config
         self._state = StatementMetrics()
         self._stat_column_cache = []
@@ -232,24 +230,29 @@ class PostgresStatementMetrics(DBMAsyncJob):
             if self._check.pg_settings.get("track_io_timing") != "on":
                 desired_columns -= PG_STAT_STATEMENTS_TIMING_COLUMNS
 
-            pg_stat_statements_max = self._check.pg_settings.get("pg_stat_statements.max")
-            if not self._ignore_pg_stat_statements_max_warning and \
-                    self._config.query_metrics.pg_stat_statements_max > 10000:
+            pg_stat_statements_max = int(self._check.pg_settings.get("pg_stat_statements.max"))
+            if pg_stat_statements_max > self._pg_stat_statements_max_warning_threshold:
                 self._check.record_warning(
                     DatabaseConfigurationError.high_pg_stat_statements_max,
                     warning_with_tags(
-                        "pg_stat_statements.max is set to %d which is higher to the supported"
-                        "limit of %d. This can have a negative impact on database and collection of "
-                        "query metrics performance. Consider updating pg_stat_statements.max to %d"
-                        "or set query_metrics.ignore_pg_stat_statements_max_warning to true."
+                        "pg_stat_statements.max is set to %d which is higher to the supported "
+                        "value of %d. This can have a negative impact on database and collection of "
+                        "query metrics performance. Consider lowering the pg_stat_statements.max value to %d. "
+                        "Alternatively, you may acknowledge the potential performance impact by increasing the "
+                        "query_metrics.pg_stat_statements_max_warning_threshold to equal or greater than %d to "
+                        "silence this warning. "
                         "See https://docs.datadoghq.com/database_monitoring/setup_postgres/"
                         "troubleshooting#%s for more details",
                         pg_stat_statements_max,
-                        DEFAULT_STATEMENTS_LIMIT,
+                        self._pg_stat_statements_max_warning_threshold,
+                        self._pg_stat_statements_max_warning_threshold,
+                        self._pg_stat_statements_max_warning_threshold,
                         DatabaseConfigurationError.high_pg_stat_statements_max.value,
                         host=self._check.resolved_hostname,
                         dbname=self._config.dbname,
-                        code=DatabaseConfigurationError.pg_stat_statements_not_loaded.value,
+                        code=DatabaseConfigurationError.high_pg_stat_statements_max.value,
+                        value=pg_stat_statements_max,
+                        threshold=self._pg_stat_statements_max_warning_threshold,
                     ),
                 )
 

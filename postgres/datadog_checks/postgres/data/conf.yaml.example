@@ -265,10 +265,11 @@ instances:
         #
         # collection_interval: 10
 
-        ## @param ignore_pg_stat_statements_max_warning - boolean - optional - default: false
-        ## Disable emission of warnings for `pg_stat_statements.max` being set higher than 10000.
+        ## @param pg_stat_statements_max_warning_threshold - number - optional - default: 10000
+        ## Set the threshold for a safe value of `pg_stat_statements.max`. If the database is configured with a value
+        ## higher than this threshold, a warning is emitted to recommend lowering the setting value.
         #
-        # ignore_pg_stat_statements_max_warning: false
+        # pg_stat_statements_max_warning_threshold: 10000
 
     ## Configure collection of query samples
     #

@@ -317,12 +317,14 @@ files:
           value:
             type: number
             example: 10
-        - name: ignore_pg_stat_statements_max_warning
+        - name: pg_stat_statements_max_warning_threshold
           description: |
-            Disable emission of warnings for `pg_stat_statements.max` being set higher than 10000.
+            Set the threshold for a safe value of `pg_stat_statements.max`. If the database is configured with a value
+            higher than this threshold, a warning is emitted to recommend lowering the setting value.
           value:
-            type: boolean
-            example: false
+            type: number
+            example: 10000
+            hidden: true
     - name: query_samples
       description: Configure collection of query samples
       options:
