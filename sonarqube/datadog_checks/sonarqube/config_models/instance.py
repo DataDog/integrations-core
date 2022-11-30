@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from typing import Any, Mapping, Optional, Sequence, Union
 
-from pydantic import BaseModel, Field, root_validator, validator
+from pydantic import BaseModel, root_validator, validator
 
 from datadog_checks.base.utils.functions import identity
 from datadog_checks.base.utils.models import validation
@@ -40,26 +40,16 @@ class Discovery(BaseModel):
     class Config:
         allow_mutation = False
 
-    exclude: Optional[Sequence[str]] = Field(
-        None,
-        description='List of regular expressions with the patterns of elements that will not be included\n'
-        'in the autodiscovery\n',
-    )
-    include: Optional[Sequence[str]] = Field(
-        None, description='List of regular expressions that will be able to match autodiscovered elements\n'
-    )
-    limit: Optional[float] = Field(None, description="Maximum number of items to be 'autodiscovered'\n")
+    exclude: Optional[Sequence[str]]
+    include: Optional[Sequence[str]]
+    limit: Optional[float]
 
 
 class Projects(BaseModel):
     class Config:
         allow_mutation = False
 
-    discovery: Optional[Discovery] = Field(
-        None,
-        description="It allows the 'autodiscovery' functionality in the list of projects so that the user "
-        "does not have to\ninclude them one by one.\n",
-    )
+    discovery: Optional[Discovery]
     keys: Optional[Sequence[Union[Mapping[str, Any], str]]]
 
 

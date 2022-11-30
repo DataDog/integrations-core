@@ -132,25 +132,15 @@ files:
                 - type: object
                 - type: string
           - name: discovery
-            description: |
-              It allows the 'autodiscovery' functionality in the list of projects so that the user does not have to
-              include them one by one.
             type: object
             properties:
               - name: limit
-                description: |
-                  Maximum number of items to be 'autodiscovered'
                 type: number
               - name: include
-                description: |
-                  List of regular expressions that will be able to match autodiscovered elements
                 type: array
                 items:
                   type: string
               - name: exclude
-                description: |
-                  List of regular expressions with the patterns of elements that will not be included
-                  in the autodiscovery
                 type: array
                 items:
                   type: string
