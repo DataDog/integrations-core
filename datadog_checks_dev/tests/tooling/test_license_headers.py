@@ -74,7 +74,7 @@ import os
 
     errors = validate_license_headers(check_path)
     assert len(errors) == 1
-    assert errors[0].message == "missing"
+    assert errors[0].message == "missing license header"
     assert errors[0].path == "setup.py"
 
 
@@ -108,7 +108,7 @@ import os
 
     errors = validate_license_headers(check_path)
     assert len(errors) == 1
-    assert errors[0].message == "missing"
+    assert errors[0].message == "missing license header"
     assert errors[0].path == "datadog_checks/check/check.py"
 
 
@@ -172,7 +172,7 @@ import os
 
     errors = validate_license_headers(check_path, get_previous=_make_get_previous())
     assert len(errors) == 1
-    assert errors[0].message == "new file does not match template"
+    assert errors[0].message == "file does not match expected license format"
     assert errors[0].path == "setup.py"
 
 

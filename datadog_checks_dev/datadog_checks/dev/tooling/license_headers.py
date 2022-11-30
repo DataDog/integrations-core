@@ -87,7 +87,7 @@ def validate_license_headers(
 
         # License is missing altogether
         if not license_header:
-            return LicenseHeaderError("missing", relpath)
+            return LicenseHeaderError("missing license header", relpath)
 
         # When file already existed, check whether the license has changed
         previous = get_previous(path)
@@ -96,7 +96,7 @@ def validate_license_headers(
                 return LicenseHeaderError("existing file has changed license", relpath)
         # When it's a new file, compare it to the current header template
         elif license_header != get_default_license_header():
-            return LicenseHeaderError("new file does not match template", relpath)
+            return LicenseHeaderError("file does not match expected license format", relpath)
 
     errors = []
     for candidate in walk_recursively(root):
