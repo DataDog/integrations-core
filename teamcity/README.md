@@ -15,8 +15,18 @@ The TeamCity check is included in the [Datadog Agent][1] package, so you don't n
 #### Prepare TeamCity
 
 1. To prepare TeamCity, see [Enabling Guest Login][2].
-2. To collect metrics, enable `Per-project permissions` and assign the `View Usage Statistics` permission to the Guest user.
-3. To enable the check to automatically detect build configuration type during event collection, assign the `View Build Configuration Settings` permission to the Guest user. 
+
+2. Enable `Per-project permissions` to allow assigning project-based permissions to the Guest user. See [Changing Authorization Mode][22].
+![Enable Guest Login][17]
+3. Use an existing or create a new Read-only role and add the `View Usage Statistics` permission to the role. See [Managing Roles and Permissions][23].
+![Create Read-only Role][18]
+
+3. _[Optional]_ To enable the check to automatically detect build configuration type during event collection, add the `View Build Configuration Settings` permission to the Read-only role.
+![Assign View Build Config Settings Permission][19]
+
+4. Assign the Read-only role to the Guest user. See [Assigning Roles to Users][24].
+![Guest user settings][20]
+![Assign Role][21]
 
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Host" xxx -->
@@ -57,6 +67,7 @@ The TeamCity check offers two methods of data collection. To optimally monitor y
        #
        use_openmetrics: true
    ```
+**Note:** To collect [OpenMetrics-compliant][16] histogram and summary metrics (available starting in TeamCity Server 2022.10+), enable the internal property, `teamcity.metrics.followOpenMetricsSpec`. 
 
 2. TeamCity Server REST API method:
 
@@ -203,7 +214,7 @@ Need help? Contact [Datadog support][12].
 - [Track performance impact of code changes with TeamCity and Datadog.][13]
 
 [1]: https://app.datadoghq.com/account/settings#agent
-[2]: https://confluence.jetbrains.com/display/TCD9/Enabling+Guest+Login
+[2]: https://www.jetbrains.com/help/teamcity/enabling-guest-login.html
 [3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [4]: https://github.com/DataDog/integrations-core/blob/master/teamcity/datadog_checks/teamcity/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
@@ -217,3 +228,12 @@ Need help? Contact [Datadog support][12].
 [13]: https://www.datadoghq.com/blog/track-performance-impact-of-code-changes-with-teamcity-and-datadog
 [14]: https://github.com/DataDog/integrations-core/blob/master/teamcity/metadata.csv
 [15]: https://github.com/DataDog/integrations-core/blob/master/teamcity/assets/service_checks.json
+[16]: https://github.com/OpenObservability/OpenMetrics/blob/main/specification/OpenMetrics.md
+[17]: https://raw.githubusercontent.com/DataDog/integrations-core/master/teamcity/images/images/authentication.jpg
+[18]: https://raw.githubusercontent.com/DataDog/integrations-core/master/teamcity/images/images/create_role.jpg
+[19]: https://raw.githubusercontent.com/DataDog/integrations-core/master/teamcity/images/images/build_config_permissions.jpg
+[20]: https://raw.githubusercontent.com/DataDog/integrations-core/master/teamcity/images/images/guest_user_settings.jpg
+[21]: https://raw.githubusercontent.com/DataDog/integrations-core/master/teamcity/images/assign_role.jpg
+[22]: https://www.jetbrains.com/help/teamcity/managing-roles-and-permissions.html#Changing+Authorization+Mode
+[23]: https://www.jetbrains.com/help/teamcity/managing-roles-and-permissions.html
+[24]: https://www.jetbrains.com/help/teamcity/creating-and-managing-users.html#Assigning+Roles+to+Users
