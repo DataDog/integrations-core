@@ -27,7 +27,7 @@ except ImportError:
 
 STATEMENTS_QUERY = """
 SELECT {cols}
-  FROM {pg_stat_statements_view} as pg_stat_statements
+  FROM {pg_stat_hstatements_view} as pg_stat_statements
   LEFT JOIN pg_roles
          ON pg_stat_statements.userid = pg_roles.oid
   LEFT JOIN pg_database
@@ -235,7 +235,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
                 self._check.record_warning(
                     DatabaseConfigurationError.high_pg_stat_statements_max,
                     warning_with_tags(
-                        "pg_stat_statements.max is set to %d which is higher to the supported "
+                        "pg_stat_statements.max is set to %d which is higher than the supported "
                         "value of %d. This can have a negative impact on database and collection of "
                         "query metrics performance. Consider lowering the pg_stat_statements.max value to %d. "
                         "Alternatively, you may acknowledge the potential performance impact by increasing the "

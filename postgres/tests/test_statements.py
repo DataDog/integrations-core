@@ -1558,7 +1558,7 @@ def test_statement_metrics_database_errors(
 @pytest.mark.parametrize(
     "pg_stat_statements_max_threshold,expected_warnings", [
         (9999, [
-            'pg_stat_statements.max is set to 10000 which is higher to the supported value of 9999. '
+            'pg_stat_statements.max is set to 10000 which is higher than the supported value of 9999. '
             'This can have a negative impact on database and collection of query metrics performance. '
             'Consider lowering the pg_stat_statements.max value to 9999. Alternatively, you may acknowledge the '
             'potential performance impact by increasing the query_metrics.pg_stat_statements_max_warning_threshold to '
