@@ -2,18 +2,15 @@ version: '3'
 # Adapted from https://github.com/JetBrains/teamcity-docker-samples
 services:
   teamcity-server:
-    container_name: teamcity-server
-    build:
-      context: .
-    platform: linux/amd64
+    image: datadog/docker-library:teamcity-2022.10
     ports:
       - "8111:8111"
+    volumes:
+      - ./config/internal.properties:/data/teamcity_server/datadir/config/internal.properties
 
   teamcity-agent:
     container_name: teamcity-agent
-    build:
-      context: ../teamcity_agent
-      dockerfile: agent.Dockerfile
+    image: datadog/docker-library:teamcity-2022.10
     platform: linux/amd64
     environment:
       - AGENT_NAME=regular_agent

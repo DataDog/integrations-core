@@ -21,7 +21,6 @@ def dd_environment(rest_instance, openmetrics_instance):
     instance = rest_instance
     if USE_OPENMETRICS:
         compose_file = COMPOSE_FILE.format('teamcity_server')
-        conditions = [CheckDockerLogs('teamcity-server', ['TeamCity initialized'], attempts=100, wait=5)]
         instance = openmetrics_instance
 
     with docker_run(compose_file, conditions=conditions, sleep=10):
