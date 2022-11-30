@@ -10,6 +10,7 @@ INSTANCE = {
     'tags': ['custom:tag'],
 }
 
+
 @pytest.fixture(scope='session')
 def dd_environment():
     yield deepcopy(INSTANCE)
