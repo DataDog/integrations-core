@@ -12,39 +12,39 @@ pytestmark = [pytest.mark.unit]
     [
         (
             {},
-            '\'web_endpoint\' setting must be defined',
+            '`web_endpoint` setting must be defined',
         ),
         (
             {'web_endpoint': []},
-            '\'web_endpoint\' setting must be a string',
+            '`web_endpoint` setting must be a string',
         ),
         (
             {'web_endpoint': 'http://{}:{}'.format(HOST, PORT), 'tags': 'string'},
-            '\'tags\' setting must be a list',
+            '`tags` setting must be a list',
         ),
         (
             {'web_endpoint': 'http://{}:{}'.format(HOST, PORT), 'default_tag': []},
-            '\'default_tag\' setting must be a string',
+            '`default_tag` setting must be a string',
         ),
         (
             {'web_endpoint': 'http://{}:{}'.format(HOST, PORT), 'default_include': 'string'},
-            '\'default_include\' setting must be a list',
+            '`default_include` setting must be a list',
         ),
         (
             {'web_endpoint': 'http://{}:{}'.format(HOST, PORT), 'default_exclude': 'string'},
-            '\'default_exclude\' setting must be a list',
+            '`default_exclude` setting must be a list',
         ),
         (
             {'web_endpoint': 'http://{}:{}'.format(HOST, PORT), 'projects': {'keys': [[]]}},
-            '\'project\' key setting must be a string or a dict',
+            '`project` key setting must be a string or a dict',
         ),
         (
             {'web_endpoint': 'http://{}:{}'.format(HOST, PORT)},
-            '\'projects\' setting must be defined',
+            '`projects` setting must be defined',
         ),
         (
             {'web_endpoint': 'http://{}:{}'.format(HOST, PORT), 'projects': []},
-            '\'projects\' setting must be defined',
+            '`projects` setting must be defined',
         ),
     ],
 )

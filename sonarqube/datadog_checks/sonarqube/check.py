@@ -67,7 +67,6 @@ class SonarqubeCheck(AgentCheck):
             'metrics',
             self.log,
             project_config.get('metrics', {}) if project_config else {},
-            mandatory=False,
             default_limit=self._config.projects.get('default_metrics_limit', self._config.default_metrics_limit),
             default_include=['({})'.format(item) for item in self._config.default_metrics_include],
             default_exclude=['({})'.format(item) for item in self._config.default_metrics_exclude],

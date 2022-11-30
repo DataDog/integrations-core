@@ -1,7 +1,5 @@
 import re
 
-from datadog_checks.base import ConfigurationError
-
 
 # The DiscoveryFilter class allows to filter a list of values or identifiers passed to the 'match' method
 # by obtaining the subset of values from that list that match the specified configuration.
@@ -26,7 +24,6 @@ class DiscoveryFilter:
         name,
         log,
         config,
-        mandatory=True,
         items_id='keys',
         default_limit=10,
         default_include=None,
@@ -39,8 +36,6 @@ class DiscoveryFilter:
         self._default_include = [] if default_include is None else default_include
         self._default_exclude = [] if default_exclude is None else default_exclude
         self._log.debug('`%s` config: %s', name, self._config)
-        if self._config is None and mandatory:
-            raise ConfigurationError('`{}` setting must be defined'.format(name))
 
     def match(self, items):
         self._log.debug('trying to match: %s', items)

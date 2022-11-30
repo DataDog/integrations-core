@@ -34,6 +34,8 @@ class SonarqubeConfig:
             self._validate_default_include()
             self._validate_default_exclude()
             self._validate_components()
+        if self.projects is None:
+            raise ConfigurationError('`projects` setting must be defined')
 
     def _validate_config(self):
         self._validate_web_endpoint()
@@ -48,21 +50,21 @@ class SonarqubeConfig:
     def _validate_web_endpoint(self):
         self.web_endpoint = self._instance.get('web_endpoint')
         if self.web_endpoint is None:
-            raise ConfigurationError('\'web_endpoint\' setting must be defined')
+            raise ConfigurationError('`web_endpoint` setting must be defined')
         if not isinstance(self.web_endpoint, str):
-            raise ConfigurationError('\'web_endpoint\' setting must be a string')
+            raise ConfigurationError('`web_endpoint` setting must be a string')
 
     def _validate_tags(self):
         tags = self._instance.get('tags', [])
         if not isinstance(tags, list):
-            raise ConfigurationError('\'tags\' setting must be a list')
+            raise ConfigurationError('`tags` setting must be a list')
         self.tags = ['endpoint:{}'.format(self.web_endpoint)] + tags
 
     def _validate_projects(self):
-        self._log.debug('validating \'projects\': %s', self._instance)
+        self._log.debug('validating `projects`: %s', self._instance)
         projects = self._instance.get('projects', None)
         if projects is not None and isinstance(projects, dict):
-            self._log.debug('\'projects\' found in config: %s', projects)
+            self._log.debug('`projects` found in config: %s', projects)
             self.projects = {'keys': [], 'discovery': projects.get('discovery', {})}
             self.default_tag = projects.get('default_tag', 'component')
             self._log.debug('default_tag: %s', self.default_tag)
@@ -80,30 +82,30 @@ class SonarqubeConfig:
                 elif isinstance(keys_item, str):
                     self.projects['keys'].append({keys_item: {}})
                 else:
-                    self._log.warning('\'project\' key setting must be a string or a dict: %s', keys_item)
-                    raise ConfigurationError('\'project\' key setting must be a string or a dict')
+                    self._log.warning('`project` key setting must be a string or a dict: %s', keys_item)
+                    raise ConfigurationError('`project` key setting must be a string or a dict')
             self._log.debug("projects: %s", self.projects)
 
     def _validate_default_tag(self):
         self.default_tag = self._instance.get('default_tag', 'component')
         if not isinstance(self.default_tag, str):
-            raise ConfigurationError('\'default_tag\' setting must be a string')
+            raise ConfigurationError('`default_tag` setting must be a string')
 
     def _validate_default_include(self):
         default_include = self._instance.get('default_include', [])
         if not isinstance(default_include, list):
-            raise ConfigurationError('\'default_include\' setting must be a list')
+            raise ConfigurationError('`default_include` setting must be a list')
 
     def _validate_default_exclude(self):
         default_exclude = self._instance.get('default_exclude', [])
         if not isinstance(default_exclude, list):
-            raise ConfigurationError('\'default_exclude\' setting must be a list')
+            raise ConfigurationError('`default_exclude` setting must be a list')
 
     def _validate_components(self):
-        self._log.debug('validating \'components\': %s', self._instance)
+        self._log.debug('validating `components`: %s', self._instance)
         components = self._instance.get('components', None)
         if components is not None and isinstance(components, dict):
-            self._log.debug('\'components\' found in config: %s', components)
+            self._log.debug('`components` found in config: %s', components)
             self.projects = {'keys': []}
             default_tag = self._instance.get('default_tag', 'component')
             self._log.debug('default_tag: %s', default_tag)
