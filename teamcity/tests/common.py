@@ -7,7 +7,7 @@ from datadog_checks.base import is_affirmative
 from datadog_checks.dev import get_docker_hostname, get_here
 
 HERE = get_here()
-COMPOSE_FILE = os.path.join(HERE, 'docker', 'docker-compose.yaml')
+COMPOSE_FILE = os.path.join(HERE, 'docker', 'mockserver-docker-compose.yaml')
 HOST = get_docker_hostname()
 PORT = '8111'
 SERVER_URL = "http://{}:{}".format(HOST, PORT)
@@ -122,31 +122,42 @@ BUILD_TAGS = [
     'test_tag:ci_builds',
 ]
 
-NEW_SUCCESSFUL_BUILD = {
-    'id': 232,
-    'buildTypeId': 'TeamCityV2Project_Build',
-    'number': '11',
-    'status': 'SUCCESS',
-    'state': 'finished',
-    'branchName': 'main',
-    'defaultBranch': True,
-    'href': '/guestAuth/app/rest/builds/id:232',
-    'webUrl': 'http://localhost:8111/viewLog.html?buildId=232&buildTypeId=TeamCityV2Project_Build',
-    'finishOnAgentDate': '20220913T210820+0000',
-}
-
-NEW_FAILED_BUILD = {
-    'id': 233,
-    'buildTypeId': 'TeamCityV2Project_FailedBuild',
-    'number': '12',
-    'status': 'FAILURE',
-    'state': 'finished',
-    'branchName': 'main',
-    'defaultBranch': True,
-    'href': '/guestAuth/app/rest/builds/id:233',
-    'webUrl': 'http://localhost:8111/viewLog.html?buildId=233&buildTypeId=TeamCityV2Project_FailedBuild',
-    'finishOnAgentDate': '20220913T210826+0000',
-}
+REST_METRICS = [
+    'teamcity.artifacts_size',
+    'teamcity.build_duration',
+    'teamcity.build_duration.net_time',
+    'teamcity.build_stage_duration',
+    'teamcity.build_test_status',
+    'teamcity.code_coverage.blocks.covered',
+    'teamcity.code_coverage.blocks.pct',
+    'teamcity.code_coverage.blocks.total',
+    'teamcity.code_coverage.branches.covered',
+    'teamcity.code_coverage.branches.pct',
+    'teamcity.code_coverage.branches.total',
+    'teamcity.code_coverage.classes.covered',
+    'teamcity.code_coverage.classes.pct',
+    'teamcity.code_coverage.classes.total',
+    'teamcity.code_coverage.lines.covered',
+    'teamcity.code_coverage.lines.pct',
+    'teamcity.code_coverage.lines.total',
+    'teamcity.code_coverage.methods.covered',
+    'teamcity.code_coverage.methods.pct',
+    'teamcity.code_coverage.methods.total',
+    'teamcity.code_coverage.statements.covered',
+    'teamcity.code_coverage.statements.pct',
+    'teamcity.code_coverage.statements.total',
+    'teamcity.duplicator_stats',
+    'teamcity.failed_test_count',
+    'teamcity.passed_test_count',
+    'teamcity.ignored_test_count',
+    'teamcity.inspection_stats_e',
+    'teamcity.inspection_stats_w',
+    'teamcity.queue_wait_reason',
+    'teamcity.server_side_build_finishing',
+    'teamcity.success_rate',
+    'teamcity.time_spent_in_queue',
+    'teamcity.total_test_count',
+]
 
 PROMETHEUS_METRICS = [
     'teamcity.agents.connected.authorized',

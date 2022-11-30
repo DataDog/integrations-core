@@ -31,6 +31,16 @@ def rest_instance():
 
 
 @pytest.fixture(scope='session')
+def empty_builds_rest_instance():
+    if PY2:
+        LEGACY_REST_INSTANCE['build_configuration'] = 'SampleProject_Empty_Builds'
+        return LEGACY_REST_INSTANCE
+    else:
+        REST_INSTANCE['projects'] = {'include': [{'SampleProject': {'include': ['SampleProject_Empty_Builds']}}]}
+        return REST_INSTANCE
+
+
+@pytest.fixture(scope='session')
 def openmetrics_instance():
     return OPENMETRICS_INSTANCE
 

@@ -1,10 +1,8 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import json
 from copy import deepcopy
 
-import mock
 import pytest
 from mock import ANY, patch
 from six import PY2
@@ -21,74 +19,40 @@ from .common import (
     BUILD_TAGS,
     EXPECTED_SERVICE_CHECK_TEST_RESULTS,
     LEGACY_REST_INSTANCE,
-    NEW_FAILED_BUILD,
-    NEW_SUCCESSFUL_BUILD,
     USE_OPENMETRICS,
-    get_fixture_path,
 )
 
 pytestmark = [
     pytest.mark.skipif(USE_OPENMETRICS, reason='Tests not available in OpenMetrics version of check'),
     pytest.mark.integration,
+    pytest.mark.usefixtures('dd_environment'),
 ]
+
+BUILD_TAGS = BUILD_TAGS + ['instance_name:SampleProject_Build'] if PY2 else BUILD_TAGS
 
 
 def test_build_event(dd_run_check, aggregator, rest_instance):
-    rest_instance['build_config_metrics'] = False
-    rest_instance['tests_health_check'] = False
-    rest_instance['build_problem_health_check'] = False
+    instance = deepcopy(rest_instance)
+    flags = {'build_config_metrics': False, 'tests_health_check': False, 'build_problem_health_check': False}
+    instance.update(flags)
 
-    teamcity = TeamCityRest('teamcity', {}, [rest_instance])
-    event_tags = BUILD_TAGS + ['instance_name:SampleProject_Build'] if PY2 else BUILD_TAGS
-
-    responses = json.load(open(get_fixture_path('event_responses.json'), 'r'))
-
-    single_build_responses = [
-        responses['build_config'],
-        responses['build_config_settings'],
-        responses['last_build'],
-        responses['new_builds'],
-        responses['server_details'],
-    ]
-
-    multi_build_responses = [
-        responses['projects'],
-        responses['build_configs'],
-        responses['build_config_settings'],
-        responses['last_build'],
-        responses['new_builds'],
-        responses['server_details'],
-    ]
-
-    json_responses = single_build_responses if PY2 else multi_build_responses
-
-    with mock.patch('datadog_checks.base.utils.http.requests') as req:
-        mock_resp = mock.MagicMock(status_code=200)
-        mock_resp.json.side_effect = json_responses
-        req.get.return_value = mock_resp
-        teamcity.check(rest_instance)
+    check = TeamCityRest('teamcity', {}, [instance])
+    event_tags = BUILD_TAGS
+    dd_run_check(check)
     assert not len(aggregator.metric_names)
     aggregator.assert_event(
         event_type='build',
         host='buildhost42.dtdg.co',
-        msg_text='Build Number: 1\nDeployed To: buildhost42.dtdg.co\n\n'
+        msg_text='Build Number: 2\nDeployed To: buildhost42.dtdg.co\n\n'
         'More Info: http://localhost:8111/viewLog.html?buildId=1&buildTypeId=SampleProject_Build',
         msg_title='Build for SampleProject_Build successful',
         source_type_name='teamcity',
         alert_type='success',
-        tags=event_tags + ['build_id:1', 'build_number:1', 'build', 'type:build'],
+        tags=event_tags + ['build_id:2', 'build_number:2', 'build', 'type:build'],
         count=1,
     )
 
-    aggregator.reset()
-
-    # One more check should not create any more events
-    with mock.patch('datadog_checks.base.utils.http.requests') as req:
-        mock_resp = mock.MagicMock(status_code=200)
-        mock_resp.json.side_effect = [responses['server_details'], responses['no_new_builds']]
-        req.get.return_value = mock_resp
-        teamcity.check(rest_instance)
-
+    dd_run_check(check)
     aggregator.assert_event(msg_title="", msg_text="", count=0)
 
 
@@ -100,13 +64,13 @@ def test_build_event(dd_run_check, aggregator, rest_instance):
         pytest.param({}, {'verify': True}, id="legacy ssl config unset"),
     ],
 )
-def test_config(extra_config, expected_http_kwargs):
+def test_config(dd_run_check, extra_config, expected_http_kwargs):
     instance = deepcopy(LEGACY_REST_INSTANCE)
     instance.update(extra_config)
     check = TeamCityRest('teamcity', {}, [instance])
 
     with patch('datadog_checks.base.utils.http.requests.get') as r:
-        check.check(instance)
+        dd_run_check(check)
 
         http_wargs = dict(
             auth=ANY,
@@ -164,44 +128,51 @@ def test_validate_config(dd_run_check, build_config, expected_error, caplog):
         dd_run_check(check)
 
 
-def test_collect_build_stats(aggregator, mock_http_response, rest_instance, teamcity_rest_check):
-    check = teamcity_rest_check(rest_instance)
-    check.build_tags = BUILD_TAGS
-
-    mock_http_response(file_path=get_fixture_path("build_stats.json"))
-    check._collect_build_stats(NEW_SUCCESSFUL_BUILD)
+def test_collect_build_stats(dd_run_check, aggregator, rest_instance, teamcity_rest_check, caplog):
+    instance = deepcopy(rest_instance)
+    flags = {'collect_events': False, 'tests_health_check': False, 'build_problem_health_check': False}
+    instance.update(flags)
+    check = teamcity_rest_check(instance)
+    dd_run_check(check)
 
     for metric in BUILD_STATS_METRICS:
         metric_name = metric['name']
         expected_val = metric['value']
-        expected_stats_tags = metric['tags']
-        aggregator.assert_metric(metric_name, tags=expected_stats_tags, value=expected_val)
+        expected_tags = metric['tags'] if not PY2 else metric['tags'] + ['instance_name:SampleProject_Build']
+
+        aggregator.assert_metric(metric_name, tags=expected_tags, value=expected_val)
 
     aggregator.assert_all_metrics_covered()
 
 
-def test_collect_test_results(aggregator, mock_http_response, rest_instance, teamcity_rest_check):
-    check = teamcity_rest_check(rest_instance)
-    check.build_tags = BUILD_TAGS
+def test_collect_test_results(dd_run_check, aggregator, rest_instance, teamcity_rest_check):
+    instance = deepcopy(rest_instance)
+    flags = {'collect_events': False, 'build_config_metrics': False, 'build_problem_health_check': False}
+    instance.update(flags)
+    check = teamcity_rest_check(instance)
 
-    mock_http_response(file_path=get_fixture_path("test_occurrences.json"))
-    check._collect_test_results(NEW_SUCCESSFUL_BUILD)
+    dd_run_check(check)
 
     for res in EXPECTED_SERVICE_CHECK_TEST_RESULTS:
         expected_status = res['value']
-        expected_tests_tags = res['tags']
+        expected_tests_tags = res['tags'] if not PY2 else res['tags'] + ['instance_name:SampleProject_Build']
         aggregator.assert_service_check(
             'teamcity.{}'.format(SERVICE_CHECK_TEST_RESULTS), status=expected_status, tags=expected_tests_tags
         )
 
 
-def test_collect_build_problems(aggregator, mock_http_response, rest_instance, teamcity_rest_check):
-    mock_http_response(file_path=get_fixture_path('build_problems.json'))
-    check = teamcity_rest_check(rest_instance)
-    check.build_tags = BUILD_TAGS
+def test_collect_build_problems(dd_run_check, aggregator, rest_instance, teamcity_rest_check):
+    instance = deepcopy(rest_instance)
+    flags = {
+        'collect_events': False,
+        'build_config_metrics': False,
+        'tests_health_check': False,
+    }
+    instance.update(flags)
     expected_tags = BUILD_TAGS + ['problem_identity:python_build_error_identity', 'problem_type:TC_EXIT_CODE']
+    check = teamcity_rest_check(instance)
 
-    check._collect_build_problems(NEW_FAILED_BUILD)
+    dd_run_check(check)
 
     aggregator.assert_service_check(
         'teamcity.{}'.format(SERVICE_CHECK_BUILD_PROBLEMS),
@@ -211,9 +182,7 @@ def test_collect_build_problems(aggregator, mock_http_response, rest_instance, t
     )
 
 
-def test_handle_empty_builds(aggregator, mock_http_response, rest_instance, teamcity_rest_check):
-    check = teamcity_rest_check(rest_instance)
-
-    mock_http_response(file_path=get_fixture_path("init_no_builds.json"))
-    check.check(rest_instance)
+def test_handle_empty_builds(dd_run_check, aggregator, empty_builds_rest_instance, teamcity_rest_check):
+    check = teamcity_rest_check(empty_builds_rest_instance)
+    dd_run_check(check)
     aggregator.assert_service_check('teamcity.{}'.format(SERVICE_CHECK_BUILD_STATUS), count=0)
