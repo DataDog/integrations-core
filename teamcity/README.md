@@ -67,7 +67,7 @@ The TeamCity check offers two methods of data collection. To optimally monitor y
        #
        use_openmetrics: true
    ```
-**Note:** To collect [OpenMetrics-compliant][16] histogram and summary metrics (available starting in TeamCity Server 2022.10+), enable the internal property, `teamcity.metrics.followOpenMetricsSpec`. 
+**Note:** To collect [OpenMetrics-compliant][16] histogram and summary metrics (available starting in TeamCity Server 2022.10+), add the internal property, `teamcity.metrics.followOpenMetricsSpec=true`. See, [TeamCity Internal Properties][25].
 
 2. TeamCity Server REST API method:
 
@@ -237,3 +237,4 @@ Need help? Contact [Datadog support][12].
 [22]: https://www.jetbrains.com/help/teamcity/managing-roles-and-permissions.html#Changing+Authorization+Mode
 [23]: https://www.jetbrains.com/help/teamcity/managing-roles-and-permissions.html
 [24]: https://www.jetbrains.com/help/teamcity/creating-and-managing-users.html#Assigning+Roles+to+Users
+[25]: https://www.jetbrains.com/help/teamcity/server-startup-properties.html#TeamCity+Internal+Properties

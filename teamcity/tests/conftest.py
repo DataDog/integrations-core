@@ -5,7 +5,6 @@ import pytest
 from six import PY2, PY3
 
 from datadog_checks.dev import docker_run
-from datadog_checks.dev.conditions import CheckDockerLogs
 from datadog_checks.teamcity.teamcity_rest import TeamCityRest
 
 if PY3:
