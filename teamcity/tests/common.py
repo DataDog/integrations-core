@@ -290,6 +290,16 @@ PROMETHEUS_METRICS = [
     'teamcity.pullRequests.batch.time.milliseconds.count',
     'teamcity.pullRequests.single.time.milliseconds.count',
     'teamcity.vcsChangesCollection.delay.milliseconds.count',
+    'teamcity.build.queue.optimization.time.milliseconds.count',
+    'teamcity.build.triggers.execution.milliseconds.count',
+    'teamcity.build.triggers.per.type.execution.milliseconds.count',
+    'teamcity.finishingBuild.buildFinishDelay.milliseconds.count',
+    'teamcity.full.agent.waiting.time.milliseconds.count',
+    'teamcity.queuedBuild.waitingTime.milliseconds.count',
+    'teamcity.startingBuild.buildStartDelay.milliseconds.count',
+    'teamcity.startingBuild.runBuildDelay.milliseconds.count',
+    'teamcity.vcs.changes.checking.milliseconds.count',
+    'teamcity.vcs.git.fetch.duration.milliseconds.count',
 ]
 
 

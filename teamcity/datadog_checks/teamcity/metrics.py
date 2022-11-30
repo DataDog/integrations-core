@@ -133,12 +133,22 @@ STANDARD_PROMETHEUS_METRICS = {
 HISTOGRAM_METRICS = {'http_requests_duration_milliseconds': 'http.requests.duration.milliseconds'}
 
 SUMMARY_METRICS = {
+    'build_triggers_execution_milliseconds': 'build.triggers.execution.milliseconds',
+    'build_triggers_per_type_execution_milliseconds': 'build.triggers.per.type.execution.milliseconds',
+    'finishingBuild_buildFinishDelay_milliseconds': 'finishingBuild.buildFinishDelay.milliseconds',
+    'full_agent_waiting_time_milliseconds': 'full.agent.waiting.time.milliseconds',
+    'build_queue_optimization_time_milliseconds': 'build.queue.optimization.time.milliseconds',
     'process_queue_milliseconds': 'process.queue.milliseconds',
     'process_queue_parts_milliseconds': 'process.queue.parts.milliseconds',
     'process_websocket_send_pending_messages_milliseconds': 'process.websocket.send.pending.messages.milliseconds',
     'pullRequests_batch_time_milliseconds': 'pullRequests.batch.time.milliseconds',
     'pullRequests_single_time_milliseconds': 'pullRequests.single.time.milliseconds',
+    'queuedBuild_waitingTime_milliseconds': 'queuedBuild.waitingTime.milliseconds',
+    'startingBuild_buildStartDelay_milliseconds': 'startingBuild.buildStartDelay.milliseconds',
+    'startingBuild_runBuildDelay_milliseconds': 'startingBuild.runBuildDelay.milliseconds',
+    'vcs_changes_checking_milliseconds': 'vcs.changes.checking.milliseconds',
     'vcsChangesCollection_delay_milliseconds': 'vcsChangesCollection.delay.milliseconds',
+    'vcs_git_fetch_duration_milliseconds': 'vcs.git.fetch.duration.milliseconds',
 }
 
 METRIC_MAP = deepcopy(STANDARD_PROMETHEUS_METRICS)
