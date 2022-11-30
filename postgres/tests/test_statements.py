@@ -1554,6 +1554,7 @@ def test_statement_metrics_database_errors(
 
     assert check.warnings == expected_warnings
 
+
 @pytest.mark.parametrize(
     "pg_stat_statements_max_threshold,expected_warnings", [
         (9999, [
