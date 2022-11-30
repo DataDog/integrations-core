@@ -38,9 +38,9 @@ class DiscoveryFilter:
         self._default_limit = default_limit
         self._default_include = [] if default_include is None else default_include
         self._default_exclude = [] if default_exclude is None else default_exclude
-        self._log.debug('\'%s\' config: %s', name, self._config)
+        self._log.debug('`%s` config: %s', name, self._config)
         if self._config is None and mandatory:
-            raise ConfigurationError('\'{}\' setting must be defined'.format(name))
+            raise ConfigurationError('`{}` setting must be defined'.format(name))
 
     def match(self, items):
         self._log.debug('trying to match: %s', items)
@@ -60,18 +60,18 @@ class DiscoveryFilter:
                 for id_item in config_items_id:
                     id_key, id_value = None, None
                     if isinstance(id_item, dict):
-                        id_key = list(id_item)[0]  # iterating over a dictionary implicitly iterates only over its keys
+                        id_key = list(id_item)[0]
                         id_value = list(id_item.values())[0]
                     elif isinstance(id_item, str):
                         id_key = id_item
                     if id_key not in [key for key, _ in matched_id]:
                         if id_key in items:
-                            self._log.debug('\'%s\' item matched', id_key)
+                            self._log.debug('`%s` item matched', id_key)
                             matched_id.append(tuple([id_key, id_value]))
                         else:
-                            self._log.warning('\'%s\' item not found in items', id_key)
+                            self._log.warning('`%s` item not found in items', id_key)
                     else:
-                        self._log.debug('\'%s\' item was already matched', id_key)
+                        self._log.debug('`%s` item was already matched', id_key)
         return matched_id
 
     def _match_discovery(self, matched_items, items):
