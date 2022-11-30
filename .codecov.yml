@@ -114,6 +114,10 @@ coverage:
         target: 75
         flags:
         - cloud_foundry_api
+      Cloudera:
+        target: 75
+        flags:
+        - cloudera
       CockroachDB:
         target: 75
         flags:
@@ -736,6 +740,11 @@ flags:
     paths:
     - cloud_foundry_api/datadog_checks/cloud_foundry_api
     - cloud_foundry_api/tests
+  cloudera:
+    carryforward: true
+    paths:
+    - cloudera/datadog_checks/cloudera
+    - cloudera/tests
   cockroachdb:
     carryforward: true
     paths:

@@ -28,17 +28,13 @@
       },
       "metrics": {
         "prefix": "cloudera.",
-        "check": "",
+        "check": "cloudera.cluster.cpu_percent_across_hosts",
         "metadata_path": "metadata.csv"
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       }
-    },
-    "dashboards": {},
-    "monitors": {},
-    "logs": {},
-    "saved_views": {}
+    }
   },
   "author": {
     "support_email": "help@datadoghq.com",

@@ -2,13 +2,11 @@ base_package:
 - datadog_checks_base/**/*
 changelog/no-changelog:
 - requirements-agent-release.txt
-- '*/__about__.py'
+- datadog_checks_dev/datadog_checks/dev/__about__.py
 - all:
   - '*/!(datadog_checks)/**'
 - all:
   - '*/!(pyproject.toml)'
-- all:
-  - '*/(!ddev)/**'
 ddev:
 - ddev/**/*
 dependencies:
@@ -94,6 +92,8 @@ integration/clickhouse:
 - clickhouse/**/*
 integration/cloud_foundry_api:
 - cloud_foundry_api/**/*
+integration/cloudera:
+- cloudera/**/*
 integration/cockroachdb:
 - cockroachdb/**/*
 integration/confluent_platform:

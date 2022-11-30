@@ -1,1 +1,2 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
+cloudera.cluster.cpu_percent_across_hosts,gauge,,percent,,CPU usage in percent across hosts for this cluster,0,cloudera,cluster cpu percent across hosts,

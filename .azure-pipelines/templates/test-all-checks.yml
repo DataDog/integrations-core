@@ -120,6 +120,9 @@ jobs:
     - checkName: cloud_foundry_api
       displayName: Cloud Foundry API
       os: linux
+    - checkName: cloudera
+      displayName: Cloudera
+      os: linux
     - checkName: cockroachdb
       displayName: CockroachDB
       os: linux
