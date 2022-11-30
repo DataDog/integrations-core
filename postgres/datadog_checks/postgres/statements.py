@@ -256,7 +256,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
                     cols=', '.join(query_columns),
                     pg_stat_statements_view=self._config.pg_stat_statements_view,
                     filters=filters,
-                    limit=self._config.statement_metrics_config.get('limit_pg_stat_statements_rows', DEFAULT_STATEMENTS_LIMIT),
+                    limit=DEFAULT_STATEMENTS_LIMIT,
                 ),
                 params=params,
             )

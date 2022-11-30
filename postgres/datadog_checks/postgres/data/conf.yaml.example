@@ -265,12 +265,6 @@ instances:
         #
         # collection_interval: 10
 
-        ## @param limit_pg_stat_statements_rows - number - optional - default: 10000
-        ## Set a limit of rows returned from `pg_stat_statements`, which is useful in cases where the query
-        ## returns too much data and causes performance implications.
-        #
-        # limit_pg_stat_statements_rows: 10000
-
     ## Configure collection of query samples
     #
     # query_samples:

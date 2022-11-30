@@ -78,7 +78,6 @@ class QueryMetrics(BaseModel):
 
     collection_interval: Optional[float]
     enabled: Optional[bool]
-    limit_pg_stat_statements_rows: Optional[float]
 
 
 class QuerySamples(BaseModel):

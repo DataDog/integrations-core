@@ -317,13 +317,6 @@ files:
           value:
             type: number
             example: 10
-        - name: limit_pg_stat_statements_rows
-          description: |
-            Set a limit of rows returned from `pg_stat_statements`, which is useful in cases where the query
-            returns too much data and causes performance implications.
-          value:
-            type: number
-            example: 10000
     - name: query_samples
       description: Configure collection of query samples
       options:
