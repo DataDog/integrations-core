@@ -104,6 +104,18 @@ class Terminal:
 
         self.display_raw(Markdown(text), stderr=stderr, **kwargs)
 
+    def create_display_tree(self, label: str):
+        from rich.tree import Tree
+
+        from ddev.console.tree import DisplayTree
+
+        return DisplayTree(
+            self.console,
+            Tree(label, style=self._style_level_info),
+            error_style=self._style_level_error,
+            warning_style=self._style_level_warning,
+        )
+
     @contextmanager
     def status_waiting(self, text='', final_text=None, **kwargs):
         if not self.interactive or not self.console.is_terminal:
