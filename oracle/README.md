@@ -197,7 +197,7 @@ instances:
 
 2. Update the `sqlnet.ora`, `listener.ora`, and `tnsnames.ora` to allow TCPS connections on your Oracle Database. 
 
-##### TCPS through Oracle
+##### TCPS through Oracle without JDBC
 
 If you are connecting to Oracle Database through Oracle, verify that the Datadog Agent is able to connect to your database. Use the `sqlplus` command line tool with the information inputted in your configuration options:
 
