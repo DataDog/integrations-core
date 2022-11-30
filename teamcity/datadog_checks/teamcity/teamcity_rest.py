@@ -186,6 +186,7 @@ class TeamCityRest(AgentCheck):
             self._initialize_multi_build_config()
 
     def _send_events(self, new_build):
+        self.log.debug('Sending build event...')
         teamcity_event = construct_event(self, new_build)
         self.log.trace('Submitting event: %s', teamcity_event)
         self.event(teamcity_event)
@@ -194,6 +195,7 @@ class TeamCityRest(AgentCheck):
         )
 
     def _collect_build_stats(self, new_build):
+        self.log.debug('Collecting build statistics...')
         build_id = new_build['id']
         build_stats = get_response(self, 'build_stats', build_id=build_id)
 
@@ -211,6 +213,7 @@ class TeamCityRest(AgentCheck):
             self.log.debug('No build stats found for build ID: %s.', build_id)
 
     def _collect_test_results(self, new_build):
+        self.log.debug('Collecting build test results...')
         build_id = new_build['id']
         test_results = get_response(self, 'test_occurrences', build_id=build_id)
 
@@ -224,6 +227,7 @@ class TeamCityRest(AgentCheck):
                 self.service_check(SERVICE_CHECK_TEST_RESULTS, test_status, tags=self.build_tags + tags)
 
     def _collect_build_problems(self, new_build):
+        self.log.debug('Collecting build problems...')
         build_id = new_build['id']
         problem_results = get_response(self, 'build_problems', build_id=build_id)
 
@@ -245,6 +249,7 @@ class TeamCityRest(AgentCheck):
         if not last_build_id:
             self._initialize()
         else:
+            self.log.debug('Checking for new builds...')
             new_builds = get_response(
                 self, 'new_builds', build_conf=self.current_build_config, since_build=last_build_id
             )
