@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
+import copy
 import psycopg2
 import pytest
 import select
@@ -48,10 +49,12 @@ def test_deadlock(aggregator, dd_run_check, integration_check, pg_instance):
             time.sleep(0.1)
 
     conn_args = { 'host': HOST, 'dbname': DB_NAME, 'user': "bob", 'password': "bob"}
+    conn_args_async = copy.copy(conn_args)
+    conn_args_async["async_"]=1
     conn1 = psycopg2.connect(**conn_args)
     conn1.autocommit = False
 
-    conn2 = psycopg2.connect(**conn_args, async_=1)
+    conn2 = psycopg2.connect(**conn_args_async)
     wait(conn2)
 
     appname = 'deadlock sess'
