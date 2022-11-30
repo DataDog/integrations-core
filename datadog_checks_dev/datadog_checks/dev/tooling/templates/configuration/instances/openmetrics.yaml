@@ -123,6 +123,7 @@
     `promhttp_metric_handler_requests`. This submits to Datadog the metric name appended with `.count`.
     For more information, see:
     https://github.com/OpenObservability/OpenMetrics/blob/main/specification/OpenMetrics.md#suffixes
+    
     Regular expressions may be used to match the exposed metric names, for example:
 
       extra_metrics:
