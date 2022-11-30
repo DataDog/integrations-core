@@ -329,7 +329,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
             count = 0
             if rows:
                 count = rows[0][0]
-            self._check.count(
+            self._check.gauge(
                 "postgresql.pg_stat_statements.max",
                 self._check.pg_settings.get("pg_stat_statements.max", 0),
                 tags=self._tags,
@@ -343,11 +343,33 @@ class PostgresStatementMetrics(DBMAsyncJob):
             )
         except psycopg2.Error as e:
             self._log.warning("Failed to query for pg_stat_statements count: %s", e)
+    
+    def _emit_pg_stat_statement_query_text_length_metrics(self, rows):
+        txt_length_sum = 0
+        txt_length_max = 0
+        for r in rows:
+            query_length = len(r['query'])
+            txt_length_sum += query_length
+            if query_length > txt_length_max:
+                txt_length_max = query_length
+        self._check.gauge(
+            "postgresql.pg_stat_statements.query_text.avg",
+            txt_length_sum/len(rows),
+            tags=self._tags,
+            hostname=self._check.resolved_hostname,
+        )
+        self._check.gauge(
+            "postgresql.pg_stat_statements.query_text.max",
+            txt_length_max,
+            tags=self._tags,
+            hostname=self._check.resolved_hostname,
+        )
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _collect_metrics_rows(self):
         self._emit_pg_stat_statements_metrics()
         rows = self._load_pg_stat_statements()
+        self._emit_pg_stat_statement_query_text_length_metrics(rows)
 
         rows = self._normalize_queries(rows)
         if not rows:
