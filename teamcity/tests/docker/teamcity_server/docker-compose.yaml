@@ -2,6 +2,7 @@ version: '3'
 # Adapted from https://github.com/JetBrains/teamcity-docker-samples
 services:
   teamcity-server:
+    container_name: teamcity-server
     image: datadog/docker-library:teamcity-2022.10
     ports:
       - "8111:8111"
@@ -10,7 +11,9 @@ services:
 
   teamcity-agent:
     container_name: teamcity-agent
-    image: datadog/docker-library:teamcity-2022.10
+    build:
+      context: ../teamcity_agent
+      dockerfile: agent.Dockerfile
     platform: linux/amd64
     environment:
       - AGENT_NAME=regular_agent

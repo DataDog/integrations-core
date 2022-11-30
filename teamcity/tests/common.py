@@ -12,6 +12,7 @@ HOST = get_docker_hostname()
 PORT = '8111'
 SERVER_URL = "http://{}:{}".format(HOST, PORT)
 CHECK_NAME = 'teamcity'
+METRIC_ENDPOINT = f'{SERVER_URL}/guestAuth/app/metrics'
 
 USE_OPENMETRICS = is_affirmative(os.environ.get('USE_OPENMETRICS'))
 
