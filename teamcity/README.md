@@ -229,10 +229,10 @@ Need help? Contact [Datadog support][12].
 [14]: https://github.com/DataDog/integrations-core/blob/master/teamcity/metadata.csv
 [15]: https://github.com/DataDog/integrations-core/blob/master/teamcity/assets/service_checks.json
 [16]: https://github.com/OpenObservability/OpenMetrics/blob/main/specification/OpenMetrics.md
-[17]: https://raw.githubusercontent.com/DataDog/integrations-core/master/teamcity/images/images/authentication.jpg
-[18]: https://raw.githubusercontent.com/DataDog/integrations-core/master/teamcity/images/images/create_role.jpg
-[19]: https://raw.githubusercontent.com/DataDog/integrations-core/master/teamcity/images/images/build_config_permissions.jpg
-[20]: https://raw.githubusercontent.com/DataDog/integrations-core/master/teamcity/images/images/guest_user_settings.jpg
+[17]: https://raw.githubusercontent.com/DataDog/integrations-core/master/teamcity/images/authentication.jpg
+[18]: https://raw.githubusercontent.com/DataDog/integrations-core/master/teamcity/images/create_role.jpg
+[19]: https://raw.githubusercontent.com/DataDog/integrations-core/master/teamcity/images/build_config_permissions.jpg
+[20]: https://raw.githubusercontent.com/DataDog/integrations-core/master/teamcity/images/guest_user_settings.jpg
 [21]: https://raw.githubusercontent.com/DataDog/integrations-core/master/teamcity/images/assign_role.jpg
 [22]: https://www.jetbrains.com/help/teamcity/managing-roles-and-permissions.html#Changing+Authorization+Mode
 [23]: https://www.jetbrains.com/help/teamcity/managing-roles-and-permissions.html
