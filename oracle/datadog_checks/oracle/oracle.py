@@ -173,7 +173,7 @@ class Oracle(AgentCheck):
             return connection
         except oracledb.DatabaseError as e:
             self._connection_errors += 1
-            self.log.error("Failed to connect to Oracle DB using Python Oracle, error: %s", str(e))
+            self.log.error("Failed to connect to Oracle DB, error: %s", str(e))
             raise
 
     def _get_dsn(self):
