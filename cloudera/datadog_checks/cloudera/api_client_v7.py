@@ -7,17 +7,24 @@ from datadog_checks.cloudera.metrics import METRICS
 from .common import CLUSTER_HEALTH, HOST_HEALTH
 from datadog_checks.base import AgentCheck
 
-# TODO: Refactor this to be cleaner
+# TODO: Refactor this to abstract out timeseries queries using composite pattern
 class ApiClientV7(ApiClient):
     def __init__(self, check, api_client):
         super(ApiClientV7, self).__init__(check, api_client)
 
     def collect_data(self):
-        self._collect_clusters()
+        try:
+            self._collect_clusters()
+        except Exception as e:
+            self.error("Unable to finish collecting data: %s", e)
+            raise
 
     def _collect_clusters(self):
         clusters_resource_api = cm_client.ClustersResourceApi(self._api_client)
         read_clusters_response = clusters_resource_api.read_clusters(cluster_type='any', view='full')
+        self.log.debug("Full clusters response:")
+        self.log.debug(read_clusters_response)
+
         for cluster in read_clusters_response.items:
             self._collect_cluster_metrics_and_service_check(cluster)
 
@@ -50,11 +57,16 @@ class ApiClientV7(ApiClient):
         query = f'SELECT {metric_names} WHERE clusterName="{cluster_name}" AND category=CLUSTER'
         self._log.debug('query: %s', query)
         query_time_series_response = time_series_resource_api.query_time_series(query=query)
-        self._collect_query_time_series(query_time_series_response, 'cluster')
+        self.log.debug("Full timeseries response:")
+        self.log.debug(query_time_series_response)
+        self._collect_query_time_series(query_time_series_response, 'cluster', [])
 
     def _collect_hosts_metrics_and_service_check(self, cluster_name):
         clusters_resource_api = cm_client.ClustersResourceApi(self._api_client)
         list_hosts_response = clusters_resource_api.list_hosts(cluster_name, view='full')
+        self.log.debug("Full hosts response:")
+        self.log.debug(list_hosts_response)
+
         for host in list_hosts_response.items:
             self._collect_host_metrics_and_service_check(host)
 
@@ -67,7 +79,7 @@ class ApiClientV7(ApiClient):
         self._log.debug('host_id: %s', host_id)
 
         if host_id:
-            tags = [f"{tag.name}:{tag.value}" for tag in host.tags]
+            tags = [f"{tag.name}:{tag.value}" for tag in host.tags] if host.tags else []
             self._collect_host_metrics(host_id, tags)
             self._collect_role_metrics(host_id, tags)
             self._log.debug('host tags: %s', tags)
@@ -79,6 +91,9 @@ class ApiClientV7(ApiClient):
         query = f'SELECT {metric_names} WHERE hostId="{host_id}" AND category=HOST'
         self._log.debug('query: %s', query)
         query_time_series_response = time_series_resource_api.query_time_series(query=query)
+        self.log.debug("Full timeseries response:")
+        self.log.debug(query_time_series_response)
+
         self._collect_query_time_series(query_time_series_response, 'host', tags)
 
     def _collect_role_metrics(self, host_id, tags):
@@ -87,9 +102,11 @@ class ApiClientV7(ApiClient):
         query = f'SELECT {metric_names} WHERE hostId="{host_id}" AND category=ROLE'
         self._log.debug('query: %s', query)
         query_time_series_response = time_series_resource_api.query_time_series(query=query)
-        self._collect_query_time_series(query_time_series_response, 'role', tags)
+        self.log.debug("Full timeseries response:")
+        self.log.debug(query_time_series_response)
+        self._collect_query_time_series(query_time_series_response, 'role', [])
 
-    def _collect_query_time_series(self, query_time_series_response, category, tags=[]):
+    def _collect_query_time_series(self, query_time_series_response, category, tags):
         for item in query_time_series_response.items:
             last_metadata_metric_name = None
             for ts in item.time_series:
@@ -100,7 +117,11 @@ class ApiClientV7(ApiClient):
                     index += 1
                 last_metadata_metric_name = ts.metadata.metric_name
                 metric_name = METRICS[category][index]
+                metric_tags = tags + [f'cloudera_{category}:{ts.metadata.entity_name}']
                 full_metric_name = f'{category}.{metric_name}'
+                new_tag = f'cloudera_{category}:{ts.metadata.entity_name}'
+                if new_tag not in tags:
+                    tags.append(new_tag)
                 new_tag = f'cloudera_{category}:{ts.metadata.entity_name}'
                 if new_tag not in tags:
                     tags.append(new_tag)
@@ -108,5 +129,5 @@ class ApiClientV7(ApiClient):
                     value = d.value
                     self._log.debug('full_metric_name: %s', full_metric_name)
                     self._log.debug('value: %s', value)
-                    self._log.debug('tags: %s', tags)
-                    self._check.gauge(full_metric_name, value, tags=tags)
+                    self._log.debug('metric_tags: %s', metric_tags)
+                    self._check.gauge(full_metric_name, value, tags=metric_tags)

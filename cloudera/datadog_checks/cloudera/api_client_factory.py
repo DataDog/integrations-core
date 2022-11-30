@@ -22,3 +22,5 @@ def make_api_client(check, config):
     # return ApiClientV5(check, api_client)
     if cloudera_version.major == 7:
         return ApiClientV7(check, api_client)
+    else:
+        raise ConfigurationError()  # TODO: Clean up
