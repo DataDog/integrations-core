@@ -16,14 +16,14 @@ class ApiClientV7(ApiClient):
         try:
             self._collect_clusters()
         except Exception as e:
-            self.error("Unable to finish collecting data: %s", e)
+            self.check.error("Unable to finish collecting data: %s", str(e))
             raise
 
     def _collect_clusters(self):
         clusters_resource_api = cm_client.ClustersResourceApi(self._api_client)
         read_clusters_response = clusters_resource_api.read_clusters(cluster_type='any', view='full')
-        self.log.debug("Full clusters response:")
-        self.log.debug(read_clusters_response)
+        self._log.debug("Full clusters response:")
+        self._log.debug(read_clusters_response)
 
         for cluster in read_clusters_response.items:
             self._collect_cluster_metrics_and_service_check(cluster)
@@ -57,15 +57,15 @@ class ApiClientV7(ApiClient):
         query = f'SELECT {metric_names} WHERE clusterName="{cluster_name}" AND category=CLUSTER'
         self._log.debug('query: %s', query)
         query_time_series_response = time_series_resource_api.query_time_series(query=query)
-        self.log.debug("Full timeseries response:")
-        self.log.debug(query_time_series_response)
+        self._log.debug("Full timeseries response:")
+        self._log.debug(query_time_series_response)
         self._collect_query_time_series(query_time_series_response, 'cluster', [])
 
     def _collect_hosts_metrics_and_service_check(self, cluster_name):
         clusters_resource_api = cm_client.ClustersResourceApi(self._api_client)
         list_hosts_response = clusters_resource_api.list_hosts(cluster_name, view='full')
-        self.log.debug("Full hosts response:")
-        self.log.debug(list_hosts_response)
+        self._log.debug("Full hosts response:")
+        self._log.debug(list_hosts_response)
 
         for host in list_hosts_response.items:
             self._collect_host_metrics_and_service_check(host)
@@ -91,8 +91,8 @@ class ApiClientV7(ApiClient):
         query = f'SELECT {metric_names} WHERE hostId="{host_id}" AND category=HOST'
         self._log.debug('query: %s', query)
         query_time_series_response = time_series_resource_api.query_time_series(query=query)
-        self.log.debug("Full timeseries response:")
-        self.log.debug(query_time_series_response)
+        self._log.debug("Full timeseries response:")
+        self._log.debug(query_time_series_response)
 
         self._collect_query_time_series(query_time_series_response, 'host', tags)
 
@@ -102,8 +102,8 @@ class ApiClientV7(ApiClient):
         query = f'SELECT {metric_names} WHERE hostId="{host_id}" AND category=ROLE'
         self._log.debug('query: %s', query)
         query_time_series_response = time_series_resource_api.query_time_series(query=query)
-        self.log.debug("Full timeseries response:")
-        self.log.debug(query_time_series_response)
+        self._log.debug("Full timeseries response:")
+        self._log.debug(query_time_series_response)
         self._collect_query_time_series(query_time_series_response, 'role', [])
 
     def _collect_query_time_series(self, query_time_series_response, category, tags):
