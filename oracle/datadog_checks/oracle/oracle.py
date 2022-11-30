@@ -157,8 +157,7 @@ class Oracle(AgentCheck):
         if self._jdbc_driver:
             if JDBC_IMPORT_ERROR is not None:
                 self.log.error(
-                    "The integration is unable to import JDBC libraries. You might not "
-                    "have the Microsoft Visual C++ Runtime 2015 installed on your system. Please double check your "
+                    "The integration is unable to import JDBC libraries. Please double check your "
                     "installation and refer to the Datadog documentation for more information."
                 )
                 raise JDBC_IMPORT_ERROR
