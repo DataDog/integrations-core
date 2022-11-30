@@ -8,7 +8,7 @@ from datadog_checks.base import AgentCheck
 
 @pytest.mark.e2e
 def test_e2e(dd_agent_check, aggregator, instance):
-	
+
     with pytest.raises(Exception):
         dd_agent_check(instance, rate=True)
     endpoint_tag = "endpoint:" + instance.get('kube_state_url')
