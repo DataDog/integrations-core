@@ -4,9 +4,6 @@ base-package-features = [
     "kube",
 ]
 
-[envs.default]
-e2e-env = true
-
 [[envs.default.matrix]]
 python = ["27", "38"]
 
