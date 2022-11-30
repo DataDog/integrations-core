@@ -1,5 +1,7 @@
 import re
 
+from datadog_checks.sonarqube.common import SONARQUBE_NUMERIC_TYPES
+
 
 class SonarqubeAPI:
     def __init__(self, log, http, endpoint):
@@ -31,7 +33,7 @@ class SonarqubeAPI:
                     hidden_metrics += 1
                     self._log.debug("hidden metric: %s", metric)
                     continue
-                if metric['type'] not in ['INT', 'FLOAT', 'PERCENT', 'BOOL', 'MILLISEC', 'RATING']:
+                if metric['type'] not in SONARQUBE_NUMERIC_TYPES:
                     not_numeric += 1
                     self._log.debug("not_numeric metric: %s", metric)
                     continue
