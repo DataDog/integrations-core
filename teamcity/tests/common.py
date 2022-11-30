@@ -7,7 +7,7 @@ from datadog_checks.base import is_affirmative
 from datadog_checks.dev import get_docker_hostname, get_here
 
 HERE = get_here()
-COMPOSE_FILE = os.path.join(HERE, 'docker', 'mockserver-docker-compose.yaml')
+COMPOSE_FILE = os.path.join(HERE, 'docker', '{}', 'docker-compose.yaml')
 HOST = get_docker_hostname()
 PORT = '8111'
 SERVER_URL = "http://{}:{}".format(HOST, PORT)

@@ -5,6 +5,7 @@ import pytest
 from six import PY2, PY3
 
 from datadog_checks.dev import docker_run
+from datadog_checks.dev.conditions import CheckDockerLogs
 from datadog_checks.teamcity.teamcity_rest import TeamCityRest
 
 if PY3:
@@ -15,11 +16,16 @@ from .common import COMPOSE_FILE, LEGACY_REST_INSTANCE, OPENMETRICS_INSTANCE, RE
 
 @pytest.fixture(scope='session')
 def dd_environment(rest_instance, openmetrics_instance):
-    with docker_run(COMPOSE_FILE, sleep=10):
-        if USE_OPENMETRICS:
-            yield openmetrics_instance
-        else:
-            yield rest_instance
+    compose_file = COMPOSE_FILE.format('mockserver')
+    conditions = None
+    instance = rest_instance
+    if USE_OPENMETRICS:
+        compose_file = COMPOSE_FILE.format('teamcity_server')
+        conditions = [CheckDockerLogs('teamcity-server', ['TeamCity initialized'], attempts=100, wait=5)]
+        instance = openmetrics_instance
+
+    with docker_run(compose_file, conditions=conditions, sleep=10):
+        yield instance
 
 
 @pytest.fixture(scope='session')

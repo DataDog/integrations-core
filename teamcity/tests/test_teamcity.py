@@ -180,6 +180,12 @@ def test_collect_build_problems(dd_run_check, aggregator, rest_instance, teamcit
         tags=expected_tags,
         status=TeamCityRest.CRITICAL,
     )
+    aggregator.assert_service_check(
+        'teamcity.{}'.format(SERVICE_CHECK_BUILD_PROBLEMS),
+        count=1,
+        tags=BUILD_TAGS,
+        status=TeamCityRest.OK,
+    )
 
 
 def test_handle_empty_builds(dd_run_check, aggregator, empty_builds_rest_instance, teamcity_rest_check):
