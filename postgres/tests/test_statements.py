@@ -1556,23 +1556,27 @@ def test_statement_metrics_database_errors(
 
 
 @pytest.mark.parametrize(
-    "pg_stat_statements_max_threshold,expected_warnings", [
-        (9999, [
-            'pg_stat_statements.max is set to 10000 which is higher than the supported value of 9999. '
-            'This can have a negative impact on database and collection of query metrics performance. '
-            'Consider lowering the pg_stat_statements.max value to 9999. Alternatively, you may acknowledge the '
-            'potential performance impact by increasing the query_metrics.pg_stat_statements_max_warning_threshold to '
-            'equal or greater than 9999 to silence this warning. '
-            'See https://docs.datadoghq.com/database_monitoring/setup_postgres/troubleshooting#'
-            'high-pg-stat-statements-max-configuration for more details\n'
-            'code=high-pg-stat-statements-max-configuration dbname=datadog_test host=stubbed.hostname '
-            'threshold=9999 value=10000',
-        ]),
+    "pg_stat_statements_max_threshold,expected_warnings",
+    [
+        (
+                9999,
+                [
+                    'pg_stat_statements.max is set to 10000 which is higher than the supported value of 9999. '
+                    'This can have a negative impact on database and collection of query metrics performance. '
+                    'Consider lowering the pg_stat_statements.max value to 9999. Alternatively, you may acknowledge '
+                    'the potential performance impact by increasing the '
+                    'query_metrics.pg_stat_statements_max_warning_threshold to equal or greater than 9999 to silence '
+                    'this warning. See https://docs.datadoghq.com/database_monitoring/setup_postgres/troubleshooting#'
+                    'high-pg-stat-statements-max-configuration for more details\n'
+                    'code=high-pg-stat-statements-max-configuration dbname=datadog_test host=stubbed.hostname '
+                    'threshold=9999 value=10000',
+                ]
+        ),
         (10000, []),
     ],
 )
 def test_pg_stat_statements_max_warning(
-        integration_check, dbm_instance, pg_stat_statements_max_threshold, expected_warnings
+    integration_check, dbm_instance, pg_stat_statements_max_threshold, expected_warnings
 ):
     dbm_instance['query_metrics']['pg_stat_statements_max_warning_threshold'] = pg_stat_statements_max_threshold
     check = integration_check(dbm_instance)
