@@ -20,6 +20,8 @@ from cm_client.rest import ApiException
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.cloudera.metrics import METRICS
+from six import PY2
+
 
 # from datadog_checks.cloudera.queries import TIMESERIES_QUERIES
 
@@ -30,12 +32,12 @@ def test_given_cloudera_check_when_py2_then_raises_exception(
     aggregator,
     dd_run_check,
     cloudera_check,
+    instance,
 ):
     with mock.patch.object(six, 'PY2'), pytest.raises(
         ConfigurationError, match='This version of the integration is only available when using py3'
     ):
         # Given
-        instance = {}
         cloudera_check(instance)
 
 
@@ -43,13 +45,13 @@ def test_given_cloudera_check_when_get_version_exception_from_cloudera_client_th
     aggregator,
     dd_run_check,
     cloudera_check,
+    instance,
 ):
     with mock.patch(
         'cm_client.ClouderaManagerResourceApi.get_version',
         side_effect=ApiException('Service not available'),
     ):
         # Given
-        instance = {}
         check = cloudera_check(instance)
         # When
         dd_run_check(check)
@@ -62,13 +64,13 @@ def test_given_cloudera_check_when_version_field_not_found_then_emits_critical_s
     dd_run_check,
     cloudera_check,
     api_response,
+    instance,
 ):
     with mock.patch(
         'cm_client.ClouderaManagerResourceApi.get_version',
         return_value=ApiVersionInfo(),
     ):
         # Given
-        instance = {}
         check = cloudera_check(instance)
         # When
         dd_run_check(check)
@@ -81,13 +83,13 @@ def test_given_cloudera_check_when_not_supported_version_then_emits_critical_ser
     dd_run_check,
     cloudera_check,
     api_response,
+    instance,
 ):
     with mock.patch(
         'cm_client.ClouderaManagerResourceApi.get_version',
         return_value=ApiVersionInfo(version='5.0.0'),
     ):
         # Given
-        instance = {}
         check = cloudera_check(instance)
         # When
         dd_run_check(check)
@@ -100,6 +102,7 @@ def test_given_cloudera_check_when_supported_version_then_emits_ok_service(
     dd_run_check,
     cloudera_check,
     api_response,
+    instance,
 ):
     with mock.patch(
         'cm_client.ClouderaManagerResourceApi.get_version',
@@ -146,7 +149,6 @@ def test_given_cloudera_check_when_supported_version_then_emits_ok_service(
         ),
     ):
         # Given
-        instance = {}
         check = cloudera_check(instance)
         # When
         dd_run_check(check)
@@ -181,6 +183,7 @@ def test_given_cloudera_check_when_v7_read_clusters_exception_from_cloudera_clie
     dd_run_check,
     cloudera_check,
     api_response,
+    instance,
 ):
     with mock.patch(
         'cm_client.ClouderaManagerResourceApi.get_version',
@@ -190,7 +193,6 @@ def test_given_cloudera_check_when_v7_read_clusters_exception_from_cloudera_clie
         side_effect=ApiException('Service not available'),
     ):
         # Given
-        instance = {}
         check = cloudera_check(instance)
         # When
         dd_run_check(check)
@@ -203,6 +205,7 @@ def test_given_cloudera_check_when_bad_health_cluster_then_emits_cluster_health_
     dd_run_check,
     cloudera_check,
     api_response,
+    instance,
 ):
     with mock.patch(
         'cm_client.ClouderaManagerResourceApi.get_version',
@@ -249,7 +252,6 @@ def test_given_cloudera_check_when_bad_health_cluster_then_emits_cluster_health_
         ),
     ):
         # Given
-        instance = {}
         check = cloudera_check(instance)
         # When
         dd_run_check(check)
@@ -266,6 +268,7 @@ def test_given_cloudera_check_when_good_health_cluster_then_emits_cluster_health
     dd_run_check,
     cloudera_check,
     api_response,
+    instance,
 ):
     with mock.patch(
         'cm_client.ClouderaManagerResourceApi.get_version',
@@ -312,7 +315,6 @@ def test_given_cloudera_check_when_good_health_cluster_then_emits_cluster_health
         ),
     ):
         # Given
-        instance = {}
         check = cloudera_check(instance)
         # When
         dd_run_check(check)
@@ -329,6 +331,7 @@ def test_given_cloudera_check_when_good_health_cluster_then_emits_cluster_metric
     dd_run_check,
     cloudera_check,
     api_response,
+    instance,
 ):
     with mock.patch(
         'cm_client.ClouderaManagerResourceApi.get_version',
@@ -375,7 +378,6 @@ def test_given_cloudera_check_when_good_health_cluster_then_emits_cluster_metric
         ),
     ):
         # Given
-        instance = {}
         check = cloudera_check(instance)
         # When
         dd_run_check(check)

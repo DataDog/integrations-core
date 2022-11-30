@@ -3,6 +3,7 @@ import packaging.version
 
 from datadog_checks.cloudera.api_client_v7 import ApiClientV7
 
+from datadog_checks.base import ConfigurationError
 
 def make_api_client(check, config):
     cm_client.configuration.username = config.workload_username
@@ -23,4 +24,4 @@ def make_api_client(check, config):
     if cloudera_version.major == 7:
         return ApiClientV7(check, api_client)
     else:
-        raise ConfigurationError()  # TODO: Clean up
+        raise ConfigurationError("Version is unsupported or unknown.")

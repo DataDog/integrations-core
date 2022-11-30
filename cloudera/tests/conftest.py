@@ -15,16 +15,22 @@ from . import common
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    compose_file = os.path.join(common.HERE, 'compose', common.COMPOSE_FILE)
-    conditions = [
-        CheckDockerLogs(
-            identifier='cloudera', patterns=['Success! You can now log into Cloudera Manager'], attempts=180, wait=5
-        ),
-    ]
-    with docker_run(
-        compose_file,
-        conditions=conditions,
-    ):
+    # FIXME: Commenting out v12 Cloudera Docker image until confirmation this version should be supported
+    
+    # compose_file = os.path.join(common.HERE, 'compose', common.COMPOSE_FILE)
+    # conditions = [
+    #     CheckDockerLogs(
+    #         identifier='cloudera', patterns=['Success! You can now log into Cloudera Manager'], attempts=180, wait=5
+    #     ),
+    # ]
+    # with docker_run(
+    #     compose_file,
+    #     conditions=conditions,
+    # ):
+    #     yield common.INSTANCE
+
+    compose_file = common.COMPOSE_FILE
+    with docker_run(compose_file):
         yield common.INSTANCE
 
 
