@@ -19,6 +19,7 @@ cachetools,PyPI,MIT,Thomas Kemmer
 check-postgres,"https://github.com/bucardo/",BSD-2-Clause,Greg Sabino Mullane
 clickhouse-cityhash,PyPI,MIT,Alexander [Amper] Marshalov
 clickhouse-driver,PyPI,MIT,Konstantin Lebedev
+cm-client,PyPI,Apache-2.0,Cloudera team
 contextlib2,PyPI,PSF,Nick Coghlan
 cryptography,PyPI,Apache-2.0,The Python Cryptographic Authority and individual contributors | The cryptography developers
 cryptography,PyPI,BSD-3-Clause,The Python Cryptographic Authority and individual contributors | The cryptography developers
