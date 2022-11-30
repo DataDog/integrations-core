@@ -101,7 +101,7 @@ files:
           
             projects:
               keys:
-                - some-project:
+                - some-project: {}
                 - another-project:
                     tag: project-2
                     metrics:
