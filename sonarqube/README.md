@@ -262,8 +262,32 @@ See [metadata.csv][14] for a list of metrics provided by this check.
 SonarQube does not include any events.
 
 ### Service Checks
-
 See [service_checks.json][15] for a list of service checks provided by this integration.
+
+### Autodiscovery Feature
+
+The user can configure the `autodiscovery` functionality in `projects` and `metrics`.
+Here's an example where projects named `some-project` and `another-project` will be included and
+projects matching the pattern `tmp_project.*` will be excluded:
+
+```
+projects:
+  keys:
+    - some-project: {}
+    - another-project:
+        tag: project-2
+        metrics:
+          discovery:
+            include:
+            - issues\..*
+            - maintainability\..*
+            - security\..*
+            exclude:
+            - issues.(false_positive_issues|reopened_issues)
+  discovery:
+    exclude:
+    - tmp_project\..*
+```
 
 ## Troubleshooting
 
