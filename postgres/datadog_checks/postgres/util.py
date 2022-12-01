@@ -31,6 +31,7 @@ class DatabaseConfigurationError(Enum):
     pg_stat_statements_not_created = 'pg-stat-statements-not-created'
     pg_stat_statements_not_loaded = 'pg-stat-statements-not-loaded'
     undefined_explain_function = 'undefined-explain-function'
+    high_pg_stat_statements_max = 'high-pg-stat-statements-max-configuration'
 
 
 def warning_with_tags(warning_message, *args, **kwargs):

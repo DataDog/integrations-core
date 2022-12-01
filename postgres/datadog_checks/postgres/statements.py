@@ -36,14 +36,12 @@ SELECT {cols}
   WHERE query != '<insufficient privilege>'
   AND query NOT LIKE 'EXPLAIN %%'
   {filters}
-  LIMIT {limit}
+  {extra_clauses}
 """
 
 # Use pg_stat_statements(false) when available as an optimization to avoid pulling SQL text from disk
 PG_STAT_STATEMENTS_COUNT_QUERY = "SELECT COUNT(*) FROM pg_stat_statements(false)"
 PG_STAT_STATEMENTS_COUNT_QUERY_LT_9_4 = "SELECT COUNT(*) FROM pg_stat_statements"
-
-DEFAULT_STATEMENTS_LIMIT = 10000
 
 # Required columns for the check to run
 PG_STAT_STATEMENTS_REQUIRED_COLUMNS = frozenset({'calls', 'query', 'rows'})
@@ -129,6 +127,9 @@ class PostgresStatementMetrics(DBMAsyncJob):
         )
         self._check = check
         self._metrics_collection_interval = collection_interval
+        self._pg_stat_statements_max_warning_threshold = config.statement_metrics_config.get(
+            'pg_stat_statements_max_warning_threshold', 10000
+        )
         self._config = config
         self._state = StatementMetrics()
         self._stat_column_cache = []
@@ -163,7 +164,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
 
         # Querying over '*' with limit 0 allows fetching only the column names from the cursor without data
         query = STATEMENTS_QUERY.format(
-            cols='*', pg_stat_statements_view=self._config.pg_stat_statements_view, limit=0, filters=""
+            cols='*', pg_stat_statements_view=self._config.pg_stat_statements_view, extra_clauses="LIMIT 0", filters=""
         )
         cursor = self._check._get_db(self._config.dbname).cursor()
         self._execute_query(cursor, query, params=(self._config.dbname,))
@@ -239,6 +240,32 @@ class PostgresStatementMetrics(DBMAsyncJob):
             if self._check.pg_settings.get("track_io_timing") != "on":
                 desired_columns -= PG_STAT_STATEMENTS_TIMING_COLUMNS
 
+            pg_stat_statements_max = int(self._check.pg_settings.get("pg_stat_statements.max"))
+            if pg_stat_statements_max > self._pg_stat_statements_max_warning_threshold:
+                self._check.record_warning(
+                    DatabaseConfigurationError.high_pg_stat_statements_max,
+                    warning_with_tags(
+                        "pg_stat_statements.max is set to %d which is higher than the supported "
+                        "value of %d. This can have a negative impact on database and collection of "
+                        "query metrics performance. Consider lowering the pg_stat_statements.max value to %d. "
+                        "Alternatively, you may acknowledge the potential performance impact by increasing the "
+                        "query_metrics.pg_stat_statements_max_warning_threshold to equal or greater than %d to "
+                        "silence this warning. "
+                        "See https://docs.datadoghq.com/database_monitoring/setup_postgres/"
+                        "troubleshooting#%s for more details",
+                        pg_stat_statements_max,
+                        self._pg_stat_statements_max_warning_threshold,
+                        self._pg_stat_statements_max_warning_threshold,
+                        self._pg_stat_statements_max_warning_threshold,
+                        DatabaseConfigurationError.high_pg_stat_statements_max.value,
+                        host=self._check.resolved_hostname,
+                        dbname=self._config.dbname,
+                        code=DatabaseConfigurationError.high_pg_stat_statements_max.value,
+                        value=pg_stat_statements_max,
+                        threshold=self._pg_stat_statements_max_warning_threshold,
+                    ),
+                )
+
             query_columns = sorted(list(available_columns & desired_columns))
             params = ()
             filters = ""
@@ -256,7 +283,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
                     cols=', '.join(query_columns),
                     pg_stat_statements_view=self._config.pg_stat_statements_view,
                     filters=filters,
-                    limit=DEFAULT_STATEMENTS_LIMIT,
+                    extra_clauses="",
                 ),
                 params=params,
             )
