@@ -224,3 +224,24 @@ def test_validate_license_headers_honors_gitignore_file_on_check_path(tmp_path):
         f.write("import os\n")
 
     assert validate_license_headers(check_path) == []
+
+
+def test_validate_license_headers_honors_nested_gitignore_files(tmp_path):
+    check_path = tmp_path / "check"
+    check_path.mkdir()
+
+    # .gitignore at check_path allows `build/`
+    with open(check_path / ".gitignore", "w") as f:
+        f.write("!build/\n")
+
+    target_path = check_path / "foo" / "build"
+    target_path.mkdir(parents=True)
+
+    # .gitignore at subfolder disallows `build/`, overriding the parent's gitignore
+    with open(check_path / "foo" / ".gitignore", "w") as f:
+        f.write("build/\n")
+
+    with open(target_path / "some.py", "w") as f:
+        f.write("import os\n")
+
+    assert validate_license_headers(check_path) == []

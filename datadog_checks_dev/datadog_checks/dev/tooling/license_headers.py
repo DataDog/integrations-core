@@ -54,16 +54,15 @@ def validate_license_headers(
     """
     root = check_path
     ignoreset = set(ignore or [])
-    gitignore_spec = _gitignore_spec_from_file(check_path / ".gitignore")
 
-    def walk_recursively(path):
+    def walk_recursively(path, gitignore_matcher=_GitIgnoreMatcher()):
 
         for child in path.iterdir():
             relpath = child.relative_to(root)
 
             # Skip gitignored files
-            if gitignore_spec and gitignore_spec.match_file(relpath.as_posix()):
-                continue
+            if gitignore_matcher.match(relpath.as_posix()):
+                return
 
             # For directories, keep recursing unless folder is blacklisted
             if child.is_dir():
@@ -75,7 +74,7 @@ def validate_license_headers(
                 if relpath in ignoreset:
                     continue
 
-                yield from walk_recursively(child)
+                yield from walk_recursively(child, gitignore_matcher.with_file(path / ".gitignore"))
                 continue
 
             # Skip non-python files
@@ -118,6 +117,29 @@ def parse_license_header(contents):
     """
     match = _COPYRIGHT_PATTERN.match(contents)
     return match[0] if match else ""
+
+
+class _GitIgnoreMatcher:
+    """Class to combine multiple GitIgnoreSpec`s"""
+
+    def __init__(self, matchers=None):
+        self._matchers = matchers or []
+
+    def with_file(self, gitignore_path):
+        """Returns a copy with the patterns from `gitignore_path` added (with greater priority).
+
+        If `gitignore_path` doesn't exist, it silently ignores the error and returns a copy of the original matcher.
+        """
+        if spec := _gitignore_spec_from_file(gitignore_path):
+            return self.__class__([spec] + self._matchers)
+        else:
+            return self.__class__(self._matchers)
+
+    def match(self, relpath):
+        for matcher in self._matchers:
+            if matcher.match_file(relpath):
+                return True
+        return False
 
 
 def _gitignore_spec_from_file(path):
