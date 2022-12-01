@@ -166,3 +166,26 @@ def check():
 @pytest.fixture
 def instance():
     return CONFIG
+
+
+def _parse_major_minor_version(v):
+    major, minor, *_ = v.split(".")
+    return (int(major), int(minor))
+
+
+def pytest_collection_modifyitems(config, items):
+    for item in items:
+        if "openmetrics" in os.path.relpath(item.fspath, start=config.rootdir):
+            item.add_marker(
+                pytest.mark.skipif(
+                    _parse_major_minor_version(os.environ["RABBITMQ_VERSION"]) < (3, 8),
+                    reason='No openmetrics support in rabbitmq <3.8',
+                )
+            )
+        else:
+            item.add_marker(
+                pytest.mark.skipif(
+                    _parse_major_minor_version(os.environ["RABBITMQ_VERSION"]) >= (3, 8),
+                    reason='Not testing management plugin on rabbitmq v3.8+',
+                )
+            )
