@@ -85,6 +85,45 @@ class TestSingle:
             tracker.warning((), message='')
 
 
+class TestFixCommand:
+    def test_success(self, helpers):
+        tracker = get_tracker()
+        tracker.success()
+
+        assert tracker.passed == 1
+        assert tracker.errors == 0
+        assert tracker.warnings == 0
+        assert helpers.remove_trailing_spaces(tracker.render(fix_command='ddev')) == helpers.dedent(
+            """
+            validate test
+
+            Passed: 1
+            """
+        )
+
+    def test_error(self, helpers):
+        tracker = get_tracker()
+        tracker.error(('a', 'b', 'c'), message='foo')
+
+        assert tracker.passed == 0
+        assert tracker.errors == 1
+        assert tracker.warnings == 0
+        assert helpers.remove_trailing_spaces(tracker.render(fix_command='ddev')) == helpers.dedent(
+            """
+            validate test
+            └── a
+                └── b
+                    └── c
+
+                        foo
+
+            Errors: 1
+
+            To fix, run: ddev
+            """
+        )
+
+
 def test_order(helpers):
     tracker = get_tracker()
     tracker.success()

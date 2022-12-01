@@ -40,7 +40,7 @@ class ValidationTracker:
     def warnings(self) -> int:
         return self.__warnings
 
-    def display(self):
+    def display(self, *, fix_command: str = ''):
         self.__finalize(self.__tree, self.__branches)
         self.__console.print(self.__tree)
 
@@ -56,10 +56,12 @@ class ValidationTracker:
             summary.append_text(Text(f'\nWarnings: {self.warnings}', style=self.__warning_style))
 
         self.__console.print(summary)
+        if fix_command and self.errors:
+            self.__console.print(f'\nTo fix, run: {fix_command}')
 
-    def render(self) -> str:
+    def render(self, **kwargs) -> str:
         with self.__console.capture() as capture:
-            self.display()
+            self.display(**kwargs)
 
         return capture.get()
 
