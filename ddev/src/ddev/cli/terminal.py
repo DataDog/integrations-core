@@ -104,14 +104,15 @@ class Terminal:
 
         self.display_raw(Markdown(text), stderr=stderr, **kwargs)
 
-    def create_display_tree(self, label: str):
+    def create_validation_tracker(self, label: str):
         from rich.tree import Tree
 
-        from ddev.console.tree import DisplayTree
+        from ddev.validation.tracker import ValidationTracker
 
-        return DisplayTree(
+        return ValidationTracker(
             self.console,
             Tree(label, style=self._style_level_info),
+            success_style=self._style_level_success,
             error_style=self._style_level_error,
             warning_style=self._style_level_warning,
         )

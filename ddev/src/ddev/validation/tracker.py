@@ -14,17 +14,23 @@ if TYPE_CHECKING:
     from rich.tree import Tree
 
 
-class DisplayTree:
-    def __init__(self, console: Console, tree: Tree, error_style: Style, warning_style: Style):
+class ValidationTracker:
+    def __init__(self, console: Console, tree: Tree, *, success_style: Style, error_style: Style, warning_style: Style):
         self.__console = console
         self.__tree = tree
+        self.__success_style = success_style
         self.__error_style = error_style
         self.__warning_style = warning_style
 
         self.__finalized = False
-        self.__branches: defaultdict[DisplayTreeNode, Any] = _tree()
+        self.__branches: defaultdict[ValidationNode, Any] = _tree()
+        self.__passed = 0
         self.__errors = 0
         self.__warnings = 0
+
+    @property
+    def passed(self) -> int:
+        return self.__passed
 
     @property
     def errors(self) -> int:
@@ -34,40 +40,63 @@ class DisplayTree:
     def warnings(self) -> int:
         return self.__warnings
 
-    def render(self):
+    def display(self):
         self.__finalize(self.__tree, self.__branches)
         self.__console.print(self.__tree)
 
-    def error(self, branch: tuple[str, ...], *, message: str):
-        if self.__finalized:
-            return
+        summary = Text()
 
+        if self.passed:
+            summary.append_text(Text(f'\nPassed: {self.passed}', style=self.__success_style))
+
+        if self.errors:
+            summary.append_text(Text(f'\nErrors: {self.errors}', style=self.__error_style))
+
+        if self.warnings:
+            summary.append_text(Text(f'\nWarnings: {self.warnings}', style=self.__warning_style))
+
+        self.__console.print(summary)
+
+    def render(self) -> str:
+        with self.__console.capture() as capture:
+            self.display()
+
+        return capture.get()
+
+    def success(self):
+        self.__check_status()
+        self.__passed += 1
+
+    def error(self, branch: tuple[str, ...], *, message: str):
+        self.__check_status()
         self.__add_branch(self.__error_style, branch, message)
         self.__errors += 1
 
     def warning(self, branch: tuple[str, ...], *, message: str):
-        if self.__finalized:
-            return
-
+        self.__check_status()
         self.__add_branch(self.__warning_style, branch, message)
         self.__warnings += 1
 
     def __add_branch(self, style: Style, branch: tuple[str, ...], message: str):
         branches = self.__branches
-        leaf = cast(DisplayTreeNode, None)
+        leaf = cast(ValidationNode, None)
         for node in branch:
             for possible_leaf in branches:
                 if possible_leaf.name == node:
                     leaf = possible_leaf
                     break
             else:
-                leaf = DisplayTreeNode(node)
+                leaf = ValidationNode(node)
 
             branches = branches[leaf]
 
         leaf.label = Text(leaf.name, style=style)
         leaf.label.append('\n\n')
         leaf.label.append_text(Text(message, style=style))
+
+    def __construct(self, tree: Tree, branches: dict):
+        for node, branches in sorted(branches.items()):
+            self.__construct(tree.add(node.label), branches)
 
     def __finalize(self, tree: Tree, branches: dict):
         if self.__finalized:
@@ -76,18 +105,12 @@ class DisplayTree:
         self.__construct(tree, branches)
         self.__finalized = True
 
-    def __construct(self, tree: Tree, branches: dict):
-        for node, branches in sorted(branches.items()):
-            self.__construct(tree.add(node.label), branches)
-
-    def __str__(self) -> str:
-        with self.__console.capture() as capture:
-            self.render()
-
-        return capture.get()
+    def __check_status(self):
+        if self.__finalized:
+            raise RuntimeError('Tracker already finalized')
 
 
-class DisplayTreeNode:
+class ValidationNode:
     def __init__(self, name: str):
         self.name = name
         self.label = Text(name)
