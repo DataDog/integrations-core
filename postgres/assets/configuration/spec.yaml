@@ -367,10 +367,17 @@ files:
           value:
             type: integer
             example: 10000
+        - name: explain_parameterized_queries
+          description: |
+            Note, this is a BETA feature. This option will enable the ability to explain parameterized queries.
+            This is useful if your SQL clients are using the extended query protocol.
+          value:
+            type: boolean
+            example: false
         - name: max_pg_prepared_statements_space
           description: |
             Prepared statements may be created to enable some functionality, this option configures the max amount
-            of space (in megabytes) the integration will allocate. 
+            of space (in megabytes) the integration will allocate.
           value:
             type: integer
             example: 20

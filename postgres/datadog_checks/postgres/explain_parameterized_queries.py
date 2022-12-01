@@ -67,9 +67,8 @@ class ExplainParameterizedQueries:
     '''
 
     # Roughly equates to 4,882 prepared statements. This was calcuated by (20mb / 4096 bytes).
-    # 4096 comes from DBM's recommended `track_activity_query_size` of 4096 which limits
-    # the SQL text retrieved from `pg_stat_activity` and `pg_stat_statements` which is where we get
-    # the query statements from.
+    # 4096 comes from DBM's recommended `track_activity_query_size` of 4096 which limits the SQL text retrieved
+    # from `pg_stat_activity` and `pg_stat_statements` which is where the query statements come from.
     DEFAULT_MAX_ALLOWABLE_SPACE_MB = 20
 
     def __init__(self, check, config):
@@ -205,7 +204,7 @@ class ExplainParameterizedQueries:
         '''
         Prepared statements are not deallocated until the session ends, so to prevent taking up a lot of space,
         this method estimates how much space we've allocated for prepared statements and deallocates
-        ~all~ prepared statements if we've reached our max.
+        ~all~ prepared statements if we've reached our max (configurable option).
         '''
         rows = self._execute_query_and_fetch_rows(dbname, PG_PREPARED_STATEMENTS_SIZE_ESTIMATE_QUERY)
         pg_prepared_statements_mb = 0
