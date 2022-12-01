@@ -15,7 +15,7 @@ Get metrics from Oracle Database servers in real time to visualize and monitor a
 To use the Oracle integration you can either use the native client (no additional install steps required) or download the Oracle JDBC driver (Linux only). To use the Oracle integration with JDBC, download the Oracle JDBC driver. If not using the JDBC method, the minimun [supported version][2] is Oracle 12c.
 Due to licensing restrictions, the JDBC library is not included in the Datadog Agent, but can be downloaded directly from Oracle.
 
-**Note**: With Agent v7.42.x, the Agent uses `python-oracledb` thin mode which no longer requires installing the Instant Client libraries. If you're on an older version of the Agent and want to use the Instant Client, refer to the [Oracle Instant Client][3] setup instructions.
+**Note**: With Agent v7.42.x, the Agent no longer requires or supports installing the Instant Client libraries. If you're on an older version of the Agent and want to use the Instant Client, refer to the [Oracle Instant Client][3] setup instructions.
 
 
 ##### JDBC driver
