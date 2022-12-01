@@ -67,6 +67,8 @@ from datadog_checks.sqlserver.queries import (
 )
 from datadog_checks.sqlserver.utils import set_default_driver_conf
 
+from .connection_errors import ConnectionErrWarning
+
 try:
     import adodbapi
 except ImportError:
@@ -96,6 +98,7 @@ class SQLServer(AgentCheck):
         self.instance_metrics = []
         self.instance_per_type_metrics = defaultdict(set)
         self.do_check = True
+        self._warnings_by_code = {}
 
         self.tags = self.instance.get("tags", [])
         self.reported_hostname = self.instance.get('reported_hostname')
@@ -177,6 +180,18 @@ class SQLServer(AgentCheck):
     def cancel(self):
         self.statement_metrics.cancel()
         self.activity.cancel()
+
+    def record_warning(self, code, message):
+        # type: (ConnectionErrWarning, str) -> None
+        self._warnings_by_code[code] = message
+
+    def _report_warnings(self):
+        messages = self._warnings_by_code.values()
+        # Reset the warnings for the next check run
+        self._warnings_by_code = {}
+
+        for warning in messages:
+            self.warning(warning)
 
     def config_checks(self):
         if self.autodiscovery and self.instance.get('database'):
@@ -279,7 +294,7 @@ class SQLServer(AgentCheck):
         return self._agent_hostname
 
     def initialize_connection(self):
-        self.connection = Connection(self.init_config, self.instance, self.handle_service_check)
+        self.connection = Connection(self, self.init_config, self.instance, self.handle_service_check)
 
         # Pre-process the list of metrics to collect
         try:
@@ -746,6 +761,7 @@ class SQLServer(AgentCheck):
             finally:
                 with self.connection.get_managed_cursor() as cursor:
                     cursor.execute("SET NOCOUNT OFF")
+                self._report_warnings()
 
     def execute_query_raw(self, query):
         with self.connection.get_managed_cursor() as cursor:

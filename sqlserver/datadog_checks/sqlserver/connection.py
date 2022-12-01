@@ -4,7 +4,6 @@
 import logging
 import socket
 from contextlib import closing, contextmanager
-from enum import Enum
 
 from six import raise_from
 
@@ -13,8 +12,6 @@ from datadog_checks.base.log import get_check_logger
 
 try:
     import adodbapi
-    from adodbapi.apibase import OperationalError
-    from pywintypes import com_error
 except ImportError:
     adodbapi = None
 
@@ -23,28 +20,12 @@ try:
 except ImportError:
     pyodbc = None
 
+from .connection_errors import ConnectionErrWarning, SQLConnectionError, format_connection_exception, warning_with_tags
+
 logger = logging.getLogger(__file__)
 
 DATABASE_EXISTS_QUERY = 'select name, collation_name from sys.databases;'
 DEFAULT_CONN_PORT = 1433
-
-
-class SQLConnectionError(Exception):
-    """Exception raised for SQL instance connection issues"""
-    pass
-
-class ConnectionError(Enum):
-    """
-    Denotes the various reasons a connection might fail.
-    """
-    # TODO: write words about each one of these things -> ->
-    # TODO: disginuish between TCP issues? is there a way to check specifically what is going on?
-    tcp_connection_failed = 'tcp_connection_failed'  # error code -2147467259 -> couldn't open database
-    login_failed = 'login_failed'
-    unable_to_connect = 'unable_to_connect' # error code -2147352567 .. gen connection issue
-    ssl_security_error = 'ssl_security_error'
-    driver_not_found = 'driver_not_found'
-    cert_authority_not_trusted = 'cert_authority_not_trusted'
 
 
 def split_sqlserver_host_port(host):
@@ -144,43 +125,6 @@ def parse_connection_string_properties(cs):
     return params
 
 
-known_hresult_codes = {
-    -2147352567: "unable to connect",
-    -2147217843: "login failed for user",
-    -2146824582: {ConnectionError.driver_not_found: "driver not installed on host"},
-    # this error can also be caused by a failed TCP connection, but we are already reporting on the TCP
-    # connection status via test_network_connectivity, so we don't need to explicitly state that
-    # as an error condition in this message
-    -2147467259: {ConnectionError.tcp_connection_failed: "could not open database requested by login"},
-}
-# TODO: change name of this to something better
-def _format_connection_exception(e):
-    # type: (Exception) -> Tuple[Optional[ConnectionErrorMessage], Optional[str]]
-
-    """
-    Formats the provided database connection exception.
-    If the exception comes from an ADO Provider and contains a misleading 'Invalid connection string attribute' message
-    then the message is replaced with more descriptive messages based on the contained HResult error codes.
-    """
-    if adodbapi is not None:
-        if isinstance(e, OperationalError) and e.args and isinstance(e.args[0], com_error):
-            e_comm = e.args[0]
-            hresult = e_comm.hresult
-            sub_hresult = None
-            internal_message = None
-            if e_comm.args and len(e_comm.args) == 4:
-                internal_args = e_comm.args[2]
-                if len(internal_args) == 6:
-                    internal_message = internal_args[2]
-                    sub_hresult = internal_args[5]
-            if internal_message == 'Invalid connection string attribute':
-                base_message = known_hresult_codes.get(hresult)
-                sub_message = known_hresult_codes.get(sub_hresult)
-                if base_message and sub_message:
-                    return base_message + ": " + sub_message
-    return repr(e)
-
-
 class Connection(object):
     """Manages the connection to a SQL Server instance."""
 
@@ -195,8 +139,9 @@ class Connection(object):
     valid_adoproviders = ['SQLOLEDB', 'MSOLEDBSQL', 'MSOLEDBSQL19', 'SQLNCLI11']
     default_adoprovider = 'MSOLEDBSQL'
 
-    def __init__(self, init_config, instance_config, service_check_handler):
+    def __init__(self, check, init_config, instance_config, service_check_handler):
         self.instance = instance_config
+        self._check = check
         self.service_check_handler = service_check_handler
         self.log = get_check_logger()
 
@@ -308,7 +253,7 @@ class Connection(object):
         """
         conn_key = self._conn_key(db_key, db_name, key_prefix)
 
-        _, host, _, _, database, _ = self._get_access_info(db_key, db_name)
+        _, host, _, _, database, driver = self._get_access_info(db_key, db_name)
 
         cs = self.instance.get('connection_string', '')
         cs += ';' if cs != '' else ''
@@ -340,13 +285,32 @@ class Connection(object):
         except Exception as e:
             error_message = self.test_network_connectivity()
             tcp_connection_status = error_message if error_message else "OK"
+            exception_msg, conn_warn_msg = format_connection_exception(e, driver)
             message = "Unable to connect to SQL Server (host={} database={}). TCP-connection({}). Exception: {}".format(
-                host, database, tcp_connection_status, _format_connection_exception(e)
+                host, database, tcp_connection_status, exception_msg
             )
+            if tcp_connection_status != "OK" and conn_warn_msg is None:
+                conn_warn_msg = ConnectionErrWarning.tcp_connection_failed
 
             password = self.instance.get('password')
             if password is not None:
                 message = message.replace(password, "*" * 6)
+
+            if conn_warn_msg is None:
+                conn_warn_msg = ConnectionErrWarning.unknown
+            self._check.record_warning(
+                conn_warn_msg,
+                warning_with_tags(
+                    message + " See https://docs.datadoghq.com/database_monitoring/setup_sql_server/troubleshooting#%s "
+                    "for more details: %s",
+                    conn_warn_msg.value,
+                    exception_msg,
+                    code=conn_warn_msg.value,
+                    host=self._check.resolved_hostname,
+                    connector=self.connector,
+                    driver=driver,
+                ),
+            )
 
             self.service_check_handler(AgentCheck.CRITICAL, host, database, message, is_default=is_default)
 
