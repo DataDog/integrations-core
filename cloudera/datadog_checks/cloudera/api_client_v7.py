@@ -15,6 +15,7 @@ class ApiClientV7(ApiClient):
 
     def collect_data(self):
         self._collect_clusters()
+        self._collect_events()
 
     def _collect_clusters(self):
         clusters_resource_api = cm_client.ClustersResourceApi(self._api_client)
