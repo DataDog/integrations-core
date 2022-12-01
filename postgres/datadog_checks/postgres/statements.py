@@ -15,8 +15,8 @@ from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.statement_metrics import StatementMetrics
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding, obfuscate_sql_with_metadata
-from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.base.utils.serialization import json
+from datadog_checks.base.utils.tracking import tracked_method
 
 from .util import DatabaseConfigurationError, warning_with_tags
 from .version_utils import V9_4
@@ -318,26 +318,31 @@ class PostgresStatementMetrics(DBMAsyncJob):
 
             return []
 
-    def _emit_pg_stat_statement_query_text_length_metrics(self, rows):
-        txt_length_sum = 0
-        txt_length_max = 0
-        for r in rows:
-            query_length = len(r['query'])
-            txt_length_sum += query_length
-            if query_length > txt_length_max:
-                txt_length_max = query_length
-        self._check.gauge(
-            "postgresql.pg_stat_statements.query_text.avg",
-            txt_length_sum/len(rows),
-            tags=self._tags,
-            hostname=self._check.resolved_hostname,
-        )
-        self._check.gauge(
-            "postgresql.pg_stat_statements.query_text.max",
-            txt_length_max,
-            tags=self._tags,
-            hostname=self._check.resolved_hostname,
-        )
+    @tracked_method(agent_check_getter=agent_check_getter)
+    def _emit_pg_stat_statements_metrics(self):
+        query = PG_STAT_STATEMENTS_COUNT_QUERY_LT_9_4 if self._check.version < V9_4 else PG_STAT_STATEMENTS_COUNT_QUERY
+        try:
+            rows = self._execute_query(
+                self._check._get_db(self._config.dbname).cursor(cursor_factory=psycopg2.extras.DictCursor),
+                query,
+            )
+            count = 0
+            if rows:
+                count = rows[0][0]
+            self._check.gauge(
+                "postgresql.pg_stat_statements.max",
+                self._check.pg_settings.get("pg_stat_statements.max", 0),
+                tags=self._tags,
+                hostname=self._check.resolved_hostname,
+            )
+            self._check.count(
+                "postgresql.pg_stat_statements.count",
+                count,
+                tags=self._tags,
+                hostname=self._check.resolved_hostname,
+            )
+        except psycopg2.Error as e:
+            self._log.warning("Failed to query for pg_stat_statements count: %s", e)
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _collect_metrics_rows(self):
