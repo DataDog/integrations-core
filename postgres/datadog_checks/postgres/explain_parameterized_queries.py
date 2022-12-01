@@ -67,10 +67,10 @@ class ExplainParameterizedQueries:
     '''
 
     # Roughly equates to 4,882 prepared statements. This was calcuated by (20mb / 4096 bytes).
-    # 4096 comes from DBM's recommended `track_activity_query_size` of 4096. This option limits
+    # 4096 comes from DBM's recommended `track_activity_query_size` of 4096 which limits
     # the SQL text retrieved from `pg_stat_activity` and `pg_stat_statements` which is where we get
     # the query statements from.
-    MAX_ALLOWABLE_MB = 20
+    DEFAULT_MAX_ALLOWABLE_MB = 20
 
     def __init__(self, check, config, tags):
         self._check = check
@@ -205,7 +205,7 @@ class ExplainParameterizedQueries:
     def _cleanup_pg_prepared_statements(self, dbname):
         '''
         Prepared statements are not deallocated until the session ends, so to prevent taking up a lot of space,
-        this method estimates how much space we've allocated for prepared statements and deallocates 
+        this method estimates how much space we've allocated for prepared statements and deallocates
         ~all~ prepared statements if we've reached our max.
         '''
         rows = self._execute_query_and_fetch_rows(dbname, PG_PREPARED_STATEMENTS_SIZE_ESTIMATE_QUERY)
@@ -226,9 +226,12 @@ class ExplainParameterizedQueries:
             hostname=self._check.resolved_hostname,
         )
 
-        if pg_prepared_statements_mb >= ExplainParameterizedQueries.MAX_ALLOWABLE_MB:
+        if pg_prepared_statements_mb >= (
+            self._config.statement_samples_config.get(
+                'max_pg_prepared_statements_space', ExplainParameterizedQueries.DEFAULT_MAX_ALLOWABLE_MB
+            )
+        ):
             self._execute_query(dbname, "DEALLOCATE ALL")
-
 
     def _execute_query(self, dbname, query):
         with self._check._get_db(dbname).cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
