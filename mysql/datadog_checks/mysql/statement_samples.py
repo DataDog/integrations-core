@@ -454,7 +454,13 @@ class MySQLStatementSamples(DBMAsyncJob):
                 ),
                 params,
             )
+            self._log.debug(
+                "Fetching all rows from events statements query, table %s. Using window function? %s",
+                events_statements_table,
+                self._has_window_functions,
+            )
             rows = cursor.fetchall()
+
             self._cursor_run(cursor, drop_temp_table_query)
             tags = (
                 self._tags
