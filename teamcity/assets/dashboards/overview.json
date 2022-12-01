@@ -125,7 +125,7 @@
 							"display_format": "countsAndList",
 							"color_preference": "text",
 							"hide_zero_counts": true,
-							"query": "tag:(integration:teamcity)",
+							"query": "tag:(integration:teamcity) $host $build_config $project_id $type",
 							"sort": "status,asc",
 							"count": 50,
 							"start": 0,
@@ -256,7 +256,7 @@
 								"live_span": "1w"
 							},
 							"type": "event_timeline",
-							"query": "source:teamcity",
+							"query": "source:teamcity $host $build_config $project_id $type",
 							"tags_execution": "and"
 						},
 						"layout": {
@@ -295,7 +295,7 @@
 									"response_format": "timeseries",
 									"queries": [
 										{
-											"query": "avg:teamcity.build_duration{$build_config,$host,$type} by {type}",
+											"query": "avg:teamcity.build_duration{$build_config,$host,$type,$project_id} by {type}",
 											"data_source": "metrics",
 											"name": "query1"
 										}
@@ -355,17 +355,17 @@
 									"response_format": "timeseries",
 									"queries": [
 										{
-											"query": "sum:teamcity.builds.started.count{*} by {host}.as_count()",
+											"query": "sum:teamcity.builds.started.count{$host,$build_config,$project_id,$type} by {host}.as_count()",
 											"data_source": "metrics",
 											"name": "query1"
 										},
 										{
-											"query": "sum:teamcity.builds.finished.count{*} by {host}.as_count()",
+											"query": "sum:teamcity.builds.finished.count{$host,$build_config,$project_id,$type} by {host}.as_count()",
 											"data_source": "metrics",
 											"name": "query2"
 										},
 										{
-											"query": "sum:teamcity.build.queue.incoming.count{*} by {host}.as_count()",
+											"query": "sum:teamcity.build.queue.incoming.count{$host,$build_config,$project_id,$type} by {host}.as_count()",
 											"data_source": "metrics",
 											"name": "query3"
 										}
@@ -424,12 +424,12 @@
 									"response_format": "timeseries",
 									"queries": [
 										{
-											"query": "avg:teamcity.builds.running{$host} by {host}",
+											"query": "avg:teamcity.builds.running{$host,$build_config,$project_id,$type} by {host}",
 											"data_source": "metrics",
 											"name": "query1"
 										},
 										{
-											"query": "avg:teamcity.builds.queued{$host} by {host}",
+											"query": "avg:teamcity.builds.queued{$host,$build_config,$project_id,$type} by {host}",
 											"data_source": "metrics",
 											"name": "query2"
 										}
@@ -514,7 +514,7 @@
 									"queries": [
 										{
 											"search": {
-												"query": "teamcity"
+												"query": "teamcity $host $build_config $project_id $type"
 											},
 											"data_source": "logs",
 											"compute": {
@@ -557,7 +557,7 @@
 								"live_span": "1w"
 							},
 							"type": "event_stream",
-							"query": "source:teamcity @evt.type:($host.value )",
+							"query": "source:teamcity @evt.type:$host.value $host $build_config $project_id $type",
 							"event_size": "l"
 						},
 						"layout": {
@@ -624,7 +624,7 @@
 									"response_format": "scalar",
 									"queries": [
 										{
-											"query": "avg:teamcity.httpSessions.active{$host}",
+											"query": "avg:teamcity.httpSessions.active{$host,$build_config,$project_id,$type}",
 											"data_source": "metrics",
 											"name": "query1",
 											"aggregator": "avg"
@@ -662,7 +662,7 @@
 									"response_format": "scalar",
 									"queries": [
 										{
-											"query": "avg:teamcity.database.connections.active{$host}",
+											"query": "avg:teamcity.database.connections.active{$host,$build_config,$project_id,$type}",
 											"data_source": "metrics",
 											"name": "query1",
 											"aggregator": "sum"
@@ -703,7 +703,7 @@
 									"response_format": "scalar",
 									"queries": [
 										{
-											"query": "avg:teamcity.agents.connected.authorized{$host}",
+											"query": "avg:teamcity.agents.connected.authorized{$host,$build_config,$project_id,$type}",
 											"data_source": "metrics",
 											"name": "query1",
 											"aggregator": "avg"
@@ -744,7 +744,7 @@
 									"response_format": "scalar",
 									"queries": [
 										{
-											"query": "avg:teamcity.system.load.average.1m{$host}",
+											"query": "avg:teamcity.system.load.average.1m{$host,$build_config,$project_id,$type}",
 											"data_source": "metrics",
 											"name": "query1",
 											"aggregator": "avg"
@@ -808,12 +808,12 @@
 									"response_format": "timeseries",
 									"queries": [
 										{
-											"query": "avg:teamcity.cpu.usage.process{*} by {host}",
+											"query": "avg:teamcity.cpu.usage.process{$host,$build_config,$project_id,$type} by {host}",
 											"data_source": "metrics",
 											"name": "query1"
 										},
 										{
-											"query": "avg:teamcity.cpu.usage.system{*} by {host}",
+											"query": "avg:teamcity.cpu.usage.system{$host,$build_config,$project_id,$type} by {host}",
 											"data_source": "metrics",
 											"name": "query2"
 										}
@@ -855,7 +855,7 @@
 									"response_format": "scalar",
 									"queries": [
 										{
-											"query": "avg:teamcity.jvm.gc.live.data.size.bytes{*}",
+											"query": "avg:teamcity.jvm.gc.live.data.size.bytes{$host,$build_config,$project_id,$type}",
 											"data_source": "metrics",
 											"name": "query1",
 											"aggregator": "avg"
@@ -896,7 +896,7 @@
 									"response_format": "scalar",
 									"queries": [
 										{
-											"query": "avg:teamcity.jvm.gc.max.data.size.bytes{*}",
+											"query": "avg:teamcity.jvm.gc.max.data.size.bytes{$host,$build_config,$project_id,$type}",
 											"data_source": "metrics",
 											"name": "query1",
 											"aggregator": "avg"
@@ -937,7 +937,7 @@
 									"response_format": "scalar",
 									"queries": [
 										{
-											"query": "avg:teamcity.jvm.gc.count{*}",
+											"query": "avg:teamcity.jvm.gc.count{$host,$build_config,$project_id,$type}",
 											"data_source": "metrics",
 											"name": "query1",
 											"aggregator": "avg"
@@ -981,7 +981,7 @@
 									"response_format": "scalar",
 									"queries": [
 										{
-											"query": "avg:teamcity.jvm.gc.duration.total.milliseconds{*}",
+											"query": "avg:teamcity.jvm.gc.duration.total.milliseconds{$host,$build_config,$project_id,$type}",
 											"data_source": "metrics",
 											"name": "query1",
 											"aggregator": "avg"
@@ -1024,7 +1024,7 @@
 									"response_format": "scalar",
 									"queries": [
 										{
-											"query": "sum:teamcity.jvm.memory.max.bytes{*} by {host}",
+											"query": "sum:teamcity.jvm.memory.max.bytes{$host,$build_config,$project_id,$type} by {host}",
 											"data_source": "metrics",
 											"name": "query1",
 											"aggregator": "avg"
@@ -1080,19 +1080,19 @@
 									"response_format": "scalar",
 									"queries": [
 										{
-											"query": "sum:teamcity.jvm.memory.max.bytes{*} by {host}",
+											"query": "sum:teamcity.jvm.memory.max.bytes{$host,$build_config,$project_id,$type} by {host}",
 											"data_source": "metrics",
 											"name": "query1",
 											"aggregator": "avg"
 										},
 										{
-											"query": "sum:teamcity.jvm.memory.used.bytes{*} by {host}",
+											"query": "sum:teamcity.jvm.memory.used.bytes{$host,$build_config,$project_id,$type} by {host}",
 											"data_source": "metrics",
 											"name": "query2",
 											"aggregator": "avg"
 										},
 										{
-											"query": "sum:teamcity.jvm.memory.committed.bytes{*} by {host}",
+											"query": "sum:teamcity.jvm.memory.committed.bytes{$host,$build_config,$project_id,$type} by {host}",
 											"data_source": "metrics",
 											"name": "query3",
 											"aggregator": "avg"
@@ -1141,13 +1141,13 @@
 									"response_format": "scalar",
 									"queries": [
 										{
-											"query": "avg:teamcity.jvm.threads{*} by {host}",
+											"query": "avg:teamcity.jvm.threads{$host,$build_config,$project_id,$type} by {host}",
 											"data_source": "metrics",
 											"name": "query1",
 											"aggregator": "avg"
 										},
 										{
-											"query": "avg:teamcity.jvm.threads.daemon{*} by {host}",
+											"query": "avg:teamcity.jvm.threads.daemon{$host,$build_config,$project_id,$type} by {host}",
 											"data_source": "metrics",
 											"name": "query2",
 											"aggregator": "avg"
@@ -1168,7 +1168,7 @@
 			},
 			"layout": {
 				"x": 0,
-				"y": 21,
+				"y": 0,
 				"width": 12,
 				"height": 13,
 				"is_column_break": true
@@ -1241,25 +1241,25 @@
 									"response_format": "scalar",
 									"queries": [
 										{
-											"query": "min:teamcity.total_test_count{*} by {build_config}",
+											"query": "min:teamcity.total_test_count{$host,$build_config,$project_id,$type} by {build_config}",
 											"data_source": "metrics",
 											"name": "query1",
 											"aggregator": "avg"
 										},
 										{
-											"query": "avg:teamcity.failed_test_count{*} by {build_config}",
+											"query": "avg:teamcity.failed_test_count{$host,$build_config,$project_id,$type} by {build_config}",
 											"data_source": "metrics",
 											"name": "query2",
 											"aggregator": "avg"
 										},
 										{
-											"query": "avg:teamcity.passed_test_count{*} by {build_config}",
+											"query": "avg:teamcity.passed_test_count{$host,$build_config,$project_id,$type} by {build_config}",
 											"data_source": "metrics",
 											"name": "query3",
 											"aggregator": "avg"
 										},
 										{
-											"query": "avg:teamcity.ignored_test_count{*} by {build_config}",
+											"query": "avg:teamcity.ignored_test_count{$host,$build_config,$project_id,$type} by {build_config}",
 											"data_source": "metrics",
 											"name": "query4",
 											"aggregator": "avg"
@@ -1280,7 +1280,7 @@
 			},
 			"layout": {
 				"x": 0,
-				"y": 34,
+				"y": 13,
 				"width": 12,
 				"height": 4
 			}
@@ -1313,7 +1313,6 @@
 		}
 	],
 	"layout_type": "ordered",
-	"is_read_only": false,
 	"notify_list": [],
 	"reflow_type": "fixed",
 	"id": "ddv-zx8-czm"
