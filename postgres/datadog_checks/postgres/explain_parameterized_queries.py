@@ -3,6 +3,8 @@ import logging
 import psycopg2
 
 from datadog_checks.base.utils.db.sql import compute_sql_signature
+from datadog_checks.base.utils.tracking import tracked_method
+
 from .version_utils import V12
 
 logger = logging.getLogger(__name__)
@@ -17,9 +19,15 @@ PARAM_TYPES_FOR_PREPARED_STATEMENT_QUERY = '''\
 SELECT parameter_types FROM pg_prepared_statements WHERE name = 'dd_{query_signature}'
 '''
 
+PG_PREPARED_STATEMENTS_SIZE_ESTIMATE_QUERY = "SELECT SUM(octet_length(ps.*::text)) FROM pg_prepared_statements AS ps"
+
 EXECUTE_PREPARED_STATEMENT_QUERY = 'EXECUTE dd_{prepared_statement}({null_parameter})'
 
 EXPLAIN_QUERY = 'SELECT {explain_function}($stmt${statement}$stmt$)'
+
+
+def agent_check_getter(self):
+    return self._check
 
 
 class ExplainParameterizedQueries:
@@ -30,30 +38,46 @@ class ExplainParameterizedQueries:
         Given the query: SELECT * FROM products WHERE id = $1;
 
         We're unable to explain this because we do not know the value of the parameter ($1). Attempting to explain
-        this will result in an error. We could provide `null` as a value because it works with any datatype, but
-        that also does not work because Postgres knows that no rows will be returned.
+        this will result in an error.
+            e.g. EXPLAIN SELECT * FROM products WHERE id = $1;
+                Returns: error
+        We could provide `null` as a value because it works with any datatype, but this will also not work
+        because Postgres knows that no rows will be returned.
             e.g. EXPLAIN SELECT * FROM products WHERE id = null;
+                Returns: nothing
 
-        However, with Postgres versions 12 and above, you can control how the query planner behaves with the `plan_cache_mode`.
-        The mode `force_generic_plan` will force Postgres to produce a generic plan.
+        However, with Postgres versions 12 and above, you can control how the query planner behaves with
+        the `plan_cache_mode`. The mode `force_generic_plan` will force Postgres to produce a generic plan.
 
-        We're still faced with the problem of not knowing how many parameters there are in a query. So is there a clever way
-        we can go about finding this information? Yes, if we create a prepared statement, the `pg_prepared_statements`
-        table provides information about a query's parameters. More specifically, the type and how many parameters there are.
+        Furthermore, we're still faced with the problem of not knowing how many parameters there
+        are in a query. So is there a clever way we can go about finding this information?
+        Yes, if we create a prepared statement, the `pg_prepared_statements` table provides
+        information such as how many parameters are required and the type.
 
-        The idea is to create a prepared statement for a query and explain the prepared statement with generic values.
+        Note, prepared statements created by the user defined in the integration config are not persisted.
+        When the session ends, all the prepared statements are automatically deallocated by Postgres.
 
         Walkthrough:
-        1. Set the plan cache mode: SET plan_cache_mode = force_generic_plan;
-        2. Create a prepared statement: PREPARE dd_products AS SELECT * FROM products WHERE id = $1;
-        3. Execute and explain: EXPLAIN EXECUTE dd_products(null);
-            Returns: (plan)
+            1. Set the plan cache mode: SET plan_cache_mode = force_generic_plan;
+            2. Create a prepared statement: PREPARE dd_products AS SELECT * FROM products WHERE id = $1;
+            3. Query `pg_prepared_statements` to determine how many parameters a query requires
+            and provide generic values (null).
+            3. Execute and explain: EXPLAIN EXECUTE dd_products(null);
+                Returns: (plan)
     '''
 
-    def __init__(self, check, config):
+    # Roughly equates to 4,882 prepared statements. This was calcuated by (20mb / 4096 bytes).
+    # 4096 comes from DBM's recommended `track_activity_query_size` of 4096. This option limits
+    # the SQL text retrieved from `pg_stat_activity` and `pg_stat_statements` which is where we get
+    # the query statements from.
+    MAX_ALLOWABLE_MB = 20
+
+    def __init__(self, check, config, tags):
         self._check = check
         self._config = config
+        self._tags = tags
 
+    @tracked_method(agent_check_getter=agent_check_getter)
     def explain_statement(self, dbname, statement, obfuscated_statement):
         if self._check.version < V12:
             return None
@@ -62,7 +86,9 @@ class ExplainParameterizedQueries:
         query_signature = compute_sql_signature(obfuscated_statement)
         if not self._create_prepared_statement(dbname, statement, obfuscated_statement, query_signature):
             return None
+
         result = self._explain_prepared_statement(dbname, statement, obfuscated_statement, query_signature)
+        self._cleanup_pg_prepared_statements(dbname)
         if result:
             return result[0][0][0]
         return None
@@ -70,6 +96,7 @@ class ExplainParameterizedQueries:
     def _set_plan_cache_mode(self, dbname):
         self._execute_query(dbname, "SET plan_cache_mode = force_generic_plan")
 
+    @tracked_method(agent_check_getter=agent_check_getter)
     def _prepared_statement_exists(self, dbname, statement, obfuscated_statement, query_signature):
         try:
             return (
@@ -97,6 +124,7 @@ class ExplainParameterizedQueries:
                 )
             return False
 
+    @tracked_method(agent_check_getter=agent_check_getter)
     def _create_prepared_statement(self, dbname, statement, obfuscated_statement, query_signature):
         if self._prepared_statement_exists(dbname, statement, obfuscated_statement, query_signature):
             return True
@@ -123,6 +151,7 @@ class ExplainParameterizedQueries:
                 )
         return False
 
+    @tracked_method(agent_check_getter=agent_check_getter)
     def _get_number_of_parameters_for_prepared_statement(self, dbname, query_signature):
         rows = self._execute_query_and_fetch_rows(
             dbname, PARAM_TYPES_FOR_PREPARED_STATEMENT_QUERY.format(query_signature=query_signature)
@@ -136,6 +165,7 @@ class ExplainParameterizedQueries:
             return len(param_types.split(','))
         return 0
 
+    @tracked_method(agent_check_getter=agent_check_getter)
     def _explain_prepared_statement(self, dbname, statement, obfuscated_statement, query_signature):
         null_parameter = ','.join(
             'null' for _ in range(self._get_number_of_parameters_for_prepared_statement(dbname, query_signature))
@@ -170,6 +200,30 @@ class ExplainParameterizedQueries:
                     e,
                 )
         return None
+
+    @tracked_method(agent_check_getter=agent_check_getter)
+    def _cleanup_pg_prepared_statements(self, dbname):
+        rows = self._execute_query_and_fetch_rows(dbname, PG_PREPARED_STATEMENTS_SIZE_ESTIMATE_QUERY)
+        pg_prepared_statements_mb = 0
+        if rows:
+            pg_prepared_statements_mb = rows[0][0] / 1048576  # 1MB
+
+        self._check.gauge(
+            "dd.postgres.explain_parameterized_queries.size",
+            pg_prepared_statements_mb,
+            tags=self._tags,
+            hostname=self._check.resolved_hostname,
+        )
+        self._check.gauge(
+            "dd.postgres.explain_parameterized_queries.max",
+            ExplainParameterizedQueries.MAX_ALLOWABLE_MB,
+            tags=self._tags,
+            hostname=self._check.resolved_hostname,
+        )
+
+        if pg_prepared_statements_mb >= ExplainParameterizedQueries.MAX_ALLOWABLE_MB:
+            self._execute_query(dbname, "DEALLOCATE ALL")
+
 
     def _execute_query(self, dbname, query):
         with self._check._get_db(dbname).cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:

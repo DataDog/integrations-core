@@ -187,7 +187,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         self._activity_last_query_start = None
         # The value is loaded when connecting to the main database
         self._explain_function = config.statement_samples_config.get('explain_function', 'datadog.explain_statement')
-        self._explain_parameterized_queries = ExplainParameterizedQueries(check, config)
+        self._explain_parameterized_queries = ExplainParameterizedQueries(check, config, self._tags)
         self._obfuscate_options = to_native_string(json.dumps(self._config.obfuscator_options))
 
         self._collection_strategy_cache = TTLCache(
