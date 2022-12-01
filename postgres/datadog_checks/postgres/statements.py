@@ -15,8 +15,8 @@ from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.statement_metrics import StatementMetrics
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding, obfuscate_sql_with_metadata
-from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.base.utils.serialization import json
+from datadog_checks.base.utils.tracking import tracked_method
 
 from .util import DatabaseConfigurationError, warning_with_tags
 from .version_utils import V9_4
@@ -343,7 +343,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
             )
         except psycopg2.Error as e:
             self._log.warning("Failed to query for pg_stat_statements count: %s", e)
-    
+
     def _emit_pg_stat_statement_query_text_length_metrics(self, rows):
         txt_length_sum = 0
         txt_length_max = 0
@@ -354,7 +354,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
                 txt_length_max = query_length
         self._check.gauge(
             "postgresql.pg_stat_statements.query_text.avg",
-            txt_length_sum/len(rows),
+            txt_length_sum / len(rows),
             tags=self._tags,
             hostname=self._check.resolved_hostname,
         )

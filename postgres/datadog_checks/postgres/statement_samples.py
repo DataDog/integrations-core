@@ -23,8 +23,8 @@ from datadog_checks.base.utils.db.utils import (
     obfuscate_sql_with_metadata,
 )
 from datadog_checks.base.utils.serialization import json
-from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.base.utils.time import get_timestamp
+from datadog_checks.base.utils.tracking import tracked_method
 
 from .util import DatabaseConfigurationError, warning_with_tags
 from .version_utils import V9_6
