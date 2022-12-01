@@ -55,8 +55,8 @@ class DiscoveryFilter:
                 for id_item in config_items_id:
                     id_key, id_value = None, None
                     if isinstance(id_item, dict):
-                        id_key = list(id_item)[0]
-                        id_value = list(id_item.values())[0]
+                        id_key = next(iter(id_item))
+                        id_value = next(iter(id_item.values()))
                     elif isinstance(id_item, str):
                         id_key = id_item
                     if id_key not in [key for key, _ in matched_id]:
@@ -99,13 +99,13 @@ class DiscoveryFilter:
                 pattern = (
                     include_pattern
                     if isinstance(include_pattern, str)
-                    else list(include_pattern.keys())[0]
+                    else next(iter(include_pattern.keys()))
                     if isinstance(include_pattern, dict) and len(include_pattern) == 1
                     else None
                 )
                 if pattern:
                     pattern_config = (
-                        list(include_pattern.values())[0]
+                        next(iter(include_pattern.values()))
                         if isinstance(include_pattern, dict) and len(include_pattern) == 1
                         else None
                     )
