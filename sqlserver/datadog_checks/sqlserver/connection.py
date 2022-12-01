@@ -394,7 +394,7 @@ class Connection(object):
                 self.close_cursor(cursor)
 
         exists = False
-        if database and database.lower() in self.existing_databases:
+        if database.lower() in self.existing_databases:
             case_insensitive, cased_name = self.existing_databases[database.lower()]
             if case_insensitive or database == cased_name:
                 exists = True
