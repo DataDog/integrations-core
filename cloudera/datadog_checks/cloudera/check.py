@@ -8,6 +8,7 @@ from datadog_checks.base import AgentCheck, ConfigurationError
 from .api_client_factory import make_api_client
 from .common import CAN_CONNECT
 from .config_models import ConfigMixin
+from datadog_checks.base.utils.time import get_timestamp
 
 
 class ClouderaCheck(AgentCheck, ConfigMixin):
@@ -22,6 +23,7 @@ class ClouderaCheck(AgentCheck, ConfigMixin):
             )
         super(ClouderaCheck, self).__init__(name, init_config, instances)
         self.client = None
+        self.latest_event_query_utc = get_timestamp()
         self.check_initializations.append(self._create_client)
 
     def _create_client(self):
