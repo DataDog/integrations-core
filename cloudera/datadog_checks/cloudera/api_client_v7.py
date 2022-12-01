@@ -15,7 +15,6 @@ class ApiClientV7(ApiClient):
 
     def collect_data(self):
         self._collect_clusters()
-        # self._collect_events()
 
     def _collect_clusters(self):
         clusters_resource_api = cm_client.ClustersResourceApi(self._api_client)
@@ -138,16 +137,3 @@ class ApiClientV7(ApiClient):
                     self._log.debug('value: %s', value)
                     self._log.debug('metric_tags: %s', metric_tags)
                     self._check.gauge(full_metric_name, value, tags=metric_tags)
-
-    def _collect_events(self):
-        events_resource_api = cm_client.EventsResourceApi(self._api_client)
-
-        # TODO: need to determine the time ranges to collect events, look at Silk integration for logic
-        query = "timeOccurred=ge=2022-11-30T21:06:35Z;timeOccurred=le=2022-11-30T21:07:35Z"
-        event_resource_response = events_resource_api.read_events(query=query)
-
-        # TODO: Implement
-        for item in event_resource_response.items:
-            self._log.debug('content: %s', item.content)
-            self._log.debug('id: %s', item.id)
-            self._log.debug('category: %s', item.category)
