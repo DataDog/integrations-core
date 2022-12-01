@@ -327,26 +327,27 @@ def test_connection_failure(aggregator, dd_run_check, instance_docker):
             "unknown_adoprovider",
             {'adoprovider': "fake"},
             {".*": "TCP-connection\\(OK\\).*Provider cannot be found. It may not be properly installed."},
-            ConnectionErrWarning.driver_not_installed,
+            ConnectionErrWarning.driver_not_found,
         ),
         (
             "unknown_odbc_driver",
             {'driver': "{SQL Driver For Fake Tests 2022}"},
             {
-                "odbc-linux|odbc-windows": "TCP-connection\\(OK\\).*"
-                # "Can't open lib .* file not found .* configured odbc driver .* not in list of installed drivers",
-                "Can't open lib .* file not found",
+                "odbc-linux": "TCP-connection\\(OK\\).*"
+                "Can't open lib .* file not found .* configured odbc driver .* not in list of installed drivers",
+                "odbc-windows": "TCP-connection\\(OK\\).*"
+                "Data source name not found.* and no default driver specified",
             },
-            ConnectionErrWarning.driver_not_installed,
+            ConnectionErrWarning.driver_not_found,
         ),
         (
             "odbc_driver_incorrect_dsn",
             {'dsn': "Not The Real DSN"},
             {
                 "odbc-linux|odbc-windows": "TCP-connection\\(OK\\).*"
-                "Data source name not found, and no default driver specified",
+                "Data source name not found.* and no default driver specified",
             },
-            ConnectionErrWarning.dsn_not_found,
+            ConnectionErrWarning.driver_not_found,
         ),
         (
             "unknown_hostname",

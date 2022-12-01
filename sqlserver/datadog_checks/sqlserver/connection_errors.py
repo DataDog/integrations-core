@@ -27,39 +27,29 @@ class ConnectionErrWarning(Enum):
     Denotes the various reasons a connection might fail.
     """
 
-    unknown = "diagnosing-common-connection-issues"
-    login_failed_for_user = "sql-server-unable-to-connect-login-failed-for-user"
-    tcp_connection_failed = "sql-server-unable-to-connect-due-to-invalid-connection-string-attribute"
-    certificate_verify_failed = "ssl-provider-the-certificate-chain-was-issued-by-an-authority-that-is-not-trusted"
-    driver_not_installed = "picking-a-sql-server-driver"
-    dsn_not_found = "data-source-name-not-found-and-no-default-driver-specified"
-    ssl_security_error = 'sql-server-unable-to-connect-ssl-security-error-18'
+    unknown = "common-connection-issues"
+    login_failed_for_user = "login-failed-for-user"
+    tcp_connection_failed = "tcp-connection-error"
+    certificate_verify_failed = "certificate-verify-fail"
+    driver_not_found = "common-driver-issues"
+    ssl_security_error = 'ssl-security-error'
 
 
-ODBC_DB_FAILURE_REGEX = "(cannot open database .* requested by the login. the login failed|login timeout expired)"
-
-
-# Connection error messages, which we expect to get from an ODBC driver
-# ODBC drivers have inconsistent error codes across versions, so regex on
+# Connection error messages, which we expect to get from an ADO provider or
+# ODBC. These drivers can have inconsistent error codes across versions, so regex on
 # the known error messages
-known_odbc_error_patterns = {
+known_error_patterns = {
+    # typically results in an -2147467259 ADO error code, which is not very descriptive. Identifying this error
+    # can help provide specific troubleshooting help to the customer
+    "(certificate verify failed|certificate chain was issued by an authority that is not trusted)": ConnectionErrWarning.certificate_verify_failed,
     # DSN could be specified incorrectly in config
-    "data source name not found, and no default driver specified": ConnectionErrWarning.dsn_not_found,
+    "data source name not found.* and no default driver specified": ConnectionErrWarning.driver_not_found,
     # driver not installed on host
-    "can't open lib .* file not found": ConnectionErrWarning.driver_not_installed,
-    # SSL verification failed
-    "certificate verify failed": ConnectionErrWarning.certificate_verify_failed,
+    "can't open lib .* file not found": ConnectionErrWarning.driver_not_found,
     # Connection & login issues
-    ODBC_DB_FAILURE_REGEX: ConnectionErrWarning.tcp_connection_failed,
+    "(cannot open database .* requested by the login. the login failed|login timeout expired)": ConnectionErrWarning.tcp_connection_failed,
     "login failed for user": ConnectionErrWarning.login_failed_for_user,
     "ssl security error": ConnectionErrWarning.ssl_security_error,
-}
-
-# Connection error messages, which we expect to get from an ADO provider
-known_ado_errors = {
-    # typically results in an -2147467259 error code, which is not very descriptive. Identifying this error
-    # can help provide specific troubleshooting help to the customer
-    "certificate chain was issued by an authority that is not trusted": ConnectionErrWarning.certificate_verify_failed,
 }
 
 # ADO provider connection errors yield a hresult code, which
@@ -67,7 +57,7 @@ known_ado_errors = {
 known_hresult_codes = {
     -2147352567: ["unable to connect", ConnectionErrWarning.tcp_connection_failed],
     -2147217843: ["login failed for user", ConnectionErrWarning.login_failed_for_user],
-    -2146824582: ["provider not found", ConnectionErrWarning.driver_not_installed],
+    -2146824582: ["provider not found", ConnectionErrWarning.driver_not_found],
     # this error can also be e caused by a failed TCP connection, but we are already reporting on the TCP
     # connection status via test_network_connectivity, so we don't need to explicitly state that
     # as an error condition in this message
@@ -84,7 +74,7 @@ def warning_with_tags(warning_message, *args, **kwargs):
     )
 
 
-def format_connection_exception(e, driver):
+def format_connection_exception(e, driver, logger):
     """
     Formats the provided database connection exception.
     If the exception comes from an ADO Provider and contains a misleading 'Invalid connection string attribute' message
@@ -101,8 +91,8 @@ def format_connection_exception(e, driver):
                 if len(internal_args) == 6:
                     internal_message = internal_args[2]
                     sub_hresult = internal_args[5]
-            base_message, base_conn_err = _lookup_ado_conn_error_and_msg(hresult, internal_message)
-            sub_message, sub_conn_err = _lookup_ado_conn_error_and_msg(sub_hresult, internal_message)
+            base_message, base_conn_err = _lookup_conn_error_and_msg(hresult, internal_message)
+            sub_message, sub_conn_err = _lookup_conn_error_and_msg(sub_hresult, internal_message)
             if internal_message == 'Invalid connection string attribute':
                 if base_message and sub_message:
                     conn_err = sub_conn_err if sub_conn_err else base_conn_err
@@ -112,11 +102,17 @@ def format_connection_exception(e, driver):
                 # ConnectionErrWarning for this issue
                 conn_err = sub_conn_err if sub_conn_err else base_conn_err
                 return repr(e), conn_err
+        else:
+            # if not an Operational error, try looking up ConnectionErr type
+            # by doing a regex search on the whole exception message
+            e_msg = repr(e)
+            _, conn_err = _lookup_conn_error_and_msg(0, e_msg)
+            return e_msg, conn_err
 
     elif pyodbc is not None:
         e_msg = repr(e)
-        conn_err = _lookup_odbc_conn_error(e_msg)
-        if conn_err == ConnectionErrWarning.driver_not_installed:
+        _, conn_err = _lookup_conn_error_and_msg(0, e_msg)
+        if conn_err == ConnectionErrWarning.driver_not_found:
             installed, drivers = _get_is_odbc_driver_installed(driver)
             if not installed and drivers:
                 e_msg += " configured odbc driver {} not in list of installed drivers: {}".format(driver, drivers)
@@ -132,16 +128,11 @@ def _get_is_odbc_driver_installed(configured_driver):
     return False, None
 
 
-def _lookup_odbc_conn_error(msg):
-    for k in known_odbc_error_patterns.keys():
+def _lookup_conn_error_and_msg(hresult, msg):
+    for k in known_error_patterns.keys():
         if re.search(k.lower(), msg.lower()):
-            return known_odbc_error_patterns[k]
-
-
-def _lookup_ado_conn_error_and_msg(hresult, msg):
-    for k in known_ado_errors.keys():
-        if k.lower() in msg.lower():
-            return None, known_ado_errors[k]
+            return None, known_error_patterns[k]
+    # if error message is Invalid connection string attribute, look up type by hresult
     if hresult > 0:
         res = known_hresult_codes.get(hresult)
         if len(res) > 0:
