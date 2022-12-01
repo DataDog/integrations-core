@@ -2,38 +2,6 @@
 #
 init_config:
 
-    ## @param proxy - mapping - optional
-    ## Set HTTP or HTTPS proxies for all instances. Use the `no_proxy` list
-    ## to specify hosts that must bypass proxies.
-    ##
-    ## The SOCKS protocol is also supported like so:
-    ##
-    ##   socks5://user:pass@host:port
-    ##
-    ## Using the scheme `socks5` causes the DNS resolution to happen on the
-    ## client, rather than on the proxy server. This is in line with `curl`,
-    ## which uses the scheme to decide whether to do the DNS resolution on
-    ## the client or proxy. If you want to resolve the domains on the proxy
-    ## server, use `socks5h` as the scheme.
-    #
-    # proxy:
-    #   http: http://<PROXY_SERVER_FOR_HTTP>:<PORT>
-    #   https: https://<PROXY_SERVER_FOR_HTTPS>:<PORT>
-    #   no_proxy:
-    #   - <HOSTNAME_1>
-    #   - <HOSTNAME_2>
-
-    ## @param skip_proxy - boolean - optional - default: false
-    ## If set to `true`, this makes the check bypass any proxy
-    ## settings enabled and attempt to reach services directly.
-    #
-    # skip_proxy: false
-
-    ## @param timeout - number - optional - default: 10
-    ## The timeout for connecting to services.
-    #
-    # timeout: 10
-
     ## @param service - string - optional
     ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
     ##
@@ -45,43 +13,264 @@ init_config:
 #
 instances:
 
-    ## @param name - string - required
-    ## A custom unique name per build configuration that is shown
-    ## in the events.
+    ## Openmetrics instance example
+  -
+    ## @param username - string - optional
+    ## The username to use if services are behind basic or digest auth.
     #
-  - name: <BUILD_NAME>
+    # username: <USERNAME>
+
+    ## @param password - string - optional
+    ## The password to use if services are behind basic or NTLM auth.
+    #
+    # password: <PASSWORD>
+
+    ## @param use_openmetrics - boolean - optional - default: false
+    ## Use the latest OpenMetrics V2 implementation to collect metrics from
+    ## the TeamCity server's Prometheus metrics endpoint.
+    ## Requires Python version 3.
+    ##
+    ## Enable in a separate instance to collect Prometheus metrics.
+    ## This option does not collect events, service checks, or metrics from the TeamCity REST API.
+    #
+    use_openmetrics: true
 
     ## @param server - string - required
-    ## Specify the server name of your teamcity instance
-    ## Guest authentication must be on if you want the check to be able to get data
-    ## When using the optional `basic_http_authentication` use:
-    ##
-    ##  server: http://<USER>:<PASSWORD>@teamcity.<ACCOUNT_NAME>.com
+    ## Specify the server name of your TeamCity instance.
+    ## Enable Guest Authentication on your instance or specify `username` and `password` to
+    ## enable basic HTTP authentication.
     #
     server: http://teamcity.<ACCOUNT_NAME>.com
 
-    ## @param build_configuration - string - required
-    ## This is the internal build ID of the build configuration you wish to track.
-    ## You can find it labelled as "Build configuration ID" when editing the configuration in question.
+    ## @param experimental_metrics - boolean - optional - default: false
+    ## Enable collection of experimental TeamCity Prometheus metrics.
+    ## See https://www.jetbrains.com/help/teamcity/teamcity-monitoring-and-diagnostics.html#Metrics
+    ## Only available with `use_openmetrics: true`.
     #
-    build_configuration: <BUILD_CONFIGURATION>
+    # experimental_metrics: false
 
-    ## @param basic_http_authentication - boolean - optional - default: false
-    ## Set to true to turn on basic http authentication.
+    ## @param raw_metric_prefix - string - optional
+    ## A prefix that will be removed from all exposed metric names, if present.
+    ## All configuration options will use the prefix-less name.
     #
-    # basic_http_authentication: false
+    # raw_metric_prefix: <PREFIX>_
 
-    ## @param host_affected - string - optional
-    ## Use this parameter to override the host that is affected by this build configuration.
-    ## Defaults to the host that the agent is running on.
+    ## @param extra_metrics - (list of string or mapping) - optional
+    ## This list defines metrics to collect from the `openmetrics_endpoint`, in addition to
+    ## what the check collects by default. If the check already collects a metric, then
+    ## metric definitions here take precedence. Metrics may be defined in 3 ways:
+    ##
+    ## 1. If the item is a string, then it represents the exposed metric name, and
+    ##    the sent metric name will be identical. For example:
+    ##
+    ##      extra_metrics:
+    ##      - <METRIC_1>
+    ##      - <METRIC_2>
+    ## 2. If the item is a mapping, then the keys represent the exposed metric names.
+    ##
+    ##      a. If a value is a string, then it represents the sent metric name. For example:
+    ##
+    ##           extra_metrics:
+    ##           - <EXPOSED_METRIC_1>: <SENT_METRIC_1>
+    ##           - <EXPOSED_METRIC_2>: <SENT_METRIC_2>
+    ##      b. If a value is a mapping, then it must have a `name` and/or `type` key.
+    ##         The `name` represents the sent metric name, and the `type` represents how
+    ##         the metric should be handled, overriding any type information the endpoint
+    ##         may provide. For example:
+    ##
+    ##           extra_metrics:
+    ##           - <EXPOSED_METRIC_1>:
+    ##               name: <SENT_METRIC_1>
+    ##               type: <METRIC_TYPE_1>
+    ##           - <EXPOSED_METRIC_2>:
+    ##               name: <SENT_METRIC_2>
+    ##               type: <METRIC_TYPE_2>
+    ##
+    ##         The supported native types are `gauge`, `counter`, `histogram`, and `summary`.
+    ##
+    ## Note: To collect counter metrics with names ending in `_total`, specify the metric name without the `_total`
+    ## suffix. For example, to collect the counter metric `promhttp_metric_handler_requests_total`, specify
+    ## `promhttp_metric_handler_requests`. This submits to Datadog the metric name appended with `.count`.
+    ## For more information, see:
+    ## https://github.com/OpenObservability/OpenMetrics/blob/main/specification/OpenMetrics.md#suffixes
+    ##
+    ## Regular expressions may be used to match the exposed metric names, for example:
+    ##
+    ##   extra_metrics:
+    ##   - ^network_(ingress|egress)_.+
+    ##   - .+:
+    ##       type: gauge
     #
-    # host_affected: <HOST_AFFECTED>
+    # extra_metrics: []
 
-    ## @param is_deployment - boolean - optional - default: false
-    ## Set to true to change the event message slightly to specify that TeamCity was used to deploy something
-    ## rather than just that a successful build happened
+    ## @param exclude_metrics - list of strings - optional
+    ## A list of metrics to exclude, with each entry being either
+    ## the exact metric name or a regular expression.
+    ## In order to exclude all metrics but the ones matching a specific filter,
+    ## you can use a negative lookahead regex like:
+    ##   - ^(?!foo).*$
     #
-    # is_deployment: false
+    # exclude_metrics: []
+
+    ## @param exclude_metrics_by_labels - mapping - optional
+    ## A mapping of labels where metrics with matching label name and values are ignored. To match
+    ## all values of a label, set it to `true`.
+    ##
+    ## Note: Label filtering happens before `rename_labels`.
+    ##
+    ## For example, the following configuration instructs the check to exclude all metrics with
+    ## a label `worker` or a label `pid` with the value of either `23` or `42`.
+    ##
+    ##   exclude_metrics_by_labels:
+    ##     worker: true
+    ##     pid:
+    ##     - '23'
+    ##     - '42'
+    #
+    # exclude_metrics_by_labels: {}
+
+    ## @param exclude_labels - list of strings - optional
+    ## A list of labels to exclude, useful for high cardinality values like timestamps or UUIDs.
+    ## May be used in conjunction with `include_labels`.
+    ## Labels defined in `exclude_labels` will take precedence in case of overlap.
+    ##
+    ## Note: Label filtering happens before `rename_labels`.
+    #
+    # exclude_labels: []
+
+    ## @param include_labels - list of strings - optional
+    ## A list of labels to include. May be used in conjunction with `exclude_labels`.
+    ## Labels defined in `exclude_labels` will take precedence in case of overlap.
+    ##
+    ## Note: Label filtering happens before `rename_labels`.
+    #
+    # include_labels: []
+
+    ## @param rename_labels - mapping - optional
+    ## A mapping of label names to how they should be renamed.
+    #
+    # rename_labels:
+    #   <LABEL_NAME_1>: <NEW_LABEL_NAME_1>
+    #   <LABEL_NAME_2>: <NEW_LABEL_NAME_2>
+
+    ## @param enable_health_service_check - boolean - optional - default: true
+    ## Whether or not to send a service check named `<NAMESPACE>.openmetrics.health` which reports
+    ## the health of the `openmetrics_endpoint`.
+    #
+    # enable_health_service_check: true
+
+    ## @param hostname_label - string - optional
+    ## Override the hostname for every metric submission with the value of one of its labels.
+    #
+    # hostname_label: <HOSTNAME_LABEL>
+
+    ## @param hostname_format - string - optional
+    ## When `hostname_label` is set, this instructs the check how to format the values. The string
+    ## `<HOSTNAME>` will be replaced by the value of the label defined by `hostname_label`.
+    #
+    # hostname_format: <HOSTNAME>
+
+    ## @param collect_histogram_buckets - boolean - optional - default: true
+    ## Whether or not to send histogram buckets.
+    #
+    # collect_histogram_buckets: true
+
+    ## @param non_cumulative_histogram_buckets - boolean - optional - default: false
+    ## Whether or not histogram buckets should be non-cumulative and to come with a `lower_bound` tag.
+    #
+    # non_cumulative_histogram_buckets: false
+
+    ## @param histogram_buckets_as_distributions - boolean - optional - default: false
+    ## Whether or not to send histogram buckets as Datadog distribution metrics. This implicitly
+    ## enables the `collect_histogram_buckets` and `non_cumulative_histogram_buckets` options.
+    ##
+    ## Learn more about distribution metrics:
+    ## https://docs.datadoghq.com/developers/metrics/types/?tab=distribution#metric-types
+    #
+    # histogram_buckets_as_distributions: false
+
+    ## @param collect_counters_with_distributions - boolean - optional - default: false
+    ## Whether or not to also collect the observation counter metrics ending in `.sum` and `.count`
+    ## when sending histogram buckets as Datadog distribution metrics. This implicitly enables the
+    ## `histogram_buckets_as_distributions` option.
+    #
+    # collect_counters_with_distributions: false
+
+    ## @param use_process_start_time - boolean - optional - default: false
+    ## Whether to enable a heuristic for reporting counter values on the first scrape. When true,
+    ## the first time an endpoint is scraped, check `process_start_time_seconds` to decide whether zero
+    ## initial value can be assumed for counters. This requires keeping metrics in memory until the entire
+    ## response is received.
+    #
+    # use_process_start_time: false
+
+    ## @param share_labels - mapping - optional
+    ## This mapping allows for the sharing of labels across multiple metrics. The keys represent the
+    ## exposed metrics from which to share labels, and the values are mappings that configure the
+    ## sharing behavior. Each mapping must have at least one of the following keys:
+    ##
+    ##   labels - This is a list of labels to share. All labels are shared if this is not set.
+    ##   match - This is a list of labels to match on other metrics as a condition for sharing.
+    ##   values - This is a list of allowed values as a condition for sharing.
+    ##
+    ## To unconditionally share all labels of a metric, set it to `true`.
+    ##
+    ## For example, the following configuration instructs the check to apply all labels from `metric_a`
+    ## to all other metrics, the `node` label from `metric_b` to only those metrics that have a `pod`
+    ## label value that matches the `pod` label value of `metric_b`, and all labels from `metric_c`
+    ## to all other metrics if its value is equal to `23` or `42`.
+    ##
+    ##   share_labels:
+    ##     metric_a: true
+    ##     metric_b:
+    ##       labels:
+    ##       - node
+    ##       match:
+    ##       - pod
+    ##     metric_c:
+    ##       values:
+    ##       - 23
+    ##       - 42
+    #
+    # share_labels: {}
+
+    ## @param cache_shared_labels - boolean - optional - default: true
+    ## When `share_labels` is set, it instructs the check to cache labels collected from the first payload
+    ## for improved performance.
+    ##
+    ## Set this to `false` to compute label sharing for every payload at the risk of potentially increased memory usage.
+    #
+    # cache_shared_labels: true
+
+    ## @param raw_line_filters - list of strings - optional
+    ## A list of regular expressions used to exclude lines read from the `openmetrics_endpoint`
+    ## from being parsed.
+    #
+    # raw_line_filters: []
+
+    ## @param cache_metric_wildcards - boolean - optional - default: true
+    ## Whether or not to cache data from metrics that are defined by regular expressions rather
+    ## than the full metric name.
+    #
+    # cache_metric_wildcards: true
+
+    ## @param use_latest_spec - boolean - optional - default: false
+    ## Whether or not the parser will strictly adhere to the latest version of the OpenMetrics specification.
+    #
+    # use_latest_spec: false
+
+    ## @param telemetry - boolean - optional - default: false
+    ## Whether or not to submit metrics prefixed by `<NAMESPACE>.telemetry.` for debugging purposes.
+    #
+    # telemetry: false
+
+    ## @param ignore_tags - list of strings - optional
+    ## A list of regular expressions used to ignore tags added by autodiscovery and entries in the `tags` option.
+    #
+    # ignore_tags:
+    #   - <FULL:TAG>
+    #   - <TAG_PREFIX:.*>
+    #   - <TAG_SUFFIX$>
 
     ## @param proxy - mapping - optional
     ## This overrides the `proxy` setting in `init_config`.
@@ -149,16 +338,6 @@ instances:
     ## When `auth_type` is set to `basic`, this determines whether to encode as `latin1` rather than `utf-8`.
     #
     # use_legacy_auth_encoding: true
-
-    ## @param username - string - optional
-    ## The username to use if services are behind basic or digest auth.
-    #
-    # username: <USERNAME>
-
-    ## @param password - string - optional
-    ## The password to use if services are behind basic or NTLM auth.
-    #
-    # password: <PASSWORD>
 
     ## @param ntlm_domain - string - optional
     ## If your services use NTLM authentication, specify
@@ -428,6 +607,146 @@ instances:
     #   - <INCLUDE_REGEX>
     #   exclude:
     #   - <EXCLUDE_REGEX>
+
+    ## REST API instance example
+    ## @param server - string - required
+    ## Specify the server name of your TeamCity instance.
+    ## Enable Guest Authentication on your instance or specify `username` and `password` to
+    ## enable basic HTTP authentication.
+    #
+  - server: http://teamcity.<ACCOUNT_NAME>.com
+
+    ## @param projects - mapping - optional
+    ## Mapping of TeamCity projects and build configurations to collect events and metrics from the TeamCity REST API.
+    ##
+    ## Configure only one of `projects` or `build_configuration` per instance.
+    ##
+    ## Requires Python version 3. For Python version 2, use the `build_configuration` option to configure 
+    ## one build configuration ID per instance.
+    ##
+    ## Configure each Project ID or Project ID RegEx pattern as the top-level keys or nested under the optional
+    ## `include` or `exclude` keys to filter your TeamCity projects more granularly.
+    ##
+    ## Each Project ID key value may be configured with a mapping of the optional `include` and `exclude` keys to
+    ## specify Build Configuration ID RegEx match patterns. If `include` and `exclude` keys are omitted,
+    ## all Build Configurations per specified Project are collected.
+    ## In case of overlap, patterns specified with `exclude` take precedence.
+    ##
+    ## * To collect all build configurations per Project ID, configure an empty mapping value:
+    ##
+    ##     projects:
+    ##       <PROJECT_ID>: {}
+    ##       <PROJECT_ID_REGEX>: {}
+    ##
+    ## OR
+    ##
+    ##     projects:
+    ##       include:
+    ##         - <PROJECT_ID_REGEX>: {}
+    ##         - <PROJECT_ID_REGEX>: {}
+    ##       exclude:
+    ##         - <PROJECT_ID_REGEX>: {}
+    ##
+    ## * To filter build configurations in each configured Project, use the optional `include` and `exclude` keys
+    ##   to configure a list of Build Configuration IDs or RegEx matching patterns:
+    ##
+    ##     projects:
+    ##       include:
+    ##         - <PROJECT_ID_REGEX>:
+    ##             include:
+    ##               - <BUILD_CONFIG_ID>
+    ##               - <BUILD_CONFIG_ID_REGEX>
+    ##             exclude:
+    ##               - <BUILD_CONFIG_ID_REGEX>
+    ##
+    ## * Configure `<PROJECT_ID>.limit` to limit discovered build configurations for the given project.
+    ##   If `<PROJECT_ID>.limit` is omitted, the `default_build_configs_limit` is used.
+    ##
+    ##     projects:
+    ##       include:
+    ##         - <PROJECT_ID_REGEX>:
+    ##             limit: 5
+    ##             include:
+    ##               - <BUILD_CONFIG_ID_REGEX>
+    ##               - <BUILD_CONFIG_ID_REGEX>
+    ##             exclude:
+    ##               - <BUILD_CONFIG_ID_REGEX>
+    ##
+    ## Not available with `use_openmetrics: true`.
+    #
+    # projects: {}
+
+    ## @param default_build_configs_limit - integer - optional - default: 5
+    ## The default maximum number of build configurations per project to discover when using the `projects`
+    ## configuration option. The `default_build_configs_limit` value is overridden when `build_config_limit`
+    ## is configured for a given project.
+    ## Not available with `use_openmetrics: true`.
+    #
+    # default_build_configs_limit: 5
+
+    ## @param default_projects_limit - integer - optional - default: 5
+    ## The default maximum number of projects to discover when using the `projects`
+    ## configuration option.
+    ## Not available with `use_openmetrics: true`.
+    #
+    # default_projects_limit: 5
+
+    ## @param global_build_configs_include - list of strings - optional
+    ## List of build configuration RegEx patterns to include across all monitored projects.
+    ## In case of overlap, patterns specified with `global_build_configs_exclude` take precedence.
+    ## Not available with `use_openmetrics: true`.
+    #
+    # global_build_configs_include:
+    #   - <BUILD_CONFIG_REGEX>
+
+    ## @param global_build_configs_exclude - list of strings - optional
+    ## List of build configuration RegEx patterns to exclude across all monitored projects.
+    ## In case of overlap, patterns specified with `global_build_configs_exclude` take precedence.
+    ## Not available with `use_openmetrics: true`.
+    #
+    # global_build_configs_exclude:
+    #   - <BUILD_CONFIG_REGEX>
+
+    ## @param projects_refresh_interval - integer - optional
+    ## Configure projects refresh interval (seconds) in which the check discovers updated projects and build 
+    ## configurations based on the `projects` configuration. Set a lower interval if projects and build 
+    ## configurations are subject to frequent changes on the TeamCity server. Set a higher interval if projects 
+    ## and build configurations change less frequently. Default interval is 3600 seconds (1 hour).
+    #
+    # projects_refresh_interval: <PROJECTS_REFRESH_INTERVAL>
+
+    ## @param build_configuration - string - optional
+    ## This is the internal build ID of the build configuration you wish to track.
+    ## You can find it labeled as "Build configuration ID" when editing the configuration in question.
+    ##
+    ## Configure only one of `projects` or `build_configuration` per instance.
+    ## Not available with `use_openmetrics: true`.
+    #
+    # build_configuration: <BUILD_CONFIGURATION>
+
+    ## @param collect_events - boolean - optional - default: true
+    ## Enable collection of TeamCity success and failure events for builds and deployments.
+    ## Not available with `use_openmetrics: true`.
+    #
+    # collect_events: true
+
+    ## @param build_config_metrics - boolean - optional - default: true
+    ## Collect Build Configuration statistics per build.
+    ## Not available with `use_openmetrics: true`.
+    #
+    # build_config_metrics: true
+
+    ## @param tests_health_check - boolean - optional - default: true
+    ## Collect test result statistics per build.
+    ## Not available with `use_openmetrics: true`.
+    #
+    # tests_health_check: true
+
+    ## @param build_problem_health_check - boolean - optional - default: true
+    ## Collect build problem service checks.
+    ## Not available with `use_openmetrics: true`.
+    #
+    # build_problem_health_check: true
 
 ## Log Section
 ##

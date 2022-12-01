@@ -1,0 +1,619 @@
+# Welcome to TeamCity metrics in Prometheus format
+# To get all metrics including experimental ones, add ?experimental=true parameter to the request
+# To see the more human-friendly list of available metrics,
+# go to Administration -> Diagnostics -> Metrics tab
+#
+#
+# HELP agents_connected_authorized_number Number of connected and authorized build agents
+# TYPE agents_connected_authorized_number gauge
+agents_connected_authorized_number{nodeId="tc-instance-1",} 0.0
+# HELP agents_running_builds_number Number of build agents which are running builds
+# TYPE agents_running_builds_number gauge
+agents_running_builds_number{nodeId="tc-instance-1",} 0.0
+# HELP build_messages_incoming_number Incoming agent messages
+# TYPE build_messages_incoming_number counter
+build_messages_incoming_number{experimental="true",nodeId="tc-instance-1",} 17414.0
+# HELP build_messages_processing_number Processed agent messages
+# TYPE build_messages_processing_number counter
+build_messages_processing_number{experimental="true",nodeId="tc-instance-1",} 17414.0
+# HELP build_queue_estimates_processing_number Build queue estimates processing
+# TYPE build_queue_estimates_processing_number counter
+build_queue_estimates_processing_number{experimental="true",nodeId="tc-instance-1",} 2085.0
+# HELP build_queue_incoming_number Builds added to queue
+# TYPE build_queue_incoming_number counter
+build_queue_incoming_number{experimental="true",nodeId="tc-instance-1",} 179.0
+# HELP build_queue_optimization_time_milliseconds Build queue optimization time
+# TYPE build_queue_optimization_time_milliseconds summary
+build_queue_optimization_time_milliseconds_count{nodeId="tc-instance-1",type="build_with_more_changes_available",} 106.0
+build_queue_optimization_time_milliseconds_total{nodeId="tc-instance-1",type="build_with_more_changes_available",} 2550213.0
+build_queue_optimization_time_milliseconds_count{nodeId="tc-instance-1",type="build_with_same_revisions_available",} 0.0
+build_queue_optimization_time_milliseconds_total{nodeId="tc-instance-1",type="build_with_same_revisions_available",} 0.0
+build_queue_optimization_time_milliseconds_count{nodeId="tc-instance-1",type="other",} 0.0
+build_queue_optimization_time_milliseconds_total{nodeId="tc-instance-1",type="other",} 0.0
+# HELP build_queue_processing_number Build queue processing
+# TYPE build_queue_processing_number counter
+build_queue_processing_number{experimental="true",nodeId="tc-instance-1",} 65653.0
+# HELP build_service_messages_number Processed service messages
+# TYPE build_service_messages_number counter
+build_service_messages_number{experimental="true",nodeId="tc-instance-1",} 926.0
+# HELP build_triggers_execution_milliseconds Total time spent processing build triggers
+# TYPE build_triggers_execution_milliseconds summary
+build_triggers_execution_milliseconds_count{experimental="true",nodeId="tc-instance-1",} 10514.0
+build_triggers_execution_milliseconds_total{experimental="true",nodeId="tc-instance-1",} 22103.0
+# HELP build_triggers_per_type_execution_milliseconds Time spent processing build triggers of given type
+# TYPE build_triggers_per_type_execution_milliseconds summary
+build_triggers_per_type_execution_milliseconds_count{experimental="true",nodeId="tc-instance-1",triggerName="schedulingTrigger",} 24378.0
+build_triggers_per_type_execution_milliseconds_total{experimental="true",nodeId="tc-instance-1",triggerName="schedulingTrigger",} 12324.0
+# HELP buildConfigurations_number Number of build configurations
+# TYPE buildConfigurations_number gauge
+buildConfigurations_number{nodeId="tc-instance-1",} 6.0
+# HELP buildConfigurations_active_number Number of active build configurations
+# TYPE buildConfigurations_active_number gauge
+buildConfigurations_active_number{experimental="true",nodeId="tc-instance-1",} 6.0
+# HELP buildConfigurations_composite_active_number Number of active composite configurations
+# TYPE buildConfigurations_composite_active_number gauge
+buildConfigurations_composite_active_number{experimental="true",nodeId="tc-instance-1",} 0.0
+# TYPE building_hosted_agents_number gauge
+building_hosted_agents_number{experimental="true",image="Linux-Medium",nodeId="tc-instance-1",version="prod-188",} 0.0
+building_hosted_agents_number{experimental="true",image="Linux-Small",nodeId="tc-instance-1",version="prod-188",} 0.0
+building_hosted_agents_number{experimental="true",image="Windows-Medium",nodeId="tc-instance-1",version="prod-188",} 0.0
+building_hosted_agents_number{experimental="true",image="Windows-Small",nodeId="tc-instance-1",version="prod-188",} 0.0
+# HELP builds_number Number of builds in the database
+# TYPE builds_number gauge
+builds_number{experimental="true",nodeId="tc-instance-1",} 74.0
+# HELP builds_finished_number Number of finished builds
+# TYPE builds_finished_number counter
+builds_finished_number{interrupted="false",nodeId="tc-instance-1",} 74.0
+# HELP builds_queued_number Build queue size
+# TYPE builds_queued_number gauge
+builds_queued_number{nodeId="tc-instance-1",} 0.0
+# HELP builds_running_number Number of running builds
+# TYPE builds_running_number gauge
+builds_running_number{nodeId="tc-instance-1",} 0.0
+# HELP builds_started_number Number of started builds
+# TYPE builds_started_number counter
+builds_started_number{nodeId="tc-instance-1",} 74.0
+# HELP cloud_active_nodes_number Number of active nodes at the moment
+# TYPE cloud_active_nodes_number gauge
+cloud_active_nodes_number{experimental="true",nodeId="tc-instance-1",nodeType="main",} 1.0
+cloud_active_nodes_number{experimental="true",nodeId="tc-instance-1",nodeType="secondary",} 0.0
+# HELP cloud_agent_afterBuild_number Time spent by agent before it was terminated
+# TYPE cloud_agent_afterBuild_number gauge
+cloud_agent_afterBuild_number{experimental="true",nodeId="tc-instance-1",} 508354.0
+# HELP cloud_agent_beforeBuild_number Time spent by agent before a build has actually started
+# TYPE cloud_agent_beforeBuild_number gauge
+cloud_agent_beforeBuild_number{experimental="true",nodeId="tc-instance-1",} 720271.0
+# HELP cloud_agent_beforeRegister_number Time spent to start cloud agent
+# TYPE cloud_agent_beforeRegister_number gauge
+cloud_agent_beforeRegister_number{experimental="true",nodeId="tc-instance-1",} 0.0
+# HELP cloud_agent_betweenBuild_number Time spent by agent before it was terminated
+# TYPE cloud_agent_betweenBuild_number gauge
+cloud_agent_betweenBuild_number{experimental="true",nodeId="tc-instance-1",} 0.0
+# HELP cloud_agent_totalBuild_number Total build duration on managed agents
+# TYPE cloud_agent_totalBuild_number gauge
+cloud_agent_totalBuild_number{experimental="true",nodeId="tc-instance-1",} 1748425.0
+# HELP cloud_agent_totalBuildBeforeFinish_number Total build duration on managed agents (beforeBuildFinish)
+# TYPE cloud_agent_totalBuildBeforeFinish_number gauge
+cloud_agent_totalBuildBeforeFinish_number{experimental="true",nodeId="tc-instance-1",} 1742469.0
+# HELP cloud_agent_useless_number Useless time - agent wasn't doing anything
+# TYPE cloud_agent_useless_number gauge
+cloud_agent_useless_number{experimental="true",nodeId="tc-instance-1",} 1764743.0
+# HELP cloud_build_stuckCanceled_number Number of builds stuck in the canceling state
+# TYPE cloud_build_stuckCanceled_number gauge
+cloud_build_stuckCanceled_number{experimental="true",nodeId="tc-instance-1",} 0.0
+# HELP cloud_pluginsFailedToLoad_number The number of plugins failed to load
+# TYPE cloud_pluginsFailedToLoad_number counter
+cloud_pluginsFailedToLoad_number{experimental="true",nodeId="tc-instance-1",} 0.0
+# HELP cloud_server_lowMemory_gcUsageExceeded_number Number of GC usage exceeded errors
+# TYPE cloud_server_lowMemory_gcUsageExceeded_number gauge
+cloud_server_lowMemory_gcUsageExceeded_number{experimental="true",nodeId="tc-instance-1",} 0.0
+# HELP cloud_server_lowMemory_highTotal_number Number of high total memory errors
+# TYPE cloud_server_lowMemory_highTotal_number gauge
+cloud_server_lowMemory_highTotal_number{experimental="true",nodeId="tc-instance-1",} 0.0
+# HELP cloud_tccPluginLoaded_number A flag showing that the TeamCity Cloud Plugin is loaded and running
+# TYPE cloud_tccPluginLoaded_number gauge
+cloud_tccPluginLoaded_number{experimental="true",nodeId="tc-instance-1",} 1.0
+# TYPE cloud_images_count_number gauge
+cloud_images_count_number{experimental="true",nodeId="tc-instance-1",version="prod-188",} 4.0
+# HELP cpu_count_number The number of processors available to the Java virtual machine
+# TYPE cpu_count_number gauge
+cpu_count_number{nodeId="tc-instance-1",} 1.0
+# HELP cpu_usage_process_number The "recent cpu usage" for the Java Virtual Machine process
+# TYPE cpu_usage_process_number gauge
+cpu_usage_process_number{nodeId="tc-instance-1",} 0.07017543859649122
+# HELP cpu_usage_system_number The "recent cpu usage" for the whole system
+# TYPE cpu_usage_system_number gauge
+cpu_usage_system_number{nodeId="tc-instance-1",} 0.07694079824561403
+# TYPE current_full_agent_waiting_instances_number gauge
+current_full_agent_waiting_instances_number{experimental="true",image="Linux-Medium",nodeId="tc-instance-1",version="prod-188",} 0.0
+current_full_agent_waiting_instances_number{experimental="true",image="Linux-Small",nodeId="tc-instance-1",version="prod-188",} 0.0
+current_full_agent_waiting_instances_number{experimental="true",image="Windows-Medium",nodeId="tc-instance-1",version="prod-188",} 0.0
+current_full_agent_waiting_instances_number{experimental="true",image="Windows-Small",nodeId="tc-instance-1",version="prod-188",} 0.0
+# TYPE current_full_agent_waiting_time_max_number gauge
+current_full_agent_waiting_time_max_number{experimental="true",image="Linux-Medium",nodeId="tc-instance-1",version="prod-188",} 0.0
+current_full_agent_waiting_time_max_number{experimental="true",image="Linux-Small",nodeId="tc-instance-1",version="prod-188",} 0.0
+current_full_agent_waiting_time_max_number{experimental="true",image="Windows-Medium",nodeId="tc-instance-1",version="prod-188",} 0.0
+current_full_agent_waiting_time_max_number{experimental="true",image="Windows-Small",nodeId="tc-instance-1",version="prod-188",} 0.0
+# TYPE current_full_agent_waiting_time_total_number gauge
+current_full_agent_waiting_time_total_number{experimental="true",image="Linux-Medium",nodeId="tc-instance-1",version="prod-188",} 0.0
+current_full_agent_waiting_time_total_number{experimental="true",image="Linux-Small",nodeId="tc-instance-1",version="prod-188",} 0.0
+current_full_agent_waiting_time_total_number{experimental="true",image="Windows-Medium",nodeId="tc-instance-1",version="prod-188",} 0.0
+current_full_agent_waiting_time_total_number{experimental="true",image="Windows-Small",nodeId="tc-instance-1",version="prod-188",} 0.0
+# HELP database_connections_active_number Number of active database connections
+# TYPE database_connections_active_number gauge
+database_connections_active_number{nodeId="tc-instance-1",} 0.0
+# HELP db_table_writes_number Writes to build_data_storage DB table
+# TYPE db_table_writes_number counter
+db_table_writes_number{experimental="true",nodeId="tc-instance-1",tableName="build_data_storage",} 1365.0
+db_table_writes_number{experimental="true",nodeId="tc-instance-1",tableName="test_info",} 112.0
+db_table_writes_number{experimental="true",nodeId="tc-instance-1",tableName="test_names",} 5.0
+# HELP diskUsage_artifacts_bytes Artifacts disk usage
+# TYPE diskUsage_artifacts_bytes gauge
+diskUsage_artifacts_bytes{experimental="true",nodeId="tc-instance-1",projectId="PythonProject",} 0.0
+diskUsage_artifacts_bytes{experimental="true",nodeId="tc-instance-1",projectId="_Root",} 0.0
+# HELP diskUsage_logs_bytes Build logs disk usage
+# TYPE diskUsage_logs_bytes gauge
+diskUsage_logs_bytes{experimental="true",nodeId="tc-instance-1",projectId="PythonProject",} 1908758.0
+diskUsage_logs_bytes{experimental="true",nodeId="tc-instance-1",projectId="_Root",} 1908758.0
+# HELP executors_asyncXmlRpc_activeTasks_number Running executor tasks for asyncXmlRpc
+# TYPE executors_asyncXmlRpc_activeTasks_number gauge
+executors_asyncXmlRpc_activeTasks_number{experimental="true",nodeId="tc-instance-1",} 0.0
+# HELP executors_asyncXmlRpc_completedTasks_number Completed executor tasks for asyncXmlRpc
+# TYPE executors_asyncXmlRpc_completedTasks_number gauge
+executors_asyncXmlRpc_completedTasks_number{experimental="true",nodeId="tc-instance-1",} 2313.0
+# HELP executors_asyncXmlRpc_maxQueueCapacity_number Queue capacity for asyncXmlRpc
+# TYPE executors_asyncXmlRpc_maxQueueCapacity_number gauge
+executors_asyncXmlRpc_maxQueueCapacity_number{experimental="true",nodeId="tc-instance-1",} 300.0
+# HELP executors_asyncXmlRpc_poolSize_number Pool size for asyncXmlRpc
+# TYPE executors_asyncXmlRpc_poolSize_number gauge
+executors_asyncXmlRpc_poolSize_number{experimental="true",nodeId="tc-instance-1",} 1.0
+# HELP executors_asyncXmlRpc_queuedTasks_number Number of queued tasks for asyncXmlRpc
+# TYPE executors_asyncXmlRpc_queuedTasks_number gauge
+executors_asyncXmlRpc_queuedTasks_number{experimental="true",nodeId="tc-instance-1",} 0.0
+# HELP executors_asyncXmlRpc_rejectsCount_number Rejects count for adding task to asyncXmlRpc
+# TYPE executors_asyncXmlRpc_rejectsCount_number gauge
+executors_asyncXmlRpc_rejectsCount_number{experimental="true",nodeId="tc-instance-1",} 0.0
+# HELP executors_baseVcsExecutor_activeTasks_number Running executor tasks for baseVcsExecutor
+# TYPE executors_baseVcsExecutor_activeTasks_number gauge
+executors_baseVcsExecutor_activeTasks_number{experimental="true",nodeId="tc-instance-1",} 0.0
+# HELP executors_baseVcsExecutor_completedTasks_number Completed executor tasks for baseVcsExecutor
+# TYPE executors_baseVcsExecutor_completedTasks_number gauge
+executors_baseVcsExecutor_completedTasks_number{experimental="true",nodeId="tc-instance-1",} 350.0
+# HELP executors_baseVcsExecutor_maxQueueCapacity_number Queue capacity for baseVcsExecutor
+# TYPE executors_baseVcsExecutor_maxQueueCapacity_number gauge
+executors_baseVcsExecutor_maxQueueCapacity_number{experimental="true",nodeId="tc-instance-1",} 1000.0
+# HELP executors_baseVcsExecutor_poolSize_number Pool size for baseVcsExecutor
+# TYPE executors_baseVcsExecutor_poolSize_number gauge
+executors_baseVcsExecutor_poolSize_number{experimental="true",nodeId="tc-instance-1",} 3.0
+# HELP executors_baseVcsExecutor_queuedTasks_number Number of queued tasks for baseVcsExecutor
+# TYPE executors_baseVcsExecutor_queuedTasks_number gauge
+executors_baseVcsExecutor_queuedTasks_number{experimental="true",nodeId="tc-instance-1",} 0.0
+# HELP executors_baseVcsExecutor_rejectsCount_number Rejects count for adding task to baseVcsExecutor
+# TYPE executors_baseVcsExecutor_rejectsCount_number gauge
+executors_baseVcsExecutor_rejectsCount_number{experimental="true",nodeId="tc-instance-1",} 0.0
+# HELP executors_cleanupExecutor_activeTasks_number Running executor tasks for cleanupExecutor
+# TYPE executors_cleanupExecutor_activeTasks_number gauge
+executors_cleanupExecutor_activeTasks_number{experimental="true",nodeId="tc-instance-1",} 0.0
+# HELP executors_cleanupExecutor_completedTasks_number Completed executor tasks for cleanupExecutor
+# TYPE executors_cleanupExecutor_completedTasks_number gauge
+executors_cleanupExecutor_completedTasks_number{experimental="true",nodeId="tc-instance-1",} 21.0
+# HELP executors_cleanupExecutor_maxQueueCapacity_number Queue capacity for cleanupExecutor
+# TYPE executors_cleanupExecutor_maxQueueCapacity_number gauge
+executors_cleanupExecutor_maxQueueCapacity_number{experimental="true",nodeId="tc-instance-1",} 500.0
+# HELP executors_cleanupExecutor_poolSize_number Pool size for cleanupExecutor
+# TYPE executors_cleanupExecutor_poolSize_number gauge
+executors_cleanupExecutor_poolSize_number{experimental="true",nodeId="tc-instance-1",} 1.0
+# HELP executors_cleanupExecutor_queuedTasks_number Number of queued tasks for cleanupExecutor
+# TYPE executors_cleanupExecutor_queuedTasks_number gauge
+executors_cleanupExecutor_queuedTasks_number{experimental="true",nodeId="tc-instance-1",} 0.0
+# HELP executors_cleanupExecutor_rejectsCount_number Rejects count for adding task to cleanupExecutor
+# TYPE executors_cleanupExecutor_rejectsCount_number gauge
+executors_cleanupExecutor_rejectsCount_number{experimental="true",nodeId="tc-instance-1",} 0.0
+# HELP executors_lowPriorityExecutor_activeTasks_number Running executor tasks for lowPriorityExecutor
+# TYPE executors_lowPriorityExecutor_activeTasks_number gauge
+executors_lowPriorityExecutor_activeTasks_number{experimental="true",nodeId="tc-instance-1",} 0.0
+# HELP executors_lowPriorityExecutor_completedTasks_number Completed executor tasks for lowPriorityExecutor
+# TYPE executors_lowPriorityExecutor_completedTasks_number gauge
+executors_lowPriorityExecutor_completedTasks_number{experimental="true",nodeId="tc-instance-1",} 1425.0
+# HELP executors_lowPriorityExecutor_maxQueueCapacity_number Queue capacity for lowPriorityExecutor
+# TYPE executors_lowPriorityExecutor_maxQueueCapacity_number gauge
+executors_lowPriorityExecutor_maxQueueCapacity_number{experimental="true",nodeId="tc-instance-1",} 10000.0
+# HELP executors_lowPriorityExecutor_poolSize_number Pool size for lowPriorityExecutor
+# TYPE executors_lowPriorityExecutor_poolSize_number gauge
+executors_lowPriorityExecutor_poolSize_number{experimental="true",nodeId="tc-instance-1",} 5.0
+# HELP executors_lowPriorityExecutor_queuedTasks_number Number of queued tasks for lowPriorityExecutor
+# TYPE executors_lowPriorityExecutor_queuedTasks_number gauge
+executors_lowPriorityExecutor_queuedTasks_number{experimental="true",nodeId="tc-instance-1",} 0.0
+# HELP executors_lowPriorityExecutor_rejectsCount_number Rejects count for adding task to lowPriorityExecutor
+# TYPE executors_lowPriorityExecutor_rejectsCount_number gauge
+executors_lowPriorityExecutor_rejectsCount_number{experimental="true",nodeId="tc-instance-1",} 0.0
+# HELP executors_normalExecutor_activeTasks_number Running executor tasks for normalExecutor
+# TYPE executors_normalExecutor_activeTasks_number gauge
+executors_normalExecutor_activeTasks_number{experimental="true",nodeId="tc-instance-1",} 0.0
+# HELP executors_normalExecutor_completedTasks_number Completed executor tasks for normalExecutor
+# TYPE executors_normalExecutor_completedTasks_number gauge
+executors_normalExecutor_completedTasks_number{experimental="true",nodeId="tc-instance-1",} 10952.0
+# HELP executors_normalExecutor_maxQueueCapacity_number Queue capacity for normalExecutor
+# TYPE executors_normalExecutor_maxQueueCapacity_number gauge
+executors_normalExecutor_maxQueueCapacity_number{experimental="true",nodeId="tc-instance-1",} 3000.0
+# HELP executors_normalExecutor_poolSize_number Pool size for normalExecutor
+# TYPE executors_normalExecutor_poolSize_number gauge
+executors_normalExecutor_poolSize_number{experimental="true",nodeId="tc-instance-1",} 14.0
+# HELP executors_normalExecutor_queuedTasks_number Number of queued tasks for normalExecutor
+# TYPE executors_normalExecutor_queuedTasks_number gauge
+executors_normalExecutor_queuedTasks_number{experimental="true",nodeId="tc-instance-1",} 0.0
+# HELP executors_normalExecutor_rejectsCount_number Rejects count for adding task to normalExecutor
+# TYPE executors_normalExecutor_rejectsCount_number gauge
+executors_normalExecutor_rejectsCount_number{experimental="true",nodeId="tc-instance-1",} 0.0
+# HELP executors_periodicalVcsExecutor_activeTasks_number Running executor tasks for periodicalVcsExecutor
+# TYPE executors_periodicalVcsExecutor_activeTasks_number gauge
+executors_periodicalVcsExecutor_activeTasks_number{experimental="true",nodeId="tc-instance-1",} 0.0
+# HELP executors_periodicalVcsExecutor_completedTasks_number Completed executor tasks for periodicalVcsExecutor
+# TYPE executors_periodicalVcsExecutor_completedTasks_number gauge
+executors_periodicalVcsExecutor_completedTasks_number{experimental="true",nodeId="tc-instance-1",} 1334.0
+# HELP executors_periodicalVcsExecutor_maxQueueCapacity_number Queue capacity for periodicalVcsExecutor
+# TYPE executors_periodicalVcsExecutor_maxQueueCapacity_number gauge
+executors_periodicalVcsExecutor_maxQueueCapacity_number{experimental="true",nodeId="tc-instance-1",} 2000.0
+# HELP executors_periodicalVcsExecutor_poolSize_number Pool size for periodicalVcsExecutor
+# TYPE executors_periodicalVcsExecutor_poolSize_number gauge
+executors_periodicalVcsExecutor_poolSize_number{experimental="true",nodeId="tc-instance-1",} 5.0
+# HELP executors_periodicalVcsExecutor_queuedTasks_number Number of queued tasks for periodicalVcsExecutor
+# TYPE executors_periodicalVcsExecutor_queuedTasks_number gauge
+executors_periodicalVcsExecutor_queuedTasks_number{experimental="true",nodeId="tc-instance-1",} 0.0
+# HELP executors_periodicalVcsExecutor_rejectsCount_number Rejects count for adding task to periodicalVcsExecutor
+# TYPE executors_periodicalVcsExecutor_rejectsCount_number gauge
+executors_periodicalVcsExecutor_rejectsCount_number{experimental="true",nodeId="tc-instance-1",} 0.0
+# HELP executors_tomcatHttpThreadPool_activeTasks_number Apache Tomcat HTTP thread pool active threads number
+# TYPE executors_tomcatHttpThreadPool_activeTasks_number gauge
+executors_tomcatHttpThreadPool_activeTasks_number{experimental="true",nodeId="tc-instance-1",port="8111",} 1.0
+# HELP executors_tomcatHttpThreadPool_poolSize_number Apache Tomcat HTTP thread pool size
+# TYPE executors_tomcatHttpThreadPool_poolSize_number gauge
+executors_tomcatHttpThreadPool_poolSize_number{experimental="true",nodeId="tc-instance-1",port="8111",} 200.0
+# HELP executors_triggersExecutor_activeTasks_number Running executor tasks for triggersExecutor
+# TYPE executors_triggersExecutor_activeTasks_number gauge
+executors_triggersExecutor_activeTasks_number{experimental="true",nodeId="tc-instance-1",} 0.0
+# HELP executors_triggersExecutor_completedTasks_number Completed executor tasks for triggersExecutor
+# TYPE executors_triggersExecutor_completedTasks_number gauge
+executors_triggersExecutor_completedTasks_number{experimental="true",nodeId="tc-instance-1",} 10514.0
+# HELP executors_triggersExecutor_maxQueueCapacity_number Queue capacity for triggersExecutor
+# TYPE executors_triggersExecutor_maxQueueCapacity_number gauge
+executors_triggersExecutor_maxQueueCapacity_number{experimental="true",nodeId="tc-instance-1",} 2.147483647E9
+# HELP executors_triggersExecutor_poolSize_number Pool size for triggersExecutor
+# TYPE executors_triggersExecutor_poolSize_number gauge
+executors_triggersExecutor_poolSize_number{experimental="true",nodeId="tc-instance-1",} 1.0
+# HELP executors_triggersExecutor_queuedTasks_number Number of queued tasks for triggersExecutor
+# TYPE executors_triggersExecutor_queuedTasks_number gauge
+executors_triggersExecutor_queuedTasks_number{experimental="true",nodeId="tc-instance-1",} 0.0
+# HELP executors_triggersExecutor_rejectsCount_number Rejects count for adding task to triggersExecutor
+# TYPE executors_triggersExecutor_rejectsCount_number gauge
+executors_triggersExecutor_rejectsCount_number{experimental="true",nodeId="tc-instance-1",} 0.0
+# HELP finishingBuild_buildFinishDelay_milliseconds Time spent since the server received buildFinish from the agent and a moment when the build has been finished by the server
+# TYPE finishingBuild_buildFinishDelay_milliseconds summary
+finishingBuild_buildFinishDelay_milliseconds_count{experimental="true",nodeId="tc-instance-1",} 74.0
+finishingBuild_buildFinishDelay_milliseconds_total{experimental="true",nodeId="tc-instance-1",} 13902.0
+# TYPE full_agent_waiting_time_milliseconds summary
+full_agent_waiting_time_milliseconds_count{experimental="true",image="Linux-Medium",nodeId="tc-instance-1",version="prod-188",} 19.0
+full_agent_waiting_time_milliseconds_total{experimental="true",image="Linux-Medium",nodeId="tc-instance-1",version="prod-188",} 460726.0
+full_agent_waiting_time_milliseconds_count{experimental="true",image="Linux-Small",nodeId="tc-instance-1",version="prod-188",} 55.0
+full_agent_waiting_time_milliseconds_total{experimental="true",image="Linux-Small",nodeId="tc-instance-1",version="prod-188",} 1945550.0
+full_agent_waiting_time_milliseconds_count{experimental="true",image="Windows-Medium",nodeId="tc-instance-1",version="prod-188",} 0.0
+full_agent_waiting_time_milliseconds_total{experimental="true",image="Windows-Medium",nodeId="tc-instance-1",version="prod-188",} 0.0
+full_agent_waiting_time_milliseconds_count{experimental="true",image="Windows-Small",nodeId="tc-instance-1",version="prod-188",} 0.0
+full_agent_waiting_time_milliseconds_total{experimental="true",image="Windows-Small",nodeId="tc-instance-1",version="prod-188",} 0.0
+# TYPE full_agent_waiting_time_quantile_number gauge
+full_agent_waiting_time_quantile_number{experimental="true",image="Linux-Medium",nodeId="tc-instance-1",quantile="0.5",version="prod-188",} 25105.0
+full_agent_waiting_time_quantile_number{experimental="true",image="Linux-Medium",nodeId="tc-instance-1",quantile="0.8",version="prod-188",} 28765.0
+full_agent_waiting_time_quantile_number{experimental="true",image="Linux-Small",nodeId="tc-instance-1",quantile="0.5",version="prod-188",} 14031.0
+full_agent_waiting_time_quantile_number{experimental="true",image="Linux-Small",nodeId="tc-instance-1",quantile="0.8",version="prod-188",} 123226.0
+full_agent_waiting_time_quantile_number{experimental="true",image="Windows-Medium",nodeId="tc-instance-1",quantile="0.5",version="prod-188",} 0.0
+full_agent_waiting_time_quantile_number{experimental="true",image="Windows-Medium",nodeId="tc-instance-1",quantile="0.8",version="prod-188",} 0.0
+full_agent_waiting_time_quantile_number{experimental="true",image="Windows-Small",nodeId="tc-instance-1",quantile="0.5",version="prod-188",} 0.0
+full_agent_waiting_time_quantile_number{experimental="true",image="Windows-Small",nodeId="tc-instance-1",quantile="0.8",version="prod-188",} 0.0
+# HELP http_requests_duration_milliseconds Duration of http requests to the server
+# TYPE http_requests_duration_milliseconds histogram
+http_requests_duration_milliseconds_bucket{apiType="other",clientType="tc_agent",essential="false",experimental="true",nodeId="tc-instance-1",le="1000",} 819.0
+http_requests_duration_milliseconds_bucket{apiType="other",clientType="tc_agent",essential="false",experimental="true",nodeId="tc-instance-1",le="10000",} 820.0
+http_requests_duration_milliseconds_bucket{apiType="other",clientType="tc_agent",essential="false",experimental="true",nodeId="tc-instance-1",le="300",} 741.0
+http_requests_duration_milliseconds_bucket{apiType="other",clientType="tc_agent",essential="false",experimental="true",nodeId="tc-instance-1",le="3000",} 820.0
+http_requests_duration_milliseconds_bucket{apiType="other",clientType="tc_agent",essential="false",experimental="true",nodeId="tc-instance-1",le="500",} 808.0
+http_requests_duration_milliseconds_bucket{apiType="other",clientType="tc_agent",essential="false",experimental="true",nodeId="tc-instance-1",le="60000",} 820.0
+http_requests_duration_milliseconds_bucket{apiType="other",clientType="tc_agent",essential="false",experimental="true",nodeId="tc-instance-1",le="600000",} 820.0
+http_requests_duration_milliseconds_count{apiType="other",clientType="tc_agent",essential="false",experimental="true",nodeId="tc-instance-1",} 820.0
+http_requests_duration_milliseconds_total{apiType="other",clientType="tc_agent",essential="false",experimental="true",nodeId="tc-instance-1",} 38004.0
+http_requests_duration_milliseconds_bucket{apiType="other",clientType="web_ui",essential="false",experimental="true",nodeId="tc-instance-1",le="1000",} 2435.0
+http_requests_duration_milliseconds_bucket{apiType="other",clientType="web_ui",essential="false",experimental="true",nodeId="tc-instance-1",le="10000",} 2440.0
+http_requests_duration_milliseconds_bucket{apiType="other",clientType="web_ui",essential="false",experimental="true",nodeId="tc-instance-1",le="300",} 2420.0
+http_requests_duration_milliseconds_bucket{apiType="other",clientType="web_ui",essential="false",experimental="true",nodeId="tc-instance-1",le="3000",} 2439.0
+http_requests_duration_milliseconds_bucket{apiType="other",clientType="web_ui",essential="false",experimental="true",nodeId="tc-instance-1",le="500",} 2429.0
+http_requests_duration_milliseconds_bucket{apiType="other",clientType="web_ui",essential="false",experimental="true",nodeId="tc-instance-1",le="60000",} 2442.0
+http_requests_duration_milliseconds_bucket{apiType="other",clientType="web_ui",essential="false",experimental="true",nodeId="tc-instance-1",le="600000",} 2442.0
+http_requests_duration_milliseconds_count{apiType="other",clientType="web_ui",essential="false",experimental="true",nodeId="tc-instance-1",} 2442.0
+http_requests_duration_milliseconds_total{apiType="other",clientType="web_ui",essential="false",experimental="true",nodeId="tc-instance-1",} 74140.0
+http_requests_duration_milliseconds_bucket{apiType="other",clientType="web_ui",essential="true",experimental="true",nodeId="tc-instance-1",le="1000",} 4.0
+http_requests_duration_milliseconds_bucket{apiType="other",clientType="web_ui",essential="true",experimental="true",nodeId="tc-instance-1",le="10000",} 4.0
+http_requests_duration_milliseconds_bucket{apiType="other",clientType="web_ui",essential="true",experimental="true",nodeId="tc-instance-1",le="300",} 4.0
+http_requests_duration_milliseconds_bucket{apiType="other",clientType="web_ui",essential="true",experimental="true",nodeId="tc-instance-1",le="3000",} 4.0
+http_requests_duration_milliseconds_bucket{apiType="other",clientType="web_ui",essential="true",experimental="true",nodeId="tc-instance-1",le="500",} 4.0
+http_requests_duration_milliseconds_bucket{apiType="other",clientType="web_ui",essential="true",experimental="true",nodeId="tc-instance-1",le="60000",} 4.0
+http_requests_duration_milliseconds_bucket{apiType="other",clientType="web_ui",essential="true",experimental="true",nodeId="tc-instance-1",le="600000",} 4.0
+http_requests_duration_milliseconds_count{apiType="other",clientType="web_ui",essential="true",experimental="true",nodeId="tc-instance-1",} 4.0
+http_requests_duration_milliseconds_total{apiType="other",clientType="web_ui",essential="true",experimental="true",nodeId="tc-instance-1",} 27.0
+http_requests_duration_milliseconds_bucket{apiType="rest_api",clientType="other",essential="false",experimental="true",nodeId="tc-instance-1",le="1000",} 24003.0
+http_requests_duration_milliseconds_bucket{apiType="rest_api",clientType="other",essential="false",experimental="true",nodeId="tc-instance-1",le="10000",} 24003.0
+http_requests_duration_milliseconds_bucket{apiType="rest_api",clientType="other",essential="false",experimental="true",nodeId="tc-instance-1",le="300",} 24003.0
+http_requests_duration_milliseconds_bucket{apiType="rest_api",clientType="other",essential="false",experimental="true",nodeId="tc-instance-1",le="3000",} 24003.0
+http_requests_duration_milliseconds_bucket{apiType="rest_api",clientType="other",essential="false",experimental="true",nodeId="tc-instance-1",le="500",} 24003.0
+http_requests_duration_milliseconds_bucket{apiType="rest_api",clientType="other",essential="false",experimental="true",nodeId="tc-instance-1",le="60000",} 24003.0
+http_requests_duration_milliseconds_bucket{apiType="rest_api",clientType="other",essential="false",experimental="true",nodeId="tc-instance-1",le="600000",} 24003.0
+http_requests_duration_milliseconds_count{apiType="rest_api",clientType="other",essential="false",experimental="true",nodeId="tc-instance-1",} 24003.0
+http_requests_duration_milliseconds_total{apiType="rest_api",clientType="other",essential="false",experimental="true",nodeId="tc-instance-1",} 53158.0
+http_requests_duration_milliseconds_bucket{apiType="rest_api",clientType="web_ui",essential="false",experimental="true",nodeId="tc-instance-1",le="1000",} 2069.0
+http_requests_duration_milliseconds_bucket{apiType="rest_api",clientType="web_ui",essential="false",experimental="true",nodeId="tc-instance-1",le="10000",} 2069.0
+http_requests_duration_milliseconds_bucket{apiType="rest_api",clientType="web_ui",essential="false",experimental="true",nodeId="tc-instance-1",le="300",} 2068.0
+http_requests_duration_milliseconds_bucket{apiType="rest_api",clientType="web_ui",essential="false",experimental="true",nodeId="tc-instance-1",le="3000",} 2069.0
+http_requests_duration_milliseconds_bucket{apiType="rest_api",clientType="web_ui",essential="false",experimental="true",nodeId="tc-instance-1",le="500",} 2068.0
+http_requests_duration_milliseconds_bucket{apiType="rest_api",clientType="web_ui",essential="false",experimental="true",nodeId="tc-instance-1",le="60000",} 2069.0
+http_requests_duration_milliseconds_bucket{apiType="rest_api",clientType="web_ui",essential="false",experimental="true",nodeId="tc-instance-1",le="600000",} 2069.0
+http_requests_duration_milliseconds_count{apiType="rest_api",clientType="web_ui",essential="false",experimental="true",nodeId="tc-instance-1",} 2069.0
+http_requests_duration_milliseconds_total{apiType="rest_api",clientType="web_ui",essential="false",experimental="true",nodeId="tc-instance-1",} 19761.0
+http_requests_duration_milliseconds_bucket{apiType="rest_api",clientType="web_ui",essential="true",experimental="true",nodeId="tc-instance-1",le="1000",} 27.0
+http_requests_duration_milliseconds_bucket{apiType="rest_api",clientType="web_ui",essential="true",experimental="true",nodeId="tc-instance-1",le="10000",} 27.0
+http_requests_duration_milliseconds_bucket{apiType="rest_api",clientType="web_ui",essential="true",experimental="true",nodeId="tc-instance-1",le="300",} 26.0
+http_requests_duration_milliseconds_bucket{apiType="rest_api",clientType="web_ui",essential="true",experimental="true",nodeId="tc-instance-1",le="3000",} 27.0
+http_requests_duration_milliseconds_bucket{apiType="rest_api",clientType="web_ui",essential="true",experimental="true",nodeId="tc-instance-1",le="500",} 27.0
+http_requests_duration_milliseconds_bucket{apiType="rest_api",clientType="web_ui",essential="true",experimental="true",nodeId="tc-instance-1",le="60000",} 27.0
+http_requests_duration_milliseconds_bucket{apiType="rest_api",clientType="web_ui",essential="true",experimental="true",nodeId="tc-instance-1",le="600000",} 27.0
+http_requests_duration_milliseconds_count{apiType="rest_api",clientType="web_ui",essential="true",experimental="true",nodeId="tc-instance-1",} 27.0
+http_requests_duration_milliseconds_total{apiType="rest_api",clientType="web_ui",essential="true",experimental="true",nodeId="tc-instance-1",} 1209.0
+http_requests_duration_milliseconds_bucket{apiType="rpc2",clientType="tc_agent",essential="false",experimental="true",nodeId="tc-instance-1",le="1000",} 4626.0
+http_requests_duration_milliseconds_bucket{apiType="rpc2",clientType="tc_agent",essential="false",experimental="true",nodeId="tc-instance-1",le="10000",} 4626.0
+http_requests_duration_milliseconds_bucket{apiType="rpc2",clientType="tc_agent",essential="false",experimental="true",nodeId="tc-instance-1",le="300",} 4626.0
+http_requests_duration_milliseconds_bucket{apiType="rpc2",clientType="tc_agent",essential="false",experimental="true",nodeId="tc-instance-1",le="3000",} 4626.0
+http_requests_duration_milliseconds_bucket{apiType="rpc2",clientType="tc_agent",essential="false",experimental="true",nodeId="tc-instance-1",le="500",} 4626.0
+http_requests_duration_milliseconds_bucket{apiType="rpc2",clientType="tc_agent",essential="false",experimental="true",nodeId="tc-instance-1",le="60000",} 4626.0
+http_requests_duration_milliseconds_bucket{apiType="rpc2",clientType="tc_agent",essential="false",experimental="true",nodeId="tc-instance-1",le="600000",} 4626.0
+http_requests_duration_milliseconds_count{apiType="rpc2",clientType="tc_agent",essential="false",experimental="true",nodeId="tc-instance-1",} 4626.0
+http_requests_duration_milliseconds_total{apiType="rpc2",clientType="tc_agent",essential="false",experimental="true",nodeId="tc-instance-1",} 405.0
+http_requests_duration_milliseconds_bucket{apiType="other",clientType="other",essential="false",experimental="true",nodeId="tc-instance-1",le="1000",} 9088.0
+http_requests_duration_milliseconds_bucket{apiType="other",clientType="other",essential="false",experimental="true",nodeId="tc-instance-1",le="10000",} 9102.0
+http_requests_duration_milliseconds_bucket{apiType="other",clientType="other",essential="false",experimental="true",nodeId="tc-instance-1",le="300",} 9008.0
+http_requests_duration_milliseconds_bucket{apiType="other",clientType="other",essential="false",experimental="true",nodeId="tc-instance-1",le="3000",} 9100.0
+http_requests_duration_milliseconds_bucket{apiType="other",clientType="other",essential="false",experimental="true",nodeId="tc-instance-1",le="500",} 9057.0
+http_requests_duration_milliseconds_bucket{apiType="other",clientType="other",essential="false",experimental="true",nodeId="tc-instance-1",le="60000",} 9102.0
+http_requests_duration_milliseconds_bucket{apiType="other",clientType="other",essential="false",experimental="true",nodeId="tc-instance-1",le="600000",} 9102.0
+http_requests_duration_milliseconds_count{apiType="other",clientType="other",essential="false",experimental="true",nodeId="tc-instance-1",} 9102.0
+http_requests_duration_milliseconds_total{apiType="other",clientType="other",essential="false",experimental="true",nodeId="tc-instance-1",} 171853.0
+# HELP httpSessions_active_number Number of active HTTP sessions
+# TYPE httpSessions_active_number gauge
+httpSessions_active_number{nodeId="tc-instance-1",} 201.0
+# HELP io_build_log_reads_bytes Build log read bytes
+# TYPE io_build_log_reads_bytes counter
+io_build_log_reads_bytes{experimental="true",nodeId="tc-instance-1",} 781896.0
+# HELP io_build_log_writes_bytes Build log write bytes
+# TYPE io_build_log_writes_bytes counter
+io_build_log_writes_bytes{experimental="true",nodeId="tc-instance-1",} 2626877.0
+# HELP io_build_patch_writes_bytes Server side patch written bytes
+# TYPE io_build_patch_writes_bytes counter
+io_build_patch_writes_bytes{experimental="true",nodeId="tc-instance-1",} 4.38743257E8
+# HELP jvm_buffer_count_number An estimate of the number of buffers in the pool
+# TYPE jvm_buffer_count_number gauge
+jvm_buffer_count_number{id="direct",nodeId="tc-instance-1",} 71.0
+jvm_buffer_count_number{id="mapped",nodeId="tc-instance-1",} 0.0
+# HELP jvm_buffer_memory_used_bytes An estimate of the memory that the Java virtual machine is using for this buffer pool
+# TYPE jvm_buffer_memory_used_bytes gauge
+jvm_buffer_memory_used_bytes{id="direct",nodeId="tc-instance-1",} 3.5911199E7
+jvm_buffer_memory_used_bytes{id="mapped",nodeId="tc-instance-1",} 0.0
+# HELP jvm_buffer_total_capacity_bytes An estimate of the total capacity of the buffers in this pool
+# TYPE jvm_buffer_total_capacity_bytes gauge
+jvm_buffer_total_capacity_bytes{id="direct",nodeId="tc-instance-1",} 3.5911198E7
+jvm_buffer_total_capacity_bytes{id="mapped",nodeId="tc-instance-1",} 0.0
+# HELP jvm_gc_count_number Number of GC calls
+# TYPE jvm_gc_count_number gauge
+jvm_gc_count_number{experimental="true",nodeId="tc-instance-1",} 902.0
+# HELP jvm_gc_duration_total_milliseconds Total GC duration since JVM start
+# TYPE jvm_gc_duration_total_milliseconds gauge
+jvm_gc_duration_total_milliseconds{experimental="true",nodeId="tc-instance-1",} 18627.0
+# HELP jvm_gc_live_data_size_bytes Size of old generation memory pool after a full GC
+# TYPE jvm_gc_live_data_size_bytes gauge
+jvm_gc_live_data_size_bytes{nodeId="tc-instance-1",} 3.31670384E8
+# HELP jvm_gc_max_data_size_bytes Max size of old generation memory pool
+# TYPE jvm_gc_max_data_size_bytes gauge
+jvm_gc_max_data_size_bytes{nodeId="tc-instance-1",} 1.048576E9
+# HELP jvm_gc_memory_allocated_bytes Incremented for an increase in the size of the young generation memory pool after one GC to before the next
+# TYPE jvm_gc_memory_allocated_bytes counter
+jvm_gc_memory_allocated_bytes{nodeId="tc-instance-1",} 1.69196938184E11
+# HELP jvm_gc_memory_promoted_bytes Count of positive increases in the size of the old generation memory pool before GC to after GC
+# TYPE jvm_gc_memory_promoted_bytes counter
+jvm_gc_memory_promoted_bytes{nodeId="tc-instance-1",} 5.23280504E8
+# HELP jvm_memory_committed_bytes The amount of memory in bytes that is committed for the Java virtual machine to use
+# TYPE jvm_memory_committed_bytes gauge
+jvm_memory_committed_bytes{area="heap",id="Eden Space",nodeId="tc-instance-1",} 2.21380608E8
+jvm_memory_committed_bytes{area="heap",id="Survivor Space",nodeId="tc-instance-1",} 2.7656192E7
+jvm_memory_committed_bytes{area="heap",id="Tenured Gen",nodeId="tc-instance-1",} 5.52787968E8
+jvm_memory_committed_bytes{area="nonheap",id="CodeHeap 'non-nmethods'",nodeId="tc-instance-1",} 2555904.0
+jvm_memory_committed_bytes{area="nonheap",id="CodeHeap 'non-profiled nmethods'",nodeId="tc-instance-1",} 5.3936128E7
+jvm_memory_committed_bytes{area="nonheap",id="CodeHeap 'profiled nmethods'",nodeId="tc-instance-1",} 8.5065728E7
+jvm_memory_committed_bytes{area="nonheap",id="Compressed Class Space",nodeId="tc-instance-1",} 4.0108032E7
+jvm_memory_committed_bytes{area="nonheap",id="Metaspace",nodeId="tc-instance-1",} 4.05843968E8
+# HELP jvm_memory_max_bytes The maximum amount of memory in bytes that can be used for memory management
+# TYPE jvm_memory_max_bytes gauge
+jvm_memory_max_bytes{area="heap",id="Eden Space",nodeId="tc-instance-1",} 4.194304E8
+jvm_memory_max_bytes{area="heap",id="Survivor Space",nodeId="tc-instance-1",} 5.24288E7
+jvm_memory_max_bytes{area="heap",id="Tenured Gen",nodeId="tc-instance-1",} 1.048576E9
+jvm_memory_max_bytes{area="nonheap",id="CodeHeap 'non-nmethods'",nodeId="tc-instance-1",} 5828608.0
+jvm_memory_max_bytes{area="nonheap",id="CodeHeap 'non-profiled nmethods'",nodeId="tc-instance-1",} 1.22916864E8
+jvm_memory_max_bytes{area="nonheap",id="CodeHeap 'profiled nmethods'",nodeId="tc-instance-1",} 1.22912768E8
+jvm_memory_max_bytes{area="nonheap",id="Compressed Class Space",nodeId="tc-instance-1",} 1.073741824E9
+jvm_memory_max_bytes{area="nonheap",id="Metaspace",nodeId="tc-instance-1",} -1.0
+# HELP jvm_memory_used_bytes The amount of used memory
+# TYPE jvm_memory_used_bytes gauge
+jvm_memory_used_bytes{area="heap",id="Eden Space",nodeId="tc-instance-1",} 1.7329008E8
+jvm_memory_used_bytes{area="heap",id="Survivor Space",nodeId="tc-instance-1",} 2489504.0
+jvm_memory_used_bytes{area="heap",id="Tenured Gen",nodeId="tc-instance-1",} 3.58562128E8
+jvm_memory_used_bytes{area="nonheap",id="CodeHeap 'non-nmethods'",nodeId="tc-instance-1",} 1834880.0
+jvm_memory_used_bytes{area="nonheap",id="CodeHeap 'non-profiled nmethods'",nodeId="tc-instance-1",} 5.3936E7
+jvm_memory_used_bytes{area="nonheap",id="CodeHeap 'profiled nmethods'",nodeId="tc-instance-1",} 8.4618496E7
+jvm_memory_used_bytes{area="nonheap",id="Compressed Class Space",nodeId="tc-instance-1",} 3.348732E7
+jvm_memory_used_bytes{area="nonheap",id="Metaspace",nodeId="tc-instance-1",} 3.52280296E8
+# HELP jvm_threads_number The current number of live threads including both daemon and non-daemon threads
+# TYPE jvm_threads_number gauge
+jvm_threads_number{nodeId="tc-instance-1",} 194.0
+# HELP jvm_threads_daemon_number The current number of live daemon threads
+# TYPE jvm_threads_daemon_number gauge
+jvm_threads_daemon_number{experimental="true",nodeId="tc-instance-1",} 134.0
+# HELP node_events_processing_number Multi-node events processing
+# TYPE node_events_processing_number counter
+node_events_processing_number{experimental="true",nodeId="tc-instance-1",} 2.0
+# HELP node_events_publishing_number Multi-node events publishing
+# TYPE node_events_publishing_number counter
+node_events_publishing_number{experimental="true",nodeId="tc-instance-1",} 5460.0
+# HELP node_events_unprocessed_number Current number of unprocessed multi-node events
+# TYPE node_events_unprocessed_number gauge
+node_events_unprocessed_number{experimental="true",nodeId="tc-instance-1",} 0.0
+# HELP node_tasks_accepted_number Multi-node tasks accepted
+# TYPE node_tasks_accepted_number counter
+node_tasks_accepted_number{experimental="true",nodeId="tc-instance-1",} 259.0
+# HELP node_tasks_finished_number Multi-node tasks finished
+# TYPE node_tasks_finished_number counter
+node_tasks_finished_number{experimental="true",nodeId="tc-instance-1",} 249.0
+# HELP node_tasks_pending_number Current number of pending multi-node tasks
+# TYPE node_tasks_pending_number gauge
+node_tasks_pending_number{experimental="true",nodeId="tc-instance-1",} 21.0
+# HELP process_queue_milliseconds Time to process build queue and start builds
+# TYPE process_queue_milliseconds summary
+process_queue_milliseconds_count{experimental="true",nodeId="tc-instance-1",} 21609.0
+process_queue_milliseconds_total{experimental="true",nodeId="tc-instance-1",} 23752.0
+# HELP process_queue_parts_milliseconds Time spent on builds optimization while processing the build queue
+# TYPE process_queue_parts_milliseconds summary
+process_queue_parts_milliseconds_count{experimental="true",nodeId="tc-instance-1",part="optimization",} 86808.0
+process_queue_parts_milliseconds_total{experimental="true",nodeId="tc-instance-1",part="optimization",} 4154.0
+process_queue_parts_milliseconds_count{experimental="true",nodeId="tc-instance-1",part="processOtherNodesEvents",} 21609.0
+process_queue_parts_milliseconds_total{experimental="true",nodeId="tc-instance-1",part="processOtherNodesEvents",} 0.0
+process_queue_parts_milliseconds_count{experimental="true",nodeId="tc-instance-1",part="startBuilds",} 74.0
+process_queue_parts_milliseconds_total{experimental="true",nodeId="tc-instance-1",part="startBuilds",} 4199.0
+process_queue_parts_milliseconds_count{experimental="true",nodeId="tc-instance-1",part="compatibleAgents",} 1684.0
+process_queue_parts_milliseconds_total{experimental="true",nodeId="tc-instance-1",part="compatibleAgents",} 693.0
+process_queue_parts_milliseconds_count{experimental="true",nodeId="tc-instance-1",part="preconditions",} 65653.0
+process_queue_parts_milliseconds_total{experimental="true",nodeId="tc-instance-1",part="preconditions",} 9681.0
+# HELP process_websocket_send_pending_messages_milliseconds Time to send all pending WebSocket messages to UI
+# TYPE process_websocket_send_pending_messages_milliseconds summary
+process_websocket_send_pending_messages_milliseconds_count{experimental="true",nodeId="tc-instance-1",} 212944.0
+process_websocket_send_pending_messages_milliseconds_total{experimental="true",nodeId="tc-instance-1",} 225.0
+# HELP projects_number Number of projects
+# TYPE projects_number gauge
+projects_number{nodeId="tc-instance-1",} 2.0
+# HELP projects_active_number Number of active projects
+# TYPE projects_active_number gauge
+projects_active_number{nodeId="tc-instance-1",} 2.0
+# HELP pullRequests_batch_time_milliseconds Pull request retrieval, batch, duration
+# TYPE pullRequests_batch_time_milliseconds summary
+pullRequests_batch_time_milliseconds_count{experimental="true",nodeId="tc-instance-1",providerType="azureDevOps",} 0.0
+pullRequests_batch_time_milliseconds_total{experimental="true",nodeId="tc-instance-1",providerType="azureDevOps",} 0.0
+pullRequests_batch_time_milliseconds_count{experimental="true",nodeId="tc-instance-1",providerType="bitbucketCloud",} 0.0
+pullRequests_batch_time_milliseconds_total{experimental="true",nodeId="tc-instance-1",providerType="bitbucketCloud",} 0.0
+pullRequests_batch_time_milliseconds_count{experimental="true",nodeId="tc-instance-1",providerType="bitbucketServer",} 0.0
+pullRequests_batch_time_milliseconds_total{experimental="true",nodeId="tc-instance-1",providerType="bitbucketServer",} 0.0
+pullRequests_batch_time_milliseconds_count{experimental="true",nodeId="tc-instance-1",providerType="github",} 0.0
+pullRequests_batch_time_milliseconds_total{experimental="true",nodeId="tc-instance-1",providerType="github",} 0.0
+pullRequests_batch_time_milliseconds_count{experimental="true",nodeId="tc-instance-1",providerType="gitlab",} 0.0
+pullRequests_batch_time_milliseconds_total{experimental="true",nodeId="tc-instance-1",providerType="gitlab",} 0.0
+pullRequests_batch_time_milliseconds_count{experimental="true",nodeId="tc-instance-1",providerType="jetbrainsSpace",} 0.0
+pullRequests_batch_time_milliseconds_total{experimental="true",nodeId="tc-instance-1",providerType="jetbrainsSpace",} 0.0
+# HELP pullRequests_single_time_milliseconds Pull request retrieval, individual, duration
+# TYPE pullRequests_single_time_milliseconds summary
+pullRequests_single_time_milliseconds_count{experimental="true",nodeId="tc-instance-1",providerType="azureDevOps",} 0.0
+pullRequests_single_time_milliseconds_total{experimental="true",nodeId="tc-instance-1",providerType="azureDevOps",} 0.0
+pullRequests_single_time_milliseconds_count{experimental="true",nodeId="tc-instance-1",providerType="bitbucketCloud",} 0.0
+pullRequests_single_time_milliseconds_total{experimental="true",nodeId="tc-instance-1",providerType="bitbucketCloud",} 0.0
+pullRequests_single_time_milliseconds_count{experimental="true",nodeId="tc-instance-1",providerType="bitbucketServer",} 0.0
+pullRequests_single_time_milliseconds_total{experimental="true",nodeId="tc-instance-1",providerType="bitbucketServer",} 0.0
+pullRequests_single_time_milliseconds_count{experimental="true",nodeId="tc-instance-1",providerType="github",} 0.0
+pullRequests_single_time_milliseconds_total{experimental="true",nodeId="tc-instance-1",providerType="github",} 0.0
+pullRequests_single_time_milliseconds_count{experimental="true",nodeId="tc-instance-1",providerType="gitlab",} 0.0
+pullRequests_single_time_milliseconds_total{experimental="true",nodeId="tc-instance-1",providerType="gitlab",} 0.0
+pullRequests_single_time_milliseconds_count{experimental="true",nodeId="tc-instance-1",providerType="jetbrainsSpace",} 0.0
+pullRequests_single_time_milliseconds_total{experimental="true",nodeId="tc-instance-1",providerType="jetbrainsSpace",} 0.0
+# HELP queuedBuild_waitingTime_milliseconds Time spent by a build waiting in the queue due to a particular reason
+# TYPE queuedBuild_waitingTime_milliseconds summary
+queuedBuild_waitingTime_milliseconds_count{experimental="true",nodeId="tc-instance-1",reason="Build_queue_was_paused",} 8.0
+queuedBuild_waitingTime_milliseconds_total{experimental="true",nodeId="tc-instance-1",reason="Build_queue_was_paused",} 3151110.0
+queuedBuild_waitingTime_milliseconds_count{experimental="true",nodeId="tc-instance-1",reason="Build_settings_have_not_been_finalized",} 1.0
+queuedBuild_waitingTime_milliseconds_total{experimental="true",nodeId="tc-instance-1",reason="Build_settings_have_not_been_finalized",} 123.0
+queuedBuild_waitingTime_milliseconds_count{experimental="true",nodeId="tc-instance-1",reason="Checking_for_changes_is_in_progress",} 72.0
+queuedBuild_waitingTime_milliseconds_total{experimental="true",nodeId="tc-instance-1",reason="Checking_for_changes_is_in_progress",} 331918.0
+queuedBuild_waitingTime_milliseconds_count{experimental="true",nodeId="tc-instance-1",reason="There_are_no_compatible_agents_which_can_run_this_build_and_match_the_specified_restrictions",} 74.0
+queuedBuild_waitingTime_milliseconds_total{experimental="true",nodeId="tc-instance-1",reason="There_are_no_compatible_agents_which_can_run_this_build_and_match_the_specified_restrictions",} 523.0
+queuedBuild_waitingTime_milliseconds_count{experimental="true",nodeId="tc-instance-1",reason="There_are_no_idle_compatible_agents_which_can_run_this_build",} 44.0
+queuedBuild_waitingTime_milliseconds_total{experimental="true",nodeId="tc-instance-1",reason="There_are_no_idle_compatible_agents_which_can_run_this_build",} 138.0
+queuedBuild_waitingTime_milliseconds_count{experimental="true",nodeId="tc-instance-1",reason="Waiting_for_currently_scheduled_to_terminate_agents_to_stop",} 11.0
+queuedBuild_waitingTime_milliseconds_total{experimental="true",nodeId="tc-instance-1",reason="Waiting_for_currently_scheduled_to_terminate_agents_to_stop",} 10.0
+queuedBuild_waitingTime_milliseconds_count{experimental="true",nodeId="tc-instance-1",reason="Waiting_for_starting_agent",} 74.0
+queuedBuild_waitingTime_milliseconds_total{experimental="true",nodeId="tc-instance-1",reason="Waiting_for_starting_agent",} 2384637.0
+queuedBuild_waitingTime_milliseconds_count{experimental="true",nodeId="tc-instance-1",reason="Waiting_for_the_build_queue_distribution_process",} 74.0
+queuedBuild_waitingTime_milliseconds_total{experimental="true",nodeId="tc-instance-1",reason="Waiting_for_the_build_queue_distribution_process",} 4502.0
+queuedBuild_waitingTime_milliseconds_count{experimental="true",nodeId="tc-instance-1",reason="Waiting_to_start_checking_for_changes",} 47.0
+queuedBuild_waitingTime_milliseconds_total{experimental="true",nodeId="tc-instance-1",reason="Waiting_to_start_checking_for_changes",} 3218.0
+# HELP runningBuilds_numberOfUnprocessedMessages_number The number of build log messages received from the agents but not yet processed
+# TYPE runningBuilds_numberOfUnprocessedMessages_number gauge
+runningBuilds_numberOfUnprocessedMessages_number{experimental="true",nodeId="tc-instance-1",} 0.0
+# HELP server_uptime_milliseconds Time since the server process started initializing
+# TYPE server_uptime_milliseconds gauge
+server_uptime_milliseconds{nodeId="tc-instance-1",} 1.06554228E8
+# HELP startingBuild_buildStartDelay_milliseconds Time passed after the build was removed from the queue but before the start of the checking for changes operation
+# TYPE startingBuild_buildStartDelay_milliseconds summary
+startingBuild_buildStartDelay_milliseconds_count{experimental="true",nodeId="tc-instance-1",} 74.0
+startingBuild_buildStartDelay_milliseconds_total{experimental="true",nodeId="tc-instance-1",} 6866.0
+# HELP startingBuild_runBuildDelay_milliseconds Time spent while preparing the starting build data and passing it to an agent
+# TYPE startingBuild_runBuildDelay_milliseconds summary
+startingBuild_runBuildDelay_milliseconds_count{experimental="true",nodeId="tc-instance-1",} 74.0
+startingBuild_runBuildDelay_milliseconds_total{experimental="true",nodeId="tc-instance-1",} 14451.0
+# HELP system_load_average_1m_number The sum of the number of runnable entities queued to available processors and the number of runnable entities running on the available processors averaged over a period of time
+# TYPE system_load_average_1m_number gauge
+system_load_average_1m_number{nodeId="tc-instance-1",} 1.62
+# HELP teamcity_cache_InvestigationTestRunsHolder_projectScopes_number Number of project scopes in the InvestigationTestRunsHolder scopes cache
+# TYPE teamcity_cache_InvestigationTestRunsHolder_projectScopes_number gauge
+teamcity_cache_InvestigationTestRunsHolder_projectScopes_number{experimental="true",nodeId="tc-instance-1",} 0.0
+# HELP teamcity_cache_InvestigationTestRunsHolder_testNames_number Number of tests in the InvestigationTestRunsHolder scopes cache
+# TYPE teamcity_cache_InvestigationTestRunsHolder_testNames_number gauge
+teamcity_cache_InvestigationTestRunsHolder_testNames_number{experimental="true",nodeId="tc-instance-1",} 0.0
+# HELP teamcity_cache_InvestigationTestRunsHolder_testRuns_number Number of test runs in the InvestigationTestRunsHolder cache
+# TYPE teamcity_cache_InvestigationTestRunsHolder_testRuns_number gauge
+teamcity_cache_InvestigationTestRunsHolder_testRuns_number{experimental="true",nodeId="tc-instance-1",} 0.0
+# HELP users_active_number Number of unique user sessions within last hour
+# TYPE users_active_number gauge
+users_active_number{nodeId="tc-instance-1",} 2.0
+# HELP vcs_changes_checking_milliseconds Duration of checking for changes operation
+# TYPE vcs_changes_checking_milliseconds summary
+vcs_changes_checking_milliseconds_count{experimental="true",nodeId="tc-instance-1",requestor="BUILD",type="COLLECT_CHANGES",vcsName="jetbrains_git",} 175.0
+vcs_changes_checking_milliseconds_total{experimental="true",nodeId="tc-instance-1",requestor="BUILD",type="COLLECT_CHANGES",vcsName="jetbrains_git",} 592.0
+vcs_changes_checking_milliseconds_count{experimental="true",nodeId="tc-instance-1",requestor="BUILD",type="SCHEDULED",vcsName="jetbrains_git",} 103.0
+vcs_changes_checking_milliseconds_total{experimental="true",nodeId="tc-instance-1",requestor="BUILD",type="SCHEDULED",vcsName="jetbrains_git",} 166067.0
+vcs_changes_checking_milliseconds_count{experimental="true",nodeId="tc-instance-1",requestor="SCHEDULE",type="COLLECT_CHANGES",vcsName="jetbrains_git",} 1334.0
+vcs_changes_checking_milliseconds_total{experimental="true",nodeId="tc-instance-1",requestor="SCHEDULE",type="COLLECT_CHANGES",vcsName="jetbrains_git",} 1871098.0
+vcs_changes_checking_milliseconds_count{experimental="true",nodeId="tc-instance-1",requestor="SCHEDULE",type="SCHEDULED",vcsName="jetbrains_git",} 1329.0
+vcs_changes_checking_milliseconds_total{experimental="true",nodeId="tc-instance-1",requestor="SCHEDULE",type="SCHEDULED",vcsName="jetbrains_git",} 445.0
+# HELP vcs_get_current_state_calls_number VCS state requests
+# TYPE vcs_get_current_state_calls_number counter
+vcs_get_current_state_calls_number{experimental="true",nodeId="tc-instance-1",} 1435.0
+# HELP vcs_git_fetch_duration_milliseconds git fetch operations duration
+# TYPE vcs_git_fetch_duration_milliseconds summary
+vcs_git_fetch_duration_milliseconds_count{experimental="true",nodeId="tc-instance-1",repoUrl="ALL",} 7.0
+vcs_git_fetch_duration_milliseconds_total{experimental="true",nodeId="tc-instance-1",repoUrl="ALL",} 135171.0
+# HELP vcsChangesCollection_delay_milliseconds Delay of the checking for changes operations invoked by: Starting build or build chain
+# TYPE vcsChangesCollection_delay_milliseconds summary
+vcsChangesCollection_delay_milliseconds_count{experimental="true",nodeId="tc-instance-1",requestor="BUILD",} 0.0
+vcsChangesCollection_delay_milliseconds_total{experimental="true",nodeId="tc-instance-1",requestor="BUILD",} 0.0
+vcsChangesCollection_delay_milliseconds_count{experimental="true",nodeId="tc-instance-1",requestor="COMMIT_HOOK",} 0.0
+vcsChangesCollection_delay_milliseconds_total{experimental="true",nodeId="tc-instance-1",requestor="COMMIT_HOOK",} 0.0
+vcsChangesCollection_delay_milliseconds_count{experimental="true",nodeId="tc-instance-1",requestor="UNKNOWN",} 0.0
+vcsChangesCollection_delay_milliseconds_total{experimental="true",nodeId="tc-instance-1",requestor="UNKNOWN",} 0.0
+vcsChangesCollection_delay_milliseconds_count{experimental="true",nodeId="tc-instance-1",requestor="USER",} 0.0
+vcsChangesCollection_delay_milliseconds_total{experimental="true",nodeId="tc-instance-1",requestor="USER",} 0.0
+vcsChangesCollection_delay_milliseconds_count{experimental="true",nodeId="tc-instance-1",requestor="VCS_TRIGGER_QUIET_PERIOD",} 0.0
+vcsChangesCollection_delay_milliseconds_total{experimental="true",nodeId="tc-instance-1",requestor="VCS_TRIGGER_QUIET_PERIOD",} 0.0
+# HELP vcsRootInstances_active_number Number of active of VCS root instances
+# TYPE vcsRootInstances_active_number gauge
+vcsRootInstances_active_number{experimental="true",nodeId="tc-instance-1",} 1.0
+# HELP vcsRoots_number Number of VCS roots
+# TYPE vcsRoots_number gauge
+vcsRoots_number{nodeId="tc-instance-1",} 1.0
