@@ -172,7 +172,7 @@ class ExplainParameterizedQueries:
             prepared_statement=query_signature, null_parameter=null_parameter
         )
         try:
-            rows = self._execute_query_and_fetch_rows(
+            return self._execute_query_and_fetch_rows(
                 dbname,
                 EXPLAIN_QUERY.format(
                     explain_function=self._config.statement_samples_config.get(
@@ -181,7 +181,6 @@ class ExplainParameterizedQueries:
                     statement=execute_prepared_statement_query,
                 ),
             )
-            return rows
         except Exception as e:
             if self._config.log_unobfuscated_plans:
                 logger.warning(

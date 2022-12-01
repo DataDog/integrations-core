@@ -38,7 +38,6 @@ def dbm_instance(pg_instance):
 def test_explain_parameterized_queries(
     integration_check, dbm_instance, aggregator, query, expected_explain_err_code, expected_generic_values
 ):
-    aggregator.reset()
     check = integration_check(dbm_instance)
     check._connect()
 
