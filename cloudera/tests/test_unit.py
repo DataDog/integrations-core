@@ -8,6 +8,8 @@ import six
 from cm_client.models.api_cluster import ApiCluster
 from cm_client.models.api_cluster_list import ApiClusterList
 from cm_client.models.api_entity_tag import ApiEntityTag
+from cm_client.models.api_event import ApiEvent
+from cm_client.models.api_event_query_result import ApiEventQueryResult
 from cm_client.models.api_host import ApiHost
 from cm_client.models.api_host_list import ApiHostList
 from cm_client.models.api_time_series import ApiTimeSeries
@@ -356,6 +358,39 @@ def test_given_cloudera_check_when_good_health_cluster_then_emits_cluster_metric
         for category, metrics in METRICS.items():
             for metric in metrics:
                 aggregator.assert_metric(f'cloudera.{category}.{metric}')
+
+
+def test_given_cloudera_check_when_run_check_then_emits_events(
+    aggregator,
+    dd_run_check,
+    cloudera_check,
+    instance,
+):
+    content = 'Interceptor for {http://yarn.extractor.cdx.cloudera.com/}YarnHistoryClient '
+    'has thrown exception, unwinding now'
+
+    dummy_event = ApiEvent(
+        time_occurred='2022-11-30T21:06:39.870Z',
+        severity='IMPORTANT',
+        content=content,
+        category='LOG_EVENT',
+        attributes=[
+            {'name': 'ROLE', 'values': ['TELEMETRYPUBLISHER']},
+            {'name': 'CLUSTER', 'values': ['cod--qfdcinkqrzw']},
+            {'name': 'ROLE_DISPLAY_NAME', 'values': ['Telemetry Publisher (cod--qfdcinkqrzw-gateway0)']},
+        ],
+    )
+
+    with mock.patch(
+        'cm_client.ClouderaManagerResourceApi.get_version',
+        return_value=ApiVersionInfo(version="7.0.0"),
+    ), mock.patch('cm_client.EventsResourceApi.read_events', return_value=ApiEventQueryResult(items=[dummy_event])):
+        # Given
+        check = cloudera_check(instance)
+        # When
+        dd_run_check(check)
+        # Then
+        aggregator.assert_event(msg_text=content, count=1)
 
 
 # def test_run_timeseries_checks(

@@ -3,6 +3,7 @@ import cm_client
 from datadog_checks.base import AgentCheck
 from datadog_checks.cloudera.api_client import ApiClient
 from datadog_checks.cloudera.entity_status import ENTITY_STATUS
+from datadog_checks.cloudera.event import ClouderaEvent
 from datadog_checks.cloudera.metrics import TIMESERIES_METRICS
 
 from .common import CLUSTER_HEALTH, HOST_HEALTH
@@ -14,7 +15,7 @@ class ApiClientV7(ApiClient):
         super(ApiClientV7, self).__init__(check, api_client)
 
     def collect_data(self):
-        self._collect_clusters()
+        # self._collect_clusters()
         self._collect_events()
 
     def _collect_clusters(self):
@@ -138,3 +139,21 @@ class ApiClientV7(ApiClient):
                     self._log.debug('value: %s', value)
                     self._log.debug('metric_tags: %s', metric_tags)
                     self._check.gauge(full_metric_name, value, tags=metric_tags)
+<<<<<<< HEAD
+=======
+
+    def _collect_events(self):
+        events_resource_api = cm_client.EventsResourceApi(self._api_client)
+
+        # TODO: need to determine the time ranges to collect events, look at Silk integration for logic
+        query = "timeOccurred=ge=2022-11-30T21:06:35Z;timeOccurred=le=2022-11-30T21:07:35Z"
+        event_resource_response = events_resource_api.read_events(query=query)
+
+        for item in event_resource_response.items:
+            self._log.debug('content: %s', item.content)
+            self._log.debug('timestamp: %s', item.time_occurred)
+            self._log.debug('id: %s', item.id)
+            self._log.debug('category: %s', item.category)
+            event_payload = ClouderaEvent(item).get_event()
+            self._check.event(event_payload)
+>>>>>>> fa85f2c3b6 (Add unit test for events)
