@@ -70,15 +70,14 @@ class ExplainParameterizedQueries:
     # 4096 comes from DBM's recommended `track_activity_query_size` of 4096 which limits
     # the SQL text retrieved from `pg_stat_activity` and `pg_stat_statements` which is where we get
     # the query statements from.
-    DEFAULT_MAX_ALLOWABLE_MB = 20
+    DEFAULT_MAX_ALLOWABLE_SPACE_MB = 20
 
-    def __init__(self, check, config, tags):
+    def __init__(self, check, config):
         self._check = check
         self._config = config
-        self._tags = tags
 
     @tracked_method(agent_check_getter=agent_check_getter)
-    def explain_statement(self, dbname, statement, obfuscated_statement):
+    def explain_statement(self, dbname, statement, obfuscated_statement, tags):
         if self._check.version < V12:
             return None
         self._set_plan_cache_mode(dbname)
@@ -88,7 +87,7 @@ class ExplainParameterizedQueries:
             return None
 
         result = self._explain_prepared_statement(dbname, statement, obfuscated_statement, query_signature)
-        self._cleanup_pg_prepared_statements(dbname)
+        self._cleanup_pg_prepared_statements(dbname, tags)
         if result:
             return result[0][0][0]
         return None
@@ -202,7 +201,7 @@ class ExplainParameterizedQueries:
         return None
 
     @tracked_method(agent_check_getter=agent_check_getter)
-    def _cleanup_pg_prepared_statements(self, dbname):
+    def _cleanup_pg_prepared_statements(self, dbname, tags):
         '''
         Prepared statements are not deallocated until the session ends, so to prevent taking up a lot of space,
         this method estimates how much space we've allocated for prepared statements and deallocates
@@ -213,25 +212,25 @@ class ExplainParameterizedQueries:
         if rows:
             pg_prepared_statements_mb = rows[0][0] / 1048576  # 1MB
 
+        max_pg_prepared_statements_space = self._config.statement_samples_config.get(
+            'max_pg_prepared_statements_space', ExplainParameterizedQueries.DEFAULT_MAX_ALLOWABLE_SPACE_MB
+        )
+        if pg_prepared_statements_mb >= max_pg_prepared_statements_space:
+            self._execute_query(dbname, "DEALLOCATE ALL")
+            pg_prepared_statements_mb = 0
+
         self._check.gauge(
             "dd.postgres.explain_parameterized_queries.size",
             pg_prepared_statements_mb,
-            tags=self._tags,
+            tags=tags,
             hostname=self._check.resolved_hostname,
         )
         self._check.gauge(
             "dd.postgres.explain_parameterized_queries.max",
-            ExplainParameterizedQueries.MAX_ALLOWABLE_MB,
-            tags=self._tags,
+            max_pg_prepared_statements_space,
+            tags=tags,
             hostname=self._check.resolved_hostname,
         )
-
-        if pg_prepared_statements_mb >= (
-            self._config.statement_samples_config.get(
-                'max_pg_prepared_statements_space', ExplainParameterizedQueries.DEFAULT_MAX_ALLOWABLE_MB
-            )
-        ):
-            self._execute_query(dbname, "DEALLOCATE ALL")
 
     def _execute_query(self, dbname, query):
         with self._check._get_db(dbname).cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:

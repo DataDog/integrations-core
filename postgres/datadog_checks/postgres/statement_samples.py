@@ -187,7 +187,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         self._activity_last_query_start = None
         # The value is loaded when connecting to the main database
         self._explain_function = config.statement_samples_config.get('explain_function', 'datadog.explain_statement')
-        self._explain_parameterized_queries = ExplainParameterizedQueries(check, config, self._tags)
+        self._explain_parameterized_queries = ExplainParameterizedQueries(check, config)
         self._obfuscate_options = to_native_string(json.dumps(self._config.obfuscator_options))
 
         self._collection_strategy_cache = TTLCache(
@@ -597,7 +597,9 @@ class PostgresStatementSamples(DBMAsyncJob):
                 " can't be explained due to the separation of the parsed query and raw bind parameters: %s",
                 repr(e),
             )
-            result = self._explain_parameterized_queries.explain_statement(dbname, statement, obfuscated_statement)
+            result = self._explain_parameterized_queries.explain_statement(
+                dbname, statement, obfuscated_statement, self._tags
+            )
             if result:
                 return result, DBExplainError.explained_with_prepared_statement, None
             error_response = None, DBExplainError.parameterized_query, '{}'.format(type(e))
