@@ -40,7 +40,7 @@ def license_headers(ctx, check):
         path_to_check = root / check_name
         ignores = [pathlib.Path(p) for p in IGNORES.get(check_name, [])]
         ignores.extend([pathlib.Path(p) for p in IGNORES.get("all")])
-        errors = validate_license_headers(path_to_check, ignore=ignores)
+        errors = validate_license_headers(path_to_check, ignore=ignores, repo_root=root)
 
         for err in errors:
             echo_failure(f'{check_name}/{err.path}: {err.message}')
