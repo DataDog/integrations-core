@@ -44,7 +44,7 @@ class ExplainParameterizedQueries:
         We could provide `null` as a value because it works with any datatype, but this will also not work
         because Postgres knows that no rows will be returned.
             e.g. EXPLAIN SELECT * FROM products WHERE id = null;
-                Returns: nothing
+                Returns: no plan
 
         However, with Postgres versions 12 and above, you can control how the query planner behaves with
         the `plan_cache_mode`. The mode `force_generic_plan` will force Postgres to produce a generic plan.
@@ -203,6 +203,11 @@ class ExplainParameterizedQueries:
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _cleanup_pg_prepared_statements(self, dbname):
+        '''
+        Prepared statements are not deallocated until the session ends, so to prevent taking up a lot of space,
+        this method estimates how much space we've allocated for prepared statements and deallocates 
+        ~all~ prepared statements if we've reached our max.
+        '''
         rows = self._execute_query_and_fetch_rows(dbname, PG_PREPARED_STATEMENTS_SIZE_ESTIMATE_QUERY)
         pg_prepared_statements_mb = 0
         if rows:
