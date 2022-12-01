@@ -6,6 +6,7 @@ import threading
 from contextlib import closing
 
 import oracledb
+from six import PY2
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.utils.db import QueryManager
@@ -49,6 +50,12 @@ class Oracle(AgentCheck):
     SERVICE_CHECK_CAN_QUERY = "can_query"
 
     def __init__(self, name, init_config, instances):
+        if PY2:
+            raise ConfigurationError(
+                "This version of the integration is only available when using py3. "
+                "Check https://docs.datadoghq.com/agent/guide/agent-v6-python-3 "
+                "for more information."
+            )
         super(Oracle, self).__init__(name, init_config, instances)
         self._server = self.instance.get('server')
         self._user = self.instance.get('username') or self.instance.get('user')
@@ -163,6 +170,8 @@ class Oracle(AgentCheck):
                 raise JDBC_IMPORT_ERROR
             else:
                 return True
+        else:
+            return False
 
     def _oracle_connect(self):
         dsn = self._get_dsn()

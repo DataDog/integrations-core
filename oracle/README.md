@@ -17,6 +17,8 @@ Due to licensing restrictions, the JDBC library is not included in the Datadog A
 
 **Note**: With Agent v7.42.x, the Agent no longer requires or supports installing the Instant Client libraries. If you're on an older version of the Agent and want to use the Instant Client, refer to the [Oracle Instant Client][3] setup instructions.
 
+*NOTE*: Starting in v7.42.x, the Oracle integration only supports Python 3.
+
 
 ##### JDBC driver
 
