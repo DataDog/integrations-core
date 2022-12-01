@@ -37,7 +37,6 @@ TIMESERIES_METRICS = {
         'alerts_rate',
         'events_critical_rate',
         'events_important_rate',
-
     ],
     'role': [
         'mem_rss',

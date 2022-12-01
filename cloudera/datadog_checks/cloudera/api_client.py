@@ -1,5 +1,6 @@
 from abc import abstractmethod
 
+
 class ApiClient:
     def __init__(self, check, api_client):
         self._check = check

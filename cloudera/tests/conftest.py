@@ -8,15 +8,16 @@ import pytest
 
 from datadog_checks.cloudera import ClouderaCheck
 from datadog_checks.dev import docker_run
-from datadog_checks.dev.conditions import CheckDockerLogs
 
 from . import common
+
+# from datadog_checks.dev.conditions import CheckDockerLogs
 
 
 @pytest.fixture(scope='session')
 def dd_environment():
     # FIXME: Commenting out v12 Cloudera Docker image until confirmation this version should be supported
-    
+
     # compose_file = os.path.join(common.HERE, 'compose', common.COMPOSE_FILE)
     # conditions = [
     #     CheckDockerLogs(

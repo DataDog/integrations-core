@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2022-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from six import PY2
+import six
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 
@@ -14,28 +14,28 @@ class ClouderaCheck(AgentCheck, ConfigMixin):
     __NAMESPACE__ = 'cloudera'
 
     def __init__(self, name, init_config, instances):
-        if PY2:
+        if six.PY2:
             raise ConfigurationError(
                 "This version of the integration is only available when using py3. "
                 "Check https://docs.datadoghq.com/agent/guide/agent-v6-python-3 "
                 "for more information."
             )
-
         super(ClouderaCheck, self).__init__(name, init_config, instances)
         self.client = None
         self.check_initializations.append(self._create_client)
 
     def _create_client(self):
         try:
-            client = make_api_client(self, self.config)
+            self.client = make_api_client(self, self.config)
         except Exception as e:
-            self.log.error(f"Cloudera API Client is none: {e}")
+            self.log.error("Cloudera API Client is none: %s", e)
             self.service_check(CAN_CONNECT, AgentCheck.CRITICAL)
             raise
 
-        self.client = client
-        self.custom_tags = self.config.tags  # TODO: Don't need self.custom_tags
-
     def check(self, _):
-        self.client.collect_data()
-        self.service_check(CAN_CONNECT, AgentCheck.OK)
+        try:
+            self.client.collect_data()
+            self.service_check(CAN_CONNECT, AgentCheck.OK)
+        except Exception as e:
+            self.log.error('Cloudera check raised an exception: %s', e)
+            self.service_check(CAN_CONNECT, AgentCheck.CRITICAL)

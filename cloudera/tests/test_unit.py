@@ -20,29 +20,22 @@ from cm_client.rest import ApiException
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.cloudera.metrics import METRICS
-from six import PY2
-
-
-# from datadog_checks.cloudera.queries import TIMESERIES_QUERIES
 
 pytestmark = [pytest.mark.unit]
 
 
 def test_given_cloudera_check_when_py2_then_raises_exception(
-    aggregator,
-    dd_run_check,
     cloudera_check,
     instance,
 ):
     with mock.patch.object(six, 'PY2'), pytest.raises(
-        ConfigurationError, match='This version of the integration is only available when using py3'
+        ConfigurationError,
+        match='This version of the integration is only available when using py3',
     ):
-        # Given
         cloudera_check(instance)
 
 
 def test_given_cloudera_check_when_get_version_exception_from_cloudera_client_then_emits_critical_service(
-    aggregator,
     dd_run_check,
     cloudera_check,
     instance,
@@ -50,32 +43,29 @@ def test_given_cloudera_check_when_get_version_exception_from_cloudera_client_th
     with mock.patch(
         'cm_client.ClouderaManagerResourceApi.get_version',
         side_effect=ApiException('Service not available'),
+    ), pytest.raises(
+        Exception,
+        match='Service not available',
     ):
         # Given
         check = cloudera_check(instance)
         # When
         dd_run_check(check)
-        # Then
-        aggregator.assert_service_check('cloudera.can_connect', AgentCheck.CRITICAL)
 
 
 def test_given_cloudera_check_when_version_field_not_found_then_emits_critical_service(
-    aggregator,
     dd_run_check,
     cloudera_check,
-    api_response,
     instance,
 ):
-    with mock.patch(
-        'cm_client.ClouderaManagerResourceApi.get_version',
-        return_value=ApiVersionInfo(),
+    with mock.patch('cm_client.ClouderaManagerResourceApi.get_version', return_value=ApiVersionInfo(),), pytest.raises(
+        Exception,
+        match='Cloudera Manager Version is unsupported or unknown',
     ):
         # Given
         check = cloudera_check(instance)
         # When
         dd_run_check(check)
-        # Then
-        aggregator.assert_service_check('cloudera.can_connect', AgentCheck.CRITICAL)
 
 
 def test_given_cloudera_check_when_not_supported_version_then_emits_critical_service(
@@ -88,6 +78,9 @@ def test_given_cloudera_check_when_not_supported_version_then_emits_critical_ser
     with mock.patch(
         'cm_client.ClouderaManagerResourceApi.get_version',
         return_value=ApiVersionInfo(version='5.0.0'),
+    ), pytest.raises(
+        Exception,
+        match='Cloudera Manager Version is unsupported or unknown',
     ):
         # Given
         check = cloudera_check(instance)
@@ -154,28 +147,6 @@ def test_given_cloudera_check_when_supported_version_then_emits_ok_service(
         dd_run_check(check)
         # Then
         aggregator.assert_service_check('cloudera.can_connect', AgentCheck.OK)
-
-
-# def test_given_cloudera_check_when_v5_read_clusters_exception_from_cloudera_client_then_emits_critical_service(
-#     aggregator,
-#     dd_run_check,
-#     cloudera_check,
-#     api_response,
-# ):
-#     with mock.patch(
-#         'cm_client.ClouderaManagerResourceApi.get_version',
-#         return_value=ApiVersionInfo(version="5.0.0"),
-#     ), mock.patch(
-#         'cm_client.ClustersResourceApi.read_clusters',
-#         side_effect=ApiException('Service not available'),
-#     ):
-#         # Given
-#         instance = {}
-#         check = cloudera_check(instance)
-#         # When
-#         dd_run_check(check)
-#         # Then
-#         aggregator.assert_service_check('cloudera.can_connect', AgentCheck.CRITICAL)
 
 
 def test_given_cloudera_check_when_v7_read_clusters_exception_from_cloudera_client_then_emits_critical_service(

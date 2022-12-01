@@ -1,11 +1,12 @@
 import cm_client
 
+from datadog_checks.base import AgentCheck
 from datadog_checks.cloudera.api_client import ApiClient
 from datadog_checks.cloudera.entity_status import ENTITY_STATUS
-from datadog_checks.cloudera.metrics import METRICS
+from datadog_checks.cloudera.metrics import TIMESERIES_METRICS
 
 from .common import CLUSTER_HEALTH, HOST_HEALTH
-from datadog_checks.base import AgentCheck
+
 
 # TODO: Refactor this to abstract out timeseries queries using composite pattern
 class ApiClientV7(ApiClient):
@@ -13,24 +14,14 @@ class ApiClientV7(ApiClient):
         super(ApiClientV7, self).__init__(check, api_client)
 
     def collect_data(self):
-        try:
-            self._collect_clusters()
-        except Exception as e:
-            self.check.error("Unable to finish collecting data: %s", str(e))
-            raise
-
-        try:
-            self._collect_events()
-        except Exception as e:
-            self.check.error("Unable to finish collecting events: %s", str(e))
-            raise
+        self._collect_clusters()
+        # self._collect_events()
 
     def _collect_clusters(self):
         clusters_resource_api = cm_client.ClustersResourceApi(self._api_client)
         read_clusters_response = clusters_resource_api.read_clusters(cluster_type='any', view='full')
         self._log.debug("Full clusters response:")
         self._log.debug(read_clusters_response)
-
         for cluster in read_clusters_response.items:
             self._collect_cluster_metrics_and_service_check(cluster)
 
@@ -49,7 +40,7 @@ class ApiClientV7(ApiClient):
         if cluster_tags:
             for cluster_tag in cluster_tags:
                 tags.append(f"{cluster_tag.name}:{cluster_tag.value}")
-        
+
         message = cluster.entity_status if cluster_entity_status != AgentCheck.OK else None
         self._check.service_check(CLUSTER_HEALTH, cluster_entity_status, tags=tags, message=message)
 
@@ -59,7 +50,7 @@ class ApiClientV7(ApiClient):
 
     def _collect_cluster_metrics(self, cluster_name, tags):
         time_series_resource_api = cm_client.TimeSeriesResourceApi(self._api_client)
-        metric_names = ','.join(f'last({metric})' for metric in METRICS['cluster'])
+        metric_names = ','.join(f'last({metric})' for metric in TIMESERIES_METRICS['cluster'])
         query = f'SELECT {metric_names} WHERE clusterName="{cluster_name}" AND category=CLUSTER'
         self._log.debug('query: %s', query)
         query_time_series_response = time_series_resource_api.query_time_series(query=query)
@@ -88,12 +79,13 @@ class ApiClientV7(ApiClient):
             tags = [f"{tag.name}:{tag.value}" for tag in host.tags] if host.tags else []
             self._collect_host_metrics(host_id, tags)
             self._collect_role_metrics(host_id, tags)
+            self._collect_host_disks(host_id)
             self._log.debug('host tags: %s', tags)
             self._check.service_check(HOST_HEALTH, host_entity_status, tags=tags)
 
     def _collect_host_metrics(self, host_id, tags):
         time_series_resource_api = cm_client.TimeSeriesResourceApi(self._api_client)
-        metric_names = ','.join(f'last({metric})' for metric in METRICS['host'])
+        metric_names = ','.join(f'last({metric})' for metric in TIMESERIES_METRICS['host'])
         query = f'SELECT {metric_names} WHERE hostId="{host_id}" AND category=HOST'
         self._log.debug('query: %s', query)
         query_time_series_response = time_series_resource_api.query_time_series(query=query)
@@ -104,13 +96,22 @@ class ApiClientV7(ApiClient):
 
     def _collect_role_metrics(self, host_id, tags):
         time_series_resource_api = cm_client.TimeSeriesResourceApi(self._api_client)
-        metric_names = ','.join(f'last({metric})' for metric in METRICS['role'])
+        metric_names = ','.join(f'last({metric})' for metric in TIMESERIES_METRICS['role'])
         query = f'SELECT {metric_names} WHERE hostId="{host_id}" AND category=ROLE'
         self._log.debug('query: %s', query)
         query_time_series_response = time_series_resource_api.query_time_series(query=query)
         self._log.debug("Full timeseries response:")
         self._log.debug(query_time_series_response)
         self._collect_query_time_series(query_time_series_response, 'role', [])
+
+    def _collect_host_disks(self, host_id):
+        time_series_resource_api = cm_client.TimeSeriesResourceApi(self._api_client)
+        metric_names = ','.join(f'last({metric})' for metric in TIMESERIES_METRICS['disk'])
+        query = f'SELECT {metric_names} WHERE hostId="{host_id}" AND category=DISK'
+        self._log.debug('query: %s', query)
+        query_time_series_response = time_series_resource_api.query_time_series(query=query)
+        self._log.debug('query_time_series_response: %s', query_time_series_response)
+        self._collect_query_time_series(query_time_series_response, 'disk', [])
 
     def _collect_query_time_series(self, query_time_series_response, category, tags):
         for item in query_time_series_response.items:
@@ -122,7 +123,7 @@ class ApiClientV7(ApiClient):
                 elif last_metadata_metric_name != ts.metadata.metric_name:
                     index += 1
                 last_metadata_metric_name = ts.metadata.metric_name
-                metric_name = METRICS[category][index]
+                metric_name = TIMESERIES_METRICS[category][index]
                 metric_tags = tags + [f'cloudera_{category}:{ts.metadata.entity_name}']
                 full_metric_name = f'{category}.{metric_name}'
                 new_tag = f'cloudera_{category}:{ts.metadata.entity_name}'
@@ -138,7 +139,6 @@ class ApiClientV7(ApiClient):
                     self._log.debug('metric_tags: %s', metric_tags)
                     self._check.gauge(full_metric_name, value, tags=metric_tags)
 
-
     def _collect_events(self):
         events_resource_api = cm_client.EventsResourceApi(self._api_client)
 
@@ -148,6 +148,6 @@ class ApiClientV7(ApiClient):
 
         # TODO: Implement
         for item in event_resource_response.items:
-            self._log.debug(f"content: %s", item.content)
-            self._log.debug(f"id: %s", item.id)
-            self._log.debug(f"category: %s", item.category)
+            self._log.debug('content: %s', item.content)
+            self._log.debug('id: %s', item.id)
+            self._log.debug('category: %s', item.category)
