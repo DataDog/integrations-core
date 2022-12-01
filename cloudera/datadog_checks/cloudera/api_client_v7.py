@@ -139,8 +139,6 @@ class ApiClientV7(ApiClient):
                     self._log.debug('value: %s', value)
                     self._log.debug('metric_tags: %s', metric_tags)
                     self._check.gauge(full_metric_name, value, tags=metric_tags)
-<<<<<<< HEAD
-=======
 
     def _collect_events(self):
         events_resource_api = cm_client.EventsResourceApi(self._api_client)
@@ -156,4 +154,3 @@ class ApiClientV7(ApiClient):
             self._log.debug('category: %s', item.category)
             event_payload = ClouderaEvent(item).get_event()
             self._check.event(event_payload)
->>>>>>> fa85f2c3b6 (Add unit test for events)
