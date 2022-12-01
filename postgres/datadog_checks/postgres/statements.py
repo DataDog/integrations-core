@@ -318,32 +318,6 @@ class PostgresStatementMetrics(DBMAsyncJob):
 
             return []
 
-    @tracked_method(agent_check_getter=agent_check_getter)
-    def _emit_pg_stat_statements_metrics(self):
-        query = PG_STAT_STATEMENTS_COUNT_QUERY_LT_9_4 if self._check.version < V9_4 else PG_STAT_STATEMENTS_COUNT_QUERY
-        try:
-            rows = self._execute_query(
-                self._check._get_db(self._config.dbname).cursor(cursor_factory=psycopg2.extras.DictCursor),
-                query,
-            )
-            count = 0
-            if rows:
-                count = rows[0][0]
-            self._check.gauge(
-                "postgresql.pg_stat_statements.max",
-                self._check.pg_settings.get("pg_stat_statements.max", 0),
-                tags=self._tags,
-                hostname=self._check.resolved_hostname,
-            )
-            self._check.count(
-                "postgresql.pg_stat_statements.count",
-                count,
-                tags=self._tags,
-                hostname=self._check.resolved_hostname,
-            )
-        except psycopg2.Error as e:
-            self._log.warning("Failed to query for pg_stat_statements count: %s", e)
-    
     def _emit_pg_stat_statement_query_text_length_metrics(self, rows):
         txt_length_sum = 0
         txt_length_max = 0
@@ -369,7 +343,6 @@ class PostgresStatementMetrics(DBMAsyncJob):
     def _collect_metrics_rows(self):
         self._emit_pg_stat_statements_metrics()
         rows = self._load_pg_stat_statements()
-        self._emit_pg_stat_statement_query_text_length_metrics(rows)
 
         rows = self._normalize_queries(rows)
         if not rows:
@@ -389,6 +362,12 @@ class PostgresStatementMetrics(DBMAsyncJob):
     def _normalize_queries(self, rows):
         normalized_rows = []
         for row in rows:
+            self._check.histogram(
+                "postgresql.pg_stat_statements.query_text_length",
+                len(row['query']),
+                tags=self._tags,
+                hostname=self._check.resolved_hostname,
+            )
             normalized_row = dict(copy.copy(row))
             try:
                 statement = obfuscate_sql_with_metadata(row['query'], self._obfuscate_options)
