@@ -85,6 +85,20 @@ NEWER_92_METRICS = {
     'temp_files': ('postgresql.temp_files', AgentCheck.rate),
 }
 
+QUERY_PG_STAT_DATABASE = {
+    'name': 'pg_stat_database',
+    'query': """
+        SELECT
+            datname,
+            deadlocks
+        FROM pg_stat_database
+    """.strip(),
+    'columns': [
+        {'name': 'db', 'type': 'tag'},
+        {'name': 'postgresql.deadlocks.count', 'type': 'monotonic_count'},
+    ],
+}
+
 COMMON_BGW_METRICS = {
     'checkpoints_timed': ('postgresql.bgwriter.checkpoints_timed', AgentCheck.monotonic_count),
     'checkpoints_req': ('postgresql.bgwriter.checkpoints_requested', AgentCheck.monotonic_count),
