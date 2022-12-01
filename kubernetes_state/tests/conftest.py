@@ -5,7 +5,13 @@ from copy import deepcopy
 
 import pytest
 
-INSTANCE = {'prometheus_url': 'https://localhost:443/metrics', 'bearer_token_auth': 'false', 'tags': ["custom:tag"]}
+INSTANCE = {
+    'host': 'foo',
+    'kube_state_url': 'http://example.com:8080/metrics',
+    'health_service_check': True,
+    'tags': ['optional:tag1'],
+    'telemetry': False,
+}
 
 
 @pytest.fixture(scope='session')
