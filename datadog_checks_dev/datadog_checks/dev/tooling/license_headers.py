@@ -53,7 +53,6 @@ def validate_license_headers(
     - Only python (*.py) files need a license header
     - Code under hidden folders (starting with `.`) are ignored
     """
-    root = check_path
     ignoreset = set(ignore or [])
 
     def walk_recursively(path, gitignore_matcher):
@@ -69,7 +68,7 @@ def validate_license_headers(
                 if child.relative_to(child.parent).as_posix().startswith('.'):
                     continue
 
-                relpath = child.relative_to(root)
+                relpath = child.relative_to(check_path)
                 # Skip blacklisted folders
                 if relpath in ignoreset:
                     continue
@@ -86,7 +85,7 @@ def validate_license_headers(
             contents = f.read()
 
         license_header = parse_license_header(contents)
-        relpath = path.relative_to(root).as_posix()
+        relpath = path.relative_to(check_path).as_posix()
 
         # License is missing altogether
         if not license_header:
@@ -101,11 +100,11 @@ def validate_license_headers(
         elif license_header != get_default_license_header():
             return LicenseHeaderError("file does not match expected license format", relpath)
 
-    gitignore_matcher = _GitIgnoreMatcher.from_path_to_root(root, repo_root)
+    gitignore_matcher = _GitIgnoreMatcher.from_path_to_root(check_path, repo_root)
 
     # Walk through subdirs and validate files
     errors = []
-    for candidate in walk_recursively(root, gitignore_matcher):
+    for candidate in walk_recursively(check_path, gitignore_matcher):
         if error := validate_license_header(candidate):
             errors.append(error)
 
