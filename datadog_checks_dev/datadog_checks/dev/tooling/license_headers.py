@@ -41,6 +41,7 @@ def validate_license_headers(
     check_path: pathlib.Path,
     ignore: Optional[Iterable[pathlib.Path]] = None,
     *,
+    repo_root: Optional[pathlib.Path] = None,
     get_previous: Callable[[pathlib.Path], Optional[str]] = _get_previous,
 ) -> List[LicenseHeaderError]:
     """
@@ -73,7 +74,7 @@ def validate_license_headers(
                 if relpath in ignoreset:
                     continue
 
-                yield from walk_recursively(child, gitignore_matcher.with_file(path))
+                yield from walk_recursively(child, gitignore_matcher.for_path(path))
                 continue
 
             # Skip non-python files
@@ -100,8 +101,11 @@ def validate_license_headers(
         elif license_header != get_default_license_header():
             return LicenseHeaderError("file does not match expected license format", relpath)
 
+    gitignore_matcher = _GitIgnoreMatcher.from_path_to_root(root, repo_root)
+
+    # Walk through subdirs and validate files
     errors = []
-    for candidate in walk_recursively(root, _GitIgnoreMatcher(root)):
+    for candidate in walk_recursively(root, gitignore_matcher):
         if error := validate_license_header(candidate):
             errors.append(error)
 
@@ -126,16 +130,25 @@ class _GitIgnoreMatcher:
         self._path = path
         self._matcher = _gitignore_spec_from_file(path / '.gitignore')
 
-    def with_file(self, path):
-        """Returns a copy with the patterns from `gitignore_path` added (with greater priority).
+    @classmethod
+    def from_path_to_root(cls, path, repo_root=None):
+        if repo_root:
+            parents = [parent for parent in reversed(path.relative_to(repo_root).parents)]
+            instance = cls(repo_root)
+            for parent in parents[1:]:
+                instance = instance.for_path(repo_root / parent)
+            return instance.for_path(path)
+        else:
+            return cls(path)
 
-        If `gitignore_path` doesn't exist, it silently ignores the error and returns a copy of the original matcher.
-        """
+    def for_path(self, path):
+        """Returns a new matcher that takes the current matcher as a parent."""
         return self.__class__(path, self)
 
     def match(self, relpath):
-        """Return whether the given relative path is matched, checking parents if necessary."""
+        """Return whether the given relative path is matched, checking top to bottom."""
         path_to_match = relpath.relative_to(self._path).as_posix()
+
         if self._matcher and self._matcher.match_file(path_to_match):
             return True
         elif self._parent:

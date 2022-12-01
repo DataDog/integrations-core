@@ -226,7 +226,7 @@ def test_validate_license_headers_honors_gitignore_file_on_check_path(tmp_path):
     assert validate_license_headers(check_path) == []
 
 
-def test_validate_license_headers_honors_nested_gitignore_files(tmp_path):
+def test_validate_license_headers_honors_nested_gitignore_files_reincluding_file(tmp_path):
     check_path = tmp_path / "check"
     check_path.mkdir()
 
@@ -268,3 +268,26 @@ def test_validate_license_headers_honors_gitignore_relative_patterns(tmp_path):
     errors = validate_license_headers(check_path)
     assert len(errors) > 0
     assert errors[0].path == (target_path / "some.py").relative_to(check_path).as_posix()
+
+
+def test_validate_license_headers_honors_gitignore_from_parents(tmp_path):
+    # tmp_path is going to be our repo root.
+    # In all of our integration repos the check is always directly under the root,
+    # but we're assuming that the function we're testing doesn't know this, hence
+    # the extra level here for this test.
+    check_path = tmp_path / "some_folder" / "check"
+
+    target_path = check_path / "foo"
+    target_path.mkdir(parents=True)
+
+    _write_string_to_file(tmp_path / ".gitignore", "!foo\n")
+
+    _write_file_without_license(target_path / "some.py")
+
+    errors = validate_license_headers(check_path, repo_root=tmp_path)
+    assert len(errors) > 0
+    assert errors[0].path == (target_path / "some.py").relative_to(check_path).as_posix()
+
+    # If we override this in a subdir, we shouldn't get an error
+    _write_string_to_file(check_path / ".gitignore", "foo/\n")
+    assert validate_license_headers(check_path, repo_root=tmp_path) == []
