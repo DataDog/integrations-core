@@ -10,9 +10,9 @@ from .common import HOST, METRICS, PORT
 pytestmark = [pytest.mark.unit]
 
 
-@mock.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
-def test_service_check_critical(mock_api, aggregator, dd_run_check, sonarqube_check):
+def test_service_check_critical(mocker, aggregator, dd_run_check, sonarqube_check):
     # Given
+    mock_api = mocker.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
     instance = {
         'web_endpoint': 'http://{}:{}'.format(HOST, PORT),
         'projects': {},
@@ -29,9 +29,9 @@ def test_service_check_critical(mock_api, aggregator, dd_run_check, sonarqube_ch
     )
 
 
-@mock.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
-def test_version_none(mock_api, aggregator, dd_run_check, sonarqube_check):
+def test_version_none(mocker, aggregator, dd_run_check, sonarqube_check):
     # Given
+    mock_api = mocker.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
     instance = {
         'web_endpoint': 'http://{}:{}'.format(HOST, PORT),
         'projects': {},
@@ -50,9 +50,9 @@ def test_version_none(mock_api, aggregator, dd_run_check, sonarqube_check):
     )
 
 
-@mock.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
-def test_service_check_ok(mock_api, aggregator, dd_run_check, sonarqube_check):
+def test_service_check_ok(mocker, aggregator, dd_run_check, sonarqube_check):
     # Given
+    mocker.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
     instance = {
         'web_endpoint': 'http://{}:{}'.format(HOST, PORT),
         'projects': {},
@@ -68,9 +68,9 @@ def test_service_check_ok(mock_api, aggregator, dd_run_check, sonarqube_check):
     )
 
 
-@mock.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
-def test_tags(mock_api, aggregator, dd_run_check, sonarqube_check):
+def test_tags(mocker, aggregator, dd_run_check, sonarqube_check):
     # Given
+    mocker.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
     instance = {
         'web_endpoint': 'http://{}:{}'.format(HOST, PORT),
         'projects': {},
@@ -88,9 +88,9 @@ def test_tags(mock_api, aggregator, dd_run_check, sonarqube_check):
     )
 
 
-@mock.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
-def test_empty_projects(mock_api, aggregator, dd_run_check, sonarqube_check):
+def test_empty_projects(mocker, aggregator, dd_run_check, sonarqube_check):
     # Given
+    mock_api = mocker.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
     instance = {
         'web_endpoint': 'http://{}:{}'.format(HOST, PORT),
         'projects': {},
@@ -111,9 +111,9 @@ def test_empty_projects(mock_api, aggregator, dd_run_check, sonarqube_check):
     )
 
 
-@mock.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
-def test_default_tag_with_projects_type_dict(mock_api, aggregator, dd_run_check, sonarqube_check):
+def test_default_tag_with_projects_type_dict(mocker, aggregator, dd_run_check, sonarqube_check):
     # Given
+    mock_api = mocker.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
     instance = {
         'web_endpoint': 'http://{}:{}'.format(HOST, PORT),
         'projects': {
@@ -150,9 +150,9 @@ def test_default_tag_with_projects_type_dict(mock_api, aggregator, dd_run_check,
     )
 
 
-@mock.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
-def test_default_tag_with_projects_type_str(mock_api, aggregator, dd_run_check, sonarqube_check):
+def test_default_tag_with_projects_type_str(mocker, aggregator, dd_run_check, sonarqube_check):
     # Given
+    mock_api = mocker.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
     instance = {
         'web_endpoint': 'http://{}:{}'.format(HOST, PORT),
         'projects': {
@@ -187,9 +187,9 @@ def test_default_tag_with_projects_type_str(mock_api, aggregator, dd_run_check, 
     )
 
 
-@mock.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
-def test_default_tag_overwritten(mock_api, aggregator, dd_run_check, sonarqube_check):
+def test_default_tag_overwritten(mocker, aggregator, dd_run_check, sonarqube_check):
     # Given
+    mock_api = mocker.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
     instance = {
         'web_endpoint': 'http://{}:{}'.format(HOST, PORT),
         'projects': {
@@ -226,9 +226,9 @@ def test_default_tag_overwritten(mock_api, aggregator, dd_run_check, sonarqube_c
     )
 
 
-@mock.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
-def test_project_tag(mock_api, aggregator, dd_run_check, sonarqube_check):
+def test_project_tag(mocker, aggregator, dd_run_check, sonarqube_check):
     # Given
+    mock_api = mocker.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
     instance = {
         'web_endpoint': 'http://{}:{}'.format(HOST, PORT),
         'projects': {
@@ -264,9 +264,9 @@ def test_project_tag(mock_api, aggregator, dd_run_check, sonarqube_check):
     )
 
 
-@mock.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
-def test_default_metrics_limit(mock_api, aggregator, dd_run_check, sonarqube_check):
+def test_default_metrics_limit(mocker, aggregator, dd_run_check, sonarqube_check):
     # Given
+    mock_api = mocker.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
     instance = {
         'web_endpoint': 'http://{}:{}'.format(HOST, PORT),
         'projects': {
@@ -305,9 +305,9 @@ def test_default_metrics_limit(mock_api, aggregator, dd_run_check, sonarqube_che
     )
 
 
-@mock.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
-def test_default_metrics_include(mock_api, aggregator, dd_run_check, sonarqube_check):
+def test_default_metrics_include(mocker, aggregator, dd_run_check, sonarqube_check):
     # Given
+    mock_api = mocker.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
     instance = {
         'web_endpoint': 'http://{}:{}'.format(HOST, PORT),
         'projects': {
@@ -348,9 +348,9 @@ def test_default_metrics_include(mock_api, aggregator, dd_run_check, sonarqube_c
     )
 
 
-@mock.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
-def test_default_metrics_exclude(mock_api, aggregator, dd_run_check, sonarqube_check):
+def test_default_metrics_exclude(mocker, aggregator, dd_run_check, sonarqube_check):
     # Given
+    mock_api = mocker.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
     instance = {
         'web_endpoint': 'http://{}:{}'.format(HOST, PORT),
         'projects': {
@@ -389,9 +389,9 @@ def test_default_metrics_exclude(mock_api, aggregator, dd_run_check, sonarqube_c
     )
 
 
-@mock.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
-def test_default_metrics_include_and_exclude(mock_api, aggregator, dd_run_check, sonarqube_check):
+def test_default_metrics_include_and_exclude(mocker, aggregator, dd_run_check, sonarqube_check):
     # Given
+    mock_api = mocker.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
     instance = {
         'web_endpoint': 'http://{}:{}'.format(HOST, PORT),
         'projects': {
@@ -435,9 +435,9 @@ def test_default_metrics_include_and_exclude(mock_api, aggregator, dd_run_check,
     )
 
 
-@mock.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
-def test_metrics_limit(mock_api, aggregator, dd_run_check, sonarqube_check):
+def test_metrics_limit(mocker, aggregator, dd_run_check, sonarqube_check):
     # Given
+    mock_api = mocker.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
     instance = {
         'web_endpoint': 'http://{}:{}'.format(HOST, PORT),
         'projects': {
@@ -477,9 +477,9 @@ def test_metrics_limit(mock_api, aggregator, dd_run_check, sonarqube_check):
     )
 
 
-@mock.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
-def test_unexpected_measure(mock_api, aggregator, dd_run_check, sonarqube_check):
+def test_unexpected_measure(mocker, aggregator, dd_run_check, sonarqube_check):
     # Given
+    mock_api = mocker.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
     instance = {
         'web_endpoint': 'http://{}:{}'.format(HOST, PORT),
         'projects': {
@@ -521,9 +521,9 @@ def test_unexpected_measure(mock_api, aggregator, dd_run_check, sonarqube_check)
     )
 
 
-@mock.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
-def test_projects_discovery(mock_api, aggregator, dd_run_check, sonarqube_check):
+def test_projects_discovery(mocker, aggregator, dd_run_check, sonarqube_check):
     # Given
+    mock_api = mocker.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
     instance = {
         'web_endpoint': 'http://{}:{}'.format(HOST, PORT),
         'projects': {
@@ -579,9 +579,9 @@ def test_projects_discovery(mock_api, aggregator, dd_run_check, sonarqube_check)
     )
 
 
-@mock.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
-def test_projects_discovery_with_include(mock_api, aggregator, dd_run_check, sonarqube_check):
+def test_projects_discovery_with_include(mocker, aggregator, dd_run_check, sonarqube_check):
     # Given
+    mock_api = mocker.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
     instance = {
         'web_endpoint': 'http://{}:{}'.format(HOST, PORT),
         'projects': {
@@ -639,9 +639,9 @@ def test_projects_discovery_with_include(mock_api, aggregator, dd_run_check, son
     )
 
 
-@mock.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
-def test_projects_discovery_with_include_and_exclude(mock_api, aggregator, dd_run_check, sonarqube_check):
+def test_projects_discovery_with_include_and_exclude(mocker, aggregator, dd_run_check, sonarqube_check):
     # Given
+    mock_api = mocker.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
     instance = {
         'web_endpoint': 'http://{}:{}'.format(HOST, PORT),
         'projects': {
@@ -690,9 +690,9 @@ def test_projects_discovery_with_include_and_exclude(mock_api, aggregator, dd_ru
     )
 
 
-@mock.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
-def test_projects_keys_and_discovery_with_exclude(mock_api, aggregator, dd_run_check, sonarqube_check):
+def test_projects_keys_and_discovery_with_exclude(mocker, aggregator, dd_run_check, sonarqube_check):
     # Given
+    mock_api = mocker.patch("datadog_checks.sonarqube.check.SonarqubeAPI")
     instance = {
         'web_endpoint': 'http://{}:{}'.format(HOST, PORT),
         'projects': {
