@@ -207,3 +207,20 @@ def _make_get_previous(d: dict = None):
         return d.get(path)
 
     return _fake_get_previous
+
+
+def test_validate_license_headers_honors_gitignore_file_on_check_path(tmp_path):
+    check_path = tmp_path / "check"
+    check_path.mkdir()
+
+    # .gitignore at check_path
+    with open(check_path / ".gitignore", "w") as f:
+        f.write("build/\n")
+
+    target_path = check_path / "foo" / "build"
+    target_path.mkdir(parents=True)
+
+    with open(target_path / "some.py", "w") as f:
+        f.write("import os\n")
+
+    assert validate_license_headers(check_path) == []

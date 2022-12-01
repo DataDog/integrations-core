@@ -7,6 +7,8 @@ import re
 from collections import namedtuple
 from typing import Callable, Iterable, List, Optional
 
+from pathspec.gitignore import GitIgnoreSpec
+
 from ..errors import SubprocessError
 from .constants import get_root
 from .git import git_show_file
@@ -52,9 +54,17 @@ def validate_license_headers(
     """
     root = check_path
     ignoreset = set(ignore or [])
+    gitignore_spec = _gitignore_spec_from_file(check_path / ".gitignore")
 
     def walk_recursively(path):
+
         for child in path.iterdir():
+            relpath = child.relative_to(root)
+
+            # Skip gitignored files
+            if gitignore_spec and gitignore_spec.match_file(relpath.as_posix()):
+                continue
+
             # For directories, keep recursing unless folder is blacklisted
             if child.is_dir():
                 # Skip hidden folders
@@ -62,7 +72,6 @@ def validate_license_headers(
                     continue
 
                 # Skip blacklisted folders
-                relpath = child.relative_to(root)
                 if relpath in ignoreset:
                     continue
 
@@ -109,3 +118,11 @@ def parse_license_header(contents):
     """
     match = _COPYRIGHT_PATTERN.match(contents)
     return match[0] if match else ""
+
+
+def _gitignore_spec_from_file(path):
+    try:
+        with open(path) as f:
+            return GitIgnoreSpec.from_lines(f)
+    except FileNotFoundError:
+        return None
