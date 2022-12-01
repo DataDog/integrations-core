@@ -55,13 +55,11 @@ def validate_license_headers(
     root = check_path
     ignoreset = set(ignore or [])
 
-    def walk_recursively(path, gitignore_matcher=_GitIgnoreMatcher()):
+    def walk_recursively(path, gitignore_matcher):
 
         for child in path.iterdir():
-            relpath = child.relative_to(root)
-
             # Skip gitignored files
-            if gitignore_matcher.match(relpath.as_posix()):
+            if gitignore_matcher.match(child):
                 return
 
             # For directories, keep recursing unless folder is blacklisted
@@ -70,11 +68,12 @@ def validate_license_headers(
                 if child.relative_to(child.parent).as_posix().startswith('.'):
                     continue
 
+                relpath = child.relative_to(root)
                 # Skip blacklisted folders
                 if relpath in ignoreset:
                     continue
 
-                yield from walk_recursively(child, gitignore_matcher.with_file(path / ".gitignore"))
+                yield from walk_recursively(child, gitignore_matcher.with_file(path))
                 continue
 
             # Skip non-python files
@@ -102,7 +101,7 @@ def validate_license_headers(
             return LicenseHeaderError("file does not match expected license format", relpath)
 
     errors = []
-    for candidate in walk_recursively(root):
+    for candidate in walk_recursively(root, _GitIgnoreMatcher(root)):
         if error := validate_license_header(candidate):
             errors.append(error)
 
@@ -120,26 +119,29 @@ def parse_license_header(contents):
 
 
 class _GitIgnoreMatcher:
-    """Class to combine multiple GitIgnoreSpec`s"""
+    """Class to combine multiple `GitIgnoreSpec`s"""
 
-    def __init__(self, matchers=None):
-        self._matchers = matchers or []
+    def __init__(self, path, parent=None):
+        self._parent = parent
+        self._path = path
+        self._matcher = _gitignore_spec_from_file(path / '.gitignore')
 
-    def with_file(self, gitignore_path):
+    def with_file(self, path):
         """Returns a copy with the patterns from `gitignore_path` added (with greater priority).
 
         If `gitignore_path` doesn't exist, it silently ignores the error and returns a copy of the original matcher.
         """
-        if spec := _gitignore_spec_from_file(gitignore_path):
-            return self.__class__([spec] + self._matchers)
-        else:
-            return self.__class__(self._matchers)
+        return self.__class__(path, self)
 
     def match(self, relpath):
-        for matcher in self._matchers:
-            if matcher.match_file(relpath):
-                return True
-        return False
+        """Return whether the given relative path is matched, checking parents if necessary."""
+        path_to_match = relpath.relative_to(self._path).as_posix()
+        if self._matcher and self._matcher.match_file(path_to_match):
+            return True
+        elif self._parent:
+            return self._parent.match(relpath)
+        else:
+            return False
 
 
 def _gitignore_spec_from_file(path):

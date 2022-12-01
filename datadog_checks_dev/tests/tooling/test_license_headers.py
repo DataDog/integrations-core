@@ -237,7 +237,7 @@ def test_validate_license_headers_honors_nested_gitignore_files(tmp_path):
     target_path = check_path / "foo" / "build"
     target_path.mkdir(parents=True)
 
-    # .gitignore at subfolder disallows `build/`, overriding the parent's gitignore
+    # .gitignore at subfolder matches `build/`, overriding the parent's gitignore
     with open(check_path / "foo" / ".gitignore", "w") as f:
         f.write("build/\n")
 
@@ -245,3 +245,32 @@ def test_validate_license_headers_honors_nested_gitignore_files(tmp_path):
         f.write("import os\n")
 
     assert validate_license_headers(check_path) == []
+
+
+def test_validate_license_headers_honors_gitignore_relative_patterns(tmp_path):
+    # This refers to gitignore patterns that contain separators at the beginning
+    # or middle of the pattern, as those patterns are relative to the folder
+    # where the .gitignore file that defines them is.
+    check_path = tmp_path / "check"
+
+    target_path = check_path / "foo" / "build"
+    target_path.mkdir(parents=True)
+
+    # .gitignore defines '/build', which must be assumed to be relative to its folder
+    with open(check_path / "foo" / ".gitignore", "w") as f:
+        f.write("/build/\n")
+
+    with open(target_path / "some.py", "w") as f:
+        f.write("import os\n")
+
+    assert validate_license_headers(check_path) == []
+
+    # And the pattern lets a more nested build folder through
+    target_path = check_path / "foo" / "deeper" / "build"
+    target_path.mkdir(parents=True)
+    with open(target_path / "some.py", "w") as f:
+        f.write("import os\n")
+
+    errors = validate_license_headers(check_path)
+    assert len(errors) > 0
+    assert errors[0].path == (target_path / "some.py").relative_to(check_path).as_posix()
