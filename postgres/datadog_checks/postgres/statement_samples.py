@@ -24,8 +24,8 @@ from datadog_checks.base.utils.db.utils import (
 )
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.time import get_timestamp
-from datadog_checks.postgres.explain_parameterized_queries import ExplainParameterizedQueries
 from datadog_checks.base.utils.tracking import tracked_method
+from datadog_checks.postgres.explain_parameterized_queries import ExplainParameterizedQueries
 
 from .util import DatabaseConfigurationError, warning_with_tags
 from .version_utils import V9_6
@@ -610,9 +610,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                 repr(e),
             )
             if is_affirmative(self._config.statement_samples_config.get('explain_parameterized_queries', False)):
-                plan = self._explain_parameterized_queries.explain_statement(
-                    dbname, statement, obfuscated_statement, self._tags
-                )
+                plan = self._explain_parameterized_queries.explain_statement(dbname, statement, obfuscated_statement)
                 if plan:
                     return plan, DBExplainError.explained_with_prepared_statement, None
             error_response = None, DBExplainError.parameterized_query, '{}'.format(type(e))

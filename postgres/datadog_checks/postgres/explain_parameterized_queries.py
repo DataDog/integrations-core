@@ -65,7 +65,7 @@ class ExplainParameterizedQueries:
         self._config = config
 
     @tracked_method(agent_check_getter=agent_check_getter)
-    def explain_statement(self, dbname, statement, obfuscated_statement, tags):
+    def explain_statement(self, dbname, statement, obfuscated_statement):
         if self._check.version < V12:
             return None
         self._set_plan_cache_mode(dbname)
@@ -156,10 +156,12 @@ class ExplainParameterizedQueries:
                     e,
                 )
         return None
-    
+
     def _deallocate_prepared_statement(self, dbname, query_signature):
         try:
-            self._execute_query(dbname, "DEALLOCATE PREPARE dd_{query_signature}".format(query_signature=query_signature))
+            self._execute_query(
+                dbname, "DEALLOCATE PREPARE dd_{query_signature}".format(query_signature=query_signature)
+            )
         except Exception as e:
             logger.warning(
                 'Failed to deallocate prepared statement query_signature=[%s] | err=[%s]',

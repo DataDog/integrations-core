@@ -1,11 +1,10 @@
 import pytest
 
 from datadog_checks.base.utils.db.sql import compute_sql_signature
-from datadog_checks.postgres.explain_parameterized_queries import ExplainParameterizedQueries
 from datadog_checks.postgres.statement_samples import DBExplainError
 from datadog_checks.postgres.version_utils import V12
 
-from .common import DB_NAME, PORT
+from .common import DB_NAME
 
 
 @pytest.fixture
@@ -46,9 +45,7 @@ def test_explain_parameterized_queries(
     if check.version < V12:
         return
 
-    plan_dict, explain_err_code, err = check.statement_samples._run_and_track_explain(
-        DB_NAME, query, query, query
-    )
+    plan_dict, explain_err_code, err = check.statement_samples._run_and_track_explain(DB_NAME, query, query, query)
     assert plan_dict is not None
     assert explain_err_code == expected_explain_err_code
     assert err is None
@@ -56,9 +53,9 @@ def test_explain_parameterized_queries(
     explain_param_queries = check.statement_samples._explain_parameterized_queries
     # check that we deallocated the prepared statement after explaining
     rows = explain_param_queries._execute_query_and_fetch_rows(
-        DB_NAME, 
+        DB_NAME,
         "SELECT * FROM pg_prepared_statements WHERE name = 'dd_{query_signature}'".format(
             query_signature=compute_sql_signature(query)
-        )
+        ),
     )
     assert len(rows) == 0
