@@ -3,7 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import pytest
+from mock import patch
 
+from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.oracle import Oracle
 
 from .common import CHECK_NAME
@@ -76,3 +78,14 @@ def test_check_misconfig_invalid_truststore_type(dd_run_check, instance):
     check = Oracle(CHECK_NAME, {}, [instance])
     with pytest.raises(Exception):
         dd_run_check(check)
+
+
+@patch('datadog_checks.oracle.oracle.PY2', True)
+def test_py2(dd_run_check, instance):
+    # Test to ensure that a ConfigurationError is raised when running with Python 2.
+    try:
+        check = Oracle('oracle', {}, [instance])
+        dd_run_check(check)
+    except Exception as e:
+        assert type(e) == ConfigurationError
+        assert "This version of the integration is only available when using py3" in str(e)
