@@ -382,13 +382,6 @@ files:
           value:
             type: boolean
             example: false
-        - name: max_pg_prepared_statements_space
-          description: |
-            Prepared statements may be created to enable some functionality, this option configures the max amount
-            of space (in megabytes) the integration will allocate.
-          value:
-            type: integer
-            example: 20
     - name: query_activity
       description: Configure collection of query activity
       options:

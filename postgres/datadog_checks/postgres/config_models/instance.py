@@ -91,7 +91,6 @@ class QuerySamples(BaseModel):
     explain_parameterized_queries: Optional[bool]
     explained_queries_cache_maxsize: Optional[int]
     explained_queries_per_hour_per_query: Optional[int]
-    max_pg_prepared_statements_space: Optional[int]
     samples_per_hour_per_query: Optional[int]
     seen_samples_cache_maxsize: Optional[int]
 

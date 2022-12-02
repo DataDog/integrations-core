@@ -11,15 +11,9 @@ logger = logging.getLogger(__name__)
 
 PREPARE_STATEMENT_QUERY = 'PREPARE dd_{query_signature} AS {statement}'
 
-PREPARED_STATEMENT_EXISTS_QUERY = '''\
-SELECT * FROM pg_prepared_statements WHERE name = 'dd_{query_signature}'
-'''
-
 PARAM_TYPES_FOR_PREPARED_STATEMENT_QUERY = '''\
 SELECT parameter_types FROM pg_prepared_statements WHERE name = 'dd_{query_signature}'
 '''
-
-PG_PREPARED_STATEMENTS_SIZE_ESTIMATE_QUERY = "SELECT SUM(octet_length(ps.*::text)) FROM pg_prepared_statements AS ps"
 
 EXECUTE_PREPARED_STATEMENT_QUERY = 'EXECUTE dd_{prepared_statement}({generic_values})'
 
@@ -66,11 +60,6 @@ class ExplainParameterizedQueries:
                 Returns: (plan)
     '''
 
-    # Roughly equates to 4,882 prepared statements. This was calcuated by (20mb / 4096 bytes).
-    # 4096 comes from DBM's recommended `track_activity_query_size` of 4096 which limits the SQL text retrieved
-    # from `pg_stat_activity` and `pg_stat_statements` which is where the query statements come from.
-    DEFAULT_MAX_ALLOWABLE_SPACE_MB = 20
-
     def __init__(self, check, config):
         self._check = check
         self._config = config
@@ -86,7 +75,7 @@ class ExplainParameterizedQueries:
             return None
 
         result = self._explain_prepared_statement(dbname, statement, obfuscated_statement, query_signature)
-        self._cleanup_pg_prepared_statements(dbname, tags)
+        self._deallocate_prepared_statement(dbname, query_signature)
         if result:
             return result[0][0][0]
         return None
@@ -95,37 +84,7 @@ class ExplainParameterizedQueries:
         self._execute_query(dbname, "SET plan_cache_mode = force_generic_plan")
 
     @tracked_method(agent_check_getter=agent_check_getter)
-    def _prepared_statement_exists(self, dbname, statement, obfuscated_statement, query_signature):
-        try:
-            return (
-                len(
-                    self._execute_query_and_fetch_rows(
-                        dbname, PREPARED_STATEMENT_EXISTS_QUERY.format(query_signature=query_signature)
-                    )
-                )
-                > 0
-            )
-        except Exception as e:
-            if self._config.log_unobfuscated_plans:
-                logger.warning(
-                    'Failed to check if prepared statement exists for statement(%s)=[%s] | err=[%s]',
-                    query_signature,
-                    statement,
-                    e,
-                )
-            else:
-                logger.warning(
-                    'Failed to check if prepared statement exists for statement(%s)=[%s] | err=[%s]',
-                    query_signature,
-                    obfuscated_statement,
-                    e,
-                )
-            return False
-
-    @tracked_method(agent_check_getter=agent_check_getter)
     def _create_prepared_statement(self, dbname, statement, obfuscated_statement, query_signature):
-        if self._prepared_statement_exists(dbname, statement, obfuscated_statement, query_signature):
-            return True
         try:
             self._execute_query(
                 dbname,
@@ -197,38 +156,16 @@ class ExplainParameterizedQueries:
                     e,
                 )
         return None
-
-    @tracked_method(agent_check_getter=agent_check_getter)
-    def _cleanup_pg_prepared_statements(self, dbname, tags):
-        '''
-        Prepared statements are not deallocated until the session ends, so to prevent taking up a lot of space,
-        this method estimates how much space we've allocated for prepared statements and deallocates
-        ~all~ prepared statements if we've reached our max (configurable option).
-        '''
-        rows = self._execute_query_and_fetch_rows(dbname, PG_PREPARED_STATEMENTS_SIZE_ESTIMATE_QUERY)
-        pg_prepared_statements_mb = 0
-        if rows:
-            pg_prepared_statements_mb = rows[0][0] / 1048576  # 1MB
-
-        max_pg_prepared_statements_space = self._config.statement_samples_config.get(
-            'max_pg_prepared_statements_space', ExplainParameterizedQueries.DEFAULT_MAX_ALLOWABLE_SPACE_MB
-        )
-        if pg_prepared_statements_mb >= max_pg_prepared_statements_space:
-            self._execute_query(dbname, "DEALLOCATE ALL")
-            pg_prepared_statements_mb = 0
-
-        self._check.gauge(
-            "dd.postgres.explain_parameterized_queries.size",
-            pg_prepared_statements_mb,
-            tags=tags,
-            hostname=self._check.resolved_hostname,
-        )
-        self._check.gauge(
-            "dd.postgres.explain_parameterized_queries.max",
-            max_pg_prepared_statements_space,
-            tags=tags,
-            hostname=self._check.resolved_hostname,
-        )
+    
+    def _deallocate_prepared_statement(self, dbname, query_signature):
+        try:
+            self._execute_query(dbname, "DEALLOCATE PREPARE dd_{query_signature}".format(query_signature=query_signature))
+        except Exception as e:
+            logger.warning(
+                'Failed to deallocate prepared statement query_signature=[%s] | err=[%s]',
+                query_signature,
+                e,
+            )
 
     def _execute_query(self, dbname, query):
         with self._check._get_db(dbname).cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:

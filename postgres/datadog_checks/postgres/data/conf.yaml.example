@@ -321,12 +321,6 @@ instances:
         #
         # explain_parameterized_queries: false
 
-        ## @param max_pg_prepared_statements_space - integer - optional - default: 20
-        ## Prepared statements may be created to enable some functionality, this option configures the max amount
-        ## of space (in megabytes) the integration will allocate.
-        #
-        # max_pg_prepared_statements_space: 20
-
     ## Configure collection of query activity
     #
     # query_activity:
