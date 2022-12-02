@@ -8,6 +8,7 @@ import pytest
 
 from datadog_checks.cloudera import ClouderaCheck
 from datadog_checks.dev import docker_run
+from datadog_checks.dev.conditions import CheckDockerLogs
 
 from . import common
 
@@ -31,7 +32,13 @@ def dd_environment():
     #     yield common.INSTANCE
 
     compose_file = common.COMPOSE_FILE
-    with docker_run(compose_file):
+    conditions = [
+        CheckDockerLogs(identifier='cloudera', patterns=['server running']),
+    ]
+    with docker_run(
+        compose_file,
+        conditions=conditions,
+    ):
         yield common.INSTANCE
 
 
