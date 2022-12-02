@@ -47,6 +47,7 @@ from .stop import stop
 @click.option('--filter', '-k', 'test_filter', help='Only run tests matching given substring expression')
 @click.option('--changed', is_flag=True, help='Only test changed checks')
 @click.option('--debug', '-d', is_flag=True, help='Set the log level to debug')
+@click.option('--skip-failed-environments', '-sfe', is_flag=True, help='Skip environments that failed to start and continue')
 @click.pass_context
 def test(
     ctx,
@@ -63,6 +64,7 @@ def test(
     test_filter,
     changed,
     debug,
+    skip_failed_environments,
 ):
     """Test an environment."""
     check_envs = get_test_envs(checks, e2e_tests_only=True, changed_only=changed)
@@ -96,17 +98,22 @@ def test(
 
         for env in envs:
             if new_env:
-                ctx.invoke(
-                    start,
-                    check=check,
-                    env=env,
-                    agent=agent,
-                    python=python,
-                    dev=dev,
-                    base=base,
-                    env_vars=env_vars,
-                    profile_memory=profile_memory,
-                )
+                try:
+                    ctx.invoke(
+                        start,
+                        check=check,
+                        env=env,
+                        agent=agent,
+                        python=python,
+                        dev=dev,
+                        base=base,
+                        env_vars=env_vars,
+                        profile_memory=profile_memory,
+                    )
+                except SystemExit:
+                    if skip_failed_environments:
+                        echo_warning(f"Skipping {env} environment because it failed to start.")
+                        continue
             elif env not in config_envs:
                 continue
 
