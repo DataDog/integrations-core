@@ -39,3 +39,6 @@ def test_given_api_v48_endpoint_when_check_runs_then_service_check_ok_and_metric
         for metric in metrics:
             aggregator.assert_metric(f'cloudera.{category}.{metric}')
     aggregator.assert_service_check('cloudera.can_connect', ClouderaCheck.OK)
+    # caddy test env is supposed to be in BAD_HEALTH
+    aggregator.assert_service_check('cloudera.cluster.health', ClouderaCheck.CRITICAL, message="BAD_HEALTH")
+    aggregator.assert_service_check('cloudera.host.health', ClouderaCheck.OK)

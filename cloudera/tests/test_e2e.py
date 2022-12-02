@@ -15,5 +15,6 @@ def test_e2e(dd_agent_check, instance):
         for metric in metrics:
             aggregator.assert_metric(f'cloudera.{category}.{metric}')
     aggregator.assert_service_check('cloudera.can_connect', ClouderaCheck.OK)
-    aggregator.assert_service_check('cloudera.cluster.health', ClouderaCheck.CRITICAL, message="BAD_HEALTH")  # test env is in BAD_HEALTH
+    # caddy test env is supposed to be in BAD_HEALTH
+    aggregator.assert_service_check('cloudera.cluster.health', ClouderaCheck.CRITICAL, message="BAD_HEALTH")
     aggregator.assert_service_check('cloudera.host.health', ClouderaCheck.OK)
