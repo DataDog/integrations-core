@@ -9,11 +9,11 @@ from .version_utils import V12
 
 logger = logging.getLogger(__name__)
 
+PREPARE_STATEMENT_QUERY = 'PREPARE dd_{query_signature} AS {statement}'
+
 PREPARED_STATEMENT_EXISTS_QUERY = '''\
 SELECT * FROM pg_prepared_statements WHERE name = 'dd_{query_signature}'
 '''
-
-PREPARE_STATEMENT_QUERY = 'PREPARE dd_{query_signature} AS {statement}'
 
 PARAM_TYPES_FOR_PREPARED_STATEMENT_QUERY = '''\
 SELECT parameter_types FROM pg_prepared_statements WHERE name = 'dd_{query_signature}'
@@ -21,7 +21,7 @@ SELECT parameter_types FROM pg_prepared_statements WHERE name = 'dd_{query_signa
 
 PG_PREPARED_STATEMENTS_SIZE_ESTIMATE_QUERY = "SELECT SUM(octet_length(ps.*::text)) FROM pg_prepared_statements AS ps"
 
-EXECUTE_PREPARED_STATEMENT_QUERY = 'EXECUTE dd_{prepared_statement}({null_parameter})'
+EXECUTE_PREPARED_STATEMENT_QUERY = 'EXECUTE dd_{prepared_statement}({generic_values})'
 
 EXPLAIN_QUERY = 'SELECT {explain_function}($stmt${statement}$stmt$)'
 
@@ -169,7 +169,7 @@ class ExplainParameterizedQueries:
             'null' for _ in range(self._get_number_of_parameters_for_prepared_statement(dbname, query_signature))
         )
         execute_prepared_statement_query = EXECUTE_PREPARED_STATEMENT_QUERY.format(
-            prepared_statement=query_signature, null_parameter=null_parameter
+            prepared_statement=query_signature, generic_values=null_parameter
         )
         try:
             return self._execute_query_and_fetch_rows(
