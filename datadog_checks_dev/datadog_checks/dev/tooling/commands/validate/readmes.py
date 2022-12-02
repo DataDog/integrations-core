@@ -103,12 +103,12 @@ def validate_readme(integration, repo, display_queue, files_failed, readme_count
     # Check all required headers are present
     h2s = [h2.text for h2 in soup.find_all("h2")]
 
-    for section in ("Overview", "Setup"):
-        validate_header(h2s, section, files_failed, readme_path, display_queue, soup)
+    for header in ("Overview", "Setup"):
+        validate_header(h2s, header, files_failed, readme_path, display_queue, soup)
 
     if repo == 'marketplace':
-        for section in ("Support", "Uninstallation"):
-            validate_header(h2s, section, files_failed, readme_path, display_queue, soup)
+        for header in ("Support", "Uninstallation"):
+            validate_header(h2s, header, files_failed, readme_path, display_queue, soup)
 
     # Check all referenced images are in the `images` folder and that
     # they use the `raw.githubusercontent` format or relative paths to the `images` folder
@@ -138,16 +138,16 @@ def validate_readme(integration, repo, display_queue, files_failed, readme_count
 
             display_queue.append((echo_failure, error_msg))
 
-def validate_header(h2s, section, files_failed, readme_path, display_queue, soup):
-    if section not in h2s:
+def validate_header(h2s, header, files_failed, readme_path, display_queue, soup):
+    if header not in h2s:
         files_failed[readme_path] = True
-        display_queue.append((echo_failure, f"     readme is missing a {section} H2 (##) section"))
+        display_queue.append((echo_failure, f"     readme is missing a {header} H2 (##) section"))
     else:
-        setup_header = soup.find('h2', text=section)
+        setup_header = soup.find('h2', text=header)
         setup_instructions = setup_header.find_next()
         if setup_instructions.name == "h2":
             files_failed[readme_path] = True
-            display_queue.append((echo_failure, f"     readme has an empty {section} H2 (##) section"))
+            display_queue.append((echo_failure, f"     readme has an empty {header} H2 (##) section"))
 
 def get_ascii_enforcement_error_lines(contents):
     errors_lines = []
