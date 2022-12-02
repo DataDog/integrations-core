@@ -18,7 +18,7 @@ parameters:
   pip_cache_config: null
   coverage: true
   dd_url: https://app.datadoghq.com
-  memray: true
+  memray_option: '--memray'
 
 jobs:
 - job: '${{ coalesce(parameters.job_name, parameters.check) }}_Linux'
@@ -78,7 +78,7 @@ jobs:
       repo: ${{ parameters.repo }}
       coverage: ${{ parameters.coverage }}
       force_base_package: ${{ parameters.force_base_package }}
-      memray: ${{ parameters.memray }}
+      memray_option: ${{ parameters.memray_option }}
 
   - ${{ if and(eq(parameters.repo, 'core'), eq(parameters.test, 'true'), eq(parameters.coverage, 'true'), eq(parameters.force_base_package, 'false')) }}:
     # https://docs.codecov.com/docs/codecov-uploader

@@ -9,23 +9,23 @@ parameters:
   repo: ''
   coverage: true
   force_base_package: false
-  memray: true
+  memray_option: '--memray'
 
 # ${{ replace(replace(parameters.memray, 'true', '--memray'), 'false', '') }}
 # is a hack to act like a ternary operator and avoid duplicate all the steps, with or without the option.
 
 steps:
 - ${{ if and(eq(parameters.test, 'true'), eq(parameters.coverage, 'true'), eq(parameters.force_base_package, 'false')) }}:
-  - script: ddev test --cov --junit ${{ replace(replace(parameters.memray, 'true', '--memray'), 'false', '') }} ${{ parameters.ddtrace_flag }} ${{ parameters.check }}
+  - script: ddev test --cov --junit ${{ parameters.memray_option }} ${{ parameters.ddtrace_flag }} ${{ parameters.check }}
     displayName: 'Run Unit/Integration tests'
 
 - ${{ if and(eq(parameters.test, 'true'), not(eq(parameters.coverage, 'true'))) }}:
-    - script: ddev test --junit ${{ replace(replace(parameters.memray, 'true', '--memray'), 'false', '') }} ${{ parameters.ddtrace_flag }} ${{ parameters.check }}
+    - script: ddev test --junit ${{ parameters.memray_option }} ${{ parameters.ddtrace_flag }} ${{ parameters.check }}
       displayName: 'Run Unit/Integration tests (no coverage)'
 
 # Nightly base package check
 - ${{ if and(eq(parameters.test, 'true'), eq(parameters.force_base_package, 'true')) }}:
-    - script: ddev test --force-base-min --force-env-rebuild --junit ${{ replace(replace(parameters.memray, 'true', '--memray'), 'false', '') }} ${{ parameters.check }}
+    - script: ddev test --force-base-min --force-env-rebuild --junit ${{ parameters.memray_option }} ${{ parameters.check }}
       displayName: 'Run Unit/Integration tests (forced install of minimum datadog_checks_base package)'
 
 - ${{ if and(eq(parameters.test_e2e, 'true'), eq(parameters.repo, 'core'))}}:
@@ -41,11 +41,11 @@ steps:
       DD_API_KEY: $(DD_API_KEY)
 
 - ${{ if eq(parameters.benchmark, 'true') }}:
-  - script: ddev test --bench --junit ${{ replace(replace(parameters.memray, 'true', '--memray'), 'false', '') }} ${{ parameters.check }}
+  - script: ddev test --bench --junit ${{ parameters.memray_option }} ${{ parameters.check }}
     displayName: 'Run benchmarks'
 
 - ${{ if eq(parameters.latest, 'true') }}:
-    - script: ddev test --latest --junit ${{ replace(replace(parameters.memray, 'true', '--memray'), 'false', '') }} ${{ parameters.ddtrace_flag }} ${{ parameters.check }}
+    - script: ddev test --latest --junit ${{ parameters.memray_option }} ${{ parameters.ddtrace_flag }} ${{ parameters.check }}
       displayName: 'Run tests and verify support for the latest version'
 
     - script: ddev env test --base --new-env --junit ${{ parameters.ddtrace_flag }} ${{ parameters.check }}:latest
