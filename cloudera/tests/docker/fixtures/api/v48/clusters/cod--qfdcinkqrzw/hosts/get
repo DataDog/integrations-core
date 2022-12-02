@@ -70,7 +70,7 @@
           "serviceName": "hue",
           "roleName": "hue-HUE_SERVER-7d0b6bba5cf23b4729586ee8d35ab766",
           "healthSummary": "GOOD",
-          "roleStatus": "STARTED"
+          "roleStatus": "STOPPED"
         },
         {
           "clusterName": "cod--qfdcinkqrzw",
@@ -81,17 +81,17 @@
         },
         {
           "clusterName": "cod--qfdcinkqrzw",
-          "serviceName": "hue",
-          "roleName": "hue-KT_RENEWER-7d0b6bba5cf23b4729586ee8d35ab766",
+          "serviceName": "queuemanager",
+          "roleName": "queuc8af8526-QUEUEMANAGER_WEBAPP-7d0b6bba5cf23b4729586ee8d35ab76",
           "healthSummary": "GOOD",
           "roleStatus": "STARTED"
         },
         {
           "clusterName": "cod--qfdcinkqrzw",
-          "serviceName": "queuemanager",
-          "roleName": "queuc8af8526-QUEUEMANAGER_WEBAPP-7d0b6bba5cf23b4729586ee8d35ab76",
+          "serviceName": "hue",
+          "roleName": "hue-KT_RENEWER-7d0b6bba5cf23b4729586ee8d35ab766",
           "healthSummary": "GOOD",
-          "roleStatus": "STARTED"
+          "roleStatus": "STOPPED"
         },
         {
           "clusterName": "cod--qfdcinkqrzw",
@@ -112,7 +112,7 @@
           "serviceName": "hue",
           "roleName": "hue-HUE_LOAD_BALANCER-7d0b6bba5cf23b4729586ee8d35ab766",
           "healthSummary": "GOOD",
-          "roleStatus": "STARTED"
+          "roleStatus": "STOPPED"
         },
         {
           "clusterName": "cod--qfdcinkqrzw",
@@ -166,7 +166,7 @@
       "hostname": "cod--qfdcinkqrzw-gateway0.agent-in.jfha-h5rc.a0.cloudera.site",
       "rackId": "/ap-northeast-1d",
       "hostUrl": "https://cod--qfdcinkqrzw-gateway.agent-in.jfha-h5rc.a0.cloudera.site/cmf/hostRedirect/d8623d9457f4db06c5637c4fd4c02f5d",
-      "lastHeartbeat": "2022-11-23T22:24:34.308Z",
+      "lastHeartbeat": "2022-12-02T08:06:25.365Z",
       "healthSummary": "GOOD",
       "maintenanceMode": false,
       "commissionState": "COMMISSIONED",
@@ -251,6 +251,13 @@
       "roleRefs": [
         {
           "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "omid",
+          "roleName": "omid-OMID_TSO-3bc8f544ef0c15a373bbe9f9790fefba",
+          "healthSummary": "GOOD",
+          "roleStatus": "STOPPED"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
           "serviceName": "hdfs",
           "roleName": "hdfs-BALANCER-3bc8f544ef0c15a373bbe9f9790fefba",
           "healthSummary": "GOOD",
@@ -260,7 +267,7 @@
           "clusterName": "cod--qfdcinkqrzw",
           "serviceName": "yarn",
           "roleName": "yarn-JOBHISTORY-3bc8f544ef0c15a373bbe9f9790fefba",
-          "healthSummary": "GOOD",
+          "healthSummary": "BAD",
           "roleStatus": "STARTED"
         },
         {
@@ -286,6 +293,13 @@
         },
         {
           "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "hbase",
+          "roleName": "hbase-HBASETHRIFTSERVER-3bc8f544ef0c15a373bbe9f9790fefba",
+          "healthSummary": "GOOD",
+          "roleStatus": "STOPPED"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
           "serviceName": "hdfs",
           "roleName": "hdfs-GATEWAY-3bc8f544ef0c15a373bbe9f9790fefba",
           "healthSummary": "GOOD",
@@ -296,7 +310,7 @@
           "serviceName": "hbase",
           "roleName": "hbase-HBASERESTSERVER-3bc8f544ef0c15a373bbe9f9790fefba",
           "healthSummary": "GOOD",
-          "roleStatus": "STARTED"
+          "roleStatus": "STOPPED"
         },
         {
           "clusterName": "cod--qfdcinkqrzw",
@@ -311,20 +325,6 @@
           "roleName": "yarn-GATEWAY-3bc8f544ef0c15a373bbe9f9790fefba",
           "healthSummary": "GOOD",
           "roleStatus": "NA"
-        },
-        {
-          "clusterName": "cod--qfdcinkqrzw",
-          "serviceName": "omid",
-          "roleName": "omid-OMID_TSO-3bc8f544ef0c15a373bbe9f9790fefba",
-          "healthSummary": "GOOD",
-          "roleStatus": "STARTED"
-        },
-        {
-          "clusterName": "cod--qfdcinkqrzw",
-          "serviceName": "hbase",
-          "roleName": "hbase-HBASETHRIFTSERVER-3bc8f544ef0c15a373bbe9f9790fefba",
-          "healthSummary": "GOOD",
-          "roleStatus": "STARTED"
         }
       ],
       "maintenanceOwners": [],
@@ -333,7 +333,7 @@
       "hostname": "cod--qfdcinkqrzw-leader0.agent-in.jfha-h5rc.a0.cloudera.site",
       "rackId": "/ap-northeast-1a",
       "hostUrl": "https://cod--qfdcinkqrzw-gateway.agent-in.jfha-h5rc.a0.cloudera.site/cmf/hostRedirect/96efbf3e7279bf25ae44fe0a6398ee97",
-      "lastHeartbeat": "2022-11-23T22:24:34.957Z",
+      "lastHeartbeat": "2022-12-02T08:06:26.451Z",
       "healthSummary": "GOOD",
       "maintenanceMode": false,
       "commissionState": "COMMISSIONED",
@@ -421,7 +421,7 @@
           "serviceName": "yarn",
           "roleName": "yarn-RESOURCEMANAGER-6e88fa1a7ad969e10ea41365cba9abc5",
           "healthSummary": "BAD",
-          "roleStatus": "BUSY"
+          "roleStatus": "STARTED"
         },
         {
           "clusterName": "cod--qfdcinkqrzw",
@@ -429,27 +429,6 @@
           "roleName": "yarn-GATEWAY-6e88fa1a7ad969e10ea41365cba9abc5",
           "healthSummary": "GOOD",
           "roleStatus": "NA"
-        },
-        {
-          "clusterName": "cod--qfdcinkqrzw",
-          "serviceName": "hbase",
-          "roleName": "hbase-GATEWAY-6e88fa1a7ad969e10ea41365cba9abc5",
-          "healthSummary": "GOOD",
-          "roleStatus": "NA"
-        },
-        {
-          "clusterName": "cod--qfdcinkqrzw",
-          "serviceName": "hdfs",
-          "roleName": "hdfs-GATEWAY-6e88fa1a7ad969e10ea41365cba9abc5",
-          "healthSummary": "GOOD",
-          "roleStatus": "NA"
-        },
-        {
-          "clusterName": "cod--qfdcinkqrzw",
-          "serviceName": "hdfs",
-          "roleName": "hdfs-NAMENODE-6e88fa1a7ad969e10ea41365cba9abc5",
-          "healthSummary": "GOOD",
-          "roleStatus": "STARTED"
         },
         {
           "clusterName": "cod--qfdcinkqrzw",
@@ -462,8 +441,8 @@
           "clusterName": "cod--qfdcinkqrzw",
           "serviceName": "hbase",
           "roleName": "hbase-MASTER-6e88fa1a7ad969e10ea41365cba9abc5",
-          "healthSummary": "BAD",
-          "roleStatus": "STARTED"
+          "healthSummary": "GOOD",
+          "roleStatus": "STOPPED"
         },
         {
           "clusterName": "cod--qfdcinkqrzw",
@@ -485,6 +464,27 @@
           "roleName": "hdfs-JOURNALNODE-6e88fa1a7ad969e10ea41365cba9abc5",
           "healthSummary": "GOOD",
           "roleStatus": "STARTED"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "hbase",
+          "roleName": "hbase-GATEWAY-6e88fa1a7ad969e10ea41365cba9abc5",
+          "healthSummary": "GOOD",
+          "roleStatus": "NA"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "hdfs",
+          "roleName": "hdfs-GATEWAY-6e88fa1a7ad969e10ea41365cba9abc5",
+          "healthSummary": "GOOD",
+          "roleStatus": "NA"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "hdfs",
+          "roleName": "hdfs-NAMENODE-6e88fa1a7ad969e10ea41365cba9abc5",
+          "healthSummary": "GOOD",
+          "roleStatus": "STARTED"
         }
       ],
       "maintenanceOwners": [],
@@ -493,7 +493,7 @@
       "hostname": "cod--qfdcinkqrzw-master0.agent-in.jfha-h5rc.a0.cloudera.site",
       "rackId": "/ap-northeast-1d",
       "hostUrl": "https://cod--qfdcinkqrzw-gateway.agent-in.jfha-h5rc.a0.cloudera.site/cmf/hostRedirect/759451867dfde961d6adbeb21d9c13f9",
-      "lastHeartbeat": "2022-11-23T22:24:33.778Z",
+      "lastHeartbeat": "2022-12-02T08:06:23.968Z",
       "healthSummary": "GOOD",
       "maintenanceMode": false,
       "commissionState": "COMMISSIONED",
@@ -578,10 +578,31 @@
       "roleRefs": [
         {
           "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "yarn",
+          "roleName": "yarn-RESOURCEMANAGER-dbb26169f4e1fe9a387fcc5bd5bfd6af",
+          "healthSummary": "GOOD",
+          "roleStatus": "STOPPED"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "yarn",
+          "roleName": "yarn-GATEWAY-dbb26169f4e1fe9a387fcc5bd5bfd6af",
+          "healthSummary": "GOOD",
+          "roleStatus": "NA"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
           "serviceName": "hbase",
           "roleName": "hbase-MASTER-dbb26169f4e1fe9a387fcc5bd5bfd6af",
-          "healthSummary": "BAD",
-          "roleStatus": "STARTED"
+          "healthSummary": "GOOD",
+          "roleStatus": "STOPPED"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "data_context_connector-8617",
+          "roleName": "datadefdc267-GATEWAY-dbb26169f4e1fe9a387fcc5bd5bfd6af",
+          "healthSummary": "GOOD",
+          "roleStatus": "NA"
         },
         {
           "clusterName": "cod--qfdcinkqrzw",
@@ -594,36 +615,8 @@
           "clusterName": "cod--qfdcinkqrzw",
           "serviceName": "zookeeper-e52d",
           "roleName": "zookeeper-e52d-SERVER-dbb26169f4e1fe9a387fcc5bd5bfd6af",
-          "healthSummary": "BAD",
+          "healthSummary": "GOOD",
           "roleStatus": "STARTED"
-        },
-        {
-          "clusterName": "cod--qfdcinkqrzw",
-          "serviceName": "hdfs",
-          "roleName": "hdfs-FAILOVERCONTROLLER-dbb26169f4e1fe9a387fcc5bd5bfd6af",
-          "healthSummary": "GOOD",
-          "roleStatus": "STOPPED"
-        },
-        {
-          "clusterName": "cod--qfdcinkqrzw",
-          "serviceName": "yarn",
-          "roleName": "yarn-RESOURCEMANAGER-dbb26169f4e1fe9a387fcc5bd5bfd6af",
-          "healthSummary": "BAD",
-          "roleStatus": "STARTED"
-        },
-        {
-          "clusterName": "cod--qfdcinkqrzw",
-          "serviceName": "yarn",
-          "roleName": "yarn-GATEWAY-dbb26169f4e1fe9a387fcc5bd5bfd6af",
-          "healthSummary": "GOOD",
-          "roleStatus": "NA"
-        },
-        {
-          "clusterName": "cod--qfdcinkqrzw",
-          "serviceName": "data_context_connector-8617",
-          "roleName": "datadefdc267-GATEWAY-dbb26169f4e1fe9a387fcc5bd5bfd6af",
-          "healthSummary": "GOOD",
-          "roleStatus": "NA"
         },
         {
           "clusterName": "cod--qfdcinkqrzw",
@@ -645,6 +638,13 @@
           "roleName": "hbase-GATEWAY-dbb26169f4e1fe9a387fcc5bd5bfd6af",
           "healthSummary": "GOOD",
           "roleStatus": "NA"
+        },
+        {
+          "clusterName": "cod--qfdcinkqrzw",
+          "serviceName": "hdfs",
+          "roleName": "hdfs-FAILOVERCONTROLLER-dbb26169f4e1fe9a387fcc5bd5bfd6af",
+          "healthSummary": "GOOD",
+          "roleStatus": "STOPPED"
         }
       ],
       "maintenanceOwners": [],
@@ -653,7 +653,7 @@
       "hostname": "cod--qfdcinkqrzw-master1.agent-in.jfha-h5rc.a0.cloudera.site",
       "rackId": "/ap-northeast-1c",
       "hostUrl": "https://cod--qfdcinkqrzw-gateway.agent-in.jfha-h5rc.a0.cloudera.site/cmf/hostRedirect/119115ab851aefe1429860d4255b3fab",
-      "lastHeartbeat": "2022-11-23T22:24:33.786Z",
+      "lastHeartbeat": "2022-12-02T08:06:25.405Z",
       "healthSummary": "GOOD",
       "maintenanceMode": false,
       "commissionState": "COMMISSIONED",
@@ -741,27 +741,27 @@
           "serviceName": "hbase",
           "roleName": "hbase-REGIONSERVER-145da1565b8e2c4165145d9ecc0c784e",
           "healthSummary": "GOOD",
-          "roleStatus": "STARTED"
+          "roleStatus": "STOPPED"
         },
         {
           "clusterName": "cod--qfdcinkqrzw",
           "serviceName": "phoenix",
           "roleName": "phoenix-PHOENIX_QUERY_SERVER-145da1565b8e2c4165145d9ecc0c784e",
           "healthSummary": "GOOD",
-          "roleStatus": "STARTED"
+          "roleStatus": "STOPPED"
         },
         {
           "clusterName": "cod--qfdcinkqrzw",
           "serviceName": "hdfs",
           "roleName": "hdfs-DATANODE-145da1565b8e2c4165145d9ecc0c784e",
-          "healthSummary": "BAD",
+          "healthSummary": "GOOD",
           "roleStatus": "STARTED"
         },
         {
           "clusterName": "cod--qfdcinkqrzw",
           "serviceName": "yarn",
           "roleName": "yarn-NODEMANAGER-145da1565b8e2c4165145d9ecc0c784e",
-          "healthSummary": "BAD",
+          "healthSummary": "GOOD",
           "roleStatus": "STARTED"
         },
         {
@@ -799,7 +799,7 @@
       "hostname": "cod--qfdcinkqrzw-worker0.agent-in.jfha-h5rc.a0.cloudera.site",
       "rackId": "/ap-northeast-1d",
       "hostUrl": "https://cod--qfdcinkqrzw-gateway.agent-in.jfha-h5rc.a0.cloudera.site/cmf/hostRedirect/ed528836ae33e47e6657b95373571c33",
-      "lastHeartbeat": "2022-11-23T22:24:33.699Z",
+      "lastHeartbeat": "2022-12-02T08:06:25.114Z",
       "healthSummary": "GOOD",
       "maintenanceMode": false,
       "commissionState": "COMMISSIONED",
@@ -901,7 +901,7 @@
           "serviceName": "hbase",
           "roleName": "hbase-REGIONSERVER-7e9a53b768c95833df424c7d7b0ae857",
           "healthSummary": "GOOD",
-          "roleStatus": "STARTED"
+          "roleStatus": "STOPPED"
         },
         {
           "clusterName": "cod--qfdcinkqrzw",
@@ -936,7 +936,7 @@
           "serviceName": "phoenix",
           "roleName": "phoenix-PHOENIX_QUERY_SERVER-7e9a53b768c95833df424c7d7b0ae857",
           "healthSummary": "GOOD",
-          "roleStatus": "STARTED"
+          "roleStatus": "STOPPED"
         }
       ],
       "maintenanceOwners": [],
@@ -945,7 +945,7 @@
       "hostname": "cod--qfdcinkqrzw-worker1.agent-in.jfha-h5rc.a0.cloudera.site",
       "rackId": "/ap-northeast-1c",
       "hostUrl": "https://cod--qfdcinkqrzw-gateway.agent-in.jfha-h5rc.a0.cloudera.site/cmf/hostRedirect/22f6ab659c835d47bc13d6c8f3370110",
-      "lastHeartbeat": "2022-11-23T22:24:34.430Z",
+      "lastHeartbeat": "2022-12-02T08:06:26.321Z",
       "healthSummary": "GOOD",
       "maintenanceMode": false,
       "commissionState": "COMMISSIONED",
@@ -1033,7 +1033,7 @@
           "serviceName": "hbase",
           "roleName": "hbase-REGIONSERVER-3c658ac6009daca54192736b1502fae1",
           "healthSummary": "GOOD",
-          "roleStatus": "STARTED"
+          "roleStatus": "STOPPED"
         },
         {
           "clusterName": "cod--qfdcinkqrzw",
@@ -1054,7 +1054,7 @@
           "serviceName": "phoenix",
           "roleName": "phoenix-PHOENIX_QUERY_SERVER-3c658ac6009daca54192736b1502fae1",
           "healthSummary": "GOOD",
-          "roleStatus": "STARTED"
+          "roleStatus": "STOPPED"
         },
         {
           "clusterName": "cod--qfdcinkqrzw",
@@ -1091,7 +1091,7 @@
       "hostname": "cod--qfdcinkqrzw-worker2.agent-in.jfha-h5rc.a0.cloudera.site",
       "rackId": "/ap-northeast-1c",
       "hostUrl": "https://cod--qfdcinkqrzw-gateway.agent-in.jfha-h5rc.a0.cloudera.site/cmf/hostRedirect/49adda80d1b98e9262ee146fd7fd798b",
-      "lastHeartbeat": "2022-11-23T22:24:35.255Z",
+      "lastHeartbeat": "2022-12-02T08:06:25.918Z",
       "healthSummary": "GOOD",
       "maintenanceMode": false,
       "commissionState": "COMMISSIONED",
@@ -1207,14 +1207,14 @@
           "serviceName": "hbase",
           "roleName": "hbase-REGIONSERVER-d51d3a03fc3294039de9c160b1013676",
           "healthSummary": "GOOD",
-          "roleStatus": "STARTED"
+          "roleStatus": "STOPPED"
         },
         {
           "clusterName": "cod--qfdcinkqrzw",
           "serviceName": "phoenix",
           "roleName": "phoenix-PHOENIX_QUERY_SERVER-d51d3a03fc3294039de9c160b1013676",
           "healthSummary": "GOOD",
-          "roleStatus": "STARTED"
+          "roleStatus": "STOPPED"
         },
         {
           "clusterName": "cod--qfdcinkqrzw",
@@ -1237,7 +1237,7 @@
       "hostname": "cod--qfdcinkqrzw-worker3.agent-in.jfha-h5rc.a0.cloudera.site",
       "rackId": "/ap-northeast-1a",
       "hostUrl": "https://cod--qfdcinkqrzw-gateway.agent-in.jfha-h5rc.a0.cloudera.site/cmf/hostRedirect/88ae2611748383b5628d4aec94873da9",
-      "lastHeartbeat": "2022-11-23T22:24:33.808Z",
+      "lastHeartbeat": "2022-12-02T08:06:26.106Z",
       "healthSummary": "GOOD",
       "maintenanceMode": false,
       "commissionState": "COMMISSIONED",
@@ -1325,7 +1325,7 @@
           "serviceName": "phoenix",
           "roleName": "phoenix-PHOENIX_QUERY_SERVER-bf4b8e304dd0b549bcad6614d3129033",
           "healthSummary": "GOOD",
-          "roleStatus": "STARTED"
+          "roleStatus": "STOPPED"
         },
         {
           "clusterName": "cod--qfdcinkqrzw",
@@ -1339,7 +1339,7 @@
           "serviceName": "hbase",
           "roleName": "hbase-REGIONSERVER-bf4b8e304dd0b549bcad6614d3129033",
           "healthSummary": "GOOD",
-          "roleStatus": "STARTED"
+          "roleStatus": "STOPPED"
         },
         {
           "clusterName": "cod--qfdcinkqrzw",
@@ -1383,7 +1383,7 @@
       "hostname": "cod--qfdcinkqrzw-worker4.agent-in.jfha-h5rc.a0.cloudera.site",
       "rackId": "/ap-northeast-1d",
       "hostUrl": "https://cod--qfdcinkqrzw-gateway.agent-in.jfha-h5rc.a0.cloudera.site/cmf/hostRedirect/9784d85849c7179b790d476c483fd905",
-      "lastHeartbeat": "2022-11-23T22:24:34.092Z",
+      "lastHeartbeat": "2022-12-02T08:06:25.955Z",
       "healthSummary": "GOOD",
       "maintenanceMode": false,
       "commissionState": "COMMISSIONED",

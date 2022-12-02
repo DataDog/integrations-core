@@ -2,9 +2,11 @@ version: "3"
 
 services:
   cloudera:
-    image: caddy:2.1.1-alpine
+    image: caddy:2.6.2-alpine
     container_name: cloudera
     volumes:
       - ./fixtures:/usr/share/caddy
+      - ./etc/caddy:/etc/caddy/
     ports:
       - "8080:80"
+      - "2019:2019"
