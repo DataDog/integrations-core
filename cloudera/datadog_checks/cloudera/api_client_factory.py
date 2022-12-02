@@ -10,7 +10,7 @@ def make_api_client(check, config):
     cm_client.configuration.password = config.workload_password
     api_client = cm_client.ApiClient(config.api_url)
 
-    check.log.debug('Getting version from cloudera')
+    check.log.debug('Getting version from cloudera[%s]', config.api_url)
     cloudera_manager_resource_api = cm_client.ClouderaManagerResourceApi(api_client)
     get_version_response = cloudera_manager_resource_api.get_version()
     check.log.debug('get_version_response: %s', get_version_response)
