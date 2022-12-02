@@ -1,4 +1,4 @@
-from datadog_checks.rabbitmq.openmetrics.check import RabbitMQOpenMetrics
+from datadog_checks.rabbitmq import RabbitMQ
 
 
 def test_initial_setup(aggregator, dd_run_check, mock_http_response):
@@ -9,10 +9,10 @@ def test_initial_setup(aggregator, dd_run_check, mock_http_response):
             'rabbitmq_queue_messages_published_total{channel="<0.1043.0>",queue_vhost="/",queue="hello",exchange_vhost="/",exchange=""} 1\n'  # noqa
         )
     )
-    check = RabbitMQOpenMetrics(
+    check = RabbitMQ(
         "rabbitmq",
         {},
-        [{"openmetrics_endpoint": "test", "metrics": [".+"], "namespace": "foo"}],
+        [{'use_openmetrics': True,"openmetrics_endpoint": "test", "metrics": [".+"], "namespace": "foo"}],
     )
     dd_run_check(check)
 
