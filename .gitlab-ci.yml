@@ -63,8 +63,8 @@ trigger-agent-build:
       changes:
         - datadog_checks_base/datadog_checks/base/data/agent_requirements.in
       when: always
-    - if: ($CI_COMMIT_BRANCH !~ /^7.[0-9]{2}.x/)
-      when: always
+    # - if: ($CI_COMMIT_BRANCH !~ /^7.[0-9]{2}.x/)
+    #   when: always
   cache:
     <<: *slack-cache
   script:
