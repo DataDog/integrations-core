@@ -58,4 +58,6 @@ def test_given_api_v48_endpoint_when_check_runs_then_events_collected(
     # When
     dd_run_check(check)
     # Then
-    aggregator.assert_event("ExecutionException running extraction tasks for service 'cod--qfdcinkqrzw::yarn'.")
+    aggregator.assert_event(
+        "ExecutionException running extraction tasks for service 'cod--qfdcinkqrzw::yarn'.", count=1
+    )
