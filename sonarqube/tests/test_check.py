@@ -3,11 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 
-from .common import PROJECT
-from .metrics import WEB_METRICS
-
 import pytest
 
+from .common import PROJECT
+from .metrics import WEB_METRICS
 
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
 
@@ -28,12 +27,14 @@ def test_check(aggregator, dd_run_check, sonarqube_check, web_instance):
     aggregator.assert_service_check('sonarqube.api_access', status=check.OK, tags=global_tags)
 
 
-def test_check_with_autodiscovery(aggregator, dd_run_check, sonarqube_check, web_instance_with_autodiscovery):
-    check = sonarqube_check(web_instance_with_autodiscovery)
+def test_check_with_autodiscovery(
+    aggregator, dd_run_check, sonarqube_check, web_instance_with_autodiscovery_only_include
+):
+    check = sonarqube_check(web_instance_with_autodiscovery_only_include)
     dd_run_check(check)
 
-    global_tags = ['endpoint:{}'.format(web_instance_with_autodiscovery['web_endpoint'])]
-    global_tags.extend(web_instance_with_autodiscovery['tags'])
+    global_tags = ['endpoint:{}'.format(web_instance_with_autodiscovery_only_include['web_endpoint'])]
+    global_tags.extend(web_instance_with_autodiscovery_only_include['tags'])
 
     project_tag = 'project:{}'.format(PROJECT)
     for metric in WEB_METRICS:
