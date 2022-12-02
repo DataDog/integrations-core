@@ -4,11 +4,11 @@
 import six
 
 from datadog_checks.base import AgentCheck, ConfigurationError
+from datadog_checks.base.utils.time import get_timestamp
 
 from .api_client_factory import make_api_client
 from .common import CAN_CONNECT
 from .config_models import ConfigMixin
-from datadog_checks.base.utils.time import get_timestamp
 
 
 class ClouderaCheck(AgentCheck, ConfigMixin):

@@ -1,12 +1,13 @@
 from datetime import datetime
+
 import cm_client
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.utils.time import get_timestamp
 from datadog_checks.cloudera.api_client import ApiClient
 from datadog_checks.cloudera.entity_status import ENTITY_STATUS
 from datadog_checks.cloudera.event import ClouderaEvent
 from datadog_checks.cloudera.metrics import TIMESERIES_METRICS
-from datadog_checks.base.utils.time import get_timestamp
 
 from .common import CLUSTER_HEALTH, HOST_HEALTH
 
@@ -145,7 +146,7 @@ class ApiClientV7(ApiClient):
     def _collect_events(self):
         events_resource_api = cm_client.EventsResourceApi(self._api_client)
         now_utc = get_timestamp()
-        
+
         start_time_iso = datetime.utcfromtimestamp(self._check.latest_event_query_utc).isoformat()
         end_time_iso = datetime.utcfromtimestamp(now_utc).isoformat()
 
