@@ -47,7 +47,9 @@ from .stop import stop
 @click.option('--filter', '-k', 'test_filter', help='Only run tests matching given substring expression')
 @click.option('--changed', is_flag=True, help='Only test changed checks')
 @click.option('--debug', '-d', is_flag=True, help='Set the log level to debug')
-@click.option('--skip-failed-environments', '-sfe', is_flag=True, help='Skip environments that failed to start and continue')
+@click.option(
+    '--skip-failed-environments', '-sfe', is_flag=True, help='Skip environments that failed to start and continue'
+)
 @click.pass_context
 def test(
     ctx,
