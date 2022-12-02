@@ -44,6 +44,21 @@ def web_instance():
     return deepcopy(common.WEB_INSTANCE)
 
 
+@pytest.fixture
+def web_instance_with_autodiscovery_only_include():
+    return deepcopy(common.WEB_INSTANCE_WITH_AUTODISCOVERY_ONLY_INCLUDE)
+
+
+@pytest.fixture
+def web_instance_with_autodiscovery_include_all_and_exclude():
+    return deepcopy(common.WEB_INSTANCE_WITH_AUTODISCOVERY_INCLUDE_ALL_AND_EXCLUDE)
+
+
+@pytest.fixture
+def web_instance_with_autodiscovery_include_all_and_limit():
+    return deepcopy(common.WEB_INSTANCE_WITH_AUTODISCOVERY_INCLUDE_ALL_AND_LIMIT)
+
+
 @pytest.fixture(scope='session')
 def sonarqube_check():
     return lambda instance: SonarqubeCheck('sonarqube', {}, [instance])

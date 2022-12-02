@@ -1,0 +1,139 @@
+{
+	"metrics": [{
+		"id": "AYTSamBVhdvoa3XoFHiJ",
+		"key": "sqale_debt_ratio",
+		"type": "PERCENT",
+		"name": "Technical Debt Ratio",
+		"description": "Ratio of the actual technical debt compared to the estimated cost to develop the whole source code from scratch",
+		"domain": "Maintainability",
+		"direction": -1,
+		"qualitative": true,
+		"hidden": false,
+		"decimalScale": 1
+	}, {
+		"id": "AYTSamBVhdvoa3XoFHiK",
+		"key": "new_sqale_debt_ratio",
+		"type": "PERCENT",
+		"name": "Technical Debt Ratio on New Code",
+		"description": "Technical Debt Ratio of new/changed code.",
+		"domain": "Maintainability",
+		"direction": -1,
+		"qualitative": true,
+		"hidden": false,
+		"decimalScale": 1
+	}, {
+		"id": "AYTSamBThdvoa3XoFHhe",
+		"key": "uncovered_conditions",
+		"type": "INT",
+		"name": "Uncovered Conditions",
+		"description": "Uncovered conditions",
+		"domain": "Coverage",
+		"direction": -1,
+		"qualitative": false,
+		"hidden": false
+	}, {
+		"id": "AYTSamBThdvoa3XoFHhf",
+		"key": "new_uncovered_conditions",
+		"type": "INT",
+		"name": "Uncovered Conditions on New Code",
+		"description": "Uncovered conditions on new code",
+		"domain": "Coverage",
+		"direction": -1,
+		"qualitative": false,
+		"hidden": false
+	}, {
+		"id": "AYTSamBShdvoa3XoFHhY",
+		"key": "uncovered_lines",
+		"type": "INT",
+		"name": "Uncovered Lines",
+		"description": "Uncovered lines",
+		"domain": "Coverage",
+		"direction": -1,
+		"qualitative": false,
+		"hidden": false
+	}, {
+		"id": "AYTSamBShdvoa3XoFHhZ",
+		"key": "new_uncovered_lines",
+		"type": "INT",
+		"name": "Uncovered Lines on New Code",
+		"description": "Uncovered lines on new code",
+		"domain": "Coverage",
+		"direction": -1,
+		"qualitative": false,
+		"hidden": false
+	}, {
+		"id": "AYTSamBShdvoa3XoFHhP",
+		"key": "test_execution_time",
+		"type": "MILLISEC",
+		"name": "Unit Test Duration",
+		"description": "Execution duration of unit tests",
+		"domain": "Coverage",
+		"direction": -1,
+		"qualitative": false,
+		"hidden": false
+	}, {
+		"id": "AYTSamBShdvoa3XoFHhQ",
+		"key": "test_errors",
+		"type": "INT",
+		"name": "Unit Test Errors",
+		"description": "Number of unit test errors",
+		"domain": "Coverage",
+		"direction": -1,
+		"qualitative": true,
+		"hidden": false
+	}, {
+		"id": "AYTSamBShdvoa3XoFHhS",
+		"key": "test_failures",
+		"type": "INT",
+		"name": "Unit Test Failures",
+		"description": "Number of unit test failures",
+		"domain": "Coverage",
+		"direction": -1,
+		"qualitative": true,
+		"hidden": false
+	}, {
+		"id": "AYTSamBShdvoa3XoFHhT",
+		"key": "test_success_density",
+		"type": "PERCENT",
+		"name": "Unit Test Success (%)",
+		"description": "Density of successful unit tests",
+		"domain": "Coverage",
+		"direction": 1,
+		"qualitative": true,
+		"hidden": false,
+		"decimalScale": 1
+	}, {
+		"id": "AYTSamBShdvoa3XoFHhO",
+		"key": "tests",
+		"type": "INT",
+		"name": "Unit Tests",
+		"description": "Number of unit tests",
+		"domain": "Coverage",
+		"direction": 1,
+		"qualitative": false,
+		"hidden": false
+	}, {
+		"id": "AYTSamBUhdvoa3XoFHh_",
+		"key": "vulnerabilities",
+		"type": "INT",
+		"name": "Vulnerabilities",
+		"description": "Vulnerabilities",
+		"domain": "Security",
+		"direction": -1,
+		"qualitative": false,
+		"hidden": false
+	}, {
+		"id": "AYTSamBUhdvoa3XoFHh3",
+		"key": "wont_fix_issues",
+		"type": "INT",
+		"name": "Won\u0027t Fix Issues",
+		"description": "Won\u0027t fix issues",
+		"domain": "Issues",
+		"direction": -1,
+		"qualitative": false,
+		"hidden": false
+	}],
+	"total": 113,
+	"p": 2,
+	"ps": 100
+}
