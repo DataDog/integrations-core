@@ -1,7 +1,7 @@
 from datadog_checks.rabbitmq.openmetrics.check import RabbitMQOpenMetrics
 
 
-def test(aggregator, dd_run_check, mock_http_response):
+def test_initial_setup(aggregator, dd_run_check, mock_http_response):
     mock_http_response(
         (
             "# TYPE rabbitmq_queue_messages_published_total counter\n"

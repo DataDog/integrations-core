@@ -7,11 +7,12 @@ import subprocess
 
 import pytest
 import requests
+from packaging import version
 
 from datadog_checks.dev import docker_run, temp_dir
 from datadog_checks.rabbitmq import RabbitMQ
 
-from .common import CHECK_NAME, CONFIG, HERE, HOST, PORT
+from .common import CHECK_NAME, CONFIG, HERE, HOST, PORT, RABBITMQ_VERSION
 
 
 @pytest.fixture(scope="session")
@@ -168,24 +169,12 @@ def instance():
     return CONFIG
 
 
-def _parse_major_minor_version(v):
-    major, minor, *_ = v.split(".")
-    return (int(major), int(minor))
-
-
 def pytest_collection_modifyitems(config, items):
     for item in items:
         if "openmetrics" in os.path.relpath(item.fspath, start=config.rootdir):
             item.add_marker(
                 pytest.mark.skipif(
-                    _parse_major_minor_version(os.environ["RABBITMQ_VERSION"]) < (3, 8),
+                    RABBITMQ_VERSION < version.parse("3.8"),
                     reason='No openmetrics support in rabbitmq <3.8',
-                )
-            )
-        else:
-            item.add_marker(
-                pytest.mark.skipif(
-                    _parse_major_minor_version(os.environ["RABBITMQ_VERSION"]) >= (3, 8),
-                    reason='Not testing management plugin on rabbitmq v3.8+',
                 )
             )
