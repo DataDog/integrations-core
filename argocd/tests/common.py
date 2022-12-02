@@ -2,11 +2,18 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-MOCKED_APP_CONTROLLER_INSTANCE = {'app_controller_endpoint': 'app_controller:8082'}
+MOCKED_APP_CONTROLLER_INSTANCE = {'app_controller_endpoint': 'http://app_controller:8082'}
 
-MOCKED_API_SERVER_INSTANCE = {'api_server_endpoint': 'api_server:8083'}
+MOCKED_APP_CONTROLLER_WITH_OTHER_PARAMS = {
+    'app_controller_endpoint': 'http://app_controller:8082',
+    'empty_default_hostname': True,
+    'enable_health_service_check': True,
+    'collect_histogram_buckets': True,
+}
 
-MOCKED_REPO_SERVER_INSTANCE = {'repo_server_endpoint': 'repo_server:8084'}
+MOCKED_API_SERVER_INSTANCE = {'api_server_endpoint': 'http://api_server:8083'}
+
+MOCKED_REPO_SERVER_INSTANCE = {'repo_server_endpoint': 'http://repo_server:8084'}
 
 EMPTY_INSTANCE = {''}
 

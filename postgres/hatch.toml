@@ -1,0 +1,31 @@
+[env.collectors.datadog-checks]
+base-package-features = ["deps", "db", "json"]
+
+check-types = true
+mypy-args = [
+  "--py2",
+  "datadog_checks/",
+  "tests/",
+]
+mypy-deps = [
+  "types-mock==0.1.5",
+  "types-cachetools==0.1.10",
+  "types-enum34==1.1.1",
+  "types-futures==3.3.1",
+]
+
+[[envs.default.matrix]]
+python = ["27", "38"]
+version = ["9.5", "9.6", "10.0", "11.0", "12.1", "13.0", "14.0"]
+
+[envs.default.overrides]
+matrix.version.env-vars = [
+  { key = "POSTGRES_VERSION", if = ["9.5", "9.6", "12.1"] },
+  { key = "POSTGRES_VERSION", value = "10", if = ["10.0"] },
+  { key = "POSTGRES_VERSION", value = "11", if = ["11.0"] },
+  { key = "POSTGRES_VERSION", value = "13", if = ["13.0"] },
+  { key = "POSTGRES_VERSION", value = "14", if = ["14.0"] },
+]
+
+[envs.latest.env-vars]
+POSTGRES_VERSION = "latest"

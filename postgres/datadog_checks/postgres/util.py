@@ -31,6 +31,7 @@ class DatabaseConfigurationError(Enum):
     pg_stat_statements_not_created = 'pg-stat-statements-not-created'
     pg_stat_statements_not_loaded = 'pg-stat-statements-not-loaded'
     undefined_explain_function = 'undefined-explain-function'
+    high_pg_stat_statements_max = 'high-pg-stat-statements-max-configuration'
 
 
 def warning_with_tags(warning_message, *args, **kwargs):
@@ -83,6 +84,20 @@ NEWER_92_METRICS = {
     'deadlocks': ('postgresql.deadlocks', AgentCheck.rate),
     'temp_bytes': ('postgresql.temp_bytes', AgentCheck.rate),
     'temp_files': ('postgresql.temp_files', AgentCheck.rate),
+}
+
+QUERY_PG_STAT_DATABASE = {
+    'name': 'pg_stat_database',
+    'query': """
+        SELECT
+            datname,
+            deadlocks
+        FROM pg_stat_database
+    """.strip(),
+    'columns': [
+        {'name': 'db', 'type': 'tag'},
+        {'name': 'postgresql.deadlocks.count', 'type': 'monotonic_count'},
+    ],
 }
 
 COMMON_BGW_METRICS = {

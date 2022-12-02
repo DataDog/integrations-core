@@ -16,6 +16,7 @@ from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.statement_metrics import StatementMetrics
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding, obfuscate_sql_with_metadata
 from datadog_checks.base.utils.serialization import json
+from datadog_checks.base.utils.tracking import tracked_method
 
 from .util import DatabaseConfigurationError, warning_with_tags
 from .version_utils import V9_4
@@ -35,14 +36,12 @@ SELECT {cols}
   WHERE query != '<insufficient privilege>'
   AND query NOT LIKE 'EXPLAIN %%'
   {filters}
-  LIMIT {limit}
+  {extra_clauses}
 """
 
 # Use pg_stat_statements(false) when available as an optimization to avoid pulling SQL text from disk
 PG_STAT_STATEMENTS_COUNT_QUERY = "SELECT COUNT(*) FROM pg_stat_statements(false)"
 PG_STAT_STATEMENTS_COUNT_QUERY_LT_9_4 = "SELECT COUNT(*) FROM pg_stat_statements"
-
-DEFAULT_STATEMENTS_LIMIT = 10000
 
 # Required columns for the check to run
 PG_STAT_STATEMENTS_REQUIRED_COLUMNS = frozenset({'calls', 'query', 'rows'})
@@ -91,6 +90,10 @@ PG_STAT_ALL_DESIRED_COLUMNS = (
 )
 
 
+def agent_check_getter(self):
+    return self._check
+
+
 def _row_key(row):
     """
     :param row: a normalized row from pg_stat_statements
@@ -122,7 +125,11 @@ class PostgresStatementMetrics(DBMAsyncJob):
             job_name="query-metrics",
             shutdown_callback=shutdown_callback,
         )
+        self._check = check
         self._metrics_collection_interval = collection_interval
+        self._pg_stat_statements_max_warning_threshold = config.statement_metrics_config.get(
+            'pg_stat_statements_max_warning_threshold', 10000
+        )
         self._config = config
         self._state = StatementMetrics()
         self._stat_column_cache = []
@@ -145,6 +152,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
             self._stat_column_cache = []
             raise e
 
+    @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _get_pg_stat_statements_columns(self):
         """
         Load the list of the columns available under the `pg_stat_statements` table. This must be queried because
@@ -156,7 +164,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
 
         # Querying over '*' with limit 0 allows fetching only the column names from the cursor without data
         query = STATEMENTS_QUERY.format(
-            cols='*', pg_stat_statements_view=self._config.pg_stat_statements_view, limit=0, filters=""
+            cols='*', pg_stat_statements_view=self._config.pg_stat_statements_view, extra_clauses="LIMIT 0", filters=""
         )
         cursor = self._check._get_db(self._config.dbname).cursor()
         self._execute_query(cursor, query, params=(self._config.dbname,))
@@ -174,6 +182,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
             return ""
         return 'v{major}.{minor}.{patch}'.format(major=version.major, minor=version.minor, patch=version.patch)
 
+    @tracked_method(agent_check_getter=agent_check_getter)
     def collect_per_statement_metrics(self):
         # exclude the default "db" tag from statement metrics & FQT events because this data is collected from
         # all databases on the host. For metrics the "db" tag is added during ingestion based on which database
@@ -200,6 +209,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
             self._log.exception('Unable to collect statement metrics due to an error')
             return []
 
+    @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _load_pg_stat_statements(self):
         try:
             available_columns = set(self._get_pg_stat_statements_columns())
@@ -230,6 +240,32 @@ class PostgresStatementMetrics(DBMAsyncJob):
             if self._check.pg_settings.get("track_io_timing") != "on":
                 desired_columns -= PG_STAT_STATEMENTS_TIMING_COLUMNS
 
+            pg_stat_statements_max = int(self._check.pg_settings.get("pg_stat_statements.max"))
+            if pg_stat_statements_max > self._pg_stat_statements_max_warning_threshold:
+                self._check.record_warning(
+                    DatabaseConfigurationError.high_pg_stat_statements_max,
+                    warning_with_tags(
+                        "pg_stat_statements.max is set to %d which is higher than the supported "
+                        "value of %d. This can have a negative impact on database and collection of "
+                        "query metrics performance. Consider lowering the pg_stat_statements.max value to %d. "
+                        "Alternatively, you may acknowledge the potential performance impact by increasing the "
+                        "query_metrics.pg_stat_statements_max_warning_threshold to equal or greater than %d to "
+                        "silence this warning. "
+                        "See https://docs.datadoghq.com/database_monitoring/setup_postgres/"
+                        "troubleshooting#%s for more details",
+                        pg_stat_statements_max,
+                        self._pg_stat_statements_max_warning_threshold,
+                        self._pg_stat_statements_max_warning_threshold,
+                        self._pg_stat_statements_max_warning_threshold,
+                        DatabaseConfigurationError.high_pg_stat_statements_max.value,
+                        host=self._check.resolved_hostname,
+                        dbname=self._config.dbname,
+                        code=DatabaseConfigurationError.high_pg_stat_statements_max.value,
+                        value=pg_stat_statements_max,
+                        threshold=self._pg_stat_statements_max_warning_threshold,
+                    ),
+                )
+
             query_columns = sorted(list(available_columns & desired_columns))
             params = ()
             filters = ""
@@ -247,7 +283,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
                     cols=', '.join(query_columns),
                     pg_stat_statements_view=self._config.pg_stat_statements_view,
                     filters=filters,
-                    limit=DEFAULT_STATEMENTS_LIMIT,
+                    extra_clauses="",
                 ),
                 params=params,
             )
@@ -309,6 +345,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
 
             return []
 
+    @tracked_method(agent_check_getter=agent_check_getter)
     def _emit_pg_stat_statements_metrics(self):
         query = PG_STAT_STATEMENTS_COUNT_QUERY_LT_9_4 if self._check.version < V9_4 else PG_STAT_STATEMENTS_COUNT_QUERY
         try:
@@ -319,7 +356,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
             count = 0
             if rows:
                 count = rows[0][0]
-            self._check.count(
+            self._check.gauge(
                 "postgresql.pg_stat_statements.max",
                 self._check.pg_settings.get("pg_stat_statements.max", 0),
                 tags=self._tags,
@@ -334,10 +371,10 @@ class PostgresStatementMetrics(DBMAsyncJob):
         except psycopg2.Error as e:
             self._log.warning("Failed to query for pg_stat_statements count: %s", e)
 
+    @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _collect_metrics_rows(self):
+        self._emit_pg_stat_statements_metrics()
         rows = self._load_pg_stat_statements()
-        if rows:
-            self._emit_pg_stat_statements_metrics()
 
         rows = self._normalize_queries(rows)
         if not rows:
@@ -357,6 +394,12 @@ class PostgresStatementMetrics(DBMAsyncJob):
     def _normalize_queries(self, rows):
         normalized_rows = []
         for row in rows:
+            self._check.histogram(
+                "postgresql.pg_stat_statements.query_text_length",
+                len(row['query']),
+                tags=self._tags,
+                hostname=self._check.resolved_hostname,
+            )
             normalized_row = dict(copy.copy(row))
             try:
                 statement = obfuscate_sql_with_metadata(row['query'], self._obfuscate_options)

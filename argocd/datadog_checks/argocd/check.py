@@ -92,7 +92,8 @@ class ArgocdCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         return argocd_cluster_connection_status_transformer
 
     def configure_additional_transformers(self):
-        for endpoint in self.instance.keys():
+        endpoints = [key for key in self.instance.keys() if "_endpoint" in key]
+        for endpoint in endpoints:
             if endpoint == "app_controller_endpoint":
                 self.scrapers[self.instance[endpoint]].metric_transformer.add_custom_transformer(
                     ("argocd_cluster_connection_status"),

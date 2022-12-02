@@ -44,9 +44,8 @@ class Path(_PathBase):
         # https://bugs.python.org/issue38671
         return Path(os.path.realpath(self))
 
-    def read_text(self, **kwargs) -> str:
-        kwargs.setdefault('encoding', 'utf-8')
-        return super().read_text(**kwargs)
+    def read_text(self, encoding='utf-8', errors=None) -> str:
+        return super().read_text(encoding, errors)
 
     def write_text(self, *args, **kwargs) -> int:
         kwargs.setdefault('encoding', 'utf-8')

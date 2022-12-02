@@ -82,7 +82,7 @@ trigger-agent-build:
           DATADOG_AGENT_PIPELINE_URL=$DATADOG_AGENT_PIPELINE_URL RELEASE_BRANCH=$RELEASE_BRANCH python -u /trigger_agent_build.py --output-file pipeline_id.txt
 
           # Get slack user
-          if [[ $GITLAB_USER_LOGIN = "gitsync" ]]; then EMAIL=$(git show -s --format="%ae" "$CI_COMMIT_SHA"); else EMAIL=$GITLAB_USER_EMAIL; fi
+          if [[ $GITLAB_USER_LOGIN = "codesync" ]]; then EMAIL=$(git show -s --format="%ae" "$CI_COMMIT_SHA"); else EMAIL=$GITLAB_USER_EMAIL; fi
           SLACK_AUTHOR=$(echo $EMAIL | email2slackid)
           if [ -z "$SLACK_AUTHOR" ]; then echo "${EMAIL} cannot be translated into a Slack user, defaulting to ${AGENT_BUILD_NOTIFICATIONS_SLACK_CHANNEL}"; SLACK_AUTHOR=$AGENT_BUILD_NOTIFICATIONS_SLACK_CHANNEL; fi
 
@@ -115,7 +115,7 @@ validate-agent-build:
           PIPELINE_ID=$(cat pipeline_id.txt)
 
           # Get slack user
-          if [[ $GITLAB_USER_LOGIN = "gitsync" ]]; then EMAIL=$(git show -s --format="%ae" "$CI_COMMIT_SHA"); else EMAIL=$GITLAB_USER_EMAIL; fi
+          if [[ $GITLAB_USER_LOGIN = "codesync" ]]; then EMAIL=$(git show -s --format="%ae" "$CI_COMMIT_SHA"); else EMAIL=$GITLAB_USER_EMAIL; fi
           SLACK_AUTHOR=$(echo $EMAIL | email2slackid)
           if [ -z "$SLACK_AUTHOR" ]; then echo "${EMAIL} cannot be translated into a Slack user, defaulting to ${AGENT_BUILD_NOTIFICATIONS_SLACK_CHANNEL}"; SLACK_AUTHOR=$AGENT_BUILD_NOTIFICATIONS_SLACK_CHANNEL; fi
 

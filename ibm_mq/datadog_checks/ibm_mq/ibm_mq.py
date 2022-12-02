@@ -71,14 +71,20 @@ class IbmMqCheck(AgentCheck):
             queue_manager = connection.get_queue_manager_connection(self._config, self.log)
             self.service_check(self.SERVICE_CHECK, AgentCheck.OK, self._config.tags, hostname=self._config.hostname)
         except Exception as e:
-            self.warning("cannot connect to queue manager: %s", e)
+            message = 'cannot connect to queue manager: {}'.format(e)
+            self.warning(message)
             self.service_check(
-                self.SERVICE_CHECK, AgentCheck.CRITICAL, self._config.tags, hostname=self._config.hostname
+                self.SERVICE_CHECK,
+                AgentCheck.CRITICAL,
+                self._config.tags,
+                message=message,
+                hostname=self._config.hostname,
             )
             self.service_check(
                 QueueMetricCollector.QUEUE_MANAGER_SERVICE_CHECK,
                 AgentCheck.CRITICAL,
                 self._config.tags,
+                message=message,
                 hostname=self._config.hostname,
             )
             self.reset_queue_manager_process_match()
