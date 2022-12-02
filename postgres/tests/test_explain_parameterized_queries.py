@@ -3,6 +3,7 @@ import pytest
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.postgres.explain_parameterized_queries import ExplainParameterizedQueries
 from datadog_checks.postgres.statement_samples import DBExplainError
+from datadog_checks.postgres.version_utils import V12
 
 from .common import DB_NAME, PORT
 
@@ -42,6 +43,9 @@ def test_explain_parameterized_queries(
     check._connect()
 
     check.check(dbm_instance)
+    if check.version < V12:
+        return
+
     plan_dict, explain_err_code, err = check.statement_samples._run_and_track_explain(
         "datadog_test", query, query, query
     )
@@ -81,6 +85,9 @@ def test_explain_parameterized_queries_max_space(integration_check, dbm_instance
     check._connect()
 
     check.check(dbm_instance)
+    if check.version < V12:
+        return
+
     query = "SELECT * FROM pg_settings WHERE name = $1"
 
     plan_dict, explain_err_code, err = check.statement_samples._run_and_track_explain(
