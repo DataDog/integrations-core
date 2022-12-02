@@ -35,15 +35,15 @@ class ExplainParameterizedQueries:
     ExplainParameterizedQueries will attempt to use a workaround to explain a parameterized query.
 
     High-level explanation:
-        Given the query: SELECT * FROM products WHERE id = $1;
+        Given the query: `SELECT * FROM products WHERE id = $1;`
 
         We're unable to explain this because we do not know the value of the parameter ($1). Attempting to explain
         this will result in an error.
-            e.g. EXPLAIN SELECT * FROM products WHERE id = $1;
+            e.g. `EXPLAIN SELECT * FROM products WHERE id = $1;`
                 Returns: error
         We could provide `null` as a value because it works with any datatype, but this will also not work
         because Postgres knows that no rows will be returned.
-            e.g. EXPLAIN SELECT * FROM products WHERE id = null;
+            e.g. `EXPLAIN SELECT * FROM products WHERE id = null;`
                 Returns: no plan
 
         However, with Postgres versions 12 and above, you can control how the query planner behaves with
@@ -55,14 +55,14 @@ class ExplainParameterizedQueries:
         information such as how many parameters are required and the type.
 
         Note, prepared statements created by the user defined in the integration config are not persisted.
-        When the session ends, all the prepared statements are automatically deallocated by Postgres.
+        When the session ends, all prepared statements are automatically deallocated by Postgres.
 
         Walkthrough:
-            1. Set the plan cache mode: SET plan_cache_mode = force_generic_plan;
-            2. Create a prepared statement: PREPARE dd_products AS SELECT * FROM products WHERE id = $1;
+            1. Set the plan cache mode: `SET plan_cache_mode = force_generic_plan;`
+            2. Create a prepared statement: `PREPARE dd_products AS SELECT * FROM products WHERE id = $1;`
             3. Query `pg_prepared_statements` to determine how many parameters a query requires
             and provide generic values (null).
-            3. Execute and explain: EXPLAIN EXECUTE dd_products(null);
+            4. Execute and explain: `EXPLAIN EXECUTE dd_products(null);`
                 Returns: (plan)
     '''
 
