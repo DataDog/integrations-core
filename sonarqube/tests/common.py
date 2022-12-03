@@ -16,6 +16,16 @@ WEB_INSTANCE = {
     'components': {PROJECT: {'tag': 'project'}},
     'tags': ['foo:bar'],
 }
+WEB_INSTANCE_CONFIG_NONE = {
+    'web_endpoint': 'http://{}:{}'.format(HOST, PORT),
+    'components': {PROJECT: None},
+    'tags': ['foo:bar'],
+}
+WEB_INSTANCE_AND_EXCLUDE_METRICS = {
+    'web_endpoint': 'http://{}:{}'.format(HOST, PORT),
+    'components': {PROJECT: {'tag': 'project', 'exclude': ['coverage.metric2']}},
+    'tags': ['foo:bar'],
+}
 WEB_INSTANCE_WITH_AUTODISCOVERY_ONLY_INCLUDE = {
     'web_endpoint': 'http://{}:{}'.format(HOST, PORT),
     'components_discovery': {'include': {'org.sonarqube:*': {'tag': 'project'}}},

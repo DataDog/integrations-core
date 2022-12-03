@@ -132,8 +132,18 @@
 		"direction": -1,
 		"qualitative": false,
 		"hidden": false
+	}, {
+		"id": "UnknownCategory",
+		"key": "unknown_category",
+		"type": "INT",
+		"name": "Technical Debt",
+		"description": "Total effort (in hours) to fix all the issues on the component and therefore to comply to all the requirements.",
+		"domain": "Unknown",
+		"direction": -1,
+		"qualitative": true,
+		"hidden": false
 	}],
-	"total": 113,
+	"total": 114,
 	"p": 2,
 	"ps": 100
 }

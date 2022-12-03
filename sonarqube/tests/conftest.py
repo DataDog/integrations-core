@@ -45,6 +45,16 @@ def web_instance():
 
 
 @pytest.fixture
+def web_instance_config_none():
+    return deepcopy(common.WEB_INSTANCE_CONFIG_NONE)
+
+
+@pytest.fixture
+def web_instance_and_exclude_metrics():
+    return deepcopy(common.WEB_INSTANCE_AND_EXCLUDE_METRICS)
+
+
+@pytest.fixture
 def web_instance_with_autodiscovery_only_include():
     return deepcopy(common.WEB_INSTANCE_WITH_AUTODISCOVERY_ONLY_INCLUDE)
 
