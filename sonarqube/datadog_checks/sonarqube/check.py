@@ -64,7 +64,9 @@ class SonarqubeCheck(AgentCheck):
                 for component in available_components:
                     self.log.debug('processing component `%s`', component)
                     if should_collect_component(component):
-                        self.collect_metrics_from_component(available_metrics, component, tag_name, should_collect_metric)
+                        self.collect_metrics_from_component(
+                            available_metrics, component, tag_name, should_collect_metric
+                        )
                         collected_components += 1
                         self.log.debug(
                             'collected %d component%s', collected_components, '' if collected_components == 1 else 's'
