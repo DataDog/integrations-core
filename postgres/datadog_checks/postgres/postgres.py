@@ -76,6 +76,7 @@ class PostgreSql(AgentCheck):
 
     def cancel(self):
         self.statement_samples.cancel()
+        self.statement_traces.cancel()
         self.statement_metrics.cancel()
 
     def _clean_state(self):
@@ -590,6 +591,7 @@ class PostgreSql(AgentCheck):
             if self._config.dbm_enabled:
                 self.statement_metrics.run_job_loop(tags)
                 self.statement_samples.run_job_loop(tags)
+                self.statement_traces.run_job_loop(tags)
             if self._config.collect_wal_metrics:
                 self._collect_wal_metrics(tags)
 
