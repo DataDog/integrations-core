@@ -45,10 +45,7 @@ class SonarqubeCheck(AgentCheck):
         available_metrics = self.discover_available_metrics()
         self.log.debug('available_metrics: %s', available_metrics)
         self.collect_components(available_metrics)
-        if self._components_discovery:
-            self.collect_components_discovery(available_metrics)
-        else:
-            self.log.debug('components_discovery is None')
+        self.collect_components_discovery(available_metrics)
 
     def collect_components(self, available_metrics):
         for component, (tag_name, should_collect_metric) in self._components.items():
@@ -56,29 +53,32 @@ class SonarqubeCheck(AgentCheck):
             self.collect_metrics_from_component(available_metrics, component, tag_name, should_collect_metric)
 
     def collect_components_discovery(self, available_metrics):
-        self.log.debug('components_discovery: %s', self._components_discovery)
-        available_components = self.discover_available_components()
-        self.log.debug('available_components: %s', available_components)
-        (discovery_limit, components_discovery) = self._components_discovery
-        collected_components = 0
-        for pattern, (should_collect_component, tag_name, should_collect_metric) in components_discovery.items():
-            self.log.debug('processing pattern `%s`', pattern)
-            for component in available_components:
-                self.log.debug('processing component `%s`', component)
-                if should_collect_component(component):
-                    self.collect_metrics_from_component(available_metrics, component, tag_name, should_collect_metric)
-                    collected_components += 1
-                    self.log.debug(
-                        'collected %d component%s', collected_components, '' if collected_components == 1 else 's'
-                    )
-                    if collected_components == discovery_limit:
-                        return
-                else:
-                    self.log.debug(
-                        'component `%s` should not be collected '
-                        '(see `exclude` list in `components_discovery` key config)',
-                        component,
-                    )
+        if self._components_discovery:
+            self.log.debug('components_discovery: %s', self._components_discovery)
+            available_components = self.discover_available_components()
+            self.log.debug('available_components: %s', available_components)
+            (discovery_limit, components_discovery) = self._components_discovery
+            collected_components = 0
+            for pattern, (should_collect_component, tag_name, should_collect_metric) in components_discovery.items():
+                self.log.debug('processing pattern `%s`', pattern)
+                for component in available_components:
+                    self.log.debug('processing component `%s`', component)
+                    if should_collect_component(component):
+                        self.collect_metrics_from_component(available_metrics, component, tag_name, should_collect_metric)
+                        collected_components += 1
+                        self.log.debug(
+                            'collected %d component%s', collected_components, '' if collected_components == 1 else 's'
+                        )
+                        if collected_components == discovery_limit:
+                            return
+                    else:
+                        self.log.debug(
+                            'component `%s` should not be collected '
+                            '(see `exclude` list in `components_discovery` key config)',
+                            component,
+                        )
+        else:
+            self.log.debug('components_discovery is None')
 
     def collect_metrics_from_component(self, available_metrics, component, tag_name, should_collect_metric):
         self.log.debug('collecting metrics from component `%s`', component)
