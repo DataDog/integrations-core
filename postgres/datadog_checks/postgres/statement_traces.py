@@ -160,7 +160,7 @@ class PostgresStatementTraces(DBMAsyncJob):
             pg_stat_activity_cols=', '.join(available_activity_columns),
             pg_blocking_func=blocking_func,
             pg_stat_activity_view=self._config.pg_stat_activity_view,
-            username=self._username,
+            user=self._username,
             extra_filters=extra_filters,
         )
         with self._check._get_db(self._config.dbname).cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
