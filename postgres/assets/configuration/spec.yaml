@@ -390,6 +390,70 @@ files:
           value:
             type: number
             example: 3500
+    - name: query_traces
+      description: Configure collection of query traces
+      options:
+        - name: enabled
+          description: |
+            Enable collection of query traces. Requires `dbm: true`.
+          value:
+            type: boolean
+            example: true
+        - name: collection_interval
+          description: |
+            Set the query sample collection interval (in seconds). Each collection involves a single query to
+            `pg_stat_activity` followed by at most one `EXPLAIN` query per unique normalized query seen.
+          value:
+            type: number
+            example: 0.1
+        - name: explain_analyze_function
+          description: |
+            Override the default function used to collect execution plans for queries.
+          value:
+            type: string
+            example: datadog.explain_analyze_statement
+        - name: collection_strategy_cache_maxsize
+          description: |
+            Set the max size of the cache used for the collection strategy cache. This should
+            be increased for databases with a very large number unique normalized queries which exceed the cache's
+            limit.
+          value:
+            type: number
+            example: 1000
+        - name: collection_strategy_cache_ttl
+          description: |
+            Set the collection strategy cache ttl in seconds.
+          value:
+            type: number
+            example: 300
+        - name: explain_errors_cache_maxsize
+          description: |
+            Set the max size of the cache used for the collection errors cache. This should
+            be increased for databases with a very large number unique normalized queries which exceed the cache's
+            limit.
+          value:
+            type: number
+            example: 5000
+        - name: explain_errors_cache_ttl
+          description: |
+            Set the explain error cache ttl in seconds.
+          value:
+            type: number
+            example: 86400
+        - name: plan_cache_maxsize
+          description: |
+            Set the max size of the cache used for the explain plan cache. This should
+            be increased for databases with a very large number unique normalized queries which exceed the cache's
+            limit.
+          value:
+            type: number
+            example: 30000
+        - name: plan_cache_ttl
+          description: |
+            Set the plan cache ttl in seconds.
+          value:
+            type: number
+            example: 300
             
     - name: aws
       description: |

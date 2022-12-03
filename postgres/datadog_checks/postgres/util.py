@@ -5,8 +5,16 @@ import string
 from enum import Enum
 from typing import Any, List, Tuple
 
+from six import PY2
+
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.errors import CheckException
+
+# according to https://unicodebook.readthedocs.io/unicode_encodings.html, the max supported size of a UTF-8 encoded
+# character is 6 bytes
+MAX_CHARACTER_SIZE_IN_BYTES = 6
+
+TRACK_ACTIVITY_QUERY_SIZE_UNKNOWN_VALUE = -1
 
 
 class PartialFormatter(string.Formatter):
@@ -54,6 +62,37 @@ def get_schema_field(descriptors):
         if name == 'schema':
             return column
     raise CheckException("The descriptors are missing a schema field")
+
+
+class StatementTruncationState(Enum):
+    """
+    Denotes the various possible states of a statement's truncation
+    """
+
+    truncated = 'truncated'
+    not_truncated = 'not_truncated'
+    unknown = 'unknown'
+
+
+def get_track_activity_query_size(check):
+    return int(check.pg_settings.get("track_activity_query_size", TRACK_ACTIVITY_QUERY_SIZE_UNKNOWN_VALUE))
+
+
+def get_truncation_state(track_activity_query_size, statement):
+    # Only check is a statement is truncated if the value of track_activity_query_size was loaded correctly
+    # to avoid confusingly reporting a wrong indicator by using a default that might be wrong for the database
+    if track_activity_query_size == TRACK_ACTIVITY_QUERY_SIZE_UNKNOWN_VALUE:
+        return StatementTruncationState.unknown
+
+    # Compare the query length (in bytes to match Postgres) to the configured max query size to determine
+    # if the query has been truncated. Note that the length of a truncated statement
+    # can be less than the value of 'track_activity_query_size' by MAX_CHARACTER_SIZE_IN_BYTES + 1 because
+    # multi-byte characters that fall on the limit are left out. One caveat is that if a statement's length
+    # happens to be greater or equal to the threshold below but isn't actually truncated, this
+    # would falsely report it as a truncated statement
+    statement_bytes = bytes(statement) if PY2 else bytes(statement, "utf-8")
+    truncated = len(statement_bytes) >= track_activity_query_size - (MAX_CHARACTER_SIZE_IN_BYTES + 1)
+    return StatementTruncationState.truncated if truncated else StatementTruncationState.not_truncated
 
 
 fmt = PartialFormatter()

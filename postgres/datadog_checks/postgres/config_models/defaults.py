@@ -142,6 +142,10 @@ def instance_query_timeout(field, value):
     return 5000
 
 
+def instance_query_traces(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_relations(field, value):
     return get_default_field_value(field, value)
 

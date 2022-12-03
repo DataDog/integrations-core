@@ -330,6 +330,62 @@ instances:
         #
         # payload_row_limit: 3500
 
+    ## Configure collection of query traces
+    #
+    # query_traces:
+
+        ## @param enabled - boolean - optional - default: true
+        ## Enable collection of query traces. Requires `dbm: true`.
+        #
+        # enabled: true
+
+        ## @param collection_interval - number - optional - default: 0.1
+        ## Set the query sample collection interval (in seconds). Each collection involves a single query to
+        ## `pg_stat_activity` followed by at most one `EXPLAIN` query per unique normalized query seen.
+        #
+        # collection_interval: 0.1
+
+        ## @param explain_analyze_function - string - optional - default: datadog.explain_analyze_statement
+        ## Override the default function used to collect execution plans for queries.
+        #
+        # explain_analyze_function: datadog.explain_analyze_statement
+
+        ## @param collection_strategy_cache_maxsize - number - optional - default: 1000
+        ## Set the max size of the cache used for the collection strategy cache. This should
+        ## be increased for databases with a very large number unique normalized queries which exceed the cache's
+        ## limit.
+        #
+        # collection_strategy_cache_maxsize: 1000
+
+        ## @param collection_strategy_cache_ttl - number - optional - default: 300
+        ## Set the collection strategy cache ttl in seconds.
+        #
+        # collection_strategy_cache_ttl: 300
+
+        ## @param explain_errors_cache_maxsize - number - optional - default: 5000
+        ## Set the max size of the cache used for the collection errors cache. This should
+        ## be increased for databases with a very large number unique normalized queries which exceed the cache's
+        ## limit.
+        #
+        # explain_errors_cache_maxsize: 5000
+
+        ## @param explain_errors_cache_ttl - number - optional - default: 86400
+        ## Set the explain error cache ttl in seconds.
+        #
+        # explain_errors_cache_ttl: 86400
+
+        ## @param plan_cache_maxsize - number - optional - default: 30000
+        ## Set the max size of the cache used for the explain plan cache. This should
+        ## be increased for databases with a very large number unique normalized queries which exceed the cache's
+        ## limit.
+        #
+        # plan_cache_maxsize: 30000
+
+        ## @param plan_cache_ttl - number - optional - default: 300
+        ## Set the plan cache ttl in seconds.
+        #
+        # plan_cache_ttl: 300
+
     ## This block defines the configuration for AWS RDS and Aurora instances. 
     ##
     ## Complete this section if you have installed the Datadog AWS Integration 

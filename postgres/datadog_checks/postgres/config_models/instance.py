@@ -93,6 +93,21 @@ class QuerySamples(BaseModel):
     seen_samples_cache_maxsize: Optional[int]
 
 
+class QueryTraces(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    collection_interval: Optional[float]
+    collection_strategy_cache_maxsize: Optional[float]
+    collection_strategy_cache_ttl: Optional[float]
+    enabled: Optional[bool]
+    explain_analyze_function: Optional[str]
+    explain_errors_cache_maxsize: Optional[float]
+    explain_errors_cache_ttl: Optional[float]
+    plan_cache_maxsize: Optional[float]
+    plan_cache_ttl: Optional[float]
+
+
 class Relation(BaseModel):
     class Config:
         allow_mutation = False
@@ -141,6 +156,7 @@ class InstanceConfig(BaseModel):
     query_metrics: Optional[QueryMetrics]
     query_samples: Optional[QuerySamples]
     query_timeout: Optional[int]
+    query_traces: Optional[QueryTraces]
     relations: Optional[Sequence[Union[str, Relation]]]
     reported_hostname: Optional[str]
     service: Optional[str]

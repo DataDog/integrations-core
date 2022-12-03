@@ -54,12 +54,34 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" "$DBNAME" <<-'EOSQL'
     RETURNS NULL ON NULL INPUT
     SECURITY DEFINER;
 
+    CREATE OR REPLACE FUNCTION datadog.explain_analyze_statement(
+      l_query TEXT,
+      OUT explain JSON
+    )
+    RETURNS SETOF JSON AS
+    $$
+    DECLARE
+    curs REFCURSOR;
+    plan JSON;
+
+    BEGIN
+      OPEN curs FOR EXECUTE pg_catalog.concat('EXPLAIN ANALYZE (FORMAT JSON) ', l_query);
+      FETCH curs INTO plan;
+      CLOSE curs;
+      RETURN QUERY SELECT plan;
+    END;
+    $$
+    LANGUAGE 'plpgsql'
+    RETURNS NULL ON NULL INPUT
+    SECURITY DEFINER;
+
     CREATE OR REPLACE FUNCTION datadog.pg_stat_activity() RETURNS SETOF pg_stat_activity AS
     $$ SELECT * FROM pg_catalog.pg_stat_activity; $$
     LANGUAGE sql
     SECURITY DEFINER;
 
     ALTER FUNCTION datadog.explain_statement(l_query text, out explain json) OWNER TO postgres;
+    ALTER FUNCTION datadog.explain_analyze_statement(l_query text, out explain json) OWNER TO postgres;
     ALTER FUNCTION datadog.pg_stat_activity() owner to postgres;
 
     -- datadog.explain_statement_noaccess is not part of the standard setup
