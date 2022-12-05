@@ -267,7 +267,7 @@ See [service_checks.json][15] for a list of service checks provided by this inte
 
 ### Components Discovery
 
-The user can configure the discovery functionality for components: `components_discovery`
+You can configure how your components are discovered with the `components_discovery` parameter.
 
 `limit`
 : Maximum number of items to be auto discovered.  
