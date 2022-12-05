@@ -92,9 +92,9 @@ files:
       - name: components_discovery
         description: |
           The autodiscovery patterns for components.
-          The following example collects all defect metrics for those components whose names start with "my_project"
+          The following example collects all defect metrics for those components with names starting with "my_project"
           and only the metrics from the "issues" category for projects starting with "issue".
-          It will also exclude projects starting with "temp" from autodiscovery.
+          It also excludes projects starting with "temp" from autodiscovery.
           The maximum total number of projects processed by autodiscovery is 10.
           
             components_discovery:

@@ -234,7 +234,7 @@ components_discovery:
     'my_project*':
 ```
 
-Include all `components` except those beginning with `temp*` up to a maximum of `20`:
+Include a maximum of `20` components and exclude those beginning with `temp`:
 
 ```yaml
 components_discovery:
@@ -245,8 +245,7 @@ components_discovery:
     - 'temp*'
 ```
 
-Include all `components` whose name starts with `issues` processing them with the tag `issues_project` and only collect metrics belonging to said category `issues` (as `limit` is not configured, the number of components discovered will be limited to `10`, the default value):
-
+Include all components with names starting with `issues` processing them with `issues_project`, and only collect metrics belonging to the category `issues`. As `limit` is not defined, the number of components discovered is limited to the default value `10`:
 ```yaml
 components_discovery:
   include:
