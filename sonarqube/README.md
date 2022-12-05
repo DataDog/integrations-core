@@ -277,7 +277,7 @@ The user can configure the discovery functionality for components: `components_d
 
 Examples:
 
-Include only `components` whose name starts with `my_project` up to a maximum of `5`:
+Include a maximum of `5` components with names starting with `my_project`:
 
 ```yaml
 components_discovery:
