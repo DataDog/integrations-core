@@ -23,6 +23,7 @@ class ApiClientV7(ApiClient):
         self._log.debug(read_clusters_response)
         for cluster in read_clusters_response.items:
             self._collect_cluster_metrics_and_service_check(cluster)
+            self._collect_cluster_native_metrics(cluster)
 
     def _collect_cluster_metrics_and_service_check(self, cluster):
         self._log.debug('cluster: %s', cluster)
@@ -64,7 +65,25 @@ class ApiClientV7(ApiClient):
         self._log.debug(list_hosts_response)
 
         for host in list_hosts_response.items:
+            self._collect_host_native_metrics(host)
             self._collect_host_metrics_and_service_check(host)
+
+    def _collect_host_native_metrics(self, host):
+        # Collect num_cores, num_physical_cores, total_phys_mem_bytes
+        tags = [f"{tag.name}:{tag.value}" for tag in host.tags] if host.tags else []
+
+        # Get rack_id, hostname, host_id
+        tag_items = {
+            'cloudera_cluster': host.hostname,
+            'cloudera_rack_id': host.rack_id,
+            'cloudera_host_id': host.host_id,
+        }
+
+        tags = tags + [f"{item}:{tag_items[item]}" for item in tag_items]
+
+        self._check.gauge("host.num_cores", host.num_cores, tags)
+        self._check.gauge("host.num_physical_cores", host.num_physical_cores, tags)
+        self._check.gauge("host.total_phys_mem_bytes", host.total_phys_mem_bytes, tags)
 
     def _collect_host_metrics_and_service_check(self, host):
         self._log.debug('host: %s', host)
