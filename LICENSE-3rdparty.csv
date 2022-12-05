@@ -38,6 +38,7 @@ ipaddress,PyPI,PSF,Philipp Hagemeister
 jellyfish,PyPI,BSD-3-Clause,
 kafka-python,PyPI,Apache-2.0,Dana Powers
 kazoo,PyPI,Apache-2.0,Kazoo team
+keystoneauth1,PyPI,Apache-2.0,OpenStack
 kubernetes,PyPI,Apache-2.0,Kubernetes
 ldap3,PyPI,LGPL-3.0-only,Giovanni Cannata
 lxml,PyPI,BSD-3-Clause,lxml dev team
