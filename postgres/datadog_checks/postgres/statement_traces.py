@@ -543,7 +543,7 @@ class PostgresStatementTraces(DBMAsyncJob):
                     "commands": row['dd_commands'],
                     "comments": row['dd_comments'],
                 },
-                "query_truncated": get_truncation_state(self._get_track_activity_query_size(), row['query']).value,
+                "query_truncated": get_truncation_state(get_track_activity_query_size(self._check), row['query']).value,
             },
             'postgres': {k: v for k, v in row.items() if k not in pg_stat_activity_sample_exclude_keys},
         }
