@@ -211,6 +211,7 @@ class SonarqubeCheck(AgentCheck):
                     config = {}
                 if not isinstance(config, dict):
                     raise ConfigurationError('Pattern `{}` must refer to a mapping'.format(pattern))
+                include_component = self.create_matcher(re.compile(pattern), default=True)
                 include_metric = self.create_matcher(
                     self.compile_metric_patterns(config, 'include') or default_metric_inclusion_pattern,
                     default=True,
@@ -223,7 +224,8 @@ class SonarqubeCheck(AgentCheck):
                 if not isinstance(tag_name, str):
                     raise ConfigurationError('The `tag` setting must be a string')
                 components_discovery_data[pattern] = (
-                    lambda _component, _exclude_component=exclude_component: not _exclude_component(_component),
+                    lambda _component, _include=include_component, _exclude=exclude_component: _include(_component)
+                    and not _exclude(_component),
                     tag_name,
                     lambda _metric, _include_metric=include_metric, _exclude_metric=exclude_metric: _include_metric(
                         _metric
