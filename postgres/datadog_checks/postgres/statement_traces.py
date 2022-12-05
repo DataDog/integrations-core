@@ -74,7 +74,7 @@ PG_STAT_ACTIVITY_TRACE_QUERY = re.sub(
     r'\s+',
     ' ',
     """
-    SELECT {current_time_func} {pg_stat_activity_cols} {pg_blocking_func} FROM {pg_stat_activity_view}
+    SELECT {current_time_func} {pg_stat_activity_cols} FROM {pg_stat_activity_view}
     where query like '%traceparent=''%-01''%'
     AND usename != '{user}'
     AND query_start IS NOT NULL
@@ -89,7 +89,7 @@ DEFAULT_COLLECTION_INTERVAL = 1
 
 class PostgresStatementTraces(DBMAsyncJob):
     """
-    Collects statement samples and execution plans.
+    Collects statement traces and execution plans.
     """
 
     def __init__(self, check, config, shutdown_callback):
@@ -152,20 +152,18 @@ class PostgresStatementTraces(DBMAsyncJob):
 
     def _get_new_pg_stat_traced_activity(self, available_activity_columns):
         start_time = time.time()
-        extra_filters, params = self._get_extra_filters_and_params(filter_stale_idle_conn=True)
-        cur_time_func = ""
-        blocking_func = ""
+        extra_filters = self._get_extra_filters()
+        cur_time_func = CURRENT_TIME_FUNC
         query = PG_STAT_ACTIVITY_TRACE_QUERY.format(
             current_time_func=cur_time_func,
             pg_stat_activity_cols=', '.join(available_activity_columns),
-            pg_blocking_func=blocking_func,
             pg_stat_activity_view=self._config.pg_stat_activity_view,
             user=self._username,
             extra_filters=extra_filters,
         )
         with self._check._get_db(self._config.dbname).cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
-            self._log.debug("Running query [%s] %s", query, params)
-            cursor.execute(query, params)
+            self._log.warning("Running query [%s]", query)
+            cursor.execute(query)
             rows = cursor.fetchall()
         self._report_check_hist_metrics(start_time, len(rows), "get_new_pg_stat_activity")
         self._log.debug("Loaded %s rows from %s", len(rows), self._config.pg_stat_activity_view)
@@ -250,20 +248,13 @@ class PostgresStatementTraces(DBMAsyncJob):
         normalized_row['statement'] = obfuscated_query
         return normalized_row
 
-    def _get_extra_filters_and_params(self, filter_stale_idle_conn=False):
+    def _get_extra_filters(self):
         extra_filters = ""
-        params = ()
         if self._config.dbstrict:
-            extra_filters = " AND datname = %s"
-            params = params + (self._config.dbname,)
-        else:
-            extra_filters = " AND " + " AND ".join("datname NOT ILIKE %s" for _ in self._config.ignore_databases)
-            params = params + tuple(self._config.ignore_databases)
-        if filter_stale_idle_conn and self._activity_last_query_start:
-            # do not re-read old idle connections
-            extra_filters = extra_filters + " AND NOT (query_start < %s AND state = 'idle')"
-            params = params + (self._activity_last_query_start,)
-        return extra_filters, params
+            extra_filters = " AND datname = '%s'" % self._config.dbname
+        elif self._config.ignore_databases:
+            extra_filters = " AND " + " AND ".join("datname NOT ILIKE '%s'" % d for d in self._config.ignore_databases)
+        return extra_filters
 
     def _report_check_hist_metrics(self, start_time, row_len, method_name):
         self._check.histogram(
@@ -304,18 +295,6 @@ class PostgresStatementTraces(DBMAsyncJob):
         self._check.count(
             "dd.postgres.collect_statement_traces.events_submitted.count",
             submitted_count,
-            tags=self._tags + self._check._get_debug_tags(),
-            hostname=self._check.resolved_hostname,
-        )
-        self._check.gauge(
-            "dd.postgres.collect_statement_traces.seen_samples_cache.len",
-            len(self._seen_samples_ratelimiter),
-            tags=self._tags + self._check._get_debug_tags(),
-            hostname=self._check.resolved_hostname,
-        )
-        self._check.gauge(
-            "dd.postgres.collect_statement_traces.explained_statements_cache.len",
-            len(self._explained_statements_ratelimiter),
             tags=self._tags + self._check._get_debug_tags(),
             hostname=self._check.resolved_hostname,
         )
