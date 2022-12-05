@@ -269,11 +269,17 @@ See [service_checks.json][15] for a list of service checks provided by this inte
 
 The user can configure the discovery functionality for components: `components_discovery`
 
-`limit`: Maximum number of items to be auto discovered. Default value: `10`
+`limit`
+: Maximum number of items to be auto discovered.  
+**Default value**: `10`
 
-`include`: Mapping of regular expressions keys and component config values that will be auto discovered. Default value: empty map
+`include`
+: Mapping of regular expressions keys and component config values that will be auto discovered.  
+**Default value**: empty map
 
-`exclude`: List of regular expressions with the patterns of components that will not be auto discovered. Default value: empty list
+`exclude`
+: List of regular expressions with the patterns of components that will not be auto discovered.  
+**Default value**: empty list
 
 Examples:
 
