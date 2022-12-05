@@ -265,6 +265,49 @@ SonarQube does not include any events.
 
 See [service_checks.json][15] for a list of service checks provided by this integration.
 
+### Components Discovery
+
+The user can configure the discovery functionality for components: `components_discovery`
+
+`limit`: Maximum number of items to be auto discovered. Default value: `10`
+
+`include`: Mapping of regular expressions keys and component config values that will be auto discovered. Default value: empty map
+
+`exclude`: List of regular expressions with the patterns of components that will not be auto discovered. Default value: empty list
+
+Examples:
+
+Include only `components` whose name starts with `my_project` up to a maximum of `5`:
+
+```yaml
+components_discovery:
+  limit: 5
+  include:
+    'my_project*':
+```
+
+Include all `components` except those beginning with `temp*` up to a maximum of `20`:
+
+```yaml
+components_discovery:
+  limit: 20
+  include:
+    '*':
+  exclude:
+    - 'temp*'
+```
+
+Include all `components` whose name starts with `issues` processing them with the tag `issues_project` and only collect metrics belonging to said category `issues` (as `limit` is not configured, the number of components discovered will be limited to `10`, the default value):
+
+```yaml
+components_discovery:
+  include:
+    'issues*':
+       tag: issues_project
+       include:
+         - issues.
+```
+
 ## Troubleshooting
 
 Need help? Contact [Datadog support][8].

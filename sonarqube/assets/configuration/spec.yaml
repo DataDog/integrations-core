@@ -111,7 +111,7 @@ files:
           properties:
           - name: limit
             description: |
-              Maximum number of items to be 'autodiscovered'
+              Maximum number of components to be 'autodiscovered'
             type: integer
           - name: include
             description: |
