@@ -23,7 +23,6 @@ class ApiClientV7(ApiClient):
         self._log.debug(read_clusters_response)
         for cluster in read_clusters_response.items:
             self._collect_cluster_metrics_and_service_check(cluster)
-            self._collect_cluster_native_metrics(cluster)
 
     def _collect_cluster_metrics_and_service_check(self, cluster):
         self._log.debug('cluster: %s', cluster)
