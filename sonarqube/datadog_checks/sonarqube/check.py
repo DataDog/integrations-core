@@ -225,14 +225,12 @@ class SonarqubeCheck(AgentCheck):
                     raise ConfigurationError('The `tag` setting must be a string')
                 components_discovery_data[pattern] = (
                     lambda _component, _include=include_component, _exclude=exclude_component: _include(_component)
-                                                                                               and not _exclude(
-                        _component),
+                    and not _exclude(_component),
                     tag_name,
                     lambda _metric, _include_metric=include_metric, _exclude_metric=exclude_metric: _include_metric(
                         _metric
                     )
-                                                                                                    and not _exclude_metric(
-                        _metric),
+                    and not _exclude_metric(_metric),
                 )
             self._components_discovery = (
                 components_discovery.get('limit', self._DEFAULT_COMPONENTS_DISCOVERY_LIMIT),
