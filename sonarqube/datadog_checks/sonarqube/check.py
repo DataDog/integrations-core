@@ -156,47 +156,47 @@ class SonarqubeCheck(AgentCheck):
         self.set_metadata('version', version, scheme='parts', final_scheme='semver', part_map=version_parts)
 
     def parse_config(self):
+        self._parse_defaults()
+        self._parse_components()
+        self._parse_components_discovery()
+
+    def _parse_defaults(self):
+        self._default_tag = self.instance.get('default_tag', 'component')
+        if not isinstance(self._default_tag, str):
+            raise ConfigurationError('The `default_tag` setting must be a string')
+        self._default_include = self.compile_metric_patterns(self.instance, 'default_include')
+        self._default_exclude = self.compile_metric_patterns(self.instance, 'default_exclude')
+
+    def _parse_components(self):
         components = self.instance.get('components', {})
         self.log.debug('components: %s', components)
         if not isinstance(components, dict):
             raise ConfigurationError('The `components` setting must be a mapping')
-
-        default_component_tag = self.instance.get('default_tag', 'component')
-        if not isinstance(default_component_tag, str):
-            raise ConfigurationError('The `default_tag` setting must be a string')
-
-        default_metric_inclusion_pattern = self.compile_metric_patterns(self.instance, 'default_include')
-        default_metric_exclusion_pattern = self.compile_metric_patterns(self.instance, 'default_exclude')
-
         components_data = {}
         for component, config in components.items():
             if config is None:
                 config = {}
-
             if not isinstance(config, dict):
                 raise ConfigurationError('Component `{}` must refer to a mapping'.format(component))
-
             include_metric = self.create_matcher(
-                self.compile_metric_patterns(config, 'include') or default_metric_inclusion_pattern,
+                self.compile_metric_patterns(config, 'include') or self._default_include,
                 default=True,
             )
             exclude_metric = self.create_matcher(
-                self.compile_metric_patterns(config, 'exclude') or default_metric_exclusion_pattern,
+                self.compile_metric_patterns(config, 'exclude') or self._default_exclude,
                 default=False,
             )
-
-            tag_name = config.get('tag', default_component_tag)
+            tag_name = config.get('tag', self._default_tag)
             if not isinstance(tag_name, str):
                 raise ConfigurationError('The `tag` setting must be a string')
-
             components_data[component] = (
                 tag_name,
-                lambda metric, include_metric=include_metric, exclude_metric=exclude_metric: include_metric(metric)
-                and not exclude_metric(metric),
+                lambda _metric, _include_metric=include_metric, _exclude_metric=exclude_metric: _include_metric(_metric)
+                and not _exclude_metric(_metric),
             )
-
         self._components = components_data
 
+    def _parse_components_discovery(self):
         components_discovery = self.instance.get('components_discovery', None)
         self.log.debug('components_discovery: %s', components_discovery)
         if components_discovery:
@@ -213,24 +213,26 @@ class SonarqubeCheck(AgentCheck):
                     raise ConfigurationError('Pattern `{}` must refer to a mapping'.format(pattern))
                 include_component = self.create_matcher(re.compile(pattern), default=True)
                 include_metric = self.create_matcher(
-                    self.compile_metric_patterns(config, 'include') or default_metric_inclusion_pattern,
+                    self.compile_metric_patterns(config, 'include') or self._default_include,
                     default=True,
                 )
                 exclude_metric = self.create_matcher(
-                    self.compile_metric_patterns(config, 'exclude') or default_metric_exclusion_pattern,
+                    self.compile_metric_patterns(config, 'exclude') or self._default_exclude,
                     default=False,
                 )
-                tag_name = config.get('tag', default_component_tag)
+                tag_name = config.get('tag', self._default_tag)
                 if not isinstance(tag_name, str):
                     raise ConfigurationError('The `tag` setting must be a string')
                 components_discovery_data[pattern] = (
                     lambda _component, _include=include_component, _exclude=exclude_component: _include(_component)
-                    and not _exclude(_component),
+                                                                                               and not _exclude(
+                        _component),
                     tag_name,
                     lambda _metric, _include_metric=include_metric, _exclude_metric=exclude_metric: _include_metric(
                         _metric
                     )
-                    and not _exclude_metric(_metric),
+                                                                                                    and not _exclude_metric(
+                        _metric),
                 )
             self._components_discovery = (
                 components_discovery.get('limit', self._DEFAULT_COMPONENTS_DISCOVERY_LIMIT),
