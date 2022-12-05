@@ -7,7 +7,7 @@ from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 
 
 class RabbitMQ(AgentCheck):
-    __NAMESPACE__ = 'teamcity'
+    __NAMESPACE__ = 'rabbitmq'
 
     def __new__(cls, name, init_config, instances):
         # TODO: can we use init config here?
