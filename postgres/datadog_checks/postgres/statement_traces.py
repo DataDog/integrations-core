@@ -512,56 +512,53 @@ class PostgresStatementTraces(DBMAsyncJob):
 
             plan_signature = compute_exec_plan_signature(normalized_plan)
 
-        statement_plan_sig = (row['query_signature'], plan_signature)
-        if self._seen_samples_ratelimiter.acquire(statement_plan_sig):
-            event = {
-                "host": self._check.resolved_hostname,
-                "dbm_type": "plan",
-                "ddagentversion": datadog_agent.get_version(),
-                "ddsource": "postgres",
-                "ddtags": ",".join(self._dbtags(row['datname'])),
-                "timestamp": time.time() * 1000,
-                "network": {
-                    "client": {
-                        "ip": row.get('client_addr', None),
-                        "port": row.get('client_port', None),
-                        "hostname": row.get('client_hostname', None),
-                    }
+        event = {
+            "host": self._check.resolved_hostname,
+            "dbm_type": "plan",
+            "ddagentversion": datadog_agent.get_version(),
+            "ddsource": "postgres",
+            "ddtags": ",".join(self._dbtags(row['datname'])),
+            "timestamp": time.time() * 1000,
+            "network": {
+                "client": {
+                    "ip": row.get('client_addr', None),
+                    "port": row.get('client_port', None),
+                    "hostname": row.get('client_hostname', None),
+                }
+            },
+            "db": {
+                "instance": row.get('datname', None),
+                "plan": {
+                    "definition": obfuscated_plan,
+                    "signature": plan_signature,
+                    "collection_errors": collection_errors,
                 },
-                "db": {
-                    "instance": row.get('datname', None),
-                    "plan": {
-                        "definition": obfuscated_plan,
-                        "signature": plan_signature,
-                        "collection_errors": collection_errors,
-                    },
-                    "query_signature": row['query_signature'],
-                    "resource_hash": row['query_signature'],
-                    "application": row.get('application_name', None),
-                    "user": row['usename'],
-                    "statement": row['statement'],
-                    "metadata": {
-                        "tables": row['dd_tables'],
-                        "commands": row['dd_commands'],
-                        "comments": row['dd_comments'],
-                    },
-                    "query_truncated": get_truncation_state(self._get_track_activity_query_size(), row['query']).value,
+                "query_signature": row['query_signature'],
+                "resource_hash": row['query_signature'],
+                "application": row.get('application_name', None),
+                "user": row['usename'],
+                "statement": row['statement'],
+                "metadata": {
+                    "tables": row['dd_tables'],
+                    "commands": row['dd_commands'],
+                    "comments": row['dd_comments'],
                 },
-                'postgres': {k: v for k, v in row.items() if k not in pg_stat_activity_sample_exclude_keys},
-            }
-            if row['state'] in {'idle', 'idle in transaction'}:
-                if row['state_change'] and row['query_start']:
-                    event['duration'] = (row['state_change'] - row['query_start']).total_seconds() * 1e9
-                    # If the transaction is idle then we have a more specific "end time" than the current time at
-                    # which we're collecting this event. According to the postgres docs, all of the timestamps in
-                    # pg_stat_activity are `timestamp with time zone` so the timezone should always be present. However,
-                    # if there is something wrong and it's missing then we can't use `state_change` for the timestamp
-                    # of the event else we risk the timestamp being significantly off and the event getting dropped
-                    # during ingestion.
-                    if row['state_change'].tzinfo:
-                        event['timestamp'] = get_timestamp(row['state_change']) * 1000
-            return event
-        return None
+                "query_truncated": get_truncation_state(self._get_track_activity_query_size(), row['query']).value,
+            },
+            'postgres': {k: v for k, v in row.items() if k not in pg_stat_activity_sample_exclude_keys},
+        }
+        if row['state'] in {'idle', 'idle in transaction'}:
+            if row['state_change'] and row['query_start']:
+                event['duration'] = (row['state_change'] - row['query_start']).total_seconds() * 1e9
+                # If the transaction is idle then we have a more specific "end time" than the current time at
+                # which we're collecting this event. According to the postgres docs, all of the timestamps in
+                # pg_stat_activity are `timestamp with time zone` so the timezone should always be present. However,
+                # if there is something wrong and it's missing then we can't use `state_change` for the timestamp
+                # of the event else we risk the timestamp being significantly off and the event getting dropped
+                # during ingestion.
+                if row['state_change'].tzinfo:
+                    event['timestamp'] = get_timestamp(row['state_change']) * 1000
+        return event
 
     def _collect_plans(self, rows):
         events = []
