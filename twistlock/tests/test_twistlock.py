@@ -34,6 +34,22 @@ customtag = "custom:tag"
 HERE = get_here()
 
 
+def side_effects(fixture_group):
+    return [
+        MockResponse(file_path=os.path.join(HERE, 'fixtures', fixture_group, 'license.json')),
+        MockResponse(file_path=os.path.join(HERE, 'fixtures', fixture_group, 'registry.json')),
+        MockResponse(content='{}'),
+        MockResponse(file_path=os.path.join(HERE, 'fixtures', fixture_group, 'images.json')),
+        MockResponse(content='{}'),
+        MockResponse(file_path=os.path.join(HERE, 'fixtures', fixture_group, 'hosts.json')),
+        MockResponse(content='{}'),
+        MockResponse(file_path=os.path.join(HERE, 'fixtures', fixture_group, 'containers.json')),
+        MockResponse(content='{}'),
+        MockResponse(file_path=os.path.join(HERE, 'fixtures', fixture_group, 'vulnerabilities.json')),
+        MockResponse(content='{}'),
+    ]
+
+
 def mock_get_factory(fixture_group):
     def mock_get(url, *args, **kwargs):
         split_url = url.split('/')
@@ -48,8 +64,7 @@ def test_check(aggregator, instance, fixture_group):
 
     check = TwistlockCheck('twistlock', {}, [instance])
 
-    with mock.patch('requests.get', side_effect=mock_get_factory(fixture_group), autospec=True):
-        check.check(instance)
+    with mock.patch('requests.get', side_effect=side_effects(fixture_group), autospec=True):
         check.check(instance)
 
     for metric in METRICS:
@@ -65,12 +80,12 @@ def test_config_project(aggregator, instance, fixture_group):
 
     project = 'foo'
     project_tag = 'project:{}'.format(project)
-    qparams = {'project': project}
+    qparams = {'project': project, 'offset': 50}
 
     instance['project'] = project
     check = TwistlockCheck('twistlock', {}, [instance])
 
-    with mock.patch('requests.get', side_effect=mock_get_factory(fixture_group), autospec=True) as r:
+    with mock.patch('requests.get', side_effect=side_effects(fixture_group), autospec=True) as r:
         check.check(instance)
 
         r.assert_called_with(
