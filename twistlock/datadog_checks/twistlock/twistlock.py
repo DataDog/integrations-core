@@ -101,13 +101,13 @@ class TwistlockCheck(AgentCheck):
     def report_registry_scan(self):
         namespace = "{}.registry".format(self.NAMESPACE)
         service_check_name = "{}.can_connect".format(self.NAMESPACE)
+        offset = 0
         try:
-            offset = 0
-            scan_result = {}
+            scan_result = []
             while True:
                 payload = self._retrieve_json("/api/v1/registry", offset)
-                if len(payload.keys()) > 1:
-                    scan_result.update(payload)
+                if len(payload) >= 1:
+                    scan_result.extend(payload)
                 else:
                     break
                 offset += 50
@@ -136,13 +136,13 @@ class TwistlockCheck(AgentCheck):
     def report_images_scan(self):
         namespace = "{}.images".format(self.NAMESPACE)
         service_check_name = "{}.can_connect".format(self.NAMESPACE)
+        offset = 0
         try:
-            offset = 0
-            scan_result = {}
+            scan_result = []
             while True:
                 payload = self._retrieve_json("/api/v1/images", offset)
-                if len(payload.keys()) > 0:
-                    scan_result.update(payload)
+                if len(payload) >= 1:
+                    scan_result.extend(payload)
                 else:
                     break
                 offset += 50
@@ -176,13 +176,13 @@ class TwistlockCheck(AgentCheck):
     def report_hosts_scan(self):
         namespace = "{}.hosts".format(self.NAMESPACE)
         service_check_name = "{}.can_connect".format(self.NAMESPACE)
+        offset = 0
         try:
-            offset = 0
-            scan_result = {}
+            scan_result = []
             while True:
                 payload = self._retrieve_json("/api/v1/hosts", offset)
-                if len(payload.keys()) > 0:
-                    scan_result.update(payload)
+                if len(payload) >= 1:
+                    scan_result.extend(payload)
                 else:
                     break
                 offset += 50
@@ -209,13 +209,13 @@ class TwistlockCheck(AgentCheck):
     def report_container_compliance(self):
         namespace = "{}.containers".format(self.NAMESPACE)
         service_check_name = "{}.can_connect".format(self.NAMESPACE)
+        offset = 0
         try:
-            offset = 0
-            scan_result = {}
+            scan_result = []
             while True:
                 payload = self._retrieve_json("/api/v1/containers", offset)
-                if len(payload.keys()) > 0:
-                    scan_result.update(payload)
+                if len(payload) >= 1:
+                    scan_result.extend(payload)
                 else:
                     break
                 offset += 50
@@ -245,13 +245,13 @@ class TwistlockCheck(AgentCheck):
             self._report_compliance_information(namespace, container, container_tags)
 
     def report_vulnerabilities(self):
+        offset = 0
         try:
-            offset = 0
-            vuln_containers = {}
+            vuln_containers = []
             while True:
                 payload = self._retrieve_json('/api/v1/stats/vulnerabilities', offset)
-                if len(payload.keys()) > 0:
-                    vuln_containers.update(payload)
+                if len(payload) >= 1:
+                    vuln_containers.extend(payload)
                 else:
                     break
                 offset += 50
