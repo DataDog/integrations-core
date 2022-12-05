@@ -1,5 +1,9 @@
 # CHANGELOG - sqlserver
 
+## 10.0.1 / 2022-12-02
+
+* [Fixed] Revert "Fix exception thrown when database is null in config" as it was found to introduce a regression. See [#13446](https://github.com/DataDog/integrations-core/pull/13446).
+
 ## 10.0.0 / 2022-10-28
 
 * [Added] Allow port signal value 0. See [#13135](https://github.com/DataDog/integrations-core/pull/13135).
