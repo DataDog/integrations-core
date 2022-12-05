@@ -48,7 +48,7 @@ class ComponentsDiscovery(BaseModel):
         None,
         description="Mapping of regular expressions keys and component config values that will be 'autodiscovered'\n",
     )
-    limit: Optional[int] = Field(None, description="Maximum number of items to be 'autodiscovered'\n")
+    limit: Optional[int] = Field(None, description="Maximum number of components to be 'autodiscovered'\n")
 
 
 class Proxy(BaseModel):
