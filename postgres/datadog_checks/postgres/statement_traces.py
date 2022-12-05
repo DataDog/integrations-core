@@ -165,7 +165,7 @@ class PostgresStatementTraces(DBMAsyncJob):
             self._log.debug("Running query [%s]", query)
             cursor.execute(query)
             rows = cursor.fetchall()
-        self._report_check_hist_metrics(start_time, len(rows), "get_new_pg_stat_activity")
+        self._report_check_hist_metrics(start_time, len(rows), "get_new_pg_stat_traced_activity")
         self._log.debug("Loaded %s rows from %s", len(rows), self._config.pg_stat_activity_view)
         return rows
 
@@ -437,7 +437,7 @@ class PostgresStatementTraces(DBMAsyncJob):
             return cached_error_response
 
         plan = self._plan_cache.get(query_signature)
-        if cached_error_response:
+        if plan:
             return plan, None, None
 
         try:
@@ -516,6 +516,7 @@ class PostgresStatementTraces(DBMAsyncJob):
         if self._seen_samples_ratelimiter.acquire(statement_plan_sig):
             event = {
                 "host": self._check.resolved_hostname,
+                "dbm_type": "plan",
                 "ddagentversion": datadog_agent.get_version(),
                 "ddsource": "postgres",
                 "ddtags": ",".join(self._dbtags(row['datname'])),
