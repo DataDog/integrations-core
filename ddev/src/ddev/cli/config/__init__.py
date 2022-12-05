@@ -36,9 +36,9 @@ def find(app, copy):
 
         pyperclip.copy(config_path)
     elif ' ' in config_path:
-        app.display_info(f'"{config_path}"')
+        app.display(f'"{config_path}"')
     else:
-        app.display_info(config_path)
+        app.display(config_path)
 
 
 @config.command(short_help='Show the contents of the config file')
@@ -47,7 +47,7 @@ def find(app, copy):
 def show(app, all_keys):
     """Show the contents of the config file."""
     if not app.config_file.path.is_file():  # no cov
-        app.display_info('No config file found! Please try `ddev config restore`.')
+        app.display_critical('No config file found! Please try `ddev config restore`.')
     else:
         from rich.syntax import Syntax
 
