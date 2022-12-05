@@ -89,6 +89,54 @@ files:
             type: array
             items:
               type: string
+      - name: components_discovery
+        description: |
+          The autodiscovery patterns for components.
+          The following example collects all defect metrics for those components whose names start with "my_project"
+          and only the metrics from the "issues" category for projects starting with "issue".
+          It will also exclude projects starting with "temp" from autodiscovery.
+          The maximum total number of projects processed by autodiscovery will be 10.
+          
+            components_discovery:
+              limit: 10
+              include:
+                my_project*:
+                issue*:
+                  include:
+                    - issues.
+              exclude:
+                - temp*
+        value:
+          type: object
+          properties:
+          - name: limit
+            description: |
+              Maximum number of items to be 'autodiscovered'
+            type: integer
+          - name: include
+            description: |
+              Mapping of regular expressions keys and component config values that will be 'autodiscovered'
+            type: object
+            value:
+              type: object
+              properties:
+              - name: tag
+                type: string
+              - name: include
+                type: array
+                items:
+                  type: string
+              - name: exclude
+                type: array
+                items:
+                  type: string
+          - name: exclude
+            description: |
+              List of regular expressions with the patterns of components that will not be 'autodiscovered'
+            type: array
+            items:
+              type: string
+
       - template: instances/http
         overrides:
           password.hidden: true
