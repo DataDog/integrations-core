@@ -25,9 +25,6 @@
                If not set, all instances are monitored.
       exclude: This is the list of regular expressions used to select which instances to ignore.
                If not set, no instances are ignored. Note: `_Total` instances are always ignored.
-      include_fast: This is the list of wildcards or exact instance names used to select which
-                    instances to monitor. It is faster than regular expression "include" filter
-                    because it relies on the Windows PDH built-in wildcard filtering.
       instance_counts: This is a mapping used to select the count of instances to submit, where each
                        key is a count type and the value is the metric name to use, ignoring `name`.
                        The `total` count type represents the total number of encountered instances.
