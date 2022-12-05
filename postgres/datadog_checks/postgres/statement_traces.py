@@ -162,7 +162,7 @@ class PostgresStatementTraces(DBMAsyncJob):
             extra_filters=extra_filters,
         )
         with self._check._get_db(self._config.dbname).cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
-            self._log.warning("Running query [%s]", query)
+            self._log.debug("Running query [%s]", query)
             cursor.execute(query)
             rows = cursor.fetchall()
         self._report_check_hist_metrics(start_time, len(rows), "get_new_pg_stat_activity")
