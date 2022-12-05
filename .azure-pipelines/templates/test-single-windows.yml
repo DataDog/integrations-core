@@ -20,7 +20,7 @@ parameters:
   pip_cache_config: null
   coverage: true
   dd_url: https://app.datadoghq.com
-  memray_option: ''
+  memray_flag: ''
 
 jobs:
 - job: '${{ coalesce(parameters.job_name, parameters.check) }}_Windows'
@@ -92,7 +92,7 @@ jobs:
       repo: ${{ parameters.repo }}
       coverage: ${{ parameters.coverage }}
       force_base_package: ${{ parameters.force_base_package }}
-      memray_option: '' # Memray can't be used on Windows
+      memray_flag: '' # Memray can't be used on Windows
 
   - ${{ if and(eq(parameters.repo, 'core'), eq(parameters.test, 'true'), eq(parameters.coverage, 'true'), eq(parameters.force_base_package, 'false')) }}:
     # https://docs.codecov.com/docs/codecov-uploader
