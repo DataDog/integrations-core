@@ -29,6 +29,11 @@ files:
 
         Do not specify more than one host here unless you are connecting to a mongos instance
         and you want to balance requests performed by the agent to multiple mongos instances.
+        
+        If you do need to use the above to monitor muliple mongos instances and are using v 7.39 + of the agent, 
+        you will need to configure the integration to disable directConnection which is enabled by default starting in 4.0.2. 
+        This can be done by setting options.directConnection to 'false'.
+        
       value:
         example:
         - <HOST>:<PORT>
