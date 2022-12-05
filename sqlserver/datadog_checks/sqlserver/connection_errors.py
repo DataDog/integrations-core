@@ -48,7 +48,7 @@ known_error_patterns = {
     "can't open lib .* file not found": ConnectionErrWarning.driver_not_found,
     # Connection & login issues
     "(cannot open database .* requested by the login. the login failed|login timeout expired)": ConnectionErrWarning.tcp_connection_failed,
-    "login failed for user": ConnectionErrWarning.login_failed_for_user,
+    "(login failed for user|The login is from an untrusted domain)": ConnectionErrWarning.login_failed_for_user,
     "ssl security error": ConnectionErrWarning.ssl_security_error,
 }
 
@@ -74,7 +74,7 @@ def warning_with_tags(warning_message, *args, **kwargs):
     )
 
 
-def format_connection_exception(e, driver, logger):
+def format_connection_exception(e, driver):
     """
     Formats the provided database connection exception.
     If the exception comes from an ADO Provider and contains a misleading 'Invalid connection string attribute' message
@@ -130,10 +130,11 @@ def _get_is_odbc_driver_installed(configured_driver):
 
 def _lookup_conn_error_and_msg(hresult, msg):
     for k in known_error_patterns.keys():
-        if re.search(k.lower(), msg.lower()):
+        if re.search(k, msg, re.IGNORECASE):
             return None, known_error_patterns[k]
     # if error message is Invalid connection string attribute, look up type by hresult
     if hresult > 0:
         res = known_hresult_codes.get(hresult)
         if len(res) > 0:
             return res[0], res[1]
+    return None, None

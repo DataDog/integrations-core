@@ -285,7 +285,7 @@ class Connection(object):
         except Exception as e:
             error_message = self.test_network_connectivity()
             tcp_connection_status = error_message if error_message else "OK"
-            exception_msg, conn_warn_msg = format_connection_exception(e, driver, self.log)
+            exception_msg, conn_warn_msg = format_connection_exception(e, driver)
             message = "Unable to connect to SQL Server (host={} database={}). TCP-connection({}). Exception: {}".format(
                 host, database, tcp_connection_status, exception_msg
             )
@@ -295,9 +295,6 @@ class Connection(object):
             password = self.instance.get('password')
             if password is not None:
                 message = message.replace(password, "*" * 6)
-
-            self.log.warning(exception_msg)
-            # self.log.warning(conn_warn_msg.value)
 
             if conn_warn_msg is None:
                 conn_warn_msg = ConnectionErrWarning.unknown
