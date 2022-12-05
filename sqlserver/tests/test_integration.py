@@ -22,16 +22,16 @@ except ImportError:
 @pytest.mark.usefixtures('dd_environment')
 def test_check_invalid_password(aggregator, dd_run_check, init_config, instance_docker):
     instance_docker['password'] = 'FOO'
-
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker])
 
-    with pytest.raises(SQLConnectionError):
+    with pytest.raises(SQLConnectionError) as excinfo:
         sqlserver_check.initialize_connection()
         sqlserver_check.check(instance_docker)
     aggregator.assert_service_check(
         'sqlserver.can_connect',
         status=sqlserver_check.CRITICAL,
-        tags=['sqlserver_host:localhost,1433', 'db:master', 'optional:tag1'],
+        tags=['sqlserver_host:{}'.format(sqlserver_check.resolved_hostname), 'db:master', 'optional:tag1'],
+        message=str(excinfo.value),
     )
 
 

@@ -20,12 +20,13 @@ try:
 except ImportError:
     pyodbc = None
 
-from .connection_errors import ConnectionErrWarning, SQLConnectionError, format_connection_exception, warning_with_tags
+from .connection_errors import ConnectionErrorCode, SQLConnectionError, error_with_tags, format_connection_exception
 
 logger = logging.getLogger(__file__)
 
 DATABASE_EXISTS_QUERY = 'select name, collation_name from sys.databases;'
 DEFAULT_CONN_PORT = 1433
+SUPPORT_LINK = "https://docs.datadoghq.com/database_monitoring/setup_sql_server/troubleshooting"
 
 
 def split_sqlserver_host_port(host):
@@ -286,37 +287,35 @@ class Connection(object):
             error_message = self.test_network_connectivity()
             tcp_connection_status = error_message if error_message else "OK"
             exception_msg, conn_warn_msg = format_connection_exception(e, driver)
-            message = "Unable to connect to SQL Server (host={} database={}). TCP-connection({}). Exception: {}".format(
-                host, database, tcp_connection_status, exception_msg
-            )
-            if tcp_connection_status != "OK" and conn_warn_msg is None:
-                conn_warn_msg = ConnectionErrWarning.tcp_connection_failed
+            if tcp_connection_status != "OK" and conn_warn_msg is ConnectionErrorCode.unknown:
+                conn_warn_msg = ConnectionErrorCode.tcp_connection_failed
 
             password = self.instance.get('password')
             if password is not None:
-                message = message.replace(password, "*" * 6)
+                exception_msg = exception_msg.replace(password, "*" * 6)
 
-            if conn_warn_msg is None:
-                conn_warn_msg = ConnectionErrWarning.unknown
-            self._check.record_warning(
-                conn_warn_msg,
-                warning_with_tags(
-                    message + " See https://docs.datadoghq.com/database_monitoring/setup_sql_server/troubleshooting#%s "
-                    "for more details: %s",
-                    conn_warn_msg.value,
-                    exception_msg,
-                    code=conn_warn_msg.value,
-                    host=self._check.resolved_hostname,
-                    connector=self.connector,
-                    driver=driver,
-                ),
+            check_err_message = error_with_tags(
+                "Unable to connect to SQL Server, see %s#%s for more details on how to debug this issue. "
+                "TCP-connection(%s), Exception: %s",
+                SUPPORT_LINK,
+                conn_warn_msg.value,
+                tcp_connection_status,
+                exception_msg,
+                host=self._check.resolved_hostname,
+                database=database,
+                code=conn_warn_msg.value,
+                connector=self.connector,
+                driver=driver,
             )
-
-            self.service_check_handler(AgentCheck.CRITICAL, host, database, message, is_default=is_default)
+            self.service_check_handler(
+                AgentCheck.CRITICAL, self._check.resolved_hostname, database, check_err_message, is_default=is_default
+            )
 
             # Only raise exception on the default instance database
             if is_default:
-                raise_from(SQLConnectionError(message), None)
+                # the message that is raised here (along with the exception stack trace)
+                # is what will be seen in the agent status output.
+                raise_from(SQLConnectionError(check_err_message), None)
 
     def _setup_new_connection(self, rawconn):
         with rawconn.cursor() as cursor:

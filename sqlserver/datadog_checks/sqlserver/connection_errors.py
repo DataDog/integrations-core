@@ -22,7 +22,7 @@ class SQLConnectionError(Exception):
     pass
 
 
-class ConnectionErrWarning(Enum):
+class ConnectionErrorCode(Enum):
     """
     Denotes the various reasons a connection might fail.
     """
@@ -41,36 +41,38 @@ class ConnectionErrWarning(Enum):
 known_error_patterns = {
     # typically results in an -2147467259 ADO error code, which is not very descriptive. Identifying this error
     # can help provide specific troubleshooting help to the customer
-    "(certificate verify failed|certificate chain was issued by an authority that is not trusted)": ConnectionErrWarning.certificate_verify_failed,
+    "(certificate verify failed|"
+    "certificate chain was issued by an authority that is not trusted)": ConnectionErrorCode.certificate_verify_failed,
     # DSN could be specified incorrectly in config
-    "data source name not found.* and no default driver specified": ConnectionErrWarning.driver_not_found,
+    "data source name not found.* and no default driver specified": ConnectionErrorCode.driver_not_found,
     # driver not installed on host
-    "can't open lib .* file not found": ConnectionErrWarning.driver_not_found,
+    "(can't open lib .* file not found|Provider cannot be found)": ConnectionErrorCode.driver_not_found,
     # Connection & login issues
-    "(cannot open database .* requested by the login. the login failed|login timeout expired)": ConnectionErrWarning.tcp_connection_failed,
-    "(login failed for user|The login is from an untrusted domain)": ConnectionErrWarning.login_failed_for_user,
-    "ssl security error": ConnectionErrWarning.ssl_security_error,
+    "(cannot open database .* requested by the login. the login failed|"
+    "login timeout expired)": ConnectionErrorCode.tcp_connection_failed,
+    "(login failed for user|The login is from an untrusted domain)": ConnectionErrorCode.login_failed_for_user,
+    "ssl security error": ConnectionErrorCode.ssl_security_error,
 }
 
 # ADO provider connection errors yield a hresult code, which
 # can be mapped to helpful err messages
 known_hresult_codes = {
-    -2147352567: ["unable to connect", ConnectionErrWarning.tcp_connection_failed],
-    -2147217843: ["login failed for user", ConnectionErrWarning.login_failed_for_user],
-    -2146824582: ["provider not found", ConnectionErrWarning.driver_not_found],
+    -2147352567: ["unable to connect", ConnectionErrorCode.tcp_connection_failed],
+    -2147217843: ["login failed for user", ConnectionErrorCode.login_failed_for_user],
+    -2146824582: ["provider not found", ConnectionErrorCode.driver_not_found],
     # this error can also be e caused by a failed TCP connection, but we are already reporting on the TCP
     # connection status via test_network_connectivity, so we don't need to explicitly state that
     # as an error condition in this message
-    -2147467259: ["could not open database requested by login", ConnectionErrWarning.tcp_connection_failed],
+    -2147467259: ["could not open database requested by login", ConnectionErrorCode.tcp_connection_failed],
 }
 
 
-def warning_with_tags(warning_message, *args, **kwargs):
+def error_with_tags(error_message, *args, **kwargs):
     if args:
-        warning_message = warning_message % args
+        error_message = error_message % args
 
     return "{msg}\n{tags}".format(
-        msg=warning_message, tags=" ".join('{key}={value}'.format(key=k, value=v) for k, v in sorted(kwargs.items()))
+        msg=error_message, tags=" ".join('{key}={value}'.format(key=k, value=v) for k, v in sorted(kwargs.items()))
     )
 
 
@@ -99,7 +101,7 @@ def format_connection_exception(e, driver):
                     return base_message + ": " + sub_message, conn_err
             else:
                 # else we can return the original exception message + lookup the proper
-                # ConnectionErrWarning for this issue
+                # ConnectionErrorCode for this issue
                 conn_err = sub_conn_err if sub_conn_err else base_conn_err
                 return repr(e), conn_err
         else:
@@ -112,13 +114,13 @@ def format_connection_exception(e, driver):
     elif pyodbc is not None:
         e_msg = repr(e)
         _, conn_err = _lookup_conn_error_and_msg(0, e_msg)
-        if conn_err == ConnectionErrWarning.driver_not_found:
+        if conn_err == ConnectionErrorCode.driver_not_found:
             installed, drivers = _get_is_odbc_driver_installed(driver)
             if not installed and drivers:
                 e_msg += " configured odbc driver {} not in list of installed drivers: {}".format(driver, drivers)
         return e_msg, conn_err
 
-    return repr(e), None
+    return repr(e), ConnectionErrorCode.unknown
 
 
 def _get_is_odbc_driver_installed(configured_driver):
@@ -132,9 +134,10 @@ def _lookup_conn_error_and_msg(hresult, msg):
     for k in known_error_patterns.keys():
         if re.search(k, msg, re.IGNORECASE):
             return None, known_error_patterns[k]
-    # if error message is Invalid connection string attribute, look up type by hresult
-    if hresult > 0:
+    # if we cannot determine the type or error based on the msg, try to look it up by its hresult
+    # this will be true for error messages like 'Invalid connection string attribute'
+    if hresult:
         res = known_hresult_codes.get(hresult)
-        if len(res) > 0:
+        if res and len(res) == 2:
             return res[0], res[1]
-    return None, None
+    return None, ConnectionErrorCode.unknown

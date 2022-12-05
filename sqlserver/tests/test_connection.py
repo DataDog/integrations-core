@@ -13,11 +13,15 @@ import pytest
 from datadog_checks.base import ConfigurationError
 from datadog_checks.dev.utils import running_on_windows_ci
 from datadog_checks.sqlserver import SQLServer
-from datadog_checks.sqlserver.connection import Connection, SQLConnectionError, parse_connection_string_properties
+from datadog_checks.sqlserver.connection import (
+    SUPPORT_LINK,
+    Connection,
+    SQLConnectionError,
+    parse_connection_string_properties,
+)
+from datadog_checks.sqlserver.connection_errors import ConnectionErrorCode, format_connection_exception
 
 from .common import CHECK_NAME, SQLSERVER_MAJOR_VERSION
-
-from datadog_checks.sqlserver.connection_errors import ConnectionErrWarning
 
 
 @pytest.mark.unit
@@ -321,13 +325,13 @@ def test_connection_failure(aggregator, dd_run_check, instance_docker):
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
-    "test_case_name, instance_overrides, expected_error_patterns,expected_warning_value",
+    "test_case_name,instance_overrides,expected_error_patterns,expected_error",
     [
         (
             "unknown_adoprovider",
             {'adoprovider': "fake"},
             {".*": "TCP-connection\\(OK\\).*Provider cannot be found. It may not be properly installed."},
-            ConnectionErrWarning.driver_not_found,
+            ConnectionErrorCode.driver_not_found,
         ),
         (
             "unknown_odbc_driver",
@@ -338,7 +342,7 @@ def test_connection_failure(aggregator, dd_run_check, instance_docker):
                 "odbc-windows": "TCP-connection\\(OK\\).*"
                 "Data source name not found.* and no default driver specified",
             },
-            ConnectionErrWarning.driver_not_found,
+            ConnectionErrorCode.driver_not_found,
         ),
         (
             "odbc_driver_incorrect_dsn",
@@ -347,7 +351,7 @@ def test_connection_failure(aggregator, dd_run_check, instance_docker):
                 "odbc-linux|odbc-windows": "TCP-connection\\(OK\\).*"
                 "Data source name not found.* and no default driver specified",
             },
-            ConnectionErrWarning.driver_not_found,
+            ConnectionErrorCode.driver_not_found,
         ),
         (
             "unknown_hostname",
@@ -361,7 +365,7 @@ def test_connection_failure(aggregator, dd_run_check, instance_docker):
                 "Unable to connect to data source|"
                 "TCP-connection\\(ERROR: Name or service not known\\).*Login timeout expired)",
             },
-            ConnectionErrWarning.tcp_connection_failed,
+            ConnectionErrorCode.tcp_connection_failed,
         ),
         (
             "failed_tcp_connection",
@@ -375,7 +379,7 @@ def test_connection_failure(aggregator, dd_run_check, instance_docker):
                 "odbc-linux": "TCP-connection\\(ERROR: Connection refused\\).*"
                 "(Unable to connect: Adaptive Server is unavailable|Login timeout expired*)",
             },
-            ConnectionErrWarning.tcp_connection_failed,
+            ConnectionErrorCode.tcp_connection_failed,
         ),
         (
             "unknown_database",
@@ -386,7 +390,7 @@ def test_connection_failure(aggregator, dd_run_check, instance_docker):
                 "odbc-linux": "TCP-connection\\(OK\\).*"
                 "(Cannot open database .* requested by the login|Login failed for user)",
             },
-            ConnectionErrWarning.tcp_connection_failed,
+            ConnectionErrorCode.tcp_connection_failed,
         ),
         (
             "invalid_credentials",
@@ -395,7 +399,7 @@ def test_connection_failure(aggregator, dd_run_check, instance_docker):
                 "odbc-windows|odbc-linux|MSOLEDBSQL": "TCP-connection\\(OK\\).*Login failed for user",
                 "SQLOLEDB|SQLNCLI11": "TCP-connection\\(OK\\).*login failed for user",
             },
-            ConnectionErrWarning.login_failed_for_user,
+            ConnectionErrorCode.login_failed_for_user,
         ),
     ],
 )
@@ -404,7 +408,7 @@ def test_connection_error_reporting(
     instance_docker,
     instance_overrides,
     expected_error_patterns,
-    expected_warning_value,
+    expected_error,
 ):
     for key, value in instance_overrides.items():
         instance_docker[key] = value
@@ -414,6 +418,8 @@ def test_connection_error_reporting(
         adoprovider_override = instance_overrides['adoprovider'].upper()
         if adoprovider_override not in Connection.valid_adoproviders:
             Connection.valid_adoproviders.append(adoprovider_override)
+    if 'adoprovider' in instance_docker and ('driver' in instance_overrides or 'dsn' in instance_overrides):
+        pytest.skip("driver or DSN overrides is not relevant for the adoprovider")
 
     driver = "odbc" if instance_docker['connector'] == "odbc" else instance_docker['adoprovider']
     if driver == "odbc":
@@ -431,5 +437,53 @@ def test_connection_error_reporting(
 
     message = str(excinfo.value)
     assert re.search(expected_error_pattern, message)
-    assert len(check._warnings_by_code) == 1
-    assert check._warnings_by_code[expected_warning_value] is not None
+    expected_link = "see {}#{} for more details".format(SUPPORT_LINK, expected_error.value)
+    assert re.search(expected_link, message, re.IGNORECASE)
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "error_message,expected_error",
+    [
+        (
+            "OperationalError('08001', '[08001] "
+            "[Microsoft][ODBC SQL Server Driver][DBNETLIB]SSL Security error (18) "
+            "(SQLDriverConnect); [08001] [Microsoft][ODBC SQL Server Driver][DBNETLIB]ConnectionOpen "
+            "(SECCreateCredentials()). (1); [08001] "
+            "[Microsoft][ODBC SQL Server Driver]Invalid connection string attribute (0)')",
+            ConnectionErrorCode.ssl_security_error,
+        ),
+        (
+            "OperationalError(com_error(-2147352567, 'Exception occurred.', "
+            "(0, 'Microsoft OLE DB Driver 19 for SQL Server', "
+            "'SSL Provider: The certificate chain was issued by an authority that is not trusted.\\r\\n', "
+            "None, 0, -2147467259), None)",
+            ConnectionErrorCode.certificate_verify_failed,
+        ),
+        (
+            "InterfaceError('IM002', '[IM002] [Microsoft][ODBC Driver Manager] "
+            "Data source name not found and no default driver specified (0) (SQLDriverConnect)')",
+            ConnectionErrorCode.driver_not_found,
+        ),
+        (
+            "OperationalError(com_error(-2147352567, 'Exception occurred.', (0, 'Microsoft OLE DB Driver 19 "
+            "for SQL Server', 'Login failed. The login is from an untrusted domain and cannot be used with "
+            "Windows authentication.', None, 0, -2147467259), None)",
+            ConnectionErrorCode.login_failed_for_user,
+        ),
+        (
+            "OperationalError(com_error(-2147352567, 'Exception occurred.', (0, 'Microsoft OLE DB Driver 19 "
+            "for SQL Server', 'I can't say why I couldn't connect!', None, 0, -2147467259), None)",
+            ConnectionErrorCode.unknown,
+        ),
+    ],
+)
+def test_format_connection_error(
+    instance_docker,
+    error_message,
+    expected_error,
+):
+    driver = "odbc" if instance_docker['connector'] == "odbc" else instance_docker['adoprovider']
+    _, conn_err = format_connection_exception(error_message, driver)
+    assert conn_err
+    assert conn_err.value == expected_error.value
