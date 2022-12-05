@@ -207,6 +207,55 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
+#### Components Discovery
+
+You can configure how your components are discovered with the `components_discovery` parameter.
+
+`limit`
+: Maximum number of items to be auto discovered.  
+**Default value**: `10`
+
+`include`
+: Mapping of regular expressions keys and component config values that will be auto discovered.  
+**Default value**: empty map
+
+`exclude`
+: List of regular expressions with the patterns of components that will not be auto discovered.  
+**Default value**: empty list
+
+Examples:
+
+Include a maximum of `5` components with names starting with `my_project`:
+
+```yaml
+components_discovery:
+  limit: 5
+  include:
+    'my_project*':
+```
+
+Include all `components` except those beginning with `temp*` up to a maximum of `20`:
+
+```yaml
+components_discovery:
+  limit: 20
+  include:
+    '*':
+  exclude:
+    - 'temp*'
+```
+
+Include all `components` whose name starts with `issues` processing them with the tag `issues_project` and only collect metrics belonging to said category `issues` (as `limit` is not configured, the number of components discovered will be limited to `10`, the default value):
+
+```yaml
+components_discovery:
+  include:
+    'issues*':
+       tag: issues_project
+       include:
+         - issues.
+```
+
 ### Validation
 
 [Run the Agent's status subcommand][13] and look for `sonarqube` under the **JMXFetch** section:
@@ -264,55 +313,6 @@ SonarQube does not include any events.
 ### Service Checks
 
 See [service_checks.json][15] for a list of service checks provided by this integration.
-
-### Components Discovery
-
-You can configure how your components are discovered with the `components_discovery` parameter.
-
-`limit`
-: Maximum number of items to be auto discovered.  
-**Default value**: `10`
-
-`include`
-: Mapping of regular expressions keys and component config values that will be auto discovered.  
-**Default value**: empty map
-
-`exclude`
-: List of regular expressions with the patterns of components that will not be auto discovered.  
-**Default value**: empty list
-
-Examples:
-
-Include a maximum of `5` components with names starting with `my_project`:
-
-```yaml
-components_discovery:
-  limit: 5
-  include:
-    'my_project*':
-```
-
-Include all `components` except those beginning with `temp*` up to a maximum of `20`:
-
-```yaml
-components_discovery:
-  limit: 20
-  include:
-    '*':
-  exclude:
-    - 'temp*'
-```
-
-Include all `components` whose name starts with `issues` processing them with the tag `issues_project` and only collect metrics belonging to said category `issues` (as `limit` is not configured, the number of components discovered will be limited to `10`, the default value):
-
-```yaml
-components_discovery:
-  include:
-    'issues*':
-       tag: issues_project
-       include:
-         - issues.
-```
 
 ## Troubleshooting
 
