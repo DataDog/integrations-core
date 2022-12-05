@@ -12,7 +12,7 @@ This check monitors [{integration_name}][1].
 
 ### Configuration
 
-1. <List of steps to setup this Integration>
+1. <List of steps to configure this integration>
 
 ### Validation
 
