@@ -223,7 +223,7 @@ You can configure how your components are discovered with the `components_discov
 : List of regular expressions with the patterns of components that will not be auto discovered.  
 **Default value**: empty list
 
-Examples:
+**Examples**:
 
 Include a maximum of `5` components with names starting with `my_project`:
 
