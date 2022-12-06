@@ -50,7 +50,6 @@ from .console import CONTEXT_SETTINGS, abort, echo_debug, echo_info, echo_succes
 @click.option('--force-base-min', is_flag=True, help='Force using lowest viable release version of datadog-checks-base')
 @click.option('--force-env-rebuild', is_flag=True, help='Force creating a new env')
 @click.option('--memray', is_flag=True, help='Run memray to measure memory usage on all tests')
-@click.option('--memray-show-report', is_flag=True, help='Print the memray report at the end of the test suite')
 @click.pass_context
 def test(
     ctx,
@@ -79,7 +78,6 @@ def test(
     force_base_min,
     force_env_rebuild,
     memray,
-    memray_show_report,
 ):
     """Run tests for Agent-based checks.
 
@@ -204,7 +202,6 @@ def test(
             e2e=e2e,
             ddtrace=ddtrace_check,
             memray=memray,
-            memray_show_report=memray_show_report,
         )
         if coverage:
             pytest_options = pytest_options.format(pytest_coverage_sources(check))
