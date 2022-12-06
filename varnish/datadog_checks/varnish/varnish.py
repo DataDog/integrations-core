@@ -5,9 +5,9 @@ import json
 import re
 import xml.parsers.expat  # python 2.4 compatible
 from collections import defaultdict
-from distutils.version import LooseVersion
 from os import geteuid
 
+from packaging.version import Version
 from six import PY3, iteritems
 from six.moves import filter
 
@@ -156,7 +156,7 @@ class Varnish(AgentCheck):
         if geteuid() != 0:
             cmd.append('sudo')
 
-        if version < LooseVersion('4.1.0'):
+        if version < Version('4.1.0'):
             cmd.extend(self.varnishadm_path + ['-S', self.secretfile_path, 'debug.health'])
         else:
             cmd.extend(
@@ -210,12 +210,12 @@ class Varnish(AgentCheck):
         if raw_version is None:
             raw_version = '3.0.0'
 
-        version = LooseVersion(raw_version)
+        version = Version(raw_version)
 
         # Location of varnishstat
-        if version < LooseVersion('3.0.0'):
+        if version < Version('3.0.0'):
             varnishstat_format = "text"
-        elif version < LooseVersion('5.0.0'):  # we default to json starting version 5.0.0
+        elif version < Version('5.0.0'):  # we default to json starting version 5.0.0
             varnishstat_format = "xml"
 
         return version, varnishstat_format
