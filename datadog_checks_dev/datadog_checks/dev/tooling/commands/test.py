@@ -49,7 +49,7 @@ from .console import CONTEXT_SETTINGS, abort, echo_debug, echo_info, echo_succes
 @click.option('--force-base-unpinned', is_flag=True, help='Force using datadog-checks-base as specified by check dep')
 @click.option('--force-base-min', is_flag=True, help='Force using lowest viable release version of datadog-checks-base')
 @click.option('--force-env-rebuild', is_flag=True, help='Force creating a new env')
-@click.option('--memray', is_flag=True, help='Run memray to measure memory usage')
+@click.option('--memray', is_flag=True, help='Run memray to measure memory usage on all tests')
 @click.option('--memray-show-report', is_flag=True, help='Print the memray report at the end of the test suite')
 @click.pass_context
 def test(
