@@ -212,15 +212,15 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 You can configure how your components are discovered with the `components_discovery` parameter.
 
 `limit`
-: Maximum number of items to be auto discovered.  
+: Maximum number of items to be autodiscovered.  
 **Default value**: `10`
 
 `include`
-: Mapping of regular expressions keys and component config values that will be auto discovered.  
+: Mapping of regular expression keys and component config values to autodiscover.  
 **Default value**: empty map
 
 `exclude`
-: List of regular expressions with the patterns of components that will not be auto discovered.  
+: List of regular expressions with the patterns of components to exclude from autodiscovery.  
 **Default value**: empty list
 
 **Examples**:
