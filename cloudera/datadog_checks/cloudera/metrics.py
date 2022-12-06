@@ -51,12 +51,6 @@ TIMESERIES_METRICS = {
     ],
 }
 
-NATIVE_METRICS = {
-    'host': [
-        'num_cores',
-        'num_physical_cores',
-        'total_phys_mem_bytes',
-    ]
-}
+NATIVE_METRICS = {}
 
 METRICS = {**NATIVE_METRICS, **TIMESERIES_METRICS}

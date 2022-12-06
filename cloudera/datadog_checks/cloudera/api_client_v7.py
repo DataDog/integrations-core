@@ -67,15 +67,9 @@ class ApiClientV7(ApiClient):
                 for host_tag in host_tags:
                     tags.append(f"{host_tag.name}:{host_tag.value}")
 
-            self._collect_host_native_metrics(host, tags)
-
             if host.host_id:
                 self._collect_host_metrics(host, tags)
                 self._collect_host_service_check(host, tags)
-
-    def _collect_host_native_metrics(self, host, tags):
-        for metric in NATIVE_METRICS['host']:
-            self._check.gauge(f"host.{metric}", getattr(host, metric), tags)
 
     def _collect_host_service_check(self, host, tags):
         host_entity_status = ENTITY_STATUS[host.entity_status] if host.entity_status else None
