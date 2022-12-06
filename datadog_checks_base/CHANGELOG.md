@@ -3,7 +3,6 @@
 ## 27.5.0 / 2022-12-06
 
 * [Added] Implement multi-instance counters without Windows PdhEnumObjects API. See [#13243](https://github.com/DataDog/integrations-core/pull/13243).
-* [Fixed] Pin the keystoneauth1 version for py2. See [#13445](https://github.com/DataDog/integrations-core/pull/13445).
 * [Fixed] Do not install psycopg2-binary on arm macs. See [#13343](https://github.com/DataDog/integrations-core/pull/13343).
 * [Fixed] Update Snowflake connector and cryptography dependencies. See [#13367](https://github.com/DataDog/integrations-core/pull/13367).
 * [Fixed] Remove `default_backend` parameter from cryptography calls. See [#13333](https://github.com/DataDog/integrations-core/pull/13333).
