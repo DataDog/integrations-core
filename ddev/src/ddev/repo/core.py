@@ -42,11 +42,7 @@ class Repository:
     def config(self) -> RepositoryConfig:
         from ddev.repo.config import RepositoryConfig
 
-        config_file = self.path / CONFIG_DIRECTORY / 'config.toml'
-        if not config_file.is_file():
-            return RepositoryConfig({})
-
-        return RepositoryConfig.from_toml_file(config_file)
+        return RepositoryConfig(self.path / CONFIG_DIRECTORY / 'config.toml')
 
 
 class IntegrationRegistry:
