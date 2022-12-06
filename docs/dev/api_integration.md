@@ -5,7 +5,7 @@ type: documentation
 
 ## Overview
 
-Use an [Datadog API endpoint][1] to enrich and submit data from your backend, or pull data directly out of Datadog. API integrations work well in building a connector between Datadog and another SaaS platform. This method is ideal for Technology Partners that are SaaS based, and have an existing website for users to log into for authorization purposes.
+Use a [Datadog API endpoint][1] to enrich and submit data from your backend, or pull data directly out of Datadog. API integrations work well in building a connector between Datadog and another SaaS platform. This method is ideal for Technology Partners that are SaaS based, and have an existing website for users to log into for authorization purposes.
 
 API integrations send the following types of data to Datadog:
 
@@ -35,21 +35,22 @@ Instead of requesting these credentials directly from a user, Datadog recommends
 
 You can explore examples of existing API integrations in the `integrations-extras` repository such as [Vantage][17].
 
-## Set up a directory and fork the Integrations Extras repository
+## Set up a directory and fork the `integrations-extras` repository
+
 
 1. Create a `dd` directory:
 
    {{< code-block lang="shell" >}}mkdir $HOME/dd{{< /code-block >}}
    
-   The Datadog Development Toolkit command expects you to be working in the `$HOME/dd/` directory. This is not mandatory, but working in a different directory requires additional configuration steps.
+   The Datadog Development Toolkit expects you to be working in the `$HOME/dd/` directory. This is not mandatory, but working in a different directory requires additional configuration steps.
 
 2. Clone the `integrations-extras` repository:
 
    {{< code-block lang="shell" >}}git clone git@github.com:DataDog/integrations-extras.git{{< /code-block >}}
 
-## Install and configure the Datadog development toolkit
+## Install and configure the Datadog Development Toolkit
 
-The Datadog Development Toolkit command (`ddev`) allows you to create scaffolding when you are developing an integration by generating a skeleton of your integration tile's assets and metadata.
+The Datadog Development Toolkit (`ddev`) allows you to generate the directory structure, assets, and metadata needed for your integration.
 
 Before you begin, make sure you meet the following prerequisites:
 
@@ -86,16 +87,14 @@ Install and configure the development toolkit:
 
 ## Populate the integration tile scaffolding
 
-Run the `ddev` command to generate a skeleton of the folders and files needed for your integration. The options you use with the command are different depending on what type of integration you are developing. For a full list of the files created by the `ddev` command, see [Integrations assets][20].
-
-### Create an informational tile only listing
-
-To create the informational tile-only listing's scaffolding:
+Run the `ddev` command to create scaffolding for an informational tile-only listing:
 
 1. Make sure you're inside the `integrations-extras` directory:
    {{< code-block lang="shell" >}}cd $HOME/dd/integrations-extras{{< /code-block >}}
 2. Run the `ddev` command with the `-t tile` option
    {{< code-block lang="shell" >}}ddev create -t tile "<Offering Name>"{{< /code-block >}}
+   
+The options you use with the `ddev` command are different depending on what type of integration you are developing. For a full list of the files created by the `ddev` command, see [Integrations assets][20].   
 
 ## Complete the necessary integration asset files
 
