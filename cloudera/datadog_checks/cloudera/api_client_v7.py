@@ -3,7 +3,7 @@ import cm_client
 from datadog_checks.base import AgentCheck
 from datadog_checks.cloudera.api_client import ApiClient
 from datadog_checks.cloudera.entity_status import ENTITY_STATUS
-from datadog_checks.cloudera.metrics import NATIVE_METRICS, TIMESERIES_METRICS
+from datadog_checks.cloudera.metrics import TIMESERIES_METRICS
 
 from .common import CLUSTER_HEALTH, HOST_HEALTH
 
