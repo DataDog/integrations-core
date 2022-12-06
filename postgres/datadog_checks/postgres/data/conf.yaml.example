@@ -16,7 +16,7 @@ instances:
     ## @param host - string - required
     ## The hostname to connect to.
     ## NOTE: Even if the server name is `localhost`, the Agent connects to PostgreSQL using TCP/IP unless you also
-    ## provide a value for the sock key.
+    ## provide a value for the sock key.e
     #
   - host: localhost
 
@@ -345,10 +345,10 @@ instances:
         #
         # collection_interval: 0.1
 
-        ## @param explain_analyze_function - string - optional - default: datadog.explain_analyze_statement
+        ## @param explain_function - string - optional - default: datadog.explain_statement
         ## Override the default function used to collect execution plans for queries.
         #
-        # explain_analyze_function: datadog.explain_analyze_statement
+        # explain_function: datadog.explain_statement
 
         ## @param collection_strategy_cache_maxsize - number - optional - default: 1000
         ## Set the max size of the cache used for the collection strategy cache. This should

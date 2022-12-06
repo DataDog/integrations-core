@@ -101,9 +101,9 @@ class QueryTraces(BaseModel):
     collection_strategy_cache_maxsize: Optional[float]
     collection_strategy_cache_ttl: Optional[float]
     enabled: Optional[bool]
-    explain_analyze_function: Optional[str]
     explain_errors_cache_maxsize: Optional[float]
     explain_errors_cache_ttl: Optional[float]
+    explain_function: Optional[str]
     plan_cache_maxsize: Optional[float]
     plan_cache_ttl: Optional[float]
 

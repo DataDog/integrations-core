@@ -12,7 +12,7 @@ files:
       description: |
         The hostname to connect to.
         NOTE: Even if the server name is `localhost`, the Agent connects to PostgreSQL using TCP/IP unless you also
-        provide a value for the sock key.
+        provide a value for the sock key.e
       value:
         example: localhost
         type: string
@@ -406,12 +406,12 @@ files:
           value:
             type: number
             example: 0.1
-        - name: explain_analyze_function
+        - name: explain_function
           description: |
             Override the default function used to collect execution plans for queries.
           value:
             type: string
-            example: datadog.explain_analyze_statement
+            example: datadog.explain_statement
         - name: collection_strategy_cache_maxsize
           description: |
             Set the max size of the cache used for the collection strategy cache. This should
