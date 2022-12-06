@@ -442,7 +442,7 @@ class PostgresStatementTraces(DBMAsyncJob):
 
         try:
             plan = self._run_explain(dbname, statement, obfuscated_statement)
-            self._plan_cache.set(query_signature, plan)
+            self._plan_cache[query_signature] = plan
             return plan, None, None
         except psycopg2.errors.UndefinedParameter as e:
             self._log.debug(
