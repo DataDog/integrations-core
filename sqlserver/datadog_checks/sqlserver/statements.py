@@ -50,7 +50,7 @@ SQL_SERVER_QUERY_METRICS_COLUMNS = [
 
 STATEMENT_METRICS_QUERY = """\
 with qstats as (
-    select query_hash, query_plan_hash, last_execution_time,
+    select query_hash, query_plan_hash, last_execution_time, last_elapsed_time,
             CONCAT(
                 CONVERT(binary(64), plan_handle),
                 CONVERT(binary(4), statement_start_offset),
@@ -63,6 +63,7 @@ qstats_aggr as (
     select query_hash, query_plan_hash, CAST(S.dbid as int) as dbid,
        D.name as database_name, max(plan_handle_and_offsets) as plan_handle_and_offsets,
        max(last_execution_time) as last_execution_time,
+       max(last_elapsed_time) as last_elapsed_time,
     {query_metrics_column_sums}
     from qstats S
     left join sys.databases D on S.dbid = D.database_id
@@ -73,7 +74,7 @@ qstats_aggr_split as (select TOP {limit}
     convert(int, convert(varbinary(4), substring(plan_handle_and_offsets, 64+1, 4))) as statement_start_offset,
     convert(int, convert(varbinary(4), substring(plan_handle_and_offsets, 64+6, 4))) as statement_end_offset,
     * from qstats_aggr
-    where last_execution_time > dateadd(second, -?, getdate())
+    where DATEADD(ms, last_elapsed_time / 1000, last_execution_time) > dateadd(second, -?, getdate())
 )
 select
     SUBSTRING(text, (statement_start_offset / 2) + 1,
