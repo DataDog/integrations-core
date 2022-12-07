@@ -245,7 +245,7 @@ components_discovery:
     - 'temp*'
 ```
 
-Include all components with names starting with `issues` processing them with `issues_project`, and only collect metrics belonging to the category `issues`. As `limit` is not defined, the number of components discovered is limited to the default value `10`:
+Include all components with names starting with `issues` apply the `issues_project` tag, and only collect metrics belonging to the category `issues`. As `limit` is not defined, the number of components discovered is limited to the default value `10`:
 ```yaml
 components_discovery:
   include:
