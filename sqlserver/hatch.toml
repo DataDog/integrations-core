@@ -1,32 +1,32 @@
 [env.collectors.datadog-checks]
 base-package-features = ["deps", "db", "json"]
 
-[[envs.default.matrix]]
-python = ["27", "38"]
-os = ["linux"]
-version = ["2017", "2019"]
-setup = ["single", "ha"]
-
-# test the full combination of python-version/driver against a the latest sql server version
-# ideally we'd test this against all sql server versions but that makes the test take too long and time out.
-# time out. until we're able to modify and parallelize the work we'll limit the per-driver tests to only a single
-# sqlserver version
-[[envs.default.matrix]]
-python = ["27", "38"]
-os = ["windows"]
-driver = ["SQLOLEDB", "SQLNCLI11", "MSOLEDBSQL", "odbc"]
-version = ["2019"]
-setup = ["single"]
-
-# older sql server versions tested on only a single python version and driver
-# TODO: Investigate versions 2016 & 2017 causing CI to fail. Flaky version as of 7/12/2022.
-# py38-windows-odbc-{2012,2014,2016,2017}-single
-[[envs.default.matrix]]
-python = ["38"]
-os = ["windows"]
-driver = ["odbc"]
-version = ["2012", "2014"]
-setup = ["single"]
+#[[envs.default.matrix]]
+#python = ["27", "38"]
+#os = ["linux"]
+#version = ["2017", "2019"]
+#setup = ["single", "ha"]
+#
+## test the full combination of python-version/driver against a the latest sql server version
+## ideally we'd test this against all sql server versions but that makes the test take too long and time out.
+## time out. until we're able to modify and parallelize the work we'll limit the per-driver tests to only a single
+## sqlserver version
+#[[envs.default.matrix]]
+#python = ["27", "38"]
+#os = ["windows"]
+#driver = ["SQLOLEDB", "SQLNCLI11", "MSOLEDBSQL", "odbc"]
+#version = ["2019"]
+#setup = ["single"]
+#
+## older sql server versions tested on only a single python version and driver
+## TODO: Investigate versions 2016 & 2017 causing CI to fail. Flaky version as of 7/12/2022.
+## py38-windows-odbc-{2012,2014,2016,2017}-single
+#[[envs.default.matrix]]
+#python = ["38"]
+#os = ["windows"]
+#driver = ["odbc"]
+#version = ["2012", "2014"]
+#setup = ["single"]
 
 # temporarily exclude high cardinality windows env. to be fixed in a follow-up PR
 [[envs.default.matrix]]
