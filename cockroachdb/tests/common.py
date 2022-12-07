@@ -5,6 +5,7 @@ import os
 
 from datadog_checks.cockroachdb.metrics import METRIC_MAP
 from datadog_checks.dev import get_docker_hostname
+from datadog_checks.dev.utils import get_metadata_metrics
 
 HOST = get_docker_hostname()
 PORT = '8080'
@@ -208,10 +209,13 @@ for raw_metric_name, metric_name in METRIC_MAP.items():
 
 
 def assert_metrics(aggregator):
+    metadata_metrics = get_metadata_metrics()
     for metric in EXPECTED_METRICS:
         aggregator.assert_metric('cockroachdb.{}'.format(metric), at_least=0)
 
     # Custom transformer
     aggregator.assert_metric('cockroachdb.build.timestamp')
+
+    aggregator.assert_metrics_using_metadata(metadata_metrics, check_submission_type=True)
 
     assert aggregator.metrics_asserted_pct > 80, 'Missing metrics {}'.format(aggregator.not_asserted())

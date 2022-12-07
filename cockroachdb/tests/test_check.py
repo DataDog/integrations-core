@@ -5,7 +5,6 @@ import pytest
 
 from datadog_checks.cockroachdb import CockroachdbCheck
 from datadog_checks.dev.testing import requires_py3
-from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import COCKROACHDB_VERSION, assert_metrics
 
@@ -16,9 +15,6 @@ def test_metrics(aggregator, instance, dd_run_check):
     check = CockroachdbCheck('cockroachdb', {}, [instance])
     dd_run_check(check)
 
-    metadata_metrics = get_metadata_metrics()
-
-    aggregator.assert_metrics_using_metadata(metadata_metrics, check_submission_type=True)
     assert_metrics(aggregator)
 
 
