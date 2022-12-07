@@ -116,6 +116,7 @@ def test(
                     if skip_failed_environments:
                         echo_warning(f"Skipping {env} environment because it failed to start.")
                         continue
+                    raise
             elif env not in config_envs:
                 continue
 
