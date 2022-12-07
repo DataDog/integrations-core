@@ -12,7 +12,7 @@ from ...testing import process_checks_option
 from ...utils import complete_valid_checks
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
 
-IGNORES = {"datadog_checks_dev": ["datadog_checks/dev/tooling/templates"]}
+IGNORES = {"datadog_checks_dev": ["datadog_checks/dev/tooling/templates"], "all": ["tests/compose", "tests/docker"]}
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate license headers in python files')
@@ -39,7 +39,8 @@ def license_headers(ctx, check):
     for check_name in checks:
         path_to_check = root / check_name
         ignores = [pathlib.Path(p) for p in IGNORES.get(check_name, [])]
-        errors = validate_license_headers(path_to_check, extra_ignore=ignores)
+        ignores.extend([pathlib.Path(p) for p in IGNORES.get("all")])
+        errors = validate_license_headers(path_to_check, ignore=ignores)
 
         for err in errors:
             echo_failure(f'{check_name}/{err.path}: {err.message}')

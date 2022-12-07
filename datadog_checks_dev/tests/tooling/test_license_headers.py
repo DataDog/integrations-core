@@ -129,8 +129,6 @@ def test_validate_license_headers_skips_non_python_files(tmp_path):
         ".hidden/subfolder",
         "tests/docker",
         "tests/docker/subfolder",
-        "tests/compose",
-        "tests/compose/subfolder",
     ],
 )
 def test_validate_license_headers_skips_blacklisted_folders(tmp_path, relpath):
@@ -141,19 +139,7 @@ def test_validate_license_headers_skips_blacklisted_folders(tmp_path, relpath):
     with open(target_path / "some.py", "w") as f:
         f.write("import os\n")
 
-    assert validate_license_headers(check_path) == []
-
-
-def test_validate_license_headers_skips_explicitly_ignored_folders(tmp_path):
-    check_path = tmp_path / "check"
-    path_to_ignore = pathlib.Path("path/to/ignore")
-    target_path = check_path / path_to_ignore
-    target_path.mkdir(parents=True)
-
-    with open(target_path / "some.py", "w") as f:
-        f.write("import os\n")
-
-    assert validate_license_headers(check_path, extra_ignore=[path_to_ignore]) == []
+    assert validate_license_headers(check_path, ignore=[pathlib.Path("tests/docker")]) == []
 
 
 def test_validate_license_headers_returns_error_on_new_file_with_header_not_matching_template(tmp_path):

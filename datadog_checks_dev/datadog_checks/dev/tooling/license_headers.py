@@ -37,26 +37,21 @@ def _get_previous(path):
 
 def validate_license_headers(
     check_path: pathlib.Path,
-    extra_ignore: Optional[Iterable[pathlib.Path]] = None,
+    ignore: Optional[Iterable[pathlib.Path]] = None,
     *,
     get_previous: Callable[[pathlib.Path], Optional[str]] = _get_previous,
 ) -> List[LicenseHeaderError]:
     """
     Validate license headers under `check_path` and return a list of validation errors.
 
-    Paths on `extra_ignore` will be ignored.
+    Paths on `ignore` will be ignored, as well as their subpaths.
 
     Assumptions regarding which files require license header validation:
     - Only python (*.py) files need a license header
     - Code under hidden folders (starting with `.`) are ignored
-    - Files under the following folders are not checked, as it's where integration
-      testing environments are typically defined, where licenses may be a bit more heterogeneous:
-      - tests/docker
-      - tests/compose
     """
     root = check_path
-    default_ignore = {pathlib.Path("tests/docker"), pathlib.Path("tests/compose")}
-    ignoreset = frozenset(default_ignore.union(extra_ignore or set()))
+    ignoreset = set(ignore or [])
 
     def walk_recursively(path):
         for child in path.iterdir():
