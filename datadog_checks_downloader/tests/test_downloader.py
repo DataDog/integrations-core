@@ -92,7 +92,7 @@ def test_expired_metadata_error(distribution_name, distribution_version):
     """Test expiration of metadata raises an exception."""
     argv = [distribution_name, "--version", distribution_version]
 
-    # Make sure we use futuristic time.
+    # Make sure we use a time far enough into the future.
     with freeze_time("2524-01-01"), pytest.raises(ExpiredMetadataError):
         _do_run_downloader(argv)
 
@@ -181,7 +181,7 @@ def test_local_expired_metadata_error(distribution_name, distribution_version):
             http_url,
         ]
 
-        # Make sure we use futuristic time.
+        # Make sure we use a time far enough into the future.
         with freeze_time(_LOCAL_TESTS_DATA_TIMESTAMP_EXPIRED), pytest.raises(ExpiredMetadataError):
             _do_run_downloader(argv)
 
