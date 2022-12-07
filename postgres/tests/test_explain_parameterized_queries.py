@@ -69,9 +69,7 @@ def test_explain_parameterized_queries(integration_check, dbm_instance, query, e
         ),
     ],
 )
-def test_explain_parameterized_queries_generic_params(
-    integration_check, dbm_instance, query, expected_generic_values
-):
+def test_explain_parameterized_queries_generic_params(integration_check, dbm_instance, query, expected_generic_values):
     check = integration_check(dbm_instance)
     check._connect()
 

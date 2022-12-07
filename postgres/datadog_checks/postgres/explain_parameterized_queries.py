@@ -92,20 +92,15 @@ class ExplainParameterizedQueries:
             )
             return True
         except Exception as e:
+            logged_statement = obfuscated_statement
             if self._config.log_unobfuscated_plans:
-                logger.warning(
-                    'Failed to create prepared statement when explaining statement(%s)=[%s] | err=[%s]',
-                    query_signature,
-                    statement,
-                    e,
-                )
-            else:
-                logger.warning(
-                    'Failed to create prepared statement when explaining statement(%s)=[%s] | err=[%s]',
-                    query_signature,
-                    obfuscated_statement,
-                    e,
-                )
+                logged_statement = statement
+            logger.warning(
+                'Failed to create prepared statement when explaining statement(%s)=[%s] | err=[%s]',
+                query_signature,
+                logged_statement,
+                e,
+            )
         return False
 
     @tracked_method(agent_check_getter=agent_check_getter)
@@ -134,20 +129,15 @@ class ExplainParameterizedQueries:
                 ),
             )
         except Exception as e:
+            logged_statement = obfuscated_statement
             if self._config.log_unobfuscated_plans:
-                logger.warning(
-                    'Failed to explain parameterized statement(%s)=[%s] | err=[%s]',
-                    query_signature,
-                    statement,
-                    e,
-                )
-            else:
-                logger.warning(
-                    'Failed to explain parameterized statement(%s)=[%s] | err=[%s]',
-                    query_signature,
-                    obfuscated_statement,
-                    e,
-                )
+                logged_statement = statement
+            logger.warning(
+                'Failed to explain parameterized statement(%s)=[%s] | err=[%s]',
+                query_signature,
+                logged_statement,
+                e,
+            )
         return None
 
     def _deallocate_prepared_statement(self, dbname, query_signature):
