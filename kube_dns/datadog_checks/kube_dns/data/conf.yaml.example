@@ -530,3 +530,8 @@ instances:
     #   - <INCLUDE_REGEX>
     #   exclude:
     #   - <EXCLUDE_REGEX>
+
+    ## @param health_url - string - optional - default: http://localhost:8081/readiness
+    ## URL for the kube-dns health endpoint.
+    #
+    # health_url: http://localhost:8081/readiness
