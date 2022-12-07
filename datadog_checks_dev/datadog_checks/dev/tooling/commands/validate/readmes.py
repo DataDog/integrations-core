@@ -147,13 +147,14 @@ def validate_header(h2s, header, files_failed, readme_path, display_queue, soup)
         curr_header = soup.find('h2', text=header)
         curr_instructions = curr_header.find_next()
         if curr_instructions.name == "h2":
+            rest=curr_header.find_next_siblings()
             files_failed[readme_path] = True
-            display_queue.append((echo_failure, f"     readme has an empty {header} H2 (##) section"))
+            display_queue.append((echo_failure, f"     readme has an empty {header} H2 (##) section" + rest))
 
 def validate_no_images(header, soup):
     curr_header = soup.find('h2',text=header)
     rest=curr_header.find_next_siblings()
-    print("hello world")
+    print("hello")
     print(rest)
 
     
