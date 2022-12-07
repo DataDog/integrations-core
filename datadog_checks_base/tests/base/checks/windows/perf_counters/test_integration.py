@@ -36,6 +36,9 @@ def test(aggregator, dd_run_check):
 
     dd_run_check(check)
     aggregator.assert_service_check('test.windows.perf.health', ServiceCheck.OK, count=1, tags=static_tags)
+
+    dd_run_check(check)
+    aggregator.assert_service_check('test.windows.perf.health', ServiceCheck.OK, count=2, tags=static_tags)
     aggregator.assert_metric(
         'test.num_cpu_threads.total', num_threads + 1, metric_type=aggregator.GAUGE, count=1, tags=static_tags
     )
@@ -45,10 +48,9 @@ def test(aggregator, dd_run_check):
     aggregator.assert_metric(
         'test.num_cpu_threads.unique', num_threads, metric_type=aggregator.GAUGE, count=1, tags=static_tags
     )
-    aggregator.assert_all_metrics_covered()
 
     dd_run_check(check)
-    aggregator.assert_service_check('test.windows.perf.health', ServiceCheck.OK, count=2, tags=static_tags)
+    aggregator.assert_service_check('test.windows.perf.health', ServiceCheck.OK, count=3, tags=static_tags)
     aggregator.assert_metric(
         'test.num_cpu_threads.total', num_threads + 1, metric_type=aggregator.GAUGE, count=2, tags=static_tags
     )

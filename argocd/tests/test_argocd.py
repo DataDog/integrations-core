@@ -14,6 +14,7 @@ from .common import (
     APP_CONTROLLER_METRICS,
     MOCKED_API_SERVER_INSTANCE,
     MOCKED_APP_CONTROLLER_INSTANCE,
+    MOCKED_APP_CONTROLLER_WITH_OTHER_PARAMS,
     MOCKED_REPO_SERVER_INSTANCE,
     NOT_EXPOSED_METRICS,
     REPO_SERVER_METRICS,
@@ -25,6 +26,7 @@ from .utils import get_fixture_path
     'namespace, instance, metrics',
     [
         ('app_controller', MOCKED_APP_CONTROLLER_INSTANCE, APP_CONTROLLER_METRICS),
+        ('app_controller', MOCKED_APP_CONTROLLER_WITH_OTHER_PARAMS, APP_CONTROLLER_METRICS),
         ('api_server', MOCKED_API_SERVER_INSTANCE, API_SERVER_METRICS),
         ('repo_server', MOCKED_REPO_SERVER_INSTANCE, REPO_SERVER_METRICS),
     ],
@@ -67,22 +69,22 @@ def test_app_controller_service_check(dd_run_check, aggregator, mock_http_respon
     aggregator.assert_service_check(
         'argocd.app_controller.cluster.connection.status',
         ServiceCheck.OK,
-        tags=['endpoint:app_controller:8082', 'name:bar'],
+        tags=['endpoint:http://app_controller:8082', 'name:bar'],
     )
     aggregator.assert_service_check(
         'argocd.app_controller.cluster.connection.status',
         ServiceCheck.CRITICAL,
-        tags=['endpoint:app_controller:8082', 'name:foo'],
+        tags=['endpoint:http://app_controller:8082', 'name:foo'],
     )
     aggregator.assert_service_check(
         'argocd.app_controller.cluster.connection.status',
         ServiceCheck.UNKNOWN,
-        tags=['endpoint:app_controller:8082', 'name:baz'],
+        tags=['endpoint:http://app_controller:8082', 'name:baz'],
     )
     aggregator.assert_service_check(
         'argocd.app_controller.cluster.connection.status',
         ServiceCheck.UNKNOWN,
-        tags=['endpoint:app_controller:8082', 'name:faz'],
+        tags=['endpoint:http://app_controller:8082', 'name:faz'],
     )
 
 

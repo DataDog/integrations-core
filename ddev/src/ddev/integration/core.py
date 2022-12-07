@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING
 from ddev.repo.constants import NOT_SHIPPABLE
 
 if TYPE_CHECKING:
+    from ddev.integration.manifest import Manifest
     from ddev.repo.config import RepositoryConfig
     from ddev.utils.fs import Path
 
@@ -59,29 +60,17 @@ class Integration:
             return self.path / 'datadog_checks' / directory
 
     @cached_property
-    def manifest_path(self) -> Path:
-        return self.path / 'manifest.json'
+    def manifest(self) -> Manifest:
+        from ddev.integration.manifest import Manifest
 
-    @cached_property
-    def __manifest_data(self) -> dict:
-        if not self.manifest_path.is_file():
-            return {}
-
-        import json
-
-        return json.loads(self.manifest_path.read_text())
-
-    @cached_property
-    def manifest(self):
-        # TODO: generate a Pydantic model using https://github.com/koxudaxi/datamodel-code-generator
-        raise NotImplementedError
+        return Manifest(self.path / 'manifest.json')
 
     @cached_property
     def display_name(self) -> str:
-        if name := self.repo_config.display_name_overrides.get(self.name):
+        if name := self.repo_config.get(f'/overrides/display-name/{self.name}', None):
             return name
         else:
-            return self.__manifest_data.get('assets', {}).get('integration', {}).get('source_type_name', self.name)
+            return self.manifest.get('/assets/integration/source_type_name', self.name)
 
     @cached_property
     def is_valid(self) -> bool:

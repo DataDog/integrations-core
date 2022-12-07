@@ -454,7 +454,13 @@ class MySQLStatementSamples(DBMAsyncJob):
                 ),
                 params,
             )
+            self._log.debug(
+                "Fetching all rows from events statements query, table %s. Using window function? %s",
+                events_statements_table,
+                self._has_window_functions,
+            )
             rows = cursor.fetchall()
+
             self._cursor_run(cursor, drop_temp_table_query)
             tags = (
                 self._tags
@@ -470,7 +476,9 @@ class MySQLStatementSamples(DBMAsyncJob):
             self._check.histogram(
                 "dd.mysql.get_new_events_statements.rows", len(rows), tags=tags, hostname=self._check.resolved_hostname
             )
-            self._log.debug("Read %s rows from %s", len(rows), events_statements_table)
+            self._log.debug(
+                "Read %s rows from %s after checkpoint %d", len(rows), events_statements_table, self._checkpoint
+            )
             return rows
 
     def _filter_valid_statement_rows(self, rows):
@@ -670,7 +678,9 @@ class MySQLStatementSamples(DBMAsyncJob):
                 continue
             rows = self._get_new_events_statements(table, 1)
             if not rows:
-                self._log.debug("No statements found in %s table. checking next one.", table)
+                self._log.debug(
+                    "No statements found in %s table after checkpoint %d. checking next one.", table, self._checkpoint
+                )
                 continue
             events_statements_table = table
             break

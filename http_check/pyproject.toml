@@ -9,7 +9,6 @@ build-backend = "hatchling.build"
 name = "datadog-http-check"
 description = "The HTTP check"
 readme = "README.md"
-license = {text = "BSD-3-Clause"}
 keywords = [
     "datadog",
     "datadog agent",
@@ -36,10 +35,13 @@ dynamic = [
     "version",
 ]
 
+[project.license]
+text = "BSD-3-Clause"
+
 [project.optional-dependencies]
 deps = [
     "cryptography==3.3.2; python_version < '3.0'",
-    "cryptography==3.4.8; python_version > '3.0'",
+    "cryptography==38.0.3; python_version > '3.0'",
     "requests-ntlm==1.1.0",
 ]
 
@@ -54,8 +56,6 @@ include = [
     "/datadog_checks",
     "/tests",
     "/manifest.json",
-    "/requirements-dev.txt",
-    "/tox.ini",
 ]
 
 [tool.hatch.build.targets.wheel]

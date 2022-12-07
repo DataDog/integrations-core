@@ -68,6 +68,7 @@ KNOWN_LICENSES = {
     'psf': 'PSF',
     'psf license': 'PSF',
     'python software foundation license': 'PSF',
+    'upl': 'UPL',
 }
 KNOWN_CLASSIFIERS = {'Python Software Foundation License': 'PSF'}
 CLASSIFIER_TO_HIGHEST_SPDX = {
@@ -104,6 +105,7 @@ CLASSIFIER_TO_HIGHEST_SPDX = {
     'Mozilla Public License 1.1 (MPL 1.1)': 'MPL-1.1',
     'Mozilla Public License 2.0 (MPL 2.0)': 'MPL-2.0',
     'Netscape Public License (NPL)': 'NPL-1.1',
+    "Universal Permissive License (UPL)": 'UPL',
     'W3C License': 'W3C',
     'Zope Public License': 'ZPL-2.1',
 }
@@ -281,7 +283,7 @@ def licenses(ctx, sync):
             package_license = package_license.strip('"')
 
             expanded_licenses = []
-            for separator in ('/', ' OR ', ' or '):
+            for separator in (' and/or ', '/', ' OR ', ' or '):
                 if separator in package_license:
                     expanded_licenses.extend(package_license.split(separator))
                     break

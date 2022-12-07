@@ -1,0 +1,17 @@
+[env.collectors.datadog-checks]
+
+[[envs.default.matrix]]
+python = ["27", "38"]
+version = ["8.1", "9.1"]
+
+[envs.default.overrides]
+matrix.version.env-vars = [
+  { key = "SSH_SERVER_VERSION", value = "SSH-2.0-OpenSSH_8.1", if = ["8.1"] },
+  { key = "SSH_SERVER_IMAGE", value = "8.1_p1-r0", if = ["8.1"] },
+
+  { key = "SSH_SERVER_VERSION", value = "SSH-2.0-OpenSSH_9.1", if = ["9.1"] },
+  { key = "SSH_SERVER_IMAGE", value = "9.1_p1-r1", if = ["9.1"] },
+]
+
+[envs.latest.env-vars]
+SSH_SERVER_IMAGE = "latest"

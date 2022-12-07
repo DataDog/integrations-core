@@ -8,7 +8,7 @@ changelog/no-changelog:
 - all:
   - '*/!(pyproject.toml)'
 - all:
-  - '*(!ddev)/**'
+  - '*/(!ddev)/**'
 ddev:
 - ddev/**/*
 dependencies:

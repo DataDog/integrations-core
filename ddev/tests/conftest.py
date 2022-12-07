@@ -88,6 +88,13 @@ def config_file(tmp_path) -> ConfigFile:
     return config
 
 
+@pytest.fixture
+def temp_dir(tmp_path) -> Path:
+    path = Path(tmp_path, 'temp')
+    path.mkdir()
+    return path
+
+
 @pytest.fixture(scope='session', autouse=True)
 def isolation() -> Generator[Path, None, None]:
     with temp_directory() as d:

@@ -9,7 +9,7 @@
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
     "description": "Track builds and understand the performance impact of every deploy.",
-    "title": "Teamcity Integration",
+    "title": "TeamCity",
     "media": [],
     "classifier_tags": [
       "Supported OS::Linux",
@@ -37,12 +37,23 @@
       "configuration": {
         "spec": "assets/configuration/spec.yaml"
       },
+      "metrics": {
+        "prefix": "teamcity.",
+        "check": ["teamcity.builds", "teamcity.build_duration"],
+        "metadata_path": "metadata.csv"
+      },
       "events": {
         "creates_events": true
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       }
+    },
+    "dashboards": {
+      "TeamCity Overview": "assets/dashboards/overview.json"
+    },
+    "monitors": {
+      "Build Status": "assets/recommended_monitors/build_status.json"
     },
     "saved_views": {
       "teamcity_processes": "assets/saved_views/teamcity_processes.json"
