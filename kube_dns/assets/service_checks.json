@@ -1,6 +1,6 @@
 [
     {
-        "agent_version": "6.0.0",
+        "agent_version": "7.42.0",
         "integration": "Kube DNS",
         "check": "kubedns.up",
         "groups": [],
