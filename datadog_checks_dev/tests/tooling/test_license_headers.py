@@ -162,6 +162,7 @@ import os
     assert len(errors) == 1
     assert errors[0].message == "file does not match expected license format"
     assert errors[0].path == "setup.py"
+    assert errors[0].fixed == f"{get_license_header()}\n\nimport os\n"
 
 
 def test_validate_license_headers_returns_error_on_existing_file_with_changed_header(tmp_path):
@@ -170,8 +171,7 @@ def test_validate_license_headers_returns_error_on_existing_file_with_changed_he
 
     original_license = """# (C) Foo, Inc. 1999-present
 # All rights reserved
-# Licensed under a 3-clause BSD style license (see LICENSE)
-"""
+# Licensed under a 3-clause BSD style license (see LICENSE)"""
 
     prev_contents = f"{original_license}\n\nimport os\n"
 
@@ -181,7 +181,7 @@ def test_validate_license_headers_returns_error_on_existing_file_with_changed_he
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import os
+import sys
 """,
     )
 
@@ -199,6 +199,7 @@ import os
     assert len(errors) == 1
     assert errors[0].message == "existing file has changed license"
     assert errors[0].path == "setup.py"
+    assert errors[0].fixed == f"{original_license}\n\nimport sys\n"
 
 
 def test_validate_license_headers_accepts_any_header_when_previous_version_with_no_license_exists(tmp_path):

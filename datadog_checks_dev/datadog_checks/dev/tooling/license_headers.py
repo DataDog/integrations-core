@@ -23,7 +23,7 @@ _COPYRIGHT_PATTERN = re.compile(
     re.MULTILINE | re.VERBOSE,
 )
 
-LicenseHeaderError = namedtuple("LicenseHeaderError", ["message", "path"])
+LicenseHeaderError = namedtuple("LicenseHeaderError", ["message", "path", "fixed"])
 
 
 def _get_previous(path):
@@ -89,17 +89,23 @@ def validate_license_headers(
 
         # License is missing altogether
         if not license_header:
-            return LicenseHeaderError("missing license header", relpath)
+            return LicenseHeaderError("missing license header", relpath, "")
 
         # When file already existed, check whether the license has changed
         previous = get_previous(path)
         if previous:
-            previous_license_header = parse_license_header(previous)
-            if previous_license_header and license_header != previous_license_header:
-                return LicenseHeaderError("existing file has changed license", relpath)
+            original_header = parse_license_header(previous)
+            if original_header and license_header != original_header:
+                return LicenseHeaderError(
+                    "existing file has changed license", relpath, _replace_header(contents, original_header)
+                )
         # When it's a new file, compare it to the current header template
         elif license_header != get_default_license_header():
-            return LicenseHeaderError("file does not match expected license format", relpath)
+            return LicenseHeaderError(
+                "file does not match expected license format",
+                relpath,
+                _replace_header(contents, get_default_license_header()),
+            )
 
     if repo_root:
         gitignore_matcher = _GitIgnoreMatcher.from_path_to_root(check_path, repo_root)
@@ -123,6 +129,10 @@ def parse_license_header(contents):
     """
     match = _COPYRIGHT_PATTERN.match(contents)
     return match[0] if match else ""
+
+
+def _replace_header(contents, new_header):
+    return _COPYRIGHT_PATTERN.sub(new_header, contents)
 
 
 class _GitIgnoreMatcher:
