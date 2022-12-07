@@ -2,7 +2,6 @@ import pytest
 
 from datadog_checks.cloudera import ClouderaCheck
 from datadog_checks.cloudera.metrics import METRICS
-from datadog_checks.dev.utils import get_metadata_metrics
 
 
 @pytest.mark.usefixtures('dd_environment')
@@ -43,4 +42,3 @@ def test_given_api_v48_endpoint_when_check_runs_then_service_check_ok_and_metric
     aggregator.assert_service_check('cloudera.cluster.health', ClouderaCheck.CRITICAL, message="BAD_HEALTH")
     aggregator.assert_service_check('cloudera.host.health', ClouderaCheck.OK)
     aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
