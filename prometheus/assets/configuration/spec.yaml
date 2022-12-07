@@ -28,11 +28,14 @@ files:
         value:
           type: array
           items:
-            type: object
-            additionalProperties:
-              type: string
+            anyOf:
+              - type: object
+                additionalProperties:
+                  type: string
+              - type: string
           example:
             - <METRIC_TO_FETCH>: <NEW_METRIC_NAME>
+            - <METRIC_TO_FETCH>
       - name: prometheus_metrics_prefix
         description: Prefix for exposed Prometheus metrics.
         value:

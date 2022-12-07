@@ -23,13 +23,14 @@ instances:
     #
     namespace: <SERVICE_NAME>
 
-    ## @param metrics - list of mappings - required
+    ## @param metrics - (list of mapping or string) - required
     ## List of `<METRIC_TO_FETCH>: <NEW_METRIC_NAME>` for metrics to be fetched from the Prometheus endpoint.
     ## `<NEW_METRIC_NAME>` is optional. If set, it transforms the name in Datadog.
     ## This list should contain at least one metric.
     #
     metrics:
       - <METRIC_TO_FETCH>: <NEW_METRIC_NAME>
+      - <METRIC_TO_FETCH>
 
     ## @param prometheus_metrics_prefix - string - optional
     ## Prefix for exposed Prometheus metrics.

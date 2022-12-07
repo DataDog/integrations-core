@@ -9,7 +9,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Mapping, Optional, Sequence
+from typing import Any, Mapping, Optional, Sequence, Union
 
 from pydantic import BaseModel, root_validator, validator
 
@@ -44,7 +44,7 @@ class InstanceConfig(BaseModel):
     label_to_hostname: Optional[str]
     labels_mapper: Optional[Mapping[str, Any]]
     max_returned_metrics: Optional[int]
-    metrics: Sequence[Mapping[str, str]]
+    metrics: Sequence[Union[Mapping[str, str], str]]
     namespace: str
     prometheus_metrics_prefix: Optional[str]
     prometheus_timeout: Optional[int]
