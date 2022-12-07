@@ -53,34 +53,32 @@ class SonarqubeCheck(AgentCheck):
             self.collect_metrics_from_component(available_metrics, component, tag_name, should_collect_metric)
 
     def collect_components_discovery(self, available_metrics):
-        if self._components_discovery:
-            self.log.debug('components_discovery: %s', self._components_discovery)
-            available_components = self.discover_available_components()
-            self.log.debug('available_components: %s', available_components)
-            (discovery_limit, components_discovery) = self._components_discovery
-            collected_components = 0
-            for pattern, (should_collect_component, tag_name, should_collect_metric) in components_discovery.items():
-                self.log.debug('processing pattern `%s`', pattern)
-                for component in available_components:
-                    self.log.debug('processing component `%s`', component)
-                    if should_collect_component(component):
-                        self.collect_metrics_from_component(
-                            available_metrics, component, tag_name, should_collect_metric
-                        )
-                        collected_components += 1
-                        self.log.debug(
-                            'collected %d component%s', collected_components, '' if collected_components == 1 else 's'
-                        )
-                        if collected_components == discovery_limit:
-                            return
-                    else:
-                        self.log.debug(
-                            'component `%s` should not be collected '
-                            '(see `exclude` list in `components_discovery` key config)',
-                            component,
-                        )
-        else:
+        if not self._components_discovery:
             self.log.debug('components_discovery is None')
+            return
+        self.log.debug('components_discovery: %s', self._components_discovery)
+        available_components = self.discover_available_components()
+        self.log.debug('available_components: %s', available_components)
+        (discovery_limit, components_discovery) = self._components_discovery
+        collected_components = 0
+        for pattern, (should_collect_component, tag_name, should_collect_metric) in components_discovery.items():
+            self.log.debug('processing pattern `%s`', pattern)
+            for component in available_components:
+                self.log.debug('processing component `%s`', component)
+                if should_collect_component(component):
+                    self.collect_metrics_from_component(available_metrics, component, tag_name, should_collect_metric)
+                    collected_components += 1
+                    self.log.debug(
+                        'collected %d component%s', collected_components, '' if collected_components == 1 else 's'
+                    )
+                    if collected_components == discovery_limit:
+                        return
+                else:
+                    self.log.debug(
+                        'component `%s` should not be collected '
+                        '(see `exclude` list in `components_discovery` key config)',
+                        component,
+                    )
 
     def collect_metrics_from_component(self, available_metrics, component, tag_name, should_collect_metric):
         self.log.debug('collecting metrics from component `%s`', component)
@@ -199,43 +197,42 @@ class SonarqubeCheck(AgentCheck):
     def _parse_components_discovery(self):
         components_discovery = self.instance.get('components_discovery', None)
         self.log.debug('components_discovery: %s', components_discovery)
-        if components_discovery:
-            components_discovery_data = {}
-            exclude_component = self.create_matcher(
-                self.compile_component_patterns(components_discovery, 'exclude'),
+        if not components_discovery:
+            return
+        components_discovery_data = {}
+        exclude_component = self.create_matcher(
+            self.compile_component_patterns(components_discovery, 'exclude'),
+            default=False,
+        )
+        for pattern, config in components_discovery.get('include', {}).items():
+            self.log.debug('pattern: %s, config: %s', pattern, config)
+            if config is None:
+                config = {}
+            if not isinstance(config, dict):
+                raise ConfigurationError('Pattern `{}` must refer to a mapping'.format(pattern))
+            include_component = self.create_matcher(re.compile(pattern), default=True)
+            include_metric = self.create_matcher(
+                self.compile_metric_patterns(config, 'include') or self._default_include,
+                default=True,
+            )
+            exclude_metric = self.create_matcher(
+                self.compile_metric_patterns(config, 'exclude') or self._default_exclude,
                 default=False,
             )
-            for pattern, config in components_discovery.get('include', {}).items():
-                self.log.debug('pattern: %s, config: %s', pattern, config)
-                if config is None:
-                    config = {}
-                if not isinstance(config, dict):
-                    raise ConfigurationError('Pattern `{}` must refer to a mapping'.format(pattern))
-                include_component = self.create_matcher(re.compile(pattern), default=True)
-                include_metric = self.create_matcher(
-                    self.compile_metric_patterns(config, 'include') or self._default_include,
-                    default=True,
-                )
-                exclude_metric = self.create_matcher(
-                    self.compile_metric_patterns(config, 'exclude') or self._default_exclude,
-                    default=False,
-                )
-                tag_name = config.get('tag', self._default_tag)
-                if not isinstance(tag_name, str):
-                    raise ConfigurationError('The `tag` setting must be a string')
-                components_discovery_data[pattern] = (
-                    lambda _component, _include=include_component, _exclude=exclude_component: _include(_component)
-                    and not _exclude(_component),
-                    tag_name,
-                    lambda _metric, _include_metric=include_metric, _exclude_metric=exclude_metric: _include_metric(
-                        _metric
-                    )
-                    and not _exclude_metric(_metric),
-                )
-            self._components_discovery = (
-                components_discovery.get('limit', self._DEFAULT_COMPONENTS_DISCOVERY_LIMIT),
-                components_discovery_data,
+            tag_name = config.get('tag', self._default_tag)
+            if not isinstance(tag_name, str):
+                raise ConfigurationError('The `tag` setting must be a string')
+            components_discovery_data[pattern] = (
+                lambda _component, _include=include_component, _exclude=exclude_component: _include(_component)
+                and not _exclude(_component),
+                tag_name,
+                lambda _metric, _include_metric=include_metric, _exclude_metric=exclude_metric: _include_metric(_metric)
+                and not _exclude_metric(_metric),
             )
+        self._components_discovery = (
+            components_discovery.get('limit', self._DEFAULT_COMPONENTS_DISCOVERY_LIMIT),
+            components_discovery_data,
+        )
 
     @staticmethod
     def compile_metric_patterns(config, field):
