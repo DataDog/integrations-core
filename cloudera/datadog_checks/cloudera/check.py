@@ -28,8 +28,8 @@ class ClouderaCheck(AgentCheck, ConfigMixin):
         try:
             self.client = make_api_client(self, self.config)
         except Exception as e:
-            self.log.error("Cloudera API Client is none: %s", e)
-            self.service_check(CAN_CONNECT, AgentCheck.CRITICAL)
+            message = f"Cloudera API Client is none: {e}", e
+            self.service_check(CAN_CONNECT, AgentCheck.CRITICAL, message=message)
             raise
 
     def check(self, _):
@@ -37,5 +37,6 @@ class ClouderaCheck(AgentCheck, ConfigMixin):
             self.client.collect_data()
             self.service_check(CAN_CONNECT, AgentCheck.OK)
         except Exception as e:
-            self.log.error('Cloudera check raised an exception: %s', e)
-            self.service_check(CAN_CONNECT, AgentCheck.CRITICAL)
+            message = f'Cloudera check raised an exception: {e}'
+            self.service_check(CAN_CONNECT, AgentCheck.CRITICAL, message=message)
+            self.log.error(message)

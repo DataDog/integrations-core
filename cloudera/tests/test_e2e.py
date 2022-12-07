@@ -7,7 +7,6 @@ from datadog_checks.cloudera.metrics import METRICS
 @pytest.mark.e2e
 def test_e2e(dd_agent_check, instance):
     # Given
-    instance['api_url'] = "http://localhost:8080/api/v48"
     # When
     aggregator = dd_agent_check(instance)
     # Then

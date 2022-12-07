@@ -8,7 +8,7 @@ PORT = 7180
 INSTANCE = {
     'workload_username': '~',
     'workload_password': '~',
-    'api_url': '~',
+    'api_url': 'http://localhost:8080/api/v48/',
 }
 
 HERE = get_here()

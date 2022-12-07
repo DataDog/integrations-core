@@ -7,19 +7,17 @@ import pytest
 import six
 from cm_client.models.api_cluster import ApiCluster
 from cm_client.models.api_cluster_list import ApiClusterList
+from cm_client.models.api_cluster_ref import ApiClusterRef
 from cm_client.models.api_entity_tag import ApiEntityTag
 from cm_client.models.api_host import ApiHost
 from cm_client.models.api_host_list import ApiHostList
-from cm_client.models.api_time_series import ApiTimeSeries
-from cm_client.models.api_time_series_data import ApiTimeSeriesData
-from cm_client.models.api_time_series_metadata import ApiTimeSeriesMetadata
-from cm_client.models.api_time_series_response import ApiTimeSeriesResponse
-from cm_client.models.api_time_series_response_list import ApiTimeSeriesResponseList
 from cm_client.models.api_version_info import ApiVersionInfo
 from cm_client.rest import ApiException
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.cloudera.metrics import METRICS
+
+from .conftest import get_timeseries_resource
 
 pytestmark = [pytest.mark.unit]
 
@@ -39,6 +37,7 @@ def test_given_cloudera_check_when_get_version_exception_from_cloudera_client_th
     dd_run_check,
     cloudera_check,
     instance,
+    aggregator,
 ):
     with mock.patch(
         'cm_client.ClouderaManagerResourceApi.get_version',
@@ -51,12 +50,15 @@ def test_given_cloudera_check_when_get_version_exception_from_cloudera_client_th
         check = cloudera_check(instance)
         # When
         dd_run_check(check)
+        # Then
+        aggregator.assert_service_check('cloudera.can_connect', AgentCheck.CRITICAL)
 
 
 def test_given_cloudera_check_when_version_field_not_found_then_emits_critical_service(
     dd_run_check,
     cloudera_check,
     instance,
+    aggregator,
 ):
     with mock.patch('cm_client.ClouderaManagerResourceApi.get_version', return_value=ApiVersionInfo(),), pytest.raises(
         Exception,
@@ -66,13 +68,18 @@ def test_given_cloudera_check_when_version_field_not_found_then_emits_critical_s
         check = cloudera_check(instance)
         # When
         dd_run_check(check)
+        # Then
+        aggregator.assert_service_check(
+            'cloudera.can_connect',
+            AgentCheck.CRITICAL,
+            message='Cloudera API Client is none: Cloudera Manager Version is unsupported or unknown',
+        )
 
 
 def test_given_cloudera_check_when_not_supported_version_then_emits_critical_service(
     aggregator,
     dd_run_check,
     cloudera_check,
-    api_response,
     instance,
 ):
     with mock.patch(
@@ -87,7 +94,11 @@ def test_given_cloudera_check_when_not_supported_version_then_emits_critical_ser
         # When
         dd_run_check(check)
         # Then
-        aggregator.assert_service_check('cloudera.can_connect', AgentCheck.CRITICAL)
+        aggregator.assert_service_check(
+            'cloudera.can_connect',
+            AgentCheck.CRITICAL,
+            message='Cloudera API Client is none: Cloudera Manager Version is unsupported or unknown',
+        )
 
 
 def test_given_cloudera_check_when_supported_version_then_emits_ok_service(
@@ -117,28 +128,19 @@ def test_given_cloudera_check_when_supported_version_then_emits_ok_service(
         ),
     ), mock.patch(
         'cm_client.TimeSeriesResourceApi.query_time_series',
-        side_effect=[
-            ApiTimeSeriesResponseList(
-                items=[
-                    ApiTimeSeriesResponse(
-                        time_series=[
-                            ApiTimeSeries(
-                                data=[
-                                    ApiTimeSeriesData(value=49.7),
-                                ],
-                                metadata=ApiTimeSeriesMetadata(metric_name=metric, entity_name=category),
-                            )
-                            for metric in metrics
-                        ]
-                    ),
-                ],
-            )
-            for category, metrics in METRICS.items()
-        ],
+        side_effect=get_timeseries_resource(),
     ), mock.patch(
         'cm_client.ClustersResourceApi.list_hosts',
         return_value=ApiHostList(
-            items=[ApiHost(host_id='host_1')],
+            items=[
+                ApiHost(
+                    host_id='host_1',
+                    cluster_ref=ApiClusterRef(
+                        cluster_name="cluster_1",
+                        display_name="cluster_1",
+                    ),
+                )
+            ],
         ),
     ):
         # Given
@@ -153,7 +155,6 @@ def test_given_cloudera_check_when_v7_read_clusters_exception_from_cloudera_clie
     aggregator,
     dd_run_check,
     cloudera_check,
-    api_response,
     instance,
 ):
     with mock.patch(
@@ -168,7 +169,11 @@ def test_given_cloudera_check_when_v7_read_clusters_exception_from_cloudera_clie
         # When
         dd_run_check(check)
         # Then
-        aggregator.assert_service_check('cloudera.can_connect', AgentCheck.CRITICAL)
+        aggregator.assert_service_check(
+            'cloudera.can_connect',
+            AgentCheck.CRITICAL,
+            message="Cloudera check raised an exception: (Service not available)\nReason: None\n",
+        )
 
 
 def test_given_cloudera_check_when_bad_health_cluster_then_emits_cluster_health_critical(
@@ -198,28 +203,19 @@ def test_given_cloudera_check_when_bad_health_cluster_then_emits_cluster_health_
         ),
     ), mock.patch(
         'cm_client.TimeSeriesResourceApi.query_time_series',
-        side_effect=[
-            ApiTimeSeriesResponseList(
-                items=[
-                    ApiTimeSeriesResponse(
-                        time_series=[
-                            ApiTimeSeries(
-                                data=[
-                                    ApiTimeSeriesData(value=49.7),
-                                ],
-                                metadata=ApiTimeSeriesMetadata(metric_name=metric, entity_name=category),
-                            )
-                            for metric in metrics
-                        ]
-                    ),
-                ],
-            )
-            for category, metrics in METRICS.items()
-        ],
+        side_effect=get_timeseries_resource(),
     ), mock.patch(
         'cm_client.ClustersResourceApi.list_hosts',
         return_value=ApiHostList(
-            items=[ApiHost(host_id='host_1')],
+            items=[
+                ApiHost(
+                    host_id='host_1',
+                    cluster_ref=ApiClusterRef(
+                        cluster_name="cluster_1",
+                        display_name="cluster_1",
+                    ),
+                )
+            ],
         ),
     ):
         # Given
@@ -232,6 +228,8 @@ def test_given_cloudera_check_when_bad_health_cluster_then_emits_cluster_health_
             AgentCheck.CRITICAL,
             tags=['_cldr_cb_clustertype:Data Hub', '_cldr_cb_origin:cloudbreak', 'cloudera_cluster:cluster_1'],
         )
+
+        aggregator.assert_service_check('cloudera.can_connect', AgentCheck.OK)
 
 
 def test_given_cloudera_check_when_good_health_cluster_then_emits_cluster_health_ok(
@@ -261,28 +259,19 @@ def test_given_cloudera_check_when_good_health_cluster_then_emits_cluster_health
         ),
     ), mock.patch(
         'cm_client.TimeSeriesResourceApi.query_time_series',
-        side_effect=[
-            ApiTimeSeriesResponseList(
-                items=[
-                    ApiTimeSeriesResponse(
-                        time_series=[
-                            ApiTimeSeries(
-                                data=[
-                                    ApiTimeSeriesData(value=49.7),
-                                ],
-                                metadata=ApiTimeSeriesMetadata(metric_name=metric, entity_name=category),
-                            )
-                            for metric in metrics
-                        ]
-                    ),
-                ],
-            )
-            for category, metrics in METRICS.items()
-        ],
+        side_effect=get_timeseries_resource(),
     ), mock.patch(
         'cm_client.ClustersResourceApi.list_hosts',
         return_value=ApiHostList(
-            items=[ApiHost(host_id='host_1')],
+            items=[
+                ApiHost(
+                    host_id='host_1',
+                    cluster_ref=ApiClusterRef(
+                        cluster_name="cluster_1",
+                        display_name="cluster_1",
+                    ),
+                )
+            ],
         ),
     ):
         # Given
@@ -295,6 +284,8 @@ def test_given_cloudera_check_when_good_health_cluster_then_emits_cluster_health
             AgentCheck.OK,
             tags=['_cldr_cb_clustertype:Data Hub', '_cldr_cb_origin:cloudbreak', 'cloudera_cluster:cluster_1'],
         )
+
+        aggregator.assert_service_check('cloudera.can_connect', AgentCheck.OK)
 
 
 def test_given_cloudera_check_when_good_health_cluster_then_emits_cluster_metrics(
@@ -324,28 +315,19 @@ def test_given_cloudera_check_when_good_health_cluster_then_emits_cluster_metric
         ),
     ), mock.patch(
         'cm_client.TimeSeriesResourceApi.query_time_series',
-        side_effect=[
-            ApiTimeSeriesResponseList(
-                items=[
-                    ApiTimeSeriesResponse(
-                        time_series=[
-                            ApiTimeSeries(
-                                data=[
-                                    ApiTimeSeriesData(value=49.7),
-                                ],
-                                metadata=ApiTimeSeriesMetadata(metric_name=metric, entity_name=category),
-                            )
-                            for metric in metrics
-                        ]
-                    ),
-                ],
-            )
-            for category, metrics in METRICS.items()
-        ],
+        side_effect=get_timeseries_resource(),
     ), mock.patch(
         'cm_client.ClustersResourceApi.list_hosts',
         return_value=ApiHostList(
-            items=[ApiHost(host_id='host_1')],
+            items=[
+                ApiHost(
+                    host_id='host_1',
+                    cluster_ref=ApiClusterRef(
+                        cluster_name="cluster_1",
+                        display_name="cluster_1",
+                    ),
+                )
+            ],
         ),
     ):
         # Given
@@ -357,25 +339,10 @@ def test_given_cloudera_check_when_good_health_cluster_then_emits_cluster_metric
             for metric in metrics:
                 aggregator.assert_metric(f'cloudera.{category}.{metric}')
 
+        aggregator.assert_service_check('cloudera.can_connect', AgentCheck.OK)
 
-# def test_run_timeseries_checks(
-#     aggregator,
-#     dd_run_check,
-#     cloudera_check,
-# ):
-#     # Given
-#     instance = {
-#         'run_timeseries': True,
-#         'username': 'csso_shri.subramanian',
-#         'password': 'wyz*xbw7cej*mbh9VUW',
-#         'api_url': 'https://cod--qfdcinkqrzw-gateway.agent-in.jfha-h5rc.a0.cloudera.site/'
-#         'cod--qfdcinkqrzw/cdp-proxy-api/cm-api/v48',
-#     }
-#     check = cloudera_check(instance)
-#     # When
-#     dd_run_check(check)
-#     # Then
-#     for metric in TIMESERIES_QUERIES:
-#         metric_name = metric['metric_name']
-#         for category in metric['categories']:
-#             aggregator.assert_metric(f'cloudera.{category}.{metric_name}')
+        aggregator.assert_service_check(
+            'cloudera.cluster.health',
+            AgentCheck.OK,
+            tags=['_cldr_cb_clustertype:Data Hub', '_cldr_cb_origin:cloudbreak', 'cloudera_cluster:cluster_1'],
+        )

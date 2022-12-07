@@ -5,32 +5,22 @@ import json
 import os
 
 import pytest
+from cm_client.models.api_time_series import ApiTimeSeries
+from cm_client.models.api_time_series_data import ApiTimeSeriesData
+from cm_client.models.api_time_series_metadata import ApiTimeSeriesMetadata
+from cm_client.models.api_time_series_response import ApiTimeSeriesResponse
+from cm_client.models.api_time_series_response_list import ApiTimeSeriesResponseList
 
 from datadog_checks.cloudera import ClouderaCheck
+from datadog_checks.cloudera.metrics import TIMESERIES_METRICS
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs
 
 from . import common
 
-# from datadog_checks.dev.conditions import CheckDockerLogs
-
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    # FIXME: Commenting out v12 Cloudera Docker image until confirmation this version should be supported
-
-    # compose_file = os.path.join(common.HERE, 'compose', common.COMPOSE_FILE)
-    # conditions = [
-    #     CheckDockerLogs(
-    #         identifier='cloudera', patterns=['Success! You can now log into Cloudera Manager'], attempts=180, wait=5
-    #     ),
-    # ]
-    # with docker_run(
-    #     compose_file,
-    #     conditions=conditions,
-    # ):
-    #     yield common.INSTANCE
-
     compose_file = common.COMPOSE_FILE
     conditions = [
         CheckDockerLogs(identifier='cloudera', patterns=['server running']),
@@ -59,3 +49,24 @@ def api_response():
             return json.load(f)
 
     return _response
+
+
+def get_timeseries_resource():
+    return [
+        ApiTimeSeriesResponseList(
+            items=[
+                ApiTimeSeriesResponse(
+                    time_series=[
+                        ApiTimeSeries(
+                            data=[
+                                ApiTimeSeriesData(value=49.7),
+                            ],
+                            metadata=ApiTimeSeriesMetadata(entity_name=category, alias=metric),
+                        )
+                        for metric in metrics
+                    ]
+                ),
+            ],
+        )
+        for category, metrics in TIMESERIES_METRICS.items()
+    ]
