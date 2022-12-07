@@ -3,7 +3,7 @@ import cm_client
 from datadog_checks.base import AgentCheck
 from datadog_checks.cloudera.api_client import ApiClient
 from datadog_checks.cloudera.entity_status import ENTITY_STATUS
-from datadog_checks.cloudera.metrics import TIMESERIES_METRICS
+from datadog_checks.cloudera.metrics import NATIVE_METRICS, TIMESERIES_METRICS
 
 from .common import CLUSTER_HEALTH, HOST_HEALTH
 
@@ -59,6 +59,7 @@ class ApiClientV7(ApiClient):
             tags = self._collect_host_tags(host)
 
             if host.host_id:
+                self._collect_host_native_metrics(host, tags)
                 self._collect_host_metrics(host, tags)
                 self._collect_role_metrics(host, tags)
                 self._collect_disk_metrics(host, tags)
@@ -80,6 +81,10 @@ class ApiClientV7(ApiClient):
         host_entity_status = ENTITY_STATUS[host.entity_status] if host.entity_status else None
         self._log.debug('host_entity_status: %s', host_entity_status)
         self._check.service_check(HOST_HEALTH, host_entity_status, tags=tags)
+
+    def _collect_host_native_metrics(self, host, tags):
+        for metric in NATIVE_METRICS['host']:
+            self._check.gauge(f"host.{metric}", getattr(host, metric), tags)
 
     def _collect_host_metrics(self, host, tags):
         metric_names = ','.join(f'last({metric}) AS {metric}' for metric in TIMESERIES_METRICS['host'])

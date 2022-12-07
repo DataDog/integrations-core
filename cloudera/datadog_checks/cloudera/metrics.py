@@ -51,6 +51,21 @@ TIMESERIES_METRICS = {
     ],
 }
 
-NATIVE_METRICS = {}
+NATIVE_METRICS = {
+    'host': [
+        'num_cores',
+        'num_physical_cores',
+        'total_phys_mem_bytes',
+    ]
+}
 
-METRICS = {**NATIVE_METRICS, **TIMESERIES_METRICS}
+
+def merge_dicts(dict_1, dict_2):
+    dict_3 = {**dict_1, **dict_2}
+    for key, values in dict_1.items():
+        for value in values:
+            dict_3[key].append(value)
+    return dict_3
+
+
+METRICS = merge_dicts(NATIVE_METRICS, TIMESERIES_METRICS)
