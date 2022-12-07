@@ -64,6 +64,8 @@ matrix.version.env-vars = [
   { key = "SQLSERVER_IMAGE_TAG", value = "2019-CU11-ubuntu-16.04", if = ["2019"], platform = ["linux"] },
   { key = "SQLSERVER_BASE_IMAGE", value = "datadog/docker-library:sqlserver_{matrix:version}", platform = ["windows"] },
 ]
-matrix.driver.env-vars = "WINDOWS_SQLSERVER_DRIVER"
+matrix.driver.env-vars = [
+  { key = "WINDOWS_SQLSERVER_DRIVER", if = ["SQLOLEDB", "SQLNCLI11", "MSOLEDBSQL", "odbc"], platform = ["windows"] },
+]
 name.linux-odbc-2019-high-cardinality.env-vars = "COMPOSE_FOLDER=compose-high-cardinality"
 name.windows-odbc-2019-high-cardinality.env-vars = "COMPOSE_FOLDER=compose-high-cardinality-windows"
