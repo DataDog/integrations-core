@@ -105,6 +105,7 @@ def validate_readme(integration, repo, display_queue, files_failed, readme_count
 
     for header in ("Overview", "Setup"):
         validate_header(h2s, header, files_failed, readme_path, display_queue, soup)
+        validate_no_images
 
     if repo == 'marketplace':
         for header in ("Support", "Uninstallation"):
@@ -143,11 +144,20 @@ def validate_header(h2s, header, files_failed, readme_path, display_queue, soup)
         files_failed[readme_path] = True
         display_queue.append((echo_failure, f"     readme is missing a {header} H2 (##) section"))
     else:
-        setup_header = soup.find('h2', text=header)
-        setup_instructions = setup_header.find_next()
-        if setup_instructions.name == "h2":
+        curr_header = soup.find('h2', text=header)
+        curr_instructions = curr_header.find_next()
+        if curr_instructions.name == "h2":
             files_failed[readme_path] = True
             display_queue.append((echo_failure, f"     readme has an empty {header} H2 (##) section"))
+
+def validate_no_images(header, soup):
+    curr_header = soup.find('h2',text=header)
+    rest=curr_header.find_next_siblings()
+    print("hello world")
+    print(rest)
+
+    
+
 
 def get_ascii_enforcement_error_lines(contents):
     errors_lines = []
