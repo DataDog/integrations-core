@@ -1,6 +1,6 @@
 # CHANGELOG - etcd
 
-## 3.3.0 / 2022-09-16
+## 3.3.0 / 2022-09-16 / Agent 7.40.0
 
 * [Added] Update HTTP config spec templates. See [#12890](https://github.com/DataDog/integrations-core/pull/12890).
 * [Added] Add missing etcd metrics. See [#12715](https://github.com/DataDog/integrations-core/pull/12715).

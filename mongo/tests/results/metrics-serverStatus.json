@@ -608,6 +608,30 @@
         ]
     },
     {
+        "name": "mongodb.oplatencies.reads.latency",
+        "type": 0,
+        "value": 2874788.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test"
+        ]
+    },
+    {
+        "name": "mongodb.oplatencies.writes.latency",
+        "type": 0,
+        "value": 193160.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test"
+        ]
+    },
+    {
+        "name": "mongodb.oplatencies.commands.latency",
+        "type": 0,
+        "value": 67574004.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test"
+        ]
+    },
+    {
         "name": "mongodb.opcounters.commandps",
         "type": 1,
         "value": 7882.0,

@@ -1,6 +1,6 @@
 # CHANGELOG - consul
 
-## 2.2.0 / 2022-09-16
+## 2.2.0 / 2022-09-16 / Agent 7.40.0
 
 * [Added] Update HTTP config spec templates. See [#12890](https://github.com/DataDog/integrations-core/pull/12890).
 * [Added] Add tag consul_node to consul service check consul.check from ConsulCheck.Node. See [#12675](https://github.com/DataDog/integrations-core/pull/12675). Thanks [hjkatz](https://github.com/hjkatz).

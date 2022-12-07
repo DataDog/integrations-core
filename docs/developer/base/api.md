@@ -31,10 +31,13 @@
         - assert_metric_has_tag_prefix
         - assert_service_check
         - assert_event
+        - assert_histogram_bucket
+        - assert_metrics_using_metadata
         - assert_all_metrics_covered
         - assert_no_duplicate_metrics
         - assert_no_duplicate_service_checks
-        - assert_no_duplicate_all reset
+        - assert_no_duplicate_all
+        - all_metrics_asserted
         - reset
 
 ::: datadog_checks.base.stubs.datadog_agent.DatadogAgentStub

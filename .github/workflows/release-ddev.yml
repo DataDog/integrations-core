@@ -34,4 +34,4 @@ jobs:
       run: ddev release upload -s ddev
       env:
         TWINE_USERNAME: __token__
-        TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN_DEV }}
+        TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN_DDEV }}

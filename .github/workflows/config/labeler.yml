@@ -2,10 +2,13 @@ base_package:
 - datadog_checks_base/**/*
 changelog/no-changelog:
 - requirements-agent-release.txt
-- datadog_checks_dev/datadog_checks/dev/__about__.py
-- all: ['*/!(datadog_checks)/**']
-- all: ['*/!(pyproject.toml)']
-- all: ['*(!ddev)/**']
+- '*/__about__.py'
+- all:
+  - '*/!(datadog_checks)/**'
+- all:
+  - '*/!(pyproject.toml)'
+- all:
+  - '*/(!ddev)/**'
 ddev:
 - ddev/**/*
 dependencies:
@@ -55,6 +58,8 @@ integration/apache:
 - apache/**/*
 integration/arangodb:
 - arangodb/**/*
+integration/argocd:
+- argocd/**/*
 integration/aspdotnet:
 - aspdotnet/**/*
 integration/avi_vantage:
@@ -433,4 +438,4 @@ integration/zk:
 - zk/**/*
 release:
 - requirements-agent-release.txt
-- datadog_checks_dev/datadog_checks/dev/__about__.py
+- '*/__about__.py'

@@ -5,7 +5,7 @@
 * [Added] Update downloader to use v5 root layout. See [#13174](https://github.com/DataDog/integrations-core/pull/13174).
 * [Fixed] Fix setup.py keywords in datadog-checks-downloader. See [#12951](https://github.com/DataDog/integrations-core/pull/12951). Thanks [fridex](https://github.com/fridex).
 
-## 3.9.0 / 2022-09-16
+## 3.9.0 / 2022-09-16 / Agent 7.40.0
 
 * [Added] Add `packaging` to dependencies. See [#12753](https://github.com/DataDog/integrations-core/pull/12753).
 * [Fixed] Use packaging instead of pkg_resources for parsing version. See [#12560](https://github.com/DataDog/integrations-core/pull/12560). Thanks [fridex](https://github.com/fridex).

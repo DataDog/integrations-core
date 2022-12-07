@@ -1,5 +1,9 @@
 # CHANGELOG - mongo
 
+## 4.1.0 / 2022-11-17
+
+* [Added] Added new opLatencies metrics with correct type. See [#13336](https://github.com/DataDog/integrations-core/pull/13336).
+
 ## 4.0.4 / 2022-10-28
 
 * [Fixed] Update dependencies. See [#13207](https://github.com/DataDog/integrations-core/pull/13207).

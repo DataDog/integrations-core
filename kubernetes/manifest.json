@@ -62,6 +62,12 @@
       "[kubernetes] Monitor Kubernetes Failed Pods in Namespaces": "assets/monitors/monitor_pods_failed_state.json",
       "[kubernetes] Monitor Kubernetes Pods Restarting": "assets/monitors/monitor_pods_restarting.json",
       "[kubernetes] Monitor Kubernetes Statefulset Replicas": "assets/monitors/monitor_statefulset_replicas.json"
+    },
+    "saved_views": {
+      "non_ok_pods": "assets/saved_views/non_ok_pods.json",
+      "non_ready_nodes": "assets/saved_views/non_ready_nodes.json",
+      "unavailable_replicas_deployments": "assets/saved_views/unavailable_replicas_deployments.json",
+      "unbound_volumes": "assets/saved_views/unbound_volumes.json"
     }
   }
 }

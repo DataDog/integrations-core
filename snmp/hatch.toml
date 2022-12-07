@@ -1,0 +1,24 @@
+[env.collectors.datadog-checks]
+check-types = true
+mypy-args = [
+    "--py2",
+    "--disallow-untyped-defs",
+    "--follow-imports silent",
+    "--install-types",
+    "--non-interactive",
+    "datadog_checks/snmp",
+]
+
+[[envs.default.matrix]]
+python = ["27"]
+snmplistener = ["false"]
+
+[[envs.default.matrix]]
+python = ["38"]
+snmplistener = ["false", "true"]
+
+[envs.default.overrides]
+matrix.snmplistener.env-vars = "SNMP_LISTENER_ENV"
+
+[envs.default.env-vars]
+DDEV_SKIP_GENERIC_TAGS_CHECK = "true"

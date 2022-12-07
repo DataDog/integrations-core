@@ -586,7 +586,7 @@
           {
             "id": 7487114663198344,
             "definition": {
-              "title": "Deadlocks per database",
+              "title": "Deadlocks count",
               "title_size": "16",
               "title_align": "left",
               "show_legend": false,
@@ -603,14 +603,14 @@
                 {
                   "formulas": [
                     {
-                      "formula": "query1",
-                      "alias": "Deadlocks"
+                      "alias": "Deadlocks",
+                      "formula": "query1"
                     }
                   ],
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "sum:postgresql.deadlocks{$scope}",
+                      "query": "max:postgresql.deadlocks.count{$scope} by {db}.as_count()",
                       "data_source": "metrics",
                       "name": "query1"
                     }
@@ -622,9 +622,9 @@
                 }
               ],
               "yaxis": {
+                "include_zero": true,
                 "scale": "linear",
                 "label": "",
-                "include_zero": true,
                 "min": "auto",
                 "max": "auto"
               },

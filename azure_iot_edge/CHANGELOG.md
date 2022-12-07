@@ -1,6 +1,6 @@
 # CHANGELOG - Azure IoT Edge
 
-## 3.3.0 / 2022-09-16
+## 3.3.0 / 2022-09-16 / Agent 7.40.0
 
 * [Added] Update HTTP config spec templates. See [#12890](https://github.com/DataDog/integrations-core/pull/12890).
 

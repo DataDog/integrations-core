@@ -9,7 +9,7 @@
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
     "description": "Send Windows events to your Datadog event stream.",
-    "title": "Win 32 event log",
+    "title": "Win32 Event Log",
     "media": [],
     "classifier_tags": [
       "Supported OS::Windows",

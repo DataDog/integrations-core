@@ -4,7 +4,8 @@
 from __future__ import division
 
 from copy import deepcopy
-from distutils.version import LooseVersion
+
+from packaging.version import Version
 
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.mongo.api import MongoApi
@@ -95,10 +96,10 @@ class MongoDb(AgentCheck):
             potential_collectors.append(JumboStatsCollector(self, tags))
         if 'top' in self._config.additional_metrics:
             potential_collectors.append(TopCollector(self, tags))
-        if LooseVersion(self._mongo_version) >= LooseVersion("3.6"):
+        if Version(self._mongo_version) >= Version("3.6"):
             potential_collectors.append(SessionStatsCollector(self, tags))
         if self._config.collections_indexes_stats:
-            if LooseVersion(self._mongo_version) >= LooseVersion("3.2"):
+            if Version(self._mongo_version) >= Version("3.2"):
                 potential_collectors.append(
                     IndexStatsCollector(self, self._config.db_name, tags, self._config.coll_names)
                 )

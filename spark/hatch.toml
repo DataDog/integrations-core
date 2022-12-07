@@ -1,0 +1,19 @@
+[env.collectors.datadog-checks]
+
+[envs.default]
+dependencies = [
+  "datadog_checks_tests_helper @ {root:uri}/../datadog_checks_tests_helper",
+]
+
+[[envs.default.matrix]]
+python = ["27", "38"]
+version = ["2.4", "3.0"]
+
+[envs.default.overrides]
+matrix.version.env-vars = [
+  { key = "SPARK_IMAGE", value = "2.4.0-hadoop2.7", if = ["2.4"] },
+  { key = "SPARK_IMAGE", value = "3.0.1-hadoop3.2", if = ["3.0"] },
+]
+
+[envs.default.env-vars]
+DDEV_SKIP_GENERIC_TAGS_CHECK = "true"

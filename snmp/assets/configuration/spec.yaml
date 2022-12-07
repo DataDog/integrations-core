@@ -139,6 +139,8 @@ files:
           type: boolean
           example: true
       - template: init_config/default
+        overrides:
+          service.hidden: true
     - template: instances
       options:
       - name: ip_address
@@ -402,3 +404,5 @@ files:
           type: boolean
           example: true
       - template: instances/default
+        overrides:
+          service.hidden: true

@@ -15,14 +15,14 @@ if TYPE_CHECKING:
 @click.pass_obj
 def status(app: Application):
     """Show information about the current environment."""
-    app.display_always(f'Repo: {app.repo.name} @ {app.repo.path}')
-    app.display_always(f'Branch: {app.repo.git.current_branch}')
-    app.display_always(f'Org: {app.config.org.name}')
+    app.display(f'Repo: {app.repo.name} @ {app.repo.path}')
+    app.display(f'Branch: {app.repo.git.current_branch}')
+    app.display(f'Org: {app.config.org.name}')
 
     if changed_integrations := [i.name for i in app.repo.integrations.iter_changed()]:
         import shutil
         import textwrap
 
-        app.display_always(
+        app.display(
             textwrap.shorten(f'Changed: {", ".join(changed_integrations)}', width=shutil.get_terminal_size().columns)
         )

@@ -8,7 +8,7 @@
 
 * [Fixed] Fix missing latency metrics from other namespaces. See [#12944](https://github.com/DataDog/integrations-core/pull/12944).
 
-## 1.17.0 / 2022-09-16
+## 1.17.0 / 2022-09-16 / Agent 7.40.0
 
 * [Added] Update HTTP config spec templates. See [#12890](https://github.com/DataDog/integrations-core/pull/12890).
 * [Fixed] Bump dependencies for 7.40. See [#12896](https://github.com/DataDog/integrations-core/pull/12896).

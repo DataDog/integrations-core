@@ -2,7 +2,7 @@ version: '3.5'
 
 services:
   squid:
-    image: "datadog/squid:${SQUID_VERSION}"
+    image: "ubuntu/squid:${SQUID_VERSION}"
     ports:
       - "3128:3128"
     volumes:

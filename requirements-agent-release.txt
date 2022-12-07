@@ -7,6 +7,7 @@ datadog-amazon-msk==3.2.1
 datadog-ambari==3.2.0; sys_platform != 'win32'
 datadog-apache==4.2.0
 datadog-arangodb==1.3.0
+datadog-argocd==1.0.0
 datadog-aspdotnet==1.12.0; sys_platform == 'win32'
 datadog-avi-vantage==3.2.0
 datadog-azure-iot-edge==3.3.0
@@ -18,7 +19,7 @@ datadog-cassandra-nodetool==1.11.0
 datadog-cassandra==1.16.0
 datadog-ceph==2.7.0; sys_platform != 'win32'
 datadog-cert-manager==3.0.0
-datadog-checks-base==27.4.2
+datadog-checks-base==27.5.0
 datadog-checks-dependency-provider==1.3.0
 datadog-checks-downloader==3.10.0
 datadog-cilium==2.3.0
@@ -50,8 +51,8 @@ datadog-flink==1.4.0
 datadog-fluentd==2.2.0
 datadog-foundationdb==1.2.0
 datadog-gearmand==2.3.0; sys_platform != 'win32'
-datadog-gitlab-runner==3.3.0
-datadog-gitlab==5.3.0
+datadog-gitlab-runner==3.3.1
+datadog-gitlab==5.3.1
 datadog-glusterfs==1.5.0; sys_platform == 'linux2'
 datadog-go-expvar==2.2.0
 datadog-gunicorn==2.3.1; sys_platform != 'win32'
@@ -76,17 +77,17 @@ datadog-impala==1.0.1
 datadog-istio==4.3.0
 datadog-jboss-wildfly==2.0.1
 datadog-journald==1.1.0
-datadog-kafka-consumer==2.16.1
+datadog-kafka-consumer==2.16.2
 datadog-kafka==2.13.0
 datadog-kong==2.2.0
 datadog-kube-apiserver-metrics==3.3.0
 datadog-kube-controller-manager==4.3.0
-datadog-kube-dns==3.3.0
+datadog-kube-dns==3.3.1
 datadog-kube-metrics-server==2.3.0
 datadog-kube-proxy==5.3.0
 datadog-kube-scheduler==4.5.0
 datadog-kubelet==7.5.1
-datadog-kubernetes-state==7.4.0
+datadog-kubernetes-state==7.4.1
 datadog-kyototycoon==2.2.0
 datadog-lighttpd==3.2.0
 datadog-linkerd==3.3.0
@@ -98,7 +99,7 @@ datadog-marklogic==3.2.0
 datadog-mcache==3.3.0; sys_platform != 'win32'
 datadog-mesos-master==3.1.0; sys_platform != 'win32'
 datadog-mesos-slave==3.1.0; sys_platform != 'win32'
-datadog-mongo==4.0.4
+datadog-mongo==4.1.0
 datadog-mysql==9.0.0
 datadog-nagios==1.11.0
 datadog-network==2.9.2
@@ -133,11 +134,11 @@ datadog-sidekiq==1.3.0
 datadog-silk==1.2.0
 datadog-singlestore==1.3.1
 datadog-snmp==5.10.0
-datadog-snowflake==4.4.4
+datadog-snowflake==4.4.5
 datadog-solr==1.11.1
 datadog-sonarqube==2.1.0
 datadog-spark==3.1.2
-datadog-sqlserver==10.0.0
+datadog-sqlserver==10.0.1
 datadog-squid==2.2.0
 datadog-ssh-check==2.3.2
 datadog-statsd==1.10.0
@@ -145,7 +146,7 @@ datadog-supervisord==2.3.0
 datadog-system-core==1.14.0
 datadog-system-swap==1.14.1
 datadog-tcp-check==4.6.0
-datadog-teamcity==2.2.0
+datadog-teamcity==3.0.0
 datadog-tenable==1.4.0
 datadog-teradata==1.1.0; sys_platform != 'darwin'
 datadog-tls==2.9.0

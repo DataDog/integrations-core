@@ -1,11 +1,15 @@
 # CHANGELOG - kafka_consumer
 
+## 2.16.2 / 2022-11-22
+
+* [Fixed] Disable socket wakeup when sending requests. See [#13221](https://github.com/DataDog/integrations-core/pull/13221).
+
 ## 2.16.1 / 2022-10-28
 
 * [Fixed] Update dependencies. See [#13205](https://github.com/DataDog/integrations-core/pull/13205).
 * [Fixed] Fix sensitive client_secret config specification. See [#12983](https://github.com/DataDog/integrations-core/pull/12983).
 
-## 2.16.0 / 2022-09-16
+## 2.16.0 / 2022-09-16 / Agent 7.40.0
 
 * [Added] Put lag in seconds behind a feature flag. See [#12942](https://github.com/DataDog/integrations-core/pull/12942).
 * [Fixed] Bump dependencies for 7.40. See [#12896](https://github.com/DataDog/integrations-core/pull/12896).

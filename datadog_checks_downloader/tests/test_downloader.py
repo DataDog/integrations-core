@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import glob
 import logging
 import os
 import random
@@ -64,58 +63,6 @@ EXCLUDED_INTEGRATION_VERSION = [
 ]
 
 
-@pytest.fixture(autouse=True)
-def _clear_cache():
-    """Clear the downloader's cache to make sure it does not affect test results."""
-    # current
-    metadata_current_dir = os.path.join(
-        os.path.dirname(datadog_checks.downloader.__file__),
-        "data",
-        "repo",
-        "metadata",
-        "current",
-    )
-    for file in os.listdir(metadata_current_dir):
-        if file == "root.json" or file.startswith("."):
-            continue
-
-        file_path = os.path.join(metadata_current_dir, file)
-
-        if not os.path.isfile(file_path):
-            # Skip any nested dirs.
-            continue
-
-        os.remove(file_path)
-
-    # previous
-    metadata_previous_dir = os.path.join(
-        os.path.dirname(datadog_checks.downloader.__file__),
-        "data",
-        "repo",
-        "metadata",
-        "previous",
-    )
-    for file in os.listdir(metadata_previous_dir):
-        if file.startswith("."):
-            continue
-
-        file_path = os.path.join(metadata_previous_dir, file)
-
-        if not os.path.isfile(file_path):
-            # Skip any nested dirs.
-            continue
-
-        os.remove(file_path)
-
-    # targets
-    targets_dir = os.path.join(os.path.dirname(datadog_checks.downloader.__file__), "data", "repo", "targets")
-    for item in os.listdir(targets_dir):
-        if item.startswith("."):
-            continue
-
-        shutil.rmtree(os.path.join(targets_dir, item))
-
-
 def _do_run_downloader(argv):
     """Run the Datadog checks downloader."""
     old_sys_argv = sys.argv
@@ -128,7 +75,7 @@ def _do_run_downloader(argv):
 
 
 @pytest.mark.online
-def test_download(capfd, distribution_name, distribution_version):
+def test_download(capfd, distribution_name, distribution_version, temporary_local_repo):
     """Test datadog-checks-downloader successfully downloads and validates a wheel file."""
     argv = [distribution_name, "--version", distribution_version]
 
@@ -140,15 +87,10 @@ def test_download(capfd, distribution_name, distribution_version):
     output = [line for line in stdout.splitlines() if line]
     assert len(output) == 1, "Only one output line expected, got {}:\n\t{}".format(len(output), stdout)
 
-    # XXX: could be extended to be less error-prone.
-    delimiter = "datadog_checks_downloader/datadog_checks/downloader/data/repo/targets/simple/{}/{}-{}".format(
-        distribution_name, distribution_name.replace("-", "_"), distribution_version
+    expected_output = r"{}/repo/targets/simple/{}/{}-{}-.*?\.whl".format(
+        temporary_local_repo, distribution_name, distribution_name.replace("-", "_"), distribution_version
     )
-
-    parts = output[0].split(delimiter)
-
-    assert len(parts) == 2, "Unable to find expected substring {} in {}".format(delimiter, output[0])
-    assert parts[1].endswith(".whl"), "No wheel extension found in {}".format(parts[1])
+    assert re.match(expected_output, output[0]), "Expected '{}' to match '{}'".format(output[0], expected_output)
 
 
 @pytest.mark.online
@@ -184,16 +126,15 @@ def test_non_datadog_distribution():
         (
             "datadog-active-directory",
             "1.10.0",
-            "datadog_checks_downloader/datadog_checks/downloader/data/repo/targets/"
             "simple/datadog-active-directory/datadog_active_directory-1.10.0-py2.py3-none-any.whl",
         ),
     ],
 )
 @pytest.mark.skipif(PY2, reason="tuf builds for Python 2 do not provide required information in exception")
 @mock.patch("time.time", mock.MagicMock(return_value=_LOCAL_TESTS_DATA_TIMESTAMP))
-@pytest.mark.skip(reason="currently failing since offline metadata was generated with v9 ceremony but currently on v10")
-def test_local_download(capfd, distribution_name, distribution_version, target):
+def test_local_download(capfd, distribution_name, distribution_version, target, monkeypatch):
     """Test local verification of a wheel file."""
+
     with local_http_server("{}-{}".format(distribution_name, distribution_version)) as http_url:
         argv = [
             distribution_name,
@@ -212,7 +153,6 @@ def test_local_download(capfd, distribution_name, distribution_version, target):
 
 
 @pytest.mark.local_dir
-@pytest.mark.skip(reason="currently failing since offline metadata was generated with v9 ceremony but currently on v10")
 def test_local_dir_download(capfd, local_dir, distribution_name, distribution_version):
     """Test local verification of a wheel file."""
     if local_dir is None:
@@ -244,7 +184,6 @@ def test_local_dir_download(capfd, local_dir, distribution_name, distribution_ve
         ("datadog-active-directory", "1.10.0"),
     ],
 )
-@pytest.mark.skip(reason="currently failing since offline metadata was generated with v9 ceremony but currently on v10")
 @pytest.mark.skipif(PY2, reason="tuf builds for Python 2 do not provide required information in exception")
 def test_local_expired_metadata_error(distribution_name, distribution_version):
     """Test expiration of metadata raises an exception."""
@@ -269,7 +208,6 @@ def test_local_expired_metadata_error(distribution_name, distribution_version):
 
 
 @pytest.mark.offline
-@pytest.mark.skip(reason="currently failing since offline metadata was generated with v9 ceremony but currently on v10")
 @pytest.mark.skipif(PY2, reason="tuf builds for Python 2 do not provide required information in exception")
 def test_local_unreachable_repository():
     """Test unreachable repository raises an exception."""
@@ -296,7 +234,6 @@ def test_local_unreachable_repository():
     ],
 )
 @pytest.mark.skipif(PY2, reason="tuf builds for Python 2 do not provide required information in exception")
-@pytest.mark.skip(reason="currently failing since offline metadata was generated with v9 ceremony but currently on v10")
 @mock.patch("time.time", mock.MagicMock(return_value=_LOCAL_TESTS_DATA_TIMESTAMP))
 def test_local_wheels_signer_signature_leaf_error(distribution_name, distribution_version):
     """Test failure in verifying wheels-signer signature.
@@ -324,30 +261,22 @@ def delete_files(files):
         os.remove(f)
 
 
-def _cleanup():
-    REPO_DIR = "datadog_checks/downloader/data/repo/"
+@pytest.fixture
+def restore_repo_state(tmp_path):
+    """
+    Backs up the state of the data folder to restore it after the test.
 
-    METADATA_DIR = os.path.join(REPO_DIR, "metadata")
-    TARGETS_DIR = os.path.join(REPO_DIR, "targets")
-    IN_TOTO_METADATA_DIR = os.path.join(TARGETS_DIR, "in-toto-metadata")
-    IN_TOTO_PUBKEYS_DIR = os.path.join(TARGETS_DIR, "in-toto-pubkeys")
-    SIMPLE_DIR = os.path.join(TARGETS_DIR, "simple")
+    This is needed for tests that invoke the downloader from a subprocess.
+    """
+    # PY2's os.path prefers strings
+    tmp_path = str(tmp_path)
 
-    # First, nuke all known targets. but not the directory for targets itself.
-    shutil.rmtree(IN_TOTO_METADATA_DIR, ignore_errors=True)
-    shutil.rmtree(IN_TOTO_PUBKEYS_DIR, ignore_errors=True)
-    shutil.rmtree(SIMPLE_DIR, ignore_errors=True)
-
-    # Then, nuke all previous TUF metadata.
-    previous_jsons = os.path.join(METADATA_DIR, "previous/*.json")
-    previous_jsons = glob.glob(previous_jsons)
-    delete_files(previous_jsons)
-
-    # Finally, nuke ALL current TUF metadata EXCEPT the unversioned root metadata.
-    current_jsons = os.path.join(METADATA_DIR, "current/*.json")
-    current_jsons = glob.glob(current_jsons)
-    current_jsons = [c for c in current_jsons if os.path.basename(c) != "root.json"]
-    delete_files(current_jsons)
+    src_dir = os.path.join(os.path.dirname(datadog_checks.downloader.__file__), 'data')
+    dst_dir = os.path.join(tmp_path, 'data')
+    shutil.copytree(src_dir, dst_dir)
+    yield
+    shutil.rmtree(src_dir)
+    shutil.copytree(dst_dir, src_dir)
 
 
 @retry(wait=wait_exponential(min=2, max=60), stop=stop_after_attempt(10))
@@ -432,6 +361,7 @@ def get_all_integrations_metadata():
 
 
 @pytest.mark.online
+@pytest.mark.usefixtures("restore_repo_state")
 def test_downloader():
     integrations_metadata = get_all_integrations_metadata()
     # Download the global simple index, which contains all known package names.
@@ -457,8 +387,6 @@ def test_downloader():
             integrations_to_test.append((match.group(1), version, root_layout_type))
 
     sample = random.sample(integrations_to_test, _TEST_DOWNLOADER_SAMPLE_SIZE)
-    try:
-        for integration_name, integration_version, root_layout_type in sample:
-            _do_download(integration_name, integration_version, root_layout_type)
-    finally:
-        _cleanup()
+
+    for integration_name, integration_version, root_layout_type in sample:
+        _do_download(integration_name, integration_version, root_layout_type)

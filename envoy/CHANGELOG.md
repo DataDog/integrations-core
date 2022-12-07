@@ -1,6 +1,6 @@
 # CHANGELOG - Envoy
 
-## 2.4.0 / 2022-09-16
+## 2.4.0 / 2022-09-16 / Agent 7.40.0
 
 * [Added] Update HTTP config spec templates. See [#12890](https://github.com/DataDog/integrations-core/pull/12890).
 * [Added] [Envoy] Support `envoy.cluster.outlier_detection.*` in OpenMetrics V2. See [#11860](https://github.com/DataDog/integrations-core/pull/11860).

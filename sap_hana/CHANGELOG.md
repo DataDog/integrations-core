@@ -1,6 +1,6 @@
 # CHANGELOG - SAP HANA
 
-## 2.2.1 / 2022-09-16
+## 2.2.1 / 2022-09-16 / Agent 7.40.0
 
 * [Fixed] Change docker image / Do not emit message on OK service check. See [#12826](https://github.com/DataDog/integrations-core/pull/12826).
 

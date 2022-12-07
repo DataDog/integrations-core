@@ -1,5 +1,13 @@
 # CHANGELOG - datadog_checks_base
 
+## 27.5.0 / 2022-12-06
+
+* [Added] Implement multi-instance counters without Windows PdhEnumObjects API. See [#13243](https://github.com/DataDog/integrations-core/pull/13243).
+* [Fixed] Do not install psycopg2-binary on arm macs. See [#13343](https://github.com/DataDog/integrations-core/pull/13343).
+* [Fixed] Update Snowflake connector and cryptography dependencies. See [#13367](https://github.com/DataDog/integrations-core/pull/13367).
+* [Fixed] Remove `default_backend` parameter from cryptography calls. See [#13333](https://github.com/DataDog/integrations-core/pull/13333).
+* [Fixed] Update protobuf. See [#13262](https://github.com/DataDog/integrations-core/pull/13262).
+
 ## 27.4.2 / 2022-10-28
 
 * [Fixed] Update dependencies. See [#13205](https://github.com/DataDog/integrations-core/pull/13205) and [#13207](https://github.com/DataDog/integrations-core/pull/13207).
@@ -12,7 +20,7 @@
 
 * [Added] Add utility to handle concurrent evaluation of conditions. See [#13053](https://github.com/DataDog/integrations-core/pull/13053).
 
-## 27.3.1 / 2022-10-12
+## 27.3.1 / 2022-10-12 / Agent 7.40.0
 
 * [Fixed] Prevent fork bomb when defining the experimental process_isolation option globally in the init_config section. See [#13094](https://github.com/DataDog/integrations-core/pull/13094).
 
