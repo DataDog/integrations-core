@@ -126,9 +126,9 @@
   "pods": [
    {
     "podRef": {
-     "name": "dd-agent-ntepl",
-     "namespace": "datadog",
-     "uid": "12ceeaa9-33ca-11e6-ac8f-42010af00003"
+     "name": "fluentd-gcp-v2.0.10-9q9t4",
+     "namespace": "kube-system",
+     "uid": "2edfd4d9-10ce-11e8-bd5a-42010af00137"
     },
     "startTime": "2019-11-19T10:43:16Z",
     "containers": [
@@ -1333,9 +1333,9 @@
    },
    {
     "podRef": {
-     "name": "demo-app-success-c485bc67b-klj45",
-     "namespace": "lenaic",
-     "uid": "24d6daa3-10d8-11e8-bd5a-42010af00137"
+     "name": "datadog-agent-ntepl",
+     "namespace": "default",
+     "uid": "c2319815-10d0-11e8-bd5a-42010af00137"
     },
     "startTime": "2019-11-20T13:10:17Z",
     "containers": [

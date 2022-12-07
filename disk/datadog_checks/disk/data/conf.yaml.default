@@ -35,11 +35,11 @@ init_config:
     #
     # service: <SERVICE>
 
-## Every instance is scheduled independent of the others.
+## Every instance is scheduled independently of the others.
 #
 instances:
 
-    ## @param use_mount - boolean - required
+    ## @param use_mount - boolean - optional - default: false
     ## If enabled, metrics are tagged using mount points (for example `device:/`) instead of volumes
     ## (for example `device:/dev/disk1s5`).
     #
@@ -79,6 +79,17 @@ instances:
     ## This is useful for cluster-level checks.
     #
     # empty_default_hostname: false
+
+    ## @param metric_patterns - mapping - optional
+    ## A mapping of metrics to include or exclude, with each entry being a regular expression.
+    ##
+    ## Metrics defined in `exclude` will take precedence in case of overlap.
+    #
+    # metric_patterns:
+    #   include:
+    #   - <INCLUDE_REGEX>
+    #   exclude:
+    #   - <EXCLUDE_REGEX>
 
     ## @param file_system_include - list of strings - optional
     ## Instruct the check to only collect from matching file systems.
@@ -185,10 +196,17 @@ instances:
 
     ## @param blkid_cache_file - string - optional
     ## Instruct the check to read the labels from the blkid cache file instead of `blkid` executable.
-    ## This parameter is used only if `tag_by_label` is true.
+    ## This parameter is used only if `tag_by_label` is true. It is incompatible with `use_lsblk`.
     ## Works on Linux only.
     #
     # blkid_cache_file: /run/blkid/blkid.tab
+
+    ## @param use_lsblk - boolean - optional - default: false
+    ## Instruct the check to read the labels from the `lsblk` executable instead of `blkid` executable.
+    ## This parameter is used only if `tag_by_label` is true. It is incompatible with `blkid_cache_file`.
+    ## Works on Linux only.
+    #
+    # use_lsblk: false
 
     ## @param device_tag_re - mapping - optional
     ## Instruct the check to apply additional tags to matching

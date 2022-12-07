@@ -13,7 +13,7 @@ from . import common
 pytestmark = pytest.mark.unit
 
 
-def test_datacenter_metrics(aggregator):
+def test_datacenter_metrics(aggregator, dd_run_check):
     check = AerospikeCheck('aerospike', {}, [common.INSTANCE])
     original_get_info = check.get_info
 
@@ -27,11 +27,14 @@ def test_datacenter_metrics(aggregator):
 
     check.get_info = mock_get_info
     check._client = mock.MagicMock()
+    check._client.get_node_names = mock.MagicMock(
+        side_effect=lambda: [{'address': common.HOST, 'port': common.PORT, 'node_name': 'test'}]
+    )
     check.get_namespaces = mock.MagicMock()
     check.collect_info = mock.MagicMock()
     check.collect_throughput = mock.MagicMock()
     check.collect_latency = mock.MagicMock()
-    check.check(None)
+    dd_run_check(check)
     for metric in common.DATACENTER_METRICS:
         aggregator.assert_metric(metric)
 
@@ -94,25 +97,50 @@ def test_connection_uses_tls():
         assert client.called_with({'host': check._host, 'tls': tls_config})
 
 
-def test_collect_latency_parser(aggregator):
+@pytest.mark.parametrize(
+    "return_vals",
+    [
+        pytest.param(
+            [
+                'error-no-data-yet-or-back-too-small',
+                'batch-index:11:53:47-GMT,ops/sec,>1ms,>8ms,>64ms',
+                '11:53:57,0.0,0.00,0.00,0.00',
+                '{ns-1}-read:11:53:47-GMT,ops/sec,>1ms,>8ms,>64ms',
+                '11:53:57,0.0,0.00,0.00,0.00',
+                '{ns-1}-write:11:53:47-GMT,ops/sec,>1ms,>8ms,>64ms',
+                '11:53:57,0.0,0.00,0.00,0.00',
+                'BAD_LINE',
+                '{ns-2_foo}-read:11:53:47-GMT,ops/sec,>1ms,>8ms,>64ms',
+                '11:53:57,0.0,0.00,0.00,0.00',
+                '{ns-2_foo}-write:11:53:47-GMT,ops/sec,>1ms,>8ms,>64ms',
+                '11:53:57,0.0,0.00,0.00,0.00',
+                'error-no-data-yet-or-back-too-small',
+                'error-no-data-yet-or-back-too-small',
+            ],
+            id="Last value no data",
+        ),
+        pytest.param(
+            [
+                'error-no-data-yet-or-back-too-small',
+                'batch-index:11:53:47-GMT,ops/sec,>1ms,>8ms,>64ms',
+                '11:53:57,0.0,0.00,0.00,0.00',
+                '{ns-1}-read:11:53:47-GMT,ops/sec,>1ms,>8ms,>64ms',
+                '11:53:57,0.0,0.00,0.00,0.00',
+                'BAD_LINE',
+                '{ns-1}-write:11:53:47-GMT,ops/sec,>1ms,>8ms,>64ms',
+                '11:53:57,0.0,0.00,0.00,0.00',
+                '{ns-2_foo}-read:11:53:47-GMT,ops/sec,>1ms,>8ms,>64ms',
+                '11:53:57,0.0,0.00,0.00,0.00',
+                '{ns-2_foo}-write:11:53:47-GMT,ops/sec,>1ms,>8ms,>64ms',
+                '11:53:57,0.0,0.00,0.00,0.00',
+            ],
+            id="Last value has data",
+        ),
+    ],
+)
+def test_collect_latency_parser(aggregator, return_vals):
     check = AerospikeCheck('aerospike', {}, [common.INSTANCE])
-    check.get_info = mock.MagicMock(
-        return_value=[
-            'error-no-data-yet-or-back-too-small',
-            'batch-index:11:53:47-GMT,ops/sec,>1ms,>8ms,>64ms',
-            '11:53:57,0.0,0.00,0.00,0.00',
-            '{ns-1}-read:11:53:47-GMT,ops/sec,>1ms,>8ms,>64ms',
-            '11:53:57,0.0,0.00,0.00,0.00',
-            '{ns-1}-write:11:53:47-GMT,ops/sec,>1ms,>8ms,>64ms',
-            '11:53:57,0.0,0.00,0.00,0.00',
-            '{ns-2_foo}-read:11:53:47-GMT,ops/sec,>1ms,>8ms,>64ms',
-            '11:53:57,0.0,0.00,0.00,0.00',
-            '{ns-2_foo}-write:11:53:47-GMT,ops/sec,>1ms,>8ms,>64ms',
-            '11:53:57,0.0,0.00,0.00,0.00',
-            'error-no-data-yet-or-back-too-small',
-            'error-no-data-yet-or-back-too-small',
-        ]
-    )
+    check.get_info = mock.MagicMock(return_value=return_vals)
     check.collect_latency(None)
 
     for ns in ['ns-1', 'ns-2_foo']:
@@ -121,7 +149,6 @@ def test_collect_latency_parser(aggregator):
                 aggregator.assert_metric(metric, tags=['tag:value'])
             else:
                 aggregator.assert_metric(metric, tags=['namespace:{}'.format(ns), 'tag:value'])
-
     aggregator.assert_all_metrics_covered()
 
 
@@ -144,6 +171,9 @@ def test_collect_latency_invalid_data(aggregator):
         'xxxread:11:53:47-GMT,ops/sec,>1ms,>8ms,>64ms',
     )
 
+    for metric in (m for m in common.LAZY_METRICS if "write" in m):
+        aggregator.assert_metric(metric, tags=['namespace:ns-2', 'tag:value'])
+
     aggregator.assert_all_metrics_covered()  # no metric
 
 
@@ -151,27 +181,56 @@ def test_collect_empty_data(aggregator):
     check = AerospikeCheck('aerospike', {}, [common.INSTANCE])
 
     check._client = mock.MagicMock()
-    check._client.info_node.return_value = 'sets/test/ci	'  # from real data, there is a tab after the command
+    check._client.info_single_node.return_value = 'sets/test/ci	'  # from real data, there is a tab after the command
     check.log = mock.MagicMock()
     assert [] == check.get_info('sets/test/ci')
 
 
-def test_collect_latencies_parser(aggregator):
+@pytest.mark.parametrize(
+    "return_vals",
+    [
+        pytest.param(
+            [
+                'batch-index:',
+                '{test}-read:msec,1.5,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,'
+                '0.00',
+                '{test}-write:',
+                '{test}-pi-query:msec,1.5,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,'
+                '0.00,0.00',
+                '{test}-si-query:',
+                'BAD_LINE',
+                '{test}-udf:msec,1.7,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,'
+                '0.00',
+                '{test}-query:',
+            ],
+            id="Last value empty data",
+        ),
+        pytest.param(
+            [
+                'batch-index:',
+                '{test}-read:msec,1.5,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,'
+                '0.00',
+                '{test}-write:',
+                '{test}-pi-query:msec,1.5,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,'
+                '0.00,0.00',
+                '{test}-si-query:',
+                'bad-line',
+                '{test}-udf:msec,1.7,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,'
+                '0.00',
+            ],
+            id="Last value has data",
+        ),
+    ],
+)
+def test_collect_latencies_parser(aggregator, return_vals):
     check = AerospikeCheck('aerospike', {}, [common.INSTANCE])
-    check.get_info = mock.MagicMock(
-        return_value=[
-            'batch-index:',
-            '{test}-read:msec,1.5,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00',
-            '{test}-write:',
-            '{test}-udf:msec,1.7,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00',
-            '{test}-query:',
-        ]
-    )
+    check.get_info = mock.MagicMock(return_value=return_vals)
+
     check.collect_latencies(None)
 
-    for metric_type in ['read', 'udf']:
+    for metric_type in ['read', 'udf', 'pi_query']:
         for i in range(17):
-            bucket = 2 ** i
+            bucket = 2**i
             aggregator.assert_metric(
                 'aerospike.namespace.latency.{}'.format(metric_type),
                 tags=['namespace:{}'.format('test'), 'tag:value', 'bucket:{}'.format(str(bucket))],

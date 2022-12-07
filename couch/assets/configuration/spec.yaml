@@ -30,7 +30,6 @@ files:
         example:
           - <DATABASE_1>
           - <DATABASE_2>
-        display_default: all
     - name: db_exclude
       description: |
         The `db_exclude` should contain the names of any databases meant to be excluded
@@ -43,7 +42,6 @@ files:
         example:
           - <DATABASE_1>
           - <DATABASE_2>
-        display_default: null
     - name: max_dbs_per_check
       description: Number of databases to scan per check.
       value:

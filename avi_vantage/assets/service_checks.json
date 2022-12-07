@@ -1,0 +1,16 @@
+[
+    {
+        "agent_version": "7.31.0",
+        "integration": "Avi Vantage",
+        "groups": [
+            "host"
+        ],
+        "check": "avi_vantage.can_connect",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "name": "Can Connect",
+        "description": "Returns `CRITICAL` if the Agent is unable to connect to the monitored Avi Vantage instance. Returns `OK` otherwise."
+    }
+]

@@ -9,25 +9,25 @@ It creates and maintains structured, indexed journals based on logging informati
 
 ### Installation
 
-The journald check is included in the [Datadog Agent][2] package.
+The journald check is included in the [Datadog Agent][1] package.
 No additional installation is needed on your server.
 
 ### Configuration
 
-Journal files are, by default, owned and readable by the systemd-journal system group. To start collecting your journal logs, you need to:
+Journal files, by default, are owned and readable by the systemd-journal system group. To start collecting your journal logs, you need to:
 
-1. [Install the Agent][3] on the instance running the journal.
+1. [Install the Agent][2] on the instance running the journal.
 2. Add the `dd-agent` user to the `systemd-journal` group by running:
     ```text
      usermod -a -G systemd-journal dd-agent
     ```
 
-{{< tabs >}}
-{{% tab "Host" %}}
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
 
 To configure this check for an Agent running on a host:
 
-Edit the `journald.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][4] to start collecting logs.
+Edit the `journald.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3] to start collecting logs.
 
 #### Log collection
 
@@ -49,25 +49,25 @@ To fill `source` and `service` attributes, the Agent collects `SYSLOG_IDENTIFIER
 
 **Note**: With Agent 7.17+, if `container_mode` is set to `true`, the default behavior changes for logs coming from Docker containers. The `source` attribute of your logs is automatically set to the corresponding short image name of the container instead of simply `docker`.
 
-[Restart the Agent][2].
+[Restart the Agent][1].
 
 
-{{% /tab %}}
-{{% tab "Containerized" %}}
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
 
-For containerized environments, see the [Autodiscovery Integration Templates][5] for guidance on applying the parameters below.
+For containerized environments, see the [Autodiscovery Integration Templates][4] for guidance on applying the parameters below.
 
 #### Log collection
 
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][6].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][5].
 
 | Parameter      | Value                                                  |
 | -------------- | ------------------------------------------------------ |
 | `<LOG_CONFIG>` | `{"source": "journald", "service": "<YOUR_APP_NAME>"}` |
 
-{{% /tab %}}
-{{< /tabs >}}
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 
 #### Advanced features
@@ -109,7 +109,7 @@ This works automatically when the Agent is running from the host. If you are usi
 
 ### Validation
 
-Run the Agent's [status subcommand][7] and look for `journald` under the Logs Agent section.
+Run the Agent's [status subcommand][6] and look for `journald` under the Logs Agent section.
 
 ## Data Collected
 
@@ -127,12 +127,12 @@ journald does not include any events.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][1].
+Need help? Contact [Datadog support][7].
 
-[1]: https://docs.datadoghq.com/help/
-[2]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[3]: https://app.datadoghq.com/account/settings#agent
-[4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
-[5]: https://docs.datadoghq.com/agent/kubernetes/integrations/
-[6]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=containerinstallation#setup
-[7]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[1]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[2]: https://app.datadoghq.com/account/settings#agent
+[3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
+[4]: https://docs.datadoghq.com/agent/kubernetes/integrations/
+[5]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=containerinstallation#setup
+[6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[7]: https://docs.datadoghq.com/help/

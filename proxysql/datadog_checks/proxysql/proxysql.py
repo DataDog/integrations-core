@@ -12,6 +12,7 @@ from datadog_checks.base.utils.db import QueryManager
 from .queries import (
     STATS_COMMAND_COUNTERS,
     STATS_MEMORY_METRICS,
+    STATS_MYSQL_BACKENDS,
     STATS_MYSQL_CONNECTION_POOL,
     STATS_MYSQL_GLOBAL,
     STATS_MYSQL_QUERY_RULES,
@@ -25,6 +26,7 @@ ADDITIONAL_METRICS_MAPPING = {
     'connection_pool_metrics': STATS_MYSQL_CONNECTION_POOL,
     'users_metrics': STATS_MYSQL_USERS,
     'memory_metrics': STATS_MEMORY_METRICS,
+    'backends_metrics': STATS_MYSQL_BACKENDS,
     'query_rules_metrics': STATS_MYSQL_QUERY_RULES,
 }
 

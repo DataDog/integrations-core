@@ -1,38 +1,53 @@
 {
-  "categories": [
-    "aws",
-    "containers",
-    "orchestration"
-  ],
-  "creates_events": false,
-  "display_name": "Amazon Fargate",
-  "guid": "7484e55c-99ec-45ad-92f8-28e798796411",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "ecs.",
-  "metric_to_check": "ecs.fargate.cpu.user",
-  "name": "ecs_fargate",
-  "public_title": "Datadog-Amazon Fargate Integration",
-  "short_description": "Track metrics for containers running with ECS Fargate",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "type": "check",
-  "integration_id": "aws-fargate",
+  "manifest_version": "2.0.0",
+  "app_uuid": "4c298061-c7d2-4ce6-ab3e-5378039de65a",
+  "app_id": "aws-fargate",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Track metrics for containers running with ECS Fargate",
+    "title": "Amazon ECS on AWS Fargate",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::AWS",
+      "Category::Containers",
+      "Category::Log Collection",
+      "Category::Orchestration"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "Amazon Fargate",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "ecs.",
+        "check": "ecs.fargate.cpu.user",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
     },
-    "monitors": {},
     "dashboards": {
       "Amazon Fargate": "assets/dashboards/amazon_fargate_overview.json"
-    },
-    "service_checks": "assets/service_checks.json",
-    "logs": {},
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

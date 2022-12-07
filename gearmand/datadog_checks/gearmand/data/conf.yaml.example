@@ -9,19 +9,20 @@ init_config:
     #
     # service: <SERVICE>
 
-## Every instance is scheduled independent of the others.
+## Every instance is scheduled independently of the others.
 #
 instances:
 
-    ## @param server - string - required
+  -
+    ## @param server - string - optional - default: 127.0.0.1
     ## Server to connect to.
     #
-  - server: localhost
+    # server: 127.0.0.1
 
-    ## @param port - integer - required
+    ## @param port - integer - optional - default: 4730
     ## Port to use when connecting to "server".
     #
-    port: 4730
+    # port: 4730
 
     ## @param tasks - list of strings - optional
     ## Use the `tasks` parameter to specify the tasks you'd like to
@@ -62,14 +63,25 @@ instances:
     #
     # empty_default_hostname: false
 
+    ## @param metric_patterns - mapping - optional
+    ## A mapping of metrics to include or exclude, with each entry being a regular expression.
+    ##
+    ## Metrics defined in `exclude` will take precedence in case of overlap.
+    #
+    # metric_patterns:
+    #   include:
+    #   - <INCLUDE_REGEX>
+    #   exclude:
+    #   - <EXCLUDE_REGEX>
+
 ## Log Section
 ##
-## type - required - Type of log input source (tcp / udp / file / windows_event)
+## type - required - Type of log input source (tcp / udp / file / windows_event).
 ## port / path / channel_path - required - Set port if type is tcp or udp.
 ##                                         Set path if type is file.
 ##                                         Set channel_path if type is windows_event.
-## source  - required - Attribute that defines which Integration sent the logs.
-## encoding - optional - For file specifies the file encoding, default is utf-8, other
+## source  - required - Attribute that defines which integration sent the logs.
+## encoding - optional - For file specifies the file encoding. Default is utf-8. Other
 ##                       possible values are utf-16-le and utf-16-be.
 ## service - optional - The name of the service that generates the log.
 ##                      Overrides any `service` defined in the `init_config` section.

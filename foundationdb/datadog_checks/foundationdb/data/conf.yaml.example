@@ -1,0 +1,98 @@
+## All options defined here are available to all instances.
+#
+init_config:
+
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Additionally, this sets the default `service` for every log source.
+    #
+    # service: <SERVICE>
+
+## Every instance is scheduled independently of the others.
+#
+instances:
+
+  -
+    ## @param cluster_file - string - optional - default: /var/lib/foundationdb/fdb.cluster
+    ## A path to the cluster file specifing connection to the FoundationDB.
+    ## If the check does not pass, it will rely on the binding library to find
+    ## the file using standard locations (e.g. `/etc/foundationdb/fdb.cluster` or
+    ## `/etc/foundationdb/fdb.cluster`).
+    #
+    # cluster_file: /var/lib/foundationdb/fdb.cluster
+
+    ## @param tls_certificate_file - string - optional
+    ## Path to the file from which the local certificates can be loaded
+    #
+    # tls_certificate_file: <TLS_CERTIFICATE_FILE>
+
+    ## @param tls_key_file - string - optional
+    ## Path to the file from which to load the private key
+    #
+    # tls_key_file: <TLS_KEY_FILE>
+
+    ## @param tls_verify_peers - string - optional
+    ## The byte-string for the verification of peer certificates and sessions
+    #
+    # tls_verify_peers: <TLS_VERIFY_PEERS>
+
+    ## @param tls_password - string - optional
+    ## The byte-string representing the passcode for unencrypting the private key
+    #
+    # tls_password: <TLS_PASSWORD>
+
+    ## @param tls_ca_file - string - optional
+    ## Path to the file containing the CA certificates to trust
+    #
+    # tls_ca_file: <TLS_CA_FILE>
+
+    ## @param custom_queries - list of mappings - optional
+    ## Define custom queries to collect custom metrics from your FoundationDB
+    #
+    # custom_queries:
+    #   - metric_prefix: foundationdb
+    #     query_key: <QUERY_NAME>
+    #     query_type: <QUERY_TYPE>
+    #     tags:
+    #     - <TAG_KEY>:<TAG_VALUE>
+
+    ## @param tags - list of strings - optional
+    ## A list of tags to attach to every metric and service check emitted by this instance.
+    ##
+    ## Learn more about tagging at https://docs.datadoghq.com/tagging
+    #
+    # tags:
+    #   - <KEY_1>:<VALUE_1>
+    #   - <KEY_2>:<VALUE_2>
+
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Overrides any `service` defined in the `init_config` section.
+    #
+    # service: <SERVICE>
+
+    ## @param min_collection_interval - number - optional - default: 15
+    ## This changes the collection interval of the check. For more information, see:
+    ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
+    #
+    # min_collection_interval: 15
+
+    ## @param empty_default_hostname - boolean - optional - default: false
+    ## This forces the check to send metrics with no hostname.
+    ##
+    ## This is useful for cluster-level checks.
+    #
+    # empty_default_hostname: false
+
+    ## @param metric_patterns - mapping - optional
+    ## A mapping of metrics to include or exclude, with each entry being a regular expression.
+    ##
+    ## Metrics defined in `exclude` will take precedence in case of overlap.
+    #
+    # metric_patterns:
+    #   include:
+    #   - <INCLUDE_REGEX>
+    #   exclude:
+    #   - <EXCLUDE_REGEX>

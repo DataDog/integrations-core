@@ -14,6 +14,8 @@ def parse_commit(commit):
     title = commit.title
     url = commit.url
     next_tag = None
+    category = None
+    regression = ''
 
     pull_request = commit.pull_request
 
@@ -23,11 +25,23 @@ def parse_commit(commit):
             teams = ['agent-integrations']
         title = pull_request.title
         url = pull_request.url
+        category = [label.rpartition('/')[-1] for label in pull_request.labels if label.startswith('category')]
+        category = category[0] if category else ''
+        if any(label == 'bugfix/regression' for label in pull_request.labels):
+            regression = 'yes'
 
     if commit.included_in_tag:
         next_tag = commit.included_in_tag.name
 
-    return {'sha': commit.sha, 'title': title, 'url': url, 'teams': ' & '.join(teams), 'next_tag': next_tag}
+    return {
+        'sha': commit.sha,
+        'title': title,
+        'url': url,
+        'teams': ' & '.join(teams),
+        'next_tag': next_tag,
+        'category': category,
+        'regression': str(regression),
+    }
 
 
 def export_changes_as_csv(changes, filename):
@@ -43,10 +57,12 @@ def export_changes_as_csv(changes, filename):
                 'What RC was it included in?',
                 'Short description',
                 'Severity',
-                'Was this a bug or something else?',
+                'Category',
+                'Regression'
                 'What could we have done differently or what could we do differently to find this bug earlier',
             ]
         )
+
         for change in changes:
             writer.writerow(
                 [
@@ -55,7 +71,8 @@ def export_changes_as_csv(changes, filename):
                     change['next_tag'].split('-')[-1] if '-' in change['next_tag'] else change['next_tag'],
                     change['title'],
                     '',
-                    '',
+                    change['category'],
+                    change['regression'],
                     '',
                 ]
             )

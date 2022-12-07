@@ -1,3 +1,3 @@
-metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-tcp_queue.read_buffer_max_usage_pct,gauge,,percent,,Maximum usage of read buffer in percent across all open connections,0,tcp_queue_length,rbuf_used_pct
-tcp_queue.write_buffer_max_usage_pct,gauge,,percent,,Maximum usage of write buffer in percent across all open connections,0,tcp_queue_length,wbuf_used_pct
+metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
+tcp_queue.read_buffer_max_usage_pct,gauge,,percent,,Maximum usage of read buffer in percent across all open connections,0,tcp_queue_length,rbuf_used_pct,
+tcp_queue.write_buffer_max_usage_pct,gauge,,percent,,Maximum usage of write buffer in percent across all open connections,0,tcp_queue_length,wbuf_used_pct,

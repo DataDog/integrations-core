@@ -1,40 +1,55 @@
 {
-  "display_name": "Hive",
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "name": "hive",
-  "metric_prefix": "hive.",
-  "metric_to_check": "hive.server.memory.total.used",
-  "creates_events": false,
-  "short_description": "Gathers various JMX metrics from HiveServer2 and Hive MetaStore",
-  "guid": "3faee302-f293-45de-9eb8-ba6b7fa052a3",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "public_title": "Datadog-Hive Integration",
-  "categories": [
-    "web",
-    "log collection",
-    "autodiscovery"
-  ],
-  "type": "check",
-  "is_public": true,
-  "integration_id": "hive",
+  "manifest_version": "2.0.0",
+  "app_uuid": "827ff57e-83db-45b4-8a59-2f0270d389e8",
+  "app_id": "hive",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gathers various JMX metrics from HiveServer2 and Hive MetaStore",
+    "title": "Hive",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Web",
+      "Category::Log Collection",
+      "Category::Autodiscovery"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "Hive",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "hive.",
+        "check": "hive.server.memory.total.used",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
     },
-    "monitors": {},
     "dashboards": {
       "Hive Overview": "assets/dashboards/overview.json"
     },
-    "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "hive"
-    },
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

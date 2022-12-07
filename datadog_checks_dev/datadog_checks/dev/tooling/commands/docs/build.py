@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import subprocess
+import sys
 
 import click
 
@@ -16,7 +17,7 @@ from .utils import insert_verbosity_flag
 @click.option('--pdf', is_flag=True, help='Also export the site as PDF')
 def build(verbose, pdf):
     """Build documentation."""
-    command = ['tox', '-e', 'docs', '--', 'build', '--clean', '--strict']
+    command = [sys.executable, '-m', 'tox', '-e', 'docs', '--', 'build', '--clean', '--strict']
     insert_verbosity_flag(command, verbose)
 
     env_vars = {'ENABLE_PDF_SITE_EXPORT': '1' if pdf else '0'}

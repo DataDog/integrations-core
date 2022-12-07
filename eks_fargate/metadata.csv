@@ -1,4 +1,4 @@
-metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-eks.fargate.cpu.capacity,gauge,,,,CPU capacity of pod,0,eks_fargate,cpu capacity
-eks.fargate.memory.capacity,gauge,,byte,,Memory capacity of pod,0,eks_fargate,memory capacity
-eks.fargate.pods.running,gauge,,,,Heartbeat of a pod running an Amazon Fargate workload on AWS EKS,0,eks_fargate,pods running
+metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
+eks.fargate.cpu.capacity,gauge,,,,CPU capacity of pod,0,eks_fargate,cpu capacity,
+eks.fargate.memory.capacity,gauge,,byte,,Memory capacity of pod,0,eks_fargate,memory capacity,
+eks.fargate.pods.running,gauge,,,,Heartbeat of a pod running an Amazon Fargate workload on AWS EKS,0,eks_fargate,pods running,

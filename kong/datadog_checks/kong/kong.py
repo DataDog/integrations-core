@@ -5,7 +5,7 @@ import simplejson as json
 from six import PY2
 from six.moves.urllib.parse import urlparse
 
-from datadog_checks.base import AgentCheck
+from datadog_checks.base import AgentCheck, ConfigurationError
 
 
 class Kong(AgentCheck):
@@ -22,7 +22,13 @@ class Kong(AgentCheck):
     def __new__(cls, name, init_config, instances):
         instance = instances[0]
 
-        if not PY2 and 'openmetrics_endpoint' in instance:
+        if 'openmetrics_endpoint' in instance:
+            if PY2:
+                raise ConfigurationError(
+                    "This version of the integration is only available when using py3. "
+                    "Check https://docs.datadoghq.com/agent/guide/agent-v6-python-3 "
+                    "for more information or use the older style config."
+                )
             # TODO: when we drop Python 2 move this import up top
             from .check import KongCheck
 
@@ -30,8 +36,8 @@ class Kong(AgentCheck):
         else:
             return super(Kong, cls).__new__(cls)
 
-    def check(self, instance):
-        metrics = self._fetch_data(instance)
+    def check(self, _):
+        metrics = self._fetch_data()
         for row in metrics:
             try:
                 name, value, tags = row
@@ -39,11 +45,11 @@ class Kong(AgentCheck):
             except Exception:
                 self.log.error(u'Could not submit metric: %s', row)
 
-    def _fetch_data(self, instance):
-        if 'kong_status_url' not in instance:
+    def _fetch_data(self):
+        if 'kong_status_url' not in self.instance:
             raise Exception('missing "kong_status_url" value')
-        tags = instance.get('tags', [])
-        url = instance.get('kong_status_url')
+        tags = self.instance.get('tags', [])
+        url = self.instance.get('kong_status_url')
 
         parsed_url = urlparse(url)
         host = parsed_url.hostname
@@ -73,15 +79,9 @@ class Kong(AgentCheck):
         parsed = json.loads(raw)
         output = []
 
-        # First get the server stats
+        # Get the server stats
         for name, value in parsed.get('server').items():
             metric_name = self.METRIC_PREFIX + name
             output.append((metric_name, value, tags))
-
-        # Then the database metrics
-        databases_metrics = parsed.get('database').items()
-        output.append((self.METRIC_PREFIX + 'table.count', len(databases_metrics), tags))
-        for name, items in databases_metrics:
-            output.append((self.METRIC_PREFIX + 'table.items', items, tags + ['table:{}'.format(name)]))
 
         return output

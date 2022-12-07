@@ -38,7 +38,7 @@ To configure this check for an Agent running on a host:
 
 #### Containerized
 
-For containerized environments, see the [Autodiscovery Integration Templates][10] for guidance on applying the parameters below.
+For containerized environments, see the [Autodiscovery Integration Templates][5] for guidance on applying the parameters below.
 
 | Parameter            | Value                                 |
 | -------------------- | ------------------------------------- |
@@ -73,13 +73,13 @@ For containerized environments, see the [Autodiscovery Integration Templates][10
 
 ### Validation
 
-[Run the Agent's `status` subcommand][5] and look for `statsd` under the Checks section.
+Run the [Agent's status subcommand][6] and look for `statsd` under the Checks section.
 
 ## Data Collected
 
 ### Metrics
 
-See [metadata.csv][6] for a list of metrics provided by this integration.
+See [metadata.csv][7] for a list of metrics provided by this integration.
 
 ### Events
 
@@ -87,29 +87,28 @@ The StatsD check does not include any events.
 
 ### Service Checks
 
-**statsd.is_up**:<br>
-Returns `CRITICAL` if the StatsD server does not respond to the Agent's health status request, otherwise `OK`.
-
-**statsd.can_connect**:<br>
-Returns `CRITICAL` if the Agent cannot collect metrics about StatsD, otherwise `OK`.
+See [service_checks.json][8] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][7].
+Need help? Contact [Datadog support][9].
 
 ## Further Reading
 
-If you don't know what StatsD is and how does it work, check out [our blog post about it][8]
+Additional helpful documentation, links, and articles:
 
-To get a better idea of how (or why) to visualize StatsD metrics with Counts Graphing with Datadog, check out our [series of blog posts][9] about it.
+- [StatsD, what it is and how it can help you][10]
+- [Visualize StatsD metrics with Counts Graphing][11]
+
 
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [3]: https://github.com/DataDog/integrations-core/blob/master/statsd/datadog_checks/statsd/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[5]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[6]: https://github.com/DataDog/integrations-core/blob/master/statsd/metadata.csv
-[7]: https://docs.datadoghq.com/help/
-[8]: https://www.datadoghq.com/blog/statsd
-[9]: https://www.datadoghq.com/blog/visualize-statsd-metrics-counts-graphing
-[10]: https://docs.datadoghq.com/agent/kubernetes/integrations/
+[5]: https://docs.datadoghq.com/agent/kubernetes/integrations/
+[6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[7]: https://github.com/DataDog/integrations-core/blob/master/statsd/metadata.csv
+[8]: https://github.com/DataDog/integrations-core/blob/master/statsd/assets/service_checks.json
+[9]: https://docs.datadoghq.com/help/
+[10]: https://www.datadoghq.com/blog/statsd
+[11]: https://www.datadoghq.com/blog/visualize-statsd-metrics-counts-graphing

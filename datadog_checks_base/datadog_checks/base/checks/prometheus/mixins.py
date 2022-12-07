@@ -140,7 +140,7 @@ class PrometheusScraperMixin(object):
         # overloaded/hardcoded in the final check not to be counted as custom metric.
         self.type_overrides = {}
 
-        # Some metrics are retrieved from differents hosts and often
+        # Some metrics are retrieved from different hosts and often
         # a label can hold this information, this transfers it to the hostname
         self.label_to_hostname = None
 
@@ -747,5 +747,5 @@ class PrometheusScraperMixin(object):
         return not (isnan(val) or isinf(val))
 
     def set_prometheus_timeout(self, instance, default_value=10):
-        """ extract `prometheus_timeout` directly from the instance configuration """
+        """extract `prometheus_timeout` directly from the instance configuration"""
         self.prometheus_timeout = instance.get('prometheus_timeout', default_value)

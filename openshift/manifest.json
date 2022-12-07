@@ -1,33 +1,48 @@
 {
-  "categories": [
-    "containers",
-    "orchestration"
-  ],
-  "creates_events": false,
-  "display_name": "OpenShift",
-  "guid": "ea7f642f-263f-4ed1-8da0-9bb96c7df1f0",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "openshift.",
-  "metric_to_check": [
-    "openshift.clusterquota.cpu.requests.used",
-    "openshift.clusterquota.cpu.used"
-  ],
-  "name": "openshift",
-  "public_title": "Datadog-OpenShift Integration",
-  "short_description": "The Kubernetes platform for big ideas",
-  "support": "core",
-  "supported_os": [
-    "linux"
-  ],
-  "type": "check",
-  "integration_id": "openshift",
+  "manifest_version": "2.0.0",
+  "app_uuid": "e92e309f-7bdc-4ff4-91d4-975497526325",
+  "app_id": "openshift",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "The Kubernetes platform for big ideas",
+    "title": "OpenShift",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Category::Containers",
+      "Category::Orchestration",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "monitors": {},
-    "dashboards": {},
-    "service_checks": "assets/service_checks.json",
-    "logs": {},
-    "metrics_metadata": "metadata.csv"
+    "integration": {
+      "source_type_name": "OpenShift",
+      "configuration": {},
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "openshift.",
+        "check": [
+          "openshift.clusterquota.cpu.requests.used",
+          "openshift.clusterquota.cpu.used"
+        ],
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    }
   }
 }

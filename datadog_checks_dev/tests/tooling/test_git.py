@@ -57,7 +57,7 @@ file2
                 ]
             )
             calls = [
-                mock.call('git diff --name-status master...', capture='out'),
+                mock.call('git diff --name-status origin/master...', capture='out'),
                 mock.call('git diff --name-only master', capture='out'),
             ]
             run.assert_has_calls(calls)
@@ -78,7 +78,7 @@ R100	foo2	foo3
             retval = files_changed(include_uncommitted=False)
 
             chdir.assert_called_once_with('/foo/')
-            run.assert_called_once_with('git diff --name-status master...', capture='out')
+            run.assert_called_once_with('git diff --name-status origin/master...', capture='out')
             assert retval == ['bar', 'baz', 'foo', 'foo2', 'foo3']
 
 
@@ -89,8 +89,8 @@ def test_get_commits_since():
             get_commits_since('my-check')
             chdir.assert_called_once_with('/foo/')
             get_commits_since('my-check', target_tag='the-tag')
-            run.assert_any_call('git log --pretty=%s /foo/my-check', capture=True)
-            run.assert_any_call('git log --pretty=%s the-tag... /foo/my-check', capture=True)
+            run.assert_any_call('git log --pretty=%s /foo/my-check', capture=True, check=True)
+            run.assert_any_call('git log --pretty=%s the-tag.. /foo/my-check', capture=True, check=True)
 
 
 def test_git_show_file():
@@ -99,7 +99,7 @@ def test_git_show_file():
             set_root('/foo/')
             git_show_file('path-string', 'git-ref-string')
             chdir.assert_called_once_with('/foo/')
-            run.assert_called_once_with('git show git-ref-string:path-string', capture=True)
+            run.assert_called_once_with('git show git-ref-string:path-string', capture=True, check=True)
 
 
 def test_git_commit():

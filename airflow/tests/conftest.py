@@ -49,7 +49,7 @@ dogstatsd_metrics_stats_enable: true
 
     with docker_run(
         os.path.join(HERE, 'compose', AIRFLOW_VERSION, 'docker-compose.yaml'),
-        conditions=[CheckEndpoints(endpoint, attempts=100)],
+        conditions=[CheckEndpoints(endpoint, attempts=120)],
     ):
         yield instance, E2E_METADATA
 

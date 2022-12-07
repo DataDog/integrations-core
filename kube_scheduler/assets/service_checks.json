@@ -28,5 +28,17 @@
         ],
         "name": "Kube Scheduler leader election health",
         "description": "Returns `CRITICAL` if no replica is currently set as leader."
+    },
+    {
+        "agent_version": "6.0.0",
+        "integration": "Kube_scheduler",
+        "check": "kube_scheduler.up",
+        "groups": [],
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "name": "Kube Scheduler health",
+        "description": "Returns `CRITICAL` if Kube Scheduler is not healthy."
     }
 ]

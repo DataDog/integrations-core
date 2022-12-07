@@ -1,0 +1,713 @@
+{
+  "title": "IBM ACE Overview",
+  "description": "## IBM ACE Integration\n\nThis dashboard enables you to gain insights into the health and performance of your IBM ACE system at different levels of abstraction. It provides information on error rates of message flows and integration server connections, overall health insights from log data, and a Server-to-MQ Connections service check.\n\nFor more information, refer to:\n* [Datadog Documentation for IBM Ace](https://docs.datadoghq.com/integrations/ibm_ace/)\n* [IBM Ace Documentation](https://www.ibm.com/docs/en/app-connect/12.0?topic=overview-app-connect-enterprise-introduction)\n* [IBM Ace Logs Documentation](https://www.ibm.com/docs/en/app-connect/12.0?topic=logs-activity-log-overview)",
+  "widgets": [
+    {
+      "id": 4941854340121238,
+      "definition": {
+        "title": "",
+        "type": "group",
+        "banner_img": "https://static.datadoghq.com/static/images/logos/ibm-ace_large.svg",
+        "show_title": false,
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 2091206377392818,
+            "definition": {
+              "type": "note",
+              "content": "## IBM ACE\n\nIBM App Connect Enterprise (ACE) enables the communication of business information across different applications and platforms. \n\nThis dashboard enables you to gain insights into the health and performance of your IBM ACE system at different levels of abstraction. It provides information on error rates of message flows and integration server connections, overall health insights from log data, and a Server-to-MQ Connections service check. \n",
+              "background_color": "white",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "top",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 3,
+              "height": 4
+            }
+          },
+          {
+            "id": 7287355267941594,
+            "definition": {
+              "type": "note",
+              "content": "## Useful Links\n\n* [Datadog Documentation for IBM Ace](https://docs.datadoghq.com/integrations/ibm_ace/)\n* [IBM Ace Documentation](https://www.ibm.com/docs/en/app-connect/12.0?topic=overview-app-connect-enterprise-introduction)\n* [IBM Ace Logs Documentation](https://www.ibm.com/docs/en/app-connect/12.0?topic=logs-activity-log-overview)\n",
+              "background_color": "white",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "top",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 3,
+              "y": 0,
+              "width": 3,
+              "height": 4
+            }
+          }
+        ],
+        "template_variables": []
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 6,
+        "height": 7
+      }
+    },
+    {
+      "id": 1377207532668358,
+      "definition": {
+        "title": "System Overview",
+        "type": "group",
+        "background_color": "vivid_green",
+        "show_title": true,
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 8403527757465156,
+            "definition": {
+              "type": "note",
+              "content": "This overview provides relevant information on health at the Message Flow Level as well as a status check on the connection health at the server process level. It is a good place to start investigating system health.\n",
+              "background_color": "green",
+              "font_size": "14",
+              "text_align": "center",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 1
+            }
+          },
+          {
+            "id": 1528825921028194,
+            "definition": {
+              "title": "Total Input Messages",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "sum:ibm_ace.MessageFlow.TotalInputMessages{*}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "avg"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 2,
+              "height": 2
+            }
+          },
+          {
+            "id": 1481456370876700,
+            "definition": {
+              "title": "Total Number of Commits",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "sum:ibm_ace.MessageFlow.TotalNumberOfCommits{*}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "avg"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "bars"
+              }
+            },
+            "layout": {
+              "x": 2,
+              "y": 1,
+              "width": 2,
+              "height": 1
+            }
+          },
+          {
+            "id": 1697148221776484,
+            "definition": {
+              "title": "Server-to-MQ System Check",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "check_status",
+              "check": "ibm_ace.mq.subscription",
+              "grouping": "check",
+              "group_by": [],
+              "tags": [
+                "*"
+              ]
+            },
+            "layout": {
+              "x": 4,
+              "y": 1,
+              "width": 2,
+              "height": 2
+            }
+          },
+          {
+            "id": 7682811574933544,
+            "definition": {
+              "title": "Total Number of Backouts",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "sum:ibm_ace.MessageFlow.TotalNumberOfBackouts{*}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "avg"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "bars"
+              }
+            },
+            "layout": {
+              "x": 2,
+              "y": 2,
+              "width": 2,
+              "height": 1
+            }
+          },
+          {
+            "id": 7647876637738268,
+            "definition": {
+              "title": "Number of Threads in Pool",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "limit": {
+                        "count": 10,
+                        "order": "desc"
+                      }
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "sum:ibm_ace.MessageFlow.NumberOfThreadsInPool{$integration_server} by {message_flow}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "avg"
+                    }
+                  ]
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 6,
+              "height": 2
+            }
+          }
+        ],
+        "template_variables": []
+      },
+      "layout": {
+        "x": 6,
+        "y": 0,
+        "width": 6,
+        "height": 6
+      }
+    },
+    {
+      "id": 7822187889997680,
+      "definition": {
+        "title": "Message Flows",
+        "type": "group",
+        "background_color": "vivid_green",
+        "show_title": true,
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 2772971407460400,
+            "definition": {
+              "type": "note",
+              "content": "Gaining insights into Message Flows like the Error Rate and CPU Utilization for Flows can speak to the overall health of that server. ",
+              "background_color": "green",
+              "font_size": "14",
+              "text_align": "center",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 1
+            }
+          },
+          {
+            "id": 5944477179958728,
+            "definition": {
+              "title": "CPU Time for Message Flows",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "vertical",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    },
+                    {
+                      "formula": "query2"
+                    },
+                    {
+                      "formula": "query3"
+                    },
+                    {
+                      "formula": "query4"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "max:ibm_ace.MessageFlow.CPUTime{$integration_server} by {message_flow}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    },
+                    {
+                      "query": "max:ibm_ace.MessageFlow.CPUTimeWaitingForInputMessage{$integration_server} by {message_flow}",
+                      "data_source": "metrics",
+                      "name": "query2"
+                    },
+                    {
+                      "query": "max:ibm_ace.MessageFlow.ElapsedTimeWaitingForInputMessage{$integration_server} by {message_flow}",
+                      "data_source": "metrics",
+                      "name": "query3"
+                    },
+                    {
+                      "query": "max:ibm_ace.MessageFlow.MaximumElapsedTime{$integration_server} by {message_flow}",
+                      "data_source": "metrics",
+                      "name": "query4"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 6,
+              "height": 2
+            }
+          },
+          {
+            "id": 5220674376155750,
+            "definition": {
+              "title": "Number of MQ Messages vs. Number with Errors",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    },
+                    {
+                      "formula": "query2"
+                    },
+                    {
+                      "formula": "query3"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "avg:ibm_ace.MessageFlow.TotalNumberOfErrorsProcessingMessages{$integration_server} by {message_flow}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    },
+                    {
+                      "query": "avg:ibm_ace.MessageFlow.TotalNumberOfMQErrors{$integration_server} by {message_flow}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query2"
+                    },
+                    {
+                      "query": "sum:ibm_ace.MessageFlow.TotalNumberOfMessagesWithErrors{$integration_server} by {message_flow}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query3"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 6,
+              "height": 2
+            }
+          }
+        ],
+        "template_variables": []
+      },
+      "layout": {
+        "x": 6,
+        "y": 6,
+        "width": 6,
+        "height": 6
+      }
+    },
+    {
+      "id": 4366155156631570,
+      "definition": {
+        "title": "Integration Server",
+        "type": "group",
+        "background_color": "vivid_green",
+        "show_title": true,
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 512201691665470,
+            "definition": {
+              "type": "note",
+              "content": "The Integration Server is processes that enable encapsulated orchestration of message flows. The ratio of closed to failed connections of a server to a message broker can provide insights into the health of each server within a node (instance).",
+              "background_color": "green",
+              "font_size": "14",
+              "text_align": "center",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 1
+            }
+          },
+          {
+            "id": 4829285376640556,
+            "definition": {
+              "title": "Closed vs. Failed Connections in a Server",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    },
+                    {
+                      "formula": "query2"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "avg:ibm_ace.MQTT.ClosedConnections{$integration_node} by {integration_server}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    },
+                    {
+                      "query": "avg:ibm_ace.MQTT.FailedConnections{$integration_node} by {integration_server}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query2"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 6,
+              "height": 2
+            }
+          },
+          {
+            "id": 7985434320724262,
+            "definition": {
+              "title": "Closed vs. Failed Connections since Integration Server Restart",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    },
+                    {
+                      "formula": "query2"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "sum:ibm_ace.TCPIPClientNodes.ClosedConnections{$integration_node} by {integration_server}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    },
+                    {
+                      "query": "sum:ibm_ace.TCPIPClientNodes.FailedConnections{$integration_node} by {integration_server}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query2"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 6,
+              "height": 2
+            }
+          }
+        ],
+        "template_variables": []
+      },
+      "layout": {
+        "x": 0,
+        "y": 7,
+        "width": 6,
+        "height": 6
+      }
+    },
+    {
+      "id": 3478066258425548,
+      "definition": {
+        "title": "Logs",
+        "type": "group",
+        "background_color": "vivid_green",
+        "show_title": true,
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 8431102545788856,
+            "definition": {
+              "type": "note",
+              "content": "Logs provide detailed messages on health and error statuses for integration nodes and integration servers. ",
+              "background_color": "green",
+              "font_size": "14",
+              "text_align": "center",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 1
+            }
+          },
+          {
+            "id": 5698384511041042,
+            "definition": {
+              "title": "",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "query": {
+                    "query_string": "source:ibm_ace",
+                    "data_source": "logs_stream",
+                    "indexes": []
+                  },
+                  "columns": [
+                    {
+                      "field": "status_line",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "timestamp",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "host",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "service",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "content",
+                      "width": "compact"
+                    }
+                  ],
+                  "response_format": "event_list"
+                }
+              ],
+              "type": "list_stream"
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 12,
+              "height": 2
+            }
+          }
+        ],
+        "template_variables": []
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 12,
+        "height": 4,
+        "is_column_break": true
+      }
+    }
+  ],
+  "template_variables": [
+    {
+      "name": "integration_server",
+      "prefix": "integration_server",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "integration_node",
+      "prefix": "integration_node",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "message_flow",
+      "prefix": "message_flow",
+      "available_values": [],
+      "default": "*"
+    }
+  ],
+  "layout_type": "ordered",
+  "is_read_only": false,
+  "notify_list": [],
+  "reflow_type": "fixed",
+  "id": "fzw-nvi-ut4"
+}

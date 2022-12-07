@@ -1,4 +1,8 @@
-FROM mcr.microsoft.com/mssql/server:2017-latest-ubuntu
+ARG SQLSERVER_IMAGE_TAG
+
+FROM mcr.microsoft.com/mssql/server:${SQLSERVER_IMAGE_TAG}
+
+USER root
 
 EXPOSE 1433
 
@@ -9,11 +13,12 @@ RUN apt-get update && apt-get install -y  \
 RUN mkdir -p /var/opt/mssql/backup
 WORKDIR /var/opt/mssql/backup
 
-RUN curl -L -o AdventureWorks2017.bak https://github.com/Microsoft/sql-server-samples/releases/download/adventureworks/AdventureWorks2017.bak
+# the AdventureWorks test database can be used as a source of test data if needed
+# RUN curl -L -o AdventureWorks2017.bak https://github.com/Microsoft/sql-server-samples/releases/download/adventureworks/AdventureWorks2017.bak
 
 WORKDIR /
-COPY setup.* /
-COPY entrypoint.sh /
+COPY *.sh /
+COPY *.sql /
 
 RUN chmod +x setup.sh
 RUN chmod +x entrypoint.sh

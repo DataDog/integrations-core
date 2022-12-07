@@ -10,3 +10,26 @@ files:
         options:
           - template: instances/http
           - template: instances/default
+            overrides:
+              min_collection_interval.display_default: 20
+              min_collection_interval.value.example: 20
+              min_collection_interval.enabled: 20
+  - name: default.yaml
+    example_name: conf.yaml.default
+    options:
+      - template: ad_identifiers
+        overrides:
+          value.example:
+            - _ecs_fargate
+      - template: init_config
+        options:
+          - template: init_config/http
+          - template: init_config/default
+      - template: instances
+        options:
+          - template: instances/http
+          - template: instances/default
+            overrides:
+              min_collection_interval.display_default: 20
+              min_collection_interval.value.example: 20
+              min_collection_interval.enabled: 20

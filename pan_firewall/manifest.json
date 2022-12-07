@@ -1,34 +1,44 @@
 {
-  "display_name": "Palo Alto Networks Firewall",
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "name": "pan_firewall",
-  "metric_prefix": "pan.firewall",
-  "metric_to_check": "",
-  "creates_events": false,
-  "short_description": "Palo Alto Networks Firewall log events",
-  "guid": "f7f2aa4b-cb93-4406-975d-3a282fef6d0e",
-  "support": "core",
-  "process_signatures": [],
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "public_title": "Datadog-Palo Alto Networks Firewall Integration",
-  "categories": [
-    "log collection",
-    "security"
-  ],
-  "type": "check",
-  "is_public": true,
-  "integration_id": "pan-firewall",
+  "manifest_version": "2.0.0",
+  "app_uuid": "1e4b89ef-f66e-4c78-8cb3-70a222a1fcb4",
+  "app_id": "pan-firewall",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Palo Alto Networks Firewall log events",
+    "title": "Palo Alto Networks Firewall",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Log Collection",
+      "Category::Security"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
-    },
-    "logs": {
-      "source": "pan.firewall"
+    "integration": {
+      "source_type_name": "Palo Alto Networks Firewall",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      },
+      "process_signatures": []
     },
     "dashboards": {
       "Palo Alto Networks Firewall Overview": "assets/dashboards/palo_alto_networks_firewall_overview.json"
@@ -37,8 +47,8 @@
       "High Severity Issues": "assets/saved_views/all_high_severity_issues.json",
       "Authentication Protocol": "assets/saved_views/top_ips_flagged_in_high_severity_threats.json"
     },
-    "monitors": {},
-    "service_checks": "assets/service_checks.json",
-    "metrics_metadata": "metadata.csv"
+    "logs": {
+      "source": "pan.firewall"
+    }
   }
 }

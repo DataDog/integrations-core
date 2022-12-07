@@ -4,11 +4,13 @@
 from __future__ import division
 
 import json
+import os
 import re
 from collections import OrderedDict, defaultdict
 
 from six import iteritems
 
+from ..constants import ServiceCheck
 from ..utils.common import ensure_unicode, to_native_string
 from .common import HistogramBucketStub, MetricStub, ServiceCheckStub
 from .similar import build_similar_elements_msg
@@ -35,6 +37,24 @@ def backend_normalize_metric_name(metric_name):
     """
     metric_name = METRIC_REPLACEMENT.sub("_", metric_name)
     return METRIC_DOTUNDERSCORE_CLEANUP.sub(".", metric_name).strip("_")
+
+
+def check_tag_names(metric, tags):
+    if tags and not os.environ.get('DDEV_SKIP_GENERIC_TAGS_CHECK'):
+        try:
+            from datadog_checks.base.utils.tagging import GENERIC_TAGS
+        except ImportError:
+            GENERIC_TAGS = []
+
+        for tag in tags:
+            tag_name = tag.split(':')[0]
+            if tag_name in GENERIC_TAGS:
+                raise Exception(
+                    "Metric {} was submitted with a forbidden tag: {}. Please rename this tag, or skip "
+                    "the tag validation with DDEV_SKIP_GENERIC_TAGS_CHECK environment variable.".format(
+                        metric, tag_name
+                    )
+                )
 
 
 class AggregatorStub(object):
@@ -74,13 +94,7 @@ class AggregatorStub(object):
     }
 
     def __init__(self):
-        self._metrics = defaultdict(list)
-        self._asserted = set()
-        self._service_checks = defaultdict(list)
-        self._events = []
-        # dict[event_type, [events]]
-        self._event_platform_events = {}
-        self._histogram_buckets = defaultdict(list)
+        self.reset()
 
     @classmethod
     def is_aggregate(cls, mtype):
@@ -91,17 +105,23 @@ class AggregatorStub(object):
         return name in cls.IGNORED_METRICS
 
     def submit_metric(self, check, check_id, mtype, name, value, tags, hostname, flush_first_value):
+        check_tag_names(name, tags)
         if not self.ignore_metric(name):
-            self._metrics[name].append(MetricStub(name, mtype, value, tags, hostname, None))
+            self._metrics[name].append(MetricStub(name, mtype, value, tags, hostname, None, flush_first_value))
 
     def submit_metric_e2e(
         self, check, check_id, mtype, name, value, tags, hostname, device=None, flush_first_value=False
     ):
+        check_tag_names(name, tags)
         # Device is only present in metrics read from the real agent in e2e tests. Normally it is submitted as a tag
         if not self.ignore_metric(name):
-            self._metrics[name].append(MetricStub(name, mtype, value, tags, hostname, device))
+            self._metrics[name].append(MetricStub(name, mtype, value, tags, hostname, device, flush_first_value))
 
     def submit_service_check(self, check, check_id, name, status, tags, hostname, message):
+        if status == ServiceCheck.OK and message:
+            raise Exception("Expected empty message on OK service check")
+
+        check_tag_names(name, tags)
         self._service_checks[name].append(ServiceCheckStub(check_id, name, status, tags, hostname, message))
 
     def submit_event(self, check, check_id, event):
@@ -111,10 +131,21 @@ class AggregatorStub(object):
         self._event_platform_events[event_type].append(raw_event)
 
     def submit_histogram_bucket(
-        self, check, check_id, name, value, lower_bound, upper_bound, monotonic, hostname, tags
+        self,
+        check,
+        check_id,
+        name,
+        value,
+        lower_bound,
+        upper_bound,
+        monotonic,
+        hostname,
+        tags,
+        flush_first_value=False,
     ):
+        check_tag_names(name, tags)
         self._histogram_buckets[name].append(
-            HistogramBucketStub(name, value, lower_bound, upper_bound, monotonic, hostname, tags)
+            HistogramBucketStub(name, value, lower_bound, upper_bound, monotonic, hostname, tags, flush_first_value)
         )
 
     def metrics(self, name):
@@ -129,6 +160,7 @@ class AggregatorStub(object):
                 normalize_tags(stub.tags),
                 ensure_unicode(stub.hostname),
                 stub.device,
+                stub.flush_first_value,
             )
             for stub in self._metrics.get(to_native_string(name), [])
         ]
@@ -175,6 +207,7 @@ class AggregatorStub(object):
                 stub.monotonic,
                 ensure_unicode(stub.hostname),
                 normalize_tags(stub.tags),
+                stub.flush_first_value,
             )
             for stub in self._histogram_buckets.get(to_native_string(name), [])
         ]
@@ -186,15 +219,29 @@ class AggregatorStub(object):
         self._asserted.add(metric_name)
 
         candidates = []
+        candidates_with_tag = []
         for metric in self.metrics(metric_name):
+            candidates.append(metric)
             if tag in metric.tags:
-                candidates.append(metric)
+                candidates_with_tag.append(metric)
 
-        msg = "Candidates size assertion for `{}`, count: {}, at_least: {}) failed".format(metric_name, count, at_least)
-        if count is not None:
-            assert len(candidates) == count, msg
+        if candidates_with_tag:  # The metric was found with the tag but not enough times
+            msg = "The metric '{}' with tag '{}' was only found {}/{} times".format(metric_name, tag, count, at_least)
+        elif candidates:
+            msg = (
+                "The metric '{}' was found but not with the tag '{}'.\n".format(metric_name, tag)
+                + "Similar submitted:\n"
+                + "\n".join(["     {}".format(m) for m in candidates])
+            )
         else:
-            assert len(candidates) >= at_least, msg
+            expected_stub = MetricStub(metric_name, type=None, value=None, tags=[tag], hostname=None, device=None)
+            msg = "Metric '{}' not found".format(metric_name)
+            msg = "{}\n{}".format(msg, build_similar_elements_msg(expected_stub, self._metrics))
+
+        if count is not None:
+            assert len(candidates_with_tag) == count, msg
+        else:
+            assert len(candidates_with_tag) >= at_least, msg
 
     # Potential kwargs: aggregation_key, alert_type, event_type,
     # msg_title, source_type_name
@@ -218,7 +265,17 @@ class AggregatorStub(object):
             assert len(candidates) >= at_least, msg
 
     def assert_histogram_bucket(
-        self, name, value, lower_bound, upper_bound, monotonic, hostname, tags, count=None, at_least=1
+        self,
+        name,
+        value,
+        lower_bound,
+        upper_bound,
+        monotonic,
+        hostname,
+        tags,
+        count=None,
+        at_least=1,
+        flush_first_value=None,
     ):
         expected_tags = normalize_tags(tags, sort=True)
 
@@ -233,9 +290,17 @@ class AggregatorStub(object):
             if hostname and hostname != bucket.hostname:
                 continue
 
+            if monotonic != bucket.monotonic:
+                continue
+
+            if flush_first_value is not None and flush_first_value != bucket.flush_first_value:
+                continue
+
             candidates.append(bucket)
 
-        expected_bucket = HistogramBucketStub(name, value, lower_bound, upper_bound, monotonic, hostname, tags)
+        expected_bucket = HistogramBucketStub(
+            name, value, lower_bound, upper_bound, monotonic, hostname, tags, flush_first_value
+        )
 
         if count is not None:
             msg = "Needed exactly {} candidates for '{}', got {}".format(count, name, len(candidates))
@@ -248,7 +313,16 @@ class AggregatorStub(object):
         )
 
     def assert_metric(
-        self, name, value=None, tags=None, count=None, at_least=1, hostname=None, metric_type=None, device=None
+        self,
+        name,
+        value=None,
+        tags=None,
+        count=None,
+        at_least=1,
+        hostname=None,
+        metric_type=None,
+        device=None,
+        flush_first_value=None,
     ):
         """
         Assert a metric was processed by this stub
@@ -274,9 +348,12 @@ class AggregatorStub(object):
             if device is not None and device != metric.device:
                 continue
 
+            if flush_first_value is not None and flush_first_value != metric.flush_first_value:
+                continue
+
             candidates.append(metric)
 
-        expected_metric = MetricStub(name, metric_type, value, tags, hostname, device)
+        expected_metric = MetricStub(name, metric_type, value, expected_tags, hostname, device, flush_first_value)
 
         if value is not None and candidates and all(self.is_aggregate(m.type) for m in candidates):
             got = sum(m.value for m in candidates)
@@ -338,9 +415,9 @@ class AggregatorStub(object):
         msg = ''
         if not condition:
             prefix = '\n\t- '
-            msg = 'Some metrics are missing:'
+            msg = 'Some metrics are collected but not asserted:'
             msg += '\nAsserted Metrics:{}{}'.format(prefix, prefix.join(sorted(self._asserted)))
-            msg += '\nMissing Metrics:{}{}'.format(prefix, prefix.join(sorted(self.not_asserted())))
+            msg += '\nFound metrics that are not asserted:{}{}'.format(prefix, prefix.join(sorted(self.not_asserted())))
         assert condition, msg
 
     def assert_metrics_using_metadata(
@@ -371,7 +448,7 @@ class AggregatorStub(object):
                 actual_metric_type = AggregatorStub.METRIC_ENUM_MAP_REV[metric_stub.type]
 
                 # We only check `*.count` metrics for histogram and historate submissions
-                # Note: all Openmetrics histogram and summary metrics are actually separatly submitted
+                # Note: all Openmetrics histogram and summary metrics are actually separately submitted
                 if check_submission_type and actual_metric_type in ['histogram', 'historate']:
                     metric_stub_name += '.count'
 
@@ -418,7 +495,7 @@ class AggregatorStub(object):
         - hostname
         """
         # metric types that intended to be called multiple times are ignored
-        ignored_types = [self.COUNT, self.MONOTONIC_COUNT, self.COUNTER]
+        ignored_types = [self.COUNT, self.COUNTER]
         metric_stubs = [m for metrics in self._metrics.values() for m in metrics if m.type not in ignored_types]
 
         def stub_to_key_fn(stub):
@@ -472,7 +549,9 @@ class AggregatorStub(object):
         self._asserted = set()
         self._service_checks = defaultdict(list)
         self._events = []
+        # dict[event_type, [events]]
         self._event_platform_events = defaultdict(list)
+        self._histogram_buckets = defaultdict(list)
 
     def all_metrics_asserted(self):
         assert self.metrics_asserted_pct >= 100.0

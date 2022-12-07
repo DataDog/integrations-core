@@ -1,10 +1,12 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import copy
 from os import environ
 
 import requests
 from openstack import connection
+from six import PY3
 from six.moves.urllib.parse import urljoin
 
 from .exceptions import (
@@ -63,7 +65,7 @@ class AbstractApi(object):
     def get_projects(self):
         raise NotImplementedError()
 
-    def get_os_hypervisor_uptime(self, hypervisor_id):
+    def get_os_hypervisor_uptime(self, hypervisor):
         raise NotImplementedError()
 
     def get_os_aggregates(self):
@@ -212,10 +214,16 @@ class OpenstackSDKApi(AbstractApi):
 
         return self.connection.list_hypervisors()
 
-    def get_os_hypervisor_uptime(self, hypervisor_id):
-        # Hypervisor uptime is not available in openstacksdk 0.24.0.
-        self.logger.warning("Hypervisor uptime is not available with this version of openstacksdk")
-        raise NotImplementedError()
+    def get_os_hypervisor_uptime(self, hypervisor):
+        if PY3:
+            if hypervisor.uptime is None:
+                self._check_authentication()
+                self.connection.compute.get_hypervisor_uptime(hypervisor)
+            return hypervisor.uptime
+        else:
+            # Hypervisor uptime is not available in openstacksdk 0.24.0.
+            self.logger.warning("Hypervisor uptime is not available with this version of openstacksdk")
+            raise NotImplementedError()
 
     def get_os_aggregates(self):
         # Each aggregate is missing the 'uuid' attribute compared to what is returned by SimpleApi
@@ -246,9 +254,14 @@ class OpenstackSDKApi(AbstractApi):
         return self.connection.list_servers(detailed=True, all_projects=True, filters=query_params)
 
     def get_server_diagnostics(self, server_id):
-        # Server diagnostics is not available in openstacksdk 0.24.0. It should be available in the next release.
-        self.logger.warning("Server diagnostics is not available with this version of openstacksdk")
-        raise NotImplementedError()
+        # With microversion 2.48 the format of server diagnostics changed
+        # https://docs.openstack.org/api-ref/compute/?expanded=show-server-diagnostics-detail
+        # With SimpleApi this method returns either the new or the old format depending on the hypervisor.
+        # Because openstacksdk only supports the new format, this method either returns the new format with new
+        # hypervisor, or an empty payload with older hypervisor.
+        self._check_authentication()
+
+        return self.connection.compute.get_server_diagnostics(server_id)
 
 
 class SimpleApi(AbstractApi):
@@ -307,7 +320,8 @@ class SimpleApi(AbstractApi):
     def get_neutron_endpoint(self):
         self._make_request(self.neutron_endpoint)
 
-    def get_os_hypervisor_uptime(self, hyp_id):
+    def get_os_hypervisor_uptime(self, hypervisor):
+        hyp_id = hypervisor['id']
         url = '{}/os-hypervisors/{}/uptime'.format(self.nova_endpoint, hyp_id)
         resp = self._make_request(url)
         return resp.get('hypervisor', {}).get('uptime')
@@ -430,10 +444,11 @@ class Authenticator(object):
         projects = cls._get_auth_projects(logger, keystone_endpoint, requests_wrapper)
 
         # For each project, we create an OpenStackProject object that we add to the `project_scopes` dict
-        last_auth_token = None
-        last_project_auth_scope = None
-        last_nova_endpoint = None
-        last_neutron_endpoint = None
+        credential_auth_token = None
+        credential_project_auth_scope = None
+        credential_nova_endpoint = None
+        credential_neutron_endpoint = None
+        found_admin_credential = False
         for project in projects:
             identity = {"methods": ['token'], "token": {"id": keystone_auth_token}}
             scope = {'project': {'id': project.get('id')}}
@@ -444,6 +459,9 @@ class Authenticator(object):
             auth_token = token_resp.headers.get('X-Subject-Token')
             nova_endpoint = cls._get_nova_endpoint(token_resp.json())
             neutron_endpoint = cls._get_neutron_endpoint(token_resp.json())
+            roles = cls._get_roles(token_resp.json())
+            has_admin_auth = "admin" in roles
+
             project_auth_scope = {
                 'project': {
                     'name': project.get('name'),
@@ -454,14 +472,27 @@ class Authenticator(object):
 
             project_name = project.get('name')
             project_id = project.get('id')
-            if project_name is not None and project_id is not None:
-                last_auth_token = auth_token
-                last_project_auth_scope = project_auth_scope
-                last_nova_endpoint = nova_endpoint
-                last_neutron_endpoint = neutron_endpoint
 
-        if last_auth_token and last_project_auth_scope and last_nova_endpoint and last_neutron_endpoint:
-            return Credential(last_auth_token, last_project_auth_scope, last_nova_endpoint, last_neutron_endpoint)
+            if not found_admin_credential and project_name is not None and project_id is not None:
+                found_admin_credential = has_admin_auth
+
+                credential_auth_token = auth_token
+                credential_project_auth_scope = project_auth_scope
+                credential_nova_endpoint = nova_endpoint
+                credential_neutron_endpoint = neutron_endpoint
+
+        if (
+            credential_auth_token
+            and credential_project_auth_scope
+            and credential_nova_endpoint
+            and credential_neutron_endpoint
+        ):
+            return Credential(
+                credential_auth_token,
+                credential_project_auth_scope,
+                credential_nova_endpoint,
+                credential_neutron_endpoint,
+            )
 
         return None
 
@@ -476,8 +507,10 @@ class Authenticator(object):
             return resp
 
         except (requests.exceptions.HTTPError, requests.exceptions.Timeout, requests.exceptions.ConnectionError):
+            safe_identity = copy.deepcopy(identity)
+            safe_identity['password']['user']['password'] = '********'
             msg = "Failed keystone auth with identity:{identity} scope:{scope} @{url}".format(
-                identity=identity, scope=scope, url=auth_url
+                identity=safe_identity, scope=scope, url=auth_url
             )
             logger.debug(msg)
             raise KeystoneUnreachable(msg)
@@ -541,6 +574,15 @@ class Authenticator(object):
         if valid_endpoint:
             return valid_endpoint
         raise MissingNovaEndpoint()
+
+    @classmethod
+    def _get_roles(cls, json_resp):
+        """
+        Collec the role names returned by the Identity API
+        """
+        roles_json = json_resp.get('token', {}).get('roles', [])
+        role_names = [role.get('name') for role in roles_json]
+        return role_names
 
     @staticmethod
     def _get_valid_endpoint(resp, name, entry_type):

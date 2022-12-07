@@ -1,45 +1,60 @@
 {
-  "categories": [
-    "Collaboration",
-    "log collection"
-  ],
-  "creates_events": false,
-  "display_name": "Postfix",
-  "guid": "7f03c5b7-ee54-466e-8854-5896d62c82b4",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "postfix.",
-  "metric_to_check": "postfix.queue.size",
-  "name": "postfix",
-  "process_signatures": [
-    "postfix start",
-    "sendmail -bd"
-  ],
-  "public_title": "Datadog-Postfix Integration",
-  "short_description": "Monitor the size of all your Postfix queues.",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os"
-  ],
-  "type": "check",
-  "integration_id": "postfix",
+  "manifest_version": "2.0.0",
+  "app_uuid": "76293d0a-1cde-4f25-ae72-c3e6ef352273",
+  "app_id": "postfix",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor the size of all your Postfix queues.",
+    "title": "Postfix",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Category::Collaboration",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "Postfix",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "postfix.",
+        "check": "postfix.queue.size",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      },
+      "process_signatures": [
+        "postfix start",
+        "sendmail -bd"
+      ]
     },
-    "monitors": {},
     "dashboards": {
       "postfix": "assets/dashboards/postfix_dashboard.json"
     },
-    "service_checks": "assets/service_checks.json",
-    "logs": {
-      "source": "postfix"
-    },
-    "metrics_metadata": "metadata.csv",
     "saved_views": {
       "postfix_processes": "assets/saved_views/postfix_processes.json"
+    },
+    "logs": {
+      "source": "postfix"
     }
   }
 }

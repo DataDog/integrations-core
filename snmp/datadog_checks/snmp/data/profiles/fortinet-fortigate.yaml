@@ -1,12 +1,70 @@
 # Profile for Fortinet FortiGate devices
+#
+# For Fortinet FortiGate devices, the sysDescr is not a reliable source of info.
+
 extends:
   - _base.yaml
   - _generic-if.yaml
+  - _fortinet-fortigate-cpu-memory.yaml
+  - _fortinet-fortigate-vpn-tunnel.yaml
 
 device:
   vendor: "fortinet"
 
+# All fortinet devices have sysObjectID starting with `1.3.6.1.4.1.12356.101.1` (fgModel)
+# We only target Fortinet Fortigate devices (1.3.6.1.4.1.12356.101/fnFortiGateMib)
 sysobjectid: 1.3.6.1.4.1.12356.101.1.*
+
+
+# Note related to use of index `1` of entPhysicalTable columns:
+# Based on snmpwalks of Fortigate devices, the main/chassis hardware have the index `1`
+# Librennms is also using index `1`: https://github.com/librenms/librenms/blob/1ac60e3b1d90616119f3c4adc28213e3c35c2477/includes/definitions/discovery/fortigate.yaml#L10-L13
+metadata:
+  device:
+    fields:
+      vendor:
+        value: "fortinet"
+      serial_number:
+        symbol:
+          MIB: ENTITY-MIB
+          OID: 1.3.6.1.2.1.47.1.1.1.1.11.1  # entPhysicalSerialNum OID at index `1`
+          name: entPhysicalSerialNum
+          # Examples: `FG5H1E1110000000`
+      version:
+        symbol:
+          MIB: FORTINET-FORTIGATE-MIB
+          OID: 1.3.6.1.4.1.12356.101.4.1.1.0
+          name: fgSysVersion
+          # Example fgSysVersion (Firmware version of the device)
+          # - v5.6.4,build1575,180425 (GA)
+          # - v5.4.8,build1183,180115 (GA)
+      product_name:
+        symbol:
+          OID: 1.3.6.1.2.1.47.1.1.1.1.10.1  # entPhysicalName OID at index `1`
+          name: entPhysicalSoftwareRev
+          match_pattern: '^(\S+)\s+'
+          match_value: '$1'
+          # Examples: `FortiGate-1500D` from `FortiGate-1500D v5.4.8,build1183b1183,180115 (GA)`
+      model:
+        symbol:
+          OID: 1.3.6.1.2.1.47.1.1.1.1.13.1  # entPhysicalModelName OID at index `1`
+          name: entPhysicalModelName
+          # Examples: `FGT_501E`
+      os_name:
+        # "FortiOS is a security-hardened, purpose-built operating system that is the software foundation of FortiGate.
+        # Control all the security and networking capabilities in all your FortiGates across your entire network with
+        # one intuitive operating system."
+        # source: 'http://www.corex.at/Produktinfos/FortiOS_6_0.pdf'
+        value: FortiOS
+      os_version:
+        # The device firmware version and FortiOS version are same
+        symbol:
+          MIB: FORTINET-FORTIGATE-MIB
+          OID: 1.3.6.1.4.1.12356.101.4.1.1.0
+          name: fgSysVersion
+          match_pattern: 'v([\d.]+)'
+          match_value: '$1'
+          # Examples: `5.6.4` from `v5.6.4,build1575,180425 (GA)`
 
 metrics:
 
@@ -208,12 +266,12 @@ metrics:
       - OID: 1.3.6.1.4.1.12356.101.5.1.2.1.1.3
         name: fgFwPolByteCount
     metric_tags:
+      # Internal virtual domain index used to uniquely identify rows in this table. This index is also used by other tables referencing a virtual domain.
+      - index: 1
+        tag: virtualdomain_index
       # Firewall policy ID. Only enabled policies are present in this table. Policy IDs are only unique within a virtual domain.
-      - tag: policy_index
-        column:
-          OID: 1.3.6.1.4.1.12356.101.5.1.2.1.1.1
-          name: fgFwPolID
-
+      - index: 2
+        tag: policy_index
   # Firewall policy6 statistics table.
   - MIB: FORTINET-FORTIGATE-MIB
     table:
@@ -228,8 +286,9 @@ metrics:
       - OID: 1.3.6.1.4.1.12356.101.5.1.2.2.1.3
         name: fgFwPol6ByteCount
     metric_tags:
+      # Internal virtual domain index used to uniquely identify rows in this table. This index is also used by other tables referencing a virtual domain.
+      - index: 1
+        tag: virtualdomain_index
       # Firewall policy6 ID. Only enabled policies are present in this table. Policy IDs are only unique within a virtual domain.
-      - tag: policy6_index
-        column:
-          OID: 1.3.6.1.4.1.12356.101.5.1.2.2.1.1
-          name: fgFwPol6ID
+      - index: 2
+        tag: policy6_index

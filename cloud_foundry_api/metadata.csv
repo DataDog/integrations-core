@@ -1,2 +1,2 @@
-metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-cloud_foundry_api.events.count,count,,event,,The count of events collected by this check,0,cloud_foundry_api,events count
+metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
+cloud_foundry_api.events.count,count,,event,,The count of events collected by this check,0,cloud_foundry_api,events count,

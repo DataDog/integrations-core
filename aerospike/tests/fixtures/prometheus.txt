@@ -1,0 +1,114 @@
+# HELP aerospike_namespace_client_delete_error client delete error
+# TYPE aerospike_namespace_client_delete_error counter
+aerospike_namespace_client_delete_error{cluster_name="null",ns="test",service="192.168.32.3:3000"} 0
+# HELP aerospike_namespace_client_read_error client read error
+# TYPE aerospike_namespace_client_read_error counter
+aerospike_namespace_client_read_error{cluster_name="null",ns="test",service="192.168.32.3:3000"} 0
+# HELP aerospike_namespace_client_udf_error client udf error
+# TYPE aerospike_namespace_client_udf_error counter
+aerospike_namespace_client_udf_error{cluster_name="null",ns="test",service="192.168.32.3:3000"} 0
+# HELP aerospike_namespace_client_write_error client write error
+# TYPE aerospike_namespace_client_write_error counter
+aerospike_namespace_client_write_error{cluster_name="null",ns="test",service="192.168.32.3:3000"} 0
+# HELP aerospike_namespace_clock_skew_stop_writes clock skew stop writes
+# TYPE aerospike_namespace_clock_skew_stop_writes gauge
+aerospike_namespace_clock_skew_stop_writes{cluster_name="null",ns="test",service="192.168.32.3:3000"} 0
+# HELP aerospike_namespace_dead_partitions dead partitions
+# TYPE aerospike_namespace_dead_partitions gauge
+aerospike_namespace_dead_partitions{cluster_name="null",ns="test",service="192.168.32.3:3000"} 0
+# HELP aerospike_namespace_device_available_pct device available pct
+# TYPE aerospike_namespace_device_available_pct gauge
+aerospike_namespace_device_available_pct{cluster_name="null",ns="test",service="192.168.32.3:3000"} 99
+# HELP aerospike_namespace_hwm_breached hwm breached
+# TYPE aerospike_namespace_hwm_breached gauge
+aerospike_namespace_hwm_breached{cluster_name="null",ns="test",service="192.168.32.3:3000"} 0
+# HELP aerospike_namespace_memory_free_pct memory free pct
+# TYPE aerospike_namespace_memory_free_pct gauge
+aerospike_namespace_memory_free_pct{cluster_name="null",ns="test",service="192.168.32.3:3000"} 100
+# HELP aerospike_namespace_memory_used_bytes memory used bytes
+# TYPE aerospike_namespace_memory_used_bytes gauge
+aerospike_namespace_memory_used_bytes{cluster_name="null",ns="test",service="192.168.32.3:3000"} 0
+# HELP aerospike_namespace_scan_aggr_error scan aggr error
+# TYPE aerospike_namespace_scan_aggr_error counter
+aerospike_namespace_scan_aggr_error{cluster_name="null",ns="test",service="192.168.32.3:3000"} 0
+# HELP aerospike_namespace_scan_basic_error scan basic error
+# TYPE aerospike_namespace_scan_basic_error counter
+aerospike_namespace_scan_basic_error{cluster_name="null",ns="test",service="192.168.32.3:3000"} 0
+# HELP aerospike_namespace_scan_ops_bg_error scan ops bg error
+# TYPE aerospike_namespace_scan_ops_bg_error counter
+aerospike_namespace_scan_ops_bg_error{cluster_name="null",ns="test",service="192.168.32.3:3000"} 0
+# HELP aerospike_namespace_scan_udf_bg_error scan udf bg error
+# TYPE aerospike_namespace_scan_udf_bg_error counter
+aerospike_namespace_scan_udf_bg_error{cluster_name="null",ns="test",service="192.168.32.3:3000"} 0
+# HELP aerospike_namespace_sindex_num_partitions sindex num partitions
+# TYPE aerospike_namespace_sindex_num_partitions gauge
+aerospike_namespace_sindex_num_partitions{cluster_name="null",ns="test",service="192.168.32.3:3000"} 32
+# HELP aerospike_namespace_stop_writes stop writes
+# TYPE aerospike_namespace_stop_writes gauge
+aerospike_namespace_stop_writes{cluster_name="null",ns="test",service="192.168.32.3:3000"} 0
+# HELP aerospike_namespace_storage_engine_file_defrag_q storage engine file defrag q
+# TYPE aerospike_namespace_storage_engine_file_defrag_q gauge
+aerospike_namespace_storage_engine_file_defrag_q{cluster_name="null",file="/opt/aerospike/data/test.dat",file_index="0",ns="test",service="192.168.32.3:3000"} 0
+# HELP aerospike_namespace_storage_engine_file_write_q storage engine file write q
+# TYPE aerospike_namespace_storage_engine_file_write_q gauge
+aerospike_namespace_storage_engine_file_write_q{cluster_name="null",file="/opt/aerospike/data/test.dat",file_index="0",ns="test",service="192.168.32.3:3000"} 0
+# HELP aerospike_namespace_unavailable_partitions unavailable partitions
+# TYPE aerospike_namespace_unavailable_partitions gauge
+aerospike_namespace_unavailable_partitions{cluster_name="null",ns="test",service="192.168.32.3:3000"} 0
+# HELP aerospike_node_stats_batch_index_error batch index error
+# TYPE aerospike_node_stats_batch_index_error counter
+aerospike_node_stats_batch_index_error{cluster_name="null",service="192.168.32.3:3000"} 0
+# HELP aerospike_node_stats_client_connections client connections
+# TYPE aerospike_node_stats_client_connections gauge
+aerospike_node_stats_client_connections{cluster_name="null",service="192.168.32.3:3000"} 1
+# HELP aerospike_node_stats_client_connections_opened client connections opened
+# TYPE aerospike_node_stats_client_connections_opened counter
+aerospike_node_stats_client_connections_opened{cluster_name="null",service="192.168.32.3:3000"} 3
+# HELP aerospike_node_stats_cluster_size cluster size
+# TYPE aerospike_node_stats_cluster_size gauge
+aerospike_node_stats_cluster_size{cluster_name="null",service="192.168.32.3:3000"} 1
+# HELP aerospike_node_stats_fabric_connections_opened fabric connections opened
+# TYPE aerospike_node_stats_fabric_connections_opened counter
+aerospike_node_stats_fabric_connections_opened{cluster_name="null",service="192.168.32.3:3000"} 0
+# HELP aerospike_node_stats_heap_efficiency_pct heap efficiency pct
+# TYPE aerospike_node_stats_heap_efficiency_pct gauge
+aerospike_node_stats_heap_efficiency_pct{cluster_name="null",service="192.168.32.3:3000"} 96
+# HELP aerospike_node_stats_heartbeat_connections_opened heartbeat connections opened
+# TYPE aerospike_node_stats_heartbeat_connections_opened counter
+aerospike_node_stats_heartbeat_connections_opened{cluster_name="null",service="192.168.32.3:3000"} 0
+# HELP aerospike_node_stats_rw_in_progress rw in progress
+# TYPE aerospike_node_stats_rw_in_progress gauge
+aerospike_node_stats_rw_in_progress{cluster_name="null",service="192.168.32.3:3000"} 0
+# HELP aerospike_node_stats_system_free_mem_pct system free mem pct
+# TYPE aerospike_node_stats_system_free_mem_pct gauge
+aerospike_node_stats_system_free_mem_pct{cluster_name="null",service="192.168.32.3:3000"} 91
+# HELP aerospike_xdr_abandoned abandoned
+# TYPE aerospike_xdr_abandoned counter
+aerospike_xdr_abandoned{cluster_name="null",dc="DC1",service="192.168.32.3:3000"} 0
+# HELP aerospike_xdr_lag lag
+# TYPE aerospike_xdr_lag gauge
+aerospike_xdr_lag{cluster_name="null",dc="DC1",service="192.168.32.3:3000"} 0
+# HELP aerospike_xdr_lap_us lap us
+# TYPE aerospike_xdr_lap_us gauge
+aerospike_xdr_lap_us{cluster_name="null",dc="DC1",service="192.168.32.3:3000"} 82542
+# HELP aerospike_xdr_latency_ms latency ms
+# TYPE aerospike_xdr_latency_ms gauge
+aerospike_xdr_latency_ms{cluster_name="null",dc="DC1",service="192.168.32.3:3000"} 0
+# HELP aerospike_xdr_recoveries recoveries
+# TYPE aerospike_xdr_recoveries counter
+aerospike_xdr_recoveries{cluster_name="null",dc="DC1",service="192.168.32.3:3000"} 4096
+# HELP aerospike_xdr_recoveries_pending recoveries pending
+# TYPE aerospike_xdr_recoveries_pending gauge
+aerospike_xdr_recoveries_pending{cluster_name="null",dc="DC1",service="192.168.32.3:3000"} 0
+# HELP aerospike_xdr_retry_conn_reset retry conn reset
+# TYPE aerospike_xdr_retry_conn_reset counter
+aerospike_xdr_retry_conn_reset{cluster_name="null",dc="DC1",service="192.168.32.3:3000"} 0
+# HELP aerospike_xdr_retry_dest retry dest
+# TYPE aerospike_xdr_retry_dest counter
+aerospike_xdr_retry_dest{cluster_name="null",dc="DC1",service="192.168.32.3:3000"} 0
+# HELP aerospike_xdr_retry_no_node retry no node
+# TYPE aerospike_xdr_retry_no_node counter
+aerospike_xdr_retry_no_node{cluster_name="null",dc="DC1",service="192.168.32.3:3000"} 0
+# HELP aerospike_xdr_success success
+# TYPE aerospike_xdr_success counter
+aerospike_xdr_success{cluster_name="null",dc="DC1",service="192.168.32.3:3000"} 1

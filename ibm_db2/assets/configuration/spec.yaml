@@ -40,9 +40,19 @@ files:
         value:
           type: integer
           example: 50000
+      - name: security
+        description: |
+          Set this parameter to `ssl` to use the SSL protocol for a connection to the database server using the default
+          certificate from the ibm-db driver package. Specifying `tls_cert` is not required when using this option.
+        value:
+          type: string
+          example: none
+          enum:
+          - none
+          - ssl
       - name: tls_cert
         description: |
-          The path to a SSL certicate to use, when connecting to a database in a secure fashion. It
+          The path to a SSL certificate to use, when connecting to a database in a secure fashion. It
           has to be accessible and readable by the agent user.
         value:
           type: string

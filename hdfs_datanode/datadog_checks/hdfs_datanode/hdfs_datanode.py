@@ -67,7 +67,6 @@ class HDFSDataNode(AgentCheck):
             self.JMX_SERVICE_CHECK,
             AgentCheck.OK,
             tags=tags,
-            message="Connection to {} was successful".format(jmx_address),
         )
 
     def _get_jmx_data(self, jmx_address, bean_name, tags):
@@ -168,7 +167,10 @@ class HDFSDataNode(AgentCheck):
         version = data.get('Version', None)
 
         if version is not None:
-            self.set_metadata('version', version)
             self.log.debug('found hadoop version %s', version)
+            # account for possible build data e.g.:
+            # 3.1.3, rba631c436b806728f8ec2f54ab1e289526c90579
+            version = version.replace(', ', '+')
+            self.set_metadata('version', version)
         else:
             self.log.warning('could not retrieve hadoop version information, this was data retrieved: %s', data)

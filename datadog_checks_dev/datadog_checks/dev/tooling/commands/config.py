@@ -107,7 +107,7 @@ def set_value(ctx, key, value):
     if key in ('repos.core', 'repos.extras', 'repos.agent', 'repos.marketplace') and not value.startswith('~'):
         value = os.path.abspath(value)
 
-    user_config = new_config = ctx.obj
+    user_config = new_config = ctx.obj.copy()
     user_config.pop('repo_choice', None)
 
     data = [value]

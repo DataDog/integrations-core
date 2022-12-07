@@ -1,0 +1,73 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "0ab23627-c6f5-4ec5-b42c-43b85dc26445",
+  "app_id": "foundationdb",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "FoundationDB integration",
+    "title": "FoundationDB",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Data Store",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
+  "assets": {
+    "integration": {
+      "source_type_name": "FoundationDB",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "foundationdb.",
+        "check": [
+          "foundationdb.processes",
+          "foundationdb.instances"
+        ],
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {
+      "FoundationDB Latency Probe": "assets/dashboards/foundationdb_latency_probe.json",
+      "FoundationDB Processes and Utilization": "assets/dashboards/foundationdb_processes_and_utilization.json",
+      "FoundationDB Transactions and Queues": "assets/dashboards/foundationdb_transactions_and_queues.json"
+    },
+    "monitors": {
+      "FoundationDB Status Check": "assets/monitors/service_check.json",
+      "FoundationDB Errors Logged": "assets/monitors/errors_logged.json",
+      "FoundationDB High Durability Lag": "assets/monitors/high_durability_lag.json",
+      "FoundationDB Log Queue Reaching Spill Threshold": "assets/monitors/log_queue_spill.json",
+      "FoundationDB Low Disk Space": "assets/monitors/low_disk_space.json",
+      "FoundationDB High Level Of Conflicted Transactions": "assets/monitors/conflicts.json",
+      "FoundationDB High Level Of Rejected Transactions": "assets/monitors/rejections.json",
+      "FoundationDB Read Latency Probe": "assets/monitors/read_latency_probe.json",
+      "FoundationDB Transaction Commit Latency Probe": "assets/monitors/transaction_commit_latency.json",
+      "FoundationDB Transaction Start Latency Probe": "assets/monitors/transaction_start_latency.json"
+    },
+    "saved_views": {
+      "errors": "assets/saved_views/errors.json",
+      "errors_and_strong_warnings": "assets/saved_views/errors_and_strong_warnings.json",
+      "all": "assets/saved_views/all.json"
+    }
+  }
+}

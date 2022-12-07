@@ -11,7 +11,7 @@ The Agent's Marathon check lets you:
 
 ### Installation
 
-The Marathon check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your Marathon master.
+The Marathon check is included in the [Datadog Agent][1] package. No additional installation is needed on your server.
 
 ### Configuration
 
@@ -44,7 +44,7 @@ To configure this check for an Agent running on a host:
        password: "<PASSWORD>"
    ```
 
-   The function of `username` and `password` depends on whether or not you configure `acs_url`; If you do, the Agent uses them to request an authentication token from ACS, which it then uses to authenticate to the Marathon API. Otherwise, the Agent uses `username` and `password` to directly authenticate to the Marathon API.
+   The function of `username` and `password` depends on whether or not you configure `acs_url`. If you do, the Agent uses them to request an authentication token from ACS, which it then uses to authenticate to the Marathon API. Otherwise, the Agent uses `username` and `password` to directly authenticate to the Marathon API.
 
 2. [Restart the Agent][4].
 
@@ -124,7 +124,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][5]
 
 _Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][6].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][6].
 
 | Parameter      | Value                                                 |
 | -------------- | ----------------------------------------------------- |
@@ -149,12 +149,12 @@ The Marathon check does not include any events.
 
 ### Service Checks
 
-**marathon.can_connect**:<br>
-Returns `CRITICAL` if the Agent cannot connect to the Marathon API to collect metrics, otherwise returns `OK`.
+See [service_checks.json][9] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][9].
+Need help? Contact [Datadog support][10].
+
 
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
@@ -164,4 +164,5 @@ Need help? Contact [Datadog support][9].
 [6]: https://docs.datadoghq.com/agent/kubernetes/log/
 [7]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [8]: https://github.com/DataDog/integrations-core/blob/master/marathon/metadata.csv
-[9]: https://docs.datadoghq.com/help/
+[9]: https://github.com/DataDog/integrations-core/blob/master/marathon/assets/service_checks.json
+[10]: https://docs.datadoghq.com/help/

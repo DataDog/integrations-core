@@ -1,0 +1,67 @@
+[build-system]
+requires = [
+    "hatchling>=0.11.2",
+    "setuptools<61",
+]
+build-backend = "hatchling.build"
+
+[project]
+name = "datadog-gunicorn"
+description = "The Gunicorn check"
+readme = "README.md"
+keywords = [
+    "datadog",
+    "datadog agent",
+    "datadog check",
+    "gunicorn",
+]
+authors = [
+    { name = "Datadog", email = "packages@datadoghq.com" },
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: BSD License",
+    "Programming Language :: Python :: 2.7",
+    "Programming Language :: Python :: 3.8",
+    "Topic :: System :: Monitoring",
+    "Private :: Do Not Upload",
+]
+dependencies = [
+    "datadog-checks-base>=25.1.0",
+]
+dynamic = [
+    "version",
+]
+
+[project.license]
+text = "BSD-3-Clause"
+
+[project.optional-dependencies]
+deps = [
+    "psutil==5.9.0",
+]
+
+[project.urls]
+Source = "https://github.com/DataDog/integrations-core"
+
+[tool.hatch.version]
+path = "datadog_checks/gunicorn/__about__.py"
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/datadog_checks",
+    "/tests",
+    "/manifest.json",
+    "/requirements-dev.txt",
+    "/tox.ini",
+]
+
+[tool.hatch.build.targets.wheel]
+include = [
+    "/datadog_checks/gunicorn",
+]
+dev-mode-dirs = [
+    ".",
+]

@@ -1,0 +1,64 @@
+[build-system]
+requires = [
+    "hatchling>=0.11.2",
+    "setuptools; python_version < '3.0'",
+]
+build-backend = "hatchling.build"
+
+[project]
+name = "datadog-teradata"
+description = "The Teradata check"
+readme = "README.md"
+license = "BSD-3-Clause"
+requires-python = ">=3.8"
+keywords = [
+    "datadog",
+    "datadog agent",
+    "datadog check",
+    "teradata",
+]
+authors = [
+    { name = "Datadog", email = "packages@datadoghq.com" },
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: BSD License",
+    "Programming Language :: Python :: 2.7",
+    "Programming Language :: Python :: 3.8",
+    "Topic :: System :: Monitoring",
+    "Private :: Do Not Upload",
+]
+dependencies = [
+    "datadog-checks-base>=25.2.2",
+]
+dynamic = [
+    "version",
+]
+
+[project.optional-dependencies]
+deps = []
+
+[project.urls]
+Source = "https://github.com/DataDog/integrations-core"
+
+[tool.hatch.version]
+path = "datadog_checks/teradata/__about__.py"
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/datadog_checks",
+    "/tests",
+    "/manifest.json",
+    "/requirements-dev.txt",
+    "/tox.ini",
+]
+
+[tool.hatch.build.targets.wheel]
+include = [
+    "/datadog_checks/teradata",
+]
+dev-mode-dirs = [
+    ".",
+]

@@ -1,47 +1,63 @@
 {
-  "categories": [
-    "data store",
-    "log collection"
-  ],
-  "creates_events": false,
-  "description": "The istio integration collects data from the istio service mesh and mixer.",
-  "display_name": "Istio",
-  "guid": "d8bd53c0-0884-4357-9517-11858bf6aa9d",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "istio.",
-  "metric_to_check": [
-    "istio.mixer.process.cpu_seconds_total",
-    "istio.mesh.request.count",
-    "istio.galley.endpoint_no_pod"
-  ],
-  "name": "istio",
-  "public_title": "Datadog-Istio Integration",
-  "short_description": "Collect performance schema metrics, query throughput, custom metrics, and more.",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "type": "check",
-  "integration_id": "istio",
+  "manifest_version": "2.0.0",
+  "app_uuid": "de5b5443-5038-46cf-a052-0484348776d6",
+  "app_id": "istio",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Collect performance schema metrics, query throughput, custom metrics, and more.",
+    "title": "Istio",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Data Store",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "Istio",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "istio.",
+        "check": [
+          "istio.mixer.process.cpu_seconds_total",
+          "istio.mesh.request.count",
+          "istio.galley.endpoint_no_pod"
+        ],
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {
+      "Istio base dashboard": "assets/dashboards/istio_overview.json",
+      "Istio Overview 1.5": "assets/dashboards/istio_1_5_overview.json",
+      "Istio Overview 1.5 (OpenMetrics)": "assets/dashboards/istio_1_5_openmetrics_overview.json"
     },
     "monitors": {
       "Failed sidecar injections": "assets/monitors/failed_sidecar_injection.json"
     },
-    "dashboards": {
-      "Istio base dashboard": "assets/dashboards/istio_overview.json",
-      "Istio Overview 1.5": "assets/dashboards/istio_1_5_overview.json"
-    },
-    "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "istio"
-    },
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

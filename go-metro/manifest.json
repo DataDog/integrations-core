@@ -1,32 +1,45 @@
 {
-  "categories": [
-    "languages"
-  ],
-  "creates_events": false,
-  "display_name": "Go-Metro",
-  "guid": "6d00688b-32b1-4755-98cd-44bd1bd40428",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "system.",
-  "metric_to_check": "system.net.tcp.rtt",
-  "name": "go-metro",
-  "public_title": "Datadog-Go-Metro Integration",
-  "short_description": "Passively calculate TCP RTT between hosts",
-  "support": "core",
-  "supported_os": [
-    "linux"
-  ],
-  "type": "check",
-  "integration_id": "go-metro",
+  "manifest_version": "2.0.0",
+  "app_uuid": "77c9906a-9579-4014-95c3-42b4536dc17d",
+  "app_id": "go-metro",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Passively calculate TCP RTT between hosts",
+    "title": "Go-Metro",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Category::Languages"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
-    },
-    "monitors": {},
-    "dashboards": {},
-    "service_checks": "assets/service_checks.json",
-    "logs": {},
-    "metrics_metadata": "metadata.csv"
+    "integration": {
+      "source_type_name": "Go-Metro",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "system.",
+        "check": "system.net.tcp.rtt",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    }
   }
 }

@@ -5,12 +5,13 @@
 #
 ad_identifiers:
   - cilium-agent
+  - cilium
 
 ## All options defined here are available to all instances.
 #
 init_config:
 
-## Every instance is scheduled independent of the others.
+## Every instance is scheduled independently of the others.
 #
 instances:
 

@@ -1,5 +1,10 @@
 # Profile for F5 BIG-IP devices
 #
+# Details related to F5-BIGIP-SYSTEM-MIB:
+#   http://www.mibdepot.com/cgi-bin/getmib3.cgi?win=mib_a&r=f5&f=F5-BIGIP-SYSTEM-MIB&v=v2&t=tree
+# Example sysDescr:
+#   BIG-IP Virtual Edition : Linux 3.10.0-862.14.4.el7.ve.x86_64 : BIG-IP software release 15.0.1, build 0.0.11
+
 extends:
   - _base.yaml
   - _generic-if.yaml # F5-specific variants of the other metrics are provided in this profile.
@@ -8,12 +13,44 @@ extends:
   - _generic-tcp.yaml
   - _generic-udp.yaml
   - _generic-ip.yaml
+  - _f5-big-ip-cpu-memory.yaml
 
 device:
   vendor: "f5"
 
 
 sysobjectid: 1.3.6.1.4.1.3375.2.1.3.4.*
+
+metadata:
+  device:
+    fields:
+      vendor:
+        value: "f5"
+      serial_number:
+        symbol:
+          MIB: F5-BIGIP-SYSTEM-MIB
+          OID: 1.3.6.1.4.1.3375.2.1.3.3.3.0
+          name: sysGeneralChassisSerialNum # The system serial number. 26ff4a4d-190e-12ac-d4257ed36ba6
+      version:
+        symbol:
+          OID: 1.3.6.1.4.1.3375.2.1.4.2.0
+          name: sysProductVersion # Displays BIG-IP software version information. e.g. 15.0.1
+      product_name:
+        symbol:
+          OID: 1.3.6.1.4.1.3375.2.1.4.1.0
+          name: sysProductName # The product name. e.g. BIG-IP
+      model:
+        symbol:
+          OID: 1.3.6.1.4.1.3375.2.1.3.3.1.0
+          name: sysGeneralHwName # The name of the system hardware model. e.g. Z100
+      os_name:
+        symbol:
+          OID: 1.3.6.1.4.1.3375.2.1.6.1.0
+          name: sysSystemName # The operating system name. e.g. Linux
+      os_version:
+        symbol:
+          OID: 1.3.6.1.4.1.3375.2.1.6.3.0
+          name: sysSystemRelease # The current system release level. e.g. 3.10.0-862.14.4.el7.ve.x86_64
 
 metrics:
   # Memory stats
@@ -57,6 +94,20 @@ metrics:
     symbol:
       OID: 1.3.6.1.4.1.3375.2.1.1.2.20.47.0
       name: sysGlobalHostSwapUsed
+  # CPU
+  - MIB: F5-BIGIP-SYSTEM-MIB
+    table:
+      OID: 1.3.6.1.4.1.3375.2.1.7.5.2
+      name: sysMultiHostCpuTable
+    forced_type: gauge
+    symbols:
+      - OID: 1.3.6.1.4.1.3375.2.1.7.5.2.1.11
+        name: sysMultiHostCpuUsageRatio
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.4.1.3375.2.1.7.5.2.1.3
+          name: sysMultiHostCpuId
+        tag: cpu
   - MIB: F5-BIGIP-SYSTEM-MIB
     table:
       OID: 1.3.6.1.4.1.3375.2.1.7.5.2

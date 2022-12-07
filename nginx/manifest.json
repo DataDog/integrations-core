@@ -1,46 +1,64 @@
 {
-  "categories": [
-    "web",
-    "log collection"
-  ],
-  "creates_events": false,
-  "display_name": "Nginx",
-  "guid": "88620208-3919-457c-ba51-d844d09ac97f",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "nginx.",
-  "metric_to_check": [
-    "nginx.net.connections",
-    "nginx.connections.active"
-  ],
-  "name": "nginx",
-  "process_signatures": [
-    "nginx: master process"
-  ],
-  "public_title": "Datadog-Nginx Integration",
-  "short_description": "Monitor connection and request metrics. Get more metrics with NGINX Plus.",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "type": "check",
-  "integration_id": "nginx",
+  "manifest_version": "2.0.0",
+  "app_uuid": "b98a5a97-1d65-4f74-9d1a-b2c1be85a470",
+  "app_id": "nginx",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor connection and request metrics. Get more metrics with NGINX Plus.",
+    "title": "Nginx",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Web",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
-    },
-    "monitors": {
-      "[NGINX] Upstream peers fails": "assets/monitors/upstream_peer_fails.json",
-      "[NGINX] 4xx Errors higher than usual": "assets/monitors/4xx.json",
-      "[NGINX] 5xx Errors higher than usual": "assets/monitors/5xx.json"
+    "integration": {
+      "source_type_name": "Nginx",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "nginx.",
+        "check": [
+          "nginx.net.connections",
+          "nginx.connections.active"
+        ],
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      },
+      "process_signatures": [
+        "nginx: master process"
+      ]
     },
     "dashboards": {
       "NGINX Plus base overview": "assets/dashboards/plus_overview.json",
       "NGINX-Metrics": "assets/dashboards/NGINX-Metrics_dashboard.json",
       "NGINX-Overview": "assets/dashboards/NGINX-Overview_dashboard.json"
+    },
+    "monitors": {
+      "[NGINX] Upstream peers fails": "assets/monitors/upstream_peer_fails.json",
+      "[NGINX] 4xx Errors higher than usual": "assets/monitors/4xx.json",
+      "[NGINX] 5xx Errors higher than usual": "assets/monitors/5xx.json"
     },
     "saved_views": {
       "4xx_errors": "assets/saved_views/4xx_errors.json",
@@ -49,10 +67,8 @@
       "bot_errors": "assets/saved_views/bot_errors.json",
       "nginx_processes": "assets/saved_views/nginx_processes.json"
     },
-    "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "nginx"
-    },
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

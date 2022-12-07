@@ -3,6 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
 
+from datadog_checks.base.utils.serialization import json
+
 
 class DatadogAgentStub(object):
     """
@@ -18,14 +20,17 @@ class DatadogAgentStub(object):
         self._metadata = {}
         self._cache = {}
         self._config = self.get_default_config()
+        self._hostname = 'stubbed.hostname'
+        self._process_start_time = 0
 
     def get_default_config(self):
-        return {'enable_metadata_collection': True}
+        return {'enable_metadata_collection': True, 'disable_unsafe_yaml': True}
 
     def reset(self):
         self._metadata.clear()
         self._cache.clear()
         self._config = self.get_default_config()
+        self._process_start_time = 0
 
     def assert_metadata(self, check_id, data):
         actual = {}
@@ -36,10 +41,19 @@ class DatadogAgentStub(object):
         assert data == actual
 
     def assert_metadata_count(self, count):
-        assert len(self._metadata) == count
+        metadata_items = len(self._metadata)
+        assert metadata_items == count, 'Expected {} metadata items, found {}. Submitted metadata: {}'.format(
+            count, metadata_items, repr(self._metadata)
+        )
 
     def get_hostname(self):
-        return 'stubbed.hostname'
+        return self._hostname
+
+    def set_hostname(self, hostname):
+        self._hostname = hostname
+
+    def reset_hostname(self):
+        self._hostname = 'stubbed.hostname'
 
     def get_config(self, config_option):
         return self._config.get(config_option, '')
@@ -65,13 +79,24 @@ class DatadogAgentStub(object):
     def read_persistent_cache(self, key):
         return self._cache.get(key, '')
 
-    def obfuscate_sql(self, query):
-        # This is only whitespace cleanup, NOT obfuscation. Full obfuscation implementation is in go code.
-        return re.sub(r'\s+', ' ', query or '')
+    def obfuscate_sql(self, query, options=None):
+        # Full obfuscation implementation is in go code.
+        if options:
+            # Options provided is a JSON string because the Go stub requires it, whereas
+            # the python stub does not for things such as testing.
+            if json.loads(options).get('return_json_metadata', False):
+                return json.dumps({'query': re.sub(r'\s+', ' ', query or '').strip(), 'metadata': {}})
+        return re.sub(r'\s+', ' ', query or '').strip()
 
     def obfuscate_sql_exec_plan(self, plan, normalize=False):
         # Passthrough stub: obfuscation implementation is in Go code.
         return plan
+
+    def get_process_start_time(self):
+        return self._process_start_time
+
+    def set_process_start_time(self, time):
+        self._process_start_time = time
 
 
 # Use the stub as a singleton

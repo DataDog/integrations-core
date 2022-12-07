@@ -335,7 +335,7 @@ class ApplyResult(object):
         the collector will be called when the result from the Job is
         ready
         :param callback: when not None, function to call when the
-        result becomes available (this is the paramater passed to the
+        result becomes available (this is the parameter passed to the
         Pool::*_async() methods.
         """
         self._success = False
@@ -396,7 +396,7 @@ class ApplyResult(object):
                 traceback.print_exc()
 
     def _set_exception(self):
-        """Called by a Job object to tell that an exception occured
+        """Called by a Job object to tell that an exception occurred
         during the processing of the function. The object will become
         ready but not successful. The collector's notify_ready()
         method will be called, but NOT the callback method"""

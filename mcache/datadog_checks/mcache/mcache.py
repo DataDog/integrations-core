@@ -31,6 +31,7 @@ class Memcache(AgentCheck):
         "uptime",
         "bytes",
         "curr_connections",
+        "max_connections",
         "connection_structures",
         "threads",
         "pointer_size",
@@ -141,33 +142,41 @@ class Memcache(AgentCheck):
                     self.rate(our_metric, float(stats[metric]), tags=tags)
 
             # calculate some metrics based on other metrics.
-            # stats should be present, but wrap in try/except
-            # and log an exception just in case.
-            try:
-                self.gauge(
-                    "memcache.get_hit_percent", 100.0 * float(stats["get_hits"]) / float(stats["cmd_get"]), tags=tags
+            # stats should be present, but log an exception just in case.
+            get_hits = stats.get("get_hits")
+            cmd_get = stats.get("cmd_get")
+            bytes = stats.get("bytes")
+            limit_maxbytes = stats.get("limit_maxbytes")
+            curr_items = stats.get("curr_items")
+
+            if get_hits and cmd_get and float(cmd_get) != 0:
+                self.gauge("memcache.get_hit_percent", 100.0 * float(get_hits) / float(cmd_get), tags=tags)
+            else:
+                self.log.warning(
+                    "memcache.get_hit_percent cannot be collected because `get_hits` or `cmd_get` are "
+                    "missing, or `cmd_get` is 0"
                 )
-            except ZeroDivisionError:
-                pass
 
-            try:
-                self.gauge(
-                    "memcache.fill_percent", 100.0 * float(stats["bytes"]) / float(stats["limit_maxbytes"]), tags=tags
+            if bytes and limit_maxbytes and float(limit_maxbytes) != 0:
+                self.gauge("memcache.fill_percent", 100.0 * float(bytes) / float(limit_maxbytes), tags=tags)
+            else:
+                self.log.warning(
+                    "memcache.fill_percent cannot be collected because `bytes` or `limit_maxbytes` are "
+                    "missing, or `limit_maxbytes` is 0"
                 )
-            except ZeroDivisionError:
-                pass
 
-            try:
-                self.gauge("memcache.avg_item_size", float(stats["bytes"]) / float(stats["curr_items"]), tags=tags)
-            except ZeroDivisionError:
-                pass
+            if bytes and curr_items and float(curr_items) != 0:
+                self.gauge("memcache.avg_item_size", float(bytes) / float(curr_items), tags=tags)
+            else:
+                self.log.warning(
+                    "memcache.avg_item_size cannot be collected because `bytes` or `curr_items` are "
+                    "missing, or `curr_items` is 0"
+                )
 
-            uptime = stats.get("uptime", 0)
             self.service_check(
                 self.SERVICE_CHECK,
                 AgentCheck.OK,
                 tags=service_check_tags,
-                message="Server has been up for %s seconds" % uptime,
             )
         except BadResponseError:
             raise

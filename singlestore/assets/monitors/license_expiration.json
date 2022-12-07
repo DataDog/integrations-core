@@ -1,0 +1,30 @@
+{
+	"name": "[SingleStore] License will expire soon",
+	"type": "query alert",
+	"query": "avg(last_5m):cutoff_min(avg:singlestore.seconds_until_expiration{*} by {singlestore_node_name,singlestore_node_id}, -0.1) < 604800",
+	"message": "{{#is_alert}}\nSingleStore license will expire in 7 days on node {{singlestore_node_name.name}}\n{{/is_alert}} \n\n{{#is_warning}}\nSingleStore license will expire in 30 days on node {{singlestore_node_name.name}}\n{{/is_warning}} ",
+	"tags": [
+		"integration:singlestore"
+	],
+	"options": {
+		"notify_audit": false,
+		"locked": false,
+		"timeout_h": 0,
+		"new_group_delay": 60,
+		"require_full_window": false,
+		"notify_no_data": false,
+		"renotify_interval": "0",
+		"escalation_message": "",
+		"no_data_timeframe": null,
+		"include_tags": true,
+		"thresholds": {
+			"critical": 604800,
+			"warning": 2592000
+		}
+	},
+	"priority": null,
+	"restricted_roles": null,
+    "recommended_monitor_metadata": {
+        "description": "Notify your team before your SingleStore license expires."
+    }
+}

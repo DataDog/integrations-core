@@ -27,14 +27,14 @@ MemoryMetrics = {
         {'name': 'memory.rss', 'type': 'gauge'},
         {'name': 'memory.java.used', 'type': 'gauge'},
         {'name': 'memory.java.unused', 'type': 'gauge'},
-        {'name': 'memory.java.max_heap', 'type': 'gauge'},
         {'name': 'memory.tuple_data', 'type': 'gauge'},
         {'name': 'memory.tuple_allocated', 'type': 'gauge'},
-        {'name': 'memory.tuple_count', 'type': 'gauge'},
         {'name': 'memory.index', 'type': 'gauge'},
         {'name': 'memory.string', 'type': 'gauge'},
+        {'name': 'memory.tuple_count', 'type': 'gauge'},
         {'name': 'memory.pooled', 'type': 'gauge'},
         {'name': 'memory.physical', 'type': 'gauge'},
+        {'name': 'memory.java.max_heap', 'type': 'gauge'},
     ],
 }
 
@@ -67,7 +67,7 @@ SnapshotStatusMetrics = {
 # (Enterprise edition only.)
 CommandLogMetrics = {
     'name': 'commandlog',
-    'query': '@Statistics:[COMMANDLOG]',
+    'query': '@Statistics:[COMMANDLOG, 1]',
     'columns': [
         None,  # TIMESTAMP
         {'name': 'host_id', 'type': 'tag'},
@@ -84,7 +84,7 @@ CommandLogMetrics = {
 # One row per (non-system) stored procedure that has been executed on the cluster, by execution site.
 ProcedureMetrics = {
     'name': 'procedure',
-    'query': '@Statistics:[PROCEDURE]',
+    'query': '@Statistics:[PROCEDURE, 1]',
     'columns': [
         None,  # TIMESTAMP
         {'name': 'host_id', 'type': 'tag'},
@@ -142,7 +142,7 @@ LatencyMetrics = {
 # One row per server.
 GCMetrics = {
     'name': 'gc',
-    'query': '@Statistics:[GC]',
+    'query': '@Statistics:[GC, 1]',
     'columns': [
         None,  # TIMESTAMP
         {'name': 'host_id', 'type': 'tag'},
@@ -158,7 +158,7 @@ GCMetrics = {
 # One row per client connection on the cluster.
 IOStatsMetrics = {
     'name': 'iostats',
-    'query': '@Statistics:[IOSTATS]',
+    'query': '@Statistics:[IOSTATS, 1]',
     'columns': [
         None,  # TIMESTAMP
         {'name': 'host_id', 'type': 'tag'},
@@ -176,7 +176,7 @@ IOStatsMetrics = {
 # One row per partition of each table (num_partitions = num_sites_per_node * num_nodes).
 TableMetrics = {
     'name': 'table',
-    'query': '@Statistics:[TABLE]',
+    'query': '@Statistics:[TABLE, 1]',
     'columns': [
         None,  # TIMESTAMP
         {'name': 'host_id', 'type': 'tag'},
@@ -202,7 +202,7 @@ TableMetrics = {
 # One row per index.
 IndexMetrics = {
     'name': 'index',
-    'query': '@Statistics:[INDEX]',
+    'query': '@Statistics:[INDEX, 1]',
     'columns': [
         None,  # TIMESTAMP
         {'name': 'host_id', 'type': 'tag'},
@@ -224,7 +224,7 @@ IndexMetrics = {
 # One row per export stream per partition.
 ExportMetrics = {
     'name': 'export',
-    'query': '@Statistics:[EXPORT]',
+    'query': '@Statistics:[EXPORT, 1]',
     'columns': [
         None,  # TIMESTAMP
         {'name': 'host_id', 'type': 'tag'},
@@ -271,7 +271,7 @@ ExportMetrics = {
 # One row per import stream per server.
 ImportMetrics = {
     'name': 'import',
-    'query': '@Statistics:[IMPORT]',
+    'query': '@Statistics:[IMPORT, 1]',
     'columns': [
         None,  # TIMESTAMP
         {'name': 'host_id', 'type': 'tag'},
@@ -290,7 +290,7 @@ ImportMetrics = {
 # One row per partition and host listing the current state of the process queue.
 QueueMetrics = {
     'name': 'queue',
-    'query': '@Statistics:[QUEUE]',
+    'query': '@Statistics:[QUEUE, 1]',
     'columns': [
         None,  # TIMESTAMP
         {'name': 'host_id', 'type': 'tag'},
@@ -310,7 +310,7 @@ QueueMetrics = {
 # One row per execution site and host.
 IdleTimeMetrics = {
     'name': 'idletime',
-    'query': '@Statistics:[IDLETIME]',
+    'query': '@Statistics:[IDLETIME, 1]',
     'columns': [
         None,  # TIMESTAMP
         {'name': 'host_id', 'type': 'tag'},
@@ -326,7 +326,7 @@ IdleTimeMetrics = {
 }
 
 # See: https://docs.voltdb.com/UsingVoltDB/sysprocstatistics.php#sysprocstatprocedureoutput
-# One row per procedure, summarized accross the cluster.
+# One row per procedure, summarized across the cluster.
 ProcedureOutputMetrics = {
     'name': 'procedureoutput',
     'query': '@Statistics:[PROCEDUREOUTPUT]',
@@ -344,7 +344,7 @@ ProcedureOutputMetrics = {
 
 
 # See: https://docs.voltdb.com/UsingVoltDB/sysprocstatistics.php#sysprocstatprocedureprofile
-# One row per procedure, summarized accross the cluster.
+# One row per procedure, summarized across the cluster.
 ProcedureProfileMetrics = {
     'name': 'procedureprofile',
     'query': '@Statistics:[PROCEDUREPROFILE]',

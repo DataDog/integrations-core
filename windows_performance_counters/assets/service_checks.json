@@ -1,0 +1,17 @@
+[
+    {
+        "agent_version": "7.33.0",
+        "integration": "Windows performance counters",
+        "check": "windows.perf.health",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "groups": [
+            "host",
+            "server"
+        ],
+        "name": "Windows performance counters health",
+        "description": "Returns `CRITICAL` if the Agent is unable to connect to the Windows system, otherwise returns `OK`."
+    }
+]

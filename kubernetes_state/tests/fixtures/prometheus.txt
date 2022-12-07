@@ -31,6 +31,12 @@ kube_cronjob_status_active{cronjob="hello",namespace="default"} 0
 # HELP kube_cronjob_status_last_schedule_time LastScheduleTime keeps information of when was the last time the job was successfully scheduled.
 # TYPE kube_cronjob_status_last_schedule_time gauge
 kube_cronjob_status_last_schedule_time{cronjob="hello",namespace="default"} 1.50999846e+09
+# HELP kube_statefulset_status_observed_generation The generation observed by the StatefulSet controller.
+# TYPE kube_statefulset_status_observed_generation gauge
+kube_statefulset_status_observed_generation{namespace="default",statefulset="web"} 1
+kube_statefulset_status_observed_generation{namespace="default",statefulset="nginx"} 4
+kube_statefulset_status_observed_generation{namespace="kube-system",statefulset="mysql"} 1
+kube_statefulset_status_observed_generation{namespace="kube-system",statefulset="redis"} 2
 # HELP kube_statefulset_status_replicas The number of replicas per StatefulSet.
 # TYPE kube_statefulset_status_replicas gauge
 kube_statefulset_status_replicas{namespace="ns3",statefulset="statefulset3"} 7
@@ -293,6 +299,7 @@ kube_node_status_condition{condition="OutOfDisk",node="minikube",status="unknown
 kube_node_status_condition{condition="Ready",node="minikube",status="false"} 0
 kube_node_status_condition{condition="Ready",node="minikube",status="true"} 1
 kube_node_status_condition{condition="Ready",node="minikube",status="unknown"} 0
+kube_node_status_condition{condition="Ready",node="test-test-node",status="unknown"} 1
 # HELP kube_node_status_network_unavailable Whether the network is correctly configured for the node.
 # TYPE kube_node_status_network_unavailable gauge
 kube_node_status_network_unavailable{node="127.0.0.1",condition="false"} 1
@@ -476,39 +483,71 @@ kube_pod_container_status_waiting{container="tiller",namespace="kube-system",pod
 # TYPE kube_pod_container_status_waiting_reason gauge
 kube_pod_container_status_waiting_reason{container="dd-k8state",namespace="default",pod="jaundiced-numbat-dd-k8state-b6s77",reason="ContainerCreating"} 0
 kube_pod_container_status_waiting_reason{container="dd-k8state",namespace="default",pod="jaundiced-numbat-dd-k8state-b6s77",reason="ErrImagePull"} 1
+kube_pod_container_status_waiting_reason{container="dd-k8state",namespace="default",pod="jaundiced-numbat-dd-k8state-b6s77",reason="CreateContainerError"} 0
+kube_pod_container_status_waiting_reason{container="dd-k8state",namespace="default",pod="jaundiced-numbat-dd-k8state-b6s77",reason="InvalidImageName"} 1
 kube_pod_container_status_waiting_reason{container="dnsmasq",namespace="kube-system",pod="kube-dns-1326421443-hj4hx",reason="ContainerCreating"} 0
 kube_pod_container_status_waiting_reason{container="dnsmasq",namespace="kube-system",pod="kube-dns-1326421443-hj4hx",reason="ErrImagePull"} 0
+kube_pod_container_status_waiting_reason{container="dnsmasq",namespace="kube-system",pod="kube-dns-1326421443-hj4hx",reason="CreateContainerError"} 0
+kube_pod_container_status_waiting_reason{container="dnsmasq",namespace="kube-system",pod="kube-dns-1326421443-hj4hx",reason="InvalidImageName"} 0
 kube_pod_container_status_waiting_reason{container="hello",namespace="default",pod="hello-1509998340-k4f8q",reason="ContainerCreating"} 0
 kube_pod_container_status_waiting_reason{container="hello",namespace="default",pod="hello-1509998340-k4f8q",reason="ErrImagePull"} 0
+kube_pod_container_status_waiting_reason{container="hello",namespace="default",pod="hello-1509998340-k4f8q",reason="CreateContainerError"} 0
+kube_pod_container_status_waiting_reason{container="hello",namespace="default",pod="hello-1509998340-k4f8q",reason="InvalidImageName"} 0
 kube_pod_container_status_waiting_reason{container="hello",namespace="default",pod="hello-1509998400-rb8bs",reason="ContainerCreating"} 0
 kube_pod_container_status_waiting_reason{container="hello",namespace="default",pod="hello-1509998400-rb8bs",reason="ErrImagePull"} 0
+kube_pod_container_status_waiting_reason{container="hello",namespace="default",pod="hello-1509998400-rb8bs",reason="CreateContainerError"} 0
+kube_pod_container_status_waiting_reason{container="hello",namespace="default",pod="hello-1509998400-rb8bs",reason="InvalidImageName"} 0
 kube_pod_container_status_waiting_reason{container="hello",namespace="default",pod="hello-1509998460-tzh8k",reason="ContainerCreating"} 0
 kube_pod_container_status_waiting_reason{container="hello",namespace="default",pod="hello-1509998460-tzh8k",reason="ErrImagePull"} 0
 kube_pod_container_status_waiting_reason{container="hello",namespace="default",pod="hello-1509998460-tzh8k",reason="CrashLoopBackOff"} 1
+kube_pod_container_status_waiting_reason{container="hello",namespace="default",pod="hello-1509998460-tzh8k",reason="CreateContainerError"} 0
+kube_pod_container_status_waiting_reason{container="hello",namespace="default",pod="hello-1509998460-tzh8k",reason="InvalidImageName"} 1
 kube_pod_container_status_waiting_reason{container="kube-addon-manager",namespace="kube-system",pod="kube-addon-manager-minikube",reason="ContainerCreating"} 0
 kube_pod_container_status_waiting_reason{container="kube-addon-manager",namespace="kube-system",pod="kube-addon-manager-minikube",reason="ErrImagePull"} 0
+kube_pod_container_status_waiting_reason{container="kube-addon-manager",namespace="kube-system",pod="kube-addon-manager-minikube",reason="CreateContainerError"} 0
+kube_pod_container_status_waiting_reason{container="kube-addon-manager",namespace="kube-system",pod="kube-addon-manager-minikube",reason="InvalidImageName"} 0
 kube_pod_container_status_waiting_reason{container="kube-state-metrics",namespace="default",pod="jaundiced-numbat-kube-state-metrics-b7fbc487d-4phhj",reason="ContainerCreating"} 0
 kube_pod_container_status_waiting_reason{container="kube-state-metrics",namespace="default",pod="jaundiced-numbat-kube-state-metrics-b7fbc487d-4phhj",reason="CrashLoopBackoff"} 1
 kube_pod_container_status_waiting_reason{container="kube-state-metrics",namespace="default",pod="jaundiced-numbat-kube-state-metrics-b7fbc487d-4phhj",reason="ImagePullBackoff"} 1
 kube_pod_container_status_waiting_reason{container="kube-state-metrics",namespace="default",pod="jaundiced-numbat-kube-state-metrics-b7fbc487d-4phhj",reason="ErrImagePull"} 0
+kube_pod_container_status_waiting_reason{container="kube-state-metrics",namespace="default",pod="jaundiced-numbat-kube-state-metrics-b7fbc487d-4phhj",reason="CreateContainerError"} 1
+kube_pod_container_status_waiting_reason{container="kube-state-metrics",namespace="default",pod="jaundiced-numbat-kube-state-metrics-b7fbc487d-4phhj",reason="InvalidImageName"} 0
 kube_pod_container_status_waiting_reason{container="kubedns",namespace="kube-system",pod="kube-dns-1326421443-hj4hx",reason="ContainerCreating"} 0
 kube_pod_container_status_waiting_reason{container="kubedns",namespace="kube-system",pod="kube-dns-1326421443-hj4hx",reason="ErrImagePull"} 0
+kube_pod_container_status_waiting_reason{container="kubedns",namespace="kube-system",pod="kube-dns-1326421443-hj4hx",reason="CreateContainerError"} 0
+kube_pod_container_status_waiting_reason{container="kubedns",namespace="kube-system",pod="kube-dns-1326421443-hj4hx",reason="InvalidImageName"} 0
 kube_pod_container_status_waiting_reason{container="kubernetes-dashboard",namespace="kube-system",pod="kubernetes-dashboard-zhtjl",reason="ContainerCreating"} 0
 kube_pod_container_status_waiting_reason{container="kubernetes-dashboard",namespace="kube-system",pod="kubernetes-dashboard-zhtjl",reason="ErrImagePull"} 0
+kube_pod_container_status_waiting_reason{container="kubernetes-dashboard",namespace="kube-system",pod="kubernetes-dashboard-zhtjl",reason="CreateContainerError"} 0
+kube_pod_container_status_waiting_reason{container="kubernetes-dashboard",namespace="kube-system",pod="kubernetes-dashboard-zhtjl",reason="ImagePullBackoff"} 0
 kube_pod_container_status_waiting_reason{container="nginxbleww",namespace="default",pod="failingtest-f585bbd4-2fsml",reason="ContainerCreating"} 0
 kube_pod_container_status_waiting_reason{container="nginxbleww",namespace="default",pod="failingtest-f585bbd4-2fsml",reason="ErrImagePull"} 1
+kube_pod_container_status_waiting_reason{container="nginxbleww",namespace="default",pod="failingtest-f585bbd4-2fsml",reason="CreateContainerError"} 0
+kube_pod_container_status_waiting_reason{container="nginxbleww",namespace="default",pod="failingtest-f585bbd4-2fsml",reason="InvalidImageName"} 1
 kube_pod_container_status_waiting_reason{container="nxf-126",namespace="default",pod="nxf-126",reason="ContainerCreating"} 0
 kube_pod_container_status_waiting_reason{container="nxf-126",namespace="default",pod="nxf-126",reason="ErrImagePull"} 0
+kube_pod_container_status_waiting_reason{container="nxf-126",namespace="default",pod="nxf-126",reason="CreateContainerError"} 0
+kube_pod_container_status_waiting_reason{container="nxf-126",namespace="default",pod="nxf-126",reason="ImagePullBackoff"} 0
 kube_pod_container_status_waiting_reason{container="registry-creds",namespace="kube-system",pod="registry-creds-hq249",reason="ContainerCreating"} 1
 kube_pod_container_status_waiting_reason{container="registry-creds",namespace="kube-system",pod="registry-creds-hq249",reason="ErrImagePull"} 0
+kube_pod_container_status_waiting_reason{container="registry-creds",namespace="kube-system",pod="registry-creds-hq249",reason="CreateContainerError"} 1
+kube_pod_container_status_waiting_reason{container="registry-creds",namespace="kube-system",pod="registry-creds-hq249",reason="InvalidImageName"} 0
 kube_pod_container_status_waiting_reason{container="should-run-once",namespace="default",pod="should-run-once",reason="ContainerCreating"} 0
 kube_pod_container_status_waiting_reason{container="should-run-once",namespace="default",pod="should-run-once",reason="ErrImagePull"} 0
+kube_pod_container_status_waiting_reason{container="should-run-once",namespace="default",pod="should-run-once",reason="CreateContainerError"} 0
+kube_pod_container_status_waiting_reason{container="should-run-once",namespace="default",pod="should-run-once",reason="InvalidImageName"} 0
 kube_pod_container_status_waiting_reason{container="sidecar",namespace="kube-system",pod="kube-dns-1326421443-hj4hx",reason="ContainerCreating"} 0
 kube_pod_container_status_waiting_reason{container="sidecar",namespace="kube-system",pod="kube-dns-1326421443-hj4hx",reason="ErrImagePull"} 0
+kube_pod_container_status_waiting_reason{container="sidecar",namespace="kube-system",pod="kube-dns-1326421443-hj4hx",reason="CreateContainerError"} 0
+kube_pod_container_status_waiting_reason{container="sidecar",namespace="kube-system",pod="kube-dns-1326421443-hj4hx",reason="InvalidImageName"} 0
 kube_pod_container_status_waiting_reason{container="task-pv-container",namespace="default",pod="task-pv-pod",reason="ContainerCreating"} 0
 kube_pod_container_status_waiting_reason{container="task-pv-container",namespace="default",pod="task-pv-pod",reason="ErrImagePull"} 0
+kube_pod_container_status_waiting_reason{container="task-pv-container",namespace="default",pod="task-pv-pod",reason="CreateContainerError"} 0
+kube_pod_container_status_waiting_reason{container="task-pv-container",namespace="default",pod="task-pv-pod",reason="InvalidImageName"} 0
 kube_pod_container_status_waiting_reason{container="tiller",namespace="kube-system",pod="tiller-deploy-1651615695-dcphn",reason="ContainerCreating"} 0
 kube_pod_container_status_waiting_reason{container="tiller",namespace="kube-system",pod="tiller-deploy-1651615695-dcphn",reason="ErrImagePull"} 1
+kube_pod_container_status_waiting_reason{container="tiller",namespace="kube-system",pod="tiller-deploy-1651615695-dcphn",reason="CreateContainerError"} 0
+kube_pod_container_status_waiting_reason{container="tiller",namespace="kube-system",pod="tiller-deploy-1651615695-dcphn",reason="InvalidImageName"} 1
 # HELP kube_pod_created Unix creation timestamp
 # TYPE kube_pod_created gauge
 kube_pod_created{namespace="default",pod="failingtest-f585bbd4-2fsml"} 1.510059371e+09

@@ -3,14 +3,20 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 import copy
+import ipaddress
 import logging
 import os
+import socket
+import sys
+from collections import defaultdict
 
 import pytest
+from six import iteritems
 
 from datadog_checks.base.stubs.aggregator import AggregatorStub
-from datadog_checks.base.utils.common import get_docker_hostname
+from datadog_checks.base.utils.common import get_docker_hostname, to_native_string
 from datadog_checks.dev.docker import get_container_ip
+from datadog_checks.dev.utils import get_active_env
 from datadog_checks.snmp import SnmpCheck
 
 log = logging.getLogger(__name__)
@@ -19,8 +25,8 @@ HOST = get_docker_hostname()
 PORT = 1161
 HERE = os.path.dirname(os.path.abspath(__file__))
 COMPOSE_DIR = os.path.join(HERE, 'compose')
-AUTODISCOVERY_TYPE = os.environ['AUTODISCOVERY_TYPE']
-TOX_ENV_NAME = os.environ['TOX_ENV_NAME']
+SNMP_LISTENER_ENV = os.environ['SNMP_LISTENER_ENV']
+ACTIVE_ENV_NAME = get_active_env()
 
 AUTH_PROTOCOLS = {'MD5': 'usmHMACMD5AuthProtocol', 'SHA': 'usmHMACSHAAuthProtocol'}
 PRIV_PROTOCOLS = {'DES': 'usmDESPrivProtocol', 'AES': 'usmAesCfb128Protocol'}
@@ -30,7 +36,7 @@ SNMP_CONTAINER_NAME = 'dd-snmp'
 
 CHECK_TAGS = ['snmp_device:{}'.format(HOST)]
 
-SNMP_CONF = {'name': 'snmp_conf', 'ip_address': HOST, 'port': PORT, 'community_string': 'public'}
+SNMP_CONF = {'ip_address': HOST, 'port': PORT, 'community_string': 'public'}
 
 SNMP_V3_CONF = {
     'name': 'snmp_v3_conf',
@@ -189,15 +195,18 @@ RESOLVED_TABULAR_OBJECTS = [
     }
 ]
 
-agent_autodiscovery_only = pytest.mark.skipif(AUTODISCOVERY_TYPE != 'agent', reason='Agent discovery only')
-python_autodiscovery_only = pytest.mark.skipif(AUTODISCOVERY_TYPE != 'python', reason='Python discovery only')
+EXCLUDED_E2E_TAG_KEYS = ['agent_version']
+
+snmp_listener_only = pytest.mark.skipif(SNMP_LISTENER_ENV != 'true', reason='Agent snmp lister tests only')
+snmp_integration_only = pytest.mark.skipif(SNMP_LISTENER_ENV != 'false', reason='Normal tests')
+py3_plus_only = pytest.mark.skipif(sys.version_info[0] < 3, reason='Run test with Python 3+ only')
 
 
 def generate_instance_config(metrics, template=None):
     template = template if template else SNMP_CONF
     instance_config = copy.copy(template)
-    instance_config['metrics'] = metrics
-    instance_config['name'] = HOST
+    if metrics:
+        instance_config['metrics'] = metrics
     return instance_config
 
 
@@ -213,6 +222,27 @@ def generate_container_instance_config(metrics):
 def generate_container_profile_config(profile):
     conf = copy.deepcopy(SNMP_CONF)
     conf['ip_address'] = get_container_ip(SNMP_CONTAINER_NAME)
+
+    init_config = {}
+
+    instance = generate_instance_config([], template=conf)
+    instance['community_string'] = profile
+    instance['enforce_mib_constraints'] = False
+    return {
+        'init_config': init_config,
+        'instances': [instance],
+    }
+
+
+def generate_container_profile_config_with_ad(profile):
+    host = socket.gethostbyname(get_container_ip(SNMP_CONTAINER_NAME))
+    network = ipaddress.ip_network(u'{}/29'.format(host), strict=False).with_prefixlen
+    conf = {
+        # Make sure the check handles bytes
+        'network_address': to_native_string(network),
+        'port': PORT,
+        'community_string': 'apc_ups',
+    }
 
     init_config = {}
 
@@ -274,3 +304,36 @@ def assert_common_device_metrics(
     aggregator.assert_metric(
         'snmp.devices_monitored', metric_type=aggregator.GAUGE, tags=tags, count=count, value=devices_monitored_value
     )
+
+
+def remove_tags(tags, tag_keys_to_remove):
+    """
+    Remove tags by excluding tags with specific keys.
+    """
+    new_tags = []
+    for tag in tags:
+        for tag_key in tag_keys_to_remove:
+            if tag.startswith(tag_key + ':'):
+                break
+        else:
+            new_tags.append(tag)
+    return new_tags
+
+
+def dd_agent_check_wrapper(dd_agent_check, *args, **kwargs):
+    """
+    dd_agent_check_wrapper is a wrapper around dd_agent_check that will return an aggregator.
+    The wrapper will modify tags by excluding EXCLUDED_E2E_TAG_KEYS.
+    """
+    aggregator = dd_agent_check(*args, **kwargs)
+    new_agg_metrics = defaultdict(list)
+    for metric_name, metric_list in iteritems(aggregator._metrics):
+        new_metrics = []
+        for metric in metric_list:
+            # metric is a Namedtuple, to modify namedtuple fields we need to use `._replace()`
+            new_metric = metric._replace(tags=remove_tags(metric.tags, EXCLUDED_E2E_TAG_KEYS))
+            new_metrics.append(new_metric)
+        new_agg_metrics[metric_name] = new_metrics
+
+    aggregator._metrics = new_agg_metrics
+    return aggregator

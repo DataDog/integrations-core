@@ -2,13 +2,21 @@
 
 ## Overview
 
-Whether you use Redis as a database, cache, or message queue, this integration helps you track problems with your Redis servers and the parts of your infrastructure that they serve. The Datadog Agent's Redis check collects metrics related to performance, memory usage, blocked clients, slave connections, disk persistence, expired and evicted keys, and many more.
+Whether you use Redis as a database, cache, or message queue, this integration tracks problems with your Redis servers, cloud service, and the parts of your infrastructure they serve. Use the Datadog Agent's Redis check to collects metrics related to:
+
+- Performance
+- Memory usage
+- Blocked clients
+- Secondary connections
+- Disk persistence
+- Expired and evicted keys
+- and many more
 
 ## Setup
 
 ### Installation
 
-The Redis check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your Redis servers.
+The Redis check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your Redis servers.
 
 ### Configuration
 
@@ -21,7 +29,7 @@ To configure this check for an Agent running on a host:
 
 ##### Metric collection
 
-1. Edit the `redisdb.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3]. The following parameters may require updating. See the [sample redisdb.d/conf.yaml][4] for all available configuration options.
+1. Edit the `redisdb.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][2]. The following parameters may require updating. See the [sample redisdb.d/conf.yaml][3] for all available configuration options.
 
    ```yaml
    init_config:
@@ -44,7 +52,7 @@ To configure this check for an Agent running on a host:
        # password: <PASSWORD>
    ```
 
-2. If using Redis 6+ and ACLs, ensure that the user has at least `DB  Viewer` permissions at the Database level, and `Cluster Viewer` permissions if operating in a cluster environment.  For more details, see the [documentation][16].
+2. If using Redis 6+ and ACLs, ensure that the user has at least `DB  Viewer` permissions at the Database level, `Cluster Viewer` permissions if operating in a cluster environment, and `+config|get +info +slowlog|get` ACL rules. For more details, see [Database access control][4].
 
 3. [Restart the Agent][5].
 
@@ -68,7 +76,7 @@ _Available for Agent versions >6.0_
        service: myapplication
    ```
 
-    Change the `path` and `service` parameter values and configure them for your environment. See the [sample redisdb.yaml][4] for all available configuration options.
+    Change the `path` and `service` parameter values and configure them for your environment. See the [sample redisdb.yaml][3] for all available configuration options.
 
 3. [Restart the Agent][5].
 
@@ -89,7 +97,7 @@ To configure this check for an Agent running on a container:
 
 ##### Metric collection
 
-Set [Autodiscovery Integrations Templates][19] as Docker labels on your application container:
+Set [Autodiscovery Integrations Templates][8] as Docker labels on your application container:
 
 ```yaml
 LABEL "com.datadoghq.ad.check_names"='["redisdb"]'
@@ -97,15 +105,15 @@ LABEL "com.datadoghq.ad.init_configs"='[{}]'
 LABEL "com.datadoghq.ad.instances"='[{"host":"%%host%%","port":"6379","password":"%%env_REDIS_PASSWORD%%"}]'
 ```
 
-**Note**: The `"%%env_<ENV_VAR>%%"` template variable logic is used to avoid storing the password in plain text, hence the `REDIS_PASSWORD` environment variable must be set on the Agent container. See the [Autodiscovery Template Variable][17] documentation for more details. Alternatively, the Agent can leverage the `secrets` package to work with any [secrets management][27] backend (such as HashiCorp Vault or AWS Secrets Manager).
+**Note**: The `"%%env_<ENV_VAR>%%"` template variable logic is used to avoid storing the password in plain text, hence the `REDIS_PASSWORD` environment variable must be set on the Agent container. See the [Autodiscovery Template Variable][9] documentation for more details. Alternatively, the Agent can leverage the `secrets` package to work with any [secrets management][10] backend (such as HashiCorp Vault or AWS Secrets Manager).
 
 ##### Log collection
 
 _Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Docker log collection documentation][18].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker Log Collection][11].
 
-Then, set [Log Integrations][20] as Docker labels:
+Then, set [Log Integrations][12] as Docker labels:
 
 ```yaml
 LABEL "com.datadoghq.ad.logs"='[{"source":"redis","service":"<YOUR_APP_NAME>"}]'
@@ -123,7 +131,7 @@ Required environment variables on the Agent container:
 | `<DD_APM_ENABLED>`      | true                                                              |
 | `<DD_APM_NON_LOCAL_TRAFFIC>`  | true |
 
-See [Tracing Docker Applications][21] for a complete list of available environment variables and configuration.
+See [Tracing Docker Applications][13] for a complete list of available environment variables and configuration.
 
 Then, [instrument your application container that makes requests to Redis][7] and set `DD_AGENT_HOST` to the name of your Agent container.
 
@@ -137,7 +145,9 @@ To configure this check for an Agent running on Kubernetes:
 
 ##### Metric collection
 
-Set [Autodiscovery Integrations Templates][22] as pod annotations on your application container. Aside from this, templates can also be configure via [a file, a configmap, or a key-value store][23].
+Set [Autodiscovery Integrations Templates][14] as pod annotations on your application container. Aside from this, templates can also be configured using a [file, configmap, or key-value store][15].
+
+**Annotations v1** (for Datadog Agent < v7.36)
 
 ```yaml
 apiVersion: v1
@@ -165,15 +175,48 @@ spec:
         - containerPort: 6379
 ```
 
-**Note**: The `"%%env_<ENV_VAR>%%"` template variable logic is used to avoid storing the password in plain text, hence the `REDIS_PASSWORD` environment variable must be set on the Agent container. See the [Autodiscovery Template Variable][17] documentation. Alternatively, the Agent can leverage the `secrets` package to work with any [secrets management][27] backend (such as HashiCorp Vault or AWS Secrets Manager).
+**Annotations v2** (for Datadog Agent v7.36+)
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: redis
+  annotations:
+    ad.datadoghq.com/redis.checks: |
+      {
+        "redisdb": {
+          "init_config": {},
+          "instances": [
+            {
+              "host": "%%host%%",
+              "port":"6379",
+              "password":"%%env_REDIS_PASSWORD%%"
+            }
+          ]
+        }
+      }
+  labels:
+    name: redis
+spec:
+  containers:
+    - name: redis
+      image: redis:latest
+      ports:
+        - containerPort: 6379
+```
+
+**Note**: The `"%%env_<ENV_VAR>%%"` template variable logic is used to avoid storing the password in plain text, hence the `REDIS_PASSWORD` environment variable must be set on the Agent container. See the [Autodiscovery Template Variable][9] documentation. Alternatively, the Agent can leverage the `secrets` package to work with any [secrets management][10] backend (such as HashiCorp Vault or AWS Secrets Manager).
 
 ##### Log collection
 
 _Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Kubernetes log collection documentation][13].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][16].
 
-Then, set [Log Integrations][20] as pod annotations. This can also be configure via [a file, a configmap, or a key-value store][24].
+Then, set [Log Integrations][12] as pod annotations. This can also be configure using a [file, configmap, or key-value store][17].
+
+**Annotations v1/v2**
 
 ```yaml
 apiVersion: v1
@@ -204,7 +247,7 @@ Required environment variables on the Agent container:
 | `<DD_APM_ENABLED>`      | true                                                              |
 | `<DD_APM_NON_LOCAL_TRAFFIC>`  | true |
 
-See [Tracing Kubernetes Applications][14] and the [Kubernetes Daemon Setup][15] for a complete list of available environment variables and configuration.
+See [Tracing Kubernetes Applications][18] and the [Kubernetes Daemon Setup][19] for a complete list of available environment variables and configuration.
 
 Then, [instrument your application container that makes requests to Redis][7].
 
@@ -217,7 +260,7 @@ To configure this check for an Agent running on ECS:
 
 ##### Metric collection
 
-Set [Autodiscovery Integrations Templates][19] as Docker labels on your application container:
+Set [Autodiscovery Integrations Templates][8] as Docker labels on your application container:
 
 ```json
 {
@@ -233,15 +276,15 @@ Set [Autodiscovery Integrations Templates][19] as Docker labels on your applicat
 }
 ```
 
-**Note**: The `"%%env_<ENV_VAR>%%"` template variable logic is used to avoid storing the password in plain text, hence the `REDIS_PASSWORD` environment variable must be set on the Agent container. See the [Autodiscovery Template Variable][17] documentation. Alternatively, the Agent can leverage the `secrets` package to work with any [secrets management][27] backend (such as HashiCorp Vault or AWS Secrets Manager).
+**Note**: The `"%%env_<ENV_VAR>%%"` template variable logic is used to avoid storing the password in plain text, hence the `REDIS_PASSWORD` environment variable must be set on the Agent container. See the [Autodiscovery Template Variable][9] documentation. Alternatively, the Agent can leverage the `secrets` package to work with any [secrets management][10] backend (such as HashiCorp Vault or AWS Secrets Manager).
 
 ##### Log collection
 
 _Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [ECS log collection documentation][26].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [ECS Log Collection][20].
 
-Then, set [Log Integrations][20] as Docker labels:
+Then, set [Log Integrations][12] as Docker labels:
 
 ```yaml
 {
@@ -267,22 +310,22 @@ Required environment variables on the Agent container:
 | `<DD_APM_ENABLED>`      | true                                                              |
 | `<DD_APM_NON_LOCAL_TRAFFIC>`  | true |
 
-See [Tracing Docker Applications][21] for a complete list of available environment variables and configuration.
+See [Tracing Docker Applications][13] for a complete list of available environment variables and configuration.
 
-Then, [instrument your application container that makes requests to Redis][7] and set `DD_AGENT_HOST` to the [EC2 private IP address][25].
+Then, [instrument your application container that makes requests to Redis][7] and set `DD_AGENT_HOST` to the [EC2 private IP address][21].
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
 ### Validation
 
-[Run the Agent's status subcommand][8] and look for `redisdb` under the Checks section.
+[Run the Agent's status subcommand][22] and look for `redisdb` under the Checks section.
 
 ## Data Collected
 
 ### Metrics
 
-See [metadata.csv][9] for a list of metrics provided by this integration.
+See [metadata.csv][23] for a list of metrics provided by this integration.
 
 ### Events
 
@@ -290,15 +333,9 @@ The Redis check does not include any events.
 
 ### Service Checks
 
-**redis.can_connect**:<br>
-Returns `CRITICAL` if the Agent cannot connect to Redis to collect metrics, otherwise returns `OK`.
-
-**redis.replication.master_link_status**:<br>
-Returns `CRITICAL` if this Redis instance is unable to connect to its master instance, otherwise returns `OK`.
+See [service_checks.json][24] for a list of service checks provided by this integration.
 
 ## Troubleshooting
-
-- [Redis Integration Error: "unknown command 'CONFIG'"][10]
 
 ### Agent cannot connect
 
@@ -306,7 +343,7 @@ Returns `CRITICAL` if this Redis instance is unable to connect to its master ins
     redisdb
     -------
       - instance #0 [ERROR]: 'Error 111 connecting to localhost:6379. Connection refused.'
-      - Collected 0 metrics, 0 events & 1 service chec
+      - Collected 0 metrics, 0 events & 1 service check
 ```
 
 Check that the connection info in `redisdb.yaml` is correct.
@@ -326,32 +363,30 @@ Configure a `password` in `redisdb.yaml`.
 
 Additional helpful documentation, links, and articles:
 
-- [How to monitor Redis performance metrics][12]
+- [How to monitor Redis performance metrics][26]
 
-[1]: https://docs.datadoghq.com/agent/kubernetes/integrations/
-[2]: https://app.datadoghq.com/account/settings#agent
-[3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
-[4]: https://github.com/DataDog/integrations-core/blob/master/redisdb/datadog_checks/redisdb/data/conf.yaml.example
+[1]: https://app.datadoghq.com/account/settings#agent
+[2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
+[3]: https://github.com/DataDog/integrations-core/blob/master/redisdb/datadog_checks/redisdb/data/conf.yaml.example
+[4]: https://docs.redis.com/latest/rs/security/passwords-users-roles/
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [6]: https://docs.datadoghq.com/tracing/send_traces/
 [7]: https://docs.datadoghq.com/tracing/setup/
-[8]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[9]: https://github.com/DataDog/integrations-core/blob/master/redisdb/metadata.csv
-[10]: https://docs.datadoghq.com/integrations/faq/redis-integration-error-unknown-command-config/
-[11]: https://docs.datadoghq.com/developers/integrations/
-[12]: https://www.datadoghq.com/blog/how-to-monitor-redis-performance-metrics
-[13]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=containerinstallation#setup
-[14]: https://docs.datadoghq.com/agent/kubernetes/apm/?tab=java
-[15]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/?tab=k8sfile#apm-and-distributed-tracing
-[16]: https://docs.redislabs.com/latest/rs/administering/access-control/user-roles/#cluster-management-roles
-[17]: https://docs.datadoghq.com/agent/faq/template_variables/
-[18]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#installation
-[19]: https://docs.datadoghq.com/agent/docker/integrations/?tab=docker
-[20]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#log-integrations
-[21]: https://docs.datadoghq.com/agent/docker/apm/?tab=linux
-[22]: https://docs.datadoghq.com/agent/kubernetes/integrations/?tab=kubernetes
-[23]: https://docs.datadoghq.com/agent/kubernetes/integrations/?tab=kubernetes#configuration
-[24]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=daemonset#configuration
-[25]: https://docs.datadoghq.com/agent/amazon_ecs/apm/?tab=ec2metadataendpoint#setup
-[26]: https://docs.datadoghq.com/agent/amazon_ecs/logs/?tab=linux
-[27]: https://docs.datadoghq.com/agent/guide/secrets-management/?tab=linux
+[8]: https://docs.datadoghq.com/agent/docker/integrations/?tab=docker
+[9]: https://docs.datadoghq.com/agent/faq/template_variables/
+[10]: https://docs.datadoghq.com/agent/guide/secrets-management/?tab=linux
+[11]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#installation
+[12]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#log-integrations
+[13]: https://docs.datadoghq.com/agent/docker/apm/?tab=linux
+[14]: https://docs.datadoghq.com/agent/kubernetes/integrations/?tab=kubernetes
+[15]: https://docs.datadoghq.com/agent/kubernetes/integrations/?tab=kubernetes#configuration
+[16]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=containerinstallation#setup
+[17]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=daemonset#configuration
+[18]: https://docs.datadoghq.com/agent/kubernetes/apm/?tab=java
+[19]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/?tab=k8sfile#apm-and-distributed-tracing
+[20]: https://docs.datadoghq.com/agent/amazon_ecs/logs/?tab=linux
+[21]: https://docs.datadoghq.com/agent/amazon_ecs/apm/?tab=ec2metadataendpoint#setup
+[22]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[23]: https://github.com/DataDog/integrations-core/blob/master/redisdb/metadata.csv
+[24]: https://github.com/DataDog/integrations-core/blob/master/redisdb/assets/service_checks.json
+[26]: https://www.datadoghq.com/blog/how-to-monitor-redis-performance-metrics

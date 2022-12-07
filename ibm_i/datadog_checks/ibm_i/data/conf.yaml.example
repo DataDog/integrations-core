@@ -1,0 +1,130 @@
+## All options defined here are available to all instances.
+#
+init_config:
+
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Additionally, this sets the default `service` for every log source.
+    #
+    # service: <SERVICE>
+
+## Every instance is scheduled independently of the others.
+#
+instances:
+
+  -
+    ## @param system - string - optional
+    ## The name of the IBM i system.
+    #
+    # system: <SYSTEM>
+
+    ## @param hostname - string - optional
+    ## Hostname used for this instance's metrics. If unset, HOST_NAME from SYSIBMADM.ENV_SYS_INFO will be used.
+    #
+    # hostname: <HOSTNAME>
+
+    ## @param username - string - optional
+    ## The user profile name used to authenticate to the system.
+    #
+    # username: <USERNAME>
+
+    ## @param password - string - optional
+    ## The user profile password used to authenticate to the system.
+    #
+    # password: <PASSWORD>
+
+    ## @param driver - string - optional - default: iSeries Access ODBC Driver
+    ## The name of the ODBC driver used to connect to the system.
+    #
+    # driver: iSeries Access ODBC Driver
+
+    ## @param connection_string - string - optional
+    ## The raw connection string used to connect to the system, ignoring all of the above options.
+    #
+    # connection_string: <CONNECTION_STRING>
+
+    ## @param severity_threshold - integer - optional - default: 50
+    ## The minimum severity level for a message to be considered 'critical' (see ibm_i.message_queue.critical_size).
+    #
+    # severity_threshold: 50
+
+    ## @param job_query_timeout - integer - optional - default: 240
+    ## The timeout (in seconds) applied to queries on job views (ACTIVE_JOB_INFO, JOB_INFO) made on the IBM i system.
+    #
+    # job_query_timeout: 240
+
+    ## @param system_mq_query_timeout - integer - optional - default: 80
+    ## The timeout (in seconds) applied to queries on message queue views (MESSAGE_QUEUE_INFO) made on the IBM i system.
+    #
+    # system_mq_query_timeout: 80
+
+    ## @param query_timeout - integer - optional - default: 30
+    ## The timeout (in seconds) applied to queries made on the IBM i system.
+    #
+    # query_timeout: 30
+
+    ## @param queries - list of mappings - optional
+    ## List of queries to be run against the IBM i system. By default, all queries are run.
+    #
+    # queries:
+    #   - name: disk_usage
+    #   - name: cpu_usage
+    #   - name: jobq_job_status
+    #   - name: active_job_status
+    #   - name: job_memory_usage
+    #   - name: memory_info
+    #   - name: subsystem
+    #   - name: job_queue
+    #   - name: message_queue_info
+
+    ## @param message_queue_info - mapping - optional
+    ## A configuration mapping for the message_queue_info query.
+    ##
+    ## selected_message_queues restricts the message_queue_info query to a subset of the queues.
+    ## This can reduce the CPU usage on the target IBM i machine. By default no filter is applied.
+    #
+    # message_queue_info:
+    #   selected_message_queues:
+    #   - QSYSOPR
+    #   - QPGMR
+
+    ## @param tags - list of strings - optional
+    ## A list of tags to attach to every metric and service check emitted by this instance.
+    ##
+    ## Learn more about tagging at https://docs.datadoghq.com/tagging
+    #
+    # tags:
+    #   - <KEY_1>:<VALUE_1>
+    #   - <KEY_2>:<VALUE_2>
+
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Overrides any `service` defined in the `init_config` section.
+    #
+    # service: <SERVICE>
+
+    ## @param min_collection_interval - number - optional - default: 15
+    ## This changes the collection interval of the check. For more information, see:
+    ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
+    #
+    # min_collection_interval: 15
+
+    ## @param empty_default_hostname - boolean - optional - default: false
+    ## This forces the check to send metrics with no hostname.
+    ##
+    ## This is useful for cluster-level checks.
+    #
+    # empty_default_hostname: false
+
+    ## @param metric_patterns - mapping - optional
+    ## A mapping of metrics to include or exclude, with each entry being a regular expression.
+    ##
+    ## Metrics defined in `exclude` will take precedence in case of overlap.
+    #
+    # metric_patterns:
+    #   include:
+    #   - <INCLUDE_REGEX>
+    #   exclude:
+    #   - <EXCLUDE_REGEX>

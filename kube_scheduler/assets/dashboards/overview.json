@@ -1,642 +1,1006 @@
 {
-  "title": "Kubernetes Scheduler - Overview",
-  "description": "",
-  "widgets": [
-    {
-      "id": 0,
-      "definition": {
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "avg:kube_scheduler.threads{$cluster_name,$scope}",
-            "metadata": [
-              {
-                "expression": "avg:kube_scheduler.threads{$cluster_name,$scope}",
-                "alias_name": "threads"
-              }
-            ],
-            "display_type": "line",
-            "style": {
-              "palette": "dog_classic",
-              "line_type": "solid",
-              "line_width": "normal"
+    "title": "Kubernetes Scheduler Overview",
+    "description": "The Kubernetes scheduler is a control plane process which assigns Pods to Nodes. This makes it a critical component in the Kubernetes control plane that needs to be monitored.\n\nThe Datadog Kubernetes Scheduler Overview dashboard gives you broad visibility into the status of the scheduler, including the state of its scheduling queues and preempted pods.\n\nFurther reading around the Kubernetes Scheduler:\n\n- [Datadog Kubernetes Scheduler integration documentation](https://docs.datadoghq.com/integrations/kube_scheduler/)\n\n- [Kubernetes Scheduler official documentation](https://kubernetes.io/docs/concepts/scheduling-eviction/kube-scheduler/)\n\n- [Monitoring in the Kubernetes era](https://www.datadoghq.com/blog/monitoring-kubernetes-era/)\n\nCheck [the agent documentation](https://docs.datadoghq.com/agent/kubernetes/) if some of the graphs are empty.\nClone this template dashboard to make changes and add your own graph widgets. ",
+    "widgets": [
+        {
+            "id": 895563546267612,
+            "definition": {
+                "title": "New group",
+                "type": "group",
+                "banner_img": "/static/images/integration_dashboard/kubernetes_hero_2.jpeg",
+                "show_title": false,
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 2538956346653136,
+                        "definition": {
+                            "type": "note",
+                            "content": "### The Kubernetes scheduler is a control plane process which assigns Pods to Nodes. This makes it a critical component in the Kubernetes control plane that needs to be monitored.\n\nThe Datadog Kubernetes Scheduler Overview dashboard gives you broad visibility into the status of the scheduler, including the state of its scheduling queues and preempted pods.\n\nFurther reading around the Kubernetes Scheduler:\n\n- [Datadog Kubernetes Scheduler integration documentation](https://docs.datadoghq.com/integrations/kube_scheduler/)\n\n- [Kubernetes Scheduler official documentation](https://kubernetes.io/docs/concepts/scheduling-eviction/kube-scheduler/)\n\n- [Monitoring in the Kubernetes era](https://www.datadoghq.com/blog/monitoring-kubernetes-era/)\n",
+                            "background_color": "transparent",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "vertical_align": "top",
+                            "show_tick": false,
+                            "tick_pos": "50%",
+                            "tick_edge": "left",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 4,
+                            "height": 2
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 4,
+                "height": 5
             }
-          }
-        ],
-        "custom_links": [],
-        "title": "Threads",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": false,
-        "legend_size": "0"
-      },
-      "layout": {
-        "x": 24,
-        "y": 66,
-        "width": 47,
-        "height": 15
-      }
-    },
-    {
-      "id": 1,
-      "definition": {
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "avg:kube_scheduler.max_fds{$cluster_name,$scope}, avg:kube_scheduler.open_fds{$cluster_name,$scope}",
-            "metadata": [
-              {
-                "expression": "avg:kube_scheduler.open_fds{$cluster_name,$scope}",
-                "alias_name": "open"
-              },
-              {
-                "expression": "avg:kube_scheduler.max_fds{$cluster_name,$scope}",
-                "alias_name": "max"
-              }
-            ],
-            "display_type": "area",
-            "style": {
-              "palette": "dog_classic",
-              "line_type": "solid",
-              "line_width": "normal"
+        },
+        {
+            "id": 6390333099532916,
+            "definition": {
+                "title": "Kubernetes Scheduler Health",
+                "title_align": "left",
+                "type": "group",
+                "background_color": "blue",
+                "show_title": true,
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 5997974745054737,
+                        "definition": {
+                            "title": "Replicas Up",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "check_status",
+                            "check": "kube_scheduler.up",
+                            "grouping": "cluster",
+                            "group_by": [],
+                            "tags": [
+                                "$cluster",
+                                "$scope"
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 27112096702006,
+                        "definition": {
+                            "title": "Kube Scheduler CPU usage vs requests",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "time": {},
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "requests",
+                                            "formula": "query5"
+                                        },
+                                        {
+                                            "alias": "usage",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "sum:kubernetes.cpu.requests{$cluster,$scope,image_name:k8s.gcr.io/kube-scheduler} by {pod_name}",
+                                            "data_source": "metrics",
+                                            "name": "query5"
+                                        },
+                                        {
+                                            "query": "sum:kubernetes.cpu.usage.total{$cluster,$scope,image_name:k8s.gcr.io/kube-scheduler} by {pod_name}",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "yaxis": {
+                                "include_zero": true,
+                                "scale": "linear",
+                                "label": "",
+                                "min": "auto",
+                                "max": "auto"
+                            },
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 2,
+                            "y": 0,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 5382860624626359,
+                        "definition": {
+                            "title": "Leader Election",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "check_status",
+                            "check": "kube_scheduler.leader_election.status",
+                            "grouping": "cluster",
+                            "group_by": [],
+                            "tags": [
+                                "$cluster",
+                                "$scope"
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 2,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 5608027259222025,
+                        "definition": {
+                            "title": "Kube Scheduler memory usage vs requests",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "time": {},
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "requests",
+                                            "formula": "query5"
+                                        },
+                                        {
+                                            "alias": "usage",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "sum:kubernetes.memory.requests{$cluster,$scope,image_name:k8s.gcr.io/kube-scheduler} by {pod_name}",
+                                            "data_source": "metrics",
+                                            "name": "query5"
+                                        },
+                                        {
+                                            "query": "sum:kubernetes.memory.usage{$cluster,$scope,image_name:k8s.gcr.io/kube-scheduler} by {pod_name}",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "yaxis": {
+                                "include_zero": true,
+                                "scale": "linear",
+                                "label": "",
+                                "min": "auto",
+                                "max": "auto"
+                            },
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 2,
+                            "y": 2,
+                            "width": 6,
+                            "height": 2
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 4,
+                "y": 0,
+                "width": 8,
+                "height": 5
             }
-          }
-        ],
-        "custom_links": [],
-        "title": "Open File Descriptors",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": false,
-        "legend_size": "0"
-      },
-      "layout": {
-        "x": 72,
-        "y": 66,
-        "width": 47,
-        "height": 15
-      }
-    },
-    {
-      "id": 2,
-      "definition": {
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "avg:kube_scheduler.goroutines{$cluster_name,$scope}",
-            "metadata": [
-              {
-                "expression": "avg:kube_scheduler.goroutines{$cluster_name,$scope}",
-                "alias_name": "goroutines"
-              }
-            ],
-            "display_type": "line",
-            "style": {
-              "palette": "dog_classic",
-              "line_type": "solid",
-              "line_width": "normal"
+        },
+        {
+            "id": 1509571421115336,
+            "definition": {
+                "title": "Pod Preemption",
+                "type": "group",
+                "background_color": "orange",
+                "show_title": true,
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 714501943625093,
+                        "definition": {
+                            "title": "Pod preemption attempts",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_size": "0",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "avg:kube_scheduler.pod_preemption.attempts{$cluster,$scope}.as_count()",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ],
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 2797323401459281,
+                        "definition": {
+                            "title": "Total preemtion victims",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "time": {},
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "query": "sum:kube_scheduler.pod_preemption.victims.sum{$cluster,$scope}",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 0,
+                            "width": 6,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 5,
+                "width": 12,
+                "height": 5
             }
-          }
-        ],
-        "custom_links": [],
-        "title": "Goroutines",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": false,
-        "legend_size": "0"
-      },
-      "layout": {
-        "x": 24,
-        "y": 82,
-        "width": 47,
-        "height": 15
-      }
-    },
-    {
-      "id": 3,
-      "definition": {
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "derivative(avg:kube_scheduler.gc_duration_seconds.sum{$cluster_name,$scope})/derivative(avg:kube_scheduler.gc_duration_seconds.count{$cluster_name,$scope})",
-            "display_type": "area",
-            "style": {
-              "palette": "dog_classic",
-              "line_type": "solid",
-              "line_width": "normal"
+        },
+        {
+            "id": 4643450728041347,
+            "definition": {
+                "title": "HTTP Requests",
+                "type": "group",
+                "background_color": "green",
+                "show_title": true,
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 7977492195226830,
+                        "definition": {
+                            "title": "HTTP client requests by (method,code)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "time": {},
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "avg:kube_scheduler.client.http.requests{$cluster,$scope} by {method,code}.as_count()",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ],
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 3966660970637023,
+                        "definition": {
+                            "title": "Average HTTP client requests duration by (verb,url)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "time": {},
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "derivative(query1) / derivative(query2)"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "avg:kube_scheduler.client.http.requests_duration.sum{$cluster,$scope} by {verb,url}",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        },
+                                        {
+                                            "query": "avg:kube_scheduler.client.http.requests_duration.count{$cluster,$scope} by {verb,url}",
+                                            "data_source": "metrics",
+                                            "name": "query2"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "area"
+                                }
+                            ],
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 0,
+                            "width": 6,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 10,
+                "width": 12,
+                "height": 5
             }
-          }
-        ],
-        "custom_links": [],
-        "title": "Average go garbage collection duration",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": false,
-        "legend_size": "0"
-      },
-      "layout": {
-        "x": 72,
-        "y": 82,
-        "width": 47,
-        "height": 15
-      }
-    },
-    {
-      "id": 4,
-      "definition": {
-        "type": "image",
-        "url": "/static/images/screenboard/integrations/kubernetes.jpg",
-        "sizing": "zoom"
-      },
-      "layout": {
-        "x": 0,
-        "y": 8,
-        "width": 23,
-        "height": 12
-      }
-    },
-    {
-      "id": 5,
-      "definition": {
-        "type": "free_text",
-        "text": "kube_scheduler",
-        "color": "#4d4d4d",
-        "font_size": "auto",
-        "text_align": "left"
-      },
-      "layout": {
-        "x": 0,
-        "y": 20,
-        "width": 23,
-        "height": 6
-      }
-    },
-    {
-      "id": 6,
-      "definition": {
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "avg:kube_scheduler.schedule_attempts{$cluster_name,$scope} by {result}.as_count()",
-            "metadata": [
-              {
-                "expression": "avg:kube_scheduler.schedule_attempts{$cluster_name,$scope} by {result}.as_count()",
-                "alias_name": "attempts"
-              }
-            ],
-            "display_type": "bars",
-            "style": {
-              "palette": "dog_classic",
-              "line_type": "solid",
-              "line_width": "normal"
+        },
+        {
+            "id": 1018697804875837,
+            "definition": {
+                "title": "Kube Scheduler Logs",
+                "type": "group",
+                "background_color": "pink",
+                "show_title": true,
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 7674420530817556,
+                        "definition": {
+                            "title": "Kube Scheduler Logs",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "log_stream",
+                            "indexes": [],
+                            "query": "source:kube-scheduler",
+                            "sort": {
+                                "column": "time",
+                                "order": "desc"
+                            },
+                            "columns": [
+                                "host",
+                                "service"
+                            ],
+                            "show_date_column": true,
+                            "show_message_column": true,
+                            "message_display": "expanded-md"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 12,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 15,
+                "width": 12,
+                "height": 5
             }
-          }
-        ],
-        "custom_links": [],
-        "title": "Schedule Attempts",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": true,
-        "legend_size": "0"
-      },
-      "layout": {
-        "x": 24,
-        "y": 8,
-        "width": 47,
-        "height": 21
-      }
-    },
-    {
-      "id": 7,
-      "definition": {
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "derivative(avg:kube_scheduler.scheduling.e2e_scheduling_duration.sum{$cluster_name,$scope})/derivative(avg:kube_scheduler.scheduling.e2e_scheduling_duration.count{$cluster_name,$scope})",
-            "display_type": "area",
-            "style": {
-              "palette": "dog_classic",
-              "line_type": "solid",
-              "line_width": "normal"
+        },
+        {
+            "id": 2358358132143955,
+            "definition": {
+                "title": "Scheduling Attemps",
+                "type": "group",
+                "background_color": "vivid_green",
+                "show_title": true,
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 2421506191729400,
+                        "definition": {
+                            "title": "Schedule Attempts (by profile, result)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "time": {},
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "avg:kube_scheduler.schedule_attempts{$cluster,$scope} by {result,profile}.as_count()",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ],
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 12,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 20,
+                "width": 12,
+                "height": 5,
+                "is_column_break": true
             }
-          }
-        ],
-        "custom_links": [],
-        "title": "Average e2e scheduling duration",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": false,
-        "legend_size": "0"
-      },
-      "layout": {
-        "x": 72,
-        "y": 44,
-        "width": 47,
-        "height": 17
-      }
-    },
-    {
-      "id": 8,
-      "definition": {
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "derivative(avg:kube_scheduler.volume_scheduling_duration.sum{$cluster_name,$scope})/derivative(avg:kube_scheduler.volume_scheduling_duration.count{$cluster_name,$scope})",
-            "display_type": "area",
-            "style": {
-              "palette": "dog_classic",
-              "line_type": "solid",
-              "line_width": "normal"
+        },
+        {
+            "id": 5832204887451464,
+            "definition": {
+                "title": "Scheduling Latency",
+                "type": "group",
+                "background_color": "vivid_blue",
+                "show_title": true,
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 234396491075329,
+                        "definition": {
+                            "title": "Average E2E scheduling latency (algorithm + binding)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1 / query2"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "avg:kube_scheduler.scheduling.attempt_duration.sum{$cluster,$scope}",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        },
+                                        {
+                                            "query": "avg:kube_scheduler.scheduling.algorithm_duration.count{$cluster,$scope}",
+                                            "data_source": "metrics",
+                                            "name": "query2"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "area"
+                                }
+                            ],
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 1725224522972587,
+                        "definition": {
+                            "title": "Average scheduling algorithm latency",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1 / query2"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "avg:kube_scheduler.scheduling.algorithm_duration.sum{$cluster,$scope}",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        },
+                                        {
+                                            "query": "avg:kube_scheduler.scheduling.algorithm_duration.count{$cluster,$scope}",
+                                            "data_source": "metrics",
+                                            "name": "query2"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "area"
+                                }
+                            ],
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 0,
+                            "width": 6,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 25,
+                "width": 12,
+                "height": 5
             }
-          }
-        ],
-        "custom_links": [],
-        "title": "Average scheduling volumes duration",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": false,
-        "legend_size": "0"
-      },
-      "layout": {
-        "x": 72,
-        "y": 26,
-        "width": 47,
-        "height": 17
-      }
-    },
-    {
-      "id": 9,
-      "definition": {
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "avg:kube_scheduler.pod_preemption.attempts{$cluster_name,$scope}.as_count()",
-            "display_type": "bars",
-            "style": {
-              "palette": "dog_classic",
-              "line_type": "solid",
-              "line_width": "normal"
+        },
+        {
+            "id": 2612461281032204,
+            "definition": {
+                "title": "Queue",
+                "type": "group",
+                "background_color": "yellow",
+                "show_title": true,
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 5145861618475972,
+                        "definition": {
+                            "title": "Total pending pods (by queue)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "avg:kube_scheduler.pending_pods{$cluster,$scope} by {queue}",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 8964164644855150,
+                        "definition": {
+                            "title": "Incoming Pods in the Queue (by event, queue)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "sum:kube_scheduler.queue.incoming_pods{$cluster,$scope} by {event,queue}.as_count()",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ],
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 0,
+                            "width": 6,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 30,
+                "width": 12,
+                "height": 5
             }
-          }
-        ],
-        "custom_links": [],
-        "title": "Pod preemption attempts",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": false,
-        "legend_size": "0"
-      },
-      "layout": {
-        "x": 24,
-        "y": 30,
-        "width": 47,
-        "height": 15
-      }
-    },
-    {
-      "id": 10,
-      "definition": {
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "avg:kube_scheduler.pod_preemption.victims{$cluster_name,$scope}",
-            "display_type": "area",
-            "style": {
-              "palette": "dog_classic",
-              "line_type": "solid",
-              "line_width": "normal"
+        },
+        {
+            "id": 56137128632033,
+            "definition": {
+                "title": "Go Metrics",
+                "type": "group",
+                "background_color": "vivid_purple",
+                "show_title": true,
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 5806566826736078,
+                        "definition": {
+                            "title": "Threads",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_size": "0",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "avg:kube_scheduler.threads{$cluster,$scope}",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 2904488759548787,
+                        "definition": {
+                            "title": "Open File Descriptors",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_size": "0",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "avg:kube_scheduler.max_fds{$cluster,$scope}",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        },
+                                        {
+                                            "query": "avg:kube_scheduler.open_fds{$cluster,$scope}",
+                                            "data_source": "metrics",
+                                            "name": "query2"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "area"
+                                }
+                            ],
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 0,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 1253715625043501,
+                        "definition": {
+                            "title": "Goroutines",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_size": "0",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "avg:kube_scheduler.goroutines{$cluster,$scope}",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 2,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 1938988799424487,
+                        "definition": {
+                            "title": "Average go garbage collection duration",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_size": "0",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "derivative(query1) / derivative(query2)"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "avg:kube_scheduler.gc_duration_seconds.sum{$cluster,$scope}",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        },
+                                        {
+                                            "query": "avg:kube_scheduler.gc_duration_seconds.count{$cluster,$scope}",
+                                            "data_source": "metrics",
+                                            "name": "query2"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "area"
+                                }
+                            ],
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 2,
+                            "width": 6,
+                            "height": 2
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 35,
+                "width": 12,
+                "height": 5
             }
-          }
-        ],
-        "custom_links": [],
-        "title": "Pod preemption victims",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": false,
-        "legend_size": "0"
-      },
-      "layout": {
-        "x": 24,
-        "y": 46,
-        "width": 47,
-        "height": 15
-      }
-    },
-    {
-      "id": 11,
-      "definition": {
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "avg:kube_scheduler.client.http.requests{$cluster_name,$scope} by {method,code}.as_count()",
-            "metadata": [
-              {
-                "expression": "avg:kube_scheduler.client.http.requests{$cluster_name,$scope} by {method,code}.as_count()",
-                "alias_name": "sum"
-              }
-            ],
-            "display_type": "bars",
-            "style": {
-              "palette": "dog_classic",
-              "line_type": "solid",
-              "line_width": "normal"
-            }
-          }
-        ],
-        "custom_links": [],
-        "title": "HTTP client requests by (method,code)",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": true,
-        "legend_size": "0"
-      },
-      "layout": {
-        "x": 24,
-        "y": 100.91666666666667,
-        "width": 47,
-        "height": 34
-      }
-    },
-    {
-      "id": 12,
-      "definition": {
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "derivative(avg:kube_scheduler.client.http.requests_duration.sum{$cluster_name,$scope} by {verb,url})/derivative(avg:kube_scheduler.client.http.requests_duration.count{$cluster_name,$scope} by {verb,url})",
-            "metadata": [
-              {
-                "expression": "derivative(avg:kube_scheduler.client.http.requests_duration.sum{$cluster_name,$scope} by {verb,url})/derivative(avg:kube_scheduler.client.http.requests_duration.count{$cluster_name,$scope} by {verb,url})",
-                "alias_name": "duration"
-              }
-            ],
-            "display_type": "area",
-            "style": {
-              "palette": "dog_classic",
-              "line_type": "solid",
-              "line_width": "normal"
-            }
-          }
-        ],
-        "custom_links": [],
-        "title": "Average HTTP client requests duration by (verb,url)",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": true,
-        "legend_size": "0"
-      },
-      "layout": {
-        "x": 72,
-        "y": 101,
-        "width": 47,
-        "height": 34
-      }
-    },
-    {
-      "id": 13,
-      "definition": {
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "derivative(avg:kube_scheduler.binding_duration.sum{$cluster_name,$scope})/derivative(avg:kube_scheduler.binding_duration.count{$cluster_name,$scope})",
-            "display_type": "area",
-            "style": {
-              "palette": "dog_classic",
-              "line_type": "solid",
-              "line_width": "normal"
-            }
-          }
-        ],
-        "custom_links": [],
-        "title": "Average scheduling binding duration",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": false,
-        "legend_size": "0"
-      },
-      "layout": {
-        "x": 72,
-        "y": 8,
-        "width": 47,
-        "height": 17
-      }
-    },
-    {
-      "id": 14,
-      "definition": {
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "derivative(avg:kube_scheduler.scheduling.algorithm.priority_duration.sum{$cluster_name,$scope})/derivative(avg:kube_scheduler.scheduling.algorithm.priority_duration.count{$cluster_name,$scope})",
-            "display_type": "area",
-            "style": {
-              "palette": "dog_classic",
-              "line_type": "solid",
-              "line_width": "normal"
-            }
-          }
-        ],
-        "custom_links": [],
-        "title": "Average scheduling priority duration",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": false,
-        "legend_size": "0"
-      },
-      "layout": {
-        "x": 120,
-        "y": 26,
-        "width": 47,
-        "height": 17
-      }
-    },
-    {
-      "id": 15,
-      "definition": {
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "derivative(avg:kube_scheduler.scheduling.algorithm_duration.sum{$cluster_name,$scope})/derivative(avg:kube_scheduler.scheduling.algorithm_duration.count{$cluster_name,$scope})",
-            "display_type": "area",
-            "style": {
-              "palette": "dog_classic",
-              "line_type": "solid",
-              "line_width": "normal"
-            }
-          }
-        ],
-        "custom_links": [],
-        "title": "Average scheduling algorithm duration",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": false,
-        "legend_size": "0"
-      },
-      "layout": {
-        "x": 120,
-        "y": 8,
-        "width": 47,
-        "height": 17
-      }
-    },
-    {
-      "id": 16,
-      "definition": {
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "derivative(avg:kube_scheduler.scheduling.algorithm.preemption_duration.sum{*})/derivative(avg:kube_scheduler.scheduling.algorithm.preemption_duration.count{*})",
-            "display_type": "area",
-            "style": {
-              "palette": "dog_classic",
-              "line_type": "solid",
-              "line_width": "normal"
-            }
-          }
-        ],
-        "custom_links": [],
-        "title": "Average scheduling preemption duration",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": false,
-        "legend_size": "0"
-      },
-      "layout": {
-        "x": 120,
-        "y": 44,
-        "width": 47,
-        "height": 17
-      }
-    },
-    {
-      "id": 17,
-      "definition": {
-        "type": "check_status",
-        "title": "Replicas Up",
-        "title_size": "16",
-        "title_align": "center",
-        "check": "kube_scheduler.prometheus.health",
-        "grouping": "cluster",
-        "group": "$cluster_name,$scope",
-        "group_by": [],
-        "tags": [
-          "$cluster_name,$scope"
-        ]
-      },
-      "layout": {
-        "x": 3,
-        "y": 28,
-        "width": 15,
-        "height": 10
-      }
-    },
-    {
-      "id": 18,
-      "definition": {
-        "type": "check_status",
-        "title": "Leader Election",
-        "title_size": "16",
-        "title_align": "center",
-        "check": "kube_scheduler.leader_election.status",
-        "grouping": "cluster",
-        "group_by": [],
-        "tags": [
-          "$cluster_name,$scope"
-        ]
-      },
-      "layout": {
-        "x": 3,
-        "y": 40,
-        "width": 15,
-        "height": 10
-      }
-    },
-    {
-      "id": 19,
-      "definition": {
-        "type": "query_value",
-        "requests": [
-          {
-            "q": "max:kube_scheduler.goroutines{$cluster_name,$scope}",
-            "aggregator": "last"
-          }
-        ],
-        "custom_links": [],
-        "title": "Goroutines",
-        "title_size": "16",
-        "title_align": "left",
-        "autoscale": true,
-        "precision": 0
-      },
-      "layout": {
-        "x": 3,
-        "y": 88,
-        "width": 15,
-        "height": 9
-      }
-    },
-    {
-      "id": 20,
-      "definition": {
-        "type": "query_value",
-        "requests": [
-          {
-            "q": "max:kube_scheduler.threads{$cluster_name,$scope}",
-            "aggregator": "last"
-          }
-        ],
-        "custom_links": [],
-        "title": "Threads",
-        "title_size": "16",
-        "title_align": "left",
-        "autoscale": true,
-        "precision": 0
-      },
-      "layout": {
-        "x": 3,
-        "y": 66,
-        "width": 15,
-        "height": 9
-      }
-    },
-    {
-      "id": 21,
-      "definition": {
-        "type": "query_value",
-        "requests": [
-          {
-            "q": "max:kube_scheduler.open_fds{$cluster_name,$scope}",
-            "aggregator": "last"
-          }
-        ],
-        "custom_links": [],
-        "title": "Open FDS",
-        "title_size": "16",
-        "title_align": "left",
-        "autoscale": true,
-        "precision": 0
-      },
-      "layout": {
-        "x": 3,
-        "y": 77,
-        "width": 15,
-        "height": 9
-      }
-    }
-  ],
-  "template_variables": [
-    {
-      "name": "scope",
-      "default": "*",
-      "prefix": null
-    },
-    {
-      "name": "cluster_name",
-      "default": "*",
-      "prefix": "cluster_name"
-    }
-  ],
-  "layout_type": "free",
-  "is_read_only": true,
-  "notify_list": [],
-  "id": 30270
+        }
+    ],
+    "template_variables": [
+        {
+            "name": "scope",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "cluster",
+            "prefix": "kube_cluster_name",
+            "available_values": [],
+            "default": "*"
+        }
+    ],
+    "layout_type": "ordered",
+    "is_read_only": false,
+    "notify_list": [],
+    "reflow_type": "fixed",
+    "id": "dbp-x57-bra"
 }

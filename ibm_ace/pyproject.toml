@@ -1,0 +1,66 @@
+[build-system]
+requires = [
+    "hatchling>=0.11.2",
+]
+build-backend = "hatchling.build"
+
+[project]
+name = "datadog-ibm-ace"
+description = "The IBM ACE check"
+readme = "README.md"
+requires-python = ">=3.8"
+keywords = [
+    "datadog",
+    "datadog agent",
+    "datadog check",
+    "ibm_ace",
+]
+authors = [
+    { name = "Datadog", email = "packages@datadoghq.com" },
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: BSD License",
+    "Programming Language :: Python :: 3.8",
+    "Topic :: System :: Monitoring",
+    "Private :: Do Not Upload",
+]
+dependencies = [
+    "datadog-checks-base>=25.1.0",
+]
+dynamic = [
+    "version",
+]
+
+[project.license]
+text = "BSD-3-Clause"
+
+[project.optional-dependencies]
+deps = [
+    "pymqi==1.12.8; sys_platform != 'darwin' or platform_machine != 'arm64'",
+]
+
+[project.urls]
+Source = "https://github.com/DataDog/integrations-core"
+
+[tool.hatch.version]
+path = "datadog_checks/ibm_ace/__about__.py"
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/datadog_checks",
+    "/tests",
+    "/manifest.json",
+    "/requirements-dev.txt",
+    "/tox.ini",
+]
+
+[tool.hatch.build.targets.wheel]
+include = [
+    "/datadog_checks/ibm_ace",
+]
+dev-mode-dirs = [
+    ".",
+]

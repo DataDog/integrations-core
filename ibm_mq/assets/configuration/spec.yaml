@@ -4,6 +4,29 @@ files:
   options:
   - template: init_config
     options:
+      - name: queue_manager_process
+        description: |
+          A regular expression that must match the command line of a running process in
+          order for the check to run, which is useful if running MQ in a failover mode.
+          A `<queue_manager>` placeholder is supported which represents the value of
+          the `queue_manager` option defined in each check instance.
+
+          This option is only available on Agent 7+.
+        value:
+          display_default: null
+          example: amqpcsea <queue_manager>
+          type: string
+      - name: queue_manager_process_limit
+        description: |
+          The maximum number of processes that can be matched at any given moment by
+          the `queue_manager_process` option.
+
+          Note that if this limit is lower than the actual limit the check will ignore
+          some active queue managers, while if this limit is higher than the actual
+          limit you may see increased CPU usage during check runs.
+        value:
+          example: 1
+          type: integer
       - template: init_config/default
   - template: instances
     options:
@@ -12,6 +35,7 @@ files:
         value:
           example: 'DEV.ADMIN.SVRCONN'
           type: string
+          minLength: 1
         description: The IBMMQ Channel to connect to.
       - name: queue_manager
         required: true
@@ -19,10 +43,12 @@ files:
         value:
           example: 'datadog'
           type: string
+          minLength: 1
       - name: host
         value:
           example: 'localhost'
           type: string
+          minLength: 1
         description: The host IBM MQ is running on.
       - name: port
         value:
@@ -42,24 +68,40 @@ files:
           Either `host/port` or `connection_name` configuration must be provided.
         value:
           type: string
+          minLength: 1
+      - name: override_hostname
+        description: |
+          If enabled, the check sends the provided `host` as hostname instead of the agent's host.
+          In this case the `mq_host` tag will not be emitted. This cannot be used alongside `connection_name`
+        value:
+          type: boolean
+          example: false
       - name: username
         value:
           type: string
+          minLength: 1
         description: <USERNAME> of the IBMMQ Channel to connect to.
       - name: password
         secret: true
         value:
           type: string
+          minLength: 1
         description: <PASSWORD> of the IBMMQ Channel to connect to.
       - name: queues
-        description: The IBMMQ queues to get data from (no queue metrics will be sent, but the check will run without it).
+        description: |
+          The IBMMQ queues to get data from (no queue metrics will be sent, but the check will run without it).
+          This will be in addition to any queues discovered using `auto_discover_queues`, `queue_regex` or
+          `queue_patterns`.
         value:
           example: ['<QUEUE_NAME>']
           type: array
           items:
             type: string
       - name: queue_patterns
-        description: Collect from queues that match a MQ pattern
+        description: |
+          Collect from queues that match a MQ pattern
+          Note: Do not use in conjunction with `auto_discover_queues` or `queue_regex` as it may lead to
+          unexpected results.
         value:
           example:
             - 'DEV.*'          # match queues starting with "DEV."
@@ -68,7 +110,10 @@ files:
           items:
             type: string
       - name: queue_regex
-        description: Collect from queues that match a regex
+        description: |
+          Collect from queues that match a regex
+          Note: Do not use in conjunction with `auto_discover_queues` or `queue_patterns` as it may lead to
+          unexpected results.
         value:
           example:
             - '^DEV\..*$'          # match queues starting with "DEV."
@@ -83,6 +128,15 @@ files:
           type: array
           items:
             type: string
+      - name: auto_discover_channels
+        description: |
+          Autodiscover channels to monitor. This finds all discoverable channels.
+
+          Note: autodiscovered channels are in addition to the ones provided in `channels`.
+          Disabling this option will stop autodiscovery only for status metrics but not for property metrics.
+        value:
+          example: true
+          type: boolean
       - name: channel_status_mapping
         description: |
           Custom channel status mapping for service check `ibm_mq.channel.status`.
@@ -107,8 +161,10 @@ files:
           properties: []
       - name: auto_discover_queues
         description: |
-          Autodiscover the queues to monitor
-          Warning: this will lead to some warnings in your logs
+          Autodiscover the queues to monitor. This will discover all available queues. If you have dynamic queues
+          it will discover and monitor them all which can drive CPU usage up. If you want to be more specific about the
+          queues to monitor use `queue_patterns` or `queue_regex` instead.
+          Warning: this can lead to some warnings in your logs
         value:
           example: false
           type: boolean
@@ -120,30 +176,71 @@ files:
         value:
           example: false
           type: boolean
+      - name: collect_reset_queue_metrics
+        description: |
+          Collect metrics from Reset Queue Statistics. Statistics collected are:
+            - reset queue statistics (MQCMD_RESET_Q_STATS)
+
+          Note: Collecting reset queue statistics will also reset the performance data and requires `+chg`
+          permissions. More information found here:
+          https://www.ibm.com/docs/en/ibm-mq/9.1?topic=formats-reset-queue-statistics
+        value:
+          example: true
+          type: boolean
       - name: mqcd_version
         description: |
           Which channel definition version to use. Supported values are 1 to 9 including.
-          If you're having connection issues make sure it matches your MQ version
+          If you're having connection issues make sure it matches your MQ version.
+          TLS encryption requires MQCD of version at least 7.
         value:
           example: 6
           type: number
+          minimum: 1
       - name: convert_endianness
         description: |
           If you are monitoring IBM MQ remotely and if the Agent and the server are using different endianness,
-          set this field to true.
+          set this field to true. For example, you will need to enable this option if you are monitoring a server that
+          is running on AIX or IBM i.
         value:
           example: false
           type: boolean
+      - name: queue_manager_timezone
+        description: |
+          Time zone of the queue manager in IANA/Olson timezone format, if it differs from Etc/UTC. Canonical IANA
+          time zone names must be used for accurate time calculations during daylight saving time periods.
+          E.g. `America/New_York` instead of `EST`.
+          https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+          Used to calculate `ibm_mq.queue.last_put_time` and `ibm_mq.queue.last_get_time` metrics.
+        value:
+          example: Etc/UTC
+          type: string
+          minLength: 1
+      - name: timeout
+        description: |
+          The number of seconds to wait for IBM MQ to respond.
+        value:
+          example: 5
+          type: integer
       - name: ssl_auth
         description: Whether or not to use SSL auth while connecting to the channel.
         value:
           example: False
           type: boolean
-      - name: ssl_cipher_spec
-        type: string
-        description: The ssl cipher to use. It should match the value of the channels SSLCIPH attribute.
+      - name: try_basic_auth
+        description: |
+          Whether or not to try connecting with just username and password before SSL when `ssl_auth` is enabled.
+
+          WARNING: There is a known issue with the client library in which disabling
+          this option has the potential to cause a memory leak.
         value:
-          example: 'TLS_RSA_WITH_AES_256_CBC_SHA'
+          example: false
+          type: boolean
+          display_default: true
+      - name: ssl_cipher_spec
+        description: |
+          The TLS/SSL cipher to use. It should match the value of the channels SSLCIPH attribute. For an enumeration
+          see: https://www.ibm.com/docs/en/ibm-mq/9.3?topic=jms-tls-cipherspecs-ciphersuites-in-mq-classes
+        value:
           type: string
       - name: ssl_key_repository_location
         description: |
@@ -157,6 +254,7 @@ files:
         value:
           example: '/var/mqm/ssl-db/client/KeyringClient'
           type: string
+          minLength: 1
       - name: ssl_certificate_label
         description: Certificate label used for SSL connection.
         value:
@@ -173,6 +271,21 @@ files:
             'SYSTEM.*': queue_type:system
             'DEV.*': role:dev,queue_type:default
           type: object
+      - name: queue_manager_process
+        description: |
+          A regular expression that must match the command line of a running process in
+          order for the check to run, which is useful if running MQ in a failover mode.
+          A `<queue_manager>` placeholder is supported which represents the value of
+          the `queue_manager` option.
+
+          This option is only available on Agent 7+.
+
+          This overrides the `queue_manager_process` option in the `init_config` section
+          but the `queue_manager_process_limit` option still applies.
+        value:
+          display_default: null
+          example: amqpcsea <queue_manager>
+          type: string
       - template: instances/default
   - template: logs
     example:

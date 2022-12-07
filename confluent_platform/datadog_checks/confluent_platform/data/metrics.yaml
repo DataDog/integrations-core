@@ -53,6 +53,23 @@ jmx_metrics:
           alias: confluent.$domain.fetcher_lag.$name
           metric_type: gauge
 
+  # Kafka Broker Server Metrics Regex (Yammer Metric Gauge)
+  - include:
+      domain: kafka.server
+      bean_regex:
+        - kafka\.server:type=BrokerTopicMetrics,name=BytesInPerSec,topic=.*
+        - kafka\.server:type=BrokerTopicMetrics,name=BytesOutPerSec,topic=.*
+        - kafka\.server:type=BrokerTopicMetrics,name=MessagesInPerSec,topic=.*
+        - kafka\.server:type=BrokerTopicMetrics,name=MessagesOutPerSec,topic=.*
+        - kafka\.server:type=BrokerTopicMetrics,name=ProduceMessageConversionsPerSec,topic=.*
+        - kafka\.server:type=BrokerTopicMetrics,name=FetchMessageConversionsPerSec,topic=.*
+      tags:
+        topic: $0
+      attribute:
+        MeanRate:
+          alias: confluent.$domain.broker_topic_metrics.$name
+          metric_type: gauge
+
   # Kafka Broker Cluster Metrics Regex (Yammer Metric Gauge)
   - include:
       domain: kafka.cluster
@@ -136,16 +153,46 @@ jmx_metrics:
           alias: confluent.$domain.session.$name.rate
           metric_type: rate
 
+  # Kafka Broker ZooKeeper Metrics (Yammer Metric Meter)
+  - include:
+      domain: kafka.server
+      bean:
+        # Zookeeper latency from client
+        - kafka.server:type=ZooKeeperClientMetrics,name=ZooKeeperRequestLatencyMs
+      attribute:
+        Count:
+          alias: confluent.$domain.session.$name
+          metric_type: gauge
+
   # Kafka Broker Request Metrics (Yammer Metric Meter)
   - include:
       domain: kafka.network
       bean_regex:
         # Request rate.
-        - kafka.network:type=RequestMetrics,name=RequestsPerSec,request=(Produce|FetchConsumer|FetchFollower).*
+        - kafka.network:type=RequestMetrics,name=RequestsPerSec,request=(.*)
+      tags:
+        request: $0
       attribute:
         Count:
           alias: confluent.$domain.request.$name.rate
           metric_type: rate
+
+  # Kafka Broker Controller Metrics (Yammer Metric Timer/Meter)
+  - include:
+      domain: kafka.controller
+      bean:
+        # Replica Imbalance Count
+        - kafka.controller:type=KafkaController,name=PreferredReplicaImbalanceCount
+        # Under Min ISR Count
+        - kafka.controller:type=KafkaController,name=GlobalUnderMinIsrPartitionCount
+        # Count of topics
+        - kafka.controller:type=KafkaController,name=GlobalTopicCount
+        # Count of partitions
+        - kafka.controller:type=KafkaController,name=GlobalPartitionCount
+      attribute:
+        Value:  # Timer and Meter
+          alias: confluent.$domain.$name
+          metric_type: gauge
 
   # Kafka Broker Controller Metrics (Yammer Metric Timer/Meter)
   - include:
@@ -163,12 +210,26 @@ jmx_metrics:
           alias: confluent.$domain.$name.avg
           metric_type: gauge
 
+  # Kafka Broker Log Metrics (Yammer Metric Regex)
+  - include:
+      domain: kafka.log
+      bean_regex:
+        # Log size, only shows after segment roll
+        - kafka\.log:type=Log,name=Size(?:,topic=)([-.\w]+)(?:,partition=)([0-9]+)
+      tags:
+        topic: $0
+        partition: $1
+      attribute:
+        Value:
+          alias: confluent.$domain.size
+          metric_type: gauge
+
   # Kafka Broker Log Metrics (Yammer Metric Timer)
   - include:
       domain: kafka.log
-      bean:
+      bean_regex:
         # Log flush rate and time.
-        - kafka.log:type=LogFlushStats,name=LogFlushRateAndTimeMs
+        - kafka\.log:type=LogFlushStats,name=LogFlushRateAndTimeMs
       attribute:
         Count:
           alias: confluent.$domain.$name.rate
@@ -489,7 +550,7 @@ jmx_metrics:
           alias: confluent.$domain.fetch.$attribute
           metric_type: gauge
         fetch-size-max:
-          # The average number of bytes fetched per request.
+          # The maximum number of bytes fetched per request.
           alias: confluent.$domain.fetch.$attribute
           metric_type: gauge
         bytes-consumed-rate:
@@ -551,6 +612,63 @@ jmx_metrics:
             alias: confluent.$domain.fetch_topic.$attribute
             metric_type: gauge
 
+# Confluent Broker Consumer Group Metrics: https://docs.confluent.io/platform/current/kafka/monitoring.html#consumer-group-metrics
+  - include:
+      domain: kafka.consumer
+      bean_regex: kafka\.consumer:type=consumer-coordinator-metrics,client-id=([-.\w]+)$
+      attribute:
+        assigned-partitions:
+          # The number of partitions currently assigned to this consumer.
+          alias: confluent.$domain.group.$attribute
+          metric_type: gauge
+        commit-latency-avg:
+          # The average time taken for a commit request.
+          alias: confluent.$domain.group.$attribute
+          metric_type: gauge
+        commit-latency-max:
+          # The max time taken for a commit request.
+          alias: confluent.$domain.group.$attribute
+          metric_type: gauge
+        commit-rate:
+          # The number of commit calls per second.
+          alias: confluent.$domain.group.$attribute
+          metric_type: gauge
+        heartbeat-rate:
+          # The average number of heartbeats per second. After a rebalance, the consumer sends heartbeats to the coordinator to keep itself active in the group. You can control this using the heartbeat.interval.ms setting for the consumer. You may see a lower rate than configured if the processing loop is taking more time to handle message batches. Usually this is OK as long as you see no increase in the join rate.
+          alias: confluent.$domain.group.$attribute
+          metric_type: gauge
+        heartbeat-response-time-max:
+          # The max time taken to receive a response to a heartbeat request.
+          alias: confluent.$domain.group.$attribute
+          metric_type: gauge
+        join-rate:
+          # The number of group joins per second. Group joining is the first phase of the rebalance protocol. A large value indicates that the consumer group is unstable and will likely be coupled with increased lag.
+          alias: confluent.$domain.group.$attribute
+          metric_type: gauge
+        join-time-avg:
+          # The average time taken for a group rejoin. This value can get as high as the configured session timeout for the consumer, but should usually be lower.
+          alias: confluent.$domain.group.$attribute
+          metric_type: gauge
+        join-time-max:
+          # The max time taken for a group rejoin. This value should not get much higher than the configured session timeout for the consumer.
+          alias: confluent.$domain.group.$attribute
+          metric_type: gauge
+        last-heartbeat-seconds-ago:
+          # The number of seconds since the last controller heartbeat.
+          alias: confluent.$domain.group.$attribute
+          metric_type: gauge
+        sync-rate:
+          # The number of group syncs per second. Group synchronization is the second and last phase of the rebalance protocol. Similar to join-rate, a large value indicates group instability.
+          alias: confluent.$domain.group.$attribute
+          metric_type: gauge
+        sync-time-avg:
+          # The average time taken for a group sync.
+          alias: confluent.$domain.group.$attribute
+          metric_type: gauge
+        sync-time-max:
+          # The max time taken for a group sync.
+          alias: confluent.$domain.group.$attribute
+          metric_type: gauge
 
   # Kafka Connect Metrics
   # https://kafka.apache.org/documentation/#connect_monitoring
@@ -607,6 +725,53 @@ jmx_metrics:
           alias: confluent.$domain.worker.$attribute
           metric_type: gauge
 
+
+  # Kafka Connect Metrics
+  # https://kafka.apache.org/documentation/#connect_monitoring
+  - include:
+      domain: kafka.connect
+      bean_regex:
+        - kafka\.connect:type=connect-metrics,client-id=.*
+      attribute:
+        outgoing-byte-rate: 
+          # Rate of outgoing bytes
+          alias: confluent.$domain.connect_metrics.outgoing_byte_rate
+        incoming-byte-rate:
+          # Rate of incoming bytes
+          alias: confluent.$domain.connect_metrics.incoming_byte_rate
+        failed-authentication-rate:
+          # Rate of failed authentications
+          alias: confluent.$domain.connect_metrics.failed_authentication_rate
+        successful-authentication-rate:
+          # Rate of successful authentication
+          alias: confluent.$domain.connect_metrics.successful_authentication_rate
+        failed-authentication-total:
+          # Total amount of failed authentications
+          alias: confluent.$domain.connect_metrics.failed_authentication_total
+        successful-authentication-total:
+          # Total amount of failed authentications
+          alias: confluent.$domain.connect_metrics.successful_authentication_total
+
+  # Kafka Connect Metrics
+  # https://kafka.apache.org/documentation/#connect_monitoring
+  - include:
+      domain: kafka.connect
+      bean_regex:
+        - kafka\.connect:type=connector-metrics,connector=.*
+      tags:
+        connector: $0
+      attribute:
+        status:
+          # Status of the connector (string)
+          metric_type: gauge
+          alias: confluent.$domain.connector_metrics.status
+          values:
+                "unassigned": 0
+                "running": 1
+                "paused": 2
+                "falied": 3
+                "destroyed": 4
+
   # Kafka Connect Metrics
   # https://kafka.apache.org/documentation/#connect_monitoring
   - include:
@@ -614,6 +779,7 @@ jmx_metrics:
       bean_regex:
         # The bean should `connect-worker-metrics` but in practice the type is `connector-metrics`
         # We are supporting both while the issue is solved: https://issues.apache.org/jira/browse/KAFKA-9790
+        # Issue above is solved. Leaving for backwards compatibility.
         - kafka\.connect:type=connect-worker-metrics,connector=.*
         - kafka\.connect:type=connector-metrics,connector=.*
       attribute:
@@ -890,6 +1056,39 @@ jmx_metrics:
   #   - Kafka REST: https://docs.confluent.io/current/kafka-rest/monitoring.html
   #   - Kafka Schema Registry: https://docs.confluent.io/current/schema-registry/monitoring.html
   - include:
+      domain: kafka.schema.registry
+      bean:
+        - kafka.schema.registry:type=avro-schemas-created
+        - kafka.schema.registry:type=json-schemas-created
+        - kafka.schema.registry:type=protobuf-schemas-created
+        - kafka.schema.registry:type=avro-schemas-deleted
+        - kafka.schema.registry:type=json-schemas-deleted
+        - kafka.schema.registry:type=protobuf-schemas-deleted
+        - kafka.schema.registry:type=registered-count
+      attribute:
+        avro-schemas-created:
+          alias: confluent.$domain.avro_schemas_created
+          metric_type: gauge
+        json-schemas-created:
+          alias: confluent.$domain.json_schemas_created
+          metric_type: gauge
+        protobuf-schemas-created:
+          alias: confluent.$domain.protobuf_schemas_created
+          metric_type: gauge
+        avro-schemas-deleted:
+          alias: confluent.$domain.avro_schemas_deleted
+          metric_type: gauge
+        json-schemas-deleted:
+          alias: confluent.$domain.json_schemas_deleted
+          metric_type: gauge
+        protobuf-schemas-deleted:
+          alias: confluent.$domain.protobuf_schemas_deleted
+          metric_type: gauge
+        registered-count:
+          alias: confluent.$domain.registered_count
+          metric_type: gauge
+
+  - include:
       bean:
         - kafka.rest:type=jersey-metrics
         - kafka.schema.registry:type=jersey-metrics
@@ -914,6 +1113,10 @@ jmx_metrics:
           # The average number of requests per second that resulted in HTTP error responses
           alias: confluent.$domain.jersey.$attribute
           metric_type: gauge
+        consumer.records.read-avro+v2.request-error-rate:
+          # The average number of requests per second that resulted in HTTP error responses
+          alias: confluent.$domain.jersey.$attribute
+          metric_type: gauge
         consumer.committed-offsets+v2.request-error-rate:
           # The average number of requests per second that resulted in HTTP error responses
           alias: confluent.$domain.jersey.$attribute
@@ -934,7 +1137,11 @@ jmx_metrics:
           # The average number of requests per second that resulted in HTTP error responses
           alias: confluent.$domain.jersey.$attribute
           metric_type: gauge
-        consumer.records.read-avro+v2.request-error-rate:
+        consumer.records.read-jsonschema+v2.request-error-rate:
+          # The average number of requests per second that resulted in HTTP error responses
+          alias: confluent.$domain.jersey.$attribute
+          metric_type: gauge
+        consumer.records.read-protobuf+v2.request-error-rate:
           # The average number of requests per second that resulted in HTTP error responses
           alias: confluent.$domain.jersey.$attribute
           metric_type: gauge
@@ -1034,6 +1241,14 @@ jmx_metrics:
           # The average number of requests per second that resulted in HTTP error responses
           alias: confluent.$domain.jersey.$attribute
           metric_type: gauge
+        partition.produce-jsonschema+v2.request-error-rate:
+          # The average number of requests per second that resulted in HTTP error responses
+          alias: confluent.$domain.jersey.$attribute
+          metric_type: gauge
+        partition.produce-protobuf+v2.request-error-rate:
+          # The average number of requests per second that resulted in HTTP error responses
+          alias: confluent.$domain.jersey.$attribute
+          metric_type: gauge
         request-error-rate:
           # The average number of requests per second that resulted in HTTP error responses
           alias: confluent.$domain.jersey.$attribute
@@ -1063,6 +1278,22 @@ jmx_metrics:
           alias: confluent.$domain.jersey.$attribute
           metric_type: gauge
         topics.list.request-error-rate:
+          # The average number of requests per second that resulted in HTTP error responses
+          alias: confluent.$domain.jersey.$attribute
+          metric_type: gauge
+        root.get+v2.request-error-rate:
+          # The average number of requests per second that resulted in HTTP error responses
+          alias: confluent.$domain.jersey.$attribute
+          metric_type: gauge
+        root.post+v2.request-error-rate:
+          # The average number of requests per second that resulted in HTTP error responses
+          alias: confluent.$domain.jersey.$attribute
+          metric_type: gauge
+        topic.get+v2.request-error-rate:
+          # The average number of requests per second that resulted in HTTP error responses
+          alias: confluent.$domain.jersey.$attribute
+          metric_type: gauge
+        topics.list+v2.request-error-rate:
           # The average number of requests per second that resulted in HTTP error responses
           alias: confluent.$domain.jersey.$attribute
           metric_type: gauge
@@ -1100,8 +1331,6 @@ jmx_metrics:
           alias: $domain.task.topic_partition_latency
           metric_type: gauge
 
-  # Components Metrics:
-  #   - Confluent KSQL: https://docs.confluent.io/current/ksql/docs/installation/server-config/index.html#jmx-metrics
   - include:
       domain: io.confluent.ksql.metrics
       bean: io.confluent.ksql.metrics:type=_confluent-ksql-default_ksql-engine-query-stats
@@ -1150,6 +1379,225 @@ jmx_metrics:
           # Number of queries with no messages available to process.
           alias: confluent.ksql.query_stats.$attribute
           metric_type: gauge
+
+  # Components Metrics:
+  #   - Confluent KSQL: https://docs.confluent.io/current/ksql/docs/installation/server-config/index.html#jmx-metrics
+  - include:
+      domain: io.confluent.ksql.metrics
+      bean_regex: 
+        - io\.confluent\.ksql\.metrics:type=_confluent-ksql-engine-query-stats,ksql_service_id=(.*)
+      tags:
+        ksql_service_id: $0
+      attribute:
+        bytes-consumed-total:
+          # Number of bytes consumed across all queries.
+          alias: confluent.ksql.query_stats.$attribute
+          metric_type: gauge
+        error-rate:
+          # Number of messages that have been consumed but not processed across all queries.
+          alias: confluent.ksql.query_stats.$attribute
+          metric_type: gauge
+        messages-consumed-avg:
+          # Average number of messages consumed by a query per second.
+          alias: confluent.ksql.query_stats.$attribute
+          metric_type: gauge
+        messages-consumed-per-sec:
+          # Number of messages consumed per second across all queries.
+          alias: confluent.ksql.query_stats.$attribute
+          metric_type: gauge
+        messages-consumed-min:
+          # Number of messages consumed per second for the query with the fewest messages consumed per second.
+          alias: confluent.ksql.query_stats.$attribute
+          metric_type: gauge
+        messages-consumed-max:
+          # Number of messages consumed per second for the query with the most messages consumed per second.
+          alias: confluent.ksql.query_stats.$attribute
+          metric_type: gauge
+        messages-consumed-total:
+          # Number of messages consumed across all queries.
+          alias: confluent.ksql.query_stats.$attribute
+          metric_type: gauge
+        messages-produced-per-sec:
+          # Number of messages produced per second across all queries.
+          alias: confluent.ksql.query_stats.$attribute
+          metric_type: gauge
+        num-persistent-queries:
+          # Number of persistent queries that are currently executing.
+          alias: confluent.ksql.query_stats.$attribute
+          metric_type: gauge
+        num-active-queries:
+          # Number of queries that are actively processing messages.
+          alias: confluent.ksql.query_stats.$attribute
+          metric_type: gauge
+        num-idle-queries:
+          # Number of queries with no messages available to process.
+          alias: confluent.ksql.query_stats.$attribute
+          metric_type: gauge
+        RUNNING-queries:
+          alias: confluent.ksql.query_stats.$attribute
+          metric_type: gauge
+        NOT_RUNNING-queries:
+          alias: confluent.ksql.query_stats.$attribute
+          metric_type: gauge
+        REBALANCING-queries:
+          alias: confluent.ksql.query_stats.$attribute
+          metric_type: gauge
+        CREATED-queries:
+          alias: confluent.ksql.query_stats.$attribute
+          metric_type: gauge
+        PENDING_SHUTDOWN-queries:
+          alias: confluent.ksql.query_stats.$attribute
+          metric_type: gauge
+        ERROR-queries:
+          alias: confluent.ksql.query_stats.$attribute
+          metric_type: gauge
+  
+  - include:
+      domain: io.confluent.ksql.metrics
+      bean: io.confluent.ksql.metrics:type=producer-metrics
+      attribute:
+        total-messages:
+          alias: confluent.ksql.producer_metrics.$attribute
+          metric_type: gauge
+        messages-per-sec:
+          alias: confluent.ksql.producer_metrics.$attribute
+          metric_type: gauge
+
+  - include:
+      domain: io.confluent.ksql.metrics
+      bean: io.confluent.ksql.metrics:type=consumer-metrics
+      attribute:
+        consumer-total-messages:
+          alias: confluent.ksql.consumer_metrics.$attribute
+          metric_type: gauge
+        consumer-messages-per-sec:
+          alias: confluent.ksql.consumer_metrics.$attribute
+          metric_type: gauge
+        consumer-total-bytes:
+          alias: confluent.ksql.consumer_metrics.$attribute
+          metric_type: gauge
+
+  - include:
+      domain: io.confluent.ksql.metrics
+      bean: io.confluent.ksql.metrics:type=_confluent-ksql-pull-query
+      attribute:
+        pull-query-requests-total:
+          alias: confluent.ksql.pull_query_metrics.$attribute
+          metric_type: gauge
+        pull-query-requests-rate:
+          alias: confluent.ksql.pull_query_metrics.$attribute
+          metric_type: gauge
+        pull-query-requests-error-total:
+          alias: confluent.ksql.pull_query_metrics.$attribute
+          metric_type: gauge
+        pull-query-requests-error-rate:
+          alias: confluent.ksql.pull_query_metrics.$attribute
+          metric_type: gauge
+        pull-query-requests-local:
+          alias: confluent.ksql.pull_query_metrics.$attribute
+          metric_type: gauge
+        pull-query-requests-local-rate:
+          alias: confluent.ksql.pull_query_metrics.$attribute
+          metric_type: gauge
+        pull-query-requests-remote:
+          alias: confluent.ksql.pull_query_metrics.$attribute
+          metric_type: gauge
+        pull-query-requests-remote-rate:
+          alias: confluent.ksql.pull_query_metrics.$attribute
+          metric_type: gauge
+        pull-query-requests-latency-latency-min:
+          alias: confluent.ksql.pull_query_metrics.$attribute
+          metric_type: gauge
+        pull-query-requests-latency-latency-max:
+          alias: confluent.ksql.pull_query_metrics.$attribute
+          metric_type: gauge
+        pull-query-requests-latency-latency-avg:
+          alias: confluent.ksql.pull_query_metrics.$attribute
+          metric_type: gauge
+        pull-query-requests-latency-distribution-50:
+          alias: confluent.ksql.pull_query_metrics.$attribute
+          metric_type: gauge
+        pull-query-requests-latency-distribution-75:
+          alias: confluent.ksql.pull_query_metrics.$attribute
+          metric_type: gauge
+        pull-query-requests-latency-distribution-90:
+          alias: confluent.ksql.pull_query_metrics.$attribute
+          metric_type: gauge
+        pull-query-requests-latency-distribution-99:
+          alias: confluent.ksql.pull_query_metrics.$attribute
+          metric_type: gauge
+
+  # Components Metrics:
+  # Metric summaries: https://cwiki.apache.org/confluence/display/KAFKA/KIP-607%3A+Add+Metrics+to+Kafka+Streams+to+Report+Properties+of+RocksDB
+  #   - Confluent KSQL: https://docs.confluent.io/current/ksql/docs/installation/server-config/index.html#jmx-metrics
+  - include:
+      domain: io.confluent.ksql.metrics
+      bean: io.confluent.ksql.metrics:type=ksql-rocksdb-aggregates
+      attribute:
+        cur-size-all-mem-tables-total:
+          alias: confluent.ksql.ksql_rocksdb_aggregates.cur_size_all_mem_tables_total
+          metric_type: gauge
+        cur-size-active-mem-table-total:
+          alias: confluent.ksql.ksql_rocksdb_aggregates.cur_size_active_mem_table_total
+          metric_type: gauge
+        mem-table-flush-pending-total:
+          alias: confluent.ksql.ksql_rocksdb_aggregates.mem_table_flush_pending_total
+          metric_type: gauge
+        block-cache-pinned-usage-total:
+          alias: confluent.ksql.ksql_rocksdb_aggregates.block_cache_pinned_usage_total
+          metric_type: gauge
+        estimate-num-keys-total:
+          alias: confluent.ksql.ksql_rocksdb_aggregates.estimate_num_keys_total
+          metric_type: gauge
+        live-sst-files-size-total:
+          alias: confluent.ksql.ksql_rocksdb_aggregates.live_sst_files_size_total
+          metric_type: gauge
+        size-all-mem-tables-total:
+          alias: confluent.ksql.ksql_rocksdb_aggregates.size_all_mem_tables_total
+          metric_type: gauge
+        block-cache-usage-total:
+          alias: confluent.ksql.ksql_rocksdb_aggregates.block_cache_usage_total
+          metric_type: gauge
+        estimate-table-readers-mem-total:
+          alias: confluent.ksql.ksql_rocksdb_aggregates.estimate_table_readers_mem_total
+          metric_type: gauge
+        compaction-pending-total:
+          alias: confluent.ksql.ksql_rocksdb_aggregates.compaction_pending_total
+          metric_type: gauge
+        num-entries-imm-mem-tables-total:
+          alias: confluent.ksql.ksql_rocksdb_aggregates.num_entries_imm_mem_tables_total
+          metric_type: gauge
+        total-sst-files-size-total:
+          alias: confluent.ksql.ksql_rocksdb_aggregates.total_sst_files_size_total
+          metric_type: gauge
+        num-running-compactions-total:
+          alias: confluent.ksql.ksql_rocksdb_aggregates.num_running_compactions_total
+          metric_type: gauge
+        block-cache-pinned-usage-max:
+          alias: confluent.ksql.ksql_rocksdb_aggregates.block_cache_pinned_usage_max
+          metric_type: gauge
+        estimate-pending-compaction-bytes-total:
+          alias: confluent.ksql.ksql_rocksdb_aggregates.estimate_pending_compaction_bytes_total
+          metric_type: gauge
+        num-deletes-active-mem-table-total:
+          alias: confluent.ksql.ksql_rocksdb_aggregates.num_deletes_active_mem_table_total
+          metric_type: gauge
+        num-immutable-mem-table-total:
+          alias: confluent.ksql.ksql_rocksdb_aggregates.num_immutable_mem_table_total
+          metric_type: gauge
+        num-running-flushes-total:
+          alias: confluent.ksql.ksql_rocksdb_aggregates.num_running_flushes_total
+          metric_type: gauge
+        block-cache-usage-max:
+          alias: confluent.ksql.ksql_rocksdb_aggregates.block_cache_usage_max
+          metric_type: gauge
+        num-entries-active-mem-table-total:
+          alias: confluent.ksql.ksql_rocksdb_aggregates.num_entries_active_mem_table_total
+          metric_type: gauge
+        num-deletes-imm-mem-tables-total:
+          alias: confluent.ksql.ksql_rocksdb_aggregates.num_deletes_imm_mem_tables_total
+          metric_type: gauge
+        
 
   # Components Metrics:
   #   - Confluent Streams Thread: https://docs.confluent.io/current/streams/monitoring.html#built-in-metrics

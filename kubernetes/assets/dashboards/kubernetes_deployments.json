@@ -39,7 +39,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "sum:kubernetes_state.deployment.replicas_available{$scope,$kube_cluster_name,$kube_namespace,$kube_deployment} by {deployment}",
+                        "q": "sum:kubernetes_state.deployment.replicas_available{$scope,$kube_cluster_name,$kube_namespace,$kube_deployment} by {kube_deployment}",
                         "display_type": "area",
                         "style": {
                             "palette": "green",
@@ -107,7 +107,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "sum:kubernetes_state.deployment.replicas{$scope,$kube_deployment,$kube_cluster_name,$kube_namespace} by {deployment}",
+                        "q": "sum:kubernetes_state.deployment.replicas{$scope,$kube_deployment,$kube_cluster_name,$kube_namespace} by {kube_deployment}",
                         "display_type": "area",
                         "style": {
                             "palette": "dog_classic",
@@ -252,7 +252,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "sum:kubernetes_state.deployment.replicas_desired{$scope,$kube_cluster_name,$kube_namespace,$kube_deployment} by {deployment}",
+                        "q": "sum:kubernetes_state.deployment.replicas_desired{$scope,$kube_cluster_name,$kube_namespace,$kube_deployment} by {kube_deployment}",
                         "display_type": "area",
                         "style": {
                             "palette": "cool",
@@ -319,7 +319,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "sum:kubernetes_state.deployment.replicas_updated{$scope,$kube_cluster_name,$kube_namespace,$kube_deployment} by {deployment}",
+                        "q": "sum:kubernetes_state.deployment.replicas_updated{$scope,$kube_cluster_name,$kube_namespace,$kube_deployment} by {kube_deployment}",
                         "display_type": "area",
                         "style": {
                             "palette": "dog_classic",
@@ -361,7 +361,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "sum:kubernetes_state.deployment.rollingupdate.max_unavailable{$scope,$kube_cluster_name,$kube_namespace,$kube_deployment} by {deployment}",
+                        "q": "sum:kubernetes_state.deployment.rollingupdate.max_unavailable{$scope,$kube_cluster_name,$kube_namespace,$kube_deployment} by {kube_deployment}",
                         "display_type": "area",
                         "style": {
                             "palette": "warm",
@@ -397,7 +397,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "sum:kubernetes_state.deployment.replicas_desired{$scope,$kube_cluster_name,$kube_namespace,$kube_deployment} by {deployment,kube_cluster_name,kube_namespace}-sum:kubernetes_state.deployment.replicas_available{$scope,$kube_cluster_name,$kube_namespace,$kube_deployment} by {deployment,kube_cluster_name,kube_namespace}",
+                        "q": "sum:kubernetes_state.deployment.replicas_desired{$scope,$kube_cluster_name,$kube_namespace,$kube_deployment} by {kube_deployment,kube_cluster_name,kube_namespace}-sum:kubernetes_state.deployment.replicas_available{$scope,$kube_cluster_name,$kube_namespace,$kube_deployment} by {kube_deployment,kube_cluster_name,kube_namespace}",
                         "display_type": "area",
                         "style": {
                             "palette": "warm",
@@ -439,7 +439,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "sum:kubernetes_state.deployment.replicas{$scope,$kube_cluster_name,$kube_namespace,$kube_deployment} by {deployment}-sum:kubernetes_state.deployment.replicas_updated{$scope,$kube_cluster_name,$kube_namespace,$kube_deployment} by {deployment}",
+                        "q": "sum:kubernetes_state.deployment.replicas{$scope,$kube_cluster_name,$kube_namespace,$kube_deployment} by {kube_deployment}-sum:kubernetes_state.deployment.replicas_updated{$scope,$kube_cluster_name,$kube_namespace,$kube_deployment} by {kube_deployment}",
                         "display_type": "area",
                         "style": {
                             "palette": "orange",
@@ -678,7 +678,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "sum:kubernetes_state.deployment.replicas_desired{$scope,$kube_cluster_name,$kube_namespace,$kube_deployment} by {deployment}-sum:kubernetes_state.deployment.replicas_available{$scope,$kube_cluster_name,$kube_namespace,$kube_deployment} by {deployment}",
+                        "q": "sum:kubernetes_state.deployment.replicas_desired{$scope,$kube_cluster_name,$kube_namespace,$kube_deployment} by {kube_deployment}-sum:kubernetes_state.deployment.replicas_available{$scope,$kube_cluster_name,$kube_namespace,$kube_deployment} by {kube_deployment}",
                         "display_type": "area",
                         "style": {
                             "palette": "dog_classic",

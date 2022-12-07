@@ -1,6 +1,6 @@
 {
-    "title": "Istio overview (v1.5+)",
-    "description": "### Istio\n\nNote: This dashboard outlines new metrics from Istio `v1.5+.\n\n- [What is Istio](https://istio.io/docs/concepts/what-is-istio/)?\n- [Istiod](https://istio.io/docs/ops/deployment/architecture/)\n- [Envoy](https://istio.io/docs/concepts/what-is-istio/#envoy), a high performance proxy.\n    - XDS = Envoy management APIs that can be implemented by backend servers. \n        - These APIs support:\n            - Cluster discovery service (CDS)\n            - Route discovery service (RDS)\n            - Endpoint discovery service (EDS)\n            - Listener discovery service (LDS)",
+    "title": "Istio - Overview (v1.5+) - Legacy",
+    "description": "### Istio\n\nNote: This dashboard outlines metrics from Istio `v1.5+ collected via legacy method.\n\n- [What is Istio](https://istio.io/docs/concepts/what-is-istio/)?\n- [Istiod](https://istio.io/docs/ops/deployment/architecture/)\n- [Envoy](https://istio.io/docs/concepts/what-is-istio/#envoy), a high performance proxy.\n    - XDS = Envoy management APIs that can be implemented by backend servers. \n        - These APIs support:\n            - Cluster discovery service (CDS)\n            - Route discovery service (RDS)\n            - Endpoint discovery service (EDS)\n            - Listener discovery service (LDS)",
     "widgets": [
         {
             "id": 0,
@@ -46,7 +46,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "top(avg:istio.mesh.request.count{$cluster} by {host}, 10, 'mean', 'desc')",
+                        "q": "top(sum:istio.mesh.request.count{$cluster} by {host}, 10, 'mean', 'desc')",
                         "display_type": "area",
                         "style": {
                             "palette": "dog_classic",
@@ -200,31 +200,56 @@
         {
             "id": 7,
             "definition": {
-                "type": "timeseries",
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "legend_layout": "auto",
+                "markers": [],
                 "requests": [
                     {
-                        "q": "(top(avg:istio.go.memstats.heap_inuse_bytes{$cluster}, 10, 'mean', 'desc')/top(avg:istio.go.memstats.heap_alloc_bytes{$cluster}, 10, 'mean', 'desc'))*100",
                         "display_type": "line",
+                        "formulas": [
+                            {
+                                "formula": "(query2 / query1) * 100"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "top(avg:istio.go.memstats.heap_inuse_bytes{$cluster}, 10, 'mean', 'desc')"
+                            },
+                            {
+                                "data_source": "metrics",
+                                "name": "query2",
+                                "query": "top(avg:istio.go.memstats.heap_alloc_bytes{$cluster}, 10, 'mean', 'desc')"
+                            }
+                        ],
+                        "response_format": "timeseries",
                         "style": {
-                            "palette": "dog_classic",
                             "line_type": "solid",
-                            "line_width": "thin"
+                            "line_width": "thin",
+                            "palette": "dog_classic"
                         }
                     }
                 ],
-                "custom_links": [],
-                "yaxis": {
-                    "label": "",
-                    "scale": "linear",
-                    "min": "auto",
-                    "max": "auto",
-                    "include_zero": true
-                },
-                "title": "Heap in use (percent)",
-                "title_size": "16",
-                "title_align": "center",
                 "show_legend": false,
-                "legend_size": "0"
+                "time": {},
+                "title": "Heap in use (percent)",
+                "title_align": "center",
+                "title_size": "16",
+                "type": "timeseries",
+                "yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
             },
             "layout": {
                 "x": 163,

@@ -10,9 +10,9 @@ import re
 from collections import defaultdict
 from typing import List
 
-from six import iteritems
+from six import PY2, iteritems
 
-from datadog_checks.base import AgentCheck
+from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.errors import CheckException
 
 try:
@@ -70,6 +70,28 @@ def parse_namespace(data, namespace, secondary):
 
 
 class AerospikeCheck(AgentCheck):
+    """
+    This is a legacy implementation that will be removed at some point, refer to check.py for the new implementation.
+    """
+
+    def __new__(cls, name, init_config, instances):
+        instance = instances[0]
+
+        if 'openmetrics_endpoint' in instance:
+            if PY2:
+                raise ConfigurationError(
+                    "This version of the integration is only available when using py3. "
+                    "Check https://docs.datadoghq.com/agent/guide/agent-v6-python-3 "
+                    "for more information or use the older style config."
+                )
+            # TODO: when we drop Python 2 move this import up top
+            from .check import AerospikeCheckV2
+
+            return AerospikeCheckV2(name, init_config, instances)
+
+        else:
+            return super(AerospikeCheck, cls).__new__(cls)
+
     def __init__(self, name, init_config, instances):
         super(AerospikeCheck, self).__init__(name, init_config, instances)
 
@@ -106,6 +128,9 @@ class AerospikeCheck(AgentCheck):
         # We'll connect on the first check run
         self._client = None
 
+        # Cache for the entirety of each check run
+        self._node_name = None
+
     def check(self, _):
         if self._client is None:
             client = self.get_client()
@@ -113,6 +138,8 @@ class AerospikeCheck(AgentCheck):
                 return
 
             self._client = client
+
+        self._node_name = None
 
         # https://www.aerospike.com/docs/reference/info/#statistics
         self.collect_info('statistics', CLUSTER_METRIC_TYPE, required_keys=self._metrics, tags=self._tags)
@@ -289,12 +316,33 @@ class AerospikeCheck(AgentCheck):
             self.service_check(SERVICE_CHECK_CONNECT, self.OK, tags=self._tags)
             return client
 
+    @property
+    def node_name(self):
+        if self._node_name is None:
+            host, port = self._host[:2]
+            node_data = self._client.get_node_names()
+            for data in node_data:
+                if data['address'] == host and data['port'] == port:
+                    self._node_name = data['node_name']
+                    break
+            else:
+                raise Exception('Could not find node name for {}:{} among: {}'.format(host, port, node_data))
+
+        return self._node_name
+
+    def get_node_info(self, command):
+        # Aerospike deprecated `info_node` as of v6.0
+        if hasattr(self._client, 'get_node_names'):
+            return self._client.info_single_node(command, self.node_name, self._info_policies)
+        else:
+            return self._client.info_node(command, self._host, self._info_policies)
+
     def get_info(self, command, separator=';'):
         # type: (str, str) -> List[str]
         # See https://www.aerospike.com/docs/reference/info/
         # Example output: command\tKEY=VALUE;KEY=VALUE;...
         try:
-            data = self._client.info_node(command, self._host, self._info_policies)
+            data = self.get_node_info(command)
             self.log.debug(
                 "Get info results for command=`%s`, host=`%s`, policies=`%s`: %s",
                 command,
@@ -315,6 +363,8 @@ class AerospikeCheck(AgentCheck):
         if not data:
             return []
 
+        # Get rid of any trailing separators before splitting
+        data = data.rstrip(';')
         return data.split(separator)
 
     def collect_datacenter(self, datacenter):
@@ -343,7 +393,7 @@ class AerospikeCheck(AgentCheck):
     def get_metric_name(self, line):
         # match only works at the beginning
         # ':' or ';' are not allowed in namespace-name: https://www.aerospike.com/docs/guide/limitations.html
-        ns_metric_name_match = re.match(r'\{([^}:;]+)\}-(\w+):', line)
+        ns_metric_name_match = re.match(r'\{([^}:;]+)\}-([-\w]+):', line)
         if ns_metric_name_match:
             return ns_metric_name_match.groups()[0], ns_metric_name_match.groups()[1]
         elif line.startswith("batch-index"):
@@ -366,12 +416,9 @@ class AerospikeCheck(AgentCheck):
         while data:
             line = data.pop(0)
 
-            if not data:
-                break
-
             ns, metric_name = self.get_metric_name(line)
             if metric_name is None:
-                return
+                continue
 
             namespace_tags = ['namespace:{}'.format(ns)] if ns else []
             namespace_tags.extend(self._tags)
@@ -388,7 +435,7 @@ class AerospikeCheck(AgentCheck):
                     latencies = bucket_vals.split(',')
                     if latencies and len(latencies) == 17:
                         for i in range(len(latencies)):
-                            bucket = 2 ** i
+                            bucket = 2**i
                             tags = namespace_tags + ['bucket:{}'.format(bucket)]
                             latency_name = metric_name
                             self.send(NAMESPACE_LATENCY_METRIC_TYPE, latency_name, latencies[i], tags)
@@ -419,9 +466,6 @@ class AerospikeCheck(AgentCheck):
             if line.startswith("error-"):
                 continue
 
-            if not data:
-                break
-
             timestamp = re.match(r'(\d+:\d+:\d+)', line)
             if timestamp:
                 metric_values = line.split(",")[1:]
@@ -430,7 +474,7 @@ class AerospikeCheck(AgentCheck):
 
             ns, metric_name = self.get_metric_name(line)
             if metric_name is None:
-                return
+                continue
 
             # need search because this isn't at the beginning
             ops_per_sec = re.search(r'(\w+\/\w+)', line)
@@ -455,6 +499,8 @@ class AerospikeCheck(AgentCheck):
             if len(metric_names) == len(metric_values):
                 for i in range(len(metric_names)):
                     self.send(NAMESPACE_LATENCY_METRIC_TYPE, metric_names[i], metric_values[i], namespace_tags)
+            else:
+                self.log.debug("Got unexpected latency buckets: %s", ns_latencies)
 
     def collect_throughput(self, namespaces):
         """

@@ -48,7 +48,8 @@ class VSphereConfig(object):
             'tls_verify': self.ssl_verify,
             'tls_ignore_warning': self.tls_ignore_warning,
         }
-        self.rest_api_options.update(instance.get('rest_api_options', {}))
+        if isinstance(instance.get('rest_api_options'), dict):
+            self.rest_api_options.update(instance['rest_api_options'])
         self.shared_rest_api_options = init_config.get('rest_api_options', {})  # type: Dict[str, Any]
 
         # vSphere options
@@ -77,6 +78,7 @@ class VSphereConfig(object):
         self.refresh_metrics_metadata_cache_interval = instance.get(
             'refresh_metrics_metadata_cache_interval', DEFAULT_REFRESH_METRICS_METADATA_CACHE_INTERVAL
         )
+        self.connection_reset_timeout = instance.get("connection_reset_timeout", 900)
 
         # Always collect events if `collect_events_only` is true
         if self.collect_events_only:

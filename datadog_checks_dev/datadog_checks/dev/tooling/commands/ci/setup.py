@@ -8,7 +8,7 @@ import subprocess
 import click
 
 from ...constants import get_root
-from ...testing import get_tox_envs
+from ...testing import get_test_envs
 from ..console import CONTEXT_SETTINGS, echo_debug, echo_info
 
 
@@ -35,7 +35,7 @@ def setup(checks, changed):
     else:
         echo_info('Checks chosen: changed')
 
-    check_envs = list(get_tox_envs(checks, every=True, sort=True, changed_only=changed))
+    check_envs = list(get_test_envs(checks, every=True, sort=True, changed_only=changed))
     echo_info(f'Configuring these envs: {check_envs}')
 
     for check, _ in check_envs:
@@ -51,8 +51,11 @@ def setup(checks, changed):
             echo_debug(f"Skip! No scripts for check `{check}` and platform `{cur_platform}`")
             continue
 
-        scripts = sorted(os.listdir(os.path.join(check_scripts_path, cur_platform)))
-        echo_info(f'Setting up: {check} with these config scripts: {scripts}')
+        setup_files = sorted(os.listdir(os.path.join(check_scripts_path, cur_platform)))
+        scripts = [s for s in setup_files if not s.startswith("_")]
+        non_exe = [s for s in setup_files if s.startswith("_")]
+        non_exe_msg = f" (Non-executable setup files: {non_exe})" if non_exe else ""
+        echo_info(f'Setting up: {check} with these config scripts: {scripts}{non_exe_msg}')
 
         for script in scripts:
             script_file = os.path.join(check_scripts_path, cur_platform, script)

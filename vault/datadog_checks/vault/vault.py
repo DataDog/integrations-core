@@ -2,33 +2,29 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import time
-from collections import namedtuple
 
 import requests
+from six import PY2
 
 from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheck, is_affirmative
 
+from .common import API_METHODS, DEFAULT_API_VERSION, SYS_HEALTH_DEFAULT_CODES, SYS_LEADER_DEFAULT_CODES, Api, Leader
 from .errors import ApiUnreachable
-from .metrics import METRIC_MAP, METRIC_ROLLBACK_COMPAT_MAP
+from .metrics import METRIC_MAP, METRIC_ROLLBACK_COMPAT_MAP, ROUTE_METRICS_TO_TRANSFORM
 
 try:
     from json import JSONDecodeError
 except ImportError:
     from simplejson import JSONDecodeError
 
-Api = namedtuple('Api', ('check_health', 'check_leader'))
-Leader = namedtuple('Leader', ('leader_addr', 'leader_cluster_addr'))
-
 
 class Vault(OpenMetricsBaseCheck):
     DEFAULT_METRIC_LIMIT = 0
     CHECK_NAME = 'vault'
-    DEFAULT_API_VERSION = '1'
     EVENT_LEADER_CHANGE = 'vault.leader_change'
     SERVICE_CHECK_CONNECT = 'vault.can_connect'
     SERVICE_CHECK_UNSEALED = 'vault.unsealed'
     SERVICE_CHECK_INITIALIZED = 'vault.initialized'
-    API_METHODS = ('check_health', 'check_leader')
 
     HTTP_CONFIG_REMAPPER = {
         'ssl_verify': {'name': 'tls_verify'},
@@ -38,25 +34,31 @@ class Vault(OpenMetricsBaseCheck):
         'ssl_ignore_warning': {'name': 'tls_ignore_warning'},
     }
 
-    # Expected HTTP Error codes for /sys/health endpoint
-    # https://www.vaultproject.io/api/system/health.html
-    SYS_HEALTH_DEFAULT_CODES = {
-        200,  # initialized, unsealed, and active
-        429,  # unsealed and standby
-        472,  # data recovery mode replication secondary and active
-        473,  # performance standby
-        501,  # not initialized
-        503,  # sealed
-    }
+    def __new__(cls, name, init_config, instances):
+        instance = instances[0]
 
-    SYS_LEADER_DEFAULT_CODES = {503}  # sealed
+        if is_affirmative(instance.get('use_openmetrics', False)):
+            if PY2:
+                raise ConfigurationError(
+                    'This version of the integration is only available when using Python 3. '
+                    'Check https://docs.datadoghq.com/agent/guide/agent-v6-python-3/ '
+                    'for more information or use the older style config.'
+                )
+            # TODO: when we drop Python 2 move this import up top
+            from .check import VaultCheckV2
+
+            return VaultCheckV2(name, init_config, instances)
+        else:
+            return super(Vault, cls).__new__(cls)
 
     def __init__(self, name, init_config, instances):
         super(Vault, self).__init__(
             name,
             init_config,
             instances,
-            default_instances={self.CHECK_NAME: {'namespace': self.CHECK_NAME, 'metrics': [METRIC_MAP]}},
+            default_instances={
+                self.CHECK_NAME: {'namespace': self.CHECK_NAME, 'metrics': [METRIC_MAP] + ROUTE_METRICS_TO_TRANSFORM},
+            },
             default_namespace=self.CHECK_NAME,
         )
 
@@ -67,6 +69,7 @@ class Vault(OpenMetricsBaseCheck):
         self._tags = list(self.instance.get('tags', []))
         self._tags.append('api_url:{}'.format(self._api_url))
         self._disable_legacy_cluster_tag = is_affirmative(self.instance.get('disable_legacy_cluster_tag', False))
+        self._collect_secondary_dr = is_affirmative(self.instance.get('collect_secondary_dr', False))
 
         # Keep track of the previous cluster leader to detect changes
         self._previous_leader = None
@@ -81,8 +84,9 @@ class Vault(OpenMetricsBaseCheck):
         # Avoid error on the first attempt to refresh tokens
         self._refreshing_token = False
 
-        # Detect if Vault is in replication mode
-        self._replication_dr_secondary_mode = False
+        # we skip metric collection for DR if Vault is in replication mode
+        # and collect_secondary_dr is not enabled
+        self._skip_dr_metric_collection = False
 
         # The Agent only makes one attempt to instantiate each AgentCheck so any errors occurring
         # in `__init__` are logged just once, making it difficult to spot. Therefore, we emit
@@ -112,7 +116,7 @@ class Vault(OpenMetricsBaseCheck):
             for submit_function in submission_queue:
                 submit_function(tags=tags)
 
-        if (self._client_token or self._no_token) and not self._replication_dr_secondary_mode:
+        if (self._client_token or self._no_token) and not self._skip_dr_metric_collection:
             self._scraper_config['_metric_tags'] = dynamic_tags
             try:
                 self.process(self._scraper_config, self._metric_transformers)
@@ -137,7 +141,7 @@ class Vault(OpenMetricsBaseCheck):
 
     def check_leader_v1(self, submission_queue, dynamic_tags):
         url = self._api_url + '/sys/leader'
-        leader_data = self.access_api(url, ignore_status_codes=self.SYS_LEADER_DEFAULT_CODES)
+        leader_data = self.access_api(url, ignore_status_codes=SYS_LEADER_DEFAULT_CODES)
         errors = leader_data.get('errors')
         if errors:
             error_msg = ';'.join(errors)
@@ -202,7 +206,7 @@ class Vault(OpenMetricsBaseCheck):
 
     def check_health_v1(self, submission_queue, dynamic_tags):
         url = self._api_url + '/sys/health'
-        health_data = self.access_api(url, ignore_status_codes=self.SYS_HEALTH_DEFAULT_CODES)
+        health_data = self.access_api(url, ignore_status_codes=SYS_HEALTH_DEFAULT_CODES)
         cluster_name = health_data.get('cluster_name')
         if cluster_name:
             dynamic_tags.append('vault_cluster:{}'.format(cluster_name))
@@ -211,10 +215,19 @@ class Vault(OpenMetricsBaseCheck):
 
         replication_mode = health_data.get('replication_dr_mode', '').lower()
         if replication_mode == 'secondary':
-            self._replication_dr_secondary_mode = True
-            self.log.debug("Detected vault in replication DR secondary mode, skipping Prometheus metric collection.")
+            if self._collect_secondary_dr:
+                self._skip_dr_metric_collection = False
+                self.log.debug(
+                    'Detected vault in replication DR secondary mode but also detected that '
+                    '`collect_secondary_dr` is enabled, Prometheus metric collection will still occur.'
+                )
+            else:
+                self._skip_dr_metric_collection = True
+                self.log.debug(
+                    'Detected vault in replication DR secondary mode, skipping Prometheus metric collection.'
+                )
         else:
-            self._replication_dr_secondary_mode = False
+            self._skip_dr_metric_collection = False
 
         vault_version = health_data.get('version')
         if vault_version:
@@ -265,18 +278,16 @@ class Vault(OpenMetricsBaseCheck):
         return json_data
 
     def parse_config(self):
-        if not self._api_url:
+        if PY2 and not self._api_url:
             raise ConfigurationError('Vault setting `api_url` is required')
 
         api_version = self._api_url[-1]
         if api_version not in ('1',):
-            self.log.warning(
-                'Unknown Vault API version `%s`, using version `%s`', api_version, self.DEFAULT_API_VERSION
-            )
-            api_version = self.DEFAULT_API_VERSION
+            self.log.warning('Unknown Vault API version `%s`, using version `%s`', api_version, DEFAULT_API_VERSION)
+            api_version = DEFAULT_API_VERSION
             self._api_url = self._api_url[:-1] + api_version
 
-        methods = {method: getattr(self, '{}_v{}'.format(method, api_version)) for method in self.API_METHODS}
+        methods = {method: getattr(self, '{}_v{}'.format(method, api_version)) for method in API_METHODS}
         self._api = Api(**methods)
 
         if self._client_token_path or self._client_token or self._no_token:
@@ -306,7 +317,7 @@ class Vault(OpenMetricsBaseCheck):
                 else:
                     self.set_client_token(self._client_token)
 
-        # https://www.vaultproject.io/api/overview#the-x-vault-request-header
+        # https://www.vaultproject.io/api-docs#the-x-vault-request-header
         self._set_header(self.http, 'X-Vault-Request', 'true')
 
     def set_client_token(self, client_token):
@@ -317,14 +328,6 @@ class Vault(OpenMetricsBaseCheck):
     def renew_client_token(self):
         with open(self._client_token_path, 'rb') as f:
             self.set_client_token(f.read().decode('utf-8'))
-
-    def poll(self, scraper_config, headers=None):
-        # https://www.vaultproject.io/api/overview#the-x-vault-request-header
-        headers = {'X-Vault-Request': 'true'}
-        if self._client_token:
-            headers['X-Vault-Token'] = self._client_token
-
-        return super(Vault, self).poll(scraper_config, headers=headers)
 
     def _set_header(self, http_wrapper, header, value):
         http_wrapper.options['headers'][header] = value
@@ -338,13 +341,15 @@ class Vault(OpenMetricsBaseCheck):
         if metric.name in METRIC_ROLLBACK_COMPAT_MAP:
             self.submit_openmetric(METRIC_ROLLBACK_COMPAT_MAP[metric.name], metric, scraper_config)
 
-        metricname = transformerkey.replace('_', '.')[:-2]
-        metrictag = metric.name[len(transformerkey) - 1 : -1]
+        metric_name = metric.name.replace('_', '.').rstrip('.')
 
         # Remove extra vault prefix
-        if metricname.startswith('vault.'):
-            metricname = metricname[len('vault.') :]
+        if metric_name.startswith('vault.'):
+            metric_name = metric_name[len('vault.') :]
 
+        metric_tag = metric.name[len(transformerkey) - 1 : -1]
         for i in metric.samples:
-            i.labels['mountpoint'] = metrictag
-        self.submit_openmetric(metricname, metric, scraper_config)
+            i.labels['mountpoint'] = metric_tag
+
+        normalized_metric_name = metric_name.replace('.' + metric_tag, '')
+        self.submit_openmetric(normalized_metric_name, metric, scraper_config)

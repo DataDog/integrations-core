@@ -3,6 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 import mock
+import pytest
 from dns.resolver import Resolver, Timeout
 
 from datadog_checks.dns_check import DNSCheck
@@ -15,49 +16,53 @@ RESULTS_TIMEOUT = 10
 
 @mock.patch('datadog_checks.dns_check.dns_check.get_precise_time', side_effect=MockTime.time)
 @mock.patch.object(Resolver, 'query', side_effect=success_query_mock)
-def test_success(mocked_query, mocked_time, aggregator):
-    integration = DNSCheck('dns_check', {}, common.CONFIG_SUCCESS['instances'])
+@pytest.mark.parametrize(
+    'instance, tags',
+    [
+        (
+            common.CONFIG_SUCCESS['instances'][0],
+            ['instance:success', 'resolved_hostname:www.example.org', 'nameserver:127.0.0.1', 'record_type:A'],
+        ),
+        (
+            common.CONFIG_SUCCESS['instances'][1],
+            ['instance:cname', 'resolved_hostname:www.example.org', 'nameserver:127.0.0.1', 'record_type:CNAME'],
+        ),
+        (
+            common.CONFIG_SUCCESS['instances'][2],
+            [
+                'instance:check_response_ip',
+                'resolved_hostname:www.example.org',
+                'nameserver:127.0.0.1',
+                'record_type:A',
+                'resolved_as:127.0.0.2',
+            ],
+        ),
+        (
+            common.CONFIG_SUCCESS['instances'][3],
+            [
+                'instance:check_response_multiple_ips',
+                'resolved_hostname:my.example.org',
+                'nameserver:127.0.0.1',
+                'record_type:A',
+                'resolved_as:127.0.0.2,127.0.0.3,127.0.0.4',
+            ],
+        ),
+        (
+            common.CONFIG_SUCCESS['instances'][4],
+            [
+                'instance:check_response_CNAME',
+                'resolved_hostname:www.example.org',
+                'nameserver:127.0.0.1',
+                'record_type:CNAME',
+                'resolved_as:alias.example.org',
+            ],
+        ),
+    ],
+)
+def test_success(mocked_query, mocked_time, aggregator, instance, tags):
+    integration = DNSCheck('dns_check', {}, [instance])
 
-    integration.check(common.CONFIG_SUCCESS['instances'][0])
-    tags = ['instance:success', 'resolved_hostname:www.example.org', 'nameserver:127.0.0.1', 'record_type:A']
-    aggregator.assert_service_check(DNSCheck.SERVICE_CHECK_NAME, status=DNSCheck.OK, tags=tags, count=1)
-    aggregator.assert_metric('dns.response_time', tags=tags, count=1, value=1)
-
-    integration.check(common.CONFIG_SUCCESS['instances'][2])
-    tags = [
-        'instance:check_response_ip',
-        'resolved_hostname:www.example.org',
-        'nameserver:127.0.0.1',
-        'record_type:A',
-        'resolved_as:127.0.0.2',
-    ]
-    aggregator.assert_service_check(DNSCheck.SERVICE_CHECK_NAME, status=DNSCheck.OK, tags=tags, count=1)
-    aggregator.assert_metric('dns.response_time', tags=tags, count=1, value=1)
-
-    integration.check(common.CONFIG_SUCCESS['instances'][3])
-    tags = [
-        'instance:check_response_multiple_ips',
-        'resolved_hostname:my.example.org',
-        'nameserver:127.0.0.1',
-        'record_type:A',
-        'resolved_as:127.0.0.2,127.0.0.3,127.0.0.4',
-    ]
-    aggregator.assert_service_check(DNSCheck.SERVICE_CHECK_NAME, status=DNSCheck.OK, tags=tags, count=1)
-    aggregator.assert_metric('dns.response_time', tags=tags, count=1, value=1)
-
-    integration.check(common.CONFIG_SUCCESS['instances'][4])
-    tags = [
-        'instance:check_response_CNAME',
-        'resolved_hostname:www.example.org',
-        'nameserver:127.0.0.1',
-        'record_type:CNAME',
-        'resolved_as:alias.example.org',
-    ]
-    aggregator.assert_service_check(DNSCheck.SERVICE_CHECK_NAME, status=DNSCheck.OK, tags=tags, count=1)
-    aggregator.assert_metric('dns.response_time', tags=tags, count=1, value=1)
-
-    integration.check(common.CONFIG_SUCCESS['instances'][1])
-    tags = ['instance:cname', 'resolved_hostname:www.example.org', 'nameserver:127.0.0.1', 'record_type:CNAME']
+    integration.check({})
     aggregator.assert_service_check(DNSCheck.SERVICE_CHECK_NAME, status=DNSCheck.OK, tags=tags, count=1)
     aggregator.assert_metric('dns.response_time', tags=tags, count=1, value=1)
 

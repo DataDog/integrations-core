@@ -64,8 +64,8 @@ class IbmWasCheck(AgentCheck):
                 server_tags.extend(node_tags)
 
                 for category, prefix in iteritems(self.metric_categories):
-                    self.log.debug("Collecting %s stats", category)
                     if self.collect_stats.get(category):
+                        self.log.debug("Collecting %s stats", category)
                         stats = self.get_node_from_name(server, category)
                         self.process_stats(stats, prefix, server_tags)
 
@@ -76,7 +76,7 @@ class IbmWasCheck(AgentCheck):
         if len(data):
             return data[0]
         else:
-            self.warning('Error finding %s stats in XML output.', path)
+            self.log.debug('Error finding %s stats in XML output for server name `%s`.', path, xml_data.get('name'))
             return []
 
     def get_node_from_root(self, xml_data, path):

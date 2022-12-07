@@ -25,7 +25,6 @@ if platform.system() == 'Windows':
     def _base_device_name(device):
         return device.strip('\\').lower()
 
-
 else:
     IGNORE_CASE = 0
 
@@ -34,7 +33,7 @@ else:
 
 
 class Disk(AgentCheck):
-    """ Collects metrics about the machine's disks. """
+    """Collects metrics about the machine's disks."""
 
     METRIC_DISK = 'system.disk.{}'
     METRIC_INODE = 'system.fs.inodes.{}'
@@ -62,10 +61,14 @@ class Disk(AgentCheck):
         self._service_check_rw = is_affirmative(instance.get('service_check_rw', False))
         self._min_disk_size = instance.get('min_disk_size', 0) * 1024 * 1024
         self._blkid_cache_file = instance.get('blkid_cache_file')
+        self._use_lsblk = is_affirmative(instance.get('use_lsblk', False))
         self._timeout = instance.get('timeout', 5)
         self._compile_pattern_filters(instance)
         self._compile_tag_re()
         self._blkid_label_re = re.compile('LABEL=\"(.*?)\"', re.I)
+
+        if self._use_lsblk and self._blkid_cache_file:
+            raise ConfigurationError("Only one of 'use_lsblk' and 'blkid_cache_file' can be set at the same time.")
 
         if platform.system() == 'Windows':
             self._manual_mounts = instance.get('create_mounts', [])
@@ -106,12 +109,11 @@ class Disk(AgentCheck):
 
         self.devices_label = {}
 
-    def check(self, instance):
+    def check(self, _):
         """Get disk space/inode stats"""
         if self._tag_by_label and Platform.is_linux():
             self.devices_label = self._get_devices_label()
 
-        self._valid_disks = {}
         for part in psutil.disk_partitions(all=self._include_all_devices):
             # we check all exclude conditions
             if self.exclude_disk(part):
@@ -144,29 +146,9 @@ class Disk(AgentCheck):
                     self.log.info('Excluding device %s with total disk size %s', part.device, disk_usage.total)
                 continue
 
-            # For later, latency metrics
-            self._valid_disks[part.device] = (part.fstype, part.mountpoint)
             self.log.debug('Passed: %s', part.device)
 
-            device_name = part.mountpoint if self._use_mount else part.device
-
-            tags = [part.fstype, 'filesystem:{}'.format(part.fstype)] if self._tag_by_filesystem else []
-            tags.extend(self._custom_tags)
-
-            # apply device/mountpoint specific tags
-            for regex, device_tags in self._device_tag_re:
-                if regex.match(device_name):
-                    tags.extend(device_tags)
-
-            if self.devices_label.get(device_name):
-                tags.extend(self.devices_label.get(device_name))
-
-            # legacy check names c: vs psutil name C:\\
-            if Platform.is_win32():
-                device_name = device_name.strip('\\').lower()
-
-            tags.append('device:{}'.format(device_name))
-            tags.append('device_name:{}'.format(_base_device_name(part.device)))
+            tags = self._get_tags(part)
             for metric_name, metric_value in iteritems(self._collect_part_metrics(part, disk_usage)):
                 self.gauge(metric_name, metric_value, tags=tags)
 
@@ -181,6 +163,28 @@ class Disk(AgentCheck):
                     self.service_check('disk.read_write', AgentCheck.UNKNOWN, tags=tags)
 
         self.collect_latency_metrics()
+
+    def _get_tags(self, part):
+        device_name = part.mountpoint if self._use_mount else part.device
+        tags = [part.fstype, 'filesystem:{}'.format(part.fstype)] if self._tag_by_filesystem else []
+        tags.extend(self._custom_tags)
+
+        # apply device-specific tags
+        device_specific_tags = self._get_device_specific_tags(device_name)
+        tags.extend(device_specific_tags)
+
+        # apply device labels as tags (from blkid or lsblk).
+        # we want to use the real device name and not the device_name (which can be the mountpoint)
+        if self.devices_label.get(part.device):
+            tags.extend(self.devices_label.get(part.device))
+
+        # legacy check names c: vs psutil name C:\\
+        if Platform.is_win32():
+            device_name = device_name.strip('\\').lower()
+
+        tags.append('device:{}'.format(device_name))
+        tags.append('device_name:{}'.format(_base_device_name(part.device)))
+        return tags
 
     def exclude_disk(self, part):
         # skip cd-rom drives with no disk in it; they may raise
@@ -316,6 +320,10 @@ class Disk(AgentCheck):
             self.log.debug('IO Counters: %s -> %s', disk_name, disk)
             try:
                 metric_tags = [] if self._custom_tags is None else self._custom_tags[:]
+
+                device_specific_tags = self._get_device_specific_tags(disk_name)
+                metric_tags.extend(device_specific_tags)
+
                 metric_tags.append('device:{}'.format(disk_name))
                 metric_tags.append('device_name:{}'.format(_base_device_name(disk_name)))
                 if self.devices_label.get(disk_name):
@@ -414,9 +422,34 @@ class Disk(AgentCheck):
         """
         Get every label to create tags and returns a map of device name to label:value
         """
-        if not self._blkid_cache_file:
+        if self._use_lsblk:
+            return self._get_devices_label_from_lsblk()
+        elif not self._blkid_cache_file:
             return self._get_devices_label_from_blkid()
         return self._get_devices_label_from_blkid_cache()
+
+    def _get_devices_label_from_lsblk(self):
+        """
+        Get device labels using the `lsblk` command. Returns a map of device name to label:value
+        """
+        devices_labels = dict()
+        try:
+            # Use raw output mode (space-separated fields encoded in UTF-8).
+            # We want to be compatible with lsblk version 2.19 since
+            # it is the last version supported by CentOS 6 and SUSE 11.
+            lsblk_out, _, _ = get_subprocess_output(["lsblk", "--noheadings", "--raw", "--output=NAME,LABEL"], self.log)
+
+            for line in lsblk_out.splitlines():
+                device, _, label = line.partition(' ')
+                if label:
+                    # Line sample (device "/dev/sda1" with label " MY LABEL")
+                    # sda1  MY LABEL
+                    devices_labels["/dev/" + device] = ['label:{}'.format(label), 'device_label:{}'.format(label)]
+
+        except SubprocessOutputEmptyError:
+            self.log.debug("Couldn't use lsblk to have device labels")
+
+        return devices_labels
 
     def _get_devices_label_from_blkid(self):
         devices_label = {}
@@ -460,6 +493,15 @@ class Disk(AgentCheck):
                 )
 
         return devices_label
+
+    def _get_device_specific_tags(self, device_name):
+        device_specific_tags = []
+
+        # apply device/mountpoint specific tags
+        for regex, device_tags in self._device_tag_re:
+            if regex.match(device_name):
+                device_specific_tags.extend(device_tags)
+        return device_specific_tags
 
     def _create_manual_mounts(self):
         """

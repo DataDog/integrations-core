@@ -7,25 +7,25 @@
 The Datadog Agent can collect many metrics from NGINX instances, including (but not limited to)::
 
 - Total requests
-- Connections (e.g. accepted, handled, active)
+- Connections, such as accepted, handled, and active
 
 For users of NGINX Plus, the commercial version of NGINX, the Agent can collect the significantly more metrics that NGINX Plus provides, like:
 
-- Errors (e.g. 4xx codes, 5xx codes)
-- Upstream servers (e.g. active connections, 5xx codes, health checks, etc.)
-- Caches (e.g. size, hits, misses, etc.)
-- SSL (e.g. handshakes, failed handshakes, etc.)
+- Errors, such as 4xx codes and 5xx codes
+- Upstream servers, such as active connections, 5xx codes, and health checks
+- Caches, such as size, hits, and misses
+- SSL, such as handshakes and failed handshakes
 
 ## Setup
 
 ### Installation
 
-The NGINX check pulls metrics from a local NGINX status endpoint, so your `nginx` binaries need to have been compiled with one of two NGINX status modules:
+The NGINX check pulls metrics from a local NGINX status endpoint, so your `nginx` binaries need to be compiled with a NGINX status module:
 
-- [stub status module][2] - for open source NGINX
-- [http status module][3] - only for NGINX Plus
+- [Stub status module][2] - for open source NGINX
+- [HTTP status module][3] - only for NGINX Plus
 
-#### NGINX Open Source
+#### NGINX open source
 
 If you use open source NGINX, your instances may lack the stub status module. Verify that your `nginx` binary includes the module before proceeding to **Configuration**:
 
@@ -42,7 +42,10 @@ NGINX Plus packages prior to release 13 include the http status module. For NGIN
 
 #### Prepare NGINX
 
-On each NGINX server, create a `status.conf` file in the directory that contains your other NGINX configuration files (e.g. `/etc/nginx/conf.d/`).
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
+On each NGINX server, create a `status.conf` file in the directory that contains your other NGINX configuration files, such as `/etc/nginx/conf.d/`.
 
 ```conf
 server {
@@ -73,7 +76,7 @@ server {
 
 **NGINX Plus**
 
-NGINX Plus users can also utilize `stub_status`, but since that module provides fewer metrics, Datadog recommends using `status`.
+NGINX Plus users can also use `stub_status`, but since that module provides fewer metrics, Datadog recommends using `status`.
 
 For NGINX Plus releases 15+, the `status` module is deprecated. Use the [http_api_module][5] instead. For example, enable the `/api` endpoint in your main NGINX configuration file (`/etc/nginx/conf.d/default.conf`):
 
@@ -101,6 +104,67 @@ Reload NGINX to enable the status or API endpoint. There's no need for a full re
 ```shell
 sudo nginx -t && sudo nginx -s reload
 ```
+<!-- xxz tab xxx -->
+<!-- xxx tab "Kubernetes" xxx -->
+
+Add the following snippet to your configuration ConfigMaps to expose the metrics endpoint in a different port:
+
+```yaml
+kind: ConfigMap
+metadata:
+  name: nginx-conf
+data:
+[...]
+  status.conf: |
+    server {
+      listen 18080;
+
+      location /nginx_status {
+        stub_status on;
+      }
+
+      location / {
+        return 404;
+      }
+    }
+```
+
+Then, in your NGINX pod, expose the `18080` endpoint and mount that file in the NGINX configuration folder:
+
+```yaml
+spec:
+  containers:
+    - name: nginx
+      ports:
+        - containerPort: 18080
+      volumeMounts:
+        - mountPath: /etc/nginx/conf.d/status.conf
+          subPath: status.conf
+          readOnly: true
+          name: "config"
+  volumes:
+    - name: "config"
+      configMap:
+          name: "nginx-conf"
+```
+
+Finally, expose that port in your NGINX service:
+
+```yaml
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 80
+    name: default
+  - port: 81
+    protocol: TCP
+    targetPort: 18080
+    name: status
+```
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Configuration
 
@@ -111,7 +175,7 @@ sudo nginx -t && sudo nginx -s reload
 
 To configure this check for an Agent running on a host:
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized section](#containerized).
+Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Docker](?tab=docker#docker), [Kubernetes](?tab=kubernetes#kubernetes), or [ECS](?tab=ecs#ecs) sections.
 
 ##### Metric collection
 
@@ -174,48 +238,173 @@ http {
 ```
 
 <!-- xxz tab xxx -->
-<!-- xxx tab "Containerized" xxx -->
+<!-- xxx tab "Docker" xxx -->
 
-#### Containerized
+#### Docker
 
-For containerized environments, see the [Autodiscovery Integration Templates][8] for guidance on applying the parameters below.
+To configure this check for an Agent running on a container:
 
 ##### Metric collection
 
-| Parameter            | Value                                                      |
-| -------------------- | ---------------------------------------------------------- |
-| `<INTEGRATION_NAME>` | `nginx`                                                    |
-| `<INIT_CONFIG>`      | blank or `{}`                                              |
-| `<INSTANCE_CONFIG>`  | `{"nginx_status_url": "http://%%host%%:81/nginx_status/"}` |
+Set [Autodiscovery Integration Templates][8] as Docker labels on your application container:
 
-**Note**: This `<INSTANCE_CONFIG>` configuration works only with NGINX Open Source. If you are using NGINX Plus, inline the corresponding instance configuration.
+```yaml
+LABEL "com.datadoghq.ad.check_names"='["nginx"]'
+LABEL "com.datadoghq.ad.init_configs"='[{}]'
+LABEL "com.datadoghq.ad.instances"='[{"nginx_status_url": "http://%%host%%:81/nginx_status/"}]'
+```
+
+**Note**: This instance configuration works only with NGINX Open Source. If you are using NGINX Plus, inline the corresponding instance configuration.
+
+#### Log collection
+
+
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker Log Collection][9].
+
+Then, set [Log Integrations][10] as Docker labels:
+
+```yaml
+LABEL "com.datadoghq.ad.logs"='[{"source":"nginx","service":"nginx"}]'
+```
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "Kubernetes" xxx -->
+
+#### Kubernetes
+
+To configure this check for an Agent running on Kubernetes:
+
+##### Metric collection
+
+Set [Autodiscovery Integrations Templates][11] as pod annotations on your application container. Alternatively, you can configure templates with a [file, configmap, or key-value store][12].
+
+**Annotations v1** (for Datadog Agent < v7.36)
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+  annotations:
+    ad.datadoghq.com/nginx.check_names: '["nginx"]'
+    ad.datadoghq.com/nginx.init_configs: '[{}]'
+    ad.datadoghq.com/nginx.instances: |
+      [
+        {
+          "nginx_status_url":"http://%%host%%:81/nginx_status/"
+        }
+      ]
+  labels:
+    name: nginx
+```
+
+**Annotations v2** (for Datadog Agent v7.36+)
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+  annotations:
+    ad.datadoghq.com/nginx.checks: |
+      {
+        "nginx": {
+          "init_config": {},
+          "instances": [
+            {
+              "nginx_status_url":"http://%%host%%:81/nginx_status/"
+            }
+          ]
+        }
+      }
+  labels:
+    name: nginx
+```
+
+**Note**: This instance configuration works only with NGINX Open Source. If you are using NGINX Plus, inline the corresponding instance configuration.
+
+#### Log collection
+
+
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][13].
+
+Then, set [Log Integrations][10] as pod annotations. Alternatively, you can configure this with a [file, configmap, or key-value store][14].
+
+**Annotations v1/v2**
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+  annotations:
+    ad.datadoghq.com/nginx.logs: '[{"source":"nginx","service":"nginx"}]'
+  labels:
+    name: nginx
+```
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "ECS" xxx -->
+
+#### ECS
+
+To configure this check for an Agent running on ECS:
+
+##### Metric collection
+
+Set [Autodiscovery Integrations Templates][8] as Docker labels on your application container:
+
+```json
+{
+  "containerDefinitions": [{
+    "name": "nginx",
+    "image": "nginx:latest",
+    "dockerLabels": {
+      "com.datadoghq.ad.check_names": "[\"nginx\"]",
+      "com.datadoghq.ad.init_configs": "[{}]",
+      "com.datadoghq.ad.instances": "[{\"nginx_status_url\":\"http://%%host%%:81/nginx_status/\"}]"
+    }
+  }]
+}
+```
+
+**Note**: This instance configuration works only with NGINX Open Source. If you are using NGINX Plus, inline the corresponding instance configuration.
 
 ##### Log collection
 
-_Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][9].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [ECS Log Collection][15].
 
-| Parameter      | Value                                     |
-| -------------- | ----------------------------------------- |
-| `<LOG_CONFIG>` | `{"source": "nginx", "service": "nginx"}` |
+Then, set [Log Integrations][10] as Docker labels:
+
+```yaml
+{
+  "containerDefinitions": [{
+    "name": "nginx",
+    "image": "nginx:latest",
+    "dockerLabels": {
+      "com.datadoghq.ad.logs": "[{\"source\":\"nginx\",\"service\":\"nginx\"}]"
+    }
+  }]
+}
+```
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
 ### Validation
 
-[Run the Agent's status subcommand][10] and look for `nginx` under the Checks section.
+[Run the Agent's status subcommand][16] and look for `nginx` under the Checks section.
 
 ## Data Collected
 
 ### Metrics
 
-See [metadata.csv][11] for a full list of provided metrics by this integration.
+See [metadata.csv][17] for a full list of provided metrics by this integration.
 
 Not all metrics shown are available to users of open source NGINX. Compare the module reference for [stub status][2] (open source NGINX) and [http status][3] (NGINX Plus) to understand which metrics are provided by each module.
 
-A few open-source NGINX metrics are named differently in NGINX Plus; they refer to the exact same metric, though:
+A few open-source NGINX metrics are named differently in NGINX Plus, but they are the same metric:
 
 | NGINX                          | NGINX Plus                   |
 | ------------------------------ | ---------------------------- |
@@ -243,22 +432,21 @@ The NGINX check does not include any events.
 
 ### Service Checks
 
-**nginx.can_connect**:<br>
-Returns `CRITICAL` if the Agent cannot connect to NGINX to collect metrics, otherwise returns `OK`.
+See [service_checks.json][18] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
-- [Why do my logs not have the expected timestamp?][12]
+- [Why do my logs not have the expected timestamp?][19]
 
-Need help? Contact [Datadog support][13].
+Need help? Contact [Datadog support][20].
 
 ## Further Reading
 
 Additional helpful documentation, links, and articles:
 
-- [How to monitor NGINX][14]
-- [How to collect NGINX metrics][15]
-- [How to monitor NGINX with Datadog][16]
+- [How to monitor NGINX][21]
+- [How to collect NGINX metrics][22]
+- [How to monitor NGINX with Datadog][23]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/nginx/images/nginx_dashboard.png
 [2]: https://nginx.org/en/docs/http/ngx_http_stub_status_module.html
@@ -267,12 +455,19 @@ Additional helpful documentation, links, and articles:
 [5]: https://nginx.org/en/docs/http/ngx_http_api_module.html
 [6]: https://github.com/DataDog/integrations-core/blob/master/nginx/datadog_checks/nginx/data/conf.yaml.example
 [7]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[8]: https://docs.datadoghq.com/agent/kubernetes/integrations/
-[9]: https://docs.datadoghq.com/agent/kubernetes/log/
-[10]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[11]: https://github.com/DataDog/integrations-core/blob/master/nginx/metadata.csv
-[12]: https://docs.datadoghq.com/logs/faq/why-do-my-logs-not-have-the-expected-timestamp/
-[13]: https://docs.datadoghq.com/help/
-[14]: https://www.datadoghq.com/blog/how-to-monitor-nginx
-[15]: https://www.datadoghq.com/blog/how-to-collect-nginx-metrics/index.html
-[16]: https://www.datadoghq.com/blog/how-to-monitor-nginx-with-datadog/index.html
+[8]: https://docs.datadoghq.com/agent/docker/integrations/?tab=docker
+[9]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#installation
+[10]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#log-integrations
+[11]: https://docs.datadoghq.com/agent/kubernetes/integrations/
+[12]: https://docs.datadoghq.com/agent/kubernetes/integrations/?tab=kubernetes#configuration
+[13]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=containerinstallation#setup
+[14]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=daemonset#configuration
+[15]: https://docs.datadoghq.com/agent/amazon_ecs/logs/?tab=linux
+[16]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[17]: https://github.com/DataDog/integrations-core/blob/master/nginx/metadata.csv
+[18]: https://github.com/DataDog/integrations-core/blob/master/nginx/assets/service_checks.json
+[19]: https://docs.datadoghq.com/logs/faq/why-do-my-logs-not-have-the-expected-timestamp/
+[20]: https://docs.datadoghq.com/help/
+[21]: https://www.datadoghq.com/blog/how-to-monitor-nginx
+[22]: https://www.datadoghq.com/blog/how-to-collect-nginx-metrics/index.html
+[23]: https://www.datadoghq.com/blog/how-to-monitor-nginx-with-datadog/index.html

@@ -27,7 +27,6 @@ if PY3:
         with open(file, 'w', encoding=encoding) as f:
             f.writelines(lines)
 
-
 else:
 
     def write_file(file, contents, encoding='utf-8'):
@@ -66,6 +65,7 @@ def read_file_binary(file):
 
 
 def read_file(file, encoding='utf-8'):
+    # type: (str, str) -> str
     with open(file, 'r', encoding=encoding) as f:
         return f.read()
 

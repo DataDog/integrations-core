@@ -12,7 +12,7 @@ This check collects TokuMX metrics, including:
 
 ### Installation
 
-The TokuMX check is included in the [Datadog Agent][2] package for Agent versions <=6.x, so you don't need to install anything else on your TokuMX servers.
+The TokuMX check is included in the [Datadog Agent][1] package. No additional installation is needed on your server.
 
 ### Configuration
 
@@ -51,7 +51,7 @@ The TokuMX check is included in the [Datadog Agent][2] package for Agent version
    echo -e "\033[0;31mdatadog user - Missing\033[0m"
    ```
 
-For more details about creating and managing users in MongoDB, see [the MongoDB documentation][3].
+For more details about creating and managing users in MongoDB, see the [MongoDB Security documentation][2].
 
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Host" xxx -->
@@ -60,8 +60,8 @@ For more details about creating and managing users in MongoDB, see [the MongoDB 
 
 To configure this check for an Agent running on a host:
 
-1. Edit the `tokumx.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][4].
-   See the [sample tokumx.d/conf.yaml][5] for all available configuration options:
+1. Edit the `tokumx.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][3].
+   See the [sample tokumx.d/conf.yaml][4] for all available configuration options:
 
    ```yaml
    init_config:
@@ -70,14 +70,14 @@ To configure this check for an Agent running on a host:
      - server: "mongodb://<USER>:<PASSWORD>@localhost:27017"
    ```
 
-2. [Restart the Agent][6] to start sending TokuMX metrics to Datadog.
+2. [Restart the Agent][5] to start sending TokuMX metrics to Datadog.
 
 <!-- xxz tab xxx -->
 <!-- xxx tab "Containerized" xxx -->
 
 #### Containerized
 
-For containerized environments, see the [Autodiscovery Integration Templates][1] for guidance on applying the parameters below.
+For containerized environments, see the [Autodiscovery Integration Templates][6] for guidance on applying the parameters below.
 
 | Parameter            | Value                                                      |
 | -------------------- | ---------------------------------------------------------- |
@@ -106,24 +106,24 @@ This check emits an event each time a TokuMX node has a change in its replicatio
 
 ### Service Checks
 
-**tokumx.can_connect**:<br>
-Returns `CRITICAL` if the Agent cannot connect to TokuMX to collect metrics, otherwise `OK`.
+See [service_checks.json][9] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][9].
+Need help? Contact [Datadog support][10].
 
 ## Further Reading
 
-- [Monitor key TokuMX metrics for MongoDB applications][10].
+- [Monitor key TokuMX metrics for MongoDB applications][11].
 
-[1]: https://docs.datadoghq.com/agent/kubernetes/integrations/
-[2]: https://app.datadoghq.com/account/settings#agent
-[3]: https://www.mongodb.org/display/DOCS/Security+and+Authentication
-[4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
-[5]: https://github.com/DataDog/integrations-core/blob/master/tokumx/datadog_checks/tokumx/data/conf.yaml.example
-[6]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[1]: https://app.datadoghq.com/account/settings#agent
+[2]: https://docs.mongodb.com/manual/security/
+[3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
+[4]: https://github.com/DataDog/integrations-core/blob/master/tokumx/datadog_checks/tokumx/data/conf.yaml.example
+[5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[6]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [7]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [8]: https://github.com/DataDog/integrations-core/blob/master/tokumx/metadata.csv
-[9]: https://docs.datadoghq.com/help/
-[10]: https://www.datadoghq.com/blog/monitor-key-tokumx-metrics-mongodb-applications
+[9]: https://github.com/DataDog/integrations-core/blob/master/tokumx/assets/service_checks.json
+[10]: https://docs.datadoghq.com/help/
+[11]: https://www.datadoghq.com/blog/monitor-key-tokumx-metrics-mongodb-applications

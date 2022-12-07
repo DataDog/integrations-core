@@ -1,33 +1,441 @@
-# Configuration for labeler - https://github.com/actions/labeler
-
-documentation:
-- "*/manifest.json"
-- "*/assets/configuration/**"
-- (?<!CHANGELOG)\.md$
-- docs/**
-
+base_package:
+- datadog_checks_base/**/*
+changelog/no-changelog:
+- requirements-agent-release.txt
+- '*/__about__.py'
+- all:
+  - '*/!(datadog_checks)/**'
+- all:
+  - '*/!(pyproject.toml)'
+- all:
+  - '*/(!ddev)/**'
+ddev:
+- ddev/**/*
+dependencies:
+- datadog_checks_base/datadog_checks/base/data/agent_requirements.in
+dependency_provider:
+- datadog_checks_dependency_provider/**/*
 dev/testing:
 - .azure-pipelines/**
 - .codecov.yml
-
 dev/tooling:
 - .github/workflows/**
 - .github/stale.yml
 - .gitlab/**
 - .gitlab-ci.yml
 - datadog_checks_dev/datadog_checks/dev/tooling/**
-
-dependencies:
-- datadog_checks_base/datadog_checks/base/data/agent_requirements.in
-
+dev_package:
+- datadog_checks_dev/**/*
+documentation:
+- '*/manifest.json'
+- '*/assets/configuration/**'
+- '*/CHANGELOG.md'
+- '*/README.md'
+- docs/**
+downloader:
+- datadog_checks_downloader/**/*
+integration/active_directory:
+- active_directory/**/*
+integration/activemq:
+- activemq/**/*
+integration/activemq_xml:
+- activemq_xml/**/*
+integration/aerospike:
+- aerospike/**/*
+integration/agent_metrics:
+- agent_metrics/**/*
+integration/airflow:
+- airflow/**/*
+integration/amazon_eks:
+- amazon_eks/**/*
+integration/amazon_eks_blueprints:
+- amazon_eks_blueprints/**/*
+integration/amazon_msk:
+- amazon_msk/**/*
+integration/ambari:
+- ambari/**/*
+integration/apache:
+- apache/**/*
+integration/arangodb:
+- arangodb/**/*
+integration/argocd:
+- argocd/**/*
+integration/aspdotnet:
+- aspdotnet/**/*
+integration/avi_vantage:
+- avi_vantage/**/*
+integration/azure_active_directory:
+- azure_active_directory/**/*
+integration/azure_iot_edge:
+- azure_iot_edge/**/*
+integration/boundary:
+- boundary/**/*
+integration/btrfs:
+- btrfs/**/*
+integration/cacti:
+- cacti/**/*
+integration/calico:
+- calico/**/*
+integration/cassandra:
+- cassandra/**/*
+integration/cassandra_nodetool:
+- cassandra_nodetool/**/*
+integration/ceph:
+- ceph/**/*
+integration/cert_manager:
+- cert_manager/**/*
+integration/cilium:
+- cilium/**/*
+integration/cisco_aci:
+- cisco_aci/**/*
+integration/citrix_hypervisor:
+- citrix_hypervisor/**/*
+integration/clickhouse:
+- clickhouse/**/*
+integration/cloud_foundry_api:
+- cloud_foundry_api/**/*
+integration/cockroachdb:
+- cockroachdb/**/*
+integration/confluent_platform:
+- confluent_platform/**/*
+integration/consul:
+- consul/**/*
+integration/consul_connect:
+- consul_connect/**/*
+integration/container:
+- container/**/*
+integration/containerd:
+- containerd/**/*
+integration/coredns:
+- coredns/**/*
+integration/couch:
+- couch/**/*
+integration/couchbase:
+- couchbase/**/*
+integration/cri:
+- cri/**/*
+integration/crio:
+- crio/**/*
+integration/databricks:
+- databricks/**/*
+integration/datadog_checks_tests_helper:
+- datadog_checks_tests_helper/**/*
+integration/datadog_cluster_agent:
+- datadog_cluster_agent/**/*
+integration/directory:
+- directory/**/*
+integration/disk:
+- disk/**/*
+integration/dns_check:
+- dns_check/**/*
+integration/docker_daemon:
+- docker_daemon/**/*
+integration/dotnetclr:
+- dotnetclr/**/*
+integration/druid:
+- druid/**/*
+integration/ecs_fargate:
+- ecs_fargate/**/*
+integration/eks_anywhere:
+- eks_anywhere/**/*
+integration/eks_fargate:
+- eks_fargate/**/*
+integration/elastic:
+- elastic/**/*
+integration/envoy:
+- envoy/**/*
+integration/etcd:
+- etcd/**/*
+integration/exchange_server:
+- exchange_server/**/*
+integration/external_dns:
+- external_dns/**/*
+integration/flink:
+- flink/**/*
+integration/fluentd:
+- fluentd/**/*
+integration/foundationdb:
+- foundationdb/**/*
+integration/gearmand:
+- gearmand/**/*
+integration/gitlab:
+- gitlab/**/*
+integration/gitlab_runner:
+- gitlab_runner/**/*
+integration/gke:
+- gke/**/*
+integration/glusterfs:
+- glusterfs/**/*
+integration/go-metro:
+- go-metro/**/*
+integration/go_expvar:
+- go_expvar/**/*
+integration/gunicorn:
+- gunicorn/**/*
+integration/haproxy:
+- haproxy/**/*
+integration/harbor:
+- harbor/**/*
+integration/hazelcast:
+- hazelcast/**/*
+integration/hdfs_datanode:
+- hdfs_datanode/**/*
+integration/hdfs_namenode:
+- hdfs_namenode/**/*
+integration/helm:
+- helm/**/*
+integration/hive:
+- hive/**/*
+integration/hivemq:
+- hivemq/**/*
+integration/http_check:
+- http_check/**/*
+integration/hudi:
+- hudi/**/*
+integration/hyperv:
+- hyperv/**/*
+integration/iam_access_analyzer:
+- iam_access_analyzer/**/*
+integration/ibm_ace:
+- ibm_ace/**/*
+integration/ibm_db2:
+- ibm_db2/**/*
+integration/ibm_i:
+- ibm_i/**/*
+integration/ibm_mq:
+- ibm_mq/**/*
+integration/ibm_was:
+- ibm_was/**/*
+integration/ignite:
+- ignite/**/*
+integration/iis:
+- iis/**/*
+integration/impala:
+- impala/**/*
+integration/istio:
+- istio/**/*
+integration/jboss_wildfly:
+- jboss_wildfly/**/*
+integration/jmeter:
+- jmeter/**/*
+integration/journald:
+- journald/**/*
+integration/kafka:
+- kafka/**/*
+integration/kafka_consumer:
+- kafka_consumer/**/*
+integration/kong:
+- kong/**/*
+integration/kube_apiserver_metrics:
+- kube_apiserver_metrics/**/*
+integration/kube_controller_manager:
+- kube_controller_manager/**/*
+integration/kube_dns:
+- kube_dns/**/*
+integration/kube_metrics_server:
+- kube_metrics_server/**/*
+integration/kube_proxy:
+- kube_proxy/**/*
+integration/kube_scheduler:
+- kube_scheduler/**/*
+integration/kubelet:
+- kubelet/**/*
+integration/kubernetes:
+- kubernetes/**/*
+integration/kubernetes_state:
+- kubernetes_state/**/*
+integration/kubernetes_state_core:
+- kubernetes_state_core/**/*
+integration/kyototycoon:
+- kyototycoon/**/*
+integration/lighttpd:
+- lighttpd/**/*
+integration/linkerd:
+- linkerd/**/*
+integration/linux_proc_extras:
+- linux_proc_extras/**/*
+integration/mapr:
+- mapr/**/*
+integration/mapreduce:
+- mapreduce/**/*
+integration/marathon:
+- marathon/**/*
+integration/marklogic:
+- marklogic/**/*
+integration/mcache:
+- mcache/**/*
+integration/mesos_master:
+- mesos_master/**/*
+integration/mesos_slave:
+- mesos_slave/**/*
+integration/mongo:
+- mongo/**/*
+integration/mysql:
+- mysql/**/*
+integration/nagios:
+- nagios/**/*
+integration/network:
+- network/**/*
+integration/nfsstat:
+- nfsstat/**/*
+integration/nginx:
+- nginx/**/*
+integration/nginx_ingress_controller:
+- nginx_ingress_controller/**/*
+integration/ntp:
+- ntp/**/*
+integration/nvidia_jetson:
+- nvidia_jetson/**/*
+integration/oke:
+- oke/**/*
+integration/oom_kill:
+- oom_kill/**/*
+integration/openldap:
+- openldap/**/*
+integration/openmetrics:
+- openmetrics/**/*
+integration/openshift:
+- openshift/**/*
+integration/openstack:
+- openstack/**/*
+integration/openstack_controller:
+- openstack_controller/**/*
+integration/oracle:
+- oracle/**/*
+integration/otel:
+- otel/**/*
+integration/pan_firewall:
+- pan_firewall/**/*
+integration/pdh_check:
+- pdh_check/**/*
+integration/pgbouncer:
+- pgbouncer/**/*
+integration/php_fpm:
+- php_fpm/**/*
+integration/pivotal_pks:
+- pivotal_pks/**/*
+integration/podman:
+- podman/**/*
+integration/postfix:
+- postfix/**/*
+integration/postgres:
+- postgres/**/*
+integration/powerdns_recursor:
+- powerdns_recursor/**/*
+integration/presto:
+- presto/**/*
+integration/process:
+- process/**/*
+integration/prometheus:
+- prometheus/**/*
+integration/proxysql:
+- proxysql/**/*
+integration/pulsar:
+- pulsar/**/*
+integration/rabbitmq:
+- rabbitmq/**/*
+integration/redisdb:
+- redisdb/**/*
+integration/rethinkdb:
+- rethinkdb/**/*
+integration/riak:
+- riak/**/*
+integration/riakcs:
+- riakcs/**/*
+integration/sap_hana:
+- sap_hana/**/*
+integration/scylla:
+- scylla/**/*
+integration/sidekiq:
+- sidekiq/**/*
+integration/silk:
+- silk/**/*
+integration/singlestore:
+- singlestore/**/*
+integration/snmp:
+- snmp/**/*
+integration/snmp_cisco:
+- snmp_cisco/**/*
+integration/snmp_dell:
+- snmp_dell/**/*
+integration/snmp_f5:
+- snmp_f5/**/*
+integration/snmp_juniper:
+- snmp_juniper/**/*
+integration/snowflake:
+- snowflake/**/*
+integration/solr:
+- solr/**/*
+integration/sonarqube:
+- sonarqube/**/*
+integration/spark:
+- spark/**/*
+integration/sqlserver:
+- sqlserver/**/*
+integration/squid:
+- squid/**/*
+integration/ssh_check:
+- ssh_check/**/*
+integration/statsd:
+- statsd/**/*
+integration/supervisord:
+- supervisord/**/*
+integration/system_core:
+- system_core/**/*
+integration/system_swap:
+- system_swap/**/*
+integration/systemd:
+- systemd/**/*
+integration/tcp_check:
+- tcp_check/**/*
+integration/tcp_queue_length:
+- tcp_queue_length/**/*
+integration/teamcity:
+- teamcity/**/*
+integration/tenable:
+- tenable/**/*
+integration/teradata:
+- teradata/**/*
+integration/terraform:
+- terraform/**/*
+integration/tls:
+- tls/**/*
+integration/tokumx:
+- tokumx/**/*
+integration/tomcat:
+- tomcat/**/*
+integration/traffic_server:
+- traffic_server/**/*
+integration/twemproxy:
+- twemproxy/**/*
+integration/twistlock:
+- twistlock/**/*
+integration/varnish:
+- varnish/**/*
+integration/vault:
+- vault/**/*
+integration/vertica:
+- vertica/**/*
+integration/voltdb:
+- voltdb/**/*
+integration/vsphere:
+- vsphere/**/*
+integration/weblogic:
+- weblogic/**/*
+integration/win32_event_log:
+- win32_event_log/**/*
+integration/windows_performance_counters:
+- windows_performance_counters/**/*
+integration/windows_service:
+- windows_service/**/*
+integration/winkmem:
+- winkmem/**/*
+integration/wmi_check:
+- wmi_check/**/*
+integration/yarn:
+- yarn/**/*
+integration/zk:
+- zk/**/*
 release:
 - requirements-agent-release.txt
-- datadog_checks_dev/datadog_checks/dev/__about__.py
-
-changelog/no-changelog:
-- requirements-agent-release.txt
-- datadog_checks_dev/datadog_checks/dev/__about__.py
-- all:^(?![^/]+/datadog_checks/.*|[^/]+/setup\.py).*
-
-integration/$1:
-- ^(?!\.azure-pipelines|\.github|\.gitlab|\.in-toto|\.stubs|docs)([^/]+)/.*
+- '*/__about__.py'

@@ -115,4 +115,5 @@ def test_legacy_username_password(instance, auth_config):
                 proxies=mock.ANY,
                 timeout=mock.ANY,
                 verify=mock.ANY,
+                allow_redirects=mock.ANY,
             )

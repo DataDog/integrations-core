@@ -1,38 +1,55 @@
 {
-  "categories": [
-    "processing",
-    "os & system",
-    "log collection",
-    "autodiscovery"
-  ],
-  "creates_events": false,
-  "display_name": "HDFS Datanode",
-  "guid": "c1409bbd-ff4a-4616-9948-6dc7f4910942",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "hdfs.",
-  "metric_to_check": "hdfs.datanode.dfs_capacity",
-  "name": "hdfs_datanode",
-  "public_title": "Datadog-HDFS Datanode Integration",
-  "short_description": "Track cluster disk usage, volume failures, dead DataNodes, and more.",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os"
-  ],
-  "type": "check",
-  "integration_id": "hdfs-datanode",
+  "manifest_version": "2.0.0",
+  "app_uuid": "28c9684a-678b-4bcf-8994-9c4c60e6f130",
+  "app_id": "hdfs-datanode",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Track cluster disk usage, volume failures, dead DataNodes, and more.",
+    "title": "HDFS Datanode",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Category::Processing",
+      "Category::OS & System",
+      "Category::Log Collection",
+      "Category::Autodiscovery"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "HDFS Datanode",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "hdfs.",
+        "check": "hdfs.datanode.dfs_capacity",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
     },
-    "monitors": {},
-    "dashboards": {},
-    "service_checks": "assets/service_checks.json",
+    "dashboards": {
+      "hdfs_datanode": "assets/dashboards/hdfs_datanode_dashboard.json"
+    },
     "logs": {
       "source": "hdfs_datanode"
-    },
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

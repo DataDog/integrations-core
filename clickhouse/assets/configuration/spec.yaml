@@ -7,8 +7,7 @@ files:
     - template: init_config/db
       overrides:
         global_custom_queries.value.example:
-          - metric_prefix: clickhouse
-            query: <QUERY>
+          - query: <QUERY>
             columns: <COLUMNS>
             tags: <TAGS>
     - template: init_config/default
@@ -24,7 +23,7 @@ files:
       value:
         type: integer
         example: 9000
-    - name: user
+    - name: username
       description: The database user to authenticate as.
       value:
           type: string

@@ -10,13 +10,28 @@ ad_identifiers:
 #
 init_config:
 
-## Every instance is scheduled independent of the others.
+## Every instance is scheduled independently of the others.
 #
 instances:
 
-    ## @param prometheus_url - string - required
+    ## @param possible_prometheus_urls - list of strings - required
+    ## The URLs to try to get your application metrics that are exposed by Prometheus.
+    ## The check will try each URLs in the list and will use the first working one.
+    ## One of possible_prometheus_urls or prometheus_url parameter is required.
+    #
+  - possible_prometheus_urls:
+      - https://%%host%%:2379/metrics
+      - http://%%host%%:2379/metrics
+
+    ## @param prometheus_url - string - optional - default: http://%%host%%:2379/metrics
     ## Prometheus endpoint of your etcd instance.
+    ## One of possible_prometheus_urls or prometheus_url parameter is required.
     ##
     ## Note: To monitor ETCD versions pre-3.x.x, set `use_preview` to `false` and use the `url` configuration option.
     #
-  - prometheus_url: http://%%host%%:2379/metrics
+    # prometheus_url: http://%%host%%:2379/metrics
+
+    ## @param ssl_verify - boolean - required
+    ## Used to verify self signed certificates.
+    #
+    ssl_verify: false

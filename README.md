@@ -26,9 +26,6 @@ to run, test and build a Check. More advanced documentation can be found [here][
 For more information on integrations, please reference our [documentation][11] and
 [knowledge base][12]. You can also visit our [help page][13] to connect with us.
 
-## GPG public keys
-
-An up-to-date list of all developers authorized to sign releases can be found [here][23].
 
 [1]: https://dev.azure.com/datadoghq/integrations-core/_apis/build/status/Master%20All?branchName=master
 [2]: https://dev.azure.com/datadoghq/integrations-core/_build/latest?definitionId=29&branchName=master
@@ -36,7 +33,7 @@ An up-to-date list of all developers authorized to sign releases can be found [h
 [5]: https://github.com/DataDog/integrations-extras
 [6]: https://docs.datadoghq.com/developers/integrations/
 [7]: https://github.com/DataDog/datadog-agent
-[8]: https://docs.datadoghq.com/agent/
+[8]: https://app.datadoghq.com/account/settings#agent
 [9]: https://docs.pytest.org/en/latest/
 [10]: https://packaging.python.org/tutorials/distributing-packages/
 [11]: https://docs.datadoghq.com
@@ -50,6 +47,5 @@ An up-to-date list of all developers authorized to sign releases can be found [h
 [20]: https://github.com/DataDog/integrations-core/actions?workflow=docs
 [21]: https://img.shields.io/badge/code%20style-black-000000.svg
 [22]: https://github.com/ambv/black
-[23]: https://datadoghq.dev/integrations-core/process/integration-release/#releasers
 [24]: https://img.shields.io/badge/code%20style-isort-1674b1.svg
 [25]: https://github.com/PyCQA/isort

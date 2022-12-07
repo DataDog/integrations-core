@@ -1,0 +1,63 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "80a8d9e2-48dd-4242-be78-0d929ea1a492",
+  "app_id": "weblogic",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor the health and performance of WebLogic Servers.",
+    "title": "WebLogic",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Log Collection",
+      "Category::Web",
+      "Category::Oracle"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
+  "assets": {
+    "integration": {
+      "source_type_name": "WebLogic",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "weblogic.",
+        "check": "weblogic.jvm_runtime.heap_size",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      },
+      "process_signatures": [
+        "java weblogic.Server"
+      ]
+    },
+    "dashboards": {
+      "overview": "assets/dashboards/overview.json",
+      "metrics": "assets/dashboards/metrics.json"
+    },
+    "monitors": {
+      "active_threads": "assets/monitors/active_threads.json",
+      "stuck_threads": "assets/monitors/stuck_threads.json"
+    },
+    "logs": {
+      "source": "weblogic"
+    }
+  }
+}

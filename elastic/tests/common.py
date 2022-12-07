@@ -6,13 +6,15 @@ import os
 from datadog_checks.dev import get_docker_hostname
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-USER = "elastic"
-PASSWORD = "changeme"
+USER = "admin"
+PASSWORD = "admin"
 HOST = get_docker_hostname()
 PORT = '9200'
 CLUSTER_TAG = ["cluster_name:test-cluster"]
 ELASTIC_CLUSTER_TAG = ["elastic_cluster:test-cluster"]
+IS_OPENSEARCH = 'opensearch' in os.getenv('ELASTIC_REGISTRY')
 URL = 'http://{}:{}'.format(HOST, PORT)
+
 ELASTIC_VERSION = os.getenv('ELASTIC_VERSION', os.environ['ELASTIC_IMAGE'])
 
 JVM_RATES = [

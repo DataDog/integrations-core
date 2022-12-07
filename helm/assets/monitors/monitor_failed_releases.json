@@ -1,0 +1,26 @@
+{
+  "name": "Helm release {{helm_namespace.name}}/{{helm_release.name}} failed on {{kube_cluster_name.name}}",
+  "type": "service check",
+  "query": "\"helm.release_state\".over(\"*\").by(\"helm_namespace\",\"helm_release\",\"helm_storage\",\"kube_cluster_name\").last(6).count_by_status()",
+  "message": "The Helm release deployment {{helm_namespace.name}}/{{helm_release.name}} (using storage {{helm_storage.name}}) has failed on {{kube_cluster_name.name}}.",
+  "tags": [
+    "integration:helm"
+  ],
+  "options": {
+    "renotify_interval": 0,
+    "timeout_h": 0,
+    "thresholds": {
+      "ok": 1,
+      "warning": 1,
+      "critical": 5
+    },
+    "notify_no_data": false,
+    "no_data_timeframe": 2,
+    "notify_audit": false,
+    "escalation_message": "",
+    "new_group_delay": 60
+  },
+  "recommended_monitor_metadata": {
+    "description": "Get notified when the latest revision of a Helm release is in \"failed\" state."
+  }
+}

@@ -40,7 +40,7 @@ init_config:
     #
     # service: <SERVICE>
 
-## Every instance is scheduled independent of the others.
+## Every instance is scheduled independently of the others.
 #
 instances:
 
@@ -48,18 +48,21 @@ instances:
     ## Name of your account (provided by Snowflake), including the platform and region if applicable.
     ## For more information on Snowflake account names,
     ## see https://docs.snowflake.com/en/user-guide/connecting.html#your-snowflake-account-name
+    ##
+    ## If you are using private connectivity with Snowflake, your account name should be in the following format:
+    ##   account: <ACCOUNT>.<REGION_ID>.privatelink
     #
   - account: <ACCOUNT>
 
-    ## @param user - string - required
+    ## @param username - string - required
     ## Login name for the user.
     #
-    user: <USER>
+    username: <USER>
 
-    ## @param password - string - required
+    ## @param password - string - optional
     ## Password for the user
     #
-    password: <PASSWORD>
+    # password: <PASSWORD>
 
     ## @param role - string - required
     ## Name of the role to use.
@@ -77,6 +80,8 @@ instances:
 
     ## @param schema - string - optional - default: ACCOUNT_USAGE
     ## Name of the default schema to use for the database.
+    ##
+    ## To collect organization level metrics, set this to ORGANIZATION_USAGE.
     #
     # schema: ACCOUNT_USAGE
 
@@ -105,15 +110,36 @@ instances:
     # ocsp_response_cache_filename: <OCSP_RESPONSE_CACHE_FILENAME>
 
     ## @param authenticator - string - optional - default: snowflake
-    ## Authenticator for Snowflake. The default `snowflake` uses the internal Snowflake authenticator.
-    ## Use `oauth` to authenticate with OAuth, be sure to set the `token` option as well.
+    ## Authenticator for Snowflake. Supported methods are:
+    ## * `snowflake`, the default value, uses the internal Snowflake authenticator. It needs `password` or 
+    ##   `private_key_path` option.
+    ## * `snowflake_jwt`, uses key pair authentication. It needs `private_key_path` option.
+    ## * `oauth`, to authenticate with OAuth method. It needs `token` or `token_path` option.
     #
     # authenticator: <AUTHENTICATOR>
 
     ## @param token - string - optional
-    ## Token used for OAuth connection to Snowflake.
+    ## Token used for OAuth connection to Snowflake. You cannot use this alongside `token_path`.
     #
     # token: <TOKEN>
+
+    ## @param token_path - string - optional - default: /path/to/token
+    ## Path to the file that contains the token used for OAuth connection to Snowflake.
+    ## You cannot use this alongside `token`.
+    ## The token is re-read at every check run.
+    #
+    # token_path: /path/to/token
+
+    ## @param private_key_path - string - optional
+    ## The path to the file that contains the private key used to connect to Snowflake.
+    ## The key is re-read at every check run.
+    #
+    # private_key_path: /path/to/private_key
+
+    ## @param private_key_password - string - optional
+    ## The password protecting the private key file in the `private_key_path` option.
+    #
+    # private_key_password: <PRIVATE_KEY_PASSWORD>
 
     ## @param client_session_keep_alive - boolean - optional - default: false
     ## If set to true, Snowflake keeps the session active indefinitely as long as the connection is active,
@@ -124,26 +150,48 @@ instances:
     # client_session_keep_alive: false
 
     ## @param metric_groups - list of strings - optional
-    ## List Snowflake metric groups to collect. Metric groups are determined by the metric prefixes.
+    ## List of Snowflake metric groups to collect. Metric groups are determined by the metric prefixes.
     ##
-    ## The available metric groups are:
+    ## When querying the ACCOUNT_USAGE schema, the available metric groups are:
     ##
-    ##   - snowflake.query
-    ##   - snowflake.billing
-    ##   - snowflake.storage
+    ##   - snowflake.query (enabled by default)
+    ##   - snowflake.billing (enabled by default)
+    ##   - snowflake.storage (enabled by default)
     ##   - snowflake.storage.database
     ##   - snowflake.storage.table
-    ##   - snowflake.logins
+    ##   - snowflake.logins (enabled by default)
     ##   - snowflake.data_transfer
     ##   - snowflake.auto_recluster
     ##   - snowflake.pipe
     ##   - snowflake.replication
+    ##
+    ## When querying the ORGANIZATION_USAGE schema, the available metric groups are:
+    ##   - snowflake.organization.warehouse (enabled by default)
+    ##   - snowflake.organization.currency (enabled by default)
+    ##   - snowflake.organization.credit
+    ##   - snowflake.organization.storage (enabled by default)
+    ##   - snowflake.organization.contracts
+    ##   - snowflake.organization.balance
+    ##   - snowflake.organization.rate
+    ##   - snowflake.organization.data_transfer
     #
     # metric_groups:
     #   - snowflake.query
     #   - snowflake.billing
     #   - snowflake.storage
     #   - snowflake.logins
+
+    ## @param aggregate_last_24_hours - boolean - optional - default: false
+    ## Set to `true` to aggregate table entries on the last 24 hours instead of
+    ## aggregating entries of the current day.
+    #
+    # aggregate_last_24_hours: true
+
+    ## @param only_custom_queries - boolean - optional - default: false
+    ## Set this parameter to `true` if you want to skip the integration's default metrics collection.
+    ## Only metrics specified in `custom_queries` will be collected.
+    #
+    # only_custom_queries: false
 
     ## @param use_global_custom_queries - string - optional - default: true
     ## How `global_custom_queries` should be used for this instance. There are 3 options:
@@ -201,12 +249,12 @@ instances:
     #
     # service: <SERVICE>
 
-    ## @param min_collection_interval - number - optional - default: 3600
+    ## @param min_collection_interval - number - optional - default: 15
     ## This changes the collection interval of the check. For more information, see:
     ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
     ##
     ## NOTE: Most Snowflake ACCOUNT_USAGE views are populated on an hourly basis,
-    ## so to minimize unnecessary queries the `min_collection_interval` defaults to 1 hour.
+    ## so to minimize unnecessary queries, set the `min_collection_interval` to 1 hour.
     ##
     ## Most metrics are aggregated by day, you can increase the interval to reduce the number of queries.
     #
@@ -218,3 +266,20 @@ instances:
     ## This is useful for cluster-level checks.
     #
     # empty_default_hostname: false
+
+    ## @param disable_generic_tags - boolean - optional - default: false
+    ## Generic tags such as `cluster` will be replaced by <integration_name>_cluster to avoid
+    ## getting mixed with other integraton tags.
+    #
+    disable_generic_tags: true
+
+    ## @param metric_patterns - mapping - optional
+    ## A mapping of metrics to include or exclude, with each entry being a regular expression.
+    ##
+    ## Metrics defined in `exclude` will take precedence in case of overlap.
+    #
+    # metric_patterns:
+    #   include:
+    #   - <INCLUDE_REGEX>
+    #   exclude:
+    #   - <EXCLUDE_REGEX>

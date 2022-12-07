@@ -1,0 +1,744 @@
+{
+    "title": "Mesos - Overview",
+    "description": "",
+    "widgets": [
+        {
+            "id": 0,
+            "definition": {
+                "type": "toplist",
+                "requests": [
+                    {
+                        "q": "top(avg:mesos.stats.uptime_secs{mesos_node:master} by {host}, 10, 'mean', 'desc')",
+                        "style": {
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Masters uptime",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                }
+            },
+            "layout": {
+                "x": 75,
+                "y": 1,
+                "width": 28,
+                "height": 14
+            }
+        },
+        {
+            "id": 1,
+            "definition": {
+                "type": "toplist",
+                "requests": [
+                    {
+                        "q": "top(avg:mesos.stats.uptime_secs{mesos_node:slave} by {host}, 10, 'mean', 'desc')",
+                        "style": {
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "custom_links": [],
+                "title": "Slaves uptime",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                }
+            },
+            "layout": {
+                "x": 75,
+                "y": 16,
+                "width": 28,
+                "height": 14
+            }
+        },
+        {
+            "id": 2,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "avg:mesos.cluster.tasks_starting{*}",
+                        "aggregator": "max",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "value": 10,
+                                "palette": "white_on_red"
+                            },
+                            {
+                                "comparator": ">=",
+                                "value": 5,
+                                "palette": "white_on_yellow"
+                            },
+                            {
+                                "comparator": "<",
+                                "value": 5,
+                                "palette": "white_on_green"
+                            }
+                        ]
+                    }
+                ],
+                "custom_links": [],
+                "title": "Tasks starting",
+                "title_size": "16",
+                "title_align": "center",
+                "time": {
+                    "live_span": "5m"
+                },
+                "autoscale": true,
+                "text_align": "center"
+            },
+            "layout": {
+                "x": 88,
+                "y": 31,
+                "width": 15,
+                "height": 9
+            }
+        },
+        {
+            "id": 3,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "avg:mesos.cluster.tasks_running{*}",
+                        "aggregator": "max",
+                        "conditional_formats": [
+                            {
+                                "comparator": "<",
+                                "value": 0,
+                                "palette": "white_on_red"
+                            },
+                            {
+                                "comparator": "<=",
+                                "value": 0,
+                                "palette": "white_on_yellow"
+                            },
+                            {
+                                "comparator": ">",
+                                "value": 0,
+                                "palette": "white_on_green"
+                            }
+                        ]
+                    }
+                ],
+                "custom_links": [],
+                "title": "Tasks running",
+                "title_size": "16",
+                "title_align": "center",
+                "time": {
+                    "live_span": "5m"
+                },
+                "autoscale": true,
+                "precision": 0,
+                "text_align": "center"
+            },
+            "layout": {
+                "x": 72,
+                "y": 31,
+                "width": 15,
+                "height": 9
+            }
+        },
+        {
+            "id": 4,
+            "definition": {
+                "type": "image",
+                "url": "/static/images/logos/mesos_small.svg",
+                "sizing": "fit"
+            },
+            "layout": {
+                "x": 1,
+                "y": 1,
+                "width": 45,
+                "height": 13
+            }
+        },
+        {
+            "id": 5,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "avg:mesos.cluster.cpus_total{*}",
+                        "aggregator": "avg",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "value": 0,
+                                "palette": "white_on_green"
+                            }
+                        ]
+                    }
+                ],
+                "custom_links": [],
+                "title": "Cluster CPU",
+                "title_size": "16",
+                "title_align": "center",
+                "time": {
+                    "live_span": "5m"
+                },
+                "autoscale": true,
+                "precision": 0,
+                "text_align": "center"
+            },
+            "layout": {
+                "x": 1,
+                "y": 22,
+                "width": 15,
+                "height": 8
+            }
+        },
+        {
+            "id": 6,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "sum:mesos.cluster.mem_total{*} / 1000",
+                        "aggregator": "avg",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "value": 0,
+                                "palette": "white_on_green"
+                            }
+                        ]
+                    }
+                ],
+                "custom_links": [],
+                "title": "Cluster Mem",
+                "title_size": "16",
+                "title_align": "center",
+                "time": {
+                    "live_span": "5m"
+                },
+                "autoscale": false,
+                "custom_unit": "Gb",
+                "precision": 0,
+                "text_align": "center"
+            },
+            "layout": {
+                "x": 31,
+                "y": 22,
+                "width": 15,
+                "height": 8
+            }
+        },
+        {
+            "id": 7,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "sum:mesos.cluster.disk_total{*} / 1000",
+                        "aggregator": "avg",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "value": 0,
+                                "palette": "white_on_green"
+                            }
+                        ]
+                    }
+                ],
+                "custom_links": [],
+                "title": "Cluster Disk",
+                "title_size": "16",
+                "title_align": "center",
+                "time": {
+                    "live_span": "5m"
+                },
+                "autoscale": false,
+                "custom_unit": "Gb",
+                "precision": 0,
+                "text_align": "center"
+            },
+            "layout": {
+                "x": 16,
+                "y": 22,
+                "width": 15,
+                "height": 8
+            }
+        },
+        {
+            "id": 8,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "avg:mesos.cluster.tasks_killed{*}",
+                        "aggregator": "max",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "value": 10,
+                                "palette": "white_on_red"
+                            },
+                            {
+                                "comparator": ">=",
+                                "value": 5,
+                                "palette": "white_on_yellow"
+                            },
+                            {
+                                "comparator": "<",
+                                "value": 5,
+                                "palette": "white_on_green"
+                            }
+                        ]
+                    }
+                ],
+                "custom_links": [],
+                "title": "Tasks killed",
+                "title_size": "16",
+                "title_align": "center",
+                "time": {
+                    "live_span": "5m"
+                },
+                "autoscale": true,
+                "precision": 0,
+                "text_align": "center"
+            },
+            "layout": {
+                "x": 72,
+                "y": 61,
+                "width": 15,
+                "height": 9
+            }
+        },
+        {
+            "id": 9,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "avg:mesos.cluster.tasks_error{*}",
+                        "aggregator": "max",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "value": 10,
+                                "palette": "white_on_red"
+                            },
+                            {
+                                "comparator": ">=",
+                                "value": 5,
+                                "palette": "white_on_yellow"
+                            },
+                            {
+                                "comparator": "<",
+                                "value": 5,
+                                "palette": "white_on_green"
+                            }
+                        ]
+                    }
+                ],
+                "custom_links": [],
+                "title": "Tasks error",
+                "title_size": "16",
+                "title_align": "center",
+                "time": {
+                    "live_span": "5m"
+                },
+                "autoscale": true,
+                "text_align": "center"
+            },
+            "layout": {
+                "x": 72,
+                "y": 41,
+                "width": 15,
+                "height": 9
+            }
+        },
+        {
+            "id": 10,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "avg:mesos.cluster.tasks_lost{*}",
+                        "aggregator": "max",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "value": 10,
+                                "palette": "white_on_red"
+                            },
+                            {
+                                "comparator": ">=",
+                                "value": 5,
+                                "palette": "white_on_yellow"
+                            },
+                            {
+                                "comparator": "<",
+                                "value": 5,
+                                "palette": "white_on_green"
+                            }
+                        ]
+                    }
+                ],
+                "custom_links": [],
+                "title": "Tasks lost",
+                "title_size": "16",
+                "title_align": "center",
+                "time": {
+                    "live_span": "5m"
+                },
+                "autoscale": true,
+                "text_align": "center"
+            },
+            "layout": {
+                "x": 88,
+                "y": 41,
+                "width": 15,
+                "height": 9
+            }
+        },
+        {
+            "id": 11,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "avg:mesos.cluster.tasks_staging{*}",
+                        "aggregator": "max",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "value": 10,
+                                "palette": "white_on_red"
+                            },
+                            {
+                                "comparator": ">=",
+                                "value": 5,
+                                "palette": "white_on_yellow"
+                            },
+                            {
+                                "comparator": "<",
+                                "value": 5,
+                                "palette": "white_on_green"
+                            }
+                        ]
+                    }
+                ],
+                "custom_links": [],
+                "title": "Tasks Staging",
+                "title_size": "16",
+                "title_align": "center",
+                "time": {
+                    "live_span": "5m"
+                },
+                "autoscale": true,
+                "precision": 0,
+                "text_align": "center"
+            },
+            "layout": {
+                "x": 72,
+                "y": 51,
+                "width": 15,
+                "height": 9
+            }
+        },
+        {
+            "id": 12,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "avg:mesos.cluster.tasks_finished{*}",
+                        "aggregator": "max",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "value": 10,
+                                "palette": "white_on_red"
+                            },
+                            {
+                                "comparator": ">=",
+                                "value": 5,
+                                "palette": "white_on_yellow"
+                            },
+                            {
+                                "comparator": "<",
+                                "value": 5,
+                                "palette": "white_on_green"
+                            }
+                        ]
+                    }
+                ],
+                "custom_links": [],
+                "title": "Tasks Finished",
+                "title_size": "16",
+                "title_align": "center",
+                "time": {
+                    "live_span": "5m"
+                },
+                "autoscale": true,
+                "text_align": "center"
+            },
+            "layout": {
+                "x": 88,
+                "y": 51,
+                "width": 15,
+                "height": 9
+            }
+        },
+        {
+            "id": 13,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "avg:mesos.cluster.tasks_failed{*}",
+                        "aggregator": "max",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "value": 10,
+                                "palette": "white_on_red"
+                            },
+                            {
+                                "comparator": ">=",
+                                "value": 5,
+                                "palette": "white_on_yellow"
+                            },
+                            {
+                                "comparator": "<",
+                                "value": 5,
+                                "palette": "white_on_green"
+                            }
+                        ]
+                    }
+                ],
+                "custom_links": [],
+                "title": "Tasks failed",
+                "title_size": "16",
+                "title_align": "center",
+                "time": {
+                    "live_span": "5m"
+                },
+                "autoscale": true,
+                "precision": 0,
+                "text_align": "center"
+            },
+            "layout": {
+                "x": 88,
+                "y": 61,
+                "width": 15,
+                "height": 9
+            }
+        },
+        {
+            "id": 14,
+            "definition": {
+                "type": "note",
+                "content": "Number and uptime of mesos master and slave nodes in your infrastructure.",
+                "background_color": "pink",
+                "font_size": "18",
+                "text_align": "center",
+                "show_tick": true,
+                "tick_pos": "50%",
+                "tick_edge": "right"
+            },
+            "layout": {
+                "x": 47,
+                "y": 1,
+                "width": 27,
+                "height": 14
+            }
+        },
+        {
+            "id": 15,
+            "definition": {
+                "type": "note",
+                "content": "Overview of your tasks status and number of tasks failed, running the past four hours.",
+                "background_color": "blue",
+                "font_size": "18",
+                "text_align": "center",
+                "show_tick": true,
+                "tick_pos": "50%",
+                "tick_edge": "right"
+            },
+            "layout": {
+                "x": 1,
+                "y": 31,
+                "width": 70,
+                "height": 9
+            }
+        },
+        {
+            "id": 16,
+            "definition": {
+                "type": "note",
+                "content": "Cluster Resources",
+                "background_color": "yellow",
+                "font_size": "18",
+                "text_align": "center",
+                "show_tick": true,
+                "tick_pos": "50%",
+                "tick_edge": "bottom"
+            },
+            "layout": {
+                "x": 1,
+                "y": 15,
+                "width": 45,
+                "height": 6
+            }
+        },
+        {
+            "id": 17,
+            "definition": {
+                "type": "check_status",
+                "title": "Mesos master",
+                "title_size": "13",
+                "title_align": "center",
+                "check": "mesos_master.can_connect",
+                "grouping": "cluster",
+                "tags": ["*"],
+                "time": {
+                    "live_span": "1h"
+                }
+            },
+            "layout": {
+                "x": 61,
+                "y": 16,
+                "width": 13,
+                "height": 14
+            }
+        },
+        {
+            "id": 18,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:mesos.cluster.tasks_failed{*}",
+                        "display_type": "bars"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Failed Tasks in the past four hours",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 1,
+                "y": 41,
+                "width": 38,
+                "height": 14
+            }
+        },
+        {
+            "id": 19,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:mesos.cluster.tasks_running{*}",
+                        "display_type": "bars"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Running Tasks in the past four hours",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 1,
+                "y": 56,
+                "width": 38,
+                "height": 14
+            }
+        },
+        {
+            "id": 20,
+            "definition": {
+                "type": "check_status",
+                "title": "Mesos slave",
+                "title_size": "13",
+                "title_align": "center",
+                "check": "mesos_slave.can_connect",
+                "grouping": "cluster",
+                "tags": ["*"],
+                "time": {
+                    "live_span": "1h"
+                }
+            },
+            "layout": {
+                "x": 47,
+                "y": 16,
+                "width": 13,
+                "height": 14
+            }
+        },
+        {
+            "id": 21,
+            "definition": {
+                "type": "change",
+                "requests": [
+                    {
+                        "q": "avg:mesos.slave.tasks_running{*} by {host}",
+                        "change_type": "absolute",
+                        "compare_to": "day_before",
+                        "increase_good": true,
+                        "order_by": "change",
+                        "order_dir": "desc",
+                        "show_present": true
+                    }
+                ],
+                "custom_links": [],
+                "title": "Tasks running per slave compared to a day ago",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                }
+            },
+            "layout": {
+                "x": 40,
+                "y": 41,
+                "width": 31,
+                "height": 19
+            }
+        },
+        {
+            "id": 22,
+            "definition": {
+                "type": "note",
+                "content": "Comparison of tasks running per slave between the past hour and the past day.",
+                "background_color": "blue",
+                "font_size": "18",
+                "text_align": "center",
+                "show_tick": true,
+                "tick_pos": "50%",
+                "tick_edge": "top"
+            },
+            "layout": {
+                "x": 40,
+                "y": 61,
+                "width": 31,
+                "height": 9
+            }
+        }
+    ],
+    "template_variables": [],
+    "layout_type": "free",
+    "is_read_only": true,
+    "notify_list": [],
+    "id": 55
+}

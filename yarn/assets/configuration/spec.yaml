@@ -19,13 +19,11 @@ files:
 
               The ResourceManager port can be found in the yarn-site.xml conf file under
               the property yarn.resourcemanager.webapp.address
-            required: true
             value:
               example: http://localhost:8088
               type: string
           - name: cluster_name
             description: A friendly name for the cluster.
-            required: true
             value:
               example: default_cluster
               type: string
@@ -77,10 +75,10 @@ files:
               type: boolean
           - name: queue_blacklist
             description: |
-              Do not emit metrics for certain yarn capacityScheduler queues.
-              The check can send queue metrics on up to 100 queues.
-              If you have less than 100 queues, you don't have to set this parameter.
-              If you have more than 100 queues, please exclude queues with this parameter.
+              Do not emit metrics for certain yarn capacityScheduler queues and sub_queues.
+              The check can send queue metrics on up to 100 queues and sub_queues in total.
+              If you have less than 100 total queues and sub_queues, you do not need to set this parameter.
+              If you have more than 100 total queues and sub_queues, exclude queues with this parameter.
             value:
               example:
                 - "<QUEUE_NAME_1>"

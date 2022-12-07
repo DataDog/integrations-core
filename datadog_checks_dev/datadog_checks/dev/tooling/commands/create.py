@@ -16,6 +16,8 @@ HYPHEN = b'\xe2\x94\x80\xe2\x94\x80'.decode('utf-8')
 PIPE = b'\xe2\x94\x82'.decode('utf-8')
 PIPE_MIDDLE = b'\xe2\x94\x9c'.decode('utf-8')
 PIPE_END = b'\xe2\x94\x94'.decode('utf-8')
+# Static text to let users know these values need updating by hand
+TODO_FILL_IN = "TODO Please Fill In"
 
 
 def tree():
@@ -25,15 +27,15 @@ def tree():
 def construct_output_info(path, depth, last, is_dir=False):
     if depth == 0:
         return '', path, is_dir
-    else:
-        if depth == 1:
-            return (f'{PIPE_END if last else PIPE_MIDDLE}{HYPHEN} ', path, is_dir)
-        else:
-            return (
-                f"{PIPE}   {' ' * 4 * (depth - 2)}{PIPE_END if last or is_dir else PIPE_MIDDLE}{HYPHEN} ",
-                path,
-                is_dir,
-            )
+
+    if depth == 1:
+        return f'{PIPE_END if last else PIPE_MIDDLE}{HYPHEN} ', path, is_dir
+
+    return (
+        f"{PIPE}   {' ' * 4 * (depth - 2)}{PIPE_END if last or is_dir else PIPE_MIDDLE}{HYPHEN} ",
+        path,
+        is_dir,
+    )
 
 
 def path_tree_output(path_tree, depth=0):
@@ -96,9 +98,12 @@ def create(ctx, name, integration_type, location, non_interactive, quiet, dry_ru
 
     NAME: The display name of the integration that will appear in documentation.
     """
+    if name.lower().startswith("datadog"):
+        abort("Integration names cannot start with datadog")
 
     if name.islower():
         echo_warning('Make sure to use the display name. e.g. MapR, Ambari, IBM MQ, vSphere, ...')
+        click.confirm('Do you want to continue?', abort=True)
 
     repo_choice = ctx.obj['repo_choice']
     root = resolve_path(location) if location else get_root()
@@ -111,13 +116,14 @@ def create(ctx, name, integration_type, location, non_interactive, quiet, dry_ru
     if os.path.exists(integration_dir):
         abort(f'Path `{integration_dir}` already exists!')
 
-    template_fields = {}
+    template_fields = {'manifest_version': '1.0.0'}
     if non_interactive and repo_choice != 'core':
         abort(f'Cannot use non-interactive mode with repo_choice: {repo_choice}')
 
     if not non_interactive and not dry_run:
-        if repo_choice != 'core':
-            template_fields['email'] = click.prompt('Email used for support requests')
+        if repo_choice not in ['core', 'integrations']:
+            support_email = click.prompt('Email used for support requests')
+            template_fields['email'] = support_email
             template_fields['email_packages'] = template_fields['email']
         if repo_choice == 'extras':
             template_fields['author'] = click.prompt('Your name')
@@ -125,16 +131,18 @@ def create(ctx, name, integration_type, location, non_interactive, quiet, dry_ru
         if repo_choice == 'marketplace':
             author_name = click.prompt('Your Company Name')
             homepage = click.prompt('The product or company homepage')
+            sales_email = click.prompt('Email used for subscription notifications')
+            legal_email = click.prompt('The Legal email used to receive subscription notifications')
+
             template_fields['author'] = author_name
-            template_fields[
-                'author_info'
-            ] = f'\n  "author": {{\n    "name": "{author_name}",\n    "homepage": "{homepage}"\n  }},'
 
             eula = 'assets/eula.pdf'
-            legal_email = click.prompt('The Legal email used to receive subscription notifications')
             template_fields[
                 'terms'
             ] = f'\n  "terms": {{\n    "eula": "{eula}",\n    "legal_email": "{legal_email}"\n  }},'
+            template_fields[
+                'author_info'
+            ] = f'\n  "author": {{\n    "name": "{author_name}",\n    "homepage": "{homepage}",\n    "vendor_id": "{TODO_FILL_IN}",\n    "sales_email": "{sales_email}",\n    "support_email": "{support_email}"\n  }},'  # noqa
 
             template_fields['pricing_plan'] = '\n  "pricing": [],'
 
@@ -144,14 +152,35 @@ def create(ctx, name, integration_type, location, non_interactive, quiet, dry_ru
         else:
             # Fill in all common non Marketplace fields
             template_fields['pricing_plan'] = ''
-            template_fields['author_info'] = ''
+            if repo_choice in ['core', 'integrations']:
+                template_fields[
+                    'author_info'
+                ] = """
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },"""
+            else:
+                prompt_and_update_if_missing(template_fields, 'email', 'Email used for support requests')
+                prompt_and_update_if_missing(template_fields, 'author', 'Your name')
+                template_fields[
+                    'author_info'
+                ] = f"""
+  "author": {{
+    "support_email": "{template_fields['email']}",
+    "name": "{template_fields['author']}",
+    "homepage": "",
+    "sales_email": ""
+  }},"""
             template_fields['terms'] = ''
             template_fields['integration_id'] = kebab_case_name(name)
             template_fields['package_url'] = (
                 f"\n    # The project's main homepage."
                 f"\n    url='https://github.com/DataDog/integrations-{repo_choice}',"
             )
-    config = construct_template_fields(name, repo_choice, **template_fields)
+    config = construct_template_fields(name, repo_choice, integration_type, **template_fields)
 
     files = create_template_files(integration_type, root, config, read=not dry_run)
     file_paths = [file.file_path.replace(f'{root}{path_sep}', '', 1) for file in files]
@@ -179,3 +208,8 @@ def create(ctx, name, integration_type, location, non_interactive, quiet, dry_ru
     else:
         echo_info(f'Created in `{root}`:')
         display_path_tree(path_tree)
+
+
+def prompt_and_update_if_missing(mapping, field, prompt):
+    if mapping.get(field) is None:
+        mapping[field] = click.prompt(prompt)

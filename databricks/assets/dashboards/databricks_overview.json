@@ -1,7 +1,8 @@
 {
     "author_name": "Datadog",
-    "description": "This dashboard tracks the current status of your Spark jobs, tasks, and stages on your Databricks clusters. It also allows you to track expensive operations like shuffles, which point to possible areas for optimization. Further reading on Spark monitoring:\n\n- [Docs for Datadog's Databricks integration](https://docs.datadoghq.com/integrations/databricks/)\n\nClone this template dashboard to make changes and add your own graph widgets. ",
-    "layout_type": "free",
+    "description": "This Dashboard provides a high-level overview of your Databricks clusters, alongside detailed Spark metrics and logs, so you can monitor your jobs in real-time.\n\n- [Monitor Databricks with Datadog](/blog/databricks-monitoring-datadog)\n- [Databricks integration docs](https://docs.datadoghq.com/integrations/databricks/?tab=driveronly)\n- [Spark integration docs](https://docs.datadoghq.com/integrations/spark/?tab=host)\n",
+    "layout_type": "ordered",
+    "reflow_type": "fixed",
     "template_variables": [
         {
             "default": "*",
@@ -19,1152 +20,1563 @@
             "prefix": "app_name"
         }
     ],
-    "title": "Databricks Spark Overview",
+    "title": "Databricks Overview",
     "widgets": [
         {
             "definition": {
-                "legend_columns": [
-                    "avg",
-                    "min",
-                    "max",
-                    "value",
-                    "sum"
-                ],
-                "legend_layout": "auto",
-                "legend_size": "0",
-                "markers": [],
-                "requests": [
+                "banner_img": "https://trello-attachments.s3.amazonaws.com/5c747d70330c3550f87cd622/609ee046c72dcc1731c5fffe/ed221b6aa89e83bd08717b397038ea00/Databricks-Agent_integration_210601_FINAL.png",
+                "layout_type": "ordered",
+                "show_title": false,
+                "title": "New group",
+                "type": "group",
+                "widgets": [
                     {
-                        "display_type": "bars",
-                        "q": "sum:spark.job.count{status:succeeded,$spark_node,$databricks_cluster_name,$app_name}",
-                        "style": {
-                            "line_type": "solid",
-                            "line_width": "normal",
-                            "palette": "dog_classic"
-                        }
-                    },
-                    {
-                        "display_type": "bars",
-                        "on_right_yaxis": false,
-                        "q": "sum:spark.job.count{status:running,$spark_node,$databricks_cluster_name,$app_name}",
-                        "style": {
-                            "line_type": "solid",
-                            "line_width": "normal",
-                            "palette": "purple"
-                        }
-                    },
-                    {
-                        "display_type": "bars",
-                        "on_right_yaxis": false,
-                        "q": "avg:spark.job.count{status:failed,$spark_node,$databricks_cluster_name,$app_name}",
-                        "style": {
-                            "line_type": "solid",
-                            "line_width": "normal",
-                            "palette": "warm"
+                        "definition": {
+                            "background_color": "white",
+                            "content": "This dashboard tracks the current status of your Spark jobs, tasks, and stages in your Databricks clusters. It also allows you to track the resource utilization of your nodes, which point to possible areas for optimization.\n\nSee the [Datadog Databricks integration documentation](https://docs.datadoghq.com/integrations/databricks/?tab=driveronly) to find the suitable init script for your Databricks cluster environment.\nClone this template dashboard to make changes and add your own graph widgets.",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "left",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 5113654429288854,
+                        "layout": {
+                            "height": 6,
+                            "width": 4,
+                            "x": 0,
+                            "y": 0
                         }
                     }
-                ],
-                "show_legend": false,
-                "time": {
-                    "live_span": "4h"
-                },
-                "title": "Jobs by status",
-                "title_align": "left",
-                "title_size": "16",
-                "type": "timeseries",
-                "yaxis": {
-                    "include_zero": true,
-                    "label": "",
-                    "max": "auto",
-                    "min": "auto",
-                    "scale": "linear"
-                }
+                ]
             },
-            "id": 1,
-            "layout": {
-                "height": 15,
-                "width": 38,
-                "x": 22,
-                "y": 106
-            }
-        },
-        {
-            "definition": {
-                "custom_unit": " ",
-                "precision": 0,
-                "requests": [
-                    {
-                        "aggregator": "last",
-                        "q": "sum:spark.job.num_tasks{status:running,$spark_node,$databricks_cluster_name,$app_name}"
-                    }
-                ],
-                "time": {
-                    "live_span": "1h"
-                },
-                "title": "Tasks Running",
-                "title_align": "left",
-                "title_size": "16",
-                "type": "query_value"
-            },
-            "id": 2,
-            "layout": {
-                "height": 11,
-                "width": 15,
-                "x": 38,
-                "y": 19
-            }
-        },
-        {
-            "definition": {
-                "custom_links": [],
-                "precision": 0,
-                "requests": [
-                    {
-                        "aggregator": "last",
-                        "q": "sum:spark.job.count{status:running,$spark_node,$databricks_cluster_name,$app_name}"
-                    }
-                ],
-                "time": {
-                    "live_span": "1h"
-                },
-                "title": "Jobs Running",
-                "title_align": "left",
-                "title_size": "16",
-                "type": "query_value"
-            },
-            "id": 3,
-            "layout": {
-                "height": 11,
-                "width": 15,
-                "x": 38,
-                "y": 7
-            }
-        },
-        {
-            "definition": {
-                "custom_links": [],
-                "precision": 0,
-                "requests": [
-                    {
-                        "aggregator": "last",
-                        "q": "sum:spark.executor.count{$spark_node,$databricks_cluster_name,$app_name}"
-                    }
-                ],
-                "time": {
-                    "live_span": "1h"
-                },
-                "title": "Executors",
-                "title_align": "left",
-                "title_size": "16",
-                "type": "query_value"
-            },
-            "id": 4,
-            "layout": {
-                "height": 11,
-                "width": 15,
-                "x": 22,
-                "y": 7
-            }
-        },
-        {
-            "definition": {
-                "precision": 0,
-                "requests": [
-                    {
-                        "aggregator": "last",
-                        "q": "sum:spark.stage.count{status:active,$spark_node,$databricks_cluster_name,$app_name}"
-                    }
-                ],
-                "time": {
-                    "live_span": "1h"
-                },
-                "title": "Stages Running",
-                "title_align": "left",
-                "title_size": "16",
-                "type": "query_value"
-            },
-            "id": 5,
-            "layout": {
-                "height": 11,
-                "width": 15,
-                "x": 22,
-                "y": 19
-            }
-        },
-        {
-            "definition": {
-                "legend_columns": [
-                    "avg",
-                    "min",
-                    "max",
-                    "value",
-                    "sum"
-                ],
-                "legend_layout": "auto",
-                "legend_size": "0",
-                "markers": [],
-                "requests": [
-                    {
-                        "display_type": "line",
-                        "q": "sum:spark.job.num_tasks{status:running,$spark_node,$databricks_cluster_name,$app_name}",
-                        "style": {
-                            "line_type": "solid",
-                            "line_width": "normal",
-                            "palette": "dog_classic"
-                        }
-                    },
-                    {
-                        "display_type": "line",
-                        "on_right_yaxis": false,
-                        "q": "sum:spark.job.num_completed_tasks{$spark_node,$databricks_cluster_name,$app_name}",
-                        "style": {
-                            "line_type": "solid",
-                            "line_width": "normal",
-                            "palette": "purple"
-                        }
-                    },
-                    {
-                        "display_type": "line",
-                        "on_right_yaxis": false,
-                        "q": "sum:spark.job.num_skipped_tasks{$spark_node,$databricks_cluster_name,$app_name}",
-                        "style": {
-                            "line_type": "solid",
-                            "line_width": "normal",
-                            "palette": "grey"
-                        }
-                    },
-                    {
-                        "display_type": "line",
-                        "on_right_yaxis": false,
-                        "q": "sum:spark.job.num_failed_tasks{$spark_node,$databricks_cluster_name,$app_name}",
-                        "style": {
-                            "line_type": "solid",
-                            "line_width": "normal",
-                            "palette": "warm"
-                        }
-                    }
-                ],
-                "show_legend": false,
-                "time": {
-                    "live_span": "4h"
-                },
-                "title": "Job tasks",
-                "title_align": "left",
-                "title_size": "16",
-                "type": "timeseries",
-                "yaxis": {
-                    "include_zero": true,
-                    "label": "",
-                    "max": "auto",
-                    "min": "auto",
-                    "scale": "linear"
-                }
-            },
-            "id": 6,
-            "layout": {
-                "height": 15,
-                "width": 38,
-                "x": 61,
-                "y": 106
-            }
-        },
-        {
-            "definition": {
-                "custom_links": [],
-                "legend_size": "0",
-                "requests": [
-                    {
-                        "display_type": "line",
-                        "q": "sum:spark.stage.input_bytes{$spark_node,$databricks_cluster_name,$app_name}"
-                    },
-                    {
-                        "display_type": "line",
-                        "q": "sum:spark.stage.output_bytes{$spark_node,$databricks_cluster_name,$app_name}"
-                    }
-                ],
-                "show_legend": false,
-                "time": {
-                    "live_span": "4h"
-                },
-                "title": "Stage Input/Output Bytes",
-                "title_align": "left",
-                "title_size": "16",
-                "type": "timeseries"
-            },
-            "id": 8,
-            "layout": {
-                "height": 15,
-                "width": 38,
-                "x": 61,
-                "y": 68
-            }
-        },
-        {
-            "definition": {
-                "custom_links": [],
-                "legend_size": "0",
-                "requests": [
-                    {
-                        "display_type": "line",
-                        "q": "sum:spark.stage.input_records{$spark_node,$databricks_cluster_name,$app_name}"
-                    },
-                    {
-                        "display_type": "line",
-                        "q": "sum:spark.stage.output_records{$spark_node,$databricks_cluster_name,$app_name}"
-                    }
-                ],
-                "show_legend": false,
-                "time": {
-                    "live_span": "4h"
-                },
-                "title": "Stage Input/Output Records",
-                "title_align": "left",
-                "title_size": "16",
-                "type": "timeseries"
-            },
-            "id": 9,
-            "layout": {
-                "height": 15,
-                "width": 38,
-                "x": 22,
-                "y": 68
-            }
-        },
-        {
-            "definition": {
-                "custom_links": [],
-                "legend_size": "0",
-                "requests": [
-                    {
-                        "display_type": "line",
-                        "q": "sum:spark.stage.shuffle_read_bytes{$spark_node,$databricks_cluster_name,$app_name}"
-                    },
-                    {
-                        "display_type": "line",
-                        "q": "sum:spark.stage.shuffle_write_bytes{$spark_node,$databricks_cluster_name,$app_name}"
-                    },
-                    {
-                        "display_type": "line",
-                        "q": "sum:spark.stage.shuffle_write_bytes{$spark_node,$databricks_cluster_name,$app_name}"
-                    }
-                ],
-                "show_legend": false,
-                "time": {
-                    "live_span": "4h"
-                },
-                "title": "Shuffle Read/Write Bytes",
-                "title_align": "left",
-                "title_size": "16",
-                "type": "timeseries"
-            },
-            "id": 10,
-            "layout": {
-                "height": 15,
-                "width": 38,
-                "x": 61,
-                "y": 84
-            }
-        },
-        {
-            "definition": {
-                "custom_links": [],
-                "legend_size": "0",
-                "requests": [
-                    {
-                        "display_type": "line",
-                        "q": "avg:spark.stage.shuffle_read_records{$spark_node,$databricks_cluster_name,$app_name}"
-                    },
-                    {
-                        "display_type": "line",
-                        "q": "avg:spark.stage.shuffle_write_records{$spark_node,$databricks_cluster_name,$app_name}"
-                    }
-                ],
-                "show_legend": false,
-                "time": {
-                    "live_span": "4h"
-                },
-                "title": "Shuffle Read/Write Records",
-                "title_align": "left",
-                "title_size": "16",
-                "type": "timeseries"
-            },
-            "id": 11,
-            "layout": {
-                "height": 15,
-                "width": 38,
-                "x": 22,
-                "y": 84
-            }
-        },
-        {
-            "definition": {
-                "query": "spark has status $spark_node $databricks_cluster_name $app_name",
-                "tags_execution": "and",
-                "time": {
-                    "live_span": "1d"
-                },
-                "title": "Spark Application Event Counts",
-                "title_align": "left",
-                "title_size": "16",
-                "type": "event_timeline"
-            },
-            "id": 14,
-            "layout": {
-                "height": 9,
-                "width": 53,
-                "x": 100,
-                "y": 62
-            }
-        },
-        {
-            "definition": {
-                "sizing": "fit",
-                "type": "image",
-                "url": "/static/images/logos/databricks_avatar.svg"
-            },
-            "id": 6923169892567062,
+            "id": 8293469218180810,
             "layout": {
                 "height": 12,
-                "width": 21,
+                "width": 4,
                 "x": 0,
-                "y": 1
+                "y": 0
             }
         },
         {
             "definition": {
-                "no_group_hosts": true,
-                "no_metric_hosts": true,
-                "node_type": "host",
-                "requests": {
-                    "fill": {
-                        "q": "avg:system.cpu.user{$databricks_cluster_name,$spark_node,$app_name} by {host}"
+                "background_color": "vivid_purple",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Resource overview",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "precision": 0,
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:spark.job.count{status:running,$spark_node,$databricks_cluster_name,$app_name}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "time": {
+                                "live_span": "1h"
+                            },
+                            "title": "Jobs Running",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 6197576040379390,
+                        "layout": {
+                            "height": 2,
+                            "width": 2,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "precision": 0,
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:spark.stage.count{status:active,$spark_node,$databricks_cluster_name,$app_name}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "time": {
+                                "live_span": "1h"
+                            },
+                            "title": "Stages Running",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 6592587232099286,
+                        "layout": {
+                            "height": 2,
+                            "width": 2,
+                            "x": 2,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "no_group_hosts": true,
+                            "no_metric_hosts": true,
+                            "node_type": "host",
+                            "requests": {
+                                "fill": {
+                                    "q": "avg:system.cpu.idle{$databricks_cluster_name,$spark_node} by {host}"
+                                }
+                            },
+                            "scope": [
+                                "$databricks_cluster_name",
+                                "$spark_node"
+                            ],
+                            "style": {
+                                "palette": "green_to_orange",
+                                "palette_flip": false
+                            },
+                            "title": "Clusters by name",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "hostmap"
+                        },
+                        "id": 3112727709135612,
+                        "layout": {
+                            "height": 4,
+                            "width": 4,
+                            "x": 4,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "custom_unit": " ",
+                            "precision": 0,
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:spark.job.num_tasks{status:running,$spark_node,$databricks_cluster_name,$app_name}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "time": {
+                                "live_span": "1h"
+                            },
+                            "title": "Tasks Running",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 5059320545095740,
+                        "layout": {
+                            "height": 2,
+                            "width": 2,
+                            "x": 0,
+                            "y": 2
+                        }
+                    },
+                    {
+                        "definition": {
+                            "precision": 0,
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:spark.executor.count{$spark_node,$databricks_cluster_name,$app_name}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "time": {
+                                "live_span": "1h"
+                            },
+                            "title": "Executors",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 3401018144734882,
+                        "layout": {
+                            "height": 2,
+                            "width": 2,
+                            "x": 2,
+                            "y": 2
+                        }
                     }
-                },
-                "scope": [
-                    "$databricks_cluster_name",
-                    "$spark_node"
-                ],
-                "style": {
-                    "palette": "green_to_orange",
-                    "palette_flip": false
-                },
-                "title": "Clusters by name",
-                "title_align": "left",
-                "title_size": "16",
-                "type": "hostmap"
+                ]
             },
-            "id": 1229753999311206,
-            "layout": {
-                "height": 23,
-                "width": 31,
-                "x": 22,
-                "y": 31
-            }
-        },
-        {
-            "definition": {
-                "background_color": "orange",
-                "content": "## Driver",
-                "font_size": "14",
-                "has_padding": true,
-                "show_tick": false,
-                "text_align": "center",
-                "tick_edge": "left",
-                "tick_pos": "50%",
-                "type": "note",
-                "vertical_align": "top"
-            },
-            "id": 8960035777117260,
+            "id": 5844050937367044,
             "layout": {
                 "height": 5,
-                "width": 53,
-                "x": 100,
-                "y": 7
+                "width": 8,
+                "x": 4,
+                "y": 0
             }
+        },
+        {
+            "definition": {
+                "background_color": "purple",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Cluster resource usage",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "markers": [],
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:system.cpu.system{$spark_node,$databricks_cluster_name,$app_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": false,
+                            "time": {
+                                "live_span": "4h"
+                            },
+                            "title": "CPU percent utilization",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries",
+                            "yaxis": {
+                                "include_zero": true,
+                                "label": "",
+                                "max": "auto",
+                                "min": "auto",
+                                "scale": "linear"
+                            }
+                        },
+                        "id": 2330119040102846,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "markers": [],
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:system.load.1{$spark_node,$databricks_cluster_name,$app_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                },
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:system.load.5{$spark_node,$databricks_cluster_name,$app_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                },
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:system.load.15{$spark_node,$databricks_cluster_name,$app_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": false,
+                            "time": {
+                                "live_span": "4h"
+                            },
+                            "title": "System load",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries",
+                            "yaxis": {
+                                "include_zero": true,
+                                "label": "",
+                                "max": "auto",
+                                "min": "auto",
+                                "scale": "linear"
+                            }
+                        },
+                        "id": 6868952846105808,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 4,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "markers": [],
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "on_right_yaxis": false,
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:system.mem.free{$spark_node,$databricks_cluster_name,$app_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "purple"
+                                    }
+                                },
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "on_right_yaxis": false,
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:system.mem.total{$spark_node,$databricks_cluster_name,$app_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "grey"
+                                    }
+                                }
+                            ],
+                            "show_legend": false,
+                            "time": {
+                                "live_span": "4h"
+                            },
+                            "title": "System memory",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries",
+                            "yaxis": {
+                                "include_zero": true,
+                                "label": "",
+                                "max": "auto",
+                                "min": "auto",
+                                "scale": "linear"
+                            }
+                        },
+                        "id": 3201874791576104,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 0,
+                            "y": 3
+                        }
+                    },
+                    {
+                        "definition": {
+                            "background_color": "gray",
+                            "content": "Monitor resource usage on your clusters to see how your jobs are performing. \n\nIf CPU utilization and system load are consistently high, you should consider [re-configuring your clusters](https://docs.databricks.com/clusters/cluster-config-best-practices.html) to fit your workload.",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "left",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 2010657842575070,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 4,
+                            "y": 3
+                        }
+                    }
+                ]
+            },
+            "id": 796870736393506,
+            "layout": {
+                "height": 7,
+                "width": 8,
+                "x": 4,
+                "y": 5
+            }
+        },
+        {
+            "definition": {
+                "background_color": "yellow",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Spark events and logs",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "white",
+                            "content": "The Datadog init scripts support logs configuration to collect and monitor your [Databrick's driver logs](https://docs.microsoft.com/en-us/azure/databricks/clusters/clusters-manage#driver-logs). \n\nYou can also modify the init scripts to configure additional logs instances to read from other log files in your environment. ",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "left",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 5374534613650044,
+                        "layout": {
+                            "height": 2,
+                            "width": 12,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "query": "spark has status $spark_node $databricks_cluster_name $app_name",
+                            "time": {
+                                "live_span": "1d"
+                            },
+                            "title": "Spark Application Event Counts",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "event_timeline"
+                        },
+                        "id": 5999753748001210,
+                        "layout": {
+                            "height": 2,
+                            "width": 12,
+                            "x": 0,
+                            "y": 2
+                        }
+                    },
+                    {
+                        "definition": {
+                            "columns": [
+                                "host",
+                                "service"
+                            ],
+                            "indexes": [],
+                            "message_display": "expanded-md",
+                            "query": "service:databricks $databricks_cluster_name $spark_node $app_name",
+                            "show_date_column": true,
+                            "show_message_column": true,
+                            "sort": {
+                                "column": "time",
+                                "order": "desc"
+                            },
+                            "title": "",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "log_stream"
+                        },
+                        "id": 3225730658499518,
+                        "layout": {
+                            "height": 5,
+                            "width": 12,
+                            "x": 0,
+                            "y": 4
+                        }
+                    }
+                ]
+            },
+            "id": 8043915041370682
         },
         {
             "definition": {
                 "background_color": "vivid_orange",
-                "content": "## Spark Job Status",
-                "font_size": "14",
-                "has_padding": true,
-                "show_tick": false,
-                "text_align": "center",
-                "tick_edge": "left",
-                "tick_pos": "50%",
-                "type": "note",
-                "vertical_align": "top"
-            },
-            "id": 7350862878747550,
-            "layout": {
-                "height": 5,
-                "width": 77,
-                "x": 22,
-                "y": 56
-            }
-        },
-        {
-            "definition": {
-                "background_color": "vivid_orange",
-                "content": "## Resource Overview",
-                "font_size": "14",
-                "has_padding": true,
-                "show_tick": false,
-                "text_align": "center",
-                "tick_edge": "left",
-                "tick_pos": "50%",
-                "type": "note",
-                "vertical_align": "top"
-            },
-            "id": 8686124901378756,
-            "layout": {
-                "height": 5,
-                "width": 77,
-                "x": 22,
-                "y": 1
-            }
-        },
-        {
-            "definition": {
-                "background_color": "orange",
-                "content": "## Stages",
-                "font_size": "14",
-                "has_padding": true,
-                "show_tick": false,
-                "text_align": "center",
-                "tick_edge": "left",
-                "tick_pos": "50%",
-                "type": "note",
-                "vertical_align": "top"
-            },
-            "id": 5686463021863234,
-            "layout": {
-                "height": 5,
-                "width": 77,
-                "x": 22,
-                "y": 62
-            }
-        },
-        {
-            "definition": {
-                "background_color": "orange",
-                "content": "## Jobs",
-                "font_size": "14",
-                "has_padding": true,
-                "show_tick": false,
-                "text_align": "center",
-                "tick_edge": "left",
-                "tick_pos": "50%",
-                "type": "note",
-                "vertical_align": "top"
-            },
-            "id": 3811207773638468,
-            "layout": {
-                "height": 5,
-                "width": 77,
-                "x": 22,
-                "y": 100
-            }
-        },
-        {
-            "definition": {
-                "background_color": "vivid_orange",
-                "content": "## Events and Logs",
-                "font_size": "14",
-                "has_padding": true,
-                "show_tick": false,
-                "text_align": "center",
-                "tick_edge": "left",
-                "tick_pos": "50%",
-                "type": "note",
-                "vertical_align": "top"
-            },
-            "id": 1840504089064110,
-            "layout": {
-                "height": 5,
-                "width": 53,
-                "x": 100,
-                "y": 56
-            }
-        },
-        {
-            "definition": {
-                "columns": [
-                    "host",
-                    "service"
-                ],
-                "indexes": [],
-                "message_display": "expanded-md",
-                "query": "service:databricks $databricks_cluster_name $spark_node",
-                "show_date_column": true,
-                "show_message_column": true,
-                "sort": {
-                    "column": "time",
-                    "order": "desc"
-                },
-                "title": "",
-                "title_align": "left",
-                "title_size": "16",
-                "type": "log_stream"
-            },
-            "id": 683819160013726,
-            "layout": {
-                "height": 35,
-                "width": 53,
-                "x": 100,
-                "y": 74
-            }
-        },
-        {
-            "definition": {
-                "background_color": "orange",
-                "content": "## Executor",
-                "font_size": "14",
-                "has_padding": true,
-                "show_tick": false,
-                "text_align": "center",
-                "tick_edge": "left",
-                "tick_pos": "50%",
-                "type": "note",
-                "vertical_align": "top"
-            },
-            "id": 4053892245219892,
-            "layout": {
-                "height": 5,
-                "width": 53,
-                "x": 100,
-                "y": 31
-            }
-        },
-        {
-            "definition": {
-                "legend_columns": [
-                    "avg",
-                    "min",
-                    "max",
-                    "value",
-                    "sum"
-                ],
-                "legend_layout": "auto",
-                "legend_size": "0",
-                "markers": [],
-                "requests": [
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Spark node resources",
+                "type": "group",
+                "widgets": [
                     {
-                        "display_type": "line",
-                        "q": "sum:spark.driver.disk_used{$spark_node,$databricks_cluster_name,$app_name}.as_count()",
-                        "style": {
-                            "line_type": "solid",
-                            "line_width": "normal",
-                            "palette": "dog_classic"
-                        }
-                    }
-                ],
-                "show_legend": false,
-                "time": {
-                    "live_span": "4h"
-                },
-                "title": "Disk used",
-                "title_align": "left",
-                "title_size": "16",
-                "type": "timeseries",
-                "yaxis": {
-                    "include_zero": true,
-                    "label": "",
-                    "max": "auto",
-                    "min": "auto",
-                    "scale": "linear"
-                }
-            },
-            "id": 3910475514087374,
-            "layout": {
-                "height": 16,
-                "width": 26,
-                "x": 127,
-                "y": 13
-            }
-        },
-        {
-            "definition": {
-                "legend_columns": [
-                    "avg",
-                    "min",
-                    "max",
-                    "value",
-                    "sum"
-                ],
-                "legend_layout": "auto",
-                "legend_size": "0",
-                "markers": [],
-                "requests": [
-                    {
-                        "display_type": "line",
-                        "q": "sum:spark.driver.memory_used{$spark_node,$databricks_cluster_name,$app_name}.as_count()",
-                        "style": {
-                            "line_type": "solid",
-                            "line_width": "normal",
-                            "palette": "dog_classic"
-                        }
-                    }
-                ],
-                "show_legend": false,
-                "time": {
-                    "live_span": "4h"
-                },
-                "title": "Memory used",
-                "title_align": "left",
-                "title_size": "16",
-                "type": "timeseries",
-                "yaxis": {
-                    "include_zero": true,
-                    "label": "",
-                    "max": "auto",
-                    "min": "auto",
-                    "scale": "linear"
-                }
-            },
-            "id": 2550647787685396,
-            "layout": {
-                "height": 16,
-                "width": 26,
-                "x": 100,
-                "y": 13
-            }
-        },
-        {
-            "definition": {
-                "legend_columns": [
-                    "avg",
-                    "min",
-                    "max",
-                    "value",
-                    "sum"
-                ],
-                "legend_layout": "auto",
-                "legend_size": "0",
-                "markers": [],
-                "requests": [
-                    {
-                        "display_type": "line",
-                        "q": "sum:spark.executor.disk_used{$spark_node,$databricks_cluster_name,$app_name}.as_count()",
-                        "style": {
-                            "line_type": "solid",
-                            "line_width": "normal",
-                            "palette": "dog_classic"
-                        }
-                    }
-                ],
-                "show_legend": false,
-                "time": {
-                    "live_span": "4h"
-                },
-                "title": "Disk used",
-                "title_align": "left",
-                "title_size": "16",
-                "type": "timeseries",
-                "yaxis": {
-                    "include_zero": true,
-                    "label": "",
-                    "max": "auto",
-                    "min": "auto",
-                    "scale": "linear"
-                }
-            },
-            "id": 1989121037430794,
-            "layout": {
-                "height": 17,
-                "width": 26,
-                "x": 127,
-                "y": 37
-            }
-        },
-        {
-            "definition": {
-                "legend_columns": [
-                    "avg",
-                    "min",
-                    "max",
-                    "value",
-                    "sum"
-                ],
-                "legend_layout": "auto",
-                "legend_size": "0",
-                "markers": [],
-                "requests": [
-                    {
-                        "display_type": "line",
-                        "q": "sum:spark.job.num_active_stages{$spark_node,$databricks_cluster_name,$app_name}.as_count()",
-                        "style": {
-                            "line_type": "solid",
-                            "line_width": "normal",
-                            "palette": "dog_classic"
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "markers": [],
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:spark.driver.disk_used{$spark_node,$databricks_cluster_name,$app_name}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": false,
+                            "title": "Driver disk used",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries",
+                            "yaxis": {
+                                "include_zero": true,
+                                "label": "",
+                                "max": "auto",
+                                "min": "auto",
+                                "scale": "linear"
+                            }
+                        },
+                        "id": 1379510956496642,
+                        "layout": {
+                            "height": 2,
+                            "width": 4,
+                            "x": 0,
+                            "y": 0
                         }
                     },
                     {
-                        "display_type": "line",
-                        "on_right_yaxis": false,
-                        "q": "sum:spark.job.num_failed_stages{$spark_node,$databricks_cluster_name,$app_name}.as_count()",
-                        "style": {
-                            "line_type": "solid",
-                            "line_width": "normal",
-                            "palette": "warm"
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "markers": [],
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:spark.driver.memory_used{$spark_node,$databricks_cluster_name,$app_name}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": false,
+                            "time": {
+                                "live_span": "4h"
+                            },
+                            "title": "Driver memory used",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries",
+                            "yaxis": {
+                                "include_zero": true,
+                                "label": "",
+                                "max": "auto",
+                                "min": "auto",
+                                "scale": "linear"
+                            }
+                        },
+                        "id": 3441506126780764,
+                        "layout": {
+                            "height": 2,
+                            "width": 4,
+                            "x": 4,
+                            "y": 0
                         }
                     },
                     {
-                        "display_type": "line",
-                        "on_right_yaxis": false,
-                        "q": "sum:spark.job.num_skipped_stages{$spark_node,$databricks_cluster_name,$app_name}.as_count()",
-                        "style": {
-                            "line_type": "solid",
-                            "line_width": "normal",
-                            "palette": "grey"
-                        }
-                    }
-                ],
-                "show_legend": false,
-                "time": {
-                    "live_span": "4h"
-                },
-                "title": "Job stages",
-                "title_align": "left",
-                "title_size": "16",
-                "type": "timeseries",
-                "yaxis": {
-                    "include_zero": true,
-                    "label": "",
-                    "max": "auto",
-                    "min": "auto",
-                    "scale": "linear"
-                }
-            },
-            "id": 3386900080029476,
-            "layout": {
-                "height": 15,
-                "width": 38,
-                "x": 22,
-                "y": 122
-            }
-        },
-        {
-            "definition": {
-                "background_color": "vivid_orange",
-                "content": "## Spark Resources",
-                "font_size": "14",
-                "has_padding": true,
-                "show_tick": false,
-                "text_align": "center",
-                "tick_edge": "left",
-                "tick_pos": "50%",
-                "type": "note",
-                "vertical_align": "top"
-            },
-            "id": 6857959232502226,
-            "layout": {
-                "height": 5,
-                "width": 53,
-                "x": 100,
-                "y": 1
-            }
-        },
-        {
-            "definition": {
-                "legend_columns": [
-                    "avg",
-                    "min",
-                    "max",
-                    "value",
-                    "sum"
-                ],
-                "legend_layout": "auto",
-                "legend_size": "0",
-                "markers": [],
-                "requests": [
-                    {
-                        "display_type": "line",
-                        "on_right_yaxis": false,
-                        "q": "sum:system.mem.free{$spark_node,$databricks_cluster_name}",
-                        "style": {
-                            "line_type": "solid",
-                            "line_width": "normal",
-                            "palette": "purple"
+                        "definition": {
+                            "background_color": "gray",
+                            "content": "Monitor the resource consumption on your Spark driver and worker nodes.\n\nIf there is high resource consumption on your clusters, consider choosing a larger Driver or Worker type for the cluster. Read more about configuring your [Databricks clusters](https://docs.databricks.com/clusters/configure.html).",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": true,
+                            "text_align": "left",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "center"
+                        },
+                        "id": 6606212809463528,
+                        "layout": {
+                            "height": 4,
+                            "width": 4,
+                            "x": 8,
+                            "y": 0
                         }
                     },
                     {
-                        "display_type": "line",
-                        "on_right_yaxis": false,
-                        "q": "sum:system.mem.total{$spark_node,$databricks_cluster_name}",
-                        "style": {
-                            "line_type": "solid",
-                            "line_width": "normal",
-                            "palette": "grey"
-                        }
-                    }
-                ],
-                "show_legend": false,
-                "time": {
-                    "live_span": "4h"
-                },
-                "title": "System memory",
-                "title_align": "left",
-                "title_size": "16",
-                "type": "timeseries",
-                "yaxis": {
-                    "include_zero": true,
-                    "label": "",
-                    "max": "auto",
-                    "min": "auto",
-                    "scale": "linear"
-                }
-            },
-            "id": 8086606489508008,
-            "layout": {
-                "height": 15,
-                "width": 44,
-                "x": 55,
-                "y": 7
-            }
-        },
-        {
-            "definition": {
-                "legend_columns": [
-                    "avg",
-                    "min",
-                    "max",
-                    "value",
-                    "sum"
-                ],
-                "legend_layout": "auto",
-                "legend_size": "0",
-                "markers": [],
-                "requests": [
-                    {
-                        "display_type": "line",
-                        "q": "sum:spark.executor.memory_used{$spark_node,$databricks_cluster_name,$app_name}.as_count()",
-                        "style": {
-                            "line_type": "solid",
-                            "line_width": "normal",
-                            "palette": "dog_classic"
-                        }
-                    }
-                ],
-                "show_legend": false,
-                "time": {
-                    "live_span": "4h"
-                },
-                "title": "Memory used",
-                "title_align": "left",
-                "title_size": "16",
-                "type": "timeseries",
-                "yaxis": {
-                    "include_zero": true,
-                    "label": "",
-                    "max": "auto",
-                    "min": "auto",
-                    "scale": "linear"
-                }
-            },
-            "id": 617417483140790,
-            "layout": {
-                "height": 17,
-                "width": 26,
-                "x": 100,
-                "y": 37
-            }
-        },
-        {
-            "definition": {
-                "legend_columns": [
-                    "avg",
-                    "min",
-                    "max",
-                    "value",
-                    "sum"
-                ],
-                "legend_layout": "auto",
-                "legend_size": "0",
-                "markers": [],
-                "requests": [
-                    {
-                        "display_type": "line",
-                        "q": "sum:system.cpu.pct{$spark_node,$databricks_cluster_name}",
-                        "style": {
-                            "line_type": "solid",
-                            "line_width": "normal",
-                            "palette": "dog_classic"
-                        }
-                    }
-                ],
-                "show_legend": false,
-                "time": {
-                    "live_span": "4h"
-                },
-                "title": "CPU percent utilization",
-                "title_align": "left",
-                "title_size": "16",
-                "type": "timeseries",
-                "yaxis": {
-                    "include_zero": true,
-                    "label": "",
-                    "max": "auto",
-                    "min": "auto",
-                    "scale": "linear"
-                }
-            },
-            "id": 4028442823303522,
-            "layout": {
-                "height": 15,
-                "width": 44,
-                "x": 55,
-                "y": 23
-            }
-        },
-        {
-            "definition": {
-                "legend_columns": [
-                    "avg",
-                    "min",
-                    "max",
-                    "value",
-                    "sum"
-                ],
-                "legend_layout": "auto",
-                "legend_size": "0",
-                "markers": [],
-                "requests": [
-                    {
-                        "display_type": "line",
-                        "q": "sum:system.load.1{$spark_node,$databricks_cluster_name}",
-                        "style": {
-                            "line_type": "solid",
-                            "line_width": "normal",
-                            "palette": "dog_classic"
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "markers": [],
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:spark.executor.disk_used{$spark_node,$databricks_cluster_name,$app_name}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": false,
+                            "time": {
+                                "live_span": "4h"
+                            },
+                            "title": "Executor disk used",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries",
+                            "yaxis": {
+                                "include_zero": true,
+                                "label": "",
+                                "max": "auto",
+                                "min": "auto",
+                                "scale": "linear"
+                            }
+                        },
+                        "id": 3188641158324516,
+                        "layout": {
+                            "height": 2,
+                            "width": 4,
+                            "x": 0,
+                            "y": 2
                         }
                     },
                     {
-                        "display_type": "line",
-                        "q": "sum:system.load.5{$spark_node,$databricks_cluster_name}",
-                        "style": {
-                            "line_type": "solid",
-                            "line_width": "normal",
-                            "palette": "dog_classic"
-                        }
-                    },
-                    {
-                        "display_type": "line",
-                        "q": "sum:system.load.15{$spark_node,$databricks_cluster_name,$app_name}",
-                        "style": {
-                            "line_type": "solid",
-                            "line_width": "normal",
-                            "palette": "dog_classic"
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "markers": [],
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:spark.executor.memory_used{$spark_node,$databricks_cluster_name,$app_name}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": false,
+                            "time": {
+                                "live_span": "4h"
+                            },
+                            "title": "Executor memory used",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries",
+                            "yaxis": {
+                                "include_zero": true,
+                                "label": "",
+                                "max": "auto",
+                                "min": "auto",
+                                "scale": "linear"
+                            }
+                        },
+                        "id": 4392706808455228,
+                        "layout": {
+                            "height": 2,
+                            "width": 4,
+                            "x": 4,
+                            "y": 2
                         }
                     }
-                ],
-                "show_legend": false,
-                "time": {
-                    "live_span": "4h"
-                },
-                "title": "System load",
-                "title_align": "left",
-                "title_size": "16",
-                "type": "timeseries",
-                "yaxis": {
-                    "include_zero": true,
-                    "label": "",
-                    "max": "auto",
-                    "min": "auto",
-                    "scale": "linear"
-                }
+                ]
             },
-            "id": 2866533534112550,
+            "id": 3770619620282260,
             "layout": {
-                "height": 15,
-                "width": 44,
-                "x": 55,
-                "y": 39
-            }
-        },
-        {
-            "definition": {
-                "background_color": "white",
-                "content": "This dashboard tracks the current status of your Spark jobs, tasks, and stages in your Databricks clusters. It also allows you to track the resource utilization of your nodes, which point to possible areas for optimization. \n\nSee the [Datadog Databricks integration documentation](https://docs.datadoghq.com/integrations/databricks/) to find the suitable init script for your Databricks cluster environment.\n\nClone this template dashboard to make changes and add your own graph widgets.",
-                "font_size": "14",
-                "has_padding": true,
-                "show_tick": true,
-                "text_align": "left",
-                "tick_edge": "left",
-                "tick_pos": "50%",
-                "type": "note",
-                "vertical_align": "top"
-            },
-            "id": 7665647046384524,
-            "layout": {
-                "height": 33,
-                "width": 21,
                 "x": 0,
-                "y": 15
-            }
+                "y": 22,
+                "width": 12,
+                "height": 5,
+                "is_column_break": true
+              }
         },
         {
             "definition": {
-                "background_color": "gray",
-                "content": "Monitor the resource consumption on your Spark driver and worker nodes.\n\nIf there is high resource consumption on your clusters, consider choosing a larger Driver or Worker type for the cluster. Read more about configuring your [Databricks clusters](https://docs.databricks.com/clusters/configure.html).",
-                "font_size": "14",
-                "has_padding": true,
-                "show_tick": false,
-                "text_align": "left",
-                "tick_edge": "left",
-                "tick_pos": "50%",
-                "type": "note",
-                "vertical_align": "top"
+                "background_color": "orange",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Spark job status",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "gray",
+                            "content": "Monitor your Spark jobs, stages, and tasks by status.\n\nIncrease in stage failures may signify there is a problem with processing a Spark task like incorrect Spark configuration or code errors. Correlate the failures with your driver logs to observe for an exception.",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": true,
+                            "text_align": "left",
+                            "tick_edge": "right",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "center"
+                        },
+                        "id": 8149905710105464,
+                        "layout": {
+                            "height": 4,
+                            "width": 3,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "markers": [],
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:spark.job.count{$spark_node,$databricks_cluster_name,$app_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                },
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "on_right_yaxis": false,
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:spark.job.count{$spark_node,$databricks_cluster_name,$app_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "purple"
+                                    }
+                                },
+                                {
+                                    "display_type": "bars",
+                                    "on_right_yaxis": false,
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:spark.job.count{status:failed,*,databricks_cluster_name:databricks-demo-2,*,$spark_node,$app_name,$databricks_cluster_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "warm"
+                                    }
+                                }
+                            ],
+                            "show_legend": false,
+                            "title": "Jobs by status",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries",
+                            "yaxis": {
+                                "include_zero": true,
+                                "label": "",
+                                "max": "auto",
+                                "min": "auto",
+                                "scale": "linear"
+                            }
+                        },
+                        "id": 7573136366330252,
+                        "layout": {
+                            "height": 4,
+                            "width": 4,
+                            "x": 3,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "markers": [],
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:spark.job.num_active_stages{$spark_node,$databricks_cluster_name,$app_name}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                },
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "on_right_yaxis": false,
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:spark.job.num_failed_stages{$spark_node,$databricks_cluster_name,$app_name}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "warm"
+                                    }
+                                },
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "on_right_yaxis": false,
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:spark.job.num_skipped_stages{$spark_node,$databricks_cluster_name,$app_name}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "grey"
+                                    }
+                                }
+                            ],
+                            "show_legend": false,
+                            "time": {
+                                "live_span": "4h"
+                            },
+                            "title": "Job stages",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries",
+                            "yaxis": {
+                                "include_zero": true,
+                                "label": "",
+                                "max": "auto",
+                                "min": "auto",
+                                "scale": "linear"
+                            }
+                        },
+                        "id": 2385306040827966,
+                        "layout": {
+                            "height": 2,
+                            "width": 5,
+                            "x": 7,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "markers": [],
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:spark.job.num_tasks{status:running,$spark_node,$databricks_cluster_name,$app_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                },
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "on_right_yaxis": false,
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:spark.job.num_completed_tasks{$spark_node,$databricks_cluster_name,$app_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "purple"
+                                    }
+                                },
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "on_right_yaxis": false,
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:spark.job.num_skipped_tasks{$spark_node,$databricks_cluster_name,$app_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "grey"
+                                    }
+                                },
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "on_right_yaxis": false,
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:spark.job.num_failed_tasks{$spark_node,$databricks_cluster_name,$app_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "warm"
+                                    }
+                                }
+                            ],
+                            "show_legend": false,
+                            "time": {
+                                "live_span": "4h"
+                            },
+                            "title": "Job tasks",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries",
+                            "yaxis": {
+                                "include_zero": true,
+                                "label": "",
+                                "max": "auto",
+                                "min": "auto",
+                                "scale": "linear"
+                            }
+                        },
+                        "id": 7038624806940714,
+                        "layout": {
+                            "height": 2,
+                            "width": 5,
+                            "x": 7,
+                            "y": 2
+                        }
+                    }
+                ]
             },
-            "id": 2699895617290038,
-            "layout": {
-                "height": 24,
-                "width": 18,
-                "x": 154,
-                "y": 7
-            }
+            "id": 6411891144884286
         },
         {
             "definition": {
-                "background_color": "gray",
-                "content": "The Datadog init scripts support logs configuration to collect and monitor your [Databrick's driver logs](https://docs.microsoft.com/en-us/azure/databricks/clusters/clusters-manage#driver-logs). \n\nYou can also modify the init scripts to configure additional logs instances to read from other log files in your environment. ",
-                "font_size": "14",
-                "has_padding": true,
-                "show_tick": false,
-                "text_align": "left",
-                "tick_edge": "left",
-                "tick_pos": "50%",
-                "type": "note",
-                "vertical_align": "top"
+                "background_color": "orange",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Spark stage metrics",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "markers": [],
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:spark.stage.shuffle_read_records{$spark_node,$databricks_cluster_name,$app_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                },
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:spark.stage.shuffle_write_records{$spark_node,$databricks_cluster_name,$app_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": false,
+                            "time": {
+                                "live_span": "4h"
+                            },
+                            "title": "Shuffle Read/Write Records",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries",
+                            "yaxis": {
+                                "include_zero": true,
+                                "label": "",
+                                "max": "auto",
+                                "min": "auto",
+                                "scale": "linear"
+                            }
+                        },
+                        "id": 2200886270850842,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "markers": [],
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:spark.stage.shuffle_read_bytes{$spark_node,$databricks_cluster_name,$app_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                },
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:spark.stage.shuffle_write_bytes{$spark_node,$databricks_cluster_name,$app_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                },
+                                {
+                                    "display_type": "line",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:spark.stage.shuffle_write_bytes{*,databricks_cluster_name:databricks-demo-2,*,$spark_node,$app_name,$databricks_cluster_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries"
+                                }
+                            ],
+                            "show_legend": false,
+                            "time": {
+                                "live_span": "4h"
+                            },
+                            "title": "Shuffle Read/Write Bytes",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries",
+                            "yaxis": {
+                                "include_zero": true,
+                                "label": "",
+                                "max": "auto",
+                                "min": "auto",
+                                "scale": "linear"
+                            }
+                        },
+                        "id": 1776518634487838,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 6,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "markers": [],
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:spark.stage.input_records{$spark_node,$databricks_cluster_name,$app_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                },
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:spark.stage.output_records{$spark_node,$databricks_cluster_name,$app_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": false,
+                            "time": {
+                                "live_span": "4h"
+                            },
+                            "title": "Stage Input/Output Records",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries",
+                            "yaxis": {
+                                "include_zero": true,
+                                "label": "",
+                                "max": "auto",
+                                "min": "auto",
+                                "scale": "linear"
+                            }
+                        },
+                        "id": 7164070663543756,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 0,
+                            "y": 3
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "markers": [],
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:spark.stage.input_bytes{$spark_node,$databricks_cluster_name,$app_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                },
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:spark.stage.output_bytes{$spark_node,$databricks_cluster_name,$app_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": false,
+                            "time": {
+                                "live_span": "4h"
+                            },
+                            "title": "Stage Input/Output Bytes",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries",
+                            "yaxis": {
+                                "include_zero": true,
+                                "label": "",
+                                "max": "auto",
+                                "min": "auto",
+                                "scale": "linear"
+                            }
+                        },
+                        "id": 8035950902456730,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 6,
+                            "y": 3
+                        }
+                    }
+                ]
             },
-            "id": 7563107946559838,
-            "layout": {
-                "height": 24,
-                "width": 18,
-                "x": 154,
-                "y": 74
-            }
-        },
-        {
-            "definition": {
-                "background_color": "gray",
-                "content": "Monitor your Spark jobs, stages, and tasks by status. \n\nIncrease in stage failures may signify there is a problem with processing a Spark task like incorrect Spark configuration or code errors. Correlate the failures with your driver logs to observe for an exception.",
-                "font_size": "14",
-                "has_padding": true,
-                "show_tick": false,
-                "text_align": "left",
-                "tick_edge": "left",
-                "tick_pos": "50%",
-                "type": "note",
-                "vertical_align": "top"
-            },
-            "id": 2025887844092124,
-            "layout": {
-                "height": 24,
-                "width": 19,
-                "x": 1,
-                "y": 77
-            }
+            "id": 6885072118259984
         }
     ]
 }

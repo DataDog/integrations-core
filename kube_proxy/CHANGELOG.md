@@ -1,5 +1,42 @@
 # CHANGELOG - Kube_proxy
 
+## 5.3.0 / 2022-09-16 / Agent 7.40.0
+
+* [Added] Update HTTP config spec templates. See [#12890](https://github.com/DataDog/integrations-core/pull/12890).
+
+## 5.2.0 / 2022-05-15 / Agent 7.37.0
+
+* [Added] Support dynamic bearer tokens (Bound Service Account Token Volume). See [#11915](https://github.com/DataDog/integrations-core/pull/11915).
+
+## 5.1.0 / 2022-04-05 / Agent 7.36.0
+
+* [Added] Add metric_patterns options to filter all metric submission by a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
+* [Fixed] Remove outdated warning in the description for the `tls_ignore_warning` option. See [#11591](https://github.com/DataDog/integrations-core/pull/11591).
+
+## 5.0.0 / 2022-02-19 / Agent 7.35.0
+
+* [Added] Add `pyproject.toml` file. See [#11384](https://github.com/DataDog/integrations-core/pull/11384).
+* [Fixed] Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).
+* [Changed] Add tls_protocols_allowed option documentation. See [#11251](https://github.com/DataDog/integrations-core/pull/11251).
+
+## 4.0.2 / 2022-01-21 / Agent 7.34.0
+
+* [Fixed] Remove new kube proxy metric with high cardinality. See [#11182](https://github.com/DataDog/integrations-core/pull/11182).
+
+## 4.0.1 / 2022-01-18
+
+* [Fixed] Fix the type of `bearer_token_auth`. See [#11144](https://github.com/DataDog/integrations-core/pull/11144).
+
+## 4.0.0 / 2022-01-08
+
+* [Changed] Improve kube_proxy metrics. See [#11052](https://github.com/DataDog/integrations-core/pull/11052).
+
+## 3.5.0 / 2021-11-13 / Agent 7.33.0
+
+* [Added] Document new include_labels option. See [#10617](https://github.com/DataDog/integrations-core/pull/10617).
+* [Added] Document new use_process_start_time option. See [#10601](https://github.com/DataDog/integrations-core/pull/10601).
+* [Added] Add kube_proxy config spec. See [#10510](https://github.com/DataDog/integrations-core/pull/10510).
+
 ## 3.4.1 / 2021-03-07 / Agent 7.27.0
 
 * [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).

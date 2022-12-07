@@ -22,17 +22,17 @@ The PowerDNS Recursor check is included in the [Datadog Agent][1] package, so yo
 
 #### Prepare PowerDNS
 
-This check collects performance statistics via PowerDNS Recursor's statistics API. Versions of pdns_recursor before 4.1 do not enable the stats API by default. If you're running an older version, enable it by adding the following to your recursor config file (e.g. `/etc/powerdns/recursor.conf`):
+This check collects performance statistics using PowerDNS Recursor's statistics API. Versions of pdns_recursor before 4.1 do not enable the stats API by default. If you're running an older version, enable it by adding the following to your recursor config file, for example `/etc/powerdns/recursor.conf`:
 
 ```conf
 webserver=yes
-api-key=changeme             # only available since ver 4.0
+api-key=changeme             # only available since v4.0
 webserver-readonly=yes       # default no
 #webserver-port=8081         # default 8082
 #webserver-address=0.0.0.0   # default 127.0.0.1
 ```
 
-If you're running pdns_recursor 3.x, prepend `experimental-` to these option names, e.g. `experimental-webserver=yes`.
+If you're running pdns_recursor 3.x, prepend `experimental-` to these option names, for example: `experimental-webserver=yes`.
 
 If you're running pdns_recursor >= 4.1, just set `api-key`.
 
@@ -124,7 +124,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][5]
 
 ##### Log collection
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][9].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][6].
 
 | Parameter      | Value                                     |
 |----------------|-------------------------------------------|
@@ -135,14 +135,13 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 ### Validation
 
-[Run the Agent's `status` subcommand][6] and look for `powerdns_recursor` under the Checks section.
+[Run the Agent's `status` subcommand][7] and look for `powerdns_recursor` under the Checks section.
 
 ## Data Collected
 
 ### Metrics
 
-See [metadata.csv][7] for a list of metrics provided by this integration.
-
+See [metadata.csv][8] for a list of metrics provided by this integration.
 
 ### Events
 
@@ -150,20 +149,20 @@ The PowerDNS Recursor check does not include any events.
 
 ### Service Checks
 
-**powerdns.recursor.can_connect**:<br>
-Returns `CRITICAL` if the Agent is unable to connect to the recursor's statistics API, otherwise `OK`.
+See [service_checks.json][9] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][8].
+Need help? Contact [Datadog support][10].
+
 
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [3]: https://github.com/DataDog/integrations-core/blob/master/powerdns_recursor/datadog_checks/powerdns_recursor/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [5]: https://docs.datadoghq.com/agent/kubernetes/integrations/
-[6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[7]: https://github.com/DataDog/integrations-core/blob/master/powerdns_recursor/metadata.csv
-[8]: https://docs.datadoghq.com/help/
-[9]: https://docs.datadoghq.com/agent/kubernetes/log/
-
+[6]: https://docs.datadoghq.com/agent/kubernetes/log/
+[7]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[8]: https://github.com/DataDog/integrations-core/blob/master/powerdns_recursor/metadata.csv
+[9]: https://github.com/DataDog/integrations-core/blob/master/powerdns_recursor/assets/service_checks.json
+[10]: https://docs.datadoghq.com/help/

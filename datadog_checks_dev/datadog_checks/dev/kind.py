@@ -10,7 +10,7 @@ from .env import environment_run
 from .fs import create_file, file_exists, path_join
 from .structures import EnvVars, LazyFunction, TempDir
 from .subprocess import run_command
-from .utils import get_current_check_name, get_tox_env
+from .utils import get_active_env, get_current_check_name
 
 if PY3:
     from shutil import which
@@ -19,7 +19,16 @@ else:
 
 
 @contextmanager
-def kind_run(sleep=None, endpoints=None, conditions=None, env_vars=None, wrappers=None):
+def kind_run(
+    sleep=None,
+    endpoints=None,
+    conditions=None,
+    env_vars=None,
+    wrappers=None,
+    kind_config=None,
+    attempts=None,
+    attempts_wait=1,
+):
     """
     This utility provides a convenient way to safely set up and tear down Kind environments.
 
@@ -33,6 +42,12 @@ def kind_run(sleep=None, endpoints=None, conditions=None, env_vars=None, wrapper
     :param env_vars: A dictionary to update ``os.environ`` with during execution.
     :type env_vars: ``dict``
     :param wrappers: A list of context managers to use during execution.
+    :param kind_config: A path to a yaml file that contains the configuration for creating the kind cluster.
+    :type kind_config: ``str``
+    :param attempts: Number of attempts to run `up` and the `conditions` successfully. Defaults to 2 in CI.
+    :type attempts: ``int``
+    :param attempts_wait: Time to wait between attempts.
+    :type attempts_wait: ``int``
     """
     if not which('kind'):
         pytest.skip('Kind not available')
@@ -41,7 +56,7 @@ def kind_run(sleep=None, endpoints=None, conditions=None, env_vars=None, wrapper
     check_name = get_current_check_name(depth=2)
     # Replace undercores as kubeadm doesn't accept them
     check_name = check_name.replace("_", "-")
-    cluster_name = 'cluster-{}-{}'.format(check_name, get_tox_env())
+    cluster_name = 'cluster-{}-{}'.format(check_name, get_active_env())
 
     with TempDir(cluster_name) as temp_dir:
         kubeconfig_path = path_join(temp_dir, 'config')
@@ -50,7 +65,7 @@ def kind_run(sleep=None, endpoints=None, conditions=None, env_vars=None, wrapper
             create_file(kubeconfig_path)
 
         with EnvVars({'KUBECONFIG': kubeconfig_path}):
-            set_up = KindUp(cluster_name)
+            set_up = KindUp(cluster_name, kind_config)
             tear_down = KindDown(cluster_name)
 
             with environment_run(
@@ -61,6 +76,8 @@ def kind_run(sleep=None, endpoints=None, conditions=None, env_vars=None, wrapper
                 conditions=conditions,
                 env_vars=env_vars,
                 wrappers=wrappers,
+                attempts=attempts,
+                attempts_wait=attempts_wait,
             ):
                 yield kubeconfig_path
 
@@ -70,12 +87,17 @@ class KindUp(LazyFunction):
     `kind create cluster --name <integration>-cluster`
     """
 
-    def __init__(self, cluster_name):
+    def __init__(self, cluster_name, kind_config):
         self.cluster_name = cluster_name
+        self.kind_config = kind_config
 
     def __call__(self):
         # Create cluster
-        run_command(['kind', 'create', 'cluster', '--name', self.cluster_name], check=True)
+        create_cmd = ['kind', 'create', 'cluster', '--name', self.cluster_name]
+        if self.kind_config:
+            create_cmd += ['--config', self.kind_config]
+
+        run_command(create_cmd, check=True)
         # Connect to cluster
         run_command(['kind', 'export', 'kubeconfig', '--name', self.cluster_name], check=True)
 

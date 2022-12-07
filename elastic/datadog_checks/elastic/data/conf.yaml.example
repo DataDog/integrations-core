@@ -41,7 +41,7 @@ init_config:
     #
     # service: <SERVICE>
 
-## Every instance is scheduled independent of the others.
+## Every instance is scheduled independently of the others.
 #
 instances:
 
@@ -68,6 +68,13 @@ instances:
     #
     # cluster_stats: false
 
+    ## @param detailed_index_stats - boolean - optional - default: false
+    ## If you want to obtain index-specific stats, use this flag with `cluster_stats` and `pshard_stats` set to true.
+    ## Without this flag you only get stats from `_all`.
+    ## Do not use it if you are pointing to localhost.
+    #
+    # detailed_index_stats: false
+
     ## @param index_stats - boolean - optional - default: false
     ## Set "index_stats" to true to collect metrics for individual indices.
     #
@@ -86,7 +93,7 @@ instances:
 
     ## @param slm_stats - boolean - optional - default: false
     ## Set "slm_stats" to true to collect statistics about Snapshot Lifcycle Management.
-    ## The user must have `manage_slm` cluster privilege to get these metrics.
+    ## The user must have the `read_slm` cluster privilege to get these metrics.
     #
     # slm_stats: false
 
@@ -104,7 +111,7 @@ instances:
     # pending_task_stats: true
 
     ## @param cat_allocation_stats - boolean - optional - default: false
-    ## Enable to collect Elastic Cat Allocation metrics. Available only for Elasticsearch 7.2 or higher.
+    ## Enable to collect Elastic Cat Allocation metrics. Available only for Elasticsearch 5.0 or higher.
     ## Ref: https://www.elastic.co/guide/en/elasticsearch/reference/current/cat-allocation.html.
     #
     # cat_allocation_stats: false
@@ -126,6 +133,54 @@ instances:
     ## Enable to stop submitting the tag `cluster_name`, which has been renamed to `elastic_cluster`.
     #
     disable_legacy_cluster_tag: true
+
+    ## @param custom_queries - list of mappings - optional
+    ## Run custom queries for Elasticsearch. Each custom query endpoint can collect multiple metrics and tags.
+    ## Note: Each custom query requires an `endpoint`, `data_path`, and `columns` parameter. Each `columns` parameter
+    ## should have at least one value containing `name` and `value_path`.
+    ##
+    ## Each query can have the following parameters:
+    ##
+    ## 1. endpoint - The Elasticsearch API endpoint to query.
+    ##
+    ## 2. data_path - The JSON path up to, but not including, the metric. For example, if querying for size of parent
+    ##                circuit breaker, the full path is 'breakers.parent.estimated_size_in_bytes', which means the
+    ##                `data_path` is 'breakers.parent'.
+    ##
+    ## 3. columns - The list representing the data to be collected from the JSON query. There are two required pieces
+    ##              of data:
+    ##                a. value_path - This is the JSON path from the `data_path` to the metric. For example, if
+    ##                                querying for size of parent circuit breaker, the `value_path` is
+    ##                                `estimated_size_in_bytes`.
+    ##                b. name - The full metric name sent to Datadog. If `type` is `tag`, this column is considered a
+    ##                          tag and applied to every metric collected by this particular query.
+    ##
+    ##                c. type (optional) - An optional parameter to designates the type of data sent. Possible values
+    ##                                     for `type` include `gauge`, `monotonic_count`, `rate`, and `tag`, with
+    ##                                     `gauge` being the default.
+    ##
+    ## 4. payload (optional) - An optional payload can be included when querying the endpoint. This turns the GET
+    ##                         request into a POST request, so a read-only user should be used when writing
+    ##                         custom queries with a payload. Use YAML formatting when including a payload.
+    ##
+    ## Example:
+    ## - endpoint: /_search
+    ##   data_path: aggregations.genres.buckets
+    ##   payload:
+    ##     aggs:
+    ##       genres:
+    ##         terms:
+    ##           field: "id"
+    ##   columns:
+    ##   - value_path: key
+    ##     name: id
+    ##     type: tag
+    ##   - value_path: doc_count
+    ##     name: elasticsearch.doc_count
+    ##   tags:
+    ##   - custom_tag:1
+    #
+    # custom_queries: []
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
@@ -155,6 +210,17 @@ instances:
     ## This is useful for cluster-level checks.
     #
     # empty_default_hostname: false
+
+    ## @param metric_patterns - mapping - optional
+    ## A mapping of metrics to include or exclude, with each entry being a regular expression.
+    ##
+    ## Metrics defined in `exclude` will take precedence in case of overlap.
+    #
+    # metric_patterns:
+    #   include:
+    #   - <INCLUDE_REGEX>
+    #   exclude:
+    #   - <EXCLUDE_REGEX>
 
     ## @param proxy - mapping - optional
     ## This overrides the `proxy` setting in `init_config`.
@@ -304,13 +370,19 @@ instances:
     ##     path (required): The absolute path for the file to read from.
     ##     pattern: A regular expression pattern with a single capture group used to find the
     ##              token rather than using the entire file, for example: Your secret is (.+)
+    ##   - type: oauth
+    ##     url (required): The token endpoint.
+    ##     client_id (required): The client identifier.
+    ##     client_secret (required): The client secret.
+    ##     basic_auth: Whether the provider expects credentials to be transmitted in
+    ##                 an HTTP Basic Auth header. The default is: false
     ##
     ## The available writers are:
     ##
     ##   - type: header
     ##     name (required): The name of the field, for example: Authorization
     ##     value: The template value, for example `Bearer <TOKEN>`. The default is: <TOKEN>
-    ##     placeholder: The substring in `value` to replace by the token, defaults to: <TOKEN>
+    ##     placeholder: The substring in `value` to replace with the token, defaults to: <TOKEN>
     #
     # auth_token:
     #   reader:
@@ -331,6 +403,8 @@ instances:
 
     ## @param aws_host - string - optional
     ## If your services require AWS Signature Version 4 signing, set the host.
+    ## This only needs the hostname and does not require the protocol (HTTP, HTTPS, and more).
+    ## For example, if connecting to https://us-east-1.amazonaws.com/, set `aws_host` to `us-east-1.amazonaws.com`.
     ##
     ## Note: This setting is not necessary for official integrations.
     ##
@@ -361,10 +435,6 @@ instances:
     ## @param tls_ignore_warning - boolean - optional - default: false
     ## If `tls_verify` is disabled, security warnings are logged by the check.
     ## Disable those by setting `tls_ignore_warning` to true.
-    ##
-    ## Note: `tls_ignore_warning` set to true is currently only reliable if used by one instance of one integration.
-    ## If enabled for multiple instances, spurious warnings might still appear even if `tls_ignore_warning` is set
-    ## to true.
     #
     # tls_ignore_warning: false
 
@@ -388,6 +458,20 @@ instances:
     ## https://www.openssl.org/docs/manmaster/man3/SSL_CTX_load_verify_locations.html
     #
     # tls_ca_cert: <CA_CERT_PATH>
+
+    ## @param tls_protocols_allowed - list of strings - optional
+    ## The expected versions of TLS/SSL when fetching intermediate certificates.
+    ## Only `SSLv3`, `TLSv1.2`, `TLSv1.3` are allowed by default. The possible values are:
+    ##   SSLv3
+    ##   TLSv1
+    ##   TLSv1.1
+    ##   TLSv1.2
+    ##   TLSv1.3
+    #
+    # tls_protocols_allowed:
+    #   - SSLv3
+    #   - TLSv1.2
+    #   - TLSv1.3
 
     ## @param headers - mapping - optional
     ## The headers parameter allows you to send specific headers with every request.
@@ -424,24 +508,34 @@ instances:
     #
     # read_timeout: <READ_TIMEOUT>
 
+    ## @param request_size - number - optional - default: 16
+    ## The number of kibibytes (KiB) to read from streaming HTTP responses at a time.
+    #
+    # request_size: 16
+
     ## @param log_requests - boolean - optional - default: false
     ## Whether or not to debug log the HTTP(S) requests made, including the method and URL.
     #
     # log_requests: false
 
     ## @param persist_connections - boolean - optional - default: false
-    ## Whether or not to persist cookies and use connection pooling for increased performance.
+    ## Whether or not to persist cookies and use connection pooling for improved performance.
     #
     # persist_connections: false
 
+    ## @param allow_redirects - boolean - optional - default: true
+    ## Whether or not to allow URL redirection.
+    #
+    # allow_redirects: true
+
 ## Log Section
 ##
-## type - required - Type of log input source (tcp / udp / file / windows_event)
+## type - required - Type of log input source (tcp / udp / file / windows_event).
 ## port / path / channel_path - required - Set port if type is tcp or udp.
 ##                                         Set path if type is file.
 ##                                         Set channel_path if type is windows_event.
-## source  - required - Attribute that defines which Integration sent the logs.
-## encoding - optional - For file specifies the file encoding, default is utf-8, other
+## source  - required - Attribute that defines which integration sent the logs.
+## encoding - optional - For file specifies the file encoding. Default is utf-8. Other
 ##                       possible values are utf-16-le and utf-16-be.
 ## service - optional - The name of the service that generates the log.
 ##                      Overrides any `service` defined in the `init_config` section.

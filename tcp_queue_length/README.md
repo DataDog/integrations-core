@@ -2,7 +2,7 @@
 
 ## Overview
 
-This check monitors the usage of the Linux TCP receive and send queues, and can detect if a TCP receive or send queue is full for individual containers.
+This check monitors the usage of the Linux TCP receive and send queues. It can detect if a TCP receive or send queue is full for individual containers.
 
 ## Setup
 
@@ -23,7 +23,7 @@ yum install -y kernel-headers-$(uname -r)
 yum install -y kernel-devel-$(uname -r)
 ```
 
-**Note**: CentOS/RHEL versions < 8 are not supported.
+**Note**: Windows, Container-Optimized OS, and CentOS/RHEL versions earlier than 8 are not supported.
 
 ### Configuration
 
@@ -39,17 +39,17 @@ system_probe_config:
    Agent's configuration directory to start collecting your tcp_queue_length performance data.
    See the [sample tcp_queue_length.d/conf.yaml][1] for all available configuration options.
 
-2. [Restart the Agent][3].
+2. [Restart the Agent][2].
 
 
 ### Configuration with Helm
 
-With the [Datadog Helm chart][2], we must ensure that `system-probe` is activated by setting `datadog.systemProbe.enabled` to `true` in the `values.yaml` file.
+With the [Datadog Helm chart][3], the `system-probe` must be activated by setting `datadog.systemProbe.enabled` to `true` in the `values.yaml` file.
 Then, the check can be activated by setting the `datadog.systemProbe.enableTCPQueueLength` parameter.
 
 ### Validation
 
-[Run the Agent's `status` subcommand][3] and look for `tcp_queue_length` under the checks section.
+[Run the Agent's `status` subcommand][2] and look for `tcp_queue_length` under the checks section.
 
 ## Data Collected
 
@@ -72,7 +72,7 @@ The TCP Queue Length check does not include any events.
 Need help? Contact [Datadog support][5].
 
 [1]: https://github.com/DataDog/datadog-agent/blob/master/cmd/agent/dist/conf.d/tcp_queue_length.d/conf.yaml.example
-[2]: https://github.com/helm/charts/tree/master/stable/datadog
-[3]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[2]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[3]: https://github.com/helm/charts/tree/master/stable/datadog
 [4]: https://github.com/DataDog/integrations-core/blob/master/tcp_queue_length/metadata.csv
 [5]: https://docs.datadoghq.com/help/

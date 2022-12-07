@@ -1,0 +1,101 @@
+{
+    "title": "HDFS Data Node - Overview",
+    "description": "This specialized dashboard provides visibility into the resource usage of the [DataNodes](https://www.datadoghq.com/blog/monitor-hadoop-metrics/#datanode-metrics) in your Hadoop cluster, which you can also monitor on the more expansive [Hadoop overview dashboard](https://app.datadoghq.com/screen/integration/90/hadoop---overview). Further reading on Hadoop monitoring:\n\n- [An architectural overview of Hadoop](https://www.datadoghq.com/blog/hadoop-architecture-overview/)\n\n- [Datadog's guide to key metrics for Hadoop monitoring](https://www.datadoghq.com/blog/monitor-hadoop-metrics/)\n\n- [How to collect Hadoop metrics](https://www.datadoghq.com/blog/collecting-hadoop-metrics/)\n\n- [How to monitor Hadoop with Datadog](https://www.datadoghq.com/blog/monitor-hadoop-metrics-datadog/)\n\n- [Datadog's blog post announcing Hadoop monitoring support](https://www.datadoghq.com/blog/monitoring-spark/)\n\n- [Docs for Datadog's HDFS DataNode integration](https://docs.datadoghq.com/integrations/hdfs/#hdfs-datanode-integration)\n\nClone this template dashboard to make changes and add your own graph widgets.",
+    "widgets": [
+        {
+            "id": 0,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:hdfs.datanode.dfs_capacity{*}",
+                        "display_type": "line"
+                    },
+                    {
+                        "q": "avg:hdfs.datanode.cache_used{*}",
+                        "display_type": "line"
+                    }
+                ],
+                "custom_links": [],
+                "title": "HDFS Usage",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 2,
+                "y": 2,
+                "width": 47,
+                "height": 15
+            }
+        },
+        {
+            "id": 1,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "avg:hdfs.datanode.num_failed_volumes{*}",
+                        "aggregator": "avg",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "value": 0,
+                                "palette": "white_on_red"
+                            }
+                        ]
+                    }
+                ],
+                "custom_links": [],
+                "title": "Failed Volumes",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "precision": 0
+            },
+            "layout": {
+                "x": 2,
+                "y": 19,
+                "width": 18,
+                "height": 16
+            }
+        },
+        {
+            "id": 2,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "avg:hdfs.namenode.blocks_total{*}",
+                        "aggregator": "avg"
+                    }
+                ],
+                "custom_links": [],
+                "title": "Total Blocks",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "precision": 2
+            },
+            "layout": {
+                "x": 31,
+                "y": 19,
+                "width": 18,
+                "height": 16
+            }
+        }
+    ],
+    "template_variables": [],
+    "layout_type": "free",
+    "is_read_only": true,
+    "notify_list": [],
+    "id": 41
+}

@@ -9,7 +9,7 @@ init_config:
     #
     # service: <SERVICE>
 
-## Every instance is scheduled independent of the others.
+## Every instance is scheduled independently of the others.
 #
 instances:
 
@@ -28,10 +28,15 @@ instances:
     #
     mysql_user: <MYSQL_USER>
 
-    ## @param mysql_password - string - required
+    ## @param mysql_password - string - optional
     ## Password to use to connect to MySQL in order to gather metrics.
     #
-    mysql_password: <MYSQL_PASSWORD>
+    # mysql_password: <MYSQL_PASSWORD>
+
+    ## @param mysql_db - string - optional - default: cacti
+    ## The MySQL database to connect to
+    #
+    # mysql_db: cacti
 
     ## @param rrd_path - string - required
     ## The Cacti checks requires access to the Cacti DB in MySQL and to the RRD
@@ -45,8 +50,8 @@ instances:
 
     ## @param field_names - list of strings - optional
     ## The `field_names` specifies which field_names should be used
-    ## to determine if a device is a real device. You can let it commented
-    ## out as the default values should satisfy your needs.
+    ## to determine if a device is a real device. You can leave it commented
+    ## out as the default values [ifName, dskDevice] should satisfy your needs.
     ## You can run the following query to determine your field names:
     ##       SELECT
     ##            h.hostname as hostname,
@@ -64,7 +69,6 @@ instances:
     # field_names:
     #   - ifName
     #   - dskDevice
-    #   - ifIndex
 
     ## @param rrd_whitelist - string - optional
     ## The `rrd_whitelist` is a path to a text file that has a list of file patterns,
@@ -102,14 +106,25 @@ instances:
     #
     # empty_default_hostname: false
 
+    ## @param metric_patterns - mapping - optional
+    ## A mapping of metrics to include or exclude, with each entry being a regular expression.
+    ##
+    ## Metrics defined in `exclude` will take precedence in case of overlap.
+    #
+    # metric_patterns:
+    #   include:
+    #   - <INCLUDE_REGEX>
+    #   exclude:
+    #   - <EXCLUDE_REGEX>
+
 ## Log Section
 ##
-## type - required - Type of log input source (tcp / udp / file / windows_event)
+## type - required - Type of log input source (tcp / udp / file / windows_event).
 ## port / path / channel_path - required - Set port if type is tcp or udp.
 ##                                         Set path if type is file.
 ##                                         Set channel_path if type is windows_event.
-## source  - required - Attribute that defines which Integration sent the logs.
-## encoding - optional - For file specifies the file encoding, default is utf-8, other
+## source  - required - Attribute that defines which integration sent the logs.
+## encoding - optional - For file specifies the file encoding. Default is utf-8. Other
 ##                       possible values are utf-16-le and utf-16-be.
 ## service - optional - The name of the service that generates the log.
 ##                      Overrides any `service` defined in the `init_config` section.

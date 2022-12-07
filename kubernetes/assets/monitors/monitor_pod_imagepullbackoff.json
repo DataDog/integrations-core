@@ -1,8 +1,8 @@
 {
 	"name": "[kubernetes] Pod {{pod_name.name}} is ImagePullBackOff on namespace {{kube_namespace.name}}",
 	"type": "query alert",
-	"query": "max(last_10m):max:kubernetes_state.container.status_report.count.waiting{reason:imagepullbackoff} by {kube_namespace,pod_name} >= 1",
-	"message": "pod {{pod_name.name}} is ImagePullBackOff on {{kube_namespace.name}} \n This could happen for several reasons, for example a bad image path or tag or if the credentials for pulling images are not configured properly.",
+	"query": "max(last_10m):max:kubernetes_state.container.status_report.count.waiting{reason:imagepullbackoff} by {kube_cluster_name,kube_namespace,pod_name} >= 1",
+	"message": "pod {{pod_name.name}} is in ImagePullBackOff on {{kube_namespace.name}} \n This could happen for several reasons, for example a bad image path or tag or if the credentials for pulling images are not configured properly.",
 	"tags": [
 		"integration:kubernetes"
 	],

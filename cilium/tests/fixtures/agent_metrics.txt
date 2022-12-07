@@ -591,6 +591,12 @@ cilium_ip_addresses{family="ipv6"} 0
 # HELP cilium_ipam_events_total Number of IPAM events received labeled by action and datapath family type
 # TYPE cilium_ipam_events_total counter
 cilium_ipam_events_total{action="allocate",family="ipv4"} 3
+# HELP cilium_k8s_client_api_calls_total Number of API calls made to kube-apiserver labeled by host, method and return code.
+# TYPE cilium_k8s_client_api_calls_total counter
+cilium_k8s_client_api_calls_total{host="10.100.0.1:443",method="GET",return_code="200"} 61
+cilium_k8s_client_api_calls_total{host="10.100.0.1:443",method="PATCH",return_code="200"} 1
+cilium_k8s_client_api_calls_total{host="10.100.0.1:443",method="PUT",return_code="200"} 3
+cilium_k8s_client_api_calls_total{host="10.100.0.1:443",method="PUT",return_code="409"} 1
 # HELP cilium_k8s_client_api_calls_counter Number of API calls made to kube-apiserver labeled by host, method and return code.
 # TYPE cilium_k8s_client_api_calls_counter counter
 cilium_k8s_client_api_calls_counter{host="10.48.0.1:443",method="DELETE",return_code="200"} 1
@@ -1084,4 +1090,4 @@ cilium_unreachable_health_endpoints 0
 cilium_unreachable_nodes 1
 # HELP cilium_version Cilium version
 # TYPE cilium_version gauge
-cilium_version{version="1.6.90"} 0
+cilium_version{version="1.9.10"} 0

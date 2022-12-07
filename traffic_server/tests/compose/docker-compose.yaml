@@ -1,0 +1,10 @@
+version: '3'
+
+services:
+  trafficserver:
+    image: shaker/trafficserver:${TRAFFIC_SERVER_VERSION}
+    tty: true
+    volumes:
+     - ./plugin.config:/etc/trafficserver/plugin.config
+    ports:
+        - "8080:8080"

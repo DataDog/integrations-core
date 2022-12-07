@@ -2,7 +2,7 @@
 
 ## Overview
 
-This integration monitors [{integration_name}][3].
+This integration monitors [{integration_name}][4].
 
 ## Setup
 
@@ -45,20 +45,20 @@ This integration monitors [{integration_name}][3].
 
     Change the `path` and `service` parameter values and configure them for your environment.
 
-3. [Restart the Agent][2].
-
-### Service Checks
-
-{integration_name} does not include any service checks.
+3. [Restart the Agent][3].
 
 ### Events
 
-{integration_name} does not include any events.
+The {integration_name} integration does not include any events.
+
+### Service Checks
+
+The {integration_name} integration does not include any service checks.
+
+See [service_checks.json][5] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
 Need help? Contact [Datadog support][1].
 
-[1]: https://docs.datadoghq.com/help/
-[2]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[3]: **LINK_TO_INTEGRATION_SITE**
+{integration_links}

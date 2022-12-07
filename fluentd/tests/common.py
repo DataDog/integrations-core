@@ -23,7 +23,7 @@ BAD_URL = "http://{}:{}/api/plugins.json".format(HOST, BAD_PORT)
 CHECK_NAME = 'fluentd'
 
 DEFAULT_INSTANCE = {"monitor_agent_url": URL}
-INSTANCE_WITH_PLUGIN = {"monitor_agent_url": URL, "plugin_ids": "plg1"}
+INSTANCE_WITH_PLUGIN = {"monitor_agent_url": URL, "plugin_ids": ["plg1"]}
 
 EXPECTED_GAUGES = [
     'retry_count',

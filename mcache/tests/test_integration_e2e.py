@@ -3,6 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
+from datadog_checks.dev.utils import get_metadata_metrics
+from datadog_checks.mcache import Memcache
+
 from .common import HOST, PORT, SERVICE_CHECK, requires_socket_support, requires_unix_utils
 from .metrics import GAUGES, ITEMS_GAUGES, ITEMS_RATES, RATES, SLABS_AGGREGATES, SLABS_GAUGES, SLABS_RATES
 from .utils import count_connections, get_host_socket_path
@@ -37,16 +40,18 @@ def test_e2e(client, dd_agent_check, instance):
     aggregator = dd_agent_check(instance, rate=True)
 
     assert_check_coverage(aggregator)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_service_ok(check, instance, aggregator):
+def test_service_ok(instance, aggregator, dd_run_check):
     """
     Service is up
     """
     tags = ["host:{}".format(HOST), "port:{}".format(PORT), "foo:bar"]
-    check.check(instance)
+    check = Memcache('mcache', {}, [instance])
+    dd_run_check(check)
     assert len(aggregator.service_checks(SERVICE_CHECK)) == 1
     sc = aggregator.service_checks(SERVICE_CHECK)[0]
     assert sc.status == check.OK
@@ -55,7 +60,7 @@ def test_service_ok(check, instance, aggregator):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_metrics(client, check, instance, aggregator):
+def test_metrics(client, instance, aggregator, dd_run_check):
     """
     Test all the available metrics: default, options and slabs
     """
@@ -65,9 +70,11 @@ def test_metrics(client, check, instance, aggregator):
         assert client.get("foo") == "bar"
 
     instance.update({'options': {'items': True, 'slabs': True}})
-    check.check(instance)
+    check = Memcache('mcache', {}, [instance])
+    dd_run_check(check)
 
     assert_check_coverage(aggregator)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 @pytest.mark.integration
@@ -89,7 +96,7 @@ def test_metadata(check, instance, datadog_agent):
 @requires_socket_support
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_service_with_socket_ok(check, instance_socket, aggregator):
+def test_service_with_socket_ok(instance_socket, aggregator, dd_run_check):
     """
     Service is up
 
@@ -97,18 +104,20 @@ def test_service_with_socket_ok(check, instance_socket, aggregator):
     See https://docs.docker.com/docker-for-mac/osxfs/#file-types
     See open PR https://github.com/docker/for-mac/issues/483
     """
-    tags = ["host:unix", "port:{}".format(get_host_socket_path()), "foo:bar"]
-    check.check(instance_socket)
+    check = Memcache('mcache', {}, [instance_socket])
+    dd_run_check(check)
+
     assert len(aggregator.service_checks(SERVICE_CHECK)) == 1
     sc = aggregator.service_checks(SERVICE_CHECK)[0]
+    expected_tags = ["host:unix", "port:{}".format(get_host_socket_path()), "foo:bar"]
     assert sc.status == check.OK
-    assert sc.tags == tags
+    assert sc.tags == expected_tags
 
 
 @requires_socket_support
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_metrics_with_socket(client_socket, check, instance_socket, aggregator):
+def test_metrics_with_socket(client_socket, check, instance_socket, aggregator, dd_run_check):
     """
     Test all the available metrics: default, options and slabs
     """
@@ -118,7 +127,8 @@ def test_metrics_with_socket(client_socket, check, instance_socket, aggregator):
         assert client_socket.get("foo") == "bar"
 
     instance_socket.update({'options': {'items': True, 'slabs': True}})
-    check.check(instance_socket)
+    check = Memcache('mcache', {}, [instance_socket])
+    dd_run_check(check)
 
     expected_tags = ["url:unix:{}".format(get_host_socket_path()), 'foo:bar']
     for m in GAUGES + RATES + SLABS_AGGREGATES:

@@ -1,74 +1,90 @@
-metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-postgresql.connections,gauge,,connection,,The number of active connections to this database.,0,postgres,conns
-postgresql.commits,gauge,,transaction,second,The number of transactions that have been committed in this database.,0,postgres,commits
-postgresql.rollbacks,gauge,,transaction,second,The number of transactions that have been rolled back in this database.,-1,postgres,rollbacks
-postgresql.disk_read,gauge,,block,second,The number of disk blocks read in this database.,0,postgres,disk read
-postgresql.buffer_hit,gauge,,hit,second,"The number of times disk blocks were found in the buffer cache, preventing the need to read from the database. ",1,postgres,buff hit
-postgresql.rows_returned,gauge,,row,second,The number of rows returned by queries in this database,0,postgres,rows ret
-postgresql.rows_fetched,gauge,,row,second,The number of rows fetched by queries in this database,0,postgres,rows fetch
-postgresql.rows_inserted,gauge,,row,second,The number of rows inserted by queries in this database,0,postgres,rows insrt
-postgresql.rows_updated,gauge,,row,second,The number of rows updated by queries in this database,0,postgres,rows updt
-postgresql.rows_deleted,gauge,,row,second,The number of rows deleted by queries in this database,0,postgres,rows del
-postgresql.database_size,gauge,,byte,,The disk space used by this database.,0,postgres,db size
-postgresql.db.count,gauge,,item,,The number of available databases.,0,postgres,db cnt
-postgresql.deadlocks,gauge,,,,The number of deadlocks detected in this database,-1,postgres,deadlocks
-postgresql.temp_bytes,gauge,,byte,second,The amount of data written to temporary files by queries in this database.,0,postgres,temp bytes
-postgresql.temp_files,gauge,,file,second,The number of temporary files created by queries in this database.,0,postgres,temp files
-postgresql.bgwriter.checkpoints_timed,count,,,,The number of scheduled checkpoints that were performed.,0,postgres,bgw cp timed
-postgresql.bgwriter.checkpoints_requested,count,,,,The number of requested checkpoints that were performed.,0,postgres,bgw cp req
-postgresql.bgwriter.buffers_checkpoint,count,,,,The number of buffers written during checkpoints.,0,postgres,bgw buff cp
-postgresql.bgwriter.buffers_clean,count,,,,The number of buffers written by the background writer.,0,postgres,bgw buff clean
-postgresql.bgwriter.maxwritten_clean,count,,,,The number of times the background writer stopped a cleaning scan due to writing too many buffers.,0,postgres,bgw maxwr clean
-postgresql.bgwriter.buffers_backend,count,,buffer,,The number of buffers written directly by a backend.,0,postgres,bgw buff bkend
-postgresql.bgwriter.buffers_alloc,count,,,,The number of buffers allocated,0,postgres,bgw buff alloc
-postgresql.bgwriter.buffers_backend_fsync,count,,,,The of times a backend had to execute its own fsync call instead of the background writer.,0,postgres,bgw buff bkend fsync
-postgresql.bgwriter.write_time,count,,millisecond,,The total amount of checkpoint processing time spent writing files to disk.,0,postgres,bgw wrt time
-postgresql.bgwriter.sync_time,count,,millisecond,,The total amount of checkpoint processing time spent synchronizing files to disk.,0,postgres,bgw sync time
-postgresql.locks,gauge,,lock,,The number of locks active for this database.,0,postgres,locks
-postgresql.seq_scans,gauge,,,,The number of sequential scans initiated on this table.,0,postgres,seq scans
-postgresql.seq_rows_read,gauge,,row,second,The number of live rows fetched by sequential scans.,0,postgres,seq rows rd
-postgresql.index_scans,gauge,,,,"The number of index scans initiated on this table, tagged by index.",0,postgres,idx scans
-postgresql.index_rel_scans,gauge,,,,The overall number of index scans initiated on this table.,0,postgres,idx scans
-postgresql.index_rows_fetched,gauge,,row,second,The number of live rows fetched by index scans.,0,postgres,idx rows fetch
-postgresql.index_rel_rows_fetched,gauge,,row,second,The number of live rows fetched by index scans.,0,postgres,idx rows fetch
-postgresql.rows_hot_updated,gauge,,row,second,"The number of rows HOT updated, meaning no separate index update was needed.",0,postgres,rows hot updated
-postgresql.live_rows,gauge,,row,,The estimated number of live rows.,0,postgres,live rows
-postgresql.dead_rows,gauge,,row,,The estimated number of dead rows.,0,postgres,dead rows
-postgresql.index_rows_read,gauge,,row,second,The number of index entries returned by scans on this index.,0,postgres,idx rows read
-postgresql.table_size,gauge,,byte,,"The total disk space used by the specified table. Includes TOAST, free space map, and visibility map. Excludes indexes.",0,postgres,tbl size
-postgresql.index_size,gauge,,byte,,The total disk space used by indexes attached to the specified table.,0,postgres,idx size
-postgresql.total_size,gauge,,byte,,"The total disk space used by the table, including indexes and TOAST data.",0,postgres,tot size
-postgresql.table.count,gauge,,table,,The number of user tables in this database.,0,postgres,tbl count
-postgresql.max_connections,gauge,,connection,, The maximum number of client connections allowed to this database.,0,postgres,max conns
-postgresql.percent_usage_connections,gauge,,fraction,,The number of connections to this database as a fraction of the maximum number of allowed connections.,0,postgres,pct usg conns
-postgresql.replication_delay,gauge,,second,,The current replication delay in seconds. Only available with postgresql 9.1 and newer,-1,postgres,repl delay
-postgresql.replication_delay_bytes,gauge,,byte,,The current replication delay in bytes. Only available with postgresql 9.2 and newer,-1,postgres,repl delay bytes
-postgresql.replication.wal_write_lag,gauge,,second,,"Time elapsed between flushing recent WAL locally and receiving notification that this standby server has written it (but not yet flushed it or applied it). This can be used to gauge the delay that synchronous_commit level remote_write incurred while committing if this server was configured as a synchronous standby. Only available with postgresql 10 and newer.",-1,postgres,repl write lag
-postgresql.replication.wal_flush_lag,gauge,,second,,"Time elapsed between flushing recent WAL locally and receiving notification that this standby server has written and flushed it (but not yet applied it). This can be used to gauge the delay that synchronous_commit level on incurred while committing if this server was configured as a synchronous standby. Only available with postgresql 10 and newer.",-1,postgres,repl flush lag
-postgresql.replication.wal_replay_lag,gauge,,second,,"Time elapsed between flushing recent WAL locally and receiving notification that this standby server has written, flushed and applied it. This can be used to gauge the delay that synchronous_commit level remote_apply incurred while committing if this server was configured as a synchronous standby. Only available with postgresql 10 and newer.",-1,postgres,repl replay lag
-postgresql.heap_blocks_read,gauge,,block,second,The number of disk blocks read from this table.,0,postgres,heap blks read
-postgresql.heap_blocks_hit,gauge,,hit,second,The number of buffer hits in this table.,0,postgres,heap blks hit
-postgresql.index_blocks_read,gauge,,block,second,The number of disk blocks read from all indexes on this table.,0,postgres,idx blks read
-postgresql.index_blocks_hit,gauge,,hit,second,The number of buffer hits in all indexes on this table.,0,postgres,idx blks hit
-postgresql.toast_blocks_read,gauge,,block,second,The number of disk blocks read from this table's TOAST table.,0,postgres,toast blks read
-postgresql.toast_blocks_hit,gauge,,hit,second,The number of buffer hits in this table's TOAST table.,0,postgres,toast blks hit
-postgresql.toast_index_blocks_read,gauge,,block,second,The number of disk blocks read from this table's TOAST table index.,0,postgres,toast idx blks read
-postgresql.toast_index_blocks_hit,gauge,,block,second,The number of buffer hits in this table's TOAST table index.,0,postgres,toast idx blks hit
-postgresql.transactions.open,gauge,,transaction,,The number of open transactions in this database.,0,postgres,transactions open
-postgresql.transactions.idle_in_transaction,gauge,,transaction,,The number of 'idle in transaction' transactions in this database.,0,postgres,transactions idle_in_transaction
-postgresql.before_xid_wraparound,gauge,,transaction,,The number of transactions that can occur until a transaction wraparound.,0,postgres,tx before xid wraparound
-postgresql.active_queries,gauge,,,,The number of active queries in this database.,0,postgres,active queries
-postgresql.waiting_queries,gauge,,,,The number of waiting queries in this database.,0,postgres,transactions waiting queries
-postgresql.queries.count,count,,query,,The total count of executed queries per statement. This metric is only available as part of the Deep Database Monitoring ALPHA.,0,postgres,postgres queries count
-postgresql.queries.time,count,,nanosecond,,The total query execution time per statement. This metric is only available as part of the Deep Database Monitoring ALPHA.,0,postgres,postgres queries time
-postgresql.queries.rows,count,,row,,The total number of rows retrieved or affected by queries per statement. This metric is only available as part of the Deep Database Monitoring ALPHA.,0,postgres,postgres queries rows
-postgresql.queries.shared_blks_hit,count,,block,,Total number of shared block cache hits by queries per statement. This metric is only available as part of the Deep Database Monitoring ALPHA.,0,postgres,postgres queries shared blocks hit
-postgresql.queries.shared_blks_read,count,,block,,Total number of shared blocks read by queries per statement. This metric is only available as part of the Deep Database Monitoring ALPHA.,0,postgres,postgres queries shared blocks read
-postgresql.queries.shared_blks_dirtied,count,,block,,Total number of shared blocks dirtied by queries per statement. This metric is only available as part of the Deep Database Monitoring ALPHA.,0,postgres,postgres queries shared blocks dirtied
-postgresql.queries.shared_blks_written,count,,block,,Total number of shared blocks written by queries per statement. This metric is only available as part of the Deep Database Monitoring ALPHA.,0,postgres,postgres queries shared blocks written
-postgresql.queries.local_blks_hit,count,,block,,Total number of local block cache hits by queries per statement. This metric is only available as part of the Deep Database Monitoring ALPHA.,0,postgres,postgres queries local blocks hit
-postgresql.queries.local_blks_read,count,,block,,Total number of local blocks read by queries per statement. This metric is only available as part of the Deep Database Monitoring ALPHA.,0,postgres,postgres queries local blocks read
-postgresql.queries.local_blks_dirtied,count,,block,,Total number of local blocks dirtied by queries per statement. This metric is only available as part of the Deep Database Monitoring ALPHA.,0,postgres,postgres queries local blocks dirtied
-postgresql.queries.local_blks_written,count,,block,,Total number of local blocks written by queries per statement. This metric is only available as part of the Deep Database Monitoring ALPHA.,0,postgres,postgres queries local blocks written
-postgresql.queries.temp_blks_read,count,,block,,Total number of temp blocks read by queries per statement. This metric is only available as part of the Deep Database Monitoring ALPHA.,0,postgres,postgres queries temp blocks read
-postgresql.queries.temp_blks_written,count,,block,,Total number of temp blocks written by queries per statement. This metric is only available as part of the Deep Database Monitoring ALPHA.,0,postgres,postgres queries temp blocks written
+metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
+postgresql.connections,gauge,,connection,,"The number of active connections to this database. If DBM is enabled, this metric is tagged with state, app, db and user",0,postgres,conns,
+postgresql.commits,gauge,,transaction,second,The number of transactions that have been committed in this database.,0,postgres,commits,
+postgresql.rollbacks,gauge,,transaction,second,The number of transactions that have been rolled back in this database.,-1,postgres,rollbacks,
+postgresql.disk_read,gauge,,block,second,The number of disk blocks read in this database.,0,postgres,disk read,
+postgresql.buffer_hit,gauge,,hit,second,"The number of times disk blocks were found in the buffer cache, preventing the need to read from the database. ",1,postgres,buff hit,
+postgresql.rows_returned,gauge,,row,second,The number of rows returned by queries in this database,0,postgres,rows ret,
+postgresql.rows_fetched,gauge,,row,second,The number of rows fetched by queries in this database,0,postgres,rows fetch,
+postgresql.rows_inserted,gauge,,row,second,The number of rows inserted by queries in this database,0,postgres,rows insrt,
+postgresql.rows_updated,gauge,,row,second,The number of rows updated by queries in this database,0,postgres,rows updt,
+postgresql.rows_deleted,gauge,,row,second,The number of rows deleted by queries in this database,0,postgres,rows del,
+postgresql.database_size,gauge,,byte,,The disk space used by this database.,0,postgres,db size,
+postgresql.db.count,gauge,,item,,The number of available databases.,0,postgres,db cnt,
+postgresql.deadlocks,gauge,,lock,second,The rate of deadlocks detected in this database,-1,postgres,deadlocks,
+postgresql.deadlocks.count,count,,lock,,The number of deadlocks detected in this database,-1,postgres,deadlocks.count,
+postgresql.temp_bytes,gauge,,byte,second,The amount of data written to temporary files by queries in this database.,0,postgres,temp bytes,
+postgresql.temp_files,gauge,,file,second,The number of temporary files created by queries in this database.,0,postgres,temp files,
+postgresql.bgwriter.checkpoints_timed,count,,,,The number of scheduled checkpoints that were performed.,0,postgres,bgw cp timed,
+postgresql.bgwriter.checkpoints_requested,count,,,,The number of requested checkpoints that were performed.,0,postgres,bgw cp req,
+postgresql.bgwriter.buffers_checkpoint,count,,,,The number of buffers written during checkpoints.,0,postgres,bgw buff cp,
+postgresql.bgwriter.buffers_clean,count,,,,The number of buffers written by the background writer.,0,postgres,bgw buff clean,
+postgresql.bgwriter.maxwritten_clean,count,,,,The number of times the background writer stopped a cleaning scan due to writing too many buffers.,0,postgres,bgw maxwr clean,
+postgresql.bgwriter.buffers_backend,count,,buffer,,The number of buffers written directly by a backend.,0,postgres,bgw buff bkend,
+postgresql.bgwriter.buffers_alloc,count,,,,The number of buffers allocated,0,postgres,bgw buff alloc,
+postgresql.bgwriter.buffers_backend_fsync,count,,,,The of times a backend had to execute its own fsync call instead of the background writer.,0,postgres,bgw buff bkend fsync,
+postgresql.bgwriter.write_time,count,,millisecond,,The total amount of checkpoint processing time spent writing files to disk.,0,postgres,bgw wrt time,
+postgresql.bgwriter.sync_time,count,,millisecond,,The total amount of checkpoint processing time spent synchronizing files to disk.,0,postgres,bgw sync time,
+postgresql.locks,gauge,,lock,,The number of locks active for this database.,0,postgres,locks,
+postgresql.seq_scans,gauge,,,,The number of sequential scans initiated on this table.,0,postgres,seq scans,
+postgresql.seq_rows_read,gauge,,row,second,The number of live rows fetched by sequential scans.,0,postgres,seq rows rd,
+postgresql.index_scans,gauge,,,,"The number of index scans initiated on this table, tagged by index.",0,postgres,idx scans,
+postgresql.index_rel_scans,gauge,,,,The overall number of index scans initiated on this table.,0,postgres,idx scans,
+postgresql.index_rows_fetched,gauge,,row,second,The number of live rows fetched by index scans.,0,postgres,idx rows fetch,
+postgresql.index_rel_rows_fetched,gauge,,row,second,The number of live rows fetched by index scans.,0,postgres,idx rows fetch,
+postgresql.rows_hot_updated,gauge,,row,second,"The number of rows HOT updated, meaning no separate index update was needed.",0,postgres,rows hot updated,
+postgresql.live_rows,gauge,,row,,The estimated number of live rows.,0,postgres,live rows,
+postgresql.dead_rows,gauge,,row,,The estimated number of dead rows.,0,postgres,dead rows,
+postgresql.vacuumed,count,,,,The number of times this table has been manually vacuumed.,0,postgres,vac,
+postgresql.autovacuumed,count,,,,The number of times this table has been vacuumed by the autovacuum daemon.,0,postgres,auto vac,
+postgresql.analyzed,count,,,,The number of times this table has been manually analyzed.,0,postgres,analyze,
+postgresql.autoanalyzed,count,,,,The number of times this table has been analyzed by the autovacuum daemon.,0,postgres,auto analyze,
+postgresql.index_rows_read,gauge,,row,second,The number of index entries returned by scans on this index.,0,postgres,idx rows read,
+postgresql.table_size,gauge,,byte,,"The total disk space used by the specified table. Includes TOAST, free space map, and visibility map. Excludes indexes.",0,postgres,tbl size,
+postgresql.index_size,gauge,,byte,,The total disk space used by indexes attached to the specified table.,0,postgres,idx size,
+postgresql.total_size,gauge,,byte,,"The total disk space used by the table, including indexes and TOAST data.",0,postgres,tot size,
+postgresql.table.count,gauge,,table,,The number of user tables in this database.,0,postgres,tbl count,
+postgresql.max_connections,gauge,,connection,, The maximum number of client connections allowed to this database.,0,postgres,max conns,
+postgresql.percent_usage_connections,gauge,,fraction,,The number of connections to this database as a fraction of the maximum number of allowed connections.,0,postgres,pct usg conns,
+postgresql.replication_delay,gauge,,second,,The current replication delay in seconds. Only available with postgresql 9.1 and newer,-1,postgres,repl delay,
+postgresql.replication_delay_bytes,gauge,,byte,,The current replication delay in bytes. Only available with postgresql 9.2 and newer,-1,postgres,repl delay bytes,
+postgresql.replication.wal_write_lag,gauge,,second,,"Time elapsed between flushing recent WAL locally and receiving notification that this standby server has written it (but not yet flushed it or applied it). This can be used to gauge the delay that synchronous_commit level remote_write incurred while committing if this server was configured as a synchronous standby. Only available with postgresql 10 and newer.",-1,postgres,repl write lag,
+postgresql.replication.wal_flush_lag,gauge,,second,,"Time elapsed between flushing recent WAL locally and receiving notification that this standby server has written and flushed it (but not yet applied it). This can be used to gauge the delay that synchronous_commit level on incurred while committing if this server was configured as a synchronous standby. Only available with postgresql 10 and newer.",-1,postgres,repl flush lag,
+postgresql.replication.wal_replay_lag,gauge,,second,,"Time elapsed between flushing recent WAL locally and receiving notification that this standby server has written, flushed and applied it. This can be used to gauge the delay that synchronous_commit level remote_apply incurred while committing if this server was configured as a synchronous standby. Only available with postgresql 10 and newer.",-1,postgres,repl replay lag,
+postgresql.heap_blocks_read,gauge,,block,second,The number of disk blocks read from this table.,0,postgres,heap blks read,
+postgresql.heap_blocks_hit,gauge,,hit,second,The number of buffer hits in this table.,0,postgres,heap blks hit,
+postgresql.index_blocks_read,gauge,,block,second,The number of disk blocks read from all indexes on this table.,0,postgres,idx blks read,
+postgresql.index_blocks_hit,gauge,,hit,second,The number of buffer hits in all indexes on this table.,0,postgres,idx blks hit,
+postgresql.table_bloat,gauge,,percent,,The estimated percentage of table bloat.,0,postgres,tbloat,
+postgresql.index_bloat,gauge,,percent,,The estimated percentage of index bloat.,0,postgres,ibloat,
+postgresql.toast_blocks_read,gauge,,block,second,The number of disk blocks read from this table's TOAST table.,0,postgres,toast blks read,
+postgresql.toast_blocks_hit,gauge,,hit,second,The number of buffer hits in this table's TOAST table.,0,postgres,toast blks hit,
+postgresql.toast_index_blocks_read,gauge,,block,second,The number of disk blocks read from this table's TOAST table index.,0,postgres,toast idx blks read,
+postgresql.toast_index_blocks_hit,gauge,,block,second,The number of buffer hits in this table's TOAST table index.,0,postgres,toast idx blks hit,
+postgresql.transactions.open,gauge,,transaction,,The number of open transactions in this database.,0,postgres,transactions open,
+postgresql.transactions.idle_in_transaction,gauge,,transaction,,The number of 'idle in transaction' transactions in this database.,0,postgres,transactions idle_in_transaction,
+postgresql.before_xid_wraparound,gauge,,transaction,,The number of transactions that can occur until a transaction wraparound.,0,postgres,tx before xid wraparound,
+postgresql.active_queries,gauge,,,,The number of active queries in this database.,0,postgres,active queries,
+postgresql.active_waiting_queries,gauge,,,,The number of waiting queries in this database in state active.,0,postgres,transactions active_waiting queries,
+postgresql.waiting_queries,gauge,,,,The number of waiting queries in this database.,0,postgres,transactions waiting queries,
+postgresql.queries.count,count,,query,,"The total query execution count per query_signature, db, and user. (DBM only)",0,postgres,postgres queries count,
+postgresql.queries.time,count,,nanosecond,,"The total query execution time per query_signature, db, and user. (DBM only)",0,postgres,postgres queries time,
+postgresql.queries.rows,count,,row,,"The total number of rows retrieved or affected per query_signature, db, and user. (DBM only)",0,postgres,postgres queries rows,
+postgresql.queries.shared_blks_hit,count,,block,,"Total number of shared block cache hits per query_signature, db, and user. (DBM only)",0,postgres,postgres queries shared blocks hit,
+postgresql.queries.shared_blks_read,count,,block,,"Total number of shared blocks read per query_signature, db, and user. (DBM only)",0,postgres,postgres queries shared blocks read,
+postgresql.queries.shared_blks_dirtied,count,,block,,"Total number of shared blocks dirtied per query_signature, db, and user. (DBM only)",0,postgres,postgres queries shared blocks dirtied,
+postgresql.queries.shared_blks_written,count,,block,,"Total number of shared blocks written per query_signature, db, and user. (DBM only)",0,postgres,postgres queries shared blocks written,
+postgresql.queries.local_blks_hit,count,,block,,"Total number of local block cache hits per query_signature, db, and user. (DBM only)",0,postgres,postgres queries local blocks hit,
+postgresql.queries.local_blks_read,count,,block,,"Total number of local blocks read per query_signature, db, and user. (DBM only)",0,postgres,postgres queries local blocks read,
+postgresql.queries.local_blks_dirtied,count,,block,,"Total number of local blocks dirtied per query_signature, db, and user. (DBM only)",0,postgres,postgres queries local blocks dirtied,
+postgresql.queries.local_blks_written,count,,block,,"Total number of local blocks written per query_signature, db, and user. (DBM only)",0,postgres,postgres queries local blocks written,
+postgresql.queries.temp_blks_read,count,,block,,"Total number of temp blocks read per query_signature, db, and user. (DBM only)",0,postgres,postgres queries temp blocks read,
+postgresql.queries.temp_blks_written,count,,block,,"Total number of temp blocks written per query_signature, db, and user. (DBM only)",0,postgres,postgres queries temp blocks written,
+postgresql.queries.blk_read_time,count,,nanosecond,,"Total time spent reading blocks per query_signature, db, and user. (DBM only)",0,postgres, postgres queries block read time,
+postgresql.queries.blk_write_time,count,,nanosecond,,"Total time spent writing blocks per query_signature, db, and user. (DBM only)",0,postgres, postgres queries block write time,
+postgresql.queries.duration.max,gauge,,nanosecond,,"The age of the longest running query per user, db and app. (DBM only)",0,postgres,postgres queries duration max,
+postgresql.queries.duration.sum,gauge,,nanosecond,,"The sum of the age of all running queries per user, db and app. (DBM only)",0,postgres,postgres queries duration sum,
+postgresql.transactions.duration.max,gauge,,nanosecond,,"The age of the longest running transaction per user, db and app. (DBM only)",0,postgres,postgres transactions duration max,
+postgresql.transactions.duration.sum,gauge,,nanosecond,,"The sum of the age of all running transactions per user, db and app. (DBM only)",0,postgres,postgres transactions duration sum,
+postgresql.wal_age,gauge,,second,,The age in seconds of the oldest WAL file.,0,postgres,wal age,
+postgresql.function.calls,rate,,,,The number of calls made to a function.,0,postgres,postgres_function_calls,

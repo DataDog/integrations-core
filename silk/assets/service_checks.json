@@ -1,0 +1,47 @@
+[
+    {
+        "agent_version": "7.35.0",
+        "integration": "Silk",
+        "groups": [
+            "host"
+        ],
+        "check": "silk.system.state",
+        "statuses": [
+            "ok",
+            "critical",
+            "unknown",
+            "warning"
+        ],
+        "name": "Silk system state",
+        "description": "Returns `CRITICAL` if the system is degraded, `WARNING` if the system is offline. Returns `OK` if ONLINE, `UNKNOWN` if the endpoint is is inaccessible."
+    },
+    {
+        "agent_version": "7.35.0",
+        "integration": "Silk",
+        "groups": [
+            "host"
+        ],
+        "check": "silk.server.state",
+        "statuses": [
+            "ok",
+            "unknown"
+        ],
+        "name": "Silk servers state",
+        "description": "Returns `OK` if the server is ONLINE, `UNKNOWN` if the endpoint is inaccessible or returns a non-OK status. Tagged by `server_name`."
+    },
+    {
+      "agent_version": "7.35.0",
+      "integration": "Silk",
+      "groups": [
+          "host"
+      ],
+      "check": "silk.can_connect",
+      "statuses": [
+          "ok",
+          "critical",
+          "warning"
+      ],
+      "name": "Can connect",
+      "description": "Returns `CRITICAL` if check cannot access stats endpoints, `WARNING` if an error response is encountered. Returns `OK` otherwise."
+  }
+]

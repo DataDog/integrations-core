@@ -6,6 +6,13 @@ from datadog_checks.base import AgentCheck
 RATE = AgentCheck.rate
 GAUGE = AgentCheck.gauge
 
+CONFIG_METRICS = {
+    'descriptors': [],
+    'metrics': [
+        ('max_client_conn', ('pgbouncer.max_client_conn', GAUGE)),
+    ],
+    'query': """SHOW CONFIG""",
+}
 
 STATS_METRICS = {
     'descriptors': [('database', 'db')],
@@ -55,4 +62,24 @@ DATABASES_METRICS = {
         ('current_connections', ('pgbouncer.databases.current_connections', GAUGE)),
     ],
     'query': """SHOW DATABASES""",
+}
+
+CLIENTS_METRICS = {
+    'descriptors': [('database', 'db'), ('user', 'user'), ('state', 'state')],
+    'metrics': [
+        ('connect_time', ('pgbouncer.clients.connect_time', GAUGE)),
+        ('request_time', ('pgbouncer.clients.request_time', GAUGE)),
+        ('wait', ('pgbouncer.clients.wait', GAUGE)),  # >= 1.8
+        ('wait_us', ('pgbouncer.clients.wait_us', GAUGE)),  # >= 1.8
+    ],
+    'query': """SHOW CLIENTS""",
+}
+
+SERVERS_METRICS = {
+    'descriptors': [('database', 'db'), ('user', 'user'), ('state', 'state')],
+    'metrics': [
+        ('connect_time', ('pgbouncer.servers.connect_time', GAUGE)),
+        ('request_time', ('pgbouncer.servers.request_time', GAUGE)),
+    ],
+    'query': """SHOW SERVERS""",
 }

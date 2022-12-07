@@ -1,0 +1,16 @@
+[
+    {
+        "agent_version": "7.32.0",
+        "integration": "IBM i",
+        "groups": [
+            "host"
+        ],
+        "check": "ibm_i.can_connect",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "name": "Can Connect",
+        "description": "Returns `CRITICAL` if the Agent is unable to connect and collect metrics from the monitored IBM i instance, otherwise returns `OK`."
+    }
+]

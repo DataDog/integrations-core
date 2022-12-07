@@ -4,12 +4,20 @@ files:
     options:
     - template: init_config
       options:
-        - template: init_config/openmetrics_legacy
+        - template: init_config/openmetrics
     - template: instances
       options:
-        - template: instances/openmetrics_legacy
+        - template: instances/openmetrics
           overrides:
-            namespace.required: true
             namespace.hidden: false
             metrics.required: true
             metrics.hidden: false
+            extra_metrics.hidden: true
+            openmetrics_endpoint.required: false
+            tag_by_endpoint.example: false
+            tag_by_endpoint.hidden: false
+            tag_by_endpoint.enabled: true
+        - template: instances/openmetrics_legacy_base
+          hidden: true
+          overrides:
+            prometheus_url.required: false

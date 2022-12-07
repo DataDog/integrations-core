@@ -10,9 +10,9 @@ The Solr check tracks the state and performance of a Solr cluster. It collects m
 
 ### Installation
 
-The Solr check is included in the [Datadog Agent][3] package, so you don't need to install anything else on your Solr nodes.
+The Solr check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your Solr nodes.
 
-This check is JMX-based, so you need to enable JMX Remote on your Solr servers. Read the [JMX Check documentation][4] for more details.
+This check is JMX-based, so you need to enable JMX Remote on your Solr servers. See the [JMX Check documentation][3] for more details.
 
 ### Configuration
 
@@ -23,7 +23,7 @@ This check is JMX-based, so you need to enable JMX Remote on your Solr servers. 
 
 To configure this check for an Agent running on a host:
 
-1. Edit the `solr.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][5]. See the [sample solr.d/conf.yaml][6] for all available configuration options.
+1. Edit the `solr.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][4]. See the [sample solr.d/conf.yaml][5] for all available configuration options.
 
    ```yaml
    init_config:
@@ -48,7 +48,7 @@ To configure this check for an Agent running on a host:
        port: 9999
    ```
 
-2. [Restart the Agent][7].
+2. [Restart the Agent][6].
 
 #### List of metrics
 
@@ -133,7 +133,7 @@ List of filters is only supported in Datadog Agent > 5.3.0. If you are using an 
 
 #### Containerized
 
-For containerized environments, see the [Autodiscovery with JMX][2] guide.
+For containerized environments, see the [Autodiscovery with JMX][7] guide.
 
 ##### Log collection
 
@@ -143,16 +143,16 @@ For containerized environments, see the [Autodiscovery with JMX][2] guide.
        logs_enabled: true
      ```
 
-2. Solr uses the `log4j` logger by default. To customize the logging format, edit the [`server/resources/log4j2.xml`][12] file. By default, Datadog's integration pipeline supports the following conversion [pattern][11]:
+2. Solr uses the `log4j` logger by default. To customize the logging format, edit the [`server/resources/log4j2.xml`][8] file. By default, Datadog's integration pipeline supports the following conversion [pattern][9]:
 
    ```text
    %maxLen{%d{yyyy-MM-dd HH:mm:ss.SSS} %-5p (%t) [%X{collection} %X{shard} %X{replica} %X{core}] %c{1.} %m%notEmpty{ =>%ex{short}}}{10240}%n
    ```
 
-    Clone and edit the [integration pipeline][13] if you have a different format.
+    Clone and edit the [integration pipeline][10] if you have a different format.
 
 
-3. Uncomment and edit the logs configuration block in your `solr.d/conf.yaml` file. Change the `type`, `path`, and `service` parameter values based on your environment. See the [sample solr.d/solr.yaml][6] for all available configuration options.
+3. Uncomment and edit the logs configuration block in your `solr.d/conf.yaml` file. Change the `type`, `path`, and `service` parameter values based on your environment. See the [sample solr.d/solr.yaml][5] for all available configuration options.
 
       ```yaml
        logs:
@@ -166,22 +166,22 @@ For containerized environments, see the [Autodiscovery with JMX][2] guide.
            #     name: new_log_start_with_date
      ```
 
-4. [Restart the Agent][7].
+4. [Restart the Agent][6].
 
-See [Datadog's documentation][10] for additional information on how to configure the Agent for log collection in Docker environments.
+To enable logs for Kubernetes environments, see [Kubernetes Log Collection][11].
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
 ### Validation
 
-[Run the Agent's status subcommand][8] and look for `solr` under the Checks section.
+[Run the Agent's status subcommand][12] and look for `solr` under the Checks section.
 
 ## Data Collected
 
 ### Metrics
 
-See [metadata.csv][9] for a list of metrics provided by this check.
+See [metadata.csv][13] for a list of metrics provided by this check.
 
 ### Events
 
@@ -189,8 +189,7 @@ The Solr check does not include any events.
 
 ### Service Checks
 
-**solr.can_connect**:<br>
-Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored SolR instance. Returns `OK` otherwise.
+See [service_checks.json][14] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
@@ -236,15 +235,16 @@ attribute:
 ```
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/solr/images/solrgraph.png
-[2]: https://docs.datadoghq.com/agent/guide/autodiscovery-with-jmx/?tab=containerizedagent
-[3]: https://app.datadoghq.com/account/settings#agent
-[4]: https://docs.datadoghq.com/integrations/java/
-[5]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
-[6]: https://github.com/DataDog/integrations-core/blob/master/solr/datadog_checks/solr/data/conf.yaml.example
-[7]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[8]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[9]: https://github.com/DataDog/integrations-core/blob/master/solr/metadata.csv
-[10]: https://docs.datadoghq.com/agent/docker/log/
-[11]: https://logging.apache.org/log4j/2.x/manual/layouts.html#Patterns
-[12]: https://lucene.apache.org/solr/guide/configuring-logging.html#permanent-logging-settings
-[13]: https://docs.datadoghq.com/logs/processing/#integration-pipelines
+[2]: https://app.datadoghq.com/account/settings#agent
+[3]: https://docs.datadoghq.com/integrations/java/
+[4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
+[5]: https://github.com/DataDog/integrations-core/blob/master/solr/datadog_checks/solr/data/conf.yaml.example
+[6]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[7]: https://docs.datadoghq.com/agent/guide/autodiscovery-with-jmx/?tab=containerizedagent
+[8]: https://lucene.apache.org/solr/guide/configuring-logging.html#permanent-logging-settings
+[9]: https://logging.apache.org/log4j/2.x/manual/layouts.html#Patterns
+[10]: https://docs.datadoghq.com/logs/processing/#integration-pipelines
+[11]: https://docs.datadoghq.com/agent/docker/log/
+[12]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[13]: https://github.com/DataDog/integrations-core/blob/master/solr/metadata.csv
+[14]: https://github.com/DataDog/integrations-core/blob/master/solr/assets/service_checks.json

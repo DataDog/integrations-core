@@ -2,6 +2,26 @@
 #
 init_config:
 
+    ## @param queue_manager_process - string - optional
+    ## A regular expression that must match the command line of a running process in
+    ## order for the check to run, which is useful if running MQ in a failover mode.
+    ## A `<queue_manager>` placeholder is supported which represents the value of
+    ## the `queue_manager` option defined in each check instance.
+    ##
+    ## This option is only available on Agent 7+.
+    #
+    # queue_manager_process: amqpcsea <queue_manager>
+
+    ## @param queue_manager_process_limit - integer - optional - default: 1
+    ## The maximum number of processes that can be matched at any given moment by
+    ## the `queue_manager_process` option.
+    ##
+    ## Note that if this limit is lower than the actual limit the check will ignore
+    ## some active queue managers, while if this limit is higher than the actual
+    ## limit you may see increased CPU usage during check runs.
+    #
+    # queue_manager_process_limit: 1
+
     ## @param service - string - optional
     ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
     ##
@@ -9,7 +29,7 @@ init_config:
     #
     # service: <SERVICE>
 
-## Every instance is scheduled independent of the others.
+## Every instance is scheduled independently of the others.
 #
 instances:
 
@@ -46,6 +66,12 @@ instances:
     #
     # connection_name: <CONNECTION_NAME>
 
+    ## @param override_hostname - boolean - optional - default: false
+    ## If enabled, the check sends the provided `host` as hostname instead of the agent's host.
+    ## In this case the `mq_host` tag will not be emitted. This cannot be used alongside `connection_name`
+    #
+    # override_hostname: false
+
     ## @param username - string - optional
     ## <USERNAME> of the IBMMQ Channel to connect to.
     #
@@ -58,12 +84,16 @@ instances:
 
     ## @param queues - list of strings - optional
     ## The IBMMQ queues to get data from (no queue metrics will be sent, but the check will run without it).
+    ## This will be in addition to any queues discovered using `auto_discover_queues`, `queue_regex` or
+    ## `queue_patterns`.
     #
     # queues:
     #   - <QUEUE_NAME>
 
     ## @param queue_patterns - list of strings - optional
     ## Collect from queues that match a MQ pattern
+    ## Note: Do not use in conjunction with `auto_discover_queues` or `queue_regex` as it may lead to
+    ## unexpected results.
     #
     # queue_patterns:
     #   - DEV.*
@@ -71,6 +101,8 @@ instances:
 
     ## @param queue_regex - list of strings - optional
     ## Collect from queues that match a regex
+    ## Note: Do not use in conjunction with `auto_discover_queues` or `queue_patterns` as it may lead to
+    ## unexpected results.
     #
     # queue_regex:
     #   - ^DEV\..*$
@@ -81,6 +113,14 @@ instances:
     #
     # channels:
     #   - <CHANNEL_NAME>
+
+    ## @param auto_discover_channels - boolean - optional - default: true
+    ## Autodiscover channels to monitor. This finds all discoverable channels.
+    ##
+    ## Note: autodiscovered channels are in addition to the ones provided in `channels`.
+    ## Disabling this option will stop autodiscovery only for status metrics but not for property metrics.
+    #
+    # auto_discover_channels: true
 
     ## @param channel_status_mapping - mapping - optional
     ## Custom channel status mapping for service check `ibm_mq.channel.status`.
@@ -103,8 +143,10 @@ instances:
     #   initializing: warning
 
     ## @param auto_discover_queues - boolean - optional - default: false
-    ## Autodiscover the queues to monitor
-    ## Warning: this will lead to some warnings in your logs
+    ## Autodiscover the queues to monitor. This will discover all available queues. If you have dynamic queues
+    ## it will discover and monitor them all which can drive CPU usage up. If you want to be more specific about the
+    ## queues to monitor use `queue_patterns` or `queue_regex` instead.
+    ## Warning: this can lead to some warnings in your logs
     #
     # auto_discover_queues: false
 
@@ -115,27 +157,62 @@ instances:
     #
     # collect_statistics_metrics: false
 
+    ## @param collect_reset_queue_metrics - boolean - optional - default: true
+    ## Collect metrics from Reset Queue Statistics. Statistics collected are:
+    ##   - reset queue statistics (MQCMD_RESET_Q_STATS)
+    ##
+    ## Note: Collecting reset queue statistics will also reset the performance data and requires `+chg`
+    ## permissions. More information found here:
+    ## https://www.ibm.com/docs/en/ibm-mq/9.1?topic=formats-reset-queue-statistics
+    #
+    # collect_reset_queue_metrics: true
+
     ## @param mqcd_version - number - optional - default: 6
     ## Which channel definition version to use. Supported values are 1 to 9 including.
-    ## If you're having connection issues make sure it matches your MQ version
+    ## If you're having connection issues make sure it matches your MQ version.
+    ## TLS encryption requires MQCD of version at least 7.
     #
     # mqcd_version: 6
 
     ## @param convert_endianness - boolean - optional - default: false
     ## If you are monitoring IBM MQ remotely and if the Agent and the server are using different endianness,
-    ## set this field to true.
+    ## set this field to true. For example, you will need to enable this option if you are monitoring a server that
+    ## is running on AIX or IBM i.
     #
     # convert_endianness: false
+
+    ## @param queue_manager_timezone - string - optional - default: Etc/UTC
+    ## Time zone of the queue manager in IANA/Olson timezone format, if it differs from Etc/UTC. Canonical IANA
+    ## time zone names must be used for accurate time calculations during daylight saving time periods.
+    ## E.g. `America/New_York` instead of `EST`.
+    ## https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+    ## Used to calculate `ibm_mq.queue.last_put_time` and `ibm_mq.queue.last_get_time` metrics.
+    #
+    # queue_manager_timezone: Etc/UTC
+
+    ## @param timeout - integer - optional - default: 5
+    ## The number of seconds to wait for IBM MQ to respond.
+    #
+    # timeout: 5
 
     ## @param ssl_auth - boolean - optional - default: false
     ## Whether or not to use SSL auth while connecting to the channel.
     #
     # ssl_auth: false
 
-    ## @param ssl_cipher_spec - string - optional - default: TLS_RSA_WITH_AES_256_CBC_SHA
-    ## The ssl cipher to use. It should match the value of the channels SSLCIPH attribute.
+    ## @param try_basic_auth - boolean - optional - default: true
+    ## Whether or not to try connecting with just username and password before SSL when `ssl_auth` is enabled.
+    ##
+    ## WARNING: There is a known issue with the client library in which disabling
+    ## this option has the potential to cause a memory leak.
     #
-    # ssl_cipher_spec: TLS_RSA_WITH_AES_256_CBC_SHA
+    # try_basic_auth: false
+
+    ## @param ssl_cipher_spec - string - optional
+    ## The TLS/SSL cipher to use. It should match the value of the channels SSLCIPH attribute. For an enumeration
+    ## see: https://www.ibm.com/docs/en/ibm-mq/9.3?topic=jms-tls-cipherspecs-ciphersuites-in-mq-classes
+    #
+    # ssl_cipher_spec: <SSL_CIPHER_SPEC>
 
     ## @param ssl_key_repository_location - string - optional - default: /var/mqm/ssl-db/client/KeyringClient
     ## It specifies the location of the key database file in which keys and certificates are stored.
@@ -163,6 +240,19 @@ instances:
     # queue_tag_re:
     #   SYSTEM.*: queue_type:system
     #   DEV.*: role:dev,queue_type:default
+
+    ## @param queue_manager_process - string - optional
+    ## A regular expression that must match the command line of a running process in
+    ## order for the check to run, which is useful if running MQ in a failover mode.
+    ## A `<queue_manager>` placeholder is supported which represents the value of
+    ## the `queue_manager` option.
+    ##
+    ## This option is only available on Agent 7+.
+    ##
+    ## This overrides the `queue_manager_process` option in the `init_config` section
+    ## but the `queue_manager_process_limit` option still applies.
+    #
+    # queue_manager_process: amqpcsea <queue_manager>
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
@@ -193,14 +283,25 @@ instances:
     #
     # empty_default_hostname: false
 
+    ## @param metric_patterns - mapping - optional
+    ## A mapping of metrics to include or exclude, with each entry being a regular expression.
+    ##
+    ## Metrics defined in `exclude` will take precedence in case of overlap.
+    #
+    # metric_patterns:
+    #   include:
+    #   - <INCLUDE_REGEX>
+    #   exclude:
+    #   - <EXCLUDE_REGEX>
+
 ## Log Section
 ##
-## type - required - Type of log input source (tcp / udp / file / windows_event)
+## type - required - Type of log input source (tcp / udp / file / windows_event).
 ## port / path / channel_path - required - Set port if type is tcp or udp.
 ##                                         Set path if type is file.
 ##                                         Set channel_path if type is windows_event.
-## source  - required - Attribute that defines which Integration sent the logs.
-## encoding - optional - For file specifies the file encoding, default is utf-8, other
+## source  - required - Attribute that defines which integration sent the logs.
+## encoding - optional - For file specifies the file encoding. Default is utf-8. Other
 ##                       possible values are utf-16-le and utf-16-be.
 ## service - optional - The name of the service that generates the log.
 ##                      Overrides any `service` defined in the `init_config` section.

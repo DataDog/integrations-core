@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2010-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import logging
 import os
 import shutil
 import tempfile
@@ -12,6 +13,7 @@ import pytest
 from datadog_checks.base.errors import CheckException, ConfigurationError
 from datadog_checks.dev.fs import create_file
 from datadog_checks.dev.fs import temp_dir as temp_directory
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.directory import DirectoryCheck
 
 from . import common
@@ -28,6 +30,8 @@ def setup_module(module):
 
     # Create folder structure
     os.makedirs(str(temp_dir) + "/main/subfolder")
+    os.makedirs(str(temp_dir) + "/main/subfolder/subsubfolder")
+    os.makedirs(str(temp_dir) + "/main/othersubfolder")
     os.makedirs(str(temp_dir) + "/many/subfolder")
 
     # Create 10 files in main
@@ -82,7 +86,10 @@ def test_exclude_dirs(aggregator):
         dir_check = DirectoryCheck('directory', {}, [instance])
         dir_check.check(instance)
 
-    assert len(aggregator.metric_names) == 1
+    aggregator.assert_metric("system.disk.directory.folders", count=1, value=0)
+    aggregator.assert_metric("system.disk.directory.files", count=1, value=0)
+    aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 def test_directory_metrics(aggregator):
@@ -117,6 +124,11 @@ def test_directory_metrics(aggregator):
         else:
             # 12 files in 'temp_dir'
             aggregator.assert_metric("system.disk.directory.files", tags=dir_tags, count=1, value=12)
+
+        if config.get('recursive'):
+            aggregator.assert_metric("system.disk.directory.folders", tags=dir_tags, count=1, value=3)
+        else:
+            aggregator.assert_metric("system.disk.directory.folders", tags=dir_tags, count=1, value=2)
 
     # Raises when coverage < 100%
     aggregator.metrics_asserted_pct == 100.0
@@ -204,8 +216,8 @@ def test_file_metrics(aggregator):
         for mname in common.DIR_METRICS:
             aggregator.assert_metric(mname, tags=dir_tags, count=1)
 
-        # Raises when coverage < 100%
-        assert aggregator.metrics_asserted_pct == 100.0
+        aggregator.assert_all_metrics_covered()
+        aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 def test_file_metrics_many(aggregator):
@@ -276,6 +288,21 @@ def test_file_metrics_many(aggregator):
         assert aggregator.metrics_asserted_pct == 100.0
 
 
+def test_omit_histograms(aggregator, dd_run_check):
+    check = DirectoryCheck('directory', {}, [{'directory': temp_dir + '/main', 'submit_histograms': False}])
+    dd_run_check(check)
+
+    aggregator.assert_metric('system.disk.directory.bytes', count=1)
+    aggregator.assert_metric('system.disk.directory.files', count=1)
+    aggregator.assert_metric('system.disk.directory.folders', count=1)
+    aggregator.assert_metric('system.disk.directory.file.bytes', count=0)
+    aggregator.assert_metric('system.disk.directory.file.modified_sec_ago', count=0)
+    aggregator.assert_metric('system.disk.directory.file.created_sec_ago', count=0)
+
+    aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+
 def test_non_existent_directory(aggregator):
     """
     Missing or inaccessible directory coverage.
@@ -302,6 +329,31 @@ def test_non_existent_directory_ignore_missing(aggregator):
 
     expected_tags = ['dir_name:/non-existent/directory', 'foo:bar']
     aggregator.assert_service_check('system.disk.directory.exists', DirectoryCheck.WARNING, tags=expected_tags)
+
+
+def test_os_error_mid_walk_emits_error_and_continues(aggregator, monkeypatch, caplog):
+    caplog.set_level(logging.WARNING)
+
+    def mock_walk(folder, *args, **kwargs):
+        from datadog_checks.directory.traverse import walk
+
+        walker = walk(folder, *args, **kwargs)
+        yield next(walker)
+        raise OSError('Permission denied')
+
+    monkeypatch.setattr('datadog_checks.directory.directory.walk', mock_walk)
+
+    with temp_directory() as tdir:
+
+        # Create folder
+        mkdir(os.path.join(tdir, 'a_folder'))
+
+        # Run Check
+        instance = {'directory': tdir, 'recursive': True}
+        check = DirectoryCheck('directory', {}, [instance])
+        check.check(instance)
+
+    assert 'Permission denied' in caplog.text
 
 
 def test_no_recursive_symlink_loop(aggregator):
@@ -341,6 +393,7 @@ def test_no_recursive_symlink_loop(aggregator):
             aggregator.assert_metric(metric, count=1, tags=tags)
 
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 @pytest.mark.parametrize(

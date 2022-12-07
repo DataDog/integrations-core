@@ -51,7 +51,7 @@ files:
           type: array
           items:
             type: string
-    - template: instances/pdh
+    - template: instances/pdh_legacy
       overrides:
         additional_metrics.hidden: true
         host.display_priority: 1

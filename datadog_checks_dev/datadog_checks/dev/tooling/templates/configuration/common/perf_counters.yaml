@@ -1,0 +1,130 @@
+- name: metrics
+  description: |
+    This mapping defines which metrics to collect from the performance
+    counters on the `server`. For more information, see:
+    https://docs.microsoft.com/en-us/windows/win32/perfctrs/about-performance-counters
+
+    The top-level keys are the names of the desired performance objects:
+
+      metrics:
+        System:
+          <OPTION_1>: ...
+          <OPTION_2>: ...
+        LogicalDisk:
+          <OPTION_1>: ...
+          <OPTION_2>: ...
+
+    The available performance object options are:
+
+      name (required): This becomes the prefix of all metrics submitted for each counter.
+      counters (required): This is the list of counters to collect.
+      tag_name: This is the name of the tag used for instances. For example, if the tag name for
+                the `LogicalDisk` performance object is `disk`, a possible tag would be `disk:C`.
+                If not set, the default tag name is `instance`.
+      include: This is the list of regular expressions used to select which instances to monitor.
+               If not set, all instances are monitored.
+      exclude: This is the list of regular expressions used to select which instances to ignore.
+               If not set, no instances are ignored. Note: `_Total` instances are always ignored.
+      include_fast: This is the list of wildcards or exact instance names used to select which
+                    instances to monitor. It is faster than the regular expression `include` filter
+                    because it relies on the Windows PDH built-in wildcard filtering.
+      instance_counts: This is a mapping used to select the count of instances to submit, where each
+                       key is a count type and the value is the metric name to use, ignoring `name`.
+                       The `total` count type represents the total number of encountered instances.
+                       The `monitored` count type represents the number of monitored instances after
+                       `include`/`exclude` filtering. The `unique` count type represents the number
+                       of unique instance names that are monitored.
+      use_localized_counters: Whether or not performance object and counter names should refer to their
+                              locale-specific versions rather than by their English name. This overrides
+                              any defined value in `init_config`.
+
+    The key for each counter object represents the name of the desired counter.
+    Counters can be defined in the following ways:
+
+    1. Mapping the counter name to a string. If a value is a string, then it represents the suffix of the sent metric
+       name, for example:
+
+         counters:
+         - '% Free Space': usable
+         - Current Disk Queue Length: queue_length.current
+
+    2. Mapping the counter name to a set of options. If a value is a mapping, then it must have a `name` or
+       `metric_name` key that represents the suffix or full metric name of the
+       sent metric name, for example:
+
+         counters:
+         - '% Free Space':
+             name: usable
+             type: rate
+         - Current Disk Queue Length:
+             metric_name: queue_length.current
+             average: true
+
+    The available counter options are:
+
+      type: This represents how the metric is handled, defaulting to `gauge`. The available types are:
+            gauge, rate, count, monotonic_count, service_check, temporal_percent, and time_elapsed.
+      average: When there are multiple values for the same instance name (for example, multiple processes
+               spawned with the same name) the check submits the sum. Setting this option to `true`
+               instructs the check to calculate the average instead.
+      aggregate: Whether or not to send an additional metric that is the aggregation of all values for
+                 every monitored instance. If `average` is set to `true` the check submits the average as
+                 a metric suffixed by `avg`, otherwise it submits the sum as a metric suffixed by `sum`.
+                 If this is set to `only`, the check does not submit a metric per instance.
+      metric_name: This represents the full metric name in lieu of a `name` key and is not be prefixed by
+                   the parent object's `name` key.
+  value:
+    type: object
+    additionalProperties:
+      type: object
+      required:
+      - name
+      - counters
+      properties:
+      - name: name
+        type: string
+      - name: tag_name
+        type: string
+      - name: include
+        type: array
+        items:
+          type: string
+      - name: exclude
+        type: array
+        items:
+          type: string
+      - name: instance_counts
+        type: object
+        properties:
+        - name: total
+          type: string
+        - name: monitored
+          type: string
+        - name: unique
+          type: string
+      - name: use_localized_counters
+        type: boolean
+      - name: counters
+        type: array
+        items:
+          type: object
+          additionalProperties:
+            anyOf:
+            - type: string
+            - type: object
+              properties:
+              - name: name
+                type: string
+              - name: type
+                type: string
+              - name: average
+                type: boolean
+              - name: aggregate
+                anyOf:
+                - type: boolean
+                - type: string
+                  enum:
+                  - only
+              - name: metric_name
+                type: string
+              additionalProperties: true

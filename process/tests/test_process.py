@@ -68,22 +68,22 @@ def noop_get_pagefault_stats(pid):
 
 def test_psutil_wrapper_simple(aggregator):
     # Load check with empty config
-    process = ProcessCheck(common.CHECK_NAME, {}, {})
-    name = process.psutil_wrapper(get_psutil_proc(), 'name', None, False)
+    process = ProcessCheck(common.CHECK_NAME, {}, [{}])
+    name = process.psutil_wrapper(get_psutil_proc(), 'name')
     assert name is not None
 
 
 def test_psutil_wrapper_simple_fail(aggregator):
     # Load check with empty config
-    process = ProcessCheck(common.CHECK_NAME, {}, {})
-    name = process.psutil_wrapper(get_psutil_proc(), 'blah', None, False)
+    process = ProcessCheck(common.CHECK_NAME, {}, [{}])
+    name = process.psutil_wrapper(get_psutil_proc(), 'blah')
     assert name is None
 
 
 def test_psutil_wrapper_accessors(aggregator):
     # Load check with empty config
-    process = ProcessCheck(common.CHECK_NAME, {}, {})
-    meminfo = process.psutil_wrapper(get_psutil_proc(), 'memory_info', ['rss', 'vms', 'foo'], False)
+    process = ProcessCheck(common.CHECK_NAME, {}, [{}])
+    meminfo = process.psutil_wrapper(get_psutil_proc(), 'memory_info', ['rss', 'vms', 'foo'])
     assert 'rss' in meminfo
     assert 'vms' in meminfo
     assert 'foo' not in meminfo
@@ -91,14 +91,14 @@ def test_psutil_wrapper_accessors(aggregator):
 
 def test_psutil_wrapper_accessors_fail(aggregator):
     # Load check with empty config
-    process = ProcessCheck(common.CHECK_NAME, {}, {})
-    meminfo = process.psutil_wrapper(get_psutil_proc(), 'memory_infoo', ['rss', 'vms'], False)
+    process = ProcessCheck(common.CHECK_NAME, {}, [{}])
+    meminfo = process.psutil_wrapper(get_psutil_proc(), 'memory_infoo', ['rss', 'vms'])
     assert 'rss' not in meminfo
     assert 'vms' not in meminfo
 
 
 @patch('psutil.process_iter', side_effect=[[NamedMockProcess("Process 1")], [NamedMockProcess("Process 2")]])
-def test_process_list_cache(aggregator):
+def test_process_list_cache(aggregator, dd_run_check):
     config = {
         'instances': [{'name': 'python', 'search_string': ['python']}, {'name': 'python', 'search_string': ['python']}]
     }
@@ -106,8 +106,8 @@ def test_process_list_cache(aggregator):
     process2 = ProcessCheck(common.CHECK_NAME, {}, [config['instances'][1]])
 
     with patch('datadog_checks.process.cache.ProcessListCache.reset'):
-        process1.check(config['instances'][0])
-        process2.check(config['instances'][1])
+        dd_run_check(process1)
+        dd_run_check(process2)
 
     # Should always succeed
     assert process1.process_list_cache.elements[0].name() == "Process 1"
@@ -115,7 +115,7 @@ def test_process_list_cache(aggregator):
     assert process2.process_list_cache.elements[0].name() == "Process 1"
 
 
-def test_ad_cache(aggregator):
+def test_ad_cache(aggregator, dd_run_check):
     config = {'instances': [{'name': 'python', 'search_string': ['python'], 'ignore_denied_access': 'false'}]}
     process = ProcessCheck(common.CHECK_NAME, {}, config['instances'])
 
@@ -123,13 +123,13 @@ def test_ad_cache(aggregator):
         raise psutil.AccessDenied()
 
     with patch.object(psutil.Process, 'name', deny_name):
-        with pytest.raises(psutil.AccessDenied):
-            process.check(config['instances'][0])
+        with pytest.raises(Exception):
+            dd_run_check(process)
 
     assert len(process.ad_cache) > 0
 
     # The next run shouldn't throw an exception
-    process.check(config['instances'][0])
+    dd_run_check(process)
     # The ad cache should still be valid
     assert process.should_refresh_ad_cache('python') is False
 
@@ -138,7 +138,7 @@ def test_ad_cache(aggregator):
     process.last_pid_cache_ts = {}
 
     # Shouldn't throw an exception
-    process.check(config['instances'][0])
+    dd_run_check(process)
 
 
 def mock_find_pid(name, search_string, exact_match=True, ignore_ad=True, refresh_ad_cache=True):
@@ -149,7 +149,7 @@ def mock_find_pid(name, search_string, exact_match=True, ignore_ad=True, refresh
     return config_stubs[int(idx)]['mocked_processes']
 
 
-def mock_psutil_wrapper(process, method, accessors, try_sudo, *args, **kwargs):
+def mock_psutil_wrapper(method, accessors):
     if method == 'num_handles':  # win32 only
         return None
     if accessors is None:
@@ -168,24 +168,19 @@ def generate_expected_tags(instance):
 
 
 @patch('psutil.Process', return_value=MockProcess())
-def test_check(mock_process, reset_process_list_cache, aggregator):
-    (minflt, cminflt, majflt, cmajflt) = [1, 2, 3, 4]
-
-    def mock_get_pagefault_stats(pid):
-        return [minflt, cminflt, majflt, cmajflt]
-
-    process = ProcessCheck(common.CHECK_NAME, {}, {})
+def test_check(mock_process, reset_process_list_cache, aggregator, dd_run_check):
     config = common.get_config_stubs()
     for idx in range(len(config)):
         instance = config[idx]['instance']
+        process = ProcessCheck(common.CHECK_NAME, {}, [instance])
         if 'search_string' not in instance.keys():
-            process.check(instance)
+            dd_run_check(process)
         else:
             with patch(
                 'datadog_checks.process.ProcessCheck.find_pids',
                 return_value=mock_find_pid(instance['name'], instance['search_string']),
             ):
-                process.check(instance)
+                dd_run_check(process)
 
         # these are just here to ensure it passes the coverage report.
         # they don't really "test" for anything.
@@ -196,40 +191,40 @@ def test_check(mock_process, reset_process_list_cache, aggregator):
 
 
 @patch('psutil.Process', return_value=MockProcess())
-def test_check_collect_children(mock_process, reset_process_list_cache, aggregator):
+def test_check_collect_children(mock_process, reset_process_list_cache, aggregator, dd_run_check):
     instance = {'name': 'foo', 'pid': 1, 'collect_children': True}
-    process = ProcessCheck(common.CHECK_NAME, {}, {})
-    process.check(instance)
+    process = ProcessCheck(common.CHECK_NAME, {}, [instance])
+    dd_run_check(process)
     aggregator.assert_metric('system.processes.number', value=1, tags=generate_expected_tags(instance))
 
 
 @patch('psutil.Process', return_value=MockProcess())
-def test_check_filter_user(mock_process, reset_process_list_cache, aggregator):
+def test_check_filter_user(mock_process, reset_process_list_cache, aggregator, dd_run_check):
     instance = {'name': 'foo', 'pid': 1, 'user': 'Bob'}
-    process = ProcessCheck(common.CHECK_NAME, {}, {})
+    process = ProcessCheck(common.CHECK_NAME, {}, [instance])
     with patch('datadog_checks.process.ProcessCheck._filter_by_user', return_value={1, 2}):
-        process.check(instance)
+        dd_run_check(process)
 
     aggregator.assert_metric('system.processes.number', value=2, tags=generate_expected_tags(instance))
 
 
-def test_check_missing_pid(aggregator):
+def test_check_missing_pid(aggregator, dd_run_check):
     instance = {'name': 'foo', 'pid_file': '/foo/bar/baz'}
-    process = ProcessCheck(common.CHECK_NAME, {}, {})
-    process.check(instance)
+    process = ProcessCheck(common.CHECK_NAME, {}, [instance])
+    dd_run_check(process)
     aggregator.assert_service_check('process.up', count=1, status=process.CRITICAL)
 
 
-def test_check_missing_process(aggregator, caplog):
+def test_check_missing_process(aggregator, dd_run_check, caplog):
     caplog.set_level(logging.DEBUG)
     instance = {'name': 'foo', 'search_string': ['fooprocess', '/usr/bin/foo'], 'exact_match': False}
-    process = ProcessCheck(common.CHECK_NAME, {}, {})
-    process.check(instance)
+    process = ProcessCheck(common.CHECK_NAME, {}, [instance])
+    dd_run_check(process)
     aggregator.assert_service_check('process.up', count=1, status=process.CRITICAL)
     assert "Unable to find process named ['fooprocess', '/usr/bin/foo'] among processes" in caplog.text
 
 
-def test_check_real_process(aggregator):
+def test_check_real_process(aggregator, dd_run_check):
     "Check that we detect python running (at least this process)"
     from datadog_checks.base.utils.platform import Platform
 
@@ -240,9 +235,9 @@ def test_check_real_process(aggregator):
         'ignored_denied_access': True,
         'thresholds': {'warning': [1, 10], 'critical': [1, 100]},
     }
-    process = ProcessCheck(common.CHECK_NAME, {}, {})
+    process = ProcessCheck(common.CHECK_NAME, {}, [instance])
     expected_tags = generate_expected_tags(instance)
-    process.check(instance)
+    dd_run_check(process)
     for mname in common.PROCESS_METRIC:
         # cases where we don't actually expect some metrics here:
         #  - if io_counters() is not available
@@ -264,12 +259,12 @@ def test_check_real_process(aggregator):
     aggregator.assert_service_check('process.up', count=1, tags=expected_tags + ['process:py'])
 
     # this requires another run
-    process.check(instance)
+    dd_run_check(process)
     aggregator.assert_metric('system.processes.cpu.pct', count=1, tags=expected_tags)
     aggregator.assert_metric('system.processes.cpu.normalized_pct', count=1, tags=expected_tags)
 
 
-def test_check_real_process_regex(aggregator):
+def test_check_real_process_regex(aggregator, dd_run_check):
     "Check to specifically find this python pytest running process using regex."
     from datadog_checks.base.utils.platform import Platform
 
@@ -280,9 +275,9 @@ def test_check_real_process_regex(aggregator):
         'ignored_denied_access': True,
         'thresholds': {'warning': [1, 10], 'critical': [1, 100]},
     }
-    process = ProcessCheck(common.CHECK_NAME, {}, {})
+    process = ProcessCheck(common.CHECK_NAME, {}, [instance])
     expected_tags = generate_expected_tags(instance)
-    process.check(instance)
+    dd_run_check(process)
     for mname in common.PROCESS_METRIC:
         # cases where we don't actually expect some metrics here:
         #  - if io_counters() is not available
@@ -304,12 +299,12 @@ def test_check_real_process_regex(aggregator):
     aggregator.assert_service_check('process.up', count=1, tags=expected_tags + ['process:py'])
 
     # this requires another run
-    process.check(instance)
+    dd_run_check(process)
     aggregator.assert_metric('system.processes.cpu.pct', count=1, tags=expected_tags)
     aggregator.assert_metric('system.processes.cpu.normalized_pct', count=1, tags=expected_tags)
 
 
-def test_relocated_procfs(aggregator):
+def test_relocated_procfs(aggregator, dd_run_check):
     import shutil
     import tempfile
     import uuid
@@ -367,7 +362,7 @@ def test_relocated_procfs(aggregator):
         with patch('socket.AF_PACKET', create=True), patch('sys.platform', 'linux'), patch(
             'psutil._psutil_linux', create=True
         ), patch('psutil._psutil_posix', create=True):
-            process.check(config["instances"][0])
+            dd_run_check(process)
     finally:
         shutil.rmtree(my_procfs)
         psutil.PROCFS_PATH = '/proc'
@@ -378,7 +373,7 @@ def test_relocated_procfs(aggregator):
 
 
 def test_process_service_check(aggregator):
-    process = ProcessCheck(common.CHECK_NAME, {}, {})
+    process = ProcessCheck(common.CHECK_NAME, {}, [{}])
 
     process._process_service_check('warning', 3, {'warning': [4, 6], 'critical': [2, 10]}, [])
     process._process_service_check('no_top_ok', 3, {'warning': [2, float('inf')], 'critical': [2, float('inf')]}, [])

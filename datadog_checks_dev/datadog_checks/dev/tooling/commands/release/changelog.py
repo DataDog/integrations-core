@@ -7,7 +7,7 @@ from datetime import datetime
 from io import StringIO
 
 import click
-from semver import parse_version_info
+from semver import VersionInfo
 
 from ....fs import stream_file_lines, write_file
 from ...constants import CHANGELOG_TYPE_NONE, CHANGELOG_TYPES_ORDERED, get_root
@@ -21,9 +21,10 @@ ChangelogEntry = namedtuple('ChangelogEntry', 'number, title, url, author, autho
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Update the changelog for a check')
-@click.argument('check', autocompletion=complete_testable_checks, callback=validate_check_arg)
+@click.argument('check', shell_complete=complete_testable_checks, callback=validate_check_arg)
 @click.argument('version')
 @click.argument('old_version', required=False)
+@click.option('--end')
 @click.option('--initial', is_flag=True)
 @click.option('--organization', '-r', default='DataDog')
 @click.option('--quiet', '-q', is_flag=True)
@@ -31,9 +32,22 @@ ChangelogEntry = namedtuple('ChangelogEntry', 'number, title, url, author, autho
 @click.option('--output-file', '-o', default='CHANGELOG.md', show_default=True)
 @click.option('--tag-prefix', '-tp', default='v', show_default=True)
 @click.option('--no-semver', '-ns', default=False, is_flag=True)
+@click.option('--exclude-branch', default=None, help="Exclude changes comming from a specific branch")
 @click.pass_context
 def changelog(
-    ctx, check, version, old_version, initial, quiet, dry_run, output_file, tag_prefix, no_semver, organization
+    ctx,
+    check,
+    version,
+    old_version,
+    end,
+    initial,
+    quiet,
+    dry_run,
+    output_file,
+    tag_prefix,
+    no_semver,
+    organization,
+    exclude_branch,
 ):
     """Perform the operations needed to update the changelog.
 
@@ -50,7 +64,7 @@ def changelog(
             'following SemVer and matches the provided tag_prefix and/or tag_pattern.'
         )
 
-    if not no_semver and parse_version_info(version.replace(tag_prefix, '', 1)) <= parse_version_info(
+    if not no_semver and VersionInfo.parse(version.replace(tag_prefix, '', 1)) <= VersionInfo.parse(
         cur_version.replace(tag_prefix, '', 1)
     ):
         abort(f'Current version is {cur_version}, cannot bump to {version}')
@@ -62,7 +76,7 @@ def changelog(
     target_tag = get_release_tag_string(check, cur_version)
 
     # get the diff from HEAD
-    diff_lines = get_commits_since(check, None if initial else target_tag)
+    diff_lines = get_commits_since(check, None if initial else target_tag, end=end, exclude_branch=exclude_branch)
 
     # for each PR get the title, we'll use it to populate the changelog
     pr_numbers = parse_pr_numbers(diff_lines)

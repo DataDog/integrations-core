@@ -6,12 +6,12 @@ from collections import deque
 from copy import deepcopy
 
 import toml
-from appdirs import user_data_dir
 from atomicwrites import atomic_write
+from platformdirs import user_data_dir
 
 from ..fs import ensure_parent_dir_exists, file_exists, read_file
 
-APP_DIR = user_data_dir('dd-checks-dev', '')
+APP_DIR = user_data_dir('dd-checks-dev', False)
 CONFIG_FILE = os.path.join(APP_DIR, 'config.toml')
 
 SECRET_KEYS = {
@@ -40,6 +40,7 @@ DEFAULT_CONFIG = {
         'extras': os.path.join('~', 'dd', 'integrations-extras'),
         'agent': os.path.join('~', 'dd', 'datadog-agent'),
         'marketplace': os.path.join('~', 'dd', 'marketplace'),
+        'integrations': os.path.join('~', 'dd', 'integrations'),
     },
     'agents': {
         'master': {'docker': 'datadog/agent-dev:master', 'local': 'latest'},
@@ -51,7 +52,7 @@ DEFAULT_CONFIG = {
             'api_key': os.getenv('DD_API_KEY'),
             'app_key': os.getenv('DD_APP_KEY'),
             'site': os.getenv('DD_SITE'),
-            'dd_url': os.getenv('DD_DD_URL'),
+            'dd_url': os.getenv('DD_DD_URL', 'https://app.datadoghq.com'),
             'log_url': os.getenv('DD_LOGS_CONFIG_DD_URL'),
         }
     },

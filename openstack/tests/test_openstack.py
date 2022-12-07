@@ -138,10 +138,10 @@ def test_unscoped_from_config():
 
                 assert scope.auth_token == 'fake_token'
                 assert len(scope.project_scope_map) == 1
-                for _, scope in iteritems(scope.project_scope_map):
-                    assert isinstance(scope, OpenStackProjectScope)
-                    assert scope.auth_token == 'fake_token'
-                    assert scope.tenant_id == '263fd9'
+                for _, project_scope in iteritems(scope.project_scope_map):
+                    assert isinstance(project_scope, OpenStackProjectScope)
+                    assert project_scope.auth_token == 'fake_token'
+                    assert project_scope.tenant_id == '263fd9'
 
 
 def test_get_nova_endpoint():

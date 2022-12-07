@@ -5,18 +5,25 @@ from __future__ import division
 
 from copy import deepcopy
 
+from kubeutil import get_connection_info
 from six import iteritems
 
+from datadog_checks.base.checks.kubelet_base.base import urljoin
 from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.base.utils.tagging import tagger
 
-from .common import get_pod_by_uid, is_static_pending_pod, replace_container_rt_prefix
+from .common import get_container_label, get_pod_by_uid, is_static_pending_pod, replace_container_rt_prefix
 
 METRIC_TYPES = ['counter', 'gauge', 'summary']
 
 # container-specific metrics should have all these labels
 PRE_1_16_CONTAINER_LABELS = set(['namespace', 'name', 'image', 'id', 'container_name', 'pod_name'])
 POST_1_16_CONTAINER_LABELS = set(['namespace', 'name', 'image', 'id', 'container', 'pod'])
+
+# Value above which the figure can be discarded because it's an aberrant transient value
+MAX_MEMORY_RSS = 2**63
+
+CADVISOR_METRICS_PATH = '/metrics/cadvisor'
 
 
 class CadvisorPrometheusScraperMixin(object):
@@ -66,14 +73,14 @@ class CadvisorPrometheusScraperMixin(object):
         Create a copy of the instance and set default values.
         This is so the base class can create a scraper_config with the proper values.
         """
+        kubelet_conn_info = get_connection_info()
+        endpoint = kubelet_conn_info.get('url')
+
         cadvisor_instance = deepcopy(instance)
         cadvisor_instance.update(
             {
                 'namespace': self.NAMESPACE,
-                # We need to specify a prometheus_url so the base class can use it as the key for our config_map,
-                # we specify a dummy url that will be replaced in the `check()` function. We append it with "cadvisor"
-                # so the key is different than the kubelet scraper.
-                'prometheus_url': instance.get('cadvisor_metrics_endpoint', 'dummy_url/cadvisor'),
+                'prometheus_url': instance.get('cadvisor_metrics_endpoint', urljoin(endpoint, CADVISOR_METRICS_PATH)),
                 'ignore_metrics': [
                     'container_fs_inodes_free',
                     'container_fs_inodes_total',
@@ -146,36 +153,6 @@ class CadvisorPrometheusScraperMixin(object):
             return True
         return False
 
-    @staticmethod
-    def _get_container_label(labels, l_name):
-        """
-        Iter on all labels to find the label.name equal to the l_name
-        :param labels: list of labels
-        :param l_name: str
-        :return: str or None
-        """
-        if l_name in labels:
-            return labels[l_name]
-
-    def _get_container_id(self, labels):
-        """
-        Should only be called on a container-scoped metric
-        It gets the container id from the podlist using the metrics labels
-
-        :param labels
-        :return str or None
-        """
-        namespace = CadvisorPrometheusScraperMixin._get_container_label(labels, "namespace")
-        # k8s >= 1.16
-        pod_name = CadvisorPrometheusScraperMixin._get_container_label(labels, "pod")
-        container_name = CadvisorPrometheusScraperMixin._get_container_label(labels, "container")
-        # k8s < 1.16
-        if not pod_name:
-            pod_name = CadvisorPrometheusScraperMixin._get_container_label(labels, "pod_name")
-        if not container_name:
-            container_name = CadvisorPrometheusScraperMixin._get_container_label(labels, "container_name")
-        return self.pod_list_utils.get_cid_by_name_tuple((namespace, pod_name, container_name))
-
     def _get_entity_id_if_container_metric(self, labels):
         """
         Checks the labels indicate a container metric,
@@ -190,7 +167,7 @@ class CadvisorPrometheusScraperMixin(object):
                 # If the pod is static, ContainerStatus is unavailable.
                 # Return the pod UID so that we can collect metrics from it later on.
                 return self._get_pod_uid(labels)
-            return self._get_container_id(labels)
+            return self.pod_list_utils.get_cid_by_labels(labels)
 
     def _get_pod_uid(self, labels):
         """
@@ -198,11 +175,11 @@ class CadvisorPrometheusScraperMixin(object):
         :param labels:
         :return: str or None
         """
-        namespace = CadvisorPrometheusScraperMixin._get_container_label(labels, "namespace")
-        pod_name = CadvisorPrometheusScraperMixin._get_container_label(labels, "pod")
+        namespace = get_container_label(labels, "namespace")
+        pod_name = get_container_label(labels, "pod")
         # k8s < 1.16
         if not pod_name:
-            pod_name = CadvisorPrometheusScraperMixin._get_container_label(labels, "pod_name")
+            pod_name = get_container_label(labels, "pod_name")
         return self.pod_list_utils.get_uid_by_name_tuple((namespace, pod_name))
 
     def _get_pod_uid_if_pod_metric(self, labels):
@@ -246,10 +223,10 @@ class CadvisorPrometheusScraperMixin(object):
         :param labels: metric labels: iterable
         :return: list
         """
-        container_name = CadvisorPrometheusScraperMixin._get_container_label(labels, "container")
+        container_name = get_container_label(labels, "container")
         # k8s < 1.16
         if not container_name:
-            container_name = CadvisorPrometheusScraperMixin._get_container_label(labels, "container_name")
+            container_name = get_container_label(labels, "container_name")
         if container_name:
             return ["kube_container_name:%s" % container_name]
         return []
@@ -270,7 +247,7 @@ class CadvisorPrometheusScraperMixin(object):
                 # TODO
                 # metric.Clear()  # Ignore this metric message
                 continue
-            # Sum the counter value accross all contexts
+            # Sum the counter value across all contexts
             if uid not in seen:
                 seen[uid] = sample
             else:
@@ -282,6 +259,25 @@ class CadvisorPrometheusScraperMixin(object):
                 )
                 # TODO
                 # metric.Clear()  # Ignore this metric message
+        return seen
+
+    @staticmethod
+    def _latest_value_by_context(metric, uid_from_labels):
+        """
+        Iterates over all metrics in a metric and keep the last value
+        matching the same uid. Modifies the metric family in place.
+        :param metric: prometheus metric family
+        :param uid_from_labels: function mapping a metric.label to a unique context id
+        :return: dict with uid as keys, metric object references as values
+        """
+        seen = {}
+        for sample in metric.samples:
+            uid = uid_from_labels(sample[OpenMetricsBaseCheck.SAMPLE_LABELS])
+            if not uid:
+                # TODO
+                # metric.Clear()  # Ignore this metric message
+                continue
+            seen[uid] = sample
         return seen
 
     def _process_container_metric(self, type, metric_name, metric, scraper_config, labels=None):
@@ -344,6 +340,11 @@ class CadvisorPrometheusScraperMixin(object):
 
         samples = self._sum_values_by_context(metric, self._get_pod_uid_if_pod_metric)
         for pod_uid, sample in iteritems(samples):
+            pod = get_pod_by_uid(pod_uid, self.pod_list)
+            namespace = pod.get('metadata', {}).get('namespace', None)
+            if self.pod_list_utils.is_namespace_excluded(namespace):
+                continue
+
             if '.network.' in metric_name and self._is_pod_host_networked(pod_uid):
                 continue
             tags = tagger.tag('kubernetes_pod_uid://%s' % pod_uid, tagger.HIGH)
@@ -371,7 +372,7 @@ class CadvisorPrometheusScraperMixin(object):
 
         samples = self._sum_values_by_context(metric, self._get_entity_id_if_container_metric)
         for c_id, sample in iteritems(samples):
-            c_name = self._get_container_label(sample[self.SAMPLE_LABELS], 'name')
+            c_name = get_container_label(sample[self.SAMPLE_LABELS], 'name')
             if not c_name:
                 continue
             pod_uid = self._get_pod_uid(sample[self.SAMPLE_LABELS])
@@ -415,7 +416,7 @@ class CadvisorPrometheusScraperMixin(object):
         and optionally checks in the given cache if there's a usage
         for each sample in the metric and reports the usage_pct
         """
-        samples = self._sum_values_by_context(metric, self._get_entity_id_if_container_metric)
+        samples = self._latest_value_by_context(metric, self._get_entity_id_if_container_metric)
         for c_id, sample in iteritems(samples):
             limit = sample[self.SAMPLE_VALUE]
             pod_uid = self._get_pod_uid(sample[self.SAMPLE_LABELS])
@@ -431,7 +432,7 @@ class CadvisorPrometheusScraperMixin(object):
                 self.gauge(m_name, limit, tags)
 
             if pct_m_name and limit > 0:
-                c_name = self._get_container_label(sample[self.SAMPLE_LABELS], 'name')
+                c_name = get_container_label(sample[self.SAMPLE_LABELS], 'name')
                 if not c_name:
                     continue
                 usage, tags = cache.get(c_name, (None, None))
@@ -452,7 +453,7 @@ class CadvisorPrometheusScraperMixin(object):
             metric.samples[i] = (
                 sample[self.SAMPLE_NAME],
                 sample[self.SAMPLE_LABELS],
-                sample[self.SAMPLE_VALUE] * 10.0 ** 9,
+                sample[self.SAMPLE_VALUE] * 10.0**9,
             )
         self._process_container_metric('rate', metric_name, metric, scraper_config)
 
@@ -559,6 +560,8 @@ class CadvisorPrometheusScraperMixin(object):
 
     def container_memory_rss(self, metric, scraper_config):
         metric_name = scraper_config['namespace'] + '.memory.rss'
+        # Filter out aberrant values
+        metric.samples = [sample for sample in metric.samples if sample[self.SAMPLE_VALUE] < MAX_MEMORY_RSS]
         self._process_container_metric('gauge', metric_name, metric, scraper_config)
 
     def container_memory_swap(self, metric, scraper_config):

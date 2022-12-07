@@ -1,48 +1,60 @@
 {
-  "display_name": "RethinkDB",
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "name": "rethinkdb",
-  "process_signatures": [
-    "rethinkdb"
-  ],
-  "metric_prefix": "rethinkdb.",
-  "metric_to_check": "rethinkdb.config.servers",
-  "creates_events": false,
-  "short_description": "Collect status, performance and other metrics from a RethinkDB cluster.",
-  "guid": "a09f3ed3-c947-413c-a9c6-0dcb641ea890",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "public_title": "Datadog-RethinkDB Integration",
-  "categories": [
-    "data store",
-    "log collection"
-  ],
-  "type": "check",
-  "is_public": true,
-  "integration_id": "rethinkdb",
+  "manifest_version": "2.0.0",
+  "app_uuid": "f8348717-0ba8-4d42-b856-983e0cde0314",
+  "app_id": "rethinkdb",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Collect status, performance and other metrics from a RethinkDB cluster.",
+    "title": "RethinkDB",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Data Store",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
-    },
-    "docs": {
-      "spec": "assets/docs/spec.yaml"
+    "integration": {
+      "source_type_name": "RethinkDB",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "rethinkdb.",
+        "check": "rethinkdb.config.servers",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      },
+      "process_signatures": [
+        "rethinkdb"
+      ]
     },
     "dashboards": {
       "RethinkDB Overview": "assets/dashboards/overview.json"
     },
-    "monitors": {},
     "saved_views": {
       "rethinkdb_processes": "assets/saved_views/rethinkdb_processes.json"
     },
-    "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "rethinkdb"
-    },
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

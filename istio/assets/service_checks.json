@@ -15,6 +15,21 @@
         "description": "Returns `CRITICAL` if the check cannot access the metrics endpoint. Returns `OK` otherwise."
     },
     {
+        "agent_version": "7.30.0",
+        "integration": "Istio",
+        "check": "istio.openmetrics.health",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "groups": [
+            "host",
+            "endpoint"
+        ],
+        "name": "OpenMetrics endpoint health",
+        "description": "Returns `CRITICAL` if the Agent is unable to connect to the OpenMetrics endpoint, otherwise returns `OK`."
+    },
+    {
         "agent_version": "6.20.0",
         "integration": "Istio",
         "check": "istio.pilot.prometheus.health",

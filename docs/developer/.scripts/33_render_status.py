@@ -5,7 +5,9 @@ from datadog_checks.dev.tooling.utils import (
     get_available_logs_integrations,
     get_check_file,
     get_default_config_spec,
-    get_default_docs_spec,
+    get_hatch_file,
+    get_testable_checks,
+    get_tox_file,
     get_valid_checks,
     get_valid_integrations,
     has_logs,
@@ -16,7 +18,9 @@ from datadog_checks.dev.tooling.utils import (
     has_process_signature,
     has_saved_views,
     has_recommended_monitor,
-    is_tile_only, is_logs_only, get_available_recommended_monitors_integrations,
+    is_tile_only,
+    is_logs_only,
+    get_available_recommended_monitors_integrations,
 )
 
 MARKER = '<docs-insert-status>'
@@ -35,13 +39,14 @@ def patch(lines):
         render_logs_progress,
         render_recommended_monitors_progress,
         render_config_spec_progress,
-        render_docs_spec_progress,
         render_e2e_progress,
+        render_latest_version_progress,
         render_config_validation_progress,
         render_metadata_progress,
         render_process_signatures_progress,
         render_check_signatures_progress,
         render_saved_views_progress,
+        render_hatch_migration_progress,
     ):
         new_lines.extend(renderer())
         new_lines.append('')
@@ -53,22 +58,15 @@ def patch(lines):
     return new_lines
 
 
-def _spec_progress(spec_type):
-    if spec_type == 'config':
-        name = 'Config'
-        func = get_default_config_spec
-    elif spec_type == 'docs':
-        name = 'Docs'
-        func = get_default_docs_spec
-
+def render_config_spec_progress():
     valid_checks = [x for x in sorted(get_valid_checks()) if not is_tile_only(x)]
     total_checks = len(valid_checks)
     checks_with_spec = 0
 
-    lines = [f'## {name} specs', '', None, '', '??? check "Completed"']
+    lines = ['## Config specs', '', None, '', '??? check "Completed"']
 
     for check in valid_checks:
-        spec_path = func(check)
+        spec_path = get_default_config_spec(check)
         if os.path.isfile(spec_path):
             checks_with_spec += 1
             status = 'X'
@@ -82,14 +80,6 @@ def _spec_progress(spec_type):
     lines[2] = f'[={formatted_percent}% "{formatted_percent}%"]'
     lines[4] = f'??? check "Completed {checks_with_spec}/{total_checks}"'
     return lines
-
-
-def render_config_spec_progress():
-    return _spec_progress('config')
-
-
-def render_docs_spec_progress():
-    return _spec_progress('docs')
 
 
 def render_dashboard_progress():
@@ -204,6 +194,44 @@ def render_e2e_progress():
     return lines
 
 
+def render_latest_version_progress():
+    valid_checks = sorted(get_testable_checks())
+    total_checks = len(valid_checks)
+    supported_checks = 0
+
+    lines = ['## New version support', '', None, '', '??? check "Completed"']
+
+    for check in valid_checks:
+        skip_check = False
+
+        hatch_config_file = get_hatch_file(check)
+        tox_config_file = get_tox_file(check)
+        config_file_path = hatch_config_file if os.path.isfile(hatch_config_file) else tox_config_file
+        with open(config_file_path) as config_file:
+            for line in config_file:
+                if line.startswith(('[testenv:latest]', '[envs.latest]', 'latest-env = true')):
+                    supported_checks += 1
+                    status = 'X'
+                    break
+                elif line.startswith('# SKIP-LATEST-VERSION-CHECK'):
+                    skip_check = True
+                    break
+            else:
+                status = ' '
+
+        if skip_check:
+            total_checks -= 1
+            continue
+
+        lines.append(f'    - [{status}] {check}')
+
+    percent = supported_checks / total_checks * 100
+    formatted_percent = f'{percent:.2f}'
+    lines[2] = f'[={formatted_percent}% "{formatted_percent}%"]'
+    lines[4] = f'??? check "Completed {supported_checks}/{total_checks}"'
+    return lines
+
+
 def render_process_signatures_progress():
     valid_checks = sorted([c for c in get_valid_checks() if c not in PROCESS_SIGNATURE_EXCLUDE])
     total_checks = len(valid_checks)
@@ -313,4 +341,27 @@ def render_config_validation_progress():
     formatted_percent = f'{percent:.2f}'
     lines[2] = f'[={formatted_percent}% "{formatted_percent}%"]'
     lines[4] = f'??? check "Completed {checks_with_config_validation}/{total_checks}"'
+    return lines
+
+
+def render_hatch_migration_progress():
+    valid_checks = sorted(get_valid_checks())
+    total_checks = len(valid_checks)
+    checks_migrated = 0
+
+    lines = ['## Hatch migration', '', None, '', '??? check "Completed"']
+
+    for check in valid_checks:
+        if os.path.exists(get_hatch_file(check)):
+            status = 'X'
+            checks_migrated += 1
+        else:
+            status = ' '
+
+        lines.append(f'    - [{status}] {check}')
+
+    percent = checks_migrated / total_checks * 100
+    formatted_percent = f'{percent:.2f}'
+    lines[2] = f'[={formatted_percent}% "{formatted_percent}%"]'
+    lines[4] = f'??? check "Completed {checks_migrated}/{total_checks}"'
     return lines

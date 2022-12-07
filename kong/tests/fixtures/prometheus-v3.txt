@@ -1,0 +1,123 @@
+# HELP kong_bandwidth_bytes Total bandwidth (ingress/egress) throughput in bytes
+# TYPE kong_bandwidth_bytes counter
+kong_bandwidth_bytes{service="google",route="google.route-1",direction="egress",consumer=""} 264
+kong_bandwidth_bytes{service="google",route="google.route-1",direction="ingress",consumer=""} 93
+# HELP kong_datastore_reachable Datastore reachable from Kong, 0 is unreachable
+# TYPE kong_datastore_reachable gauge
+kong_datastore_reachable 1
+# HELP kong_http_requests_total HTTP status codes per consumer/service/route in Kong
+# TYPE kong_http_requests_total counter
+kong_http_requests_total{service="google",route="google.route-1",code="200",source="service",consumer=""} 1
+# HELP kong_node_info Kong Node metadata information
+# TYPE kong_node_info gauge
+kong_node_info{node_id="849373c5-45c1-4c1d-b595-fdeaea6daed8",version="3.0.0"} 1
+# HELP kong_kong_latency_ms Latency added by Kong and enabled plugins for each service/route in Kong
+# TYPE kong_kong_latency_ms histogram
+kong_kong_latency_ms_bucket{service="google",route="google.route-1",le="5"} 1
+kong_kong_latency_ms_bucket{service="google",route="google.route-1",le="7"} 1
+kong_kong_latency_ms_bucket{service="google",route="google.route-1",le="10"} 1
+kong_kong_latency_ms_bucket{service="google",route="google.route-1",le="15"} 1
+kong_kong_latency_ms_bucket{service="google",route="google.route-1",le="20"} 1
+kong_kong_latency_ms_bucket{service="google",route="google.route-1",le="30"} 1
+kong_kong_latency_ms_bucket{service="google",route="google.route-1",le="50"} 1
+kong_kong_latency_ms_bucket{service="google",route="google.route-1",le="75"} 1
+kong_kong_latency_ms_bucket{service="google",route="google.route-1",le="100"} 1
+kong_kong_latency_ms_bucket{service="google",route="google.route-1",le="200"} 1
+kong_kong_latency_ms_bucket{service="google",route="google.route-1",le="500"} 1
+kong_kong_latency_ms_bucket{service="google",route="google.route-1",le="750"} 1
+kong_kong_latency_ms_bucket{service="google",route="google.route-1",le="1000"} 1
+kong_kong_latency_ms_bucket{service="google",route="google.route-1",le="+Inf"} 1
+kong_kong_latency_ms_count{service="google",route="google.route-1"} 1
+kong_kong_latency_ms_sum{service="google",route="google.route-1"} 4
+# HELP kong_memory_lua_shared_dict_bytes Allocated slabs in bytes in a shared_dict
+# TYPE kong_memory_lua_shared_dict_bytes gauge
+kong_memory_lua_shared_dict_bytes{node_id="849373c5-45c1-4c1d-b595-fdeaea6daed8",shared_dict="kong",kong_subsystem="http"} 40960
+kong_memory_lua_shared_dict_bytes{node_id="849373c5-45c1-4c1d-b595-fdeaea6daed8",shared_dict="kong_cluster_events",kong_subsystem="http"} 40960
+kong_memory_lua_shared_dict_bytes{node_id="849373c5-45c1-4c1d-b595-fdeaea6daed8",shared_dict="kong_core_db_cache",kong_subsystem="http"} 823296
+kong_memory_lua_shared_dict_bytes{node_id="849373c5-45c1-4c1d-b595-fdeaea6daed8",shared_dict="kong_core_db_cache_miss",kong_subsystem="http"} 90112
+kong_memory_lua_shared_dict_bytes{node_id="849373c5-45c1-4c1d-b595-fdeaea6daed8",shared_dict="kong_db_cache",kong_subsystem="http"} 794624
+kong_memory_lua_shared_dict_bytes{node_id="849373c5-45c1-4c1d-b595-fdeaea6daed8",shared_dict="kong_db_cache_miss",kong_subsystem="http"} 86016
+kong_memory_lua_shared_dict_bytes{node_id="849373c5-45c1-4c1d-b595-fdeaea6daed8",shared_dict="kong_healthchecks",kong_subsystem="http"} 40960
+kong_memory_lua_shared_dict_bytes{node_id="849373c5-45c1-4c1d-b595-fdeaea6daed8",shared_dict="kong_locks",kong_subsystem="http"} 61440
+kong_memory_lua_shared_dict_bytes{node_id="849373c5-45c1-4c1d-b595-fdeaea6daed8",shared_dict="kong_process_events",kong_subsystem="http"} 40960
+kong_memory_lua_shared_dict_bytes{node_id="849373c5-45c1-4c1d-b595-fdeaea6daed8",shared_dict="kong_rate_limiting_counters",kong_subsystem="http"} 86016
+kong_memory_lua_shared_dict_bytes{node_id="849373c5-45c1-4c1d-b595-fdeaea6daed8",shared_dict="prometheus_metrics",kong_subsystem="http"} 57344
+# HELP kong_memory_lua_shared_dict_total_bytes Total capacity in bytes of a shared_dict
+# TYPE kong_memory_lua_shared_dict_total_bytes gauge
+kong_memory_lua_shared_dict_total_bytes{node_id="849373c5-45c1-4c1d-b595-fdeaea6daed8",shared_dict="kong",kong_subsystem="http"} 5242880
+kong_memory_lua_shared_dict_total_bytes{node_id="849373c5-45c1-4c1d-b595-fdeaea6daed8",shared_dict="kong_cluster_events",kong_subsystem="http"} 5242880
+kong_memory_lua_shared_dict_total_bytes{node_id="849373c5-45c1-4c1d-b595-fdeaea6daed8",shared_dict="kong_core_db_cache",kong_subsystem="http"} 134217728
+kong_memory_lua_shared_dict_total_bytes{node_id="849373c5-45c1-4c1d-b595-fdeaea6daed8",shared_dict="kong_core_db_cache_miss",kong_subsystem="http"} 12582912
+kong_memory_lua_shared_dict_total_bytes{node_id="849373c5-45c1-4c1d-b595-fdeaea6daed8",shared_dict="kong_db_cache",kong_subsystem="http"} 134217728
+kong_memory_lua_shared_dict_total_bytes{node_id="849373c5-45c1-4c1d-b595-fdeaea6daed8",shared_dict="kong_db_cache_miss",kong_subsystem="http"} 12582912
+kong_memory_lua_shared_dict_total_bytes{node_id="849373c5-45c1-4c1d-b595-fdeaea6daed8",shared_dict="kong_healthchecks",kong_subsystem="http"} 5242880
+kong_memory_lua_shared_dict_total_bytes{node_id="849373c5-45c1-4c1d-b595-fdeaea6daed8",shared_dict="kong_locks",kong_subsystem="http"} 8388608
+kong_memory_lua_shared_dict_total_bytes{node_id="849373c5-45c1-4c1d-b595-fdeaea6daed8",shared_dict="kong_process_events",kong_subsystem="http"} 5242880
+kong_memory_lua_shared_dict_total_bytes{node_id="849373c5-45c1-4c1d-b595-fdeaea6daed8",shared_dict="kong_rate_limiting_counters",kong_subsystem="http"} 12582912
+kong_memory_lua_shared_dict_total_bytes{node_id="849373c5-45c1-4c1d-b595-fdeaea6daed8",shared_dict="prometheus_metrics",kong_subsystem="http"} 5242880
+# HELP kong_memory_workers_lua_vms_bytes Allocated bytes in worker Lua VM
+# TYPE kong_memory_workers_lua_vms_bytes gauge
+kong_memory_workers_lua_vms_bytes{node_id="849373c5-45c1-4c1d-b595-fdeaea6daed8",pid="21173",kong_subsystem="http"} 64329517
+kong_memory_workers_lua_vms_bytes{node_id="849373c5-45c1-4c1d-b595-fdeaea6daed8",pid="21174",kong_subsystem="http"} 46314808
+kong_memory_workers_lua_vms_bytes{node_id="849373c5-45c1-4c1d-b595-fdeaea6daed8",pid="21175",kong_subsystem="http"} 46681598
+kong_memory_workers_lua_vms_bytes{node_id="849373c5-45c1-4c1d-b595-fdeaea6daed8",pid="21176",kong_subsystem="http"} 46637209
+kong_memory_workers_lua_vms_bytes{node_id="849373c5-45c1-4c1d-b595-fdeaea6daed8",pid="21177",kong_subsystem="http"} 46234336
+kong_memory_workers_lua_vms_bytes{node_id="849373c5-45c1-4c1d-b595-fdeaea6daed8",pid="21178",kong_subsystem="http"} 46180420
+kong_memory_workers_lua_vms_bytes{node_id="849373c5-45c1-4c1d-b595-fdeaea6daed8",pid="21179",kong_subsystem="http"} 46161105
+kong_memory_workers_lua_vms_bytes{node_id="849373c5-45c1-4c1d-b595-fdeaea6daed8",pid="21180",kong_subsystem="http"} 46366877
+# HELP kong_nginx_connections_total Number of connections by subsystem
+# TYPE kong_nginx_connections_total gauge
+kong_nginx_connections_total{node_id="849373c5-45c1-4c1d-b595-fdeaea6daed8",subsystem="http",state="accepted"} 296
+kong_nginx_connections_total{node_id="849373c5-45c1-4c1d-b595-fdeaea6daed8",subsystem="http",state="active"} 9
+kong_nginx_connections_total{node_id="849373c5-45c1-4c1d-b595-fdeaea6daed8",subsystem="http",state="handled"} 296
+kong_nginx_connections_total{node_id="849373c5-45c1-4c1d-b595-fdeaea6daed8",subsystem="http",state="reading"} 0
+kong_nginx_connections_total{node_id="849373c5-45c1-4c1d-b595-fdeaea6daed8",subsystem="http",state="total"} 296
+kong_nginx_connections_total{node_id="849373c5-45c1-4c1d-b595-fdeaea6daed8",subsystem="http",state="waiting"} 0
+kong_nginx_connections_total{node_id="849373c5-45c1-4c1d-b595-fdeaea6daed8",subsystem="http",state="writing"} 9
+# HELP kong_nginx_metric_errors_total Number of nginx-lua-prometheus errors
+# TYPE kong_nginx_metric_errors_total counter
+kong_nginx_metric_errors_total 0
+# HELP kong_nginx_requests_total Total number of requests
+# TYPE kong_nginx_requests_total gauge
+kong_nginx_requests_total{node_id="849373c5-45c1-4c1d-b595-fdeaea6daed8",subsystem="http"} 296
+# HELP kong_nginx_timers Number of Nginx timers
+# TYPE kong_nginx_timers gauge
+kong_nginx_timers{state="pending"} 1
+kong_nginx_timers{state="running"} 39
+# HELP kong_request_latency_ms Total latency incurred during requests for each service/route in Kong
+# TYPE kong_request_latency_ms histogram
+kong_request_latency_ms_bucket{service="google",route="google.route-1",le="25"} 1
+kong_request_latency_ms_bucket{service="google",route="google.route-1",le="50"} 1
+kong_request_latency_ms_bucket{service="google",route="google.route-1",le="80"} 1
+kong_request_latency_ms_bucket{service="google",route="google.route-1",le="100"} 1
+kong_request_latency_ms_bucket{service="google",route="google.route-1",le="250"} 1
+kong_request_latency_ms_bucket{service="google",route="google.route-1",le="400"} 1
+kong_request_latency_ms_bucket{service="google",route="google.route-1",le="700"} 1
+kong_request_latency_ms_bucket{service="google",route="google.route-1",le="1000"} 1
+kong_request_latency_ms_bucket{service="google",route="google.route-1",le="2000"} 1
+kong_request_latency_ms_bucket{service="google",route="google.route-1",le="5000"} 1
+kong_request_latency_ms_bucket{service="google",route="google.route-1",le="10000"} 1
+kong_request_latency_ms_bucket{service="google",route="google.route-1",le="30000"} 1
+kong_request_latency_ms_bucket{service="google",route="google.route-1",le="60000"} 1
+kong_request_latency_ms_bucket{service="google",route="google.route-1",le="+Inf"} 1
+kong_request_latency_ms_count{service="google",route="google.route-1"} 1
+kong_request_latency_ms_sum{service="google",route="google.route-1"} 6
+# HELP kong_upstream_latency_ms Latency added by upstream response for each service/route in Kong
+# TYPE kong_upstream_latency_ms histogram
+kong_upstream_latency_ms_bucket{service="google",route="google.route-1",le="25"} 1
+kong_upstream_latency_ms_bucket{service="google",route="google.route-1",le="50"} 1
+kong_upstream_latency_ms_bucket{service="google",route="google.route-1",le="80"} 1
+kong_upstream_latency_ms_bucket{service="google",route="google.route-1",le="100"} 1
+kong_upstream_latency_ms_bucket{service="google",route="google.route-1",le="250"} 1
+kong_upstream_latency_ms_bucket{service="google",route="google.route-1",le="400"} 1
+kong_upstream_latency_ms_bucket{service="google",route="google.route-1",le="700"} 1
+kong_upstream_latency_ms_bucket{service="google",route="google.route-1",le="1000"} 1
+kong_upstream_latency_ms_bucket{service="google",route="google.route-1",le="2000"} 1
+kong_upstream_latency_ms_bucket{service="google",route="google.route-1",le="5000"} 1
+kong_upstream_latency_ms_bucket{service="google",route="google.route-1",le="10000"} 1
+kong_upstream_latency_ms_bucket{service="google",route="google.route-1",le="30000"} 1
+kong_upstream_latency_ms_bucket{service="google",route="google.route-1",le="60000"} 1
+kong_upstream_latency_ms_bucket{service="google",route="google.route-1",le="+Inf"} 1
+kong_upstream_latency_ms_count{service="google",route="google.route-1"} 1
+kong_upstream_latency_ms_sum{service="google",route="google.route-1"} 2
+

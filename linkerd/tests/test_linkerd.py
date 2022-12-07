@@ -31,14 +31,14 @@ def get_response(filename):
     return response
 
 
-def test_linkerd(aggregator):
+def test_linkerd(aggregator, dd_run_check):
     """
     Test the full check
     """
     check = LinkerdCheck('linkerd', {}, [MOCK_INSTANCE])
     with requests_mock.Mocker() as metric_request:
         metric_request.get('http://fake.tld/prometheus', text=get_response('linkerd.txt'))
-        check.check(MOCK_INSTANCE)
+        dd_run_check(check)
 
     for metric in LINKERD_FIXTURE_VALUES:
         aggregator.assert_metric(metric, LINKERD_FIXTURE_VALUES[metric])
@@ -52,11 +52,11 @@ def test_linkerd(aggregator):
     )
 
 
-def test_linkerd_v2(aggregator):
+def test_linkerd_v2(aggregator, dd_run_check):
     check = LinkerdCheck('linkerd', {}, [MOCK_INSTANCE])
     with requests_mock.Mocker() as metric_request:
         metric_request.get('http://fake.tld/prometheus', text=get_response('linkerd_v2.txt'))
-        check.check(MOCK_INSTANCE)
+        dd_run_check(check)
 
     for metric_name, metric_type in EXPECTED_METRICS_V2.items():
         aggregator.assert_metric(metric_name, metric_type=metric_type)
@@ -84,19 +84,22 @@ def test_linkerd_v2_new(aggregator, dd_run_check, mock_http_response):
     )
 
 
-def test_openmetrics_error(monkeypatch):
+def test_openmetrics_error(monkeypatch, dd_run_check):
     check = LinkerdCheck('linkerd', {}, [MOCK_INSTANCE])
     with requests_mock.Mocker() as metric_request:
         metric_request.get('http://fake.tld/prometheus', exc="Exception")
         with pytest.raises(Exception):
-            check.check(MOCK_INSTANCE)
+            dd_run_check(check)
 
 
 @pytest.mark.e2e
 def test_e2e(dd_agent_check):
     aggregator = dd_agent_check(rate=True)
     for metric_name, metric_type in EXPECTED_METRICS_V2_E2E.items():
-        aggregator.assert_metric(metric_name, metric_type=metric_type)
+        if metric_name == 'linkerd.route.actual_request_total':
+            aggregator.assert_metric(metric_name, metric_type=metric_type, at_least=0)
+        else:
+            aggregator.assert_metric(metric_name, metric_type=metric_type)
     aggregator.assert_all_metrics_covered()
 
     aggregator.assert_service_check('linkerd.prometheus.health', status=LinkerdCheck.OK, count=2)

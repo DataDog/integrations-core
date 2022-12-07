@@ -13,7 +13,7 @@ from ..console import CONTEXT_SETTINGS, abort, echo_info, echo_success, echo_wai
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Build a wheel for a check')
-@click.argument('check', autocompletion=complete_testable_checks)
+@click.argument('check', shell_complete=complete_testable_checks)
 @click.option('--sdist', '-s', is_flag=True)
 def build(check, sdist):
     """Build a wheel for a check as it is on the repo HEAD"""

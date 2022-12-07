@@ -4,7 +4,7 @@ version: '3'
 # https://clickhouse.yandex/docs/en/operations/table_engines/replication/#creating-replicated-tables
 services:
   clickhouse-01:
-    image: yandex/clickhouse-server:${CLICKHOUSE_VERSION}
+    image: ${CLICKHOUSE_REPOSITORY}:${CLICKHOUSE_VERSION}
     hostname: clickhouse-01
     container_name: clickhouse-01
     cap_add:
@@ -16,9 +16,12 @@ services:
         soft: 262144
         hard: 262144
     ports:
-      - "8127:8123"
+      - "8128:8123"
       - "9001:9000"
     volumes:
+      - ./override_configs/zookeeper.xml:/etc/clickhouse-server/config.d/zookeeper.xml
+      - ./override_configs/remote_servers.xml:/etc/clickhouse-server/config.d/remote_servers.xml
+      - ./override_configs/compression.xml:/etc/clickhouse-server/config.d/compression.xml
       - ./metrika.xml:/etc/metrika.xml
       - ./macros/macros-01.xml:/etc/clickhouse-server/config.d/macros.xml
       - ./users.xml:/etc/clickhouse-server/users.d/users.xml
@@ -31,7 +34,7 @@ services:
       - clickhouse-network
 
   clickhouse-02:
-    image: yandex/clickhouse-server:${CLICKHOUSE_VERSION}
+    image: ${CLICKHOUSE_REPOSITORY}:${CLICKHOUSE_VERSION}
     hostname: clickhouse-02
     container_name: clickhouse-02
     cap_add:
@@ -43,9 +46,12 @@ services:
         soft: 262144
         hard: 262144
     ports:
-      - "8128:8123"
+      - "8129:8123"
       - "9002:9000"
     volumes:
+      - ./override_configs/zookeeper.xml:/etc/clickhouse-server/config.d/zookeeper.xml
+      - ./override_configs/remote_servers.xml:/etc/clickhouse-server/config.d/remote_servers.xml
+      - ./override_configs/compression.xml:/etc/clickhouse-server/config.d/compression.xml
       - ./metrika.xml:/etc/metrika.xml
       - ./macros/macros-02.xml:/etc/clickhouse-server/config.d/macros.xml
       - ./users.xml:/etc/clickhouse-server/users.d/users.xml
@@ -56,7 +62,7 @@ services:
       - clickhouse-network
 
   clickhouse-03:
-    image: yandex/clickhouse-server:${CLICKHOUSE_VERSION}
+    image: ${CLICKHOUSE_REPOSITORY}:${CLICKHOUSE_VERSION}
     hostname: clickhouse-03
     container_name: clickhouse-03
     cap_add:
@@ -68,9 +74,12 @@ services:
         soft: 262144
         hard: 262144
     ports:
-      - "8129:8123"
+      - "8130:8123"
       - "9003:9000"
     volumes:
+      - ./override_configs/zookeeper.xml:/etc/clickhouse-server/config.d/zookeeper.xml
+      - ./override_configs/remote_servers.xml:/etc/clickhouse-server/config.d/remote_servers.xml
+      - ./override_configs/compression.xml:/etc/clickhouse-server/config.d/compression.xml
       - ./metrika.xml:/etc/metrika.xml
       - ./macros/macros-03.xml:/etc/clickhouse-server/config.d/macros.xml
       - ./users.xml:/etc/clickhouse-server/users.d/users.xml
@@ -81,7 +90,7 @@ services:
       - clickhouse-network
 
   clickhouse-04:
-    image: yandex/clickhouse-server:${CLICKHOUSE_VERSION}
+    image: ${CLICKHOUSE_REPOSITORY}:${CLICKHOUSE_VERSION}
     hostname: clickhouse-04
     container_name: clickhouse-04
     cap_add:
@@ -93,9 +102,12 @@ services:
         soft: 262144
         hard: 262144
     ports:
-      - "8130:8123"
+      - "8131:8123"
       - "9004:9000"
     volumes:
+      - ./override_configs/zookeeper.xml:/etc/clickhouse-server/config.d/zookeeper.xml
+      - ./override_configs/remote_servers.xml:/etc/clickhouse-server/config.d/remote_servers.xml
+      - ./override_configs/compression.xml:/etc/clickhouse-server/config.d/compression.xml
       - ./metrika.xml:/etc/metrika.xml
       - ./macros/macros-04.xml:/etc/clickhouse-server/config.d/macros.xml
       - ./users.xml:/etc/clickhouse-server/users.d/users.xml
@@ -106,7 +118,7 @@ services:
       - clickhouse-network
 
   clickhouse-05:
-    image: yandex/clickhouse-server:${CLICKHOUSE_VERSION}
+    image: ${CLICKHOUSE_REPOSITORY}:${CLICKHOUSE_VERSION}
     hostname: clickhouse-05
     container_name: clickhouse-05
     cap_add:
@@ -118,9 +130,12 @@ services:
         soft: 262144
         hard: 262144
     ports:
-      - "8131:8123"
+      - "8132:8123"
       - "9005:9000"
     volumes:
+      - ./override_configs/zookeeper.xml:/etc/clickhouse-server/config.d/zookeeper.xml
+      - ./override_configs/remote_servers.xml:/etc/clickhouse-server/config.d/remote_servers.xml
+      - ./override_configs/compression.xml:/etc/clickhouse-server/config.d/compression.xml
       - ./metrika.xml:/etc/metrika.xml
       - ./macros/macros-05.xml:/etc/clickhouse-server/config.d/macros.xml
       - ./users.xml:/etc/clickhouse-server/users.d/users.xml
@@ -131,7 +146,7 @@ services:
       - clickhouse-network
 
   clickhouse-06:
-    image: yandex/clickhouse-server:${CLICKHOUSE_VERSION}
+    image: ${CLICKHOUSE_REPOSITORY}:${CLICKHOUSE_VERSION}
     hostname: clickhouse-06
     container_name: clickhouse-06
     cap_add:
@@ -143,9 +158,12 @@ services:
         soft: 262144
         hard: 262144
     ports:
-      - "8132:8123"
+      - "8133:8123"
       - "9006:9000"
     volumes:
+      - ./override_configs/zookeeper.xml:/etc/clickhouse-server/config.d/zookeeper.xml
+      - ./override_configs/remote_servers.xml:/etc/clickhouse-server/config.d/remote_servers.xml
+      - ./override_configs/compression.xml:/etc/clickhouse-server/config.d/compression.xml
       - ./metrika.xml:/etc/metrika.xml
       - ./macros/macros-06.xml:/etc/clickhouse-server/config.d/macros.xml
       - ./users.xml:/etc/clickhouse-server/users.d/users.xml

@@ -2,20 +2,26 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import socket
-import time
-from concurrent.futures.thread import ThreadPoolExecutor
 
 import mock
 import psycopg2
 import pytest
 from semver import VersionInfo
 
-from datadog_checks.base.utils.serialization import json
 from datadog_checks.postgres import PostgreSql
-from datadog_checks.postgres.statement_samples import PostgresStatementSamples
 from datadog_checks.postgres.util import PartialFormatter, fmt
 
-from .common import DB_NAME, HOST, PORT, POSTGRES_VERSION, check_bgw_metrics, check_common_metrics
+from .common import (
+    COMMON_METRICS,
+    DB_NAME,
+    DBM_MIGRATED_METRICS,
+    HOST,
+    PORT,
+    POSTGRES_VERSION,
+    check_bgw_metrics,
+    check_common_metrics,
+    requires_static_version,
+)
 from .utils import requires_over_10
 
 CONNECTION_METRICS = ['postgresql.max_connections', 'postgresql.percent_usage_connections']
@@ -25,39 +31,17 @@ ACTIVITY_METRICS = [
     'postgresql.transactions.idle_in_transaction',
     'postgresql.active_queries',
     'postgresql.waiting_queries',
-]
-
-STATEMENT_METRICS = [
-    'postgresql.queries.count',
-    'postgresql.queries.time',
-    'postgresql.queries.rows',
-    'postgresql.queries.shared_blks_hit',
-    'postgresql.queries.shared_blks_read',
-    'postgresql.queries.shared_blks_dirtied',
-    'postgresql.queries.shared_blks_written',
-    'postgresql.queries.local_blks_hit',
-    'postgresql.queries.local_blks_read',
-    'postgresql.queries.local_blks_dirtied',
-    'postgresql.queries.local_blks_written',
-    'postgresql.queries.temp_blks_read',
-    'postgresql.queries.temp_blks_written',
+    'postgresql.active_waiting_queries',
 ]
 
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
-
-
-@pytest.fixture(autouse=True)
-def stop_orphaned_threads():
-    # make sure we shut down any orphaned threads and create a new Executor for each test
-    PostgresStatementSamples.executor.shutdown(wait=True)
-    PostgresStatementSamples.executor = ThreadPoolExecutor()
 
 
 def test_common_metrics(aggregator, integration_check, pg_instance):
     check = integration_check(pg_instance)
     check.check(pg_instance)
 
-    expected_tags = pg_instance['tags'] + ['server:{}'.format(HOST), 'port:{}'.format(PORT)]
+    expected_tags = pg_instance['tags'] + ['port:{}'.format(PORT)]
     check_bgw_metrics(aggregator, expected_tags)
 
     expected_tags += ['db:{}'.format(DB_NAME)]
@@ -91,7 +75,7 @@ def test_unsupported_replication(aggregator, integration_check, pg_instance):
     # Verify our mocking was called
     assert called == [True]
 
-    expected_tags = pg_instance['tags'] + ['server:{}'.format(HOST), 'port:{}'.format(PORT)]
+    expected_tags = pg_instance['tags'] + ['port:{}'.format(PORT)]
     check_bgw_metrics(aggregator, expected_tags)
 
     expected_tags += ['db:{}'.format(DB_NAME)]
@@ -102,8 +86,6 @@ def test_can_connect_service_check(aggregator, integration_check, pg_instance):
     # First: check run with a valid postgres instance
     check = integration_check(pg_instance)
     expected_tags = pg_instance['tags'] + [
-        'host:{}'.format(HOST),
-        'server:{}'.format(HOST),
         'port:{}'.format(PORT),
         'db:{}'.format(DB_NAME),
     ]
@@ -132,19 +114,18 @@ def test_schema_metrics(aggregator, integration_check, pg_instance):
 
     expected_tags = pg_instance['tags'] + [
         'db:{}'.format(DB_NAME),
-        'server:{}'.format(HOST),
         'port:{}'.format(PORT),
         'schema:public',
     ]
     aggregator.assert_metric('postgresql.table.count', value=1, count=1, tags=expected_tags)
-    aggregator.assert_metric('postgresql.db.count', value=2, count=1)
+    aggregator.assert_metric('postgresql.db.count', value=5, count=1)
 
 
 def test_connections_metrics(aggregator, integration_check, pg_instance):
     check = integration_check(pg_instance)
     check.check(pg_instance)
 
-    expected_tags = pg_instance['tags'] + ['server:{}'.format(HOST), 'port:{}'.format(PORT)]
+    expected_tags = pg_instance['tags'] + ['port:{}'.format(PORT)]
     for name in CONNECTION_METRICS:
         aggregator.assert_metric(name, count=1, tags=expected_tags)
     expected_tags += ['db:datadog_test']
@@ -169,7 +150,7 @@ def test_activity_metrics(aggregator, integration_check, pg_instance):
     check = integration_check(pg_instance)
     check.check(pg_instance)
 
-    expected_tags = pg_instance['tags'] + ['server:{}'.format(HOST), 'port:{}'.format(PORT), 'db:datadog_test']
+    expected_tags = pg_instance['tags'] + ['port:{}'.format(PORT), 'db:datadog_test']
     for name in ACTIVITY_METRICS:
         aggregator.assert_metric(name, count=1, tags=expected_tags)
 
@@ -187,6 +168,7 @@ def test_wrong_version(aggregator, integration_check, pg_instance):
     assert_state_set(check)
 
 
+@requires_static_version
 def test_version_metadata(integration_check, pg_instance, datadog_agent):
     check = integration_check(pg_instance)
     check.check_id = 'test:123'
@@ -237,216 +219,57 @@ def test_config_tags_is_unchanged_between_checks(integration_check, pg_instance)
     pg_instance['tag_replication_role'] = True
     check = integration_check(pg_instance)
 
-    expected_tags = pg_instance['tags'] + ['server:{}'.format(HOST), 'port:{}'.format(PORT), 'db:datadog_test']
+    expected_tags = pg_instance['tags'] + ['port:{}'.format(PORT), 'db:datadog_test']
 
     for _ in range(3):
         check.check(pg_instance)
         assert check._config.tags == expected_tags
 
 
-def test_statement_metrics(aggregator, integration_check, pg_instance):
-    pg_instance['deep_database_monitoring'] = True
-    # The query signature should match the query and consistency of this tag has product impact. Do not change
-    # the query signature for this test unless you know what you're doing.
-    QUERY = 'select * from pg_stat_activity'
-    QUERY_SIGNATURE = '7cde606dbf8eaa17'
-
-    check = integration_check(pg_instance)
-    check._connect()
-    cursor = check.db.cursor()
-
-    # Execute the query once to begin tracking it. Execute again between checks to track the difference.
-    # This should result in a count of 1
-    cursor.execute(QUERY)
-    check.check(pg_instance)
-    cursor.execute(QUERY)
-    check.check(pg_instance)
-
-    expected_tags = pg_instance['tags'] + [
-        'server:{}'.format(HOST),
-        'port:{}'.format(PORT),
-        'db:datadog_test',
-        'user:datadog',
-        'query:{}'.format(QUERY),
-        'query_signature:{}'.format(QUERY_SIGNATURE),
-        'resource_hash:{}'.format(QUERY_SIGNATURE),
-    ]
-
-    for name in STATEMENT_METRICS:
-        aggregator.assert_metric(name, count=1, tags=expected_tags)
-
-
-def test_statement_metrics_with_duplicates(aggregator, integration_check, pg_instance, datadog_agent):
-    pg_instance['deep_database_monitoring'] = True
-
-    # The query signature matches the normalized query returned by the mock agent and would need to be
-    # updated if the normalized query is updated
-    query = 'select * from pg_stat_activity where application_name = ANY(%s);'
-    query_signature = 'a478c1e7aaac3ff2'
-    normalized_query = 'select * from pg_stat_activity where application_name = ANY(array [ ? ])'
-
-    def obfuscate_sql(query):
-        if query.startswith('select * from pg_stat_activity where application_name'):
-            return normalized_query
-        return query
-
-    check = integration_check(pg_instance)
-    check._connect()
-    cursor = check.db.cursor()
-
-    # Execute the query once to begin tracking it. Execute again between checks to track the difference.
-    # This should result in a single metric for that query_signature having a value of 2
-    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
-        mock_agent.side_effect = obfuscate_sql
-        cursor.execute(query, (['app1', 'app2'],))
-        cursor.execute(query, (['app1', 'app2', 'app3'],))
-        check.check(pg_instance)
-        cursor.execute(query, (['app1', 'app2'],))
-        cursor.execute(query, (['app1', 'app2', 'app3'],))
-        check.check(pg_instance)
-
-    expected_tags = pg_instance['tags'] + [
-        'server:{}'.format(HOST),
-        'port:{}'.format(PORT),
-        'db:datadog_test',
-        'user:datadog',
-        'query:{}'.format(normalized_query),
-        'query_signature:{}'.format(query_signature),
-        'resource_hash:{}'.format(query_signature),
-    ]
-
-    aggregator.assert_metric('postgresql.queries.count', count=1, tags=expected_tags)
-    aggregator.assert_metric('postgresql.queries.count', value=2.0, tags=expected_tags)
-
-
-@pytest.fixture
-def bob_conn():
-    conn = psycopg2.connect(host=HOST, dbname=DB_NAME, user="bob", password="bob")
-    yield conn
-    conn.close()
-
-
-@pytest.fixture
-def dbm_instance(pg_instance):
-    pg_instance['deep_database_monitoring'] = True
-    pg_instance['min_collection_interval'] = 1
-    pg_instance['pg_stat_activity_view'] = "datadog.pg_stat_activity()"
-    pg_instance['statement_samples'] = {'enabled': True, 'run_sync': True, 'collections_per_second': 1}
-    return pg_instance
-
-
-@pytest.mark.parametrize("pg_stat_activity_view", ["pg_stat_activity", "datadog.pg_stat_activity()"])
-def test_statement_samples_collect(aggregator, integration_check, dbm_instance, bob_conn, pg_stat_activity_view):
-    dbm_instance['pg_stat_activity_view'] = pg_stat_activity_view
-    check = integration_check(dbm_instance)
-    check._connect()
-    query = "SELECT city FROM persons WHERE city = %s"
-    # we are able to see the full query (including the raw parameters) in pg_stat_activity because psycopg2 uses
-    # the simple query protocol, sending the whole query as a plain string to postgres.
-    # if a client is using the extended query protocol with prepare then the query would appear as
-    expected_query = query % "'hello'"
-    # leave bob's connection open until after the check has run to ensure we're able to see the query in
-    # pg_stat_activity
-    cursor = bob_conn.cursor()
-    cursor.execute(query, ("hello",))
-    check.check(dbm_instance)
-    matching = [
-        e for e in aggregator.get_event_platform_events("dbm-samples") if e['db']['statement'] == expected_query
-    ]
-    if POSTGRES_VERSION.split('.')[0] == "9" and pg_stat_activity_view == "pg_stat_activity":
-        # pg_monitor role exists only in version 10+
-        assert len(matching) == 0, "did not expect to catch any events"
-        return
-    assert len(matching) > 0, "should have collected an event"
-    event = matching[0]
-    assert event['db']['plan']['definition'] is not None, "missing execution plan"
-    assert 'Plan' in json.loads(event['db']['plan']['definition']), "invalid json execution plan"
-    # we're expected to get a duration because the connection is in "idle" state
-    assert event['duration']
-    cursor.close()
-
-
-def test_statement_samples_rate_limits(aggregator, integration_check, dbm_instance, bob_conn):
-    dbm_instance['statement_samples']['run_sync'] = False
-    # one collection every two seconds
-    dbm_instance['statement_samples']['collections_per_second'] = 0.5
-    check = integration_check(dbm_instance)
-    check._connect()
-    query = "SELECT city FROM persons WHERE city = 'hello'"
-    # leave bob's connection open until after the check has run to ensure we're able to see the query in
-    # pg_stat_activity
-    cursor = bob_conn.cursor()
-    for _ in range(5):
-        cursor.execute(query)
-        check.check(dbm_instance)
-        time.sleep(1)
-    cursor.close()
-
-    matching = [e for e in aggregator.get_event_platform_events("dbm-samples") if e['db']['statement'] == query]
-    assert len(matching) == 1, "should have collected exactly one event due to sample rate limit"
-
-    metrics = aggregator.metrics("dd.postgres.collect_statement_samples.time")
-    assert 2 < len(metrics) < 6
-
-
-def test_statement_samples_collection_loop_inactive_stop(aggregator, integration_check, dbm_instance):
-    dbm_instance['statement_samples']['run_sync'] = False
-    check = integration_check(dbm_instance)
-    check._connect()
-    check.check(dbm_instance)
-    # make sure there were no unhandled exceptions
-    check.statement_samples._collection_loop_future.result()
-    aggregator.assert_metric("dd.postgres.statement_samples.collection_loop_inactive_stop")
-
-
-def test_statement_samples_collection_loop_cancel(aggregator, integration_check, dbm_instance):
-    dbm_instance['statement_samples']['run_sync'] = False
-    check = integration_check(dbm_instance)
-    check._connect()
-    check.check(dbm_instance)
-    check.cancel()
-    # wait for it to stop and make sure it doesn't throw any exceptions
-    check.statement_samples._collection_loop_future.result()
-    assert not check.statement_samples._collection_loop_future.running(), "thread should be stopped"
-    assert check.statement_samples._db is None, "db connection should be gone"
-    aggregator.assert_metric("dd.postgres.statement_samples.collection_loop_cancel")
-
-
-def test_statement_samples_invalid_activity_view(aggregator, integration_check, dbm_instance):
-    dbm_instance['pg_stat_activity_view'] = "wrong_view"
-
-    # run synchronously, so we expect it to blow up right away
-    dbm_instance['statement_samples'] = {'enabled': True, 'run_sync': True}
-    check = integration_check(dbm_instance)
-    check._connect()
-    with pytest.raises(psycopg2.errors.UndefinedTable):
-        check.check(dbm_instance)
-
-    # run asynchronously, loop will crash the first time it tries to run as the table doesn't exist
-    dbm_instance['statement_samples']['run_sync'] = False
-    check = integration_check(dbm_instance)
-    check._connect()
-    check.check(dbm_instance)
-    # make sure there were no unhandled exceptions
-    check.statement_samples._collection_loop_future.result()
-    aggregator.assert_metric_has_tag_prefix("dd.postgres.statement_samples.error", "error:database-")
-
-
+@mock.patch.dict('os.environ', {'DDEV_SKIP_GENERIC_TAGS_CHECK': 'true'})
 @pytest.mark.parametrize(
-    "number_key",
+    'dbm_enabled, reported_hostname, expected_hostname',
     [
-        "explained_statements_cache_maxsize",
-        "explained_statements_per_hour_per_query",
-        "seen_samples_cache_maxsize",
-        "collections_per_second",
+        (True, '', 'resolved.hostname'),
+        (False, '', 'stubbed.hostname'),
+        (False, 'forced_hostname', 'forced_hostname'),
+        (True, 'forced_hostname', 'forced_hostname'),
     ],
 )
-def test_statement_samples_config_invalid_number(integration_check, pg_instance, number_key):
-    pg_instance['statement_samples'] = {
-        number_key: "not-a-number",
-    }
-    with pytest.raises(ValueError):
-        integration_check(pg_instance)
+def test_correct_hostname(dbm_enabled, reported_hostname, expected_hostname, aggregator, pg_instance):
+    pg_instance['dbm'] = dbm_enabled
+    pg_instance['collect_activity_metrics'] = True
+    pg_instance['disable_generic_tags'] = False  # This flag also affects the hostname
+    pg_instance['reported_hostname'] = reported_hostname
+    check = PostgreSql('test_instance', {}, [pg_instance])
+
+    with mock.patch(
+        'datadog_checks.postgres.PostgreSql.resolve_db_host', return_value='resolved.hostname'
+    ) as resolve_db_host:
+        check.check(pg_instance)
+        if reported_hostname:
+            assert resolve_db_host.called is False, 'Expected resolve_db_host.called to be False'
+        else:
+            assert resolve_db_host.called == dbm_enabled, 'Expected resolve_db_host.called to be ' + str(dbm_enabled)
+
+    expected_tags_no_db = pg_instance['tags'] + ['server:{}'.format(HOST), 'port:{}'.format(PORT)]
+    expected_tags_with_db = expected_tags_no_db + ['db:datadog_test']
+    c_metrics = COMMON_METRICS
+    if not dbm_enabled:
+        c_metrics = c_metrics + DBM_MIGRATED_METRICS
+    for name in c_metrics + ACTIVITY_METRICS:
+        aggregator.assert_metric(name, count=1, tags=expected_tags_with_db, hostname=expected_hostname)
+
+    for name in CONNECTION_METRICS:
+        aggregator.assert_metric(name, count=1, tags=expected_tags_no_db, hostname=expected_hostname)
+
+    aggregator.assert_service_check(
+        'postgres.can_connect',
+        count=1,
+        status=PostgreSql.OK,
+        tags=expected_tags_with_db,
+        hostname=expected_hostname,
+    )
 
 
 def assert_state_clean(check):

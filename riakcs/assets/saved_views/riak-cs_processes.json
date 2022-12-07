@@ -14,11 +14,8 @@
       "showArguments"
     ],
     "filter": {
-      "text": "",
-      "groups": [],
-      "tags": [
-        "integration:riakcs"
-      ]
+      "query_filter": "integration:riakcs",
+      "groups": []
     },
     "selected_top_graph": "scatterplot",
     "enabled_columns": [

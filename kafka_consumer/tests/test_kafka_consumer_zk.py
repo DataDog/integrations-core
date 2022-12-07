@@ -20,12 +20,12 @@ CONSUMER_METRICS = ['kafka.consumer_offset', 'kafka.consumer_lag']
 
 
 @pytest.mark.usefixtures('dd_environment')
-def test_check_zk_basic_case_integration(aggregator, zk_instance):
+def test_check_zk_basic_case_integration(aggregator, zk_instance, dd_run_check):
     """
     Testing Kafka_consumer check.
     """
     kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [zk_instance])
-    kafka_consumer_check.check(zk_instance)
+    dd_run_check(kafka_consumer_check)
 
     _assert_check_zk_basic_case(aggregator, zk_instance)
 
@@ -53,7 +53,7 @@ def _assert_check_zk_basic_case(aggregator, zk_instance):
 
 
 @pytest.mark.usefixtures('dd_environment')
-def test_multiple_servers_zk(aggregator, zk_instance):
+def test_multiple_servers_zk(aggregator, zk_instance, dd_run_check):
     """
     Testing Kafka_consumer check.
     """
@@ -64,7 +64,7 @@ def test_multiple_servers_zk(aggregator, zk_instance):
     ]
 
     kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [multiple_server_zk_instance])
-    kafka_consumer_check.check(multiple_server_zk_instance)
+    dd_run_check(kafka_consumer_check)
 
     for name, consumer_group in multiple_server_zk_instance['consumer_groups'].items():
         for topic, partitions in consumer_group.items():
@@ -81,7 +81,7 @@ def test_multiple_servers_zk(aggregator, zk_instance):
 
 
 @pytest.mark.usefixtures('dd_environment')
-def test_check_no_groups_zk(aggregator, zk_instance):
+def test_check_no_groups_zk(aggregator, zk_instance, dd_run_check):
     """
     Testing Kafka_consumer check grabbing groups from ZK
     """
@@ -90,7 +90,7 @@ def test_check_no_groups_zk(aggregator, zk_instance):
     nogroup_instance['monitor_unlisted_consumer_groups'] = True
 
     kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [nogroup_instance])
-    kafka_consumer_check.check(nogroup_instance)
+    dd_run_check(kafka_consumer_check)
 
     for topic in TOPICS:
         for partition in PARTITIONS:
@@ -104,7 +104,7 @@ def test_check_no_groups_zk(aggregator, zk_instance):
 
 
 @pytest.mark.usefixtures('dd_environment')
-def test_check_no_partitions_zk(aggregator, zk_instance):
+def test_check_no_partitions_zk(aggregator, zk_instance, dd_run_check):
     """
     Testing Kafka_consumer check grabbing partitions from ZK
     """
@@ -113,7 +113,7 @@ def test_check_no_partitions_zk(aggregator, zk_instance):
     no_partitions_instance['consumer_groups'] = {'my_consumer': {topic: []}}
 
     kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [no_partitions_instance])
-    kafka_consumer_check.check(no_partitions_instance)
+    dd_run_check(kafka_consumer_check)
 
     for partition in PARTITIONS:
         tags = ["topic:{}".format(topic), "partition:{}".format(partition)]

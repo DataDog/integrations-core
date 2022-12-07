@@ -96,7 +96,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][6]
 
 _Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][7].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][7].
 
 | Parameter      | Value                                                                                                                                                        |
 | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -121,12 +121,12 @@ The Riak check does not include any events.
 
 ### Service Checks
 
-**riak.can_connect**:<br>
-Returns `CRITICAL` if the Agent cannot connect to the Riak stats endpoint to collect metrics, otherwise returns `OK`.
+See [service_checks.json][10] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][10].
+Need help? Contact [Datadog support][11].
+
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/riak/images/riak_graph.png
 [2]: https://app.datadoghq.com/account/settings#agent
@@ -137,4 +137,5 @@ Need help? Contact [Datadog support][10].
 [7]: https://docs.datadoghq.com/agent/kubernetes/log/
 [8]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [9]: https://github.com/DataDog/integrations-core/blob/master/riak/metadata.csv
-[10]: https://docs.datadoghq.com/help/
+[10]: https://github.com/DataDog/integrations-core/blob/master/riak/assets/service_checks.json
+[11]: https://docs.datadoghq.com/help/

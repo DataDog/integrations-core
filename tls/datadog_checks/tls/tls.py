@@ -1,13 +1,11 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import abc
 import socket
 import ssl
 from datetime import datetime
 
 import service_identity
-import six
 from six import text_type
 from six.moves.urllib.parse import urlparse
 
@@ -26,7 +24,6 @@ from .utils import days_to_seconds, get_protocol_versions, is_ip_address, second
 PROTOCOL_TLS_CLIENT = getattr(ssl, 'PROTOCOL_TLS_CLIENT', ssl.PROTOCOL_TLS)
 
 
-@six.add_metaclass(abc.ABCMeta)
 class TLSCheck(AgentCheck):
     # This remapper is used to support legacy TLS integration config values
     TLS_CONFIG_REMAPPER = {
@@ -36,19 +33,6 @@ class TLSCheck(AgentCheck):
         'validate_hostname': {'name': 'tls_validate_hostname'},
         'validate_cert': {'name': 'tls_verify'},
     }
-
-    def __new__(cls, name, init_config, instances):
-        local_cert_path = instances[0].get('local_cert_path', '')
-
-        # Decide the method of collection for this instance (local file vs remote connection)
-        if local_cert_path:
-            from .tls_local import TLSLocalCheck
-
-            return super(TLSCheck, TLSLocalCheck).__new__(TLSLocalCheck)
-        else:
-            from .tls_remote import TLSRemoteCheck
-
-            return super(TLSCheck, TLSRemoteCheck).__new__(TLSRemoteCheck)
 
     def __init__(self, name, init_config, instances):
         super(TLSCheck, self).__init__(name, init_config, instances)
@@ -78,6 +62,8 @@ class TLSCheck(AgentCheck):
             self._sock_type = socket.SOCK_STREAM
             self._port = int(self.instance.get('port', parsed_uri.port or 443))
 
+        self._start_tls = self.instance.get('start_tls')
+
         # https://en.wikipedia.org/wiki/Server_Name_Indication
         self._server_hostname = self.instance.get('server_hostname', self._server)
 
@@ -102,7 +88,7 @@ class TLSCheck(AgentCheck):
         )
 
         # https://docs.python.org/3/library/ssl.html#ssl.SSLSocket.version
-        self._allowed_versions = get_protocol_versions(
+        self.allowed_versions = get_protocol_versions(
             self.instance.get('allowed_versions', self.init_config.get('allowed_versions', []))
         )
 
@@ -122,13 +108,28 @@ class TLSCheck(AgentCheck):
         # Only load intermediate certs once
         self._intermediate_cert_id_cache = set()
 
+        local_cert_path = instances[0].get('local_cert_path', '')
+
+        # Decide the method of collection for this instance (local file vs remote connection)
+        if local_cert_path:
+            from .tls_local import TLSLocalCheck
+
+            self.checker = TLSLocalCheck(self)
+        else:
+            from .tls_remote import TLSRemoteCheck
+
+            self.checker = TLSRemoteCheck(self)
+
+    def check(self, _):
+        self.checker.check()
+
     def check_protocol_version(self, version):
         if version is None:
             self.log.debug('Could not fetch protocol version')
             return
 
         self.log.debug('Checking protocol version')
-        if version in self._allowed_versions:
+        if version in self.allowed_versions:
             self.log.debug('Protocol version is allowed')
             self.service_check(SERVICE_CHECK_VERSION, self.OK, tags=self._tags)
         else:

@@ -1,410 +1,1320 @@
 {
-    "title": "Envoy - Overview",
-    "description": "## Envoy\n\nThis dashboard provides a high-level overview of your Envoy cluster so you can monitor its performance and resource usage.\n\nFor further reading on monitoring Envoy, see:\n\n- [Official Envoy integration docs](https://docs.datadoghq.com/integrations/envoy/#data-collected)\n- [Monitoring AWS App Mesh and Envoy with Datadog](https://www.datadoghq.com/blog/envoy-app-mesh-monitoring/)\n\nClone this template to make changes and add your own graphs and widgets.",
-    "widgets": [
-        {
-            "id": 0,
+  "title": "Envoy - Overview",
+  "description": "## Envoy\n\nThis dashboard provides a high-level overview of your Envoy cluster so you can monitor its performance and resource usage.\n\nFor further reading on monitoring Envoy, see:\n\n- [Datadog Envoy integration docs](https://docs.datadoghq.com/integrations/envoy/)\n- [Monitoring AWS App Mesh and Envoy with Datadog](https://www.datadoghq.com/blog/envoy-app-mesh-monitoring/)\n\nClone this template to make changes and add your own graphs and widgets.",
+  "widgets": [
+    {
+      "id": 2469678217434246,
+      "definition": {
+        "title": "About Envoy",
+        "title_align": "left",
+        "type": "group",
+        "banner_img": "/static/images/integration_dashboard/envoy_hero_1.png",
+        "show_title": false,
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 8803181340356126,
             "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "sum:envoy.http.downstream_rq_total{$scope}.as_rate()",
-                        "display_type": "area",
-                        "style": {
-                            "palette": "dog_classic",
-                            "line_type": "solid",
-                            "line_width": "normal"
-                        }
-                    }
-                ],
-                "custom_links": [],
-                "title": "Requests (req/s)",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": false,
-                "legend_size": "0"
+              "type": "note",
+              "content": "This dashboard provides a high-level overview of your Envoy deployment so you can quickly identify downstream and upstream errors and rejections.\n",
+              "background_color": "transparent",
+              "font_size": "14",
+              "text_align": "left",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left"
             },
             "layout": {
-                "x": 1,
-                "y": 17,
-                "width": 43,
-                "height": 17
+              "x": 0,
+              "y": 0,
+              "width": 4,
+              "height": 2
             }
-        },
-        {
-            "id": 1,
+          },
+          {
+            "id": 6583474077558724,
             "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "avg:envoy.cluster.update_success{*} by {cluster_name}.as_count()",
-                        "display_type": "bars",
-                        "style": {
-                            "palette": "dog_classic",
-                            "line_type": "solid",
-                            "line_width": "normal"
-                        }
-                    }
-                ],
-                "custom_links": [],
-                "title": "Total cluster membership update successes",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": false,
-                "legend_size": "0"
+              "type": "note",
+              "content": "**Refer to the following resources for more information**\n\n- [Datadog Envoy documentation](https://www.envoyproxy.io/docs/envoy/latest/)\n\n- [Available Envoy metrics](https://docs.datadoghq.com/integrations/envoy/?tab=host#data-collected) \n\n- [How to monitor Envoy using AWS App Mesh](https://www.datadoghq.com/blog/envoy-app-mesh-monitoring/)",
+              "background_color": "transparent",
+              "font_size": "12",
+              "text_align": "left",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left"
             },
             "layout": {
-                "x": 48,
-                "y": 53,
-                "width": 43,
-                "height": 17
+              "x": 4,
+              "y": 0,
+              "width": 4,
+              "height": 2
             }
-        },
-        {
-            "id": 2,
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 8,
+        "height": 5
+      }
+    },
+    {
+      "id": 1783340964874598,
+      "definition": {
+        "title": "Overview",
+        "type": "group",
+        "background_color": "pink",
+        "show_title": true,
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 6079077549151020,
             "definition": {
-                "type": "timeseries",
-                "requests": [
+              "title": "Incoming Success Rate (non-5xx responses)",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
                     {
-                        "q": "avg:envoy.http.downstream_cx_rx_bytes_total{$scope}.as_rate()",
-                        "display_type": "line",
-                        "style": {
-                            "palette": "dog_classic",
-                            "line_type": "solid",
-                            "line_width": "normal"
-                        }
+                      "alias": "2xx",
+                      "formula": "(1 - query1 / query2) * 100"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">=",
+                      "palette": "white_on_green",
+                      "value": 0.95
                     },
                     {
-                        "q": "avg:envoy.http.downstream_cx_tx_bytes_total{$scope}.as_rate()",
-                        "display_type": "line",
-                        "style": {
-                            "palette": "dog_classic",
-                            "line_type": "solid",
-                            "line_width": "normal"
-                        }
+                      "comparator": "<",
+                      "palette": "white_on_yellow",
+                      "value": 0.95
                     }
-                ],
-                "custom_links": [],
-                "title": "Bytes received and sent (B/s)",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": false,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 1,
-                "y": 35,
-                "width": 43,
-                "height": 17
-            }
-        },
-        {
-            "id": 3,
-            "definition": {
-                "type": "query_value",
-                "requests": [
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
                     {
-                        "q": "avg:envoy.cluster_manager.active_clusters{*}",
-                        "aggregator": "last"
-                    }
-                ],
-                "custom_links": [],
-                "title": "Total active clusters",
-                "title_size": "16",
-                "title_align": "left",
-                "autoscale": true,
-                "precision": 2
-            },
-            "layout": {
-                "x": 48,
-                "y": 45,
-                "width": 21,
-                "height": 7
-            }
-        },
-        {
-            "id": 4,
-            "definition": {
-                "type": "query_value",
-                "requests": [
+                      "query": "sum:envoy.cluster.upstream_rq_5xx{$envoy_cluster,$listener,$release}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "avg"
+                    },
                     {
-                        "q": "avg:envoy.cluster_manager.warming_clusters{*}",
-                        "aggregator": "last"
+                      "query": "sum:envoy.cluster.upstream_rq_completed{$envoy_cluster,$listener,$release}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "aggregator": "avg"
                     }
-                ],
-                "custom_links": [],
-                "title": "Total warming clusters",
-                "title_size": "16",
-                "title_align": "left",
-                "autoscale": true,
-                "precision": 2
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "custom_unit": "%",
+              "precision": 2
             },
             "layout": {
-                "x": 70,
-                "y": 45,
-                "width": 21,
-                "height": 7
+              "x": 0,
+              "y": 0,
+              "width": 2,
+              "height": 1
             }
-        },
-        {
-            "id": 5,
+          },
+          {
+            "id": 8008492131546334,
             "definition": {
-                "type": "timeseries",
-                "requests": [
+              "title": "Incoming Requests Volume",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
                     {
-                        "q": "avg:envoy.cluster.upstream_rq_pending_total{*} by {cluster_name}.as_count()",
-                        "display_type": "bars",
-                        "style": {
-                            "palette": "dog_classic",
-                            "line_type": "solid",
-                            "line_width": "normal"
-                        }
+                      "formula": "query1 + query3 + query2 + query4"
                     }
-                ],
-                "custom_links": [],
-                "title": "Total pending requests per cluster",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": false,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 1,
-                "y": 53,
-                "width": 43,
-                "height": 17
-            }
-        },
-        {
-            "id": 6,
-            "definition": {
-                "type": "image",
-                "url": "/static/images/logos/envoy_small.svg",
-                "sizing": "zoom"
-            },
-            "layout": {
-                "x": 1,
-                "y": 1,
-                "width": 19,
-                "height": 7
-            }
-        },
-        {
-            "id": 7,
-            "definition": {
-                "type": "query_value",
-                "requests": [
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
                     {
-                        "q": "avg:envoy.server.memory_allocated{*}",
-                        "aggregator": "avg"
-                    }
-                ],
-                "custom_links": [],
-                "title": "Allocated memory",
-                "title_size": "16",
-                "title_align": "left",
-                "autoscale": true,
-                "custom_unit": "B",
-                "precision": 2
-            },
-            "layout": {
-                "x": 74,
-                "y": 1,
-                "width": 17,
-                "height": 7
-            }
-        },
-        {
-            "id": 8,
-            "definition": {
-                "type": "note",
-                "content": "Requests",
-                "background_color": "yellow",
-                "font_size": "14",
-                "text_align": "center",
-                "show_tick": true,
-                "tick_pos": "50%",
-                "tick_edge": "bottom"
-            },
-            "layout": {
-                "x": 1,
-                "y": 10,
-                "width": 43,
-                "height": 5
-            }
-        },
-        {
-            "id": 9,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
+                      "query": "sum:envoy.cluster.upstream_rq_2xx{$envoy_cluster,$listener,$release}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "avg"
+                    },
                     {
-                        "q": "sum:envoy.http.downstream_cx_total{$scope} by {cluster_name}.as_count()",
-                        "display_type": "bars",
-                        "style": {
-                            "palette": "dog_classic",
-                            "line_type": "solid",
-                            "line_width": "normal"
-                        }
-                    }
-                ],
-                "custom_links": [],
-                "title": "Total connections per cluster",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": false,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 48,
-                "y": 17,
-                "width": 43,
-                "height": 17
-            }
-        },
-        {
-            "id": 10,
-            "definition": {
-                "type": "note",
-                "content": "Connections",
-                "background_color": "yellow",
-                "font_size": "14",
-                "text_align": "center",
-                "show_tick": true,
-                "tick_pos": "50%",
-                "tick_edge": "bottom"
-            },
-            "layout": {
-                "x": 48,
-                "y": 10,
-                "width": 43,
-                "height": 5
-            }
-        },
-        {
-            "id": 11,
-            "definition": {
-                "type": "note",
-                "content": "Clusters",
-                "background_color": "yellow",
-                "font_size": "14",
-                "text_align": "center",
-                "show_tick": true,
-                "tick_pos": "50%",
-                "tick_edge": "bottom"
-            },
-            "layout": {
-                "x": 48,
-                "y": 38,
-                "width": 43,
-                "height": 5
-            }
-        },
-        {
-            "id": 12,
-            "definition": {
-                "type": "query_value",
-                "requests": [
+                      "query": "sum:envoy.cluster.upstream_rq_3xx{$envoy_cluster,$listener,$release}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query3",
+                      "aggregator": "avg"
+                    },
                     {
-                        "q": "avg:envoy.server.uptime{*}/3600/24",
-                        "aggregator": "last"
+                      "query": "sum:envoy.cluster.upstream_rq_4xx{$envoy_cluster,$listener,$release}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "query": "sum:envoy.cluster.upstream_rq_5xx{$envoy_cluster,$listener,$release}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query4",
+                      "aggregator": "avg"
                     }
-                ],
-                "custom_links": [],
-                "title": "Uptime",
-                "title_size": "16",
-                "title_align": "left",
-                "autoscale": true,
-                "custom_unit": "days",
-                "precision": 1
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2
             },
             "layout": {
-                "x": 56,
-                "y": 1,
-                "width": 17,
-                "height": 7
+              "x": 2,
+              "y": 0,
+              "width": 2,
+              "height": 1
             }
-        },
-        {
-            "id": 13,
+          },
+          {
+            "id": 7959120365359748,
             "definition": {
-                "type": "query_value",
-                "requests": [
+              "title": "Incoming Requests by Release",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "formulas": [
                     {
-                        "q": "avg:envoy.server.live{*}",
-                        "aggregator": "last",
-                        "conditional_formats": [
-                            {
-                                "comparator": ">",
-                                "value": 0,
-                                "palette": "white_on_green"
-                            },
-                            {
-                                "comparator": "<",
-                                "value": 1,
-                                "palette": "white_on_yellow"
-                            }
-                        ]
+                      "formula": "query4"
                     }
-                ],
-                "custom_links": [],
-                "title": "Live",
-                "title_size": "16",
-                "title_align": "left",
-                "autoscale": true,
-                "precision": 2
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "sum:envoy.cluster.upstream_rq_total{$envoy_cluster,$listener,$release}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query4",
+                      "aggregator": "avg"
+                    }
+                  ]
+                }
+              ],
+              "type": "sunburst"
             },
             "layout": {
-                "x": 38,
-                "y": 1,
-                "width": 17,
-                "height": 7
+              "x": 0,
+              "y": 1,
+              "width": 4,
+              "height": 3
             }
-        },
-        {
-            "id": 14,
+          }
+        ]
+      },
+      "layout": {
+        "x": 8,
+        "y": 0,
+        "width": 4,
+        "height": 5
+      }
+    },
+    {
+      "id": 3684307880536090,
+      "definition": {
+        "title": "Upstream Clusters",
+        "type": "group",
+        "background_color": "vivid_purple",
+        "show_title": true,
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 3911328006359958,
             "definition": {
-                "type": "query_value",
-                "requests": [
+              "title": "Upstream Response Codes (% breakdown)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
                     {
-                        "q": "avg:envoy.cluster.update_failure{*}.as_count()",
-                        "aggregator": "last",
-                        "conditional_formats": [
-                            {
-                                "comparator": ">",
-                                "value": 0,
-                                "palette": "red_on_white"
-                            }
-                        ]
+                      "alias": "2xx",
+                      "formula": "query1 / query2 * 100"
+                    },
+                    {
+                      "alias": "3xx",
+                      "formula": "query3 / query2 * 100"
+                    },
+                    {
+                      "alias": "4xx",
+                      "formula": "query4 / query2 * 100"
+                    },
+                    {
+                      "alias": "5xx",
+                      "formula": "query5 / query2 * 100"
                     }
-                ],
-                "custom_links": [],
-                "title": "Cluster membership update failures",
-                "title_size": "16",
-                "title_align": "left",
-                "time": {
-                    "live_span": "30m"
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "query": "sum:envoy.cluster.upstream_rq_2xx{$envoy_cluster,$listener,$release}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    },
+                    {
+                      "query": "sum:envoy.cluster.upstream_rq_completed{$envoy_cluster,$listener,$release}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query2"
+                    },
+                    {
+                      "query": "sum:envoy.cluster.upstream_rq_3xx{$envoy_cluster,$listener,$release}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query3"
+                    },
+                    {
+                      "query": "sum:envoy.cluster.upstream_rq_4xx{$envoy_cluster,$listener,$release}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query4"
+                    },
+                    {
+                      "query": "sum:envoy.cluster.upstream_rq_5xx{$envoy_cluster,$listener,$release}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query5"
+                    }
+                  ],
+                  "style": {
+                    "palette": "warm",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "label": "",
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 8,
+              "height": 3
+            }
+          },
+          {
+            "id": 3748025168013652,
+            "definition": {
+              "title": "Upstream Response Codes (Total Count Breakdown)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "2xx",
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "3xx",
+                      "formula": "query3"
+                    },
+                    {
+                      "alias": "5xx",
+                      "formula": "query2"
+                    },
+                    {
+                      "alias": "4xx",
+                      "formula": "query4"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "query": "sum:envoy.cluster.upstream_rq_2xx{$envoy_cluster,$listener,$release}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    },
+                    {
+                      "query": "sum:envoy.cluster.upstream_rq_3xx{$envoy_cluster,$listener,$release}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query3"
+                    },
+                    {
+                      "query": "sum:envoy.cluster.upstream_rq_5xx{$envoy_cluster,$listener,$release}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query2"
+                    },
+                    {
+                      "query": "sum:envoy.cluster.upstream_rq_4xx{$envoy_cluster,$listener,$release}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query4"
+                    }
+                  ],
+                  "style": {
+                    "palette": "warm",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "label": "",
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 8,
+              "height": 3
+            }
+          },
+          {
+            "id": 4743777231988956,
+            "definition": {
+              "type": "note",
+              "content": "Monitor the response times to identify latency issues before your customers are substantially impacted. \n\nConsider [creating alerts](https://www.datadoghq.com/blog/introducing-recovery-thresholds/) when your p95 response times pass acceptable thresholds.",
+              "background_color": "orange",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": true,
+              "tick_pos": "50%",
+              "tick_edge": "right",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 6,
+              "width": 2,
+              "height": 3
+            }
+          },
+          {
+            "id": 8526626981392194,
+            "definition": {
+              "title": "Upstream p99 Response Time",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "vertical",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "avg:envoy.cluster.upstream_rq_time.99percentile{$envoy_cluster,$listener,$release}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 2,
+              "y": 6,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 8166695746340130,
+            "definition": {
+              "title": "Average Upstream Traffic Rate",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "vertical",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "avg:envoy.cluster.upstream_rq_total{$envoy_cluster,$listener,$release}.as_rate()",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 0,
+              "y": 9,
+              "width": 8,
+              "height": 3
+            }
+          },
+          {
+            "id": 8582025331671068,
+            "definition": {
+              "title": "Cluster Load Balancer Panics",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "total_requests",
+                      "formula": "query1"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "avg:envoy.cluster.lb_healthy_panic{$envoy_cluster,$listener,$release}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "warm",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "label": "",
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 0,
+              "y": 12,
+              "width": 5,
+              "height": 3
+            }
+          },
+          {
+            "id": 6140256689199842,
+            "definition": {
+              "type": "note",
+              "content": "**Cluster load balancer (lb) panics** refer to how many times the proxy is ignoring the health check restrictions because there are not enough healthy upstreams. \n\nIt's helpful to see when Envoy is redirecting to unhealthy upstreams, which should not happen normally. It's also useful to see when health checks are not properly set up. Cluster panics should always be 0.",
+              "background_color": "orange",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": true,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 5,
+              "y": 12,
+              "width": 3,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 8,
+        "height": 16
+      }
+    },
+    {
+      "id": 2779213978520494,
+      "definition": {
+        "title": "Pod statistics",
+        "type": "group",
+        "background_color": "purple",
+        "show_title": true,
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 728848402879588,
+            "definition": {
+              "title": "CPU Usage Average % by Release",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1 / query2 / 10000000"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "query": "max:kubernetes.cpu.usage.total{$envoy_cluster,$listener,$release}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    },
+                    {
+                      "query": "max:kubernetes.cpu.limits{$envoy_cluster,$listener,$release}",
+                      "data_source": "metrics",
+                      "name": "query2"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "label": "",
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": [
+                {
+                  "label": "CPU is the bottleneck",
+                  "value": "y > 75",
+                  "display_type": "error dashed"
                 },
-                "autoscale": true,
-                "precision": 2
+                {
+                  "label": "Time to upscale",
+                  "value": "50 < y < 75",
+                  "display_type": "warning dashed"
+                },
+                {
+                  "label": "Time to downscale",
+                  "value": "y < 20",
+                  "display_type": "info dashed"
+                }
+              ]
             },
             "layout": {
-                "x": 48,
-                "y": 71,
-                "width": 43,
-                "height": 7
+              "x": 0,
+              "y": 0,
+              "width": 4,
+              "height": 3
             }
-        }
-    ],
-    "template_variables": [
-        {
-            "name": "scope",
-            "default": "*",
-            "prefix": null
-        }
-    ],
-    "layout_type": "free",
-    "is_read_only": true,
-    "notify_list": [],
-    "id": 30293
+          },
+          {
+            "id": 5777007512003854,
+            "definition": {
+              "title": "Memory Usage %",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1 / query2 * 100"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "query": "max:kubernetes.memory.usage{$envoy_cluster,$listener,$release}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    },
+                    {
+                      "query": "avg:kubernetes.memory.limits{$envoy_cluster,$listener,$release}",
+                      "data_source": "metrics",
+                      "name": "query2"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "label": "",
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": [
+                {
+                  "value": "y > 100",
+                  "display_type": "error dashed"
+                },
+                {
+                  "value": "80 < y < 100",
+                  "display_type": "warning dashed"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 6604562097761210,
+            "definition": {
+              "title": "Running Containers by Version and Cluster",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "query": "sum:kubernetes.containers.running{$envoy_cluster,$listener,$release}.as_count().fill(null)",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "label": "",
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 0,
+              "y": 6,
+              "width": 4,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 8,
+        "y": 0,
+        "width": 4,
+        "height": 10
+      }
+    },
+    {
+      "id": 7497762923700564,
+      "definition": {
+        "title": "Listeners",
+        "type": "group",
+        "background_color": "vivid_purple",
+        "show_title": true,
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 6834680793364994,
+            "definition": {
+              "title": "Listeners Success Rate (excluding Admin Interface)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Success",
+                      "formula": "(query3 + query1 + query6) / query2 * 100"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "query": "sum:envoy.listener.http.downstream_rq_3xx{$envoy_cluster,$listener,$release}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query3"
+                    },
+                    {
+                      "query": "sum:envoy.listener.http.downstream_rq_2xx{$envoy_cluster,$listener,$release}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    },
+                    {
+                      "query": "sum:envoy.listener.http.downstream_rq_1xx{$envoy_cluster,$listener,$release}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query6"
+                    },
+                    {
+                      "query": "sum:envoy.listener.http.downstream_rq_completed{$envoy_cluster,$listener,$release}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query2"
+                    },
+                    {
+                      "query": "sum:envoy.listener.http.downstream_rq_4xx{$envoy_cluster,$listener,$release}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query4"
+                    },
+                    {
+                      "query": "sum:envoy.listener.http.downstream_rq_5xx{$envoy_cluster,$listener,$release}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query5"
+                    }
+                  ],
+                  "style": {
+                    "palette": "warm",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "min": "0",
+                "max": "100"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 2949219819723468,
+            "definition": {
+              "title": "Listeners Response Time Percentiles",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "p50",
+                      "formula": "query"
+                    },
+                    {
+                      "alias": "p25",
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "p90",
+                      "formula": "query2"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "avg:envoy.http.downstream_rq_time.50percentile{$envoy_cluster,$listener,$release}",
+                      "data_source": "metrics",
+                      "name": "query"
+                    },
+                    {
+                      "query": "avg:envoy.http.downstream_rq_time.25percentile{$envoy_cluster,$listener,$release}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    },
+                    {
+                      "query": "avg:envoy.http.downstream_rq_time.90percentile{$envoy_cluster,$listener,$release}",
+                      "data_source": "metrics",
+                      "name": "query2"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "label": "",
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 4,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 8,
+        "y": 10,
+        "width": 4,
+        "height": 6
+      }
+    },
+    {
+      "id": 6735586572768258,
+      "definition": {
+        "title": "Overview",
+        "type": "group",
+        "background_color": "purple",
+        "show_title": true,
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 5856985560949164,
+            "definition": {
+              "title": "Listener Traffic",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "vertical",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "total_requests",
+                      "formula": "query1"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "sum:envoy.listener.http.downstream_rq_completed{$envoy_cluster,$listener,$release}.as_rate()",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    },
+                    {
+                      "query": "sum:envoy.http.downstream_cx_tx_bytes_total{$envoy_cluster,$listener,$release}.as_rate()",
+                      "data_source": "metrics",
+                      "name": "query2"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "label": "",
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 3099014382844336,
+            "definition": {
+              "title": "Requests Rejected by Reason",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "No matching route",
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "No matching cluster",
+                      "formula": "query2"
+                    },
+                    {
+                      "alias": "Protocol error",
+                      "formula": "query3"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "query": "avg:envoy.http.no_route{$envoy_cluster,$listener,$release}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    },
+                    {
+                      "query": "avg:envoy.http.no_cluster{$envoy_cluster,$listener,$release}",
+                      "data_source": "metrics",
+                      "name": "query2"
+                    },
+                    {
+                      "query": "avg:envoy.http.downstream_cx_protocol_error{$envoy_cluster,$listener,$release}",
+                      "data_source": "metrics",
+                      "name": "query3"
+                    }
+                  ],
+                  "style": {
+                    "palette": "warm"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "label": "",
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 6137726645487440,
+            "definition": {
+              "type": "note",
+              "content": "**Request rejected by reason**\n\nThis graph highlights the top reasons your Envoy requests were rejected based on the `no_route`, `no_cluster` and `cx_protocol_error` metrics. ",
+              "background_color": "blue",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": true,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 4,
+              "y": 3,
+              "width": 2,
+              "height": 2
+            }
+          },
+          {
+            "id": 524226509076760,
+            "definition": {
+              "title": "Active Connections per Type and Listener",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "All",
+                      "formula": "query"
+                    },
+                    {
+                      "alias": "Http2",
+                      "formula": "query3"
+                    },
+                    {
+                      "alias": "Http1.1",
+                      "formula": "query4"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "query": "avg:envoy.http.downstream_cx_active{$envoy_cluster,$listener,$release}",
+                      "data_source": "metrics",
+                      "name": "query"
+                    },
+                    {
+                      "query": "avg:envoy.http.downstream_cx_http2_active{$envoy_cluster,$listener,$release}",
+                      "data_source": "metrics",
+                      "name": "query3"
+                    },
+                    {
+                      "query": "avg:envoy.http.downstream_cx_http1_active{$envoy_cluster,$listener,$release}",
+                      "data_source": "metrics",
+                      "name": "query4"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "label": "",
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 0,
+              "y": 5,
+              "width": 6,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 6,
+        "height": 9
+      }
+    },
+    {
+      "id": 8491481107946150,
+      "definition": {
+        "title": "Logs",
+        "type": "group",
+        "background_color": "vivid_green",
+        "show_title": true,
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 2980541100727590,
+            "definition": {
+              "title": "Envoy Logs",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "log_stream",
+              "indexes": [],
+              "query": "source:envoy",
+              "sort": {
+                "column": "time",
+                "order": "desc"
+              },
+              "columns": [
+                "host",
+                "@service"
+              ],
+              "show_date_column": true,
+              "show_message_column": true,
+              "message_display": "expanded-md"
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 8
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 6,
+        "y": 0,
+        "width": 6,
+        "height": 9
+      }
+    }
+  ],
+  "template_variables": [
+    {
+      "name": "envoy_cluster",
+      "default": "*",
+      "prefix": "envoy_cluster",
+      "available_values": []
+    },
+    {
+      "name": "release",
+      "default": "*",
+      "prefix": "release",
+      "available_values": []
+    },
+    {
+      "name": "listener",
+      "default": "*",
+      "prefix": "listener",
+      "available_values": []
+    }
+  ],
+  "layout_type": "ordered",
+  "is_read_only": false,
+  "notify_list": [],
+  "reflow_type": "fixed",
+  "id": "cmj-jxn-cr5"
 }

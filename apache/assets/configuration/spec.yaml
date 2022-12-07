@@ -16,6 +16,12 @@ files:
         type: string
     - template: instances/http
     - template: instances/default
+      overrides:
+        disable_generic_tags.hidden: False
+        disable_generic_tags.enabled: True
+        disable_generic_tags.description: |
+            Generic tags such as `host` will be replaced by `apache_host` to avoid
+            getting mixed with other integraton tags.
   - template: logs
     example:
     - type: file

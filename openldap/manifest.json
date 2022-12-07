@@ -1,39 +1,55 @@
 {
-  "aliases": [],
-  "categories": [
-    "data store",
-    "log collection",
-    "autodiscovery"
-  ],
-  "creates_events": false,
-  "display_name": "OpenLDAP",
-  "guid": "ec61c06d-a870-4183-8a27-c66db1fc47cc",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "openldap.",
-  "metric_to_check": "openldap.connections.current",
-  "name": "openldap",
-  "public_title": "Datadog-OpenLDAP Integration",
-  "short_description": "Collect metrics from your OpenLDAP server using the cn=monitor backend",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "type": "check",
-  "integration_id": "openldap",
+  "manifest_version": "2.0.0",
+  "app_uuid": "ea3487c9-2c55-417c-bed5-17a42bdf71cf",
+  "app_id": "openldap",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Collect metrics from your OpenLDAP server using the cn=monitor backend",
+    "title": "OpenLDAP",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Data Store",
+      "Category::Log Collection",
+      "Category::Autodiscovery"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "OpenLDAP",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "openldap.",
+        "check": "openldap.connections.current",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
     },
-    "monitors": {},
-    "dashboards": {},
-    "service_checks": "assets/service_checks.json",
+    "dashboards": {
+      "OpenLDAP Overview": "assets/dashboards/openldap_overview.json"
+    },
     "logs": {
       "source": "openldap"
-    },
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

@@ -10,7 +10,10 @@ files:
     options:
     - name: name
       required: true
-      description: Name of your Http check instance.
+      description: |
+        Name of your HTTP check instance.
+
+        Note: The `instance` tag takes the value of this parameter and normalizes all `,+*-/()[]{}` characters into `_`.
       value:
         example: My first service
         type: string
@@ -33,7 +36,9 @@ files:
         request with the data parameter.
         SOAP requests are supported if you use the POST method and supply an XML string as the data parameter.
       value:
-        type: object
+        anyOf:
+        - type: object
+        - type: string
         enabled: false
         example:
           <KEY>: <VALUE>
@@ -103,8 +108,6 @@ files:
         that configuration parameters expressed in seconds take precedence over
         the corresponding ones expressed in days.
 
-        The SSL certificate will always be validated for this additional
-        service check regardless of the value of `tls_verify`.
         By default, for the expiration check, the Agent validates the SSL certificate
         hostname against the host of the provided url.
       value:
@@ -130,22 +133,12 @@ files:
         the critical threshold for the HTTP check in second
       value:
         type: integer
-    - name: check_hostname
-      description: Set check_hostname to false to disable the verification check for matching hostnames.
-      value:
-        type: boolean
-        example: true
     - name: ssl_server_name
       description: |
         If necessary and check_hostname is set to true,
         override the hostname to match with ssl_server_name.
       value:
         type: string
-    - name: allow_redirects
-      description: The allow_redirects parameter can enable redirection for the HTTP check.
-      value:
-        type: boolean
-        example: true
     - name: stream
       description: |
         The stream parameter can be used to check the status code and/or
@@ -165,3 +158,9 @@ files:
     - template: instances/http
       overrides:
         tls_verify.value.example: false
+    - template: instances/tls
+      overrides:
+        tls_verify.hidden: true
+        tls_cert.hidden: true
+        tls_ca_cert.hidden: true
+        tls_private_key.hidden: true

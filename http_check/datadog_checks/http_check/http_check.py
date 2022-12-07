@@ -10,12 +10,12 @@ import time
 from datetime import datetime
 
 import requests
+from requests import Response
 from six import PY2, string_types
 from six.moves.urllib.parse import urlparse
 
 from datadog_checks.base import AgentCheck, ensure_unicode
 
-from .adapters import WeakCiphersAdapter, WeakCiphersHTTPSConnection
 from .config import DEFAULT_EXPECTED_CODE, from_instance
 from .utils import get_ca_certs_path
 
@@ -45,6 +45,10 @@ class HTTPCheck(AgentCheck):
         'ca_certs': {'name': 'tls_ca_cert'},
     }
 
+    TLS_CONFIG_REMAPPER = {
+        'check_hostname': {'name': 'tls_validate_hostname'},
+    }
+
     def __init__(self, name, init_config, instances):
         super(HTTPCheck, self).__init__(name, init_config, instances)
 
@@ -53,6 +57,11 @@ class HTTPCheck(AgentCheck):
         self.ca_certs = init_config.get('ca_certs')
         if not self.ca_certs:
             self.ca_certs = get_ca_certs_path()
+
+        if not self.instance.get('include_default_headers', True) and 'headers' not in self.instance:
+            headers = self.http.options['headers']
+            headers.clear()
+            headers.update(self.instance.get('extra_headers', {}))
 
     def check(self, instance):
         (
@@ -70,25 +79,21 @@ class HTTPCheck(AgentCheck):
             tags,
             ssl_expire,
             instance_ca_certs,
-            weakcipher,
             check_hostname,
-            allow_redirects,
             stream,
         ) = from_instance(instance, self.ca_certs)
         timeout = self.http.options['timeout'][0]
         start = time.time()
-        # allows default headers to be included based on `include_default_headers` flag
-        self.http.options['headers'] = headers
 
-        def send_status_up(logMsg):
+        def send_status_up(log_msg):
             # TODO: A6 log needs bytes and cannot handle unicode
-            self.log.debug(logMsg)
+            self.log.debug(log_msg)
             service_checks.append((self.SC_STATUS, AgentCheck.OK, "UP"))
 
         def send_status_down(loginfo, down_msg):
             # TODO: A6 log needs bytes and cannot handle unicode
             self.log.info(loginfo)
-            down_msg = self._include_content(include_content, down_msg, content)
+            down_msg = self._include_content(include_content, down_msg, r.text)
             service_checks.append((self.SC_STATUS, AgentCheck.CRITICAL, down_msg))
 
         # Store tags in a temporary list so that we don't modify the global tags data structure
@@ -98,19 +103,11 @@ class HTTPCheck(AgentCheck):
         tags_list.append("instance:{}".format(instance_name))
         service_checks = []
         service_checks_tags = self._get_service_checks_tags(instance)
-        r = None
+        r = None  # type: Response
         try:
             parsed_uri = urlparse(addr)
             self.log.debug("Connecting to %s", addr)
             self.http.session.trust_env = False
-            if weakcipher:
-                base_addr = '{uri.scheme}://{uri.netloc}/'.format(uri=parsed_uri)
-                self.http.session.mount(base_addr, WeakCiphersAdapter())
-                self.log.debug(
-                    "Weak Ciphers will be used for %s. Supported Cipherlist: %s",
-                    base_addr,
-                    WeakCiphersHTTPSConnection.SUPPORTED_CIPHERS,
-                )
 
             # Add 'Content-Type' for non GET requests when they have not been specified in custom headers
             if method.upper() in DATA_METHODS and not headers.get('Content-Type'):
@@ -123,7 +120,6 @@ class HTTPCheck(AgentCheck):
             r = getattr(self.http, http_method)(
                 addr,
                 persist=True,
-                allow_redirects=allow_redirects,
                 stream=stream,
                 json=data if method.upper() in DATA_METHODS and isinstance(data, dict) else None,
                 data=data if method.upper() in DATA_METHODS and isinstance(data, string_types) else None,
@@ -169,8 +165,6 @@ class HTTPCheck(AgentCheck):
             if response_time and not service_checks:
                 self.gauge('network.http.response_time', r.elapsed.total_seconds(), tags=tags_list)
 
-            content = r.text
-
             # Check HTTP response status code
             if not (service_checks or re.match(http_response_status_code, str(r.status_code))):
                 if http_response_status_code == DEFAULT_EXPECTED_CODE:
@@ -181,7 +175,7 @@ class HTTPCheck(AgentCheck):
                 message = "Incorrect HTTP return code for url {}. Expected {}, got {}.".format(
                     addr, expected_code, str(r.status_code)
                 )
-                message = self._include_content(include_content, message, content)
+                message = self._include_content(include_content, message, r.text)
 
                 self.log.info(message)
 
@@ -191,7 +185,7 @@ class HTTPCheck(AgentCheck):
                 # Host is UP
                 # Check content matching is set
                 if content_match:
-                    if re.search(content_match, content, re.UNICODE):
+                    if re.search(content_match, r.text, re.UNICODE):
                         if reverse_content_match:
                             send_status_down(
                                 '{} is found in return content with the reverse_content_match option'.format(
@@ -247,6 +241,9 @@ class HTTPCheck(AgentCheck):
 
         for status in service_checks:
             sc_name, status, msg = status
+
+            if status is AgentCheck.OK:
+                msg = None
             self.report_as_service_check(sc_name, status, service_checks_tags, msg)
 
     def _get_service_checks_tags(self, instance):
@@ -306,20 +303,21 @@ class HTTPCheck(AgentCheck):
 
             ssl_sock = context.wrap_socket(sock, server_hostname=server_name)
             cert = ssl_sock.getpeercert()
-
+            if cert:
+                exp_date = datetime.strptime(cert['notAfter'], "%b %d %H:%M:%S %Y %Z")
+            else:
+                raise Exception("Empty or no certificate found.")
         except Exception as e:
-            msg = str(e)
+            msg = repr(e)
             if any(word in msg for word in ['expired', 'expiration']):
                 self.log.debug("error: %s. Cert might be expired.", e)
                 return AgentCheck.CRITICAL, 0, 0, msg
             elif 'Hostname mismatch' in msg or "doesn't match" in msg:
                 self.log.debug("The hostname on the SSL certificate does not match the given host: %s", e)
-                return AgentCheck.UNKNOWN, None, None, msg
             else:
                 self.log.debug("Unable to connect to site to get cert expiration: %s", e)
-                return AgentCheck.UNKNOWN, None, None, msg
+            return AgentCheck.UNKNOWN, None, None, msg
 
-        exp_date = datetime.strptime(cert['notAfter'], "%b %d %H:%M:%S %Y %Z")
         time_left = exp_date - datetime.utcnow()
         days_left = time_left.days
         seconds_left = time_left.total_seconds()

@@ -22,7 +22,7 @@ The Scylla check is included in the [Datadog Agent][2] package. No additional in
 
 ##### Log collection
 
-Scylla has different modes of outputting logs depending on the environment it's running in.  See the [Scylla documentation][8] for more specifics on how the application generates logs.
+Scylla has different modes of outputting logs depending on the environment it's running in. See the [Scylla documentation][5] for more specifics on how the application generates logs.
 
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
@@ -30,7 +30,7 @@ Scylla has different modes of outputting logs depending on the environment it's 
        logs_enabled: true
      ```
 
-2. Uncomment and edit the logs configuration block in your `scylla.d/conf.yaml` file. Change the `type`, `path`, and `service` parameter values based on your environment. See the [sample scylla.d/conf.yaml][9] for all available configuration options.
+2. Uncomment and edit the logs configuration block in your `scylla.d/conf.yaml` file. Change the `type`, `path`, and `service` parameter values based on your environment. See the [sample scylla.d/conf.yaml][3] for all available configuration options.
 
       ```yaml
        logs:
@@ -47,38 +47,38 @@ Scylla has different modes of outputting logs depending on the environment it's 
 
 3. [Restart the Agent][4].
 
-See [Datadog's documentation][10] for additional information on how to configure the Agent for log collection in Kubernetes environments.
+To enable logs for Kubernetes environments, see [Kubernetes Log Collection][6].
 
 ### Validation
 
-[Run the Agent's status subcommand][5] and look for `scylla` under the Checks section.
+[Run the Agent's status subcommand][7] and look for `scylla` under the Checks section.
 
 ## Data Collected
 
 ### Metrics
 
-See [metadata.csv][6] for a list of metrics provided by this check.
-
-### Service Checks
-
-**scylla.prometheus.health**:<br>
-Returns `CRITICAL` if the Agent cannot reach the metrics endpoints, `OK` otherwise.
+See [metadata.csv][8] for a list of metrics provided by this check.
 
 ### Events
 
 The Scylla check does not include any events.
 
+### Service Checks
+
+See [service_checks.json][9] for a list of service checks provided by this integration.
+
 ## Troubleshooting
 
-Need help? Contact [Datadog support][7].
+Need help? Contact [Datadog support][10].
+
 
 [1]: https://scylladb.com
-[2]: https://docs.datadoghq.com/agent/
+[2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://github.com/DataDog/integrations-core/blob/master/scylla/datadog_checks/scylla/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[5]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[6]: https://github.com/DataDog/integrations-core/blob/master/scylla/metadata.csv
-[7]: https://docs.datadoghq.com/help/
-[8]: https://docs.scylladb.com/getting-started/logging/
-[9]: https://github.com/DataDog/integrations-core/blob/master/scylla/datadog_checks/scylla/data/conf.yaml.example
-[10]: https://docs.datadoghq.com/agent/kubernetes/log/
+[5]: https://docs.scylladb.com/getting-started/logging/
+[6]: https://docs.datadoghq.com/agent/kubernetes/log/
+[7]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[8]: https://github.com/DataDog/integrations-core/blob/master/scylla/metadata.csv
+[9]: https://github.com/DataDog/integrations-core/blob/master/scylla/assets/service_checks.json
+[10]: https://docs.datadoghq.com/help/

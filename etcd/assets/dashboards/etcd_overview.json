@@ -1,375 +1,1593 @@
 {
-    "title": "Etcd v3 - Overview",
-    "description": "This dashboard visualizes your etcd v3 cluster's activity and performance so you can ensure your configurations are synced across your hosts and containers. Further reading on etcd monitoring:\n\n- [Datadog's etcd integration docs](https://docs.datadoghq.com/integrations/etcd/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
-    "widgets": [
-        {
-            "id": 0,
-            "definition": {
-                "type": "image",
-                "url": "/static/images/logos/etcd_large.svg",
-                "sizing": "fit"
-            },
-            "layout": {
-                "x": 0,
-                "y": 0,
-                "width": 47,
-                "height": 15
-            }
-        },
-        {
-            "id": 1,
-            "definition": {
-                "type": "note",
-                "content": "Network",
-                "background_color": "blue",
-                "font_size": "14",
-                "text_align": "left",
-                "show_tick": true,
-                "tick_pos": "50%",
-                "tick_edge": "bottom"
-            },
-            "layout": {
-                "x": 49,
-                "y": 0,
-                "width": 96,
-                "height": 5
-            }
-        },
-        {
-            "id": 2,
-            "definition": {
-                "type": "note",
-                "content": "GRPC cache",
-                "background_color": "blue",
-                "font_size": "14",
-                "text_align": "left",
-                "show_tick": true,
-                "tick_pos": "50%",
-                "tick_edge": "bottom"
-            },
-            "layout": {
-                "x": 0,
-                "y": 17,
-                "width": 47,
-                "height": 5
-            }
-        },
-        {
-            "id": 3,
-            "definition": {
-                "type": "note",
-                "content": "Disk",
-                "background_color": "blue",
-                "font_size": "14",
-                "text_align": "left",
-                "show_tick": true,
-                "tick_pos": "50%",
-                "tick_edge": "bottom"
-            },
-            "layout": {
-                "x": 0,
-                "y": 42,
-                "width": 47,
-                "height": 5
-            }
-        },
-        {
-            "id": 4,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "avg:etcd.disk.backend.commit.duration.seconds{$scope}",
-                        "display_type": "line",
-                        "style": {
-                            "palette": "dog_classic",
-                            "line_type": "solid",
-                            "line_width": "normal"
-                        }
-                    },
-                    {
-                        "q": "avg:etcd.disk.wal.fsync.duration.seconds{$scope}",
-                        "display_type": "line",
-                        "style": {
-                            "palette": "dog_classic",
-                            "line_type": "solid",
-                            "line_width": "normal"
-                        }
-                    }
-                ],
-                "custom_links": [],
-                "title": "Commit / Fsync duration",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": false,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 0,
-                "y": 49,
-                "width": 47,
-                "height": 15
-            }
-        },
-        {
-            "id": 5,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "avg:etcd.grpc.proxy.cache.hits.total{$scope}",
-                        "display_type": "line",
-                        "style": {
-                            "palette": "dog_classic",
-                            "line_type": "solid",
-                            "line_width": "normal"
-                        }
-                    },
-                    {
-                        "q": "avg:etcd.grpc.proxy.cache.misses.total{$scope}",
-                        "display_type": "line",
-                        "style": {
-                            "palette": "dog_classic",
-                            "line_type": "solid",
-                            "line_width": "normal"
-                        }
-                    }
-                ],
-                "custom_links": [],
-                "title": "GRPC cache hits / misses",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": false,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 0,
-                "y": 25,
-                "width": 47,
-                "height": 15
-            }
-        },
-        {
-            "id": 6,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "avg:etcd.network.client.grpc.received.bytes.total{*}.as_count()",
-                        "display_type": "line",
-                        "style": {
-                            "palette": "dog_classic",
-                            "line_type": "solid",
-                            "line_width": "normal"
-                        }
-                    },
-                    {
-                        "q": "avg:etcd.network.client.grpc.sent.bytes.total{*}.as_count()",
-                        "display_type": "line",
-                        "style": {
-                            "palette": "dog_classic",
-                            "line_type": "solid",
-                            "line_width": "normal"
-                        }
-                    }
-                ],
-                "custom_links": [],
-                "title": "Client received and sent bytes",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": false,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 49,
-                "y": 7,
-                "width": 47,
-                "height": 15
-            }
-        },
-        {
-            "id": 7,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "avg:etcd.network.peer.received.bytes.total{$scope}.as_count()",
-                        "display_type": "line",
-                        "style": {
-                            "palette": "dog_classic",
-                            "line_type": "solid",
-                            "line_width": "normal"
-                        }
-                    },
-                    {
-                        "q": "avg:etcd.network.peer.sent.bytes.total{$scope}.as_count()",
-                        "display_type": "line",
-                        "style": {
-                            "palette": "dog_classic",
-                            "line_type": "solid",
-                            "line_width": "normal"
-                        }
-                    }
-                ],
-                "custom_links": [],
-                "title": "Peer received and sent bytes",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": false,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 98,
-                "y": 7,
-                "width": 47,
-                "height": 15
-            }
-        },
-        {
-            "id": 8,
-            "definition": {
-                "type": "note",
-                "content": "Memstats",
-                "background_color": "blue",
-                "font_size": "14",
-                "text_align": "left",
-                "show_tick": true,
-                "tick_pos": "50%",
-                "tick_edge": "bottom"
-            },
-            "layout": {
-                "x": 49,
-                "y": 25,
-                "width": 96,
-                "height": 6
-            }
-        },
-        {
-            "id": 9,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "avg:etcd.go.memstats.last.gc.time.seconds{$scope}",
-                        "display_type": "bars",
-                        "style": {
-                            "palette": "dog_classic",
-                            "line_type": "solid",
-                            "line_width": "normal"
-                        }
-                    }
-                ],
-                "custom_links": [],
-                "title": "GC time",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": false,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 49,
-                "y": 49,
-                "width": 47,
-                "height": 15
-            }
-        },
-        {
-            "id": 10,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "avg:etcd.go.memstats.heap.alloc.bytes{$scope}",
-                        "display_type": "line",
-                        "style": {
-                            "palette": "dog_classic",
-                            "line_type": "solid",
-                            "line_width": "normal"
-                        }
-                    }
-                ],
-                "custom_links": [],
-                "title": "Allocated heap",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": false,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 98,
-                "y": 33,
-                "width": 47,
-                "height": 15
-            }
-        },
-        {
-            "id": 11,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "avg:etcd.go.memstats.alloc.bytes{$scope}",
-                        "display_type": "line",
-                        "style": {
-                            "palette": "dog_classic",
-                            "line_type": "solid",
-                            "line_width": "normal"
-                        }
-                    }
-                ],
-                "custom_links": [],
-                "title": "Allocated bytes",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": false,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 49,
-                "y": 33,
-                "width": 47,
-                "height": 15
-            }
-        },
-        {
-            "id": 12,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "avg:etcd.go.memstats.buck.hash.sys.bytes{$scope}",
-                        "display_type": "line",
-                        "style": {
-                            "palette": "dog_classic",
-                            "line_type": "solid",
-                            "line_width": "normal"
-                        }
-                    }
-                ],
-                "custom_links": [],
-                "title": "Profiling bucket hash table size",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": false,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 98,
-                "y": 49,
-                "width": 47,
-                "height": 15
-            }
-        }
-    ],
-    "template_variables": [
-        {
-            "name": "scope",
-            "default": "*",
-            "prefix": null
-        }
-    ],
-    "layout_type": "free",
-    "is_read_only": true,
-    "notify_list": [],
-    "id": 30289
+	"title": "Etcd v3 - Overview",
+	"description": "**etcd** is a strongly consistent, distributed key-value store that provides a reliable way to store data that needs to be accessed by a distributed system or cluster of machines. It gracefully handles leader elections during network partitions and can tolerate machine failure, even in the leader node.\n\netcd is where Kubernetes stores all of the information about a cluster's state, making it a critical component to monitor when using Kubernetes clusters.\n\nThe Datadog etcd Overview dashboard gives you broad visibility into the status of an etcd cluster, including relevant server and disk metrics.\n\nFurther reading around etcd:\n\n- [Datadog etcd integration documentation](https://docs.datadoghq.com/integrations/etcd/)\n\n- [etcd metrics documentation](https://etcd.io/docs/latest/metrics/)\n\n- [Monitoring in the Kubernetes era](https://www.datadoghq.com/blog/monitoring-kubernetes-era/)\n\nClone this template dashboard to make changes and add your own graph widgets. ",
+	"widgets": [
+		{
+			"id": 354399876068349,
+			"definition": {
+				"title": "New group",
+				"type": "group",
+				"banner_img": "/static/images/logos/etcd_large.svg",
+				"show_title": false,
+				"layout_type": "ordered",
+				"widgets": [
+					{
+						"id": 8677252395138641,
+						"definition": {
+							"type": "note",
+							"content": "**etcd** is a strongly consistent, distributed key-value store that provides a reliable way to store data that needs to be accessed by a distributed system or cluster of machines. It gracefully handles leader elections during network partitions and can tolerate machine failure, even in the leader node.\n\netcd is where Kubernetes stores all of the information about a cluster's state, making it a critical component to monitor when using Kubernetes clusters.\n\nThe Datadog etcd Overview dashboard gives you broad visibility into the status of an etcd cluster, including relevant server and disk metrics.\n\nFurther reading around etcd:\n\n- [Datadog etcd integration documentation](https://docs.datadoghq.com/integrations/etcd/)\n\n- [etcd metrics documentation](https://etcd.io/docs/latest/metrics/)\n\n- [Monitoring in the Kubernetes era](https://www.datadoghq.com/blog/monitoring-kubernetes-era/)\n\nClone this template dashboard to make changes and add your own graph widgets. ",
+							"background_color": "transparent",
+							"font_size": "14",
+							"text_align": "left",
+							"vertical_align": "top",
+							"show_tick": false,
+							"tick_pos": "50%",
+							"tick_edge": "left",
+							"has_padding": true
+						},
+						"layout": {
+							"x": 0,
+							"y": 0,
+							"width": 4,
+							"height": 2
+						}
+					}
+				]
+			},
+			"layout": {
+				"x": 0,
+				"y": 0,
+				"width": 4,
+				"height": 5
+			}
+		},
+		{
+			"id": 7375144978424898,
+			"definition": {
+				"title": "etcd Health",
+				"title_align": "left",
+				"type": "group",
+				"background_color": "blue",
+				"show_title": true,
+				"layout_type": "ordered",
+				"widgets": [
+					{
+						"id": 1542974765273562,
+						"definition": {
+							"title": "Replicas Up",
+							"title_size": "16",
+							"title_align": "left",
+							"type": "check_status",
+							"check": "etcd.prometheus.health",
+							"grouping": "cluster",
+							"group_by": [],
+							"tags": [
+								"$cluster",
+								"$scope",
+								"$env"
+							]
+						},
+						"layout": {
+							"x": 0,
+							"y": 0,
+							"width": 2,
+							"height": 2
+						}
+					},
+					{
+						"id": 3262952125210849,
+						"definition": {
+							"title": "Successful Health Checks",
+							"title_size": "16",
+							"title_align": "left",
+							"show_legend": false,
+							"legend_layout": "horizontal",
+							"legend_columns": [
+								"avg",
+								"min",
+								"max",
+								"value",
+								"sum"
+							],
+							"type": "timeseries",
+							"requests": [
+								{
+									"formulas": [
+										{
+											"formula": "query5"
+										}
+									],
+									"response_format": "timeseries",
+									"queries": [
+										{
+											"query": "sum:etcd.server.health.success.total{$cluster,$scope,$env}.as_count()",
+											"data_source": "metrics",
+											"name": "query5"
+										}
+									],
+									"style": {
+										"palette": "dog_classic",
+										"line_type": "solid",
+										"line_width": "normal"
+									},
+									"display_type": "bars"
+								}
+							],
+							"yaxis": {
+								"include_zero": true,
+								"scale": "linear",
+								"label": "",
+								"min": "auto",
+								"max": "auto"
+							},
+							"markers": []
+						},
+						"layout": {
+							"x": 2,
+							"y": 0,
+							"width": 6,
+							"height": 2
+						}
+					},
+					{
+						"id": 6240265480180397,
+						"definition": {
+							"title": "Leaders",
+							"title_size": "16",
+							"title_align": "left",
+							"time": {},
+							"type": "query_value",
+							"requests": [
+								{
+									"formulas": [
+										{
+											"formula": "query1"
+										}
+									],
+									"conditional_formats": [
+										{
+											"comparator": ">",
+											"palette": "white_on_green",
+											"value": 0
+										}
+									],
+									"response_format": "scalar",
+									"queries": [
+										{
+											"query": "avg:etcd.server.has_leader{$cluster,$scope,$env}",
+											"data_source": "metrics",
+											"name": "query1",
+											"aggregator": "avg"
+										}
+									]
+								}
+							],
+							"autoscale": false,
+							"custom_unit": " ",
+							"precision": 0,
+							"timeseries_background": {
+								"type": "area"
+							}
+						},
+						"layout": {
+							"x": 0,
+							"y": 2,
+							"width": 2,
+							"height": 2
+						}
+					},
+					{
+						"id": 513039419825814,
+						"definition": {
+							"title": "etcd Health Failures",
+							"title_size": "16",
+							"title_align": "left",
+							"show_legend": true,
+							"legend_layout": "horizontal",
+							"legend_columns": [
+								"avg",
+								"min",
+								"max",
+								"value",
+								"sum"
+							],
+							"time": {},
+							"type": "timeseries",
+							"requests": [
+								{
+									"formulas": [
+										{
+											"alias": "failures",
+											"formula": "query5"
+										},
+										{
+											"alias": "heartbeat failures",
+											"formula": "query1"
+										}
+									],
+									"queries": [
+										{
+											"query": "sum:etcd.server.health.failures.total{$cluster,$scope,$env}.as_count()",
+											"data_source": "metrics",
+											"name": "query5"
+										},
+										{
+											"query": "sum:etcd.server.heartbeat.send.failures.total{$cluster,$scope,$env}.as_count()",
+											"data_source": "metrics",
+											"name": "query1"
+										}
+									],
+									"response_format": "timeseries",
+									"style": {
+										"palette": "dog_classic",
+										"line_type": "solid",
+										"line_width": "normal"
+									},
+									"display_type": "line"
+								}
+							],
+							"yaxis": {
+								"include_zero": true,
+								"scale": "linear",
+								"label": "",
+								"min": "auto",
+								"max": "auto"
+							},
+							"markers": []
+						},
+						"layout": {
+							"x": 2,
+							"y": 2,
+							"width": 6,
+							"height": 2
+						}
+					}
+				]
+			},
+			"layout": {
+				"x": 4,
+				"y": 0,
+				"width": 8,
+				"height": 5
+			}
+		},
+		{
+			"id": 8925829144375002,
+			"definition": {
+				"title": "Disk",
+				"type": "group",
+				"background_color": "yellow",
+				"show_title": true,
+				"layout_type": "ordered",
+				"widgets": [
+					{
+						"id": 2055011605399241,
+						"definition": {
+							"title": "Total number of bytes written in WAL",
+							"title_size": "16",
+							"title_align": "left",
+							"type": "query_value",
+							"requests": [
+								{
+									"formulas": [
+										{
+											"formula": "query1"
+										}
+									],
+									"response_format": "scalar",
+									"queries": [
+										{
+											"query": "avg:etcd.disk.wal.write.bytes.total{$cluster,$scope,$env}",
+											"data_source": "metrics",
+											"name": "query1",
+											"aggregator": "avg"
+										}
+									]
+								}
+							],
+							"autoscale": true,
+							"precision": 2
+						},
+						"layout": {
+							"x": 0,
+							"y": 0,
+							"width": 6,
+							"height": 3
+						}
+					},
+					{
+						"id": 29673518157218,
+						"definition": {
+							"title": "Avg Fsync Duration (per host)",
+							"title_size": "16",
+							"title_align": "left",
+							"show_legend": false,
+							"legend_layout": "auto",
+							"legend_columns": [
+								"avg",
+								"min",
+								"max",
+								"value",
+								"sum"
+							],
+							"time": {},
+							"type": "timeseries",
+							"requests": [
+								{
+									"formulas": [
+										{
+											"formula": "query1 / query2"
+										}
+									],
+									"queries": [
+										{
+											"query": "avg:etcd.disk.wal.fsync.duration.seconds.sum{$cluster,$scope,$env} by {host}",
+											"data_source": "metrics",
+											"name": "query1"
+										},
+										{
+											"query": "avg:etcd.disk.wal.fsync.duration.seconds.count{$cluster,$scope,$env} by {host}",
+											"data_source": "metrics",
+											"name": "query2"
+										}
+									],
+									"response_format": "timeseries",
+									"style": {
+										"palette": "dog_classic",
+										"line_type": "solid",
+										"line_width": "normal"
+									},
+									"display_type": "line"
+								}
+							],
+							"custom_links": []
+						},
+						"layout": {
+							"x": 6,
+							"y": 0,
+							"width": 6,
+							"height": 3
+						}
+					},
+					{
+						"id": 1306191008528151,
+						"definition": {
+							"title": "Avg Commit Duration (per host)",
+							"title_size": "16",
+							"title_align": "left",
+							"show_legend": false,
+							"legend_layout": "auto",
+							"legend_columns": [
+								"avg",
+								"min",
+								"max",
+								"value",
+								"sum"
+							],
+							"time": {},
+							"type": "timeseries",
+							"requests": [
+								{
+									"formulas": [
+										{
+											"formula": "query1 / query2"
+										}
+									],
+									"queries": [
+										{
+											"query": "avg:etcd.disk.backend.commit.duration.seconds.sum{$cluster,$scope,$env} by {host}",
+											"data_source": "metrics",
+											"name": "query1"
+										},
+										{
+											"query": "avg:etcd.disk.backend.commit.duration.seconds.count{$cluster,$scope,$env} by {host}",
+											"data_source": "metrics",
+											"name": "query2"
+										}
+									],
+									"response_format": "timeseries",
+									"style": {
+										"palette": "dog_classic",
+										"line_type": "solid",
+										"line_width": "normal"
+									},
+									"display_type": "line"
+								}
+							],
+							"custom_links": []
+						},
+						"layout": {
+							"x": 0,
+							"y": 3,
+							"width": 6,
+							"height": 3
+						}
+					},
+					{
+						"id": 7749247066424746,
+						"definition": {
+							"title": "Avg Snapshot Duration (per host)",
+							"title_size": "16",
+							"title_align": "left",
+							"show_legend": false,
+							"legend_layout": "auto",
+							"legend_columns": [
+								"avg",
+								"min",
+								"max",
+								"value",
+								"sum"
+							],
+							"time": {},
+							"type": "timeseries",
+							"requests": [
+								{
+									"formulas": [
+										{
+											"formula": "query1 / query2"
+										}
+									],
+									"queries": [
+										{
+											"query": "avg:etcd.disk.backend.snapshot.duration.seconds.sum{$cluster,$scope,$env} by {host}",
+											"data_source": "metrics",
+											"name": "query1"
+										},
+										{
+											"query": "avg:etcd.disk.backend.snapshot.duration.seconds.count{$cluster,$scope,$env} by {host}",
+											"data_source": "metrics",
+											"name": "query2"
+										}
+									],
+									"response_format": "timeseries",
+									"style": {
+										"palette": "dog_classic",
+										"line_type": "solid",
+										"line_width": "normal"
+									},
+									"display_type": "line"
+								}
+							],
+							"custom_links": []
+						},
+						"layout": {
+							"x": 6,
+							"y": 3,
+							"width": 6,
+							"height": 3
+						}
+					}
+				]
+			},
+			"layout": {
+				"x": 0,
+				"y": 5,
+				"width": 12,
+				"height": 7
+			}
+		},
+		{
+			"id": 1193467372450514,
+			"definition": {
+				"title": "Network",
+				"type": "group",
+				"background_color": "green",
+				"show_title": true,
+				"layout_type": "ordered",
+				"widgets": [
+					{
+						"id": 8201566845432817,
+						"definition": {
+							"title": "Client received and sent bytes",
+							"title_size": "16",
+							"title_align": "left",
+							"show_legend": true,
+							"legend_layout": "horizontal",
+							"legend_columns": [
+								"avg",
+								"min",
+								"max",
+								"value",
+								"sum"
+							],
+							"time": {},
+							"type": "timeseries",
+							"requests": [
+								{
+									"formulas": [
+										{
+											"alias": "received",
+											"formula": "query1"
+										}
+									],
+									"queries": [
+										{
+											"query": "avg:etcd.network.client.grpc.received.bytes.total{$cluster,$scope,$env}.as_count()",
+											"data_source": "metrics",
+											"name": "query1"
+										}
+									],
+									"response_format": "timeseries",
+									"style": {
+										"palette": "dog_classic",
+										"line_type": "solid",
+										"line_width": "normal"
+									},
+									"display_type": "line"
+								},
+								{
+									"formulas": [
+										{
+											"alias": "sent",
+											"formula": "query1"
+										}
+									],
+									"queries": [
+										{
+											"query": "avg:etcd.network.client.grpc.sent.bytes.total{$cluster,$scope,$env}.as_count()",
+											"data_source": "metrics",
+											"name": "query1"
+										}
+									],
+									"response_format": "timeseries",
+									"style": {
+										"palette": "dog_classic",
+										"line_type": "solid",
+										"line_width": "normal"
+									},
+									"display_type": "line"
+								}
+							],
+							"custom_links": []
+						},
+						"layout": {
+							"x": 0,
+							"y": 0,
+							"width": 6,
+							"height": 3
+						}
+					},
+					{
+						"id": 8507368793904399,
+						"definition": {
+							"title": "Peer bytes sent",
+							"title_size": "16",
+							"title_align": "left",
+							"show_legend": true,
+							"legend_layout": "horizontal",
+							"legend_columns": [
+								"avg",
+								"min",
+								"max",
+								"value",
+								"sum"
+							],
+							"time": {},
+							"type": "timeseries",
+							"requests": [
+								{
+									"formulas": [
+										{
+											"alias": "success",
+											"formula": "query1"
+										},
+										{
+											"alias": "failures",
+											"formula": "query2"
+										}
+									],
+									"queries": [
+										{
+											"query": "avg:etcd.network.client.grpc.sent.bytes.total{$cluster,$scope,$env}.as_count()",
+											"data_source": "metrics",
+											"name": "query1"
+										},
+										{
+											"query": "sum:etcd.network.peer.sent.failures.total{$cluster,$scope,$env}.as_count()",
+											"data_source": "metrics",
+											"name": "query2"
+										}
+									],
+									"response_format": "timeseries",
+									"style": {
+										"palette": "dog_classic",
+										"line_type": "solid",
+										"line_width": "normal"
+									},
+									"display_type": "line"
+								}
+							],
+							"custom_links": []
+						},
+						"layout": {
+							"x": 6,
+							"y": 0,
+							"width": 6,
+							"height": 3
+						}
+					},
+					{
+						"id": 889121407282561,
+						"definition": {
+							"title": "Active peers vs disconnected peers",
+							"title_size": "16",
+							"title_align": "left",
+							"show_legend": true,
+							"legend_layout": "horizontal",
+							"legend_columns": [
+								"avg",
+								"min",
+								"max",
+								"value",
+								"sum"
+							],
+							"time": {},
+							"type": "timeseries",
+							"requests": [
+								{
+									"formulas": [
+										{
+											"alias": "active",
+											"formula": "query1"
+										}
+									],
+									"queries": [
+										{
+											"query": "sum:etcd.network.active_peers{$cluster,$scope,$env} by {host}",
+											"data_source": "metrics",
+											"name": "query1"
+										}
+									],
+									"response_format": "timeseries",
+									"style": {
+										"palette": "dog_classic",
+										"line_type": "solid",
+										"line_width": "normal"
+									},
+									"display_type": "area"
+								},
+								{
+									"formulas": [
+										{
+											"alias": "disconnected",
+											"formula": "query0"
+										}
+									],
+									"queries": [
+										{
+											"query": "sum:etcd.network.disconnected_peers.total{$cluster,$scope,$env}.as_count()",
+											"data_source": "metrics",
+											"name": "query0"
+										}
+									],
+									"response_format": "timeseries",
+									"style": {
+										"palette": "warm",
+										"line_type": "solid",
+										"line_width": "normal"
+									},
+									"display_type": "bars"
+								}
+							]
+						},
+						"layout": {
+							"x": 0,
+							"y": 3,
+							"width": 6,
+							"height": 3
+						}
+					},
+					{
+						"id": 5939383221647774,
+						"definition": {
+							"title": "Peer bytes received",
+							"title_size": "16",
+							"title_align": "left",
+							"show_legend": true,
+							"legend_layout": "horizontal",
+							"legend_columns": [
+								"avg",
+								"min",
+								"max",
+								"value",
+								"sum"
+							],
+							"time": {},
+							"type": "timeseries",
+							"requests": [
+								{
+									"formulas": [
+										{
+											"alias": "success",
+											"formula": "query1"
+										}
+									],
+									"queries": [
+										{
+											"query": "avg:etcd.network.peer.received.bytes.total{$cluster,$scope,$env}.as_count()",
+											"data_source": "metrics",
+											"name": "query1"
+										}
+									],
+									"response_format": "timeseries",
+									"style": {
+										"palette": "dog_classic",
+										"line_type": "solid",
+										"line_width": "normal"
+									},
+									"display_type": "line"
+								},
+								{
+									"formulas": [
+										{
+											"alias": "failures",
+											"formula": "query1"
+										}
+									],
+									"queries": [
+										{
+											"query": "sum:etcd.network.peer.received.failures.total{$cluster,$scope,$env}.as_count()",
+											"data_source": "metrics",
+											"name": "query1"
+										}
+									],
+									"response_format": "timeseries",
+									"style": {
+										"palette": "dog_classic",
+										"line_type": "solid",
+										"line_width": "normal"
+									},
+									"display_type": "bars"
+								}
+							],
+							"custom_links": []
+						},
+						"layout": {
+							"x": 6,
+							"y": 3,
+							"width": 6,
+							"height": 3
+						}
+					}
+				]
+			},
+			"layout": {
+				"x": 0,
+				"y": 12,
+				"width": 12,
+				"height": 7
+			}
+		},
+		{
+			"id": 4785807519924544,
+			"definition": {
+				"title": "etcd Logs",
+				"type": "group",
+				"background_color": "pink",
+				"show_title": true,
+				"layout_type": "ordered",
+				"widgets": [
+					{
+						"id": 6744780399407746,
+						"definition": {
+							"title": "etcd Logs",
+							"title_size": "16",
+							"title_align": "left",
+							"type": "log_stream",
+							"indexes": [],
+							"query": "service:etcd",
+							"sort": {
+								"column": "time",
+								"order": "desc"
+							},
+							"columns": [
+								"host",
+								"service"
+							],
+							"show_date_column": true,
+							"show_message_column": true,
+							"message_display": "expanded-md"
+						},
+						"layout": {
+							"x": 0,
+							"y": 0,
+							"width": 12,
+							"height": 3
+						}
+					}
+				]
+			},
+			"layout": {
+				"x": 0,
+				"y": 19,
+				"width": 12,
+				"height": 4
+			}
+		},
+		{
+			"id": 8996244071996242,
+			"definition": {
+				"title": "Server",
+				"type": "group",
+				"background_color": "orange",
+				"show_title": true,
+				"layout_type": "ordered",
+				"widgets": [
+					{
+						"id": 7812360378473174,
+						"definition": {
+							"type": "note",
+							"content": "Rapid leadership changes impact the performance of etcd significantly. It also signals that the leader is unstable, perhaps due to network connectivity issues or excessive load hitting the etcd cluster.",
+							"background_color": "orange",
+							"font_size": "16",
+							"text_align": "left",
+							"vertical_align": "center",
+							"show_tick": true,
+							"tick_pos": "50%",
+							"tick_edge": "right",
+							"has_padding": true
+						},
+						"layout": {
+							"x": 0,
+							"y": 0,
+							"width": 4,
+							"height": 3
+						}
+					},
+					{
+						"id": 529323145756144,
+						"definition": {
+							"title": "Leader changes the member has seen (by host)",
+							"title_size": "16",
+							"title_align": "left",
+							"show_legend": true,
+							"legend_layout": "auto",
+							"legend_columns": [
+								"avg",
+								"min",
+								"max",
+								"value",
+								"sum"
+							],
+							"time": {},
+							"type": "timeseries",
+							"requests": [
+								{
+									"formulas": [
+										{
+											"formula": "query1"
+										}
+									],
+									"queries": [
+										{
+											"query": "sum:etcd.server.leader.changes.seen.total{$cluster,$scope,$env} by {host}.as_count()",
+											"data_source": "metrics",
+											"name": "query1"
+										}
+									],
+									"response_format": "timeseries",
+									"style": {
+										"palette": "dog_classic",
+										"line_type": "solid",
+										"line_width": "normal"
+									},
+									"display_type": "bars"
+								}
+							]
+						},
+						"layout": {
+							"x": 4,
+							"y": 0,
+							"width": 8,
+							"height": 3
+						}
+					},
+					{
+						"id": 8708750006853207,
+						"definition": {
+							"type": "note",
+							"content": "Failed proposals are normally related to two issues: temporary failures related to a leader election or longer downtime caused by a loss of quorum in the cluster",
+							"background_color": "orange",
+							"font_size": "16",
+							"text_align": "left",
+							"vertical_align": "center",
+							"show_tick": true,
+							"tick_pos": "50%",
+							"tick_edge": "right",
+							"has_padding": true
+						},
+						"layout": {
+							"x": 0,
+							"y": 3,
+							"width": 4,
+							"height": 3
+						}
+					},
+					{
+						"id": 5425536317118026,
+						"definition": {
+							"title": "Failed proposals (by host)",
+							"title_size": "16",
+							"title_align": "left",
+							"show_legend": false,
+							"legend_layout": "auto",
+							"legend_columns": [
+								"avg",
+								"min",
+								"max",
+								"value",
+								"sum"
+							],
+							"time": {},
+							"type": "timeseries",
+							"requests": [
+								{
+									"formulas": [
+										{
+											"formula": "query1"
+										}
+									],
+									"queries": [
+										{
+											"query": "sum:etcd.server.proposals.failed.total{$cluster,$scope,$env} by {host}.as_count()",
+											"data_source": "metrics",
+											"name": "query1"
+										}
+									],
+									"response_format": "timeseries",
+									"style": {
+										"palette": "dog_classic",
+										"line_type": "solid",
+										"line_width": "normal"
+									},
+									"display_type": "bars"
+								}
+							]
+						},
+						"layout": {
+							"x": 4,
+							"y": 3,
+							"width": 4,
+							"height": 3
+						}
+					},
+					{
+						"id": 2056037671995894,
+						"definition": {
+							"type": "note",
+							"content": "Rising pending proposals suggests there is a high client load or the member cannot commit proposals.\n",
+							"background_color": "orange",
+							"font_size": "16",
+							"text_align": "left",
+							"vertical_align": "center",
+							"show_tick": true,
+							"tick_pos": "50%",
+							"tick_edge": "right",
+							"has_padding": true
+						},
+						"layout": {
+							"x": 8,
+							"y": 3,
+							"width": 2,
+							"height": 3
+						}
+					},
+					{
+						"id": 4983165863722180,
+						"definition": {
+							"title": "Total pending proposals (past minute)",
+							"title_size": "16",
+							"title_align": "left",
+							"time": {
+								"live_span": "1m"
+							},
+							"type": "query_value",
+							"requests": [
+								{
+									"formulas": [
+										{
+											"formula": "query1"
+										}
+									],
+									"response_format": "scalar",
+									"queries": [
+										{
+											"query": "sum:etcd.server.proposals.pending{$cluster,$scope,$env}",
+											"data_source": "metrics",
+											"name": "query1",
+											"aggregator": "last"
+										}
+									]
+								}
+							],
+							"autoscale": true,
+							"custom_unit": " ",
+							"precision": 2
+						},
+						"layout": {
+							"x": 10,
+							"y": 3,
+							"width": 2,
+							"height": 3
+						}
+					},
+					{
+						"id": 298124973410779,
+						"definition": {
+							"type": "note",
+							"content": "**Committed proposals** should increase over time if the cluster is healthy. It is important to monitor this metric across all the members in the cluster; a consistently large lag between a single member and its leader indicates that member is slow or unhealthy.\n\n**Applied proposals** records the total number of consensus proposals applied. The etcd server applies every committed proposal asynchronously. If the difference between committed and applied rises, it may indicate that the etcd server is overloaded.",
+							"background_color": "orange",
+							"font_size": "14",
+							"text_align": "left",
+							"vertical_align": "center",
+							"show_tick": true,
+							"tick_pos": "50%",
+							"tick_edge": "bottom",
+							"has_padding": true
+						},
+						"layout": {
+							"x": 0,
+							"y": 6,
+							"width": 12,
+							"height": 2
+						}
+					},
+					{
+						"id": 1485706961750157,
+						"definition": {
+							"title": "Total committed proposals",
+							"title_size": "16",
+							"title_align": "left",
+							"show_legend": true,
+							"legend_layout": "auto",
+							"legend_columns": [
+								"avg",
+								"min",
+								"max",
+								"value",
+								"sum"
+							],
+							"time": {},
+							"type": "timeseries",
+							"requests": [
+								{
+									"formulas": [
+										{
+											"formula": "query1"
+										}
+									],
+									"queries": [
+										{
+											"query": "sum:etcd.server.proposals.committed.total{$cluster,$scope,$env} by {host}",
+											"data_source": "metrics",
+											"name": "query1"
+										}
+									],
+									"response_format": "timeseries",
+									"style": {
+										"palette": "dog_classic",
+										"line_type": "solid",
+										"line_width": "normal"
+									},
+									"display_type": "line"
+								}
+							]
+						},
+						"layout": {
+							"x": 0,
+							"y": 8,
+							"width": 4,
+							"height": 3
+						}
+					},
+					{
+						"id": 1793310873998352,
+						"definition": {
+							"title": "Total applied proposals",
+							"title_size": "16",
+							"title_align": "left",
+							"show_legend": true,
+							"legend_layout": "auto",
+							"legend_columns": [
+								"avg",
+								"min",
+								"max",
+								"value",
+								"sum"
+							],
+							"time": {},
+							"type": "timeseries",
+							"requests": [
+								{
+									"formulas": [
+										{
+											"formula": "query1"
+										}
+									],
+									"queries": [
+										{
+											"query": "sum:etcd.server.proposals.applied.total{$cluster,$scope,$env} by {host}",
+											"data_source": "metrics",
+											"name": "query1"
+										}
+									],
+									"response_format": "timeseries",
+									"style": {
+										"palette": "dog_classic",
+										"line_type": "solid",
+										"line_width": "normal"
+									},
+									"display_type": "line"
+								}
+							]
+						},
+						"layout": {
+							"x": 4,
+							"y": 8,
+							"width": 4,
+							"height": 3
+						}
+					},
+					{
+						"id": 1546449009305554,
+						"definition": {
+							"title": "Diff applied/committed (by host)",
+							"title_size": "16",
+							"title_align": "left",
+							"show_legend": true,
+							"legend_layout": "auto",
+							"legend_columns": [
+								"avg",
+								"min",
+								"max",
+								"value",
+								"sum"
+							],
+							"time": {},
+							"type": "timeseries",
+							"requests": [
+								{
+									"formulas": [
+										{
+											"formula": "query1 - query2"
+										}
+									],
+									"queries": [
+										{
+											"query": "sum:etcd.server.proposals.applied.total{$cluster,$scope,$env} by {host}",
+											"data_source": "metrics",
+											"name": "query1"
+										},
+										{
+											"query": "sum:etcd.server.proposals.committed.total{$cluster,$scope,$env} by {host}",
+											"data_source": "metrics",
+											"name": "query2"
+										}
+									],
+									"response_format": "timeseries",
+									"style": {
+										"palette": "dog_classic",
+										"line_type": "solid",
+										"line_width": "normal"
+									},
+									"display_type": "line"
+								}
+							]
+						},
+						"layout": {
+							"x": 8,
+							"y": 8,
+							"width": 4,
+							"height": 3
+						}
+					}
+				]
+			},
+			"layout": {
+				"x": 0,
+				"y": 0,
+				"width": 12,
+				"height": 12,
+				"is_column_break": true
+			}
+		},
+		{
+			"id": 5317948598735569,
+			"definition": {
+				"title": "Memstats",
+				"type": "group",
+				"background_color": "vivid_purple",
+				"show_title": true,
+				"layout_type": "ordered",
+				"widgets": [
+					{
+						"id": 4183253840341564,
+						"definition": {
+							"title": "Allocated bytes",
+							"title_size": "16",
+							"title_align": "left",
+							"show_legend": false,
+							"legend_layout": "auto",
+							"legend_columns": [
+								"avg",
+								"min",
+								"max",
+								"value",
+								"sum"
+							],
+							"time": {},
+							"type": "timeseries",
+							"requests": [
+								{
+									"formulas": [
+										{
+											"formula": "query1"
+										}
+									],
+									"queries": [
+										{
+											"query": "avg:etcd.go.memstats.alloc.bytes{$cluster,$scope,$env}",
+											"data_source": "metrics",
+											"name": "query1"
+										}
+									],
+									"response_format": "timeseries",
+									"style": {
+										"palette": "dog_classic",
+										"line_type": "solid",
+										"line_width": "normal"
+									},
+									"display_type": "line"
+								}
+							],
+							"custom_links": []
+						},
+						"layout": {
+							"x": 0,
+							"y": 0,
+							"width": 6,
+							"height": 3
+						}
+					},
+					{
+						"id": 6033204596385676,
+						"definition": {
+							"title": "Allocated heap",
+							"title_size": "16",
+							"title_align": "left",
+							"show_legend": false,
+							"legend_layout": "auto",
+							"legend_columns": [
+								"avg",
+								"min",
+								"max",
+								"value",
+								"sum"
+							],
+							"time": {},
+							"type": "timeseries",
+							"requests": [
+								{
+									"formulas": [
+										{
+											"formula": "query1"
+										}
+									],
+									"queries": [
+										{
+											"query": "avg:etcd.go.memstats.heap.alloc.bytes{$cluster,$scope,$env}",
+											"data_source": "metrics",
+											"name": "query1"
+										}
+									],
+									"response_format": "timeseries",
+									"style": {
+										"palette": "dog_classic",
+										"line_type": "solid",
+										"line_width": "normal"
+									},
+									"display_type": "line"
+								}
+							],
+							"custom_links": []
+						},
+						"layout": {
+							"x": 6,
+							"y": 0,
+							"width": 6,
+							"height": 3
+						}
+					},
+					{
+						"id": 5216208910356773,
+						"definition": {
+							"title": "mspan bytes",
+							"title_size": "16",
+							"title_align": "left",
+							"show_legend": false,
+							"legend_layout": "auto",
+							"legend_columns": [
+								"avg",
+								"min",
+								"max",
+								"value",
+								"sum"
+							],
+							"time": {},
+							"type": "timeseries",
+							"requests": [
+								{
+									"formulas": [
+										{
+											"formula": "query1"
+										}
+									],
+									"queries": [
+										{
+											"query": "sum:etcd.go.memstats.mspan.inuse.bytes{$cluster,$scope,$env}",
+											"data_source": "metrics",
+											"name": "query1"
+										}
+									],
+									"response_format": "timeseries",
+									"style": {
+										"palette": "dog_classic",
+										"line_type": "solid",
+										"line_width": "normal"
+									},
+									"display_type": "line"
+								}
+							],
+							"custom_links": []
+						},
+						"layout": {
+							"x": 0,
+							"y": 3,
+							"width": 6,
+							"height": 3
+						}
+					},
+					{
+						"id": 5014167787440583,
+						"definition": {
+							"title": "Profiling bucket hash table size",
+							"title_size": "16",
+							"title_align": "left",
+							"show_legend": false,
+							"legend_layout": "auto",
+							"legend_columns": [
+								"avg",
+								"min",
+								"max",
+								"value",
+								"sum"
+							],
+							"time": {},
+							"type": "timeseries",
+							"requests": [
+								{
+									"formulas": [
+										{
+											"formula": "query1"
+										}
+									],
+									"queries": [
+										{
+											"query": "avg:etcd.go.memstats.buck.hash.sys.bytes{$cluster,$scope,$env}",
+											"data_source": "metrics",
+											"name": "query1"
+										}
+									],
+									"response_format": "timeseries",
+									"style": {
+										"palette": "dog_classic",
+										"line_type": "solid",
+										"line_width": "normal"
+									},
+									"display_type": "line"
+								}
+							],
+							"custom_links": []
+						},
+						"layout": {
+							"x": 6,
+							"y": 3,
+							"width": 6,
+							"height": 3
+						}
+					}
+				]
+			},
+			"layout": {
+				"x": 0,
+				"y": 12,
+				"width": 12,
+				"height": 7
+			}
+		},
+		{
+			"id": 3012310171836528,
+			"definition": {
+				"title": "File Descriptors",
+				"type": "group",
+				"background_color": "gray",
+				"show_title": true,
+				"layout_type": "ordered",
+				"widgets": [
+					{
+						"id": 3421368230637273,
+						"definition": {
+							"title": "Process Open vs Max File Descriptors",
+							"title_size": "16",
+							"title_align": "left",
+							"show_legend": true,
+							"legend_layout": "auto",
+							"legend_columns": [
+								"avg",
+								"min",
+								"max",
+								"value",
+								"sum"
+							],
+							"time": {},
+							"type": "timeseries",
+							"requests": [
+								{
+									"formulas": [
+										{
+											"alias": "open",
+											"formula": "query1"
+										}
+									],
+									"queries": [
+										{
+											"query": "avg:etcd.process.open.fds{$cluster,$scope,$env}",
+											"data_source": "metrics",
+											"name": "query1"
+										}
+									],
+									"response_format": "timeseries",
+									"style": {
+										"palette": "dog_classic",
+										"line_type": "solid",
+										"line_width": "normal"
+									},
+									"display_type": "line"
+								},
+								{
+									"formulas": [
+										{
+											"alias": "max",
+											"formula": "query0"
+										}
+									],
+									"queries": [
+										{
+											"query": "avg:etcd.process.max.fds{$cluster,$scope,$env}",
+											"data_source": "metrics",
+											"name": "query0"
+										}
+									],
+									"response_format": "timeseries",
+									"style": {
+										"palette": "dog_classic",
+										"line_type": "solid",
+										"line_width": "normal"
+									},
+									"display_type": "line"
+								}
+							]
+						},
+						"layout": {
+							"x": 0,
+							"y": 0,
+							"width": 6,
+							"height": 3
+						}
+					},
+					{
+						"id": 8813034200196531,
+						"definition": {
+							"title": "OS Used vs Limit File Descriptors",
+							"title_size": "16",
+							"title_align": "left",
+							"show_legend": true,
+							"legend_layout": "auto",
+							"legend_columns": [
+								"avg",
+								"min",
+								"max",
+								"value",
+								"sum"
+							],
+							"type": "timeseries",
+							"requests": [
+								{
+									"formulas": [
+										{
+											"alias": "used",
+											"formula": "query1"
+										}
+									],
+									"response_format": "timeseries",
+									"queries": [
+										{
+											"query": "avg:etcd.os.fd.used{*}",
+											"data_source": "metrics",
+											"name": "query1"
+										}
+									],
+									"style": {
+										"palette": "dog_classic",
+										"line_type": "solid",
+										"line_width": "normal"
+									},
+									"display_type": "line"
+								},
+								{
+									"formulas": [
+										{
+											"alias": "limit",
+											"formula": "query0"
+										}
+									],
+									"response_format": "timeseries",
+									"queries": [
+										{
+											"query": "avg:etcd.os.fd.limit{*}",
+											"data_source": "metrics",
+											"name": "query0"
+										}
+									],
+									"style": {
+										"palette": "dog_classic",
+										"line_type": "solid",
+										"line_width": "normal"
+									},
+									"display_type": "line"
+								}
+							]
+						},
+						"layout": {
+							"x": 6,
+							"y": 0,
+							"width": 6,
+							"height": 3
+						}
+					}
+				]
+			},
+			"layout": {
+				"x": 0,
+				"y": 19,
+				"width": 12,
+				"height": 4
+			}
+		}
+	],
+	"template_variables": [
+		{
+			"name": "cluster",
+			"default": "*",
+			"prefix": "cluster_name",
+			"available_values": []
+		},
+		{
+			"name": "scope",
+			"default": "*",
+			"prefix": "scope",
+			"available_values": []
+		},
+		{
+			"name": "env",
+			"default": "*",
+			"prefix": "env",
+			"available_values": []
+		}
+	],
+	"layout_type": "ordered",
+	"is_read_only": false,
+	"notify_list": [],
+	"reflow_type": "fixed",
+	"id": "id6-ij5-wvc"
 }

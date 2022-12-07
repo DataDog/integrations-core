@@ -80,7 +80,7 @@ files:
           If `collect_events_only: true`, this option has no effect and events will be collected.
         value:
           type: boolean
-          display_default: depends on collection_type value
+          display_default: null
           example: true
       - name: use_collect_events_fallback
         description: |
@@ -111,10 +111,6 @@ files:
         description: |
           If `ssl_verify ` is disabled, security warnings are logged by the check when making http requests.
           Disable those by setting `tls_ignore_warning` to true.
-
-          Note: `tls_ignore_warning` set to true is currently only reliable if used by one instance of one integration.
-          If enabled for multiple instances, spurious warnings might still appear even if `tls_ignore_warning` is set
-          to true.
         value:
           type: boolean
           example: false
@@ -147,7 +143,6 @@ files:
                   historical metrics
 
         value:
-          display_default: no filter
           example:
             - resource: vm
               property: name
@@ -202,7 +197,6 @@ files:
           Note2: 'vm' and 'host' filters are ignored when collecting historical metrics as those resources do no
                   have historical metrics. They will work only with "collection_type: realtime".
         value:
-          display_default: all metrics
           example:
             vm:
               - <VM_REGEX>                 # Only possible with "collection_type: realtime"
@@ -247,7 +241,6 @@ files:
           Note2: 'vm' and 'host' are possible only with "collection_type: realtime"
           /!\ Use with parsimony, collecting per-instance metrics might be very expensive for big environments.
         value:
-          display_default: none
           example:
             vm:
               - <VM_REGEX>                 # Only possible with "collection_type: realtime"
@@ -340,6 +333,8 @@ files:
           not available, it will fallback to the VM name.
           Use this if you install the agent in VMs so that the hosts are not duplicated
           in the web application UI.
+          Note: If VMs are duplicated in the Infrastructure List, follow these troubleshooting steps
+                https://docs.datadoghq.com/integrations/faq/troubleshooting-duplicated-hosts-with-vsphere/.
         value:
           type: boolean
           example: false
@@ -435,6 +430,12 @@ files:
           when `collect_tags` instance config is enabled.
         options:
           - template: instances/http
+      - name: connection_reset_timeout
+        description: |
+          The time interval in seconds at which the agent should re-authenticate using the provided credentials
+        value:
+          type: integer
+          example: 900
       - template: instances/default
         overrides:
           empty_default_hostname.display_priority: 1

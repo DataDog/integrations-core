@@ -14,9 +14,9 @@ Get metrics from Cacti in real time to:
 The Cacti check is included in the [Datadog Agent][1] package, to start gathering metrics you first need to:
 
 1. Install `librrd` headers and libraries.
-2. Install python bindings to `rrdtool`.
+2. Install Python bindings to `rrdtool`.
 
-#### librrd headers and libraries
+#### Headers and libraries
 
 On Debian/Ubuntu:
 
@@ -32,7 +32,7 @@ sudo yum install rrdtool-devel
 
 #### Python bindings
 
-Now add the `rrdtool` Python package to the Agent with the following command:
+Add the `rrdtool` Python package to the Agent with the following command:
 
 ```shell
 sudo -u dd-agent /opt/datadog-agent/embedded/bin/pip install rrdtool

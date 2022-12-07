@@ -146,7 +146,6 @@ JMX_METRICS_MAP = {
     'kafka_network_RequestMetrics_98thPercentile': 'kafka.network.RequestMetrics.98thPercentile',
     'kafka_network_RequestMetrics_999thPercentile': 'kafka.network.RequestMetrics.999thPercentile',
     'kafka_network_RequestMetrics_99thPercentile': 'kafka.network.RequestMetrics.99thPercentile',
-    'kafka_network_RequestMetrics_Count': 'kafka.network.RequestMetrics.Count',
     'kafka_network_RequestMetrics_FifteenMinuteRate': 'kafka.network.RequestMetrics.FifteenMinuteRate',
     'kafka_network_RequestMetrics_FiveMinuteRate': 'kafka.network.RequestMetrics.FiveMinuteRate',
     'kafka_network_RequestMetrics_Max': 'kafka.network.RequestMetrics.Max',
@@ -161,7 +160,6 @@ JMX_METRICS_MAP = {
     'kafka_security_SimpleAclAuthorizer_FiveMinuteRate': 'kafka.security.SimpleAclAuthorizer.FiveMinuteRate',
     'kafka_security_SimpleAclAuthorizer_MeanRate': 'kafka.security.SimpleAclAuthorizer.MeanRate',
     'kafka_security_SimpleAclAuthorizer_OneMinuteRate': 'kafka.security.SimpleAclAuthorizer.OneMinuteRate',
-    'kafka_server_BrokerTopicMetrics_Count': 'kafka.server.BrokerTopicMetrics.Count',
     'kafka_server_BrokerTopicMetrics_FifteenMinuteRate': 'kafka.server.BrokerTopicMetrics.FifteenMinuteRate',
     'kafka_server_BrokerTopicMetrics_FiveMinuteRate': 'kafka.server.BrokerTopicMetrics.FiveMinuteRate',
     'kafka_server_BrokerTopicMetrics_MeanRate': 'kafka.server.BrokerTopicMetrics.MeanRate',
@@ -200,7 +198,6 @@ JMX_METRICS_MAP = {
     'kafka_server_ReplicaManager_FiveMinuteRate': 'kafka.server.ReplicaManager.FiveMinuteRate',
     'kafka_server_ReplicaManager_MeanRate': 'kafka.server.ReplicaManager.MeanRate',
     'kafka_server_ReplicaManager_OneMinuteRate': 'kafka.server.ReplicaManager.OneMinuteRate',
-    'kafka_server_ReplicaManager_Value': 'kafka.server.ReplicaManager.Value',
     'kafka_server_Request_queue_size': 'kafka.server.Request.queue.size',
     'kafka_server_SessionExpireListener_Count': 'kafka.server.SessionExpireListener.Count',
     'kafka_server_SessionExpireListener_FifteenMinuteRate': 'kafka.server.SessionExpireListener.FifteenMinuteRate',
@@ -597,7 +594,6 @@ JMX_METRICS_OVERRIDES = {
     'kafka_network_RequestMetrics_98thPercentile': 'gauge',
     'kafka_network_RequestMetrics_999thPercentile': 'gauge',
     'kafka_network_RequestMetrics_99thPercentile': 'gauge',
-    'kafka_network_RequestMetrics_Count': 'gauge',
     'kafka_network_RequestMetrics_FifteenMinuteRate': 'gauge',
     'kafka_network_RequestMetrics_FiveMinuteRate': 'gauge',
     'kafka_network_RequestMetrics_Max': 'gauge',
@@ -612,7 +608,6 @@ JMX_METRICS_OVERRIDES = {
     'kafka_security_SimpleAclAuthorizer_FiveMinuteRate': 'gauge',
     'kafka_security_SimpleAclAuthorizer_MeanRate': 'gauge',
     'kafka_security_SimpleAclAuthorizer_OneMinuteRate': 'gauge',
-    'kafka_server_BrokerTopicMetrics_Count': 'gauge',
     'kafka_server_BrokerTopicMetrics_FifteenMinuteRate': 'gauge',
     'kafka_server_BrokerTopicMetrics_FiveMinuteRate': 'gauge',
     'kafka_server_BrokerTopicMetrics_MeanRate': 'gauge',
@@ -651,7 +646,6 @@ JMX_METRICS_OVERRIDES = {
     'kafka_server_ReplicaManager_FiveMinuteRate': 'gauge',
     'kafka_server_ReplicaManager_MeanRate': 'gauge',
     'kafka_server_ReplicaManager_OneMinuteRate': 'gauge',
-    'kafka_server_ReplicaManager_Value': 'gauge',
     'kafka_server_Request_queue_size': 'gauge',
     'kafka_server_SessionExpireListener_Count': 'gauge',
     'kafka_server_SessionExpireListener_FifteenMinuteRate': 'gauge',
@@ -815,6 +809,27 @@ JMX_METRICS_OVERRIDES = {
     'kafka_utils_Throttler_FiveMinuteRate': 'gauge',
     'kafka_utils_Throttler_MeanRate': 'gauge',
     'kafka_utils_Throttler_OneMinuteRate': 'gauge',
+}
+
+METRICS_WITH_NAME_AS_LABEL = {
+    'kafka_network_RequestMetrics_Count': {
+        'legacy_name': 'kafka.network.RequestMetrics.Count',
+        'new_name': 'kafka.network.request',
+        'label_name': 'name',
+        'metric_type': 'gauge',
+    },
+    'kafka_server_BrokerTopicMetrics_Count': {
+        'legacy_name': 'kafka.server.BrokerTopicMetrics.Count',
+        'new_name': 'kafka.server.broker_topics',
+        'label_name': 'name',
+        'metric_type': 'gauge',
+    },
+    'kafka_server_ReplicaManager_Value': {
+        'legacy_name': 'kafka.server.ReplicaManager.Value',
+        'new_name': 'kafka.server.replica_manager',
+        'label_name': 'name',
+        'metric_type': 'gauge',
+    },
 }
 
 

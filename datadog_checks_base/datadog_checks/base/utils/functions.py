@@ -29,3 +29,7 @@ def return_true(*args, **kwargs):
 
 def return_false(*args, **kwargs):
     return False
+
+
+def raise_exception(exception_class, *args, **kwargs):
+    raise exception_class(*args, **kwargs)

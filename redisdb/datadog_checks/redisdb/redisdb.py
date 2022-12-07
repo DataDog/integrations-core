@@ -9,7 +9,7 @@ from collections import Counter, defaultdict
 from copy import deepcopy
 
 import redis
-from six import iteritems
+from six import PY2, iteritems
 
 from datadog_checks.base import AgentCheck, ConfigurationError, ensure_unicode, is_affirmative
 from datadog_checks.base.utils.common import round_value
@@ -60,6 +60,8 @@ class Redis(AgentCheck):
         'blocked_clients': 'redis.clients.blocked',
         'client_biggest_input_buf': 'redis.clients.biggest_input_buf',
         'client_longest_output_list': 'redis.clients.longest_output_list',
+        'client_recent_max_input_buffer': 'redis.clients.recent_max_input_buffer',
+        'client_recent_max_output_buffer': 'redis.clients.recent_max_output_buffer',
         # Keys
         'evicted_keys': 'redis.keys.evicted',
         'expired_keys': 'redis.keys.expired',
@@ -195,35 +197,39 @@ class Redis(AgentCheck):
         conn = self._get_conn(self.instance)
         # Ping the database for info, and track the latency.
         # Process the service check: the check passes if we can connect to Redis
-        start = time.time()
+        start = (
+            time.time() if PY2 else time.process_time()
+        )  # New in python 3.3: time.process_time (It does not include time elapsed during sleep)
+        tags = list(self.tags)
         try:
             info = conn.info()
-            latency_ms = round_value((time.time() - start) * 1000, 2)
-
-            tags = list(self.tags)
-            if info.get("role"):
-                tags.append("redis_role:{}".format(info["role"]))
-            else:
-                self.log.debug("Redis role was not found")
-
-            self.gauge('redis.info.latency_ms', latency_ms, tags=tags)
-            try:
-                config = conn.config_get("maxclients")
-            except redis.ResponseError:
-                # config_get is disabled on some environments
-                self.log.debug("Error querying config")
-                config = {}
-            status = AgentCheck.OK
-            self.service_check('redis.can_connect', status, tags=tags)
+            cur_time = (
+                time.time() if PY2 else time.process_time()
+            )  # New in python 3.3: time.process_time (It does not include time elapsed during sleep)
+            latency_ms = round_value((cur_time - start) * 1000, 2)
             self._collect_metadata(info)
-        except ValueError:
-            status = AgentCheck.CRITICAL
-            self.service_check('redis.can_connect', status, tags=self.tags)
+        except ValueError as e:
+            self.service_check('redis.can_connect', AgentCheck.CRITICAL, message=str(e), tags=self.tags)
             raise
-        except Exception:
-            status = AgentCheck.CRITICAL
-            self.service_check('redis.can_connect', status, tags=self.tags)
+        except Exception as e:
+            self.service_check('redis.can_connect', AgentCheck.CRITICAL, message=str(e), tags=self.tags)
             raise
+        else:
+            self.service_check('redis.can_connect', AgentCheck.OK, tags=tags)
+
+        if info.get("role"):
+            tags.append("redis_role:{}".format(info["role"]))
+        else:
+            self.log.debug("Redis role was not found")
+
+        self.gauge('redis.info.latency_ms', latency_ms, tags=tags)
+
+        try:
+            config = conn.config_get("maxclients")
+        except redis.ResponseError:
+            # config_get is disabled on some environments
+            self.log.debug("Unable to collect max clients: CONFIG GET disabled in managed Redis instances.")
+            config = {}
 
         # Save the database statistics.
         for key in info.keys():
@@ -262,11 +268,15 @@ class Redis(AgentCheck):
                 self.gauge(metric_name, value, tags=tags)
 
         if self.collect_client_metrics:
-            # Save client connections statistics
-            clients = conn.client_list()
-            clients_by_name = Counter(client["name"] or DEFAULT_CLIENT_NAME for client in clients)
-            for name, count in clients_by_name.items():
-                self.gauge("redis.net.connections", count, tags=tags + ['source:' + name])
+            try:
+                # Save client connections statistics
+                clients = conn.client_list()
+                clients_by_name = Counter(client["name"] or DEFAULT_CLIENT_NAME for client in clients)
+                for name, count in clients_by_name.items():
+                    self.gauge("redis.net.connections", count, tags=tags + ['source:' + name])
+            except redis.ResponseError:
+                # client_list is disabled on some environments
+                self.log.debug("Unable to collect client metrics: CLIENT disabled in some managed Redis.")
 
         # Save the number of commands.
         self.rate('redis.net.commands', info['total_commands_processed'], tags=tags)
@@ -368,6 +378,10 @@ class Redis(AgentCheck):
                         # Send 1 if the key exists as a string
                         lengths[text_key]["length"] += 1
                         lengths_overall[text_key] += 1
+                    elif key_type == 'stream':
+                        keylen = db_conn.xlen(key)
+                        lengths[text_key]["length"] += 1
+                        lengths_overall[text_key] += 1
                     else:
                         # If the type is unknown, it might be because the key doesn't exist,
                         # which can be because the list is empty. So always send 0 in that case.
@@ -436,6 +450,30 @@ class Redis(AgentCheck):
 
         """
         conn = self._get_conn(self.instance)
+
+        # Use fixed version of parse_slowlog_get callback for the
+        # 'SLOWLOG GET' command; taken from upstream/master since it
+        # will not be released in redis==3.5.3
+        # - https://github.com/andymccurdy/redis-py/issues/1428#issuecomment-749692873
+        # - upstream/master: https://github.com/andymccurdy/redis-py/commit/bc5854217b4e94eb7a33e3da5738858a17135ca5
+        def upstream_parse_slowlog_get(response, **options):
+            space = ' ' if options.get('decode_responses', False) else b' '
+            return [
+                {
+                    'id': item[0],
+                    'start_time': int(item[1]),
+                    'duration': int(item[2]),
+                    'command':
+                    # Redis Enterprise injects another entry at index [3], which has
+                    # the complexity info (i.e. the value N in case the command has
+                    # an O(N) complexity) instead of the command.
+                    space.join(item[3]) if isinstance(item[3], list) else space.join(item[4]),
+                }
+                for item in response
+            ]
+
+        conn.set_response_callback("SLOWLOG GET", upstream_parse_slowlog_get)
+
         if not self.instance.get(MAX_SLOW_ENTRIES_KEY):
             try:
                 max_slow_entries = int(conn.config_get(MAX_SLOW_ENTRIES_KEY)[MAX_SLOW_ENTRIES_KEY])
@@ -449,6 +487,7 @@ class Redis(AgentCheck):
                     max_slow_entries = DEFAULT_MAX_SLOW_ENTRIES
             # No config on AWS Elasticache
             except redis.ResponseError:
+                self.log.debug("Unable to collect length of slow log: CONFIG GET disabled in some managed Redis.")
                 max_slow_entries = DEFAULT_MAX_SLOW_ENTRIES
         else:
             max_slow_entries = int(self.instance.get(MAX_SLOW_ENTRIES_KEY))
@@ -457,9 +496,17 @@ class Redis(AgentCheck):
         try:
             slowlogs = conn.slowlog_get(max_slow_entries)
         except TypeError as e:
-            # https://github.com/andymccurdy/redis-py/issues/1475
+            # This catch is needed in PY2 because there is a known issue that has only been fixed after redis
+            # dropped python 2 support
+            # issue: https://github.com/andymccurdy/redis-py/issues/1475
+            # fix: https://github.com/andymccurdy/redis-py/pull/1352
+            # TODO: remove once PY2 is no longer supported
             self.log.exception(e)
-            self.log.error('There was an error retrieving slowlog, these metrics will be skipped')
+            self.log.error(
+                'There was an error retrieving slowlog, these metrics will be skipped. This issue is fixed on Agent 7+.'
+                ' You can find more information about upgrading to agent 7 in '
+                'https://docs.datadoghq.com/agent/versions/upgrade_to_agent_v7/?tab=linux'
+            )
             slowlogs = []
 
         # Find slowlog entries between last timestamp and now using start_time
@@ -477,16 +524,14 @@ class Redis(AgentCheck):
 
             slowlog_tags = list(self.tags)
             command = slowlog['command'].split()
-            # When the "Garantia Data" custom Redis is used, redis-py returns
-            # an empty `command` field
-            # FIXME when https://github.com/andymccurdy/redis-py/pull/622 is released in redis-py
-            if command:
+            if len(command) > 0:
                 slowlog_tags.append('command:{}'.format(ensure_unicode(command[0])))
 
             value = slowlog['duration']
             self.histogram('redis.slowlog.micros', value, tags=slowlog_tags)
 
-        self.last_timestamp_seen = max_ts
+        if max_ts != 0:
+            self.last_timestamp_seen = max_ts
 
     def _check_command_stats(self, conn, tags):
         """Get command-specific statistics from redis' INFO COMMANDSTATS command"""

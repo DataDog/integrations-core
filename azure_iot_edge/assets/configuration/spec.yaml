@@ -23,4 +23,5 @@ files:
               example: http://edgeAgent:9600/metrics
           - template: instances/openmetrics_legacy
             overrides:
+              prometheus_url.required: false
               prometheus_url.hidden: true

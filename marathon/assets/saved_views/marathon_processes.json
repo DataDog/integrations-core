@@ -14,11 +14,8 @@
       "showArguments"
     ],
     "filter": {
-      "text": "",
-      "groups": [],
-      "tags": [
-        "integration:marathon"
-      ]
+      "query_filter": "integration:marathon",
+      "groups": []
     },
     "selected_top_graph": "scatterplot",
     "enabled_columns": [

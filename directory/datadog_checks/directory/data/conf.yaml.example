@@ -9,7 +9,7 @@ init_config:
     #
     # service: <SERVICE>
 
-## Every instance is scheduled independent of the others.
+## Every instance is scheduled independently of the others.
 #
 instances:
 
@@ -61,7 +61,7 @@ instances:
     ## @param dirs_patterns_full - boolean - optional - default: false
     ## Make exclude_dirs patterns operate on the full directory path (may be slightly slower).
     ## Setting this option to `false` excludes any directory in the traversal with the provided name.
-    ## Setting this option to `true` allows you to specify the absolute path. This ensures multiple directories 
+    ## Setting this option to `true` allows you to specify the absolute path. This ensures multiple directories
     ## with the same name aren't all excluded.
     #
     # dirs_patterns_full: false
@@ -73,7 +73,7 @@ instances:
 
     ## @param follow_symlinks - boolean - optional - default: true
     ## Follow symlinks when traversing directories.
-    ## When `recursive: true` is used, setting `follow_symlinks: false` helps avoid symlink loops. 
+    ## When `recursive: true` is used, setting `follow_symlinks: false` helps avoid symlink loops.
     #
     # follow_symlinks: true
 
@@ -92,6 +92,11 @@ instances:
     ## When true the check does not raise an exception on missing or inaccessible directories.
     #
     # ignore_missing: false
+
+    ## @param submit_histograms - boolean - optional - default: true
+    ## Whether or not to submit histograms.
+    #
+    # submit_histograms: true
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
@@ -121,3 +126,14 @@ instances:
     ## This is useful for cluster-level checks.
     #
     # empty_default_hostname: false
+
+    ## @param metric_patterns - mapping - optional
+    ## A mapping of metrics to include or exclude, with each entry being a regular expression.
+    ##
+    ## Metrics defined in `exclude` will take precedence in case of overlap.
+    #
+    # metric_patterns:
+    #   include:
+    #   - <INCLUDE_REGEX>
+    #   exclude:
+    #   - <EXCLUDE_REGEX>

@@ -142,26 +142,6 @@ def test_is_pod_metric():
         assert CadvisorPrometheusScraperMixin._is_pod_metric(metric.label) is True
 
 
-def test_get_container_label():
-    labels = {"container_name": "POD", "id": "/kubepods/burstable/pod531c80d9-9fc4-11e7-ba8b-42010af002bb"}
-    assert CadvisorPrometheusScraperMixin._get_container_label(labels, "container_name") == "POD"
-    assert CadvisorPrometheusScraperMixin._get_container_label({}, "not-in") is None
-
-
-def test_get_container_id(cadvisor_scraper):
-    # k8s >= 1.16
-    labels = {"container": "datadog-agent", "namespace": "default", "pod": "datadog-agent-pbqt2"}
-    container_id = cadvisor_scraper._get_container_id(labels)
-    assert container_id == "containerd://51cba2ca229069039575750d44ed3a67e9b5ead651312ba7ff218dd9202fde64"
-
-    # k8s < 1.16
-    labels = {"container_name": "datadog-agent", "namespace": "default", "pod_name": "datadog-agent-pbqt2"}
-    container_id = cadvisor_scraper._get_container_id(labels)
-    assert container_id == "containerd://51cba2ca229069039575750d44ed3a67e9b5ead651312ba7ff218dd9202fde64"
-
-    assert cadvisor_scraper._get_container_id([]) is None
-
-
 def test_get_entity_id_if_container_metric(cadvisor_scraper):
     # k8s >= 1.16
     static_pod_1_16 = MockMetric(

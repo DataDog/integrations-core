@@ -20,7 +20,7 @@ init_config:
     #
     # service: <SERVICE>
 
-## Every instance is scheduled independent of the others.
+## Every instance is scheduled independently of the others.
 #
 instances:
 
@@ -35,10 +35,21 @@ instances:
     #
     service_name: <SERVICE_NAME>
 
-    ## @param user - string - required
+    ## @param protocol - string - optional - default: TCP
+    ## The protocol to connect to the Oracle Database Server. Valid protocols include TCP and TCPS.
+    ##
+    ## If you are using the TCPS protocol and connecting to Oracle Database through JDBC, `jdbc_truststore` and
+    ## `jdbc_truststore_type` are required.
+    ##
+    ## More information can be found from Oracle Database's whitepaper:
+    ## https://www.oracle.com/technetwork/topics/wp-oracle-jdbc-thin-ssl-130128.pdf
+    #
+    # protocol: TCP
+
+    ## @param username - string - required
     ## The username for the Datadog user account.
     #
-    user: <USER>
+    username: <USERNAME>
 
     ## @param password - string - required
     ## The password for the Datadog user account.
@@ -51,8 +62,28 @@ instances:
     #
     # jdbc_driver_path: <DRIVER_PATH>.jar
 
+    ## @param jdbc_truststore_path - string - optional
+    ## The JDBC truststore file path.
+    ##
+    ## Note: This option is required if connecting with TCPS through JDBC.
+    #
+    # jdbc_truststore_path: <JDBC_TRUSTSTORE_PATH>
+
+    ## @param jdbc_truststore_type - string - optional
+    ## The JDBC truststore file type. Supported truststore types include JKS, SSO, and PKCS12.
+    ##
+    ## Note: This option is required if connecting with TCPS through JDBC.
+    #
+    # jdbc_truststore_type: <JDBC_TRUSTSTORE_TYPE>
+
+    ## @param jdbc_truststore_password - string - optional
+    ## The password for the truststore when connecting through JDBC.
+    #
+    # jdbc_truststore_password: <JDBC_TRUSTSTORE_PASSWORD>
+
     ## @param only_custom_queries - boolean - optional - default: false
-    ## Set this parameter to `true` if you want to skip default system, process, and tablespace metrics checks.
+    ## Set this parameter to `true` if you want to skip the integration's default metrics collection.
+    ## Only metrics specified in `custom_queries` will be collected.
     #
     # only_custom_queries: false
 
@@ -124,3 +155,14 @@ instances:
     ## This is useful for cluster-level checks.
     #
     # empty_default_hostname: false
+
+    ## @param metric_patterns - mapping - optional
+    ## A mapping of metrics to include or exclude, with each entry being a regular expression.
+    ##
+    ## Metrics defined in `exclude` will take precedence in case of overlap.
+    #
+    # metric_patterns:
+    #   include:
+    #   - <INCLUDE_REGEX>
+    #   exclude:
+    #   - <EXCLUDE_REGEX>

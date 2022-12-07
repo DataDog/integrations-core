@@ -4,8 +4,18 @@
 
 import click
 
-from ...utils import complete_valid_checks, get_check_files, get_valid_integrations
-from ..console import CONTEXT_SETTINGS, abort, echo_debug, echo_failure, echo_info, echo_success, echo_warning
+from ...testing import process_checks_option
+from ...utils import complete_valid_checks, get_check_files
+from ..console import (
+    CONTEXT_SETTINGS,
+    abort,
+    annotate_error,
+    echo_debug,
+    echo_failure,
+    echo_info,
+    echo_success,
+    echo_warning,
+)
 
 
 def validate_import(filepath, check, autofix):
@@ -45,23 +55,20 @@ def validate_import(filepath, check, autofix):
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate proper base imports')
-@click.argument('checks', nargs=-1, autocompletion=complete_valid_checks, required=False)
+@click.argument('check', shell_complete=complete_valid_checks, required=False)
 @click.option('--autofix', is_flag=True, help='Apply suggested fix')
 @click.pass_context
-def imports(ctx, autofix, checks):
-    """Validate proper imports in checks."""
+def imports(ctx, check, autofix):
+    """Validate proper imports in checks.
 
-    validation_fails = {}
-    all_checks = sorted(get_valid_integrations())
-
-    if checks:
-        invalid_checks = [c for c in checks if c not in all_checks]
-        if invalid_checks:
-            abort(f'Invalid checks: {invalid_checks}')
-        all_checks = sorted(checks)
-
-    echo_info("Validating imports avoiding deprecated modules ...")
-    for check_name in sorted(all_checks):
+    If `check` is specified, only the check will be validated, if check value is 'changed' will only apply to changed
+    checks, an 'all' or empty `check` value will validate all README files.
+    """
+    checks = process_checks_option(check, source='integrations')
+    echo_info(f"Validating imports for {len(checks)} checks to avoid deprecated modules ...")
+    failed = False
+    for check_name in checks:
+        validation_fails = {}
         echo_debug(f'Checking {check_name}')
 
         # focus on check and testing directories
@@ -69,19 +76,29 @@ def imports(ctx, autofix, checks):
             success, lines = validate_import(fpath, check_name, autofix)
 
             if not success:
+                failed = True
                 validation_fails[fpath] = lines
 
-    if validation_fails:
-        num_files = len(validation_fails)
-        num_failures = sum(len(lines) for lines in validation_fails.values())
-        echo_failure(f'\nValidation failed: {num_failures} deprecated imports found in {num_files} files:\n')
-        for f, lines in validation_fails.items():
-            for line in lines:
-                linenum, linetext = line
-                echo_warning(f'{f}: line # {linenum}', indent='  ')
-                echo_info(f'{linetext}', indent='    ')
+        if validation_fails:
+            num_files = len(validation_fails)
+            num_failures = sum(len(lines) for lines in validation_fails.values())
+            header_message = f'\nValidation failed: {num_failures} deprecated imports found in {num_files} files:\n'
+            echo_failure(header_message)
+            for f, lines in validation_fails.items():
+                for line in lines:
+                    linenum, linetext = line
+                    echo_warning(f'{f}: line # {linenum + 1}', indent='  ')
+                    echo_info(f'{linetext}', indent='    ')
+                    message = 'Detected deprecated import: `{}`, run "ddev validate imports --autofix" to fix.'.format(
+                        linetext.strip("\n")
+                    )
+                    annotate_error(
+                        f,
+                        message,
+                        line=linenum + 1,
+                    )
 
-        abort()
-
+        if failed:
+            abort()
     else:
         echo_success('Validation passed!')

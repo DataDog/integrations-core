@@ -1,0 +1,2 @@
+-e ../datadog_checks_dev
+foundationdb==6.3.24

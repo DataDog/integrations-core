@@ -14,11 +14,8 @@
       "showArguments"
     ],
     "filter": {
-      "text": "",
-      "groups": [],
-      "tags": [
-        "integration:redisdb"
-      ]
+      "query_filter": "integration:redisdb",
+      "groups": []
     },
     "selected_top_graph": "scatterplot",
     "enabled_columns": [

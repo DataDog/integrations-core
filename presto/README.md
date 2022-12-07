@@ -20,7 +20,7 @@ No additional installation is needed on your server. Install the Agent on each C
 
 1. Edit the `presto.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Presto performance data. See the [sample presto.d/conf.yaml][4] for all available configuration options.
 
-    This check has a limit of 350 metrics per instance. The number of returned metrics is indicated in the info page. You can specify the metrics you are interested in by editing the configuration below. To learn how to customize the metrics to collect, visit the [JMX Checks documentation][5] for more detailed instructions. If you need to monitor more metrics, contact [Datadog support][6].
+    This check has a limit of 350 metrics per instance. The number of returned metrics is indicated in the info page. You can specify the metrics you are interested in by editing the configuration below. To learn how to customize the metrics to collect, see the [JMX Checks documentation][5] for more detailed instructions. If you need to monitor more metrics, contact [Datadog support][6].
 
 2. [Restart the Agent][7].
 
@@ -54,7 +54,7 @@ _Available for Agent versions >6.0_
 
 ### Validation
 
-[Run the Agent's status subcommand][8] and look for `presto` under the Checks section.
+Run the [Agent's status subcommand][8] and look for `presto` under the Checks section.
 
 ## Data Collected
 
@@ -68,12 +68,12 @@ Presto does not include any events.
 
 ### Service Checks
 
-**presto.can_connect**:<br>
-Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored Presto instance, otherwise returns `OK`.
+See [service_checks.json][10] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
 Need help? Contact [Datadog support][6].
+
 
 [1]: https://docs.datadoghq.com/integrations/presto/
 [2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
@@ -84,3 +84,4 @@ Need help? Contact [Datadog support][6].
 [7]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [8]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [9]: https://github.com/DataDog/integrations-core/blob/master/presto/metadata.csv
+[10]: https://github.com/DataDog/integrations-core/blob/master/presto/assets/service_checks.json

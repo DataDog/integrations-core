@@ -24,7 +24,7 @@ def test_from_instance():
 
     # defaults
     config = from_instance({'url': 'https://example.com', 'name': 'UpService'})
-    assert len(config) == 18
+    assert len(config) == 16
 
     # `url` is mandatory
     assert config.url == 'https://example.com'
@@ -43,9 +43,7 @@ def test_from_instance():
     assert config.tags == []
     assert config.ssl_expire is True
     assert config.instance_ca_certs != ''  # `ca_certs`, it's mocked we don't care
-    assert config.weakcipher is False
     assert config.check_hostname is True
-    assert config.allow_redirects is True
     assert config.stream is False
 
     # headers

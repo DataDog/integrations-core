@@ -27,6 +27,21 @@ def get_dependencies():
         return f.readlines()
 
 
+def parse_pyproject_array(name):
+    import os
+    import re
+    from ast import literal_eval
+
+    pattern = r'^{} = (\[.+?\])$'.format(name)
+
+    with open(os.path.join(HERE, 'pyproject.toml'), 'r', encoding='utf-8') as f:
+        # Windows \r\n prevents match
+        contents = '\n'.join(line.rstrip() for line in f.readlines())
+
+    array = re.search(pattern, contents, flags=re.MULTILINE | re.DOTALL).group(1)
+    return literal_eval(array)
+
+
 setup(
     # Version should always match one from an agent release
     version=ABOUT["__version__"],
@@ -34,7 +49,7 @@ setup(
     description='The Datadog Checks Downloader',
     long_description=LONG_DESC,
     long_description_content_type='text/markdown',
-    keywords='datadog agent checks',
+    keywords='datadog,agent,checks',
     url='https://github.com/DataDog/integrations-core',
     author='Datadog',
     author_email='packages@datadoghq.com',
@@ -52,7 +67,7 @@ setup(
     ],
     packages=['datadog_checks.downloader'],
     # Run-time dependencies
-    extras_require={'deps': get_dependencies()},
+    extras_require={'deps': parse_pyproject_array('deps')},
     # NOTE: Copy over TUF directories, and root metadata.
     package_data={
         'datadog_checks.downloader': [

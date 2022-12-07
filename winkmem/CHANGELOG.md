@@ -1,0 +1,2 @@
+# CHANGELOG - Windows Kernel Memory
+

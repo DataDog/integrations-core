@@ -1,8 +1,10 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import re
 import time
 from collections import defaultdict
+from copy import deepcopy
 
 import requests
 from six import iteritems, itervalues
@@ -22,9 +24,34 @@ from .metrics import (
     stats_for_version,
 )
 
+REGEX = r'(?<!\\)\.'  # This regex string is used to traverse through nested dictionaries for JSON responses
+
 
 class AuthenticationError(requests.exceptions.HTTPError):
     """Authentication Error, unable to reach server"""
+
+
+def get_dynamic_tags(columns):
+    dynamic_tags = []  # This is a list of (path to tag, name of tag)
+    for column in columns:
+        if column.get('type') == 'tag':
+            value_path = column.get('value_path')
+            name = column.get('name')
+            dynamic_tags.append((value_path, name))
+    return dynamic_tags
+
+
+def get_value_from_path(value, path):
+    result = value
+
+    # Traverse the nested dictionaries
+    for key in re.split(REGEX, path):
+        if result is not None:
+            result = result.get(key.replace('\\', ''))
+        else:
+            break
+
+    return result
 
 
 class ESCheck(AgentCheck):
@@ -79,6 +106,7 @@ class ESCheck(AgentCheck):
         # is retrieved here, and added to the tag list.
         stats_url = self._join_url(stats_url, admin_forwarder)
         stats_data = self._get_data(stats_url)
+
         if stats_data.get('cluster_name'):
             # retrieve the cluster name from the data, and append it to the
             # master tag list.
@@ -129,6 +157,10 @@ class ESCheck(AgentCheck):
         if self._config.cat_allocation_stats:
             self._process_cat_allocation_data(admin_forwarder, version, base_tags)
 
+        # Load custom queries
+        if self._config.custom_queries:
+            self._run_custom_queries(admin_forwarder, base_tags)
+
         # If we're here we did not have any ES conn issues
         self.service_check(self.SERVICE_CHECK_CONNECT_NAME, AgentCheck.OK, tags=self._config.service_check_tags)
 
@@ -139,11 +171,17 @@ class ESCheck(AgentCheck):
         try:
             data = self._get_data(self._config.url, send_sc=False)
             raw_version = data['version']['number']
+
             self.set_metadata('version', raw_version)
             # pre-release versions of elasticearch are suffixed with -rcX etc..
             # peel that off so that the map below doesn't error out
             raw_version = raw_version.split('-')[0]
             version = [int(p) for p in raw_version.split('.')[0:3]]
+            if data['version'].get('distribution', '') == 'opensearch':
+                # Opensearch API is backwards compatible with ES 7.10.0
+                # https://opensearch.org/faq
+                self.log.debug('OpenSearch version %s detected', version)
+                version = [7, 10, 0]
         except AuthenticationError:
             raise
         except Exception as e:
@@ -194,7 +232,7 @@ class ESCheck(AgentCheck):
             for key, value in list(iteritems(index_data)):
                 if value is None:
                     del index_data[key]
-                    self.log.warning("The index %s has no metric data for %s", idx['index'], key)
+                    self.log.debug("The index %s has no metric data for %s", idx['index'], key)
 
             for metric in index_stats_metrics:
                 # metric description
@@ -228,13 +266,16 @@ class ESCheck(AgentCheck):
 
         return health_url, stats_url, pshard_stats_url, pending_tasks_url, slm_url
 
-    def _get_data(self, url, send_sc=True):
+    def _get_data(self, url, send_sc=True, data=None):
         """
         Hit a given URL and return the parsed json
         """
         resp = None
         try:
-            resp = self.http.get(url)
+            if data:
+                resp = self.http.post(url, json=data)
+            else:
+                resp = self.http.get(url)
             resp.raise_for_status()
         except Exception as e:
             # this means we've hit a particular kind of auth error that means the config is broken
@@ -301,7 +342,23 @@ class ESCheck(AgentCheck):
 
     def _process_pshard_stats_data(self, data, pshard_stats_metrics, base_tags):
         for metric, desc in iteritems(pshard_stats_metrics):
-            self._process_metric(data, metric, *desc, tags=base_tags)
+            pshard_tags = base_tags
+            if desc[1].startswith('_all.'):
+                pshard_tags = pshard_tags + ['index_name:_all']
+            self._process_metric(data, metric, *desc, tags=pshard_tags)
+        # process index-level metrics
+        if self._config.cluster_stats and self._config.detailed_index_stats:
+            for metric, desc in iteritems(pshard_stats_metrics):
+                if desc[1].startswith('_all.'):
+                    for index in data['indices']:
+                        self.log.debug("Processing index %s", index)
+                        escaped_index = index.replace('.', '\.')  # noqa: W605
+                        index_desc = (
+                            desc[0],
+                            'indices.' + escaped_index + '.' + desc[1].replace('_all.', ''),
+                            desc[2] if 2 < len(desc) else None,
+                        )
+                        self._process_metric(data, metric, *index_desc, tags=base_tags + ['index_name:' + index])
 
     def _process_metric(self, data, metric, xtype, path, xform=None, tags=None, hostname=None):
         """
@@ -310,20 +367,15 @@ class ESCheck(AgentCheck):
         path: corresponding path in data, flattened, e.g. thread_pool.bulk.queue
         xform: a lambda to apply to the numerical value
         """
-        value = data
-
-        # Traverse the nested dictionaries
-        for key in path.split('.'):
-            if value is not None:
-                value = value.get(key)
-            else:
-                break
+        value = get_value_from_path(data, path)
 
         if value is not None:
             if xform:
                 value = xform(value)
             if xtype == "gauge":
                 self.gauge(metric, value, tags=tags, hostname=hostname)
+            elif xtype == "monotonic_count":
+                self.monotonic_count(metric, value, tags=tags, hostname=hostname)
             else:
                 self.rate(metric, value, tags=tags, hostname=hostname)
         else:
@@ -387,9 +439,10 @@ class ESCheck(AgentCheck):
                 self._process_metric(policy_data, metric, *desc, tags=tags)
 
     def _process_cat_allocation_data(self, admin_forwarder, version, base_tags):
-        if version < [7, 2, 0]:
+        if version < [5, 0, 0]:
             self.log.debug(
-                "Collecting cat allocation metrics is not supported in version %s. Skipping", '.'.join(version)
+                "Collecting cat allocation metrics is not supported in version %s. Skipping",
+                '.'.join(str(int) for int in version),
             )
             return
 
@@ -412,6 +465,110 @@ class ESCheck(AgentCheck):
             for metric in CAT_ALLOCATION_METRICS:
                 desc = CAT_ALLOCATION_METRICS[metric]
                 self._process_metric(cat_allocation_dic, metric, *desc, tags=tags)
+
+    def _process_custom_metric(
+        self,
+        value,
+        data_path,
+        value_path,
+        dynamic_tags,
+        xtype,
+        metric_name,
+        tags=None,
+    ):
+        """
+        value: JSON payload to traverse
+        data_path: path to data right before metric value or right before list of metric values
+        value_path: path to data after data_path to metric value
+        dynamic_tags: list of dynamic tags and their value_paths
+        xtype: datadog metric type, default to gauge
+        metric_name: datadog metric name
+        tags: list of tags that should be included with each metric submitted
+        """
+
+        tags_to_submit = deepcopy(tags)
+        path = '{}.{}'.format(data_path, value_path)
+
+        # Collect the value of tags first, and then append to tags_to_submit
+        for (dynamic_tag_path, dynamic_tag_name) in dynamic_tags:
+            # Traverse down the tree to find the tag value
+            dynamic_tag_value = get_value_from_path(value, dynamic_tag_path)
+
+            # If tag is there, then add it to list of tags to submit
+            if dynamic_tag_value is not None:
+                dynamic_tag = '{}:{}'.format(dynamic_tag_name, dynamic_tag_value)
+                tags_to_submit.append(dynamic_tag)
+            else:
+                self.log.debug("Dynamic tag is null: %s -> %s", path, dynamic_tag_name)
+
+        # Now do the same for the actual metric
+        branch_value = get_value_from_path(value, value_path)
+
+        if branch_value is not None:
+            if xtype == "gauge":
+                self.gauge(metric_name, branch_value, tags=tags_to_submit)
+            elif xtype == "monotonic_count":
+                self.monotonic_count(metric_name, branch_value, tags=tags_to_submit)
+            elif xtype == "rate":
+                self.rate(metric_name, branch_value, tags=tags_to_submit)
+            else:
+                self.log.warning(
+                    "Metric type of %s is not gauge, monotonic_count, or rate; skipping this metric", metric_name
+                )
+        else:
+            self.log.debug("Metric not found: %s -> %s", path, metric_name)
+
+    def _run_custom_queries(self, admin_forwarder, base_tags):
+        self.log.debug("Running custom queries")
+        custom_queries = self._config.custom_queries
+
+        for query_endpoint in custom_queries:
+            try:
+                columns = query_endpoint.get('columns', [])
+                data_path = query_endpoint.get('data_path')
+                raw_endpoint = query_endpoint.get('endpoint')
+                static_tags = query_endpoint.get('tags', [])
+                payload = query_endpoint.get('payload', {})
+
+                endpoint = self._join_url(raw_endpoint, admin_forwarder)
+                data = self._get_data(endpoint, data=payload)
+
+                # If there are tags, add the tag path to list of paths to evaluate while processing metric
+                dynamic_tags = get_dynamic_tags(columns)
+                tags = base_tags + static_tags
+
+                # Traverse the nested dictionaries to the data_path and get the remainder JSON response
+                value = get_value_from_path(data, data_path)
+
+                for column in columns:
+                    metric_type = column.get('type', 'gauge')
+
+                    # Skip tags since already processed
+                    if metric_type == 'tag':
+                        continue
+                    name = column.get('name')
+                    value_path = column.get('value_path')
+                    if name and value_path:
+                        # At this point, there may be multiple branches of value_paths.
+                        # If value is a list, go through each entry
+                        if isinstance(value, list):
+                            value = value
+                        else:
+                            value = [value]
+
+                        for branch in value:
+                            self._process_custom_metric(
+                                value=branch,
+                                data_path=data_path,
+                                value_path=value_path,
+                                dynamic_tags=dynamic_tags,
+                                xtype=metric_type,
+                                metric_name=name,
+                                tags=tags,
+                            )
+            except Exception as e:
+                self.log.error("Custom query %s failed: %s", query_endpoint, e)
+                continue
 
     def _create_event(self, status, tags=None):
         hostname = to_string(self.hostname)

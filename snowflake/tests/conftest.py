@@ -1,40 +1,23 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from copy import deepcopy
+
 import pytest
 
-INSTANCE = {
-    "user": "testuser",
-    "password": "pass",
-    "account": "test_acct.us-central1.gcp",
-    "database": "SNOWFLAKE",
-    "schema": "ACCOUNT_USAGE",
-    'role': "ACCOUNTADMIN",
-}
-
-OAUTH_INSTANCE = {
-    "user": "testuser",
-    "account": "test_acct.us-central1.gcp",
-    "database": "SNOWFLAKE",
-    "schema": "ACCOUNT_USAGE",
-    'role': "ACCOUNTADMIN",
-    "authenticator": "oauth",
-    "token": "testtoken",
-}
-
-CHECK_NAME = 'snowflake'
+from . import common
 
 
 @pytest.fixture(scope='session')
-def dd_environment(instance):
-    yield instance
+def dd_environment():
+    yield common.INSTANCE, common.E2E_METADATA
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture
 def instance():
-    return INSTANCE
+    return deepcopy(common.INSTANCE)
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture
 def oauth_instance():
-    return OAUTH_INSTANCE
+    return deepcopy(common.OAUTH_INSTANCE)

@@ -147,6 +147,8 @@ YARN_QUEUE_METRICS = {
     'usedCapacity': ('yarn.queue.used_capacity', GAUGE),
     'numContainers': ('yarn.queue.num_containers', GAUGE),
     'maxCapacity': ('yarn.queue.max_capacity', GAUGE),
+    'maxActiveApplications': ('yarn.queue.max_active_applications', GAUGE),
+    'maxActiveApplicationsPerUser': ('yarn.queue.max_active_applications_per_user', GAUGE),
     'maxApplications': ('yarn.queue.max_applications', GAUGE),
     'maxApplicationsPerUser': ('yarn.queue.max_applications_per_user', GAUGE),
 }
@@ -273,8 +275,12 @@ class YarnCheck(AgentCheck):
         tags = []
         kv_pairs = [x.split(':') for x in application_tags.split(',')]
         try:
-            for tag_key, tag_value in kv_pairs:
-                tags.append('app_{tag}:{value}'.format(tag=tag_key, value=tag_value))
+            for tag_set in kv_pairs:
+                if len(tag_set) > 1:
+                    tag_key, tag_value = tag_set
+                    tags.append('app_{tag}:{value}'.format(tag=tag_key, value=tag_value))
+                else:
+                    tags.append('app_{}'.format(tag_set[0]))
         except ValueError:
             self.log.warning("Unable to split string %s with YARN application tags", application_tags)
             # Reverting to default behavior.
@@ -337,8 +343,8 @@ class YarnCheck(AgentCheck):
                 queues_count += 1
                 if queues_count > MAX_DETAILED_QUEUES:
                     self.warning(
-                        "Found more than 100 queues, will only send metrics on first 100 queues. "
-                        "Please filter the queues with the check's `queue_blacklist` parameter"
+                        "Found more than 100 queues, only sending metrics on the first 100 queues and sub_queues. "
+                        "Filter the queues with the check's `queue_blacklist` parameter."
                     )
                     break
 
@@ -346,6 +352,26 @@ class YarnCheck(AgentCheck):
                 tags.extend(addl_tags)
 
                 self._set_yarn_metrics_from_json(tags, queue_json, YARN_QUEUE_METRICS)
+                if queue_json.get('queues') and queue_json['queues'].get('queue') is not None:
+                    for sub_queue_json in queue_json['queues']['queue']:
+                        sub_queue_name = sub_queue_json['queueName']
+
+                        if sub_queue_name in queue_blacklist:
+                            self.log.debug('Sublevel Queue "%s" is blacklisted. Ignoring it.', sub_queue_name)
+                            continue
+
+                        queues_count += 1
+                        if queues_count > MAX_DETAILED_QUEUES:
+                            self.warning(
+                                "Found more than 100 sub_queues, only sending metrics on the first 100 queues and "
+                                "sub_queues. Filter the sub_queues with the check's `queue_blacklist` parameter."
+                            )
+                            break
+
+                        tags = ['sub_queue_name:{}'.format(str(sub_queue_name))]
+                        tags.extend(addl_tags)
+
+                        self._set_yarn_metrics_from_json(tags, sub_queue_json, YARN_QUEUE_METRICS)
 
     def _set_yarn_metrics_from_json(self, tags, metrics_json, yarn_metrics):
         """
@@ -435,7 +461,6 @@ class YarnCheck(AgentCheck):
                 SERVICE_CHECK_NAME,
                 AgentCheck.OK,
                 tags=service_check_tags,
-                message="Connection to {} was successful".format(url),
             )
 
             return response_json

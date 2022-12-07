@@ -4,14 +4,15 @@
 from contextlib import closing
 
 import snowflake.connector as sf
+from cryptography.hazmat.primitives import serialization
 
-from datadog_checks.base import AgentCheck, ConfigurationError
+from datadog_checks.base import AgentCheck, ConfigurationError, ensure_bytes, to_native_string
 from datadog_checks.base.utils.db import QueryManager
 
 from . import queries
 from .config import Config
 
-METRIC_GROUPS = {
+ACCOUNT_USAGE_METRIC_GROUPS = {
     'snowflake.query': [queries.WarehouseLoad, queries.QueryHistory],
     'snowflake.billing': [queries.CreditUsage, queries.WarehouseCreditUsage],
     'snowflake.storage': [queries.StorageUsageMetrics],
@@ -24,6 +25,17 @@ METRIC_GROUPS = {
     'snowflake.replication': [queries.ReplicationUsage],
 }
 
+ORGANIZATION_USAGE_METRIC_GROUPS = {
+    'snowflake.organization.contracts': [queries.OrgContractItems],
+    'snowflake.organization.credit': [queries.OrgCreditUsage],
+    'snowflake.organization.currency': [queries.OrgCurrencyUsage],
+    'snowflake.organization.warehouse': [queries.OrgWarehouseCreditUsage],
+    'snowflake.organization.storage': [queries.OrgStorageDaily],
+    'snowflake.organization.balance': [queries.OrgBalance],
+    'snowflake.organization.rate': [queries.OrgRateSheet],
+    'snowflake.organization.data_transfer': [queries.OrgDataTransfer],
+}
+
 
 class SnowflakeCheck(AgentCheck):
     """
@@ -32,7 +44,7 @@ class SnowflakeCheck(AgentCheck):
 
     __NAMESPACE__ = 'snowflake'
 
-    SERVICE_CHECK_CONNECT = 'snowflake.can_connect'
+    SERVICE_CHECK_CONNECT = 'can_connect'
 
     def __init__(self, *args, **kwargs):
         super(SnowflakeCheck, self).__init__(*args, **kwargs)
@@ -50,29 +62,79 @@ class SnowflakeCheck(AgentCheck):
         if self._config.password:
             self.register_secret(self._config.password)
 
+        if self._config.private_key_password:
+            self.register_secret(self._config.private_key_password)
+
         if self._config.role == 'ACCOUNTADMIN':
             self.log.info(
                 'Snowflake `role` is set as `ACCOUNTADMIN` which should be used cautiously, '
                 'refer to docs about custom roles.'
             )
-
+        metric_groups = (
+            ORGANIZATION_USAGE_METRIC_GROUPS
+            if (self._config.schema == 'ORGANIZATION_USAGE')
+            else ACCOUNT_USAGE_METRIC_GROUPS
+        )
         self.metric_queries = []
         self.errors = []
         for mgroup in self._config.metric_groups:
             try:
-                self.metric_queries.extend(METRIC_GROUPS[mgroup])
+                if not self._config.aggregate_last_24_hours:
+                    for query in range(len(metric_groups[mgroup])):
+                        metric_groups[mgroup][query]['query'] = metric_groups[mgroup][query]['query'].replace(
+                            'DATEADD(hour, -24, current_timestamp())', 'date_trunc(day, current_date)'
+                        )
+                self.metric_queries.extend(metric_groups[mgroup])
             except KeyError:
                 self.errors.append(mgroup)
 
         if self.errors:
-            self.log.warning('Invalid metric_groups found in snowflake conf.yaml: %s', (', '.join(self.errors)))
-        if not self.metric_queries:
-            raise ConfigurationError('No valid metric_groups configured, please list at least one.')
+            self.log.warning(
+                'Invalid metric_groups for `%s` found in snowflake conf.yaml: %s',
+                self._config.schema,
+                (', '.join(self.errors)),
+            )
+        if not self.metric_queries and not self._config.custom_queries_defined:
+            raise ConfigurationError(
+                'No valid metric_groups for `{}` or custom query configured, please list at least one.'.format(
+                    self._config.schema
+                )
+            )
 
         self._query_manager = QueryManager(self, self.execute_query_raw, queries=self.metric_queries, tags=self._tags)
         self.check_initializations.append(self._query_manager.compile_queries)
 
+    def read_token(self):
+        if self._config.token_path:
+            self.log.debug("Renewing Snowflake client token")
+            with open(self._config.token_path, 'r', encoding="UTF-8") as f:
+                self._config.token = f.read()
+
+        return self._config.token
+
+    def read_key(self):
+        if self._config.private_key_path:
+            self.log.debug("Reading Snowflake client key for key pair authentication")
+            # https://docs.snowflake.com/en/user-guide/python-connector-example.html#using-key-pair-authentication-key-pair-rotation
+            with open(self._config.private_key_path, "rb") as key:
+                p_key = serialization.load_pem_private_key(
+                    key.read(), password=ensure_bytes(self._config.private_key_password)
+                )
+
+                pkb = p_key.private_bytes(
+                    encoding=serialization.Encoding.DER,
+                    format=serialization.PrivateFormat.PKCS8,
+                    encryption_algorithm=serialization.NoEncryption(),
+                )
+
+                return pkb
+
+        return None
+
     def check(self, _):
+        if self.instance.get('user'):
+            self._log_deprecation('_config_renamed', 'user', 'username')
+
         self.connect()
 
         if self._conn is not None:
@@ -128,7 +190,8 @@ class SnowflakeCheck(AgentCheck):
                 login_timeout=self._config.login_timeout,
                 ocsp_response_cache_filename=self._config.ocsp_response_cache_filename,
                 authenticator=self._config.authenticator,
-                token=self._config.token,
+                token=self.read_token(),
+                private_key=self.read_key(),
                 client_session_keep_alive=self._config.client_keep_alive,
                 proxy_host=self.proxy_host,
                 proxy_port=self.proxy_port,
@@ -153,3 +216,21 @@ class SnowflakeCheck(AgentCheck):
         else:
             if version:
                 self.set_metadata('version', version)
+
+    # override
+    def _normalize_tags_type(self, tags, device_name=None, metric_name=None):
+        if self.disable_generic_tags:
+            return super(SnowflakeCheck, self)._normalize_tags_type(tags, device_name, metric_name)
+
+        # If disable_generic_tags is not enabled, for each generic tag we emmit both the generic and the non generic
+        # version to ease transition.
+        normalized_tags = []
+        for tag in tags:
+            if tag is not None:
+                try:
+                    tag = to_native_string(tag)
+                except UnicodeError:
+                    self.log.warning('Encoding error with tag `%s` for metric `%s`, ignoring tag', tag, metric_name)
+                    continue
+                normalized_tags.extend(list({tag, self.degeneralise_tag(tag)}))
+        return normalized_tags

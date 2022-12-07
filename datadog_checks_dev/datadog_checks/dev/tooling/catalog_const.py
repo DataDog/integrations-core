@@ -39,21 +39,28 @@ DASHBOARD_NOT_POSSIBLE = {
 
 # List of integrations where is not possible or it does not make sense to have its own log integration
 INTEGRATION_LOGS_NOT_POSSIBLE = {
+    'avi_vantage',  # TODO: requires submitting logs via the agent
     'btrfs',  # it emits to the system log
     'datadog_checks_base',
     'datadog_checks_dev',
+    'datadog_checks_dependency_provider',
     'datadog_checks_downloader',
     'directory',  # OS
+    'dns_check',  # not a specific service
     'dotnetclr',  # No relevant logs
     'external_dns',  # remote connection
     'go-metro',  # for agent 5 only
+    'go_expvar',  # its a go package
     'http_check',  # Its not a service
+    'ibm_i',  # remote connection
     'linux_proc_extras',
     'ntp',  # the integration is for a remote ntp server
     'openmetrics',  # base class
+    'oracle',  # TODO: requires submitting logs via agent
     'pdh_check',  # base class
     'process',  # system
     'prometheus',  # base class
+    'riakcs',  # would require installing agent on each node
     'sap_hana',  # see open questions in the architecture rfc
     'snmp',  # remote connection to the devices
     'snowflake',  # No logs to parse, needs to be from QUERY_HISTORY view
@@ -62,6 +69,7 @@ INTEGRATION_LOGS_NOT_POSSIBLE = {
     'system_swap',  # system
     'tcp_check',  # remote connection
     'tls',  # remote connection
+    'tokumx',  # eoled, only available in py2
     'windows_service',  # OS
     'wmi_check',  # base class
 }

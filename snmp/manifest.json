@@ -1,39 +1,58 @@
 {
-  "categories": [
-    "monitoring",
-    "notification",
-    "network",
-    "autodiscovery"
-  ],
-  "creates_events": false,
-  "display_name": "SNMP",
-  "guid": "080bb566-d1c8-428c-9d85-71cc2cdf393c",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "snmp.",
-  "name": "snmp",
-  "public_title": "Datadog-SNMP Integration",
-  "short_description": "Collect SNMP metrics from your network devices.",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "type": "check",
-  "integration_id": "snmp",
-  "aliases": [
-    "/agent/faq/how-to-monitor-snmp-devices/"
-  ],
+  "manifest_version": "2.0.0",
+  "app_uuid": "4fc8e176-17ce-4346-9544-bec30ac47a00",
+  "app_id": "snmp",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Collect SNMP metrics from your network devices.",
+    "title": "SNMP",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Monitoring",
+      "Category::Notification",
+      "Category::Network",
+      "Category::Autodiscovery",
+      "Category::SNMP"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "monitors": {},
+    "integration": {
+      "source_type_name": "SNMP",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "snmp.",
+        "check": "snmp.devices_monitored",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
     "dashboards": {
       "Interface Performance": "assets/dashboards/interface_performance.json",
       "Datacenter Overview": "assets/dashboards/datacenter_overview.json"
     },
-    "service_checks": "assets/service_checks.json",
-    "logs": {},
-    "metrics_metadata": "metadata.csv"
+    "monitors": {
+      "[SNMP] Device Down Alert": "assets/monitors/device_down.json"
+    }
   }
 }

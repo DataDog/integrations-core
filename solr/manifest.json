@@ -1,46 +1,61 @@
 {
-  "categories": [
-    "data store",
-    "autodiscovery",
-    "log collection"
-  ],
-  "creates_events": false,
-  "display_name": "Solr",
-  "guid": "0235124a-0207-44dd-aede-f578a6d46b26",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "solr.",
-  "metric_to_check": "solr.searcher.numdocs",
-  "name": "solr",
-  "process_signatures": [
-    "solr start"
-  ],
-  "public_title": "Datadog-Solr Integration",
-  "short_description": "Monitor request rate, handler errors, cache misses and evictions, and more.",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "type": "check",
-  "integration_id": "solr",
+  "manifest_version": "2.0.0",
+  "app_uuid": "3733c24e-8466-4f3b-8411-59ef85c28302",
+  "app_id": "solr",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor request rate, handler errors, cache misses and evictions, and more.",
+    "title": "Solr",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Data Store",
+      "Category::Autodiscovery",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "Solr",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "solr.",
+        "check": "solr.searcher.numdocs",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      },
+      "process_signatures": [
+        "solr start"
+      ]
     },
-    "monitors": {},
     "dashboards": {
       "solr": "assets/dashboards/solr_dashboard.json"
     },
-    "service_checks": "assets/service_checks.json",
-    "logs": {
-      "source": "solr"
-    },
-    "metrics_metadata": "metadata.csv",
     "saved_views": {
       "solr_processes": "assets/saved_views/solr_processes.json"
+    },
+    "logs": {
+      "source": "solr"
     }
   }
 }

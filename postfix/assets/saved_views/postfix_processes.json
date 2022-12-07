@@ -14,11 +14,8 @@
       "showArguments"
     ],
     "filter": {
-      "text": "",
-      "groups": [],
-      "tags": [
-        "integration:postfix"
-      ]
+      "query_filter": "integration:postfix",
+      "groups": []
     },
     "selected_top_graph": "scatterplot",
     "enabled_columns": [

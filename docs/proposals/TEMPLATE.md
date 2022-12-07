@@ -34,7 +34,7 @@ fulfill. For example:*
 
 *Describe your solution in the bare minimum detail to be understood. Explain
 why it's better than the current implementation and better than other options. Address
-any critical operational issues (failure modes, failover, redudancy, performance, cost).
+any critical operational issues (failure modes, failover, redundancy, performance, cost).
 For example:*
 
 Embedding CPython is a well known, documented and supported practice which is quite

@@ -10,7 +10,7 @@
     The namespace to be prepended to all metrics.
   value:
     type: string
-    pattern: '\w+'
+    pattern: '\w*'
 - name: raw_metric_prefix
   description: |
     A prefix that will be removed from all exposed metric names, if present.
@@ -19,7 +19,8 @@
     type: string
     example: <PREFIX>_
     display_default: null
-- name: metrics  # Only shown for the `openmetrics` provider integration
+# Only shown for the generic `openmetrics` integration. Lets a user define which metrics they want to collect.
+- name: metrics
   hidden: true
   description: |
     This list defines which metrics to collect from the `openmetrics_endpoint`.
@@ -53,6 +54,12 @@
 
             The supported native types are `gauge`, `counter`, `histogram`, and `summary`.
 
+    Note: To collect counter metrics with names ending in `_total`, specify the metric name without the `_total`
+    suffix. For example, to collect the counter metric `promhttp_metric_handler_requests_total`, specify
+    `promhttp_metric_handler_requests`. This submits to Datadog the metric name appended with `.count`.
+    For more information, see:
+    https://github.com/OpenObservability/OpenMetrics/blob/main/specification/OpenMetrics.md#suffixes
+
     Regular expressions may be used to match the exposed metric names, for example:
 
       metrics:
@@ -75,7 +82,9 @@
             - name: type
               type: string
             additionalProperties: true
-- name: extra_metrics  # Hidden for the `openmetrics` provider integration
+# Hidden for the generic `openmetrics` integration, which uses the `metrics` field.
+# For custom openmetrics-based integrations this allows users to specify metrics in addition to the built-in ones.
+- name: extra_metrics
   description: |
     This list defines metrics to collect from the `openmetrics_endpoint`, in addition to
     what the check collects by default. If the check already collects a metric, then
@@ -84,14 +93,14 @@
     1. If the item is a string, then it represents the exposed metric name, and
        the sent metric name will be identical. For example:
 
-         metrics:
+         extra_metrics:
          - <METRIC_1>
          - <METRIC_2>
     2. If the item is a mapping, then the keys represent the exposed metric names.
 
          a. If a value is a string, then it represents the sent metric name. For example:
 
-              metrics:
+              extra_metrics:
               - <EXPOSED_METRIC_1>: <SENT_METRIC_1>
               - <EXPOSED_METRIC_2>: <SENT_METRIC_2>
          b. If a value is a mapping, then it must have a `name` and/or `type` key.
@@ -99,7 +108,7 @@
             the metric should be handled, overriding any type information the endpoint
             may provide. For example:
 
-              metrics:
+              extra_metrics:
               - <EXPOSED_METRIC_1>:
                   name: <SENT_METRIC_1>
                   type: <METRIC_TYPE_1>
@@ -109,9 +118,15 @@
 
             The supported native types are `gauge`, `counter`, `histogram`, and `summary`.
 
+    Note: To collect counter metrics with names ending in `_total`, specify the metric name without the `_total`
+    suffix. For example, to collect the counter metric `promhttp_metric_handler_requests_total`, specify
+    `promhttp_metric_handler_requests`. This submits to Datadog the metric name appended with `.count`.
+    For more information, see:
+    https://github.com/OpenObservability/OpenMetrics/blob/main/specification/OpenMetrics.md#suffixes
+    
     Regular expressions may be used to match the exposed metric names, for example:
 
-      metrics:
+      extra_metrics:
       - ^network_(ingress|egress)_.+
       - .+:
           type: gauge
@@ -135,6 +150,9 @@
   description: |
     A list of metrics to exclude, with each entry being either
     the exact metric name or a regular expression.
+    In order to exclude all metrics but the ones matching a specific filter,
+    you can use a negative lookahead regex like:
+      - ^(?!foo).*$
   value:
     type: array
     items:
@@ -143,6 +161,8 @@
   description: |
     A mapping of labels where metrics with matching label name and values are ignored. To match
     all values of a label, set it to `true`.
+
+    Note: Label filtering happens before `rename_labels`.
 
     For example, the following configuration instructs the check to exclude all metrics with
     a label `worker` or a label `pid` with the value of either `23` or `42`.
@@ -160,9 +180,30 @@
       - type: array
         items:
           type: string
+- name: tag_by_endpoint
+  description: Whether to include an endpoint tag or not.
+  hidden: true
+  value:
+    type: boolean
+    example: False
+    display_default: True
 - name: exclude_labels
   description: |
     A list of labels to exclude, useful for high cardinality values like timestamps or UUIDs.
+    May be used in conjunction with `include_labels`.
+    Labels defined in `exclude_labels` will take precedence in case of overlap.
+
+    Note: Label filtering happens before `rename_labels`.
+  value:
+    type: array
+    items:
+      type: string
+- name: include_labels
+  description: |
+    A list of labels to include. May be used in conjunction with `exclude_labels`.
+    Labels defined in `exclude_labels` will take precedence in case of overlap.
+
+    Note: Label filtering happens before `rename_labels`.
   value:
     type: array
     items:
@@ -216,6 +257,23 @@
   value:
     example: false
     type: boolean
+- name: collect_counters_with_distributions
+  description: |
+    Whether or not to also collect the observation counter metrics ending in `.sum` and `.count`
+    when sending histogram buckets as Datadog distribution metrics. This implicitly enables the
+    `histogram_buckets_as_distributions` option.
+  value:
+    example: false
+    type: boolean
+- name: use_process_start_time
+  description: |
+    Whether to enable a heuristic for reporting counter values on the first scrape. When true,
+    the first time an endpoint is scraped, check `process_start_time_seconds` to decide whether zero
+    initial value can be assumed for counters. This requires keeping metrics in memory until the entire
+    response is received.
+  value:
+    example: false
+    type: boolean
 - name: share_labels
   description: |
     This mapping allows for the sharing of labels across multiple metrics. The keys represent the
@@ -259,12 +317,15 @@
           type: array
           items:
             type: string
-- name: request_size
+- name: cache_shared_labels
   description: |
-    The number of kibibytes (KiB) to read from the `openmetrics_endpoint` at a time.
+    When `share_labels` is set, it instructs the check to cache labels collected from the first payload
+    for improved performance.
+
+    Set this to `false` to compute label sharing for every payload at the risk of potentially increased memory usage.
   value:
-    example: 16
-    type: number
+    type: boolean
+    example: true
 - name: raw_line_filters
   description: |
     A list of regular expressions used to exclude lines read from the `openmetrics_endpoint`
@@ -292,5 +353,16 @@
   value:
     example: false
     type: boolean
+- name: ignore_tags
+  description: |
+    A list of regular expressions used to ignore tags added by autodiscovery and entries in the `tags` option.
+  value:
+    type: array
+    items:
+      type: string
+    example:
+      - <FULL:TAG>
+      - <TAG_PREFIX:.*>
+      - <TAG_SUFFIX$>
 - template: instances/http
 - template: instances/default

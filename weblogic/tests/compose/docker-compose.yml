@@ -1,0 +1,76 @@
+version: "3"
+
+services:
+  weblogic-admin-server:
+    build:
+      context: ./weblogic
+      args:
+        - WEBLOGIC_VERSION=${WEBLOGIC_VERSION}
+    hostname: wlsadmin
+    ports:
+      - '7001:7001'
+      - '9090:9090'
+    healthcheck:
+      test: curl -f http://wlsadmin:7001/weblogic/ready || exit 1
+      interval: 10s
+    volumes:
+      - ${PROPERTIES_DIR}/docker-run:/u01/oracle/properties
+    environment:
+      JAVA_OPTIONS: >-
+        -Dcom.sun.management.jmxremote
+        -Dcom.sun.management.jmxremote.authenticate=false
+        -Dcom.sun.management.jmxremote.ssl=false
+        -Dcom.sun.management.jmxremote.port=9090
+        -Dcom.sun.management.jmxremote.rmi.port=9090
+        -Djava.rmi.server.hostname=0.0.0.0
+        -Djavax.management.builder.initial=weblogic.management.jmx.mbeanserver.WLSMBeanServerBuilder
+  weblogic-managed-server-1:
+    build:
+      context: ./weblogic
+      args:
+        - WEBLOGIC_VERSION=${WEBLOGIC_VERSION}
+    hostname: ms1
+    ports:
+      - '8001:8001'
+      - '9091:9091'
+    healthcheck:
+      test: curl -f http://wlsadmin:7001/weblogic/ready || exit 1
+      interval: 10s
+    volumes:
+      - ${PROPERTIES_DIR}/docker-run:/u01/oracle/properties
+    environment:
+      JAVA_OPTIONS: >-
+        -Dcom.sun.management.jmxremote
+        -Dcom.sun.management.jmxremote.authenticate=false
+        -Dcom.sun.management.jmxremote.ssl=false
+        -Dcom.sun.management.jmxremote.port=9091
+        -Dcom.sun.management.jmxremote.rmi.port=9091
+        -Djava.rmi.server.hostname=0.0.0.0
+        -Djavax.management.builder.initial=weblogic.management.jmx.mbeanserver.WLSMBeanServerBuilder
+      MANAGED_SERV_NAME: managed-server1
+    command: 'startManagedServer.sh'
+  weblogic-managed-server-2:
+    build:
+      context: ./weblogic
+      args:
+        - WEBLOGIC_VERSION=${WEBLOGIC_VERSION}
+    hostname: ms2
+    ports:
+      - '8002:8001'
+      - '9092:9092'
+    healthcheck:
+      test: curl -f http://wlsadmin:7001/weblogic/ready || exit 1
+      interval: 10s
+    volumes:
+      - ${PROPERTIES_DIR}/docker-run:/u01/oracle/properties
+    environment:
+      JAVA_OPTIONS: >-
+        -Dcom.sun.management.jmxremote
+        -Dcom.sun.management.jmxremote.authenticate=false
+        -Dcom.sun.management.jmxremote.ssl=false
+        -Dcom.sun.management.jmxremote.port=9092
+        -Dcom.sun.management.jmxremote.rmi.port=9092
+        -Djava.rmi.server.hostname=0.0.0.0
+        -Djavax.management.builder.initial=weblogic.management.jmx.mbeanserver.WLSMBeanServerBuilder
+      MANAGED_SERV_NAME: managed-server2
+    command: 'startManagedServer.sh'

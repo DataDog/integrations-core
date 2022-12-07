@@ -1,0 +1,16 @@
+{
+    "one":{
+       "passed":679904,
+       "delayed":0,
+       "rejected":0,
+       "delayed_dry_run":322948,
+       "rejected_dry_run":35120
+    },
+    "ban":{
+       "passed":1,
+       "delayed":0,
+       "rejected":0,
+       "delayed_dry_run":0,
+       "rejected_dry_run":0
+    }
+ }

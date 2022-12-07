@@ -1,0 +1,328 @@
+# HELP apiserver_audit_event_total [ALPHA] Counter of audit events generated and sent to the audit backend.
+# TYPE apiserver_audit_event_total counter
+apiserver_audit_event_total 0
+# HELP apiserver_audit_requests_rejected_total [ALPHA] Counter of apiserver requests rejected due to an error in audit logging backend.
+# TYPE apiserver_audit_requests_rejected_total counter
+apiserver_audit_requests_rejected_total 0
+# HELP go_gc_duration_seconds A summary of the pause duration of garbage collection cycles.
+# TYPE go_gc_duration_seconds summary
+go_gc_duration_seconds{quantile="0"} 6.55e-05
+go_gc_duration_seconds{quantile="0.25"} 9.72e-05
+go_gc_duration_seconds{quantile="0.5"} 0.0001715
+go_gc_duration_seconds{quantile="0.75"} 0.0002874
+go_gc_duration_seconds{quantile="1"} 0.0149932
+go_gc_duration_seconds_sum 0.0861523
+go_gc_duration_seconds_count 221
+# HELP go_goroutines Number of goroutines that currently exist.
+# TYPE go_goroutines gauge
+go_goroutines 41
+# HELP go_info Information about the Go environment.
+# TYPE go_info gauge
+go_info{version="go1.16.4"} 1
+# HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
+# TYPE go_memstats_alloc_bytes gauge
+go_memstats_alloc_bytes 1.0854312e+07
+# HELP go_memstats_alloc_bytes_total Total number of bytes allocated, even if freed.
+# TYPE go_memstats_alloc_bytes_total counter
+go_memstats_alloc_bytes_total 1.87858352e+08
+# HELP go_memstats_buck_hash_sys_bytes Number of bytes used by the profiling bucket hash table.
+# TYPE go_memstats_buck_hash_sys_bytes gauge
+go_memstats_buck_hash_sys_bytes 1.470179e+06
+# HELP go_memstats_frees_total Total number of frees.
+# TYPE go_memstats_frees_total counter
+go_memstats_frees_total 854916
+# HELP go_memstats_gc_cpu_fraction The fraction of this program's available CPU time used by the GC since the program started.
+# TYPE go_memstats_gc_cpu_fraction gauge
+go_memstats_gc_cpu_fraction 7.389597129753807e-06
+# HELP go_memstats_gc_sys_bytes Number of bytes used for garbage collection system metadata.
+# TYPE go_memstats_gc_sys_bytes gauge
+go_memstats_gc_sys_bytes 5.589584e+06
+# HELP go_memstats_heap_alloc_bytes Number of heap bytes allocated and still in use.
+# TYPE go_memstats_heap_alloc_bytes gauge
+go_memstats_heap_alloc_bytes 1.0854312e+07
+# HELP go_memstats_heap_idle_bytes Number of heap bytes waiting to be used.
+# TYPE go_memstats_heap_idle_bytes gauge
+go_memstats_heap_idle_bytes 5.2682752e+07
+# HELP go_memstats_heap_inuse_bytes Number of heap bytes that are in use.
+# TYPE go_memstats_heap_inuse_bytes gauge
+go_memstats_heap_inuse_bytes 1.3377536e+07
+# HELP go_memstats_heap_objects Number of allocated objects.
+# TYPE go_memstats_heap_objects gauge
+go_memstats_heap_objects 33090
+# HELP go_memstats_heap_released_bytes Number of heap bytes released to OS.
+# TYPE go_memstats_heap_released_bytes gauge
+go_memstats_heap_released_bytes 5.230592e+07
+# HELP go_memstats_heap_sys_bytes Number of heap bytes obtained from system.
+# TYPE go_memstats_heap_sys_bytes gauge
+go_memstats_heap_sys_bytes 6.6060288e+07
+# HELP go_memstats_last_gc_time_seconds Number of seconds since 1970 of last garbage collection.
+# TYPE go_memstats_last_gc_time_seconds gauge
+go_memstats_last_gc_time_seconds 1.6415217337206907e+09
+# HELP go_memstats_lookups_total Total number of pointer lookups.
+# TYPE go_memstats_lookups_total counter
+go_memstats_lookups_total 0
+# HELP go_memstats_mallocs_total Total number of mallocs.
+# TYPE go_memstats_mallocs_total counter
+go_memstats_mallocs_total 888006
+# HELP go_memstats_mcache_inuse_bytes Number of bytes in use by mcache structures.
+# TYPE go_memstats_mcache_inuse_bytes gauge
+go_memstats_mcache_inuse_bytes 7200
+# HELP go_memstats_mcache_sys_bytes Number of bytes used for mcache structures obtained from system.
+# TYPE go_memstats_mcache_sys_bytes gauge
+go_memstats_mcache_sys_bytes 16384
+# HELP go_memstats_mspan_inuse_bytes Number of bytes in use by mspan structures.
+# TYPE go_memstats_mspan_inuse_bytes gauge
+go_memstats_mspan_inuse_bytes 159256
+# HELP go_memstats_mspan_sys_bytes Number of bytes used for mspan structures obtained from system.
+# TYPE go_memstats_mspan_sys_bytes gauge
+go_memstats_mspan_sys_bytes 180224
+# HELP go_memstats_next_gc_bytes Number of heap bytes when next garbage collection will take place.
+# TYPE go_memstats_next_gc_bytes gauge
+go_memstats_next_gc_bytes 1.4370176e+07
+# HELP go_memstats_other_sys_bytes Number of bytes used for other system allocations.
+# TYPE go_memstats_other_sys_bytes gauge
+go_memstats_other_sys_bytes 1.215189e+06
+# HELP go_memstats_stack_inuse_bytes Number of bytes in use by the stack allocator.
+# TYPE go_memstats_stack_inuse_bytes gauge
+go_memstats_stack_inuse_bytes 1.048576e+06
+# HELP go_memstats_stack_sys_bytes Number of bytes obtained from system for stack allocator.
+# TYPE go_memstats_stack_sys_bytes gauge
+go_memstats_stack_sys_bytes 1.048576e+06
+# HELP go_memstats_sys_bytes Number of bytes obtained from system.
+# TYPE go_memstats_sys_bytes gauge
+go_memstats_sys_bytes 7.5580424e+07
+# HELP go_threads Number of OS threads created.
+# TYPE go_threads gauge
+go_threads 10
+# HELP kubeproxy_network_programming_duration_seconds [ALPHA] In Cluster Network Programming Latency in seconds
+# TYPE kubeproxy_network_programming_duration_seconds histogram
+kubeproxy_network_programming_duration_seconds_bucket{le="0"} 0
+kubeproxy_network_programming_duration_seconds_bucket{le="0.25"} 0
+kubeproxy_network_programming_duration_seconds_bucket{le="0.5"} 0
+kubeproxy_network_programming_duration_seconds_bucket{le="1"} 0
+kubeproxy_network_programming_duration_seconds_bucket{le="2"} 5
+kubeproxy_network_programming_duration_seconds_bucket{le="3"} 6
+kubeproxy_network_programming_duration_seconds_bucket{le="4"} 6
+kubeproxy_network_programming_duration_seconds_bucket{le="5"} 6
+kubeproxy_network_programming_duration_seconds_bucket{le="6"} 6
+kubeproxy_network_programming_duration_seconds_bucket{le="7"} 7
+kubeproxy_network_programming_duration_seconds_bucket{le="8"} 7
+kubeproxy_network_programming_duration_seconds_bucket{le="9"} 7
+kubeproxy_network_programming_duration_seconds_bucket{le="10"} 7
+kubeproxy_network_programming_duration_seconds_bucket{le="11"} 7
+kubeproxy_network_programming_duration_seconds_bucket{le="12"} 7
+kubeproxy_network_programming_duration_seconds_bucket{le="13"} 7
+kubeproxy_network_programming_duration_seconds_bucket{le="14"} 7
+kubeproxy_network_programming_duration_seconds_bucket{le="15"} 7
+kubeproxy_network_programming_duration_seconds_bucket{le="16"} 7
+kubeproxy_network_programming_duration_seconds_bucket{le="17"} 8
+kubeproxy_network_programming_duration_seconds_bucket{le="18"} 8
+kubeproxy_network_programming_duration_seconds_bucket{le="19"} 8
+kubeproxy_network_programming_duration_seconds_bucket{le="20"} 8
+kubeproxy_network_programming_duration_seconds_bucket{le="21"} 8
+kubeproxy_network_programming_duration_seconds_bucket{le="22"} 8
+kubeproxy_network_programming_duration_seconds_bucket{le="23"} 8
+kubeproxy_network_programming_duration_seconds_bucket{le="24"} 8
+kubeproxy_network_programming_duration_seconds_bucket{le="25"} 8
+kubeproxy_network_programming_duration_seconds_bucket{le="26"} 8
+kubeproxy_network_programming_duration_seconds_bucket{le="27"} 8
+kubeproxy_network_programming_duration_seconds_bucket{le="28"} 8
+kubeproxy_network_programming_duration_seconds_bucket{le="29"} 8
+kubeproxy_network_programming_duration_seconds_bucket{le="30"} 8
+kubeproxy_network_programming_duration_seconds_bucket{le="31"} 8
+kubeproxy_network_programming_duration_seconds_bucket{le="32"} 8
+kubeproxy_network_programming_duration_seconds_bucket{le="33"} 8
+kubeproxy_network_programming_duration_seconds_bucket{le="34"} 8
+kubeproxy_network_programming_duration_seconds_bucket{le="35"} 8
+kubeproxy_network_programming_duration_seconds_bucket{le="36"} 8
+kubeproxy_network_programming_duration_seconds_bucket{le="37"} 8
+kubeproxy_network_programming_duration_seconds_bucket{le="38"} 8
+kubeproxy_network_programming_duration_seconds_bucket{le="39"} 8
+kubeproxy_network_programming_duration_seconds_bucket{le="40"} 8
+kubeproxy_network_programming_duration_seconds_bucket{le="41"} 8
+kubeproxy_network_programming_duration_seconds_bucket{le="42"} 8
+kubeproxy_network_programming_duration_seconds_bucket{le="43"} 8
+kubeproxy_network_programming_duration_seconds_bucket{le="44"} 8
+kubeproxy_network_programming_duration_seconds_bucket{le="45"} 8
+kubeproxy_network_programming_duration_seconds_bucket{le="46"} 8
+kubeproxy_network_programming_duration_seconds_bucket{le="47"} 8
+kubeproxy_network_programming_duration_seconds_bucket{le="48"} 8
+kubeproxy_network_programming_duration_seconds_bucket{le="49"} 8
+kubeproxy_network_programming_duration_seconds_bucket{le="50"} 8
+kubeproxy_network_programming_duration_seconds_bucket{le="51"} 8
+kubeproxy_network_programming_duration_seconds_bucket{le="52"} 8
+kubeproxy_network_programming_duration_seconds_bucket{le="53"} 8
+kubeproxy_network_programming_duration_seconds_bucket{le="54"} 8
+kubeproxy_network_programming_duration_seconds_bucket{le="55"} 8
+kubeproxy_network_programming_duration_seconds_bucket{le="56"} 8
+kubeproxy_network_programming_duration_seconds_bucket{le="57"} 8
+kubeproxy_network_programming_duration_seconds_bucket{le="58"} 8
+kubeproxy_network_programming_duration_seconds_bucket{le="59"} 8
+kubeproxy_network_programming_duration_seconds_bucket{le="60"} 8
+kubeproxy_network_programming_duration_seconds_bucket{le="65"} 8
+kubeproxy_network_programming_duration_seconds_bucket{le="70"} 8
+kubeproxy_network_programming_duration_seconds_bucket{le="75"} 8
+kubeproxy_network_programming_duration_seconds_bucket{le="80"} 8
+kubeproxy_network_programming_duration_seconds_bucket{le="85"} 8
+kubeproxy_network_programming_duration_seconds_bucket{le="90"} 8
+kubeproxy_network_programming_duration_seconds_bucket{le="95"} 8
+kubeproxy_network_programming_duration_seconds_bucket{le="100"} 8
+kubeproxy_network_programming_duration_seconds_bucket{le="105"} 8
+kubeproxy_network_programming_duration_seconds_bucket{le="110"} 8
+kubeproxy_network_programming_duration_seconds_bucket{le="115"} 8
+kubeproxy_network_programming_duration_seconds_bucket{le="120"} 8
+kubeproxy_network_programming_duration_seconds_bucket{le="150"} 8
+kubeproxy_network_programming_duration_seconds_bucket{le="180"} 8
+kubeproxy_network_programming_duration_seconds_bucket{le="210"} 8
+kubeproxy_network_programming_duration_seconds_bucket{le="240"} 8
+kubeproxy_network_programming_duration_seconds_bucket{le="270"} 8
+kubeproxy_network_programming_duration_seconds_bucket{le="300"} 8
+kubeproxy_network_programming_duration_seconds_bucket{le="+Inf"} 8
+kubeproxy_network_programming_duration_seconds_sum 33.3351237
+kubeproxy_network_programming_duration_seconds_count 8
+# HELP kubeproxy_sync_proxy_rules_duration_seconds [ALPHA] SyncProxyRules latency in seconds
+# TYPE kubeproxy_sync_proxy_rules_duration_seconds histogram
+kubeproxy_sync_proxy_rules_duration_seconds_bucket{le="0.001"} 0
+kubeproxy_sync_proxy_rules_duration_seconds_bucket{le="0.002"} 0
+kubeproxy_sync_proxy_rules_duration_seconds_bucket{le="0.004"} 0
+kubeproxy_sync_proxy_rules_duration_seconds_bucket{le="0.008"} 0
+kubeproxy_sync_proxy_rules_duration_seconds_bucket{le="0.016"} 0
+kubeproxy_sync_proxy_rules_duration_seconds_bucket{le="0.032"} 0
+kubeproxy_sync_proxy_rules_duration_seconds_bucket{le="0.064"} 6
+kubeproxy_sync_proxy_rules_duration_seconds_bucket{le="0.128"} 7
+kubeproxy_sync_proxy_rules_duration_seconds_bucket{le="0.256"} 7
+kubeproxy_sync_proxy_rules_duration_seconds_bucket{le="0.512"} 18
+kubeproxy_sync_proxy_rules_duration_seconds_bucket{le="1.024"} 20
+kubeproxy_sync_proxy_rules_duration_seconds_bucket{le="2.048"} 23
+kubeproxy_sync_proxy_rules_duration_seconds_bucket{le="4.096"} 23
+kubeproxy_sync_proxy_rules_duration_seconds_bucket{le="8.192"} 23
+kubeproxy_sync_proxy_rules_duration_seconds_bucket{le="16.384"} 23
+kubeproxy_sync_proxy_rules_duration_seconds_bucket{le="+Inf"} 23
+kubeproxy_sync_proxy_rules_duration_seconds_sum 9.3710718
+kubeproxy_sync_proxy_rules_duration_seconds_count 23
+# HELP kubeproxy_sync_proxy_rules_endpoint_changes_pending [ALPHA] Pending proxy rules Endpoint changes
+# TYPE kubeproxy_sync_proxy_rules_endpoint_changes_pending gauge
+kubeproxy_sync_proxy_rules_endpoint_changes_pending 0
+# HELP kubeproxy_sync_proxy_rules_endpoint_changes_total [ALPHA] Cumulative proxy rules Endpoint changes
+# TYPE kubeproxy_sync_proxy_rules_endpoint_changes_total counter
+kubeproxy_sync_proxy_rules_endpoint_changes_total 85
+# HELP kubeproxy_sync_proxy_rules_iptables_restore_failures_total [ALPHA] Cumulative proxy iptables restore failures
+# TYPE kubeproxy_sync_proxy_rules_iptables_restore_failures_total counter
+kubeproxy_sync_proxy_rules_iptables_restore_failures_total 0
+# HELP kubeproxy_sync_proxy_rules_iptables_total [ALPHA] Number of proxy iptables rules programmed
+# TYPE kubeproxy_sync_proxy_rules_iptables_total gauge
+kubeproxy_sync_proxy_rules_iptables_total{table="filter"} 5
+kubeproxy_sync_proxy_rules_iptables_total{table="nat"} 6
+# HELP kubeproxy_sync_proxy_rules_last_queued_timestamp_seconds [ALPHA] The last time a sync of proxy rules was queued
+# TYPE kubeproxy_sync_proxy_rules_last_queued_timestamp_seconds gauge
+kubeproxy_sync_proxy_rules_last_queued_timestamp_seconds 1.6414985179070282e+09
+# HELP kubeproxy_sync_proxy_rules_last_timestamp_seconds [ALPHA] The last time proxy rules were successfully synced
+# TYPE kubeproxy_sync_proxy_rules_last_timestamp_seconds gauge
+kubeproxy_sync_proxy_rules_last_timestamp_seconds 1.6415039183133824e+09
+# HELP kubeproxy_sync_proxy_rules_service_changes_pending [ALPHA] Pending proxy rules Service changes
+# TYPE kubeproxy_sync_proxy_rules_service_changes_pending gauge
+kubeproxy_sync_proxy_rules_service_changes_pending 0
+# HELP kubeproxy_sync_proxy_rules_service_changes_total [ALPHA] Cumulative proxy rules Service changes
+# TYPE kubeproxy_sync_proxy_rules_service_changes_total counter
+kubeproxy_sync_proxy_rules_service_changes_total 148
+# HELP kubernetes_build_info [ALPHA] A metric with a constant '1' value labeled by major, minor, git version, git commit, git tree state, build date, Go version, and compiler from which Kubernetes was built, and platform on which it is running.
+# TYPE kubernetes_build_info gauge
+kubernetes_build_info{build_date="2021-05-21T23:01:33Z",compiler="gc",git_commit="5e58841cce77d4bc13713ad2b91fa0d961e69192",git_tree_state="clean",git_version="v1.21.1",go_version="go1.16.4",major="1",minor="21",platform="linux/amd64"} 1
+# HELP process_cpu_seconds_total Total user and system CPU time spent in seconds.
+# TYPE process_cpu_seconds_total counter
+process_cpu_seconds_total 20.43
+# HELP process_max_fds Maximum number of open file descriptors.
+# TYPE process_max_fds gauge
+process_max_fds 1.048576e+06
+# HELP process_open_fds Number of open file descriptors.
+# TYPE process_open_fds gauge
+process_open_fds 16
+# HELP process_resident_memory_bytes Resident memory size in bytes.
+# TYPE process_resident_memory_bytes gauge
+process_resident_memory_bytes 2.840576e+07
+# HELP process_start_time_seconds Start time of the process since unix epoch in seconds.
+# TYPE process_start_time_seconds gauge
+process_start_time_seconds 1.6414957951e+09
+# HELP process_virtual_memory_bytes Virtual memory size in bytes.
+# TYPE process_virtual_memory_bytes gauge
+process_virtual_memory_bytes 7.6609536e+08
+# HELP process_virtual_memory_max_bytes Maximum amount of virtual memory available in bytes.
+# TYPE process_virtual_memory_max_bytes gauge
+process_virtual_memory_max_bytes -1
+# HELP rest_client_exec_plugin_certificate_rotation_age [ALPHA] Histogram of the number of seconds the last auth exec plugin client certificate lived before being rotated. If auth exec plugin client certificates are unused, histogram will contain no data.
+# TYPE rest_client_exec_plugin_certificate_rotation_age histogram
+rest_client_exec_plugin_certificate_rotation_age_bucket{le="600"} 0
+rest_client_exec_plugin_certificate_rotation_age_bucket{le="1800"} 0
+rest_client_exec_plugin_certificate_rotation_age_bucket{le="3600"} 0
+rest_client_exec_plugin_certificate_rotation_age_bucket{le="14400"} 0
+rest_client_exec_plugin_certificate_rotation_age_bucket{le="86400"} 0
+rest_client_exec_plugin_certificate_rotation_age_bucket{le="604800"} 0
+rest_client_exec_plugin_certificate_rotation_age_bucket{le="2.592e+06"} 0
+rest_client_exec_plugin_certificate_rotation_age_bucket{le="7.776e+06"} 0
+rest_client_exec_plugin_certificate_rotation_age_bucket{le="1.5552e+07"} 0
+rest_client_exec_plugin_certificate_rotation_age_bucket{le="3.1104e+07"} 0
+rest_client_exec_plugin_certificate_rotation_age_bucket{le="1.24416e+08"} 0
+rest_client_exec_plugin_certificate_rotation_age_bucket{le="+Inf"} 0
+rest_client_exec_plugin_certificate_rotation_age_sum 0
+rest_client_exec_plugin_certificate_rotation_age_count 0
+# HELP rest_client_exec_plugin_ttl_seconds [ALPHA] Gauge of the shortest TTL (time-to-live) of the client certificate(s) managed by the auth exec plugin. The value is in seconds until certificate expiry (negative if already expired). If auth exec plugins are unused or manage no TLS certificates, the value will be +INF.
+# TYPE rest_client_exec_plugin_ttl_seconds gauge
+rest_client_exec_plugin_ttl_seconds +Inf
+# HELP rest_client_request_duration_seconds [ALPHA] Request latency in seconds. Broken down by verb and URL.
+# TYPE rest_client_request_duration_seconds histogram
+rest_client_request_duration_seconds_bucket{url="https://kind-control-plane:6443/api/v1/namespaces/%7Bnamespace%7D/events",verb="POST",le="0.001"} 0
+rest_client_request_duration_seconds_bucket{url="https://kind-control-plane:6443/api/v1/namespaces/%7Bnamespace%7D/events",verb="POST",le="0.002"} 0
+rest_client_request_duration_seconds_bucket{url="https://kind-control-plane:6443/api/v1/namespaces/%7Bnamespace%7D/events",verb="POST",le="0.004"} 0
+rest_client_request_duration_seconds_bucket{url="https://kind-control-plane:6443/api/v1/namespaces/%7Bnamespace%7D/events",verb="POST",le="0.008"} 0
+rest_client_request_duration_seconds_bucket{url="https://kind-control-plane:6443/api/v1/namespaces/%7Bnamespace%7D/events",verb="POST",le="0.016"} 0
+rest_client_request_duration_seconds_bucket{url="https://kind-control-plane:6443/api/v1/namespaces/%7Bnamespace%7D/events",verb="POST",le="0.032"} 1
+rest_client_request_duration_seconds_bucket{url="https://kind-control-plane:6443/api/v1/namespaces/%7Bnamespace%7D/events",verb="POST",le="0.064"} 1
+rest_client_request_duration_seconds_bucket{url="https://kind-control-plane:6443/api/v1/namespaces/%7Bnamespace%7D/events",verb="POST",le="0.128"} 1
+rest_client_request_duration_seconds_bucket{url="https://kind-control-plane:6443/api/v1/namespaces/%7Bnamespace%7D/events",verb="POST",le="0.256"} 1
+rest_client_request_duration_seconds_bucket{url="https://kind-control-plane:6443/api/v1/namespaces/%7Bnamespace%7D/events",verb="POST",le="0.512"} 1
+rest_client_request_duration_seconds_bucket{url="https://kind-control-plane:6443/api/v1/namespaces/%7Bnamespace%7D/events",verb="POST",le="+Inf"} 1
+rest_client_request_duration_seconds_sum{url="https://kind-control-plane:6443/api/v1/namespaces/%7Bnamespace%7D/events",verb="POST"} 0.0243501
+rest_client_request_duration_seconds_count{url="https://kind-control-plane:6443/api/v1/namespaces/%7Bnamespace%7D/events",verb="POST"} 1
+rest_client_request_duration_seconds_bucket{url="https://kind-control-plane:6443/api/v1/nodes/%7Bname%7D",verb="GET",le="0.001"} 0
+rest_client_request_duration_seconds_bucket{url="https://kind-control-plane:6443/api/v1/nodes/%7Bname%7D",verb="GET",le="0.002"} 0
+rest_client_request_duration_seconds_bucket{url="https://kind-control-plane:6443/api/v1/nodes/%7Bname%7D",verb="GET",le="0.004"} 0
+rest_client_request_duration_seconds_bucket{url="https://kind-control-plane:6443/api/v1/nodes/%7Bname%7D",verb="GET",le="0.008"} 0
+rest_client_request_duration_seconds_bucket{url="https://kind-control-plane:6443/api/v1/nodes/%7Bname%7D",verb="GET",le="0.016"} 0
+rest_client_request_duration_seconds_bucket{url="https://kind-control-plane:6443/api/v1/nodes/%7Bname%7D",verb="GET",le="0.032"} 0
+rest_client_request_duration_seconds_bucket{url="https://kind-control-plane:6443/api/v1/nodes/%7Bname%7D",verb="GET",le="0.064"} 1
+rest_client_request_duration_seconds_bucket{url="https://kind-control-plane:6443/api/v1/nodes/%7Bname%7D",verb="GET",le="0.128"} 1
+rest_client_request_duration_seconds_bucket{url="https://kind-control-plane:6443/api/v1/nodes/%7Bname%7D",verb="GET",le="0.256"} 1
+rest_client_request_duration_seconds_bucket{url="https://kind-control-plane:6443/api/v1/nodes/%7Bname%7D",verb="GET",le="0.512"} 1
+rest_client_request_duration_seconds_bucket{url="https://kind-control-plane:6443/api/v1/nodes/%7Bname%7D",verb="GET",le="+Inf"} 1
+rest_client_request_duration_seconds_sum{url="https://kind-control-plane:6443/api/v1/nodes/%7Bname%7D",verb="GET"} 0.039353
+rest_client_request_duration_seconds_count{url="https://kind-control-plane:6443/api/v1/nodes/%7Bname%7D",verb="GET"} 1
+rest_client_request_duration_seconds_bucket{url="https://kind-control-plane:6443/api/v1/services?labelSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.001"} 0
+rest_client_request_duration_seconds_bucket{url="https://kind-control-plane:6443/api/v1/services?labelSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.002"} 0
+rest_client_request_duration_seconds_bucket{url="https://kind-control-plane:6443/api/v1/services?labelSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.004"} 0
+rest_client_request_duration_seconds_bucket{url="https://kind-control-plane:6443/api/v1/services?labelSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.008"} 0
+rest_client_request_duration_seconds_bucket{url="https://kind-control-plane:6443/api/v1/services?labelSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.016"} 1
+rest_client_request_duration_seconds_bucket{url="https://kind-control-plane:6443/api/v1/services?labelSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.032"} 1
+rest_client_request_duration_seconds_bucket{url="https://kind-control-plane:6443/api/v1/services?labelSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.064"} 1
+rest_client_request_duration_seconds_bucket{url="https://kind-control-plane:6443/api/v1/services?labelSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.128"} 1
+rest_client_request_duration_seconds_bucket{url="https://kind-control-plane:6443/api/v1/services?labelSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.256"} 1
+rest_client_request_duration_seconds_bucket{url="https://kind-control-plane:6443/api/v1/services?labelSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.512"} 1
+rest_client_request_duration_seconds_bucket{url="https://kind-control-plane:6443/api/v1/services?labelSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="+Inf"} 1
+rest_client_request_duration_seconds_sum{url="https://kind-control-plane:6443/api/v1/services?labelSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET"} 0.0133119
+rest_client_request_duration_seconds_count{url="https://kind-control-plane:6443/api/v1/services?labelSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET"} 1
+rest_client_request_duration_seconds_bucket{url="https://kind-control-plane:6443/apis/discovery.k8s.io/v1beta1/endpointslices?labelSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.001"} 0
+rest_client_request_duration_seconds_bucket{url="https://kind-control-plane:6443/apis/discovery.k8s.io/v1beta1/endpointslices?labelSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.002"} 0
+rest_client_request_duration_seconds_bucket{url="https://kind-control-plane:6443/apis/discovery.k8s.io/v1beta1/endpointslices?labelSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.004"} 0
+rest_client_request_duration_seconds_bucket{url="https://kind-control-plane:6443/apis/discovery.k8s.io/v1beta1/endpointslices?labelSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.008"} 0
+rest_client_request_duration_seconds_bucket{url="https://kind-control-plane:6443/apis/discovery.k8s.io/v1beta1/endpointslices?labelSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.016"} 0
+rest_client_request_duration_seconds_bucket{url="https://kind-control-plane:6443/apis/discovery.k8s.io/v1beta1/endpointslices?labelSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.032"} 1
+rest_client_request_duration_seconds_bucket{url="https://kind-control-plane:6443/apis/discovery.k8s.io/v1beta1/endpointslices?labelSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.064"} 1
+rest_client_request_duration_seconds_bucket{url="https://kind-control-plane:6443/apis/discovery.k8s.io/v1beta1/endpointslices?labelSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.128"} 1
+rest_client_request_duration_seconds_bucket{url="https://kind-control-plane:6443/apis/discovery.k8s.io/v1beta1/endpointslices?labelSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.256"} 1
+rest_client_request_duration_seconds_bucket{url="https://kind-control-plane:6443/apis/discovery.k8s.io/v1beta1/endpointslices?labelSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.512"} 1
+rest_client_request_duration_seconds_bucket{url="https://kind-control-plane:6443/apis/discovery.k8s.io/v1beta1/endpointslices?labelSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="+Inf"} 1
+rest_client_request_duration_seconds_sum{url="https://kind-control-plane:6443/apis/discovery.k8s.io/v1beta1/endpointslices?labelSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET"} 0.0163566
+rest_client_request_duration_seconds_count{url="https://kind-control-plane:6443/apis/discovery.k8s.io/v1beta1/endpointslices?labelSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET"} 1
+# HELP rest_client_requests_total [ALPHA] Number of HTTP requests, partitioned by status code, method, and host.
+# TYPE rest_client_requests_total counter
+rest_client_requests_total{code="200",host="kind-control-plane:6443",method="GET"} 120
+rest_client_requests_total{code="201",host="kind-control-plane:6443",method="POST"} 1

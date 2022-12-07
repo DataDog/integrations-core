@@ -2,13 +2,13 @@
 
 ## Overview
 
-Datadog Backend Listener for Apache JMeter is an opensource JMeter plugin used to send test results to the Datadog platform. It provides real-time reporting of test metrics like latency, the number of bytes sent and received, and more. You can also send to Datadog complete test results as log entries.
+Datadog Backend Listener for Apache JMeter is an open source JMeter plugin used to send test results to the Datadog platform. It provides real-time reporting of test metrics like latency, the number of bytes sent and received, and more. You can also send to Datadog complete test results as log entries.
 
 ## Setup
 
 ### Installation
 
-The Datadog Backend Listener plugin needs to be installed manually, you can find the latest release and more detailed installation instructions on [the repo release page][1].
+The Datadog Backend Listener plugin needs to be installed manually. See the latest release and more detailed installation instructions on the [repo release page][1].
 
 ### Configuration
 
@@ -29,7 +29,7 @@ The plugin has the following configuration options:
 
 ### Metrics
 
-See [metadata.csv][3] for a list of metrics provided by this check.
+See [metadata.csv][2] for a list of metrics provided by this check.
 
 ### Service Checks
 
@@ -41,8 +41,15 @@ JMeter does not include any events.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][2].
+Need help? Contact [Datadog support][3].
+
+## Further Reading
+
+Additional helpful documentation, links, and articles:
+
+  - [Monitor JMeter test results with Datadog][4]
 
 [1]: https://github.com/DataDog/jmeter-datadog-backend-listener/releases
-[2]: https://docs.datadoghq.com/help/
-[3]: https://github.com/DataDog/integrations-core/blob/master/jmeter/metadata.csv
+[2]: https://github.com/DataDog/integrations-core/blob/master/jmeter/metadata.csv
+[3]: https://docs.datadoghq.com/help/
+[4]: https://www.datadoghq.com/blog/monitor-jmeter-test-results-datadog/

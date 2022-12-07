@@ -15,20 +15,25 @@ To install and configure the SNMP integration, see the [Network Device Monitorin
 
 For details of monitored metrics see the [SNMP Data Collected][1] section.
 
-### Service Checks
-
-{integration_name} does not include any service checks.
-
 ### Events
 
-{integration_name} does not include any events.
+The {integration_name} integration does not include any events.
+
+### Service Checks
+
+The {integration_name} integration does not include any service checks.
+
+See [service_checks.json][3] for a list of service checks provided by this integration.
+
+## Troubleshooting
+
+Need help? Contact [Datadog support][4].
 
 ## Further Reading
 
 Additional helpful documentation, links, and articles:
 
-* [Monitor SNMP with Datadog][3]
+* [Monitor SNMP with Datadog][5]
 
-[1]: https://docs.datadoghq.com/network_performance_monitoring/devices/data
-[2]: https://docs.datadoghq.com/network_performance_monitoring/devices/setup
-[3]: https://www.datadoghq.com/blog/monitor-snmp-with-datadog/
+
+{integration_links}

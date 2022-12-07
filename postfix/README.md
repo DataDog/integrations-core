@@ -40,8 +40,9 @@ Optionally, you can configure the Agent to use a built in `postqueue -p` command
      postfix_user: postfix
 
    instances:
-     ## @param directory - string - required
-     ## Path to the postfix directory.
+     ## @param directory - string - optional - default: /var/spool/postfix
+     ## Path to the postfix directory. The directory option is required if `postqueue: false` is set. For more 
+     ## information see https://docs.datadoghq.com/integrations/postfix/#using-sudo.
      #
      - directory: /var/spool/postfix
 
@@ -106,7 +107,7 @@ Optionally, you can configure the Agent to use a built in `postqueue -p` command
          - deferred
    ```
 
-2. For each `config_directory` in `instances`, the Agent forks a `postqueue -c` for the Postfix configuration directory. Postfix has internal access controls that limit activities on the mail queue. By default, Postfix allows `anyone` to view the queue. On production systems where the Postfix installation may be configured with stricter access controls, you may need to grant the `dd-agent` user access to view the mail queue ([postqueue Postfix documentation][6]):
+2. For each `config_directory` in `instances`, the Agent forks a `postqueue -c` for the Postfix configuration directory. Postfix has internal access controls that limit activities on the mail queue. By default, Postfix allows `anyone` to view the queue. On production systems where the Postfix installation may be configured with stricter access controls, you may need to grant the `dd-agent` user access to view the mail queue. See the [postqueue Postfix documentation][6] for more details.
 
    ```shell
    postconf -e "authorized_mailq_users = dd-agent"

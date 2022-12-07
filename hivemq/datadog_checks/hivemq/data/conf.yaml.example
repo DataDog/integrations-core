@@ -7,7 +7,7 @@ init_config:
     #
     is_jmx: true
 
-    ## @param collect_default_metrics - boolean - required
+    ## @param collect_default_metrics - boolean - optional - default: false
     ## Whether or not the check should collect all default metrics.
     #
     collect_default_metrics: true
@@ -20,7 +20,7 @@ init_config:
     ##                       jvm.gc.major_collection_time
     ## The default value is false to ensure backward compatibility.
     #
-    # new_gc_metrics: false
+    new_gc_metrics: true
 
     ## @param service_check_prefix - string - optional
     ## Custom service check prefix. e.g. `my_prefix` to get a service check called `my_prefix.can_connect`.
@@ -49,7 +49,7 @@ init_config:
     #
     # service: <SERVICE>
 
-## Every instance is scheduled independent of the others.
+## Every instance is scheduled independently of the others.
 #
 instances:
 
@@ -78,12 +78,18 @@ instances:
     ## This requires the JDK to be installed and the path to tools.jar to be set below.
     ## Note: It needs to be set when process_name_regex parameter is set
     ## e.g. .*process_name.*
+    ##
+    ## Note: tools.jar was removed in Java 9: https://openjdk.java.net/jeps/220.
+    ## This option is supported in Java 8 and below.
     #
     # process_name_regex: <PROCESS_NAME_REGEX>
 
     ## @param tools_jar_path - string - optional
-    ## The tool.jar path to be used with the `process_name_regex` parameter,
-    ## for example: /usr/lib/jvm/java-11-openjdk-amd64/lib/tools.jar
+    ## The tools.jar path to be used with the `process_name_regex` parameter,
+    ## for example: /usr/lib/jvm/java-7-openjdk-amd64/lib/tools.jar
+    ##
+    ## Note: tools.jar was removed in Java 9: https://openjdk.java.net/jeps/220.
+    ## This option is supported in Java 8 and below.
     #
     # tools_jar_path: <TOOLS_JAR_PATH>
 
@@ -179,12 +185,12 @@ instances:
 
 ## Log Section
 ##
-## type - required - Type of log input source (tcp / udp / file / windows_event)
+## type - required - Type of log input source (tcp / udp / file / windows_event).
 ## port / path / channel_path - required - Set port if type is tcp or udp.
 ##                                         Set path if type is file.
 ##                                         Set channel_path if type is windows_event.
-## source  - required - Attribute that defines which Integration sent the logs.
-## encoding - optional - For file specifies the file encoding, default is utf-8, other
+## source  - required - Attribute that defines which integration sent the logs.
+## encoding - optional - For file specifies the file encoding. Default is utf-8. Other
 ##                       possible values are utf-16-le and utf-16-be.
 ## service - optional - The name of the service that generates the log.
 ##                      Overrides any `service` defined in the `init_config` section.

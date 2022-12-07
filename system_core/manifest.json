@@ -1,37 +1,47 @@
 {
-  "aliases": [
-    "/integrations/systemcore"
-  ],
-  "categories": [
-    "os & system"
-  ],
-  "creates_events": false,
-  "display_name": "System Core",
-  "guid": "e123ef26-81bb-4c1b-b079-4dd4cc7d7ae7",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "system.",
-  "metric_to_check": "system.core.user",
-  "name": "system_core",
-  "public_title": "Datadog-System Core Integration",
-  "short_description": "Collect the number of CPU cores and CPU times on a host",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "type": "check",
-  "integration_id": "system",
+  "manifest_version": "2.0.0",
+  "app_uuid": "61fc07e2-952e-4bdb-99aa-fe779cfde067",
+  "app_id": "system",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Collect the number of CPU cores and CPU times on a host",
+    "title": "System Core",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::OS & System"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
-    },
-    "monitors": {},
-    "dashboards": {},
-    "service_checks": "assets/service_checks.json",
-    "logs": {},
-    "metrics_metadata": "metadata.csv"
+    "integration": {
+      "source_type_name": "System Core",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "system.",
+        "check": "system.core.user",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    }
   }
 }

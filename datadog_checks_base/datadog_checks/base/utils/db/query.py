@@ -2,9 +2,11 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from copy import deepcopy
-from typing import Any, Callable, Dict, List
+from typing import Any, Dict, List, Tuple
 
 from six import raise_from
+
+from datadog_checks.base.utils.db.types import Transformer, TransformerFactory
 
 from .utils import create_extra_transformer
 
@@ -15,23 +17,28 @@ class Query(object):
     is based on our `custom_queries` format originally designed and implemented in !1528.
 
     It is now part of all our database integrations and
-    [other](https://cloud.google.com/solutions/sap/docs/sap-hana-monitoring-agent-user-guide#defining_custom_queries)
+    [other](https://cloud.google.com/solutions/sap/docs/sap-hana-monitoring-agent-planning-guide#defining_custom_queries)
     products have since adopted this format.
     """
 
     def __init__(self, query_data):
         # type: (Dict[str, Any]) -> Query
+        # Contains the data to fill the rest of the attributes
         self.query_data = deepcopy(query_data or {})  # type: Dict[str, Any]
         self.name = None  # type: str
+        # The actual query
         self.query = None  # type: str
-        self.columns = None  # type: List[str]
-        self.extras = None  # type: List[Dict[str, str]]
-        self.tags = None  # type: List[str]
+        # Contains a mapping of column_name -> column_type, transformer
+        self.column_transformers = None  # type: Tuple[Tuple[str, Tuple[str, Transformer]]]
+        # These transformers are used to collect extra metrics calculated from the query result
+        self.extra_transformers = None  # type: List[Tuple[str, Transformer]]
+        # Contains the tags defined in query_data, more tags can be added later from the query result
+        self.base_tags = None  # type: List[str]
 
     def compile(
         self,
-        column_transformers,  # type: Dict[str, Callable[[Dict[str, Callable], str, Any], Any]]
-        extra_transformers,  # type: Dict[str, Callable[[Dict[str, Callable], str, Any], Any]]
+        column_transformers,  # type: Dict[str, TransformerFactory]
+        extra_transformers,  # type: Dict[str, TransformerFactory]
     ):
         # type: (...) -> None
 
@@ -52,7 +59,7 @@ class Query(object):
         query = self.query_data.get('query')
         if not query:
             raise ValueError('field `query` for {} is required'.format(query_name))
-        elif not isinstance(query, str):
+        elif query_name.startswith('custom query #') and not isinstance(query, str):
             raise ValueError('field `query` for {} must be a string'.format(query_name))
 
         columns = self.query_data.get('columns')
@@ -124,20 +131,20 @@ class Query(object):
                     # a reference to None since if we use e.g. `value` it would never be checked anyway.
                     column_data.append((column_name, (None, transformer)))
 
-        submission_transformers = column_transformers.copy()
+        submission_transformers = column_transformers.copy()  # type: Dict[str, Transformer]
         submission_transformers.pop('tag')
         submission_transformers.pop('tag_list')
 
-        extras = self.query_data.get('extras', [])
+        extras = self.query_data.get('extras', [])  # type: List[Dict[str, Any]]
         if not isinstance(extras, list):
             raise ValueError('field `extras` for {} must be a list'.format(query_name))
 
-        extra_data = []
+        extra_data = []  # type: List[Tuple[str, Transformer]]
         for i, extra in enumerate(extras, 1):
             if not isinstance(extra, dict):
                 raise ValueError('extra #{} of {} is not a mapping'.format(i, query_name))
 
-            extra_name = extra.get('name')
+            extra_name = extra.get('name')  # type: str
             if not extra_name:
                 raise ValueError('field `name` for extra #{} of {} is required'.format(i, query_name))
             elif not isinstance(extra_name, str):
@@ -151,7 +158,7 @@ class Query(object):
 
             sources[extra_name] = {'type': 'extra', 'index': i}
 
-            extra_type = extra.get('type')
+            extra_type = extra.get('type')  # type: str  # Is the key in a transformers dict
             if not extra_type:
                 if 'expression' in extra:
                     extra_type = 'expression'
@@ -162,7 +169,9 @@ class Query(object):
             elif extra_type not in extra_transformers and extra_type not in submission_transformers:
                 raise ValueError('unknown type `{}` for extra {} of {}'.format(extra_type, extra_name, query_name))
 
-            transformer_factory = extra_transformers.get(extra_type, submission_transformers.get(extra_type))
+            transformer_factory = extra_transformers.get(
+                extra_type, submission_transformers.get(extra_type)
+            )  # type: TransformerFactory
 
             extra_source = extra.get('source')
             if extra_type in submission_transformers:
@@ -188,7 +197,7 @@ class Query(object):
 
         self.name = query_name
         self.query = query
-        self.columns = tuple(column_data)
-        self.extras = tuple(extra_data)
-        self.tags = tags
+        self.column_transformers = tuple(column_data)
+        self.extra_transformers = tuple(extra_data)
+        self.base_tags = tags
         del self.query_data

@@ -12,8 +12,8 @@ pytestmark = pytest.mark.integration
 
 
 @pytest.mark.usefixtures("dd_environment")
-def test_check(aggregator, check):
-    check.check(deepcopy(common.INSTANCE))
+def test_integration(aggregator, check, dd_run_check):
+    dd_run_check(check)
     for metric in common.EXPECTED_METRICS:
         aggregator.assert_metric(metric, tags=common.EXPECTED_TAGS)
 

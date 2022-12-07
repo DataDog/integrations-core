@@ -8,7 +8,7 @@ this check will report three other states:
 
     `down`: the check cannot connect to zookeeper
     `inactive`: the zookeeper instance has lost connection to the cluster
-    `unknown`: an unexpected error has occured in this check
+    `unknown`: an unexpected error has occurred in this check
 
 States can be accessed through the gauge `zookeeper.instances.<state>,
 through the set `zookeeper.instances`, or through the `mode:<state>` tag.
@@ -61,8 +61,8 @@ import socket
 import struct
 from collections import defaultdict
 from contextlib import closing
-from distutils.version import LooseVersion  # pylint: disable=E0611,E0401
 
+from packaging.version import Version
 from six import PY3, StringIO, iteritems
 
 from datadog_checks.base import AgentCheck, ensure_bytes, ensure_unicode, is_affirmative
@@ -72,7 +72,7 @@ if PY3:
 
 
 class ZKConnectionFailure(Exception):
-    """ Raised when we are unable to connect or get the output of a command. """
+    """Raised when we are unable to connect or get the output of a command."""
 
     pass
 
@@ -101,7 +101,7 @@ class ZookeeperCheck(AgentCheck):
     # example match:
     # "Zookeeper version: 3.4.10-39d3a4f269333c922ed3db283be479f9deacaa0f, built on 03/23/2017 10:13 GMT"
     # This regex matches the entire version rather than <major>.<minor>.<patch>
-    METADATA_VERSION_PATTERN = re.compile('Zookeeper version: ([^,]+)')
+    METADATA_VERSION_PATTERN = re.compile(r'\w+ version: v?([^,]+)')
     METRIC_TAGGED_PATTERN = re.compile(r'(\w+){(\w+)="(.+)"}\s+(\S+)')
 
     SOURCE_TYPE_NAME = 'zookeeper'
@@ -143,9 +143,10 @@ class ZookeeperCheck(AgentCheck):
             ruok = ruok_out.readline()
             if ruok == 'imok':
                 status = AgentCheck.OK
+                message = None
             else:
                 status = AgentCheck.WARNING
-            message = u'Response from the server: %s' % ruok
+                message = u'Response from the server: %s' % ruok
         finally:
             self.service_check('zookeeper.ruok', status, message=message, tags=self.sc_tags)
 
@@ -179,14 +180,14 @@ class ZookeeperCheck(AgentCheck):
             if self.expected_mode:
                 if mode == self.expected_mode:
                     status = AgentCheck.OK
-                    message = u"Server is in %s mode" % mode
+                    message = None
                 else:
                     status = AgentCheck.CRITICAL
                     message = u"Server is in %s mode but check expects %s mode" % (mode, self.expected_mode)
                 self.service_check('zookeeper.mode', status, message=message, tags=self.sc_tags)
 
         # Read metrics from the `mntr` output
-        if zk_version and LooseVersion(zk_version) > LooseVersion("3.4.0"):
+        if zk_version and Version(zk_version) > Version("3.4.0"):
             try:
                 mntr_out = self._send_command('mntr')
             except ZKConnectionFailure:
@@ -221,7 +222,7 @@ class ZookeeperCheck(AgentCheck):
         gauges[mode] = 1
         for k, v in iteritems(gauges):
             gauge_name = 'zookeeper.instances.%s' % k
-            self.gauge(gauge_name, v)
+            self.gauge(gauge_name, v, tags=self.base_tags)
 
     @staticmethod
     def _get_data(sock, command):
@@ -277,7 +278,7 @@ class ZookeeperCheck(AgentCheck):
             # grabs the entire version number for inventories.
             metadata_version = total_match.group(1)
             self.set_metadata('version', metadata_version)
-        has_connections_val = LooseVersion(version) > LooseVersion("3.4.4")
+        has_connections_val = Version(version) > Version("3.4.4")
 
         # Clients:
         buf.readline()  # skip the Clients: header
@@ -316,7 +317,7 @@ class ZookeeperCheck(AgentCheck):
             _, value = buf.readline().split(':')
             metrics.append(ZKMetric('zookeeper.connections', int(value.strip())))
         else:
-            # If the zk version doesnt explicitly give the Connections val,
+            # If the zk version doesn't explicitly give the Connections val,
             # use the value we computed from the client list.
             metrics.append(ZKMetric('zookeeper.connections', connections))
 
@@ -364,7 +365,6 @@ class ZookeeperCheck(AgentCheck):
 
         metrics = []
         mode = 'inactive'
-
         for line in buf:
             try:
                 tags = []
@@ -373,7 +373,11 @@ class ZookeeperCheck(AgentCheck):
                     key, tag_name, tag_val, value = m.groups()
                     tags.append('{}:{}'.format(tag_name, tag_val))
                 else:
-                    key, value = line.split()
+                    try:
+                        key, value = line.split()
+                    except ValueError as e:
+                        self.log.debug("Unexpected 'mntr' output `%s`: %s", line, str(e))
+                        continue
 
                 if key == "zk_server_state":
                     mode = value.lower()
@@ -394,8 +398,8 @@ class ZookeeperCheck(AgentCheck):
 
                 metrics.append(ZKMetric(metric_name, metric_value, metric_type, tags))
 
-            except ValueError:
-                self.log.warning("Cannot format `mntr` value. key=%s, value=%s", key, value)
+            except ValueError as e:
+                self.log.warning("Cannot format `mntr` value from `%s`: %s", line, str(e))
 
             except Exception:
                 self.log.exception("Unexpected exception occurred while parsing `mntr` command content:\n%s", buf)

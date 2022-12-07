@@ -4,65 +4,83 @@ files:
   options:
   - template: init_config
     options:
+    - template: init_config/perf_counters
     - template: init_config/default
   - template: instances
     options:
     - name: sites
-      required: false
-      display_priority: 1
       description: |
         The `sites` parameter allows you to specify a list of sites you want to
         read metrics from. With sites specified, metrics are tagged with the
         site name. If you don't define any sites, the check pulls all of the
         sites, and tags each one with the site name.
+
+        On Agent versions 7.34 or higher, this may also be defined as a mapping
+        with `include` and/or `exclude` keys representing arrays of regular
+        expressions strings.
       value:
         example:
-        - <WEB_SITE_1>
-        - <WEB_SITE_2>
-        type: array
-        compact_example: false
-        items:
-          type: string
+          include:
+          - <PATTERN_1>
+          - <PATTERN_2>
+          exclude:
+          - <PATTERN_1>
+          - <PATTERN_2>
+        anyOf:
+        - type: array
+          items:
+            type: string
+        - type: object
+          properties:
+          - name: include
+            type: array
+            items:
+              type: string
+          - name: exclude
+            type: array
+            items:
+              type: string
     - name: app_pools
-      required: false
-      display_priority: 1
       description: |
         The `app_pools` parameter allows you to specify a list of application pools you want to
         read metrics from. With application pools specified, metrics are tagged with the
         application pool name. If you don't define any application pools, the check pulls all of the
         application pools, and tags each one with the application pool name.
+
+        On Agent versions 7.34 or higher, this may also be defined as a mapping
+        with `include` and/or `exclude` keys representing arrays of regular
+        expressions strings.
       value:
         example:
-        - <APP_POOL_1>
-        - <APP_POOL_2>
-        type: array
-        compact_example: false
-        items:
-          type: string
-    - name: is_2008
-      required: false
-      display_priority: 1
-      description: |
-        Because of a typo in IIS6/7 (typically on W2K8) where perfmon reports TotalBytesTransferred as
-        TotalBytesTransfered, you may have to enable this to grab the IIS metrics in that environment.
-      value:
-        example: false
-        type: boolean
-    - template: instances/pdh
+          include:
+          - <PATTERN_1>
+          - <PATTERN_2>
+          exclude:
+          - <PATTERN_1>
+          - <PATTERN_2>
+        anyOf:
+        - type: array
+          items:
+            type: string
+        - type: object
+          properties:
+          - name: include
+            type: array
+            items:
+              type: string
+          - name: exclude
+            type: array
+            items:
+              type: string
+    - template: instances/perf_counters
       overrides:
-          host.required: true
-          host.display_priority: 2
-          username.display_priority: 2
-          password.display_priority: 2
-          host.description: |
-            By default, this check runs against a single instance - the current
-            machine that the Agent is running on. It checks the PDH (Performance
-            Data Helper) performance counters for IIS on that machine.
-
-            "." means the current host, any other value makes the Agent attempt to connect to a remote host.
-            Note: Remote access requires additional permissions.
-          additional_metrics.value.example:
-            - ['Web Service', none, 'CGI Requests/sec', iis.httpd_request_method.cgi, gauge]
+        extra_metrics.value.example:
+          Web Service:
+            name: httpd_request_method
+            counters:
+            - CGI Requests/sec: cgi
+    - template: instances/pdh_legacy
+      hidden: true
     - template: instances/default
   - template: logs
     example:

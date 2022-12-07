@@ -28,12 +28,19 @@ files:
       value:
         example: http://localhost:4986
         type: string
+    - name: index_stats_url
+      description: |
+        The URL to get Index Statistics, available since Couchbase 7.0.
+        See https://docs.couchbase.com/server/current/rest-api/rest-index-stats.html
+      value:
+        example: http://localhost:9102
+        type: string
     - template: instances/http
     - template: instances/default
   - template: logs
     example:
     - type: file
-      path: /opt/couchbase/var/lib/couchbase/logs/*.log
+      path: /opt/couchbase/var/lib/couchbase/logs/couchdb.log
       source: couchbase
 
 - name: auto_conf.yaml

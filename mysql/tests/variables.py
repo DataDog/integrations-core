@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 STATUS_VARS = [
     # Command Metrics
+    'mysql.performance.prepared_stmt_count',
     'mysql.performance.slow_queries',
     'mysql.performance.questions',
     'mysql.performance.queries',
@@ -53,11 +54,22 @@ COMPLEX_STATUS_VARS = [
     'mysql.performance.qcache_lowmem_prunes',
 ]
 
+TABLE_VARS = [
+    'mysql.info.table.index_size',
+    'mysql.info.table.data_size',
+]
+
+ROW_TABLE_STATS_VARS = [
+    'mysql.info.table.rows.read',
+    'mysql.info.table.rows.changed',
+]
+
 # Possibly from SHOW GLOBAL VARIABLES
 VARIABLES_VARS = [
     'mysql.myisam.key_buffer_size',
     'mysql.performance.key_cache_utilization',
     'mysql.net.max_connections_available',
+    'mysql.performance.max_prepared_stmt_count',
     'mysql.performance.table_open_cache',
     'mysql.performance.thread_cache_size',
 ]
@@ -237,8 +249,27 @@ OPTIONAL_INNODB_VARS = [
 
 PERFORMANCE_VARS = ['mysql.performance.query_run_time.avg', 'mysql.performance.digest_95th_percentile.avg_us']
 
+COMMON_PERFORMANCE_VARS = ['mysql.performance.user_connections']
+
+# This exists to comply with some of the testing patterns with the old API.
+QUERY_EXECUTOR_METRIC_SETS = {
+    'user_connections': ('mysql.performance.user_connections', 'guage'),
+}
+
 SCHEMA_VARS = ['mysql.info.schema.size']
 
 SYNTHETIC_VARS = ['mysql.performance.qcache.utilization', 'mysql.performance.qcache.utilization.instant']
 
 STATEMENT_VARS = ['dd.mysql.queries.query_rows_raw', 'dd.mysql.queries.query_rows_limited']
+
+GROUP_REPLICATION_VARS = [
+    'mysql.replication.group.member_status',
+    'mysql.replication.group.conflicts_detected',
+    'mysql.replication.group.transactions',
+    'mysql.replication.group.transactions_applied',
+    'mysql.replication.group.transactions_in_applier_queue',
+    'mysql.replication.group.transactions_check',
+    'mysql.replication.group.transactions_proposed',
+    'mysql.replication.group.transactions_rollback',
+    'mysql.replication.group.transactions_validating',
+]

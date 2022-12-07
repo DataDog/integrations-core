@@ -182,13 +182,19 @@
         path (required): The absolute path for the file to read from.
         pattern: A regular expression pattern with a single capture group used to find the
                  token rather than using the entire file, for example: Your secret is (.+)
+      - type: oauth
+        url (required): The token endpoint.
+        client_id (required): The client identifier.
+        client_secret (required): The client secret.
+        basic_auth: Whether the provider expects credentials to be transmitted in
+                    an HTTP Basic Auth header. The default is: false
 
     The available writers are:
 
       - type: header
         name (required): The name of the field, for example: Authorization
         value: The template value, for example `Bearer <TOKEN>`. The default is: <TOKEN>
-        placeholder: The substring in `value` to replace by the token, defaults to: <TOKEN>
+        placeholder: The substring in `value` to replace with the token, defaults to: <TOKEN>
 - name: aws_region
   value:
     type: string
@@ -201,6 +207,8 @@
     type: string
   description: |
     If your services require AWS Signature Version 4 signing, set the host.
+    This only needs the hostname and does not require the protocol (HTTP, HTTPS, and more).
+    For example, if connecting to https://us-east-1.amazonaws.com/, set `aws_host` to `us-east-1.amazonaws.com`.
 
     Note: This setting is not necessary for official integrations.
 
@@ -233,10 +241,6 @@
   description: |
     If `tls_verify` is disabled, security warnings are logged by the check.
     Disable those by setting `tls_ignore_warning` to true.
-
-    Note: `tls_ignore_warning` set to true is currently only reliable if used by one instance of one integration.
-    If enabled for multiple instances, spurious warnings might still appear even if `tls_ignore_warning` is set
-    to true.
 - name: tls_cert
   value:
     example: <CERT_PATH>
@@ -261,6 +265,23 @@
     containing several CA certificates in PEM format. If a directory, the directory
     must have been processed using the c_rehash utility supplied with OpenSSL. See:
     https://www.openssl.org/docs/manmaster/man3/SSL_CTX_load_verify_locations.html
+- name: tls_protocols_allowed
+  value:
+    example:
+    - 'SSLv3'
+    - 'TLSv1.2'
+    - 'TLSv1.3'
+    type: array
+    items:
+      type: string
+  description: |
+    The expected versions of TLS/SSL when fetching intermediate certificates.
+    Only `SSLv3`, `TLSv1.2`, `TLSv1.3` are allowed by default. The possible values are:
+      SSLv3
+      TLSv1
+      TLSv1.1
+      TLSv1.2
+      TLSv1.3
 - name: headers
   value:
     example:
@@ -296,6 +317,12 @@
   value:
     type: number
   description: The read timeout for accessing services. Defaults to `timeout`.
+- name: request_size
+  description: |
+    The number of kibibytes (KiB) to read from streaming HTTP responses at a time.
+  value:
+    example: 16
+    type: number
 - name: log_requests
   value:
     example: false
@@ -305,4 +332,9 @@
   value:
     example: false
     type: boolean
-  description: Whether or not to persist cookies and use connection pooling for increased performance.
+  description: Whether or not to persist cookies and use connection pooling for improved performance.
+- name: allow_redirects
+  value:
+    example: true
+    type: boolean
+  description: Whether or not to allow URL redirection.

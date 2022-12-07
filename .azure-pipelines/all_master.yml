@@ -6,15 +6,14 @@ trigger:
 pr: none
 
 variables:
-  PIP_CACHE_DIR: $(Pipeline.Workspace)/.cache/pip
-  DDEV_COLOR: 1
+  - template: './templates/common-variables.yml'
 
 resources:
   containers:
     - container: dd_agent
-      image: datadog/agent:latest
+      image: gcr.io/datadoghq/agent:latest
       ports:
-        - 8126:8126
+        - 8127:8126
       env:
         DD_API_KEY: $(DD_CI_API_KEY)
         DD_HOSTNAME: "none"

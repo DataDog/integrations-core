@@ -2,6 +2,11 @@
 #
 init_config:
 
+    ## @param persist_db_connections - boolean - optional - default: true
+    ## Whether or not to persist database connections.
+    #
+    # persist_db_connections: true
+
     ## @param global_custom_queries - list of mappings - optional
     ## See `custom_queries` defined below.
     ##
@@ -20,7 +25,7 @@ init_config:
     #
     # service: <SERVICE>
 
-## Every instance is scheduled independent of the others.
+## Every instance is scheduled independently of the others.
 #
 instances:
 
@@ -44,6 +49,20 @@ instances:
     #
     password: <PASSWORD>
 
+    ## @param schema - string - optional - default: SYS_DATABASES
+    ## The schema containing the tenant databases views.
+    #
+    # schema: SYS_DATABASES
+
+    ## @param connection_properties - mapping - optional
+    ## When `hdbcli` is installed, this defines the properties of the database connections. Any property
+    ## defined here overrides any default value set by the check. For more information, see:
+    ## https://help.sap.com/viewer/f1b440ded6144a54ada97ff95dac7adf/2.10/en-US/ee592e89dcce4480a99571a4ae7a702f.html
+    #
+    # connection_properties:
+    #   key: hdbuserid
+    #   sslUseDefaultTrustStore: false
+
     ## @param use_hana_hostnames - boolean - optional - default: false
     ## Whether or not to use the hostnames contained in HANA's monitoring
     ## views instead of the Agent hostname.
@@ -53,12 +72,18 @@ instances:
     ## @param batch_size - integer - optional - default: 1000
     ## The number of rows to return with each query result.
     #
-    # batch_size: <BATCH_SIZE>
+    # batch_size: 1000
 
-    ## @param timeout - integer - optional - default: 10
+    ## @param timeout - number - optional - default: 10
     ## The timeout in seconds for connecting to `server`.
     #
-    # timeout: <TIMEOUT>
+    # timeout: 10
+
+    ## @param only_custom_queries - boolean - optional - default: false
+    ## Set this parameter to `true` if you want to skip the integration's default metrics collection.
+    ## Only metrics specified in `custom_queries` will be collected.
+    #
+    # only_custom_queries: false
 
     ## @param use_global_custom_queries - string - optional - default: true
     ## How `global_custom_queries` should be used for this instance. There are 3 options:
@@ -99,6 +124,11 @@ instances:
     #       type: gauge
     #     tags:
     #     - test:<INTEGRATION>
+
+    ## @param persist_db_connections - boolean - optional - default: true
+    ## Whether or not to persist database connections.
+    #
+    # persist_db_connections: true
 
     ## @param use_tls - boolean - optional - default: false
     ## Instructs the SAP HANA integration to connect using TLS.
@@ -177,3 +207,14 @@ instances:
     ## This is useful for cluster-level checks.
     #
     # empty_default_hostname: false
+
+    ## @param metric_patterns - mapping - optional
+    ## A mapping of metrics to include or exclude, with each entry being a regular expression.
+    ##
+    ## Metrics defined in `exclude` will take precedence in case of overlap.
+    #
+    # metric_patterns:
+    #   include:
+    #   - <INCLUDE_REGEX>
+    #   exclude:
+    #   - <EXCLUDE_REGEX>

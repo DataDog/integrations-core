@@ -6,9 +6,9 @@
 
 This check collects metrics from your YARN ResourceManager, including (but not limited to):
 
-- Cluster-wide metrics (e.g. number of running apps, running containers, unhealthy nodes, etc.)
-- Per-application metrics (e.g. app progress, elapsed running time, running containers, memory use, etc.)
-- Node metrics (e.g. available vCores, time of last health update, etc.)
+- Cluster-wide metrics, such as number of running apps, running containers, unhealthy nodes, and more.
+- Per-application metrics, such as app progress, elapsed running time, running containers, memory use, and more.
+- Node metrics, such as available vCores, time of last health update, and more.
 
 ### Deprecation notice
 
@@ -18,7 +18,7 @@ This check collects metrics from your YARN ResourceManager, including (but not l
 
 ### Installation
 
-The YARN check is included in the [Datadog Agent][3] package, so you don't need to install anything else on your YARN ResourceManager.
+The YARN check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your YARN ResourceManager.
 
 ### Configuration
 
@@ -29,7 +29,7 @@ The YARN check is included in the [Datadog Agent][3] package, so you don't need 
 
 To configure this check for an Agent running on a host:
 
-1. Edit the `yarn.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][4].
+1. Edit the `yarn.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][3].
 
    ```yaml
    init_config:
@@ -54,16 +54,16 @@ To configure this check for an Agent running on a host:
        cluster_name: default_cluster
    ```
 
-    See the [example check configuration][5] for a comprehensive list and description of all check options.
+    See the [example check configuration][4] for a comprehensive list and description of all check options.
 
-2. [Restart the Agent][6] to start sending YARN metrics to Datadog.
+2. [Restart the Agent][5] to start sending YARN metrics to Datadog.
 
 <!-- xxz tab xxx -->
 <!-- xxx tab "Containerized" xxx -->
 
 #### Containerized
 
-For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying the parameters below.
+For containerized environments, see the [Autodiscovery Integration Templates][6] for guidance on applying the parameters below.
 
 | Parameter            | Value                                                                                   |
 | -------------------- | --------------------------------------------------------------------------------------- |
@@ -79,7 +79,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][2]
     logs_enabled: true
     ```
 
-2. Uncomment and edit the logs configuration block in your `yarn.d/conf.yaml` file. Change the `type`, `path`, and `service` parameter values based on your environment. See the [sample yarn.d/conf.yaml][5] for all available configuration options.
+2. Uncomment and edit the logs configuration block in your `yarn.d/conf.yaml` file. Change the `type`, `path`, and `service` parameter values based on your environment. See the [sample yarn.d/conf.yaml][4] for all available configuration options.
 
     ```yaml
     logs:
@@ -94,22 +94,22 @@ For containerized environments, see the [Autodiscovery Integration Templates][2]
         #     name: new_log_start_with_date
     ```
 
-3. [Restart the Agent][6].
+3. [Restart the Agent][5].
 
-See [Datadog's documentation][14] for additional information on how to configure the Agent for log collection in Docker environments.
+To enable logs for Docker environments, see [Docker Log Collection][7].
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
 ### Validation
 
-[Run the Agent's `status` subcommand][7] and look for `yarn` under the Checks section.
+Run the [Agent's status subcommand][8] and look for `yarn` under the Checks section.
 
 ## Data Collected
 
 ### Metrics
 
-See [metadata.csv][8] for a list of metrics provided by this check.
+See [metadata.csv][9] for a list of metrics provided by this check.
 
 ### Events
 
@@ -117,34 +117,31 @@ The Yarn check does not include any events.
 
 ### Service Checks
 
-**yarn.can_connect**:<br>
-Returns `CRITICAL` if the Agent cannot connect to the ResourceManager URI to collect metrics, otherwise `OK`.
-
-**yarn.application.status**:<br>
-Returns per-application status according to the mapping specified in the [`conf.yaml`][5] file.
+See [service_checks.json][10] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][9].
+Need help? Contact [Datadog support][11].
 
 ## Further Reading
 
-- [Hadoop architectural overview][10]
-- [How to monitor Hadoop metrics][11]
-- [How to collect Hadoop metrics][12]
-- [How to monitor Hadoop with Datadog][13]
+- [Hadoop architectural overview][12]
+- [How to monitor Hadoop metrics][13]
+- [How to collect Hadoop metrics][14]
+- [How to monitor Hadoop with Datadog][15]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/yarn/images/yarn_dashboard.png
-[2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
-[3]: https://app.datadoghq.com/account/settings#agent
-[4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
-[5]: https://github.com/DataDog/integrations-core/blob/master/yarn/datadog_checks/yarn/data/conf.yaml.example
-[6]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[7]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[8]: https://github.com/DataDog/integrations-core/blob/master/yarn/metadata.csv
-[9]: https://docs.datadoghq.com/help/
-[10]: https://www.datadoghq.com/blog/hadoop-architecture-overview
-[11]: https://www.datadoghq.com/blog/monitor-hadoop-metrics
-[12]: https://www.datadoghq.com/blog/collecting-hadoop-metrics
-[13]: https://www.datadoghq.com/blog/monitor-hadoop-metrics-datadog
-[14]:  https://docs.datadoghq.com/agent/docker/log/
+[2]: https://app.datadoghq.com/account/settings#agent
+[3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
+[4]: https://github.com/DataDog/integrations-core/blob/master/yarn/datadog_checks/yarn/data/conf.yaml.example
+[5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[6]: https://docs.datadoghq.com/agent/kubernetes/integrations/
+[7]: https://docs.datadoghq.com/agent/docker/log/
+[8]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[9]: https://github.com/DataDog/integrations-core/blob/master/yarn/metadata.csv
+[10]: https://github.com/DataDog/integrations-core/blob/master/yarn/assets/service_checks.json
+[11]: https://docs.datadoghq.com/help/
+[12]: https://www.datadoghq.com/blog/hadoop-architecture-overview
+[13]: https://www.datadoghq.com/blog/monitor-hadoop-metrics
+[14]: https://www.datadoghq.com/blog/collecting-hadoop-metrics
+[15]: https://www.datadoghq.com/blog/monitor-hadoop-metrics-datadog

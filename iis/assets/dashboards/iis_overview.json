@@ -717,7 +717,7 @@
                 ],
                 "indexes": [],
                 "message_display": "expanded-md",
-                "query": "\"iis\"",
+                "query": "source:iis",
                 "show_date_column": true,
                 "show_message_column": true,
                 "sort": {

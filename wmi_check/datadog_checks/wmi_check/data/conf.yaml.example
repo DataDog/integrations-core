@@ -9,7 +9,7 @@ init_config:
     #
     # service: <SERVICE>
 
-## Every instance is scheduled independent of the others.
+## Every instance is scheduled independently of the others.
 #
 instances:
 
@@ -63,19 +63,62 @@ instances:
     ## A list of filters on the WMI query you may want.
     ## Filters can be in one of these forms:
     ##   [{<FILTER_PROPERTY>: <FILTER_VALUE>},...] or
-    ##   [{FILTER_PROPERTY>: [<FILTER_OPERATOR>, <FILTER_VALUE>]},...]
+    ##   [{<FILTER_PROPERTY>: [<WQL_OPERATOR>, <FILTER_VALUE>]},...]
+    ##   [{<FILTER_PROPERTY>: [[<WQL_OPERATOR>, <FILTER_VALUE>],...]},...]
+    ##   [{<FILTER_PROPERTY>: {<BOOL_OPERATOR>: [[<WQL_OPERATOR>, <FILTER_VALUE>]]},...}]
     ##
-    ## All metrics are filtered out if any given property:
-    ##   1. Has one or more filter(s) applied to it, AND
-    ##   2. None of its filters evaluate to 'True'
-    ##
-    ## Providing just a <FILTER_VALUE> defaults to the '=' comparison operator.
+    ## Providing just a <FILTER_VALUE> defaults to the '=' WQL operator.
     ##
     ##   * <FILTER_PROPERTY> the name of the filter, for example 'PercentProcessorTime'.
+    ##   * <WQL_OPERATOR>: '=' (default), '<', '>', '<=', '>=', '!=', '<>', 'LIKE'
+    ##   * <BOOL_OPERATOR>: OR (default), AND, NOR, NAND, NOT
+    ##
+    ## Examples:
+    ##     filters:
+    ##       - PROP1: AA
+    ##       - PROP2: BB%
+    ##     result> WHERE ( PROP1 = 'AA' ) OR ( PROP2 LIKE 'BB%' )
+    ##
+    ##     filters:
+    ##       - PROP1: AA
+    ##         PROP2: BB%
+    ##     result> WHERE ( PROP1 = 'AA' AND PROP2 LIKE 'BB%' )
+    ##
+    ##     filters:
+    ##       - PROP1: 
+    ##           - AA
+    ##           - BB%
+    ##     result> WHERE ( ( PROP1 = 'AA' OR PROP1 LIKE 'BB%' ) )
+    ##
+    ##     filters:
+    ##       - PROP1: 
+    ##          NOT:
+    ##           - AA
+    ##           - BB%
+    ##     result> WHERE ( NOT ( PROP1 = 'AA' OR PROP1 LIKE 'BB%' ) )
+    ##
+    ##     filters:
+    ##       - PROP1: 
+    ##           AND:
+    ##             - ['!=', 'AA']
+    ##             - ['!=', 'BB']
+    ##           OR:
+    ##             - CC%
+    ##     result> WHERE ( ( PROP1 != 'AA' AND PROP1 != 'BB' ) OR PROP1 LIKE 'CC%' )
+    ##
+    ##     filters:
+    ##       - PROP1: 
+    ##           NAND:
+    ##             - 'AA%'
+    ##             - '%BB'
+    ##     result> WHERE ( NOT ( PROP1 LIKE 'AA%' AND PROP1 LIKE '%BB' ) )
     #
     # filters:
-    #   - {<FILTER_PROPERTY>: [<FILTER_OPERATOR>, <FILTER_VALUE>]}
     #   - {<FILTER_PROPERTY>: <FILTER_VALUE>}
+    #   - {<FILTER_PROPERTY>: [<FILTER_VALUE>]}
+    #   - {<FILTER_PROPERTY>: [<WQL_OPERATOR>, <FILTER_VALUE>]}
+    #   - {<FILTER_PROPERTY>: [[<WQL_OPERATOR>, <FILTER_VALUE>]]}
+    #   - {<FILTER_PROPERTY>: {<BOOL_OPERATOR>: [[<WQL_OPERATOR>, <FILTER_VALUE>]]}}
 
     ## @param provider - integer - optional - default: 64
     ## The WMI provider.
@@ -138,3 +181,14 @@ instances:
     ## This is useful for cluster-level checks.
     #
     # empty_default_hostname: false
+
+    ## @param metric_patterns - mapping - optional
+    ## A mapping of metrics to include or exclude, with each entry being a regular expression.
+    ##
+    ## Metrics defined in `exclude` will take precedence in case of overlap.
+    #
+    # metric_patterns:
+    #   include:
+    #   - <INCLUDE_REGEX>
+    #   exclude:
+    #   - <EXCLUDE_REGEX>

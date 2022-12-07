@@ -2,143 +2,16 @@ name: Aerospike
 files:
 - name: aerospike.yaml
   options:
-  - template: instances
-    options:
-    - name: host
-      required: true
-      description: Aerospike host to connect to.
-      value:
-        type: string
-        example: localhost
-    - name: port
-      required: true
-      description: Aerospike port to connect to.
-      value:
-        type: integer
-        example: 3000
-    - name: username
-      value:
-        type: string
-      description:  The database user to authenticate as.
-    - name: password
-      secret: true
-      value:
-        type: string
-      description: The password of `username`.
-    - name: tls_name
-      value:
-        type: string
-      description: |
-        This must match the tls-name specified in the node’s server
-        configuration file and match the server’s CA certificate.
-
-        Note: TLS usage requires Aerospike Enterprise Edition
-    - name: tls_config
-      description: |
-        Note TLS usage requires Aerospike Enterprise Edition
-        Key value pairs with a choice of the following elements:
-
-          cafile: Path to a trusted CA certificate file. By default TLS will use system standard trusted CA certificates
-          capath: Path to a directory of trusted certificates.
-          protocols: Specifies enabled protocols. If not specified the client will use “-all +TLSv1.2”.
-          cipher_suite: Specifies enabled cipher suites. Defaults to the OpenSSL default cipher suite.
-          keyfile: Path to the client’s key for mutual authentication. By default mutual authentication is disabled.
-          keyfile_pw: Decryption password for the client’s key for mutual authentication if needed.
-          cert_blacklist: Path to a certificate blacklist file.
-          certfile: Path to the client’s certificate chain file for mutual authentication if needed.
-          crl_check: (True, False) Enable CRL checking for the certificate chain leaf certificate.
-          crl_check_all: (True, False): Enable CRL checking for the entire certificate chain.
-      value:
-       type: object
-       example:
-         cafile: <CA_FILE>
-         certfile: <CERT_FILE>
-         keyfile: <KEY_FILE>
-    - name: timeout
-      value:
-        example: 10
-        type: number
-      description: The read timeout in seconds.
-    - name: metrics
-      description: |
-        All metrics collected by default. You probably don't want to do this,
-        so list the ones you do want here. Check with:
-        asinfo -v statistics -l
-      value:
-        type: array
-        items:
-          type: string
-        example:
-          - migrate_rx_objs
-          - migrate_tx_objs
-    - name: namespaces
-      description: All namespaces are collected by default. If you want to collect specific namespaces specify them here.
-      value:
-        type: array
-        items:
-          type: string
-        example:
-          - example_namespace
-          - another_example_namespace
-    - name: datacenters
-      description: |
-        For Aerospike v4 or lower, all datacenters are collected by default.
-        If you want to collect specific datacenters specify them here.
-
-        Aerospike v5 or higher, you must specify a list of datacenters to monitor XDR metrics.
-      value:
-        type: array
-        items:
-          type: string
-        example:
-          - example_datacenter
-          - another_example_datacenter
-    - name: namespace_metrics
-      description: |
-        All Namespace metrics collected by default. You probably don't want to do this,
-        so list the ones you do want here. Check with:
-          `asinfo -v namespace/<NAME_SPACE> -l`.
-      value:
-        type: array
-        items:
-          type: string
-        example:
-          - free-pct-disk
-          - free-pct-memory
-          - evicted-objects
-          - expired-objects
-          - master-objects
-          - migrate-rx-partitions-initial
-          - migrate-rx-partitions-remaining
-          - migrate-tx-partitions-initial
-          - migrate-tx-partitions-remaining
-    - name: datacenter_metrics
-      description: |
-        All datacenter metrics collected by default. Specify which metrics you want here.
-        List datacenters using this command:
-          `asinfo -v dcs -l.`
-      value:
-        type: array
-        items:
-          type: string
-        example:
-          - dc_rec_ship_attempts        # renamed dc_ship_attempt
-          - dc_remote_ship_ok
-          - dc_delete_ship_attempts    # renamed dc_ship_delete_success
-    - template: instances/default
-  - template: logs
-    example:
-      - type: file
-        path: /var/log/aerospike/aerospike.log
-        source: aerospike
   - template: init_config
     options:
+    - template: init_config/openmetrics
     - name: mappings
-      required: true
+      hidden: true
       description: |
         Rate mappings. DO NOT EDIT unless you know what you're doing.
-        See https://github.com/aerospike/aerospike-collectd/blob/develop/aerospike_schema.yaml
-        for the definitive list
+        See https://github.com/aerospike-community/aerospike-collectd/blob/master/aerospike_schema.yaml
+        for the definitive list.
+      enabled: false
       value:
         type: array
         items:
@@ -489,5 +362,129 @@ files:
           - dc_ship_destination_error
           - dc_ship_source_error
           - dc_ship_success
+  - template: instances
+    options:
+    - template: instances/openmetrics
+      overrides:
+        openmetrics_endpoint.enabled: true
+        openmetrics_endpoint.required: false
+        openmetrics_endpoint.value.example: http://127.0.0.1:9145/metrics
+    - name: host
+      hidden: true
+      description: Aerospike host to connect to.
+      value:
+        type: string
+        example: localhost
+    - name: port
+      hidden: true
+      description: Aerospike port to connect to.
+      value:
+        type: integer
+        example: 3000
+    - name: tls_name
+      hidden: true
+      value:
+        type: string
+      description: |
+        This must match the tls-name specified in the node’s server
+        configuration file and match the server’s CA certificate.
 
-    - template: init_config/default
+        Note: TLS usage requires Aerospike Enterprise Edition
+    - name: tls_config
+      hidden: true
+      description: |
+        Note TLS usage requires Aerospike Enterprise Edition
+        Key value pairs with a choice of the following elements:
+
+          cafile: Path to a trusted CA certificate file. By default TLS will use system standard trusted CA certificates
+          capath: Path to a directory of trusted certificates.
+          protocols: Specifies enabled protocols. If not specified the client will use “-all +TLSv1.2”.
+          cipher_suite: Specifies enabled cipher suites. Defaults to the OpenSSL default cipher suite.
+          keyfile: Path to the client’s key for mutual authentication. By default mutual authentication is disabled.
+          keyfile_pw: Decryption password for the client’s key for mutual authentication if needed.
+          cert_blacklist: Path to a certificate blacklist file.
+          certfile: Path to the client’s certificate chain file for mutual authentication if needed.
+          crl_check: (True, False) Enable CRL checking for the certificate chain leaf certificate.
+          crl_check_all: (True, False): Enable CRL checking for the entire certificate chain.
+      value:
+       type: object
+       example:
+         cafile: <CA_FILE>
+         certfile: <CERT_FILE>
+         keyfile: <KEY_FILE>
+    - name: metrics
+      hidden: true
+      description: |
+        All metrics collected by default. You probably don't want to do this,
+        so list the ones you do want here. Check with:
+        asinfo -v statistics -l. Do not use with 'openmetrics_endpoint'.
+      value:
+        type: array
+        items:
+          type: string
+        example:
+          - migrate_rx_objs
+          - migrate_tx_objs
+    - name: namespaces
+      hidden: true
+      description: All namespaces are collected by default. If you want to collect specific namespaces specify them here.
+      value:
+        type: array
+        items:
+          type: string
+        example:
+          - example_namespace
+          - another_example_namespace
+    - name: datacenters
+      hidden: true
+      description: |
+        For Aerospike v4 or lower, all datacenters are collected by default.
+        If you want to collect specific datacenters specify them here.
+
+        Aerospike v5 or higher, you must specify a list of datacenters to monitor XDR metrics.
+      value:
+        type: array
+        items:
+          type: string
+        example:
+          - example_datacenter
+          - another_example_datacenter
+    - name: namespace_metrics
+      hidden: true
+      description: |
+        All Namespace metrics collected by default. You probably don't want to do this,
+        so list the ones you do want here. Check with:
+          `asinfo -v namespace/<NAME_SPACE> -l`.
+      value:
+        type: array
+        items:
+          type: string
+        example:
+          - free-pct-disk
+          - free-pct-memory
+          - evicted-objects
+          - expired-objects
+          - master-objects
+          - migrate-rx-partitions-initial
+          - migrate-rx-partitions-remaining
+          - migrate-tx-partitions-initial
+          - migrate-tx-partitions-remaining
+    - name: datacenter_metrics
+      hidden: true
+      description: |
+        All datacenter metrics collected by default. Specify which metrics you want here.
+        List datacenters using this command:
+          `asinfo -v dcs -l.`
+      value:
+        type: array
+        items:
+          type: string
+        example:
+          - dc_rec_ship_attempts        # renamed dc_ship_attempt
+          - dc_remote_ship_ok
+          - dc_delete_ship_attempts    # renamed dc_ship_delete_success
+  - template: logs
+    example:
+      - type: file
+        path: /var/log/aerospike/aerospike.log
+        source: aerospike

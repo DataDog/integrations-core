@@ -1,0 +1,62 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "ee9cd120-9667-4a81-a309-c34f5942406a",
+  "app_id": "hudi",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Track metrics for your Hudi configuration.",
+    "title": "Hudi",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Log Collection",
+      "Category::Processing"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
+  "assets": {
+    "integration": {
+      "source_type_name": "Hudi",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "hudi.",
+        "check": "hudi.action.duration",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {
+      "Hudi Overview": "assets/dashboards/overview.json"
+    },
+    "monitors": {
+      "commit_duration": "assets/monitors/commit_duration.json"
+    },
+    "saved_views": {
+      "hudi_error_logs": "assets/saved_views/error_logs.json",
+      "hudi_overview": "assets/saved_views/hudi_overview.json",
+      "hudi_patterns": "assets/saved_views/hudi_patterns.json"
+    },
+    "logs": {
+      "source": "hudi"
+    }
+  }
+}

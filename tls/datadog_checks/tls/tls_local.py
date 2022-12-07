@@ -1,33 +1,32 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from cryptography.hazmat.backends import default_backend
 from cryptography.x509 import load_der_x509_certificate, load_pem_x509_certificate
 
 from datadog_checks.base import ConfigurationError
+from datadog_checks.base.log import get_check_logger
 from datadog_checks.tls.const import SERVICE_CHECK_VALIDATION
 
-from . import TLSCheck
 
-
-class TLSLocalCheck(TLSCheck):
-    def __init__(self, name, init_config, instances):
-        super(TLSLocalCheck, self).__init__(name, init_config, instances)
+class TLSLocalCheck(object):
+    def __init__(self, agent_check):
+        self.agent_check = agent_check
+        self.log = get_check_logger()
         self.log.debug('Selecting local connection for method of collection')
-        if self._tls_validate_hostname and self._server_hostname:
-            self._tags.append('server_hostname:{}'.format(self._server_hostname))
+        if self.agent_check._tls_validate_hostname and self.agent_check._server_hostname:
+            self.agent_check._tags.append('server_hostname:{}'.format(self.agent_check._server_hostname))
 
     def _get_local_cert(self):
         try:
-            with open(self._local_cert_path, 'rb') as f:
+            with open(self.agent_check._local_cert_path, 'rb') as f:
                 self.log.debug('Reading from local cert path')
                 cert = f.read()
         except Exception as e:
             self.log.debug('Error occurred while reading from local cert path: %s', str(e))
-            self.service_check(
+            self.agent_check.service_check(
                 SERVICE_CHECK_VALIDATION,
-                self.CRITICAL,
-                tags=self._tags,
+                self.agent_check.CRITICAL,
+                tags=self.agent_check._tags,
                 message='Unable to open the certificate: {}'.format(e),
             )
             return None
@@ -39,28 +38,27 @@ class TLSLocalCheck(TLSCheck):
         except Exception as e:
             message = 'Unable to parse the certificate: {}'.format(e)
             self.log.debug(message)
-            self.service_check(
+            self.agent_check.service_check(
                 SERVICE_CHECK_VALIDATION,
-                self.CRITICAL,
-                tags=self._tags,
+                self.agent_check.CRITICAL,
+                tags=self.agent_check._tags,
                 message='Unable to parse the certificate: {}'.format(e),
             )
             return None
         return cert
 
-    def check(self, _):
-        if self._tls_validate_hostname and not self._server_hostname:
+    def check(self):
+        if self.agent_check._tls_validate_hostname and not self.agent_check._server_hostname:
             raise ConfigurationError(
                 'You must specify `server_hostname` in your configuration file, or disable `tls_validate_hostname`.'
             )
 
         cert = self._get_local_cert()
-        self.validate_certificate(cert)
-        self.check_age(cert)
+        self.agent_check.validate_certificate(cert)
+        self.agent_check.check_age(cert)
 
     @staticmethod
     def local_cert_loader(cert):
-        backend = default_backend()
         if b'-----BEGIN CERTIFICATE-----' in cert:
-            return load_pem_x509_certificate(cert, backend)
-        return load_der_x509_certificate(cert, backend)
+            return load_pem_x509_certificate(cert)
+        return load_der_x509_certificate(cert)

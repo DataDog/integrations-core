@@ -1,11 +1,9 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import pytest
+from datadog_checks.dev.tooling.configuration.consumers.model.model_consumer import VALIDATORS_DOCUMENTATION
 
 from ...utils import get_model_consumer, normalize_yaml
-
-pytestmark = [pytest.mark.conf, pytest.mark.conf_consumer, pytest.mark.conf_consumer_model]
 
 
 def test():
@@ -42,7 +40,7 @@ def test():
 
     validators_contents, validators_errors = files['validators.py']
     assert not validators_errors
-    assert validators_contents == ''
+    assert validators_contents == VALIDATORS_DOCUMENTATION
 
     package_root_contents, package_root_errors = files['__init__.py']
     assert not package_root_errors
@@ -88,19 +86,12 @@ def test():
         from . import defaults, validators
 
 
-        class Obj(BaseModel):
-            class Config:
-                allow_mutation = False
-
-            __root__: Sequence[float]
-
-
         class InstanceConfig(BaseModel):
             class Config:
                 allow_mutation = False
 
             foo: str
-            obj: Optional[Mapping[str, Obj]]
+            obj: Optional[Mapping[str, Sequence[float]]]
 
             @root_validator(pre=True)
             def _initial_validation(cls, values):

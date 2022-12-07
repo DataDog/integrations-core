@@ -1,39 +1,54 @@
 {
-  "display_name": "ClickHouse",
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "name": "clickhouse",
-  "metric_prefix": "clickhouse.",
-  "metric_to_check": "clickhouse.query.active",
-  "creates_events": false,
-  "short_description": "Monitor the health and performance of your ClickHouse clusters.",
-  "guid": "781edd66-9c4c-4210-898c-182a6b8ba4ab",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "public_title": "Datadog-ClickHouse Integration",
-  "categories": [
-    "data store",
-    "log collection"
-  ],
-  "type": "check",
-  "is_public": true,
-  "integration_id": "clickhouse",
+  "manifest_version": "2.0.0",
+  "app_uuid": "668f43c1-bdd8-4686-bb92-d40f0c48fda9",
+  "app_id": "clickhouse",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor the health and performance of your ClickHouse clusters.",
+    "title": "ClickHouse",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Data Store",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "ClickHouse",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "clickhouse.",
+        "check": "clickhouse.query.active",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
     },
     "dashboards": {
       "ClickHouse Overview": "assets/dashboards/overview.json"
     },
-    "monitors": {},
-    "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "clickhouse"
-    },
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

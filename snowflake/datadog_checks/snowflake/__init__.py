@@ -8,7 +8,7 @@
 import sys
 
 if not sys.executable:
-    sys.executable = None
+    sys.executable = None  # type: ignore
 
 from .__about__ import __version__
 from .check import SnowflakeCheck

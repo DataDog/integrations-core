@@ -9,6 +9,9 @@ from datadog_checks.base.utils.http import RequestsWrapper
 from datadog_checks.dev.fs import get_here
 from datadog_checks.dev.ssh_tunnel import socks_proxy
 from datadog_checks.dev.terraform import terraform_run
+from datadog_checks.openstack_controller import OpenStackControllerCheck
+
+from .common import CHECK_NAME, CONFIG_FILE_INSTANCE
 
 
 @pytest.fixture(scope='session')
@@ -27,6 +30,16 @@ def dd_environment():
             socks_ip, socks_port = socks
             agent_config = {'proxy': {'http': 'socks5://{}:{}'.format(socks_ip, socks_port)}}
             yield instance, agent_config
+
+
+@pytest.fixture
+def instance():
+    return CONFIG_FILE_INSTANCE
+
+
+@pytest.fixture
+def check(instance):
+    return OpenStackControllerCheck(CHECK_NAME, {}, [instance])
 
 
 @pytest.fixture

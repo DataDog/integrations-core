@@ -38,8 +38,9 @@ Every file has 3 possible attributes:
 
 - `name` - This is the name of the file the Agent will look for (**REQUIRED**)
 - `example_name` - This is the name of the example file the Agent will ship. If none is provided, the
-  default will be `conf.yaml.example`. The exception is auto-discovery files, which are also named
-  `auto_conf.yaml`.
+  default will be `conf.yaml.example`. The exceptions are as follows:
+  - Auto-discovery files, which are named `auto_conf.yaml`
+  - Python-based core check default files, which are named `conf.yaml.default`
 - `options` - A list of [options](#options) (**REQUIRED**)
 
 ### Options
@@ -47,7 +48,7 @@ Every file has 3 possible attributes:
 Every option has 10 possible attributes:
 
 - `name` - This is the name of the option (**REQUIRED**)
-- `description` - Information about the option (**REQUIRED**)
+- `description` - Information about the option. This can be a multi-line string, but each line must contain fewer than 120 characters (**REQUIRED**).
 - `required` - Whether or not the option is required for basic functionality. It defaults to `false`.
 - `hidden` - Whether or not the option should not be publicly exposed. It defaults to `false`.
 - `display_priority` - An integer representing the relative visual rank the option should take on
@@ -57,7 +58,7 @@ Every option has 10 possible attributes:
 
     ```yaml
     deprecation:
-      Release: 8.0.0
+      Agent version: 8.0.0
       Migration: |
         do this
         and that
@@ -65,7 +66,8 @@ Every option has 10 possible attributes:
 
 - `multiple` - Whether or not options may be selected multiple times like `instances` or just once
   like `init_config`
-- `metadata_tags` - A list of tags (like `docs:foo`) that can serve for unexpected use cases in the future
+- `multiple_instances_defined` - Whether or not we separate the definition into multiple instances or just one
+- `metadata_tags` - A list of tags (like `docs:foo`) that can be used for unexpected use cases
 - `options` - Nested options, indicating that this is a section like `instances` or `logs`
 - `value` - The expected type data
 
@@ -104,7 +106,7 @@ The template format looks like `path/to/template_file` where `path/to` must poin
 to a template directory and `template_file` must have the file extension `.yaml` or `.yml`.
 
 You can use custom templates that will take precedence over the pre-defined templates by using the `template_paths`
-parameter of the [ConfigSpec](#datadog_checks.dev.tooling.specs.configuration.core.ConfigSpec) class.
+parameter of the [ConfigSpec](#datadog_checks.dev.tooling.configuration.core.ConfigSpec) class.
 
 ### Override
 
@@ -157,7 +159,7 @@ Use the `--sync` flag of the [model validation command](../ddev/cli.md#ddev-vali
 
 ## API
 
-::: datadog_checks.dev.tooling.specs.configuration.ConfigSpec
+::: datadog_checks.dev.tooling.configuration.ConfigSpec
     rendering:
       heading_level: 3
     selection:

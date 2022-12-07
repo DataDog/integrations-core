@@ -13,77 +13,128 @@ class TrelloClient:
     LABELS_ENDPOINT = API_URL + '/1/boards/ICjijxr4/labels'
     CARDS_ENDPOINT = API_URL + '/1/cards'
     MEMBERSHIP_ENDPOINT = API_URL + '/1/boards/ICjijxr4/memberships'
-    MEMBER_ENPOINT = API_URL + '/1/members'
+    BOARD_MEMBERS_ENDPOINT = API_URL + '/1/boards/ICjijxr4/members'
     HAVE_BUG_FIXE_ME_COLUMN = '58f0c271cbf2d534bd626916'
     FIXED_READY_TO_REBUILD_COLUMN = '5d5a8a50ca7a0189ae8ac5ac'
     RC_BUILDS_COLUMN = '5727778db5367f8b4cb520ca'
 
     def __init__(self, config):
         self.auth = {'key': config['trello']['key'] or None, 'token': config['trello']['token'] or None}
+
+        # Maps the trello team label to the trello column ID (idList)
         self.team_list_map = {
             'Containers': '5ae1cab495edd80852396c71',
             'Container App': '5e8b36a8060eeb1cb3fa5a9c',
             'Core': '5ae1e3d62a5167779e65e87d',
+            'Database Monitoring': '60ec3d30532b9072b44d3900',
             'Integrations': '5ae1e3e2c81fff836d00497e',
-            'Logs': '5aeca4c19707c4222bf6d883',
+            'Triage': '5d9b687492952e6578ecf04d',  # unused
             'Platform': '5d9b687492952e6578ecf04d',
             'Networks': '5e1de8cf867357791ec5ee47',
             'Processes': '5aeca4c8621e4359b9cb9c27',
             'Trace': '5bcf3ffbe0651642ae029038',
-            'Tools and Libraries': '5ef373fb33b7b805120d5011',
+            'Platform Integrations': '5ef373fb33b7b805120d5011',
             'Runtime-Security': '5f3148683b7428276f0f2133',
-            'Infra-Integrations': '5f9f9e09af18c18c628d80ee',
+            'Network Device Monitoring': '5f9f9e09af18c18c628d80ee',
+            'Remote-Config': '619262c91ae65d40bafb576f',
+            'Container-Ecosystems': '627e693a6c58bc2144accc85',
+            'Agent-Metrics-Logs': '62a9bbeb1c71b2208581744e',
+            'Agent-Shared-Components': '62a9bc0c9ab7f433a5c26f2f',
+            'Windows-Agent': '62e8dd8d256d8968c20af29e',
+            'eBPF Platform': '63375c6c6eb62b019cdcec2b',
+            'Universal Service Monitoring': '63375c7b9be24303f4a23ab9',
+            'Windows Kernel Integrations': '63375c737bbfbc003ee007c9',
+            'Open Telemetry': '63288ebed32e72013bbdd14d',
         }
+
+        # Maps the team to the trello team label
         self.label_team_map = {
             'team/agent-apm': 'Trace',
             'team/agent-core': 'Core',
             'team/agent-platform': 'Platform',
+            'team/triage': 'Platform',
             'team/networks': 'Networks',
             'team/processes': 'Processes',
             'team/containers': 'Containers',
             'team/container-app': 'Container App',
             'team/integrations': 'Integrations',
-            'team/logs': 'Logs',
-            'team/intg-tools-libs': 'Tools and Libraries',
+            'team/database-monitoring': 'Database Monitoring',
+            'team/platform-integrations': 'Platform Integrations',
             'team/agent-security': 'Runtime-Security',
-            'team/infra-integrations': 'Infra-Integrations',
+            'team/network-device-monitoring': 'Network Device Monitoring',
+            'team/remote-config': 'Remote-Config',
+            'team/container-ecosystems': 'Container-Ecosystems',
+            'team/agent-metrics-logs': 'Agent-Metrics-Logs',
+            'team/agent-shared-components': 'Agent-Shared-Components',
+            'team/windows-agent': 'Windows-Agent',
+            'team/ebpf-platform': 'eBPF Platform',
+            'team/universal-service-monitoring': 'Universal Service Monitoring',
+            'team/windows-kernel-integrations': 'Windows Kernel Integrations',
+            'team/opentelemetry': 'Open Telemetry',
         }
 
+        # Maps the team to the github team
         self.label_github_team_map = {
             'team/agent-apm': 'agent-apm',
-            'team/agent-core': 'agent-core',
             'team/agent-platform': 'agent-platform',
-            'team/networks': 'networks',
+            'team/triage': 'agent-platform',
+            'team/networks': 'Networks',
             'team/processes': 'processes',
             'team/containers': 'container-integrations',
             'team/container-app': 'container-app',
             'team/integrations': 'agent-integrations',
-            'team/logs': 'logs-intake',
-            'team/intg-tools-libs': 'integrations-tools-and-libraries',
+            'team/database-monitoring': 'database-monitoring',
+            'team/platform-integrations': 'platform-integrations',
             'team/agent-security': 'agent-security',
-            'team/infra-integrations': 'infrastructure-integrations',
+            'team/network-device-monitoring': 'network-device-monitoring',
+            'team/remote-config': 'remote-config',
+            'team/container-ecosystems': 'container-ecosystems',
+            'team/agent-metrics-logs': 'agent-metrics-logs',
+            'team/agent-shared-components': 'agent-shared-components',
+            # 'agent-core' must be after 'agent-metrics-logs' and 'agent-shared-components'
+            # as the team of a user is the first team available.
+            'team/agent-core': 'agent-core',
+            'team/windows-agent': 'windows-agent',
+            'team/ebpf-platform': 'ebpf-platform',
+            'team/usm': 'universal-service-monitoring',
+            'team/windows-kernel-integrations': 'windows-kernel-integrations',
+            'team/opentelemetry': 'opentelemetry',
         }
 
+        # Maps the trello label name to trello label ID
         self.label_map = {
             'Containers': '5e7910856f8e4363e3b51708',
             'Container App': '5e8b36f72f642272e75edd34',
             'Core': '5e79105d4c45a45adb9e7730',
             'Integrations': '5e790ff25bd3dd48da67608d',
-            'Logs': '5e79108febd27f4864c003ff',
+            'Database Monitoring': '60ec4973bd1b8652312af938',
+            'Triage': '5e7910a45d711a6382f08bb9',  # unused
             'Platform': '5e7910a45d711a6382f08bb9',
             'Networks': '5e79109821620a60014fc016',
             'Processes': '5e7910789f92a918152b700d',
             'Trace': '5c050640ecb34f0915ec589a',
-            'Tools and Libraries': '5ab12740841642c2a8829053',
+            'Platform Integrations': '5ab12740841642c2a8829053',
             'Runtime-Security': '5f314f0a364ee16ea4e78868',
-            'Infra-Integrations': '5f9fa48537fb6633584b0e3e',
+            'Network Device Monitoring': '5f9fa48537fb6633584b0e3e',
+            'Remote-Config': '61939089d51b6f842dba4c8f',
+            'Container-Ecosystems': '627e69f0963c334272a31f19',
+            'Agent-Metrics-Logs': '62a9bc5e60fb632602641d07',
+            'Agent-Shared-Components': '62a9bc4cdb0cc563932f532f',
+            'Windows-Agent': '62e8ddb35919c982499a7ccf',
+            'eBPF Platform': '63375cbf98d9f7003e2e7a0c',
+            'Universal Service Monitoring': '63375ccf0c2fe10560959d07',
+            'Windows Kernel Integrations': '63375cd704bbd201f1e577b5',
+            'Open Telemetry': '635658ea01dd6a04e233f858',
         }
+
         self.progress_columns = {
             '600ec7ad2b78475e13c04cfc': 'In Progress',  # INPROGRESS
             self.HAVE_BUG_FIXE_ME_COLUMN: 'Issues Found',  # HAVE BUGS
             self.FIXED_READY_TO_REBUILD_COLUMN: 'Awaiting Build',  # WAITING
             '600eab615842d6560f6ce898': 'Done',
         }
+
+        self.labels_to_ignore = {"cluster-agent"}
 
         self.__check_map_consistency(self.team_list_map, self.label_team_map, self.label_map)
 
@@ -151,6 +202,8 @@ class TrelloClient:
         cards = requests.get(self.BOARD_ENDPOINT, params=self.auth)
         for card in cards.json():
             labels = card.get('labels', [])
+            if self.skip_card(labels):
+                continue
             team_found = False
             for label in labels:
                 if label['name'] in self.label_map:
@@ -170,6 +223,15 @@ class TrelloClient:
                 )
         return counts
 
+    def skip_card(self, labels):
+        """
+        True if at least one label should be ignored, False otherwise.
+        """
+        for label in labels:
+            if label['name'] in self.labels_to_ignore:
+                return True
+        return False
+
     def get_card(self, card_id):
         response = requests.get(f'{self.CARDS_ENDPOINT}/{card_id}', params=self.auth)
         response.raise_for_status()
@@ -181,28 +243,21 @@ class TrelloClient:
         response.raise_for_status()
         return response.json()
 
-    def get_membership(self):
+    def get_board_members(self):
         """
-        Get the members.
+        Get the members from the board.
         """
-        membership = requests.get(self.MEMBERSHIP_ENDPOINT, params=self.auth)
-        membership.raise_for_status()
-        return membership.json()
+        members = requests.get(self.BOARD_MEMBERS_ENDPOINT, params=self.auth)
+        members.raise_for_status()
+        members = members.json()
 
-    def get_member(self, id_member):
-        """
-        Get the member.
-        """
-        try:
-            membership = requests.get(f'{self.MEMBER_ENPOINT}/{id_member}', params=self.auth)
-            membership.raise_for_status()
-        except requests.exceptions.HTTPError as e:
-            if e.response.status_code == 429:
-                raise Exception('Timeout, please try in 900 secondes') from e
-            else:
-                raise e
+        # We need the memberships to filter out deactivated users
+        memberships = requests.get(self.MEMBERSHIP_ENDPOINT, params=self.auth)
+        memberships.raise_for_status()
+        memberships = memberships.json()
+        deactivated_users = {m['idMember'] for m in memberships if m['deactivated']}
 
-        return membership.json()
+        return [member for member in members if member['id'] not in deactivated_users]
 
     def get_list(self, list_id):
         return self.__request(self.API_URL + f'/1/lists/{list_id}/cards')

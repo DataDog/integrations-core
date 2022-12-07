@@ -1,4 +1,0 @@
-cryptography==3.3.2; python_version < '3.0'
-cryptography==3.4.6; python_version > '3.0'
-ipaddress==1.0.22; python_version < '3.0'
-service_identity[idna]==18.1.0

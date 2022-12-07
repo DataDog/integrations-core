@@ -5,7 +5,7 @@ import pytest
 
 from datadog_checks.mongo import MongoDb
 
-from .common import HOST, PORT2
+from .common import HOST, PORT1, auth, shard, standalone, tls
 
 BASE_METRICS = [
     'mongodb.connections.available',
@@ -41,30 +41,62 @@ MONGOS_METRICS = BASE_METRICS + [
     'mongodb.stats.filesize',
     'mongodb.stats.indexsize',
     'mongodb.stats.datasize',
-    'mongodb.stats.numextents',
     'mongodb.stats.indexes',
     'mongodb.stats.objects',
 ]
 
-MONGOD_METRICS = BASE_METRICS + ['mongodb.fsynclocked']
+MONGOD_METRICS = BASE_METRICS + [
+    'mongodb.oplatencies.reads.latencyps',
+    'mongodb.oplatencies.writes.latencyps',
+    'mongodb.oplatencies.commands.latencyps',
+    'mongodb.oplatencies.reads.latency',
+    'mongodb.oplatencies.writes.latency',
+    'mongodb.oplatencies.commands.latency',
+    'mongodb.metrics.queryexecutor.scannedps',
+    'mongodb.metrics.queryexecutor.scannedobjectsps',
+    'mongodb.fsynclocked',
+]
 
 
+@standalone
 @pytest.mark.e2e
-def test_e2e_mongos(dd_agent_check, instance_authdb):
-    aggregator = dd_agent_check(instance_authdb, rate=True)
-    for metric in MONGOS_METRICS:
+def test_e2e_mongo_standalone(dd_agent_check, instance_user):
+    aggregator = dd_agent_check(instance_user, rate=True)
+    for metric in MONGOD_METRICS:
         aggregator.assert_metric(metric)
-
     aggregator.assert_service_check('mongodb.can_connect', status=MongoDb.OK)
 
 
+@shard
 @pytest.mark.e2e
-def test_e2e_mongod(dd_agent_check, instance):
-    instance['hosts'] = ['{}:{}'.format(HOST, PORT2)]
-    instance['username'] = 'testUser'
-    instance['password'] = 'testPass'
+def test_e2e_mongo_shard(dd_agent_check, instance_authdb):
+    aggregator = dd_agent_check(instance_authdb, rate=True)
+    for metric in MONGOS_METRICS:
+        aggregator.assert_metric(metric)
+    aggregator.assert_service_check('mongodb.can_connect', status=MongoDb.OK)
+
+
+@auth
+@pytest.mark.e2e
+def test_e2e_mongo_auth(dd_agent_check, instance_authdb):
+    aggregator = dd_agent_check(instance_authdb, rate=True)
+    for metric in MONGOD_METRICS:
+        aggregator.assert_metric(metric)
+    aggregator.assert_service_check('mongodb.can_connect', status=MongoDb.OK)
+
+
+@tls
+@pytest.mark.e2e
+def test_e2e_mongo_tls(dd_agent_check):
+    instance = {
+        'hosts': ['{}:{}'.format(HOST, PORT1)],
+        'database': 'test',
+        'tls': True,
+        'tls_allow_invalid_certificates': True,
+        'tls_certificate_key_file': '/certs/client1.pem',
+        'tls_ca_file': '/certs/ca.pem',
+    }
     aggregator = dd_agent_check(instance, rate=True)
     for metric in MONGOD_METRICS:
         aggregator.assert_metric(metric)
-
     aggregator.assert_service_check('mongodb.can_connect', status=MongoDb.OK)

@@ -2,7 +2,8 @@
 
 This integration can be tested using the Docker Compose environment.
 
-Running the environment requires a rather large amount of memory, so make sure that Docker has a comfortable amount of RAM available - 6GB should be enough. Otherwise, spinning up the Docker Compose environment may fail with the following error:
+Running the environment requires a large amount of memory, so ensure that Docker has a comfortable amount of RAM available. 6GB should be enough.
+Otherwise, spinning up the Docker Compose environment may fail with the following error:
 
 ```
 Entering post start phase ...

@@ -1,2 +1,0 @@
-python-binary-memcached==0.26.1; sys_platform != 'win32' and python_version < '3.0'
-python-binary-memcached==0.30.1; sys_platform != 'win32' and python_version > '3.0'

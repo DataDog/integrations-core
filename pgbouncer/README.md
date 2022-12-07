@@ -58,9 +58,9 @@ To configure this check for an Agent running on a host:
      - database_url: "postgresql://datadog:<PASSWORD>@<HOSTNAME>:<PORT>/<DATABASE_URL>?sslmode=require"
    ```
 
-   **Note**: If your instance of PgBouncer does not have SSL support, replace `sslmode=require` with `sslmode=allow` to avoid server errors. For more information on SSL support, see the [Postgres documentation][10].
+   **Note**: If your instance of PgBouncer does not have SSL support, replace `sslmode=require` with `sslmode=allow` to avoid server errors. For details, see the Postgres documentation on [SSL support][4].
 
-2. [Restart the Agent][4].
+2. [Restart the Agent][5].
 
 ##### Log collection
 
@@ -84,14 +84,14 @@ _Available for Agent versions >6.0_
 
    Change the `path` and `service` parameter values and configure them for your environment. See the [sample pgbouncer.d/conf.yaml][3] for all available configuration options.
 
-3. [Restart the Agent][5].
+3. [Restart the Agent][6].
 
 <!-- xxz tab xxx -->
 <!-- xxx tab "Containerized" xxx -->
 
 #### Containerized
 
-For containerized environments, see the [Autodiscovery Integration Templates][6] for guidance on applying the parameters below.
+For containerized environments, see the [Autodiscovery Integration Templates][7] for guidance on applying the parameters below.
 
 ##### Metric collection
 
@@ -105,7 +105,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][6]
 
 _Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][7].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][8].
 
 | Parameter      | Value                                           |
 | -------------- | ----------------------------------------------- |
@@ -116,13 +116,13 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 ### Validation
 
-[Run the Agent's status subcommand][5] and look for `pgbouncer` under the Checks section.
+[Run the Agent's status subcommand][6] and look for `pgbouncer` under the Checks section.
 
 ## Data Collected
 
 ### Metrics
 
-See [metadata.csv][8] for a list of metrics provided by this check.
+See [metadata.csv][9] for a list of metrics provided by this check.
 
 **Note**: Not all metrics are available with all versions of PgBouncer.
 
@@ -132,20 +132,21 @@ The PgBouncer check does not include any events.
 
 ### Service Checks
 
-**pgbouncer.can_connect**:<br>
-Returns `CRITICAL` if the Agent cannot connect to PgBouncer to collect metrics, otherwise returns `OK`.
+See [service_checks.json][10] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][9].
+Need help? Contact [Datadog support][11].
+
 
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [3]: https://github.com/DataDog/integrations-core/blob/master/pgbouncer/datadog_checks/pgbouncer/data/conf.yaml.example
-[4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[5]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[6]: https://docs.datadoghq.com/agent/kubernetes/integrations/
-[7]: https://docs.datadoghq.com/agent/kubernetes/log/
-[8]: https://github.com/DataDog/integrations-core/blob/master/pgbouncer/metadata.csv
-[9]: https://docs.datadoghq.com/help/
-[10]: https://www.postgresql.org/docs/9.1/libpq-ssl.html
+[4]: https://www.postgresql.org/docs/9.1/libpq-ssl.html
+[5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[7]: https://docs.datadoghq.com/agent/kubernetes/integrations/
+[8]: https://docs.datadoghq.com/agent/kubernetes/log/
+[9]: https://github.com/DataDog/integrations-core/blob/master/pgbouncer/metadata.csv
+[10]: https://github.com/DataDog/integrations-core/blob/master/pgbouncer/assets/service_checks.json
+[11]: https://docs.datadoghq.com/help/

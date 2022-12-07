@@ -5,7 +5,8 @@ import re
 
 from six.moves.urllib.parse import urlparse
 
-from datadog_checks.base import AgentCheck
+from datadog_checks.base import AgentCheck, ConfigurationError
+from datadog_checks.base.errors import CheckException
 
 
 class Apache(AgentCheck):
@@ -17,6 +18,7 @@ class Apache(AgentCheck):
     GAUGES = {
         'IdleWorkers': 'apache.performance.idle_workers',
         'BusyWorkers': 'apache.performance.busy_workers',
+        'MaxWorkers': 'apache.performance.max_workers',
         'CPULoad': 'apache.performance.cpu_load',
         'Uptime': 'apache.performance.uptime',
         'Total kBytes': 'apache.net.bytes',
@@ -28,6 +30,21 @@ class Apache(AgentCheck):
     }
 
     RATES = {'Total kBytes': 'apache.net.bytes_per_s', 'Total Accesses': 'apache.net.request_per_s'}
+
+    SCOREBOARD_KEYS = {
+        '_': 'apache.scoreboard.waiting_for_connection',
+        'S': 'apache.scoreboard.starting_up',
+        'R': 'apache.scoreboard.reading_request',
+        'W': 'apache.scoreboard.sending_reply',
+        'K': 'apache.scoreboard.keepalive',
+        'D': 'apache.scoreboard.dns_lookup',
+        'C': 'apache.scoreboard.closing_connection',
+        'L': 'apache.scoreboard.logging',
+        'G': 'apache.scoreboard.gracefully_finishing',
+        'I': 'apache.scoreboard.idle_cleanup',
+        '.': 'apache.scoreboard.open_slot',
+        ' ': 'apache.scoreboard.disabled',
+    }
 
     HTTP_CONFIG_REMAPPER = {
         'apache_user': {'name': 'username'},
@@ -43,19 +60,26 @@ class Apache(AgentCheck):
         super(Apache, self).__init__(name, init_config, instances)
         self.assumed_url = {}
 
-    def check(self, instance):
-        if 'apache_status_url' not in instance:
-            raise Exception("Missing 'apache_status_url' in Apache config")
+    def check(self, _):
+        if 'apache_status_url' not in self.instance:
+            raise ConfigurationError("Missing 'apache_status_url' in Apache config")
 
-        url = self.assumed_url.get(instance['apache_status_url'], instance['apache_status_url'])
-        tags = instance.get('tags', [])
+        url = self.assumed_url.get(self.instance['apache_status_url'], self.instance['apache_status_url'])
+        tags = self.instance.get('tags', [])
+        disable_generic_tags = self.instance.get('disable_generic_tags', False)
 
         # Submit a service check for status page availability.
         parsed_url = urlparse(url)
         apache_host = parsed_url.hostname
         apache_port = parsed_url.port or 80
         service_check_name = 'apache.can_connect'
-        service_check_tags = ['host:%s' % apache_host, 'port:%s' % apache_port] + tags
+        service_check_tags = [
+            'host:%s' % apache_host,
+            'apache_host:%s' % apache_host,
+            'port:%s' % apache_port,
+        ] + tags
+        if disable_generic_tags:
+            service_check_tags = ['apache_host:%s' % apache_host, 'port:%s' % apache_port] + tags
         try:
             self.log.debug(
                 'apache check initiating request, connect timeout %d receive %d',
@@ -81,6 +105,12 @@ class Apache(AgentCheck):
             values = line.split(': ')
             if len(values) == 2:  # match
                 metric, value = values
+
+                # Special case: Report the status of the workers
+                if metric == 'Scoreboard':
+                    self._submit_scoreboard(value, tags)
+                    continue
+
                 # Special case: fetch and submit the version
                 if metric == 'ServerVersion':
                     self._submit_metadata(value)
@@ -108,15 +138,15 @@ class Apache(AgentCheck):
                     self.rate(metric_name, value, tags=tags)
 
         if metric_count == 0:
-            if self.assumed_url.get(instance['apache_status_url']) is None and url[-5:] != '?auto':
-                self.assumed_url[instance['apache_status_url']] = '%s?auto' % url
+            if self.assumed_url.get(self.instance['apache_status_url']) is None and url[-5:] != '?auto':
+                self.assumed_url[self.instance['apache_status_url']] = '%s?auto' % url
                 self.warning("Assuming url was not correct. Trying to add ?auto suffix to the url")
-                self.check(instance)
+                self.check(self.instance)
                 return
             else:
-                raise Exception(
-                    ("No metrics were fetched for this instance. Make sure that %s is the proper url.")
-                    % instance['apache_status_url']
+                raise CheckException(
+                    "No metrics were fetched for this instance. Make sure that %s is the proper url."
+                    % self.instance['apache_status_url']
                 )
 
         if not version_submitted:
@@ -141,3 +171,12 @@ class Apache(AgentCheck):
         version_parts = {name: part for name, part in zip(('major', 'minor', 'patch'), version.split('.'))}
         self.set_metadata('version', version, scheme='parts', final_scheme='semver', part_map=version_parts)
         self.log.debug("found apache version %s", version)
+
+    def _submit_scoreboard(self, value, tags):
+        """The scoreboard is a long string where each character represents the status of a given worker.
+        This method parses that string and emits the corresponding metrics"""
+        for _key, metric in self.SCOREBOARD_KEYS.items():
+            self.gauge(metric, value.count(_key), tags=tags)
+
+        self.gauge(self.GAUGES['MaxWorkers'], len(value), tags=tags)
+        self.log.debug("Scoreboard: %s", value)

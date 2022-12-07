@@ -1,37 +1,53 @@
 {
-  "categories": [
-    "processing",
-    "log collection",
-    "messaging",
-    "autodiscovery"
-  ],
-  "creates_events": false,
-  "display_name": "ActiveMQ XML",
-  "guid": "0433d687-68d3-42db-ad5c-6c232d881619",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "activemq.",
-  "metric_to_check": "activemq.queue.count",
-  "name": "activemq_xml",
-  "public_title": "Datadog-ActiveMQ XML Integration",
-  "short_description": "Collect metrics for brokers and queues, producers and consumers, and more.",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "type": "check",
-  "integration_id": "activemq-xml",
+  "manifest_version": "2.0.0",
+  "app_uuid": "def4c078-7aa6-45ab-8429-b594c98f3d48",
+  "app_id": "activemq-xml",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Collect metrics for brokers and queues, producers and consumers, and more.",
+    "title": "ActiveMQ XML",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Processing",
+      "Category::Log Collection",
+      "Category::Messaging",
+      "Category::Autodiscovery"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "ActiveMQ XML",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "activemq.",
+        "check": "activemq.queue.count",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
     },
-    "monitors": {},
-    "dashboards": {},
-    "service_checks": "assets/service_checks.json",
-    "logs": {},
-    "metrics_metadata": "metadata.csv"
+    "logs": {
+      "source": "activemq"
+    }
   }
 }

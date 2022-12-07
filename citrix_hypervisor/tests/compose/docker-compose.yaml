@@ -1,0 +1,24 @@
+version: "3"
+
+services:
+  mock-standalone:
+    build: .
+    container_name: mock-xenserver-standalone
+    volumes:
+      - ../fixtures/standalone:/usr/share/responses
+    ports:
+      - 8081:5000
+  mock-pool-slave:
+    build: .
+    container_name: mock-xenserver-pool-slave
+    volumes:
+      - ../fixtures/slave:/usr/share/responses
+    ports:
+      - 8082:5000
+  mock-pool-master:
+    build: .
+    container_name: mock-xenserver-pool-master
+    volumes:
+      - ../fixtures/master:/usr/share/responses
+    ports:
+      - 8083:5000

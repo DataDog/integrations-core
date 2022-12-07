@@ -15,12 +15,13 @@ init_config:
 #
 instances:
 
-    ## @param collect_connection_state - boolean - required
+  -
+    ## @param collect_connection_state - boolean - optional - default: false
     ## Set to true to collect connection states for your interfaces
     ## Note: this will require either the command `ss` from system package `iproute2` or
     ## the command `netstat` from the system package `net-tools` to be installed
     #
-  - collect_connection_state: false
+    # collect_connection_state: false
 
     ## @param collect_connection_queues - boolean - optional - default: false
     ## Set to true to enable connection queues collection
@@ -28,6 +29,7 @@ instances:
     ## `collect_connection_state` and `collect_connection_queues` to be true
     ## because it also requires the command `ss` from system package `iproute2` or
     ## the command `netstat` from the system package `net-tools` to be installed
+    ## Note: This option is only available on linux and will be ignored in other systems.
     #
     # collect_connection_queues: false
 
@@ -117,6 +119,24 @@ instances:
     #
     # collect_aws_ena_metrics: false
 
+    ## @param collect_ethtool_metrics - boolean - optional - default: false
+    ## Linux only.
+    ## Enable collection of ethtool statistics for network interfaces.
+    ## This will collect per queue and per cpu metrics depending on the driver.
+    ##
+    ## The queue and cpu will be used as a tag when submitting metrics.
+    ## For example, 'queue_0_tx_cnt' will be submitted as 'system.net.ena.queue.tx_cnt' with tag 'queue:0'
+    ##
+    ## Loopback interfaces 'lo' and 'lo0' are excluded as they don't support SIOCETHTOOL.
+    ##
+    ## Currently supported drivers:
+    ## - ena
+    ## - virtio_net
+    ## - hv_netvsc
+    ## - gve
+    #
+    # collect_ethtool_metrics: false
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
@@ -145,3 +165,14 @@ instances:
     ## This is useful for cluster-level checks.
     #
     # empty_default_hostname: false
+
+    ## @param metric_patterns - mapping - optional
+    ## A mapping of metrics to include or exclude, with each entry being a regular expression.
+    ##
+    ## Metrics defined in `exclude` will take precedence in case of overlap.
+    #
+    # metric_patterns:
+    #   include:
+    #   - <INCLUDE_REGEX>
+    #   exclude:
+    #   - <EXCLUDE_REGEX>

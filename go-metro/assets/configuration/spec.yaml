@@ -5,7 +5,7 @@ files:
   - template: init_config
     options:
     - name: snaplen
-      description: should be >=104 (to accomodate for the largest possible TCP header)
+      description: should be >=104 (to accommodate for the largest possible TCP header)
       required: true
       value:
         type: integer

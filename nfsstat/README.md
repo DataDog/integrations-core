@@ -14,7 +14,7 @@ The NFSstat check is included in the [Datadog Agent][2] package, so you don't ne
 
 ### Configuration
 
-Edit the `nfsstat.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3], to point to your nfsiostat binary script, or use the one included with the binary installer. See the [sample nfsstat.d/conf.yaml][4] for all available configuration options.
+Edit the `nfsstat.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3]. Point to your nfsiostat binary script, or use the one included with the binary installer. See the [sample nfsstat.d/conf.yaml][4] for all available configuration options.
 
 ### Log collection
 
@@ -36,36 +36,36 @@ Edit the `nfsstat.d/conf.yaml` file, in the `conf.d/` folder at the root of your
    Change the `path` parameter value and configure it for your environment.
    See the [sample nfsstat.d/conf.yaml][4] for all available configuration options.
 
-3. [Restart the Agent][9].
+3. [Restart the Agent][5].
 
 
 ### Validation
 
-[Run the Agent's `status` subcommand][5] and look for `nfsstat` under the Checks section.
+[Run the Agent's `status` subcommand][6] and look for `nfsstat` under the Checks section.
 
 ## Data Collected
 ### Metrics
-See [metadata.csv][6] for a list of metrics provided by this check.
+See [metadata.csv][7] for a list of metrics provided by this check.
 
 ### Events
-The Nfststat check does not include any events.
+The Nfsstat check does not include any events.
 
 ### Service Checks
 The Nfsstat check does not include any service checks.
 
 ## Troubleshooting
-Need help? Contact [Datadog support][7].
+Need help? Contact [Datadog support][8].
 
 ## Further Reading
 
-* [Built a network monitor on an http check][8]
+- [Built a network monitor on an http check][9]
 
 [1]: http://man7.org/linux/man-pages/man8/nfsiostat.8.html
 [2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [4]: https://github.com/DataDog/integrations-core/blob/master/nfsstat/datadog_checks/nfsstat/data/conf.yaml.example
-[5]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[6]: https://github.com/DataDog/integrations-core/blob/master/nfsstat/metadata.csv
-[7]: https://docs.datadoghq.com/help/
-[8]: https://docs.datadoghq.com/monitors/monitor_types/network/
-[9]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6v7#start-stop-and-restart-the-agent
+[5]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6v7#start-stop-and-restart-the-agent
+[6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[7]: https://github.com/DataDog/integrations-core/blob/master/nfsstat/metadata.csv
+[8]: https://docs.datadoghq.com/help/
+[9]: https://docs.datadoghq.com/monitors/monitor_types/network/

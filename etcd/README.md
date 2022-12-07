@@ -69,7 +69,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][6]
 
 ##### Log collection
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection][11].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection][7].
 
 | Parameter      | Value                                             |
 | -------------- | ------------------------------------------------- |
@@ -80,13 +80,13 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 ### Validation
 
-[Run the Agent's `status` subcommand][7] and look for `etcd` under the Checks section.
+[Run the Agent's `status` subcommand][8] and look for `etcd` under the Checks section.
 
 ## Data Collected
 
 ### Metrics
 
-See [metadata.csv][8] for a list of metrics provided by this integration.
+See [metadata.csv][9] for a list of metrics provided by this integration.
 
 Etcd metrics are tagged with `etcd_state:leader` or `etcd_state:follower`, depending on the node status, so you can easily aggregate metrics by status.
 
@@ -96,19 +96,16 @@ The Etcd check does not include any events.
 
 ### Service Checks
 
-**etcd.can_connect**:<br>
-Returns `CRITICAL` if the Agent cannot collect metrics from your Etcd API endpoint.
-
-**etcd.healthy**:<br>
-Returns `CRITICAL` if a member node is not healthy. Returns 'Unknown' if the Agent can't reach the `/health` endpoint, or if the health status is missing.
+See [service_checks.json][10] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][9].
+Need help? Contact [Datadog support][11].
 
 ## Further Reading
 
-To get a better idea of how (or why) to integrate Etcd with Datadog, check out our [blog post][10] about it.
+- [Kubernetes Control Plane Monitoring][13]
+- [Monitor etcd performance to ensure consistent Docker configuration][12]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/etcd/images/etcd_dashboard.png
 [2]: https://app.datadoghq.com/account/settings#agent
@@ -116,8 +113,10 @@ To get a better idea of how (or why) to integrate Etcd with Datadog, check out o
 [4]: https://github.com/DataDog/integrations-core/blob/master/etcd/datadog_checks/etcd/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [6]: https://docs.datadoghq.com/agent/kubernetes/integrations/
-[7]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[8]: https://github.com/DataDog/integrations-core/blob/master/etcd/metadata.csv
-[9]: https://docs.datadoghq.com/help/
-[10]: https://www.datadoghq.com/blog/monitor-etcd-performance
-[11]: https://docs.datadoghq.com/agent/kubernetes/log/
+[7]: https://docs.datadoghq.com/agent/kubernetes/log/
+[8]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[9]: https://github.com/DataDog/integrations-core/blob/master/etcd/metadata.csv
+[10]: https://github.com/DataDog/integrations-core/blob/master/etcd/assets/service_checks.json
+[11]: https://docs.datadoghq.com/help/
+[12]: https://www.datadoghq.com/blog/monitor-etcd-performance
+[13]: https://docs.datadoghq.com/agent/kubernetes/control_plane/?tab=helm

@@ -91,6 +91,17 @@ def replace_container_rt_prefix(cid):
     return cid
 
 
+def get_container_label(labels, l_name):
+    """
+    Iter on all labels to find the label.name equal to the l_name
+    :param labels: list of labels
+    :param l_name: str
+    :return: str or None
+    """
+    if l_name in labels:
+        return labels[l_name]
+
+
 class PodListUtils(object):
     """
     Queries the podlist and the agent6's filtering logic to determine whether to
@@ -99,14 +110,16 @@ class PodListUtils(object):
     cost (filter called once per prometheus metric), hence the PodListUtils object MUST
     be re-created at every check run.
 
-    Containers that are part of a static pod are not filtered, as we cannot curently
+    Containers that are part of a static pod are not filtered, as we cannot currently
     reliably determine their image name to pass to the filtering logic.
     """
 
     def __init__(self, podlist):
         self.containers = {}
+        self.pods = {}
         self.static_pod_uids = set()
         self.cache = {}
+        self.cache_namespace_exclusion = {}
         self.pod_uid_by_name_tuple = {}
         self.container_id_by_name_tuple = {}
         self.container_id_to_namespace = {}
@@ -119,6 +132,7 @@ class PodListUtils(object):
             namespace = metadata.get("namespace")
             pod_name = metadata.get("name")
             self.pod_uid_by_name_tuple[(namespace, pod_name)] = uid
+            self.pods[uid] = pod
 
             # FIXME we are forced to do that because the Kubelet PodList isn't updated
             # for static pods, see https://github.com/kubernetes/kubernetes/pull/59948
@@ -186,3 +200,41 @@ class PodListUtils(object):
         excluded = c_is_excluded(ctr.get("name"), ctr.get("image"), self.container_id_to_namespace.get(cid, ""))
         self.cache[cid] = excluded
         return excluded
+
+    def is_namespace_excluded(self, namespace):
+        """
+        Queries the agent container filter interface to check whether a
+        Kubernetes namespace should be excluded.
+
+        The result is cached between calls to avoid the python-go switching
+        cost.
+        :param namespace: namespace
+        :return: bool
+        """
+        if not namespace:
+            return False
+
+        # Sent empty container name and image because we are interested in
+        # applying only the namespace exclusion rules.
+        excluded = c_is_excluded('', '', namespace)
+        self.cache_namespace_exclusion[namespace] = excluded
+        return excluded
+
+    def get_cid_by_labels(self, labels):
+        """
+        Should only be called on a container-scoped metric
+        It gets the container id from the podlist using the metrics labels
+
+        :param labels
+        :return str or None
+        """
+        namespace = get_container_label(labels, "namespace")
+        # k8s >= 1.16
+        pod_name = get_container_label(labels, "pod")
+        container_name = get_container_label(labels, "container")
+        # k8s < 1.16
+        if not pod_name:
+            pod_name = get_container_label(labels, "pod_name")
+        if not container_name:
+            container_name = get_container_label(labels, "container_name")
+        return self.get_cid_by_name_tuple((namespace, pod_name, container_name))

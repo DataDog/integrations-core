@@ -1,14 +1,10 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import pytest
-
 from datadog_checks.dev import TempDir
 from datadog_checks.dev.fs import ensure_parent_dir_exists, path_join, write_file
 
 from .utils import get_spec
-
-pytestmark = pytest.mark.conf
 
 
 def test_cache():
@@ -248,6 +244,21 @@ def test_example_file_name_autodiscovery_incorrect():
     assert 'test, file #1: Example file name `test.yaml.example` should be `auto_conf.yaml`' in spec.errors
 
 
+def test_example_file_name_core_check_incorrect():
+    spec = get_spec(
+        """
+        name: foo
+        version: 0.0.0
+        files:
+        - name: conf.yaml.default
+          example_name: test.yaml.example
+        """
+    )
+    spec.load()
+
+    assert 'test, file #1: Example file name `test.yaml.example` should be `conf.yaml.default`' in spec.errors
+
+
 def test_example_file_name_standard_default():
     spec = get_spec(
         """
@@ -274,6 +285,20 @@ def test_example_file_name_autodiscovery_default():
     spec.load()
 
     assert spec.data['files'][0]['example_name'] == 'auto_conf.yaml'
+
+
+def test_example_file_name_core_check_default():
+    spec = get_spec(
+        """
+        name: foo
+        version: 0.0.0
+        files:
+        - name: conf.yaml.default
+        """
+    )
+    spec.load()
+
+    assert spec.data['files'][0]['example_name'] == 'conf.yaml.default'
 
 
 def test_no_options():
@@ -2857,13 +2882,16 @@ def test_template_array():
         'tls_cert',
         'tls_private_key',
         'tls_ca_cert',
+        'tls_protocols_allowed',
         'headers',
         'extra_headers',
         'timeout',
         'connect_timeout',
         'read_timeout',
+        'request_size',
         'log_requests',
         'persist_connections',
+        'allow_redirects',
         'bar',
     ]
 

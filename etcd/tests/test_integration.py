@@ -10,7 +10,7 @@ import requests
 from datadog_checks.dev import run_command
 from datadog_checks.etcd import Etcd
 
-from .common import COMPOSE_FILE, ETCD_VERSION, HOST, STORE_METRICS, URL
+from .common import COMPOSE_FILE, ETCD_VERSION, HOST, REMAPED_DEBUGGING_METRICS, STORE_METRICS, URL
 from .utils import is_leader, legacy, preview
 
 CHECK_NAME = 'etcd'
@@ -19,36 +19,45 @@ pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')
 
 
 @preview
-def test_check(aggregator, instance, openmetrics_metrics):
+@pytest.mark.integration
+def test_check(aggregator, instance, openmetrics_metrics, dd_run_check):
     check = Etcd('etcd', {}, [instance])
-    check.check(instance)
+    dd_run_check(check)
 
     tags = ['is_leader:{}'.format('true' if is_leader(URL) else 'false')]
 
     for metric in openmetrics_metrics:
         aggregator.assert_metric('etcd.{}'.format(metric), tags=tags, at_least=0)
 
-    assert aggregator.metrics_asserted_pct > 79, 'Missing metrics {}'.format(aggregator.not_asserted())
+    for metric in REMAPED_DEBUGGING_METRICS:
+        aggregator.assert_metric('etcd.{}'.format(metric), at_least=1)
+
+    aggregator.assert_all_metrics_covered()
 
 
 @preview
-def test_check_no_leader_tag(aggregator, instance, openmetrics_metrics):
+@pytest.mark.integration
+def test_check_no_leader_tag(aggregator, instance, openmetrics_metrics, dd_run_check):
     instance = deepcopy(instance)
     instance['leader_tag'] = False
 
     check = Etcd('etcd', {}, [instance])
-    check.check(instance)
+    dd_run_check(check)
 
     for metric in openmetrics_metrics:
         aggregator.assert_metric('etcd.{}'.format(metric), tags=[], at_least=0)
 
-    assert aggregator.metrics_asserted_pct > 79, 'Missing metrics {}'.format(aggregator.not_asserted())
+    for metric in REMAPED_DEBUGGING_METRICS:
+        aggregator.assert_metric('etcd.{}'.format(metric), at_least=1)
+
+    aggregator.assert_all_metrics_covered()
 
 
 @preview
-def test_service_check(aggregator, instance):
+@pytest.mark.integration
+def test_service_check(aggregator, instance, dd_run_check):
     check = Etcd(CHECK_NAME, {}, [instance])
-    check.check(instance)
+    dd_run_check(check)
 
     tags = ['endpoint:{}'.format(instance['prometheus_url'])]
 
@@ -56,22 +65,24 @@ def test_service_check(aggregator, instance):
 
 
 @legacy
-def test_bad_config(aggregator):
+@pytest.mark.integration
+def test_bad_config(aggregator, dd_run_check):
     bad_url = '{}/test'.format(URL)
     instance = {'url': bad_url, 'use_preview': False}
     check = Etcd(CHECK_NAME, {}, [instance])
 
     with pytest.raises(Exception):
-        check.check(instance)
+        dd_run_check(check)
 
     aggregator.assert_service_check(check.SERVICE_CHECK_NAME, tags=['url:{}'.format(bad_url)], count=1)
     aggregator.assert_service_check(check.HEALTH_SERVICE_CHECK_NAME)
 
 
 @legacy
-def test_legacy_metrics(legacy_instance, aggregator):
+@pytest.mark.integration
+def test_legacy_metrics(legacy_instance, aggregator, dd_run_check):
     check = Etcd(CHECK_NAME, {}, [legacy_instance])
-    check.check(legacy_instance)
+    dd_run_check(check)
 
     tags = ['url:{}'.format(URL), 'etcd_state:{}'.format('leader' if is_leader(URL) else 'follower')]
 
@@ -83,9 +94,10 @@ def test_legacy_metrics(legacy_instance, aggregator):
 
 
 @legacy
-def test_legacy_service_checks(legacy_instance, aggregator):
+@pytest.mark.integration
+def test_legacy_service_checks(legacy_instance, aggregator, dd_run_check):
     check = Etcd(CHECK_NAME, {}, [legacy_instance])
-    check.check(legacy_instance)
+    dd_run_check(check)
 
     tags = ['url:{}'.format(URL), 'etcd_state:{}'.format('leader' if is_leader(URL) else 'follower')]
 
@@ -94,9 +106,10 @@ def test_legacy_service_checks(legacy_instance, aggregator):
 
 
 @legacy
-def test_followers(aggregator):
+@pytest.mark.integration
+def test_followers(aggregator, dd_run_check):
     urls = []
-    result = run_command('docker-compose -f {} ps -q'.format(COMPOSE_FILE), capture='out', check=True)
+    result = run_command('docker compose -f {} ps -q'.format(COMPOSE_FILE), capture='out', check=True)
     container_ids = result.stdout.splitlines()
 
     for container_id in container_ids:
@@ -115,7 +128,7 @@ def test_followers(aggregator):
 
     instance = {'url': url, 'use_preview': False}
     check = Etcd(CHECK_NAME, {}, [instance])
-    check.check(instance)
+    dd_run_check(check)
 
     common_leader_tags = ['url:{}'.format(url), 'etcd_state:leader']
     follower_tags = [
@@ -143,17 +156,24 @@ def test_followers(aggregator):
         ("legacy ssl config unset", {}, {'verify': False}),
     ],
 )
-def test_config_legacy(legacy_instance, test_case, extra_config, expected_http_kwargs):
+@pytest.mark.integration
+def test_config_legacy(legacy_instance, test_case, extra_config, expected_http_kwargs, dd_run_check):
     legacy_instance.update(extra_config)
     check = Etcd(CHECK_NAME, {}, [legacy_instance])
 
     with mock.patch('datadog_checks.base.utils.http.requests') as r:
         r.get.return_value = mock.MagicMock(status_code=200)
 
-        check.check(legacy_instance)
+        dd_run_check(check)
 
         http_kwargs = dict(
-            auth=mock.ANY, cert=mock.ANY, headers=mock.ANY, proxies=mock.ANY, timeout=mock.ANY, verify=mock.ANY
+            auth=mock.ANY,
+            cert=mock.ANY,
+            headers=mock.ANY,
+            proxies=mock.ANY,
+            timeout=mock.ANY,
+            verify=mock.ANY,
+            allow_redirects=mock.ANY,
         )
         http_kwargs.update(expected_http_kwargs)
         r.get.assert_has_calls([mock.call(URL + '/v2/stats/store', **http_kwargs)])
@@ -170,14 +190,15 @@ def test_config_legacy(legacy_instance, test_case, extra_config, expected_http_k
         ("timeout", {'prometheus_timeout': 100}, {'timeout': (100.0, 100.0)}),
     ],
 )
-def test_config(instance, test_case, extra_config, expected_http_kwargs):
+@pytest.mark.integration
+def test_config(instance, test_case, extra_config, expected_http_kwargs, dd_run_check):
     instance.update(extra_config)
     check = Etcd(CHECK_NAME, {}, [instance])
 
     with mock.patch('datadog_checks.base.utils.http.requests') as r:
         r.get.return_value = mock.MagicMock(status_code=200)
 
-        check.check(instance)
+        dd_run_check(check)
 
         http_kwargs = dict(
             auth=mock.ANY,
@@ -187,16 +208,17 @@ def test_config(instance, test_case, extra_config, expected_http_kwargs):
             proxies=mock.ANY,
             timeout=mock.ANY,
             verify=mock.ANY,
+            allow_redirects=mock.ANY,
         )
         http_kwargs.update(expected_http_kwargs)
         r.post.assert_called_with(URL + '/v3alpha/maintenance/status', **http_kwargs)
 
 
 @pytest.mark.integration
-def test_version_metadata(aggregator, instance, dd_environment, datadog_agent):
+def test_version_metadata(aggregator, instance, dd_environment, datadog_agent, dd_run_check):
     check_instance = Etcd(CHECK_NAME, {}, [instance])
     check_instance.check_id = 'test:123'
-    check_instance.check(instance)
+    dd_run_check(check_instance)
 
     raw_version = ETCD_VERSION.lstrip('v')  # version contain `v` prefix
     major, minor, patch = raw_version.split('.')

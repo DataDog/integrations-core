@@ -10,7 +10,7 @@ from datadog_checks.base.stubs.common import MetricStub
 
 from . import common
 
-pytestmark = [pytest.mark.e2e, common.python_autodiscovery_only]
+pytestmark = [pytest.mark.e2e, common.py3_plus_only, common.snmp_integration_only]
 
 SUPPORTED_METRIC_TYPES = [
     {'MIB': 'ABC', 'symbol': {'OID': "1.3.6.1.2.1.7.1.0", 'name': "IAmACounter32"}},  # Counter32
@@ -19,11 +19,24 @@ SUPPORTED_METRIC_TYPES = [
     {'MIB': 'ABC', 'symbol': {'OID': "1.3.6.1.2.1.88.1.1.1.0", 'name': "IAmAnInteger"}},  # Integer
 ]
 
-
 ASSERT_VALUE_METRICS = [
     'snmp.devices_monitored',
     'datadog.snmp.submitted_metrics',
 ]
+
+# Profiles may contain symbols declared twice with different names and the same OID
+# Python check does handles one single metric name per OID symbol
+SKIPPED_CORE_ONLY_METRICS = [
+    'snmp.memory.total',
+    'snmp.memory.used',
+    'snmp.memory.free',
+    'snmp.memory.usage',
+    'snmp.cpu.usage',
+]
+
+DEFAULT_TAGS_TO_SKIP = ['loader']
+
+CORE_ONLY_TAGS = ['device_namespace:default']
 
 
 def test_e2e_metric_types(dd_agent_check):
@@ -44,7 +57,15 @@ def test_e2e_v3_version_autodetection(dd_agent_check):
             'community_string': '',
         }
     )
-    assert_python_vs_core(dd_agent_check, config, expected_total_count=489 + 5)
+    assert_value_metrics = [
+        'snmp.devices_monitored',
+    ]
+    assert_python_vs_core(
+        dd_agent_check,
+        config,
+        metrics_to_skip=SKIPPED_CORE_ONLY_METRICS,
+        assert_value_metrics=assert_value_metrics,
+    )
 
 
 def test_e2e_v3_explicit_version(dd_agent_check):
@@ -53,18 +74,108 @@ def test_e2e_v3_explicit_version(dd_agent_check):
         {
             'user': 'datadogSHADES',
             'authKey': 'doggiepass',
-            'authProtocol': 'sha',
+            'authProtocol': 'SHA',
             'privKey': 'doggiePRIVkey',
-            'privProtocol': 'des',
+            'privProtocol': 'DES',
             'snmp_version': 3,
             'context_name': 'f5-big-ip',
             'community_string': '',
         }
     )
-    assert_python_vs_core(dd_agent_check, config, expected_total_count=489 + 5)
+    assert_value_metrics = [
+        'snmp.devices_monitored',
+    ]
+    assert_python_vs_core(
+        dd_agent_check,
+        config,
+        metrics_to_skip=SKIPPED_CORE_ONLY_METRICS,
+        assert_value_metrics=assert_value_metrics,
+    )
 
 
-def test_e2e_regex_match(dd_agent_check, aggregator):
+def test_e2e_v3_md5_aes(dd_agent_check):
+    config = common.generate_container_instance_config([])
+    config['instances'][0].update(
+        {
+            'user': 'datadogMD5AES',
+            'authKey': 'doggiepass',
+            'authProtocol': 'MD5',
+            'privKey': 'doggiePRIVkey',
+            'privProtocol': 'AES',
+            'snmp_version': 3,
+            'context_name': 'f5-big-ip',
+            'community_string': '',
+        }
+    )
+    metrics_to_skip = SKIPPED_CORE_ONLY_METRICS
+    assert_value_metrics = [
+        'snmp.devices_monitored',
+    ]
+    assert_python_vs_core(
+        dd_agent_check,
+        config,
+        metrics_to_skip=metrics_to_skip,
+        assert_value_metrics=assert_value_metrics,
+    )
+
+
+def test_e2e_v3_md5_aes256_blumenthal(dd_agent_check):
+    config = common.generate_container_instance_config([])
+    config['instances'][0].update(
+        {
+            'user': 'datadogMD5AES256BLMT',
+            'authKey': 'doggiepass',
+            'authProtocol': 'MD5',
+            'privKey': 'doggiePRIVkey',
+            'privProtocol': 'AES256',  # `AES256` correspond to Blumenthal implementation for pysnmp and gosnmp
+            'snmp_version': 3,
+            'context_name': 'f5-big-ip',
+            'community_string': '',
+        }
+    )
+    metrics_to_skip = SKIPPED_CORE_ONLY_METRICS
+    assert_value_metrics = [
+        'snmp.devices_monitored',
+    ]
+    assert_python_vs_core(
+        dd_agent_check,
+        config,
+        metrics_to_skip=metrics_to_skip,
+        assert_value_metrics=assert_value_metrics,
+    )
+
+
+def test_e2e_v3_md5_aes256_reeder(dd_agent_check):
+    # About Reeder implementation:
+    # "Many vendors, including Cisco, use the 3DES key extension algorithm to extend the privacy keys that are
+    # too short when using AES,AES192 and AES256."
+    # source: https://github.com/gosnmp/gosnmp/blob/f6fb3f74afc3fb0e5b44b3f60751b988bc960019/v3_usm.go#L458-L461
+    config = common.generate_container_instance_config([])
+    config['instances'][0].update(
+        {
+            'user': 'datadogMD5AES256',
+            'authKey': 'doggiepass',
+            'authProtocol': 'MD5',
+            'privKey': 'doggiePRIVkey',
+            'privProtocol': 'AES256C',  # `AES256C` correspond to Reeder implementation for pysnmp and gosnmp
+            'snmp_version': 3,
+            'context_name': 'f5-big-ip',
+            'community_string': '',
+        }
+    )
+    metrics_to_skip = SKIPPED_CORE_ONLY_METRICS
+    assert_value_metrics = [
+        'snmp.devices_monitored',
+    ]
+    assert_python_vs_core(
+        dd_agent_check,
+        config,
+        metrics_to_skip=metrics_to_skip,
+        assert_value_metrics=assert_value_metrics,
+    )
+
+
+def test_e2e_regex_match(dd_agent_check):
     metrics = [
         {
             'MIB': "IF-MIB",
@@ -125,23 +236,6 @@ def test_e2e_regex_match(dd_agent_check, aggregator):
     ]
     assert_python_vs_core(dd_agent_check, config)
 
-    config['init_config']['loader'] = 'core'
-    aggregator.reset()
-    aggregator = dd_agent_check(config, rate=True)
-
-    # raw sysName: 41ba948911b9
-    aggregator.assert_metric(
-        'snmp.devices_monitored',
-        tags=[
-            'digits:41',
-            'remainder:ba948911b9',
-            'letter1:4',
-            'letter2:1',
-            'loader:core',
-            'snmp_device:' + instance['ip_address'],
-        ],
-    )
-
 
 def test_e2e_scalar_oid_retry(dd_agent_check):
     scalar_objects_with_tags = [
@@ -160,8 +254,16 @@ def test_e2e_symbol_metric_tags(dd_agent_check):
     assert_python_vs_core(dd_agent_check, instance)
 
 
-def test_e2e_extract_value_using_regex(dd_agent_check):
+def test_e2e_inline_profile_def(dd_agent_check):
+    config = common.generate_container_instance_config([])
+    config['init_config'] = {'profiles': {'profile1': {'definition': {'metrics': common.SUPPORTED_METRIC_TYPES}}}}
+    config['instances'][0]['profile'] = 'profile1'
+    assert_python_vs_core(dd_agent_check, config)
+
+
+def test_e2e_custom_metrics_cases(dd_agent_check):
     metrics = [
+        # extract value using regex
         {
             "MIB": "DUMMY-MIB",
             'symbol': {
@@ -169,12 +271,22 @@ def test_e2e_extract_value_using_regex(dd_agent_check):
                 'name': "aTemperatureValueInferred",
                 'extract_value': '(\\d+)C',
             },
-        }
+        },
+        # string float value
+        {
+            "MIB": "DUMMY-MIB",
+            'symbol': {
+                'OID': "1.3.6.1.4.1.123456789.5.0",
+                'name': "aStringFloatValue",
+            },
+        },
     ]
     config = common.generate_container_instance_config(metrics)
     instance = config['instances'][0]
     instance["community_string"] = "dummy"
-    assert_python_vs_core(dd_agent_check, config)
+    assert_python_vs_core(
+        dd_agent_check, config, assert_value_metrics=ASSERT_VALUE_METRICS + ['snmp.aStringFloatValue']
+    )
 
 
 # Profile tests
@@ -184,17 +296,27 @@ def test_e2e_extract_value_using_regex(dd_agent_check):
 
 def test_e2e_profile_apc_ups(dd_agent_check):
     config = common.generate_container_profile_config('apc_ups')
-    assert_python_vs_core(dd_agent_check, config, expected_total_count=42 + 5)
+    assert_python_vs_core(dd_agent_check, config, expected_total_count=64 + 5)
 
 
 def test_e2e_profile_arista(dd_agent_check):
     config = common.generate_container_profile_config('arista')
-    assert_python_vs_core(dd_agent_check, config, expected_total_count=14 + 5)
+    assert_python_vs_core(dd_agent_check, config, expected_total_count=16 + 5)
 
 
 def test_e2e_profile_aruba(dd_agent_check):
-    config = common.generate_container_profile_config('aruba')
-    assert_python_vs_core(dd_agent_check, config, expected_total_count=67 + 5)
+    config = common.generate_container_profile_config("aruba")
+    metrics_to_skip = SKIPPED_CORE_ONLY_METRICS
+    assert_value_metrics = [
+        'snmp.devices_monitored',
+    ]
+    assert_python_vs_core(
+        dd_agent_check,
+        config,
+        expected_total_count=67 + 5,
+        metrics_to_skip=metrics_to_skip,
+        assert_value_metrics=assert_value_metrics,
+    )
 
 
 def test_e2e_profile_chatsworth_pdu(dd_agent_check):
@@ -203,23 +325,61 @@ def test_e2e_profile_chatsworth_pdu(dd_agent_check):
 
 
 def test_e2e_profile_checkpoint_firewall(dd_agent_check):
-    config = common.generate_container_profile_config('checkpoint-firewall')
-    assert_python_vs_core(dd_agent_check, config, expected_total_count=301 + 5)
+    config = common.generate_container_profile_config("checkpoint-firewall")
+    metrics_to_skip = SKIPPED_CORE_ONLY_METRICS
+    assert_value_metrics = [
+        'snmp.devices_monitored',
+    ]
+    assert_python_vs_core(
+        dd_agent_check,
+        config,
+        expected_total_count=301 + 5,
+        metrics_to_skip=metrics_to_skip,
+        assert_value_metrics=assert_value_metrics,
+    )
 
 
 def test_e2e_profile_cisco_3850(dd_agent_check):
-    config = common.generate_container_profile_config('cisco-3850')
-    assert_python_vs_core(dd_agent_check, config, expected_total_count=4554 + 5)
+    config = common.generate_container_profile_config("cisco-3850")
+    metrics_to_skip = SKIPPED_CORE_ONLY_METRICS
+    assert_value_metrics = [
+        'snmp.devices_monitored',
+    ]
+    assert_python_vs_core(
+        dd_agent_check,
+        config,
+        expected_total_count=5108 + 5,
+        metrics_to_skip=metrics_to_skip,
+        assert_value_metrics=assert_value_metrics,
+    )
 
 
 def test_e2e_profile_cisco_asa(dd_agent_check):
-    config = common.generate_container_profile_config('cisco-asa')
-    assert_python_vs_core(dd_agent_check, config)
+    config = common.generate_container_profile_config("cisco-asa")
+    metrics_to_skip = SKIPPED_CORE_ONLY_METRICS
+    assert_value_metrics = [
+        'snmp.devices_monitored',
+    ]
+    assert_python_vs_core(
+        dd_agent_check,
+        config,
+        metrics_to_skip=metrics_to_skip,
+        assert_value_metrics=assert_value_metrics,
+    )
 
 
 def test_e2e_profile_cisco_asa_5525(dd_agent_check):
-    config = common.generate_container_profile_config('cisco-asa-5525')
-    assert_python_vs_core(dd_agent_check, config)
+    config = common.generate_container_profile_config("cisco-asa-5525")
+    metrics_to_skip = SKIPPED_CORE_ONLY_METRICS
+    assert_value_metrics = [
+        'snmp.devices_monitored',
+    ]
+    assert_python_vs_core(
+        dd_agent_check,
+        config,
+        metrics_to_skip=metrics_to_skip,
+        assert_value_metrics=assert_value_metrics,
+    )
 
 
 def test_e2e_profile_cisco_catalyst(dd_agent_check):
@@ -233,8 +393,17 @@ def test_e2e_profile_cisco_csr1000v(dd_agent_check):
 
 
 def test_e2e_profile_cisco_nexus(dd_agent_check):
-    config = common.generate_container_profile_config('cisco-nexus')
-    assert_python_vs_core(dd_agent_check, config)
+    config = common.generate_container_profile_config("cisco-nexus")
+    metrics_to_skip = SKIPPED_CORE_ONLY_METRICS
+    assert_value_metrics = [
+        'snmp.devices_monitored',
+    ]
+    assert_python_vs_core(
+        dd_agent_check,
+        config,
+        metrics_to_skip=metrics_to_skip,
+        assert_value_metrics=assert_value_metrics,
+    )
 
 
 def test_e2e_profile_cisco_icm(dd_agent_check):
@@ -261,13 +430,31 @@ def test_e2e_profile_dell_poweredge(dd_agent_check):
 
 
 def test_e2e_profile_f5_big_ip(dd_agent_check):
-    config = common.generate_container_profile_config('f5-big-ip')
-    assert_python_vs_core(dd_agent_check, config)
+    config = common.generate_container_profile_config("f5-big-ip")
+    metrics_to_skip = SKIPPED_CORE_ONLY_METRICS
+    assert_value_metrics = [
+        'snmp.devices_monitored',
+    ]
+    assert_python_vs_core(
+        dd_agent_check,
+        config,
+        metrics_to_skip=metrics_to_skip,
+        assert_value_metrics=assert_value_metrics,
+    )
 
 
 def test_e2e_profile_fortinet_fortigate(dd_agent_check):
-    config = common.generate_container_profile_config('fortinet-fortigate')
-    assert_python_vs_core(dd_agent_check, config)
+    config = common.generate_container_profile_config("fortinet-fortigate")
+    metrics_to_skip = SKIPPED_CORE_ONLY_METRICS
+    assert_value_metrics = [
+        'snmp.devices_monitored',
+    ]
+    assert_python_vs_core(
+        dd_agent_check,
+        config,
+        metrics_to_skip=metrics_to_skip,
+        assert_value_metrics=assert_value_metrics,
+    )
 
 
 def test_e2e_profile_generic_router(dd_agent_check):
@@ -297,7 +484,7 @@ def test_e2e_profile_isilon(dd_agent_check):
 
 def test_e2e_profile_meraki_cloud_controller(dd_agent_check):
     config = common.generate_container_profile_config('meraki-cloud-controller')
-    assert_python_vs_core(dd_agent_check, config)
+    assert_python_vs_core(dd_agent_check, config, tags_to_skip=['mac_address'])
 
 
 def test_e2e_profile_netapp(dd_agent_check):
@@ -310,40 +497,72 @@ def test_e2e_profile_palo_alto(dd_agent_check):
     assert_python_vs_core(dd_agent_check, config)
 
 
-def assert_python_vs_core(dd_agent_check, config, expected_total_count=None, metrics_to_skip=None):
+def test_e2e_discovery(dd_agent_check):
+    config = common.generate_container_profile_config_with_ad('apc_ups')
+    # skip telemetry metrics since they are implemented different for python and corecheck
+    # python integration autodiscovery submit telemetry metrics once for all devices
+    # core integration autodiscovery submit telemetry metrics once for each device
+    skip_metrics = [
+        'datadog.snmp.check_interval',
+        'datadog.snmp.submitted_metrics',
+        'datadog.snmp.check_duration',
+    ]
+    # we don't assert count, since the count might be off by 1 due to devices not being discovered at first check run
+    assert_python_vs_core(
+        dd_agent_check, config, rate=False, pause=300, times=3, metrics_to_skip=skip_metrics, assert_count=False
+    )
+
+
+def assert_python_vs_core(
+    dd_agent_check,
+    config,
+    expected_total_count=None,
+    metrics_to_skip=None,
+    tags_to_skip=None,
+    assert_count=True,
+    assert_value_metrics=ASSERT_VALUE_METRICS,
+    rate=True,
+    pause=0,
+    times=1,
+):
     python_config = deepcopy(config)
     python_config['init_config']['loader'] = 'python'
     core_config = deepcopy(config)
     core_config['init_config']['loader'] = 'core'
+    core_config['init_config']['collect_device_metadata'] = 'false'
     metrics_to_skip = metrics_to_skip or []
+    tags_to_skip = tags_to_skip or []
+    tags_to_skip += DEFAULT_TAGS_TO_SKIP
 
     # building expected metrics (python)
-    aggregator = dd_agent_check(python_config, rate=True)
+    aggregator = dd_agent_check(python_config, rate=rate, pause=pause, times=times)
     python_metrics = defaultdict(list)
     for _, metrics in aggregator._metrics.items():
         for stub in metrics:
             if stub.name in metrics_to_skip:
                 continue
-            stub = normalize_stub_metric(stub)
-            python_metrics[(stub.name, stub.type, tuple(sorted(stub.tags)))].append(stub)
+            stub = normalize_stub_metric(stub, tags_to_skip)
+            python_metrics[(stub.name, stub.type, tuple(sorted(list(stub.tags) + CORE_ONLY_TAGS)))].append(stub)
 
     python_service_checks = defaultdict(list)
     for _, service_checks in aggregator._service_checks.items():
         for stub in service_checks:
-            python_service_checks[(stub.name, stub.status, tuple(sorted(stub.tags)), stub.message)].append(stub)
+            python_service_checks[
+                (stub.name, stub.status, tuple(sorted(list(stub.tags) + CORE_ONLY_TAGS)), stub.message)
+            ].append(stub)
 
     total_count_python = sum(len(stubs) for stubs in python_metrics.values())
 
     # building core metrics (core)
     aggregator.reset()
-    aggregator = dd_agent_check(core_config, rate=True)
+    aggregator = common.dd_agent_check_wrapper(dd_agent_check, core_config, rate=rate, pause=pause, times=times)
     aggregator_metrics = aggregator._metrics
     aggregator._metrics = defaultdict(list)
     for metric_name in aggregator_metrics:
         for stub in aggregator_metrics[metric_name]:
             if stub.name in metrics_to_skip:
                 continue
-            aggregator._metrics[metric_name].append(normalize_stub_metric(stub))
+            aggregator._metrics[metric_name].append(normalize_stub_metric(stub, tags_to_skip))
 
     core_metrics = defaultdict(list)
     for _, metrics in aggregator._metrics.items():
@@ -361,26 +580,29 @@ def assert_python_vs_core(dd_agent_check, config, expected_total_count=None, met
             print("\t{}".format(key))
 
     for (name, mtype, tags), stubs in python_metrics.items():
-        if name in ASSERT_VALUE_METRICS:
+        count = len(stubs) if assert_count else None
+        if name in assert_value_metrics:
             for stub in stubs:
-                aggregator.assert_metric(name, metric_type=mtype, tags=tags, count=len(stubs), value=stub.value)
+                aggregator.assert_metric(name, metric_type=mtype, tags=tags, count=count, value=stub.value)
         else:
-            aggregator.assert_metric(name, metric_type=mtype, tags=tags, count=len(stubs))
+            aggregator.assert_metric(name, metric_type=mtype, tags=tags, count=count)
 
     aggregator.assert_all_metrics_covered()
 
     for (name, status, tags, message), stubs in python_service_checks.items():
-        aggregator.assert_service_check(name, status, tags, count=len(stubs), message=message)
+        count = len(stubs) if assert_count else None
+        aggregator.assert_service_check(name, status, tags, count=count, message=message)
 
     # assert count
-    total_count_corecheck = sum(len(metrics) for key, metrics in aggregator._metrics.items())
-    assert total_count_python == total_count_corecheck
-    if expected_total_count is not None:
-        assert expected_total_count == total_count_corecheck
+    if assert_count:
+        total_count_corecheck = sum(len(metrics) for key, metrics in aggregator._metrics.items())
+        assert total_count_python == total_count_corecheck
+        if expected_total_count is not None:
+            assert expected_total_count == total_count_corecheck
 
 
-def normalize_stub_metric(stub):
-    tags = [t for t in stub.tags if not t.startswith('loader:')]  # Remove `loader` tag
+def normalize_stub_metric(stub, tags_to_skip):
+    tags = [t for t in stub.tags if not is_skipped_tag(t, tags_to_skip)]  # Remove skipped tag
     return MetricStub(
         stub.name,
         stub.type,
@@ -389,3 +611,10 @@ def normalize_stub_metric(stub):
         stub.hostname,
         stub.device,
     )
+
+
+def is_skipped_tag(tag, tags_to_skip):
+    for skipped_tag in tags_to_skip:
+        if tag.startswith('{}:'.format(skipped_tag)):
+            return True
+    return False

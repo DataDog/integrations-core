@@ -45,6 +45,7 @@ Q_METRICS = [
     'rabbitmq.queue.messages.rate',
     'rabbitmq.queue.messages_ready',
     'rabbitmq.queue.messages_ready.rate',
+    'rabbitmq.queue.message_bytes',
     'rabbitmq.queue.messages_unacknowledged',
     'rabbitmq.queue.messages_unacknowledged.rate',
     'rabbitmq.queue.messages.publish.count',

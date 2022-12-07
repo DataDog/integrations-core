@@ -1,0 +1,69 @@
+[build-system]
+requires = [
+    "hatchling>=0.11.2",
+    "setuptools<61",
+]
+build-backend = "hatchling.build"
+
+[project]
+name = "datadog-postgres"
+description = "The Postgres check"
+readme = "README.md"
+keywords = [
+    "datadog",
+    "datadog agent",
+    "datadog check",
+    "postgres",
+]
+authors = [
+    { name = "Datadog", email = "packages@datadoghq.com" },
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: BSD License",
+    "Programming Language :: Python :: 2.7",
+    "Programming Language :: Python :: 3.8",
+    "Topic :: System :: Monitoring",
+    "Private :: Do Not Upload",
+]
+dependencies = [
+    "datadog-checks-base>=25.2.2",
+]
+dynamic = [
+    "version",
+]
+
+[project.license]
+text = "BSD-3-Clause"
+
+[project.optional-dependencies]
+deps = [
+    "cachetools==3.1.1; python_version < '3.0'",
+    "cachetools==5.2.0; python_version > '3.0'",
+    "futures==3.3.0; python_version < '3.0'",
+    "psycopg2-binary==2.8.6; sys_platform != 'darwin' or platform_machine != 'arm64'",
+    "semver==2.13.0",
+]
+
+[project.urls]
+Source = "https://github.com/DataDog/integrations-core"
+
+[tool.hatch.version]
+path = "datadog_checks/postgres/__about__.py"
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/datadog_checks",
+    "/tests",
+    "/manifest.json",
+]
+
+[tool.hatch.build.targets.wheel]
+include = [
+    "/datadog_checks/postgres",
+]
+dev-mode-dirs = [
+    ".",
+]

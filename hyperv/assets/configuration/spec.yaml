@@ -4,8 +4,11 @@ files:
   options:
   - template: init_config
     options:
+    - template: init_config/perf_counters
     - template: init_config/default
   - template: instances
     options:
-    - template: instances/pdh
+    - template: instances/perf_counters
+    - template: instances/pdh_legacy
+      hidden: true
     - template: instances/default

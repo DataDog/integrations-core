@@ -2,9 +2,9 @@
 
 ## Overview
 
-The TCP RTT check reports on roundtrip times between the host the agent is running on and any host it is communicating with. This check is passive and will only report RTT times for packets being sent and received from outside the check. The check itself will not send any packets.
+The TCP RTT check reports on roundtrip times between the host the Agent is running on and any host it is communicating with. This check is passive and only reports RTT times for packets being sent and received from outside the check. The check itself does not send any packets.
 
-This check is only shipped in the 64-bit DEB and RPM Datadog Agent v5 packages. The check is currently _not_ available with Datadog Agent v6.
+This check is only shipped in the 64-bit DEB and RPM Datadog Agent v5 packages. The check is _not_ available with Datadog Agent v6.
 
 ## Setup
 
@@ -12,7 +12,7 @@ Follow the instructions below to install and configure this check for an Agent r
 
 ### Installation
 
-The TCP RTT check-also known as [go-metro][2]-is packaged with the Agent, but requires additional system libraries. The check uses timestamps provided by the PCAP library to compute the time between any outgoing packet and the corresponding TCP acknowledgement. As such, PCAP must be installed and configured.
+The TCP RTT check-also known as [go-metro][2]-is packaged with the Agent, but requires additional system libraries. The check uses timestamps provided by the PCAP library to compute the time between any outgoing packet and the corresponding TCP acknowledgment. As such, PCAP must be installed and configured.
 
 Debian-based systems should use one of the following:
 
@@ -37,7 +37,7 @@ sudo setcap cap_net_raw+ep /opt/datadog-agent/bin/go-metro
 ### Configuration
 
 Edit the `go-metro.yaml` file in your agent's `conf.d` directory. See the [sample go-metro.yaml][3] for all available configuration options.
-The following is an example file that will show the TCP RTT times for app.datadoghq.com and 192.168.0.22:
+The following is an example file that shows the TCP RTT times for app.datadoghq.com and 192.168.0.22:
 
 ```yaml
 init_config:
@@ -58,7 +58,7 @@ instances:
       - app.datadoghq.com
 ```
 
-*NOTE*: for go-metro to run unprivileged, you will have to set CAP_NET_RAW capabilities on the binary:
+**Note**: For go-metro to run unprivileged, you need to set `CAP_NET_RAW` capabilities on the binary:
 ```
 # Install required libraries
 $ sudo apt-get install libcap  # debian
@@ -70,17 +70,11 @@ $ sudo yum install compat-libcap1  # redhat alternative
 $ sudo setcap cap_net_raw+ep /opt/datadog-agent/bin/go-metro
 ```
 
-Because of different package names for different distros, if the instructions above
-don't work for you, please issue an `apt-cache search libcap` or `yum search libcap` and you
-should get a shortlist of packages that might provide the binary. Feel free to reach out
-should you require assistance.
+Because of different package names for different distributions, if the instructions above don't work for you, issue an `apt-cache search libcap` or `yum search libcap` for a shortlist of packages that provide the binary. Contact [Datadog support][6], if you need assistance.
 
-Also, please note that go-metro logs to its own file - found in `/var/log/datadog/go-metro.log`.
-Additionally, go-metro runs standalone so it will *NOT* currently appear on the Agent's info page.
+**Note**: go-metro logs to its own file - found in `/var/log/datadog/go-metro.log`. Additionally, go-metro runs standalone so it does not appear on the Agent's info page.
 
-Finally, because the go-metro binary is only bundled with the 64-bit RPM and DEB distributions of the
-Datadog Agent, it is only available in those packaged versions (i.e. go-metro is currently
-unavailable with the source install or the 32-bit packages).
+Finally, because the go-metro binary is only bundled with the 64-bit RPM and DEB distributions of the Datadog Agent, it is only available in those packaged versions, that is go-metro is unavailable with the source install or 32-bit packages.
 
 ### Validation
 

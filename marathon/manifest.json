@@ -1,46 +1,61 @@
 {
-  "categories": [
-    "configuration & deployment",
-    "containers",
-    "log collection",
-    "autodiscovery"
-  ],
-  "creates_events": false,
-  "display_name": "Marathon",
-  "guid": "6af353ff-ecca-420a-82c0-a0e84cf0a35e",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "marathon.",
-  "metric_to_check": "marathon.apps",
-  "name": "marathon",
-  "process_signatures": [
-    "start --master mesos marathon"
-  ],
-  "public_title": "Datadog-Marathon Integration",
-  "short_description": "Track application metrics: required memory and disk, instance count, and more.",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os"
-  ],
-  "type": "check",
-  "integration_id": "marathon",
+  "manifest_version": "2.0.0",
+  "app_uuid": "fe9a038e-3948-4646-9a1c-ea1f1cc59977",
+  "app_id": "marathon",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Track application metrics: required memory and disk, instance count, and more.",
+    "title": "Marathon",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Category::Configuration & Deployment",
+      "Category::Containers",
+      "Category::Log Collection",
+      "Category::Autodiscovery"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "Marathon",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "marathon.",
+        "check": "marathon.apps",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      },
+      "process_signatures": [
+        "start --master mesos marathon"
+      ]
     },
-    "monitors": {},
     "dashboards": {
       "marathon-overview": "assets/dashboards/marathon-overview_dashboard.json"
     },
-    "service_checks": "assets/service_checks.json",
-    "logs": {
-      "source": "marathon"
-    },
-    "metrics_metadata": "metadata.csv",
     "saved_views": {
       "marathon_processes": "assets/saved_views/marathon_processes.json"
+    },
+    "logs": {
+      "source": "marathon"
     }
   }
 }

@@ -21,22 +21,19 @@ with open(path.join(HERE, 'README.md'), 'r', encoding='utf-8') as f:
     README = f.read()
 
 
-REQUIRES = [
-    "contextlib2; python_version < '3.0'",
-    'coverage>=5.0.3',
-    'mock',
-    'psutil',
-    'PyYAML==5.4.1',
-    'pytest',
-    'pytest-benchmark[histogram]>=3.2.1',
-    'pytest-cov>=2.6.1',
-    'pytest-mock',
-    'requests>=2.22.0',
-    'six',
-    "shutilwhich==1.1.0; python_version < '3.0'",
-    "subprocess32==3.5.4; python_version < '3.0'",
-    'tenacity',
-]
+def parse_pyproject_array(name):
+    import os
+    import re
+    from ast import literal_eval
+
+    pattern = r'^{} = (\[.+?\])$'.format(name)
+
+    with open(os.path.join(HERE, 'pyproject.toml'), 'r', encoding='utf-8') as f:
+        # Windows \r\n prevents match
+        contents = '\n'.join(line.rstrip() for line in f.readlines())
+
+    array = re.search(pattern, contents, flags=re.MULTILINE | re.DOTALL).group(1)
+    return literal_eval(array)
 
 
 setup(
@@ -63,36 +60,11 @@ setup(
         'Programming Language :: Python :: Implementation :: PyPy',
     ],
     packages=['datadog_checks', 'datadog_checks.dev'],
-    install_requires=REQUIRES,
+    install_requires=parse_pyproject_array('dependencies'),
     # TODO: Uncomment when we fully drop Python 2
     # python_requires='>=3.7',
     include_package_data=True,
-    extras_require={
-        'cli': [
-            'appdirs>=1.4.4',
-            'atomicwrites',
-            'beautifulsoup4>=4.9.3',
-            'click>7',
-            'colorama',
-            'datamodel-code-generator~=0.9.2; python_version > "3.0"',
-            'docker-compose>=1.25',
-            'in-toto>=0.4.2',
-            'jsonschema',
-            'markdown',
-            'packaging',
-            'pip-tools',
-            'pyperclip>=1.7.0',
-            'pysmi>=0.3.4',
-            'semver',
-            'setuptools>=38.6.0',
-            'tabulate>=0.8.9',
-            'toml>=0.9.4, <1.0.0',
-            'tox>=3.12.1',
-            'twine>=1.11.0',
-            'virtualenv>=20.4.3',
-            'wheel>=0.31.0',
-        ]
-    },
+    extras_require={'cli': parse_pyproject_array('cli')},
     entry_points={
         'pytest11': ['datadog_checks = datadog_checks.dev.plugin.pytest'],
         'tox': ['datadog_checks = datadog_checks.dev.plugin.tox'],

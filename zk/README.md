@@ -10,17 +10,17 @@ The ZooKeeper check tracks client connections and latencies, monitors the number
 
 ### Installation
 
-The ZooKeeper check is included in the [Datadog Agent][3] package, so you don't need to install anything else on your ZooKeeper servers.
+The ZooKeeper check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your ZooKeeper servers.
 
 ### Configuration
 
-#### ZooKeeper whitelist
+#### Inclusion list
 
-As of version 3.5, ZooKeeper has a `4lw.commands.whitelist` parameter (see [ZooKeeper documentation][7]) that whitelists [four letter word commands][8]. By default, only `srvr` is whitelisted. Add `stat` and `mntr` to the whitelist, as the integration is based on these commands.
+As of version 3.5, ZooKeeper has a `4lw.commands.whitelist` parameter. See [ZooKeeper Cluster Options][3]) for an example that allows [four letter word commands][4]. By default, only `srvr` is whitelisted. Add `stat` and `mntr` to the whitelist, as the integration is based on these commands.
 
 #### Enabling SSL
 
-ZooKeeper 3.5 introduced the ability to use SSL authentication. For information about setting up SSL with ZooKeeper, see the [ZooKeeper SSL User Guide][13]. 
+ZooKeeper 3.5 introduced the ability to use SSL authentication. For information about setting up SSL with ZooKeeper, see the [ZooKeeper SSL User Guide][5]. 
 
 After you have ZooKeeper set up with SSL, you can also configure the Datadog Agent to connect to ZooKeeper using SSL. If you already have authentication set up using JKS files, follow the steps below to convert them to PEM files for TLS/SSL configuration.
 
@@ -31,7 +31,7 @@ The following example commands assume that your JKS `truststore` and `keystore` 
 - `client_truststore.jks`
 - `client_keystore.jks`
 
-The instructions also assume that both sides' `keystore` and `truststore` files have each other's certificates with aliases `server_cert` and `client_cert`, meaning that a Java ZooKeeper client can already connect to a ZooKeeper server.
+It is also assumed that both sides' `keystore` and `truststore` files have each other's certificates with aliases `server_cert` and `client_cert`, meaning that a Java ZooKeeper client can already connect to a ZooKeeper server.
 If your private key has a password, make sure this password is included in the `config.yaml` file for config option `tls_private_key_password`.
 
 To convert the JKS files to PEM files:
@@ -58,10 +58,10 @@ To convert the JKS files to PEM files:
 
 To configure this check for an Agent running on a host:
 
-1. Edit the `zk.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][4] to start collecting your ZooKeeper [metrics](#metric-collection) and [logs](#log-collection).
-   See the [sample zk.d/conf.yaml][5] for all available configuration options.
+1. Edit the `zk.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][6] to start collecting your ZooKeeper [metrics](#metric-collection) and [logs](#log-collection).
+   See the [sample zk.d/conf.yaml][7] for all available configuration options.
 
-2. [Restart the Agent][6].
+2. [Restart the Agent][8].
 
 #### Log collection
 
@@ -77,7 +77,7 @@ _Available for Agent versions >6.0_
      log4j.appender.R.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss} %-5p [%t] %c{1}:%L - %m%n
    ```
 
-2. By default, our integration pipeline support the following conversion patterns:
+2. By default, Datadog's integration pipeline supports the following conversion patterns:
 
    ```text
      %d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n
@@ -108,16 +108,16 @@ _Available for Agent versions >6.0_
        #    pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
    ```
 
-    Change the `path` and `service` parameter values and configure them for your environment. See the [sample zk.d/conf.yaml][5] for all available configuration options.
+    Change the `path` and `service` parameter values and configure them for your environment. See the [sample zk.d/conf.yaml][7] for all available configuration options.
 
-5. [Restart the Agent][6].
+5. [Restart the Agent][8].
 
 <!-- xxz tab xxx -->
 <!-- xxx tab "Containerized" xxx -->
 
 #### Containerized
 
-For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying the parameters below.
+For containerized environments, see the [Autodiscovery Integration Templates][9] for guidance on applying the parameters below.
 
 ##### Metric collection
 
@@ -131,7 +131,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][2]
 
 _Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][12].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][10].
 
 | Parameter      | Value                                           |
 | -------------- | ----------------------------------------------- |
@@ -142,7 +142,7 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 ### Validation
 
-[Run the Agent's status subcommand][9] and look for `zk` under the Checks section.
+[Run the Agent's status subcommand][11] and look for `zk` under the Checks section.
 
 ## Data Collected
 
@@ -165,11 +165,11 @@ Duplicate information is being reported by both `mntr` and `stat`: the duplicate
 | `zookeeper.num_alive_connections` | `zookeeper.connections`      |
 | `zookeeper.znode_count`           | `zookeeper.nodes`            |
 
-See [metadata.csv][10] for a list of metrics provided by this check.
+See [metadata.csv][12] for a list of metrics provided by this check.
 
 #### Deprecated metrics
 
-Following metrics are still sent but will be removed eventually:
+The following metrics are still sent but will be removed eventually:
 
 - `zookeeper.bytes_received`
 - `zookeeper.bytes_sent`
@@ -180,26 +180,24 @@ The ZooKeeper check does not include any events.
 
 ### Service Checks
 
-**zookeeper.ruok**:<br>
-Sends `ruok` to the monitored node. Returns `OK` with an `imok` response, `WARN` in the case of a different response and `CRITICAL` if no response is received..
-
-**zookeeper.mode**:<br>
-The Agent submits this service check if `expected_mode` is configured in `zk.yaml`. The check returns `OK` when ZooKeeper's actual mode matches `expected_mode`, otherwise returns `CRITICAL`.
+See [service_checks.json][13] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][11].
+Need help? Contact [Datadog support][14].
+
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/zk/images/zk_dashboard.png
-[2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
-[3]: https://app.datadoghq.com/account/settings#agent
-[4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
-[5]: https://github.com/DataDog/integrations-core/blob/master/zk/datadog_checks/zk/data/conf.yaml.example
-[6]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[7]: https://zookeeper.apache.org/doc/r3.5.4-beta/zookeeperAdmin.html#sc_clusterOptions
-[8]: https://zookeeper.apache.org/doc/r3.5.4-beta/zookeeperAdmin.html#sc_4lw
-[9]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[10]: https://github.com/DataDog/integrations-core/blob/master/zk/metadata.csv
-[11]: https://docs.datadoghq.com/help/
-[12]: https://docs.datadoghq.com/agent/kubernetes/log/
-[13]: https://cwiki.apache.org/confluence/display/ZOOKEEPER/ZooKeeper+SSL+User+Guide
+[2]: https://app.datadoghq.com/account/settings#agent
+[3]: https://zookeeper.apache.org/doc/r3.5.4-beta/zookeeperAdmin.html#sc_clusterOptions
+[4]: https://zookeeper.apache.org/doc/r3.5.4-beta/zookeeperAdmin.html#sc_4lw
+[5]: https://cwiki.apache.org/confluence/display/ZOOKEEPER/ZooKeeper+SSL+User+Guide
+[6]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
+[7]: https://github.com/DataDog/integrations-core/blob/master/zk/datadog_checks/zk/data/conf.yaml.example
+[8]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[9]: https://docs.datadoghq.com/agent/kubernetes/integrations/
+[10]: https://docs.datadoghq.com/agent/kubernetes/log/
+[11]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[12]: https://github.com/DataDog/integrations-core/blob/master/zk/metadata.csv
+[13]: https://github.com/DataDog/integrations-core/blob/master/zk/assets/service_checks.json
+[14]: https://docs.datadoghq.com/help/

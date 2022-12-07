@@ -41,13 +41,23 @@ files:
           only generate a single check process, but if one host goes down,
           KafkaClient tries contacting the next host.
           Details: https://github.com/DataDog/dd-agent/issues/2943
-        required: True
+
+          You may specify a single server like:
+
+            kafka_connect_str: server:9092
+
+          or multiple servers like:
+
+            kafka_connect_str:
+            - server1:9092
+            - server2:9092
+        required: true
         value:
-          type: array
-          items:
-            type: string
-          example:
-            - localhost:9092
+          anyOf:
+          - type: string
+          - type: array
+            items:
+              type: string
       - name: kafka_client_api_version
         description: |
           Specify the highest client protocol version supported by all brokers in the cluster.
@@ -101,7 +111,6 @@ files:
         value:
           type: boolean
           example: false
-      - template: instances/default
       - name: security_protocol
         description: |
           Protocol used to communicate with brokers.
@@ -140,48 +149,38 @@ files:
           type: string
           example: localhost
           display_default: null
-      - name: ssl_context
+      - name: sasl_oauth_token_provider
         description: |
-          Pre-configured SSLContext for wrapping socket connections.
-          If provided, all other ssl_* configurations are ignored.
-        value:
-          type: string
-          example: <SSL_CONTEXT>
-      - name: ssl_check_hostname
-        description: |
-          Flag to configure whether SSL handshake should verify that the
-          certificate matches the broker’s hostname.
-        display_default: true
-        value:
-          type: boolean
-          example: true
-      - name: ssl_cafile
-        description: Filename of CA file path to use in certificate verification.
-        value:
-          type: string
-          example: <CA_FILE_PATH>
-      - name: ssl_certfile
-        description: |
-          Filename path of file in PEM format containing the client certificate,
-          as well as any CA certificates needed to establish the certificate’s authenticity.
-        value:
-          type: string
-          example: <CERT_FILE_PATH>
-      - name: ssl_keyfile
-        description: Optional filename containing the client private key.
-        value:
-          type: string
-          example: <KEY_FILE_PATH>
-      - name: ssl_password
-        description: Password to be used when loading the certificate chain.
-        value:
-          type: string
-          example: <PASSWORD>
-      - name: ssl_crlfile
+          Settings for when `sasl_mechanism` is set to `OAUTHBEARER`.
+        options:
+        - name: url
+          required: true
+          enabled: false
+          description: |
+            The token endpoint.
+          value:
+            type: string
+        - name: client_id
+          required: true
+          enabled: false
+          description: |
+            The client identifier.
+          value:
+            type: string
+        - name: client_secret
+          secret: true
+          required: true
+          enabled: false
+          description: |
+            The client secret.
+          value:
+            type: string
+      - template: instances/tls
+      - name: tls_crlfile
         description: |
           Filename path containing the CRL to check for certificate expiration.
           By default, no CRL check is done. When providing a file, only the leaf certificate
-          will be checked against this CRL. The CRL can only be checked with Python 3.4+ or 2.7.9+.
+          will be checked against this CRL.
         value:
           type: string
           example: <SSL_FILE_PATH>
@@ -195,6 +194,7 @@ files:
         value:
           type: integer
           example: 30
+      - template: instances/default
       - name: zk_connect_str
         description: |
           DEPRECATION NOTICE: This option is only used for fetching consumer offsets
@@ -205,13 +205,22 @@ files:
           only generate a single check process, but if one host goes down,
           KafkaClient / KazooClient tries contacting the next host.
           Details: https://github.com/DataDog/dd-agent/issues/2943
+
+          You may specify a single server like:
+
+            zk_connect_str: localhost:2181
+
+          or multiple servers like:
+
+            zk_connect_str:
+            - server1:2181
+            - server2:2181
         value:
-          type: array
-          items:
-            type: object
-          example:
-            - localhost:2181
-            - <ZOOKEEPER_ENDPOINT>:2181
+          anyOf:
+          - type: string
+          - type: array
+            items:
+              type: string
       - name: zk_prefix
         description: |
           DEPRECATION NOTICE: This option is only used for fetching consumer offsets
@@ -229,6 +238,13 @@ files:
           `monitor_unlisted_consumer_groups` since the generated list comes from Zookeeper.
           Set to true to fetch consumer offsets from both Zookeeper and Kafka
           Set to false to fetch consumer offsets only from Zookeeper.
+        value:
+          type: boolean
+          example: false
+        display_default: false
+      - name: data_streams_enabled
+        description: |
+          Beta feature to get a lag metric in Seconds. It's part of the Data Streams Monitoring Product
         value:
           type: boolean
           example: false

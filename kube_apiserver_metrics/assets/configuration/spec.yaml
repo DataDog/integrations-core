@@ -1,6 +1,6 @@
 name: Kubernetes API server metrics
 files:
-- name: kube-apiserver-metrics.yaml
+- name: kube_apiserver_metrics.yaml
   options:
   - template: init_config
     options:
@@ -32,9 +32,24 @@ files:
     options: []
   - template: instances
     options:
-    - name: prometheus_url
+    - name: possible_prometheus_urls
       required: true
-      description: The URL where your application metrics are exposed by Prometheus.
+      description: |
+        The URLs to try to get your application metrics that are exposed by Prometheus.
+        The check will try each URLs in the list and will use the first working one.
+        One of possible_prometheus_urls or prometheus_url parameter is required.
+      value:
+        type: array
+        items:
+          type: string
+        example:
+          - https://%%host%%:6443/metrics
+          - https://%%host%%:8443/metrics
+    - name: prometheus_url
+      required: false
+      description: |
+        The URL where your application metrics are exposed by Prometheus.
+        One of possible_prometheus_urls or prometheus_url parameter is required.
       value:
         example: https://%%host%%:6443/metrics
         type: string
@@ -42,9 +57,13 @@ files:
       description: |
         Used if you are using RBACs and need the Agent to authenticate
         against the APIServer to retrieve metrics. Default to true.
+      enabled: true
       value:
-        type: boolean
-        example: true
+        example: tls_only
+        default: false
+        anyOf:
+        - type: boolean
+        - type: string
     - name: bearer_token_path
       description: Used to specify the path where the service account token is located.
       value:

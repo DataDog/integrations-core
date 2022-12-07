@@ -5,6 +5,7 @@
 import datetime as dt
 import json
 import os
+import time
 
 import mock
 import pytest
@@ -14,10 +15,9 @@ from tests.legacy.utils import mock_alarm_event
 from datadog_checks.base import to_string
 from datadog_checks.vsphere import VSphereCheck
 from datadog_checks.vsphere.api import APIConnectionError
-from datadog_checks.vsphere.api_rest import VSphereRestAPI
 from datadog_checks.vsphere.config import VSphereConfig
 
-from .common import HERE
+from .common import HERE, VSPHERE_VERSION, build_rest_api_client
 from .mocked_api import MockedAPI
 
 
@@ -100,7 +100,7 @@ def test_external_host_tags(aggregator, realtime_instance):
     check = VSphereCheck('vsphere', {}, [realtime_instance])
     config = VSphereConfig(realtime_instance, {}, MagicMock())
     check.api = MockedAPI(config)
-    check.api_rest = VSphereRestAPI(config, MagicMock())
+    check.api_rest = build_rest_api_client(config, MagicMock())
 
     with check.infrastructure_cache.update():
         check.refresh_infrastructure_cache()
@@ -303,7 +303,7 @@ def test_renew_rest_api_session_on_failure(aggregator, dd_run_check, realtime_in
     realtime_instance.update({'collect_tags': True})
     check = VSphereCheck('vsphere', {}, [realtime_instance])
     config = VSphereConfig(realtime_instance, {}, MagicMock())
-    check.api_rest = VSphereRestAPI(config, MagicMock())
+    check.api_rest = build_rest_api_client(config, MagicMock())
     check.api_rest.make_batch = MagicMock(side_effect=[Exception, []])
     check.api_rest.smart_connect = MagicMock()
 
@@ -401,13 +401,15 @@ def test_version_metadata(aggregator, dd_run_check, realtime_instance, datadog_a
     check = VSphereCheck('vsphere', {}, [realtime_instance])
     check.check_id = 'test:123'
     dd_run_check(check)
+
+    major, minor, patch = VSPHERE_VERSION.split('.')
     version_metadata = {
         'version.scheme': 'semver',
-        'version.major': '6',
-        'version.minor': '7',
-        'version.patch': '0',
+        'version.major': major,
+        'version.minor': minor,
+        'version.patch': patch,
         'version.build': '123456789',
-        'version.raw': '6.7.0+123456789',
+        'version.raw': '{}+123456789'.format(VSPHERE_VERSION),
     }
 
     datadog_agent.assert_metadata('test:123', version_metadata)
@@ -430,3 +432,32 @@ def test_specs_start_time(aggregator, dd_run_check, historical_instance):
     assert len(start_times) != 0
     for start_time in start_times:
         assert start_time == (mock_time - dt.timedelta(hours=2))
+
+
+@pytest.mark.parametrize(
+    'test_timeout, expected_result',
+    [
+        (1, False),
+        (2, False),
+        (20, True),
+    ],
+)
+@pytest.mark.usefixtures('mock_type', 'mock_api')
+def test_connection_refresh(aggregator, dd_run_check, realtime_instance, test_timeout, expected_result):
+    # This test is to ensure that the connection is refreshed after a specified period of time.
+    # We run the check initially to get a connection object, sleep for a period of time, and then
+    # rerun the check and compare and see if the connection objects are the same.
+    realtime_instance['connection_reset_timeout'] = test_timeout
+    check = VSphereCheck('vsphere', {}, [realtime_instance])
+    dd_run_check(check)
+    first_connection = check.api
+
+    time.sleep(2)
+
+    dd_run_check(check)
+
+    same_object = False
+    if first_connection == check.api:
+        same_object = True
+
+    assert same_object == expected_result

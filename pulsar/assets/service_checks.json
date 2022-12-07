@@ -1,0 +1,17 @@
+[
+    {
+        "agent_version": "7.35.0",
+        "integration": "pulsar",
+        "check": "pulsar.openmetrics.health",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "groups": [
+            "host",
+            "endpoint"
+        ],
+        "name": "OpenMetrics endpoint health",
+        "description": "Returns `CRITICAL` if the Agent is unable to connect to the OpenMetrics endpoint, otherwise returns `OK`."
+    }
+]

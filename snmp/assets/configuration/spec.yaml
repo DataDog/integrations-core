@@ -1,0 +1,408 @@
+name: SNMP
+files:
+- name: snmp.yaml
+  options:
+    - template: init_config
+      overrides:
+       description: |
+          WARNING: This configuration file is for SNMP v1, v2, and v3.
+          Check all variables depending on your SNMP version.
+
+          NOTE: See SNMP integration setup guide and examples in the Datadog documentation:
+                https://docs.datadoghq.com/network_monitoring/devices/setup
+      options:
+      - name: loader
+        enabled: true
+        description: |
+            Check loader to use for all instances. Available loaders:
+            - core: (recommended) Uses new corecheck SNMP integration (faster and lower memory usage)
+            - python: Uses the legacy python SNMP integration
+        value:
+          example: core
+          type: string
+          display_default: python
+      - name: use_device_id_as_hostname
+        enabled: true
+        description: |
+            Use `device:<DEVICE_ID>` (device_id is composed of `<NAMESPACE>:<DEVICE_IP_ADDRESS>`) as `hostname`
+            for metrics and service checks (meaning that metrics and services checks will have
+            `host:device:<DEVICE_ID>` as tag).
+            This option is needed for custom tags.
+        value:
+          example: true
+          type: boolean
+          display_default: false
+      - name: oid_batch_size
+        description: |
+            The number of OIDs handled by each batch. Increasing this number improves performance but
+            uses more resources.
+
+            In corecheck, the default value depends on the version of the agent.
+            Before version 7.30 the default value is 60 and from version 7.30 its value is 5.
+        value:
+          example: 10
+          type: integer
+      - name: min_collection_interval
+        value:
+          example: 15
+          type: number
+        description: |
+          This changes the collection interval of the check. For more information, see:
+          https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
+          Only available using corecheck SNMP integration with `loader: core` config.
+
+      - name: global_metrics
+        description: |
+          Specify global_metrics you want to monitor by using MIBS for counter and gauge.
+          global_metrics are applied to all instances where use_global_metrics is set to true at the instance level.
+
+          Single scalar metrics and table metrics can be defined in this section.
+          Details on how to define metrics can be found in the documentation:
+          https://datadoghq.dev/integrations-core/tutorials/snmp/profile-format/#metrics
+        value:
+          type: array
+          items:
+            type: object
+          example:
+            - OID: 1.3.6.1.2.1.6.5.0
+              name: tcpPassiveOpens
+            - OID: 1.3.6.1.2.1.6.5.0
+              name: tcpPassiveOpens
+              metric_tags:
+                - TCP
+      - name: profiles
+        description: |
+          Specify profiles to be able to reference a set of metrics by name.
+          Either `definition_file` or `definition` must be defined.
+          `definition_file` points to a file with a profile, and `definition` inlines
+          it directly.
+          When using a profile present on the profiles directory of the
+          configuration, you can directly pass the filename.
+          By default, if the file doesn't start with an underscore, it loads all of the profiles
+          installed in the python package and in the configuration directory.
+        value:
+          type: object
+          example:
+            f5-big-ip:
+              definition_file: f5-big-ip.yaml
+            router:
+              definition_file: generic-router.yaml
+      - name: refresh_oids_cache_interval
+        description: |
+          Note: Beta feature, only available using python SNMP integration.
+          Set this option to enable caching of OIDs. The value is the number of seconds before the
+          the cache is refreshed.
+          This option works best when `oid_batch_size` is set to 128 or 256.
+          This is useful to improve performance when fetching metrics from large tables.
+          When OID caching is enabled, table row OIDs are reused. This means that the table can be fetched
+          using batched GET queries, as opposed to one GETNEXT query per row in the table.
+          The caching is disabled if the interval is set to `0` (default).
+          Note: If some tables rows are dynamic, new rows are only fetched every refresh interval.
+                  - This means new OIDs are also only picked up every refresh interval.
+                  - With auto discovery, if the same IP is assigned to a different device with different OIDs,
+                  the OIDs are refreshed only according to the refresh interval.
+
+
+        value:
+          type: integer
+          example: 3600
+          display_default: 0
+      - name: optimize_mib_memory_usage
+        description: |
+          **Experimental** - Setting this flag to true attempts to optimize memory usage related to
+          MIB information. This shares internal MIB data across instances.
+          Note: This strategy may impact MIB resolution.
+          Only available using python SNMP integration.
+        value:
+          type: boolean
+          example: false
+      - name: mibs_folder
+        description: |
+          Specify an additional folder for your custom MIB files (python format).
+          Only available using python SNMP integration.
+        value:
+          type: string
+      - name: ignore_nonincreasing_oid
+        description: |
+          Set to true to ignore non increasing OID.
+          See https://github.com/etingof/pysnmp/blob/master/docs/source/faq/oids-not-increasing.rst
+          Only available using python SNMP integration.
+        value:
+          type: boolean
+          example: false
+      - name: collect_device_metadata
+        description: |
+          Enable device metadata collection for all instances.
+          Only available using corecheck SNMP integration with `loader: core` config.
+        hidden: true
+        value:
+          type: boolean
+          example: true
+      - template: init_config/default
+        overrides:
+          service.hidden: true
+    - template: instances
+      options:
+      - name: ip_address
+        description: |
+          The IP address of the device to monitor.
+          Either `ip_address` or `network_address` must be provided.
+        value:
+          type: string
+      - name: port
+        description: |
+          Default SNMP port.
+        value:
+          type: integer
+          example: 161
+      - name: community_string
+        description: |
+          Only useful for SNMP v1 & v2.
+          Enclose the community string with single quotes to avoid special characters being interpreted. For instance:
+          community_string: 'public'
+        value:
+          type: string
+      - name: snmp_version
+        description: |
+          If you are using SNMP v1 set snmp_version to 1
+          If you are using SNMP v3 set snmp_version to 3
+        value:
+          type: integer
+          example: 2
+      - name: timeout
+        description: |
+          Amount of second before timing out. Default of 5 for Python version of this check.
+        value:
+          type: integer
+          example: 2
+      - name: retries
+        description: |
+          Amount of retries before failure. Default of 5 for Python version of this check.
+        value:
+          type: integer
+          example: 3
+      - name: loader
+        enabled: true
+        description: |
+          Check loader to use. Available loaders:
+          - core: (recommended) Uses new corecheck SNMP integration
+          - python: Uses legacy python SNMP integration
+        value:
+          type: string
+          example: core
+          display_default: python
+      - name: use_device_id_as_hostname
+        enabled: true
+        description: |
+            Use `device:<DEVICE_ID>` (device_id is composed of `<NAMESPACE>:<DEVICE_IP_ADDRESS>`) as `hostname`
+            for metrics and service checks (meaning that metrics and services checks will have
+            `host:device:<DEVICE_ID>` as tag).
+            This option is needed for custom tags.
+        value:
+          example: true
+          type: boolean
+          display_default: false
+      - name: oid_batch_size
+        description: |
+          The number of OIDs handled by each batch. Increasing this number improves performance but
+          uses more resources.
+          Only available for corecheck implementation (`loader: core`).
+
+          In corecheck, the default value depends on the version of the agent.
+          Before version 7.30 the default value is 60 and from version 7.30 its value is 5.
+        value:
+          type: integer
+          display_default: 5
+          example: 10
+      - name: user
+        description: |
+          Username to connect to your SNMP devices.
+          SNMP v3 specific configuration
+        value:
+          type: string
+          example: <USERNAME>
+      - name: authProtocol
+        description: |
+          Authentication type to use when connecting to your SNMP devices.
+          Available options are: MD5, SHA, SHA224, SHA256, SHA384, SHA512
+          Defaults to MD5 when `authKey` is specified.
+          SNMP v3 specific configuration.
+        value:
+          type: string
+          example: <AUTHENTICATION_PROTOCOL>
+      - name: authKey
+        description: |
+          Authentication key to use with your Authentication type.
+          SNMP v3 specific configuration.
+        value:
+          type: string
+          example: <AUTHENTICATION_TYPE_KEY>
+      - name: privProtocol
+        description: |
+          Privacy type to use when connecting to your SNMP devices.
+          Available options are: DES, AES (128 bits), AES192, AES192C, AES256, AES256C
+          Protocol only available for Python implementation: 3DES
+          Defaults to DES when `privKey` is specified.
+          SNMP v3 specific configuration.
+        value:
+          type: string
+          example: <PRIVACY_TYPE>
+      - name: privKey
+        description: |
+          Privacy type key to use with your Privacy type.
+          SNMP v3 specific configuration.
+        value:
+          type: string
+          example: <PRIVACY_TYPE_KEY>
+      - name: context_engine_id
+        description: |
+          (Optional SNMP v3-only parameter)
+          ID of your context engine; typically unneeded.
+          SNMP v3 specific configuration.
+        value:
+          type: string
+      - name: context_name
+        description: |
+          Name of your context (optional SNMP v3-only parameter).
+          SNMP v3 specific configuration.
+        value:
+          type: string
+      - name: use_global_metrics
+        description: |
+          Whether or not `global_metrics` should be included for this instance.
+        value:
+          type: boolean
+          example: true
+      - name: profile
+        description: |
+          Name of the profile to use, if any.
+        value:
+          type: string
+          example: <PROFILE_NAME>
+      - name: metrics
+        description: |
+          Specify metrics you want to monitor.
+          Metrics set here will override `global_metrics` set in the `init_config` section
+          if `use_global_metrics` is set to false.
+          Otherwise, they will be used in addition to `global_metrics`.
+
+          Single scalar metrics and table metrics can be defined in this section.
+          Details on how to define metrics can be found in the documentation:
+          https://datadoghq.dev/integrations-core/tutorials/snmp/profile-format/#metrics
+        value:
+          type: array
+          items:
+            type: object
+          example:
+            - OID: 1.3.6.1.2.1.6.5.0
+              name: tcpPassiveOpens
+            - OID: 1.3.6.1.2.1.6.5.0
+              name: tcpPassiveOpens
+              metric_tags:
+                - TCP
+      - name: metric_tags
+        description: |
+          Specify tags that you want applied to all metrics. A tag can be applied from a symbol or an OID.
+          Regular expressions can be used to separate the resulting value into several tags, or get a
+          substring using the regular Python engine: https://docs.python.org/3/library/re.html
+        value:
+          type: array
+          items:
+            type: object
+          example:
+            - OID: 1.3.6.1.2.1.1.5.0
+              symbol: sysName
+              tag: snmp_host
+            - # With regular expression matching
+              OID: 1.3.6.1.2.1.1.5.0
+              symbol: sysName
+              match: (.*)-(.*)
+              tags:
+                  host: \2
+                  device_type: \1
+      - name: network_address
+        description: |
+          The network address of the devices to scan for monitor.
+        value:
+          type: string
+      - name: ignored_ip_addresses
+        description: |
+          A list of IP addresses to ignore when scanning the network.
+        value:
+          type: array
+          items:
+            type: string
+          example:
+            - <IP_ADDRESS_1>
+            - <IP_ADDRESS_2>
+      - name: discovery_interval
+        description: |
+          Interval between 2 discovery starts, in seconds.
+        value:
+          type: integer
+          example: 3600
+      - name: discovery_allowed_failures
+        description: |
+          Number of times a discovered host can fail before it is removed from the discovered list.
+        value:
+          type: integer
+          example: 3
+      - name: workers
+        description: |
+          Number of workers used for check collection (metrics, service checks, metadata, etc) when using discovery.
+        value:
+          type: integer
+          example: 5
+      - name: discovery_workers
+        description: |
+          Number of workers used to discover new devices.
+          Only available using corecheck SNMP integration.
+        value:
+          type: integer
+          example: 5
+      - name: enforce_mib_constraints
+        description: |
+          If set to false, the the values returned are not checked to ensure they meet the MIB constraints.
+          Only available using python SNMP integration.
+        value:
+          type: boolean
+          example: true
+      - name: bulk_threshold
+        description: |
+          The number of symbols in each table that triggers a BULK request.
+          Only relevant for SNMP > 1.
+          Only available using python SNMP integration.
+        value:
+          type: integer
+          example: 0
+      - name: refresh_oids_cache_interval
+        description: |
+          Note: Beta feature, only available using python SNMP integration.
+          Set this option to enable caching of OIDs. The value is the number of seconds before the
+          the cache is refreshed.
+          This option works best when `oid_batch_size` is set to 128 or 256.
+          This is useful to improve performance when fetching metrics from large tables.
+          When OID caching is enabled, table row OIDs are reused. This means that the table can be fetched
+          using batched GET queries, as opposed to one GETNEXT query per row in the table.
+          The caching is disabled if the interval is set to `0` (default).
+
+          Note: If some tables rows are dynamic, new rows are only fetched at every refresh interval.
+                  - This means new OIDs are only picked up when OIDs are refreshed according to the refresh interval.
+                  - With auto discovery, if the same IP is assigned to a different device with different OIDs,
+                  the OIDs are refreshed only according to the refresh interval.
+
+        value:
+          type: integer
+          example: 3600
+          display_default: 0
+      - name: collect_device_metadata
+        description: |
+          Enable device metadata collection.
+          Only available using corecheck SNMP integration with `loader: core` config.
+        hidden: true
+        value:
+          type: boolean
+          example: true
+      - template: instances/default
+        overrides:
+          service.hidden: true

@@ -16,17 +16,17 @@ def test_bad_config(check):
         check.check({})
 
 
-def test_bad_status(aggregator):
+def test_bad_status(aggregator, dd_run_check):
     instance = {'status_url': 'http://foo:9001/status', 'tags': ['expectedbroken']}
     check = PHPFPMCheck('php_fpm', {}, [instance])
-    check.check(instance)
+    dd_run_check(check)
     assert len(aggregator.metric_names) == 0
 
 
-def test_bad_ping(aggregator):
+def test_bad_ping(aggregator, dd_run_check):
     instance = {'ping_url': 'http://foo:9001/ping', 'tags': ['some_tag']}
     check = PHPFPMCheck('php_fpm', {}, [instance])
-    check.check(instance)
+    dd_run_check(check)
     aggregator.assert_service_check(
         'php_fpm.can_ping', status=check.CRITICAL, tags=['ping_url:http://foo:9001/ping', 'some_tag']
     )
@@ -98,7 +98,7 @@ def test_backoff_success(check, instance, aggregator, payload):
         ),
     ],
 )
-def test_config(test_case, extra_config, expected_http_kwargs):
+def test_config(test_case, extra_config, expected_http_kwargs, dd_run_check):
     instance = {'ping_url': 'http://foo:9001/ping'}
     instance.update(extra_config)
     check = PHPFPMCheck('php_fpm', {}, instances=[instance])
@@ -106,10 +106,16 @@ def test_config(test_case, extra_config, expected_http_kwargs):
     with mock.patch('datadog_checks.base.utils.http.requests') as r:
         r.get.return_value = mock.MagicMock(status_code=200)
 
-        check.check(instance)
+        dd_run_check(check)
 
         http_kwargs = dict(
-            auth=mock.ANY, cert=mock.ANY, headers=mock.ANY, proxies=mock.ANY, timeout=mock.ANY, verify=mock.ANY
+            auth=mock.ANY,
+            cert=mock.ANY,
+            headers=mock.ANY,
+            proxies=mock.ANY,
+            timeout=mock.ANY,
+            verify=mock.ANY,
+            allow_redirects=mock.ANY,
         )
         http_kwargs.update(expected_http_kwargs)
         r.get.assert_called_with('http://foo:9001/ping', **http_kwargs)

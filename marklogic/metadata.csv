@@ -1,220 +1,220 @@
-metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-marklogic.databases.average_forest_size,gauge,,mebibyte,,The average forest size attached to database.,0,marklogic,db avg forest size
-marklogic.databases.backup_count,gauge,,unit,,The maximum number of forests that are backing up.,0,marklogic,db backup count
-marklogic.databases.backup_read_load,gauge,,,,"Disk read time threads spent for backup, in proportion to the elapsed time.",0,marklogic,db backup r load
-marklogic.databases.backup_read_rate,gauge,,mebibyte,second,"The moving average throughput of reading backup data from disk.",0,marklogic,db backup r rate
-marklogic.databases.backup_write_load,gauge,,,,"Disk writing time threads spent for backups, in proportion to the elapsed time.",0,marklogic,db backup w load
-marklogic.databases.backup_write_rate,gauge,,mebibyte,second,"The moving average throughput of writing data for backups.",0,marklogic,db backup w rate
-marklogic.databases.compressed_tree_cache_hit_rate,gauge,,hit,second,The average number of hits on the compressed cache.,0,marklogic,db tree cache hit
-marklogic.databases.compressed_tree_cache_miss_rate,gauge,,miss,second,The average number of misses on the compressed cache.,0,marklogic,db tree cache miss
-marklogic.databases.data_size,gauge,,mebibyte,,The total size of the database on disk.,0,marklogic,db data size
-marklogic.databases.database_replication_receive_load,gauge,,,,"Time threads spent receiving data for database replication, in proportion to the elapsed time.",0,marklogic,db replication recv load
-marklogic.databases.database_replication_receive_rate,gauge,,mebibyte,second,"The moving average throughput of receiving data for database replication.",0,marklogic,db replication recv rate
-marklogic.databases.database_replication_send_load,gauge,,,,"Time threads spent sending data for database replication, in proportion to the elapsed time.",0,marklogic,db replication send load
-marklogic.databases.database_replication_send_rate,gauge,,mebibyte,second,"The moving average throughput of sending data for database replication.",0,marklogic,db replication send recv
-marklogic.databases.deadlock_rate,gauge,,lock,second,"The rate of deadlock occurrances.",0,marklogic,db deadlock rate
-marklogic.databases.deadlock_wait_load,gauge,,,,"Time threads spent waiting for locks that eventually result in deadlocks in proportion to the elasped time.",0,marklogic,db deadlock wait load
-marklogic.databases.device_space,gauge,,mebibyte,,The amount of space left on the device.,0,marklogic,db device space
-marklogic.databases.fast_data_size,gauge,,mebibyte,,The total size of the fast storage on disk.,0,marklogic,db fast data size
-marklogic.databases.forests_count,gauge,,unit,,The number of forests for the database.,0,marklogic,db forest count
-marklogic.databases.in_memory_size,gauge,,mebibyte,,The total memory used for the database.,0,marklogic,db in mem size
-marklogic.databases.journal_write_load,gauge,,,,"Journal writing time threads spent in proportion to the elapsed time.",0,marklogic,db journal w load
-marklogic.databases.journal_write_rate,gauge,,mebibyte,second,"The moving average of writing data to the journal.",0,marklogic,db journal w rate
-marklogic.databases.large_binary_cache_hit_rate,gauge,,hit,second,"The average number of hits on the large binary cache.",0,marklogic,db b cache hit rate
-marklogic.databases.large_binary_cache_miss_rate,gauge,,miss,second,"The average number of misses on the large binary cache.",0,marklogic,db b cache miss rate
-marklogic.databases.large_data_size,gauge,,mebibyte,,The total size of the large data on disk.,0,marklogic,db large data size
-marklogic.databases.large_read_load,gauge,,,,"Disk read time threads spent on large documents, in proportion to the elapsed time.",0,marklogic,db large data r load
-marklogic.databases.large_read_rate,gauge,,mebibyte,second,"The moving average throughput of reading large documents from disk.",0,marklogic,db large data r rate
-marklogic.databases.large_write_load,gauge,,,,"Disk write time threads spent for large documents, in proportion to the elapsed time.",0,marklogic,db large data w load
-marklogic.databases.large_write_rate,gauge,,mebibyte,second,"The moving average throughput of writing data for large documents.",0,marklogic,db large data w rate
-marklogic.databases.largest_forest_size,gauge,,mebibyte,,"The size of largest forest attached to database.",0,marklogic,db largest forest size
-marklogic.databases.least_remaining_space_forest,gauge,,mebibyte,,The lowest free remaining space size.,0,marklogic,db least remaining space forest
-marklogic.databases.list_cache_hit_rate,gauge,,hit,second,The average number of hits on the list cache.,0,marklogic,db list cache hit rate
-marklogic.databases.list_cache_miss_rate,gauge,,miss,second,The average number of misses on the list cache.,0,marklogic,db list cache miss rate
-marklogic.databases.merge_count,gauge,,,,The maximum number of forests that are merging.,0,marklogic,db merge count
-marklogic.databases.merge_read_load,gauge,,,,"Disk read time threads spent during merge, in proportion to the elapsed time.",0,marklogic,db merge r load
-marklogic.databases.merge_read_rate,gauge,,mebibyte,second,"The moving average throughput of reading merge data from disk.",0,marklogic,db merge r rate
-marklogic.databases.merge_write_load,gauge,,,,"Disk writing time threads spent for merges, in proportion to the elapsed time.",0,marklogic,db merge w load
-marklogic.databases.merge_write_rate,gauge,,mebibyte,second,"The moving average throughput of writing data for merges.",0,marklogic,db merge w rate
-marklogic.databases.min_capacity,gauge,,,,"The least capacity for a forest as a percentage.",0,marklogic,db min capacity
-marklogic.databases.query_read_load,gauge,,,,"Disk reading time threads spent for a query in proportion to the elapsed time.",0,marklogic,db query r load
-marklogic.databases.query_read_rate,gauge,,mebibyte,second,"The moving average of throughput reading query data from disk.",0,marklogic,db query r rate
-marklogic.databases.read_lock_hold_load,gauge,,,,"Time threads spent holding read locks in proportion to the elapsed time.",0,marklogic,db r lock hold load
-marklogic.databases.read_lock_rate,gauge,,mebibyte,second,"The rate of read lock acquistions.",0,marklogic,db r lock rate
-marklogic.databases.read_lock_wait_load,gauge,,,,"Time threads spent waiting to acquire read locks in proportion to the elasped time.",0,marklogic,db r lock wait load
-marklogic.databases.reindex_count,gauge,,,,"The total number of reindexing forests for the database.",0,marklogic,db reindex count
-marklogic.databases.restore_count,gauge,,,,The maximum number of forests that are restoring.,0,marklogic,db restore count
-marklogic.databases.restore_read_load,gauge,,,,"Disk read time threads spent for restores, in proportion to the elapsed time.",0,marklogic,db restore r load
-marklogic.databases.restore_read_rate,gauge,,mebibyte,second,"The moving average throughput of reading restore data from disk.",0,marklogic,db restore r rate
-marklogic.databases.restore_write_load,gauge,,,,"Disk write time threads spent for restores, in proportion to the elasped time.",0,marklogic,db restore w load
-marklogic.databases.restore_write_rate,gauge,,mebibyte,second,"The moving average throughput of writing data for restores.",0,marklogic,db restore w rate
-marklogic.databases.save_write_load,gauge,,,,"The moving average of time threads spent writing to in-memory stands, in proportion to the elapsed time.",0,marklogic,db save w load
-marklogic.databases.save_write_rate,gauge,,mebibyte,second,"The moving average of writing data to in-memory stands.",0,marklogic,db save w rate
-marklogic.databases.total_load,gauge,,,,"The sum of the processing load factors.",0,marklogic,db total load
-marklogic.databases.total_merge_size,gauge,,mebibyte,,"The total size of active forest merging for the database.",0,marklogic,db total merge size
-marklogic.databases.total_rate,gauge,,,,"The sum of the processing rate factors.",0,marklogic,db total rate
-marklogic.databases.triple_cache_hit_rate,gauge,,hit,second,The average number of hits on the list cache.,0,marklogic,db t cache hit rate
-marklogic.databases.triple_cache_miss_rate,gauge,,miss,second,The average number of misses on the list cache.,0,marklogic,db t cache miss rate
-marklogic.databases.triple_value_cache_hit_rate,gauge,,hit,second,The average number of hits on the list cache.,0,marklogic,db tv cache hit rate
-marklogic.databases.triple_value_cache_miss_rate,gauge,,miss,second,The average number of misses on the list cache.,0,marklogic,db tv cache miss rate
-marklogic.databases.write_lock_hold_load,gauge,,,,Time threads spent holding write locks in proportion to the elapsed time.,0,marklogic,db w lock hold load
-marklogic.databases.write_lock_rate,gauge,,lock,second,The rate of write lock acquistions.,0,marklogic,db w lock rate
-marklogic.databases.write_lock_wait_load,gauge,,,,Time threads spent waiting to acquire write locks in proportion to the elapsed time.,0,marklogic,db w lock wait load
-marklogic.forests.backup_count,gauge,,unit,,The maximum number of forests that are backing up.,0,marklogic,forest backup
-marklogic.forests.backup_read_load,gauge,,,,"Disk read time threads spent for backup, in proportion to the elapsed time.",0,marklogic,forest backup r load
-marklogic.forests.backup_read_rate,gauge,,mebibyte,second,The moving average throughput of reading backup data from disk.,0,marklogic,forest backup r rate
-marklogic.forests.backup_write_load,gauge,,,,"Disk writing time threads spent for backups, in proportion to the elapsed time.",0,marklogic,forest backup w load
-marklogic.forests.backup_write_rate,gauge,,mebibyte,second,"The moving average throughput of writing data for backups.",0,marklogic,forest backup w rate
-marklogic.forests.compressed_tree_cache_hit_rate,gauge,,hit,second,"The average number of hits on the compressed cache.",0,marklogic,forest tree cache hit
-marklogic.forests.compressed_tree_cache_miss_rate,gauge,,miss,second,"The average number of misses on the compressed cache.",0,marklogic,forest tree cache miss
-marklogic.forests.compressed_tree_cache_ratio,gauge,,percent,,"The compressed cache ratio",0,marklogic,forest tree cache ratio
-marklogic.forests.current_foreign_master_cluster,gauge,,unit,,"The cluster ID coupled with the local cluster.",0,marklogic,forest foreign master cluster
-marklogic.forests.current_foreign_master_fsn,gauge,,unit,,"The ID of the last journal frame received from the foreign master",0,marklogic,forest foreign master fsn
-marklogic.forests.current_master_fsn,gauge,,unit,,"The journal frame ID of the local master",0,marklogic,forest master fsn
-marklogic.forests.database_replication_receive_load,gauge,,,,"Time threads spent receiving data for database replication, in proportion to the elapsed time.",0,marklogic,forest db replication recv load
-marklogic.forests.database_replication_receive_rate,gauge,,mebibyte,second,"The moving average throughput of receiving data for database replication.",0,marklogic,forest db replication recv rate
-marklogic.forests.database_replication_send_load,gauge,,,,"Time threads spent sending data for database replication, in proportion to the elapsed time.",0,marklogic,forest db replication send load
-marklogic.forests.database_replication_send_rate,gauge,,mebibyte,second,"The moving average throughput of sending data for database replication.",0,marklogic,forest db replication send rate
-marklogic.forests.deadlock_rate,gauge,,lock,second,The rate of deadlock occurrances.,0,marklogic,forest deadlock rate
-marklogic.forests.deadlock_wait_load,gauge,,,,Time threads spent waiting for locks that eventually result in deadlocks in proportion to the elasped time.,0,marklogic,forest deadlock wait
-marklogic.forests.device_space,gauge,,mebibyte,,"The amount of space left on forest device.",0,marklogic,forest device space
-marklogic.forests.forest_reserve,gauge,,mebibyte,,"The amount of space needed for merging.",0,marklogic,forest f reserve
-marklogic.forests.journal_write_load,gauge,,,,Journal writing time threads spent in proportion to the elapsed time.,0,marklogic,forest journal w load
-marklogic.forests.journal_write_rate,gauge,,mebibyte,second,The moving average of writing data to the journal.,0,marklogic,forest journal w rate
-marklogic.forests.journals_size,gauge,,mebibyte,,"The amount of space the journals take up on disk.",0,marklogic,forest journal size
-marklogic.forests.large_binary_cache_hit_rate,gauge,,hit,second,The average number of hits on the large binary cache.,0,marklogic,forest b cache hit rate
-marklogic.forests.large_binary_cache_hits,gauge,,hit,,"The number of hits on the large binary cache.",0,marklogic,forest b cache hit
-marklogic.forests.large_binary_cache_miss_rate,gauge,,miss,second,The average number of misses on the large binary cache.,0,marklogic,forest b cache miss rate
-marklogic.forests.large_binary_cache_misses,gauge,,miss,,"The number of misses on the large binary cache.",0,marklogic,forest b cache miss
-marklogic.forests.large_data_size,gauge,,mebibyte,,"The amount of space large objects take up on disk.",0,marklogic,forest large data size
-marklogic.forests.large_read_load,gauge,,,,"Disk read time threads spent on large documents, in proportion to the elapsed time.",0,marklogic,forest r load
-marklogic.forests.large_read_rate,gauge,,mebibyte,second,"The moving average throughput of reading large documents from disk.",0,marklogic,forest r rate
-marklogic.forests.large_write_load,gauge,,,,"Disk write time threads spent for large documents, in proportion to the elapsed time.",0,marklogic,forest w load
-marklogic.forests.large_write_rate,gauge,,mebibyte,second,"The moving average throughput of writing data for large documents.",0,marklogic,forest w rate
-marklogic.forests.list_cache_hit_rate,gauge,,hit,second,"The average number of hits on the list cache.",0,marklogic,forest l cache hit
-marklogic.forests.list_cache_miss_rate,gauge,,miss,second,"The average number of misses on the list cache.",0,marklogic,forest l cache miss
-marklogic.forests.list_cache_ratio,gauge,,percent,,"The list cache ratio",0,marklogic,forest l cache ratio
-marklogic.forests.max_query_timestamp,gauge,,millisecond,,"The largest timestamp a query has run at.",0,marklogic,forest max query ts
-marklogic.forests.max_stands_per_forest,gauge,,unit,,"The maximum number of stands for a forest.",0,marklogic,forest max stands
-marklogic.forests.merge_count,gauge,,unit,,"The maximum number of forests that are merging.",0,marklogic,forest merge count
-marklogic.forests.merge_read_load,gauge,,,,"Disk read time threads spent during merge, in proportion to the elapsed time.",0,marklogic,forest merge r load
-marklogic.forests.merge_read_rate,gauge,,mebibyte,second,"The moving average throughput of reading merge data from disk.",0,marklogic,forest merge r rate
-marklogic.forests.merge_write_load,gauge,,,,"Disk writing time threads spent for merges, in proportion to the elapsed time.",0,marklogic,forest merge w load
-marklogic.forests.merge_write_rate,gauge,,mebibyte,second,"The moving average throughput of writing data for merges.",0,marklogic,forest merge w rate
-marklogic.forests.min_capacity,gauge,,percent,,"The least capacity for a forest as a percentage.",0,marklogic,forest min cap
-marklogic.forests.nonblocking_timestamp,gauge,,millisecond,,"The most current timestamp for which a query will execute without waiting for transactions to settle.",0,marklogic,forest nonblocking ts
-marklogic.forests.orphaned_binaries,gauge,,item,,"The count of orphaned large binaries.",0,marklogic,forest orphaned bin
-marklogic.forests.query_read_load,gauge,,,,"Disk reading time threads spent for a query in proportion to the elapsed time.",0,marklogic,forest query r load
-marklogic.forests.query_read_rate,gauge,,mebibyte,second,"The moving average of throughput reading query data from disk.",0,marklogic,forest query r rate
-marklogic.forests.read_lock_hold_load,gauge,,,,"Time threads spent holding read locks in proportion to the elapsed time.",0,marklogic,forest r lock hold load
-marklogic.forests.read_lock_rate,gauge,,lock,second,"The rate of read lock acquistions.",0,marklogic,forest r lock rate
-marklogic.forests.read_lock_wait_load,gauge,,,,"Time threads spent waiting to acquire read locks in proportion to the elasped time.",0,marklogic,forest r lock wait load
-marklogic.forests.restore_count,gauge,,unit,,"The maximum number of forests that are restoring.",0,marklogic,forest restore count
-marklogic.forests.restore_read_load,gauge,,,,"Disk read time threads spent for restores, in proportion to the elapsed time.",0,marklogic,forest restore r load
-marklogic.forests.restore_read_rate,gauge,,mebibyte,second,"The moving average throughput of reading restore data from disk.",0,marklogic,forest restore r rate
-marklogic.forests.restore_write_load,gauge,,,,"Disk write time threads spent for restores, in proportion to the elasped time.",0,marklogic,forest restore w load
-marklogic.forests.restore_write_rate,gauge,,mebibyte,second,"The moving average throughput of writing data for restores.",0,marklogic,forest restore w rate
-marklogic.forests.save_write_load,gauge,,,,"The moving average of time threads spent writing to in_memory stands, in proportion to the elapsed time.",0,marklogic,forest save w load
-marklogic.forests.save_write_rate,gauge,,mebibyte,second,"The moving average of writing data to in_memory stands",0,marklogic,forest save w rate
-marklogic.forests.state_not_open,gauge,,unit,,"The number of forests that aren't open.",0,marklogic,forest state not open
-marklogic.forests.storage.disk_size,gauge,,mebibyte,,"The amount of space the stand takes on disk.",0,marklogic,forest stor disk size
-marklogic.forests.storage.host.capacity,gauge,,percent,,"The percentage of storage space that is free.",0,marklogic,forest stor host capacity
-marklogic.forests.storage.host.device_space,gauge,,mebibyte,,"The amount of space left on forest device.",0,marklogic,forest stor host space
-marklogic.forests.storage.host.forest_reserve,gauge,,mebibyte,,"The amount of space needed for merging.",0,marklogic,forest stor host reserve
-marklogic.forests.storage.host.forest_size,gauge,,mebibyte,,"The total ordinary storage for forests.",0,marklogic,forest stor host size
-marklogic.forests.storage.host.large_data_size,gauge,,mebibyte,,"The amount of space large objects take up on disk.",0,marklogic,forest stor host large data size
-marklogic.forests.storage.host.remaining_space,gauge,,mebibyte,,"The total free storage for forests.",0,marklogic,forest stor host remaining space
-marklogic.forests.total_forests,gauge,,unit,,"The total number of forests.",0,marklogic,forest tot
-marklogic.forests.total_load,gauge,,,,"The sum of the processing load factors.",0,marklogic,forest tot load
-marklogic.forests.total_rate,gauge,,mebibyte,second,"The sum of the processing rate factors.",0,marklogic,forest tot rate
-marklogic.forests.triple_cache_hit_rate,gauge,,hit,second,"The average number of hits on the list cache.",0,marklogic,forest t cache hit rate
-marklogic.forests.triple_cache_miss_rate,gauge,,miss,second,"The average number of misses on the list cache.",0,marklogic,forest t cache miss rate
-marklogic.forests.triple_value_cache_hit_rate,gauge,,hit,second,"The average number of hits on the list cache.",0,marklogic,forest tv cache hit rate
-marklogic.forests.triple_value_cache_miss_rate,gauge,,miss,second,"The average number of misses on the list cache.",0,marklogic,forest tv cache miss rate
-marklogic.forests.write_lock_hold_load,gauge,,,,"Time threads spent holding write locks in proportion to the elapsed time.",0,marklogic,forest w lock hold load
-marklogic.forests.write_lock_rate,gauge,,lock,second,"The rate of write lock acquistions.",0,marklogic,forest w lock rate
-marklogic.forests.write_lock_wait_load,gauge,,,,"Time threads spent waiting to acquire write locks in proportion to the elapsed time.",0,marklogic,forest w lock wait load
-marklogic.hosts.backup_read_load,gauge,,,,"Disk read time threads spent for backup, in proportion to the elapsed time.",0,marklogic,host backup r load
-marklogic.hosts.backup_read_rate,gauge,,mebibyte,second,"The moving average throughput of reading backup data from disk.",0,marklogic,host backup r rate
-marklogic.hosts.backup_write_load,gauge,,,,"Disk writing time threads spent for backups, in proportion to the elapsed time.",0,marklogic,host backup w load
-marklogic.hosts.backup_write_rate,gauge,,mebibyte,second,"The moving average throughput of writing data for backups.",0,marklogic,host backup w rate
-marklogic.hosts.deadlock_rate,gauge,,lock,second,"The rate of deadlock occurrances.",0,marklogic,host deadlock rate
-marklogic.hosts.deadlock_wait_load,gauge,,second,,"The total time spent waiting for locks that eventually deadlocked.",0,marklogic,host deadlock wait load
-marklogic.hosts.external_binary_read_load,gauge,,,,"Disk read time threads spent on external binary documents, in proportion to the elapsed time.",0,marklogic,host ext bin r load
-marklogic.hosts.external_binary_read_rate,gauge,,mebibyte,second,"Disk read throughput of external binary documents.",0,marklogic,host ext bin r rate
-marklogic.hosts.foreign_xdqp_client_receive_load,gauge,,,,"Time threads spent receiving data for the foreign xdqp client, in proportion to the elapsed time.",0,marklogic,host foreign xdqp clt recv load
-marklogic.hosts.foreign_xdqp_client_receive_rate,gauge,,mebibyte,second,"The moving average throughput of the foreign xdqp client receiving data.",0,marklogic,host foreign xdqp clt recv rate
-marklogic.hosts.foreign_xdqp_client_send_load,gauge,,,,"Time threads spent sending data for the foreign xdqp client, in proportion to the elapsed time.",0,marklogic,host foreign xdqp clt send load
-marklogic.hosts.foreign_xdqp_client_send_rate,gauge,,mebibyte,second,"The moving average throughput of the foreign xdqp client sending data.",0,marklogic,host foreign xdqp clt send rate
-marklogic.hosts.foreign_xdqp_server_receive_load,gauge,,,,"Time threads spent receiving data for the foreign xdqp server, in proportion to the elapsed time.",0,marklogic,host foreign xdqp serv recv load
-marklogic.hosts.foreign_xdqp_server_receive_rate,gauge,,mebibyte,second,"The moving average throughput of the foreign xdqp server receiving data.",0,marklogic,host foreign xdqp serv recv rate
-marklogic.hosts.foreign_xdqp_server_send_load,gauge,,,,"Time threads spent sending data for the foreign xdqp server, in proportion to the elapsed time.",0,marklogic,host foreign xdqp serv send load
-marklogic.hosts.foreign_xdqp_server_send_rate,gauge,,mebibyte,second,"The moving average throughput of the foreign xdqp server sending data.",0,marklogic,host foreign xdqp serv send rate
-marklogic.hosts.journal_write_load,gauge,,,,"Journal writing time threads spent in proportion to the elapsed time.",0,marklogic,host journal w load
-marklogic.hosts.journal_write_rate,gauge,,mebibyte,second,"The moving average of writing data to the journal.",0,marklogic,host journal w rate
-marklogic.hosts.large_read_load,gauge,,,,"Disk read time threads spent on large documents, in proportion to the elapsed time.",0,marklogic,host large r load
-marklogic.hosts.large_read_rate,gauge,,mebibyte,second,"The moving average throughput of reading large documents from disk.",0,marklogic,host large r rate
-marklogic.hosts.large_write_load,gauge,,,,"Disk write time threads spent for large documents, in proportion to the elapsed time.",0,marklogic,host large w load
-marklogic.hosts.large_write_rate,gauge,,mebibyte,second,"The moving average throughput of writing data for large documents.",0,marklogic,host large w rate
-marklogic.hosts.memory_process_huge_pages_size,gauge,,mebibyte,,"The size of huge pages for the MarkLogic process. Available on Linux platform. Sum of Sizes after /anon_hugepage in /proc/[MLpid]/smaps.",0,marklogic,host mem proc huge page size
-marklogic.hosts.memory_process_rss,gauge,,mebibyte,,"The size of Process Resident Size (RSS) for the MarkLogic process",0,marklogic,host mem proc swap rss
-marklogic.hosts.memory_process_swap_rate,gauge,,page,second,"The swap rate for the MarkLogic process.",0,marklogic,host mem proc swap rate
-marklogic.hosts.memory_size,gauge,,mebibyte,,"The amount of space the stand takes in memory.",0,marklogic,host mem size
-marklogic.hosts.memory_system_free,gauge,,mebibyte,,"The free system memory. MemFree from /proc/meminfo on Linux, ullAvailPhys from GlobalMemoryStatusEx on Windows.",0,marklogic,host mem sys free
-marklogic.hosts.memory_system_pagein_rate,gauge,,page,second,"The page in rate for the system.",0,marklogic,host mem sys pagein rate
-marklogic.hosts.memory_system_pageout_rate,gauge,,page,second,"The page out rate for the system.",0,marklogic,host mem sys pageout rate
-marklogic.hosts.memory_system_swapin_rate,gauge,,page,second,"The swap in rate for the system.",0,marklogic,host mem sys swapin rate
-marklogic.hosts.memory_system_swapout_rate,gauge,,page,second,"The swap out rate for the system.",0,marklogic,host mem sys swapout rate
-marklogic.hosts.memory_system_total,gauge,,mebibyte,,"The total system memory. MemTotal from /proc/meminfo on Linux, ullTotalPhys from GlobalMemoryStatusEx on Windows.",0,marklogic,host mem sys tot
-marklogic.hosts.merge_read_load,gauge,,,,"Disk read time threads spent during merge, in proportion to the elapsed time.",0,marklogic,host merge r load
-marklogic.hosts.merge_read_rate,gauge,,mebibyte,second,"The moving average throughput of reading merge data from disk.",0,marklogic,host merge r rate
-marklogic.hosts.merge_write_load,gauge,,,,"Disk writing time threads spent for merges, in proportion to the elapsed time.",0,marklogic,host merge w load
-marklogic.hosts.merge_write_rate,gauge,,mebibyte,second,"The moving average throughput of writing data for merges.",0,marklogic,host merge w rate
-marklogic.hosts.query_read_load,gauge,,,,"Disk reading time threads spent for a query in proportion to the elapsed time.",0,marklogic,host query r load
-marklogic.hosts.query_read_rate,gauge,,mebibyte,second,"The moving average of throughput reading query data from disk.",0,marklogic,host query r rate
-marklogic.hosts.read_lock_hold_load,gauge,,,,"Time threads spent holding read locks in proportion to the elapsed time.",0,marklogic,host r lock hold load
-marklogic.hosts.read_lock_rate,gauge,,lock,second,"The rate of read lock acquistions.",0,marklogic,host r lock rate
-marklogic.hosts.read_lock_wait_load,gauge,,,,"Time threads spent waiting to acquire read locks in proportion to the elasped time.",0,marklogic,host r lock wait load
-marklogic.hosts.restore_read_load,gauge,,,,"Disk read time threads spent for restores, in proportion to the elapsed time.",0,marklogic,host restore r load
-marklogic.hosts.restore_read_rate,gauge,,mebibyte,second,"The moving average throughput of reading restore data from disk.",0,marklogic,host restore r rate
-marklogic.hosts.restore_write_load,gauge,,,,"Disk write time threads spent for restores, in proportion to the elasped time.",0,marklogic,host restore w load
-marklogic.hosts.restore_write_rate,gauge,,mebibyte,second,"The moving average throughput of writing data for restores.",0,marklogic,host restore w rate
-marklogic.hosts.save_write_load,gauge,,,,"The moving average of time threads spent writing to in-memory stands, in proportion to the elapsed time.",0,marklogic,hoste save w load
-marklogic.hosts.save_write_rate,gauge,,mebibyte,second,"The moving average of writing data to in-memory stands.",0,marklogic,host save w rate1
-marklogic.hosts.total_cpu_stat_system,gauge,,percent,,"Total cpu utilization for system.",0,marklogic,host tot cpu sys
-marklogic.hosts.total_cpu_stat_user,gauge,,percent,,"Total cpu utilization for user.",0,marklogic,host tot cpu user
-marklogic.hosts.total_hosts,gauge,,host,,"The total number of hosts.",0,marklogic,host tot
-marklogic.hosts.total_hosts_offline,gauge,,host,,"The total number of hosts offline.",0,marklogic,host tot offline
-marklogic.hosts.total_load,gauge,,,,"The sum of the processing load factors.",0,marklogic,host tot load
-marklogic.hosts.total_rate,gauge,,mebibyte,second,"The sum of the processing rate factors.",0,marklogic,host tot rate
-marklogic.hosts.write_lock_hold_load,gauge,,,,"Time threads spent holding write locks in proportion to the elapsed time.",0,marklogic,host w lock hold load
-marklogic.hosts.write_lock_rate,gauge,,lock,second,"The rate of write lock acquistions.",0,marklogic,host w lock rate
-marklogic.hosts.write_lock_wait_load,gauge,,,,"The total time spent holding write locks.",0,marklogic,host w lock wait load
-marklogic.hosts.xdqp_client_receive_load,gauge,,,,"Time threads spent receiving data for the xdqp client, in proportion to the elapsed time.",0,marklogic,host xdqp clt recv load
-marklogic.hosts.xdqp_client_receive_rate,gauge,,mebibyte,second,"The moving average throughput of the XDQP client receiving data.",0,marklogic,host xdqp clt recv rate
-marklogic.hosts.xdqp_client_send_load,gauge,,,,"Time threads spent sending data for xdqp clients, in proportion to the elapsed time.",0,marklogic,host xdqp clt send load
-marklogic.hosts.xdqp_client_send_rate,gauge,,mebibyte,second,"The moving average throughput of the xdqp clients sending data.",0,marklogic,host xdqp clt send rate
-marklogic.hosts.xdqp_server_receive_load,gauge,,,,"Time threads spent receiving data for the xdqp server, in proportion to the elapsed time.",0,marklogic,host xdqp serv recv load
-marklogic.hosts.xdqp_server_receive_rate,gauge,,mebibyte,second,"The moving average throughput of the xdqp server receiving data.",0,marklogic,host xdqp serv recv rate
-marklogic.hosts.xdqp_server_send_load,gauge,,,,"Time threads spent sending data for the xdqp server, in proportion to the elapsed time.",0,marklogic,host xdqp serv send load
-marklogic.hosts.xdqp_server_send_rate,gauge,,mebibyte,second,"The moving average throughput of the xdqp server sending data.",0,marklogic,host xdqp serv send rate
-marklogic.requests.max_seconds,gauge,,second,,"The maximum length in seconds for the active requests.",0,marklogic,req max sec
-marklogic.requests.mean_seconds,gauge,,second,,"The mean length in seconds for the active requests or the open transactions.",0,marklogic,req mean sec
-marklogic.requests.median_seconds,gauge,,second,,"The median length in seconds for the active requests or the open transactions.",0,marklogic,req median seq
-marklogic.requests.min_seconds,gauge,,second,,"The minimum length in seconds for the active requests or the open transactions.",0,marklogic,req min seq
-marklogic.requests.ninetieth_percentile_seconds,gauge,,second,,"The length in seconds for the ninetieth percentile of the active requests.",0,marklogic,req p90 sec
-marklogic.requests.query_count,gauge,,query,,"The total number of active query requests.",0,marklogic,req query count
-marklogic.requests.standard_dev_seconds,gauge,,second,,"The standard deviation in seconds for the active requests or the open transactions.",0,marklogic,req standard dev sec
-marklogic.requests.total_requests,gauge,,request,,"The total number of active requests.",0,marklogic,req tot
-marklogic.requests.update_count,gauge,,request,,"The total number of active update requests.",0,marklogic,req update count
-marklogic.servers.expanded_tree_cache_hit_rate,gauge,,hit,second,"The average number of hits on the expanded cache.",0,marklogic,serv et cache hit rate
-marklogic.servers.expanded_tree_cache_miss_rate,gauge,,miss,second,"The average number of misses on the expanded cache.",0,marklogic,serv et cache miss rate
-marklogic.servers.request_count,gauge,,request,,"The rate of a request.",0,marklogic,serv req count
-marklogic.servers.request_rate,gauge,,request,second,"The total number of requests for the cluster.",0,marklogic,serv req rate
-marklogic.transactions.max_seconds,gauge,,second,,"The maximum length in seconds for the active transactions.",0,marklogic,trans max sec
-marklogic.transactions.mean_seconds,gauge,,second,,"The mean length in seconds for the active requests or the open transactions.",0,marklogic,trans mean sec
-marklogic.transactions.median_seconds,gauge,,second,,"The median length in seconds for the active requests or the open transactions.",0,marklogic,trans median sec
-marklogic.transactions.min_seconds,gauge,,second,,"The minimum length in seconds for the active requests or the open transactions.",0,marklogic,trans min sec
-marklogic.transactions.ninetieth_percentile_seconds,gauge,,second,,"The length in seconds for the ninetieth percentile of the active requests.",0,marklogic,trans p90 sec
-marklogic.transactions.standard_dev_seconds,gauge,,second,,"The standard deviation in seconds for the active requests or the open transactions.",0,marklogic,trans standard dev sec
-marklogic.transactions.total_transactions,gauge,,transaction,,"The total number of open transactions.",0,marklogic,trans tot
+metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
+marklogic.databases.average_forest_size,gauge,,mebibyte,,The average forest size attached to database.,0,marklogic,db avg forest size,
+marklogic.databases.backup_count,gauge,,unit,,The maximum number of forests that are backing up.,0,marklogic,db backup count,
+marklogic.databases.backup_read_load,gauge,,,,"Disk read time threads spent for backup, in proportion to the elapsed time.",0,marklogic,db backup r load,
+marklogic.databases.backup_read_rate,gauge,,mebibyte,second,"The moving average throughput of reading backup data from disk.",0,marklogic,db backup r rate,
+marklogic.databases.backup_write_load,gauge,,,,"Disk writing time threads spent for backups, in proportion to the elapsed time.",0,marklogic,db backup w load,
+marklogic.databases.backup_write_rate,gauge,,mebibyte,second,"The moving average throughput of writing data for backups.",0,marklogic,db backup w rate,
+marklogic.databases.compressed_tree_cache_hit_rate,gauge,,hit,second,The average number of hits on the compressed cache.,0,marklogic,db tree cache hit,
+marklogic.databases.compressed_tree_cache_miss_rate,gauge,,miss,second,The average number of misses on the compressed cache.,0,marklogic,db tree cache miss,
+marklogic.databases.data_size,gauge,,mebibyte,,The total size of the database on disk.,0,marklogic,db data size,
+marklogic.databases.database_replication_receive_load,gauge,,,,"Time threads spent receiving data for database replication, in proportion to the elapsed time.",0,marklogic,db replication recv load,
+marklogic.databases.database_replication_receive_rate,gauge,,mebibyte,second,"The moving average throughput of receiving data for database replication.",0,marklogic,db replication recv rate,
+marklogic.databases.database_replication_send_load,gauge,,,,"Time threads spent sending data for database replication, in proportion to the elapsed time.",0,marklogic,db replication send load,
+marklogic.databases.database_replication_send_rate,gauge,,mebibyte,second,"The moving average throughput of sending data for database replication.",0,marklogic,db replication send recv,
+marklogic.databases.deadlock_rate,gauge,,lock,second,"The rate of deadlock occurrences.",0,marklogic,db deadlock rate,
+marklogic.databases.deadlock_wait_load,gauge,,,,"Time threads spent waiting for locks that eventually result in deadlocks in proportion to the elasped time.",0,marklogic,db deadlock wait load,
+marklogic.databases.device_space,gauge,,mebibyte,,The amount of space left on the device.,0,marklogic,db device space,
+marklogic.databases.fast_data_size,gauge,,mebibyte,,The total size of the fast storage on disk.,0,marklogic,db fast data size,
+marklogic.databases.forests_count,gauge,,unit,,The number of forests for the database.,0,marklogic,db forest count,
+marklogic.databases.in_memory_size,gauge,,mebibyte,,The total memory used for the database.,0,marklogic,db in mem size,
+marklogic.databases.journal_write_load,gauge,,,,"Journal writing time threads spent in proportion to the elapsed time.",0,marklogic,db journal w load,
+marklogic.databases.journal_write_rate,gauge,,mebibyte,second,"The moving average of writing data to the journal.",0,marklogic,db journal w rate,
+marklogic.databases.large_binary_cache_hit_rate,gauge,,hit,second,"The average number of hits on the large binary cache.",0,marklogic,db b cache hit rate,
+marklogic.databases.large_binary_cache_miss_rate,gauge,,miss,second,"The average number of misses on the large binary cache.",0,marklogic,db b cache miss rate,
+marklogic.databases.large_data_size,gauge,,mebibyte,,The total size of the large data on disk.,0,marklogic,db large data size,
+marklogic.databases.large_read_load,gauge,,,,"Disk read time threads spent on large documents, in proportion to the elapsed time.",0,marklogic,db large data r load,
+marklogic.databases.large_read_rate,gauge,,mebibyte,second,"The moving average throughput of reading large documents from disk.",0,marklogic,db large data r rate,
+marklogic.databases.large_write_load,gauge,,,,"Disk write time threads spent for large documents, in proportion to the elapsed time.",0,marklogic,db large data w load,
+marklogic.databases.large_write_rate,gauge,,mebibyte,second,"The moving average throughput of writing data for large documents.",0,marklogic,db large data w rate,
+marklogic.databases.largest_forest_size,gauge,,mebibyte,,"The size of largest forest attached to database.",0,marklogic,db largest forest size,
+marklogic.databases.least_remaining_space_forest,gauge,,mebibyte,,The lowest free remaining space size.,0,marklogic,db least remaining space forest,
+marklogic.databases.list_cache_hit_rate,gauge,,hit,second,The average number of hits on the list cache.,0,marklogic,db list cache hit rate,
+marklogic.databases.list_cache_miss_rate,gauge,,miss,second,The average number of misses on the list cache.,0,marklogic,db list cache miss rate,
+marklogic.databases.merge_count,gauge,,,,The maximum number of forests that are merging.,0,marklogic,db merge count,
+marklogic.databases.merge_read_load,gauge,,,,"Disk read time threads spent during merge, in proportion to the elapsed time.",0,marklogic,db merge r load,
+marklogic.databases.merge_read_rate,gauge,,mebibyte,second,"The moving average throughput of reading merge data from disk.",0,marklogic,db merge r rate,
+marklogic.databases.merge_write_load,gauge,,,,"Disk writing time threads spent for merges, in proportion to the elapsed time.",0,marklogic,db merge w load,
+marklogic.databases.merge_write_rate,gauge,,mebibyte,second,"The moving average throughput of writing data for merges.",0,marklogic,db merge w rate,
+marklogic.databases.min_capacity,gauge,,,,"The least capacity for a forest as a percentage.",0,marklogic,db min capacity,
+marklogic.databases.query_read_load,gauge,,,,"Disk reading time threads spent for a query in proportion to the elapsed time.",0,marklogic,db query r load,
+marklogic.databases.query_read_rate,gauge,,mebibyte,second,"The moving average of throughput reading query data from disk.",0,marklogic,db query r rate,
+marklogic.databases.read_lock_hold_load,gauge,,,,"Time threads spent holding read locks in proportion to the elapsed time.",0,marklogic,db r lock hold load,
+marklogic.databases.read_lock_rate,gauge,,mebibyte,second,"The rate of read lock acquistions.",0,marklogic,db r lock rate,
+marklogic.databases.read_lock_wait_load,gauge,,,,"Time threads spent waiting to acquire read locks in proportion to the elasped time.",0,marklogic,db r lock wait load,
+marklogic.databases.reindex_count,gauge,,,,"The total number of reindexing forests for the database.",0,marklogic,db reindex count,
+marklogic.databases.restore_count,gauge,,,,The maximum number of forests that are restoring.,0,marklogic,db restore count,
+marklogic.databases.restore_read_load,gauge,,,,"Disk read time threads spent for restores, in proportion to the elapsed time.",0,marklogic,db restore r load,
+marklogic.databases.restore_read_rate,gauge,,mebibyte,second,"The moving average throughput of reading restore data from disk.",0,marklogic,db restore r rate,
+marklogic.databases.restore_write_load,gauge,,,,"Disk write time threads spent for restores, in proportion to the elasped time.",0,marklogic,db restore w load,
+marklogic.databases.restore_write_rate,gauge,,mebibyte,second,"The moving average throughput of writing data for restores.",0,marklogic,db restore w rate,
+marklogic.databases.save_write_load,gauge,,,,"The moving average of time threads spent writing to in-memory stands, in proportion to the elapsed time.",0,marklogic,db save w load,
+marklogic.databases.save_write_rate,gauge,,mebibyte,second,"The moving average of writing data to in-memory stands.",0,marklogic,db save w rate,
+marklogic.databases.total_load,gauge,,,,"The sum of the processing load factors.",0,marklogic,db total load,
+marklogic.databases.total_merge_size,gauge,,mebibyte,,"The total size of active forest merging for the database.",0,marklogic,db total merge size,
+marklogic.databases.total_rate,gauge,,,,"The sum of the processing rate factors.",0,marklogic,db total rate,
+marklogic.databases.triple_cache_hit_rate,gauge,,hit,second,The average number of hits on the list cache.,0,marklogic,db t cache hit rate,
+marklogic.databases.triple_cache_miss_rate,gauge,,miss,second,The average number of misses on the list cache.,0,marklogic,db t cache miss rate,
+marklogic.databases.triple_value_cache_hit_rate,gauge,,hit,second,The average number of hits on the list cache.,0,marklogic,db tv cache hit rate,
+marklogic.databases.triple_value_cache_miss_rate,gauge,,miss,second,The average number of misses on the list cache.,0,marklogic,db tv cache miss rate,
+marklogic.databases.write_lock_hold_load,gauge,,,,Time threads spent holding write locks in proportion to the elapsed time.,0,marklogic,db w lock hold load,
+marklogic.databases.write_lock_rate,gauge,,lock,second,The rate of write lock acquistions.,0,marklogic,db w lock rate,
+marklogic.databases.write_lock_wait_load,gauge,,,,Time threads spent waiting to acquire write locks in proportion to the elapsed time.,0,marklogic,db w lock wait load,
+marklogic.forests.backup_count,gauge,,unit,,The maximum number of forests that are backing up.,0,marklogic,forest backup,
+marklogic.forests.backup_read_load,gauge,,,,"Disk read time threads spent for backup, in proportion to the elapsed time.",0,marklogic,forest backup r load,
+marklogic.forests.backup_read_rate,gauge,,mebibyte,second,The moving average throughput of reading backup data from disk.,0,marklogic,forest backup r rate,
+marklogic.forests.backup_write_load,gauge,,,,"Disk writing time threads spent for backups, in proportion to the elapsed time.",0,marklogic,forest backup w load,
+marklogic.forests.backup_write_rate,gauge,,mebibyte,second,"The moving average throughput of writing data for backups.",0,marklogic,forest backup w rate,
+marklogic.forests.compressed_tree_cache_hit_rate,gauge,,hit,second,"The average number of hits on the compressed cache.",0,marklogic,forest tree cache hit,
+marklogic.forests.compressed_tree_cache_miss_rate,gauge,,miss,second,"The average number of misses on the compressed cache.",0,marklogic,forest tree cache miss,
+marklogic.forests.compressed_tree_cache_ratio,gauge,,percent,,"The compressed cache ratio",0,marklogic,forest tree cache ratio,
+marklogic.forests.current_foreign_master_cluster,gauge,,unit,,"The cluster ID coupled with the local cluster.",0,marklogic,forest foreign master cluster,
+marklogic.forests.current_foreign_master_fsn,gauge,,unit,,"The ID of the last journal frame received from the foreign master",0,marklogic,forest foreign master fsn,
+marklogic.forests.current_master_fsn,gauge,,unit,,"The journal frame ID of the local master",0,marklogic,forest master fsn,
+marklogic.forests.database_replication_receive_load,gauge,,,,"Time threads spent receiving data for database replication, in proportion to the elapsed time.",0,marklogic,forest db replication recv load,
+marklogic.forests.database_replication_receive_rate,gauge,,mebibyte,second,"The moving average throughput of receiving data for database replication.",0,marklogic,forest db replication recv rate,
+marklogic.forests.database_replication_send_load,gauge,,,,"Time threads spent sending data for database replication, in proportion to the elapsed time.",0,marklogic,forest db replication send load,
+marklogic.forests.database_replication_send_rate,gauge,,mebibyte,second,"The moving average throughput of sending data for database replication.",0,marklogic,forest db replication send rate,
+marklogic.forests.deadlock_rate,gauge,,lock,second,The rate of deadlock occurrences.,0,marklogic,forest deadlock rate,
+marklogic.forests.deadlock_wait_load,gauge,,,,Time threads spent waiting for locks that eventually result in deadlocks in proportion to the elasped time.,0,marklogic,forest deadlock wait,
+marklogic.forests.device_space,gauge,,mebibyte,,"The amount of space left on forest device.",0,marklogic,forest device space,
+marklogic.forests.forest_reserve,gauge,,mebibyte,,"The amount of space needed for merging.",0,marklogic,forest f reserve,
+marklogic.forests.journal_write_load,gauge,,,,Journal writing time threads spent in proportion to the elapsed time.,0,marklogic,forest journal w load,
+marklogic.forests.journal_write_rate,gauge,,mebibyte,second,The moving average of writing data to the journal.,0,marklogic,forest journal w rate,
+marklogic.forests.journals_size,gauge,,mebibyte,,"The amount of space the journals take up on disk.",0,marklogic,forest journal size,
+marklogic.forests.large_binary_cache_hit_rate,gauge,,hit,second,The average number of hits on the large binary cache.,0,marklogic,forest b cache hit rate,
+marklogic.forests.large_binary_cache_hits,gauge,,hit,,"The number of hits on the large binary cache.",0,marklogic,forest b cache hit,
+marklogic.forests.large_binary_cache_miss_rate,gauge,,miss,second,The average number of misses on the large binary cache.,0,marklogic,forest b cache miss rate,
+marklogic.forests.large_binary_cache_misses,gauge,,miss,,"The number of misses on the large binary cache.",0,marklogic,forest b cache miss,
+marklogic.forests.large_data_size,gauge,,mebibyte,,"The amount of space large objects take up on disk.",0,marklogic,forest large data size,
+marklogic.forests.large_read_load,gauge,,,,"Disk read time threads spent on large documents, in proportion to the elapsed time.",0,marklogic,forest r load,
+marklogic.forests.large_read_rate,gauge,,mebibyte,second,"The moving average throughput of reading large documents from disk.",0,marklogic,forest r rate,
+marklogic.forests.large_write_load,gauge,,,,"Disk write time threads spent for large documents, in proportion to the elapsed time.",0,marklogic,forest w load,
+marklogic.forests.large_write_rate,gauge,,mebibyte,second,"The moving average throughput of writing data for large documents.",0,marklogic,forest w rate,
+marklogic.forests.list_cache_hit_rate,gauge,,hit,second,"The average number of hits on the list cache.",0,marklogic,forest l cache hit,
+marklogic.forests.list_cache_miss_rate,gauge,,miss,second,"The average number of misses on the list cache.",0,marklogic,forest l cache miss,
+marklogic.forests.list_cache_ratio,gauge,,percent,,"The list cache ratio",0,marklogic,forest l cache ratio,
+marklogic.forests.max_query_timestamp,gauge,,millisecond,,"The largest timestamp a query has run at.",0,marklogic,forest max query ts,
+marklogic.forests.max_stands_per_forest,gauge,,unit,,"The maximum number of stands for a forest.",0,marklogic,forest max stands,
+marklogic.forests.merge_count,gauge,,unit,,"The maximum number of forests that are merging.",0,marklogic,forest merge count,
+marklogic.forests.merge_read_load,gauge,,,,"Disk read time threads spent during merge, in proportion to the elapsed time.",0,marklogic,forest merge r load,
+marklogic.forests.merge_read_rate,gauge,,mebibyte,second,"The moving average throughput of reading merge data from disk.",0,marklogic,forest merge r rate,
+marklogic.forests.merge_write_load,gauge,,,,"Disk writing time threads spent for merges, in proportion to the elapsed time.",0,marklogic,forest merge w load,
+marklogic.forests.merge_write_rate,gauge,,mebibyte,second,"The moving average throughput of writing data for merges.",0,marklogic,forest merge w rate,
+marklogic.forests.min_capacity,gauge,,percent,,"The least capacity for a forest as a percentage.",0,marklogic,forest min cap,
+marklogic.forests.nonblocking_timestamp,gauge,,millisecond,,"The most current timestamp for which a query will execute without waiting for transactions to settle.",0,marklogic,forest nonblocking ts,
+marklogic.forests.orphaned_binaries,gauge,,item,,"The count of orphaned large binaries.",0,marklogic,forest orphaned bin,
+marklogic.forests.query_read_load,gauge,,,,"Disk reading time threads spent for a query in proportion to the elapsed time.",0,marklogic,forest query r load,
+marklogic.forests.query_read_rate,gauge,,mebibyte,second,"The moving average of throughput reading query data from disk.",0,marklogic,forest query r rate,
+marklogic.forests.read_lock_hold_load,gauge,,,,"Time threads spent holding read locks in proportion to the elapsed time.",0,marklogic,forest r lock hold load,
+marklogic.forests.read_lock_rate,gauge,,lock,second,"The rate of read lock acquistions.",0,marklogic,forest r lock rate,
+marklogic.forests.read_lock_wait_load,gauge,,,,"Time threads spent waiting to acquire read locks in proportion to the elasped time.",0,marklogic,forest r lock wait load,
+marklogic.forests.restore_count,gauge,,unit,,"The maximum number of forests that are restoring.",0,marklogic,forest restore count,
+marklogic.forests.restore_read_load,gauge,,,,"Disk read time threads spent for restores, in proportion to the elapsed time.",0,marklogic,forest restore r load,
+marklogic.forests.restore_read_rate,gauge,,mebibyte,second,"The moving average throughput of reading restore data from disk.",0,marklogic,forest restore r rate,
+marklogic.forests.restore_write_load,gauge,,,,"Disk write time threads spent for restores, in proportion to the elasped time.",0,marklogic,forest restore w load,
+marklogic.forests.restore_write_rate,gauge,,mebibyte,second,"The moving average throughput of writing data for restores.",0,marklogic,forest restore w rate,
+marklogic.forests.save_write_load,gauge,,,,"The moving average of time threads spent writing to in_memory stands, in proportion to the elapsed time.",0,marklogic,forest save w load,
+marklogic.forests.save_write_rate,gauge,,mebibyte,second,"The moving average of writing data to in_memory stands",0,marklogic,forest save w rate,
+marklogic.forests.state_not_open,gauge,,unit,,"The number of forests that aren't open.",0,marklogic,forest state not open,
+marklogic.forests.storage.disk_size,gauge,,mebibyte,,"The amount of space the stand takes on disk.",0,marklogic,forest stor disk size,
+marklogic.forests.storage.host.capacity,gauge,,percent,,"The percentage of storage space that is free.",0,marklogic,forest stor host capacity,
+marklogic.forests.storage.host.device_space,gauge,,mebibyte,,"The amount of space left on forest device.",0,marklogic,forest stor host space,
+marklogic.forests.storage.host.forest_reserve,gauge,,mebibyte,,"The amount of space needed for merging.",0,marklogic,forest stor host reserve,
+marklogic.forests.storage.host.forest_size,gauge,,mebibyte,,"The total ordinary storage for forests.",0,marklogic,forest stor host size,
+marklogic.forests.storage.host.large_data_size,gauge,,mebibyte,,"The amount of space large objects take up on disk.",0,marklogic,forest stor host large data size,
+marklogic.forests.storage.host.remaining_space,gauge,,mebibyte,,"The total free storage for forests.",0,marklogic,forest stor host remaining space,
+marklogic.forests.total_forests,gauge,,unit,,"The total number of forests.",0,marklogic,forest tot,
+marklogic.forests.total_load,gauge,,,,"The sum of the processing load factors.",0,marklogic,forest tot load,
+marklogic.forests.total_rate,gauge,,mebibyte,second,"The sum of the processing rate factors.",0,marklogic,forest tot rate,
+marklogic.forests.triple_cache_hit_rate,gauge,,hit,second,"The average number of hits on the list cache.",0,marklogic,forest t cache hit rate,
+marklogic.forests.triple_cache_miss_rate,gauge,,miss,second,"The average number of misses on the list cache.",0,marklogic,forest t cache miss rate,
+marklogic.forests.triple_value_cache_hit_rate,gauge,,hit,second,"The average number of hits on the list cache.",0,marklogic,forest tv cache hit rate,
+marklogic.forests.triple_value_cache_miss_rate,gauge,,miss,second,"The average number of misses on the list cache.",0,marklogic,forest tv cache miss rate,
+marklogic.forests.write_lock_hold_load,gauge,,,,"Time threads spent holding write locks in proportion to the elapsed time.",0,marklogic,forest w lock hold load,
+marklogic.forests.write_lock_rate,gauge,,lock,second,"The rate of write lock acquistions.",0,marklogic,forest w lock rate,
+marklogic.forests.write_lock_wait_load,gauge,,,,"Time threads spent waiting to acquire write locks in proportion to the elapsed time.",0,marklogic,forest w lock wait load,
+marklogic.hosts.backup_read_load,gauge,,,,"Disk read time threads spent for backup, in proportion to the elapsed time.",0,marklogic,host backup r load,
+marklogic.hosts.backup_read_rate,gauge,,mebibyte,second,"The moving average throughput of reading backup data from disk.",0,marklogic,host backup r rate,
+marklogic.hosts.backup_write_load,gauge,,,,"Disk writing time threads spent for backups, in proportion to the elapsed time.",0,marklogic,host backup w load,
+marklogic.hosts.backup_write_rate,gauge,,mebibyte,second,"The moving average throughput of writing data for backups.",0,marklogic,host backup w rate,
+marklogic.hosts.deadlock_rate,gauge,,lock,second,"The rate of deadlock occurrences.",0,marklogic,host deadlock rate,
+marklogic.hosts.deadlock_wait_load,gauge,,second,,"The total time spent waiting for locks that eventually deadlocked.",0,marklogic,host deadlock wait load,
+marklogic.hosts.external_binary_read_load,gauge,,,,"Disk read time threads spent on external binary documents, in proportion to the elapsed time.",0,marklogic,host ext bin r load,
+marklogic.hosts.external_binary_read_rate,gauge,,mebibyte,second,"Disk read throughput of external binary documents.",0,marklogic,host ext bin r rate,
+marklogic.hosts.foreign_xdqp_client_receive_load,gauge,,,,"Time threads spent receiving data for the foreign xdqp client, in proportion to the elapsed time.",0,marklogic,host foreign xdqp clt recv load,
+marklogic.hosts.foreign_xdqp_client_receive_rate,gauge,,mebibyte,second,"The moving average throughput of the foreign xdqp client receiving data.",0,marklogic,host foreign xdqp clt recv rate,
+marklogic.hosts.foreign_xdqp_client_send_load,gauge,,,,"Time threads spent sending data for the foreign xdqp client, in proportion to the elapsed time.",0,marklogic,host foreign xdqp clt send load,
+marklogic.hosts.foreign_xdqp_client_send_rate,gauge,,mebibyte,second,"The moving average throughput of the foreign xdqp client sending data.",0,marklogic,host foreign xdqp clt send rate,
+marklogic.hosts.foreign_xdqp_server_receive_load,gauge,,,,"Time threads spent receiving data for the foreign xdqp server, in proportion to the elapsed time.",0,marklogic,host foreign xdqp serv recv load,
+marklogic.hosts.foreign_xdqp_server_receive_rate,gauge,,mebibyte,second,"The moving average throughput of the foreign xdqp server receiving data.",0,marklogic,host foreign xdqp serv recv rate,
+marklogic.hosts.foreign_xdqp_server_send_load,gauge,,,,"Time threads spent sending data for the foreign xdqp server, in proportion to the elapsed time.",0,marklogic,host foreign xdqp serv send load,
+marklogic.hosts.foreign_xdqp_server_send_rate,gauge,,mebibyte,second,"The moving average throughput of the foreign xdqp server sending data.",0,marklogic,host foreign xdqp serv send rate,
+marklogic.hosts.journal_write_load,gauge,,,,"Journal writing time threads spent in proportion to the elapsed time.",0,marklogic,host journal w load,
+marklogic.hosts.journal_write_rate,gauge,,mebibyte,second,"The moving average of writing data to the journal.",0,marklogic,host journal w rate,
+marklogic.hosts.large_read_load,gauge,,,,"Disk read time threads spent on large documents, in proportion to the elapsed time.",0,marklogic,host large r load,
+marklogic.hosts.large_read_rate,gauge,,mebibyte,second,"The moving average throughput of reading large documents from disk.",0,marklogic,host large r rate,
+marklogic.hosts.large_write_load,gauge,,,,"Disk write time threads spent for large documents, in proportion to the elapsed time.",0,marklogic,host large w load,
+marklogic.hosts.large_write_rate,gauge,,mebibyte,second,"The moving average throughput of writing data for large documents.",0,marklogic,host large w rate,
+marklogic.hosts.memory_process_huge_pages_size,gauge,,mebibyte,,"The size of huge pages for the MarkLogic process. Available on Linux platform. Sum of Sizes after /anon_hugepage in /proc/[MLpid]/smaps.",0,marklogic,host mem proc huge page size,
+marklogic.hosts.memory_process_rss,gauge,,mebibyte,,"The size of Process Resident Size (RSS) for the MarkLogic process",0,marklogic,host mem proc swap rss,
+marklogic.hosts.memory_process_swap_rate,gauge,,page,second,"The swap rate for the MarkLogic process.",0,marklogic,host mem proc swap rate,
+marklogic.hosts.memory_size,gauge,,mebibyte,,"The amount of space the stand takes in memory.",0,marklogic,host mem size,
+marklogic.hosts.memory_system_free,gauge,,mebibyte,,"The free system memory. MemFree from /proc/meminfo on Linux, ullAvailPhys from GlobalMemoryStatusEx on Windows.",0,marklogic,host mem sys free,
+marklogic.hosts.memory_system_pagein_rate,gauge,,page,second,"The page in rate for the system.",0,marklogic,host mem sys pagein rate,
+marklogic.hosts.memory_system_pageout_rate,gauge,,page,second,"The page out rate for the system.",0,marklogic,host mem sys pageout rate,
+marklogic.hosts.memory_system_swapin_rate,gauge,,page,second,"The swap in rate for the system.",0,marklogic,host mem sys swapin rate,
+marklogic.hosts.memory_system_swapout_rate,gauge,,page,second,"The swap out rate for the system.",0,marklogic,host mem sys swapout rate,
+marklogic.hosts.memory_system_total,gauge,,mebibyte,,"The total system memory. MemTotal from /proc/meminfo on Linux, ullTotalPhys from GlobalMemoryStatusEx on Windows.",0,marklogic,host mem sys tot,
+marklogic.hosts.merge_read_load,gauge,,,,"Disk read time threads spent during merge, in proportion to the elapsed time.",0,marklogic,host merge r load,
+marklogic.hosts.merge_read_rate,gauge,,mebibyte,second,"The moving average throughput of reading merge data from disk.",0,marklogic,host merge r rate,
+marklogic.hosts.merge_write_load,gauge,,,,"Disk writing time threads spent for merges, in proportion to the elapsed time.",0,marklogic,host merge w load,
+marklogic.hosts.merge_write_rate,gauge,,mebibyte,second,"The moving average throughput of writing data for merges.",0,marklogic,host merge w rate,
+marklogic.hosts.query_read_load,gauge,,,,"Disk reading time threads spent for a query in proportion to the elapsed time.",0,marklogic,host query r load,
+marklogic.hosts.query_read_rate,gauge,,mebibyte,second,"The moving average of throughput reading query data from disk.",0,marklogic,host query r rate,
+marklogic.hosts.read_lock_hold_load,gauge,,,,"Time threads spent holding read locks in proportion to the elapsed time.",0,marklogic,host r lock hold load,
+marklogic.hosts.read_lock_rate,gauge,,lock,second,"The rate of read lock acquistions.",0,marklogic,host r lock rate,
+marklogic.hosts.read_lock_wait_load,gauge,,,,"Time threads spent waiting to acquire read locks in proportion to the elasped time.",0,marklogic,host r lock wait load,
+marklogic.hosts.restore_read_load,gauge,,,,"Disk read time threads spent for restores, in proportion to the elapsed time.",0,marklogic,host restore r load,
+marklogic.hosts.restore_read_rate,gauge,,mebibyte,second,"The moving average throughput of reading restore data from disk.",0,marklogic,host restore r rate,
+marklogic.hosts.restore_write_load,gauge,,,,"Disk write time threads spent for restores, in proportion to the elasped time.",0,marklogic,host restore w load,
+marklogic.hosts.restore_write_rate,gauge,,mebibyte,second,"The moving average throughput of writing data for restores.",0,marklogic,host restore w rate,
+marklogic.hosts.save_write_load,gauge,,,,"The moving average of time threads spent writing to in-memory stands, in proportion to the elapsed time.",0,marklogic,hoste save w load,
+marklogic.hosts.save_write_rate,gauge,,mebibyte,second,"The moving average of writing data to in-memory stands.",0,marklogic,host save w rate1,
+marklogic.hosts.total_cpu_stat_system,gauge,,percent,,"Total cpu utilization for system.",0,marklogic,host tot cpu sys,
+marklogic.hosts.total_cpu_stat_user,gauge,,percent,,"Total cpu utilization for user.",0,marklogic,host tot cpu user,
+marklogic.hosts.total_hosts,gauge,,host,,"The total number of hosts.",0,marklogic,host tot,
+marklogic.hosts.total_hosts_offline,gauge,,host,,"The total number of hosts offline.",0,marklogic,host tot offline,
+marklogic.hosts.total_load,gauge,,,,"The sum of the processing load factors.",0,marklogic,host tot load,
+marklogic.hosts.total_rate,gauge,,mebibyte,second,"The sum of the processing rate factors.",0,marklogic,host tot rate,
+marklogic.hosts.write_lock_hold_load,gauge,,,,"Time threads spent holding write locks in proportion to the elapsed time.",0,marklogic,host w lock hold load,
+marklogic.hosts.write_lock_rate,gauge,,lock,second,"The rate of write lock acquistions.",0,marklogic,host w lock rate,
+marklogic.hosts.write_lock_wait_load,gauge,,,,"The total time spent holding write locks.",0,marklogic,host w lock wait load,
+marklogic.hosts.xdqp_client_receive_load,gauge,,,,"Time threads spent receiving data for the xdqp client, in proportion to the elapsed time.",0,marklogic,host xdqp clt recv load,
+marklogic.hosts.xdqp_client_receive_rate,gauge,,mebibyte,second,"The moving average throughput of the XDQP client receiving data.",0,marklogic,host xdqp clt recv rate,
+marklogic.hosts.xdqp_client_send_load,gauge,,,,"Time threads spent sending data for xdqp clients, in proportion to the elapsed time.",0,marklogic,host xdqp clt send load,
+marklogic.hosts.xdqp_client_send_rate,gauge,,mebibyte,second,"The moving average throughput of the xdqp clients sending data.",0,marklogic,host xdqp clt send rate,
+marklogic.hosts.xdqp_server_receive_load,gauge,,,,"Time threads spent receiving data for the xdqp server, in proportion to the elapsed time.",0,marklogic,host xdqp serv recv load,
+marklogic.hosts.xdqp_server_receive_rate,gauge,,mebibyte,second,"The moving average throughput of the xdqp server receiving data.",0,marklogic,host xdqp serv recv rate,
+marklogic.hosts.xdqp_server_send_load,gauge,,,,"Time threads spent sending data for the xdqp server, in proportion to the elapsed time.",0,marklogic,host xdqp serv send load,
+marklogic.hosts.xdqp_server_send_rate,gauge,,mebibyte,second,"The moving average throughput of the xdqp server sending data.",0,marklogic,host xdqp serv send rate,
+marklogic.requests.max_seconds,gauge,,second,,"The maximum length in seconds for the active requests.",0,marklogic,req max sec,
+marklogic.requests.mean_seconds,gauge,,second,,"The mean length in seconds for the active requests or the open transactions.",0,marklogic,req mean sec,
+marklogic.requests.median_seconds,gauge,,second,,"The median length in seconds for the active requests or the open transactions.",0,marklogic,req median seq,
+marklogic.requests.min_seconds,gauge,,second,,"The minimum length in seconds for the active requests or the open transactions.",0,marklogic,req min seq,
+marklogic.requests.ninetieth_percentile_seconds,gauge,,second,,"The length in seconds for the ninetieth percentile of the active requests.",0,marklogic,req p90 sec,
+marklogic.requests.query_count,gauge,,query,,"The total number of active query requests.",0,marklogic,req query count,
+marklogic.requests.standard_dev_seconds,gauge,,second,,"The standard deviation in seconds for the active requests or the open transactions.",0,marklogic,req standard dev sec,
+marklogic.requests.total_requests,gauge,,request,,"The total number of active requests.",0,marklogic,req tot,
+marklogic.requests.update_count,gauge,,request,,"The total number of active update requests.",0,marklogic,req update count,
+marklogic.servers.expanded_tree_cache_hit_rate,gauge,,hit,second,"The average number of hits on the expanded cache.",0,marklogic,serv et cache hit rate,
+marklogic.servers.expanded_tree_cache_miss_rate,gauge,,miss,second,"The average number of misses on the expanded cache.",0,marklogic,serv et cache miss rate,
+marklogic.servers.request_count,gauge,,request,,"The rate of a request.",0,marklogic,serv req count,
+marklogic.servers.request_rate,gauge,,request,second,"The total number of requests for the cluster.",0,marklogic,serv req rate,
+marklogic.transactions.max_seconds,gauge,,second,,"The maximum length in seconds for the active transactions.",0,marklogic,trans max sec,
+marklogic.transactions.mean_seconds,gauge,,second,,"The mean length in seconds for the active requests or the open transactions.",0,marklogic,trans mean sec,
+marklogic.transactions.median_seconds,gauge,,second,,"The median length in seconds for the active requests or the open transactions.",0,marklogic,trans median sec,
+marklogic.transactions.min_seconds,gauge,,second,,"The minimum length in seconds for the active requests or the open transactions.",0,marklogic,trans min sec,
+marklogic.transactions.ninetieth_percentile_seconds,gauge,,second,,"The length in seconds for the ninetieth percentile of the active requests.",0,marklogic,trans p90 sec,
+marklogic.transactions.standard_dev_seconds,gauge,,second,,"The standard deviation in seconds for the active requests or the open transactions.",0,marklogic,trans standard dev sec,
+marklogic.transactions.total_transactions,gauge,,transaction,,"The total number of open transactions.",0,marklogic,trans tot,

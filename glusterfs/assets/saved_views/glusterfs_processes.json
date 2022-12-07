@@ -14,11 +14,8 @@
       "showArguments"
     ],
     "filter": {
-      "text": "",
-      "groups": [],
-      "tags": [
-        "integration:glusterfs"
-      ]
+      "query_filter": "integration:glusterfs",
+      "groups": []
     },
     "selected_top_graph": "scatterplot",
     "enabled_columns": [

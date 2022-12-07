@@ -1,0 +1,10 @@
+ARG VERTICA_VERSION="latest"
+
+FROM vertica/vertica-ce:${VERTICA_VERSION}
+
+ADD ./custom-entrypoint.sh ${VERTICA_HOME_DIR}/custom-entrypoint.sh
+# Deleting the extension packages prevents those packages from being
+# installed when creating the database, leading to a faster startup time
+RUN rm -rf "${VERTICA_OPT_DIR}/packages"
+
+ENTRYPOINT ${VERTICA_HOME_DIR}/custom-entrypoint.sh

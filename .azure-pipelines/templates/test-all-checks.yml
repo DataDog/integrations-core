@@ -1,18 +1,30 @@
 parameters:
+  agent_image_win: ''
+  agent_image_win_py2: ''
   ispr: false
   pip_cache_config: null
   run_py2_tests: true
+  run_py3_tests: true
   force_base_package: false
+  test: true
   test_e2e: true
+  benchmark: true
+  latest: false
   ddtrace_flag: ''
 jobs:
 - template: ./test-all.yml
   parameters:
+    agent_image_win: ${{ parameters.agent_image_win }}
+    agent_image_win_py2: ${{ parameters.agent_image_win_py2 }}
     ispr: ${{ parameters.ispr }}
     pip_cache_config: ${{ parameters.pip_cache_config }}
     run_py2_tests: ${{ parameters.run_py2_tests }}
+    run_py3_tests: ${{ parameters.run_py3_tests }}
     force_base_package: ${{ parameters.force_base_package }}
+    test: ${{ parameters.test }}
     test_e2e: ${{ parameters.test_e2e }}
+    benchmark: ${{ parameters.benchmark }}
+    latest: ${{ parameters.latest }}
     ddtrace_flag: ${{ parameters.ddtrace_flag }}
     checks:
     - checkName: datadog_checks_base
@@ -54,20 +66,32 @@ jobs:
     - checkName: apache
       displayName: Apache
       os: linux
+    - checkName: arangodb
+      displayName: ArangoDB
+      os: linux
+    - checkName: argocd
+      displayName: ArgoCD
+      os: linux
     - checkName: aspdotnet
       displayName: ASP.NET
       os: windows
-    - checkName: azure_iot_edge
-      displayName: Azure IoT Edge
+    - checkName: avi_vantage
+      displayName: Avi Vantage
       os: linux
     - checkName: azure_iot_edge
       displayName: Azure IoT Edge
-      os: windows
+      os: linux
+    - checkName: boundary
+      displayName: Boundary
+      os: linux
     - checkName: btrfs
       displayName: Btrfs
       os: linux
     - checkName: cacti
       displayName: Cacti
+      os: linux
+    - checkName: calico
+      displayName: Calico
       os: linux
     - checkName: cassandra
       displayName: Cassandra
@@ -78,11 +102,17 @@ jobs:
     - checkName: ceph
       displayName: Ceph
       os: linux
+    - checkName: cert_manager
+      displayName: cert-manager
+      os: linux
     - checkName: cilium
       displayName: Cilium
       os: linux
     - checkName: cisco_aci
       displayName: Cisco ACI
+      os: linux
+    - checkName: citrix_hypervisor
+      displayName: Citrix Hypervisor
       os: linux
     - checkName: clickhouse
       displayName: ClickHouse
@@ -110,6 +140,12 @@ jobs:
       os: linux
     - checkName: crio
       displayName: CRI-O
+      os: linux
+    - checkName: datadog_cluster_agent
+      displayName: Datadog Cluster Agent
+      os: linux
+    - checkName: ddev
+      displayName: ddev
       os: linux
     - checkName: directory
       displayName: Directory
@@ -156,6 +192,9 @@ jobs:
     - checkName: fluentd
       displayName: fluentd
       os: linux
+    - checkName: foundationdb
+      displayName: FoundationDB
+      os: linux
     - checkName: gearmand
       displayName: Gearman
       os: linux
@@ -198,12 +237,24 @@ jobs:
     - checkName: http_check
       displayName: HTTP
       os: linux
+    - checkName: hudi
+      displayName: Hudi
+      os: linux
+    - checkName: ibm_ace
+      displayName: IBM ACE
+      os: linux
     - checkName: ibm_db2
       displayName: IBM Db2
       os: linux
-    - checkName: ibm_mq
-      displayName: IBM MQ
+    - checkName: ibm_i
+      displayName: IBM i
       os: linux
+    - checkName: ibm_mq
+      displayName: IBM MQ (Linux)
+      os: linux
+    - checkName: ibm_mq
+      displayName: IBM MQ (Windows)
+      os: windows
     - checkName: ibm_was
       displayName: IBM WAS
       os: linux
@@ -213,6 +264,9 @@ jobs:
     - checkName: iis
       displayName: IIS
       os: windows
+    - checkName: impala
+      displayName: Impala
+      os: linux
     - checkName: istio
       displayName: Istio
       os: linux
@@ -354,6 +408,9 @@ jobs:
     - checkName: proxysql
       displayName: ProxySQL
       os: linux
+    - checkName: pulsar
+      displayName: pulsar
+      os: linux
     - checkName: rabbitmq
       displayName: RabbitMQ
       os: linux
@@ -374,6 +431,12 @@ jobs:
       os: linux
     - checkName: scylla
       displayName: Scylla
+      os: linux
+    - checkName: silk
+      displayName: Silk
+      os: linux
+    - checkName: singlestore
+      displayName: SingleStore
       os: linux
     - checkName: snmp
       displayName: SNMP
@@ -423,6 +486,9 @@ jobs:
     - checkName: teamcity
       displayName: TeamCity
       os: linux
+    - checkName: teradata
+      displayName: Teradata
+      os: linux
     - checkName: tls
       displayName: TLS
       os: linux
@@ -432,6 +498,9 @@ jobs:
         os: linux
     - checkName: tomcat
       displayName: Tomcat
+      os: linux
+    - checkName: traffic_server
+      displayName: Traffic Server
       os: linux
     - checkName: twemproxy
       displayName: Twemproxy
@@ -454,8 +523,14 @@ jobs:
     - checkName: vsphere
       displayName: vSphere
       os: linux
+    - checkName: weblogic
+      displayName: WebLogic
+      os: linux
     - checkName: win32_event_log
       displayName: Win32 Event Log
+      os: windows
+    - checkName: windows_performance_counters
+      displayName: Windows performance counters
       os: windows
     - checkName: windows_service
       displayName: Windows Service

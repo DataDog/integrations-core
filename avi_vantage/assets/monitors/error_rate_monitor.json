@@ -1,0 +1,28 @@
+{
+	"name": "[Avi Vantage] Virtual service {{virtualservice_name.name}} has a high number of errors",
+	"type": "query alert",
+	"query": "avg(last_5m):avg:avi_vantage.l7_client.pct_response_errors{*} by {virtualservice_name,host} > 70",
+	"message": "{{#is_alert}}\nVirtual service {{virtualservice_name.name}} is experiencing a very high number of errors.\n{{/is_alert}} \n\n{{#is_recovery}}\nError rate of virtual service {{virtualservice_name.name}} is back to a lower level.\n{{/is_recovery}} ",
+	"tags": [
+		"integration:avi_vantage"
+	],
+	"options": {
+		"notify_audit": false,
+		"locked": false,
+		"timeout_h": 0,
+		"new_host_delay": 300,
+		"require_full_window": true,
+		"notify_no_data": false,
+		"renotify_interval": "0",
+		"escalation_message": "",
+		"no_data_timeframe": null,
+		"include_tags": true,
+		"thresholds": {
+			"critical": 70
+		}
+	},
+	"priority": null,
+    "recommended_monitor_metadata": {
+      "description": "Notify your team when one of Avi Virtual Service is experiencing a high percentage of errors."
+    }
+}

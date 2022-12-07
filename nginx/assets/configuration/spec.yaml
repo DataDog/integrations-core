@@ -46,10 +46,19 @@ files:
         example: false
         display_default: true
     - name: plus_api_version
-      description: Specify the version of the Plus API to use. The check supports versions 1-3.
+      description: Specify the version of the Plus API to use. The check supports versions 1-7.
       value:
         type: integer
         display_default: 2
+    - name: only_query_enabled_endpoints
+      description: |
+        Enable this option if you would like the check to determine which API endpoints
+        to query based on your NGINX Plus configuration.
+      value:
+        type: boolean
+        example: true
+        display_default: false
+      enabled: true
     - name: use_vts
       description: |
         Set this option to true if you are using the nginx vhost_traffic_status module.
@@ -59,6 +68,9 @@ files:
         example: false
     - template: instances/http
     - template: instances/default
+      overrides:
+        disable_generic_tags.hidden: False
+        disable_generic_tags.enabled: True
   - template: logs
     example:
     - type: file

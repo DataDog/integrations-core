@@ -10,27 +10,39 @@ ad_identifiers:
 #
 init_config:
 
-## Every instance is scheduled independent of the others.
+## Every instance is scheduled independently of the others.
 #
 instances:
 
-    ## @param prometheus_url - string - required
-    ## The URL where your application metrics are exposed by Prometheus.
+    ## @param possible_prometheus_urls - list of strings - optional
+    ## The URLs to try to get your application metrics that are exposed by Prometheus.
+    ## The check will try each URLs in the list and will use the first working one.
+    ## One of possible_prometheus_urls or prometheus_url parameter is required.
     #
-  - prometheus_url: http://%%host%%:10251/metrics
+  - possible_prometheus_urls:
+      - https://%%host%%:10259/metrics
+      - https://localhost:10259/metrics
+      - http://%%host%%:10251/metrics
+      - http://localhost:10251/metrics
 
-    ## @param bearer_token_auth - boolean - optional - default: true
-    ## Used if you are using RBACs and need the Agent to authenticate
-    ## against the APIServer to retrieve metrics. Default to true.
+    ## @param prometheus_url - string - optional - default: http://%%host%%:10251/metrics
+    ## The URL where your application metrics are exposed by Prometheus.
+    ## One of possible_prometheus_urls or prometheus_url parameter is required.
     #
-    # bearer_token_auth: true
+    # prometheus_url: http://%%host%%:10251/metrics
+
+    ## @param bearer_token_auth - boolean or string - optional - default: tls_only
+    ## Used if you are using RBACs and need the Agent to authenticate
+    ## against the APIServer to retrieve metrics.
+    #
+    bearer_token_auth: tls_only
 
     ## @param bearer_token_path - string - optional - default: /var/run/secrets/kubernetes.io/serviceaccount/token
     ## Used to specify the path where the service account token is located.
     #
     # bearer_token_path: /var/run/secrets/kubernetes.io/serviceaccount/token
 
-    ## @param ssl_verify - boolean - optional - default: false
+    ## @param ssl_verify - boolean - optional - default: true
     ## Used to verify self signed certificates.
     #
-    # ssl_verify: false
+    ssl_verify: false

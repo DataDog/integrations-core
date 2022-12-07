@@ -37,7 +37,10 @@ init_config:
 instances:
 
     ## @param host - string - required
-    ## Host and port of your SQL server.
+    ## Host and port of your SQL server. If a port is ommitted, a default port of 1433 will be used. 
+    ## If you use Sql Server Browser Service or a similar port autodiscovery service, pass in a port
+    ## of 0 to omit port from your connection string. This should allow SSBS to autodiscover the 
+    ## correct database port. 
     #
   - host: <HOST>,<PORT>
 
@@ -51,13 +54,28 @@ instances:
     #
     # password: <PASSWORD>
 
+    ## @param server_version - string - optional - default: 2014
+    ## Server version year of sqlserver the agent will connect to. 
+    ## Important for validating connection string attributes for older sqlserver versions.
+    ##
+    ## This is required if connecting to a SQLServer instance older than 2014.
+    #
+    # server_version: '2014'
+
     ## @param database - string - optional - default: master
     ## Database name to query.  Not compatible with `database_autodiscovery`.
     #
     # database: master
 
+    ## @param reported_hostname - string - optional
+    ## Set the reported hostname for this instance. This value overrides the hostname detected by the Agent
+    ## and can be useful to set a custom hostname when connecting to a remote database through a proxy.
+    #
+    # reported_hostname: <REPORTED_HOSTNAME>
+
     ## @param database_autodiscovery - boolean - optional - default: false
-    ## Auto-discover and monitor databases.  If `true`, overrides `database` option.
+    ## Auto-discover and monitor databases. Supported for the metrics check. 
+    ## If `true`, overrides `database` option.
     ## Can be combined with `autodiscovery_include` and `autodiscovery_exclude` options.
     #
     # database_autodiscovery: false
@@ -66,8 +84,8 @@ instances:
     ## Regular expression for database names to include as part of `database_autodiscovery`.
     ## Will report metrics for databases that are found in this instance, ignores databases listed but not found.
     ##
-    ## Character casing is ignored. The regular expressions start matching from the beginning, so 
-    ## to match anywhere, prepend `.*`. For exact matches append `$`. 
+    ## Character casing is ignored. The regular expressions start matching from the beginning, so
+    ## to match anywhere, prepend `.*`. For exact matches append `$`.
     ##
     ## Defaults to `.*` to include everything.
     #
@@ -93,6 +111,13 @@ instances:
     #
     # database_autodiscovery_interval: 3600
 
+    ## @param autodiscovery_db_service_check - boolean - optional - default: true
+    ## When enabled with database autodiscovery, attempts to connect to the list of
+    ## autodiscovered databases and submits a service check that signifies whether
+    ## the agent can connect to that database or not.
+    #
+    autodiscovery_db_service_check: false
+
     ## @param include_ao_metrics - boolean - optional - default: false
     ## Include AlwaysOn availability group metrics.
     #
@@ -117,6 +142,11 @@ instances:
     ## AlwaysOn metrics are only emitted for the selected `ao_database` if not empty.
     #
     # ao_database: <AO_DATABASE>
+
+    ## @param include_master_files_metrics - boolean - optional - default: false
+    ## Include database file size and state from `sys.master_files`.
+    #
+    # include_master_files_metrics: false
 
     ## @param include_fci_metrics - boolean - optional - default: false
     ## Include Failover Cluster Instance metrics. Note that these metrics
@@ -151,8 +181,8 @@ instances:
     ## @param adoprovider - string - optional - default: SQLOLEDB
     ## Choose the ADO provider.  Note that the (default) provider
     ## SQLOLEDB is being deprecated.  To use the newer MSOLEDBSQL
-    ## provider, set the adoprovider to "MSOLEDBSQL" below. You will also need
-    ## to download the new provider from
+    ## provider, set the adoprovider to "MSOLEDBSQL" below or "MSOLEDBSQL19" for version 19 of the driver.
+    ## You will also need to download the new provider from
     ## https://docs.microsoft.com/en-us/sql/connect/oledb/oledb-driver-for-sql-server?view=sql-server-2017
     #
     # adoprovider: SQLOLEDB
@@ -176,17 +206,194 @@ instances:
 
     ## @param connection_string - string - optional
     ## Specify a custom connection string to be used
-    ## Ex: "ApplicationIntent=ReadWrite" or "MultiSubnetFailover=True"
-    ## "Trusted_Connection=yes" to use Windows Authentication (note that in this case the connection will be performed
-    ## with the `ddagentuser` user, you can find more information about this user
-    ## in https://docs.datadoghq.com/agent/faq/windows-agent-ddagent-user/)
+    ## Ex: "ApplicationIntent=ReadWrite" or "Trusted_Connection=Yes" to use Windows Authentication
+    ## (note that in this case the connection will be performed with the `ddagentuser` user, you can
+    ## find more information about this user in https://docs.datadoghq.com/agent/faq/windows-agent-ddagent-user/)
+    ##
+    ## Please note that certain connection string values will vary depending on the connection Provider used,
+    ## for example:
+    ## * "OLE DB" provider uses "MultiSubnetFailover=Yes"
+    ## * "ADO" provider uses "MultiSubnetFailover=True"
     #
     # connection_string: <CONNECTION_STRING>
+
+    ## @param dbm - boolean - optional - default: false
+    ## Set to `true` to enable Database Monitoring.
+    #
+    # dbm: false
+
+    ## Configure collection of query metrics
+    #
+    # query_metrics:
+
+        ## @param enabled - boolean - optional - default: true
+        ## Enable collection of query metrics. Requires `dbm: true`.
+        #
+        # enabled: true
+
+        ## @param collection_interval - number - optional - default: 10
+        ## Set the query metric collection interval (in seconds). Each collection involves one or more queries to
+        ## the SQL Server Query Plan Cache. If a non-default value is chosen then that exact same value must be used
+        ## for *every* check instance. Running different instances with different collection intervals is not supported.
+        #
+        # collection_interval: 10
+
+        ## @param dm_exec_query_stats_row_limit - integer - optional - default: 10000
+        ## Set the maximum number of query stats rows that can be retrieved in a single check run.
+        #
+        # dm_exec_query_stats_row_limit: 10000
+
+        ## @param samples_per_hour_per_query - integer - optional - default: 4
+        ## Set the rate limit for the number of query sample events that are ingested per hour and per normalized
+        ## execution plan.
+        #
+        # samples_per_hour_per_query: 4
+
+    ## Configure collection of active sessions monitoring
+    #
+    # query_activity:
+
+        ## @param enabled - boolean - optional - default: true
+        ## Enable collection of active sessions. Requires `dbm: true`.
+        #
+        # enabled: true
+
+        ## @param collection_interval - number - optional - default: 10
+        ## Set the activity collection interval in seconds. Each collection involves querying several
+        ## different DMV tables such as `dm_exec_requests`, `dm_exec_sessions`, and `dm_exec_sql_text`.
+        ## If a non-default value is chosen, then that exact same value must be used for *every* check instance.
+        ## Running different instances with different collection intervals is not supported.
+        #
+        # collection_interval: 10
+
+    ## This block defines the configuration for AWS RDS and Aurora instances. 
+    ##
+    ## Complete this section if you have installed the Datadog AWS Integration 
+    ## (https://docs.datadoghq.com/integrations/amazon_web_services) to enrich instances 
+    ## with SQL Server integration telemetry.
+    ##
+    ## These values are only applied when `dbm: true` option is set.
+    #
+    # aws:
+
+        ## @param instance_endpoint - string - optional - default: mydb.cfxgae8cilcf.us-east-1.rds.amazonaws.com
+        ## Equal to the Endpoint.Address of the instance the agent is connecting to. 
+        ## This value is optional if the value of `host` is already configured to the instance endpoint.
+        ##
+        ## For more information on instance endpoints, 
+        ## see the AWS docs https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_Endpoint.html
+        #
+        # instance_endpoint: mydb.cfxgae8cilcf.us-east-1.rds.amazonaws.com
+
+    ## This block defines the configuration for Google Cloud SQL instances.
+    ##
+    ## Complete this section if you have installed the Datadog GCP Integration 
+    ## (https://docs.datadoghq.com/integrations/google_cloud_platform) to enrich instances 
+    ## with SQL Server integration telemetry.
+    ##
+    ## These values are only applied when `dbm: true` option is set.
+    #
+    # gcp:
+
+        ## @param project_id - string - optional - default: foo-project
+        ## Equal to the GCP resource's project ID.
+        ##
+        ## For more information on project IDs,
+        ## See the GCP docs https://cloud.google.com/resource-manager/docs/creating-managing-projects
+        #
+        # project_id: foo-project
+
+        ## @param instance_id - string - optional - default: foo-database
+        ## Equal to the GCP resource's instance ID.
+        ##
+        ## For more information on instance IDs,
+        ## See the GCP docs https://cloud.google.com/sql/docs/sqlserver/instance-settings#instance-id-2ndgen
+        #
+        # instance_id: foo-database
+
+    ## This block defines the configuration for Azure Managed Instance, Azure SQL Database or 
+    ## SQLServer on Virtual Machines.
+    ##
+    ## Complete this section if you have installed the Datadog Azure Integration 
+    ## (https://docs.datadoghq.com/integrations/azure) to enrich instances 
+    ## with SQL Server integration telemetry.
+    ##
+    ## These values are only applied when `dbm: true` option is set.
+    #
+    # azure:
+
+        ## @param deployment_type - string - optional - default: sql_database
+        ## Equal to the deployment type for the managed database. 
+        ##
+        ## Acceptable values are:
+        ##   - `sql_database` 
+        ##   - `managed_instance`
+        ##   - `virtual_machine`
+        ##
+        ## For more information on deployment types, see the Azure
+        ## docs https://docs.microsoft.com/en-us/azure/azure-sql/azure-sql-iaas-vs-paas-what-is-overview?view=azuresql
+        #
+        # deployment_type: sql_database
+
+        ## @param name - string - optional - default: my-sqlserver-instance
+        ## Equal to the name of the SQL Database, Managed Instance (SQL MI) or virtual machine.
+        #
+        # name: my-sqlserver-instance
+
+    ## Configure how the SQL obfuscator behaves.
+    ## Note: This option only applies when `dbm` is enabled.
+    #
+    # obfuscator_options:
+
+        ## @param replace_digits - boolean - optional - default: false
+        ## Set to `true` to replace digits in identifiers and table names with question marks in your SQL statements.
+        ## Note: This option also applies to extracted tables using `collect_tables`.
+        #
+        # replace_digits: false
+
+        ## @param collect_metadata - boolean - optional - default: true
+        ## Set to `false` to disable the collection of metadata in your SQL statements.
+        ## Metadata includes things such as tables, commands, and comments.
+        #
+        # collect_metadata: true
+
+        ## @param collect_tables - boolean - optional - default: true
+        ## Set to `false` to disable the collection of tables in your SQL statements.
+        ## Requires `collect_metadata: true`.
+        #
+        # collect_tables: true
+
+        ## @param collect_commands - boolean - optional - default: true
+        ## Set to `false` to disable the collection of commands in your SQL statements.
+        ## Requires `collect_metadata: true`.
+        ##
+        ## Examples: SELECT, UPDATE, DELETE, etc.
+        #
+        # collect_commands: true
+
+        ## @param collect_comments - boolean - optional - default: true
+        ## Set to `false` to disable the collection of comments in your SQL statements.
+        ## Requires `collect_metadata: true`.
+        #
+        # collect_comments: true
+
+        ## @param keep_sql_alias - boolean - optional - default: true
+        ## Set to `true` to keep sql aliases in obfuscated SQL statements. Examples of aliases are
+        ## `with select 1 as alias`, `select column as other_name`, or `select * from table t`.
+        ## When `true` these aliases will not be removed.
+        #
+        # keep_sql_alias: true
 
     ## @param command_timeout - integer - optional - default: 5
     ## Timeout in seconds for the connection and each command run
     #
     # command_timeout: 5
+
+    ## @param only_custom_queries - boolean - optional - default: false
+    ## Set this parameter to `true` if you want to skip the integration's default metrics collection.
+    ## Only metrics specified in `custom_queries` will be collected.
+    #
+    # only_custom_queries: false
 
     ## @param use_global_custom_queries - string - optional - default: true
     ## How `global_custom_queries` should be used for this instance. There are 3 options:
@@ -229,9 +436,10 @@ instances:
     #     - test:<INTEGRATION>
 
     ## @param stored_procedure - string - optional
+    ## DEPRECATED - use `custom_queries` instead. For guidance, see:
+    ## https://docs.datadoghq.com/integrations/guide/collect-sql-server-custom-metrics/
     ## Get metrics from custom proc in MyDB but only if the database is writable
     ## (i.e. it's the master in an availability group) Note: Custom proc must be defined in its own instance
-    ## See https://docs.datadoghq.com/integrations/guide/collect-sql-server-custom-metrics/
     #
     # stored_procedure: <PROCEDURE_NAME>
 
@@ -279,14 +487,31 @@ instances:
     #
     # empty_default_hostname: false
 
+    ## @param disable_generic_tags - boolean - optional - default: false
+    ## Generic tags such as `host` are replaced by `sqlserver_host` to avoid
+    ## getting mixed with other integraton tags.
+    #
+    disable_generic_tags: true
+
+    ## @param metric_patterns - mapping - optional
+    ## A mapping of metrics to include or exclude, with each entry being a regular expression.
+    ##
+    ## Metrics defined in `exclude` will take precedence in case of overlap.
+    #
+    # metric_patterns:
+    #   include:
+    #   - <INCLUDE_REGEX>
+    #   exclude:
+    #   - <EXCLUDE_REGEX>
+
 ## Log Section
 ##
-## type - required - Type of log input source (tcp / udp / file / windows_event)
+## type - required - Type of log input source (tcp / udp / file / windows_event).
 ## port / path / channel_path - required - Set port if type is tcp or udp.
 ##                                         Set path if type is file.
 ##                                         Set channel_path if type is windows_event.
-## source  - required - Attribute that defines which Integration sent the logs.
-## encoding - optional - For file specifies the file encoding, default is utf-8, other
+## source  - required - Attribute that defines which integration sent the logs.
+## encoding - optional - For file specifies the file encoding. Default is utf-8. Other
 ##                       possible values are utf-16-le and utf-16-be.
 ## service - optional - The name of the service that generates the log.
 ##                      Overrides any `service` defined in the `init_config` section.

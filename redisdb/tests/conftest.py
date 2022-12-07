@@ -8,11 +8,10 @@ import pytest
 import redis
 
 from datadog_checks.dev import LazyFunction, RetryError, docker_run
+from datadog_checks.dev.conditions import CheckDockerLogs
 from datadog_checks.redisdb import Redis
 
-from .common import HOST, MASTER_PORT, PASSWORD, PORT, REPLICA_PORT
-
-HERE = os.path.dirname(os.path.abspath(__file__))
+from .common import DOCKER_COMPOSE_PATH, HERE, HOST, MASTER_PORT, PASSWORD, PORT, REPLICA_PORT
 
 
 class CheckCluster(LazyFunction):
@@ -52,12 +51,14 @@ def redis_auth():
     """
     Start a standalone redis server requiring authentication before running a
     test and stop it afterwards.
-    If there's any problem executing docker-compose, let the exception bubble
+    If there's any problem executing `docker compose`, let the exception bubble
     up.
     """
+    compose_file = os.path.join(HERE, 'compose', 'standalone.compose')
     with docker_run(
-        os.path.join(HERE, 'compose', 'standalone.compose'),
+        compose_file,
         env_vars={'REDIS_CONFIG': os.path.join(HERE, 'config', 'auth.conf')},
+        conditions=[CheckDockerLogs(compose_file, 'Ready to accept connections', wait=5)],
     ):
         yield
 
@@ -68,7 +69,7 @@ def dd_environment(master_instance):
     Start a cluster with one master, one replica, and one unhealthy replica.
     """
     with docker_run(
-        os.path.join(HERE, 'compose', '1m-2s.compose'),
+        DOCKER_COMPOSE_PATH,
         conditions=[
             CheckCluster({'port': MASTER_PORT, 'db': 14, 'host': HOST}, {'port': REPLICA_PORT, 'db': 14, 'host': HOST})
         ],
@@ -98,6 +99,6 @@ def master_instance():
     return {'host': HOST, 'port': MASTER_PORT, 'keys': ['test_*'], 'collect_client_metrics': True}
 
 
-@pytest.fixture
-def check(redis_instance):
-    return Redis('redisdb', {}, [redis_instance])
+@pytest.fixture(scope='session')
+def check():
+    return lambda instance: Redis('redisdb', {}, [instance])

@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-# https://docs.snowflak e.com/en/sql-reference/account-usage/storage_usage.html
+# https://docs.snowflake.com/en/sql-reference/account-usage/storage_usage.html
 StorageUsageMetrics = {
     'name': 'storage.metrics',
     'query': ('SELECT STORAGE_BYTES, STAGE_BYTES, FAILSAFE_BYTES from STORAGE_USAGE ORDER BY USAGE_DATE DESC LIMIT 1;'),
@@ -35,7 +35,7 @@ CreditUsage = {
         'select SERVICE_TYPE, NAME, sum(CREDITS_USED_COMPUTE), avg(CREDITS_USED_COMPUTE), '
         'sum(CREDITS_USED_CLOUD_SERVICES), avg(CREDITS_USED_CLOUD_SERVICES), '
         'sum(CREDITS_USED), avg(CREDITS_USED) from METERING_HISTORY '
-        'where start_time >= date_trunc(day, current_date) group by 1, 2;'
+        'where start_time >= DATEADD(hour, -24, current_timestamp()) group by 1, 2;'
     ),
     'columns': [
         {'name': 'service_type', 'type': 'tag'},
@@ -52,12 +52,12 @@ CreditUsage = {
 
 # https://docs.snowflake.com/en/sql-reference/account-usage/warehouse_metering_history.html
 WarehouseCreditUsage = {
-    'name': 'billings.warehouse.metrics',
+    'name': 'billing.warehouse.metrics',
     'query': (
         'select WAREHOUSE_NAME, sum(CREDITS_USED_COMPUTE), avg(CREDITS_USED_COMPUTE), '
         'sum(CREDITS_USED_CLOUD_SERVICES), avg(CREDITS_USED_CLOUD_SERVICES), '
         'sum(CREDITS_USED), avg(CREDITS_USED) from WAREHOUSE_METERING_HISTORY '
-        'where start_time >= date_trunc(day, current_date) group by 1;'
+        'where start_time >= DATEADD(hour, -24, current_timestamp()) group by 1;'
     ),
     'columns': [
         {'name': 'warehouse', 'type': 'tag'},
@@ -92,7 +92,7 @@ WarehouseLoad = {
     'query': (
         'select WAREHOUSE_NAME, AVG(AVG_RUNNING), AVG(AVG_QUEUED_LOAD), AVG(AVG_QUEUED_PROVISIONING), '
         'AVG(AVG_BLOCKED) from WAREHOUSE_LOAD_HISTORY '
-        'where start_time >= date_trunc(day, current_date) group by 1;'
+        'where start_time >= DATEADD(hour, -24, current_timestamp()) group by 1;'
     ),
     'columns': [
         {'name': 'warehouse', 'type': 'tag'},
@@ -110,7 +110,7 @@ QueryHistory = {
         'select QUERY_TYPE, WAREHOUSE_NAME, DATABASE_NAME, SCHEMA_NAME, AVG(EXECUTION_TIME), '
         'AVG(COMPILATION_TIME), AVG(BYTES_SCANNED), AVG(BYTES_WRITTEN), AVG(BYTES_DELETED), '
         'AVG(BYTES_SPILLED_TO_LOCAL_STORAGE), AVG(BYTES_SPILLED_TO_REMOTE_STORAGE) '
-        'from QUERY_HISTORY where start_time >= date_trunc(day, current_date) '
+        'from QUERY_HISTORY where start_time >= DATEADD(hour, -24, current_timestamp()) '
         'group by 1, 2, 3, 4;'
     ),
     'columns': [
@@ -134,7 +134,7 @@ DataTransferHistory = {
     'query': (
         'select source_cloud, source_region, target_cloud, target_region, transfer_type, '
         'avg(bytes_transferred), sum(bytes_transferred) from DATA_TRANSFER_HISTORY '
-        'where start_time >= date_trunc(day, current_date) group by 1, 2, 3, 4, 5;'
+        'where start_time >= DATEADD(hour, -24, current_timestamp()) group by 1, 2, 3, 4, 5;'
     ),
     'columns': [
         {'name': 'source_cloud', 'type': 'tag'},
@@ -154,7 +154,8 @@ AutoReclusterHistory = {
         'select table_name, database_name, schema_name, avg(credits_used), sum(credits_used), '
         'avg(num_bytes_reclustered), sum(num_bytes_reclustered), '
         'avg(num_rows_reclustered), sum(num_rows_reclustered) '
-        'from automatic_clustering_history where start_time >= date_trunc(day, current_date) group by 1, 2, 3;'
+        'from automatic_clustering_history where start_time >= DATEADD(hour, -24, current_timestamp()) '
+        'group by 1, 2, 3;'
     ),
     'columns': [
         {'name': 'table', 'type': 'tag'},
@@ -192,7 +193,7 @@ PipeHistory = {
     'query': (
         'select pipe_name, avg(credits_used), sum(credits_used), avg(bytes_inserted), sum(bytes_inserted), '
         'avg(files_inserted), sum(files_inserted) from pipe_usage_history '
-        'where start_time >= date_trunc(day, current_date) group by 1;'
+        'where start_time >= DATEADD(hour, -24, current_timestamp()) group by 1;'
     ),
     'columns': [
         {'name': 'pipe', 'type': 'tag'},
@@ -211,7 +212,7 @@ ReplicationUsage = {
     'query': (
         'select database_name, avg(credits_used), sum(credits_used), '
         'avg(bytes_transferred), sum(bytes_transferred) from replication_usage_history '
-        'where start_time >= date_trunc(day, current_date) group by 1;'
+        'where start_time >= DATEADD(hour, -24, current_timestamp()) group by 1;'
     ),
     'columns': [
         {'name': 'database', 'type': 'tag'},
@@ -219,5 +220,153 @@ ReplicationUsage = {
         {'name': 'replication.credits_used.sum', 'type': 'gauge'},
         {'name': 'replication.bytes_transferred.avg', 'type': 'gauge'},
         {'name': 'replication.bytes_transferred.sum', 'type': 'gauge'},
+    ],
+}
+
+
+# https://docs.snowflake.com/en/sql-reference/organization-usage/contract_items.html
+OrgContractItems = {
+    'name': 'organization.contract.metrics',
+    'query': ('select CONTRACT_NUMBER, CONTRACT_ITEM, CURRENCY, sum(AMOUNT) from CONTRACT_ITEMS group by 1, 2, 3;'),
+    'columns': [
+        {'name': 'contract_number', 'type': 'tag'},
+        {'name': 'contract_item', 'type': 'tag'},
+        {'name': 'currency', 'type': 'tag'},
+        {'name': 'organization.contract.amount', 'type': 'gauge'},
+    ],
+}
+
+# https://docs.snowflake.com/en/sql-reference/organization-usage/metering_daily_history.html
+OrgCreditUsage = {
+    'name': 'organization.credit.metrics',
+    'query': (
+        'select ACCOUNT_NAME, SERVICE_TYPE, '
+        'sum(CREDITS_USED_COMPUTE), avg(CREDITS_USED_COMPUTE), '
+        'sum(CREDITS_USED_CLOUD_SERVICES), avg(CREDITS_USED_CLOUD_SERVICES), '
+        'sum(CREDITS_ADJUSTMENT_CLOUD_SERVICES), avg(CREDITS_ADJUSTMENT_CLOUD_SERVICES), '
+        'sum(CREDITS_USED), avg(CREDITS_USED), sum(CREDITS_BILLED), avg(CREDITS_BILLED) from METERING_DAILY_HISTORY '
+        'where USAGE_DATE = DATEADD(day, -1, current_date) group by 1, 2;'
+    ),
+    'columns': [
+        {'name': 'billing_account', 'type': 'tag'},
+        {'name': 'service_type', 'type': 'tag'},
+        {'name': 'organization.credit.virtual_warehouse.sum', 'type': 'gauge'},
+        {'name': 'organization.credit.virtual_warehouse.avg', 'type': 'gauge'},
+        {'name': 'organization.credit.cloud_service.sum', 'type': 'gauge'},
+        {'name': 'organization.credit.cloud_service.avg', 'type': 'gauge'},
+        {'name': 'organization.credit.cloud_service_adjustment.sum', 'type': 'gauge'},
+        {'name': 'organization.credit.cloud_service_adjustment.avg', 'type': 'gauge'},
+        {'name': 'organization.credit.total_credit.sum', 'type': 'gauge'},
+        {'name': 'organization.credit.total_credit.avg', 'type': 'gauge'},
+        {'name': 'organization.credit.total_credits_billed.sum', 'type': 'gauge'},
+        {'name': 'organization.credit.total_credits_billed.avg', 'type': 'gauge'},
+    ],
+}
+
+# https://docs.snowflake.com/en/sql-reference/organization-usage/usage_in_currency_daily.html
+OrgCurrencyUsage = {
+    'name': 'organization.currency.metrics',
+    'query': (
+        'select ACCOUNT_NAME, SERVICE_LEVEL, USAGE_TYPE, CURRENCY, '
+        'sum(USAGE), sum(USAGE_IN_CURRENCY) from USAGE_IN_CURRENCY_DAILY '
+        'where USAGE_DATE = DATEADD(day, -1, current_date) group by 1, 2, 3, 4;'
+    ),
+    'columns': [
+        {'name': 'billing_account', 'type': 'tag'},
+        {'name': 'service_level', 'type': 'tag'},
+        {'name': 'usage_type', 'type': 'tag'},
+        {'name': 'currency', 'type': 'tag'},
+        {'name': 'organization.currency.usage', 'type': 'gauge'},
+        {'name': 'organization.currency.usage_in_currency', 'type': 'gauge'},
+    ],
+}
+
+
+# https://docs.snowflake.com/en/sql-reference/organization-usage/warehouse_metering_history.html
+OrgWarehouseCreditUsage = {
+    'name': 'organization.warehouse.metrics',
+    'query': (
+        'select WAREHOUSE_NAME, ACCOUNT_NAME, sum(CREDITS_USED_COMPUTE), avg(CREDITS_USED_COMPUTE), '
+        'sum(CREDITS_USED_CLOUD_SERVICES), avg(CREDITS_USED_CLOUD_SERVICES), '
+        'sum(CREDITS_USED), avg(CREDITS_USED) from WAREHOUSE_METERING_HISTORY '
+        'where start_time = DATEADD(day, -1, current_date) group by 1, 2;'
+    ),
+    'columns': [
+        {'name': 'warehouse', 'type': 'tag'},
+        {'name': 'billing_account', 'type': 'tag'},
+        {'name': 'organization.warehouse.virtual_warehouse.sum', 'type': 'gauge'},
+        {'name': 'organization.warehouse.virtual_warehouse.avg', 'type': 'gauge'},
+        {'name': 'organization.warehouse.cloud_service.sum', 'type': 'gauge'},
+        {'name': 'organization.warehouse.cloud_service.avg', 'type': 'gauge'},
+        {'name': 'organization.warehouse.total_credit.sum', 'type': 'gauge'},
+        {'name': 'organization.warehouse.total_credit.avg', 'type': 'gauge'},
+    ],
+}
+
+# https://docs.snowflake.com/en/sql-reference/organization-usage/storage_daily_history.html
+OrgStorageDaily = {
+    'name': 'organization.storage.metrics',
+    'query': (
+        'select ACCOUNT_NAME, sum(AVERAGE_BYTES), sum(CREDITS) from STORAGE_DAILY_HISTORY '
+        'where USAGE_DATE = DATEADD(day, -1, current_date) group by 1;'
+    ),
+    'columns': [
+        {'name': 'billing_account', 'type': 'tag'},
+        {'name': 'organization.storage.average_bytes', 'type': 'gauge'},
+        {'name': 'organization.storage.credits', 'type': 'gauge'},
+    ],
+}
+
+
+# https://docs.snowflake.com/en/sql-reference/organization-usage/remaining_balance_daily.html
+OrgBalance = {
+    'name': 'organization.balance.metrics',
+    'query': (
+        'select CONTRACT_NUMBER, CURRENCY, sum(FREE_USAGE_BALANCE), sum(CAPACITY_BALANCE), '
+        'sum(ON_DEMAND_CONSUMPTION_BALANCE), sum(ROLLOVER_BALANCE) from REMAINING_BALANCE_DAILY '
+        'where DATE = DATEADD(day, -1, current_date) group by 1, 2;'
+    ),
+    'columns': [
+        {'name': 'contract_number', 'type': 'tag'},
+        {'name': 'currency', 'type': 'tag'},
+        {'name': 'organization.balance.free_usage', 'type': 'gauge'},
+        {'name': 'organization.balance.capacity', 'type': 'gauge'},
+        {'name': 'organization.balance.on_demand_consumption', 'type': 'gauge'},
+        {'name': 'organization.balance.rollover', 'type': 'gauge'},
+    ],
+}
+
+# https://docs.snowflake.com/en/sql-reference/organization-usage/rate_sheet_daily.html
+OrgRateSheet = {
+    'name': 'organization.rate.metrics',
+    'query': (
+        'select CONTRACT_NUMBER, ACCOUNT_NAME, USAGE_TYPE, SERVICE_TYPE, CURRENCY, '
+        'sum(EFFECTIVE_RATE) from RATE_SHEET_DAILY '
+        'where DATE = DATEADD(day, -1, current_date) group by 1, 2, 3, 4, 5;'
+    ),
+    'columns': [
+        {'name': 'contract_number', 'type': 'tag'},
+        {'name': 'billing_account', 'type': 'tag'},
+        {'name': 'usage_type', 'type': 'tag'},
+        {'name': 'service_type', 'type': 'tag'},
+        {'name': 'currency', 'type': 'tag'},
+        {'name': 'organization.rate.effective_rate', 'type': 'gauge'},
+    ],
+}
+
+# https://docs.snowflake.com/en/sql-reference/organization-usage/data_transfer_history.html
+OrgDataTransfer = {
+    'name': 'organization.data_transfer.metrics',
+    'query': (
+        'select ACCOUNT_NAME, SOURCE_CLOUD, TARGET_CLOUD, TRANSFER_TYPE, '
+        'sum(BYTES_TRANSFERRED) from DATA_TRANSFER_HISTORY '
+        'where USAGE_DATE = DATEADD(day, -1, current_date) group by 1, 2, 3, 4;'
+    ),
+    'columns': [
+        {'name': 'billing_account', 'type': 'tag'},
+        {'name': 'source_cloud', 'type': 'tag'},
+        {'name': 'target_cloud', 'type': 'tag'},
+        {'name': 'transfer_type', 'type': 'tag'},
+        {'name': 'organization.data_transfer.bytes_transferred', 'type': 'gauge'},
     ],
 }

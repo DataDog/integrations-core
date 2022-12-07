@@ -1,16 +1,43 @@
+## @param ad_identifiers - list of strings - required
+## A list of container identifiers that are used by Autodiscovery to identify
+## which container the check should be run against. For more information, see:
+## https://docs.datadoghq.com/agent/guide/ad_identifiers/
+#
 ad_identifiers:
   - kube-controller-manager
 
+## All options defined here are available to all instances.
+#
 init_config:
 
+## Every instance is scheduled independently of the others.
+#
 instances:
-    ## @param prometheus_url - string - required
-    ## The URL where your application metrics are exposed by Prometheus.
-    #
-  - prometheus_url: "http://%%host%%:10252/metrics"
 
-    ## @param bearer_token_auth - string - optional
-    ## Used if you are using RBACs and need the Agent to authenticate
-    ## against the APIServer to retrieve metrics. Default to true.
+    ## @param possible_prometheus_urls - list of strings - optional
+    ## The URLs to try to get your application metrics that are exposed by Prometheus.
+    ## The check tries each URL in the list and uses the first working one.
+    ## The `possible_prometheus_urls` or `prometheus_url` parameter is required.
     #
-    bearer_token_auth: true
+  - possible_prometheus_urls:
+      - https://%%host%%:10257/metrics
+      - https://localhost:10257/metrics
+      - http://%%host%%:10252/metrics
+      - http://localhost:10252/metrics
+
+    ## @param prometheus_url - string - optional - default: http://%%host%%:10252/metrics
+    ## The URL where your application metrics are exposed by Prometheus.
+    ## The `possible_prometheus_urls` or `prometheus_url` parameter is required.
+    #
+    # prometheus_url: http://%%host%%:10252/metrics
+
+    ## @param bearer_token_auth - boolean or string - optional - default: false
+    ## Used if you are using RBACs and need the Agent to authenticate
+    ## against the APIServer to retrieve metrics.
+    #
+    bearer_token_auth: tls_only
+
+    ## @param ssl_verify - boolean - optional - default: true
+    ## Used to verify self signed certificates.
+    #
+    ssl_verify: false

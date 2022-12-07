@@ -111,6 +111,16 @@ files:
           display_default: false
           example: true
         enabled: true
+      - name: enable_query_name_tag
+        description: |
+          Enable to add a `query_name` tag for Structured Streaming metrics.
+          This option should ONLY be enabled if the stream had a `.queryName` param supplied on `writeStream`,
+          otherwise the stream is given a default UUID.
+          See: https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html#starting-streaming-queries
+        value:
+          type: boolean
+          display_default: false
+          example: true
       - template: instances/http
         overrides:
           auth_token.description: |

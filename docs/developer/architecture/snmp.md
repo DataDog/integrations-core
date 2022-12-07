@@ -119,10 +119,10 @@ Agent auto-discovery combined with Cluster Agent is very scalable, it can be use
 
 First you need to [add Datadog Helm repository](https://github.com/DataDog/helm-charts).
 
-    ```
-    $ helm repo add datadog https://helm.datadoghq.com
-    $ helm repo update
-    ```
+```bash
+helm repo add datadog https://helm.datadoghq.com
+helm repo update
+```
 
 
 Then run:
@@ -186,18 +186,18 @@ helm install datadog-monitoring --set datadog.apiKey=<YOUR_API_KEY> -f cluster-a
       ## ref: https://docs.datadoghq.com/agent/autodiscovery/
       #
       confd:
-         # Static checks
-         http_check.yaml: |-
-           cluster_check: true
-           instances:
-             - name: 'Check Example Site1'
-               url: http://example.net
-             - name: 'Check Example Site2'
-               url: http://example.net
-             - name: 'Check Example Site3'
-               url: http://example.net
-         # Autodiscovery template needed for `snmp_listener` to create instance configs
-         snmp.yaml: |-
+        # Static checks
+        http_check.yaml: |-
+          cluster_check: true
+          instances:
+            - name: 'Check Example Site1'
+              url: http://example.net
+            - name: 'Check Example Site2'
+              url: http://example.net
+            - name: 'Check Example Site3'
+              url: http://example.net
+        # Autodiscovery template needed for `snmp_listener` to create instance configs
+        snmp.yaml: |-
           cluster_check: true
 
           # AD config below is copied from: https://github.com/DataDog/datadog-agent/blob/master/cmd/agent/dist/conf.d/snmp.d/auto_conf.yaml

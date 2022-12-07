@@ -4,17 +4,18 @@ files:
   options:
   - template: init_config
     options:
-      - template: init_config/openmetrics_legacy
+      - template: init_config/openmetrics
   - template: instances
     options:
     - name: use_openmetrics
       description: |
         Use the latest OpenMetrics implementation for more features and better performance.
-
-        In a future release, this option will be set to `true` by default.
+        If running on Agent v6, you must set the `python_version` option in `datadog.yaml` to `"3"`.
       value:
-        example: false
+        example: true
+        display_default: false
         type: boolean
+      enabled: true
     - name: cluster_arn
       description: The Amazon Resource Name (ARN) that uniquely identifies the cluster.
       required: true
@@ -35,12 +36,16 @@ files:
       value:
         type: string
     - name: jmx_exporter_port
-      description: The port on which the JMX Exporter serves metrics.
+      description: |
+        The port on which the JMX Exporter serves metrics.
+        Set the port to 0 to disable.
       value:
         type: integer
         example: 11001
     - name: node_exporter_port
-      description: The port on which the Node Exporter serves metrics.
+      description: |
+        The port on which the Node Exporter serves metrics.
+        Set the port to 0 to disable.
       value:
         type: integer
         example: 11002
@@ -50,8 +55,23 @@ files:
       value:
         type: string
         example: /metrics
-    - template: instances/openmetrics_legacy
+    - name: boto_config
+      description: |
+        Specify additional configuration options for the botocore Config object.
+
+        Note: Configuration values set in your AWS config file can be singularly overwritten
+        through the use of a Config object.
+        https://botocore.amazonaws.com/v1/documentation/api/latest/reference/config.html
+      value:
+        example:
+          proxies_config:
+            proxy_client_cert: '/path/of/certificate'
+            proxy_ca_bundle: 'path/to/ca/bundle'
+            proxy_use_forwarding_for_https: false
+          signature_version: s3v4
+        type: object
+    - template: instances/openmetrics
       overrides:
-        prometheus_url.hidden: true
-        prometheus_url.required: false
+        openmetrics_endpoint.hidden: true
+        openmetrics_endpoint.required: false
         tls_verify.value.example: false

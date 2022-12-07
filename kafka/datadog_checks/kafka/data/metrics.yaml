@@ -346,7 +346,7 @@ jmx_metrics:
           Count:
             metric_type: rate
             alias: kafka.net.bytes_rejected.rate
-    
+
     #
     # Per Topic Broker Stats (only v0.8.x)
     #
@@ -411,7 +411,7 @@ jmx_metrics:
             alias: kafka.request.produce.failed.rate
     - include:
         domain: 'kafka.network'
-        bean: 'kafka.network:type=RequestMetrics,name=RequestsPerSec,request=Produce'
+        bean_regex: 'kafka.network:type=RequestMetrics,name=RequestsPerSec,request=Produce(?:,version=.*)?'
         attribute:
           Count:
             metric_type: rate
@@ -428,14 +428,14 @@ jmx_metrics:
             alias: kafka.request.produce.time.99percentile
     - include:
         domain: 'kafka.network'
-        bean: 'kafka.network:type=RequestMetrics,name=RequestsPerSec,request=FetchConsumer'
+        bean_regex: 'kafka.network:type=RequestMetrics,name=RequestsPerSec,request=FetchConsumer(?:,version=.*)?'
         attribute:
           Count:
             metric_type: rate
             alias: kafka.request.fetch_consumer.rate
     - include:
         domain: 'kafka.network'
-        bean: 'kafka.network:type=RequestMetrics,name=RequestsPerSec,request=FetchFollower'
+        bean_regex: 'kafka.network:type=RequestMetrics,name=RequestsPerSec,request=FetchFollower(?:,version=.*)?'
         attribute:
           Count:
             metric_type: rate
@@ -560,6 +560,13 @@ jmx_metrics:
             alias: kafka.replication.under_replicated_partitions
     - include:
         domain: 'kafka.server'
+        bean: 'kafka.server:type=ReplicaManager,name=UnderMinIsrPartitionCount'
+        attribute:
+          Value:
+            metric_type: gauge
+            alias: kafka.replication.under_min_isr_partition_count
+    - include:
+        domain: 'kafka.server'
         bean: 'kafka.server:type=ReplicaManager,name=IsrShrinksPerSec'
         attribute:
           Count:
@@ -682,3 +689,15 @@ jmx_metrics:
           Count:
             alias: kafka.session.fetch.eviction
             metric_type: rate
+    #
+    # Listeners stats
+    #
+    - include:
+        domain: 'kafka.server'
+        bean_regex: 'kafka\.server:type=socket-server-metrics,listener=(.*?),networkProcessor=.*'
+        attribute:
+          connection-count:
+            metric_type: gauge
+            alias: kafka.server.socket.connection_count
+        tags:
+          listener: $1

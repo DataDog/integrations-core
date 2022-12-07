@@ -3,895 +3,1566 @@
   "description": "This dashboard provides a high-level overview of your PostgreSQL databases, so you can track throughput, replication, locks, and other metrics from all your servers and spot potential issues. Further reading on PostgreSQL monitoring:\n\n- [Datadog's guide to key PostgreSQL metrics](https://www.datadoghq.com/blog/postgresql-monitoring/)\n\n- [Collecting metrics with PostgreSQL monitoring tools](https://www.datadoghq.com/blog/postgresql-monitoring-tools/)\n\n- [How to monitor PostgreSQL with Datadog](https://www.datadoghq.com/blog/collect-postgresql-data-with-datadog/)\n\n- [Datadog's PostgreSQL integration docs](https://docs.datadoghq.com/integrations/postgres/)\n\nClone this template dashboard to make changes and add your own graph widgets. (cloned)",
   "widgets": [
     {
-      "id": 0,
+      "id": 8450562588885112,
       "definition": {
-        "type": "toplist",
-        "requests": [
+        "title": "About Postgres",
+        "title_align": "center",
+        "type": "group",
+        "banner_img": "/static/images/integration_dashboard/postgres_hero_2.jpg",
+        "show_title": false,
+        "layout_type": "ordered",
+        "widgets": [
           {
-            "q": "top(avg:postgresql.total_size{$scope} by {table}, 5, 'mean', 'desc')",
-            "style": {
-              "palette": "dog_classic"
+            "id": 2247473858319746,
+            "definition": {
+              "type": "note",
+              "content": "\nThis dashboard provides a high-level overview of your PostgreSQL databases, so you can track throughput, replication, locks, and other metrics from all your servers and spot potential issues. \n\n",
+              "background_color": "transparent",
+              "font_size": "14",
+              "text_align": "left",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left"
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 4,
+              "height": 2
             }
-          }
-        ],
-        "custom_links": [],
-        "title": "Tables with most disk usage (top 5)",
-        "title_size": "16",
-        "title_align": "left",
-        "time": {
-          "live_span": "4h"
-        }
-      },
-      "layout": {
-        "x": 33,
-        "y": 36,
-        "width": 34,
-        "height": 15
-      }
-    },
-    {
-      "id": 1,
-      "layout": {
-        "x": 81,
-        "y": 7,
-        "width": 22,
-        "height": 15
-      },
-      "definition": {
-        "title": "Max connections in use",
-        "title_size": "16",
-        "title_align": "left",
-        "time": {
-          "live_span": "1h"
-        },
-        "type": "query_value",
-        "requests": [
-          {
-            "q": "max:postgresql.percent_usage_connections{$scope} * 100",
-            "aggregator": "last",
-            "conditional_formats": [
-              {
-                "comparator": ">",
-                "palette": "red_on_white",
-                "value": 75
-              },
-              {
-                "comparator": ">",
-                "palette": "yellow_on_white",
-                "value": 50
-              },
-              {
-                "comparator": "<=",
-                "palette": "green_on_white",
-                "value": 50
-              }
-            ]
-          }
-        ],
-        "autoscale": true,
-        "custom_unit": "%",
-        "text_align": "center",
-        "custom_links": [],
-        "precision": 0
-      }
-    },
-    {
-      "id": 2,
-      "layout": {
-        "x": 33,
-        "y": 106,
-        "width": 70,
-        "height": 15
-      },
-      "definition": {
-        "title": "Deadlocks per database",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": false,
-        "legend_size": "0",
-        "time": {
-          "live_span": "4h"
-        },
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "sum:postgresql.deadlocks{$scope}",
-            "style": {
-              "palette": "warm"
-            },
-            "display_type": "bars"
-          }
-        ],
-        "custom_links": []
-      }
-    },
-    {
-      "id": 3,
-      "layout": {
-        "x": 1,
-        "y": 1,
-        "width": 30,
-        "height": 12
-      },
-      "definition": {
-        "type": "image",
-        "url": "/static/images/logos/postgres_large.svg",
-        "sizing": "zoom"
-      }
-    },
-    {
-      "id": 4,
-      "layout": {
-        "x": 105,
-        "y": 1,
-        "width": 70,
-        "height": 5
-      },
-      "definition": {
-        "type": "note",
-        "content": "Throughput",
-        "background_color": "vivid_blue",
-        "font_size": "18",
-        "text_align": "center",
-        "show_tick": false,
-        "tick_pos": "50%",
-        "tick_edge": "bottom"
-      }
-    },
-    {
-      "id": 5,
-      "definition": {
-        "type": "toplist",
-        "requests": [
-          {
-            "q": "top(avg:postgresql.live_rows{$scope} by {table}, 5, 'mean', 'desc')",
-            "style": {
-              "palette": "purple"
-            }
-          }
-        ],
-        "custom_links": [],
-        "title": "Tables with most live rows (1)",
-        "title_size": "16",
-        "title_align": "left",
-        "time": {
-          "live_span": "4h"
-        }
-      },
-      "layout": {
-        "x": 69,
-        "y": 68,
-        "width": 34,
-        "height": 15
-      }
-    },
-    {
-      "id": 6,
-      "layout": {
-        "x": 141,
-        "y": 7,
-        "width": 34,
-        "height": 15
-      },
-      "definition": {
-        "title": "Rows updated / deleted / inserted (1)",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": false,
-        "legend_size": "0",
-        "time": {
-          "live_span": "4h"
-        },
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "sum:postgresql.rows_updated{$scope}, sum:postgresql.rows_deleted{$scope}, sum:postgresql.rows_inserted{$scope}",
-            "style": {
-              "palette": "purple"
-            },
-            "display_type": "line"
-          }
-        ],
-        "custom_links": []
-      }
-    },
-    {
-      "id": 7,
-      "layout": {
-        "x": 105,
-        "y": 102,
-        "width": 70,
-        "height": 5
-      },
-      "definition": {
-        "type": "note",
-        "content": "Checkpoints",
-        "background_color": "blue",
-        "font_size": "18",
-        "text_align": "center",
-        "show_tick": false,
-        "tick_pos": "50%",
-        "tick_edge": "bottom"
-      }
-    },
-    {
-      "id": 8,
-      "layout": {
-        "x": 33,
-        "y": 90,
-        "width": 70,
-        "height": 15
-      },
-      "definition": {
-        "title": "Locks by lock mode",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": false,
-        "legend_size": "0",
-        "time": {
-          "live_span": "4h"
-        },
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "top(sum:postgresql.locks{$scope} by {lock_mode,table}, 5, 'mean', 'desc')",
-            "style": {
-              "palette": "warm"
-            },
-            "display_type": "bars"
-          }
-        ],
-        "custom_links": []
-      }
-    },
-    {
-      "id": 9,
-      "layout": {
-        "x": 105,
-        "y": 7,
-        "width": 34,
-        "height": 15
-      },
-      "definition": {
-        "title": "Sequential scans vs index scans (1)",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": false,
-        "legend_size": "0",
-        "time": {
-          "live_span": "4h"
-        },
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "sum:postgresql.index_scans{$scope}, sum:postgresql.seq_scans{$scope}",
-            "style": {
-              "palette": "green"
-            },
-            "display_type": "line"
-          }
-        ],
-        "custom_links": []
-      }
-    },
-    {
-      "id": 10,
-      "layout": {
-        "x": 141,
-        "y": 23,
-        "width": 34,
-        "height": 15
-      },
-      "definition": {
-        "title": "Heap-only updates (1)",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": false,
-        "legend_size": "0",
-        "time": {
-          "live_span": "4h"
-        },
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "sum:postgresql.rows_hot_updated{$scope}",
-            "style": {
-              "palette": "purple"
-            },
-            "display_type": "line"
-          }
-        ],
-        "custom_links": []
-      }
-    },
-    {
-      "id": 11,
-      "definition": {
-        "type": "toplist",
-        "requests": [
-          {
-            "q": "top(avg:postgresql.index_scans{$scope} by {index}, 5, 'mean', 'asc')",
-            "style": {
-              "palette": "grey"
-            }
-          }
-        ],
-        "custom_links": [],
-        "title": "Least frequently scanned indexes (1)",
-        "title_size": "16",
-        "title_align": "left",
-        "time": {
-          "live_span": "4h"
-        }
-      },
-      "layout": {
-        "x": 69,
-        "y": 52,
-        "width": 34,
-        "height": 15
-      }
-    },
-    {
-      "id": 12,
-      "layout": {
-        "x": 56,
-        "y": 7,
-        "width": 24,
-        "height": 15
-      },
-      "definition": {
-        "title": "Connections per database",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": false,
-        "legend_size": "0",
-        "time": {
-          "live_span": "4h"
-        },
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "avg:postgresql.connections{$scope} by {db}.rollup(max)",
-            "style": {
-              "palette": "cool"
-            },
-            "display_type": "line"
           },
           {
-            "q": "min:postgresql.max_connections{$scope} by {db}",
-            "style": {
-              "palette": "warm"
+            "id": 6131621647457690,
+            "definition": {
+              "type": "note",
+              "content": "\n**Further reading on PostgreSQL monitoring**\n\n- [Datadog's guide to key PostgreSQL metrics](https://www.datadoghq.com/blog/postgresql-monitoring/)\n\n- [Collecting metrics with PostgreSQL monitoring tools](https://www.datadoghq.com/blog/postgresql-monitoring-tools/)\n\n- [How to monitor PostgreSQL with Datadog](https://www.datadoghq.com/blog/collect-postgresql-data-with-datadog/)\n\n- [Datadog's PostgreSQL integration docs](https://docs.datadoghq.com/integrations/postgres/)",
+              "background_color": "transparent",
+              "font_size": "14",
+              "text_align": "left",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left"
             },
-            "display_type": "line"
-          }
-        ],
-        "custom_links": []
-      }
-    },
-    {
-      "id": 13,
-      "layout": {
-        "x": 105,
-        "y": 23,
-        "width": 34,
-        "height": 15
-      },
-      "definition": {
-        "title": "Sequential scans (green) vs. week before (gray) (1)",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": false,
-        "legend_size": "0",
-        "time": {
-          "live_span": "4h"
-        },
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "sum:postgresql.seq_scans{$scope}",
-            "style": {
-              "palette": "green"
-            },
-            "display_type": "line"
-          },
-          {
-            "q": "week_before(sum:postgresql.seq_scans{$scope})",
-            "style": {
-              "palette": "grey",
-              "line_type": "dashed"
-            },
-            "display_type": "line"
-          }
-        ],
-        "custom_links": []
-      }
-    },
-    {
-      "id": 14,
-      "layout": {
-        "x": 33,
-        "y": 30,
-        "width": 70,
-        "height": 5
-      },
-      "definition": {
-        "type": "note",
-        "content": "Resource Utilization",
-        "background_color": "vivid_blue",
-        "font_size": "18",
-        "text_align": "center",
-        "show_tick": false,
-        "tick_pos": "50%",
-        "tick_edge": "bottom"
-      }
-    },
-    {
-      "id": 15,
-      "layout": {
-        "x": 108,
-        "y": 116,
-        "width": 45,
-        "height": 5
-      },
-      "definition": {
-        "type": "note",
-        "content": "Locks",
-        "background_color": "gray",
-        "font_size": "18",
-        "text_align": "center",
-        "show_tick": true,
-        "tick_pos": "50%",
-        "tick_edge": "bottom"
-      }
-    },
-    {
-      "id": 16,
-      "layout": {
-        "x": 33,
-        "y": 1,
-        "width": 70,
-        "height": 5
-      },
-      "definition": {
-        "type": "note",
-        "content": "Basic Activity Monitor",
-        "background_color": "vivid_blue",
-        "font_size": "18",
-        "text_align": "center",
-        "show_tick": false,
-        "tick_pos": "50%",
-        "tick_edge": "bottom"
-      }
-    },
-    {
-      "id": 17,
-      "layout": {
-        "x": 105,
-        "y": 55,
-        "width": 70,
-        "height": 5
-      },
-      "definition": {
-        "type": "note",
-        "content": "Replication",
-        "background_color": "blue",
-        "font_size": "18",
-        "text_align": "center",
-        "show_tick": false,
-        "tick_pos": "50%",
-        "tick_edge": "bottom"
-      }
-    },
-    {
-      "id": 18,
-      "layout": {
-        "x": 105,
-        "y": 61,
-        "width": 70,
-        "height": 15
-      },
-      "definition": {
-        "title": "Number of hosts with replication delay",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": false,
-        "legend_size": "0",
-        "time": {
-          "live_span": "4h"
-        },
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "count_nonzero(sum:postgresql.replication_delay_bytes{$scope} by {host})",
-            "style": {
-              "palette": "orange"
-            },
-            "display_type": "bars"
-          }
-        ],
-        "custom_links": []
-      }
-    },
-    {
-      "id": 19,
-      "layout": {
-        "x": 33,
-        "y": 7,
-        "width": 22,
-        "height": 15
-      },
-      "definition": {
-        "title": "Rows fetched / returned",
-        "title_size": "16",
-        "title_align": "left",
-        "time": {
-          "live_span": "1h"
-        },
-        "type": "query_value",
-        "requests": [
-          {
-            "q": "sum:postgresql.rows_fetched{$scope} / ( sum:postgresql.rows_fetched{$scope} + sum:postgresql.rows_returned{$scope} ) * 100",
-            "aggregator": "avg"
-          }
-        ],
-        "autoscale": true,
-        "custom_unit": "%",
-        "custom_links": [],
-        "precision": 1
-      }
-    },
-    {
-      "id": 20,
-      "layout": {
-        "x": 105,
-        "y": 108,
-        "width": 70,
-        "height": 15
-      },
-      "definition": {
-        "title": "Scheduled (purple) vs requested (orange) checkpoints",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": false,
-        "legend_size": "0",
-        "time": {
-          "live_span": "4h"
-        },
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "sum:postgresql.bgwriter.checkpoints_timed{$scope}.as_count(), sum:postgresql.bgwriter.checkpoints_requested{$scope}.as_count()",
-            "style": {
-              "palette": "purple"
-            },
-            "display_type": "bars"
-          },
-          {
-            "q": "sum:postgresql.bgwriter.checkpoints_requested{$scope}.as_count()",
-            "style": {
-              "palette": "orange"
-            },
-            "display_type": "bars"
-          }
-        ],
-        "custom_links": []
-      }
-    },
-    {
-      "id": 21,
-      "layout": {
-        "x": 105,
-        "y": 78,
-        "width": 34,
-        "height": 5
-      },
-      "definition": {
-        "type": "note",
-        "content": "Available in version 9.1+",
-        "background_color": "gray",
-        "font_size": "14",
-        "text_align": "left",
-        "show_tick": true,
-        "tick_pos": "50%",
-        "tick_edge": "top"
-      }
-    },
-    {
-      "id": 22,
-      "layout": {
-        "x": 141,
-        "y": 78,
-        "width": 34,
-        "height": 5
-      },
-      "definition": {
-        "type": "note",
-        "content": "Available in version 9.2+",
-        "background_color": "gray",
-        "font_size": "14",
-        "text_align": "left",
-        "show_tick": true,
-        "tick_pos": "50%",
-        "tick_edge": "bottom"
-      }
-    },
-    {
-      "id": 23,
-      "layout": {
-        "x": 1,
-        "y": 64,
-        "width": 29,
-        "height": 7
-      },
-      "definition": {
-        "type": "note",
-        "content": "(1) Requires [relations parameter](https://docs.datadoghq.com/integrations/postgres/#metric-collection) setting in postgres yaml file.",
-        "background_color": "gray",
-        "font_size": "14",
-        "text_align": "left",
-        "show_tick": true,
-        "tick_pos": "50%",
-        "tick_edge": "right"
-      }
-    },
-    {
-      "id": 24,
-      "layout": {
-        "x": 69,
-        "y": 36,
-        "width": 34,
-        "height": 15
-      },
-      "definition": {
-        "title": "Temp bytes",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": false,
-        "legend_size": "0",
-        "time": {
-          "live_span": "4h"
-        },
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "sum:postgresql.temp_bytes{$scope}",
-            "style": {
-              "palette": "purple"
-            },
-            "display_type": "line"
-          }
-        ],
-        "custom_links": []
-      }
-    },
-    {
-      "id": 25,
-      "layout": {
-        "x": 105,
-        "y": 85,
-        "width": 70,
-        "height": 15
-      },
-      "definition": {
-        "title": "Max replication delay",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": false,
-        "legend_size": "0",
-        "time": {
-          "live_span": "4h"
-        },
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "max:postgresql.replication_delay{$scope}",
-            "style": {
-              "palette": "orange"
-            },
-            "display_type": "line"
-          }
-        ],
-        "custom_links": []
-      }
-    },
-    {
-      "id": 26,
-      "definition": {
-        "type": "toplist",
-        "requests": [
-          {
-            "q": "top(avg:postgresql.index_scans{$scope} by {index}, 5, 'mean', 'desc')",
-            "style": {
-              "palette": "green"
+            "layout": {
+              "x": 4,
+              "y": 0,
+              "width": 4,
+              "height": 2
             }
           }
-        ],
-        "custom_links": [],
-        "title": "Most frequently scanned indexes (1)",
-        "title_size": "16",
-        "title_align": "left",
-        "time": {
-          "live_span": "4h"
-        }
+        ]
       },
       "layout": {
-        "x": 33,
-        "y": 52,
-        "width": 34,
-        "height": 15
+        "x": 0,
+        "y": 0,
+        "width": 8,
+        "height": 5
       }
     },
     {
-      "id": 27,
-      "layout": {
-        "x": 33,
-        "y": 68,
-        "width": 34,
-        "height": 15
-      },
+      "id": 7975775563990214,
       "definition": {
-        "title": "Dead rows (1)",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": false,
-        "legend_size": "0",
-        "time": {
-          "live_span": "1w"
-        },
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "sum:postgresql.dead_rows{$scope}",
-            "style": {
-              "palette": "grey"
-            },
-            "display_type": "line"
-          }
-        ],
-        "custom_links": []
-      }
-    },
-    {
-      "id": 28,
-      "definition": {
-        "type": "toplist",
-        "requests": [
-          {
-            "q": "top(avg:postgresql.function.calls{$scope} by {function}, 5, 'mean', 'desc')",
-            "style": {
-              "palette": "green"
-            }
-          }
-        ],
-        "custom_links": [],
-        "title": "Top function calls",
-        "title_size": "16",
-        "title_align": "left",
-        "time": {
-          "live_span": "4h"
-        }
-      },
-      "layout": {
-        "x": 105,
-        "y": 39,
-        "width": 70,
-        "height": 15
-      }
-    },
-    {
-      "id": 2865211904009572,
-      "layout": {
-        "x": 1,
-        "y": 14,
-        "width": 30,
-        "height": 36
-      },
-      "definition": {
-        "type": "note",
-        "content": "This dashboard provides a high-level overview of your PostgreSQL databases, so you can track throughput, replication, locks, and other metrics from all your servers and spot potential issues. \n\nFurther reading on PostgreSQL monitoring:\n\n- [Datadog's guide to key PostgreSQL metrics](https://www.datadoghq.com/blog/postgresql-monitoring/)\n\n- [Collecting metrics with PostgreSQL monitoring tools](https://www.datadoghq.com/blog/postgresql-monitoring-tools/)\n\n- [How to monitor PostgreSQL with Datadog](https://www.datadoghq.com/blog/collect-postgresql-data-with-datadog/)\n\n- [Datadog's PostgreSQL integration docs](https://docs.datadoghq.com/integrations/postgres/)\n\nYou can clone this dashboard, copy and paste widgets from other out-of-the-box dashboards, and create your own visualizations for your custom applications.\n",
+        "title": "Current Activity",
+        "type": "group",
         "background_color": "white",
-        "font_size": "14",
-        "text_align": "left",
-        "show_tick": false,
-        "tick_pos": "50%",
-        "tick_edge": "left"
+        "show_title": true,
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 8300711807334560,
+            "definition": {
+              "title": "Max connections in use",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "q": "max:postgresql.percent_usage_connections{*}*100",
+                  "aggregator": "last",
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "palette": "white_on_red",
+                      "value": 75
+                    },
+                    {
+                      "comparator": ">",
+                      "palette": "white_on_yellow",
+                      "value": 50
+                    },
+                    {
+                      "comparator": "<=",
+                      "palette": "white_on_green",
+                      "value": 50
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "custom_unit": "%",
+              "text_align": "center",
+              "precision": 0
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 2633722480504268,
+            "definition": {
+              "title": "Rows fetched / returned",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1 / (query1 + query2) * 100"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "sum:postgresql.rows_fetched{*}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "query": "sum:postgresql.rows_returned{*}",
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "aggregator": "avg"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "custom_unit": "%",
+              "precision": 1
+            },
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 4,
+              "height": 2
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 8,
+        "y": 0,
+        "width": 4,
+        "height": 5
       }
     },
     {
-      "id": 4041052130609602,
-      "layout": {
-        "x": 33,
-        "y": 24,
-        "width": 70,
-        "height": 5
-      },
+      "id": 2888659938423792,
       "definition": {
-        "type": "note",
-        "content": "A PostgreSQL database cluster is not a collection of servers, but a collection of databases managed by a single server.",
-        "background_color": "gray",
-        "font_size": "14",
-        "text_align": "left",
-        "show_tick": true,
-        "tick_pos": "50%",
-        "tick_edge": "top"
+        "title": "Resource Utilization",
+        "title_align": "center",
+        "type": "group",
+        "background_color": "vivid_blue",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 4243914035569716,
+            "definition": {
+              "title": "Dead rows",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Dead rows"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "query": "sum:postgresql.dead_rows{$scope,$db,$table}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "grey"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 5,
+              "height": 2
+            }
+          },
+          {
+            "id": 8205880511151828,
+            "definition": {
+              "title": "Resources by table",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_table",
+              "requests": [
+                {
+                  "aggregator": "avg",
+                  "cell_display_mode": [
+                    "bar"
+                  ],
+                  "q": "avg:postgresql.total_size{$scope,$db,$table} by {table}",
+                  "alias": "Disk Usage",
+                  "limit": 50,
+                  "order": "desc"
+                },
+                {
+                  "q": "avg:postgresql.index_scans{$scope,$db,$table} by {table}",
+                  "alias": "Index Scans",
+                  "cell_display_mode": [
+                    "bar"
+                  ],
+                  "aggregator": "avg"
+                },
+                {
+                  "q": "avg:postgresql.live_rows{$scope,$db,$table} by {table}",
+                  "alias": "Live Rows",
+                  "cell_display_mode": [
+                    "bar"
+                  ],
+                  "aggregator": "avg"
+                },
+                {
+                  "q": "avg:postgresql.dead_rows{$scope,$db,$table} by {table}",
+                  "alias": "Dead Rows",
+                  "cell_display_mode": [
+                    "bar"
+                  ],
+                  "aggregator": "avg"
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 5,
+              "y": 0,
+              "width": 7,
+              "height": 4
+            }
+          },
+          {
+            "id": 4074635349618514,
+            "definition": {
+              "title": "Temp bytes",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Temp bytes"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "sum:postgresql.temp_bytes{$scope,$db,$table}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "purple"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 5,
+              "height": 2
+            }
+          },
+          {
+            "id": 3455888496260404,
+            "definition": {
+              "title": "Most frequently scanned indexes",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "limit": {
+                        "count": 5,
+                        "order": "desc"
+                      }
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "avg:postgresql.index_scans{$scope,$db} by {index}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "avg"
+                    }
+                  ]
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 3,
+              "height": 3
+            }
+          },
+          {
+            "id": 2446150695357200,
+            "definition": {
+              "title": "Least frequently scanned indexes",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "limit": {
+                        "count": 5,
+                        "order": "asc"
+                      }
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "avg:postgresql.index_scans{$scope,$db} by {index}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "avg"
+                    }
+                  ]
+                }
+              ]
+            },
+            "layout": {
+              "x": 3,
+              "y": 4,
+              "width": 3,
+              "height": 3
+            }
+          },
+          {
+            "id": 1804222491021348,
+            "definition": {
+              "title": "Tables with most disk usage (top 5)",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "limit": {
+                        "count": 5,
+                        "order": "desc"
+                      }
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "avg:postgresql.total_size{$scope,$table} by {table}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "avg"
+                    }
+                  ]
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 4,
+              "width": 3,
+              "height": 3
+            }
+          },
+          {
+            "id": 1541414885015292,
+            "definition": {
+              "title": "Tables with most live rows",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "limit": {
+                        "count": 5,
+                        "order": "desc"
+                      }
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "avg:postgresql.live_rows{$scope,$table} by {table}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "avg"
+                    }
+                  ]
+                }
+              ]
+            },
+            "layout": {
+              "x": 9,
+              "y": 4,
+              "width": 3,
+              "height": 3
+            }
+          }
+        ]
       }
     },
     {
-      "id": 8293335103140496,
-      "layout": {
-        "x": 33,
-        "y": 84,
-        "width": 70,
-        "height": 5
-      },
+      "id": 3404772226023224,
       "definition": {
-        "type": "note",
-        "content": "Locks",
+        "title": "Locks",
+        "title_align": "center",
+        "type": "group",
+        "background_color": "vivid_orange",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 5279028267799090,
+            "definition": {
+              "title": "Locks by lock mode",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "top(query1, 5, 'mean', 'desc')",
+                      "alias": "Lock Count"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "query": "sum:postgresql.locks{$scope} by {lock_mode,table}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "warm"
+                  },
+                  "display_type": "bars"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 7502615221382420,
+            "definition": {
+              "title": "Locks by lock mode",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "limit": {
+                        "count": 10,
+                        "order": "desc"
+                      }
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "sum:postgresql.locks{$scope} by {lock_mode,table}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "max"
+                    }
+                  ]
+                }
+              ]
+            },
+            "layout": {
+              "x": 4,
+              "y": 0,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 7487114663198344,
+            "definition": {
+              "title": "Deadlocks count",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Deadlocks",
+                      "formula": "query1"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "max:postgresql.deadlocks.count{$scope} by {db}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "warm"
+                  },
+                  "display_type": "bars"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "label": "",
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 8,
+              "y": 0,
+              "width": 4,
+              "height": 3
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": 2399955077694968,
+      "definition": {
+        "title": "Rows",
+        "type": "group",
+        "background_color": "vivid_purple",
+        "show_title": true,
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 3906600369706580,
+            "definition": {
+              "title": "Inserted",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query3",
+                      "alias": "Inserted Rows"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "avg:postgresql.rows_inserted{$scope,$db} by {db}",
+                      "data_source": "metrics",
+                      "name": "query3"
+                    }
+                  ],
+                  "style": {
+                    "palette": "purple"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 7149220964544692,
+            "definition": {
+              "title": "Updated",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Updated Rows"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "avg:postgresql.rows_updated{$scope,$db} by {db}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "purple"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 4,
+              "y": 0,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 7182284193407168,
+            "definition": {
+              "title": "Actions",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_table",
+              "requests": [
+                {
+                  "aggregator": "sum",
+                  "cell_display_mode": [
+                    "bar"
+                  ],
+                  "q": "avg:postgresql.rows_inserted{$db,$scope} by {db}",
+                  "alias": "Inserted",
+                  "limit": 50,
+                  "order": "desc"
+                },
+                {
+                  "q": "avg:postgresql.rows_updated{$db,$scope} by {db}",
+                  "alias": "Updated",
+                  "cell_display_mode": [
+                    "bar"
+                  ],
+                  "aggregator": "sum"
+                },
+                {
+                  "q": "avg:postgresql.rows_deleted{$db,$scope} by {db}",
+                  "alias": "Deleted",
+                  "cell_display_mode": [
+                    "bar"
+                  ],
+                  "aggregator": "sum"
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 8,
+              "y": 0,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 1990358978286900,
+            "definition": {
+              "title": "Deleted",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query2",
+                      "alias": "Deleted Rows"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "avg:postgresql.rows_deleted{$scope,$db} by {db}",
+                      "data_source": "metrics",
+                      "name": "query2"
+                    }
+                  ],
+                  "style": {
+                    "palette": "purple"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 51205630932036,
+            "definition": {
+              "title": "Heap-only updates ",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Hot updated rows"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "avg:postgresql.rows_hot_updated{$scope,$db} by {db}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "purple"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 4,
+              "y": 2,
+              "width": 4,
+              "height": 2
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": 1113650335908058,
+      "definition": {
+        "title": "Connections Monitor",
+        "title_align": "center",
+        "type": "group",
+        "background_color": "vivid_pink",
+        "show_title": true,
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 2360245042300150,
+            "definition": {
+              "title": "Connections per database",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Active connections "
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "query": "avg:postgresql.connections{$scope,$db} by {db}.rollup(max)",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "cool"
+                  },
+                  "display_type": "line"
+                },
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Max connections allowed"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "query": "min:postgresql.max_connections{$scope,$db} by {db}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "warm"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 7,
+              "height": 3
+            }
+          },
+          {
+            "id": 2702068970439250,
+            "definition": {
+              "title": "Most connected databases",
+              "type": "toplist",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "limit": {
+                        "count": 10,
+                        "order": "desc"
+                      }
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "max:postgresql.connections{$scope,$db} by {db}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "avg"
+                    }
+                  ]
+                }
+              ]
+            },
+            "layout": {
+              "x": 7,
+              "y": 0,
+              "width": 5,
+              "height": 4
+            }
+          },
+          {
+            "id": 3286749819274530,
+            "definition": {
+              "type": "note",
+              "content": "A PostgreSQL database cluster is not a collection of servers, but a collection of databases managed by a single server.",
+              "background_color": "transparent",
+              "font_size": "16",
+              "text_align": "left",
+              "vertical_align": "top",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "top",
+              "has_padding": false
+            },
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 7,
+              "height": 1
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 22,
+        "width": 12,
+        "height": 5,
+        "is_column_break": true
+      }
+    },
+    {
+      "id": 1487264123152382,
+      "definition": {
+        "title": "Throughput",
+        "title_align": "center",
+        "type": "group",
+        "background_color": "vivid_green",
+        "show_title": true,
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 3403862571191142,
+            "definition": {
+              "title": "Sequential scans vs index scans",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Index Scans"
+                    },
+                    {
+                      "formula": "query2",
+                      "alias": "Sequential Scans"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "query": "avg:postgresql.index_scans{$scope,$db} by {db}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    },
+                    {
+                      "query": "avg:postgresql.seq_scans{$scope,$db} by {db}",
+                      "data_source": "metrics",
+                      "name": "query2"
+                    }
+                  ],
+                  "style": {
+                    "palette": "green"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 1998962873985110,
+            "definition": {
+              "title": "Top function calls",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_table",
+              "requests": [
+                {
+                  "aggregator": "avg",
+                  "cell_display_mode": [
+                    "bar"
+                  ],
+                  "q": "avg:postgresql.index_scans{$scope,$db,$table} by {db}",
+                  "alias": "Index Scans",
+                  "limit": 50,
+                  "order": "desc"
+                },
+                {
+                  "q": "avg:postgresql.seq_scans{$scope,$db,$table} by {db}",
+                  "alias": "Sequential Scans",
+                  "cell_display_mode": [
+                    "bar"
+                  ],
+                  "aggregator": "avg"
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 6,
+              "y": 0,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 7413284956808278,
+            "definition": {
+              "title": "Sequential scans vs. week before",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Current"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "query": "sum:postgresql.seq_scans{$scope,$db,$table}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "green"
+                  },
+                  "display_type": "line"
+                },
+                {
+                  "formulas": [
+                    {
+                      "formula": "week_before(query1)",
+                      "alias": "Previous Week"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "query": "sum:postgresql.seq_scans{$scope,$db,$table}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "grey",
+                    "line_type": "dashed"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 1887563582446124,
+            "definition": {
+              "title": "Top function calls",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "limit": {
+                        "count": 10,
+                        "order": "desc"
+                      }
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "avg:postgresql.function.calls{$scope,$db,$table} by {function}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "avg"
+                    }
+                  ]
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 3,
+              "width": 6,
+              "height": 3
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": 2160806546189426,
+      "definition": {
+        "title": "Replication",
+        "title_align": "center",
+        "type": "group",
+        "background_color": "vivid_orange",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 1609850131661798,
+            "definition": {
+              "title": "Number of hosts with replication delay",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "count_nonzero(query1)",
+                      "alias": "Hosts with replication delay"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "sum:postgresql.replication_delay_bytes{$scope,$host} by {host}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "orange"
+                  },
+                  "display_type": "bars"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 3885088604074464,
+            "definition": {
+              "title": "Max replication delay",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "limit": {
+                        "count": 10,
+                        "order": "desc"
+                      }
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "max:postgresql.replication_delay{$scope,$host} by {host}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "avg"
+                    }
+                  ]
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 0,
+              "width": 6,
+              "height": 3
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": 4453639639662026,
+      "definition": {
+        "title": "Checkpoints",
+        "title_align": "center",
+        "type": "group",
         "background_color": "blue",
-        "font_size": "18",
-        "text_align": "center",
-        "show_tick": false,
-        "tick_pos": "50%",
-        "tick_edge": "bottom"
-      }
-    },
-    {
-      "id": 8581080208165878,
-      "layout": {
-        "x": 177,
-        "y": 7,
-        "width": 47,
-        "height": 55
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 2628267937704802,
+            "definition": {
+              "title": "Scheduled vs requested checkpoints",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Scheduled checkpoints performed"
+                    },
+                    {
+                      "formula": "query2",
+                      "alias": "Requested checkpoints performed"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "sum:postgresql.bgwriter.checkpoints_timed{$scope,$db}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    },
+                    {
+                      "query": "sum:postgresql.bgwriter.checkpoints_requested{$scope,$db}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query2"
+                    }
+                  ],
+                  "style": {
+                    "palette": "purple"
+                  },
+                  "display_type": "bars"
+                },
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Requested checkpoints performed"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "sum:postgresql.bgwriter.checkpoints_requested{$scope,$db}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "orange"
+                  },
+                  "display_type": "bars"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 4
+            }
+          }
+        ]
       },
-      "definition": {
-        "title": "",
-        "title_size": "16",
-        "title_align": "left",
-        "type": "log_stream",
-        "indexes": [],
-        "query": "source:postgresql",
-        "sort": {
-          "column": "time",
-          "order": "desc"
-        },
-        "columns": [
-          "core_host",
-          "core_service"
-        ],
-        "show_date_column": true,
-        "show_message_column": true,
-        "message_display": "expanded-md"
-      }
-    },
-    {
-      "id": 7175452850503336,
       "layout": {
-        "x": 177,
-        "y": 1,
-        "width": 47,
+        "x": 0,
+        "y": 0,
+        "width": 6,
         "height": 5
-      },
+      }
+    },
+    {
+      "id": 1127561260333130,
       "definition": {
-        "type": "note",
-        "content": "Logs",
+        "title": "Logs",
+        "title_align": "center",
+        "type": "group",
         "background_color": "blue",
-        "font_size": "18",
-        "text_align": "center",
-        "show_tick": false,
-        "tick_pos": "50%",
-        "tick_edge": "bottom"
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 8685226852632656,
+            "definition": {
+              "title": "",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "log_stream",
+              "indexes": [],
+              "query": "source:postgresql",
+              "sort": {
+                "column": "time",
+                "order": "desc"
+              },
+              "columns": [
+                "core_host",
+                "core_service"
+              ],
+              "show_date_column": true,
+              "show_message_column": true,
+              "message_display": "expanded-md"
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 6,
+        "y": 0,
+        "width": 6,
+        "height": 5
       }
     }
   ],
   "template_variables": [
     {
       "name": "scope",
-      "default": "*",
-      "prefix": null
+      "default": "*"
+    },
+    {
+      "name": "table",
+      "default": "*"
+    },
+    {
+      "name": "db",
+      "default": "*"
+    },
+    {
+      "name": "host",
+      "default": "*"
     }
   ],
-  "layout_type": "free",
+  "layout_type": "ordered",
   "is_read_only": true,
   "notify_list": [],
-  "id": "nf2-7jj-nbn"
+  "reflow_type": "fixed",
+  "id": "exk-fsj-54w"
 }

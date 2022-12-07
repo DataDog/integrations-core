@@ -1,40 +1,49 @@
 {
-  "display_name": "EKS Fargate",
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "name": "eks_fargate",
-  "metric_prefix": "eks.fargate.",
-  "metric_to_check": "eks.fargate.pods.running",
-  "creates_events": false,
-  "short_description": "Collect your Amazon EKS metrics, traces, and logs.",
-  "description": "Collect your Amazon EKS metrics, traces, and logs.",
-  "guid": "e9e58fb9-696b-4e3c-9058-c144a1d9a737",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "public_title": "Datadog-EKS fargate Integration",
-  "categories": [
-    "cloud",
-    "aws",
-    "log collection"
-  ],
-  "aliases": [
-    "/integrations/amazon_eks_fargate/"
-  ],
-  "type": "check",
-  "is_public": true,
-  "integration_id": "eks-fargate",
+  "manifest_version": "2.0.0",
+  "app_uuid": "f5919a4b-4142-4889-b9c0-6ecdab299ebb",
+  "app_id": "eks-fargate",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Collect your Amazon EKS metrics, traces, and logs.",
+    "title": "Amazon EKS on AWS Fargate",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Cloud",
+      "Category::AWS",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
-    },
-    "dashboards": {},
-    "monitors": {},
-    "service_checks": "assets/service_checks.json",
-    "logs": {},
-    "metrics_metadata": "metadata.csv"
+    "integration": {
+      "source_type_name": "EKS Fargate",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "eks.fargate.",
+        "check": "eks.fargate.pods.running",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    }
   }
 }

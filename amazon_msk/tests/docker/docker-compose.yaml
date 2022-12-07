@@ -1,0 +1,17 @@
+version: "3"
+
+services:
+  mock-msk-endpoint-jmx:
+    image: caddy:2.1.1-alpine
+    container_name: mock-msk-endpoint-jmx
+    volumes:
+      - ./exporter_jmx:/usr/share/caddy
+    ports:
+      - 11001:80
+  mock-msk-endpoint-node:
+    image: caddy:2.1.1-alpine
+    container_name: mock-msk-endpoint-node
+    volumes:
+      - ./exporter_node:/usr/share/caddy
+    ports:
+      - 11002:80

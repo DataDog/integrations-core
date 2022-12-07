@@ -1,0 +1,22 @@
+name: Kube metrics server
+files:
+- name: kube_metrics_server.yaml
+  options:
+  - template: init_config
+    options:
+      - template: init_config/openmetrics_legacy
+  - template: instances
+    options:
+    - template: instances/openmetrics_legacy
+      overrides:
+        prometheus_url.value.example: https://localhost:443/metrics
+        prometheus_url.display_priority: 1
+        prometheus_url.description: |
+          The URL where your application metrics are exposed by Prometheus.
+          It could be either the address of the metrics server service or
+          the address of the pod itself.
+          **Note**: Monitoring an exposed service of the metrics server
+          that is backed by more than one pod could lead to inaccurate metrics
+          because of load balancing. In this case, it is recommended to
+          enable endpoint checks alongside the service check and use Autodiscovery
+          to get the pod IP by setting `prometheus_url` to https://%%host%%:443/metrics

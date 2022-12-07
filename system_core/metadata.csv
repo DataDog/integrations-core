@@ -1,5 +1,26 @@
-metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-system.core.count,gauge,,core,,The number of CPU cores on the host,0,system,cpu cores
-system.core.user,gauge,,,,A given core's user-space CPU time,0,system,cpu user
-system.core.system,gauge,,,,A given core's system CPU time,0,system,cpu system
-system.core.idle,gauge,,,,A given core's idle CPU time,0,system,cpu idle
+metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
+system.core.count,gauge,,core,,The number of CPU cores on the host,0,system,cpu cores,
+system.core.user,gauge,,percent,,The percentage of time a given CPU core has spent in user mode,0,system,cpu user,
+system.core.user.total,gauge,,percent,,The percentage of time the whole CPU has spent in user mode,0,system,cpu user total,
+system.core.system,gauge,,percent,,The percentage of time a given CPU core has spent in kernel mode,0,system,cpu system,
+system.core.system.total,gauge,,percent,,The percentage of time the whole CPU has spent in kernel mode,0,system,cpu system total,
+system.core.idle,gauge,,percent,,The percentage of time a given CPU core has spent idle,0,system,cpu idle,
+system.core.idle.total,gauge,,percent,,The percentage of time the whole CPU has spent idle,0,system,cpu idle total,
+system.core.nice,gauge,,percent,,[Unix] The percentage of time a given CPU core has spent in niced (prioritized) processes in user mode,0,system,cpu nice,
+system.core.nice.total,gauge,,percent,,[Unix] The percentage of time the whole CPU has spent in niced (prioritized) processes in user mode,0,system,cpu nice total,
+system.core.guest,gauge,,percent,,[Linux] The percentage of time a given CPU core has spent running a virtual CPU for guest operating systems under the control of the Linux kernel,0,system,cpu guest,
+system.core.guest.total,gauge,,percent,,[Linux] The percentage of time the whole CPU has spent running a virtual CPU for guest operating systems under the control of the Linux kernel,0,system,cpu guest total,
+system.core.iowait,gauge,,percent,,[Linux] The percentage of time a given CPU core has spent waiting for I/O to complete,0,system,cpu iowait,
+system.core.iowait.total,gauge,,percent,,[Linux] The percentage of time the whole CPU has spent waiting for I/O to complete,0,system,cpu iowait total,
+system.core.irq,gauge,,percent,,"[Linux, BSD] The percentage of time a given CPU core has spent servicing hardware interrupts",0,system,cpu irq,
+system.core.irq.total,gauge,,percent,,"[Linux, BSD] The percentage of time the whole CPU has spent servicing hardware interrupts",0,system,cpu irq total,
+system.core.softirq,gauge,,percent,,"[Linux, BSD] The percentage of time a given CPU core has spent servicing software interrupts",0,system,cpu softirq,
+system.core.softirq.total,gauge,,percent,,"[Linux, BSD] The percentage of time the whole CPU has spent servicing software interrupts",0,system,cpu softirq total,
+system.core.guest_nice,gauge,,percent,,[Linux] The percentage of time a given CPU core has spent running a niced guest,0,system,cpu guest_nice,
+system.core.guest_nice.total,gauge,,percent,,[Linux] The percentage of time the whole CPU has spent running running a niced guest,0,system,cpu guest_nice total,
+system.core.steal,gauge,,percent,,[Linux] The percentage of time a given CPU core has spent running a virtual CPU for guest operating systems under the control of the Linux kernel,0,system,cpu steal,
+system.core.steal.total,gauge,,percent,,[Linux] The percentage of time a given CPU core has spent running a virtual CPU for guest operating systems under the control of the Linux kernel,0,system,cpu steal total,
+system.core.interrupt,gauge,,percent,,[Windows] The percentage of time a given CPU core has spent servicing hardware interrupts,0,system,cpu interrupt,
+system.core.interrupt.total,gauge,,percent,,[Windows] The percentage of time the whole CPU has spent servicing hardware interrupts,0,system,cpu interrupt total,
+system.core.dpc,gauge,,percent,,[Windows] The percentage of time a given CPU core has spent servicing deferred procedure calls (DPCs),0,system,cpu dpc,
+system.core.dpc.total,gauge,,percent,,[Windows] The percentage of time the whole CPU has spent servicing deferred procedure calls (DPCs),0,system,cpu dpc total,

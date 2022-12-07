@@ -8,27 +8,23 @@ files:
           - template: init_config/db
             overrides:
               global_custom_queries.value.example:
-                - metric_prefix: vertica
-                  query: <QUERY>
+                - query: <QUERY>
                   columns: <COLUMNS>
                   tags: <TAGS>
           - template: init_config/default
       - template: instances
         options:
           - name: db
-            required: true
-            description: The name of the database to establish a connection with.
+            description: The name of the database to establish a connection with, defaulting to the `username`.
             value:
               type: string
               example: <DATABASE_NAME>
           - name: server
-            required: true
             description: The hostname used to connect to the database.
             value:
               type: string
-              example: <SERVER>
+              example: localhost
           - name: port
-            required: true
             description: The port used to connect to the database.
             value:
               type: integer
@@ -55,7 +51,6 @@ files:
                 - disk_storage
                 - resource_usage
           - name: username
-            required: true
             description: The database user to authenticate as.
             value:
               type: string

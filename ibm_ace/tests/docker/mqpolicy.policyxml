@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<policies>
+    <policy policyType="MQEndpoint" policyName="mqpolicy" policyTemplate="MQEndpoint">
+        <connection>CLIENT</connection>
+        <destinationQueueManagerName>QM1</destinationQueueManagerName>
+        <queueManagerHostname>ibm-ace-mq</queueManagerHostname>
+        <listenerPortNumber>1414</listenerPortNumber>
+        <channelName>DEV.ADMIN.SVRCONN</channelName>
+        <securityIdentity>mqCredentials</securityIdentity>
+        <useSSL>False</useSSL>
+    </policy>
+</policies>

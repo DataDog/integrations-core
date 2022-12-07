@@ -2,6 +2,7 @@
     "author_name": "Datadog",
     "description": "### This dashboard allows you to monitor Kubernetes Jobs and CronJobs.\n",
     "layout_type": "ordered",
+    "reflow_type": "fixed",
     "template_variables": [
         {
             "default": "*",
@@ -126,7 +127,7 @@
                             "precision": 0,
                             "requests": [
                                 {
-                                    "aggregator": "sum",
+                                    "aggregator": "avg",
                                     "conditional_formats": [
                                         {
                                             "comparator": ">",
@@ -214,7 +215,7 @@
                             "precision": 0,
                             "requests": [
                                 {
-                                    "aggregator": "sum",
+                                    "aggregator": "avg",
                                     "conditional_formats": [
                                         {
                                             "comparator": ">",
@@ -1459,8 +1460,12 @@
             },
             "id": 1991208644233094,
             "layout": {
+                "x": 0,
+                "y": 28,
+                "width": 12,
+                "height": 14,
                 "is_column_break": true
-            }
+              }
         }
     ]
 }

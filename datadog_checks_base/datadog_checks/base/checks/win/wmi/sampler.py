@@ -390,34 +390,109 @@ class WMISampler(object):
         """
         Transform filters to a comprehensive WQL `WHERE` clause.
 
-        Specifying more than 1 filter defaults to an `OR` operator in the `WHERE` clause.
+        In the resulting `WHERE` clause:
+         * Specifying multiple filters defaults to an `OR` bool operator.
+            E.g.  - foo: x
+                  - bar: x
+                  result> foo OR bar
+         * Specifying multiple properties in a given filter defaults to an `AND` bool operator.
+            E.g.  - foo: x
+                    bar: x
+                  result> foo AND bar
+         * Specifying multiple conditions for a given property defaults to an `OR` bool operator unless specified otherwise.
+            E.g.  - foo: [x, y, z]
+                  result> foo = x OR  y OR  z
+                  - bar: {AND: [x, y, z]}
+                  result> foo = x AND y AND z
 
         Builds filter from a filter list.
         - filters: expects a list of dicts, typically:
                 - [{'Property': value},...] or
-                - [{'Property': [comparison_op, value]},...]
+                - [{'Property': [WQL_OP, value]},...] or
+                - [{'Property': {BOOL_OP: [WQL_OP, value]},...}]
 
-                NOTE: If we just provide a value we default to '=' comparison operator.
-                Otherwise, specify the operator in a list as above: [comp_op, value]
-                If we detect a wildcard character ('%') we will override the operator
+                NOTE: If we just provide a value we default to '=' WQL operator.
+                Otherwise, specify the operator in a list as above: [WQL_OP, value]
+                If we detect a wildcard character ('%') we will override the WQL operator
                 to use LIKE
         """
 
+        # https://docs.microsoft.com/en-us/windows/win32/wmisdk/wql-operators
+        # Not supported: ISA, IS and IS NOT
+        # Supported WQL operators.
+        WQL_OPERATORS = ('=', '<', '>', '<=', '>=', '!=', '<>', 'LIKE')
+
+        # Supported bool operators
+        # Also takes NOT which maps to NAND or NOR depending on default_bool_op
+        BOOL_OPERATORS = ('AND', 'OR', 'NAND', 'NOR')
+
         def build_where_clause(fltr):
+            def add_to_bool_ops(k, v):
+                if isinstance(v, (tuple, list)):
+                    if len(v) == 2 and isinstance(v[0], string_types) and v[0].upper() in WQL_OPERATORS:
+                        # Append if: [WQL_OP, value]
+                        #     PROPERTY: ['<WQL_OP>', '%bar']
+                        #     PROPERTY: { <BOOL_OP>: ['<WQL_OP>', 'foo']}
+                        bool_ops[k].append(v)
+                    else:
+                        # Extend if: list of string value/s, or list of [WQL_OP, value]
+                        #     PROPERTY: [foo%]
+                        #     PROPERTY: [['<WQL_OP>', '%bar']]
+                        #     PROPERTY: ['foo%', '%bar']
+                        #     PROPERTY: { <BOOL_OP>: [['<WQL_OP>', 'foo']]}
+                        #     PROPERTY: { <BOOL_OP>: ['foo%', '%bar']]}
+                        bool_ops[k].extend(v)
+                else:
+                    # Append if: string value
+                    #     PROPERTY: foo%
+                    #     PROPERTY: { <BOOL_OP>: foo%]}
+                    bool_ops[k].append(v)
+
             f = fltr.pop()
             wql = ""
             while f:
+                bool_ops = dict((op, []) for op in BOOL_OPERATORS)
+                default_bool_op = 'OR'
+                default_wql_op = '='
+                clauses = []
                 prop, value = f.popitem()
-
-                if isinstance(value, (tuple, list)) and len(value) == 2 and isinstance(value[0], string_types):
-                    oper = value[0]
-                    value = value[1]
-                elif isinstance(value, string_types) and '%' in value:
-                    oper = 'LIKE'
-                else:
-                    oper = '='
+                for p in and_props:
+                    if p.lower() in prop.lower():
+                        default_bool_op = 'AND'
+                        break
 
                 if isinstance(value, (tuple, list)):
+                    # e.g.
+                    # PROPERTY: [WQL_OP, val]
+                    # PROPERTY: [foo, bar]
+                    add_to_bool_ops(default_bool_op, value)
+                elif isinstance(value, dict):
+                    # e.g.
+                    # PROPERTY:
+                    #   BOOL_OP:
+                    #     - [WQL_OP, val]
+                    #     - foo
+                    #     - bar
+                    for k, v in iteritems(value):
+                        bool_op = default_bool_op
+                        if k.upper() in BOOL_OPERATORS:
+                            bool_op = k.upper()
+                        elif k.upper() == 'NOT':
+                            # map NOT to NOR or NAND
+                            bool_op = 'N{}'.format(default_bool_op)
+                        add_to_bool_ops(bool_op, v)
+                elif isinstance(value, string_types) and '%' in value:
+                    # Override operator to LIKE if wildcard detected
+                    # e.g.
+                    # PROPERTY: 'foo%'  -> PROPERTY LIKE 'foo%'
+                    add_to_bool_ops(default_bool_op, ['LIKE', value])
+                else:
+                    # Use default comparison operator
+                    # e.g.
+                    # PROPERTY: 'bar'   -> PROPERTY = 'foo'
+                    add_to_bool_ops(default_bool_op, [default_wql_op, value])
+
+                for bool_op, value in iteritems(bool_ops):
                     if not len(value):
                         continue
 
@@ -425,33 +500,28 @@ class WMISampler(object):
                         lambda x: (prop, x)
                         if isinstance(x, (tuple, list))
                         else (prop, ('LIKE', x))
-                        if '%' in x
-                        else (prop, (oper, x)),
+                        if isinstance(x, string_types) and '%' in x
+                        else (prop, (default_wql_op, x)),
                         value,
                     )
 
-                    bool_op = ' OR '
-                    for p in and_props:
-                        if p.lower() in prop.lower():
-                            bool_op = ' AND '
-                            break
-
-                    clause = bool_op.join(
+                    negate = True if bool_op.upper() in ('NAND', 'NOR') else False
+                    op = ' {} '.format(bool_op[1:] if negate else bool_op)
+                    clause = op.join(
                         [
-                            '{0} {1} \'{2}\''.format(k, v[0], v[1])
-                            if isinstance(v, (list, tuple))
-                            else '{0} = \'{1}\''.format(k, v)
+                            '{0} {1} \'{2}\''.format(k, v[0] if v[0].upper() in WQL_OPERATORS else default_wql_op, v[1])
                             for k, v in internal_filter
                         ]
                     )
 
-                    if bool_op.strip() == 'OR':
-                        wql += "( {clause} )".format(clause=clause)
+                    if negate:
+                        clauses.append("NOT ( {clause} )".format(clause=clause))
+                    elif len(value) > 1:
+                        clauses.append("( {clause} )".format(clause=clause))
                     else:
-                        wql += "{clause}".format(clause=clause)
+                        clauses.append("{clause}".format(clause=clause))
 
-                else:
-                    wql += "{property} {cmp} '{constant}'".format(property=prop, cmp=oper, constant=value)
+                wql += ' {} '.format(default_bool_op).join(clauses)
                 if f:
                     wql += " AND "
 

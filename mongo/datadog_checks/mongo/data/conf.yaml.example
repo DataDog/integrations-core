@@ -9,11 +9,11 @@ init_config:
     #
     # service: <SERVICE>
 
-## Every instance is scheduled independent of the others.
+## Every instance is scheduled independently of the others.
 #
 instances:
 
-    ## @param hosts - list of strings - required
+    ## @param hosts - string or list of strings - optional
     ## The host (and optional port number) where the mongod instance (or mongos instances for
     ## a sharded cluster) is running. You can specify a hostname, IP address, or UNIX domain
     ## socket. Specify as many hosts as appropriate for your deployment topology:
@@ -22,16 +22,20 @@ instances:
     ##   - For a replica set, specify the hostname of a mongod instance as listed in
     ##     the replica set configuration. You need one check instance per mongod instance
     ##     in order to collect replication metrics and events.
-    ##   - For a sharded cluster, specify the hostname(s) of the mongos instance(s).
+    ##   - For a sharded cluster, you need one check instance for each mongod instance in
+    ##     each shard (including the configsvr shard) as well as one additional check instance
+    ##     that connects to one (or more) mongos node.
     ##
     ## If the port number is not specified, the default port 27017 is used.
     ##
     ## Even if the host is an arbiter node, you still need to provide authentication credentials
     ## as the check will create an additional connection to the primary in this specific case.
+    ##
+    ## Do not specify more than one host here unless you are connecting to a mongos instance
+    ## and you want to balance requests performed by the agent to multiple mongos instances.
     #
   - hosts:
-      - <HOST_1>
-      - <HOST_2>:<PORT_2>
+      - <HOST>:<PORT>
 
     ## @param username - string - optional
     ## The username to use for authentication.
@@ -42,6 +46,14 @@ instances:
     ## The password to use for authentication.
     #
     # password: <PASSWORD>
+
+    ## @param connection_scheme - string - optional - default: mongodb
+    ## Use `mongodb` to identify that this is a string in the standard connection format. This is the default value.
+    ## In order to leverage the DNS seed list, use a connection_scheme of `mongodb+srv` rather than the standard
+    ## `mongodb`.
+    ## For more information, see: https://www.mongodb.com/docs/manual/reference/connection-string/
+    #
+    # connection_scheme: mongodb
 
     ## @param database - string - optional
     ## The database to collect metrics from.
@@ -59,6 +71,14 @@ instances:
     ## connect to the same host. Instead configure one check instance for each node.
     #
     # options: {}
+
+    ## @param dbnames - list of strings - optional
+    ## Set a list of the names of all databases to collect metrics from.
+    ## If this key does not exist, all metrics from all databases on the server will be collected.
+    #
+    # dbnames:
+    #   - one_database
+    #   - other_database
 
     ## @param replica_check - boolean - optional - default: true
     ## Whether or not to read from available replicas.
@@ -101,6 +121,42 @@ instances:
     ## Path to the ca_certs file.
     #
     # ssl_ca_certs: <SSL_CA_CERTS>
+
+    ## @param ssl_match_hostname - boolean - optional - default: true
+    ## If `False`, disables SSL hostname verification.
+    #
+    # ssl_match_hostname: true
+
+    ## @param tls - boolean - optional - default: false
+    ## If `True`, create the connection to the server using transport layer security.
+    #
+    # tls: false
+
+    ## @param tls_certificate_key_file - string - optional
+    ## A file containing the client certificate and private key. Implies tls=True.
+    #
+    # tls_certificate_key_file: <TLS_CERTIFICATE_KEY_FILE>
+
+    ## @param tls_ca_file - string - optional
+    ## A file containing one or a bundle of “certification authority” certificates, 
+    ## which are used to validate certificates passed from the other end of the connection. 
+    ## Implies tls=True.
+    #
+    # tls_ca_file: <TLS_CA_FILE>
+
+    ## @param tls_allow_invalid_hostnames - boolean - optional - default: false
+    ## If `True`, disables TLS hostname verification. tls_allow_invalid_hostnames=False implies tls=True. 
+    ## Think very carefully before setting this to True as that could make your application 
+    ## vulnerable to on-path attackers.
+    #
+    # tls_allow_invalid_hostnames: false
+
+    ## @param tls_allow_invalid_certificates - boolean - optional - default: false
+    ## If `True`, continues the TLS handshake regardless of the outcome of the certificate verification process. 
+    ## Think very carefully before setting this to True as that could make your application 
+    ## vulnerable to on-path attackers.
+    #
+    # tls_allow_invalid_certificates: false
 
     ## @param additional_metrics - list of strings - optional
     ## By default, the check collects a sample of metrics from MongoDB.
@@ -160,7 +216,7 @@ instances:
     ##
     ## <<< DEPRECATED >>>
     ##
-    ## Release: 8.0.0
+    ## Agent version: 8.0.0
     ## Migration: Use the following options instead:
     ##            hosts, username, password, database, options
     #
@@ -195,14 +251,25 @@ instances:
     #
     # empty_default_hostname: false
 
+    ## @param metric_patterns - mapping - optional
+    ## A mapping of metrics to include or exclude, with each entry being a regular expression.
+    ##
+    ## Metrics defined in `exclude` will take precedence in case of overlap.
+    #
+    # metric_patterns:
+    #   include:
+    #   - <INCLUDE_REGEX>
+    #   exclude:
+    #   - <EXCLUDE_REGEX>
+
 ## Log Section
 ##
-## type - required - Type of log input source (tcp / udp / file / windows_event)
+## type - required - Type of log input source (tcp / udp / file / windows_event).
 ## port / path / channel_path - required - Set port if type is tcp or udp.
 ##                                         Set path if type is file.
 ##                                         Set channel_path if type is windows_event.
-## source  - required - Attribute that defines which Integration sent the logs.
-## encoding - optional - For file specifies the file encoding, default is utf-8, other
+## source  - required - Attribute that defines which integration sent the logs.
+## encoding - optional - For file specifies the file encoding. Default is utf-8. Other
 ##                       possible values are utf-16-le and utf-16-be.
 ## service - optional - The name of the service that generates the log.
 ##                      Overrides any `service` defined in the `init_config` section.

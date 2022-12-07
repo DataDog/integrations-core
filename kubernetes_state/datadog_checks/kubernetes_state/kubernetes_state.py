@@ -26,24 +26,34 @@ except ImportError:
 METRIC_TYPES = ['counter', 'gauge']
 
 # As case can vary depending on Kubernetes versions, we match the lowercase string
-ALLOWED_WAITING_REASONS = ['errimagepull', 'imagepullbackoff', 'crashloopbackoff', 'containercreating']
+ALLOWED_WAITING_REASONS = [
+    'errimagepull',
+    'imagepullbackoff',
+    'crashloopbackoff',
+    'containercreating',
+    'createcontainererror',
+    'invalidimagename',
+]
 ALLOWED_TERMINATED_REASONS = ['oomkilled', 'containercannotrun', 'error']
 
 kube_labels_mapper = {
     'namespace': 'kube_namespace',
     'job': 'kube_job',
+    'job_name': 'kube_job',
     'cronjob': 'kube_cronjob',
     'pod': 'pod_name',
     'phase': 'pod_phase',
     'daemonset': 'kube_daemon_set',
     'replicationcontroller': 'kube_replication_controller',
     'replicaset': 'kube_replica_set',
-    'statefulset ': 'kube_stateful_set',
+    'statefulset': 'kube_stateful_set',
     'deployment': 'kube_deployment',
     'container': 'kube_container_name',
     'container_id': 'container_id',
     'image': 'image_name',
 }
+
+JOB_NAME_PATTERN = r"(-\d{4,10}$)"
 
 
 class KubernetesState(OpenMetricsBaseCheck):
@@ -83,7 +93,7 @@ class KubernetesState(OpenMetricsBaseCheck):
         generic_instances = [kubernetes_state_instance]
         super(KubernetesState, self).__init__(name, init_config, instances=generic_instances)
 
-        self.condition_to_status_positive = {'true': self.OK, 'false': self.CRITICAL, 'unknown': self.UNKNOWN}
+        self.condition_to_status_positive = {'true': self.OK, 'false': self.CRITICAL, 'unknown': self.WARNING}
 
         self.condition_to_status_negative = {'true': self.CRITICAL, 'false': self.OK, 'unknown': self.UNKNOWN}
 
@@ -92,9 +102,18 @@ class KubernetesState(OpenMetricsBaseCheck):
             'kube_persistentvolume_status_phase': {
                 'metric_name': 'persistentvolumes.by_phase',
                 'allowed_labels': ['storageclass', 'phase'],
+                'label_mapper_override': {
+                    'phase': 'phase'
+                },  # prevent kube_labels_mapper from converting the persistentvolume phase into pod_phase
             },
             'kube_service_spec_type': {'metric_name': 'service.count', 'allowed_labels': ['namespace', 'type']},
-            'kube_namespace_status_phase': {'metric_name': 'namespace.count', 'allowed_labels': ['phase']},
+            'kube_namespace_status_phase': {
+                'metric_name': 'namespace.count',
+                'allowed_labels': ['phase'],
+                'label_mapper_override': {
+                    'phase': 'phase'
+                },  # prevent kube_labels_mapper from converting the namespace phase tag into pod_phase
+            },
             'kube_replicaset_owner': {
                 'metric_name': 'replicaset.count',
                 'allowed_labels': ['namespace', 'owner_name', 'owner_kind'],
@@ -102,6 +121,10 @@ class KubernetesState(OpenMetricsBaseCheck):
             'kube_job_owner': {'metric_name': 'job.count', 'allowed_labels': ['namespace', 'owner_name', 'owner_kind']},
             'kube_deployment_status_observed_generation': {
                 'metric_name': 'deployment.count',
+                'allowed_labels': ['namespace'],
+            },
+            'kube_statefulset_status_observed_generation': {
+                'metric_name': 'statefulset.count',
                 'allowed_labels': ['namespace'],
             },
         }
@@ -130,6 +153,7 @@ class KubernetesState(OpenMetricsBaseCheck):
             'kube_replicaset_owner': self.count_objects_by_tags,
             'kube_job_owner': self.count_objects_by_tags,
             'kube_deployment_status_observed_generation': self.count_objects_by_tags,
+            'kube_statefulset_status_observed_generation': self.count_objects_by_tags,
         }
 
         # Handling cron jobs succeeded/failed counts
@@ -139,6 +163,9 @@ class KubernetesState(OpenMetricsBaseCheck):
         # Logic for Jobs
         self.job_succeeded_count = defaultdict(int)
         self.job_failed_count = defaultdict(int)
+
+        # Regex to extract cronjob from job names
+        self._job_name_re = re.compile(JOB_NAME_PATTERN)
 
     def check(self, instance):
         endpoint = instance.get('kube_state_url')
@@ -322,7 +349,6 @@ class KubernetesState(OpenMetricsBaseCheck):
                     'kube_replicationcontroller_metadata_generation',
                     'kube_replicationcontroller_status_observed_generation',
                     'kube_statefulset_metadata_generation',
-                    'kube_statefulset_status_observed_generation',
                     'kube_hpa_metadata_generation',
                     # kube_node_status_phase has no use case as a service check
                     'kube_node_status_phase',
@@ -426,6 +452,8 @@ class KubernetesState(OpenMetricsBaseCheck):
             ksm_instance['label_to_hostname'] = 'node'
             clustername = get_clustername()
             if clustername != "":
+                # some cluster names are not valid RFC1123, but as we use them as a hostAlias we want them to be valid.
+                clustername = clustername.replace("_", "-")
                 ksm_instance['label_to_hostname_suffix'] = "-" + clustername
 
         if 'labels_mapper' in ksm_instance and not isinstance(ksm_instance['labels_mapper'], dict):
@@ -477,18 +505,25 @@ class KubernetesState(OpenMetricsBaseCheck):
         if bool(sample[self.SAMPLE_VALUE]) is False:
             return  # Ignore if gauge is not 1 and we are not processing the pod phase check
 
+        metric_name = scraper_config['namespace'] + '.node.by_condition'
+        metric_tags = []
+        for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS]):
+            metric_tags += self._build_tags(label_name, label_value, scraper_config)
+        self.gauge(
+            metric_name,
+            sample[self.SAMPLE_VALUE],
+            tags=tags + metric_tags,
+            hostname=self.get_hostname_for_sample(sample, scraper_config),
+        )
+
         label_value, condition_map = self._get_metric_condition_map(base_sc_name, sample[self.SAMPLE_LABELS])
         service_check_name = condition_map['service_check_name']
         mapping = condition_map['mapping']
 
-        node = self._label_to_tag('node', sample[self.SAMPLE_LABELS], scraper_config)
-        condition = self._label_to_tag('condition', sample[self.SAMPLE_LABELS], scraper_config)
-        message = "{} is currently reporting {} = {}".format(node, condition, label_value)
-
         if condition_map['service_check_name'] is None:
             self.log.debug("Unable to handle %s - unknown condition %s", service_check_name, label_value)
         else:
-            self.service_check(service_check_name, mapping[label_value], tags=tags, message=message)
+            self.service_check(service_check_name, mapping[label_value], tags=tags)
 
     def _get_metric_condition_map(self, base_sc_name, labels):
         if base_sc_name == 'kubernetes_state.node':
@@ -547,12 +582,23 @@ class KubernetesState(OpenMetricsBaseCheck):
             tags += self._build_tags(tag_name or name, value, scraper_config)
         return tags
 
+    def _get_job_tags(self, lname, lvalue, scraper_config):
+        """
+        Returns kube_job and kube_cronjob tags in a list.
+        """
+        trimmed_job, was_trimmed = self._trim_job_tag(lvalue)
+        tags = self._build_tags(lname, trimmed_job, scraper_config)
+        if was_trimmed:
+            tags += self._build_tags('kube_cronjob', trimmed_job, scraper_config)
+        return tags
+
     def _trim_job_tag(self, name):
         """
         Trims suffix of job names if they match -(\\d{4,10}$)
+        Returns the trimmed name and a boolean indicating whether the name was trimmed.
         """
-        pattern = r"(-\d{4,10}$)"
-        return re.sub(pattern, '', name)
+        trimmed = self._job_name_re.sub('', name)
+        return trimmed, trimmed != name
 
     def _extract_job_timestamp(self, name):
         """
@@ -571,7 +617,7 @@ class KubernetesState(OpenMetricsBaseCheck):
     # Also submits as an aggregated count with minimal tags so it is
     # visualisable over time per namespace and phase
     def kube_pod_status_phase(self, metric, scraper_config):
-        """ Phase a pod is in. """
+        """Phase a pod is in."""
         metric_name = scraper_config['namespace'] + '.pod.status_phase'
         status_phase_counter = Counter()
 
@@ -633,7 +679,7 @@ class KubernetesState(OpenMetricsBaseCheck):
         )
 
     def kube_cronjob_next_schedule_time(self, metric, scraper_config):
-        """ Time until the next schedule """
+        """Time until the next schedule"""
         # Used as a service check so that one can be alerted if the cronjob's next schedule is in the past
         check_basename = scraper_config['namespace'] + '.cronjob.on_schedule_check'
         curr_time = int(time.time())
@@ -658,8 +704,7 @@ class KubernetesState(OpenMetricsBaseCheck):
             tags = []
             for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS]):
                 if label_name == 'job' or label_name == 'job_name':
-                    trimmed_job = self._trim_job_tag(label_value)
-                    tags += self._build_tags(label_name, trimmed_job, scraper_config)
+                    tags += self._get_job_tags(label_name, label_value, scraper_config)
                 else:
                     tags += self._build_tags(label_name, label_value, scraper_config)
             self.service_check(service_check_name, self.OK, tags=tags + scraper_config['custom_tags'])
@@ -670,8 +715,7 @@ class KubernetesState(OpenMetricsBaseCheck):
             tags = []
             for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS]):
                 if label_name == 'job' or label_name == 'job_name':
-                    trimmed_job = self._trim_job_tag(label_value)
-                    tags += self._build_tags(label_name, trimmed_job, scraper_config)
+                    tags += self._get_job_tags(label_name, label_value, scraper_config)
                 else:
                     tags += self._build_tags(label_name, label_value, scraper_config)
             self.service_check(service_check_name, self.CRITICAL, tags=tags + scraper_config['custom_tags'])
@@ -682,9 +726,8 @@ class KubernetesState(OpenMetricsBaseCheck):
             tags = [] + scraper_config['custom_tags']
             for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS]):
                 if label_name == 'job' or label_name == 'job_name':
-                    trimmed_job = self._trim_job_tag(label_value)
+                    tags += self._get_job_tags(label_name, label_value, scraper_config)
                     job_ts = self._extract_job_timestamp(label_value)
-                    tags += self._build_tags(label_name, trimmed_job, scraper_config)
                 else:
                     tags += self._build_tags(label_name, label_value, scraper_config)
             if job_ts is not None:  # if there is a timestamp, this is a Cron Job
@@ -700,9 +743,8 @@ class KubernetesState(OpenMetricsBaseCheck):
             tags = [] + scraper_config['custom_tags']
             for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS]):
                 if label_name == 'job' or label_name == 'job_name':
-                    trimmed_job = self._trim_job_tag(label_value)
+                    tags += self._get_job_tags(label_name, label_value, scraper_config)
                     job_ts = self._extract_job_timestamp(label_value)
-                    tags += self._build_tags(label_name, trimmed_job, scraper_config)
                 else:
                     tags += self._build_tags(label_name, label_value, scraper_config)
             if job_ts is not None:  # if there is a timestamp, this is a Cron Job
@@ -713,7 +755,7 @@ class KubernetesState(OpenMetricsBaseCheck):
                 self.job_succeeded_count[frozenset(tags)] += sample[self.SAMPLE_VALUE]
 
     def kube_node_status_condition(self, metric, scraper_config):
-        """ The ready status of a cluster node. v1.0+"""
+        """The ready status of a cluster node. v1.0+"""
         base_check_name = scraper_config['namespace'] + '.node'
         metric_name = scraper_config['namespace'] + '.nodes.by_condition'
         by_condition_counter = Counter()
@@ -741,7 +783,7 @@ class KubernetesState(OpenMetricsBaseCheck):
             self.gauge(metric_name, count, tags=list(tags))
 
     def kube_node_status_ready(self, metric, scraper_config):
-        """ The ready status of a cluster node (legacy)"""
+        """The ready status of a cluster node (legacy)"""
         service_check_name = scraper_config['namespace'] + '.node.ready'
         for sample in metric.samples:
             node_tags = self._label_to_tags("node", sample[self.SAMPLE_LABELS], scraper_config)
@@ -753,7 +795,7 @@ class KubernetesState(OpenMetricsBaseCheck):
             )
 
     def kube_node_status_out_of_disk(self, metric, scraper_config):
-        """ Whether the node is out of disk space (legacy)"""
+        """Whether the node is out of disk space (legacy)"""
         service_check_name = scraper_config['namespace'] + '.node.out_of_disk'
         for sample in metric.samples:
             node_tags = self._label_to_tags("node", sample[self.SAMPLE_LABELS], scraper_config)
@@ -765,7 +807,7 @@ class KubernetesState(OpenMetricsBaseCheck):
             )
 
     def kube_node_status_memory_pressure(self, metric, scraper_config):
-        """ Whether the node is in a memory pressure state (legacy)"""
+        """Whether the node is in a memory pressure state (legacy)"""
         service_check_name = scraper_config['namespace'] + '.node.memory_pressure'
         for sample in metric.samples:
             node_tags = self._label_to_tags("node", sample[self.SAMPLE_LABELS], scraper_config)
@@ -777,7 +819,7 @@ class KubernetesState(OpenMetricsBaseCheck):
             )
 
     def kube_node_status_disk_pressure(self, metric, scraper_config):
-        """ Whether the node is in a disk pressure state (legacy)"""
+        """Whether the node is in a disk pressure state (legacy)"""
         service_check_name = scraper_config['namespace'] + '.node.disk_pressure'
         for sample in metric.samples:
             node_tags = self._label_to_tags("node", sample[self.SAMPLE_LABELS], scraper_config)
@@ -789,7 +831,7 @@ class KubernetesState(OpenMetricsBaseCheck):
             )
 
     def kube_node_status_network_unavailable(self, metric, scraper_config):
-        """ Whether the node is in a network unavailable state (legacy)"""
+        """Whether the node is in a network unavailable state (legacy)"""
         service_check_name = scraper_config['namespace'] + '.node.network_unavailable'
         for sample in metric.samples:
             node_tags = self._label_to_tags("node", sample[self.SAMPLE_LABELS], scraper_config)
@@ -801,7 +843,7 @@ class KubernetesState(OpenMetricsBaseCheck):
             )
 
     def kube_node_spec_unschedulable(self, metric, scraper_config):
-        """ Whether a node can schedule new pods. """
+        """Whether a node can schedule new pods."""
         metric_name = scraper_config['namespace'] + '.node.status'
         statuses = ('schedulable', 'unschedulable')
         if metric.type in METRIC_TYPES:
@@ -817,7 +859,7 @@ class KubernetesState(OpenMetricsBaseCheck):
             self.log.error("Metric type %s unsupported for metric %s", metric.type, metric.name)
 
     def kube_resourcequota(self, metric, scraper_config):
-        """ Quota and current usage by resource type. """
+        """Quota and current usage by resource type."""
         metric_base_name = scraper_config['namespace'] + '.resourcequota.{}.{}'
         suffixes = {'used': 'used', 'hard': 'limit'}
         if metric.type in METRIC_TYPES:
@@ -834,7 +876,7 @@ class KubernetesState(OpenMetricsBaseCheck):
             self.log.error("Metric type %s unsupported for metric %s", metric.type, metric.name)
 
     def kube_limitrange(self, metric, scraper_config):
-        """ Resource limits by consumer type. """
+        """Resource limits by consumer type."""
         # type's cardinality's low: https://github.com/kubernetes/kubernetes/blob/v1.6.1/pkg/api/v1/types.go#L3872-L3879
         # idem for resource: https://github.com/kubernetes/kubernetes/blob/v1.6.1/pkg/api/v1/types.go#L3342-L3352
         # idem for constraint: https://github.com/kubernetes/kubernetes/blob/v1.6.1/pkg/api/v1/types.go#L3882-L3901
@@ -868,44 +910,50 @@ class KubernetesState(OpenMetricsBaseCheck):
             self.log.error("Metric type %s unsupported for metric %s", metric.type, metric.name)
 
     def sum_values_by_tags(self, metric, scraper_config):
-        """ Sum values by allowed tags and submit counts as gauges. """
+        """Sum values by allowed tags and submit counts as gauges."""
         config = self.object_count_params[metric.name]
         metric_name = "{}.{}".format(scraper_config['namespace'], config['metric_name'])
         object_counter = Counter()
 
         for sample in metric.samples:
-            tags = []
-            for l in config['allowed_labels']:
-                tag = self._label_to_tag(l, sample[self.SAMPLE_LABELS], scraper_config)
-                if tag is None:
-                    tag = self._format_tag(l, "unknown", scraper_config)
-                tags.append(tag)
-            tags += scraper_config['custom_tags']
+            tags = self._tags_for_count(sample, config, scraper_config)
             object_counter[tuple(sorted(tags))] += sample[self.SAMPLE_VALUE]
 
         for tags, count in iteritems(object_counter):
             self.gauge(metric_name, count, tags=list(tags))
 
     def count_objects_by_tags(self, metric, scraper_config):
-        """ Count objects by allowed tags and submit counts as gauges. """
+        """Count objects by allowed tags and submit counts as gauges."""
         config = self.object_count_params[metric.name]
         metric_name = "{}.{}".format(scraper_config['namespace'], config['metric_name'])
         object_counter = Counter()
 
         for sample in metric.samples:
-            tags = []
-            for l in config['allowed_labels']:
-                tag = self._label_to_tag(l, sample[self.SAMPLE_LABELS], scraper_config)
-                if tag is None:
-                    tag = self._format_tag(l, "unknown", scraper_config)
-                tags.append(tag)
-            tags += scraper_config['custom_tags']
+            tags = self._tags_for_count(sample, config, scraper_config)
             object_counter[tuple(sorted(tags))] += 1
 
         for tags, count in iteritems(object_counter):
             self.gauge(metric_name, count, tags=list(tags))
 
-    def _build_tags(self, label_name, label_value, scraper_config, hostname=None):
+    def _tags_for_count(self, sample, count_config, scraper_config):
+        """
+        Extracts tags for object count elements.
+        """
+        tags = []
+        for l in count_config['allowed_labels']:
+            value = sample[self.SAMPLE_LABELS].get(l, None)
+            if not value:
+                tag = self._format_tag(l, "unknown", scraper_config)
+                tags.append(tag)
+                continue
+            l_mapper_override = count_config.get('label_mapper_override', None)
+            allowed_tags = self._build_tags(l, value, scraper_config, l_mapper_override=l_mapper_override)
+            if allowed_tags:
+                tags += allowed_tags
+        tags += scraper_config['custom_tags']
+        return tags
+
+    def _build_tags(self, label_name, label_value, scraper_config, hostname=None, l_mapper_override=None):
         """
         Build a list of formatted tags from `label_name` parameter. It also depend of the
         check configuration ('keep_ksm_labels' parameter)
@@ -915,6 +963,9 @@ class KubernetesState(OpenMetricsBaseCheck):
         tag_name = scraper_config['labels_mapper'].get(label_name, label_name)
         # then try to use the kube_labels_mapper
         kube_tag_name = kube_labels_mapper.get(tag_name, tag_name)
+        # try label mapper override
+        if l_mapper_override:
+            kube_tag_name = l_mapper_override.get(tag_name, tag_name)
         label_value = to_string(label_value).lower()
         tags.append('{}:{}'.format(to_string(kube_tag_name), label_value))
         if self.keep_ksm_labels and (kube_tag_name != tag_name):

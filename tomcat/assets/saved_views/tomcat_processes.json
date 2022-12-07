@@ -14,11 +14,8 @@
       "showArguments"
     ],
     "filter": {
-      "text": "",
-      "groups": [],
-      "tags": [
-        "integration:tomcat"
-      ]
+      "query_filter": "integration:tomcat",
+      "groups": []
     },
     "selected_top_graph": "scatterplot",
     "enabled_columns": [

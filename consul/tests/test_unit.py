@@ -155,8 +155,9 @@ def test_get_nodes_with_service_critical(aggregator):
     aggregator.assert_metric('consul.catalog.services_count', value=1, tags=expected_tags)
 
 
-def test_consul_request(aggregator, instance):
+def test_consul_request(aggregator, instance, mocker):
     consul_check = ConsulCheck(common.CHECK_NAME, {}, [consul_mocks.MOCK_CONFIG])
+    mocker.patch("datadog_checks.base.utils.serialization.json.loads")
     with mock.patch("datadog_checks.consul.consul.requests.get") as mock_requests_get:
         consul_check.consul_request("foo")
         url = "{}/{}".format(instance["url"], "foo")
@@ -176,7 +177,7 @@ def test_consul_request(aggregator, instance):
 
 
 def test_service_checks(aggregator):
-    consul_check = ConsulCheck(common.CHECK_NAME, {}, [consul_mocks.MOCK_CONFIG])
+    consul_check = ConsulCheck(common.CHECK_NAME, {}, [consul_mocks.MOCK_CONFIG_DISABLE_SERVICE_TAG])
     my_mocks = consul_mocks._get_consul_mocks()
     my_mocks['consul_request'] = consul_mocks.mock_get_health_check
     consul_mocks.mock_check(consul_check, my_mocks)
@@ -186,8 +187,8 @@ def test_service_checks(aggregator):
         "consul_datacenter:dc1",
         "check:server-loadbalancer",
         "consul_service_id:server-loadbalancer",
-        "service:server-loadbalancer",
         "consul_service:server-loadbalancer",
+        "consul_node:node-1",
     ]
     aggregator.assert_service_check('consul.check', status=ConsulCheck.CRITICAL, tags=expected_tags, count=1)
 
@@ -195,28 +196,33 @@ def test_service_checks(aggregator):
         "consul_datacenter:dc1",
         "check:server-api",
         "consul_service_id:server-loadbalancer",
-        "service:server-loadbalancer",
         "consul_service:server-loadbalancer",
+        "consul_node:node-1",
     ]
     aggregator.assert_service_check('consul.check', status=ConsulCheck.OK, tags=expected_tags, count=1)
 
     expected_tags = [
         "consul_datacenter:dc1",
         "check:server-api",
-        "service:server-loadbalancer",
         "consul_service:server-loadbalancer",
+        "consul_node:node-1",
     ]
     aggregator.assert_service_check('consul.check', status=ConsulCheck.OK, tags=expected_tags, count=1)
 
-    expected_tags = ["consul_datacenter:dc1", "check:server-api", "consul_service_id:server-loadbalancer"]
+    expected_tags = [
+        "consul_datacenter:dc1",
+        "check:server-api",
+        "consul_service_id:server-loadbalancer",
+        "consul_node:node-1",
+    ]
     aggregator.assert_service_check('consul.check', status=ConsulCheck.OK, tags=expected_tags, count=1)
 
     expected_tags = [
         "consul_datacenter:dc1",
         "check:server-status-empty",
         "consul_service_id:server-empty",
-        "service:server-empty",
         "consul_service:server-empty",
+        "consul_node:node-1",
     ]
     aggregator.assert_service_check('consul.check', status=ConsulCheck.UNKNOWN, tags=expected_tags, count=1)
 
@@ -235,6 +241,7 @@ def test_service_checks_disable_service_tag(aggregator):
         'check:server-loadbalancer',
         'consul_service_id:server-loadbalancer',
         'consul_service:server-loadbalancer',
+        'consul_node:node-1',
     ]
     aggregator.assert_service_check('consul.check', status=ConsulCheck.CRITICAL, tags=expected_tags, count=1)
 
@@ -243,13 +250,24 @@ def test_service_checks_disable_service_tag(aggregator):
         'check:server-api',
         'consul_service_id:server-loadbalancer',
         'consul_service:server-loadbalancer',
+        'consul_node:node-1',
     ]
     aggregator.assert_service_check('consul.check', status=ConsulCheck.OK, tags=expected_tags, count=1)
 
-    expected_tags = ['consul_datacenter:dc1', 'check:server-api', 'consul_service:server-loadbalancer']
+    expected_tags = [
+        'consul_datacenter:dc1',
+        'check:server-api',
+        'consul_service:server-loadbalancer',
+        'consul_node:node-1',
+    ]
     aggregator.assert_service_check('consul.check', status=ConsulCheck.OK, tags=expected_tags, count=1)
 
-    expected_tags = ['consul_datacenter:dc1', 'check:server-api', 'consul_service_id:server-loadbalancer']
+    expected_tags = [
+        'consul_datacenter:dc1',
+        'check:server-api',
+        'consul_service_id:server-loadbalancer',
+        'consul_node:node-1',
+    ]
     aggregator.assert_service_check('consul.check', status=ConsulCheck.OK, tags=expected_tags, count=1)
 
     expected_tags = [
@@ -257,6 +275,7 @@ def test_service_checks_disable_service_tag(aggregator):
         'check:server-status-empty',
         'consul_service_id:server-empty',
         'consul_service:server-empty',
+        'consul_node:node-1',
     ]
     aggregator.assert_service_check('consul.check', status=ConsulCheck.UNKNOWN, tags=expected_tags, count=1)
 
@@ -489,9 +508,10 @@ def test_network_latency_checks(aggregator):
         ),
     ],
 )
-def test_config(test_case, extra_config, expected_http_kwargs):
+def test_config(test_case, extra_config, expected_http_kwargs, mocker):
     instance = extra_config
     check = ConsulCheck(common.CHECK_NAME, {}, instances=[instance])
+    mocker.patch("datadog_checks.base.utils.serialization.json.loads")
 
     with mock.patch('datadog_checks.base.utils.http.requests') as r:
         r.get.return_value = mock.MagicMock(status_code=200)
@@ -499,7 +519,13 @@ def test_config(test_case, extra_config, expected_http_kwargs):
         check.check(None)
 
         http_wargs = dict(
-            auth=mock.ANY, cert=mock.ANY, headers=mock.ANY, proxies=mock.ANY, timeout=mock.ANY, verify=mock.ANY
+            auth=mock.ANY,
+            cert=mock.ANY,
+            headers=mock.ANY,
+            proxies=mock.ANY,
+            timeout=mock.ANY,
+            verify=mock.ANY,
+            allow_redirects=mock.ANY,
         )
         http_wargs.update(expected_http_kwargs)
         r.get.assert_called_with('/v1/status/leader', **http_wargs)

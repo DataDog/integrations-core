@@ -8,18 +8,21 @@ from datadog_checks.dev import get_docker_hostname, get_here
 
 HERE = get_here()
 HOST = get_docker_hostname()
+FIXTURE_DIR = os.path.join(HERE, 'fixtures')
 
-DATANODE_URI = 'http://{}:50070/'.format(HOST)
+DATANODE_URI = 'http://{}:9870/'.format(HOST)
 
 CUSTOM_TAGS = ['optional:tag1']
 
 TEST_USERNAME = 'AzureDiamond'
 TEST_PASSWORD = 'hunter2'
 
-INSTANCE_INTEGRATION = {"hdfs_datanode_jmx_uri": "http://{}:50075".format(HOST)}
+INSTANCE_INTEGRATION = {"hdfs_datanode_jmx_uri": "http://{}:9864".format(HOST)}
 
 HDFS_RAW_VERSION = os.environ.get('HDFS_RAW_VERSION')
 HDFS_IMAGE_TAG = os.environ.get('HDFS_IMAGE_TAG')
+
+OPTIONAL_METRICS = ['hdfs.datanode.num_blocks_failed_to_uncache']
 
 EXPECTED_METRICS = [
     'hdfs.datanode.dfs_remaining',
@@ -59,7 +62,7 @@ HDFS_DATANODE_METRICS_VALUES = {
     'hdfs.datanode.num_blocks_cached': 0,
     'hdfs.datanode.num_failed_volumes': 0,
     'hdfs.datanode.num_blocks_failed_to_cache': 0,
-    'hdfs.datanode.num_blocks_failed_to_uncache': 0,
+    # 'hdfs.datanode.num_blocks_failed_to_uncache': 0, metric is flakey in 3.1.3
 }
 
 HDFS_DATANODE_METRIC_TAGS = ['datanode_url:{}'.format(DATANODE_URI)]

@@ -14,11 +14,8 @@
       "showArguments"
     ],
     "filter": {
-      "text": "",
-      "groups": [],
-      "tags": [
-        "integration:couch"
-      ]
+      "query_filter": "integration:couch",
+      "groups": []
     },
     "selected_top_graph": "scatterplot",
     "enabled_columns": [

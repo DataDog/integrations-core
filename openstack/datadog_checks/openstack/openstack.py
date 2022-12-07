@@ -394,8 +394,8 @@ class OpenStackProjectScope(OpenStackScope):
 
             assert (
                 t_id and t_id not in service_catalog.nova_endpoint
-            ), """Incorrect use of append_tenant_id, please inspect the service catalog response of your Identity server.
-                   You may need to disable this flag if your Nova service url contains the tenant_id already"""
+            ), """Incorrect use of append_tenant_id, please inspect the service catalog response of your Identity \
+            server. You may need to disable this flag if your Nova service url contains the tenant_id already """
 
             service_catalog.nova_endpoint = urljoin(service_catalog.nova_endpoint, t_id)
 
@@ -748,7 +748,7 @@ class OpenStackCheck(AgentCheck):
         return self.get_scope_for_instance(instance).service_catalog.nova_endpoint
 
     def _parse_uptime_string(self, uptime):
-        """ Parse u' 16:53:48 up 1 day, 21:34,  3 users,  load average: 0.04, 0.14, 0.19\n' """
+        """Parse u' 16:53:48 up 1 day, 21:34,  3 users,  load average: 0.04, 0.14, 0.19\n'"""
         uptime = uptime.strip()
         load_averages = uptime[uptime.find('load average:') :].split(':')[1].split(',')
         uptime_sec = uptime.split(',')[0]
@@ -966,7 +966,7 @@ class OpenStackCheck(AgentCheck):
         url = '{0}/servers/{1}/diagnostics'.format(self.get_nova_endpoint(), server_id)
         try:
             server_stats = self._make_request_with_auth_fallback(url, headers)
-        except InstancePowerOffFailure:  # 409 response code came back fro nova
+        except InstancePowerOffFailure:  # 409 response code came back for nova
             self.log.debug("Server %s is powered off and cannot be monitored", server_id)
             del self.server_details_by_id[server_id]
         except requests.exceptions.HTTPError as e:

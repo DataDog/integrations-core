@@ -15,9 +15,11 @@ from datadog_checks.dev.docker import get_container_ip
 from .common import (
     BUCKET_NAME,
     CB_CONTAINER_NAME,
+    COUCHBASE_MAJOR_VERSION,
     CUSTOM_TAGS,
     DEFAULT_INSTANCE,
     HERE,
+    INDEX_STATS_URL,
     PASSWORD,
     PORT,
     QUERY_URL,
@@ -38,7 +40,7 @@ def instance_query():
         'server': URL,
         'user': USER,
         'password': PASSWORD,
-        'timeout': 0.5,
+        'timeout': 1,
         'tags': CUSTOM_TAGS,
         'query_monitoring_url': QUERY_URL,
     }
@@ -50,9 +52,21 @@ def instance_sg():
         'server': URL,
         'user': USER,
         'password': PASSWORD,
-        'timeout': 0.5,
+        'timeout': 1,
         'tags': CUSTOM_TAGS,
         'sync_gateway_url': SG_URL,
+    }
+
+
+@pytest.fixture
+def instance_index_stats():
+    return {
+        'server': URL,
+        'user': USER,
+        'password': PASSWORD,
+        'timeout': 1,
+        'tags': CUSTOM_TAGS,
+        'index_stats_url': INDEX_STATS_URL,
     }
 
 
@@ -61,17 +75,20 @@ def dd_environment():
     """
     Spin up and initialize couchbase
     """
-
+    conditions = [
+        WaitFor(couchbase_container),
+        WaitFor(couchbase_init),
+        WaitFor(couchbase_setup),
+        WaitFor(node_stats),
+        WaitFor(bucket_stats),
+    ]
+    if COUCHBASE_MAJOR_VERSION >= 7:
+        conditions.append(WaitFor(load_sample_bucket))
     with docker_run(
         compose_file=os.path.join(HERE, 'compose', 'standalone.compose'),
         env_vars={'CB_CONTAINER_NAME': CB_CONTAINER_NAME},
-        conditions=[
-            WaitFor(couchbase_container),
-            WaitFor(couchbase_init),
-            WaitFor(couchbase_setup),
-            WaitFor(node_stats),
-            WaitFor(bucket_stats),
-        ],
+        conditions=conditions,
+        attempts=2,
     ):
         yield DEFAULT_INSTANCE
 
@@ -154,7 +171,7 @@ def couchbase_init():
         '--services',
         'data,index,fts,query',
         '--cluster-ramsize',
-        '256',
+        '512',
         '--cluster-index-ramsize',
         '256',
         '--cluster-fts-ramsize',
@@ -164,6 +181,35 @@ def couchbase_init():
 
     r = requests.get('{}/pools/default'.format(URL), auth=(USER, PASSWORD))
     return r.status_code == requests.codes.ok
+
+
+def load_sample_bucket():
+    """
+    Load sample data bucket
+    """
+
+    # Resources used:
+    # https://docs.couchbase.com/server/current/manage/manage-settings/install-sample-buckets.html
+
+    bucket_loader_args = [
+        'docker',
+        'exec',
+        CB_CONTAINER_NAME,
+        'cbdocloader',
+        '-c',
+        'localhost:{}'.format(PORT),
+        '-u',
+        USER,
+        '-p',
+        PASSWORD,
+        '-d',
+        '/opt/couchbase/samples/gamesim-sample.zip',
+        '-b',
+        'cb_bucket',
+        '-m',
+        '256',
+    ]
+    subprocess.check_call(bucket_loader_args)
 
 
 def node_stats():

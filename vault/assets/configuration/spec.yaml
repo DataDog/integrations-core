@@ -4,16 +4,38 @@ files:
   options:
   - template: init_config
     options:
-    - template: init_config/http
-    - template: init_config/default
+    - template: init_config/openmetrics
   - template: instances
     options:
+    - name: use_openmetrics
+      description: |
+        Use the latest OpenMetrics implementation for more features, better performance,
+        and more appropriate metric types by default. If running on Agent v6, you must
+        set the `python_version` option in `datadog.yaml` to `"3"`.
+
+        In a future release, this option will be set to `true` by default.
+
+        Note: To see the configuration options for the legacy implementation (Agent 7.34 or older),
+        https://github.com/DataDog/integrations-core/blob/7.34.x/vault/datadog_checks/vault/data/conf.yaml.example
+      enabled: true
+      value:
+        display_default: false
+        example: true
+        type: boolean
     - name: api_url
       required: true
       description: URL of the Vault to query.
       value:
         example: http://localhost:8200/v1
+        pattern: \w+
         type: string
+    - name: collect_secondary_dr
+      description: |
+        Enable this option to collect metrics from the OpenMetrics endpoint if the
+        connected instance is a secondary in a Vault replication cluster.
+      value:
+        example: false
+        type: boolean
     - name: detect_leader
       description: Whether or not this instance should report cluster leader change events.
       value:
@@ -36,15 +58,12 @@ files:
       value:
         example: false
         type: boolean
-    - name: disable_legacy_cluster_tag
-      description: Enable to stop submitting the tag `cluster_name`, which has been renamed to `vault_cluster`.
-      value:
-        type: boolean
-        display_default: false
-        example: true
       enabled: true
-    - template: instances/http
-    - template: instances/default
+    - template: instances/openmetrics
+      overrides:
+        openmetrics_endpoint.required: false
+        openmetrics_endpoint.hidden: true
+        auth_token.hidden: true
   - template: logs
     example:
     - type: file

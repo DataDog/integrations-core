@@ -1,6 +1,6 @@
 name: Kube_scheduler
 files:
-- name: kube-scheduler.yaml
+- name: kube_scheduler.yaml
   options:
   - template: init_config
     options:
@@ -25,6 +25,12 @@ files:
       value:
         type: string
         example: auto
+    - name: health_url
+      description: |
+        URL for the kube-scheduler health endpoint.
+      value:
+        type: string
+        example: http://localhost:10251/healthz
     - template: instances/openmetrics_legacy
       overrides:
         prometheus_url.value.example: http://localhost:10251/metrics
@@ -40,19 +46,42 @@ files:
     options: []
   - template: instances
     options:
+    - name: possible_prometheus_urls
+      required: false
+      description: |
+        The URLs to try to get your application metrics that are exposed by Prometheus.
+        The check will try each URLs in the list and will use the first working one.
+        One of possible_prometheus_urls or prometheus_url parameter is required.
+      enabled: true
+      value:
+        type: array
+        items:
+          type: string
+        example:
+          - https://%%host%%:10259/metrics
+          - https://localhost:10259/metrics
+          - http://%%host%%:10251/metrics
+          - http://localhost:10251/metrics
     - name: prometheus_url
-      required: true
-      description: The URL where your application metrics are exposed by Prometheus.
+      required: false
+      description: |
+        The URL where your application metrics are exposed by Prometheus.
+        One of possible_prometheus_urls or prometheus_url parameter is required.
       value:
         example: http://%%host%%:10251/metrics
         type: string
     - name: bearer_token_auth
+      required: false
       description: |
         Used if you are using RBACs and need the Agent to authenticate
-        against the APIServer to retrieve metrics. Default to true.
+        against the APIServer to retrieve metrics.
+      enabled: true
       value:
-        type: boolean
-        example: true
+        example: tls_only
+        default: false
+        anyOf:
+        - type: boolean
+        - type: string
     - name: bearer_token_path
       description: Used to specify the path where the service account token is located.
       value:
@@ -60,6 +89,8 @@ files:
         example: /var/run/secrets/kubernetes.io/serviceaccount/token
     - name: ssl_verify
       description: Used to verify self signed certificates.
+      enabled: true
       value:
         type: boolean
         example: false
+        display_default: true

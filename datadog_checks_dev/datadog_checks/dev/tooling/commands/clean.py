@@ -13,7 +13,7 @@ from .console import CONTEXT_SETTINGS, abort, echo_info, echo_success, echo_wait
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help="Remove a project's build artifacts")
-@click.argument('check', autocompletion=complete_testable_checks, required=False)
+@click.argument('check', shell_complete=complete_testable_checks, required=False)
 @click.option(
     '--compiled-only', '-c', is_flag=True, help=f"Remove compiled files only ({', '.join(sorted(DELETE_EVERYWHERE))})."
 )

@@ -1,267 +1,260 @@
 {
-    "title": "Kong Overview",
-    "description": "## Kong\n\nThis dashboard provides a high-level overview of your Kong instances so you can monitor metrics related to connections, table counts, and total requests.\n\nFor further reading on monitoring Kong, see:\n[Official Kong integration docs](https://docs.datadoghq.com/integrations/kong/)\n\nClone this template to make changes and add your own graphs and widgets.",
-    "widgets": [
-        {
-            "id": 0,
-            "definition": {
-                "type": "image",
-                "url": "/static/images/logos/kong_large.svg",
-                "sizing": "fit"
+  "title": "Kong Overview [Legacy]",
+  "description": "## Kong\n\nThis dashboard provides a high-level overview of your Kong instances so you can monitor metrics related to connections, table counts, and total requests.\n\nFor further reading on monitoring Kong, see:\n[Official Kong integration docs](https://docs.datadoghq.com/integrations/kong/)\n\nClone this template to make changes and add your own graphs and widgets.",
+  "widgets": [
+    {
+      "id": 0,
+      "layout": {
+        "x": 2,
+        "y": 2,
+        "width": 38,
+        "height": 23
+      },
+      "definition": {
+        "type": "image",
+        "url": "/static/images/logos/kong_large.svg",
+        "sizing": "fit"
+      }
+    },
+    {
+      "id": 1,
+      "layout": {
+        "x": 20,
+        "y": 26,
+        "width": 20,
+        "height": 15
+      },
+      "definition": {
+        "title": "Total requests rate (per minute)",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": false,
+        "type": "timeseries",
+        "requests": [
+          {
+            "response_format": "timeseries",
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "query1",
+                "query": "avg:kong.total_requests{$scope} by {host}"
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "per_minute(query1)"
+              }
+            ],
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
             },
-            "layout": {
-                "x": 1,
-                "y": 1,
-                "width": 13,
-                "height": 8
-            }
+            "display_type": "bars"
+          }
+        ],
+        "yaxis": {
+          "include_zero": true,
+          "scale": "linear",
+          "label": "",
+          "min": "auto",
+          "max": "auto"
         },
-        {
-            "id": 1,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "per_minute(avg:kong.total_requests{*} by {host})",
-                        "display_type": "bars",
-                        "style": {
-                            "palette": "dog_classic",
-                            "line_type": "solid",
-                            "line_width": "normal"
-                        }
-                    }
-                ],
-                "custom_links": [],
-                "yaxis": {
-                    "label": "",
-                    "scale": "linear",
-                    "min": "auto",
-                    "max": "auto",
-                    "include_zero": true
-                },
-                "title": "Total requests rate (per minute)",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": false
+        "custom_links": []
+      }
+    },
+    {
+      "id": 2,
+      "layout": {
+        "x": 2,
+        "y": 26,
+        "width": 17,
+        "height": 15
+      },
+      "definition": {
+        "title": "Status",
+        "title_size": "16",
+        "title_align": "center",
+        "type": "check_status",
+        "check": "kong.can_connect",
+        "grouping": "cluster",
+        "group_by": [],
+        "tags": [
+          "*"
+        ]
+      }
+    },
+    {
+      "id": 3,
+      "layout": {
+        "x": 41,
+        "y": 2,
+        "width": 71,
+        "height": 6
+      },
+      "definition": {
+        "type": "note",
+        "content": "Connections",
+        "background_color": "gray",
+        "font_size": "24",
+        "text_align": "center",
+        "show_tick": true,
+        "tick_pos": "50%",
+        "tick_edge": "bottom"
+      }
+    },
+    {
+      "id": 5,
+      "layout": {
+        "x": 41,
+        "y": 10,
+        "width": 35,
+        "height": 15
+      },
+      "definition": {
+        "title": "Active connections",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": false,
+        "legend_size": "0",
+        "type": "timeseries",
+        "requests": [
+          {
+            "response_format": "timeseries",
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "query1",
+                "query": "avg:kong.connections_active{$scope} by {host}"
+              }
+            ],
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
             },
-            "layout": {
-                "x": 1,
-                "y": 26,
-                "width": 39,
-                "height": 15
-            }
+            "display_type": "bars"
+          }
+        ],
+        "yaxis": {
+          "include_zero": true,
+          "scale": "linear",
+          "label": "",
+          "min": "auto",
+          "max": "auto"
         },
-        {
-            "id": 2,
-            "definition": {
-                "type": "check_status",
-                "title": "Status",
-                "title_size": "16",
-                "title_align": "center",
-                "check": "kong.can_connect",
-                "grouping": "cluster",
-                "group_by": [],
-                "tags": [
-                    "*"
-                ]
+        "custom_links": []
+      }
+    },
+    {
+      "id": 6,
+      "layout": {
+        "x": 77,
+        "y": 10,
+        "width": 35,
+        "height": 15
+      },
+      "definition": {
+        "title": "Idle connections",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": false,
+        "legend_size": "0",
+        "type": "timeseries",
+        "requests": [
+          {
+            "response_format": "timeseries",
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "query1",
+                "query": "avg:kong.connections_waiting{$scope} by {host}"
+              }
+            ],
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
             },
-            "layout": {
-                "x": 15,
-                "y": 1,
-                "width": 12,
-                "height": 8
-            }
+            "display_type": "bars"
+          }
+        ],
+        "yaxis": {
+          "include_zero": true,
+          "scale": "linear",
+          "label": "",
+          "min": "auto",
+          "max": "auto"
         },
-        {
-            "id": 3,
-            "definition": {
-                "type": "note",
-                "content": "Connections",
-                "background_color": "gray",
-                "font_size": "24",
-                "text_align": "center",
-                "show_tick": true,
-                "tick_pos": "50%",
-                "tick_edge": "bottom"
+        "custom_links": []
+      }
+    },
+    {
+      "id": 7,
+      "layout": {
+        "x": 41,
+        "y": 26,
+        "width": 71,
+        "height": 15
+      },
+      "definition": {
+        "title": "Rate of accepted and handled connections",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": false,
+        "legend_size": "0",
+        "type": "timeseries",
+        "requests": [
+          {
+            "response_format": "timeseries",
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "query1",
+                "query": "avg:kong.connections_handled{$scope} by {host}"
+              },
+              {
+                "data_source": "metrics",
+                "name": "query2",
+                "query": "avg:kong.connections_accepted{$scope} by {host}"
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "per_minute(query1)"
+              },
+              {
+                "formula": "per_minute(query2)"
+              }
+            ],
+            "style": {
+              "palette": "cool",
+              "line_type": "solid",
+              "line_width": "normal"
             },
-            "layout": {
-                "x": 41,
-                "y": 2,
-                "width": 71,
-                "height": 6
-            }
+            "display_type": "bars"
+          }
+        ],
+        "yaxis": {
+          "include_zero": true,
+          "scale": "linear",
+          "label": "",
+          "min": "auto",
+          "max": "auto"
         },
-        {
-            "id": 4,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "avg:kong.table.items{*} by {table}",
-                        "display_type": "bars",
-                        "style": {
-                            "palette": "dog_classic",
-                            "line_type": "solid",
-                            "line_width": "normal"
-                        }
-                    }
-                ],
-                "custom_links": [],
-                "yaxis": {
-                    "label": "",
-                    "scale": "linear",
-                    "min": "auto",
-                    "max": "auto",
-                    "include_zero": true
-                },
-                "title": "Items per table",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": false,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 1,
-                "y": 10,
-                "width": 39,
-                "height": 15
-            }
-        },
-        {
-            "id": 5,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "avg:kong.connections_active{*} by {host}",
-                        "display_type": "bars",
-                        "style": {
-                            "palette": "dog_classic",
-                            "line_type": "solid",
-                            "line_width": "normal"
-                        }
-                    }
-                ],
-                "custom_links": [],
-                "yaxis": {
-                    "label": "",
-                    "scale": "linear",
-                    "min": "auto",
-                    "max": "auto",
-                    "include_zero": true
-                },
-                "title": "Active connections",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": false,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 41,
-                "y": 10,
-                "width": 35,
-                "height": 15
-            }
-        },
-        {
-            "id": 6,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "avg:kong.connections_waiting{*} by {host}",
-                        "display_type": "bars",
-                        "style": {
-                            "palette": "dog_classic",
-                            "line_type": "solid",
-                            "line_width": "normal"
-                        }
-                    }
-                ],
-                "custom_links": [],
-                "yaxis": {
-                    "label": "",
-                    "scale": "linear",
-                    "min": "auto",
-                    "max": "auto",
-                    "include_zero": true
-                },
-                "title": "Idle connections",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": false,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 77,
-                "y": 10,
-                "width": 35,
-                "height": 15
-            }
-        },
-        {
-            "id": 7,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "per_minute(avg:kong.connections_handled{*} by {host}), per_minute(avg:kong.connections_accepted{*} by {host})",
-                        "display_type": "bars",
-                        "style": {
-                            "palette": "cool",
-                            "line_type": "solid",
-                            "line_width": "normal"
-                        }
-                    }
-                ],
-                "custom_links": [],
-                "yaxis": {
-                    "label": "",
-                    "scale": "linear",
-                    "min": "auto",
-                    "max": "auto",
-                    "include_zero": true
-                },
-                "title": "Rate of accepted and handled connections",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": false,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 41,
-                "y": 26,
-                "width": 71,
-                "height": 15
-            }
-        },
-        {
-            "id": 8,
-            "definition": {
-                "type": "query_value",
-                "requests": [
-                    {
-                        "q": "avg:kong.table.count{*}",
-                        "aggregator": "avg"
-                    }
-                ],
-                "custom_links": [],
-                "title": "Number of Tables",
-                "title_size": "16",
-                "title_align": "left",
-                "precision": 0
-            },
-            "layout": {
-                "x": 28,
-                "y": 1,
-                "width": 12,
-                "height": 8
-            }
-        }
-    ],
-    "template_variables": [],
-    "layout_type": "free",
-    "is_read_only": true,
-    "notify_list": [],
-    "id": 30262
+        "custom_links": []
+      }
+    }
+  ],
+  "template_variables": [
+    {
+      "name": "scope",
+      "available_values": [],
+      "default": "*"
+    }
+  ],
+  "layout_type": "free",
+  "is_read_only": true,
+  "notify_list": [],
+  "id": 30304
 }

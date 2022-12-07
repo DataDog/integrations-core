@@ -10,7 +10,13 @@ from datadog_checks.base.checks.openmetrics.v2.scraper import OpenMetricsCompati
 from datadog_checks.base.utils.serialization import json
 
 from .config_models import ConfigMixin
-from .metrics import construct_jmx_metrics_config, construct_node_metrics_config
+from .metrics import METRICS_WITH_NAME_AS_LABEL, construct_jmx_metrics_config, construct_node_metrics_config
+from .utils import construct_boto_config
+
+try:
+    import datadog_agent
+except ImportError:
+    from datadog_checks.base.stubs import datadog_agent
 
 
 class AmazonMskCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
@@ -30,33 +36,43 @@ class AmazonMskCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
         self._endpoint_prefix = None
         self._static_tags = None
         self._service_check_tags = None
-
+        proxies = self.instance.get('proxy', init_config.get('proxy', datadog_agent.get_config('proxy')))
+        try:
+            self._boto_config = construct_boto_config(self.instance.get('boto_config', {}), proxies=proxies)
+        except TypeError as e:
+            self.log.debug("Got error when constructing Config object: %s", str(e))
+            self.log.debug("Boto Config parameters: %s", self.instance.get('boto_config'))
+            self._boto_config = None
         self.check_initializations.append(self.parse_config)
 
     def refresh_scrapers(self):
         # Create assume_role credentials if assume_role ARN is specified in config
         assume_role = self.config.assume_role
-        if assume_role:
-            self.log.info('Assume role %s found. Creating temporary credentials using role...', assume_role)
-            sts = boto3.client('sts')
-            response = sts.assume_role(
-                RoleArn=assume_role, RoleSessionName='dd-msk-check-session', DurationSeconds=3600
-            )
-            access_key_id = response['Credentials']['AccessKeyId']
-            secret_access_key = response['Credentials']['SecretAccessKey']
-            session_token = response['Credentials']['SessionToken']
-            client = boto3.client(
-                'kafka',
-                aws_access_key_id=access_key_id,
-                aws_secret_access_key=secret_access_key,
-                aws_session_token=session_token,
-                region_name=self._region_name,
-            )
-        else:
-            # Always create a new client to account for changes in auth
-            client = boto3.client('kafka', region_name=self._region_name)
-
         try:
+            if assume_role:
+                self.log.info('Assume role %s found. Creating temporary credentials using role...', assume_role)
+                sts = boto3.client('sts')
+                response = sts.assume_role(
+                    RoleArn=assume_role, RoleSessionName='dd-msk-check-session', DurationSeconds=3600
+                )
+                access_key_id = response['Credentials']['AccessKeyId']
+                secret_access_key = response['Credentials']['SecretAccessKey']
+                session_token = response['Credentials']['SessionToken']
+                client = boto3.client(
+                    'kafka',
+                    aws_access_key_id=access_key_id,
+                    aws_secret_access_key=secret_access_key,
+                    aws_session_token=session_token,
+                    config=self._boto_config,
+                    region_name=self._region_name,
+                )
+            else:
+                # Always create a new client to account for changes in auth
+                client = boto3.client(
+                    'kafka',
+                    config=self._boto_config,
+                    region_name=self._region_name,
+                )
             response = client.list_nodes(ClusterArn=self.config.cluster_arn)
             self.log.debug('Received list_nodes response: %s', json.dumps(response))
         except Exception as e:
@@ -73,18 +89,40 @@ class AmazonMskCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
 
             for endpoint in broker_info['Endpoints']:
                 for port, metrics in self._exporter_data:
-                    url = f'{self._endpoint_prefix}://{endpoint}:{port}{self.config.prometheus_metrics_path}'
-                    if url in self.scrapers:
-                        scrapers[url] = self.scrapers[url]
-                        continue
+                    if port:
+                        url = f'{self._endpoint_prefix}://{endpoint}:{port}{self.config.prometheus_metrics_path}'
+                        if url in self.scrapers:
+                            scrapers[url] = self.scrapers[url]
+                            continue
 
-                    scraper = self.create_scraper({'openmetrics_endpoint': url, 'metrics': metrics, **self.instance})
-                    scraper.static_tags += self._static_tags
-                    scraper.set_dynamic_tags(broker_id_tag)
+                        scraper = self.create_scraper(
+                            {'openmetrics_endpoint': url, 'metrics': metrics, **self.instance}
+                        )
+                        scraper.static_tags += self._static_tags
+                        scraper.set_dynamic_tags(broker_id_tag)
+                        self.configure_additional_transformers(scraper.metric_transformer.transformer_data)
 
-                    scrapers[url] = scraper
+                        scrapers[url] = scraper
 
         self.scrapers = scrapers
+
+    def configure_transformer_with_metric_label(self, legacy_name, new_name, label_name, metric_type):
+        method = getattr(self, metric_type)
+
+        def transform(metric, sample_data, runtime_data):
+            for sample, tags, hostname in sample_data:
+                method(legacy_name, sample.value, tags=tags, hostname=hostname)
+
+                tag = sample.labels.pop(label_name)
+                tags.remove('{}:{}'.format(label_name, tag))
+
+                method('{}.{}'.format(new_name, tag), sample.value, tags=tags, hostname=hostname)
+
+        return transform
+
+    def configure_additional_transformers(self, transformer_data):
+        for metric, data in METRICS_WITH_NAME_AS_LABEL.items():
+            transformer_data[metric] = None, self.configure_transformer_with_metric_label(**data)
 
     def parse_config(self):
         self._region_name = self.config.region_name

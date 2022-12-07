@@ -14,11 +14,8 @@
       "showArguments"
     ],
     "filter": {
-      "text": "",
-      "groups": [],
-      "tags": [
-        "integration:openstack"
-      ]
+      "query_filter": "integration:openstack",
+      "groups": []
     },
     "selected_top_graph": "scatterplot",
     "enabled_columns": [

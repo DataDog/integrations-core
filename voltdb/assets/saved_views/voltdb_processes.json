@@ -14,11 +14,8 @@
       "showArguments"
     ],
     "filter": {
-      "text": "",
-      "groups": [],
-      "tags": [
-        "integration:voltdb"
-      ]
+      "query_filter": "integration:voltdb",
+      "groups": []
     },
     "selected_top_graph": "scatterplot",
     "enabled_columns": [

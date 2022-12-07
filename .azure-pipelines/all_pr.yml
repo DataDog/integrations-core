@@ -12,12 +12,25 @@ pr:
 trigger: none
 
 variables:
-  PIP_CACHE_DIR: $(Pipeline.Workspace)/.cache/pip
-  DDEV_COLOR: 1
+  - template: './templates/common-variables.yml'
+
+resources:
+  containers:
+    - ${{ if eq(variables['System.PullRequest.IsFork'], 'False') }}:
+      - container: dd_agent
+        image: gcr.io/datadoghq/agent:latest
+        ports:
+          - 8127:8126
+        env:
+          DD_API_KEY: $(DD_CI_API_KEY)
+          DD_HOSTNAME: "none"
+          DD_INSIDE_CI: "true"
 
 jobs:
 - template: './templates/test-all-checks.yml'
   parameters:
+    ${{ if eq(variables['System.PullRequest.IsFork'], 'False') }}:
+      ddtrace_flag: '--ddtrace'
     pip_cache_config:
       key: 'pip | $(Agent.OS) | datadog_checks_base/datadog_checks/base/data/agent_requirements.in'
       restoreKeys: |

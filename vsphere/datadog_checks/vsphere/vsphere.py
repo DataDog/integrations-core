@@ -15,7 +15,7 @@ from six import iteritems
 
 from datadog_checks.base import AgentCheck, is_affirmative, to_string
 from datadog_checks.base.checks.libs.timer import Timer
-from datadog_checks.base.utils.time import get_current_datetime
+from datadog_checks.base.utils.time import get_current_datetime, get_timestamp
 from datadog_checks.vsphere.api import APIConnectionError, VSphereAPI
 from datadog_checks.vsphere.api_rest import VSphereRestAPI
 from datadog_checks.vsphere.cache import InfrastructureCache, MetricsMetadataCache
@@ -33,6 +33,7 @@ from datadog_checks.vsphere.resource_filters import TagFilter
 from datadog_checks.vsphere.types import (
     CounterId,
     InfrastructureData,
+    InfrastructureDataItem,
     InstanceConfig,
     MetricName,
     MorBatch,
@@ -89,6 +90,8 @@ class VSphereCheck(AgentCheck):
         self.thread_pool = ThreadPoolExecutor(max_workers=self._config.threads_count)
         self.check_initializations.append(self.initiate_api_connection)
 
+        self.last_connection_time = get_timestamp()
+
     def initiate_api_connection(self):
         # type: () -> None
         try:
@@ -98,13 +101,25 @@ class VSphereCheck(AgentCheck):
             self.api = VSphereAPI(self._config, self.log)
             self.log.debug("Connected")
         except APIConnectionError:
+            # Clear the API connection object if the authentication fails
+            self.api = cast(VSphereAPI, None)
             self.log.error("Cannot authenticate to vCenter API. The check will not run.")
             self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self._config.base_tags, hostname=None)
             raise
 
         if self._config.should_collect_tags:
             try:
-                self.api_rest = VSphereRestAPI(self._config, self.log)
+                version_info = self.api.get_version()
+                major_version = int(version_info.version_str[0])
+
+                if major_version >= 7:
+                    try:
+                        # Try to connect to REST API vSphere v7
+                        self.api_rest = VSphereRestAPI(self._config, self.log, False)
+                        return
+                    except Exception:
+                        self.log.debug("REST API of vSphere 7 not detected, falling back to the old API.")
+                self.api_rest = VSphereRestAPI(self._config, self.log, True)
             except Exception as e:
                 self.log.error("Cannot connect to vCenter REST API. Tags won't be collected. Error: %s", e)
 
@@ -228,7 +243,12 @@ class VSphereCheck(AgentCheck):
                 # Hosts are not considered as parents of the VMs they run, we use the `runtime.host` property
                 # to get the name of the ESXi host
                 runtime_host = properties.get("runtime.host")
-                runtime_host_props = infrastructure_data[runtime_host] if runtime_host else {}
+                runtime_host_props = {}  # type: InfrastructureDataItem
+                if runtime_host:
+                    if runtime_host in infrastructure_data:
+                        runtime_host_props = infrastructure_data.get(runtime_host, {})
+                    else:
+                        self.log.debug("Missing runtime.host details for VM %s", mor_name)
                 runtime_hostname = to_string(runtime_host_props.get("name", "unknown"))
                 tags.append('vsphere_host:{}'.format(runtime_hostname))
 
@@ -446,7 +466,7 @@ class VSphereCheck(AgentCheck):
     def collect_metrics_async(self):
         # type: () -> None
         """Run queries in multiple threads and wait for completion."""
-        tasks = []
+        tasks = []  # type: List[Any]
         try:
             for query_specs in self.make_query_specs():
                 tasks.append(self.thread_pool.submit(self.query_metrics_wrapper, query_specs))
@@ -486,7 +506,7 @@ class VSphereCheck(AgentCheck):
     ):  # type: (...) -> Generator[MorBatch, None, None]
         """Iterates over mor and generate batches with a fixed number of metrics to query.
         Querying multiple resource types in the same call is error prone if we query a cluster metric. Indeed,
-        cluster metrics result in an unpredicatable number of internal metric queries which all count towards
+        cluster metrics result in an unpredictable number of internal metric queries which all count towards
         max_query_metrics. Therefore often collecting a single cluster metric can make the whole call to fail. That's
         why we should never batch cluster metrics with anything else.
         """
@@ -590,6 +610,13 @@ class VSphereCheck(AgentCheck):
         # type: (Any) -> None
         self._hostname = datadog_agent.get_hostname()
         # Assert the health of the vCenter API by getting the version, and submit the service_check accordingly
+
+        now = get_timestamp()
+        if self.last_connection_time + self._config.connection_reset_timeout <= now or self.api is None:
+            self.last_connection_time = now
+            self.log.debug("Refreshing vCenter connection")
+            self.initiate_api_connection()
+
         try:
             version_info = self.api.get_version()
             if self.is_metadata_collection_enabled():

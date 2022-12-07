@@ -4,11 +4,9 @@
 import pytest
 from six import PY2
 
-from datadog_checks.dev.tooling.specs.configuration.consumers.example import DESCRIPTION_LINE_LENGTH_LIMIT
+from datadog_checks.dev.tooling.configuration.consumers.example import DESCRIPTION_LINE_LENGTH_LIMIT
 
 from ..utils import get_example_consumer, normalize_yaml
-
-pytestmark = [pytest.mark.conf, pytest.mark.conf_consumer, pytest.mark.conf_consumer_example]
 
 
 def test_option_no_section():
@@ -158,7 +156,7 @@ def test_section_hidden():
     assert not errors
     assert contents == normalize_yaml(
         """
-        ## Every instance is scheduled independent of the others.
+        ## Every instance is scheduled independently of the others.
         #
         instances:
 
@@ -314,12 +312,12 @@ def test_section_example_indent():
 
         ## Log Section
         ##
-        ## type - required - Type of log input source (tcp / udp / file / windows_event)
+        ## type - required - Type of log input source (tcp / udp / file / windows_event).
         ## port / path / channel_path - required - Set port if type is tcp or udp.
         ##                                         Set path if type is file.
         ##                                         Set channel_path if type is windows_event.
-        ## source  - required - Attribute that defines which Integration sent the logs.
-        ## encoding - optional - For file specifies the file encoding, default is utf-8, other
+        ## source  - required - Attribute that defines which integration sent the logs.
+        ## encoding - optional - For file specifies the file encoding. Default is utf-8. Other
         ##                       possible values are utf-16-le and utf-16-be.
         ## service - optional - The name of the service that generates the log.
         ##                      Overrides any `service` defined in the `init_config` section.
@@ -378,12 +376,12 @@ def test_section_example_indent_required():
 
         ## Log Section
         ##
-        ## type - required - Type of log input source (tcp / udp / file / windows_event)
+        ## type - required - Type of log input source (tcp / udp / file / windows_event).
         ## port / path / channel_path - required - Set port if type is tcp or udp.
         ##                                         Set path if type is file.
         ##                                         Set channel_path if type is windows_event.
-        ## source  - required - Attribute that defines which Integration sent the logs.
-        ## encoding - optional - For file specifies the file encoding, default is utf-8, other
+        ## source  - required - Attribute that defines which integration sent the logs.
+        ## encoding - optional - For file specifies the file encoding. Default is utf-8. Other
         ##                       possible values are utf-16-le and utf-16-be.
         ## service - optional - The name of the service that generates the log.
         ##                      Overrides any `service` defined in the `init_config` section.
@@ -439,7 +437,7 @@ def test_section_multiple_required():
             #
             # foo: <FOO>
 
-        ## Every instance is scheduled independent of the others.
+        ## Every instance is scheduled independently of the others.
         #
         instances:
 
@@ -489,7 +487,7 @@ def test_section_multiple_no_required():
             #
             # foo: <FOO>
 
-        ## Every instance is scheduled independent of the others.
+        ## Every instance is scheduled independently of the others.
         #
         instances:
 
@@ -544,7 +542,7 @@ def test_section_multiple_required_not_first():
             #
             # foo: <FOO>
 
-        ## Every instance is scheduled independent of the others.
+        ## Every instance is scheduled independently of the others.
         #
         instances:
 
@@ -955,7 +953,7 @@ def test_deprecation():
             - name: foo
               description: foo words
               deprecation:
-                Release: 8.0.0
+                Agent version: 8.0.0
                 Migration: |
                   do this
                   and that
@@ -978,7 +976,7 @@ def test_deprecation():
             ##
             ## <<< DEPRECATED >>>
             ##
-            ## Release: 8.0.0
+            ## Agent version: 8.0.0
             ## Migration: do this
             ##            and that
             #
@@ -1012,7 +1010,7 @@ def test_template():
     assert not errors
     assert contents == normalize_yaml(
         """
-        ## Every instance is scheduled independent of the others.
+        ## Every instance is scheduled independently of the others.
         #
         instances:
 
@@ -1062,7 +1060,7 @@ def test_template_recursion():
     assert not errors
     assert contents == normalize_yaml(
         """
-        ## Every instance is scheduled independent of the others.
+        ## Every instance is scheduled independently of the others.
         #
         instances:
 
@@ -1099,6 +1097,17 @@ def test_template_recursion():
             ## This is useful for cluster-level checks.
             #
             # empty_default_hostname: false
+
+            ## @param metric_patterns - mapping - optional
+            ## A mapping of metrics to include or exclude, with each entry being a regular expression.
+            ##
+            ## Metrics defined in `exclude` will take precedence in case of overlap.
+            #
+            # metric_patterns:
+            #   include:
+            #   - <INCLUDE_REGEX>
+            #   exclude:
+            #   - <EXCLUDE_REGEX>
         """
     )
 
@@ -1128,7 +1137,7 @@ def test_no_options():
         #
         init_config:
 
-        ## Every instance is scheduled independent of the others.
+        ## Every instance is scheduled independently of the others.
         #
         instances:
 
@@ -1263,7 +1272,7 @@ def test_compact_example_nested():
     assert not errors
     assert contents == normalize_yaml(
         """
-        ## Every instance is scheduled independent of the others.
+        ## Every instance is scheduled independently of the others.
         #
         instances:
 
@@ -1416,7 +1425,7 @@ def test_enabled_override_required():
             #
             foo: <FOO>
 
-        ## Every instance is scheduled independent of the others.
+        ## Every instance is scheduled independently of the others.
         #
         instances:
 
@@ -1456,7 +1465,7 @@ def test_option_multiple_types():
     assert not errors
     assert contents == normalize_yaml(
         """
-        ## Every instance is scheduled independent of the others.
+        ## Every instance is scheduled independently of the others.
         #
         instances:
 
@@ -1503,7 +1512,7 @@ def test_option_multiple_types_nested():
     assert not errors
     assert contents == normalize_yaml(
         """
-        ## Every instance is scheduled independent of the others.
+        ## Every instance is scheduled independently of the others.
         #
         instances:
 
@@ -1512,5 +1521,194 @@ def test_option_multiple_types_nested():
             ## words
             #
             # foo: <FOO>
+        """
+    )
+
+
+def test_option_multiple_instances_defined():
+    consumer = get_example_consumer(
+        """
+        name: foo
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          options:
+          - template: instances
+            multiple_instances_defined: true
+            options:
+            - name: instance_1
+              description: Description of the first instance
+              options:
+              - name: foo
+                description: words
+                value:
+                  type: string
+            - name: instance_2
+              description: |
+                Description of the second instance
+                Multiple lines
+              options:
+              - name: bar
+                description: description
+                value:
+                  type: string
+
+        """
+    )
+
+    files = consumer.render()
+    contents, errors = files['test.yaml.example']
+    assert not errors
+    assert contents == normalize_yaml(
+        """
+        ## Every instance is scheduled independently of the others.
+        #
+        instances:
+
+            ## Description of the first instance
+          -
+            ## @param foo - string - optional
+            ## words
+            #
+            # foo: <FOO>
+
+            ## Description of the second instance
+            ## Multiple lines
+          -
+            ## @param bar - string - optional
+            ## description
+            #
+            # bar: <BAR>
+        """
+    )
+
+
+def test_parent_option_disabled():
+    consumer = get_example_consumer(
+        """
+        name: foo
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          options:
+          - template: instances
+            options:
+            - name: enabled_option
+              required: true
+              description: Description of enabled option
+              value:
+                type: boolean
+                example: true
+            - name: parent_option
+              description: Description of parent option
+              options:
+              - name: sub_option_1
+                description: words
+                value:
+                  type: boolean
+                  example: true
+              - name: sub_option_2
+                description: words
+                value:
+                  type: string
+                  example: foo.bar_none
+        """
+    )
+
+    files = consumer.render()
+    contents, errors = files['test.yaml.example']
+    assert not errors
+    assert contents == normalize_yaml(
+        """
+        ## Every instance is scheduled independently of the others.
+        #
+        instances:
+
+            ## @param enabled_option - boolean - required
+            ## Description of enabled option
+            #
+          - enabled_option: true
+
+            ## Description of parent option
+            #
+            # parent_option:
+
+                ## @param sub_option_1 - boolean - optional - default: true
+                ## words
+                #
+                # sub_option_1: true
+
+                ## @param sub_option_2 - string - optional - default: foo.bar_none
+                ## words
+                #
+                # sub_option_2: foo.bar_none
+        """
+    )
+
+
+def test_parent_option_enabled():
+    consumer = get_example_consumer(
+        """
+        name: foo
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          options:
+          - template: instances
+            options:
+            - name: enabled_option
+              required: true
+              description: Description of enabled option
+              value:
+                type: boolean
+                example: true
+            - name: parent_option
+              enabled: true
+              description: Description of parent option
+              options:
+              - name: enabled_sub_option
+                enabled: true
+                description: words
+                value:
+                  type: boolean
+                  example: true
+              - name: disabled_sub_option
+                description: words
+                value:
+                  type: string
+                  example: foo.bar_none
+        """
+    )
+
+    files = consumer.render()
+    contents, errors = files['test.yaml.example']
+    assert not errors
+    assert contents == normalize_yaml(
+        """
+        ## Every instance is scheduled independently of the others.
+        #
+        instances:
+
+            ## @param enabled_option - boolean - required
+            ## Description of enabled option
+            #
+          - enabled_option: true
+
+            ## Description of parent option
+            #
+            parent_option:
+
+                ## @param enabled_sub_option - boolean - optional - default: true
+                ## words
+                #
+                enabled_sub_option: true
+
+                ## @param disabled_sub_option - string - optional - default: foo.bar_none
+                ## words
+                #
+                # disabled_sub_option: foo.bar_none
         """
     )

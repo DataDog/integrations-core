@@ -109,7 +109,7 @@ class RethinkDBCheck(AgentCheck):
         # type: () -> None
         self._query_manager.execute()
 
-    def check(self, instance):
+    def check(self, _):
         # type: (Any) -> None
         with self.connect_submitting_service_checks():
             self.collect_metrics()

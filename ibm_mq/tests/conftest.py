@@ -7,21 +7,23 @@ import os
 import re
 
 import pytest
-from pymqi import ensure_bytes
 from six.moves import range
 
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs, WaitFor
-from datadog_checks.ibm_mq import IbmMqCheck
+from datadog_checks.dev.utils import ON_WINDOWS
 
 from . import common
 
 log = logging.getLogger(__file__)
 
 
-@pytest.fixture
-def check():
-    return IbmMqCheck('ibm_mq', {}, {})
+@pytest.fixture(scope='session')
+def get_check():
+    # Late import to ignore missing library for e2e
+    from datadog_checks.ibm_mq import IbmMqCheck
+
+    yield lambda instance: IbmMqCheck('ibm_mq', {}, [instance])
 
 
 @pytest.fixture
@@ -145,19 +147,20 @@ def prepare_queue_manager():
 
     attrs = [
         pymqi.CFST(
-            Parameter=pymqi.CMQC.MQCA_SSL_KEY_REPOSITORY, String=ensure_bytes('/etc/mqm/pki/keys/{}'.format(qm_name))
+            Parameter=pymqi.CMQC.MQCA_SSL_KEY_REPOSITORY,
+            String=pymqi.ensure_bytes('/etc/mqm/pki/keys/{}'.format(qm_name)),
         ),
-        pymqi.CFST(Parameter=pymqi.CMQC.MQCA_CERT_LABEL, String=ensure_bytes(qm_name)),
+        pymqi.CFST(Parameter=pymqi.CMQC.MQCA_CERT_LABEL, String=pymqi.ensure_bytes(qm_name)),
     ]
     pcf.MQCMD_CHANGE_Q_MGR(attrs)
 
-    tls_channel_name = ensure_bytes(common.CHANNEL_SSL)
-    cypher_spec = ensure_bytes(common.SSL_CYPHER_SPEC)
-    client_dn = ensure_bytes('CN={}'.format(common.SSL_CLIENT_LABEL))
-    certificate_label_qmgr = ensure_bytes(qm_name)
+    tls_channel_name = pymqi.ensure_bytes(common.CHANNEL_SSL)
+    cypher_spec = pymqi.ensure_bytes(common.SSL_CYPHER_SPEC)
+    client_dn = pymqi.ensure_bytes('CN={}'.format(common.SSL_CLIENT_LABEL))
+    certificate_label_qmgr = pymqi.ensure_bytes(qm_name)
 
     attrs = [
-        pymqi.CFST(Parameter=pymqi.CMQCFC.MQCACH_CHANNEL_NAME, String=ensure_bytes(tls_channel_name)),
+        pymqi.CFST(Parameter=pymqi.CMQCFC.MQCACH_CHANNEL_NAME, String=pymqi.ensure_bytes(tls_channel_name)),
         pymqi.CFIN(Parameter=pymqi.CMQCFC.MQIACH_CHANNEL_TYPE, Value=pymqi.CMQC.MQCHT_SVRCONN),
         pymqi.CFST(Parameter=pymqi.CMQCFC.MQCACH_SSL_CIPHER_SPEC, String=cypher_spec),
         pymqi.CFST(Parameter=pymqi.CMQCFC.MQCACH_SSL_PEER_NAME, String=client_dn),
@@ -168,10 +171,10 @@ def prepare_queue_manager():
     pcf.MQCMD_CREATE_CHANNEL(attrs)
 
     attrs = [
-        pymqi.CFST(Parameter=pymqi.CMQCFC.MQCACH_CHANNEL_NAME, String=ensure_bytes(tls_channel_name)),
+        pymqi.CFST(Parameter=pymqi.CMQCFC.MQCACH_CHANNEL_NAME, String=pymqi.ensure_bytes(tls_channel_name)),
         pymqi.CFIN(Parameter=pymqi.CMQCFC.MQIACF_CHLAUTH_TYPE, Value=pymqi.CMQCFC.MQCAUT_USERMAP),
         pymqi.CFIN(Parameter=pymqi.CMQCFC.MQIACF_ACTION, Value=pymqi.CMQCFC.MQACT_REPLACE),
-        pymqi.CFST(Parameter=pymqi.CMQCFC.MQCACH_CLIENT_USER_ID, String=ensure_bytes(common.USERNAME)),
+        pymqi.CFST(Parameter=pymqi.CMQCFC.MQCACH_CLIENT_USER_ID, String=pymqi.ensure_bytes(common.USERNAME)),
         pymqi.CFIN(Parameter=pymqi.CMQC.MQIA_CHECK_CLIENT_BINDING, Value=pymqi.CMQCFC.MQCHK_REQUIRED_ADMIN),
         pymqi.CFIN(Parameter=pymqi.CMQCFC.MQIACH_USER_SOURCE, Value=pymqi.CMQC.MQUSRC_MAP),
         pymqi.CFST(Parameter=pymqi.CMQCFC.MQCACH_MCA_USER_ID, String=b'mqm'),
@@ -179,13 +182,16 @@ def prepare_queue_manager():
     pcf.MQCMD_SET_CHLAUTH_REC(attrs)
 
     attrs = [
-        pymqi.CFST(Parameter=pymqi.CMQCFC.MQCACH_CHANNEL_NAME, String=ensure_bytes(tls_channel_name)),
+        pymqi.CFST(Parameter=pymqi.CMQCFC.MQCACH_CHANNEL_NAME, String=pymqi.ensure_bytes(tls_channel_name)),
         pymqi.CFIN(Parameter=pymqi.CMQCFC.MQIACF_CHLAUTH_TYPE, Value=pymqi.CMQCFC.MQCAUT_BLOCKUSER),
         pymqi.CFST(Parameter=pymqi.CMQCFC.MQCACH_MCA_USER_ID_LIST, String=b'nobody'),
         pymqi.CFIN(Parameter=pymqi.CMQCFC.MQIACH_WARNING, Value=pymqi.CMQC.MQWARN_NO),
         pymqi.CFIN(Parameter=pymqi.CMQCFC.MQIACF_ACTION, Value=pymqi.CMQCFC.MQACT_REPLACE),
     ]
     pcf.MQCMD_SET_CHLAUTH_REC(attrs)
+
+    pcf.disconnect()
+    qmgr.disconnect()
 
 
 @pytest.fixture(scope='session')
@@ -202,9 +208,9 @@ def dd_environment():
     e2e_meta.setdefault('docker_volumes', [])
     e2e_meta['docker_volumes'].append("{}:/opt/pki/keys".format(os.path.join(common.HERE, 'keys')))
 
-    with docker_run(
-        common.COMPOSE_FILE_PATH,
-        conditions=[CheckDockerLogs('ibm_mq1', log_pattern), WaitFor(prepare_queue_manager)],
-        sleep=10,
-    ):
+    conditions = [CheckDockerLogs('ibm_mq1', log_pattern)]
+    if not ON_WINDOWS:
+        conditions.append(WaitFor(prepare_queue_manager))
+
+    with docker_run(compose_file=common.COMPOSE_FILE_PATH, build=True, conditions=conditions, sleep=10, attempts=2):
         yield common.INSTANCE, e2e_meta

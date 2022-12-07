@@ -12,6 +12,6 @@ def insert_verbosity_flag(command, verbosity):
         verbosity -= 2
 
     if verbosity < 0:
-        command.insert(1, f"-{'q' * abs(verbosity)}")
+        command.insert(3, f"-{'q' * abs(verbosity)}")
     elif verbosity > 0:
-        command.insert(1, f"-{'v' * abs(verbosity)}")
+        command.insert(3, f"-{'v' * abs(verbosity)}")

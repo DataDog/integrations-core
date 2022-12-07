@@ -29,7 +29,7 @@ To configure this check for an Agent running on a host:
 
    This check has a limit of 350 metrics per instance. The number of returned metrics is indicated in the info page.
    You can specify the metrics you are interested in by editing the configuration below.
-   To learn how to customize the metrics to collect visit the [JMX Checks documentation][4] for more detailed instructions.
+   To learn how to customize the metrics to collect see the [JMX Checks documentation][4] for more detailed instructions.
    If you need to monitor more metrics, contact [Datadog support][5].
 
 2. [Restart the Agent][6]
@@ -111,12 +111,16 @@ Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from
 
 HiveMQ does not include any events.
 
+### Service Checks
+
+See [service_checks.json][11] for a list of service checks provided by this integration.
+
 ## Troubleshooting
 
 Need help? Contact [Datadog support][5].
 
 [1]: https://www.hivemq.com/hivemq/
-[2]: https://docs.datadoghq.com/agent/
+[2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://github.com/DataDog/integrations-core/blob/master/hivemq/datadog_checks/hivemq/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/integrations/java
 [5]: https://docs.datadoghq.com/help
@@ -125,3 +129,4 @@ Need help? Contact [Datadog support][5].
 [8]: https://docs.datadoghq.com/agent/docker/log/
 [9]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [10]: https://github.com/DataDog/integrations-core/blob/master/hivemq/metadata.csv
+[11]: https://github.com/DataDog/integrations-core/blob/master/hivemq/assets/service_checks.json

@@ -4,9 +4,20 @@ files:
   options:
   - template: init_config
     options:
-      - template: init_config/openmetrics_legacy
+      - template: init_config/openmetrics
   - template: instances
     options:
+    - name: use_openmetrics
+      description: |
+        Use the latest OpenMetrics V2 implementation for more features and better performance.
+
+        Note: To see the configuration options for the legacy OpenMetrics implementation (Agent 7.33 or older),
+        https://github.com/DataDog/integrations-core/blob/7.33.x/cilium/datadog_checks/cilium/data/conf.yaml.example
+      enabled: true
+      value:
+        type: boolean
+        example: true
+        display_default: false
     - name: agent_endpoint
       description: |
         The URL where your application metrics are exposed by Prometheus.
@@ -25,9 +36,14 @@ files:
         type: string
         example: http://localhost:6942/metrics
         display_default: null
-    - template: instances/openmetrics_legacy
+    - template: instances/openmetrics
       overrides:
-        prometheus_url.hidden: true
+        openmetrics_endpoint.hidden: true
+        openmetrics_endpoint.required: false
+    - template: instances/openmetrics_legacy_base
+      hidden: true
+      overrides:
+        prometheus_url.required: false
 
 - name: auto_conf.yaml
   options:
@@ -35,6 +51,7 @@ files:
     overrides:
       value.example:
       - cilium-agent
+      - cilium
   - template: init_config
     options: []
   - template: instances

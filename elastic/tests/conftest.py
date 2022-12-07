@@ -22,7 +22,32 @@ COMPOSE_FILES_MAP = {
     '2-alpine': 'legacy.yaml',
 }
 
-INSTANCE = {'url': URL, 'username': USER, 'password': PASSWORD, 'tags': CUSTOM_TAGS}
+INSTANCE = {
+    'url': URL,
+    'username': USER,
+    'password': PASSWORD,
+    'tags': CUSTOM_TAGS,
+    'tls_verify': False,
+    'custom_queries': [
+        {
+            'endpoint': '/_search',
+            'data_path': 'hits.total',
+            'columns': [
+                {'value_path': 'value', 'name': 'elasticsearch.custom.metric', 'type': 'gauge'},
+                {'value_path': 'relation', 'name': 'dynamic_tag', 'type': 'tag'},
+            ],
+        },
+    ],
+}
+
+
+BENCHMARK_INSTANCE = {
+    'url': URL,
+    'username': USER,
+    'password': PASSWORD,
+    'tags': CUSTOM_TAGS,
+    'tls_verify': False,
+}
 
 
 def ping_elastic():
@@ -31,7 +56,7 @@ def ping_elastic():
     as soon as ES is available. This is just one possible ping strategy but it's needed
     as a fixture for tests that require that index to exist in order to pass.
     """
-    response = requests.put('{}/testindex'.format(URL), auth=(USER, PASSWORD))
+    response = requests.put('{}/testindex'.format(URL), auth=(USER, PASSWORD), verify=False)
     response.raise_for_status()
 
 
@@ -44,6 +69,7 @@ def create_slm():
         '{}/_snapshot/my_repository?pretty'.format(INSTANCE['url']),
         json=create_backup_body,
         auth=(INSTANCE['username'], INSTANCE['password']),
+        verify=False,
     )
     response.raise_for_status()
 
@@ -58,8 +84,14 @@ def create_slm():
         '{}/_slm/policy/daily-snapshots?pretty'.format(INSTANCE['url']),
         json=create_slm_body,
         auth=(INSTANCE['username'], INSTANCE['password']),
+        verify=False,
     )
     response.raise_for_status()
+
+
+def index_starts_with_dot():
+    create_dot_testindex = requests.put('{}/.testindex'.format(URL), auth=(USER, PASSWORD), verify=False)
+    create_dot_testindex.raise_for_status()
 
 
 @pytest.fixture(scope='session')
@@ -68,7 +100,16 @@ def dd_environment(instance):
     compose_file = COMPOSE_FILES_MAP.get(image_name, 'docker-compose.yaml')
     compose_file = os.path.join(HERE, 'compose', compose_file)
 
-    with docker_run(compose_file=compose_file, conditions=[WaitFor(ping_elastic), WaitFor(create_slm, attempts=5)]):
+    with docker_run(
+        compose_file=compose_file,
+        conditions=[
+            WaitFor(ping_elastic, attempts=100),
+            WaitFor(index_starts_with_dot, attempts=100),
+            WaitFor(create_slm, attempts=5),
+        ],
+        attempts=2,
+        attempts_wait=10,
+    ):
         yield instance
 
 
@@ -82,9 +123,26 @@ def instance():
     return copy.deepcopy(INSTANCE)
 
 
+@pytest.fixture
+def benchmark_elastic_check():
+    return ESCheck('elastic', {}, instances=[BENCHMARK_INSTANCE])
+
+
+@pytest.fixture(scope='session')
+def benchmark_instance():
+    return copy.deepcopy(BENCHMARK_INSTANCE)
+
+
 @pytest.fixture(scope='session')
 def instance_normalize_hostname():
-    return {'url': URL, 'username': USER, 'password': PASSWORD, 'tags': CUSTOM_TAGS, 'node_name_as_host': True}
+    return {
+        'url': URL,
+        'username': USER,
+        'password': PASSWORD,
+        'tags': CUSTOM_TAGS,
+        'node_name_as_host': True,
+        'tls_verify': False,
+    }
 
 
 @pytest.fixture(scope='session')

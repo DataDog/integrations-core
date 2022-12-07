@@ -12,7 +12,7 @@ The Cisco ACI Integration lets you:
 
 ### Installation
 
-The Cisco ACI check is packaged with the Agent, so simply [install the Agent][2] on a server within your network.
+The Cisco ACI check is packaged with the Agent, so simply [install the Agent][1] on a server within your network.
 
 ### Configuration
 
@@ -23,7 +23,7 @@ The Cisco ACI check is packaged with the Agent, so simply [install the Agent][2]
 
 To configure this check for an Agent running on a host:
 
-1. Edit the `cisco_aci.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3]. See the [sample cisco_aci.d/conf.yaml][4] for all available configuration options:
+1. Edit the `cisco_aci.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][2]. See the [sample cisco_aci.d/conf.yaml][3] for all available configuration options:
 
    ```yaml
    init_config:
@@ -56,14 +56,14 @@ To configure this check for an Agent running on a host:
    
    *NOTE*: Be sure to specify any tenants for the integration to collect metrics on applications, EPG, etc.
 
-2. [Restart the Agent][5] to begin sending Cisco ACI metrics to Datadog.
+2. [Restart the Agent][4] to begin sending Cisco ACI metrics to Datadog.
 
 <!-- xxz tab xxx -->
 <!-- xxx tab "Containerized" xxx -->
 
 #### Containerized
 
-For containerized environments, see the [Autodiscovery Integration Templates][1] for guidance on applying the parameters below.
+For containerized environments, see the [Autodiscovery Integration Templates][5] for guidance on applying the parameters below.
 
 | Parameter            | Value                                                                  |
 | -------------------- | ---------------------------------------------------------------------- |
@@ -90,18 +90,26 @@ The Cisco ACI check sends tenant faults as events.
 
 ### Service Checks
 
-**cisco_aci.can_connect**:<br>
-Returns `CRITICAL` if the Agent cannot connect to the Cisco ACI API to collect metrics, otherwise `OK`.
+See [service_checks.json][8] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][8].
+### Missing `cisco_aci.tenant.*` metrics
+If you are missing `cisco_aci.tenant.*` metrics, you can run the `test/cisco_aci_query.py` script to manually query the tenant endpoint.
 
-[1]: https://docs.datadoghq.com/agent/kubernetes/integrations/
-[2]: https://app.datadoghq.com/account/settings#agent
-[3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
-[4]: https://github.com/DataDog/integrations-core/blob/master/cisco_aci/datadog_checks/cisco_aci/data/conf.yaml.example
-[5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+Modify the `apic_url`, `apic_username`, and `apic_password` to your configuration information, and input the tenant URL for the `apic_url`.
+
+Verify that the output you get from cURLing the endpoint matches any of the metrics collected in `datadog_checks/cisco_aci/aci_metrics.py`. If none of the statistics match, this means that the endpoint is not emitting any statistics that the integration can collect.
+
+
+Need help? Contact [Datadog support][9].
+
+[1]: https://app.datadoghq.com/account/settings#agent
+[2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
+[3]: https://github.com/DataDog/integrations-core/blob/master/cisco_aci/datadog_checks/cisco_aci/data/conf.yaml.example
+[4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[5]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/cisco_aci/metadata.csv
-[8]: https://docs.datadoghq.com/help/
+[8]: https://github.com/DataDog/integrations-core/blob/master/cisco_aci/assets/service_checks.json
+[9]: https://docs.datadoghq.com/help/

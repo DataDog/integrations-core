@@ -9,8 +9,7 @@ init_config:
     ## `use_global_custom_queries` setting at the instance level.
     #
     # global_custom_queries:
-    #   - metric_prefix: mysql
-    #     query: <QUERY>
+    #   - query: <QUERY>
     #     columns: <COLUMNS>
     #     tags: <TAGS>
 
@@ -21,7 +20,7 @@ init_config:
     #
     # service: <SERVICE>
 
-## Every instance is scheduled independent of the others.
+## Every instance is scheduled independently of the others.
 #
 instances:
 
@@ -32,20 +31,26 @@ instances:
     #
   - host: localhost
 
-    ## @param user - string - optional
+    ## @param username - string - optional
     ## Username used to connect to MySQL.
     #
-    user: datadog
+    username: datadog
 
-    ## @param pass - string - optional
+    ## @param password - string - optional
     ## Password associated to the MySQL user.
     #
-    pass: <PASS>
+    password: <PASSWORD>
 
     ## @param port - number - optional - default: 3306
     ## Port to use when connecting to MySQL.
     #
     port: 3306
+
+    ## @param reported_hostname - string - optional
+    ## Set the reported hostname for this instance. This value overrides the hostname detected by the Agent
+    ## and can be useful to set a custom hostname when connecting to a remote database through a proxy.
+    #
+    # reported_hostname: <REPORTED_HOSTNAME>
 
     ## @param sock - string - optional
     ## Path to a Unix Domain Socket to use when connecting to MySQL (instead of a TCP socket).
@@ -77,11 +82,19 @@ instances:
     ## key: Path to a key file.
     ## cert: Path to a cert file.
     ## ca: Path to a CA bundle file.
+    ## check_hostname: Set to false to ignore the strict relationship between the certificate and the hostname.
     #
     # ssl:
     #   key: <KEY_FILE_PATH>
     #   cert: <CERT_FILE_PATH>
     #   ca: <CA_PATH_FILE>
+    #   check_hostname: true
+
+    ## @param only_custom_queries - boolean - optional - default: false
+    ## Set this parameter to `true` if you want to skip the integration's default metrics collection.
+    ## Only metrics specified in `custom_queries` will be collected.
+    #
+    # only_custom_queries: false
 
     ## @param use_global_custom_queries - string - optional - default: true
     ## How `global_custom_queries` should be used for this instance. There are 3 options:
@@ -123,6 +136,38 @@ instances:
     #     tags:
     #     - test:mysql
 
+    ## @param additional_status - list of mappings - optional
+    ## Set this parameter to collect additional MySQL status variables as metrics
+    ## from "SHOW GLOBAL STATUS"
+    ## See MySQL documentation for available variables: https://dev.mysql.com/doc/refman/8.0/en/show-status.html
+    ##
+    ## The following fields are supported:
+    ##
+    ## name : MySQL status name on "SHOW GLOBAL STATUS"
+    ## metric_name : metric name
+    ## type : gauge | rate | count | ...
+    #
+    # additional_status:
+    #   - name: innodb_rows_read
+    #     metric_name: mysql.innodb.rows_read
+    #     type: rate
+
+    ## @param additional_variable - list of mappings - optional
+    ## Set this parameter to collect additional MySQL variables as metrics
+    ## from "SHOW GLOBAL VARIABLES"
+    ## See MySQL documentation for available variables: https://dev.mysql.com/doc/refman/8.0/en/show-variables.html
+    ##
+    ## The following fields are supported:
+    ##
+    ## name : MySQL variable name on "SHOW GLOBAL VARIABLES"
+    ## metric_name : metric name
+    ## type : gauge | rate | count | ...
+    #
+    # additional_variable:
+    #   - name: long_query_time
+    #     metric_name: mysql.performance.long_query_time
+    #     type: gauge
+
     ## @param max_custom_queries - integer - optional - default: 20
     ## Set the maximum number of custom queries to execute with this integration.
     ##
@@ -133,7 +178,7 @@ instances:
     ## @param queries - list of mappings - optional
     ## Define custom queries to collect custom metrics from your MySQL database.
     ##
-    ## See https://docs.datadoghq.com/integrations/faq/how-to-collect-metrics-from-custom-mysql-queries to learn more.
+    ## See https://docs.datadoghq.com/integrations/guide/mysql-custom-queries to learn more.
     ##
     ## WARNING: This option is deprecated and will be removed in a future release.
     ## Use the `custom_queries` option instead.
@@ -148,10 +193,13 @@ instances:
 
     ## Enable options to collect extra metrics from your MySQL integration.
     #
-    options:
+    # options:
 
         ## @param replication - boolean - optional - default: false
-        ## Set to `true` to collect replication metrics.
+        ## Set to `true` to collect replication metrics or group replication metrics.
+        ## These metrics are only collected from the specified `host`. If you want to collect replication metrics
+        ## from the source or primary node and the replica or secondary nodes you need to set separate check
+        ## instances to collect them.
         #
         # replication: false
 
@@ -200,10 +248,44 @@ instances:
         ## Note that this runs a heavy query against your database to compute the relevant metrics
         ## for all your existing schemas. Due to the nature of these calls, if you have a
         ## high number of tables and schemas, this may have a negative impact on your database performance.
+        ## Only tables and schemas for which the user has been granted SELECT privileges are collected. 
         ##
         ## See also the MySQL metrics listing: https://docs.datadoghq.com/integrations/mysql/#metrics
         #
         # schema_size_metrics: false
+
+        ## @param table_size_metrics - boolean - optional - default: false
+        ## Set to `true` to collect data table size metrics.
+        ## Note that only tables and schemas for which the user has been granted SELECT privileges are collected.
+        ## This runs a heavy query against your database to compute the relevant metrics
+        ## for all your existing tables. Due to the nature of these calls, if you have a
+        ## high number of tables and schemas, this may have a negative impact on your database performance.
+        ## See also the MySQL metrics listing: https://docs.datadoghq.com/integrations/mysql/#metrics
+        #
+        # table_size_metrics: false
+
+        ## @param system_table_size_metrics - boolean - optional - default: false
+        ## Set to `true` to collect system table size metrics from performance_schema, information_schema and mysql.
+        ## Note that only tables and schemas for which the user has been granted SELECT privileges are collected.
+        ## This runs a heavy query against your database to compute the relevant metrics
+        ## for all your existing tables. Due to the nature of these calls, if you have a
+        ## high number of tables and schemas, this may have a negative impact on your database performance.
+        ## See also the MySQL metrics listing: https://docs.datadoghq.com/integrations/mysql/#metrics
+        #
+        # system_table_size_metrics: false
+
+        ## @param table_rows_stats_metrics - boolean - optional - default: false
+        ## These metrics are reported if you have a Percona MySQL instance with `userstat` enabled
+        ## Set to `true` to collect table stats metrics.
+        ## Metrics provided by the options:
+        ##   - mysql.info.table.rows.read (total per table)
+        ##   - mysql.info.table.rows.changed (total per table)
+        ## Note that this runs a heavy query against your database to compute the relevant metrics
+        ## for all your existing tables. Due to the nature of these calls, if you have a
+        ## high number of tables and schemas, this may have a negative impact on your database performance.
+        ## See also the MySQL metrics listing: https://docs.datadoghq.com/integrations/mysql/#metrics
+        #
+        # table_rows_stats_metrics: false
 
         ## @param extra_performance_metrics - boolean - optional - default: false
         ## These metrics are reported if `performance_schema` is enabled in the MySQL instance
@@ -224,53 +306,47 @@ instances:
         #
         # extra_performance_metrics: false
 
-    ## @param deep_database_monitoring - boolean - optional - default: false
-    ## Set to `true` to enable the ALPHA features for Deep Database Monitoring.
-    ##
-    ## If you would like to hear more about Deep Database Monitoring, please reach out to your customer
-    ## success manager or Datadog support.
+    ## @param dbm - boolean - optional - default: false
+    ## Set to `true` enable Database Monitoring.
     #
-    # deep_database_monitoring: false
+    # dbm: false
 
-    ## @param statement_metrics_limits - mapping - optional - default: false
-    ## Defines the top and bottom limits on queries to track for each metric. These limits apply only to the
-    ## ALPHA features of Deep Database Monitoring. It is recommended to leave these settings at their default
-    ## values unless instructed otherwise. This API may change in the future.
-    ##
-    ## If you would like to hear more about Deep Database Monitoring, please reach out to your customer
-    ## success manager or Datadog support.
+    ## Configure collection of query metrics
     #
-    # statement_metrics_limits:
-    #   calls:
-    #   - 100
-    #   - 0
-    #   time:
-    #   - 100
-    #   - 0
-    #   <METRIC_COLUMN>:
-    #   - <TOP_K_LIMIT>
-    #   - <BOTTOM_K_LIMIT>
+    # query_metrics:
 
-    ## Configure collection of statement samples
-    #
-    statement_samples:
-
-        ## @param enabled - boolean - optional - default: false
-        ## Enables collection of statement samples. Requires `deep_database_monitoring: true`.
+        ## @param enabled - boolean - optional - default: true
+        ## Enable collection of query metrics. Requires `dbm: true`.
         #
-        # enabled: false
+        # enabled: true
 
-        ## @param collections_per_second - number - optional - default: 1
-        ## Sets the maximum statement sample collection rate. Each collection involves a single query to one
+        ## @param collection_interval - number - optional - default: 10
+        ## Set the query metric collection interval (in seconds). Each collection involves a single query to
+        ## `pg_stat_statements`. If a non-default value is chosen then that exact same value must be used for *every*
+        ## check instance. Running different instances with different collection intervals is not supported.
+        #
+        # collection_interval: 10
+
+    ## Configure collection of query samples
+    #
+    # query_samples:
+
+        ## @param enabled - boolean - optional - default: true
+        ## Enables collection of query samples. Requires `dbm: true`.
+        #
+        # enabled: true
+
+        ## @param collection_interval - number - optional - default: 1
+        ## Sets the query sample collection interval (in seconds). Each collection involves a single query to one
         ## of the `performance_schema.events_statements_*` tables, followed by at most one `EXPLAIN` query per
         ## unique statement seen.
         #
-        # collections_per_second: 1
+        # collection_interval: 1
 
-        ## @param explained_statements_per_hour_per_query - integer - optional - default: 60
-        ## Sets the rate limit for how many execution plans will be collected per hour per normalized statement.
+        ## @param explained_queries_per_hour_per_query - integer - optional - default: 60
+        ## Sets the rate limit for how many execution plans will be collected per hour per normalized query.
         #
-        # explained_statements_per_hour_per_query: 60
+        # explained_queries_per_hour_per_query: 60
 
         ## @param samples_per_hour_per_query - integer - optional - default: 15
         ## Sets the rate limit for how many statement sample events will be ingested per hour per normalized
@@ -278,12 +354,12 @@ instances:
         #
         # samples_per_hour_per_query: 15
 
-        ## @param explained_statements_cache_maxsize - integer - optional - default: 5000
-        ## Sets the max size of the cache used for the explained_statements_per_hour_per_query rate limit. This
+        ## @param explained_queries_cache_maxsize - integer - optional - default: 5000
+        ## Sets the max size of the cache used for the explained_queries_per_hour_per_query rate limit. This
         ## should be increased for databases with a very large number of unique normalized queries which exceed the
         ## cache's limit.
         #
-        # explained_statements_cache_maxsize: 5000
+        # explained_queries_cache_maxsize: 5000
 
         ## @param seen_samples_cache_maxsize - integer - optional - default: 10000
         ## Sets the max size of the cache used for the samples_per_hour_per_query rate limit. This should be
@@ -341,6 +417,137 @@ instances:
         #
         # collection_strategy_cache_ttl: 300
 
+    ## Configure collection of active sessions monitoring
+    #
+    # query_activity:
+
+        ## @param enabled - boolean - optional - default: true
+        ## Enable collection of active sessions. Requires `dbm: true`.
+        #
+        # enabled: true
+
+        ## @param collection_interval - number - optional - default: 10
+        ## Set the activity collection interval (in seconds).
+        #
+        # collection_interval: 10
+
+    ## This block defines the configuration for AWS RDS and Aurora instances. 
+    ##
+    ## Complete this section if you have installed the Datadog AWS Integration 
+    ## (https://docs.datadoghq.com/integrations/amazon_web_services) to enrich instances 
+    ## with MySQL integration telemetry.
+    ##
+    ## These values are only applied when `dbm: true` option is set.
+    #
+    # aws:
+
+        ## @param instance_endpoint - string - optional - default: mydb.cfxgae8cilcf.us-east-1.rds.amazonaws.com
+        ## Equal to the Endpoint.Address of the instance the agent is connecting to. 
+        ## This value is optional if the value of `host` is already configured to the instance endpoint.
+        ##
+        ## For more information on instance endpoints, 
+        ## see the AWS docs https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_Endpoint.html
+        #
+        # instance_endpoint: mydb.cfxgae8cilcf.us-east-1.rds.amazonaws.com
+
+    ## This block defines the configuration for Google Cloud SQL instances.
+    ##
+    ## Complete this section if you have installed the Datadog GCP Integration 
+    ## (https://docs.datadoghq.com/integrations/google_cloud_platform) to enrich instances 
+    ## with MySQL integration telemetry.
+    ##
+    ## These values are only applied when `dbm: true` option is set.
+    #
+    # gcp:
+
+        ## @param project_id - string - optional - default: foo-project
+        ## Equal to the GCP resource's project ID.
+        ##
+        ## For more information on project IDs,
+        ## See the GCP docs https://cloud.google.com/resource-manager/docs/creating-managing-projects
+        #
+        # project_id: foo-project
+
+        ## @param instance_id - string - optional - default: foo-database
+        ## Equal to the GCP resource's instance ID.
+        ##
+        ## For more information on instance IDs,
+        ## See the GCP docs https://cloud.google.com/sql/docs/mysql/instance-settings#instance-id-2ndgen
+        #
+        # instance_id: foo-database
+
+    ## This block defines the configuration for Azure Database for MySQL.
+    ##
+    ## Complete this section if you have installed the Datadog Azure Integration 
+    ## (https://docs.datadoghq.com/integrations/azure) to enrich instances 
+    ## with MySQL integration telemetry.
+    ##
+    ## These values are only applied when `dbm: true` option is set.
+    #
+    # azure:
+
+        ## @param deployment_type - string - optional - default: flexible_server
+        ## Equal to the deployment type for the managed database. 
+        ##
+        ## Acceptable values are:
+        ##   - `flexible_server` 
+        ##   - `single_server`
+        ##   - `virtual_machine`
+        ##
+        ## For more information on deployment types, 
+        ## see the Azure docs https://docs.microsoft.com/en-us/azure/mysql/select-right-deployment-type
+        #
+        # deployment_type: flexible_server
+
+        ## @param name - string - optional - default: mysql-database
+        ## Equal to the name of the Azure MySQL database instance.
+        #
+        # name: mysql-database
+
+    ## Configure how the SQL obfuscator behaves.
+    ## Note: This option only applies when `dbm` is enabled.
+    #
+    # obfuscator_options:
+
+        ## @param replace_digits - boolean - optional - default: false
+        ## Set to `true` to replace digits in identifiers and table names with question marks in your SQL statements.
+        ## Note: This option also applies to extracted tables using `collect_tables`.
+        #
+        # replace_digits: false
+
+        ## @param collect_metadata - boolean - optional - default: true
+        ## Set to `false` to disable the collection of metadata in your SQL statements.
+        ## Metadata includes things such as tables, commands, and comments.
+        #
+        # collect_metadata: true
+
+        ## @param collect_tables - boolean - optional - default: true
+        ## Set to `false` to disable the collection of tables in your SQL statements.
+        ## Requires `collect_metadata: true`.
+        #
+        # collect_tables: true
+
+        ## @param collect_commands - boolean - optional - default: true
+        ## Set to `false` to disable the collection of commands in your SQL statements.
+        ## Requires `collect_metadata: true`.
+        ##
+        ## Examples: SELECT, UPDATE, DELETE, etc.
+        #
+        # collect_commands: true
+
+        ## @param collect_comments - boolean - optional - default: true
+        ## Set to `false` to disable the collection of comments in your SQL statements.
+        ## Requires `collect_metadata: true`.
+        #
+        # collect_comments: true
+
+        ## @param keep_sql_alias - boolean - optional - default: true
+        ## Set to `true` to keep sql aliases in obfuscated SQL statements. Examples of aliases are
+        ## `with select 1 as alias`, `select column as other_name`, or `select * from table t`.
+        ## When `true` these aliases will not be removed.
+        #
+        # keep_sql_alias: true
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
@@ -370,14 +577,31 @@ instances:
     #
     # empty_default_hostname: false
 
+    ## @param disable_generic_tags - boolean - optional - default: false
+    ## Replaces generic tag such as `server` with `mysql_server` to avoid getting it mixed with
+    ## other integrations tags.
+    #
+    disable_generic_tags: true
+
+    ## @param metric_patterns - mapping - optional
+    ## A mapping of metrics to include or exclude, with each entry being a regular expression.
+    ##
+    ## Metrics defined in `exclude` will take precedence in case of overlap.
+    #
+    # metric_patterns:
+    #   include:
+    #   - <INCLUDE_REGEX>
+    #   exclude:
+    #   - <EXCLUDE_REGEX>
+
 ## Log Section
 ##
-## type - required - Type of log input source (tcp / udp / file / windows_event)
+## type - required - Type of log input source (tcp / udp / file / windows_event).
 ## port / path / channel_path - required - Set port if type is tcp or udp.
 ##                                         Set path if type is file.
 ##                                         Set channel_path if type is windows_event.
-## source  - required - Attribute that defines which Integration sent the logs.
-## encoding - optional - For file specifies the file encoding, default is utf-8, other
+## source  - required - Attribute that defines which integration sent the logs.
+## encoding - optional - For file specifies the file encoding. Default is utf-8. Other
 ##                       possible values are utf-16-le and utf-16-be.
 ## service - optional - The name of the service that generates the log.
 ##                      Overrides any `service` defined in the `init_config` section.

@@ -1,0 +1,30 @@
+name: Silk
+files:
+- name: silk.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/http
+    - template: init_config/default
+  - template: instances
+    options:
+      - name: host_address
+        description: Host address of Silk instance.
+        required: true
+        value:
+          example: https://localhost:443
+          type: string
+      - name: enable_blocksize_statistics
+        description: |
+          Enable this option to collect Silk stats metrics tagged by blocksize.
+        value:
+          type: boolean
+          example: false
+      - name: enable_read_write_statistics
+        description: |
+          Enable this option to collect Silk stats metrics differentiated by read and write.
+        value:
+          type: boolean
+          example: false
+      - template: instances/http
+      - template: instances/default

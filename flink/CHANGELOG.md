@@ -1,5 +1,10 @@
 # CHANGELOG - Flink
 
+## 1.4.0 / 2022-02-19 / Agent 7.35.0
+
+* [Added] Add `pyproject.toml` file. See [#11350](https://github.com/DataDog/integrations-core/pull/11350).
+* [Fixed] Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).
+
 ## 1.3.0 / 2020-10-31 / Agent 7.24.0
 
 * [Added] [doc] Add encoding in log config sample. See [#7708](https://github.com/DataDog/integrations-core/pull/7708).

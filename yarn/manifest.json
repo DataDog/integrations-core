@@ -1,41 +1,56 @@
 {
-  "categories": [
-    "processing",
-    "autodiscovery",
-    "log collection"
-  ],
-  "creates_events": false,
-  "display_name": "Yarn",
-  "guid": "3223c2e3-29dd-4cfb-82a2-51b951c648eb",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "yarn.",
-  "metric_to_check": "yarn.metrics.total_mb",
-  "name": "yarn",
-  "public_title": "Datadog-Yarn Integration",
-  "short_description": "Collect cluster-wide health metrics and track application progress.",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "type": "check",
-  "integration_id": "yarn",
+  "manifest_version": "2.0.0",
+  "app_uuid": "427f8f08-00a1-455a-a0e5-9b2ec7ffb0a5",
+  "app_id": "yarn",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Collect cluster-wide health metrics and track application progress.",
+    "title": "Yarn",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Processing",
+      "Category::Autodiscovery",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "Yarn",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "yarn.",
+        "check": "yarn.metrics.total_mb",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
     },
-    "monitors": {},
     "dashboards": {
       "yarn": "assets/dashboards/yarn_dashboard.json",
       "hadoop": "assets/dashboards/hadoop_dashboard.json"
     },
-    "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "yarn"
-    },
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

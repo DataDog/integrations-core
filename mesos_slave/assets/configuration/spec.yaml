@@ -1,4 +1,4 @@
-name: Mesos Slave
+name: Mesos
 
 files:
   - name: mesos_slave.yaml
@@ -20,6 +20,12 @@ files:
             value:
               example: 5050
               type: integer
+          - name: cluster_name
+            description: |
+              This is used as the value of the `mesos_cluster` tag. If not provided it is retrieved from the
+              `/state-summary` endpoint. Use this if you are experiencing load issues and you know the cluster_name.
+            value:
+              type: string
           - name: tasks
             description: Specify the tasks from which you want to send metrics to Datadog.
             value:

@@ -34,7 +34,7 @@ class EventReporter(object):
         time.sleep(wait)
 
         # https://docs.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-reporteventa
-        # http://timgolden.me.uk/pywin32-docs/win32evtlog__ReportEvent_meth.html
+        # https://mhammond.github.io/pywin32/win32evtlog__ReportEvent_meth.html
         win32evtlog.ReportEvent(
             self.log_handle,
             event_type if event_type is not None else self.EVENT_TYPES[level],
@@ -50,13 +50,13 @@ class EventReporter(object):
         # win32evtlogutil.AddSourceToRegistry(self.source)
 
         # https://docs.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-registereventsourcea
-        # http://timgolden.me.uk/pywin32-docs/win32evtlog__RegisterEventSource_meth.html
+        # https://mhammond.github.io/pywin32/win32evtlog__RegisterEventSource_meth.html
         self.log_handle = win32evtlog.RegisterEventSource(None, self.source)
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
         # https://docs.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-deregistereventsource
-        # http://timgolden.me.uk/pywin32-docs/win32evtlog__DeregisterEventSource_meth.html
+        # https://mhammond.github.io/pywin32/win32evtlog__DeregisterEventSource_meth.html
         win32evtlog.DeregisterEventSource(self.log_handle)
 
         # This requires that tests are executed in an administrator shell, useful for testing handling of Error 15027
@@ -95,4 +95,4 @@ def instance():
 
 @pytest.fixture(scope='session')
 def dd_environment():  # no cov
-    yield common.INSTANCE
+    yield common.INSTANCE, {'docker_platform': 'windows'}

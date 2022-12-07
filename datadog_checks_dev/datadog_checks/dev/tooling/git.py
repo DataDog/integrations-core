@@ -4,7 +4,7 @@
 import os
 import re
 
-from semver import parse_version_info
+from semver import VersionInfo
 
 from ..fs import chdir
 from ..subprocess import run_command
@@ -49,7 +49,7 @@ def files_changed(include_uncommitted=True):
     """
     with chdir(get_root()):
         # Use `--name-status` to include moved files
-        name_status_result = run_command('git diff --name-status master...', capture='out')
+        name_status_result = run_command('git diff --name-status origin/master...', capture='out')
 
     name_status_lines = name_status_result.stdout.splitlines()
 
@@ -68,7 +68,7 @@ def files_changed(include_uncommitted=True):
     return sorted([f for f in set(changed_files) if f])
 
 
-def get_commits_since(check_name, target_tag=None):
+def get_commits_since(check_name, target_tag=None, end=None, exclude_branch=None):
     """
     Get the list of commits from `target_tag` to `HEAD` for the given check
     """
@@ -77,10 +77,19 @@ def get_commits_since(check_name, target_tag=None):
         target_path = os.path.join(root, check_name)
     else:
         target_path = root
-    command = f"git log --pretty=%s {'' if target_tag is None else f'{target_tag}... '}{target_path}"
+
+    if end is None:
+        end = ''
+
+    if exclude_branch is not None and check_name not in {".", None}:
+        raise ValueError(f"Cannot exclude a branch from a non-root check {check_name}")
+    elif exclude_branch is not None:
+        command = f"git cherry -v {exclude_branch} HEAD {'' if target_tag is None else f'{target_tag} '}"
+    else:
+        command = f"git log --pretty=%s {'' if target_tag is None else f'{target_tag}..{end} '}{target_path}"
 
     with chdir(root):
-        return run_command(command, capture=True).stdout.splitlines()
+        return run_command(command, capture=True, check=True).stdout.splitlines()
 
 
 def git_show_file(path, ref):
@@ -91,7 +100,7 @@ def git_show_file(path, ref):
     command = f'git show {ref}:{path}'
 
     with chdir(root):
-        return run_command(command, capture=True).stdout
+        return run_command(command, capture=True, check=True).stdout
 
 
 def git_commit(targets, message, force=False, sign=False, update=False):
@@ -162,7 +171,7 @@ def get_latest_tag(pattern=None, tag_prefix='v'):
     """
     if not pattern:
         pattern = rf'^({tag_prefix})?\d+\.\d+\.\d+.*'
-    all_tags = sorted((parse_version_info(t.replace(tag_prefix, '', 1)), t) for t in git_tag_list(pattern))
+    all_tags = sorted((VersionInfo.parse(t.replace(tag_prefix, '', 1)), t) for t in git_tag_list(pattern))
     if not all_tags:
         return
     else:

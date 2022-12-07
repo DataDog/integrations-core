@@ -7,16 +7,16 @@ from itertools import chain
 
 import simplejson as json
 from six import PY3, iteritems, text_type
-from six.moves.urllib.parse import urlparse
+from six.moves.urllib.parse import urljoin, urlparse
 
-from datadog_checks.base import AgentCheck, ConfigurationError
+from datadog_checks.base import AgentCheck, ConfigurationError, to_native_string
+from datadog_checks.base.utils.time import get_timestamp
 
-from .metrics import METRICS_SEND_AS_COUNT, VTS_METRIC_MAP
+from .const import PLUS_API_ENDPOINTS, PLUS_API_STREAM_ENDPOINTS, TAGGED_KEYS
+from .metrics import COUNT_METRICS, METRICS_SEND_AS_COUNT, METRICS_SEND_AS_HISTOGRAM, VTS_METRIC_MAP
 
 if PY3:
     long = int
-
-EPOCH = datetime(1970, 1, 1)
 
 if hasattr(datetime, 'fromisoformat'):
     fromisoformat = datetime.fromisoformat
@@ -24,39 +24,6 @@ else:
 
     def fromisoformat(ts):
         return datetime.strptime(ts, "%Y-%m-%dT%H:%M:%S")
-
-
-PLUS_API_ENDPOINTS = {
-    "nginx": [],
-    "http/requests": ["requests"],
-    "http/server_zones": ["server_zones"],
-    "http/upstreams": ["upstreams"],
-    "http/caches": ["caches"],
-    "processes": ["processes"],
-    "connections": ["connections"],
-    "ssl": ["ssl"],
-    "slabs": ["slabs"],
-}
-
-PLUS_API_STREAM_ENDPOINTS = {
-    "stream/server_zones": ["stream", "server_zones"],
-    "stream/upstreams": ["stream", "upstreams"],
-}
-
-PLUS_API_V3_STREAM_ENDPOINTS = {
-    "stream/zone_sync": ["stream", "zone_sync"],
-}
-
-TAGGED_KEYS = {
-    'caches': 'cache',
-    'server_zones': 'server_zone',
-    'serverZones': 'server_zone',  # VTS
-    'upstreams': 'upstream',
-    'upstreamZones': 'upstream',  # VTS
-    'slabs': 'slab',
-    'slots': 'slot',
-    'zones': 'zone',
-}
 
 
 class Nginx(AgentCheck):
@@ -77,105 +44,171 @@ class Nginx(AgentCheck):
 
     HTTP_CONFIG_REMAPPER = {'ssl_validation': {'name': 'tls_verify'}, 'user': {'name': 'username'}}
 
-    def check(self, instance):
-        if 'nginx_status_url' not in instance:
+    def __init__(self, name, init_config, instances):
+        super(Nginx, self).__init__(name, init_config, instances)
+        self.custom_tags = self.instance.get('tags', [])
+        self.url = self.instance.get('nginx_status_url')
+        self.use_plus_api = self.instance.get("use_plus_api", False)
+        self.use_plus_api_stream = self.instance.get("use_plus_api_stream", True)
+        self.only_query_enabled_endpoints = self.instance.get("only_query_enabled_endpoints", False)
+        self.plus_api_version = str(self.instance.get("plus_api_version", 2))
+        self.use_vts = self.instance.get('use_vts', False)
+
+        if 'nginx_status_url' not in self.instance:
             raise ConfigurationError('NginX instance missing "nginx_status_url" value.')
 
-        tags = instance.get('tags', [])
-
-        url, use_plus_api, use_plus_api_stream, plus_api_version = self._get_instance_params(instance)
-
-        if not use_plus_api:
-            response, content_type, version = self._get_data(instance, url)
-            # for unpaid versions
-            self._set_version_metadata(version)
-
-            self.log.debug("Nginx status `response`: %s", response)
-            self.log.debug("Nginx status `content_type`: %s", content_type)
-
-            if content_type.startswith('application/json'):
-                metrics = self.parse_json(response, tags)
-            else:
-                metrics = self.parse_text(response, tags)
+    def check(self, _):
+        if not self.use_plus_api:
+            metrics = self.collect_unit_metrics()
         else:
-            metrics = []
-            self._perform_service_check(instance, '{}/{}'.format(url, plus_api_version))
+            metrics = self.collect_plus_metrics()
 
-            # These are all the endpoints we have to call to get the same data as we did with the old API
-            # since we can't get everything in one place anymore.
-
-            if use_plus_api_stream:
-                plus_api_chain_list = chain(
-                    iteritems(PLUS_API_ENDPOINTS), self._get_plus_api_stream_endpoints(plus_api_version)
-                )
-            else:
-                plus_api_chain_list = chain(iteritems(PLUS_API_ENDPOINTS))
-
-            for endpoint, nest in plus_api_chain_list:
-                response = self._get_plus_api_data(url, plus_api_version, endpoint, nest)
-
-                if endpoint == 'nginx':
-                    try:
-                        if isinstance(response, dict):
-                            version_plus = response.get('version')
-                        else:
-                            version_plus = json.loads(response).get('version')
-                        self._set_version_metadata(version_plus)
-                    except Exception as e:
-                        self.log.debug("Couldn't submit nginx version: %s", e)
-
-                self.log.debug("Nginx Plus API version %s `response`: %s", plus_api_version, response)
-                metrics.extend(self.parse_json(response, tags))
-
-        funcs = {'gauge': self.gauge, 'rate': self.rate, 'count': self.monotonic_count}
+        metric_submission_funcs = {'gauge': self.gauge, 'rate': self.rate, 'count': self.monotonic_count}
         conn = None
         handled = None
 
         for row in metrics:
             try:
                 name, value, tags, metric_type = row
-
-                # Translate metrics received from VTS
-                if instance.get('use_vts', False):
-                    # Requests per second
-                    if name == 'nginx.connections.handled':
-                        handled = value
-                    if name == 'nginx.connections.accepted':
-                        conn = value
-                        self.rate('nginx.net.conn_opened_per_s', conn, tags)
-                    if handled is not None and conn is not None:
-                        self.rate('nginx.net.conn_dropped_per_s', conn - handled, tags)
-                        handled = None
-                        conn = None
-                    if name == 'nginx.connections.requests':
-                        self.rate('nginx.net.request_per_s', value, tags)
-
-                    name = VTS_METRIC_MAP.get(name)
+                if self.use_vts:
+                    name, handled, conn = self._translate_from_vts(name, value, tags, handled, conn)
                     if name is None:
                         continue
 
-                if name in METRICS_SEND_AS_COUNT:
-                    func_count = funcs['count']
-                    func_count(name + "_count", value, tags)
-                func = funcs[metric_type]
-                func(name, value, tags)
+                if name in COUNT_METRICS:
+                    self.monotonic_count(name, value, tags)
+                else:
+                    if name in METRICS_SEND_AS_COUNT:
+                        self.monotonic_count(name + "_count", value, tags)
+                    if name in METRICS_SEND_AS_HISTOGRAM:
+                        self.histogram(name + "_histogram", value, tags)
+
+                    func = metric_submission_funcs[metric_type]
+                    func(name, value, tags)
 
             except Exception as e:
                 self.log.error('Could not submit metric: %s: %s', repr(row), e)
 
-    @classmethod
-    def _get_instance_params(cls, instance):
-        url = instance.get('nginx_status_url')
+    def _get_enabled_endpoints(self):
+        """
+        Dynamically determines which NGINX endpoints are enabled and Datadog supports getting metrics from
+        by querying the NGINX APIs that list availabled endpoints. If an error is encountered,
+        then it falls back to query all of the known endpoints available in the given NGINX Plus version.
+        """
+        available_endpoints = set()
 
-        use_plus_api = instance.get("use_plus_api", False)
-        use_plus_api_stream = instance.get("use_plus_api_stream", True)
-        plus_api_version = str(instance.get("plus_api_version", 2))
+        base_url = urljoin(self.url + "/", self.plus_api_version)
+        http_url = urljoin(self.url + "/", self.plus_api_version + "/http")
+        stream_url = urljoin(self.url + "/", self.plus_api_version + "/stream")
 
-        return url, use_plus_api, use_plus_api_stream, plus_api_version
+        try:
+            self.log.debug("Querying base API url: %s", base_url)
+            r = self._perform_request(base_url)
+            r.raise_for_status()
+            available_endpoints = set(r.json())
+            http_avail = "http" in available_endpoints
+            stream_avail = "stream" in available_endpoints
 
-    def _get_data(self, instance, url):
-        r = self._perform_service_check(instance, url)
+            if http_avail:
+                self.log.debug("Querying http API url: %s", http_url)
+                r = self._perform_request(http_url)
+                r.raise_for_status()
+                endpoints = set(r.json())
+                http_endpoints = {'http/{}'.format(endpoint) for endpoint in endpoints}
+                available_endpoints = available_endpoints.union(http_endpoints)
 
+            if self.use_plus_api_stream and stream_avail:
+                self.log.debug("Querying stream API url: %s", stream_url)
+                r = self._perform_request(stream_url)
+                r.raise_for_status()
+                endpoints = set(r.json())
+                stream_endpoints = {'stream/{}'.format(endpoint) for endpoint in endpoints}
+                available_endpoints = available_endpoints.union(stream_endpoints)
+
+            self.log.debug("Available endpoints are %s", available_endpoints)
+
+            supported_endpoints = self._supported_endpoints(available_endpoints)
+            self.log.debug("Supported endpoints are %s", supported_endpoints)
+            return chain(iteritems(supported_endpoints))
+        except Exception as e:
+            self.log.warning(
+                "Could not determine available endpoints from the API, "
+                "falling back to monitor all endpoints supported in nginx version %s, %s",
+                self.plus_api_version,
+                str(e),
+            )
+            return self._get_all_plus_api_endpoints()
+
+    def _supported_endpoints(self, available_endpoints):
+        """
+        Returns the endpoints that are both supported by this NGINX instance, and
+        that the integration supports collecting metrics from
+        """
+        return {
+            endpoint: nest for endpoint, nest in self._get_all_plus_api_endpoints() if endpoint in available_endpoints
+        }
+
+    def collect_plus_metrics(self):
+        metrics = []
+        self._perform_service_check('{}/{}'.format(self.url, self.plus_api_version))
+
+        # These are all the endpoints we have to call to get the same data as we did with the old API
+        # since we can't get everything in one place anymore.
+
+        plus_api_chain_list = (
+            self._get_enabled_endpoints() if self.only_query_enabled_endpoints else self._get_all_plus_api_endpoints()
+        )
+
+        for endpoint, nest in plus_api_chain_list:
+            response = self._get_plus_api_data(endpoint, nest)
+
+            if endpoint == 'nginx':
+                try:
+                    if isinstance(response, dict):
+                        version_plus = response.get('version')
+                    else:
+                        version_plus = json.loads(response).get('version')
+                    self._set_version_metadata(version_plus)
+                except Exception as e:
+                    self.log.debug("Couldn't submit nginx version: %s", e)
+
+            self.log.debug("Nginx Plus API version %s `response`: %s", self.plus_api_version, response)
+            metrics.extend(self.parse_json(response, self.custom_tags))
+        return metrics
+
+    def collect_unit_metrics(self):
+        response, content_type, version = self._get_data()
+        # for unpaid versions
+        self._set_version_metadata(version)
+
+        self.log.debug("Nginx status `response`: %s", response)
+        self.log.debug("Nginx status `content_type`: %s", content_type)
+
+        if content_type.startswith('application/json'):
+            metrics = self.parse_json(response, self.custom_tags)
+        else:
+            metrics = self.parse_text(response, self.custom_tags)
+        return metrics
+
+    def _translate_from_vts(self, name, value, tags, handled, conn):
+        # Requests per second
+        if name == 'nginx.connections.handled':
+            handled = value
+        if name == 'nginx.connections.accepted':
+            conn = value
+            self.rate('nginx.net.conn_opened_per_s', conn, tags)
+        if handled is not None and conn is not None:
+            self.rate('nginx.net.conn_dropped_per_s', conn - handled, tags)
+            handled = None
+            conn = None
+        if name == 'nginx.connections.requests':
+            self.rate('nginx.net.request_per_s', value, tags)
+
+        name = VTS_METRIC_MAP.get(name)
+        return name, handled, conn
+
+    def _get_data(self):
+        r = self._perform_service_check(self.url)
         body = r.content
         resp_headers = r.headers
         return body, resp_headers.get('content-type', 'text/plain'), resp_headers.get('server')
@@ -185,17 +218,14 @@ class Nginx(AgentCheck):
         r.raise_for_status()
         return r
 
-    def _perform_service_check(self, instance, url):
+    def _perform_service_check(self, url):
         # Submit a service check for status page availability.
         parsed_url = urlparse(url)
         nginx_host = parsed_url.hostname
         nginx_port = parsed_url.port or 80
-        custom_tags = instance.get('tags', [])
-        if custom_tags is None:
-            custom_tags = []
 
         service_check_name = 'nginx.can_connect'
-        service_check_tags = ['host:%s' % nginx_host, 'port:%s' % nginx_port] + custom_tags
+        service_check_tags = ['host:%s' % nginx_host, 'port:%s' % nginx_port] + self.custom_tags
         try:
             self.log.debug("Querying URL: %s", url)
             r = self._perform_request(url)
@@ -215,26 +245,50 @@ class Nginx(AgentCheck):
 
         return {keys[0]: self._nest_payload(keys[1:], payload)}
 
-    def _get_plus_api_stream_endpoints(self, plus_api_version):
-        endpoints = iteritems(PLUS_API_STREAM_ENDPOINTS)
-        if int(plus_api_version) >= 3:
-            endpoints = chain(endpoints, iteritems(PLUS_API_V3_STREAM_ENDPOINTS))
+    def _get_plus_api_endpoints(self, use_stream=False):
+        """
+        Returns all of either stream or default endpoints that the integration supports
+        collecting metrics from based on the Plus API version
+        """
+        endpoints = iteritems({})
+
+        available_plus_endpoints = PLUS_API_STREAM_ENDPOINTS if use_stream else PLUS_API_ENDPOINTS
+
+        for earliest_version, new_endpoints in available_plus_endpoints.items():
+            if int(self.plus_api_version) >= int(earliest_version):
+                endpoints = chain(endpoints, iteritems(new_endpoints))
         return endpoints
 
-    def _get_plus_api_data(self, api_url, plus_api_version, endpoint, nest):
+    def _get_all_plus_api_endpoints(self):
+        """
+        Returns endpoints that the integration supports collecting metrics from based on the Plus API version
+        """
+        endpoints = self._get_plus_api_endpoints()
+
+        if self.use_plus_api_stream:
+            endpoints = chain(endpoints, self._get_plus_api_endpoints(use_stream=True))
+
+        return endpoints
+
+    def _get_plus_api_data(self, endpoint, nest):
         # Get the data from the Plus API and reconstruct a payload similar to what the old API returned
         # so we can treat it the same way
 
-        url = "/".join([api_url, plus_api_version, endpoint])
+        url = "/".join([self.url, self.plus_api_version, endpoint])
         payload = {}
         try:
             self.log.debug("Querying URL: %s", url)
             r = self._perform_request(url)
             payload = self._nest_payload(nest, r.json())
         except Exception as e:
-            if endpoint in PLUS_API_STREAM_ENDPOINTS or endpoint in PLUS_API_V3_STREAM_ENDPOINTS:
+            plus_endpoints = self.list_endpoints(PLUS_API_STREAM_ENDPOINTS)
+            if not self.only_query_enabled_endpoints and endpoint in plus_endpoints:
                 self.log.warning(
-                    "Stream may not be initialized. " "Error querying %s metrics at %s: %s", endpoint, url, e
+                    "Error querying %s metrics at %s: %s. Stream may not be initialized, "
+                    "you can avoid this error by enabling `only_query_enabled_endpoints` option.",
+                    endpoint,
+                    url,
+                    e,
                 )
             else:
                 self.log.exception("Error querying %s metrics at %s: %s", endpoint, url, e)
@@ -309,15 +363,13 @@ class Nginx(AgentCheck):
         Recursively flattens the nginx json object. Returns the following: [(metric_name, value, tags)]
         """
         output = []
-
         if isinstance(val, dict):
             # Pull out the server as a tag instead of trying to read as a metric
             if 'server' in val and val['server']:
                 server = 'server:%s' % val.pop('server')
                 if tags is None:
-                    tags = [server]
-                else:
-                    tags = tags + [server]
+                    tags = []
+                tags = tags + [server]
             for key, val2 in iteritems(val):
                 if key in TAGGED_KEYS:
                     metric_name = '%s.%s' % (metric_base, TAGGED_KEYS[key])
@@ -338,15 +390,34 @@ class Nginx(AgentCheck):
         elif isinstance(val, (int, float, long)):
             output.append((metric_base, val, tags, 'gauge'))
 
-        elif isinstance(val, (text_type, str)):
-            if val[-1] == "Z":
-                try:
-                    # In the new Plus API, timestamps are now formatted
-                    # strings, some include microseconds, some don't...
-                    timestamp = fromisoformat(val[:19])
-                except ValueError:
-                    pass
-                else:
-                    output.append((metric_base, int((timestamp - EPOCH).total_seconds()), tags, 'gauge'))
-
+        elif isinstance(val, (text_type, str)) and val[-1] == "Z":
+            try:
+                # In the new Plus API, timestamps are now formatted
+                # strings, some include microseconds, some don't...
+                timestamp = fromisoformat(val[:19])
+            except ValueError:
+                pass
+            else:
+                output.append((metric_base, int(get_timestamp(timestamp)), tags, 'gauge'))
         return output
+
+    # override
+    def _normalize_tags_type(self, tags, device_name=None, metric_name=None):
+        if self.disable_generic_tags:
+            return super(Nginx, self)._normalize_tags_type(tags, device_name, metric_name)
+        # If disable_generic_tags is not enabled, for each generic tag we emmit both the generic and the non generic
+        # version to ease transition.
+        normalized_tags = []
+        for tag in tags:
+            if tag is not None:
+                try:
+                    tag = to_native_string(tag)
+                except UnicodeError:
+                    self.log.warning('Encoding error with tag `%s` for metric `%s`, ignoring tag', tag, metric_name)
+                    continue
+                normalized_tags.extend(list({tag, self.degeneralise_tag(tag)}))
+        return normalized_tags
+
+    def list_endpoints(self, api_dict_list):
+        endpoints = [endpoint for api_dict in list(api_dict_list.values()) for endpoint in api_dict.keys()]
+        return endpoints

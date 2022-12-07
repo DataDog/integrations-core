@@ -52,6 +52,7 @@ def dd_environment():
             env_vars=env_vars,
             conditions=conditions,
             log_patterns="Ignite node started OK",
+            attempts=2,
         ):
             instance = load_jmx_config()
             instance['instances'][0]['port'] = 49112

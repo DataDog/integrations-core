@@ -1,3 +1,2 @@
-metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-oom_kill.oom_process.count,count,,process,,The count of processes OOM killed,-1,oom_kill,oom_process_count
-
+metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
+oom_kill.oom_process.count,count,,process,,The count of processes OOM killed,-1,oom_kill,oom_process_count,

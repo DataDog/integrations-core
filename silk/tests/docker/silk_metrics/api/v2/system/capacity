@@ -1,0 +1,25 @@
+{
+   "hits":[
+      {
+         "allocated":318044662,
+         "allocated_snapshots_and_views":108329460,
+         "allocated_volumes":209715200,
+         "curr_dt_chunk":0,
+         "free":6999317358,
+         "id":1,
+         "is_reclamation_in_progress":false,
+         "logical":318044662,
+         "physical":202716307,
+         "provisioned":629145600,
+         "provisioned_snapshots":419430400,
+         "provisioned_views":0,
+         "provisioned_volumes":209715200,
+         "reserved":0,
+         "state":"ok",
+         "total":7202033664
+      }
+   ],
+   "limit":100,
+   "offset":0,
+   "total":1
+}

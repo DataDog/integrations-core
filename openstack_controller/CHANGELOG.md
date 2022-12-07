@@ -1,6 +1,38 @@
 # CHANGELOG - Openstack_controller
 
-## 1.11.0 / 2021-04-19
+## 2.1.2 / 2022-08-05 / Agent 7.39.0
+
+* [Fixed] Dependency updates. See [#12653](https://github.com/DataDog/integrations-core/pull/12653).
+
+## 2.1.1 / 2022-06-17 / Agent 7.38.0
+
+* [Fixed] Attempt to use token from project scope with an admin role. See [#12135](https://github.com/DataDog/integrations-core/pull/12135).
+
+## 2.1.0 / 2022-04-05 / Agent 7.36.0
+
+* [Added] Upgrade dependencies. See [#11726](https://github.com/DataDog/integrations-core/pull/11726).
+* [Added] Add metric_patterns options to filter all metric submission by a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
+* [Fixed] Remove outdated warning in the description for the `tls_ignore_warning` option. See [#11591](https://github.com/DataDog/integrations-core/pull/11591).
+
+## 2.0.0 / 2022-02-19 / Agent 7.35.0
+
+* [Added] Add `pyproject.toml` file. See [#11409](https://github.com/DataDog/integrations-core/pull/11409).
+* [Fixed] Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).
+* [Changed] Add tls_protocols_allowed option documentation. See [#11251](https://github.com/DataDog/integrations-core/pull/11251).
+
+## 1.13.0 / 2021-10-04 / Agent 7.32.0
+
+* [Added] Update dependencies. See [#10258](https://github.com/DataDog/integrations-core/pull/10258).
+* [Added] Add HTTP option to control the size of streaming responses. See [#10183](https://github.com/DataDog/integrations-core/pull/10183).
+* [Added] Add allow_redirect option. See [#10160](https://github.com/DataDog/integrations-core/pull/10160).
+* [Fixed] Fix the description of the `allow_redirects` HTTP option. See [#10195](https://github.com/DataDog/integrations-core/pull/10195).
+
+## 1.12.0 / 2021-08-22 / Agent 7.31.0
+
+* [Added] Bump openstacksdk and add missing metrics. See [#9861](https://github.com/DataDog/integrations-core/pull/9861).
+* [Fixed] Do not leak password on logs. See [#9637](https://github.com/DataDog/integrations-core/pull/9637).
+
+## 1.11.0 / 2021-04-19 / Agent 7.28.0
 
 * [Added] Openstack controller log support. See [#9115](https://github.com/DataDog/integrations-core/pull/9115).
 * [Fixed] Fix refactored imports. See [#9136](https://github.com/DataDog/integrations-core/pull/9136).

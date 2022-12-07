@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from copy import deepcopy
+
 import pytest
 
 from datadog_checks.dev import WaitFor, docker_run, run_command
@@ -12,33 +14,48 @@ from .common import (
     CLIENT_LIB,
     COMPOSE_FILE,
     CONTAINER_NAME,
+    ENABLE_TCPS,
     HERE,
     HOST,
     ORACLE_DATABASE_VERSION,
     PASSWORD,
     PORT,
+    TCPS_PORT,
     USER,
 )
 
 E2E_METADATA_ORACLE_CLIENT = {
-    'docker_volumes': ['{}/scripts/install_instant_client.sh:/tmp/install_instant_client.sh'.format(HERE)],
+    'docker_volumes': [
+        '{}/scripts/install_instant_client.sh:/tmp/install_instant_client.sh'.format(HERE),
+        '{}/docker/client/client_wallet:/opt/oracle/instantclient_19_3/client_wallet'.format(HERE),
+        '{}/docker/client/sqlnet.ora:/opt/oracle/instantclient_19_3/sqlnet.ora'.format(HERE),
+        '{}/docker/client/tnsnames.ora:/opt/oracle/instantclient_19_3/tnsnames.ora'.format(HERE),
+        '{}/docker/client/listener.ora:/opt/oracle/instantclient_19_3/listener.ora'.format(HERE),
+    ],
     'start_commands': [
         'bash /tmp/install_instant_client.sh',
-        'apt-get install libaio1',  # `apt-get update` already ran in install_instant_client.sh
-        'apt-get install gcc g++ -y',
     ],
-    'env_vars': {'LD_LIBRARY_PATH': '/opt/oracle/instantclient_19_3'},
+    'env_vars': {'LD_LIBRARY_PATH': '/opt/oracle/instantclient_19_3', 'TNS_ADMIN': '/opt/oracle/instantclient_19_3'},
 }
 
 E2E_METADATA_JDBC_CLIENT = {
     # Since we don't include Oracle instantclient to `LD_LIBRARY_PATH` env var,
     # the integration will fallback to JDBC client
     'use_jmx': True,  # Using jmx to have a ready to use java runtime
-    'docker_volumes': ['{}/scripts/install_instant_client.sh:/tmp/install_instant_client.sh'.format(HERE)],
-    'start_commands': [
-        'bash /tmp/install_instant_client.sh',
-        'apt-get install gcc g++ -y',  # `apt-get update` already ran in install_instant_client.sh
+    'docker_volumes': [
+        '{}/scripts/install_instant_client.sh:/tmp/install_instant_client.sh'.format(HERE),
+        '{}/docker/client/client_wallet:/opt/oracle/instantclient_19_3/client_wallet'.format(HERE),
+        '{}/docker/client/sqlnet.ora:/opt/oracle/instantclient_19_3/sqlnet.ora'.format(HERE),
+        '{}/docker/client/tnsnames.ora:/opt/oracle/instantclient_19_3/tnsnames.ora'.format(HERE),
+        '{}/docker/client/listener.ora:/opt/oracle/instantclient_19_3/listener.ora'.format(HERE),
+        '{}/docker/client/oraclepki.jar:/opt/oracle/instantclient_19_3/oraclepki.jar'.format(HERE),
+        '{}/docker/client/osdt_cert.jar:/opt/oracle/instantclient_19_3/osdt_cert.jar'.format(HERE),
+        '{}/docker/client/osdt_core.jar:/opt/oracle/instantclient_19_3/osdt_core.jar'.format(HERE),
     ],
+    'start_commands': [
+        'bash /tmp/install_instant_client.sh',  # Still needed to set up the database
+    ],
+    'env_vars': {'TNS_ADMIN': '/opt/oracle/instantclient_19_3'},
 }
 
 
@@ -48,23 +65,46 @@ def check(instance):
 
 
 @pytest.fixture
+def tcps_check(tcps_instance):
+    return Oracle(CHECK_NAME, {}, [tcps_instance])
+
+
+@pytest.fixture
 def instance():
-    return {
-        'server': 'localhost:1521',
-        'user': 'system',
-        'password': 'oracle',
-        'service_name': 'xe',
-        'tags': ['optional:tag1'],
-    }
+    return deepcopy(
+        {
+            'server': 'localhost:1521',
+            'username': 'system',
+            'password': 'oracle',
+            'service_name': 'xe',
+            'protocol': 'TCP',
+            'tags': ['optional:tag1'],
+        }
+    )
+
+
+@pytest.fixture
+def tcps_instance():
+    return deepcopy(
+        {
+            'server': 'localhost:2484',
+            'username': 'system',
+            'password': 'oracle',
+            'service_name': 'xe',
+            'protocol': 'TCPS',
+            'tags': ['optional:tag1'],
+        }
+    )
 
 
 @pytest.fixture(scope='session')
 def dd_environment():
     instance = {
         'server': '{}:{}'.format(HOST, PORT),
-        'user': USER,
+        'username': USER,
         'password': PASSWORD,
         'service_name': 'InfraDB.us.oracle.com',
+        'protocol': 'TCP',
     }
 
     if CLIENT_LIB == 'jdbc':
@@ -72,6 +112,15 @@ def dd_environment():
         instance['jdbc_driver_path'] = '/opt/oracle/instantclient_19_3/ojdbc8.jar'
     else:
         e2e_metadata = E2E_METADATA_ORACLE_CLIENT
+
+    # Set additional config options for TCPS
+    if ENABLE_TCPS:
+        instance['server'] = '{}:{}'.format(HOST, TCPS_PORT)
+        instance['protocol'] = 'TCPS'
+
+        if CLIENT_LIB == 'jdbc':
+            instance['jdbc_truststore_path'] = '/opt/oracle/instantclient_19_3/client_wallet/cwallet.sso'
+            instance['jdbc_truststore_type'] = 'SSO'
 
     with docker_run(
         COMPOSE_FILE,
@@ -84,6 +133,17 @@ def dd_environment():
         attempts_wait=5,
     ):
         yield instance, e2e_metadata
+
+
+@pytest.fixture
+def bad_instance():
+    return {
+        "password": "badpassword",
+        "protocol": "TCP",
+        "server": "localhost:1521",
+        "service_name": "InfraDB.us.oracle.com",
+        "username": "datadog",
+    }
 
 
 def create_user():

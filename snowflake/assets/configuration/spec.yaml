@@ -34,17 +34,19 @@ files:
           Name of your account (provided by Snowflake), including the platform and region if applicable.
           For more information on Snowflake account names,
           see https://docs.snowflake.com/en/user-guide/connecting.html#your-snowflake-account-name
+
+          If you are using private connectivity with Snowflake, your account name should be in the following format:
+            account: <ACCOUNT>.<REGION_ID>.privatelink
         value:
           type: string
           example: <ACCOUNT>
-      - name: user
+      - name: username
         required: true
         description: Login name for the user.
         value:
           type: string
           example: <USER>
       - name: password
-        required: true
         description: Password for the user
         value:
           type: string
@@ -65,7 +67,10 @@ files:
           type: string
           example: SNOWFLAKE
       - name: schema
-        description: Name of the default schema to use for the database.
+        description: |
+          Name of the default schema to use for the database.
+
+          To collect organization level metrics, set this to ORGANIZATION_USAGE.
         value:
           type: string
           example: ACCOUNT_USAGE
@@ -98,13 +103,38 @@ files:
           example: <OCSP_RESPONSE_CACHE_FILENAME>
       - name: authenticator
         description: |
-          Authenticator for Snowflake. The default `snowflake` uses the internal Snowflake authenticator.
-          Use `oauth` to authenticate with OAuth, be sure to set the `token` option as well.
+          Authenticator for Snowflake. Supported methods are:
+          * `snowflake`, the default value, uses the internal Snowflake authenticator. It needs `password` or 
+            `private_key_path` option.
+          * `snowflake_jwt`, uses key pair authentication. It needs `private_key_path` option.
+          * `oauth`, to authenticate with OAuth method. It needs `token` or `token_path` option.
         value:
           type: string
           display_default: snowflake
       - name: token
-        description: Token used for OAuth connection to Snowflake.
+        description: Token used for OAuth connection to Snowflake. You cannot use this alongside `token_path`.
+        value:
+          type: string
+      - name: token_path
+        description: |
+          Path to the file that contains the token used for OAuth connection to Snowflake.
+          You cannot use this alongside `token`.
+          The token is re-read at every check run.
+        value:
+          type: string
+          example: /path/to/token
+      - name: private_key_path
+        description: |
+          The path to the file that contains the private key used to connect to Snowflake.
+          The key is re-read at every check run.
+        value:
+          type: string
+          display_default: null
+          example: /path/to/private_key
+      - name: private_key_password
+        secret: true
+        description: |
+          The password protecting the private key file in the `private_key_path` option.
         value:
           type: string
       - name: client_session_keep_alive
@@ -118,20 +148,30 @@ files:
           example: false
       - name: metric_groups
         description: |
-          List Snowflake metric groups to collect. Metric groups are determined by the metric prefixes.
+          List of Snowflake metric groups to collect. Metric groups are determined by the metric prefixes.
 
-          The available metric groups are:
+          When querying the ACCOUNT_USAGE schema, the available metric groups are:
 
-            - snowflake.query
-            - snowflake.billing
-            - snowflake.storage
+            - snowflake.query (enabled by default)
+            - snowflake.billing (enabled by default)
+            - snowflake.storage (enabled by default)
             - snowflake.storage.database
             - snowflake.storage.table
-            - snowflake.logins
+            - snowflake.logins (enabled by default)
             - snowflake.data_transfer
             - snowflake.auto_recluster
             - snowflake.pipe
             - snowflake.replication
+
+          When querying the ORGANIZATION_USAGE schema, the available metric groups are:
+            - snowflake.organization.warehouse (enabled by default)
+            - snowflake.organization.currency (enabled by default)
+            - snowflake.organization.credit
+            - snowflake.organization.storage (enabled by default)
+            - snowflake.organization.contracts
+            - snowflake.organization.balance
+            - snowflake.organization.rate
+            - snowflake.organization.data_transfer
         value:
           type: array
           items:
@@ -141,6 +181,14 @@ files:
             - snowflake.billing
             - snowflake.storage
             - snowflake.logins
+      - name: aggregate_last_24_hours
+        description: |
+          Set to `true` to aggregate table entries on the last 24 hours instead of
+          aggregating entries of the current day.
+        value:
+          type: boolean
+          display_default: false
+          example: true
       - template: instances/db
         overrides:
           custom_queries.value.example:
@@ -159,9 +207,12 @@ files:
             https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
 
             NOTE: Most Snowflake ACCOUNT_USAGE views are populated on an hourly basis,
-            so to minimize unnecessary queries the `min_collection_interval` defaults to 1 hour.
+            so to minimize unnecessary queries, set the `min_collection_interval` to 1 hour.
 
             Most metrics are aggregated by day, you can increase the interval to reduce the number of queries.
-          min_collection_interval.display_default: 3600
+          min_collection_interval.value.display_default: 15
+          min_collection_interval.value.default: 3600
           min_collection_interval.value.example: 3600
-          min_collection_interval.enabled: 3600
+          min_collection_interval.enabled: true
+          disable_generic_tags.hidden: False
+          disable_generic_tags.enabled: True

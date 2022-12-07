@@ -327,7 +327,13 @@
           }
         ]
       },
-      "layout": { "is_column_break": true }
+      "layout": {
+        "x": 0,
+        "y": 10,
+        "width": 12,
+        "height": 8,
+        "is_column_break": true
+      }
     }
   ],
   "template_variables": [

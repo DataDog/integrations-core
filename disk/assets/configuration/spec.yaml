@@ -44,7 +44,7 @@ files:
       - template: instances
         options:
           - name: use_mount
-            required: true
+            enabled: true
             description: |
               If enabled, metrics are tagged using mount points (for example `device:/`) instead of volumes
               (for example `device:/dev/disk1s5`).
@@ -186,12 +186,20 @@ files:
           - name: blkid_cache_file
             description: |
               Instruct the check to read the labels from the blkid cache file instead of `blkid` executable.
-              This parameter is used only if `tag_by_label` is true.
+              This parameter is used only if `tag_by_label` is true. It is incompatible with `use_lsblk`.
               Works on Linux only.
             value:
               example: /run/blkid/blkid.tab
               display_default: null
               type: string
+          - name: use_lsblk
+            description: |
+              Instruct the check to read the labels from the `lsblk` executable instead of `blkid` executable.
+              This parameter is used only if `tag_by_label` is true. It is incompatible with `blkid_cache_file`.
+              Works on Linux only.
+            value:
+              example: false
+              type: boolean          
           - name: device_tag_re
             description: |
               Instruct the check to apply additional tags to matching

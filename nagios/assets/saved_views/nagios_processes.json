@@ -14,11 +14,8 @@
       "showArguments"
     ],
     "filter": {
-      "text": "",
-      "groups": [],
-      "tags": [
-        "integration:nagios"
-      ]
+      "query_filter": "integration:nagios",
+      "groups": []
     },
     "selected_top_graph": "scatterplot",
     "enabled_columns": [

@@ -448,7 +448,7 @@
         "generateName": "dd-agent-",
         "namespace": "default",
         "selfLink": "/api/v1/namespaces/default/pods/dd-agent-ntepl",
-        "uid": "12ceeaa9-33ca-11e6-ac8f-42010af00003",
+        "uid": "c2319815-10d0-11e8-bd5a-42010af00137",
         "resourceVersion": "456746",
         "creationTimestamp": "2016-06-16T13:56:07Z",
         "labels": {

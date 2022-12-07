@@ -139,7 +139,7 @@ STATS_MYSQL_CONNECTION_POOL = {
     'name': 'stats_mysql_connection_pool',
     # Need explicit selections as some columns are unusable.
     'query': 'SELECT hostgroup, srv_host, srv_port, status, ConnUsed, ConnFree, ConnOK, ConnERR, Queries, '
-    'Bytes_data_sent, Bytes_data_recv, Latency_us FROM stats_mysql_connection_pool',
+    'Bytes_data_sent, Bytes_data_recv, (Latency_us/1000.0) as Latency_ms, Latency_us FROM stats_mysql_connection_pool',
     'columns': [
         # the hostgroup in which the backend server belongs. Note that a single backend server can belong to more
         # than one hostgroup
@@ -147,8 +147,9 @@ STATS_MYSQL_CONNECTION_POOL = {
         # the TCP endpoint on which the mysqld backend server is listening for connections
         {'name': 'srv_host', 'type': 'tag'},
         {'name': 'srv_port', 'type': 'tag'},
-        # the status of the backend server. Can be ONLINE, SHUNNED, OFFLINE_SOFT, OFFLINE_HARD
-        # see https://github.com/sysown/proxysql/wiki/Main-(runtime)#mysql_servers
+        # the status of the backend server. Can be ONLINE, SHUNNED, OFFLINE_SOFT, OFFLINE_HARD, SHUNNED_REPLICATION_LAG
+        # see https://github.com/sysown/proxysql/wiki/Main-(runtime)#mysql_servers and
+        # https://github.com/sysown/proxysql/blob/v2.x/include/proxysql_structs.h#L13-L19
         {
             'name': 'backend.status',
             'type': 'service_check',
@@ -157,6 +158,7 @@ STATS_MYSQL_CONNECTION_POOL = {
                 'SHUNNED': 'CRITICAL',
                 'OFFLINE_SOFT': 'WARNING',
                 'OFFLINE_HARD': 'CRITICAL',
+                'SHUNNED_REPLICATION_LAG': 'CRITICAL',
             },
         },
         # how many connections are currently used by ProxySQL for sending queries to the backend server
@@ -176,7 +178,11 @@ STATS_MYSQL_CONNECTION_POOL = {
         # OK/ERR packets, fields' description, etc)
         {'name': 'pool.bytes_data_recv', 'type': 'rate'},
         # the currently ping time in microseconds, as reported from Monitor
+        # Latency_ms is a ProxySQL typo fixed in ProxySQL 1.3.3; it has been aptly renamed to Latency_us.
+        # See: https://github.com/sysown/proxysql/issues/882
         {'name': 'pool.latency_ms', 'type': 'gauge'},
+        # the currently ping time in microseconds, as reported from Monitor
+        {'name': 'pool.latency_us', 'type': 'gauge'},
     ],
 }
 
@@ -225,6 +231,16 @@ STATS_MEMORY_METRICS = {
             },
         },
         {'name': 'Variable_Value', 'type': 'source'},
+    ],
+}
+
+STATS_MYSQL_BACKENDS = {
+    'name': 'stats_mysql_backends',
+    'query': 'SELECT  hostgroup, status, COUNT(*) FROM stats_mysql_connection_pool GROUP BY hostgroup, status',
+    'columns': [
+        {'name': 'hostgroup', 'type': 'tag'},
+        {'name': 'status', 'type': 'tag'},
+        {'name': 'backends.count', 'type': 'gauge'},
     ],
 }
 

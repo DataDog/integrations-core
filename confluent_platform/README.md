@@ -19,16 +19,16 @@ This integration collects JMX metrics for the following components:
 
 ### Installation
 
-The Confluent Platform check is included in the [Datadog Agent][2] package. No additional installation is needed on your Confluent Platform component server.
+The Confluent Platform check is included in the [Datadog Agent][1] package. No additional installation is needed on your Confluent Platform component server.
 
-**Note**: This check collects metrics with JMX. A JVM is required on each node so the Agent can run [jmxfetch][3]. It is recommended to use an Oracle-provided JVM.
+**Note**: This check collects metrics with JMX. A JVM is required on each node so the Agent can run [jmxfetch][2]. It is recommended to use an Oracle-provided JVM.
 
 
 ### Configuration
 
-1. Edit the `confluent_platform.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to collect your Confluent Platform performance data. See the [sample confluent_platform.d/conf.yaml][4] for all available configuration options.
+1. Edit the `confluent_platform.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to collect your Confluent Platform performance data. See the [sample confluent_platform.d/conf.yaml][3] for all available configuration options.
 
-    For each component, you need to create a separate instance to collect its JMX metrics. The list of default metrics collected are listed in [`metrics.yaml` file][9], for example:
+    For each component, you need to create a separate instance to collect its JMX metrics. The list of default metrics collected are listed in [`metrics.yaml` file][4], for example:
 
     ```yaml
     instances:
@@ -71,17 +71,17 @@ _Available for Agent versions >6.0_
              pattern: \[\d{4}\-\d{2}\-\d{2}
    ```
 
-    Change the `path` and `service` parameter values and configure them for your environment. See the [sample confluent_platform.d/conf.yaml][4] for all available configuration options.
+    Change the `path` and `service` parameter values and configure them for your environment. See the [sample confluent_platform.d/conf.yaml][3] for all available configuration options.
 
-3. [Restart the Agent][7].
+3. [Restart the Agent][6].
 
 ##### Metric collection
 
-For containerized environments, see the [Autodiscovery with JMX][10] guide.
+For containerized environments, see the [Autodiscovery with JMX][7] guide.
 
 ### Validation
 
-[Run the Agent's status subcommand][6] and look for `confluent_platform` under the **JMXFetch** section.
+[Run the Agent's status subcommand][8] and look for `confluent_platform` under the **JMXFetch** section.
 
 ```
     ========
@@ -102,27 +102,28 @@ For containerized environments, see the [Autodiscovery with JMX][10] guide.
 
 ### Metrics
 
-See [metadata.csv][7] for a list of metrics provided by this check.
-
-### Service Checks
-
-**confluentplatform.can_connect**:<br>
-Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored Confluent Platform / Kafka component, otherwise returns `OK`.
+See [metadata.csv][6] for a list of metrics provided by this check.
 
 ### Events
 
 The Confluent Platform check does not include any events.
 
+### Service Checks
+
+See [service_checks.json][9] for a list of service checks provided by this integration.
+
 ## Troubleshooting
 
-Need help? Contact [Datadog support][8].
+Need help? Contact [Datadog support][10].
 
-[2]: https://app.datadoghq.com/account/settings#agent
-[3]: https://github.com/DataDog/jmxfetch
-[4]: https://github.com/DataDog/integrations-core/blob/master/confluent_platform/datadog_checks/confluent_platform/data/conf.yaml.example
+
+[1]: https://app.datadoghq.com/account/settings#agent
+[2]: https://github.com/DataDog/jmxfetch
+[3]: https://github.com/DataDog/integrations-core/blob/master/confluent_platform/datadog_checks/confluent_platform/data/conf.yaml.example
+[4]: https://github.com/DataDog/integrations-core/blob/master/confluent_platform/datadog_checks/confluent_platform/data/metrics.yaml
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[7]: https://github.com/DataDog/integrations-core/blob/master/confluent_platform/metadata.csv
-[8]: https://docs.datadoghq.com/help/
-[9]: https://github.com/DataDog/integrations-core/blob/master/confluent_platform/datadog_checks/confluent_platform/data/metrics.yaml
-[10]: https://docs.datadoghq.com/agent/guide/autodiscovery-with-jmx/?tab=containerizedagent
+[6]: https://github.com/DataDog/integrations-core/blob/master/confluent_platform/metadata.csv
+[7]: https://docs.datadoghq.com/agent/guide/autodiscovery-with-jmx/?tab=containerizedagent
+[8]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[9]: https://github.com/DataDog/integrations-core/blob/master/confluent_platform/assets/service_checks.json
+[10]: https://docs.datadoghq.com/help/

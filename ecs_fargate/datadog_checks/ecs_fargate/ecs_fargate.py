@@ -4,6 +4,7 @@
 from __future__ import division
 
 import requests
+from dateutil import parser
 from six import iteritems
 
 from datadog_checks.base import AgentCheck
@@ -70,10 +71,10 @@ class FargateCheck(AgentCheck):
 
     HTTP_CONFIG_REMAPPER = {'timeout': {'name': 'timeout', 'default': DEFAULT_TIMEOUT}}
 
-    def check(self, instance):
+    def check(self, _):
         metadata_endpoint = API_ENDPOINT + METADATA_ROUTE
         stats_endpoint = API_ENDPOINT + STATS_ROUTE
-        custom_tags = instance.get('tags', [])
+        custom_tags = self.instance.get('tags', [])
 
         try:
             request = self.http.get(metadata_endpoint)
@@ -165,11 +166,11 @@ class FargateCheck(AgentCheck):
 
         for container_id, container_stats in iteritems(stats):
             if container_id not in exlcuded_cid:
-                self.submit_perf_metrics(instance, container_tags, container_id, container_stats)
+                self.submit_perf_metrics(container_tags, container_id, container_stats)
 
         self.service_check('fargate_check', AgentCheck.OK, tags=custom_tags)
 
-    def submit_perf_metrics(self, instance, container_tags, container_id, container_stats):
+    def submit_perf_metrics(self, container_tags, container_id, container_stats):
         try:
             if container_stats is None:
                 self.log.debug("Empty stats for container %s", container_id)
@@ -181,31 +182,68 @@ class FargateCheck(AgentCheck):
             cpu_stats = container_stats.get('cpu_stats', {})
             prev_cpu_stats = container_stats.get('precpu_stats', {})
 
-            value_system = cpu_stats.get('system_cpu_usage')
+            value_system = cpu_stats.get('cpu_usage', {}).get('usage_in_kernelmode')
             if value_system is not None:
-                self.gauge('ecs.fargate.cpu.system', value_system, tags)
+                self.rate('ecs.fargate.cpu.system', value_system, tags)
+
+            value_user = cpu_stats.get('cpu_usage', {}).get('usage_in_usermode')
+            if value_user is not None:
+                self.rate('ecs.fargate.cpu.user', value_user, tags)
 
             value_total = cpu_stats.get('cpu_usage', {}).get('total_usage')
             if value_total is not None:
-                self.gauge('ecs.fargate.cpu.user', value_total, tags)
+                self.rate('ecs.fargate.cpu.usage', value_total, tags)
 
+            available_cpu = cpu_stats.get('system_cpu_usage')
+            preavailable_cpu = prev_cpu_stats.get('system_cpu_usage')
             prevalue_total = prev_cpu_stats.get('cpu_usage', {}).get('total_usage')
-            prevalue_system = prev_cpu_stats.get('system_cpu_usage')
 
-            if prevalue_system is not None and prevalue_total is not None:
+            # This is always false on Windows because the available cpu is not exposed
+            if (
+                available_cpu is not None
+                and preavailable_cpu is not None
+                and value_total is not None
+                and prevalue_total is not None
+            ):
                 cpu_delta = float(value_total) - float(prevalue_total)
-                system_delta = float(value_system) - float(prevalue_system)
+                system_delta = float(available_cpu) - float(preavailable_cpu)
             else:
                 cpu_delta = 0.0
                 system_delta = 0.0
 
+            # Not reported on Windows
             active_cpus = float(cpu_stats.get('online_cpus', 0.0))
 
             cpu_percent = 0.0
             if system_delta > 0 and cpu_delta > 0 and active_cpus > 0:
-                cpu_percent = (cpu_delta / system_delta) * active_cpus * 100.0
-                cpu_percent = round_value(cpu_percent, 2)
-                self.gauge('ecs.fargate.cpu.percent', cpu_percent, tags)
+                if system_delta > cpu_delta:
+                    cpu_percent = (cpu_delta / system_delta) * active_cpus * 100.0
+                    cpu_percent = round_value(cpu_percent, 2)
+                    self.gauge('ecs.fargate.cpu.percent', cpu_percent, tags)
+                else:
+                    # There is a bug where container CPU usage is occasionally reported as greater than system
+                    # CPU usage (which, in fact, represents the maximum available CPU time during this timeframe),
+                    # leading to a non-sensical CPU percentage to be reported. To mitigate this we substitute the
+                    # system_delta with (t1 - t0)*active_cpus (with a scale factor to convert to nanoseconds)
+
+                    self.log.debug(
+                        "Anomalous CPU value for container_id: %s. cpu_percent: %f",
+                        container_id,
+                        cpu_percent,
+                    )
+                    self.log.debug("ECS container_stats for container_id %s: %s", container_id, container_stats)
+
+                    # example format: '2021-09-22T04:55:52.490012924Z',
+                    t1 = container_stats.get('read', '')
+                    t0 = container_stats.get('preread', '')
+                    try:
+                        t_delta = int((parser.isoparse(t1) - parser.isoparse(t0)).total_seconds())
+                        # Simplified formula for cpu_percent where system_delta = t_delta * active_cpus * (10 ** 9)
+                        cpu_percent = (cpu_delta / (t_delta * (10**9))) * 100.0
+                        cpu_percent = round_value(cpu_percent, 2)
+                        self.gauge('ecs.fargate.cpu.percent', cpu_percent, tags)
+                    except ValueError:
+                        pass
 
             # Memory metrics
             memory_stats = container_stats.get('memory_stats', {})
@@ -228,13 +266,23 @@ class FargateCheck(AgentCheck):
                 self.gauge('ecs.fargate.mem.usage', value, tags)
 
             value = memory_stats.get('limit')
-            if value is not None:
+            # When there is no hard-limit defined, the ECS API returns that value of 8 EiB
+            # It's not exactly 2^63, but a rounded value of it most probably because of a int->float->int conversion
+            if value is not None and value != 9223372036854771712:
                 self.gauge('ecs.fargate.mem.limit', value, tags)
 
             # I/O metrics
             for blkio_cat, metric_name in iteritems(IO_METRICS):
                 read_counter = write_counter = 0
-                for blkio_stat in container_stats.get("blkio_stats", {}).get(blkio_cat, []):
+
+                blkio_stats = container_stats.get("blkio_stats", {}).get(blkio_cat)
+                # In Windows is always "None" (string), so don't report anything
+                if blkio_stats == 'None':
+                    continue
+                elif blkio_stats is None:
+                    blkio_stats = []
+
+                for blkio_stat in blkio_stats:
                     if blkio_stat["op"] == "Read" and "value" in blkio_stat:
                         read_counter += blkio_stat["value"]
                     elif blkio_stat["op"] == "Write" and "value" in blkio_stat:

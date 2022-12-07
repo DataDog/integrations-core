@@ -1,36 +1,40 @@
 {
-  "aliases": [
-    "/integrations/wmi"
-  ],
-  "categories": [
-    "monitoring"
-  ],
-  "creates_events": false,
-  "display_name": "WMI",
-  "guid": "d70f5c68-873d-436e-bddb-dbb3e107e3b5",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "wmi.",
-  "name": "wmi_check",
-  "public_title": "Datadog-WMI Check Integration",
-  "short_description": "Collect and graph any WMI metrics.",
-  "support": "core",
-  "supported_os": [
-    "windows"
-  ],
-  "type": "check",
-  "integration_id": "wmi",
+  "manifest_version": "2.0.0",
+  "app_uuid": "ddd1578f-d511-4d57-b5dd-33c0ea7c391e",
+  "app_id": "wmi",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Collect and graph any WMI metrics.",
+    "title": "WMI Check",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Windows",
+      "Category::Monitoring"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
-    },
-    "monitors": {},
-    "dashboards": {
-      "windows_server": "assets/dashboards/windows_server_dashboard.json"
-    },
-    "service_checks": "assets/service_checks.json",
-    "logs": {},
-    "metrics_metadata": "metadata.csv"
+    "integration": {
+      "source_type_name": "WMI",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    }
   }
 }

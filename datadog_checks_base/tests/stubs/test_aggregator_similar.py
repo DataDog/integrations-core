@@ -23,14 +23,14 @@ class TestSimilarAssertionMessages(object):
 
         expected_msg = '''
     Expected:
-        MetricStub(name='test.similar_metric', type=None, value=None, tags=None, hostname=None, device=None)
+        MetricStub(name='test.similar_metric', type=None, value=None, tags=None, hostname=None, device=None, flush_first_value=None)
 Similar submitted:
 Score   Most similar
-0.88    MetricStub(name='test.most_similar_metric', type=0, value=0.0, tags=[], hostname='', device=None)
-0.83    MetricStub(name='test.another_similar_metric', type=0, value=0.0, tags=[], hostname='', device=None)
-0.62    MetricStub(name='test.very_different_metric', type=0, value=0.0, tags=[], hostname='', device=None)
-0.42    MetricStub(name='test.very_very_different', type=0, value=0.0, tags=[], hostname='', device=None)
-    '''.strip()
+0.88    MetricStub(name='test.most_similar_metric', type=0, value=0.0, tags=[], hostname='', device=None, flush_first_value=False)
+0.83    MetricStub(name='test.another_similar_metric', type=0, value=0.0, tags=[], hostname='', device=None, flush_first_value=False)
+0.62    MetricStub(name='test.very_different_metric', type=0, value=0.0, tags=[], hostname='', device=None, flush_first_value=False)
+0.42    MetricStub(name='test.very_very_different', type=0, value=0.0, tags=[], hostname='', device=None, flush_first_value=False)
+    '''.strip()  # noqa: E501
         delta = difflib.ndiff([expected_msg], [actual_msg])
         assert expected_msg == actual_msg, delta
 
@@ -158,22 +158,6 @@ Score   Most similar
 
         # expect similar metrics in a similarity order
         assert similar_service_checks[0][1].name == 'test.similar2'
-
-    def test__build_similar_elements__service_check_message(self, aggregator):
-        check = AgentCheck()
-
-        check.service_check('test.similar1', AgentCheck.OK, message="aa")
-        check.service_check('test.similar2', AgentCheck.OK, message="bb")
-        check.service_check('test.similar3', AgentCheck.OK, message="cc")
-        check.service_check('test.similar4', AgentCheck.OK, message="dd")
-
-        expected_service_check = ServiceCheckStub(
-            None, "test.similar", status=AgentCheck.OK, tags=None, hostname=None, message="cc"
-        )
-        similar_service_checks = similar._build_similar_elements(expected_service_check, aggregator._service_checks)
-
-        # expect similar metrics in a similarity order
-        assert similar_service_checks[0][1].name == 'test.similar3'
 
     def test__build_similar_elements__service_check_tags(self, aggregator):
         check = AgentCheck()

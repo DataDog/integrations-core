@@ -7,6 +7,7 @@ import click
 import yaml
 
 from ...console import CONTEXT_SETTINGS
+from .constants import MIB_SOURCE_URL
 
 
 def fetch_mib(mib, source_url):
@@ -37,7 +38,7 @@ def fetch_mib(mib, source_url):
 @click.argument('profile_path')
 @click.option(
     '--mib_source_url',
-    default='https://raw.githubusercontent.com/projx/snmp-mibs/master/@mib@',
+    default=MIB_SOURCE_URL,
     help='Source url to fetch missing MIBS',
 )
 @click.pass_context
@@ -63,7 +64,8 @@ def translate_profile(ctx, profile_path, mib_source_url):
         data = yaml.safe_load(f.read())
 
     output = []
-    for metric in data['metrics']:
+    metrics = data.get('metrics', [])
+    for metric in metrics:
         mib = metric['MIB']
         try:
             mib_view_controller.mibBuilder.loadModule(mib)
@@ -71,11 +73,15 @@ def translate_profile(ctx, profile_path, mib_source_url):
             fetch_mib(mib, source_url=mib_source_url)
         if 'table' in metric:
             table = metric['table']
+            if not isinstance(table, str):
+                continue
             node = mib_view_controller.mibBuilder.importSymbols(mib, table)[0]
             value = '.'.join([str(i) for i in node.getName()])
             table = {'name': table, 'OID': value}
             symbols = []
             for symbol in metric['symbols']:
+                if not isinstance(symbol, str):
+                    continue
                 node = mib_view_controller.mibBuilder.importSymbols(mib, symbol)[0]
                 value = '.'.join([str(i) for i in node.getName()])
                 symbols.append({'name': symbol, 'OID': value})
@@ -84,6 +90,8 @@ def translate_profile(ctx, profile_path, mib_source_url):
                 if 'column' in tag:
                     tag_mib = tag.get('MIB', mib)
                     key = tag['column']
+                    if not isinstance(key, str):
+                        continue
                     node = mib_view_controller.mibBuilder.importSymbols(tag_mib, key)[0]
                     value = '.'.join([str(i) for i in node.getName()])
                     tag = tag.copy()

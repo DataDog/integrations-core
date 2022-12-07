@@ -1,0 +1,26 @@
+[env.collectors.datadog-checks]
+check-types = true
+mypy-args = [
+  "--install-types",
+  "--non-interactive",
+  "--follow-imports=silent",
+  "datadog_checks/dev/tooling/commands/release/trello/testable.py",
+  "datadog_checks/dev/tooling/commands/release/trello/status.py",
+]
+
+[envs.default]
+e2e-env = false
+
+[envs.default.env-vars]
+DDEV_TESTING_PLUGIN = "true"
+
+[[envs.default.matrix]]
+python = ["27", "38"]
+
+[envs.default.overrides]
+matrix.python.features = [
+  { value = "cli", if = ["38"] },
+]
+matrix.python.scripts = [
+  { key = "test", value = "_dd-test --ignore tests/tooling", if = ["27"] },
+]

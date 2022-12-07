@@ -1,8 +1,8 @@
 {
 	"name": "[kubernetes] Pod {{pod_name.name}} is CrashloopBackOff on namespace {{kube_namespace.name}}",
 	"type": "query alert",
-	"query": "max(last_10m):max:kubernetes_state.container.status_report.count.waiting{reason:crashloopbackoff} by {kube_namespace,pod_name} >= 1",
-	"message": "pod {{pod_name.name}} is CrashloopBackOff on {{kube_namespace.name}} \n This alert could generate several alerts for a bad deployment. Adjust the thresholds of the query to suit your infrastructure.",
+	"query": "max(last_10m):max:kubernetes_state.container.status_report.count.waiting{reason:crashloopbackoff} by {kube_cluster_name,kube_namespace,pod_name} >= 1",
+	"message": "pod {{pod_name.name}} is in CrashloopBackOff on {{kube_namespace.name}} \n This alert could generate several alerts for a bad deployment. Adjust the thresholds of the query to suit your infrastructure.",
 	"tags": [
 		"integration:kubernetes"
 	],

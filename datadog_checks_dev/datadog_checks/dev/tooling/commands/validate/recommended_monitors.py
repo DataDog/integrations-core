@@ -8,12 +8,31 @@ import os
 import click
 
 from ....utils import read_file
-from ...utils import get_assets_from_manifest, get_valid_integrations, load_manifest
-from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
+from ...manifest_utils import Manifest
+from ...testing import process_checks_option
+from ...utils import complete_valid_checks, get_assets_from_manifest, get_manifest_file
+from ..console import (
+    CONTEXT_SETTINGS,
+    abort,
+    annotate_display_queue,
+    annotate_error,
+    echo_failure,
+    echo_info,
+    echo_success,
+)
 
 REQUIRED_ATTRIBUTES = {'name', 'type', 'query', 'message', 'tags', 'options', 'recommended_monitor_metadata'}
 EXTRA_NOT_ALLOWED_FIELDS = ['id']
-ALLOWED_MONITOR_TYPES = ['query alert', 'event alert', 'service check']
+ALLOWED_MONITOR_TYPES = [
+    'audit alert',
+    'event alert',
+    'event-v2 alert',
+    'log alert',
+    'query alert',
+    'rum alert',
+    'service check',
+    'trace-analytics alert',
+]
 
 
 @click.command(
@@ -21,22 +40,33 @@ ALLOWED_MONITOR_TYPES = ['query alert', 'event alert', 'service check']
     context_settings=CONTEXT_SETTINGS,
     short_help='Validate recommended monitor definition JSON files',
 )
-def recommended_monitors():
-    """Validate all recommended monitors definition files."""
-    echo_info("Validating all recommended monitors...")
+@click.argument('check', shell_complete=complete_valid_checks, required=False)
+def recommended_monitors(check):
+    """Validate all recommended monitors definition files.
+
+    If `check` is specified, only the check will be validated, if check value is 'changed' will only apply to changed
+    checks, an 'all' or empty `check` value will validate all README files.
+    """
+
+    checks = process_checks_option(check, source='integrations', extend_changed=True)
+    echo_info(f"Validating recommended monitors for {len(checks)} checks ...")
+
     failed_checks = 0
     ok_checks = 0
 
-    for check_name in sorted(get_valid_integrations()):
+    for check_name in checks:
         display_queue = []
         file_failed = False
-        manifest = load_manifest(check_name)
+        manifest = Manifest.load_manifest(check_name)
         monitors_relative_locations, invalid_files = get_assets_from_manifest(check_name, 'monitors')
+        manifest_file = get_manifest_file(check_name)
         for file in invalid_files:
             echo_info(f'{check_name}... ', nl=False)
             echo_info(' FAILED')
-            echo_failure(f'  {file} does not exist')
+            message = f'{file} does not exist'
+            echo_failure('  ' + message)
             failed_checks += 1
+            annotate_error(manifest_file, message)
 
         for monitor_file in monitors_relative_locations:
             monitor_filename = os.path.basename(monitor_file)
@@ -46,7 +76,9 @@ def recommended_monitors():
                 failed_checks += 1
                 echo_info(f'{check_name}... ', nl=False)
                 echo_failure(' FAILED')
-                echo_failure(f'  invalid json: {e}')
+                message = f'invalid json: {e}'
+                echo_failure('  ' + message)
+                annotate_error(monitor_file, message)
                 continue
 
             all_keys = set(decoded.keys())
@@ -66,8 +98,7 @@ def recommended_monitors():
                     ),
                 )
             else:
-                # If all required keys exist, validate values
-
+                # If all required keys exist, validate value
                 monitor_type = decoded.get('type')
                 if monitor_type not in ALLOWED_MONITOR_TYPES:
                     file_failed = True
@@ -95,24 +126,32 @@ def recommended_monitors():
                     file_failed = True
                     display_queue.append((echo_failure, f"    {monitor_filename} must have an `integration` tag"))
 
-                display_name = manifest.get("display_name").lower()
+                display_name = manifest.get_display_name().lower()
                 monitor_name = decoded.get('name').lower()
                 if not (check_name in monitor_name or display_name in monitor_name):
                     file_failed = True
+                    if check_name == display_name:
+                        error_msg = f":{check_name}"
+                    else:
+                        error_msg = f". Either: {check_name} or {display_name}"
                     display_queue.append(
-                        (echo_failure, f"    {monitor_filename} name must contain the integration name"),
+                        (
+                            echo_failure,
+                            f"    {monitor_filename} `name` field must contain the integration name{error_msg}",
+                        ),
                     )
 
-        if file_failed:
-            failed_checks += 1
-            # Display detailed info if file is invalid
-            echo_info(f'{check_name}... ', nl=False)
-            echo_failure(' FAILED')
-            for display_func, message in display_queue:
-                display_func(message)
-            display_queue = []
-        else:
-            ok_checks += 1
+            if file_failed:
+                failed_checks += 1
+                # Display detailed info if file is invalid
+                echo_info(f'{check_name}... ', nl=False)
+                echo_failure(' FAILED')
+                annotate_display_queue(monitor_file, display_queue)
+                for display_func, message in display_queue:
+                    display_func(message)
+                display_queue = []
+            else:
+                ok_checks += 1
 
     if ok_checks:
         echo_success(f"{ok_checks} valid files")

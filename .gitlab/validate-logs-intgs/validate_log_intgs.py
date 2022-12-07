@@ -7,8 +7,8 @@ import re
 import yaml
 import os
 
-LOGS_BACKEND_INTGS_ROOT = os.path.abspath(os.environ['LOGS_BACKEND_INTGS_ROOT'])
-INTEGRATIONS_CORE = os.path.abspath(os.environ['INTEGRATIONS_CORE_ROOT'])
+LOGS_BACKEND_INTGS_ROOT = os.environ['LOGS_BACKEND_INTGS_ROOT']
+INTEGRATIONS_CORE = os.environ['INTEGRATIONS_CORE_ROOT']
 
 ERR_UNEXPECTED_LOG_COLLECTION_CAT = "The check does not have a log pipeline but defines 'log collection' in its manifest file."
 ERR_UNEXPECTED_LOG_DOC = "The check does not have a log pipeline but defines a source in its README."
@@ -18,8 +18,9 @@ ERR_MULTIPLE_SOURCES = "The check has a log pipeline but documents multiple sour
 ERR_NOT_DEFINED_WEB_UI = "The check has a log pipeline but does not have a corresponding entry defined in web-ui."
 
 EXCEPTIONS = {
-    'amazon_eks': [ERR_UNEXPECTED_LOG_COLLECTION_CAT], # eks is just a tile
-    'azure_active_directory': [
+    'amazon-eks': [ERR_UNEXPECTED_LOG_COLLECTION_CAT], # eks is just a tile
+    'aspdotnet': [ERR_MISSING_LOG_DOC], # Use iis pipeline
+    'azure-active-directory': [
         ERR_MISSING_LOG_DOC,  # This is a tile only integration, the source is populated by azure directly.
         ERR_NOT_DEFINED_WEB_UI,  # The integration does not have any metrics.
     ],
@@ -27,15 +28,29 @@ EXCEPTIONS = {
         ERR_UNEXPECTED_LOG_COLLECTION_CAT,  # cilium does not need a pipeline to automatically parse the logs
         ERR_UNEXPECTED_LOG_DOC  # The documentation says to use 'source: cilium'
     ],
-    'eks_fargate': [ERR_UNEXPECTED_LOG_COLLECTION_CAT], # Log collection but not from the agent
+    'consul-connect': [ERR_MISSING_LOG_DOC], # Use envoy pipeline
+    'docker': [ERR_UNEXPECTED_LOG_COLLECTION_CAT], # Tile only integration
+    'ecs-fargate': [
+        ERR_UNEXPECTED_LOG_COLLECTION_CAT, # Log collection but not from the agent
+        ERR_UNEXPECTED_LOG_DOC, # Not collecting logs directly, but has example in its readme
+    ],
+    'eks-anywhere': [ERR_UNEXPECTED_LOG_COLLECTION_CAT], # Works with amazon_eks
+    'eks-fargate': [ERR_UNEXPECTED_LOG_COLLECTION_CAT], # Log collection but not from the agent
     'fluentd': [ERR_UNEXPECTED_LOG_COLLECTION_CAT],  # Fluentd is about log collection but we don't collect fluentd logs
+    'jmeter': [ERR_MISSING_LOG_DOC], # Tile only in integrations-core, logs collected in DataDog/jmeter-datadog-backend-listener
+    'journald': [
+        ERR_UNEXPECTED_LOG_DOC, # Journald is a type of logs, and has its own tile
+        ERR_UNEXPECTED_LOG_COLLECTION_CAT,
+    ],
     'kubernetes': [ERR_UNEXPECTED_LOG_COLLECTION_CAT],  # The agent collects logs from kubernetes environment but there is no pipeline per se
-    'mesos_master': [ERR_UNEXPECTED_LOG_COLLECTION_CAT], # We do support log collection for mesos environments
+    'mesos-master': [ERR_UNEXPECTED_LOG_COLLECTION_CAT], # We do support log collection for mesos environments
     'linkerd': [
         ERR_UNEXPECTED_LOG_COLLECTION_CAT,  # linkerd does not need a pipeline to automatically parse the logs
         ERR_UNEXPECTED_LOG_DOC
     ],
-    'win32_event_log': [ERR_UNEXPECTED_LOG_COLLECTION_CAT],  # win32_event_log is about log collection but we don't collect win32_event_log logs
+    'openshift': [ERR_UNEXPECTED_LOG_COLLECTION_CAT],  # The agent collects logs from openshift environment but there is no pipeline
+    'pan-firewall': [ERR_NOT_DEFINED_WEB_UI], # The integration doesn't emit metric
+    'pivotal-pks': [ERR_UNEXPECTED_LOG_COLLECTION_CAT], # Using kubernetes pipeline
 }
 
 
@@ -56,11 +71,11 @@ class CheckDefinition(object):
         with open(os.path.join(INTEGRATIONS_CORE, dir_name, "manifest.json"), 'r') as manifest:
             content = json.load(manifest)
             # name of the integration
-            self.name: str = content['name']
+            self.name: str = content['app_id']
             # boolean: whether or not the integration supports log collection
-            self.log_collection: bool = 'log collection' in content['categories']
+            self.log_collection: bool = 'Category::Log Collection' in content.get('tile', {}).get('classifier_tags', [])
             # boolean: whether or not the integration has public facing docs
-            self.is_public: bool = content['is_public']
+            self.is_public: bool = content['display_on_public_website']
             # Log source defined in the manifest.json of the integration
             self.log_source: Optional[str] = content.get("assets", {}).get("logs", {}).get("source")
 
@@ -82,7 +97,7 @@ class CheckDefinition(object):
             content = f.read()
 
         code_sections: List[str] = re.findall(r'(```.*?```|`.*?`)', content, re.DOTALL)
-        sources = set(re.findall(r'(?:"source"|source): "?(\w+)"?', "\n".join(code_sections), re.MULTILINE))
+        sources = set(re.findall(r'(?:"source"|source|\\"source\\"): \\?"?(\w+)\\?"?', "\n".join(code_sections), re.MULTILINE))
 
         return list(sources)
 
@@ -158,8 +173,10 @@ if len(sys.argv) != 2:
     sys.exit(1)
 
 logs_to_metrics_mapping = get_log_to_metric_map(sys.argv[1])
+assert len(logs_to_metrics_mapping) > 0
 
 all_checks = list(get_all_checks())
+assert len(all_checks) > 0
 for check in all_checks:
     if check.log_source in logs_to_metrics_mapping:
         check.is_defined_in_web_ui = True

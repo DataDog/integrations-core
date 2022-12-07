@@ -10,20 +10,30 @@ ad_identifiers:
 #
 init_config:
 
-## Every instance is scheduled independent of the others.
+## Every instance is scheduled independently of the others.
 #
 instances:
 
-    ## @param prometheus_url - string - required
-    ## The URL where your application metrics are exposed by Prometheus.
+    ## @param possible_prometheus_urls - list of strings - required
+    ## The URLs to try to get your application metrics that are exposed by Prometheus.
+    ## The check will try each URLs in the list and will use the first working one.
+    ## One of possible_prometheus_urls or prometheus_url parameter is required.
     #
-  - prometheus_url: https://%%host%%:6443/metrics
+  - possible_prometheus_urls:
+      - https://%%host%%:6443/metrics
+      - https://%%host%%:8443/metrics
 
-    ## @param bearer_token_auth - boolean - optional - default: true
+    ## @param prometheus_url - string - optional - default: https://%%host%%:6443/metrics
+    ## The URL where your application metrics are exposed by Prometheus.
+    ## One of possible_prometheus_urls or prometheus_url parameter is required.
+    #
+    # prometheus_url: https://%%host%%:6443/metrics
+
+    ## @param bearer_token_auth - boolean or string - optional - default: tls_only
     ## Used if you are using RBACs and need the Agent to authenticate
     ## against the APIServer to retrieve metrics. Default to true.
     #
-    # bearer_token_auth: true
+    bearer_token_auth: tls_only
 
     ## @param bearer_token_path - string - optional - default: /var/run/secrets/kubernetes.io/serviceaccount/token
     ## Used to specify the path where the service account token is located.

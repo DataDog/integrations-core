@@ -83,6 +83,8 @@ GALLEY_METRICS = {
 
 
 MESH_METRICS = {
+    'istio_request_messages_total': 'request.messages.total',
+    'istio_response_messages_total': 'response.messages.total',
     # These metrics support Istio 1.5
     'istio_request_duration_milliseconds': 'request.duration.milliseconds',
     # These metrics support Istio 1.0
@@ -100,6 +102,69 @@ MESH_METRICS = {
     'istio_tcp_connections_opened_total': 'tcp.connections_opened.total',
     'istio_tcp_received_bytes_total': 'tcp.received_bytes.total',
     'istio_tcp_sent_bytes_total': 'tcp.send_bytes.total',
+    'istio_agent_pilot_conflict_outbound_listener_http_over_current_tcp': (
+        'agent.pilot.conflict.outbound_listener.http_over_current_tcp'
+    ),
+    'istio_agent_go_memstats_stack_sys_bytes': 'agent.go.memstats.stack_sys_bytes',
+    'istio_agent_pilot_conflict_inbound_listener': 'agent.conflict.inbound_listener',
+    'istio_agent_go_memstats_sys_bytes': 'agent.go.memstats.sys_bytes',
+    'istio_agent_pilot_xds': 'agent.pilot.xds',
+    'istio_agent_go_memstats_alloc_bytes': 'agent.go.memstats.alloc_bytes',
+    'istio_agent_go_memstats_heap_idle_bytes': 'agent.go.memstats.heap_idle_bytes',
+    'istio_agent_process_resident_memory_bytes': 'agent.process.resident_memory_bytes',
+    'istio_agent_go_memstats_alloc_bytes_total': 'agent.go.memstats.alloc_bytes_total',
+    'istio_agent_pilot_conflict_outbound_listener_tcp_over_current_tcp': (
+        'agent.conflict.outbound_listener.tcp_over_current_tcp'
+    ),
+    'istio_agent_go_memstats_gc_cpu_fraction': 'agent.go.memstats.gc_cpu_fraction',
+    'istio_agent_go_memstats_heap_sys_bytes': 'agent.go.memstats.heap_sys_bytes',
+    'istio_agent_go_memstats_stack_inuse_bytes': 'agent.go.memstats.stack_inuse_bytes',
+    'istio_agent_go_memstats_heap_released_bytes': 'agent.go.memstats.heap_released_bytes',
+    'istio_agent_go_memstats_mspan_inuse_bytes': 'agent.go.memstats.mspan_inuse_bytes',
+    'istio_agent_go_memstats_mallocs_total': 'agent.go.memstats.mallocs_total',
+    'istio_agent_pilot_endpoint_not_ready': 'agent.pilot.endpoint_not_ready',
+    'istio_agent_pilot_no_ip': 'agent.pilot.no_ip',
+    'istio_agent_num_outgoing_requests': 'agent.num_outgoing_requests',
+    'istio_agent_go_memstats_other_sys_bytes': 'agent.go.memstats.other_sys_bytes',
+    'istio_agent_pilot_xds_config_size_bytes': 'agent.pilot.xds.config_size_bytes',
+    'istio_agent_process_open_fds': 'agent.process.open_fds',
+    'istio_agent_go_goroutines': 'agent.go.goroutines',
+    'istio_agent_go_threads': 'agent.go.threads',
+    'istio_agent_go_info': 'agent.go.info',
+    'istio_agent_go_memstats_frees_total': 'agent.go.memstats.frees_total',
+    'istio_agent_go_memstats_mcache_inuse_bytes': 'agent.go.memstats.mcache_inuse_bytes',
+    'istio_agent_process_virtual_memory_bytes': 'agent.process.virtual_memory_bytes',
+    'istio_agent_endpoint_no_pod': 'agent.endpoint_no_pod',
+    'istio_agent_go_gc_duration_seconds': 'agent.go.gc_duration_seconds',
+    'istio_agent_process_cpu_seconds_total': 'agent.process.cpu_seconds_total',
+    'istio_agent_go_memstats_heap_objects': 'agent.go.memstats.heap_objects',
+    'istio_agent_pilot_vservice_dup_domain': 'agent.pilot.vservice_dup_domain',
+    'istio_agent_process_virtual_memory_max_bytes': 'agent.process.virtual_memory_max_bytes',
+    'istio_agent_go_memstats_mcache_sys_bytes': 'agent.go.memstats.mcache_sys_bytes',
+    'istio_agent_scrapes_total': 'agent.scrapes_total',
+    'istio_agent_pilot_duplicate_envoy_clusters': 'agent.pilot.duplicate_envoy_clusters',
+    'istio_agent_go_memstats_buck_hash_sys_bytes': 'agent.go.memstats.buck_hash_sys_bytes',
+    'istio_agent_pilot_xds_push_time': 'agent.pilot.xds.push_time',
+    'istio_agent_wasm_cache_entries': 'agent.wasm_cache_entries',
+    'istio_agent_pilot_eds_no_instances': 'agent.pilot.eds_no_instances',
+    'istio_agent_go_memstats_heap_alloc_bytes': 'agent.go.memstats.heap_alloc_bytes',
+    'istio_agent_pilot_virt_services': 'agent.pilot.virt_services',
+    'istio_agent_go_memstats_next_gc_bytes': 'agent.go.memstats.next_gc_bytes',
+    'istio_agent_startup_duration_seconds': 'agent.startup_duration_seconds',
+    'istio_agent_go_memstats_last_gc_time_seconds': 'agent.go.memstats.last_gc_time_seconds',
+    'istio_agent_pilot_xds_send_time': 'agent.pilot.xds.send_time',
+    'istio_agent_go_memstats_heap_inuse_bytes': 'agent.go.memstats.heap_inuse_bytes',
+    'istio_agent_process_max_fds': 'agent.process.max_fds',
+    'istio_agent_go_memstats_gc_sys_bytes': 'agent.go.memstats.gc_sys_bytes',
+    'istio_agent_pilot_destrule_subsets': 'agent.pilot.destrule_subsets',
+    'istio_agent_pilot_xds_pushes': 'agent.pilot.xds.pushes',
+    'istio_agent_process_start_time_seconds': 'agent.process.start_time_seconds',
+    'istio_agent_go_memstats_lookups_total': 'agent.go.memstats.lookups_total',
+    'istio_agent_outgoing_latency': 'agent.outgoing_latency',
+    'istio_agent_go_memstats_mspan_sys_bytes': 'agent.go.memstats.mspan_sys_bytes',
+    'istio_agent_pilot_conflict_outbound_listener_tcp_over_current_http': (
+        'agent.pilot.conflict.outbound_listener.tcp_over_current_http'
+    ),
 }
 
 
@@ -165,6 +230,10 @@ PILOT_METRICS = {
     'pilot_xds_push_timeout_failures': 'xds.push.timeout_failures',
     'pilot_xds_pushes': 'xds.pushes',
     'pilot_xds_write_timeout': 'xds.write_timeout',
+    'pilot_xds_rds_reject': 'pilot.xds.rds_reject',
+    'pilot_xds_eds_reject': 'pilot.xds.eds_reject',
+    'pilot_xds_cds_reject': 'pilot.xds.cds_reject',
+    'pilot_xds_lds_reject': 'pilot.xds.lds_reject',
 }
 
 
@@ -236,6 +305,10 @@ ISTIOD_METRICS = {
     'pilot_xds_push_timeout_failures': 'pilot.xds.push.timeout_failures',
     'pilot_xds_pushes': 'pilot.xds.pushes',
     'pilot_xds_write_timeout': 'pilot.xds.write_timeout',
+    'pilot_xds_rds_reject': 'pilot.xds.rds_reject',
+    'pilot_xds_eds_reject': 'pilot.xds.eds_reject',
+    'pilot_xds_cds_reject': 'pilot.xds.cds_reject',
+    'pilot_xds_lds_reject': 'pilot.xds.lds_reject',
     'grpc_server_handled_total': 'grpc.server.handled_total',
     'grpc_server_handling_seconds': 'grpc.server.handling_seconds',
     'grpc_server_msg_received_total': 'grpc.server.msg_received_total',
@@ -306,3 +379,18 @@ ISTIOD_METRICS = {
     'sidecar_injection_failure_total': 'sidecar_injection.failure_total',
     'sidecar_injection_skip_total': 'sidecar_injection.skip_total',
 }
+
+ISTIOD_VERSION = {'istio_build': {'type': 'metadata', 'label': 'tag', 'name': 'version'}}
+
+
+def construct_metrics_config(metric_map):
+    metrics = []
+    for raw_metric_name, metric_name in metric_map.items():
+        if raw_metric_name.endswith('_total'):
+            raw_metric_name = raw_metric_name[:-6]
+            metric_name = metric_name[:-6]
+
+        config = {raw_metric_name: {'name': metric_name}}
+        metrics.append(config)
+
+    return metrics

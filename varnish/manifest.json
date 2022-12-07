@@ -1,37 +1,54 @@
 {
-  "categories": [
-    "web",
-    "caching",
-    "log collection"
-  ],
-  "creates_events": false,
-  "display_name": "Varnish",
-  "guid": "d2052eae-89b8-4cb1-b631-f373010da4b8",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "varnish.",
-  "metric_to_check": "varnish.n_backend",
-  "name": "varnish",
-  "process_signatures": [
-    "service varnish start",
-    "varnishd"
-  ],
-  "public_title": "Datadog-Varnish Integration",
-  "short_description": "Track client and backend connections, cache misses and evictions, and more.",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "type": "check",
-  "integration_id": "varnish",
+  "manifest_version": "2.0.0",
+  "app_uuid": "e342e5eb-71ce-4c5b-a9c9-2c33691e858f",
+  "app_id": "varnish",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Track client and backend connections, cache misses and evictions, and more.",
+    "title": "Varnish",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Web",
+      "Category::Caching",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "Varnish",
+      "process_signatures": [
+        "service varnish start",
+        "varnishd"
+      ],
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "varnish.",
+        "check": "varnish.n_backend",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
     },
-    "monitors": {},
     "dashboards": {
       "varnish": "assets/dashboards/varnish_dashboard.json"
     },
@@ -42,10 +59,8 @@
       "bot_errors": "assets/saved_views/bot_errors.json",
       "varnish_processes": "assets/saved_views/varnish_processes.json"
     },
-    "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "varnish"
-    },
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

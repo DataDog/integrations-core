@@ -16,18 +16,18 @@ from io import open
 import yaml
 from six.moves.urllib.request import urlopen
 
-from datadog_checks.dev.fs import basepath, file_exists, get_parent_dir, path_join, read_file
-
-from .ci import running_on_ci, running_on_windows_ci  # noqa: F401
+from .ci import running_on_ci, running_on_gh_actions, running_on_windows_ci  # noqa: F401
+from .fs import basepath, file_exists, get_parent_dir, path_join, read_file
 
 __platform = platform.system()
 ON_MACOS = os.name == 'mac' or __platform == 'Darwin'
 ON_WINDOWS = NEED_SHELL = os.name == 'nt' or __platform == 'Windows'
 ON_LINUX = not (ON_MACOS or ON_WINDOWS)
+GH_ANNOTATION_LEVELS = ['warning', 'error']
 
 
-def get_tox_env():
-    return os.environ['TOX_ENV_NAME']
+def get_active_env():
+    return os.environ.get('TOX_ENV_NAME') or os.environ['HATCH_ENV_ACTIVE']
 
 
 def ensure_bytes(s):
@@ -68,6 +68,9 @@ def load_jmx_config():
     example_config = yaml.safe_load(read_file(example_config_path))
     metrics_config = yaml.safe_load(read_file(metrics_config_path))
 
+    if example_config['init_config'] is None:
+        example_config['init_config'] = {}
+
     # Avoid having to potentially mount multiple files by putting the default metrics
     # in the user-defined metric location.
     example_config['init_config']['conf'] = metrics_config['jmx_metrics']
@@ -85,7 +88,7 @@ def find_check_root(depth=0):
 
     root = get_parent_dir(frame.f_code.co_filename)
     while True:
-        if file_exists(path_join(root, 'setup.py')):
+        if file_exists(path_join(root, 'pyproject.toml')) or file_exists(path_join(root, 'setup.py')):
             break
 
         new_root = os.path.dirname(root)
@@ -134,3 +137,8 @@ def get_metadata_metrics():
         for row in csv.DictReader(f):
             metrics[row['metric_name']] = row
     return metrics
+
+
+def get_hostname():
+    """Return the socket hostname"""
+    return socket.gethostname()

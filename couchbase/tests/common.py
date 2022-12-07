@@ -12,20 +12,30 @@ HOST = get_docker_hostname()
 PORT = '8091'
 QUERY_PORT = '8093'
 SG_PORT = '4985'
+INDEX_STATS_PORT = '9102'
 
 # Tags and common bucket name
 CUSTOM_TAGS = ['optional:tag1']
 CHECK_TAGS = CUSTOM_TAGS + ['instance:http://{}:{}'.format(HOST, PORT)]
 BUCKET_NAME = 'cb_bucket'
+INDEX_STATS_TAGS = CHECK_TAGS + [
+    'bucket:cb_bucket',
+    'collection:default',
+    'index_name:gamesim_primary',
+    'scope:default',
+]
 
 URL = 'http://{}:{}'.format(HOST, PORT)
 QUERY_URL = 'http://{}:{}'.format(HOST, QUERY_PORT)
 SG_URL = 'http://{}:{}'.format(HOST, SG_PORT)
+INDEX_STATS_URL = 'http://{}:{}'.format(HOST, INDEX_STATS_PORT)
 CB_CONTAINER_NAME = 'couchbase-standalone'
 USER = 'Administrator'
 PASSWORD = 'password'
 
-DEFAULT_INSTANCE = {'server': URL, 'user': USER, 'password': PASSWORD, 'timeout': 0.5, 'tags': CUSTOM_TAGS}
+COUCHBASE_MAJOR_VERSION = int(os.getenv('COUCHBASE_VERSION').split(".")[0])
+
+DEFAULT_INSTANCE = {'server': URL, 'user': USER, 'password': PASSWORD, 'timeout': 1, 'tags': CUSTOM_TAGS}
 
 SYNC_GATEWAY_METRICS = [
     "couchbase.sync_gateway.admin_net_bytes_recv",
@@ -132,3 +142,55 @@ SYNC_GATEWAY_METRICS = [
     "couchbase.sync_gateway.system_memory_total",
     "couchbase.sync_gateway.warn_count",
 ]
+
+INDEX_STATS_INDEXER_METRICS = [
+    'couchbase.indexer.indexer_state',
+    'couchbase.indexer.memory_quota',
+    'couchbase.indexer.memory_total_storage',
+    'couchbase.indexer.memory_used',
+    'couchbase.indexer.total_indexer_gc_pause_ns',
+]
+
+INDEX_STATS_GAUGE_METRICS = [
+    'couchbase.index.avg_drain_rate',
+    'couchbase.index.avg_item_size',
+    'couchbase.index.avg_scan_latency',
+    'couchbase.index.cache_hit_percent',
+    'couchbase.index.data_size',
+    'couchbase.index.disk_size',
+    'couchbase.index.frag_percent',
+    'couchbase.index.initial_build_progress',
+    'couchbase.index.last_known_scan_time',
+    'couchbase.index.num_docs_pending',
+    'couchbase.index.num_docs_queued',
+    'couchbase.index.num_pending_requests',
+    'couchbase.index.recs_in_mem',
+    'couchbase.index.recs_on_disk',
+    'couchbase.index.resident_percent',
+    'couchbase.index.total_scan_duration',
+]
+
+INDEX_STATS_COUNT_METRICS = [
+    'couchbase.index.cache_hits',
+    'couchbase.index.cache_misses',
+    'couchbase.index.items_count',
+    'couchbase.index.num_docs_indexed',
+    'couchbase.index.num_items_flushed',
+    'couchbase.index.num_requests',
+    'couchbase.index.num_rows_returned',
+    'couchbase.index.num_scan_errors',
+    'couchbase.index.num_scan_timeouts',
+    'couchbase.index.scan_bytes_read',
+]
+
+
+QUERY_STATS_ALWAYS_PRESENT = {
+    'cores',
+    'cpu_sys_percent',
+    'cpu_user_percent',
+    'memory_total',
+    'request_per_sec_15min',
+    'request_per_sec_1min',
+    'request_per_sec_5min',
+    'request_prepared_percent',
+}

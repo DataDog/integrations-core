@@ -1,30 +1,56 @@
-metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-otel.system.cpu.time,count,,second,,Total CPU seconds broken down by different states,0,otel,cpu time
-otel.system.cpu.load_average.1m,gauge,,unit,,Average CPU Load over 1 minute,0,otel,load norm 1
-otel.system.cpu.load_average.5m,gauge,,unit,,Average CPU Load over 5 minutes,0,otel,load norm 5
-otel.system.cpu.load_average.15m,gauge,,unit,,Average CPU Load over 15 minutes,0,otel,load norm 15
-otel.system.memory.usage,count,,byte,,Bytes of memory in use,0,otel,mem usage
-otel.system.disk.io,count,,byte,,Disk bytes transferred,0,otel,disk io
-otel.system.disk.operations,count,,unit,,Disk operations count,0,otel,disk ops
-otel.system.disk.io_time,count,,unit,,Time disk spent activated,0,otel,disk io time
-otel.system.disk.operation_time,count,,second,,Time spent in disk operations,0,otel,disk ops time
-otel.system.disk.merged,count,,request,,The number of disk reads merged into single physical disk access operations.,0,otel,disk merged
-otel.system.disk.pending_operations,gauge,,unit,,The queue size of pending I/O operations.,0,otel,disk pending ops
-otel.system.filesystem.usage,gauge,,byte,,Filesystem bytes used.,0,otel,fs in use
-otel.system.filesystem.inodes.usage,gauge,,inode,,Filesystem inodes used,0,otel,inodes in use
-otel.system.network.dropped,count,,packet,,Packets that are dropped or discarded even though there was no error,-1,otel,packets dropped
-otel.system.network.packets,count,,packet,,The number of packets transferred,0,otel,packets
-otel.system.network.errors,gauge,,error,,The number of errors encountered,-1,otel,packets err
-otel.system.network.io,count,,byte,,The number of bytes transmitted and received,0,otel,bytes sent
-otel.system.network.connections,gauge,,connection,,The number of connections,0,otel,conns
-otel.system.processes.count,gauge,,process,,Total number of processes in each state,0,otel,processes count
-otel.system.processes.created,count,,process,,Total number of created processes,0,otel,processes created count
-otel.process.cpu.time,count,,second,,Total CPU seconds broken down by different states.,0,otel,processes cpu time
-otel.process.memory.physical_usage,count,,byte,,The amount of physical memory in use,0,otel,processes mem Rhys
-otel.process.memory.virtual_usage,gauge,,byte,,Virtual memory size,0,otel,processes mem virtual
-otel.process.disk.io,count,,byte,,Disk bytes transferred per second,0,otel,processes disk io
-otel.system.paging.usage,gauge,,byte,,Unix swap or windows pagefile usage,0,otel,paging in use
-otel.system.paging.faults,count,,occurrence,,The number of paging faults,0,otel,paging faults
-otel.system.paging.operations,count,,unit,,The number of paging operations,0,otel,paging ops
-otel.datadog_exporter.metrics.running,gauge,,unit,,Reports that the Datadog metrics exporter is successfully sending metrics,0,otel,metrics running
-otel.datadog_exporter.traces.running,gauge,,unit,,Reports that the Datadog traces exporter is successfully sending traces,0,otel,traces running
+metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
+otel.system.cpu.time,count,,second,,Total CPU seconds broken down by different states,0,otel,cpu time,
+otel.system.cpu.load_average.1m,gauge,,unit,,Average CPU Load over 1 minute,0,otel,load norm 1,
+otel.system.cpu.load_average.5m,gauge,,unit,,Average CPU Load over 5 minutes,0,otel,load norm 5,
+otel.system.cpu.load_average.15m,gauge,,unit,,Average CPU Load over 15 minutes,0,otel,load norm 15,
+otel.system.memory.usage,count,,byte,,Bytes of memory in use,0,otel,mem usage,
+otel.system.disk.io,count,,byte,,Disk bytes transferred,0,otel,disk io,
+otel.system.disk.operations,count,,unit,,Disk operations count,0,otel,disk ops,
+otel.system.disk.io_time,count,,unit,,Time disk spent activated,0,otel,disk io time,
+otel.system.disk.operation_time,count,,second,,Time spent in disk operations,0,otel,disk ops time,
+otel.system.disk.merged,count,,request,,The number of disk reads merged into single physical disk access operations.,0,otel,disk merged,
+otel.system.disk.pending_operations,gauge,,unit,,The queue size of pending I/O operations.,0,otel,disk pending ops,
+otel.system.filesystem.usage,gauge,,byte,,Filesystem bytes used.,0,otel,fs in use,
+otel.system.filesystem.inodes.usage,gauge,,inode,,Filesystem inodes used,0,otel,inodes in use,
+otel.system.network.dropped,count,,packet,,Packets that are dropped or discarded even though there was no error,-1,otel,packets dropped,
+otel.system.network.packets,count,,packet,,The number of packets transferred,0,otel,packets,
+otel.system.network.errors,gauge,,error,,The number of errors encountered,-1,otel,packets err,
+otel.system.network.io,count,,byte,,The number of bytes transmitted and received,0,otel,bytes sent,
+otel.system.network.connections,gauge,,connection,,The number of connections,0,otel,conns,
+otel.system.processes.count,gauge,,process,,Total number of processes in each state,0,otel,processes count,
+otel.system.processes.created,count,,process,,Total number of created processes,0,otel,processes created count,
+otel.process.cpu.time,count,,second,,Total CPU seconds broken down by different states.,0,otel,processes cpu time,
+otel.process.memory.physical_usage,count,,byte,,The amount of physical memory in use,0,otel,processes mem Rhys,
+otel.process.memory.virtual_usage,gauge,,byte,,Virtual memory size,0,otel,processes mem virtual,
+otel.process.disk.io,count,,byte,,Disk bytes transferred per second,0,otel,processes disk io,
+otel.system.paging.usage,gauge,,byte,,Unix swap or windows pagefile usage,0,otel,paging in use,
+otel.system.paging.faults,count,,occurrence,,The number of paging faults,0,otel,paging faults,
+otel.system.paging.operations,count,,unit,,The number of paging operations,0,otel,paging ops,
+otel.datadog_exporter.metrics.running,gauge,,unit,,Reports that metrics are being sent from a host through the Datadog exporter for the OpenTelemetry Collector,0,otel,metrics running,
+otel.datadog_exporter.traces.running,gauge,,unit,,Reports that traces are being sent from a host through the Datadog exporter for the OpenTelemetry Collector,0,otel,traces running,
+otelcol_process_uptime,count,,unit,,Uptime of the process,0,otel,process uptime,
+otelcol_process_memory_rss,gauge,,unit,,Total physical memory (resident set size),0,otel,process memory rss,
+otelcol_exporter_queue_size,gauge,,unit,,Current size of the retry queue (in batches),0,otel,queue size,
+otelcol_exporter_sent_spans,count,,unit,,Number of spans successfully sent to destination,0,otel,sent spans,
+otelcol_exporter_send_failed_metric_points,count,,unit,,Number of metric points in failed attempts to send to destination,-1,otel,send failed metric points,
+otelcol_exporter_send_failed_spans,count,,unit,,Number of spans in failed attempts to send to destination,-1,otel,send failed spans,
+otelcol_process_cpu_seconds,count,,unit,,Total CPU user and system time in seconds,0,otel,process cpu seconds,
+otelcol_receiver_refused_spans,count,,unit,,Number of spans that could not be pushed into the pipeline,-1,otel,refused spans,
+otelcol_exporter_queue_capacity,gauge,,unit,,Fixed capacity of the retry queue (in batches),0,otel,queue capacity,
+otelcol_receiver_accepted_spans,count,,unit,,Number of spans successfully pushed into the pipeline,0,otel,accepted spans,
+otelcol_exporter_sent_metric_points,count,,unit,,Number of metric points successfully sent to destination,0,otel,sent metric points,
+otelcol_exporter_enqueue_failed_spans,count,,unit,,Number of spans failed to be added to the sending queue,-1,otel,enqueue failed spans,
+otelcol_scraper_errored_metric_points,count,,unit,,Number of metric points that were unable to be scraped,-1,otel,scraper errored metric points,
+otelcol_scraper_scraped_metric_points,count,,unit,,Number of metric points successfully scraped,0,otel,scraped metric points,
+otelcol_receiver_refused_metric_points,count,,unit,,Number of metric points that could not be pushed into the pipeline,-1,otel,refused metric points,
+otelcol_receiver_accepted_metric_points,count,,unit,,Number of metric points successfully pushed into the pipeline,0,otel,accepted metric points,
+otelcol_process_runtime_heap_alloc_bytes,gauge,,byte,,Bytes of allocated heap objects (see 'go doc runtime.MemStats.HeapAlloc'),0,otel,runtime heap alloc bytes,
+otelcol_process_runtime_total_alloc_bytes,count,,byte,,Cumulative bytes allocated for heap objects (see 'go doc runtime.MemStats.TotalAlloc'),0,otel,total alloc bytes,
+otelcol_exporter_enqueue_failed_log_records,count,,unit,,Number of log records failed to be added to the sending queue,-1,otel,enqueue failed log records,
+otelcol_processor_batch_timeout_trigger_send,count,,unit,,Number of times the batch was sent due to a timeout trigger,0,otel,batch timeout trigger send,
+otelcol_exporter_enqueue_failed_metric_points,count,,unit,,Number of metric points failed to be added to the sending queue,-1,otel,enqueue failed metric points,
+otelcol_process_runtime_total_sys_memory_bytes,gauge,,byte,,Total bytes of memory obtained from the OS (see 'go doc runtime.MemStats.Sys'),0,otel,total sys memory bytes,
+otelcol_processor_batch_batch_size_trigger_send,count,,unit,,Number of times the batch was sent due to a size trigger,0,otel,batch size trigger send,
+otelcol_exporter_sent_log_records,count,,unit,,Number of log records successfully sent to destination,0,otel,exporter sent log records,
+otelcol_receiver_refused_log_records,count,,unit,,Number of log records that could not be pushed into the pipeline,0,otel,receiver refused log records,
+otelcol_receiver_accepted_log_records,count,,unit,,Number of log records successfully pushed into the pipeline,0,otel,receiver accepted log records,

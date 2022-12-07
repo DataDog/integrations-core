@@ -1,52 +1,103 @@
-metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-sqlserver.access.page_splits,gauge,,operation,second,The number of page splits per second.,-1,sql_server,page splits
-sqlserver.ao.ag_sync_health,gauge,,,,"Availability group synchronization health: 0 = Not healthy, 1 = Partially healthy, 2 = Healthy",0,sql_server,ag sync health
-sqlserver.ao.replica_sync_state,gauge,,,,"Replica synchronization state: 0 = Not synchronizing, 1 = Synchronizing, 2 = Synchronized, 3 = Reverting, 4 = Initializing",0,sql_server,replica sync state
-sqlserver.ao.replica_failover_mode,gauge,,,,"Replica failover mode: 0 = Automatic failover, 1 = Manual failover",0,sql_server,replica failover mode
-sqlserver.ao.replica_failover_readiness,gauge,,,,"Replica failover readiness: 0 = Not ready for failover, 1 = Ready for failover",0,sql_server,replica failover readiness
-sqlserver.ao.primary_replica_health,gauge,,,,"Recovery health of primary replica: 0 = In progress, 1 = Online. The metric is not emitted if on a secondary replica",0,sql_server,primary replica health
-sqlserver.ao.secondary_replica_health,gauge,,,,"Recovery health of secondary replica: 0 = In progress, 1 = Online. The metric is not emitted if on a primary replica",0,sql_server,secondary replica health
-sqlserver.buffer.cache_hit_ratio,gauge,,fraction,,The ratio of data pages found and read from the buffer cache over all data page requests.,1,sql_server,buff hit ratio
-sqlserver.buffer.checkpoint_pages,gauge,,page,second,The number of pages flushed to disk per second by a checkpoint or other operation that require all dirty pages to be flushed.,-1,sql_server,checkpoint pages
-sqlserver.buffer.page_life_expectancy,gauge,,second,,Duration that a page resides in the buffer pool.,1,sql_server,buff page life expectancy
-sqlserver.buffer.page_reads,gauge,,page,,Indicates the number of physical database page reads that are issued per second. This statistic displays the total number of physical page reads across all databases.,-1,sql_server,buff page reads
-sqlserver.buffer.page_writes,gauge,,page,,Indicates the number of physical database page writes that are issued per second.,-1,sql_server,buff page writes
-sqlserver.stats.batch_requests,gauge,,request,second,The number of batch requests per second.,1,sql_server,batch requests
-sqlserver.stats.sql_compilations,gauge,,operation,second,The number of SQL compilations per second.,0,sql_server,sql compils
-sqlserver.stats.sql_recompilations,gauge,,operation,second,The number of SQL re-compilations per second.,-1,sql_server,sql recompils
-sqlserver.stats.connections,gauge,,connection,,The number of user connections.,0,sql_server,conns
-sqlserver.stats.lock_waits,gauge,,lock,second,The number of times per second that SQL Server is unable to retain a lock right away for a resource.,-1,sql_server,lock waits
-sqlserver.stats.procs_blocked,gauge,,process,,The number of processes blocked.,-1,sql_server,procs blocked
-sqlserver.stats.auto_param_attempts,gauge,,attempt,,Number of auto-parameterization attempts per second.,-1,sql_server,stats auto param
-sqlserver.stats.failed_auto_param_attempts,gauge,,attempt,,Number of failed auto-parameterization attempts per second.,-1,sql_server,stats failed auto param
-sqlserver.stats.safe_auto_param_attempts,gauge,,attempt,,Number of safe auto-parameterization attempts per second.,0,sql_server,stats safe auto param
-sqlserver.cache.object_counts,gauge,,object,,Number of cache objects in the cache.,0,sql_server,cache obj counts
-sqlserver.cache.pages,gauge,,object,,Number of 8-kilobyte (KB) pages used by cache objects.,0,sql_server,cache pages
-sqlserver.database.backup_restore_throughput,gauge,,,,Read/write throughput for backup and restore operations of a database per second.,0,sql_server,database restore throughput
-sqlserver.database.log_bytes_flushed,gauge,,byte,,Total number of log bytes flushed.,0,sql_server,database log byte flushed
-sqlserver.database.log_flushes,gauge,,flush,,Number of log flushes per second.,0,sql_server,database log flushes
-sqlserver.database.log_flush_wait,gauge,,millisecond,,"Total wait time (in milliseconds) to flush the log. On an Always On secondary database, this value indicates the wait time for log records to be hardened to disk.",-1,sql_server,database log flush wait time
-sqlserver.database.transactions,gauge,,transaction,,Number of transactions started for the SQL Server instance per second.,0,sql_server,database trans
-sqlserver.database.write_transactions,gauge,,transaction,,"Number of transactions that wrote to all databases on the SQL Server instance and committed, in the last second.",0,sql_server,database trans write
-sqlserver.database.state,gauge,,,,"Database state: 0 = Online, 1 = Restoring, 2 = Recovering, 3 = Recovery_Pending, 4 = Suspect, 5 = Emergency, 6 = Offline, 7 = Copying, 10 = Offline_Secondary",0,sql_server,database state
-sqlserver.database.files.size,gauge,,kibibyte,,Current size of the database file,0,sql_server,database file size
-sqlserver.database.files.state,gauge,,,,"Database state: 0 = Online, 1 = Restoring, 2 = Recovering, 3 = Recovery_Pending, 4 = Suspect, 5 = Unknown, 6 = Offline, 7 = Defunct",0,sql_server,database file status
-sqlserver.database.active_transactions,gauge,,transaction,,Number of active transactions across all databases on the SQL Server instance.,0,sql_server,database trans active
-sqlserver.database.avg_fragment_size_in_pages,gauge,,,,"The average number of pages in one fragment on the leaf level of an IN_ROW_DATA allocation unit.",0,sql_server,avg fragment size in pages
-sqlserver.database.avg_fragmentation_in_percent,gauge,,,,"Logical fragmentation for indexes, or extent fragmentation for heaps in the IN_ROW_DATA allocation unit.",0,sql_server,avg fragmentation percent
-sqlserver.database.backup_count,gauge,,,,"The total count of successful backups made for a database.",0,sql_server,backup count
-sqlserver.database.fragment_count,gauge,,,,"The number of fragments in the leaf level of an IN_ROW_DATA allocation unit.",0,sql_server,fragment count
-sqlserver.database.is_sync_with_backup,gauge,,,,"Whether or not the database is marked for replication synchronization with backup. 0 = Not marked for replication sync, 1 = Marked for replication sync.",0,sql_server,is sync with backup
-sqlserver.memory.memory_grants_pending,gauge,,,,Specifies the total number of processes waiting for a workspace memory grant,0,sql_server,memory grant pending
-sqlserver.memory.total_server_memory,gauge,,kibibyte,,Specifies the amount of memory the server has committed using the memory manager.,0,sql_server,memory total
-sqlserver.scheduler.current_tasks_count,gauge,,task,,Number of current tasks that are associated with this scheduler.,0,sql_server,task count
-sqlserver.scheduler.current_workers_count,gauge,,worker,,Number of workers that are associated with this scheduler.,0,sql_server,worker count
-sqlserver.scheduler.active_workers_count,gauge,,worker,,"Number of workers that are active. An active worker is never preemptive, must have an associated task, and is either running, runnable, or suspended.",0,sql_server,active worker
-sqlserver.scheduler.runnable_tasks_count,gauge,,task,,"Number of workers, with tasks assigned to them, that are waiting to be scheduled on the runnable queue.",0,sql_server,runnable task
-sqlserver.scheduler.work_queue_count,gauge,,unit,,Number of tasks in the pending queue. These tasks are waiting for a worker to pick them up.,0,sql_server,work queue
-sqlserver.task.context_switches_count,gauge,,unit,,Number of scheduler context switches that this task has completed.,0,sql_server,context switch
-sqlserver.task.pending_io_count,gauge,,unit,,Number of physical I/Os that are performed by this task.,0,sql_server,task io pending
-sqlserver.task.pending_io_byte_count,gauge,,byte,,Total byte count of I/Os that are performed by this task.,0,sql_server,task io byte
-sqlserver.task.pending_io_byte_average,gauge,,byte,,Average byte count of I/Os that are performed by this task.,0,sql_server,task avg io byte
-sqlserver.fci.status,gauge,,,,Status of the node in a SQL Server failover cluster instance,0,sql_server,fci status
-sqlserver.fci.is_current_owner,gauge,,,,Whether or not this node is the current owner of the SQL Server FCI ,0,sql_server,fci current owner
+metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
+sqlserver.access.page_splits,gauge,,operation,second,The number of page splits per second.,-1,sql_server,page splits,
+sqlserver.ao.is_primary_replica,gauge,,,,"Denotes if a replica is a primary(1) or secondary(0). Tags: `availability_group`, `availability_group_name`, `replica_server_name`, `failover_mode`, `availability_mode`, `database_name`, `replica_id`, `database_id`, `database_state`, `synchronization_state`, `failover_cluster`, `replica_role`",0,sql_server,is primary replica,
+sqlserver.ao.ag_sync_health,gauge,,,,"Availability group synchronization health: 0 = Not healthy, 1 = Partially healthy, 2 = Healthy. Tags: `availability_group`, `availability_group_name`, `synchronization_health_desc`",0,sql_server,ag sync health,
+sqlserver.ao.replica_status,gauge,,,,"Denotes an Availability Group replica's status. Tags: `availability_group`, `availability_group_name`, `replica_server_name`, `failover_mode`, `availability_mode`, `database_name`, `replica_id`, `database_id`, `database_state`, `synchronization_state`, `failover_cluster`, `replica_role`",0,sql_server,is primary replica,
+sqlserver.ao.replica_sync_state,gauge,,,,"Replica synchronization state: 0 = Not synchronizing, 1 = Synchronizing, 2 = Synchronized, 3 = Reverting, 4 = Initializing. Tags: `availability_group`, `availability_group_name`, `synchronization_health_desc`",0,sql_server,replica sync state,
+sqlserver.ao.log_send_queue_size,gauge,,byte,,"Amount of log records of the primary database that has not been sent to the secondary databases. Tags: `availability_group`, `availability_group_name`, `replica_server_name`, `failover_mode`, `availability_mode`, `database_name`, `replica_id`, `database_id`, `database_state`, `synchronization_state`, `failover_cluster`, `replica_role`",0,sql_server,log send queue size,
+sqlserver.ao.log_send_rate,gauge,,byte,second,"Average rate at which primary replica instance sent data during last active period. Tags: `availability_group`, `availability_group_name`, `replica_server_name`, `failover_mode`, `availability_mode`, `database_name`, `replica_id`, `database_id`, `database_state`, `synchronization_state`, `failover_cluster`, `replica_role`",0,sql_server,log send rate,
+sqlserver.ao.redo_queue_size,gauge,,byte,,"Amount of log records in the log files of the secondary replica that has not yet been redone. Tags: `availability_group`, `availability_group_name`, `replica_server_name`, `failover_mode`, `availability_mode`, `database_name`, `replica_id`, `database_id`, `database_state`, `synchronization_state`, `failover_cluster`, `replica_role`",0,sql_server,redo queue size,
+sqlserver.ao.redo_rate,gauge,,byte,second,"Average rate at which the log records are being redone on a given secondary database. Tags: `availability_group`, `availability_group_name`, `replica_server_name`, `failover_mode`, `availability_mode`, `database_name`, `replica_id`, `database_id`, `database_state`, `synchronization_state`, `failover_cluster`, `replica_role`",0,sql_server,redo rate,
+sqlserver.ao.low_water_mark_for_ghosts,gauge,,,,"A monotonically increasing number for the database indicating a low water mark used by ghost cleanup on the primary database. Tags: `availability_group`, `availability_group_name`, `replica_server_name`, `failover_mode`, `availability_mode`, `database_name`, `replica_id`, `database_id`, `database_state`, `synchronization_state`, `failover_cluster`, `replica_role`",0,sql_server,low water mark for ghosts,
+sqlserver.ao.filestream_send_rate,gauge,,byte,second,"The rate at which the FILESTREAM files are shipped to the secondary replica. Tags: `availability_group`, `availability_group_name`, `replica_server_name`, `failover_mode`, `availability_mode`, `database_name`, `replica_id`, `database_id`, `database_state`, `synchronization_state`, `failover_cluster`, `replica_role`",0,sql_server,filestream send rate,
+sqlserver.ao.secondary_lag_seconds,gauge,,second,,"The number of seconds that the secondary replica is behind the primary replica during synchronization. Tags: `availability_group`, `availability_group_name`, `replica_server_name`, `failover_mode`, `availability_mode`, `database_name`, `replica_id`, `database_id`, `database_state`, `synchronization_state`, `failover_cluster`, `replica_role`",0,sql_server,secondary lag seconds,
+sqlserver.ao.replica_failover_mode,gauge,,,,"Replica failover mode: 0 = Automatic failover, 1 = Manual failover. Tags: `replica_server_name`, `availability_group`, `availability_group_name`, `failover_mode_desc`",0,sql_server,replica failover mode,
+sqlserver.ao.replica_failover_readiness,gauge,,,,"Replica failover readiness: 0 = Not ready for failover, 1 = Ready for failover. Tags: `replica_server_name`, `availability_group`, `availability_group_name`, `failover_mode_desc`",0,sql_server,replica failover readiness,
+sqlserver.ao.primary_replica_health,gauge,,,,"Recovery health of primary replica: 0 = In progress, 1 = Online. The metric is not emitted if on a secondary replica. Tags: `availability_group`, `availability_group_name`, `synchronization_health_desc`",0,sql_server,primary replica health,
+sqlserver.ao.secondary_replica_health,gauge,,,,"Recovery health of secondary replica: 0 = In progress, 1 = Online. The metric is not emitted if on a primary replica. Tags: `availability_group`, `availability_group_name`, `synchronization_health_desc`",0,sql_server,secondary replica health,
+sqlserver.ao.quorum_type,gauge,,,,"Type of quorum used by the WSFC cluster. Tags: `quorum_type`, `quorum_state`, `failover_cluster`",0,sql_server,ao quorum type,
+sqlserver.ao.quorum_state,gauge,,,,"State of the WSFC quorum. Tags: `quorum_type`, `quorum_state`, `failover_cluster`",0,sql_server,ao quorum state,
+sqlserver.ao.member.type,gauge,,,,"The type of member that's a part of the WSFC quorum. Tags: `member_name`, `member_type`, `member_state`, `failover_cluster`",0,sql_server,ao member type,
+sqlserver.ao.member.state,gauge,,,,"The state of a member that's a part of the WSFC quorum. Tags: `member_name`, `member_type`, `member_state`, `failover_cluster`",0,sql_server,ao member state,
+sqlserver.ao.member.number_of_quorum_votes,gauge,,,,"Number of quorum votes possessed by this quorum member. Tags: `member_name`, `member_type`, `member_state`, `failover_cluster`",0,sql_server,ao member number of quorum votes,
+sqlserver.fci.status,gauge,,,,"Status of the node in a SQL Server failover cluster instance. Tags: `node_name`, `status`, `failover_cluster`",0,sql_server,fci status,
+sqlserver.fci.is_current_owner,gauge,,,,"Whether or not this node is the current owner of the SQL Server FCI. Tags: `node_name`, `status`, `failover_cluster`",0,sql_server,fci current owner,
+sqlserver.buffer.cache_hit_ratio,gauge,,fraction,,The ratio of data pages found and read from the buffer cache over all data page requests.,1,sql_server,buff hit ratio,
+sqlserver.buffer.checkpoint_pages,gauge,,page,second,The number of pages flushed to disk per second by a checkpoint or other operation that require all dirty pages to be flushed.,-1,sql_server,checkpoint pages,
+sqlserver.buffer.page_life_expectancy,gauge,,second,,Duration that a page resides in the buffer pool.,1,sql_server,buff page life expectancy,
+sqlserver.buffer.page_reads,gauge,,page,,Indicates the number of physical database page reads that are issued per second. This statistic displays the total number of physical page reads across all databases.,-1,sql_server,buff page reads,
+sqlserver.buffer.page_writes,gauge,,page,,Indicates the number of physical database page writes that are issued per second.,-1,sql_server,buff page writes,
+sqlserver.stats.batch_requests,gauge,,request,second,The number of batch requests per second.,1,sql_server,batch requests,
+sqlserver.stats.sql_compilations,gauge,,operation,second,The number of SQL compilations per second.,0,sql_server,sql compils,
+sqlserver.stats.sql_recompilations,gauge,,operation,second,The number of SQL re-compilations per second.,-1,sql_server,sql recompils,
+sqlserver.stats.connections,gauge,,connection,,"The number of user connections. If DBM is enabled, this metric is tagged with status, db, and user.",0,sql_server,conns,
+sqlserver.stats.lock_waits,gauge,,lock,second,The number of times per second that SQL Server is unable to retain a lock right away for a resource.,-1,sql_server,lock waits,
+sqlserver.stats.procs_blocked,gauge,,process,,The number of processes blocked.,-1,sql_server,procs blocked,
+sqlserver.stats.auto_param_attempts,gauge,,attempt,,Number of auto-parameterization attempts per second.,-1,sql_server,stats auto param,
+sqlserver.stats.failed_auto_param_attempts,gauge,,attempt,,Number of failed auto-parameterization attempts per second.,-1,sql_server,stats failed auto param,
+sqlserver.stats.safe_auto_param_attempts,gauge,,attempt,,Number of safe auto-parameterization attempts per second.,0,sql_server,stats safe auto param,
+sqlserver.cache.object_counts,gauge,,object,,Number of cache objects in the cache.,0,sql_server,cache obj counts,
+sqlserver.cache.pages,gauge,,object,,Number of 8-kilobyte (KB) pages used by cache objects.,0,sql_server,cache pages,
+sqlserver.database.backup_restore_throughput,gauge,,,,Read/write throughput for backup and restore operations of a database per second.,0,sql_server,database restore throughput,
+sqlserver.database.log_bytes_flushed,gauge,,byte,,Total number of log bytes flushed.,0,sql_server,database log byte flushed,
+sqlserver.database.log_flushes,gauge,,flush,,Number of log flushes per second.,0,sql_server,database log flushes,
+sqlserver.database.log_flush_wait,gauge,,millisecond,,"Total wait time (in milliseconds) to flush the log. On an Always On secondary database, this value indicates the wait time for log records to be hardened to disk.",-1,sql_server,database log flush wait time,
+sqlserver.database.transactions,gauge,,transaction,,Number of transactions started for the SQL Server instance per second.,0,sql_server,database trans,
+sqlserver.database.write_transactions,gauge,,transaction,,"Number of transactions that wrote to all databases on the SQL Server instance and committed, in the last second.",0,sql_server,database trans write,
+sqlserver.database.state,gauge,,,,"Database state: 0 = Online, 1 = Restoring, 2 = Recovering, 3 = Recovery_Pending, 4 = Suspect, 5 = Emergency, 6 = Offline, 7 = Copying, 10 = Offline_Secondary",0,sql_server,database state,
+sqlserver.database.files.size,gauge,,kibibyte,,Current size of the database file,0,sql_server,database file size,
+sqlserver.database.files.state,gauge,,,,"Database file state: 0 = Online, 1 = Restoring, 2 = Recovering, 3 = Recovery_Pending, 4 = Suspect, 5 = Unknown, 6 = Offline, 7 = Defunct",0,sql_server,database file status,
+sqlserver.database.master_files.size,gauge,,kibibyte,,"Current size of the database file. For a database snapshot, size reflects the maximum space that the snapshot can ever use for the file. **Note**: Use `sqlserver.database.files.size` for the actual size of FILESTREAM containers.",0,sql_server,database master file size,
+sqlserver.database.master_files.state,gauge,,,,"Database file state: 0 = Online, 1 = Restoring, 2 = Recovering, 3 = Recovery_Pending, 4 = Suspect, 5 = Unknown, 6 = Offline, 7 = Defunct",0,sql_server,database master file status,
+sqlserver.database.active_transactions,gauge,,transaction,,Number of active transactions across all databases on the SQL Server instance.,0,sql_server,database trans active,
+sqlserver.database.avg_fragment_size_in_pages,gauge,,,,"The average number of pages in one fragment on the leaf level of an IN_ROW_DATA allocation unit.",0,sql_server,avg fragment size in pages,
+sqlserver.database.avg_fragmentation_in_percent,gauge,,,,"Logical fragmentation for indexes, or extent fragmentation for heaps in the IN_ROW_DATA allocation unit.",0,sql_server,avg fragmentation percent,
+sqlserver.database.backup_count,gauge,,,,"The total count of successful backups made for a database.",0,sql_server,backup count,
+sqlserver.database.fragment_count,gauge,,,,"The number of fragments in the leaf level of an IN_ROW_DATA allocation unit.",0,sql_server,fragment count,
+sqlserver.database.is_sync_with_backup,gauge,,,,"Whether or not the database is marked for replication synchronization with backup. 0 = Not marked for replication sync, 1 = Marked for replication sync.",0,sql_server,is sync with backup,
+sqlserver.files.reads,count,,read,second,"Number of reads issued on the file. Tags: `logical_name`, `file_location`, `db`, `state`",0,sql_server,reads on database file,
+sqlserver.files.read_bytes,count,,byte,second,"Bytes read from the file. Tags: `logical_name`, `file_location`, `db`, `state`",0,sql_server,bytes read from database file,
+sqlserver.files.read_io_stall,count,,millisecond,,"Total time that users waited for reads on the file. Tags: `logical_name`, `file_location`, `db`, `state`",-1,sql_server,read wait time on database file,
+sqlserver.files.read_io_stall_queued,count,,millisecond,,"Total latency from IO governance pools for reads on the file. Tags: `logical_name`, `file_location`, `db`, `state`",-1,sql_server,read io queue time on database file,
+sqlserver.files.writes,count,,write,second,"Number of writes issued on the file. Tags: `logical_name`, `file_location`, `db`, `state`",0,sql_server,writes on database file,
+sqlserver.files.written_bytes,count,,byte,second,"Bytes written to the file. Tags: `logical_name`, `file_location`, `db`, `state`",0,sql_server,bytes written to the database file,
+sqlserver.files.write_io_stall,count,,millisecond,,"Total time that users waited for writes on the file. Tags: `logical_name`, `file_location`, `db`, `state`",-1,sql_server,write wait time on database file,
+sqlserver.files.write_io_stall_queued,count,,millisecond,,"Total latency from IO governance pools for writes on the file. Tags: `logical_name`, `file_location`, `db`, `state`",-1,sql_server,write io queue time on database file,
+sqlserver.files.io_stall,count,,millisecond,,"Total time that users waited for I/O to complete on the file. Tags: `logical_name`, `file_location`, `db`, `state`",-1,sql_server,io wait time on database file,
+sqlserver.files.size_on_disk,gauge,,byte,,"Number of bytes used on the disk for this file. Tags: `logical_name`, `file_location`, `db`, `state`",0,sql_server,bytes used for database file,
+sqlserver.memory.memory_grants_pending,gauge,,,,Specifies the total number of processes waiting for a workspace memory grant,0,sql_server,memory grant pending,
+sqlserver.memory.total_server_memory,gauge,,kibibyte,,Specifies the amount of memory the server has committed using the memory manager.,0,sql_server,memory total,
+sqlserver.scheduler.current_tasks_count,gauge,,task,,Number of current tasks that are associated with this scheduler.,0,sql_server,task count,
+sqlserver.scheduler.current_workers_count,gauge,,worker,,Number of workers that are associated with this scheduler.,0,sql_server,worker count,
+sqlserver.scheduler.active_workers_count,gauge,,worker,,"Number of workers that are active. An active worker is never preemptive, must have an associated task, and is either running, runnable, or suspended.",0,sql_server,active worker,
+sqlserver.scheduler.runnable_tasks_count,gauge,,task,,"Number of workers, with tasks assigned to them, that are waiting to be scheduled on the runnable queue.",0,sql_server,runnable task,
+sqlserver.scheduler.work_queue_count,gauge,,unit,,Number of tasks in the pending queue. These tasks are waiting for a worker to pick them up.,0,sql_server,work queue,
+sqlserver.server.uptime,gauge,,second,,"Total time elapsed since the last computer restart.",0,sql_server,uptime,
+sqlserver.server.cpu_count,gauge,,byte,,"The number of logical CPUs or vCPUs on the server.",0,sql_server,cpu count,
+sqlserver.server.committed_memory,gauge,,byte,,"The amount of memory committed to the memory manager",0,sql_server,committed memory,
+sqlserver.server.physical_memory,gauge,,byte,,"Total physical memory on the machine",0,sql_server,physical memory,
+sqlserver.server.virtual_memory,gauge,,byte,,"Amount of virtual memory available to the process in user mode.",0,sql_server,virtual memory,
+sqlserver.server.target_memory,gauge,,byte,,"Amount of memory that can be consumed by the memory manager. When this value is larger than the committed memory, then the memory manager will try to obtain more memory. When it is smaller, the memory manager will try to shrink the amount of memory committed.",0,sql_server,committed memory target,
+sqlserver.task.context_switches_count,gauge,,unit,,Number of scheduler context switches that this task has completed.,0,sql_server,context switch,
+sqlserver.task.pending_io_count,gauge,,unit,,Number of physical I/Os that are performed by this task.,0,sql_server,task io pending,
+sqlserver.task.pending_io_byte_count,gauge,,byte,,Total byte count of I/Os that are performed by this task.,0,sql_server,task io byte,
+sqlserver.task.pending_io_byte_average,gauge,,byte,,Average byte count of I/Os that are performed by this task.,0,sql_server,task avg io byte,
+sqlserver.queries.count,count,,query,,Total count of executed queries per query (DBM only),0,sql_server,query count,
+sqlserver.queries.time,count,,nanosecond,,Total elapsed time for executed queries per query (DBM only),0,sql_server,query time,
+sqlserver.queries.clr_time,count,,nanosecond,,Total time consumed inside Microsoft .NET Framework common language runtime (CLR) objects for executed queries per query (DBM only),0,sql_server,query clr time,
+sqlserver.queries.worker_time,count,,nanosecond,,Total CPU time consumed by executed queries per query (DBM only),0,sql_server,query worker time,
+sqlserver.queries.rows,count,,row,,Total number of rows returned by executed queries per query (DBM only),0,sql_server,query rows,
+sqlserver.queries.physical_reads,count,,read,,Total number of physical reads performed by executed queries per query (DBM only),0,sql_server,query physical reads,
+sqlserver.queries.logical_reads,count,,read,,Total number of logical reads performed by executed queries per query (DBM only),0,sql_server,query logical reads,
+sqlserver.queries.logical_writes,count,,write,,Total number of logical writes performed by executed queries per query (DBM only),0,sql_server,query logical writes,
+sqlserver.queries.columnstore_segment_reads,count,,segment,,Total columnstore segments read by executed queries per query (DBM only),0,sql_server,query columnstore segment reads,
+sqlserver.queries.columnstore_segment_skips,count,,segment,,Total columnstore segments skipped by executed queries per query (DBM only),0,sql_server,query columnstore segment skips,
+sqlserver.queries.memory_grant,count,,byte,,The total amount of reserved memory received by executions of this query per query. It will always be 0 for querying a memory-optimized table (DBM only).,0,sql_server,query grant kb,
+sqlserver.queries.used_memory_grant,count,,byte,,The total amount of reserved memory used by executions of this query per query. It will always be 0 for querying a memory-optimized table (DBM only).,0,sql_server,query used grant kb,
+sqlserver.queries.ideal_memory_grant,count,,byte,,The total amount of ideal memory grant estimated by executions of this query per query (DBM only),0,sql_server,query ideal grant kb,
+sqlserver.queries.reserved_threads,count,,thread,,The total sum of reserved parallel threads used by executions of this query per query (DBM only),0,sql_server,query reserved threads,
+sqlserver.queries.used_threads,count,,thread,,The total sum of used parallel threads used by executions of this query per query (DBM only),0,sql_server,query used threads,
+sqlserver.queries.dop,count,,,,The total sum of degree of parallelism used by executions of this query per query (DBM only),0,sql_server,query dop,
+sqlserver.queries.spills,count,,,,The total number of pages spilled by execution of this query per query (DBM only),0,sql_server,query spills,
+sqlserver.queries.duration.max,gauge,,nanosecond,,"The age of the longest running query per user, db, and app. (DBM only)",0,sql_server,queries duration max,
+sqlserver.queries.duration.sum,gauge,,nanosecond,,"The sum of the age of all running queries per user, db, and app. (DBM only)",0,sql_server,queries duration sum,

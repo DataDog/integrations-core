@@ -1,0 +1,32 @@
+version: '3'
+
+# https://github.com/ot4i/ace-docker
+services:
+  ibm-ace:
+    container_name: ibm-ace
+    build:
+      context: .
+      args:
+      - IBM_ACE_IMAGE=${IBM_ACE_IMAGE}
+    ports:
+    - 7600:7600
+    - 7800:7800
+    environment:
+    - LICENSE=accept
+    - ACE_SERVER_NAME=${ACE_SERVER_NAME}
+    - LOG_FORMAT=json
+    volumes:
+    - ./server.conf.yaml:/home/aceuser/initial-config/serverconf/server.conf.yaml
+    - ./mqpolicy.policyxml:/home/aceuser/initial-config/policy/mqpolicy.policyxml
+    - ./policy.descriptor:/home/aceuser/initial-config/policy/policy.descriptor
+    - ./setdbparms.txt:/home/aceuser/initial-config/setdbparms/setdbparms.txt
+    depends_on:
+    - ibm-ace-mq
+  ibm-ace-mq:
+    container_name: ibm-ace-mq
+    image: ibmcom/mq:${IBM_MQ_VERSION}
+    environment:
+    - MQ_QMGR_NAME=QM1
+    - LICENSE=accept
+    ports:
+    - 11414:1414

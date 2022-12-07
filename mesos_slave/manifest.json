@@ -1,38 +1,55 @@
 {
-  "categories": [
-    "configuration & deployment",
-    "containers",
-    "orchestration",
-    "log collection"
-  ],
-  "creates_events": false,
-  "display_name": "Mesos Slave",
-  "guid": "14d0267e-9989-4d09-8362-9319958e858e",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "mesos.",
-  "metric_to_check": "mesos.stats.uptime_secs",
-  "name": "mesos_slave",
-  "public_title": "Datadog-Mesos Slave Integration",
-  "short_description": "Track cluster resource usage, master and slave counts, tasks statuses, and more.",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os"
-  ],
-  "type": "check",
-  "integration_id": "mesos-slave",
+  "manifest_version": "2.0.0",
+  "app_uuid": "05a49675-62bb-4fa7-be6a-a03e13213640",
+  "app_id": "mesos",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Track cluster resource usage, master and slave counts, tasks statuses, and more.",
+    "title": "Mesos Slave",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Category::Configuration & Deployment",
+      "Category::Containers",
+      "Category::Orchestration",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "Mesos",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "mesos.",
+        "check": "mesos.stats.uptime_secs",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
     },
-    "monitors": {},
-    "dashboards": {},
-    "service_checks": "assets/service_checks.json",
+    "dashboards": {
+      "mesos": "assets/dashboards/mesos_overview.json"
+    },
     "logs": {
       "source": "mesos"
-    },
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

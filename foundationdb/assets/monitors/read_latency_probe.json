@@ -1,0 +1,29 @@
+{
+	"name": "FoundationDB Read Latency Probe",
+	"type": "query alert",
+	"query": "avg(last_5m):avg:foundationdb.latency_probe.read_seconds{*} > 5",
+	"message": "{{#is_alert}}\nA read operation performed on the FoundationDB cluster to measure current latency took a long time.\n{{/is_alert}} \n{{#is_warning}}\nA read operation performed on the FoundationDB cluster to measure current latency took longer than would normally be expected.\n{{/is_warning}}\n{{#is_no_data}}\nNo FoundationDB latency probe data was received. This may indicate cluster unavailability.\n{{/is_no_data}} ",
+	"tags": [
+		"integration:fdb"
+	],
+	"options": {
+		"notify_audit": false,
+		"locked": false,
+		"timeout_h": 1,
+		"new_host_delay": 300,
+		"require_full_window": true,
+		"notify_no_data": true,
+		"renotify_interval": "0",
+		"escalation_message": "",
+		"no_data_timeframe": 15,
+		"include_tags": true,
+		"thresholds": {
+			"critical": 5,
+			"warning": 2
+		}
+	},
+	"priority": null,
+	"recommended_monitor_metadata": {
+		"description": "Get notified when a read operation performed on the FoundationDB cluster to measure current latency took a long time."
+	}
+}

@@ -14,11 +14,8 @@
       "showArguments"
     ],
     "filter": {
-      "text": "",
-      "groups": [],
-      "tags": [
-        "integration:rabbitmq"
-      ]
+      "query_filter": "integration:rabbitmq",
+      "groups": []
     },
     "selected_top_graph": "scatterplot",
     "enabled_columns": [

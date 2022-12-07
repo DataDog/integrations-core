@@ -12,8 +12,7 @@ from collections import defaultdict
 import psutil
 from six import iteritems
 
-from datadog_checks.base import AgentCheck
-from datadog_checks.base.config import _is_affirmative
+from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.utils.platform import Platform
 
 from .cache import DEFAULT_SHARED_PROCESS_LIST_CACHE_DURATION, ProcessListCache
@@ -65,8 +64,19 @@ class ProcessCheck(AgentCheck):
     # Shared process list
     process_list_cache = ProcessListCache()
 
-    def __init__(self, name, init_config, instances=None):
+    def __init__(self, name, init_config, instances):
         super(ProcessCheck, self).__init__(name, init_config, instances)
+
+        self.name = self.instance.get('name', None)
+        self.tags = self.instance.get('tags', [])
+        self.exact_match = is_affirmative(self.instance.get('exact_match', True))
+        self.search_string = self.instance.get('search_string', None)
+        self.ignore_ad = is_affirmative(self.instance.get('ignore_denied_access', True))
+        self.pid = self.instance.get('pid')
+        self.pid_file = self.instance.get('pid_file')
+        self.collect_children = is_affirmative(self.instance.get('collect_children', False))
+        self.user = self.instance.get('user', False)
+        self.try_sudo = self.instance.get('try_sudo', False)
 
         # ad stands for access denied
         # We cache the PIDs getting this error and don't iterate on them more often than `access_denied_cache_duration``
@@ -203,7 +213,7 @@ class ProcessCheck(AgentCheck):
             self.last_ad_cache_ts[name] = time.time()
         return matching_pids
 
-    def psutil_wrapper(self, process, method, accessors, try_sudo, *args, **kwargs):
+    def psutil_wrapper(self, process, method, accessors=None, *args, **kwargs):
         """
         A psutil wrapper that is calling
         * psutil.method(*args, **kwargs) and returns the result
@@ -224,40 +234,37 @@ class ProcessCheck(AgentCheck):
         elif method == 'num_handles' and not Platform.is_win32():
             return result
 
-        try:
-            res = getattr(process, method)(*args, **kwargs)
-            if accessors is None:
-                result = res
-            else:
-                for acc in accessors:
-                    try:
-                        result[acc] = getattr(res, acc)
-                    except AttributeError:
-                        self.log.debug("psutil.%s().%s attribute does not exist", method, acc)
-        except (NotImplementedError, AttributeError):
-            self.log.debug("psutil method %s not implemented", method)
-        except psutil.AccessDenied:
-            self.log.debug("psutil was denied access for method %s", method)
-            if method == 'num_fds' and Platform.is_unix() and try_sudo:
-                try:
-                    # It is up the agent's packager to grant
-                    # corresponding sudo policy on unix platforms
-                    ls_args = ['sudo', 'ls', '/proc/{}/fd/'.format(process.pid)]
-                    process_ls = subprocess.check_output(ls_args)
-                    result = len(process_ls.splitlines())
+        # Try running `num_fds` with sudo if possible
+        if method == 'num_fds' and self.try_sudo:
+            self.log.debug("Running num_fds using sudo")
+            try:
+                ls_args = ['sudo', 'ls', '/proc/{}/fd/'.format(process.pid)]
+                process_ls = subprocess.check_output(ls_args)
+                result = len(process_ls.splitlines())
+            except Exception as e:
+                self.log.exception("Trying to retrieve %s with sudo failed with error: %s", method, e)
 
-                except subprocess.CalledProcessError as e:
-                    self.log.exception(
-                        "trying to retrieve %s with sudo failed with return code %s", method, e.returncode
-                    )
-                except Exception:
-                    self.log.exception("trying to retrieve %s with sudo also failed", method)
-        except psutil.NoSuchProcess:
-            self.warning("Process %s disappeared while scanning", process.pid)
+        else:
+            try:
+                res = getattr(process, method)(*args, **kwargs)
+                if accessors is None:
+                    result = res
+                else:
+                    for acc in accessors:
+                        try:
+                            result[acc] = getattr(res, acc)
+                        except AttributeError:
+                            self.log.debug("psutil.%s().%s attribute does not exist", method, acc)
+            except (NotImplementedError, AttributeError):
+                self.log.debug("psutil method %s not implemented", method)
+            except psutil.AccessDenied:
+                self.log.debug("psutil was denied access for method %s", method)
+            except psutil.NoSuchProcess:
+                self.log.debug("Process %s disappeared while scanning", process.pid)
 
         return result
 
-    def get_process_state(self, name, pids, try_sudo):
+    def get_process_state(self, name, pids):
         st = defaultdict(list)
 
         # Remove from cache the processes that are not in `pids`
@@ -278,7 +285,7 @@ class ProcessCheck(AgentCheck):
                     self.log.debug('New process in cache: %s', pid)
                 # Skip processes dead in the meantime
                 except psutil.NoSuchProcess:
-                    self.warning('Process %s disappeared while scanning', pid)
+                    self.log.debug('Process %s disappeared while scanning', pid)
                     # reset the process caches now, something changed
                     self.last_pid_cache_ts[name] = 0
                     self.process_list_cache.reset()
@@ -286,27 +293,27 @@ class ProcessCheck(AgentCheck):
 
             p = self.process_cache[name][pid]
 
-            meminfo = self.psutil_wrapper(p, 'memory_info', ['rss', 'vms'], try_sudo)
+            meminfo = self.psutil_wrapper(p, 'memory_info', ['rss', 'vms'])
             st['rss'].append(meminfo.get('rss'))
             st['vms'].append(meminfo.get('vms'))
 
-            mem_percent = self.psutil_wrapper(p, 'memory_percent', None, try_sudo)
+            mem_percent = self.psutil_wrapper(p, 'memory_percent')
             st['mem_pct'].append(mem_percent)
 
             # will fail on win32 and solaris
-            shared_mem = self.psutil_wrapper(p, 'memory_info', ['shared'], try_sudo).get('shared')
+            shared_mem = self.psutil_wrapper(p, 'memory_info', ['shared']).get('shared')
             if shared_mem is not None and meminfo.get('rss') is not None:
                 st['real'].append(meminfo['rss'] - shared_mem)
             else:
                 st['real'].append(None)
 
-            ctxinfo = self.psutil_wrapper(p, 'num_ctx_switches', ['voluntary', 'involuntary'], try_sudo)
+            ctxinfo = self.psutil_wrapper(p, 'num_ctx_switches', ['voluntary', 'involuntary'])
             st['ctx_swtch_vol'].append(ctxinfo.get('voluntary'))
             st['ctx_swtch_invol'].append(ctxinfo.get('involuntary'))
 
-            st['thr'].append(self.psutil_wrapper(p, 'num_threads', None, try_sudo))
+            st['thr'].append(self.psutil_wrapper(p, 'num_threads'))
 
-            cpu_percent = self.psutil_wrapper(p, 'cpu_percent', None, try_sudo)
+            cpu_percent = self.psutil_wrapper(p, 'cpu_percent')
             cpu_count = psutil.cpu_count()
             if not new_process:
                 # psutil returns `0.` for `cpu_percent` the
@@ -317,12 +324,10 @@ class ProcessCheck(AgentCheck):
                     st['cpu_norm'].append(cpu_percent / cpu_count)
                 else:
                     self.log.debug('could not calculate the normalized cpu pct, cpu_count: %s', cpu_count)
-            st['open_fd'].append(self.psutil_wrapper(p, 'num_fds', None, try_sudo))
-            st['open_handle'].append(self.psutil_wrapper(p, 'num_handles', None, try_sudo))
+            st['open_fd'].append(self.psutil_wrapper(p, 'num_fds'))
+            st['open_handle'].append(self.psutil_wrapper(p, 'num_handles'))
 
-            ioinfo = self.psutil_wrapper(
-                p, 'io_counters', ['read_count', 'write_count', 'read_bytes', 'write_bytes'], try_sudo
-            )
+            ioinfo = self.psutil_wrapper(p, 'io_counters', ['read_count', 'write_count', 'read_bytes', 'write_bytes'])
             st['r_count'].append(ioinfo.get('read_count'))
             st['w_count'].append(ioinfo.get('write_count'))
             st['r_bytes'].append(ioinfo.get('read_bytes'))
@@ -342,7 +347,7 @@ class ProcessCheck(AgentCheck):
                 st['cmajflt'].append(None)
 
             # calculate process run time
-            create_time = self.psutil_wrapper(p, 'create_time', None, try_sudo)
+            create_time = self.psutil_wrapper(p, 'create_time')
             if create_time is not None:
                 now = time.time()
                 run_time = now - create_time
@@ -376,21 +381,12 @@ class ProcessCheck(AgentCheck):
                 for child in children:
                     children_pids.add(child.pid)
             except psutil.NoSuchProcess:
-                pass
+                self.log.debug("Unable to get children for process because process %s does not exist", pid)
 
         return children_pids
 
-    def check(self, instance):
-        name = instance.get('name', None)
-        tags = instance.get('tags', [])
-        exact_match = _is_affirmative(instance.get('exact_match', True))
-        search_string = instance.get('search_string', None)
-        ignore_ad = _is_affirmative(instance.get('ignore_denied_access', True))
-        pid = instance.get('pid')
-        pid_file = instance.get('pid_file')
-        collect_children = _is_affirmative(instance.get('collect_children', False))
-        user = instance.get('user', False)
-        try_sudo = instance.get('try_sudo', False)
+    def check(self, _):
+        tags = list(self.tags)
 
         if self._conflicting_procfs:
             self.warning(
@@ -405,29 +401,29 @@ class ProcessCheck(AgentCheck):
                 'Please specify it in `datadog.conf` instead'
             )
 
-        if not isinstance(search_string, list) and pid is None and pid_file is None:
+        if not isinstance(self.search_string, list) and self.pid is None and self.pid_file is None:
             raise ValueError('"search_string" or "pid" or "pid_file" parameter is required')
 
         # FIXME 8.x remove me
-        if search_string is not None:
-            if "All" in search_string:
+        if self.search_string is not None:
+            if "All" in self.search_string:
                 self.warning(
                     'Deprecated: Having "All" in your search_string will greatly reduce the '
                     'performance of the check and will be removed in a future version of the agent.'
                 )
 
-        if name is None:
+        if self.name is None:
             raise KeyError('The "name" of process groups is mandatory')
 
-        if search_string is not None:
-            pids = self.find_pids(name, search_string, exact_match, ignore_ad=ignore_ad)
-        elif pid is not None:
+        if self.search_string is not None:
+            pids = self.find_pids(self.name, self.search_string, self.exact_match, ignore_ad=self.ignore_ad)
+        elif self.pid is not None:
             # we use Process(pid) as a means to search, if pid not found
             # psutil.NoSuchProcess is raised.
-            pids = self._get_pid_set(pid)
-        elif pid_file is not None:
+            pids = self._get_pid_set(self.pid)
+        elif self.pid_file is not None:
             try:
-                with open(pid_file, 'r') as file_pid:
+                with open(self.pid_file, 'r') as file_pid:
                     pid_line = file_pid.readline().strip()
                     pids = self._get_pid_set(int(pid_line))
             except IOError as e:
@@ -437,24 +433,24 @@ class ProcessCheck(AgentCheck):
         else:
             raise ValueError('The "search_string" or "pid" options are required for process identification')
 
-        if collect_children:
+        if self.collect_children:
             pids.update(self._get_child_processes(pids))
 
-        if user:
-            pids = self._filter_by_user(user, pids)
+        if self.user:
+            pids = self._filter_by_user(self.user, pids)
 
-        proc_state = self.get_process_state(name, pids, try_sudo)
+        proc_state = self.get_process_state(self.name, pids)
 
         # FIXME 8.x remove the `name` tag
-        tags.extend(['process_name:{}'.format(name), name])
+        tags.extend(['process_name:{}'.format(self.name), self.name])
 
-        self.log.debug('ProcessCheck: process %s analysed', name)
+        self.log.debug('ProcessCheck: process %s analysed', self.name)
         self.gauge('system.processes.number', len(pids), tags=tags)
 
         if len(pids) == 0:
-            self.warning("No matching process '%s' was found", name)
+            self.log.debug("No matching process '%s' was found", self.name)
             # reset the process caches now, something changed
-            self.last_pid_cache_ts[name] = 0
+            self.last_pid_cache_ts[self.name] = 0
             self.process_list_cache.reset()
 
         for attr, mname in iteritems(ATTR_TO_METRIC):
@@ -478,12 +474,13 @@ class ProcessCheck(AgentCheck):
             if vals:
                 self.rate('system.processes.{}'.format(mname), sum(vals), tags=tags)
 
-        self._process_service_check(name, len(pids), instance.get('thresholds', None), tags)
+        self._process_service_check(self.name, len(pids), self.instance.get('thresholds', None), tags)
 
     def _get_pid_set(self, pid):
         try:
             return {psutil.Process(pid).pid}
         except psutil.NoSuchProcess:
+            self.log.debug("Unable to get pid set, process %s does not exist", pid)
             return set()
 
     def _process_service_check(self, name, nb_procs, bounds, tags):
@@ -513,7 +510,9 @@ class ProcessCheck(AgentCheck):
             "process.up",
             status,
             tags=service_check_tags,
-            message="PROCS {}: {} processes found for {}".format(status_str[status], nb_procs, name),
+            message="PROCS {}: {} processes found for {}".format(status_str[status], nb_procs, name)
+            if status is not AgentCheck.OK
+            else None,
         )
 
     def _filter_by_user(self, user, pids):
@@ -533,6 +532,7 @@ class ProcessCheck(AgentCheck):
                 else:
                     self.log.debug("Discarding pid %s not belonging to %s", pid, user)
             except psutil.NoSuchProcess:
+                self.log.debug("Unable to filter pids by username, process %s does not exist", pid)
                 pass
 
         return filtered_pids

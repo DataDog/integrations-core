@@ -1,0 +1,17 @@
+{
+    "name": "WebLogic error and warning",
+    "type": "logs",
+    "page": "stream",
+    "query": "source:weblogic status:(error OR warn) ",
+    "timerange": {
+      "interval_ms": 3600000
+    },
+    "visible_facets": ["source", "host", "service", "status", "weblogic"],
+    "options": {
+      "columns": ["status", "host", "service", "@weblogic.subsystem"],
+      "show_date_column": true,
+      "show_message_column": true,
+      "message_display": "inline",
+      "show_timeline": true
+    }
+  }

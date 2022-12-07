@@ -1,0 +1,65 @@
+[build-system]
+requires = [
+    "hatchling>=0.11.2",
+    "setuptools<61",
+]
+build-backend = "hatchling.build"
+
+[project]
+name = "datadog-checks-downloader"
+description = "The Datadog Checks Downloader"
+readme = "README.md"
+license = {text = "BSD-3-Clause"}
+keywords = [
+    "datadog",
+    "datadog agent",
+    "datadog check",
+]
+authors = [
+    { name = "Datadog", email = "packages@datadoghq.com" },
+]
+classifiers = [
+    "Private :: Do Not Upload",
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: BSD License",
+    "Programming Language :: Python :: 2.7",
+    "Programming Language :: Python :: 3.8",
+    "Topic :: System :: Monitoring",
+]
+dynamic = [
+    "version",
+]
+
+[project.optional-dependencies]
+deps = [
+    "in-toto==1.0.1",
+    "packaging==20.9; python_version < '3.0'",
+    "packaging==21.3; python_version > '3.0'",
+    "securesystemslib[crypto,pynacl]==0.20.1",
+    "tuf==0.17.0; python_version < '3.0'",
+    "tuf==0.19.0; python_version > '3.0'",
+]
+
+[project.urls]
+Source = "https://github.com/DataDog/integrations-core"
+
+[tool.hatch.version]
+path = "datadog_checks/downloader/__about__.py"
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/datadog_checks",
+    "/tests",
+    "/requirements-dev.txt",
+    "/tox.ini",
+]
+
+[tool.hatch.build.targets.wheel]
+include = [
+    "/datadog_checks/downloader",
+]
+dev-mode-dirs = [
+    ".",
+]

@@ -1,2 +1,0 @@
-futures==3.3.0; python_version < '3.0'
-pyvmomi==v6.5.0.2017.5-1

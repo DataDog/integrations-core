@@ -7,7 +7,7 @@ To get the MarkLogic Docker image, run `docker login` and download the Docker im
 ## Cluster mode
 
 The cluster environment is not working on CI yet (TODO).
-To start a cluster environment for testing, change the `dd_environment` fixture in the `conftest.py` by the cluster docker-compose: 
+To start a cluster environment for testing, change the `dd_environment` fixture in the `conftest.py` by the cluster `docker compose`: 
 ```python
 @pytest.fixture(scope="session")
 def dd_environment():

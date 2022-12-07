@@ -1,0 +1,75 @@
+[build-system]
+requires = [
+    "hatchling>=0.11.2",
+    "setuptools<61",
+]
+build-backend = "hatchling.build"
+
+[project]
+name = "datadog-sqlserver"
+description = "The SQL Server check"
+readme = "README.md"
+keywords = [
+    "datadog",
+    "datadog agent",
+    "datadog check",
+    "sqlserver",
+]
+authors = [
+    { name = "Datadog", email = "packages@datadoghq.com" },
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: BSD License",
+    "Programming Language :: Python :: 2.7",
+    "Programming Language :: Python :: 3.8",
+    "Topic :: System :: Monitoring",
+    "Private :: Do Not Upload",
+]
+dependencies = [
+    "datadog-checks-base>=25.4.0",
+]
+dynamic = [
+    "version",
+]
+
+[project.license]
+text = "BSD-3-Clause"
+
+[project.optional-dependencies]
+deps = [
+    "adodbapi==2.6.2.0; sys_platform == 'win32'",
+    "lxml==4.9.1",
+    "pyodbc==4.0.32; sys_platform != 'darwin' or platform_machine != 'arm64'",
+    "pyro4==4.82; sys_platform == 'win32'",
+    "pywin32==228; sys_platform == 'win32' and python_version < '3.0'",
+    "pywin32==304; sys_platform == 'win32' and python_version > '3.0'",
+    "selectors34==1.2; sys_platform == 'win32' and python_version < '3.0'",
+    "serpent==1.28; sys_platform == 'win32' and python_version < '3.0'",
+    "serpent==1.41; sys_platform == 'win32' and python_version > '3.0'",
+]
+
+[project.urls]
+Source = "https://github.com/DataDog/integrations-core"
+
+[tool.hatch.version]
+path = "datadog_checks/sqlserver/__about__.py"
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/datadog_checks",
+    "/tests",
+    "/manifest.json",
+    "/requirements-dev.txt",
+    "/tox.ini",
+]
+
+[tool.hatch.build.targets.wheel]
+include = [
+    "/datadog_checks/sqlserver",
+]
+dev-mode-dirs = [
+    ".",
+]

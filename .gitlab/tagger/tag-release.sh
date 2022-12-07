@@ -14,7 +14,7 @@ git config --global user.email "$TAGGER_EMAIL"
 git config --global user.name "$TAGGER_NAME"
 
 set +e
-ddev release tag all
+ddev release tag all --skip-prerelease
 status=$?
 set -e
 

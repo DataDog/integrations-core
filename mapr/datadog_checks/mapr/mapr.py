@@ -1,13 +1,14 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import copy
 import json
 import os
 import re
 
 from six import iteritems
 
-from datadog_checks.base import AgentCheck, ensure_unicode
+from datadog_checks.base import AgentCheck, ensure_unicode, is_affirmative
 from datadog_checks.base.errors import CheckException
 
 from .common import ALLOWED_METRICS, COUNT_METRICS, GAUGE_METRICS, HISTOGRAM_METRICS, MONOTONIC_COUNTER_METRICS
@@ -53,25 +54,25 @@ class MaprCheck(AgentCheck):
             topic_name=self.hostname,
         )
         self.allowed_metrics = [re.compile(w) for w in self.instance.get('metric_whitelist', [])]
-        self.base_tags = self.instance.get('tags', [])
+        self.custom_tags = self.instance.get('tags', [])
         self.has_ever_submitted_metrics = False
+        self._disable_legacy_cluster_tag = is_affirmative(self.instance.get('disable_legacy_cluster_tag', False))
+        self.auth_ticket = self.instance.get('ticket_location', os.environ.get(TICKET_LOCATION_ENV_VAR))
 
-        auth_ticket = self.instance.get('ticket_location', os.environ.get(TICKET_LOCATION_ENV_VAR))
-
-        if not auth_ticket:
+        if not self.auth_ticket:
             self.log.warning(
                 "Neither `ticket_location` (in the config.yaml) or the %s environment variable is set. This will"
                 "cause authentication issues if your cluster requires authenticated requests.",
                 TICKET_LOCATION_ENV_VAR,
             )
-        elif not os.access(auth_ticket, os.R_OK):
+        elif not os.access(self.auth_ticket, os.R_OK):
             raise CheckException(
                 "MapR authentication ticket located at %s is not readable by the dd-agent "
                 "user. Please update the file permissions.",
-                auth_ticket,
+                self.auth_ticket,
             )
-
-        os.environ[TICKET_LOCATION_ENV_VAR] = auth_ticket
+        else:
+            os.environ[TICKET_LOCATION_ENV_VAR] = self.auth_ticket
 
     def check(self, _):
         if ck is None:
@@ -85,11 +86,11 @@ class MaprCheck(AgentCheck):
             conn = self.get_connection()
         except Exception:
             self.service_check(
-                SERVICE_CHECK, AgentCheck.CRITICAL, self.base_tags + ['topic:{}'.format(self.topic_path)]
+                SERVICE_CHECK, AgentCheck.CRITICAL, self.custom_tags + ['topic:{}'.format(self.topic_path)]
             )
             raise
         else:
-            self.service_check(SERVICE_CHECK, AgentCheck.OK, self.base_tags + ['topic:{}'.format(self.topic_path)])
+            self.service_check(SERVICE_CHECK, AgentCheck.OK, self.custom_tags + ['topic:{}'.format(self.topic_path)])
 
         submitted_metrics_count = 0
 
@@ -103,26 +104,9 @@ class MaprCheck(AgentCheck):
 
             if msg.error() is None:
                 # Metric received
-                try:
-                    metric = json.loads(ensure_unicode(msg.value()))[0]
-                    metric_name = metric['metric']
-                    if self.should_collect_metric(metric_name):
-                        # Will sometimes submit the same metric multiple time, but because it's only
-                        # gauges and monotonic_counter that's fine.
-                        self.submit_metric(metric)
-                        submitted_metrics_count += 1
-                except Exception as e:
-                    self.log.warning("Received unexpected message %s, wont be processed", msg.value())
-                    self.log.exception(e)
-            elif msg.error().code() == ck.KafkaError.TOPIC_AUTHORIZATION_FAILED:
-                raise CheckException(
-                    "The user impersonated using the ticket %s does not have the 'consume' permission on topic %s. "
-                    "Please update the stream permissions." % (self.auth_ticket, self.topic_path)
-                )
-            elif msg.error().code() != ck.KafkaError._PARTITION_EOF:
-                # Partition EOF is expected anytime we reach the end of one partition in the topic.
-                # This is expected at least once per partition per check run.
-                raise CheckException(msg.error())
+                submitted_metrics_count += self._process_metric(msg)
+            else:
+                self._process_error(msg.error())
 
         if not self.has_ever_submitted_metrics:
             # The integration has never found any metric so far
@@ -138,7 +122,40 @@ class MaprCheck(AgentCheck):
                 )
 
         if submitted_metrics_count:
-            self.gauge(METRICS_SUBMITTED_METRIC_NAME, submitted_metrics_count, self.base_tags)
+            self.gauge(METRICS_SUBMITTED_METRIC_NAME, submitted_metrics_count, self.custom_tags)
+
+    def _process_metric(self, msg):
+        try:
+            metric = json.loads(ensure_unicode(msg.value()))[0]
+            metric_name = metric['metric']
+            if self.should_collect_metric(metric_name):
+                # Will sometimes submit the same metric multiple time, but because it's only
+                # gauges and monotonic_counter that's fine.
+                self.submit_metric(metric)
+                return 1
+            return 0
+        except Exception as e:
+            self.log.warning("Received unexpected message %s, won't be processed", msg.value())
+            self.log.exception(e)
+
+    def _process_error(self, error_msg):
+        if error_msg.code() == ck.KafkaError.TOPIC_AUTHORIZATION_FAILED:
+            if self.auth_ticket:
+                raise CheckException(
+                    "The user impersonated using the ticket %s does not have the 'consume' permission on topic %s. "
+                    "Please update the stream permissions." % (self.auth_ticket, self.topic_path)
+                )
+            else:
+                raise CheckException(
+                    "dd-agent user could not consume topic '%s'. Please ensure that:\n"
+                    "\t* This is a non-secure cluster, otherwise a user ticket is required.\n"
+                    "\t* The dd-agent user has the 'consume' permission on topic %s or "
+                    "impersonation is correctly configured." % (self.topic_path, self.topic_path)
+                )
+        elif error_msg.code() != ck.KafkaError._PARTITION_EOF:
+            # Partition EOF is expected anytime we reach the end of one partition in the topic.
+            # This is expected at least once per partition per check run.
+            raise CheckException(error_msg)
 
     def get_connection(self):
         if self._conn:
@@ -149,7 +166,7 @@ class MaprCheck(AgentCheck):
             {
                 "group.id": "dd-agent",  # uniquely identify this consumer
                 "enable.auto.commit": False  # important, do not store the offset for this consumer,
-                # if we do it just once the mapr library has a bug (feature?) which prevents resetting it to the head
+                # if we do it just once the mapr library has a bug/feature which prevents resetting it to the head
             }
         )
         self._conn.subscribe([self.topic_path])
@@ -173,7 +190,20 @@ class MaprCheck(AgentCheck):
 
     def submit_metric(self, metric):
         metric_name = metric['metric']
-        tags = self.base_tags + ["{}:{}".format(k, v) for k, v in iteritems(metric['tags'])]
+        tags = copy.deepcopy(self.custom_tags)
+        for k, v in iteritems(metric['tags']):
+            if k == 'clustername':
+                tags.append("{}:{}".format('mapr_cluster', v))
+                if not self._disable_legacy_cluster_tag:
+                    self._log_deprecation(k, 'mapr_cluster')
+                    tags.append("{}:{}".format(k, v))
+            elif k == 'clusterid':
+                tags.append("{}:{}".format('mapr_cluster_id', v))
+                if not self._disable_legacy_cluster_tag:
+                    self._log_deprecation(k, 'mapr_cluster_id')
+                    tags.append("{}:{}".format(k, v))
+            else:
+                tags.append("{}:{}".format(k, v))
 
         if 'buckets' in metric and metric_name in HISTOGRAM_METRICS:
             for bounds, value in metric['buckets'].items():

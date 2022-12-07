@@ -4,7 +4,8 @@
         "integration": "Apache",
         "groups": [
             "host",
-            "port"
+            "port",
+            "server"
         ],
         "check": "apache.can_connect",
         "statuses": [

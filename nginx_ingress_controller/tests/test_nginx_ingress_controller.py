@@ -9,7 +9,6 @@ import pytest
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.nginx_ingress_controller import NginxIngressControllerCheck
 
-INSTANCE = {'prometheus_url': 'http://localhost:10249/metrics'}
 INSTANCE_HISTO = {'prometheus_url': 'http://localhost:10249/metrics', 'collect_nginx_histograms': True}
 
 CHECK_NAME = 'nginx_ingress_controller'
@@ -55,13 +54,13 @@ EXPECTED_METRICS = [
 ]
 
 
-def test_nginx_ingress_controller(aggregator, mock_data):
+def test_nginx_ingress_controller(aggregator, instance, mock_data):
     """
     Testing nginx ingress controller.
     """
 
-    c = NginxIngressControllerCheck(CHECK_NAME, {}, [INSTANCE])
-    c.check(INSTANCE)
+    c = NginxIngressControllerCheck(CHECK_NAME, {}, [instance])
+    c.check(instance)
 
     for metric in EXPECTED_METRICS:
         aggregator.assert_metric(NAMESPACE + metric)

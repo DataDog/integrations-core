@@ -47,6 +47,7 @@ class TestKubeAPIServerMetrics:
         NAMESPACE + '.go_threads',
         NAMESPACE + '.go_goroutines',
         NAMESPACE + '.etcd_object_counts',
+        NAMESPACE + '.etcd.db.total_size',
         NAMESPACE + '.rest_client_requests_total',
         NAMESPACE + '.authenticated_user_requests',
         NAMESPACE + '.apiserver_request_total',
@@ -76,6 +77,7 @@ class TestKubeAPIServerMetrics:
         NAMESPACE + '.authentication_duration_seconds.sum',
         NAMESPACE + '.authentication_duration_seconds.count',
         NAMESPACE + '.authentication_attempts',
+        NAMESPACE + '.requested_deprecated_apis',
     ]
     COUNT_METRICS = [
         NAMESPACE + '.audit_event.count',
@@ -85,16 +87,16 @@ class TestKubeAPIServerMetrics:
         NAMESPACE + '.apiserver_request_terminations_total.count',
     ]
 
-    def test_check(self, aggregator, mock_get):
+    def test_check(self, dd_run_check, aggregator, mock_get):
         """
         Testing kube_apiserver_metrics metrics collection.
         """
 
         check = KubeAPIServerMetricsCheck('kube_apiserver_metrics', {}, [instance])
-        check.check(instance)
+        dd_run_check(check)
 
         # check that we then get the count metrics also
-        check.check(instance)
+        dd_run_check(check)
 
         for metric in self.METRICS + self.COUNT_METRICS:
             aggregator.assert_metric(metric)

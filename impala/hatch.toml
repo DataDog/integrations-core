@@ -1,0 +1,8 @@
+[env.collectors.datadog-checks]
+
+[[envs.default.matrix]]
+python = ["38"]
+version = ["4.0.0"]
+
+[envs.default.overrides]
+matrix.version.env-vars = "IMPALA_VERSION"

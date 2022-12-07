@@ -8,10 +8,11 @@ from mock import MagicMock, patch
 from pyVmomi import vim
 from six import iteritems
 
-from datadog_checks.vsphere.api_rest import VSphereRestAPI
 from datadog_checks.vsphere.cache import InfrastructureCache, MetricsMetadataCache, VSphereCache
 from datadog_checks.vsphere.config import VSphereConfig
 from datadog_checks.vsphere.constants import ALL_RESOURCES_WITH_METRICS
+
+from .common import build_rest_api_client
 
 logger = logging.getLogger()
 
@@ -78,7 +79,7 @@ def test_metrics_metadata_cache():
 def test_infrastructure_cache(realtime_instance):
     cache = InfrastructureCache(float('inf'))
     config = VSphereConfig(realtime_instance, {}, logger)
-    mock_api = VSphereRestAPI(config, log=logger)
+    mock_api = build_rest_api_client(config, logger)
 
     mors = {MagicMock(spec=k, _moId="foo"): object() for k in ALL_RESOURCES_WITH_METRICS * 2}
     with cache.update():

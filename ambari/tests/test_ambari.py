@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import pytest
 from mock import MagicMock
 
 from datadog_checks.ambari import AmbariCheck
@@ -207,7 +208,6 @@ def test_get_service_health(init_config, instance, aggregator):
         name="ambari.state",
         status=AgentCheck.OK,
         tags=['ambari_cluster:LabCluster', 'ambari_service:hdfs', 'state:INSTALLED'],
-        message='INSTALLED',
     )
 
 
@@ -279,3 +279,11 @@ def test_should_collect_service_status(instance):
 
 def _mock_clusters(ambari):
     ambari.get_clusters = MagicMock(return_value=['LabCluster'])
+
+
+# Minimal E2E testing
+@pytest.mark.e2e
+def test_e2e(dd_agent_check, aggregator, instance):
+    with pytest.raises(Exception):
+        dd_agent_check(instance, rate=True)
+    aggregator.assert_service_check("ambari.can_connect", AgentCheck.CRITICAL)

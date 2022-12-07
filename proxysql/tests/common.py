@@ -3,6 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 
+from datadog_checks.base import AgentCheck
+from datadog_checks.base.utils.db import QueryManager
 from datadog_checks.dev import get_docker_hostname
 
 GLOBAL_METRICS = (
@@ -70,6 +72,7 @@ CONNECTION_POOL_METRICS = (
     'proxysql.pool.bytes_data_sent',
     'proxysql.pool.bytes_data_recv',
     'proxysql.pool.latency_ms',
+    'proxysql.pool.latency_us',
 )
 
 USER_TAGS_METRICS = (
@@ -91,6 +94,8 @@ MEMORY_METRICS = (
     'proxysql.memory.stack_memory_admin_threads',
     'proxysql.memory.stack_memory_cluster_threads',
 )
+
+BACKENDS_METRICS = ('proxysql.backends.count',)
 
 QUERY_RULES_TAGS_METRICS = ('proxysql.query_rules.rule_hits',)
 
@@ -171,3 +176,21 @@ INSTANCE_ALL_METRICS_STATS = {
         'query_rules_metrics',
     ],
 }
+
+
+def mock_executor(result=()):
+    def executor(_):
+        return result
+
+    return executor
+
+
+def create_query_manager(*args, **kwargs):
+    executor = kwargs.pop('executor', None)
+    if executor is None:
+        executor = mock_executor()
+
+    check = kwargs.pop('check', None) or AgentCheck('test', {}, [{}])
+    check.check_id = 'test:instance'
+
+    return QueryManager(check, executor, args, **kwargs)

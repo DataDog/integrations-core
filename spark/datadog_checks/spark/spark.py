@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import re
 
 from bs4 import BeautifulSoup
 from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
@@ -11,146 +10,42 @@ from six.moves.urllib.parse import urljoin, urlparse, urlsplit, urlunsplit
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 
-# Identifier for cluster master address in `spark.yaml`
-MASTER_ADDRESS = 'spark_url'
-DEPRECATED_MASTER_ADDRESS = 'resourcemanager_uri'
-
-# Switch that determines the mode Spark is running in. Can be either
-# 'yarn' or 'standalone'
-SPARK_CLUSTER_MODE = 'spark_cluster_mode'
-SPARK_DRIVER_MODE = 'spark_driver_mode'
-SPARK_YARN_MODE = 'spark_yarn_mode'
-SPARK_STANDALONE_MODE = 'spark_standalone_mode'
-SPARK_MESOS_MODE = 'spark_mesos_mode'
-
-# option enabling compatibility mode for Spark ver < 2
-SPARK_PRE_20_MODE = 'spark_pre_20_mode'
-
-# Service Checks
-SPARK_STANDALONE_SERVICE_CHECK = 'spark.standalone_master.can_connect'
-SPARK_DRIVER_SERVICE_CHECK = 'spark.driver.can_connect'
-YARN_SERVICE_CHECK = 'spark.resource_manager.can_connect'
-SPARK_SERVICE_CHECK = 'spark.application_master.can_connect'
-MESOS_SERVICE_CHECK = 'spark.mesos_master.can_connect'
-
-# URL Paths
-YARN_APPS_PATH = 'ws/v1/cluster/apps'
-SPARK_APPS_PATH = 'api/v1/applications'
-SPARK_VERSION_PATH = 'api/v1/version'
-SPARK_MASTER_STATE_PATH = '/json/'
-SPARK_MASTER_APP_PATH = '/app/'
-MESOS_MASTER_APP_PATH = '/frameworks'
-
-# Extract the application name and the dd metric name from the structured streams metrics.
-STRUCTURED_STREAMS_METRICS_REGEX = re.compile(r"^[\w-]+\.driver\.spark\.streaming\.[\w-]+\.(?P<metric_name>[\w-]+)$")
-
-# Application type and states to collect
-YARN_APPLICATION_TYPES = 'SPARK'
-APPLICATION_STATES = 'RUNNING'
-
-# Event types
-JOB_EVENT = 'job'
-STAGE_EVENT = 'stage'
-
-# Alert types
-ERROR_STATUS = 'FAILED'
-SUCCESS_STATUS = ['SUCCEEDED', 'COMPLETE']
-
-# Event source type
-SOURCE_TYPE_NAME = 'spark'
-
-# Metric types
-GAUGE = 'gauge'
-COUNT = 'count'
-MONOTONIC_COUNT = 'monotonic_count'
-
-# Metrics to collect
-SPARK_JOB_METRICS = {
-    'numTasks': ('spark.job.num_tasks', COUNT),
-    'numActiveTasks': ('spark.job.num_active_tasks', COUNT),
-    'numCompletedTasks': ('spark.job.num_completed_tasks', COUNT),
-    'numSkippedTasks': ('spark.job.num_skipped_tasks', COUNT),
-    'numFailedTasks': ('spark.job.num_failed_tasks', COUNT),
-    'numActiveStages': ('spark.job.num_active_stages', COUNT),
-    'numCompletedStages': ('spark.job.num_completed_stages', COUNT),
-    'numSkippedStages': ('spark.job.num_skipped_stages', COUNT),
-    'numFailedStages': ('spark.job.num_failed_stages', COUNT),
-}
-
-SPARK_STAGE_METRICS = {
-    'numActiveTasks': ('spark.stage.num_active_tasks', COUNT),
-    'numCompleteTasks': ('spark.stage.num_complete_tasks', COUNT),
-    'numFailedTasks': ('spark.stage.num_failed_tasks', COUNT),
-    'executorRunTime': ('spark.stage.executor_run_time', COUNT),
-    'inputBytes': ('spark.stage.input_bytes', COUNT),
-    'inputRecords': ('spark.stage.input_records', COUNT),
-    'outputBytes': ('spark.stage.output_bytes', COUNT),
-    'outputRecords': ('spark.stage.output_records', COUNT),
-    'shuffleReadBytes': ('spark.stage.shuffle_read_bytes', COUNT),
-    'shuffleReadRecords': ('spark.stage.shuffle_read_records', COUNT),
-    'shuffleWriteBytes': ('spark.stage.shuffle_write_bytes', COUNT),
-    'shuffleWriteRecords': ('spark.stage.shuffle_write_records', COUNT),
-    'memoryBytesSpilled': ('spark.stage.memory_bytes_spilled', COUNT),
-    'diskBytesSpilled': ('spark.stage.disk_bytes_spilled', COUNT),
-}
-
-SPARK_EXECUTOR_TEMPLATE_METRICS = {
-    'rddBlocks': ('spark.{}.rdd_blocks', COUNT),
-    'memoryUsed': ('spark.{}.memory_used', COUNT),
-    'diskUsed': ('spark.{}.disk_used', COUNT),
-    'activeTasks': ('spark.{}.active_tasks', COUNT),
-    'failedTasks': ('spark.{}.failed_tasks', COUNT),
-    'completedTasks': ('spark.{}.completed_tasks', COUNT),
-    'totalTasks': ('spark.{}.total_tasks', COUNT),
-    'totalDuration': ('spark.{}.total_duration', COUNT),
-    'totalInputBytes': ('spark.{}.total_input_bytes', COUNT),
-    'totalShuffleRead': ('spark.{}.total_shuffle_read', COUNT),
-    'totalShuffleWrite': ('spark.{}.total_shuffle_write', COUNT),
-    'maxMemory': ('spark.{}.max_memory', COUNT),
-}
-
-SPARK_DRIVER_METRICS = {
-    key: (value[0].format('driver'), value[1]) for key, value in iteritems(SPARK_EXECUTOR_TEMPLATE_METRICS)
-}
-
-SPARK_EXECUTOR_METRICS = {
-    key: (value[0].format('executor'), value[1]) for key, value in iteritems(SPARK_EXECUTOR_TEMPLATE_METRICS)
-}
-
-SPARK_EXECUTOR_LEVEL_METRICS = {
-    key: (value[0].format('executor.id'), value[1]) for key, value in iteritems(SPARK_EXECUTOR_TEMPLATE_METRICS)
-}
-
-SPARK_RDD_METRICS = {
-    'numPartitions': ('spark.rdd.num_partitions', COUNT),
-    'numCachedPartitions': ('spark.rdd.num_cached_partitions', COUNT),
-    'memoryUsed': ('spark.rdd.memory_used', COUNT),
-    'diskUsed': ('spark.rdd.disk_used', COUNT),
-}
-
-SPARK_STREAMING_STATISTICS_METRICS = {
-    'avgInputRate': ('spark.streaming.statistics.avg_input_rate', GAUGE),
-    'avgProcessingTime': ('spark.streaming.statistics.avg_processing_time', GAUGE),
-    'avgSchedulingDelay': ('spark.streaming.statistics.avg_scheduling_delay', GAUGE),
-    'avgTotalDelay': ('spark.streaming.statistics.avg_total_delay', GAUGE),
-    'batchDuration': ('spark.streaming.statistics.batch_duration', GAUGE),
-    'numActiveBatches': ('spark.streaming.statistics.num_active_batches', GAUGE),
-    'numActiveReceivers': ('spark.streaming.statistics.num_active_receivers', GAUGE),
-    'numInactiveReceivers': ('spark.streaming.statistics.num_inactive_receivers', GAUGE),
-    'numProcessedRecords': ('spark.streaming.statistics.num_processed_records', MONOTONIC_COUNT),
-    'numReceivedRecords': ('spark.streaming.statistics.num_received_records', MONOTONIC_COUNT),
-    'numReceivers': ('spark.streaming.statistics.num_receivers', GAUGE),
-    'numRetainedCompletedBatches': ('spark.streaming.statistics.num_retained_completed_batches', MONOTONIC_COUNT),
-    'numTotalCompletedBatches': ('spark.streaming.statistics.num_total_completed_batches', MONOTONIC_COUNT),
-}
-
-SPARK_STRUCTURED_STREAMING_METRICS = {
-    'inputRate-total': ('spark.structured_streaming.input_rate', GAUGE),
-    'latency': ('spark.structured_streaming.latency', GAUGE),
-    'processingRate-total': ('spark.structured_streaming.processing_rate', GAUGE),
-    'states-rowsTotal': ('spark.structured_streaming.rows_count', GAUGE),
-    'states-usedBytes': ('spark.structured_streaming.used_bytes', GAUGE),
-}
+from .constants import (
+    APPLICATION_STATES,
+    COUNT,
+    DEPRECATED_MASTER_ADDRESS,
+    GAUGE,
+    MASTER_ADDRESS,
+    MESOS_MASTER_APP_PATH,
+    MESOS_SERVICE_CHECK,
+    MONOTONIC_COUNT,
+    SPARK_APPS_PATH,
+    SPARK_CLUSTER_MODE,
+    SPARK_DRIVER_METRICS,
+    SPARK_DRIVER_MODE,
+    SPARK_DRIVER_SERVICE_CHECK,
+    SPARK_EXECUTOR_LEVEL_METRICS,
+    SPARK_EXECUTOR_METRICS,
+    SPARK_JOB_METRICS,
+    SPARK_MASTER_APP_PATH,
+    SPARK_MASTER_STATE_PATH,
+    SPARK_MESOS_MODE,
+    SPARK_PRE_20_MODE,
+    SPARK_RDD_METRICS,
+    SPARK_SERVICE_CHECK,
+    SPARK_STAGE_METRICS,
+    SPARK_STANDALONE_MODE,
+    SPARK_STANDALONE_SERVICE_CHECK,
+    SPARK_STREAMING_STATISTICS_METRICS,
+    SPARK_STRUCTURED_STREAMING_METRICS,
+    SPARK_VERSION_PATH,
+    SPARK_YARN_MODE,
+    STRUCTURED_STREAMS_METRICS_REGEX,
+    UUID_REGEX,
+    YARN_APPLICATION_TYPES,
+    YARN_APPS_PATH,
+    YARN_SERVICE_CHECK,
+)
 
 
 class SparkCheck(AgentCheck):
@@ -178,6 +73,8 @@ class SparkCheck(AgentCheck):
         self._disable_legacy_cluster_tag = is_affirmative(self.instance.get('disable_legacy_cluster_tag', False))
         self.metricsservlet_path = self.instance.get('metricsservlet_path', '/metrics/json')
 
+        self._enable_query_name_tag = is_affirmative(self.instance.get('enable_query_name_tag', False))
+
         # Get the cluster name from the instance configuration
         self.cluster_name = self.instance.get('cluster_name')
         if self.cluster_name is None:
@@ -193,6 +90,10 @@ class SparkCheck(AgentCheck):
             tags.append('cluster_name:%s' % self.cluster_name)
 
         spark_apps = self._get_running_apps()
+
+        if not spark_apps:
+            self.log.warning('No running apps found. No metrics will be collected.')
+            return
 
         # Get the job metrics
         self._spark_job_metrics(spark_apps, tags)
@@ -221,7 +122,6 @@ class SparkCheck(AgentCheck):
                 SPARK_SERVICE_CHECK,
                 AgentCheck.OK,
                 tags=['url:%s' % am_address] + tags,
-                message='Connection to ApplicationMaster "%s" was successful' % am_address,
             )
 
     def _get_master_address(self):
@@ -316,7 +216,6 @@ class SparkCheck(AgentCheck):
             SPARK_DRIVER_SERVICE_CHECK,
             AgentCheck.OK,
             tags=['url:%s' % self.master_address] + tags,
-            message='Connection to Spark driver "%s" was successful' % self.master_address,
         )
         self.log.info("Returning running apps %s", running_apps)
         return running_apps
@@ -365,7 +264,6 @@ class SparkCheck(AgentCheck):
             SPARK_STANDALONE_SERVICE_CHECK,
             AgentCheck.OK,
             tags=['url:%s' % self.master_address] + tags,
-            message='Connection to Spark master "%s" was successful' % self.master_address,
         )
         self.log.info("Returning running apps %s", running_apps)
         return running_apps
@@ -400,7 +298,6 @@ class SparkCheck(AgentCheck):
             MESOS_SERVICE_CHECK,
             AgentCheck.OK,
             tags=['url:%s' % self.master_address] + tags,
-            message='Connection to ResourceManager "%s" was successful' % self.master_address,
         )
 
         return running_apps
@@ -416,7 +313,6 @@ class SparkCheck(AgentCheck):
             YARN_SERVICE_CHECK,
             AgentCheck.OK,
             tags=['url:%s' % self.master_address] + tags,
-            message='Connection to ResourceManager "%s" was successful' % self.master_address,
         )
 
         return running_apps
@@ -644,14 +540,28 @@ class SparkCheck(AgentCheck):
                 for gauge_name, value in iteritems(response):
                     match = STRUCTURED_STREAMS_METRICS_REGEX.match(gauge_name)
                     if not match:
+                        self.log.debug("No regex match found for gauge: '%s'", str(gauge_name))
                         continue
                     groups = match.groupdict()
                     metric_name = groups['metric_name']
                     if metric_name not in SPARK_STRUCTURED_STREAMING_METRICS:
+                        self.log.debug("Unknown metric_name encountered: '%s'", str(metric_name))
                         continue
                     metric_name, submission_type = SPARK_STRUCTURED_STREAMING_METRICS[metric_name]
                     tags = ['app_name:%s' % str(app_name)]
                     tags.extend(addl_tags)
+
+                    if self._enable_query_name_tag:
+                        query_name = groups['query_name']
+                        match = UUID_REGEX.match(query_name)
+                        if not match:
+                            tags.append('query_name:%s' % str(query_name))
+                        else:
+                            self.log.debug(
+                                'Cannot attach `query_name` tag. Add a query name to collect this tag for %s',
+                                query_name,
+                            )
+
                     self._set_metric(metric_name, submission_type, value, tags=tags)
             except HTTPError as e:
                 self.log.debug(

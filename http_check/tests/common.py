@@ -194,14 +194,26 @@ CONFIG_DONT_CHECK_EXP = {
     'instances': [{'name': 'simple_config', 'url': 'https://expired.mock', 'check_certificate_expiration': False}]
 }
 
-CONFIG_HTTP_REDIRECTS = {
+CONFIG_HTTP_NO_REDIRECTS = {
     'instances': [
         {
-            'name': 'redirect_service',
+            'name': 'no_allow_redirect_service',
             'url': 'https://valid.mock/301',
             'timeout': 1,
             'http_response_status_code': 301,
             'allow_redirects': False,
+        }
+    ]
+}
+
+CONFIG_HTTP_ALLOW_REDIRECTS = {
+    'instances': [
+        {
+            'name': 'allow_redirect_service',
+            'url': 'https://valid.mock/301',
+            'timeout': 1,
+            'http_response_status_code': 200,
+            'allow_redirects': True,
         }
     ]
 }

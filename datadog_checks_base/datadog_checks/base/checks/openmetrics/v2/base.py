@@ -6,15 +6,43 @@
 from collections import ChainMap
 from contextlib import contextmanager
 
+from requests.exceptions import RequestException
+from six import raise_from
+
 from ....errors import ConfigurationError
+from ....utils.tracing import traced_class
 from ... import AgentCheck
 from .scraper import OpenMetricsScraper
 
 
 class OpenMetricsBaseCheckV2(AgentCheck):
+    """
+    OpenMetricsBaseCheckV2 is an updated class of OpenMetricsBaseCheck to scrape endpoints that emit Prometheus metrics.
+
+    Minimal example configuration:
+
+    ```yaml
+    instances:
+    - openmetrics_endpoint: http://example.com/endpoint
+      namespace: "foobar"
+      metrics:
+      - bar
+      - foo
+    ```
+
+    """
+
     DEFAULT_METRIC_LIMIT = 2000
 
+    # Allow tracing for openmetrics integrations
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
+        return traced_class(cls)
+
     def __init__(self, name, init_config, instances):
+        """
+        The base class for any OpenMetrics-based integration.
+        """
         super(OpenMetricsBaseCheckV2, self).__init__(name, init_config, instances)
 
         # All desired scraper configurations, which subclasses can override as needed
@@ -32,9 +60,17 @@ class OpenMetricsBaseCheckV2(AgentCheck):
             self.log.info('Scraping OpenMetrics endpoint: %s', endpoint)
 
             with self.adopt_namespace(scraper.namespace):
-                scraper.scrape()
+                try:
+                    scraper.scrape()
+                except (ConnectionError, RequestException) as e:
+                    self.log.error("There was an error scraping endpoint %s: %s", endpoint, str(e))
+                    raise_from(type(e)("There was an error scraping endpoint {}: {}".format(endpoint, e)), None)
 
     def configure_scrapers(self):
+        """
+        Creates a scraper configuration for each instance.
+        """
+
         scrapers = {}
 
         for config in self.scraper_configs:

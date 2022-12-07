@@ -1,6 +1,6 @@
 ## How to test cisco_aci
 
-It is not possible to test this integration with a simple docker-compose environment on which to run the agent. This document lists some of the available options to test this integration. Note that installing a real cisco ACI environment is not feasible as it requires a custom hardware setup.
+It is not possible to test this integration with a simple `docker compose` environment on which to run the agent. This document lists some of the available options to test this integration. Note that installing a real cisco ACI environment is not feasible as it requires a custom hardware setup.
 
 ### Unit tests
 
@@ -18,14 +18,16 @@ https://devnetsandbox.cisco.com/
 Even if the simulator cannot be installed on a VM, cisco offers a publicly available sandbox which is running a specific version
 of the simulator. This AlwaysOn simulator is very convenient to use as it doesn't require a VPN.
 
-To use it, configure a locally-running Agent to point at the sandbox with the following configuration:
+To use it, create an account using the link, and start the ACI Simulator AlwaysOn sandbox. Configure a locally-running Agent to point at the sandbox with the following configuration:
 
 ```yaml
 instances:
   - aci_url: https://sandboxapicdc.cisco.com
     username: admin
-    pwd: ciscopsdt
+    pwd: <PASSWORD>
 ```
+
+Make sure to replace the `<PASSWORD>` with the password it gives for the ACI Sandbox.
 
 Alternatively, add a temporary `conftest.py` with the following contents:
 
@@ -37,7 +39,7 @@ SANDBOX_CONFIG = {
         {
             'aci_url': 'https://sandboxapicdc.cisco.com',
             'username': 'admin',
-            'pwd': 'ciscopsdt',
+            'pwd': '<PASSWORD>',
             'tls_verify': False,  # As of 2019-12-03, the sandbox endpoint doesn't have a valid TLS certificate.
         }
     ]

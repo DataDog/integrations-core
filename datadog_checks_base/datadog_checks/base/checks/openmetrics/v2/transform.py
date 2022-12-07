@@ -17,7 +17,10 @@ class MetricTransformer:
         self.check = check
         self.logger = check.log
         self.cache_metric_wildcards = is_affirmative(config.get('cache_metric_wildcards', True))
-        self.histogram_buckets_as_distributions = is_affirmative(
+        self.collect_counters_with_distributions = is_affirmative(
+            config.get('collect_counters_with_distributions', False)
+        )
+        self.histogram_buckets_as_distributions = self.collect_counters_with_distributions or is_affirmative(
             config.get('histogram_buckets_as_distributions', False)
         )
         self.collect_histogram_buckets = self.histogram_buckets_as_distributions or is_affirmative(
@@ -29,6 +32,7 @@ class MetricTransformer:
 
         # Accessible to every transformer
         self.global_options = {
+            'collect_counters_with_distributions': self.collect_counters_with_distributions,
             'collect_histogram_buckets': self.collect_histogram_buckets,
             'histogram_buckets_as_distributions': self.histogram_buckets_as_distributions,
             'non_cumulative_histogram_buckets': self.non_cumulative_histogram_buckets,
@@ -75,7 +79,16 @@ class MetricTransformer:
 
         self.logger.debug('Skipping metric `%s` as it is not defined in `metrics`', metric_name)
 
+    def add_custom_transformer(self, name, transformer, pattern=False):
+        if not pattern:
+            name = '^{}$'.format(name)
+        self.metric_patterns.append((re.compile(name), {'__transformer__': transformer}))
+
     def compile_transformer(self, config):
+        custom_transformer = config.pop('__transformer__', None)
+        if custom_transformer:
+            return None, custom_transformer
+
         metric_name = config.pop('name')
         if not isinstance(metric_name, str):
             raise TypeError('field `name` must be a string')
@@ -135,7 +148,7 @@ class MetricTransformer:
 
 def get_native_transformer(check, metric_name, modifiers, global_options):
     """
-    Uses whatever the endpoint describes as the metric type in the first occurence.
+    Uses whatever the endpoint describes as the metric type in the first occurrence.
     """
     transformer = None
 

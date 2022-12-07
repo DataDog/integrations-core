@@ -7,6 +7,7 @@ from itertools import chain
 from time import time as timestamp
 
 import ibm_db
+from requests import ConnectionError
 
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.utils.containers import iter_unique
@@ -29,6 +30,7 @@ class IbmDb2Check(AgentCheck):
         self._host = self.instance.get('host', '')
         self._port = self.instance.get('port', 50000)
         self._tags = self.instance.get('tags', [])
+        self._security = self.instance.get('security', 'none')
         self._tls_cert = self.instance.get('tls_cert')
 
         # Add global database tag
@@ -51,23 +53,33 @@ class IbmDb2Check(AgentCheck):
 
         # Deduplicate
         self._custom_queries = list(iter_unique(custom_queries))
+        self._query_methods = (
+            self.query_instance,
+            self.query_database,
+            self.query_buffer_pool,
+            self.query_table_space,
+            self.query_transaction_log,
+            self.query_custom,
+        )
 
     def check(self, instance):
         if self._conn is None:
-            connection = self.get_connection()
-            if connection is None:
-                return
+            self._conn = self.get_connection()
+        self.emit_connection_service_checks()
+        if self._conn is None:
+            return
 
-            self._conn = connection
-
-        self.query_instance()
-        self.query_database()
-        self.query_buffer_pool()
-        self.query_table_space()
-        self.query_transaction_log()
-        self.query_custom()
         self.collect_metadata()
+        for query_method in self._query_methods:
+            try:
+                query_method()
+            except ConnectionError:
+                raise
+            except Exception as e:
+                self.log.warning('Encountered error running `%s`: %s', query_method.__name__, str(e))
+                continue
 
+    @AgentCheck.metadata_entrypoint
     def collect_metadata(self):
         try:
             raw_version = get_version(self._conn)
@@ -535,32 +547,44 @@ class IbmDb2Check(AgentCheck):
 
     def get_connection(self):
         target, username, password = self.get_connection_data(
-            self._db, self._username, self._password, self._host, self._port, self._tls_cert
+            self._db, self._username, self._password, self._host, self._port, self._security, self._tls_cert
         )
 
         # Get column names in lower case
         connection_options = {ibm_db.ATTR_CASE: ibm_db.CASE_LOWER}
 
         try:
+            self.log.debug("Attempting to connect to Db2 with `%s`...", scrub_connection_string(target))
             connection = ibm_db.connect(target, username, password, connection_options)
         except Exception as e:
             if self._host:
                 self.log.error('Unable to connect with `%s`: %s', scrub_connection_string(target), e)
             else:  # no cov
                 self.log.error('Unable to connect to database `%s` as user `%s`: %s', target, username, e)
-            self.service_check(self.SERVICE_CHECK_CONNECT, self.CRITICAL, tags=self._tags)
+            connection = None
+        return connection
+
+    def emit_connection_service_checks(self):
+        if self._conn is None:
+            self.service_check(
+                self.SERVICE_CHECK_CONNECT,
+                self.CRITICAL,
+                tags=self._tags,
+                message="Unable to create new connection to database: {}".format(self._db),
+            )
         else:
             self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, tags=self._tags)
-            return connection
 
     @classmethod
-    def get_connection_data(cls, db, username, password, host, port, tls_cert):
+    def get_connection_data(cls, db, username, password, host, port, security, tls_cert):
         if host:
             target = 'database={};hostname={};port={};protocol=tcpip;uid={};pwd={}'.format(
                 db, host, port, username, password
             )
             username = ''
             password = ''
+            if security == 'ssl':
+                target = '{};security=ssl;'.format(target)
             if tls_cert:
                 target = '{};security=ssl;sslservercertificate={}'.format(target, tls_cert)
         else:  # no cov
@@ -574,13 +598,14 @@ class IbmDb2Check(AgentCheck):
             cursor = ibm_db.exec_immediate(self._conn, query)
         except Exception as e:
             error = str(e)
-            self.log.error("Error executing query, attempting to a new connection: %s", error)
-            connection = self.get_connection()
-
-            if connection is None:
+            self.log.error("Error executing query: %s.\nAttempting to reconnect", error)
+            # ToDo: Probably the best strategy here would be to just set self._conn = None, abort the current check run
+            # and retry on the next check run.
+            self._conn = self.get_connection()
+            self.emit_connection_service_checks()
+            if self._conn is None:
                 raise ConnectionError("Unable to create new connection")
 
-            self._conn = connection
             cursor = ibm_db.exec_immediate(self._conn, query)
 
         row = method(cursor)

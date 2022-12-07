@@ -1,29 +1,43 @@
 {
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "tcp_queue.",
-  "metric_to_check": "tcp_queue.read_buffer_max_usage_pct",
-  "name": "tcp_queue_length",
-  "short_description": "Track the size of the TCP buffers with Datadog.",
-  "guid": "0468b098-43bd-4157-8a01-14065cfdcb7b",
-  "support": "core",
-  "supported_os": [
-    "linux"
-  ],
-  "public_title": "Datadog-TCP Queue Length Integration",
-  "categories": [
-    "network"
-  ],
-  "type": "check",
-  "is_public": true,
-  "display_name": "TCP Queue Length",
-  "creates_events": false,
-  "integration_id": "tcp-queue-length",
+  "manifest_version": "2.0.0",
+  "app_uuid": "2c48a360-9fbb-4cd6-9316-0e9afd9926c8",
+  "app_id": "tcp-queue-length",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Track the size of the TCP buffers with Datadog.",
+    "title": "TCP Queue Length",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Category::Network"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "monitors": {},
-    "dashboards": {},
-    "service_checks": "assets/service_checks.json",
-    "logs": {},
-    "metrics_metadata": "metadata.csv"
+    "integration": {
+      "source_type_name": "TCP Queue Length",
+      "configuration": {},
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "tcp_queue.",
+        "check": "tcp_queue.read_buffer_max_usage_pct",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    }
   }
 }

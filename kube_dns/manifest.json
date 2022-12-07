@@ -1,32 +1,48 @@
 {
-  "categories": [
-    "web",
-    "network"
-  ],
-  "creates_events": false,
-  "display_name": "Kube DNS",
-  "guid": "3c05ed97-bf34-4061-83c4-e742d7daa5f8",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "kubedns.",
-  "metric_to_check": "kubedns.request_count",
-  "name": "kube_dns",
-  "public_title": "Datadog-Kube DNS Integration",
-  "short_description": "Track all your Kube DNS metrics with Datadog",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "type": "check",
-  "integration_id": "kube-dns",
+  "manifest_version": "2.0.0",
+  "app_uuid": "41986c96-f53e-49fb-8892-cc6716238e48",
+  "app_id": "kube-dns",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Track all your Kube DNS metrics with Datadog",
+    "title": "Kube DNS",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Web",
+      "Category::Network"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "monitors": {},
-    "dashboards": {},
-    "service_checks": "assets/service_checks.json",
-    "logs": {},
-    "metrics_metadata": "metadata.csv"
+    "integration": {
+      "source_type_name": "Kube DNS",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "kubedns.",
+        "check": "kubedns.request_count",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    }
   }
 }

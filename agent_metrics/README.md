@@ -2,57 +2,48 @@
 
 ## Overview
 
-Get metrics from the Agent Metrics service in real time to:
+Get internal metrics from the Datadog Agent to create visualizations and monitors in Datadog.
 
-- Visualize and monitor `agent_metrics` states.
-- Be notified about `agent_metrics` failovers and events.
-
-**NOTE**: The Agent Metrics check has been rewritten in Go for Agent v6 to take advantage of the new internal architecture. Hence it is still maintained but **only works with Agents prior to major version 6**.
-
-To collect Agent metrics for Agent v6+, use the [Go-expvar check][1] with [the `agent_stats.yaml` configuration file][2] packaged with the Agent.
+**Note:** The list of metrics collected by this integration may change between minor Agent versions. Such changes may not be mentioned in the Agent's changelog.
 
 ## Setup
 
 ### Installation
 
-The Agent Metrics check is included in the [Datadog Agent][3] package, so you don't need to install anything else on your servers.
+The Agent Metrics integration, based on the [go_expvar][1] check, is included in the [Datadog Agent][2] package, so you don't need to install anything else on your servers.
 
 ### Configuration
 
-1. Edit the `agent_metrics.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][4], to point to your server and port, set the masters to monitor. See the [sample agent_metrics.d/conf.yaml][5] for all available configuration options.
+1. Rename the [`go_expvar.d/agent_stats.yaml.example`][3] file, in the `conf.d/` folder at the root of your [Agent's configuration directory][4], to `go_expvar.d/agent_stats.yaml`.
 
-2. [Restart the Agent][6].
+2. [Restart the Agent][5].
 
 ### Validation
 
-[Run the Agent's status subcommand][7] and look for `agent_metrics` under the Checks section.
+[Run the Agent's status subcommand][6] and look for `go_expvar` under the Checks section.
 
 ## Data Collected
 
-All data collected are only available for Agent v5.
-
 ### Metrics
 
-See [metadata.csv][8] for a list of metrics provided by this integration.
+The Agent Metrics integration collects the metrics defined in [`agent_stats.yaml.example`][3].
 
 ### Events
 
-The Agent Metrics check does not include any events.
+The Agent Metrics integration does not include any events.
 
 ### Service Checks
 
-The Agent Metrics check does not include any service checks.
+The Agent Metrics integration does not include any service checks.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][9].
+Need help? Contact [Datadog support][7].
 
 [1]: https://docs.datadoghq.com/integrations/go_expvar/
-[2]: https://github.com/DataDog/datadog-agent/blob/master/cmd/agent/dist/conf.d/go_expvar.d/agent_stats.yaml.example
-[3]: https://app.datadoghq.com/account/settings#agent
+[2]: https://app.datadoghq.com/account/settings#agent
+[3]: https://github.com/DataDog/datadog-agent/blob/master/cmd/agent/dist/conf.d/go_expvar.d/agent_stats.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
-[5]: https://github.com/DataDog/integrations-core/blob/agent-v5/agent_metrics/datadog_checks/agent_metrics/data/conf.yaml.default
-[6]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[7]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[8]: https://github.com/DataDog/integrations-core/blob/master/agent_metrics/metadata.csv
-[9]: https://docs.datadoghq.com/help/
+[5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[7]: https://docs.datadoghq.com/help/

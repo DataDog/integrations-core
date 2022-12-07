@@ -19,16 +19,16 @@ The Kube_metrics_server check is included in the [Datadog Agent][2] package. No 
 
 To configure this check for an Agent running on a host:
 
-1. Edit the `kube_metrics_server.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your kube_metrics_server performance data. See the [sample kube_metrics_server.d/conf.yaml][2] for all available configuration options.
+1. Edit the `kube_metrics_server.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your kube_metrics_server performance data. See the [sample kube_metrics_server.d/conf.yaml][3] for all available configuration options.
 
-2. [Restart the Agent][3].
+2. [Restart the Agent][4].
 
 <!-- xxz tab xxx -->
 <!-- xxx tab "Containerized" xxx -->
 
 #### Containerized
 
-For containerized environments, see the [Kubernetes Autodiscovery Integration Templates][4] for guidance on applying the parameters below.
+For containerized environments, see the [Kubernetes Autodiscovery Integration Templates][5] for guidance on applying the parameters below.
 
 | Parameter            | Value                                                |
 | -------------------- | ---------------------------------------------------- |
@@ -47,36 +47,38 @@ If your endpoint is secured, additional configuration is required:
 
 2. Mount the related certificate file in the Agent pod.
 
-3. Apply your SSL configuration. Refer to the [default configuration file][5] for more information.
+3. Apply your SSL configuration. See the [default configuration file][6] for more information.
 
 ### Validation
 
-[Run the Agent's status subcommand][6] and look for `kube_metrics_server` under the Checks section.
+[Run the Agent's status subcommand][7] and look for `kube_metrics_server` under the Checks section.
 
 ## Data Collected
 
 ### Metrics
 
-See [metadata.csv][7] for a list of metrics provided by this integration.
-
-### Service Checks
-
-**kube_metrics_server.prometheus.health**:<br>
-Returns `CRITICAL` if the Agent cannot reach the metrics endpoints.
+See [metadata.csv][8] for a list of metrics provided by this integration.
 
 ### Events
 
 kube_metrics_server does not include any events.
 
+### Service Checks
+
+See [service_checks.json][9] for a list of service checks provided by this integration.
+
 ## Troubleshooting
 
-Need help? Contact [Datadog support][8].
+Need help? Contact [Datadog support][10].
+
 
 [1]: https://github.com/kubernetes-incubator/metrics-server
-[2]: https://github.com/DataDog/integrations-core/blob/master/kube_metrics_server/datadog_checks/kube_metrics_server/data/conf.yaml.example
-[3]: https://docs.datadoghq.com/agent/guide/agent-commands/#restart-the-agent
-[4]: https://docs.datadoghq.com/agent/kubernetes/integrations/
-[5]: https://github.com/DataDog/integrations-core/blob/master/openmetrics/datadog_checks/openmetrics/data/conf.yaml.example
-[6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[7]: https://github.com/DataDog/integrations-core/blob/master/kube_metrics_server/metadata.csv
-[8]: https://docs.datadoghq.com/help/
+[2]: https://app.datadoghq.com/account/settings#agent
+[3]: https://github.com/DataDog/integrations-core/blob/master/kube_metrics_server/datadog_checks/kube_metrics_server/data/conf.yaml.example
+[4]: https://docs.datadoghq.com/agent/guide/agent-commands/#restart-the-agent
+[5]: https://docs.datadoghq.com/agent/kubernetes/integrations/
+[6]: https://github.com/DataDog/integrations-core/blob/master/openmetrics/datadog_checks/openmetrics/data/conf.yaml.example
+[7]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[8]: https://github.com/DataDog/integrations-core/blob/master/kube_metrics_server/metadata.csv
+[9]: https://github.com/DataDog/integrations-core/blob/master/kube_metrics_server/assets/service_checks.json
+[10]: https://docs.datadoghq.com/help/

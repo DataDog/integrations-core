@@ -11,23 +11,35 @@ import win32security
 from six import PY2
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
+from datadog_checks.base.utils.common import exclude_undefined_keys
 from datadog_checks.base.utils.time import get_timestamp
 
 from .filters import construct_xpath_query
 from .legacy import Win32EventLogWMI
 
+if PY2:
+    ConfigMixin = object
+else:
+    from .config_models import ConfigMixin
 
-class Win32EventLogCheck(AgentCheck):
+
+class Win32EventLogCheck(AgentCheck, ConfigMixin):
     # The lower cased version of the `API SOURCE ATTRIBUTE` column from the table located here:
     # https://docs.datadoghq.com/integrations/faq/list-of-api-source-attribute-value/
     SOURCE_TYPE_NAME = 'event viewer'
 
+    # NOTE: Keep this in sync with config spec:
+    # instances.start.value.enum
+    #
     # https://docs.microsoft.com/en-us/windows/win32/api/winevt/ne-winevt-evt_subscribe_flags
     START_OPTIONS = {
         'now': win32evtlog.EvtSubscribeToFutureEvents,
         'oldest': win32evtlog.EvtSubscribeStartAtOldestRecord,
     }
 
+    # NOTE: Keep this in sync with config spec:
+    # instances.auth_type.value.enum
+    #
     # https://docs.microsoft.com/en-us/windows/win32/api/winevt/ne-winevt-evt_rpc_login_flags
     LOGIN_FLAGS = {
         'default': win32evtlog.EvtRpcLoginAuthDefault,
@@ -65,12 +77,6 @@ class Win32EventLogCheck(AgentCheck):
     def __init__(self, name, init_config, instances):
         super(Win32EventLogCheck, self).__init__(name, init_config, instances)
 
-        # Event channel or log file with which to subscribe
-        self._path = self.instance.get('path', '')
-
-        # The point at which to start the event subscription
-        self._subscription_start = self.instance.get('start', 'now')
-
         # Raw user-defined query or one we construct based on filters
         self._query = None
 
@@ -90,16 +96,6 @@ class Win32EventLogCheck(AgentCheck):
         # Session used for remote connections, or None if local connection
         self._session = None
 
-        # Connection options
-        self._timeout = int(float(self.instance.get('timeout', 5)) * 1000)
-        self._payload_size = int(self.instance.get('payload_size', 10))
-
-        # How often to update the cached bookmark
-        self._bookmark_frequency = int(self.instance.get('bookmark_frequency', self._payload_size))
-
-        # Custom tags to add to all events
-        self._tags = list(self.instance.get('tags', []))
-
         # Whether or not to interpret messages for unknown sources
         self._interpret_messages = is_affirmative(
             self.instance.get('interpret_messages', self.init_config.get('interpret_messages', True))
@@ -114,7 +110,7 @@ class Win32EventLogCheck(AgentCheck):
         self.check_initializations.append(self.parse_config)
         self.check_initializations.append(self.construct_query)
         self.check_initializations.append(self.create_session)
-        self.check_initializations.append(self.create_subscription)
+        self.check_initializations.append(self.init_subscription)
 
         # Define every property collector
         self._collectors = [self.collect_timestamp, self.collect_fqdn, self.collect_level, self.collect_provider]
@@ -143,7 +139,7 @@ class Win32EventLogCheck(AgentCheck):
             event_payload = {
                 'source_type_name': self.SOURCE_TYPE_NAME,
                 'priority': self._event_priority,
-                'tags': list(self._tags),
+                'tags': list(self.config.tags),
             }
 
             # As seen in every collector, before using members of the enum you need to check for existence. See:
@@ -185,7 +181,7 @@ class Win32EventLogCheck(AgentCheck):
             return
 
         event_payload['aggregation_key'] = value
-        event_payload['msg_title'] = '{}/{}'.format(self._path, value)
+        event_payload['msg_title'] = '{}/{}'.format(self.config.path, value)
 
         message = None
 
@@ -247,7 +243,7 @@ class Win32EventLogCheck(AgentCheck):
 
         try:
             # https://docs.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-lookupaccountsida
-            # http://timgolden.me.uk/pywin32-docs/win32security__LookupAccountSid_meth.html
+            # https://mhammond.github.io/pywin32/win32security__LookupAccountSid_meth.html
             user, domain, _ = win32security.LookupAccountSid(
                 None if self._session is None else event_payload['host'], value
             )
@@ -261,7 +257,7 @@ class Win32EventLogCheck(AgentCheck):
 
         # https://docs.microsoft.com/en-us/windows/win32/api/winevt/nf-winevt-evtrender
         # https://docs.microsoft.com/en-us/windows/win32/api/winevt/ne-winevt-evt_render_flags
-        # http://timgolden.me.uk/pywin32-docs/win32evtlog__EvtRender_meth.html
+        # https://mhammond.github.io/pywin32/win32evtlog__EvtRender_meth.html
         return win32evtlog.EvtRender(event, win32evtlog.EvtRenderEventValues, Context=context)
 
     def consume_events(self):
@@ -272,7 +268,7 @@ class Win32EventLogCheck(AgentCheck):
         for event in self.poll_events():
             events_since_last_bookmark += 1
 
-            if events_since_last_bookmark >= self._bookmark_frequency:
+            if events_since_last_bookmark >= self.config.bookmark_frequency:
                 events_since_last_bookmark = 0
                 self.update_bookmark(event)
 
@@ -287,17 +283,24 @@ class Win32EventLogCheck(AgentCheck):
             # IMPORTANT: the subscription starts immediately so you must consume before waiting for the first signal
             while True:
                 # https://docs.microsoft.com/en-us/windows/win32/api/winevt/nf-winevt-evtnext
-                # http://timgolden.me.uk/pywin32-docs/win32evtlog__EvtNext_meth.html
+                # https://mhammond.github.io/pywin32/win32evtlog__EvtNext_meth.html
                 #
-                # An error saying EvtNext: The operation identifier is not valid happens
-                # when you call the method and there are no events to read (i.e. polling).
-                # There is an unreleased upstream contribution to return
-                # an empty tuple instead https://github.com/mhammond/pywin32/pull/1648
-                # For the moment is logged as a debug line.
+                # Behavior when you call the EvtNext and there are no events to read (i.e. polling).
+                # Python 2: An error saying EvtNext: The operation identifier is not valid happens.
+                #           This is logged as a debug line.
+                # Python 3: Returns an empty tuple
                 try:
-                    events = win32evtlog.EvtNext(self._subscription, self._payload_size)
+                    events = win32evtlog.EvtNext(self._subscription, self.config.payload_size)
                 except pywintypes.error as e:
                     self.log_windows_error(e)
+                    if (
+                        e.winerror == 15007  # ERROR_EVT_CHANNEL_NOT_FOUND: The specified channel could not be found.
+                        or e.winerror == 6  # ERROR_INVALID_HANDLE_VALUE: The handle is invalid
+                    ):
+                        # Can happen if the event publisher is unregistered,
+                        # which sometimes happens during software updates.
+                        # Must get a new subscription handle.
+                        self.reset_subscription()
                     break
                 else:
                     if not events:
@@ -307,8 +310,8 @@ class Win32EventLogCheck(AgentCheck):
                     yield event
 
             # https://docs.microsoft.com/en-us/windows/win32/api/synchapi/nf-synchapi-waitforsingleobjectex
-            # http://timgolden.me.uk/pywin32-docs/win32event__WaitForSingleObjectEx_meth.html
-            wait_signal = win32event.WaitForSingleObjectEx(self._event_handle, self._timeout, True)
+            # https://mhammond.github.io/pywin32/win32event__WaitForSingleObjectEx_meth.html
+            wait_signal = win32event.WaitForSingleObjectEx(self._event_handle, self.config.timeout, True)
 
             # No more events, end check run
             if wait_signal != win32con.WAIT_OBJECT_0:
@@ -318,25 +321,16 @@ class Win32EventLogCheck(AgentCheck):
         # See https://docs.microsoft.com/en-us/windows/win32/wes/bookmarking-events
 
         # https://docs.microsoft.com/en-us/windows/win32/api/winevt/nf-winevt-evtupdatebookmark
-        # http://timgolden.me.uk/pywin32-docs/win32evtlog__EvtUpdateBookmark_meth.html
+        # https://mhammond.github.io/pywin32/win32evtlog__EvtUpdateBookmark_meth.html
         win32evtlog.EvtUpdateBookmark(self._bookmark_handle, event)
 
         # https://docs.microsoft.com/en-us/windows/win32/api/winevt/nf-winevt-evtrender
-        # http://timgolden.me.uk/pywin32-docs/win32evtlog__EvtRender_meth.html
+        # https://mhammond.github.io/pywin32/win32evtlog__EvtRender_meth.html
         bookmark_xml = win32evtlog.EvtRender(self._bookmark_handle, win32evtlog.EvtRenderBookmark)
 
         self.write_persistent_cache('bookmark', bookmark_xml)
 
     def parse_config(self):
-        if not self._path:
-            raise ConfigurationError('You must select a `path`.')
-
-        if self._subscription_start not in self.START_OPTIONS:
-            raise ConfigurationError('Option `start` must be one of: {}'.format(', '.join(sorted(self.START_OPTIONS))))
-
-        if self._event_priority not in ('normal', 'low'):
-            raise ConfigurationError('Option `event_priority` can only be either `normal` or `low`.')
-
         for option in ('included_messages', 'excluded_messages'):
             if option not in self.instance:
                 continue
@@ -347,25 +341,17 @@ class Win32EventLogCheck(AgentCheck):
 
             setattr(self, '_{}'.format(option), pattern)
 
-        password = self.instance.get('password')
+        password = self.config.password
         if password:
             self.register_secret(password)
 
     def construct_query(self):
-        query = self.instance.get('query')
+        query = self.config.query
         if query:
             self._query = query
             return
 
-        filters = self.instance.get('filters', {})
-        if not isinstance(filters, dict):
-            raise ConfigurationError('The `filters` option must be a mapping.')
-
-        for key, value in filters.items():
-            if not isinstance(value, list):
-                raise ConfigurationError('Value for event filter `{}` must be an array.'.format(key))
-
-        self._query = construct_xpath_query(filters)
+        self._query = construct_xpath_query(exclude_undefined_keys(self.config.filters.dict()))
         self.log.debug('Using constructed query: %s', self._query)
 
     def create_session(self):
@@ -376,31 +362,39 @@ class Win32EventLogCheck(AgentCheck):
             return
 
         # https://docs.microsoft.com/en-us/windows/win32/api/winevt/nf-winevt-evtopensession
-        # http://timgolden.me.uk/pywin32-docs/win32evtlog__EvtOpenSession_meth.html
+        # https://mhammond.github.io/pywin32/win32evtlog__EvtOpenSession_meth.html
         self._session = win32evtlog.EvtOpenSession(session_struct, win32evtlog.EvtRpcLogin, 0, 0)
 
-    def create_subscription(self):
+    def init_subscription(self):
         # https://docs.microsoft.com/en-us/windows/win32/api/synchapi/nf-synchapi-createeventa
-        # http://timgolden.me.uk/pywin32-docs/win32event__CreateEvent_meth.html
+        # https://mhammond.github.io/pywin32/win32event__CreateEvent_meth.html
         self._event_handle = win32event.CreateEvent(None, 0, 0, self.check_id)
 
         bookmark = self.read_persistent_cache('bookmark')
         if bookmark:
             flags = win32evtlog.EvtSubscribeStartAfterBookmark
         else:
-            flags = self.START_OPTIONS[self._subscription_start]
+            flags = self.START_OPTIONS[self.config.start]
 
             # Set explicitly to None rather than a potentially empty string
             bookmark = None
 
         # https://docs.microsoft.com/en-us/windows/win32/api/winevt/nf-winevt-evtcreatebookmark
-        # http://timgolden.me.uk/pywin32-docs/win32evtlog__EvtCreateBookmark_meth.html
+        # https://mhammond.github.io/pywin32/win32evtlog__EvtCreateBookmark_meth.html
         self._bookmark_handle = win32evtlog.EvtCreateBookmark(bookmark)
 
+        self.create_subscription(flags, bookmark)
+
+        # https://docs.microsoft.com/en-us/windows/win32/api/winevt/nf-winevt-evtcreaterendercontext
+        # https://docs.microsoft.com/en-us/windows/win32/api/winevt/ne-winevt-evt_render_context_flags
+        self._render_context_system = win32evtlog.EvtCreateRenderContext(win32evtlog.EvtRenderContextSystem)
+        self._render_context_data = win32evtlog.EvtCreateRenderContext(win32evtlog.EvtRenderContextUser)
+
+    def create_subscription(self, flags, bookmark):
         # https://docs.microsoft.com/en-us/windows/win32/api/winevt/nf-winevt-evtsubscribe
-        # http://timgolden.me.uk/pywin32-docs/win32evtlog__EvtSubscribe_meth.html
+        # https://mhammond.github.io/pywin32/win32evtlog__EvtSubscribe_meth.html
         self._subscription = win32evtlog.EvtSubscribe(
-            self._path,
+            self.config.path,
             flags,
             SignalEvent=self._event_handle,
             Query=self._query,
@@ -408,10 +402,12 @@ class Win32EventLogCheck(AgentCheck):
             Bookmark=self._bookmark_handle if bookmark else None,
         )
 
-        # https://docs.microsoft.com/en-us/windows/win32/api/winevt/nf-winevt-evtcreaterendercontext
-        # https://docs.microsoft.com/en-us/windows/win32/api/winevt/ne-winevt-evt_render_context_flags
-        self._render_context_system = win32evtlog.EvtCreateRenderContext(win32evtlog.EvtRenderContextSystem)
-        self._render_context_data = win32evtlog.EvtCreateRenderContext(win32evtlog.EvtRenderContextUser)
+    def reset_subscription(self):
+        # Destroy old subscription
+        # Important so that it doesn't affect event or bookmark handle states.
+        self._subscription = None
+        # Create new subscription
+        self.create_subscription(win32evtlog.EvtSubscribeStartAfterBookmark, True)
 
     def get_session_struct(self):
         server = self.instance.get('server', 'localhost')
@@ -427,11 +423,11 @@ class Win32EventLogCheck(AgentCheck):
         password = self.instance.get('password')
 
         # https://docs.microsoft.com/en-us/windows/win32/api/winevt/ns-winevt-evt_rpc_login
-        # http://timgolden.me.uk/pywin32-docs/PyEVT_RPC_LOGIN.html
+        # https://mhammond.github.io/pywin32/PyEVT_RPC_LOGIN.html
         return server, user, domain, password, self.LOGIN_FLAGS[auth_type]
 
     def log_windows_error(self, exc):
-        # http://timgolden.me.uk/pywin32-docs/error.html
+        # https://mhammond.github.io/pywin32/error.html
         #
         # Occasionally the Windows function returns some extra data after a colon which we don't need
         self.log.debug('Error code %d when calling `%s`: %s', exc.winerror, exc.funcname.split(':')[0], exc.strerror)

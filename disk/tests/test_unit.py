@@ -14,7 +14,7 @@ from datadog_checks.disk import Disk
 from datadog_checks.disk.disk import IGNORE_CASE
 
 from .common import DEFAULT_DEVICE_BASE_NAME, DEFAULT_DEVICE_NAME, DEFAULT_FILE_SYSTEM, DEFAULT_MOUNT_POINT
-from .mocks import MockDiskMetrics, MockPart, mock_blkid_output
+from .mocks import MockDiskMetrics, MockPart, mock_blkid_output, mock_lsblk_output
 
 
 def test_default_options():
@@ -45,14 +45,14 @@ def test_bad_config():
 
 
 @pytest.mark.usefixtures('psutil_mocks')
-def test_default(aggregator, gauge_metrics, rate_metrics, count_metrics):
+def test_default(aggregator, gauge_metrics, rate_metrics, count_metrics, dd_run_check):
     """
     Mock psutil and run the check
     """
     for tag_by in ['true', 'false']:
         instance = {'tag_by_filesystem': tag_by, 'tag_by_label': False}
         c = Disk('disk', {}, [instance])
-        c.check(instance)
+        dd_run_check(c)
 
         if tag_by == 'true':
             tags = [
@@ -90,24 +90,24 @@ def test_default(aggregator, gauge_metrics, rate_metrics, count_metrics):
 
 
 @pytest.mark.usefixtures('psutil_mocks')
-def test_rw(aggregator):
+def test_rw(aggregator, dd_run_check):
     """
     Check for 'ro' option in the mounts
     """
     instance = {'service_check_rw': 'yes', 'tag_by_label': False}
     c = Disk('disk', {}, [instance])
-    c.check(instance)
+    dd_run_check(c)
 
     aggregator.assert_service_check('disk.read_write', status=Disk.CRITICAL)
 
 
 @pytest.mark.usefixtures('psutil_mocks')
-def test_use_mount(aggregator, instance_basic_mount, gauge_metrics, rate_metrics, count_metrics):
+def test_use_mount(aggregator, instance_basic_mount, gauge_metrics, rate_metrics, count_metrics, dd_run_check):
     """
     Same as above, using mount to tag
     """
     c = Disk('disk', {}, [instance_basic_mount])
-    c.check(instance_basic_mount)
+    dd_run_check(c)
 
     for name, value in iteritems(gauge_metrics):
         aggregator.assert_metric(
@@ -127,7 +127,7 @@ def test_use_mount(aggregator, instance_basic_mount, gauge_metrics, rate_metrics
 
 
 @pytest.mark.usefixtures('psutil_mocks')
-def test_device_tagging(aggregator, gauge_metrics, rate_metrics, count_metrics):
+def test_device_tagging(aggregator, gauge_metrics, rate_metrics, count_metrics, dd_run_check):
     instance = {
         'use_mount': 'no',
         'device_tag_re': {'{}.*'.format(DEFAULT_DEVICE_NAME[:-1]): 'type:dev,tag:two'},
@@ -140,7 +140,7 @@ def test_device_tagging(aggregator, gauge_metrics, rate_metrics, count_metrics):
         # _get_devices_label is only called on linux, so devices_label is manually filled
         # to make the test run on everything
         c.devices_label = {DEFAULT_DEVICE_NAME: ['label:mylab', 'device_label:mylab']}
-        c.check(instance)
+        dd_run_check(c)
 
     # Assert metrics
     tags = [
@@ -153,20 +153,11 @@ def test_device_tagging(aggregator, gauge_metrics, rate_metrics, count_metrics):
         'device_label:mylab',
     ]
 
-    for name, value in iteritems(gauge_metrics):
-        aggregator.assert_metric(name, value=value, tags=tags)
-
-    for name, value in chain(iteritems(rate_metrics), iteritems(count_metrics)):
+    for name, value in chain(iteritems(gauge_metrics), iteritems(rate_metrics), iteritems(count_metrics)):
         aggregator.assert_metric(
             name,
             value=value,
-            tags=[
-                'device:{}'.format(DEFAULT_DEVICE_NAME),
-                'device_name:{}'.format(DEFAULT_DEVICE_BASE_NAME),
-                'optional:tags1',
-                'label:mylab',
-                'device_label:mylab',
-            ],
+            tags=tags,
         )
 
     aggregator.assert_all_metrics_covered()
@@ -184,15 +175,62 @@ def test_get_devices_label():
         assert labels.get("/dev/mapper/vagrant--vg-root") == ["label:DATA", "device_label:DATA"]
 
 
+def test_lsblk_blkid_cache_incompatible():
+    """
+    Verify that `use_lsblk` and `blkid_cache_file` can't be used at the same time.
+    """
+    with pytest.raises(Exception, match="Only one of 'use_lsblk' and 'blkid_cache_file' can be set at the same time."):
+        Disk('disk', {}, [{'use_lsblk': True, 'blkid_cache_file': 'filepath'}])
+
+
+def test_get_devices_label_options():
+    """
+    Verify that
+       - use_lsblk uses lsblk for labels,
+       - blkid_cache_file not null makes it use the blkid_cache and
+       - by default we use the blkid command.
+    """
+    c_lsblk = Disk('disk', {}, [{'use_lsblk': True}])
+    c_blkid = Disk('disk', {}, [{}])
+    c_blkid_cache = Disk('disk', {}, [{'blkid_cache_file': 'filepath'}])
+
+    prefix_fun = "datadog_checks.disk.disk.Disk._get_devices_label_from_"
+    with mock.patch(prefix_fun + "lsblk", return_value="lsblk"), mock.patch(
+        prefix_fun + "blkid", return_value="blkid"
+    ), mock.patch(prefix_fun + "blkid_cache", return_value="blkid_cache"):
+        assert c_lsblk._get_devices_label() == "lsblk"
+        assert c_blkid._get_devices_label() == "blkid"
+        assert c_blkid_cache._get_devices_label() == "blkid_cache"
+
+
+def test_get_devices_label_from_lsblk():
+    """
+    Test lsblk output parsing.
+    """
+    c = Disk('disk', {}, [{}])
+
+    with mock.patch(
+        "datadog_checks.disk.disk.get_subprocess_output",
+        return_value=mock_lsblk_output(),
+        __name__='get_subprocess_output',
+    ):
+        labels = c._get_devices_label_from_lsblk()
+
+    assert labels == {
+        "/dev/sda1": ["label:MYLABEL", "device_label:MYLABEL"],
+        "/dev/sda15": ["label: WITH SPACES ", "device_label: WITH SPACES "],
+    }
+
+
 @pytest.mark.usefixtures('psutil_mocks')
-def test_min_disk_size(aggregator, gauge_metrics, rate_metrics, count_metrics):
+def test_min_disk_size(aggregator, gauge_metrics, rate_metrics, count_metrics, dd_run_check):
     instance = {'min_disk_size': 0.001}
     c = Disk('disk', {}, [instance])
 
     m = MockDiskMetrics()
     m.total = 0
     with mock.patch('psutil.disk_usage', return_value=m, __name__='disk_usage'):
-        c.check(instance)
+        dd_run_check(c)
 
     for name in gauge_metrics:
         aggregator.assert_metric(name, count=0)
@@ -211,13 +249,18 @@ def test_min_disk_size(aggregator, gauge_metrics, rate_metrics, count_metrics):
 @pytest.mark.skipif(not Platform.is_linux(), reason='disk labels are only available on Linux')
 @pytest.mark.usefixtures('psutil_mocks')
 def test_labels_from_blkid_cache_file(
-    aggregator, instance_blkid_cache_file, gauge_metrics, rate_metrics, count_metrics
+    aggregator,
+    instance_blkid_cache_file,
+    gauge_metrics,
+    rate_metrics,
+    count_metrics,
+    dd_run_check,
 ):
     """
     Verify that the disk labels are set when the blkid_cache_file option is set
     """
     c = Disk('disk', {}, [instance_blkid_cache_file])
-    c.check(instance_blkid_cache_file)
+    dd_run_check(c)
     for metric in chain(gauge_metrics, rate_metrics, count_metrics):
         aggregator.assert_metric(
             metric, tags=['device:/dev/sda1', 'device_name:sda1', 'label:MYLABEL', 'device_label:MYLABEL']
@@ -227,19 +270,24 @@ def test_labels_from_blkid_cache_file(
 @pytest.mark.skipif(not Platform.is_linux(), reason='disk labels are only available on Linux')
 @pytest.mark.usefixtures('psutil_mocks')
 def test_blkid_cache_file_contains_no_labels(
-    aggregator, instance_blkid_cache_file_no_label, gauge_metrics, rate_metrics, count_metrics
+    aggregator,
+    instance_blkid_cache_file_no_label,
+    gauge_metrics,
+    rate_metrics,
+    count_metrics,
+    dd_run_check,
 ):
     """
     Verify that the disk labels are ignored if the cache file doesn't contain any
     """
     c = Disk('disk', {}, [instance_blkid_cache_file_no_label])
-    c.check(instance_blkid_cache_file_no_label)
+    dd_run_check(c)
     for metric in chain(gauge_metrics, rate_metrics, count_metrics):
         aggregator.assert_metric(metric, tags=['device:/dev/sda1', 'device_name:sda1'])
 
 
 @pytest.mark.usefixtures('psutil_mocks')
-def test_timeout_config(aggregator):
+def test_timeout_config(aggregator, dd_run_check):
     """Test timeout configuration value is used on every timeout on the check."""
 
     # Arbitrary value
@@ -254,13 +302,13 @@ def test_timeout_config(aggregator):
     with mock.patch('psutil.disk_partitions', return_value=[MockPart()]), mock.patch(
         'datadog_checks.disk.disk.timeout', return_value=no_timeout
     ) as mock_timeout:
-        c.check(instance)
+        dd_run_check(c)
 
     mock_timeout.assert_called_with(TIMEOUT_VALUE)
 
 
 @pytest.mark.usefixtures('psutil_mocks')
-def test_timeout_warning(aggregator, gauge_metrics, rate_metrics, count_metrics):
+def test_timeout_warning(aggregator, gauge_metrics, rate_metrics, count_metrics, dd_run_check):
     """Test a warning is raised when there is a Timeout exception."""
 
     # Raise exception for "/faulty" mountpoint
@@ -281,7 +329,7 @@ def test_timeout_warning(aggregator, gauge_metrics, rate_metrics, count_metrics)
     with mock.patch('psutil.disk_partitions', return_value=[MockPart(), MockPart(mountpoint="/faulty")]), mock.patch(
         'psutil.disk_usage', return_value=m, __name__='disk_usage'
     ), mock.patch('datadog_checks.disk.disk.timeout', return_value=faulty_timeout):
-        c.check({})
+        dd_run_check(c)
 
     # Check that the warning is called once for the faulty disk
     c.log.warning.assert_called_once()
@@ -297,11 +345,11 @@ def test_timeout_warning(aggregator, gauge_metrics, rate_metrics, count_metrics)
 
 
 @pytest.mark.usefixtures('psutil_mocks')
-def test_include_all_devices(aggregator, gauge_metrics, rate_metrics):
+def test_include_all_devices(aggregator, gauge_metrics, rate_metrics, dd_run_check):
     c = Disk('disk', {}, [{}])
 
     with mock.patch('psutil.disk_partitions', return_value=[]) as m:
-        c.check({})
+        dd_run_check(c)
         # By default, we include all devices
         m.assert_called_with(all=True)
 
@@ -309,5 +357,5 @@ def test_include_all_devices(aggregator, gauge_metrics, rate_metrics):
     c = Disk('disk', {}, [instance])
 
     with mock.patch('psutil.disk_partitions', return_value=[]) as m:
-        c.check({})
+        dd_run_check(c)
         m.assert_called_with(all=False)

@@ -1,0 +1,313 @@
+# HELP felix_active_local_endpoints Number of active endpoints on this host.
+# TYPE felix_active_local_endpoints gauge
+felix_active_local_endpoints 4
+# HELP felix_active_local_policies Number of active policies on this host.
+# TYPE felix_active_local_policies gauge
+felix_active_local_policies 0
+# HELP felix_active_local_selectors Number of active selectors on this host.
+# TYPE felix_active_local_selectors gauge
+felix_active_local_selectors 0
+# HELP felix_active_local_tags Number of active tags on this host.
+# TYPE felix_active_local_tags gauge
+felix_active_local_tags 0
+# HELP felix_bpf_dataplane_endpoints Number of BPF endpoints managed in the dataplane.
+# TYPE felix_bpf_dataplane_endpoints gauge
+felix_bpf_dataplane_endpoints 0
+# HELP felix_bpf_dirty_dataplane_endpoints Number of BPF endpoints managed in the dataplane that are left dirty after a failure.
+# TYPE felix_bpf_dirty_dataplane_endpoints gauge
+felix_bpf_dirty_dataplane_endpoints 0
+# HELP felix_bpf_happy_dataplane_endpoints Number of BPF endpoints that are successfully programmed.
+# TYPE felix_bpf_happy_dataplane_endpoints gauge
+felix_bpf_happy_dataplane_endpoints 0
+# HELP felix_bpf_num_ip_sets Number of BPF IP sets managed in the dataplane.
+# TYPE felix_bpf_num_ip_sets gauge
+felix_bpf_num_ip_sets 0
+# HELP felix_calc_graph_output_events Number of events emitted by the calculation graph.
+# TYPE felix_calc_graph_output_events counter
+felix_calc_graph_output_events 61
+# HELP felix_calc_graph_update_time_seconds Seconds to update calculation graph for each datastore OnUpdate call.
+# TYPE felix_calc_graph_update_time_seconds summary
+felix_calc_graph_update_time_seconds{quantile="0.5"} 6.542e-06
+felix_calc_graph_update_time_seconds{quantile="0.9"} 5.1916e-05
+felix_calc_graph_update_time_seconds{quantile="0.99"} 5.1916e-05
+felix_calc_graph_update_time_seconds_sum 0.014349126000000007
+felix_calc_graph_update_time_seconds_count 346
+# HELP felix_calc_graph_updates_processed Number of datastore updates processed by the calculation graph.
+# TYPE felix_calc_graph_updates_processed counter
+felix_calc_graph_updates_processed{type="BlockKey"} 1
+felix_calc_graph_updates_processed{type="GlobalConfigKey"} 7
+felix_calc_graph_updates_processed{type="HostConfigKey"} 60
+felix_calc_graph_updates_processed{type="HostIPKey"} 60
+felix_calc_graph_updates_processed{type="IPPoolKey"} 1
+felix_calc_graph_updates_processed{type="ProfileLabelsKey"} 49
+felix_calc_graph_updates_processed{type="ProfileRulesKey"} 50
+felix_calc_graph_updates_processed{type="ReadyFlagKey"} 1
+felix_calc_graph_updates_processed{type="ResourceKey"} 113
+felix_calc_graph_updates_processed{type="WorkloadEndpointKey"} 4
+# HELP felix_cluster_num_host_endpoints Total number of host endpoints cluster-wide.
+# TYPE felix_cluster_num_host_endpoints gauge
+felix_cluster_num_host_endpoints 0
+# HELP felix_cluster_num_hosts Total number of calico hosts in the cluster.
+# TYPE felix_cluster_num_hosts gauge
+felix_cluster_num_hosts 1
+# HELP felix_cluster_num_policies Total number of policies cluster-wide.
+# TYPE felix_cluster_num_policies gauge
+felix_cluster_num_policies 0
+# HELP felix_cluster_num_profiles Total number of profiles cluster-wide.
+# TYPE felix_cluster_num_profiles gauge
+felix_cluster_num_profiles 50
+# HELP felix_cluster_num_workload_endpoints Total number of workload endpoints cluster-wide.
+# TYPE felix_cluster_num_workload_endpoints gauge
+felix_cluster_num_workload_endpoints 4
+# HELP felix_exec_time_micros Summary of time taken to fork/exec child processes
+# TYPE felix_exec_time_micros summary
+felix_exec_time_micros{quantile="0.5"} 397.5
+felix_exec_time_micros{quantile="0.9"} 794.583
+felix_exec_time_micros{quantile="0.99"} 973.125
+felix_exec_time_micros_sum 1.0667995780000011e+06
+felix_exec_time_micros_count 1716
+# HELP felix_host Configured Felix hostname (as a label), typically used in grouping/aggregating stats; the label defaults to the hostname of the host but can be overridden by configuration. The value of the gauge is always set to 1.
+# TYPE felix_host gauge
+felix_host{host="kind-control-plane"} 1
+# HELP felix_int_dataplane_addr_msg_batch_size Number of interface address messages processed in each batch. Higher values indicate we're doing more batching to try to keep up.
+# TYPE felix_int_dataplane_addr_msg_batch_size summary
+felix_int_dataplane_addr_msg_batch_size{quantile="0.5"} NaN
+felix_int_dataplane_addr_msg_batch_size{quantile="0.9"} NaN
+felix_int_dataplane_addr_msg_batch_size{quantile="0.99"} NaN
+felix_int_dataplane_addr_msg_batch_size_sum 12
+felix_int_dataplane_addr_msg_batch_size_count 4
+# HELP felix_int_dataplane_apply_time_seconds Time in seconds that it took to apply a dataplane update.
+# TYPE felix_int_dataplane_apply_time_seconds summary
+felix_int_dataplane_apply_time_seconds{quantile="0.5"} 0.002187584
+felix_int_dataplane_apply_time_seconds{quantile="0.9"} 0.0078135
+felix_int_dataplane_apply_time_seconds{quantile="0.99"} 0.020209542
+felix_int_dataplane_apply_time_seconds_sum 9.987720965999968
+felix_int_dataplane_apply_time_seconds_count 2705
+# HELP felix_int_dataplane_failures Number of times dataplane updates failed and will be retried.
+# TYPE felix_int_dataplane_failures counter
+felix_int_dataplane_failures 0
+# HELP felix_int_dataplane_iface_msg_batch_size Number of interface state messages processed in each batch. Higher values indicate we're doing more batching to try to keep up.
+# TYPE felix_int_dataplane_iface_msg_batch_size summary
+felix_int_dataplane_iface_msg_batch_size{quantile="0.5"} NaN
+felix_int_dataplane_iface_msg_batch_size{quantile="0.9"} NaN
+felix_int_dataplane_iface_msg_batch_size{quantile="0.99"} NaN
+felix_int_dataplane_iface_msg_batch_size_sum 7
+felix_int_dataplane_iface_msg_batch_size_count 2
+# HELP felix_int_dataplane_messages Number dataplane messages by type.
+# TYPE felix_int_dataplane_messages counter
+felix_int_dataplane_messages{type="ActiveProfileUpdate"} 5
+felix_int_dataplane_messages{type="ConfigUpdate"} 1
+felix_int_dataplane_messages{type="HostMetadataUpdate"} 1
+felix_int_dataplane_messages{type="IPAMPoolUpdate"} 1
+felix_int_dataplane_messages{type="InSync"} 1
+felix_int_dataplane_messages{type="NamespaceUpdate"} 5
+felix_int_dataplane_messages{type="ServiceAccountUpdate"} 44
+felix_int_dataplane_messages{type="WorkloadEndpointUpdate"} 4
+# HELP felix_int_dataplane_msg_batch_size Number of messages processed in each batch. Higher values indicate we're doing more batching to try to keep up.
+# TYPE felix_int_dataplane_msg_batch_size summary
+felix_int_dataplane_msg_batch_size{quantile="0.5"} NaN
+felix_int_dataplane_msg_batch_size{quantile="0.9"} NaN
+felix_int_dataplane_msg_batch_size{quantile="0.99"} NaN
+felix_int_dataplane_msg_batch_size_sum 62
+felix_int_dataplane_msg_batch_size_count 3
+# HELP felix_ipset_calls Number of ipset commands executed.
+# TYPE felix_ipset_calls counter
+felix_ipset_calls 1
+# HELP felix_ipset_errors Number of ipset command failures.
+# TYPE felix_ipset_errors counter
+felix_ipset_errors 0
+# HELP felix_ipset_lines_executed Number of ipset operations executed.
+# TYPE felix_ipset_lines_executed counter
+felix_ipset_lines_executed 20
+# HELP felix_ipsets_calico Number of active Calico IP sets.
+# TYPE felix_ipsets_calico gauge
+felix_ipsets_calico{ip_version="inet"} 4
+# HELP felix_ipsets_total Total number of active IP sets.
+# TYPE felix_ipsets_total gauge
+felix_ipsets_total 4
+# HELP felix_iptables_chains Number of active iptables chains.
+# TYPE felix_iptables_chains gauge
+felix_iptables_chains{ip_version="4",table="filter"} 32
+felix_iptables_chains{ip_version="4",table="mangle"} 9
+felix_iptables_chains{ip_version="4",table="nat"} 10
+felix_iptables_chains{ip_version="4",table="raw"} 6
+# HELP felix_iptables_lines_executed Number of iptables rule updates executed.
+# TYPE felix_iptables_lines_executed counter
+felix_iptables_lines_executed{ip_version="4",table="filter"} 0
+felix_iptables_lines_executed{ip_version="4",table="mangle"} 0
+felix_iptables_lines_executed{ip_version="4",table="nat"} 0
+felix_iptables_lines_executed{ip_version="4",table="raw"} 0
+# HELP felix_iptables_lock_acquire_secs Time in seconds that it took to acquire the iptables lock(s).
+# TYPE felix_iptables_lock_acquire_secs summary
+felix_iptables_lock_acquire_secs{quantile="0.5"} NaN
+felix_iptables_lock_acquire_secs{quantile="0.9"} NaN
+felix_iptables_lock_acquire_secs{quantile="0.99"} NaN
+felix_iptables_lock_acquire_secs_sum 0
+felix_iptables_lock_acquire_secs_count 0
+# HELP felix_iptables_lock_retries Number of times the iptables lock was held by someone else and we had to retry.
+# TYPE felix_iptables_lock_retries counter
+felix_iptables_lock_retries{version="1.4"} 0
+felix_iptables_lock_retries{version="1.6"} 0
+# HELP felix_iptables_restore_calls Number of iptables-restore calls.
+# TYPE felix_iptables_restore_calls counter
+felix_iptables_restore_calls 0
+# HELP felix_iptables_restore_errors Number of iptables-restore errors.
+# TYPE felix_iptables_restore_errors counter
+felix_iptables_restore_errors 0
+# HELP felix_iptables_rules Number of active iptables rules.
+# TYPE felix_iptables_rules gauge
+felix_iptables_rules{ip_version="4",table="filter"} 134
+felix_iptables_rules{ip_version="4",table="mangle"} 32
+felix_iptables_rules{ip_version="4",table="nat"} 9
+felix_iptables_rules{ip_version="4",table="raw"} 50
+# HELP felix_iptables_save_calls Number of iptables-save calls.
+# TYPE felix_iptables_save_calls counter
+felix_iptables_save_calls 836
+# HELP felix_iptables_save_errors Number of iptables-save errors.
+# TYPE felix_iptables_save_errors counter
+felix_iptables_save_errors 0
+# HELP felix_log_errors Number of errors encountered while logging.
+# TYPE felix_log_errors counter
+felix_log_errors 6
+# HELP felix_logs_dropped Number of logs dropped because the output stream was blocked.
+# TYPE felix_logs_dropped counter
+felix_logs_dropped 0
+# HELP felix_resync_state Current datastore state.
+# TYPE felix_resync_state gauge
+felix_resync_state 3
+# HELP felix_resyncs_started Current datastore state.
+# TYPE felix_resyncs_started counter
+felix_resyncs_started 1
+# HELP felix_route_table_list_seconds Time taken to list all the interfaces during a resync.
+# TYPE felix_route_table_list_seconds summary
+felix_route_table_list_seconds{quantile="0.5"} 0.000391208
+felix_route_table_list_seconds{quantile="0.9"} 0.000520042
+felix_route_table_list_seconds{quantile="0.99"} 0.000532041
+felix_route_table_list_seconds_sum 0.2550602669999999
+felix_route_table_list_seconds_count 384
+# HELP felix_route_table_per_iface_sync_seconds Time taken to sync each interface
+# TYPE felix_route_table_per_iface_sync_seconds summary
+felix_route_table_per_iface_sync_seconds{quantile="0.5"} 0.000116667
+felix_route_table_per_iface_sync_seconds{quantile="0.9"} 0.00038125
+felix_route_table_per_iface_sync_seconds{quantile="0.99"} 0.00038125
+felix_route_table_per_iface_sync_seconds_sum 0.045474295
+felix_route_table_per_iface_sync_seconds_count 196
+# HELP go_gc_duration_seconds A summary of the pause duration of garbage collection cycles.
+# TYPE go_gc_duration_seconds summary
+go_gc_duration_seconds{quantile="0"} 4.0834e-05
+go_gc_duration_seconds{quantile="0.25"} 0.000565584
+go_gc_duration_seconds{quantile="0.5"} 0.001259458
+go_gc_duration_seconds{quantile="0.75"} 0.001696625
+go_gc_duration_seconds{quantile="1"} 0.007262666
+go_gc_duration_seconds_sum 0.479902248
+go_gc_duration_seconds_count 405
+# HELP go_goroutines Number of goroutines that currently exist.
+# TYPE go_goroutines gauge
+go_goroutines 97
+# HELP go_info Information about the Go environment.
+# TYPE go_info gauge
+go_info{version="go1.15.2"} 1
+# HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
+# TYPE go_memstats_alloc_bytes gauge
+go_memstats_alloc_bytes 9.425744e+06
+# HELP go_memstats_alloc_bytes_total Total number of bytes allocated, even if freed.
+# TYPE go_memstats_alloc_bytes_total counter
+go_memstats_alloc_bytes_total 4.23975952e+08
+# HELP go_memstats_buck_hash_sys_bytes Number of bytes used by the profiling bucket hash table.
+# TYPE go_memstats_buck_hash_sys_bytes gauge
+go_memstats_buck_hash_sys_bytes 1.543737e+06
+# HELP go_memstats_frees_total Total number of frees.
+# TYPE go_memstats_frees_total counter
+go_memstats_frees_total 3.807653e+06
+# HELP go_memstats_gc_cpu_fraction The fraction of this program's available CPU time used by the GC since the program started.
+# TYPE go_memstats_gc_cpu_fraction gauge
+go_memstats_gc_cpu_fraction 6.425064504685546e-05
+# HELP go_memstats_gc_sys_bytes Number of bytes used for garbage collection system metadata.
+# TYPE go_memstats_gc_sys_bytes gauge
+go_memstats_gc_sys_bytes 5.75804e+06
+# HELP go_memstats_heap_alloc_bytes Number of heap bytes allocated and still in use.
+# TYPE go_memstats_heap_alloc_bytes gauge
+go_memstats_heap_alloc_bytes 9.425744e+06
+# HELP go_memstats_heap_idle_bytes Number of heap bytes waiting to be used.
+# TYPE go_memstats_heap_idle_bytes gauge
+go_memstats_heap_idle_bytes 5.210112e+07
+# HELP go_memstats_heap_inuse_bytes Number of heap bytes that are in use.
+# TYPE go_memstats_heap_inuse_bytes gauge
+go_memstats_heap_inuse_bytes 1.2812288e+07
+# HELP go_memstats_heap_objects Number of allocated objects.
+# TYPE go_memstats_heap_objects gauge
+go_memstats_heap_objects 66736
+# HELP go_memstats_heap_released_bytes Number of heap bytes released to OS.
+# TYPE go_memstats_heap_released_bytes gauge
+go_memstats_heap_released_bytes 5.1126272e+07
+# HELP go_memstats_heap_sys_bytes Number of heap bytes obtained from system.
+# TYPE go_memstats_heap_sys_bytes gauge
+go_memstats_heap_sys_bytes 6.4913408e+07
+# HELP go_memstats_last_gc_time_seconds Number of seconds since 1970 of last garbage collection.
+# TYPE go_memstats_last_gc_time_seconds gauge
+go_memstats_last_gc_time_seconds 1.6319945499258482e+09
+# HELP go_memstats_lookups_total Total number of pointer lookups.
+# TYPE go_memstats_lookups_total counter
+go_memstats_lookups_total 0
+# HELP go_memstats_mallocs_total Total number of mallocs.
+# TYPE go_memstats_mallocs_total counter
+go_memstats_mallocs_total 3.874389e+06
+# HELP go_memstats_mcache_inuse_bytes Number of bytes in use by mcache structures.
+# TYPE go_memstats_mcache_inuse_bytes gauge
+go_memstats_mcache_inuse_bytes 6944
+# HELP go_memstats_mcache_sys_bytes Number of bytes used for mcache structures obtained from system.
+# TYPE go_memstats_mcache_sys_bytes gauge
+go_memstats_mcache_sys_bytes 16384
+# HELP go_memstats_mspan_inuse_bytes Number of bytes in use by mspan structures.
+# TYPE go_memstats_mspan_inuse_bytes gauge
+go_memstats_mspan_inuse_bytes 218008
+# HELP go_memstats_mspan_sys_bytes Number of bytes used for mspan structures obtained from system.
+# TYPE go_memstats_mspan_sys_bytes gauge
+go_memstats_mspan_sys_bytes 229376
+# HELP go_memstats_next_gc_bytes Number of heap bytes when next garbage collection will take place.
+# TYPE go_memstats_next_gc_bytes gauge
+go_memstats_next_gc_bytes 1.0461782e+07
+# HELP go_memstats_other_sys_bytes Number of bytes used for other system allocations.
+# TYPE go_memstats_other_sys_bytes gauge
+go_memstats_other_sys_bytes 924015
+# HELP go_memstats_stack_inuse_bytes Number of bytes in use by the stack allocator.
+# TYPE go_memstats_stack_inuse_bytes gauge
+go_memstats_stack_inuse_bytes 2.195456e+06
+# HELP go_memstats_stack_sys_bytes Number of bytes obtained from system for stack allocator.
+# TYPE go_memstats_stack_sys_bytes gauge
+go_memstats_stack_sys_bytes 2.195456e+06
+# HELP go_memstats_sys_bytes Number of bytes obtained from system.
+# TYPE go_memstats_sys_bytes gauge
+go_memstats_sys_bytes 7.5580416e+07
+# HELP go_threads Number of OS threads created.
+# TYPE go_threads gauge
+go_threads 16
+# HELP process_cpu_seconds_total Total user and system CPU time spent in seconds.
+# TYPE process_cpu_seconds_total counter
+process_cpu_seconds_total 353.57
+# HELP process_max_fds Maximum number of open file descriptors.
+# TYPE process_max_fds gauge
+process_max_fds 1.048576e+06
+# HELP process_open_fds Number of open file descriptors.
+# TYPE process_open_fds gauge
+process_open_fds 25
+# HELP process_resident_memory_bytes Resident memory size in bytes.
+# TYPE process_resident_memory_bytes gauge
+process_resident_memory_bytes 5.9363328e+07
+# HELP process_start_time_seconds Start time of the process since unix epoch in seconds.
+# TYPE process_start_time_seconds gauge
+process_start_time_seconds 1.63197657029e+09
+# HELP process_virtual_memory_bytes Virtual memory size in bytes.
+# TYPE process_virtual_memory_bytes gauge
+process_virtual_memory_bytes 7.81041664e+08
+# HELP process_virtual_memory_max_bytes Maximum amount of virtual memory available in bytes.
+# TYPE process_virtual_memory_max_bytes gauge
+process_virtual_memory_max_bytes -1
+# HELP promhttp_metric_handler_requests_in_flight Current number of scrapes being served.
+# TYPE promhttp_metric_handler_requests_in_flight gauge
+promhttp_metric_handler_requests_in_flight 1
+# HELP promhttp_metric_handler_requests_total Total number of scrapes by HTTP status code.
+# TYPE promhttp_metric_handler_requests_total counter
+promhttp_metric_handler_requests_total{code="200"} 3
+promhttp_metric_handler_requests_total{code="500"} 0
+promhttp_metric_handler_requests_total{code="503"} 0

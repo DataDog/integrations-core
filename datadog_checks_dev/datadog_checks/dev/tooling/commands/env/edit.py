@@ -3,22 +3,20 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import click
 
-from datadog_checks.dev.tooling.e2e.config import locate_config_file
-
-from ....fs import file_exists
+from ...e2e.config import locate_config_file
 from ...testing import complete_active_checks, complete_configured_envs
-from ...utils import get_tox_file
+from ...utils import is_testable_check
 from ..console import CONTEXT_SETTINGS, abort, echo_failure
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Edit config file using default editor')
-@click.argument('check', autocompletion=complete_active_checks)
-@click.argument('env', autocompletion=complete_configured_envs)
+@click.argument('check', shell_complete=complete_active_checks)
+@click.argument('env', shell_complete=complete_configured_envs)
 @click.option('--editor', '-e', help='Editor to use')
 @click.pass_context
 def edit(ctx, check, env, editor):
     """Start an environment."""
-    if not file_exists(get_tox_file(check)):
+    if not is_testable_check(check):
         abort(f'`{check}` is not a testable check.')
 
     config_file = locate_config_file(check, env)

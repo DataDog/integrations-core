@@ -37,6 +37,21 @@ def get_requirements(fpath, exclude=None, only=None):
         return requirements
 
 
+def parse_pyproject_array(name):
+    import os
+    import re
+    from ast import literal_eval
+
+    pattern = r'^{} = (\[.+?\])$'.format(name)
+
+    with open(os.path.join(HERE, 'pyproject.toml'), 'r', encoding='utf-8') as f:
+        # Windows \r\n prevents match
+        contents = '\n'.join(line.rstrip() for line in f.readlines())
+
+    array = re.search(pattern, contents, flags=re.MULTILINE | re.DOTALL).group(1)
+    return literal_eval(array)
+
+
 setup(
     # Version should always match one from an agent release
     version=ABOUT["__version__"],
@@ -61,32 +76,10 @@ setup(
     packages=['datadog_checks'],
     include_package_data=True,
     extras_require={
-        'deps': get_requirements(
-            'requirements.in',
-            exclude=[
-                'kubernetes',
-                'mmh3',
-                'orjson',
-                'pysocks',
-                'requests-kerberos',
-                'requests_ntlm',
-                'win-inet-pton',
-                'pyjwt',
-            ],
-        ),
-        'db': get_requirements('requirements.in', only=['mmh3']),
-        'http': get_requirements(
-            'requirements.in',
-            only=[
-                'pysocks',
-                'requests-kerberos',
-                'requests_ntlm',
-                'requests-unixsocket',
-                'win-inet-pton',
-                'pyjwt',
-            ],
-        ),
-        'json': get_requirements('requirements.in', only=['orjson']),
-        'kube': get_requirements('requirements.in', only=['kubernetes']),
+        'deps': parse_pyproject_array('deps'),
+        'db': parse_pyproject_array('db'),
+        'http': parse_pyproject_array('http'),
+        'json': parse_pyproject_array('json'),
+        'kube': parse_pyproject_array('kube'),
     },
 )

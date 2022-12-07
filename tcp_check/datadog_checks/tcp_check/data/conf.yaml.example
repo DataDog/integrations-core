@@ -9,7 +9,7 @@ init_config:
     #
     # service: <SERVICE>
 
-## Every instance is scheduled independent of the others.
+## Every instance is scheduled independently of the others.
 #
 instances:
 
@@ -40,6 +40,24 @@ instances:
     #
     # collect_response_time: false
 
+    ## @param ip_cache_duration - number - optional
+    ## Time in seconds to cache the IP address of the given host. If duration is not set,
+    ## the cache will expire only upon error.
+    ##
+    ## Set ip_cache_duration to `0` if the check should resolve the IP address on every check run.
+    #
+    # ip_cache_duration: 120
+
+    ## @param multiple_ips - boolean - optional - default: false
+    ## Enable to run the check against all IPs attached to `host`.
+    #
+    # multiple_ips: false
+
+    ## @param ipv4_only - boolean - optional - default: false
+    ## Enable to run the check against only IPv4-formatted addresses on every check run.
+    #
+    # ipv4_only: false
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
@@ -68,3 +86,14 @@ instances:
     ## This is useful for cluster-level checks.
     #
     # empty_default_hostname: false
+
+    ## @param metric_patterns - mapping - optional
+    ## A mapping of metrics to include or exclude, with each entry being a regular expression.
+    ##
+    ## Metrics defined in `exclude` will take precedence in case of overlap.
+    #
+    # metric_patterns:
+    #   include:
+    #   - <INCLUDE_REGEX>
+    #   exclude:
+    #   - <EXCLUDE_REGEX>

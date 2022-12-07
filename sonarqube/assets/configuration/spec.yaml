@@ -6,93 +6,112 @@ files:
     options:
     - template: init_config/jmx
       overrides:
+        is_jmx.required: false
         is_jmx.value.example: false
     - template: init_config/http
   - template: instances
+    multiple_instances_defined: true
     options:
-    - name: web_endpoint
-      description: |
-        The SonarQube web endpoint which should expose its API at `/api`. For example:
+    - name: web_api
+      description: Web API instance example
+      options:
+      - name: web_endpoint
+        description: |
+          The SonarQube web endpoint with an exposed API at `/api`. For example:
 
-          web_endpoint: http://<WEB_ENDPOINT>:<PORT>
+            web_endpoint: http://<WEB_ENDPOINT>:<PORT>
 
-        NOTE: This only takes effect when `is_jmx` is set to `false` and is required for all
-        API metrics.
-      value:
-        type: string
-    - name: default_tag
-      description: |
-        The tag name to use for `components` by default.
-
-        NOTE: This only takes effect when `is_jmx` is set to `false`.
-      value:
-        type: string
-        example: component
-    - name: default_include
-      description: |
-        A list of regular expressions that decides what metrics to collect by default. For brevity,
-        you may elide the `sonarqube.` prefix and `.` (dot) characters are treated literally.
-
-        By default, all available metrics are collected.
-
-        NOTE: This only takes effect when `is_jmx` is set to `false`.
-      value:
-        type: array
-        items:
+          Note: This only takes effect when `is_jmx` is set to `false` and is required for all
+          API metrics.
+        value:
           type: string
-    - name: default_exclude
-      description: |
-        A list of regular expressions that decides what metrics to exclude by default. For brevity,
-        you may elide the `sonarqube.` prefix and `.` (dot) characters are treated literally.
+      - name: default_tag
+        description: |
+          The tag name to use for `components` by default.
 
-        By default, no metrics are excluded.
-
-        NOTE: This only takes effect when `is_jmx` is set to `false`.
-      value:
-        type: array
-        items:
+          Note: This only takes effect when `is_jmx` is set to `false`.
+        value:
           type: string
-    - name: components
-      description: |
-        The components for which metrics should be collected. Each object may override the default
-        options. For example, the following will gather all default metrics for "some-project",
-        and only what is included/excluded for "another-project":
-          
-          components:
-            some-project:
-            another-project:
-              tag: project-2
-              include:
-                - issues.
-                - maintainability.
-                - security.
-              exclude:
-                - issues.(false_positive_issues|reopened_issues)
+          example: component
+      - name: default_include
+        description: |
+          A list of regular expressions used to collect metrics by default. For brevity,
+          you may alter the `sonarqube.` prefix and `.` (dot) characters are treated literally.
 
-        NOTE: This is required for all project checks, regardless of `is_jmx` being set to `true` 
-        or `false.
-      value:
-        type: object
-        properties:
-        - name: tag
-          type: string
-        - name: include
+          By default, all available metrics are collected.
+
+          Note: This only takes effect when `is_jmx` is set to `false`.
+        value:
           type: array
           items:
             type: string
-        - name: exclude
+      - name: default_exclude
+        description: |
+          A list of regular expressions used to collect metrics by default. For brevity,
+          you may alter the `sonarqube.` prefix and `.` (dot) characters are treated literally.
+
+          By default, no metrics are excluded.
+
+          Note: This only takes effect when `is_jmx` is set to `false`.
+        value:
           type: array
           items:
             type: string
-    - template: instances/jmx
-      overrides:
-        user.description: |
-          User name to use when connecting to JMX (or HTTP if `is_jmx = false`).
-        password.description: |
-          Password to use when connecting to JMX (or HTTP if `is_jmx = false`).
-    - template: instances/http
-      overrides:
-        password.hidden: true
+      - name: components
+        description: |
+          The components for which metrics should be collected. Each object may override the default
+          options. The following example gathers all default metrics for "some-project",
+          and only what is included/excluded for "another-project":
+
+            components:
+              some-project:
+              another-project:
+                tag: project-2
+                include:
+                  - issues.
+                  - maintainability.
+                  - security.
+                exclude:
+                  - issues.(false_positive_issues|reopened_issues)
+
+          Note: This is required for all project checks, whether `is_jmx` is set to `true`
+          or `false.
+        value:
+          type: object
+          properties:
+          - name: tag
+            type: string
+          - name: include
+            type: array
+            items:
+              type: string
+          - name: exclude
+            type: array
+            items:
+              type: string
+      - template: instances/http
+        overrides:
+          password.hidden: true
+    - name: jmx
+      description: Web JMX instance example
+      options:
+      - template: instances/jmx
+        overrides:
+          host.required: false
+          port.required: false
+          is_jmx.hidden: false
+          is_jmx.display_priority: 1
+          is_jmx.value.default: false
+          is_jmx.value.example: true
+          is_jmx.description: |
+            Whether or not this instance is a configuration for a JMX integration.
+            If `is_jmx` is set to true at the init_config level, this flag is ignored.
+
+            Note: Setting `is_jmx` to true disables some configuration options.
+          user.description: |
+            The user name for connecting to JMX (or HTTP if `is_jmx = false`).
+          password.description: |
+            The password for connecting to JMX (or HTTP if `is_jmx = false`).
   - template: logs
     example:
     - type: file

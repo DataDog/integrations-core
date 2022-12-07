@@ -35,7 +35,7 @@ init_config:
     #
     # service: <SERVICE>
 
-## Every instance is scheduled independent of the others.
+## Every instance is scheduled independently of the others.
 #
 instances:
 
@@ -49,7 +49,7 @@ instances:
     ## all the processes that match the string exactly by default. Change this behavior with the
     ## parameter `exact_match: false`.
     ##
-    ## Note: One and only one of search_string, pid or pid_file must be specified per instance.
+    ## Note: Exactly one of search_string, pid or pid_file must be specified per instance.
     #
     # search_string:
     #   - <SEARCH_STRING_1>
@@ -58,7 +58,7 @@ instances:
     ## @param pid - integer - optional
     ## A Process id to match.
     ##
-    ## Note: One and only one of search_string, pid or pid_file must be specified per instance.
+    ## Note: Exactly one of search_string, pid or pid_file must be specified per instance.
     #
     # pid: <PID>
 
@@ -67,7 +67,7 @@ instances:
     ## Notes:
     ##   * agent v6.11+ on windows runs as an unprivileged `ddagentuser`, so make sure to grant it read access to
     ##     the PID files you specify in this option.
-    ##   * One and only one of search_string, pid or pid_file must be specified per instance.
+    ##   * Exactly one of search_string, pid or pid_file must be specified per instance.
     #
     # pid_file: <PID_FILE>
 
@@ -76,7 +76,7 @@ instances:
     ## If you want to match on a substring within proc.cmdline(), set this to false
     ## Regex is also supported when this flag is set to `false`.
     ##
-    ## Note: agent v6.11+ on windows runs as an unprivileged `ddagentuser` that does not have acces to the full
+    ## Note: agent v6.11+ on windows runs as an unprivileged `ddagentuser` that does not have access to the full
     ## command line of processes running under a different user. This option cannot be used in such cases.
     ## https://docs.datadoghq.com/integrations/process/#configuration
     #
@@ -152,3 +152,14 @@ instances:
     ## This is useful for cluster-level checks.
     #
     # empty_default_hostname: false
+
+    ## @param metric_patterns - mapping - optional
+    ## A mapping of metrics to include or exclude, with each entry being a regular expression.
+    ##
+    ## Metrics defined in `exclude` will take precedence in case of overlap.
+    #
+    # metric_patterns:
+    #   include:
+    #   - <INCLUDE_REGEX>
+    #   exclude:
+    #   - <EXCLUDE_REGEX>

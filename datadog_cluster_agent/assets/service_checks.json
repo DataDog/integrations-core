@@ -1,0 +1,17 @@
+[
+  {
+    "agent_version": "6.31.0",
+    "integration": "Datadog Cluster Agent",
+    "check": "datadog.cluster_agent.prometheus.health",
+    "statuses": [
+      "ok",
+      "critical"
+    ],
+    "groups": [
+      "host",
+      "endpoint"
+    ],
+    "name": "Datadog Cluster Agent prometheus health",
+    "description": "Returns `CRITICAL` if the check cannot access the metrics endpoint. Returns `OK` otherwise."
+  }
+]

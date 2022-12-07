@@ -1,19 +1,30 @@
+## @param ad_identifiers - list of strings - required
+## A list of container identifiers that are used by Autodiscovery to identify
+## which container the check should be run against. For more information, see:
+## https://docs.datadoghq.com/agent/guide/ad_identifiers/
+#
 ad_identifiers:
   - kubedns-amd64
   - k8s-dns-kube-dns-amd64
+  - k8s-dns-kube-dns
 
+## All options defined here are available to all instances.
+#
 init_config:
 
+## Every instance is scheduled independently of the others.
+#
 instances:
+
     ## @param prometheus_endpoint - string - required
     ## The URL where your application metrics are exposed by Prometheus.
     #
-  - prometheus_endpoint: "http://%%host%%:10055/metrics"
+  - prometheus_endpoint: http://%%host%%:10055/metrics
 
-    ## @param tags - list of key:value element - optional
-    ## List of tags to attach to every metric, event and service check emitted by this integration.
+    ## @param tags - list of strings - optional
+    ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
-    ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+    ## Learn more about tagging at https://docs.datadoghq.com/tagging
     #
     tags:
-      - "dns-pod:%%host%%"
+      - dns-pod:%%host%%

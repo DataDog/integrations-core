@@ -9,6 +9,7 @@ import requests
 from six import iteritems
 
 from datadog_checks.base import ConfigurationError
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.elastic import ESCheck
 from datadog_checks.elastic.config import from_instance
 from datadog_checks.elastic.metrics import (
@@ -23,7 +24,7 @@ from datadog_checks.elastic.metrics import (
     stats_for_version,
 )
 
-from .common import CLUSTER_TAG, JVM_RATES, PASSWORD, URL, USER
+from .common import CLUSTER_TAG, IS_OPENSEARCH, JVM_RATES, PASSWORD, URL, USER
 
 log = logging.getLogger('test_elastic')
 
@@ -84,11 +85,183 @@ def test__get_urls(instance, url_fix):
 
 
 @pytest.mark.integration
+def test_custom_queries_valid_metrics(dd_environment, dd_run_check, instance, aggregator):
+    custom_queries = [
+        {
+            'endpoint': '/_nodes',
+            'data_path': '_nodes',
+            'columns': [
+                {
+                    'value_path': 'total',
+                    'name': 'elasticsearch.custom.metric',
+                },
+                {'value_path': 'total', 'name': 'elasticsearch.custom.metric2', 'type': 'monotonic_count'},
+            ],
+        },
+    ]
+
+    instance = deepcopy(instance)
+    instance['custom_queries'] = custom_queries
+    check = ESCheck('elastic', {}, instances=[instance])
+    dd_run_check(check)
+
+    aggregator.assert_metric('elasticsearch.custom.metric2', metric_type=aggregator.MONOTONIC_COUNT)
+    aggregator.assert_metric('elasticsearch.custom.metric', metric_type=aggregator.GAUGE)
+
+
+@pytest.mark.integration
+def test_custom_queries_one_invalid(dd_environment, dd_run_check, instance, aggregator):
+    custom_queries = [
+        {
+            # Wrong endpoint
+            'endpoint': '/_nodes2',
+            'data_path': '_nodes',
+            'columns': [
+                {
+                    'value_path': 'total',
+                    'name': 'elasticsearch.custom.metric2',
+                },
+            ],
+        },
+        {
+            # Good endpoint
+            'endpoint': '/_nodes',
+            'data_path': '_nodes',
+            'columns': [
+                {
+                    'value_path': 'total',
+                    'name': 'elasticsearch.custom.metric',
+                },
+            ],
+        },
+    ]
+
+    instance = deepcopy(instance)
+    instance['custom_queries'] = custom_queries
+    check = ESCheck('elastic', {}, instances=[instance])
+    dd_run_check(check)
+
+    aggregator.assert_metric('elasticsearch.custom.metric', metric_type=aggregator.GAUGE)
+
+
+@pytest.mark.integration
+def test_custom_queries_with_payload(dd_environment, dd_run_check, instance, aggregator, cluster_tags):
+    custom_queries = [
+        {
+            'endpoint': '/_search',
+            'data_path': 'hits.total',
+            'payload': {"query": {"match": {"phrase": {"query": ""}}}},
+            'columns': [
+                {
+                    'value_path': 'value',
+                    'name': 'elasticsearch.custom.metric',
+                },
+                {'value_path': 'relation', 'name': 'dynamic_tag', 'type': 'tag'},
+            ],
+        },
+    ]
+
+    instance = deepcopy(instance)
+    instance['custom_queries'] = custom_queries
+    check = ESCheck('elastic', {}, instances=[instance])
+    dd_run_check(check)
+    tags = cluster_tags + ['dynamic_tag:eq']
+
+    aggregator.assert_metric('elasticsearch.custom.metric', metric_type=aggregator.GAUGE, tags=tags)
+
+
+@pytest.mark.integration
+def test_custom_queries_valid_tags(dd_environment, dd_run_check, instance, aggregator, cluster_tags):
+    custom_queries = [
+        {
+            'endpoint': '/_nodes',
+            'data_path': '_nodes',
+            'columns': [
+                {
+                    'value_path': 'total',
+                    'name': 'elasticsearch.custom.metric',
+                },
+                {'value_path': 'total', 'name': 'dynamic_tag', 'type': 'tag'},
+            ],
+            'tags': ['custom_tag:1'],
+        },
+    ]
+
+    instance = deepcopy(instance)
+    instance['custom_queries'] = custom_queries
+    check = ESCheck('elastic', {}, instances=[instance])
+    dd_run_check(check)
+    tags = cluster_tags + ['custom_tag:1'] + ['dynamic_tag:1']
+
+    aggregator.assert_metric('elasticsearch.custom.metric', metric_type=aggregator.GAUGE, tags=tags)
+
+
+@pytest.mark.integration
+def test_custom_queries_non_existent_metrics(caplog, dd_environment, dd_run_check, instance, aggregator):
+    custom_queries = [
+        {
+            'endpoint': '/_nodes',
+            'data_path': '_nodes',
+            'columns': [
+                {
+                    'value_path': 'totals',  # nonexistent elasticsearch metric
+                    'name': 'elasticsearch.custom.metric',
+                },
+            ],
+            'tags': ['custom_tag:1'],
+        },
+    ]
+    instance = deepcopy(instance)
+    instance['custom_queries'] = custom_queries
+    check = ESCheck('elastic', {}, instances=[instance])
+    caplog.clear()
+
+    with caplog.at_level(logging.DEBUG):
+        dd_run_check(check)
+
+    aggregator.assert_metric('elasticsearch.custom.metric', count=0)
+    assert 'Metric not found: _nodes.totals -> elasticsearch.custom.metric' in caplog.text
+
+
+@pytest.mark.integration
+def test_custom_queries_non_existent_tags(caplog, dd_environment, dd_run_check, instance, aggregator, cluster_tags):
+    custom_queries = [
+        {
+            'endpoint': '/_nodes',
+            'data_path': '_nodes',
+            'columns': [
+                {
+                    'value_path': 'total',
+                    'name': 'elasticsearch.custom.metric',
+                },
+                {
+                    'value_path': 'totals',  # nonexistent elasticsearch metric as tag
+                    'name': 'nonexistent_tag',
+                    'type': 'tag',
+                },
+            ],
+        },
+    ]
+    instance = deepcopy(instance)
+    instance['custom_queries'] = custom_queries
+    check = ESCheck('elastic', {}, instances=[instance])
+    caplog.clear()
+
+    with caplog.at_level(logging.DEBUG):
+        dd_run_check(check)
+
+    aggregator.assert_metric('elasticsearch.custom.metric', count=1, tags=cluster_tags)
+
+    assert 'Dynamic tag is null: _nodes.total -> nonexistent_tag' in caplog.text
+
+
+@pytest.mark.integration
 def test_check(dd_environment, elastic_check, instance, aggregator, cluster_tags, node_tags):
     elastic_check.check(None)
     _test_check(elastic_check, instance, aggregator, cluster_tags, node_tags)
 
 
+@pytest.mark.skipif(IS_OPENSEARCH, reason='Test unavailable for OpenSearch')
 @pytest.mark.integration
 def test_check_slm_stats(dd_environment, instance, aggregator, cluster_tags, node_tags, slm_tags):
     slm_instance = deepcopy(instance)
@@ -173,7 +346,7 @@ def test_node_name_as_host(dd_environment, instance_normalize_hostname, aggregat
 
 @pytest.mark.integration
 def test_pshard_metrics(dd_environment, aggregator):
-    instance = {'url': URL, 'pshard_stats': True, 'username': USER, 'password': PASSWORD}
+    instance = {'url': URL, 'pshard_stats': True, 'username': USER, 'password': PASSWORD, 'tls_verify': False}
     elastic_check = ESCheck('elastic', {}, instances=[instance])
     es_version = elastic_check._get_es_version()
 
@@ -191,6 +364,47 @@ def test_pshard_metrics(dd_environment, aggregator):
 
 
 @pytest.mark.integration
+def test_detailed_index_stats(dd_environment, aggregator):
+    instance = {
+        "url": URL,
+        "cluster_stats": True,
+        "pshard_stats": True,
+        "detailed_index_stats": True,
+        "tls_verify": False,
+    }
+    elastic_check = ESCheck('elastic', {}, instances=[instance])
+    es_version = elastic_check._get_es_version()
+    elastic_check.check(None)
+    pshard_stats_metrics = pshard_stats_for_version(es_version)
+    for m_name, desc in iteritems(pshard_stats_metrics):
+        if desc[0] == 'gauge' and desc[1].startswith('_all.'):
+            aggregator.assert_metric(m_name)
+
+    aggregator.assert_metric_has_tag('elasticsearch.primaries.docs.count', tag='index_name:_all')
+    aggregator.assert_metric_has_tag('elasticsearch.primaries.docs.count', tag='index_name:testindex')
+    aggregator.assert_metric_has_tag('elasticsearch.primaries.docs.count', tag='index_name:.testindex')
+    aggregator.assert_metrics_using_metadata(
+        get_metadata_metrics(),
+        check_metric_type=False,
+        exclude=[
+            "system.cpu.idle",
+            "system.load.1",
+            "system.load.15",
+            "system.load.5",
+            "system.mem.free",
+            "system.mem.total",
+            "system.mem.usable",
+            "system.mem.used",
+            "system.net.bytes_rcvd",
+            "system.net.bytes_sent",
+            "system.swap.free",
+            "system.swap.total",
+            "system.swap.used",
+        ],
+    )
+
+
+@pytest.mark.integration
 def test_index_metrics(dd_environment, aggregator, instance, cluster_tags):
     instance['index_stats'] = True
     elastic_check = ESCheck('elastic', {}, instances=[instance])
@@ -201,6 +415,7 @@ def test_index_metrics(dd_environment, aggregator, instance, cluster_tags):
     elastic_check.check(None)
     for m_name in index_stats_for_version(es_version):
         aggregator.assert_metric(m_name, tags=cluster_tags + ['index_name:testindex'])
+        aggregator.assert_metric(m_name, tags=cluster_tags + ['index_name:.testindex'])
 
 
 @pytest.mark.integration
@@ -216,12 +431,12 @@ def test_cat_allocation_metrics(dd_environment, aggregator, instance, cluster_ta
 @pytest.mark.integration
 def test_health_event(dd_environment, aggregator):
     dummy_tags = ['elastique:recherche']
-    instance = {'url': URL, 'username': USER, 'password': PASSWORD, 'tags': dummy_tags}
+    instance = {'url': URL, 'username': USER, 'password': PASSWORD, 'tags': dummy_tags, 'tls_verify': False}
     elastic_check = ESCheck('elastic', {}, instances=[instance])
     es_version = elastic_check._get_es_version()
 
     # Should be yellow at first
-    requests.put(URL + '/_settings', data='{"index": {"number_of_replicas": 100}')
+    requests.put(URL + '/_settings', data='{"index": {"number_of_replicas": 100}', verify=False)
 
     elastic_check.check(None)
 

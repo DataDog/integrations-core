@@ -7,8 +7,7 @@ files:
           - template: init_config/db
             overrides:
               global_custom_queries.value.example:
-                - metric_prefix: mysql
-                  query: <QUERY>
+                - query: <QUERY>
                   columns: <COLUMNS>
                   tags: <TAGS>
           - template: init_config/default
@@ -26,7 +25,7 @@ files:
               example: localhost
               display_default: null
 
-          - name: user
+          - name: username
             description: |
               Username used to connect to MySQL.
             enabled: true
@@ -35,7 +34,7 @@ files:
               example: datadog
               display_default: null
 
-          - name: pass
+          - name: password
             description: |
               Password associated to the MySQL user.
             enabled: true
@@ -49,6 +48,13 @@ files:
             value:
               type: number
               example: 3306
+
+          - name: reported_hostname
+            description: |
+              Set the reported hostname for this instance. This value overrides the hostname detected by the Agent
+              and can be useful to set a custom hostname when connecting to a remote database through a proxy.
+            value:
+              type: string
 
           - name: sock
             description: |
@@ -85,6 +91,7 @@ files:
               key: Path to a key file.
               cert: Path to a cert file.
               ca: Path to a CA bundle file.
+              check_hostname: Set to false to ignore the strict relationship between the certificate and the hostname.
             value:
               type: object
               properties:
@@ -94,10 +101,13 @@ files:
                   type: string
                 - name: ca
                   type: string
+                - name: check_hostname
+                  type: boolean
               example:
                 key: <KEY_FILE_PATH>
                 cert: <CERT_FILE_PATH>
                 ca: <CA_PATH_FILE>
+                check_hostname: true
           - template: instances/db
             overrides:
               custom_queries.value.example:
@@ -109,6 +119,45 @@ files:
                       type: gauge
                   tags:
                     - test:mysql
+          - name: additional_status
+            description: |
+              Set this parameter to collect additional MySQL status variables as metrics
+              from "SHOW GLOBAL STATUS"
+              See MySQL documentation for available variables: https://dev.mysql.com/doc/refman/8.0/en/show-status.html
+
+              The following fields are supported:
+
+              name : MySQL status name on "SHOW GLOBAL STATUS"
+              metric_name : metric name
+              type : gauge | rate | count | ...
+            value:
+              type: array
+              items:
+                type: object
+              example:
+                - name: innodb_rows_read
+                  metric_name: mysql.innodb.rows_read
+                  type: rate
+
+          - name: additional_variable
+            description: |
+              Set this parameter to collect additional MySQL variables as metrics
+              from "SHOW GLOBAL VARIABLES"
+              See MySQL documentation for available variables: https://dev.mysql.com/doc/refman/8.0/en/show-variables.html
+
+              The following fields are supported:
+
+              name : MySQL variable name on "SHOW GLOBAL VARIABLES"
+              metric_name : metric name
+              type : gauge | rate | count | ...
+            value:
+              type: array
+              items:
+                type: object
+              example:
+                - name: long_query_time
+                  metric_name: mysql.performance.long_query_time
+                  type: gauge
 
           - name: max_custom_queries
             description: |
@@ -123,7 +172,7 @@ files:
             description: |
               Define custom queries to collect custom metrics from your MySQL database.
 
-              See https://docs.datadoghq.com/integrations/faq/how-to-collect-metrics-from-custom-mysql-queries to learn more.
+              See https://docs.datadoghq.com/integrations/guide/mysql-custom-queries to learn more.
 
               WARNING: This option is deprecated and will be removed in a future release.
               Use the `custom_queries` option instead.
@@ -146,7 +195,10 @@ files:
             options:
               - name: replication
                 description: |
-                  Set to `true` to collect replication metrics.
+                  Set to `true` to collect replication metrics or group replication metrics.
+                  These metrics are only collected from the specified `host`. If you want to collect replication metrics
+                  from the source or primary node and the replica or secondary nodes you need to set separate check
+                  instances to collect them.
                 value:
                   type: boolean
                   example: false
@@ -208,7 +260,47 @@ files:
                   Note that this runs a heavy query against your database to compute the relevant metrics
                   for all your existing schemas. Due to the nature of these calls, if you have a
                   high number of tables and schemas, this may have a negative impact on your database performance.
+                  Only tables and schemas for which the user has been granted SELECT privileges are collected. 
 
+                  See also the MySQL metrics listing: https://docs.datadoghq.com/integrations/mysql/#metrics
+                value:
+                  type: boolean
+                  example: false
+
+              - name: table_size_metrics
+                description: |
+                  Set to `true` to collect data table size metrics.
+                  Note that only tables and schemas for which the user has been granted SELECT privileges are collected.
+                  This runs a heavy query against your database to compute the relevant metrics
+                  for all your existing tables. Due to the nature of these calls, if you have a
+                  high number of tables and schemas, this may have a negative impact on your database performance.
+                  See also the MySQL metrics listing: https://docs.datadoghq.com/integrations/mysql/#metrics
+                value:
+                  type: boolean
+                  example: false
+
+              - name: system_table_size_metrics
+                description: |
+                  Set to `true` to collect system table size metrics from performance_schema, information_schema and mysql.
+                  Note that only tables and schemas for which the user has been granted SELECT privileges are collected.
+                  This runs a heavy query against your database to compute the relevant metrics
+                  for all your existing tables. Due to the nature of these calls, if you have a
+                  high number of tables and schemas, this may have a negative impact on your database performance.
+                  See also the MySQL metrics listing: https://docs.datadoghq.com/integrations/mysql/#metrics
+                value:
+                  type: boolean
+                  example: false
+
+              - name: table_rows_stats_metrics
+                description: |
+                  These metrics are reported if you have a Percona MySQL instance with `userstat` enabled
+                  Set to `true` to collect table stats metrics.
+                  Metrics provided by the options:
+                    - mysql.info.table.rows.read (total per table)
+                    - mysql.info.table.rows.changed (total per table)
+                  Note that this runs a heavy query against your database to compute the relevant metrics
+                  for all your existing tables. Due to the nature of these calls, if you have a
+                  high number of tables and schemas, this may have a negative impact on your database performance.
                   See also the MySQL metrics listing: https://docs.datadoghq.com/integrations/mysql/#metrics
                 value:
                   type: boolean
@@ -235,52 +327,51 @@ files:
                   type: boolean
                   example: false
 
-          - name: deep_database_monitoring
+          - name: dbm
             description: |
-              Set to `true` to enable the ALPHA features for Deep Database Monitoring.
-
-              If you would like to hear more about Deep Database Monitoring, please reach out to your customer
-              success manager or Datadog support.
+              Set to `true` enable Database Monitoring.
             enabled: false
             value:
               type: boolean
               example: false
               display_default: false
-          - name: statement_metrics_limits
-            description: |
-              Defines the top and bottom limits on queries to track for each metric. These limits apply only to the
-              ALPHA features of Deep Database Monitoring. It is recommended to leave these settings at their default
-              values unless instructed otherwise. This API may change in the future.
-
-              If you would like to hear more about Deep Database Monitoring, please reach out to your customer
-              success manager or Datadog support.
-            value:
-              type: object
-              example:
-                calls: [100, 0]
-                time: [100, 0]
-                <METRIC_COLUMN>: [<TOP_K_LIMIT>, <BOTTOM_K_LIMIT>]
-              display_default: false
-          - name: statement_samples
-            description: Configure collection of statement samples
+          - name: query_metrics
+            description: Configure collection of query metrics
             options:
               - name: enabled
                 description: |
-                  Enables collection of statement samples. Requires `deep_database_monitoring: true`.
+                  Enable collection of query metrics. Requires `dbm: true`.
                 value:
                   type: boolean
-                  example: false
-              - name: collections_per_second
+                  example: true
+              - name: collection_interval
                 description: |
-                  Sets the maximum statement sample collection rate. Each collection involves a single query to one
+                  Set the query metric collection interval (in seconds). Each collection involves a single query to
+                  `pg_stat_statements`. If a non-default value is chosen then that exact same value must be used for *every*
+                  check instance. Running different instances with different collection intervals is not supported.
+                value:
+                  type: number
+                  example: 10
+          - name: query_samples
+            description: Configure collection of query samples
+            options:
+              - name: enabled
+                description: |
+                  Enables collection of query samples. Requires `dbm: true`.
+                value:
+                  type: boolean
+                  example: true
+              - name: collection_interval
+                description: |
+                  Sets the query sample collection interval (in seconds). Each collection involves a single query to one
                   of the `performance_schema.events_statements_*` tables, followed by at most one `EXPLAIN` query per
                   unique statement seen.
                 value:
                   type: number
                   example: 1
-              - name: explained_statements_per_hour_per_query
+              - name: explained_queries_per_hour_per_query
                 description: |
-                  Sets the rate limit for how many execution plans will be collected per hour per normalized statement.
+                  Sets the rate limit for how many execution plans will be collected per hour per normalized query.
                 value:
                   type: integer
                   example: 60
@@ -291,9 +382,9 @@ files:
                 value:
                   type: integer
                   example: 15
-              - name: explained_statements_cache_maxsize
+              - name: explained_queries_cache_maxsize
                 description: |
-                  Sets the max size of the cache used for the explained_statements_per_hour_per_query rate limit. This
+                  Sets the max size of the cache used for the explained_queries_per_hour_per_query rate limit. This
                   should be increased for databases with a very large number of unique normalized queries which exceed the
                   cache's limit.
                 value:
@@ -365,7 +456,180 @@ files:
                 value:
                   type: integer
                   example: 300
+          - name: query_activity
+            description: Configure collection of active sessions monitoring
+            options:
+              - name: enabled
+                description: |
+                  Enable collection of active sessions. Requires `dbm: true`.
+                value:
+                  type: boolean
+                  example: true
+              - name: collection_interval
+                description: |
+                  Set the activity collection interval (in seconds).
+                value:
+                  type: number
+                  example: 10
+          - name: aws
+            description: |
+              This block defines the configuration for AWS RDS and Aurora instances. 
+              
+              Complete this section if you have installed the Datadog AWS Integration 
+              (https://docs.datadoghq.com/integrations/amazon_web_services) to enrich instances 
+              with MySQL integration telemetry.
+              
+              These values are only applied when `dbm: true` option is set.
+            options:
+              - name: instance_endpoint
+                description: |
+                  Equal to the Endpoint.Address of the instance the agent is connecting to. 
+                  This value is optional if the value of `host` is already configured to the instance endpoint.
+                  
+                  For more information on instance endpoints, 
+                  see the AWS docs https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_Endpoint.html
+                value:
+                  type: string
+                  example: mydb.cfxgae8cilcf.us-east-1.rds.amazonaws.com
+
+          - name: gcp
+            description: |
+              This block defines the configuration for Google Cloud SQL instances.
+              
+              Complete this section if you have installed the Datadog GCP Integration 
+              (https://docs.datadoghq.com/integrations/google_cloud_platform) to enrich instances 
+              with MySQL integration telemetry.
+              
+              These values are only applied when `dbm: true` option is set.
+            options:
+              - name: project_id
+                description: |
+                  Equal to the GCP resource's project ID.
+                  
+                  For more information on project IDs,
+                  See the GCP docs https://cloud.google.com/resource-manager/docs/creating-managing-projects
+                value:
+                  type: string
+                  example: foo-project
+              - name: instance_id
+                description: |
+                  Equal to the GCP resource's instance ID.
+                  
+                  For more information on instance IDs,
+                  See the GCP docs https://cloud.google.com/sql/docs/mysql/instance-settings#instance-id-2ndgen
+                value:
+                  type: string
+                  example: foo-database
+
+          - name: azure
+            description: |
+              This block defines the configuration for Azure Database for MySQL.
+              
+              Complete this section if you have installed the Datadog Azure Integration 
+              (https://docs.datadoghq.com/integrations/azure) to enrich instances 
+              with MySQL integration telemetry.
+              
+              These values are only applied when `dbm: true` option is set.
+            options:
+              - name: deployment_type
+                description: |
+                  Equal to the deployment type for the managed database. 
+                  
+                  Acceptable values are:
+                    - `flexible_server` 
+                    - `single_server`
+                    - `virtual_machine`
+                  
+                  For more information on deployment types, 
+                  see the Azure docs https://docs.microsoft.com/en-us/azure/mysql/select-right-deployment-type
+                value:
+                  type: string
+                  example: flexible_server
+              - name: name
+                description: |
+                  Equal to the name of the Azure MySQL database instance.
+                value:
+                  type: string
+                  example: mysql-database
+
+          - name: obfuscator_options
+            description: |
+              Configure how the SQL obfuscator behaves.
+              Note: This option only applies when `dbm` is enabled.
+            options:
+              - name: replace_digits
+                description: |
+                  Set to `true` to replace digits in identifiers and table names with question marks in your SQL statements.
+                  Note: This option also applies to extracted tables using `collect_tables`.
+                value:
+                  type: boolean
+                  example: false
+              - name: collect_metadata
+                description: |
+                  Set to `false` to disable the collection of metadata in your SQL statements.
+                  Metadata includes things such as tables, commands, and comments.
+                value:
+                  type: boolean
+                  example: true
+              - name: collect_tables
+                description: |
+                  Set to `false` to disable the collection of tables in your SQL statements.
+                  Requires `collect_metadata: true`.
+                value:
+                  type: boolean
+                  example: true
+              - name: collect_commands
+                description: |
+                  Set to `false` to disable the collection of commands in your SQL statements.
+                  Requires `collect_metadata: true`.
+
+                  Examples: SELECT, UPDATE, DELETE, etc.
+                value:
+                  type: boolean
+                  example: true
+              - name: collect_comments
+                description: |
+                  Set to `false` to disable the collection of comments in your SQL statements.
+                  Requires `collect_metadata: true`.
+                value:
+                  type: boolean
+                  example: true
+              - name: keep_sql_alias
+                description: |
+                  Set to `true` to keep sql aliases in obfuscated SQL statements. Examples of aliases are
+                  `with select 1 as alias`, `select column as other_name`, or `select * from table t`.
+                  When `true` these aliases will not be removed.
+                value:
+                  type: boolean
+                  example: true
+                  display_default: true
+          - name: log_unobfuscated_queries
+            hidden: true
+            description: |
+              Set to `true` to enable logging of original unobfuscated SQL queries when obfuscation errors occur.
+              For security purposes, it is recommended to use this option for debugging only when requested by Datadog Support.
+              Note: This option only applies when `dbm` is enabled.
+            value:
+              type: boolean
+              example: false
+              display_default: false
+          - name: log_unobfuscated_plans
+            hidden: true
+            description: |
+              Set to `true` to enable logging of original unobfuscated SQL plans when obfuscation errors occur.
+              For security purposes, it is recommended to use this option for debugging only when requested by Datadog Support.
+              Note: This option only applies when `dbm` is enabled.
+            value:
+              type: boolean
+              example: false
+              display_default: false
           - template: instances/default
+            overrides:
+              disable_generic_tags.hidden: false
+              disable_generic_tags.enabled: true
+              disable_generic_tags.description: |
+                  Replaces generic tag such as `server` with `mysql_server` to avoid getting it mixed with
+                  other integrations tags.
 
       - template: logs
         example:

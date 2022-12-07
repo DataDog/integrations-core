@@ -1,28 +1,59 @@
 {
-  "categories": [
-    "orchestration",
-    "containers",
-    "log collection"
-  ],
-  "creates_events": true,
-  "display_name": "Kubernetes",
-  "guid": "eb31452b-d681-4823-87cc-2ef114559edf",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "kubernetes",
-  "metric_to_check": "kubernetes.cpu.usage.total",
-  "name": "kubernetes",
-  "public_title": "Datadog-Kubernetes Integration",
-  "short_description": "Capture Pod scheduling events, track the status of your Kubelets, and much more.",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os"
-  ],
-  "type": "check",
-  "integration_id": "kubernetes",
+  "manifest_version": "2.0.0",
+  "app_uuid": "1b01568a-d25e-4e8d-98f6-c999f1d253c7",
+  "app_id": "kubernetes",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Capture Pod scheduling events, track the status of your Kubelets, and much more.",
+    "title": "Kubernetes",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Category::Orchestration",
+      "Category::Containers",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
+    "integration": {
+      "source_type_name": "Kubernetes",
+      "configuration": {},
+      "events": {
+        "creates_events": true
+      },
+      "metrics": {
+        "prefix": "kubernetes",
+        "check": "kubernetes.cpu.usage.total",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {
+      "kubernetes": "assets/dashboards/kubernetes_dashboard.json",
+      "Kubernetes - Pods": "assets/dashboards/kubernetes_pods.json",
+      "Kubernetes Nodes Overview": "assets/dashboards/kubernetes_nodes.json",
+      "Kubernetes Deployments Overview": "assets/dashboards/kubernetes_deployments.json",
+      "Kubernetes ReplicaSets Overview": "assets/dashboards/kubernetes_replicasets.json",
+      "Kubernetes Services Overview": "assets/dashboards/kubernetes_services.json",
+      "Kubernetes DaemonSets Overview": "assets/dashboards/kubernetes_daemonsets.json",
+      "Kubernetes Jobs & Cronjobs Overview": "assets/dashboards/kubernetes_jobs.json",
+      "Kubernetes StatefulSets Overview": "assets/dashboards/kubernetes_statefulsets.json",
+      "Kubernetes Clusters Overview": "assets/dashboards/kubernetes_clusters.json"
+    },
     "monitors": {
       "[kubernetes] Monitor Kubernetes Deployments Replica Pods": "assets/monitors/monitor_deployments_replicas.json",
       "[kubernetes] Monitor Unschedulable Kubernetes Nodes": "assets/monitors/monitor_node_unavailable.json",
@@ -32,18 +63,11 @@
       "[kubernetes] Monitor Kubernetes Pods Restarting": "assets/monitors/monitor_pods_restarting.json",
       "[kubernetes] Monitor Kubernetes Statefulset Replicas": "assets/monitors/monitor_statefulset_replicas.json"
     },
-    "dashboards": {
-      "kubernetes": "assets/dashboards/kubernetes_dashboard.json",
-      "Kubernetes - Pods": "assets/dashboards/kubernetes_pods.json",
-      "Kubernetes Nodes Overview": "assets/dashboards/kubernetes_nodes.json",
-      "Kubernetes Deployments Overview": "assets/dashboards/kubernetes_deployments.json",
-      "Kubernetes ReplicaSets Overview": "assets/dashboards/kubernetes_replicasets.json",
-      "Kubernetes Services Overview": "assets/dashboards/kubernetes_services.json",
-      "Kubernetes DaemonDets Overview": "assets/dashboards/kubernetes_daemonsets.json",
-      "Kubernetes Jobs & Cronjobs Overview": "assets/dashboards/kubernetes_jobs.json"
-    },
-    "service_checks": "assets/service_checks.json",
-    "logs": {},
-    "metrics_metadata": "metadata.csv"
+    "saved_views": {
+      "non_ok_pods": "assets/saved_views/non_ok_pods.json",
+      "non_ready_nodes": "assets/saved_views/non_ready_nodes.json",
+      "unavailable_replicas_deployments": "assets/saved_views/unavailable_replicas_deployments.json",
+      "unbound_volumes": "assets/saved_views/unbound_volumes.json"
+    }
   }
 }

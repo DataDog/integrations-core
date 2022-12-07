@@ -1,10 +1,9 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import mock
 import pytest
 
-from datadog_checks.couch import CouchDb, errors
+from datadog_checks.couch import CouchDb
 
 from . import common
 
@@ -13,8 +12,8 @@ pytestmark = pytest.mark.skipif(common.COUCH_MAJOR_VERSION != 1, reason='Test fo
 
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
-def test_couch(aggregator, check, instance):
-    check.check(instance)
+def test_couch(aggregator, check, dd_run_check):
+    dd_run_check(check)
     _assert_check(aggregator, assert_device_tag=True)
 
 
@@ -45,40 +44,15 @@ def _assert_check(aggregator, assert_device_tag):
 
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
-def test_bad_config(aggregator, check, instance):
-    """
-    Test the check with various bogus instances
-    """
-    with pytest.raises(errors.BadConfigError):
-        # `server` is missing from the instance
-        check.check({})
-
-    with pytest.raises(errors.ConnectionError):
-        # the server instance is invalid
-        check.check(common.BAD_CONFIG)
-        aggregator.assert_service_check(
-            CouchDb.SERVICE_CHECK_NAME, status=CouchDb.CRITICAL, tags=common.BAD_CONFIG_TAGS, count=1
-        )
-
-    check.get = mock.MagicMock(return_value={'version': '0.1.0'})
-    with pytest.raises(errors.BadVersionError):
-        # the server has an unsupported version
-        check.check(common.BAD_CONFIG)
-        aggregator.assert_service_check(
-            CouchDb.SERVICE_CHECK_NAME, status=CouchDb.CRITICAL, tags=common.BAD_CONFIG_TAGS, count=1
-        )
-
-
-@pytest.mark.usefixtures('dd_environment')
-@pytest.mark.integration
 @pytest.mark.parametrize('param_name', ["db_whitelist", "db_include"])
 def test_couch_inclusion(aggregator, check, instance, param_name):
     DB_INCLUDE = ["_users"]
     instance[param_name] = DB_INCLUDE
-    check.check(instance)
+    check.instance = instance
+    check.check({})
 
     for db_name in common.DB_NAMES:
-        expected_tags = common.BASIC_CONFIG_TAGS + ["db:{}".format(db_name), "device:{}".format(db_name)]
+        expected_tags = ["db:{}".format(db_name), "device:{}".format(db_name)] + common.BASIC_CONFIG_TAGS
         for gauge in common.CHECK_GAUGES:
             if db_name in DB_INCLUDE:
                 aggregator.assert_metric(gauge, tags=expected_tags, count=1)
@@ -92,7 +66,8 @@ def test_couch_inclusion(aggregator, check, instance, param_name):
 def test_couch_exclusion(aggregator, check, instance, param_name):
     DB_EXCLUDE = ["_replicator"]
     instance[param_name] = DB_EXCLUDE
-    check.check(instance)
+    check.instance = instance
+    check.check({})
 
     for db_name in common.DB_NAMES:
         expected_tags = common.BASIC_CONFIG_TAGS + ["db:{}".format(db_name), "device:{}".format(db_name)]
@@ -107,7 +82,8 @@ def test_couch_exclusion(aggregator, check, instance, param_name):
 @pytest.mark.integration
 def test_only_max_nodes_are_scanned(aggregator, check, instance):
     instance["max_dbs_per_check"] = 1
-    check.check(instance)
+    check.instance = instance
+    check.check({})
     for gauge in common.CHECK_GAUGES:
         aggregator.assert_metric(gauge, count=1)
 
@@ -117,7 +93,8 @@ def test_only_max_nodes_are_scanned(aggregator, check, instance):
 def test_config_tags(aggregator, check, instance):
     TEST_TAG = "test_tag"
     instance["tags"] = [TEST_TAG]
-    check.check(instance)
+    check.instance = instance
+    check.check({})
 
     for gauge in common.CHECK_GAUGES:
         aggregator.assert_metric_has_tag(gauge, TEST_TAG)

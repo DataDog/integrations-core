@@ -1,18 +1,18 @@
-# Gitlab Integration
+# GitLab Integration
 
 ## Overview
 
 Integration that allows to:
 
-- Visualize and monitor metrics collected via Gitlab through Prometheus
+- Visualize and monitor metrics collected with Gitlab through Prometheus
 
-See the [Gitlab documentation][1] for more information about Gitlab and its integration with Prometheus.
+See [Monitoring GitLab with Prometheus][1] for more information.
 
 ## Setup
 
 ### Installation
 
-The Gitlab check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your Gitlab servers.
+The GitLab check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your GitLab servers.
 
 ### Configuration
 
@@ -25,20 +25,20 @@ To configure this check for an Agent running on a host:
 
 ##### Metric collection
 
-1. Edit the `gitlab.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3], to point to the Gitlab's metrics [endpoint][13]. See the [sample gitlab.d/conf.yaml][4] for all available configuration options.
+1. Edit the `gitlab.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3], to point to the GitLab's metrics [endpoint][4]. See the [sample gitlab.d/conf.yaml][5] for all available configuration options.
 
-2. In the Gitlab settings page, ensure that the option `Enable Prometheus Metrics` is enabled. You will need to have administrator access. For more information on how to enable metric collection, see the [Gitlab documentation][12].
+2. In the GitLab settings page, ensure that the option `Enable Prometheus Metrics` is enabled (administrator access is required). For more information on how to enable metric collection, see [GitLab Prometheus metrics][6].
 
 3. Allow access to monitoring endpoints by updating your `/etc/gitlab/gitlab.rb` to include the following line:
 
     ```
     gitlab_rails['monitoring_whitelist'] = ['127.0.0.0/8', '192.168.0.1']
     ```
-    **Note** Save and restart Gitlab to see the changes.
+    **Note** Save and restart GitLab to see the changes.
 
-4. [Restart the Agent][5].
+4. [Restart the Agent][7].
 
-**Note**: The metrics in [gitlab/metrics.py][11] are collected by default. The `allowed_metrics` configuration option in the `init_config` collects specific legacy metrics. Some metrics may not be collected depending on your Gitlab instance version and configuration. See [Gitlab's documentation][12] for further information about its metric collection.
+**Note**: The metrics in [gitlab/metrics.py][8] are collected by default. The `allowed_metrics` configuration option in the `init_config` collects specific legacy metrics. Some metrics may not be collected depending on your GitLab instance version and configuration. See [GitLab Prometheus metrics][6] for more information about metric collection.
 
 
 ##### Log collection
@@ -49,7 +49,7 @@ To configure this check for an Agent running on a host:
    logs_enabled: true
    ```
 
-2. Next, edit `gitlab.d/conf.yaml` by uncommenting the `logs` lines at the bottom. Update the logs `path` with the correct path to your Gitlab log files.
+2. Next, edit `gitlab.d/conf.yaml` by uncommenting the `logs` lines at the bottom. Update the logs `path` with the correct path to your GitLab log files.
 
    ```yaml
      logs:
@@ -67,14 +67,14 @@ To configure this check for an Agent running on a host:
          source: gitlab
    ```
 
-3. [Restart the Agent][5].
+3. [Restart the Agent][7].
 
 <!-- xxz tab xxx -->
 <!-- xxx tab "Containerized" xxx -->
 
 #### Containerized
 
-For containerized environments, see the [Autodiscovery Integration Templates][6] for guidance on applying the parameters below.
+For containerized environments, see the [Autodiscovery Integration Templates][9] for guidance on applying the parameters below.
 
 ##### Metric collection
 
@@ -86,7 +86,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][6]
 
 ##### Log collection
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][7].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][10].
 
 | Parameter      | Value                                       |
 | -------------- | ------------------------------------------- |
@@ -97,48 +97,37 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 ### Validation
 
-[Run the Agent's status subcommand][8] and look for `gitlab` under the Checks section.
+[Run the Agent's status subcommand][11] and look for `gitlab` under the Checks section.
 
 ## Data Collected
 
 ### Metrics
 
-See [metadata.csv][9] for a list of metrics provided by this integration.
+See [metadata.csv][12] for a list of metrics provided by this integration.
 
 ### Events
 
-The Gitlab check does not include any events.
+The GitLab check does not include any events.
 
 ### Service Checks
 
-The Gitlab check includes health, readiness, and liveness service checks.
-
-**gitlab.prometheus_endpoint_up**:<br>
-Returns `CRITICAL` if the check cannot access the Prometheus metrics endpoint of the Gitlab instance.
-
-**gitlab.health**:<br>
-Returns `CRITICAL` if the check cannot access the Gitlab instance.
-
-**gitlab.liveness**:<br>
-Returns `CRITICAL` if the check cannot access the Gitlab instance due to deadlock with Rails Controllers.
-
-**gitlab.readiness**:<br>
-Returns `CRITICAL` if the Gitlab instance is able to accept traffic via Rails Controllers.
+See [service_checks.json][13] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][10].
+Need help? Contact [Datadog support][14].
 
 [1]: https://docs.gitlab.com/ee/administration/monitoring/prometheus
 [2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
-[4]: https://github.com/DataDog/integrations-core/blob/master/gitlab/datadog_checks/gitlab/data/conf.yaml.example
-[5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[6]: https://docs.datadoghq.com/agent/kubernetes/integrations/
-[7]: https://docs.datadoghq.com/agent/kubernetes/log/
-[8]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[9]: https://github.com/DataDog/integrations-core/blob/master/gitlab/metadata.csv
-[10]: https://docs.datadoghq.com/help/
-[11]: https://github.com/DataDog/integrations-core/blob/master/gitlab/datadog_checks/gitlab/metrics.py
-[12]: https://docs.gitlab.com/ee/administration/monitoring/prometheus/gitlab_metrics.html
-[13]: https://docs.gitlab.com/ee/administration/monitoring/prometheus/gitlab_metrics.html#collecting-the-metrics
+[4]: https://docs.gitlab.com/ee/administration/monitoring/prometheus/gitlab_metrics.html#collecting-the-metrics
+[5]: https://github.com/DataDog/integrations-core/blob/master/gitlab/datadog_checks/gitlab/data/conf.yaml.example
+[6]: https://docs.gitlab.com/ee/administration/monitoring/prometheus/gitlab_metrics.html
+[7]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[8]: https://github.com/DataDog/integrations-core/blob/master/gitlab/datadog_checks/gitlab/metrics.py
+[9]: https://docs.datadoghq.com/agent/kubernetes/integrations/
+[10]: https://docs.datadoghq.com/agent/kubernetes/log/
+[11]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[12]: https://github.com/DataDog/integrations-core/blob/master/gitlab/metadata.csv
+[13]: https://github.com/DataDog/integrations-core/blob/master/gitlab/assets/service_checks.json
+[14]: https://docs.datadoghq.com/help/

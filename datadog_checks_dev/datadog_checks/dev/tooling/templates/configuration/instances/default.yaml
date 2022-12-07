@@ -1,3 +1,31 @@
-- template: instances/tags
-- template: instances/service
-- template: instances/global
+- template: instances/all_integrations
+- name: disable_generic_tags
+  description: |
+    Generic tags such as `cluster` will be replaced by <integration_name>_cluster to avoid
+    getting mixed with other integraton tags.
+  value:
+    type: boolean
+    display_default: false
+    example: true
+  hidden: true
+- name: metric_patterns
+  description: |
+    A mapping of metrics to include or exclude, with each entry being a regular expression.
+
+    Metrics defined in `exclude` will take precedence in case of overlap.
+  value:
+    example:
+      include:
+        - <INCLUDE_REGEX>
+      exclude:
+        - <EXCLUDE_REGEX>
+    type: object
+    properties:
+      - name: include
+        type: array
+        items:
+          type: string
+      - name: exclude
+        type: array
+        items:
+          type: string

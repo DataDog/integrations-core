@@ -1,0 +1,5 @@
+1,"node-memsql-cluster-master-0.svc-memsql-cluster",3306,"MA","/dev/sdb","/var/lib/memsql",269427478528,320253952,269107224576,74584064,319164416
+2,"node-memsql-cluster-aggregator-0.svc-memsql-cluster",3306,"CA","/dev/sdb","/var/lib/memsql",269427478528,293687296,269133791232,72159232,314015744
+3,"node-memsql-cluster-aggregator-1.svc-memsql-cluster",3306,"CA","/dev/sdb","/var/lib/memsql",269427478528,289517568,269137960960,71540736,317726720
+4,"node-memsql-cluster-leaf-ag1-0.svc-memsql-cluster",3306,"LEAF","/dev/sdb","/var/lib/memsql",1081101176832,4586971136,1076514205696,72056832,319987712
+5,"node-memsql-cluster-leaf-ag2-0.svc-memsql-cluster",3306,"LEAF","/dev/sdb","/var/lib/memsql",1081101176832,4586631168,1076514545664,72691712,316645376

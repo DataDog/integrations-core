@@ -1,42 +1,60 @@
 {
-  "display_name": "Confluent Platform",
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "name": "confluent_platform",
-  "metric_prefix": "confluent.",
-  "metric_to_check": "confluent.kafka.producer.outgoing_byte_rate",
-  "creates_events": false,
-  "short_description": "Monitor Confluent Platform components.",
-  "guid": "8e4a6d7e-44bc-440c-aafa-a0f98df87cc0",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "public_title": "Datadog-Confluent Platform Integration",
-  "categories": [
-    "processing",
-    "messaging",
-    "autodiscovery",
-    "log collection"
-  ],
-  "type": "check",
-  "is_public": true,
-  "integration_id": "confluent-platform",
+  "manifest_version": "2.0.0",
+  "app_uuid": "14e9ea66-bd7c-4c84-b642-a0290166deb4",
+  "app_id": "confluent-platform",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor Confluent Platform components.",
+    "title": "Confluent Platform",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Processing",
+      "Category::Messaging",
+      "Category::Autodiscovery",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "Confluent Platform",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "confluent.",
+        "check": "confluent.kafka.producer.outgoing_byte_rate",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
     },
     "dashboards": {
       "Confluent Platform Overview": "assets/dashboards/overview.json"
     },
-    "monitors": {},
-    "saved_views": {},
-    "service_checks": "assets/service_checks.json",
+    "monitors": {
+      "[Confluent Platform] Unclean leader election": "assets/monitors/unclean_leader_election.json",
+      "[Confluent Platform] Unused topic partition": "assets/monitors/unused_partition.json"
+    },
     "logs": {
       "source": "confluent_platform"
-    },
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

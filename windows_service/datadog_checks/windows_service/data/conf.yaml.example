@@ -9,27 +9,52 @@ init_config:
     #
     # service: <SERVICE>
 
-## Every instance is scheduled independent of the others.
+## Every instance is scheduled independently of the others.
 #
 instances:
 
-    ## @param services - list of strings - required
+    ## @param services - (list of string or mapping) - required
     ## List of services to monitor e.g. Dnscache, wmiApSrv, etc.
     ##
-    ## If any service is set to `ALL`, all services registered with the SCM will be monitored.
+    ## Services can also be selectively monitored by their startup type.
+    ## The possible values for `startup_type` are:
+    ##   - disabled
+    ##   - manual
+    ##   - automatic
+    ##   - automatic_delayed_start
     ##
-    ## This matches all services starting with service, as if service.* is configured.
+    ## If any service is set to `ALL`, all services registered with the SCM will be monitored, and
+    ## all other patterns provided in this instance will be ignored.
+    ##
+    ## Service name patterns are case insensitive. `ALL` is case sensitive.
+    ##
+    ## NOTE: The service name patterns will match all services starting with the pattern. For example,
+    ## if `service` is provided, it will match all services starting with `service` as if service.* is configured.
     ## For an exact match, use ^service$
     #
   - services:
       - <SERVICE_NAME_1>
-      - <SERVICE_NAME_2>
+      - name: <SERVICE_NAME_2>
+      - startup_type: automatic
 
     ## @param disable_legacy_service_tag - boolean - optional - default: false
     ## Whether or not to stop submitting the tag `service` that has been renamed
     ## to `windows_service` and disable the associated deprecation warning.
     #
     # disable_legacy_service_tag: false
+
+    ## @param windows_service_startup_type_tag - boolean - optional - default: false
+    ## Whether or not to submit the `windows_service_startup_type` tag along
+    ## with each service check.
+    ## This tag indicates the Windows service startup type as shown in a service's properties,
+    ## and can be used as a filter/scope in Monitors.
+    ## Possible values for this tag are:
+    ##   - disabled
+    ##   - manual
+    ##   - automatic
+    ##   - automatic_delayed_start
+    #
+    # windows_service_startup_type_tag: false
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
@@ -59,3 +84,14 @@ instances:
     ## This is useful for cluster-level checks.
     #
     # empty_default_hostname: false
+
+    ## @param metric_patterns - mapping - optional
+    ## A mapping of metrics to include or exclude, with each entry being a regular expression.
+    ##
+    ## Metrics defined in `exclude` will take precedence in case of overlap.
+    #
+    # metric_patterns:
+    #   include:
+    #   - <INCLUDE_REGEX>
+    #   exclude:
+    #   - <EXCLUDE_REGEX>

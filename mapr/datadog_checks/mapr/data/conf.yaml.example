@@ -9,7 +9,7 @@ init_config:
     #
     # service: <SERVICE>
 
-## Every instance is scheduled independent of the others.
+## Every instance is scheduled independently of the others.
 #
 instances:
 
@@ -47,6 +47,12 @@ instances:
     #
     # streams_count: 1
 
+    ## @param disable_legacy_cluster_tag - boolean - optional - default: false
+    ## Enable to stop submitting the tag `clustername`, which has been renamed to `mapr_cluster` and `clusterid`
+    ## which has been renamed to `mapr_cluster_id`
+    #
+    disable_legacy_cluster_tag: true
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
@@ -75,3 +81,14 @@ instances:
     ## This is useful for cluster-level checks.
     #
     # empty_default_hostname: false
+
+    ## @param metric_patterns - mapping - optional
+    ## A mapping of metrics to include or exclude, with each entry being a regular expression.
+    ##
+    ## Metrics defined in `exclude` will take precedence in case of overlap.
+    #
+    # metric_patterns:
+    #   include:
+    #   - <INCLUDE_REGEX>
+    #   exclude:
+    #   - <EXCLUDE_REGEX>

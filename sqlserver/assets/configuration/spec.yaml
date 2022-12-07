@@ -8,7 +8,7 @@ files:
       description: |
         Collect custom metrics and send them to Datadog based on
         your SQL server counters.
-        
+
         See https://docs.datadoghq.com/integrations/guide/collect-sql-server-custom-metrics/
       value:
         type: array
@@ -26,7 +26,11 @@ files:
       Note: All '%' characters must be escaped as '%%'.
     options:
     - name: host
-      description: Host and port of your SQL server.
+      description: | 
+        Host and port of your SQL server. If a port is ommitted, a default port of 1433 will be used. 
+        If you use Sql Server Browser Service or a similar port autodiscovery service, pass in a port
+        of 0 to omit port from your connection string. This should allow SSBS to autodiscover the 
+        correct database port. 
       required: true
       value:
         type: string
@@ -39,15 +43,31 @@ files:
       description: Password for the Datadog-SQL server check user. It will be ignored if using Windows authentication.
       value:
         type: string
+    - name: server_version
+      description: |
+        Server version year of sqlserver the agent will connect to. 
+        Important for validating connection string attributes for older sqlserver versions.
+        
+        This is required if connecting to a SQLServer instance older than 2014.
+      value:
+        type: string
+        example: "2014"
     - name: database
       description: |
         Database name to query.  Not compatible with `database_autodiscovery`.
       value:
         type: string
         example: master
+    - name: reported_hostname
+      description: |
+        Set the reported hostname for this instance. This value overrides the hostname detected by the Agent
+        and can be useful to set a custom hostname when connecting to a remote database through a proxy.
+      value:
+        type: string
     - name: database_autodiscovery
       description: |
-        Auto-discover and monitor databases.  If `true`, overrides `database` option.
+        Auto-discover and monitor databases. Supported for the metrics check. 
+        If `true`, overrides `database` option.
         Can be combined with `autodiscovery_include` and `autodiscovery_exclude` options.
       value:
         type: boolean
@@ -57,8 +77,8 @@ files:
         Regular expression for database names to include as part of `database_autodiscovery`.
         Will report metrics for databases that are found in this instance, ignores databases listed but not found.
 
-        Character casing is ignored. The regular expressions start matching from the beginning, so 
-        to match anywhere, prepend `.*`. For exact matches append `$`. 
+        Character casing is ignored. The regular expressions start matching from the beginning, so
+        to match anywhere, prepend `.*`. For exact matches append `$`.
 
         Defaults to `.*` to include everything.
       value:
@@ -90,6 +110,16 @@ files:
       value:
         type: integer
         example: 3600
+    - name: autodiscovery_db_service_check
+      description: |
+        When enabled with database autodiscovery, attempts to connect to the list of
+        autodiscovered databases and submits a service check that signifies whether
+        the agent can connect to that database or not.
+      enabled: true
+      value:
+        type: boolean
+        example: false
+        display_default: true
     - name: include_ao_metrics
       description: |
         Include AlwaysOn availability group metrics.
@@ -117,6 +147,12 @@ files:
         AlwaysOn metrics are only emitted for the selected `ao_database` if not empty.
       value:
         type: string
+    - name: include_master_files_metrics
+      description: |
+        Include database file size and state from `sys.master_files`.
+      value:
+        type: boolean
+        example: false
     - name: include_fci_metrics
       description: |
         Include Failover Cluster Instance metrics. Note that these metrics
@@ -156,8 +192,8 @@ files:
       description: |
         Choose the ADO provider.  Note that the (default) provider
         SQLOLEDB is being deprecated.  To use the newer MSOLEDBSQL
-        provider, set the adoprovider to "MSOLEDBSQL" below. You will also need
-        to download the new provider from
+        provider, set the adoprovider to "MSOLEDBSQL" below or "MSOLEDBSQL19" for version 19 of the driver.
+        You will also need to download the new provider from
         https://docs.microsoft.com/en-us/sql/connect/oledb/oledb-driver-for-sql-server?view=sql-server-2017
       value:
         type: string
@@ -182,13 +218,244 @@ files:
     - name: connection_string
       description: |
         Specify a custom connection string to be used
-        Ex: "ApplicationIntent=ReadWrite" or "MultiSubnetFailover=True"
-        "Trusted_Connection=yes" to use Windows Authentication (note that in this case the connection will be performed
-        with the `ddagentuser` user, you can find more information about this user
-        in https://docs.datadoghq.com/agent/faq/windows-agent-ddagent-user/)
+        Ex: "ApplicationIntent=ReadWrite" or "Trusted_Connection=Yes" to use Windows Authentication
+        (note that in this case the connection will be performed with the `ddagentuser` user, you can
+        find more information about this user in https://docs.datadoghq.com/agent/faq/windows-agent-ddagent-user/)
+
+        Please note that certain connection string values will vary depending on the connection Provider used,
+        for example:
+        * "OLE DB" provider uses "MultiSubnetFailover=Yes"
+        * "ADO" provider uses "MultiSubnetFailover=True"
       value:
         type: string
         example: "<CONNECTION_STRING>"
+    - name: dbm
+      description: |
+        Set to `true` to enable Database Monitoring.
+      value:
+        type: boolean
+        example: false
+        display_default: false
+    - name: query_metrics
+      description: Configure collection of query metrics
+      options:
+        - name: enabled
+          description: |
+            Enable collection of query metrics. Requires `dbm: true`.
+          value:
+            type: boolean
+            example: true
+        - name: disable_secondary_tags
+          description: |
+            Disable the secondary tags on query aggregate metrics, such as `user` and `database`. This is an optimization 
+            for certain database workloads which result in long metric collection times.
+          value:
+            type: boolean
+            example: false
+          hidden: true
+        - name: collection_interval
+          description: |
+            Set the query metric collection interval (in seconds). Each collection involves one or more queries to
+            the SQL Server Query Plan Cache. If a non-default value is chosen then that exact same value must be used
+            for *every* check instance. Running different instances with different collection intervals is not supported.
+          value:
+            type: number
+            example: 10
+        - name: dm_exec_query_stats_row_limit
+          description: |
+            Set the maximum number of query stats rows that can be retrieved in a single check run.
+          value:
+            type: integer
+            example: 10000
+        - name: samples_per_hour_per_query
+          description: |
+            Set the rate limit for the number of query sample events that are ingested per hour and per normalized
+            execution plan.
+          value:
+            type: integer
+            example: 4
+        - name: enforce_collection_interval_deadline
+          description: |
+            By default, plan collection stops if it is time for the next run of the query metrics & plans loop. This
+            means that some plans may not be collected. If it is necessary to collect all of the plans and in doing so
+            cause delays in collecting query metrics, then this deadline can be disabled by setting this option to
+            false.
+          value:
+            type: boolean
+            example: True
+          hidden: true
+    - name: query_activity
+      description: Configure collection of active sessions monitoring
+      options:
+        - name: enabled
+          description: |
+            Enable collection of active sessions. Requires `dbm: true`.
+          value:
+            type: boolean
+            example: true
+        - name: collection_interval
+          description: |
+            Set the activity collection interval in seconds. Each collection involves querying several
+            different DMV tables such as `dm_exec_requests`, `dm_exec_sessions`, and `dm_exec_sql_text`.
+            If a non-default value is chosen, then that exact same value must be used for *every* check instance.
+            Running different instances with different collection intervals is not supported.
+          value:
+            type: number
+            example: 10
+
+    - name: aws
+      description: |
+        This block defines the configuration for AWS RDS and Aurora instances. 
+        
+        Complete this section if you have installed the Datadog AWS Integration 
+        (https://docs.datadoghq.com/integrations/amazon_web_services) to enrich instances 
+        with SQL Server integration telemetry.
+        
+        These values are only applied when `dbm: true` option is set.
+      options:
+        - name: instance_endpoint
+          description: |
+            Equal to the Endpoint.Address of the instance the agent is connecting to. 
+            This value is optional if the value of `host` is already configured to the instance endpoint.
+            
+            For more information on instance endpoints, 
+            see the AWS docs https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_Endpoint.html
+          value:
+            type: string
+            example: mydb.cfxgae8cilcf.us-east-1.rds.amazonaws.com
+
+    - name: gcp
+      description: |
+        This block defines the configuration for Google Cloud SQL instances.
+        
+        Complete this section if you have installed the Datadog GCP Integration 
+        (https://docs.datadoghq.com/integrations/google_cloud_platform) to enrich instances 
+        with SQL Server integration telemetry.
+
+        These values are only applied when `dbm: true` option is set.
+      options:
+        - name: project_id
+          description: |
+            Equal to the GCP resource's project ID.
+            
+            For more information on project IDs,
+            See the GCP docs https://cloud.google.com/resource-manager/docs/creating-managing-projects
+          value:
+            type: string
+            example: foo-project
+        - name: instance_id
+          description: |
+            Equal to the GCP resource's instance ID.
+            
+            For more information on instance IDs,
+            See the GCP docs https://cloud.google.com/sql/docs/sqlserver/instance-settings#instance-id-2ndgen
+          value:
+            type: string
+            example: foo-database
+
+    - name: azure
+      description: |
+        This block defines the configuration for Azure Managed Instance, Azure SQL Database or 
+        SQLServer on Virtual Machines.
+        
+        Complete this section if you have installed the Datadog Azure Integration 
+        (https://docs.datadoghq.com/integrations/azure) to enrich instances 
+        with SQL Server integration telemetry.
+
+        These values are only applied when `dbm: true` option is set.
+      options:
+        - name: deployment_type
+          description: |
+            Equal to the deployment type for the managed database. 
+            
+            Acceptable values are:
+              - `sql_database` 
+              - `managed_instance`
+              - `virtual_machine`
+            
+            For more information on deployment types, see the Azure
+            docs https://docs.microsoft.com/en-us/azure/azure-sql/azure-sql-iaas-vs-paas-what-is-overview?view=azuresql
+          value:
+            type: string
+            example: sql_database
+        - name: name
+          description: |
+            Equal to the name of the SQL Database, Managed Instance (SQL MI) or virtual machine.
+          value:
+            type: string
+            example: my-sqlserver-instance
+
+    - name: obfuscator_options
+      description: |
+        Configure how the SQL obfuscator behaves.
+        Note: This option only applies when `dbm` is enabled.
+      options:
+        - name: replace_digits
+          description: |
+            Set to `true` to replace digits in identifiers and table names with question marks in your SQL statements.
+            Note: This option also applies to extracted tables using `collect_tables`.
+          value:
+            type: boolean
+            example: false
+        - name: collect_metadata
+          description: |
+            Set to `false` to disable the collection of metadata in your SQL statements.
+            Metadata includes things such as tables, commands, and comments.
+          value:
+            type: boolean
+            example: true
+        - name: collect_tables
+          description: |
+            Set to `false` to disable the collection of tables in your SQL statements.
+            Requires `collect_metadata: true`.
+          value:
+            type: boolean
+            example: true
+        - name: collect_commands
+          description: |
+            Set to `false` to disable the collection of commands in your SQL statements.
+            Requires `collect_metadata: true`.
+
+            Examples: SELECT, UPDATE, DELETE, etc.
+          value:
+            type: boolean
+            example: true
+        - name: collect_comments
+          description: |
+            Set to `false` to disable the collection of comments in your SQL statements.
+            Requires `collect_metadata: true`.
+          value:
+            type: boolean
+            example: true
+        - name: keep_sql_alias
+          description: |
+            Set to `true` to keep sql aliases in obfuscated SQL statements. Examples of aliases are
+            `with select 1 as alias`, `select column as other_name`, or `select * from table t`.
+            When `true` these aliases will not be removed.
+          value:
+            type: boolean
+            example: true
+            display_default: true
+    - name: log_unobfuscated_queries
+      hidden: true
+      description: |
+        Set to `true` to enable logging of original unobfuscated SQL queries when obfuscation errors occur.
+        For security purposes, it is recommended to use this option for debugging only when requested by Datadog Support.
+        Note: This option only applies when `dbm` is enabled.
+      value:
+        type: boolean
+        example: false
+        display_default: false
+    - name: log_unobfuscated_plans
+      hidden: true
+      description: |
+        Set to `true` to enable logging of original unobfuscated SQL plans when obfuscation errors occur.
+        For security purposes, it is recommended to use this option for debugging only when requested by Datadog Support.
+        Note: This option only applies when `dbm` is enabled.
+      value:
+        type: boolean
+        example: false
+        display_default: false
     - name: command_timeout
       description: Timeout in seconds for the connection and each command run
       value:
@@ -197,9 +464,10 @@ files:
     - template: instances/db
     - name: stored_procedure
       description: |
+        DEPRECATED - use `custom_queries` instead. For guidance, see:
+        https://docs.datadoghq.com/integrations/guide/collect-sql-server-custom-metrics/
         Get metrics from custom proc in MyDB but only if the database is writable
         (i.e. it's the master in an availability group) Note: Custom proc must be defined in its own instance
-        See https://docs.datadoghq.com/integrations/guide/collect-sql-server-custom-metrics/
       value:
         type: string
         example: <PROCEDURE_NAME>
@@ -219,6 +487,12 @@ files:
         type: boolean
         example: false
     - template: instances/default
+      overrides:
+        disable_generic_tags.hidden: False
+        disable_generic_tags.enabled: True
+        disable_generic_tags.description: |
+            Generic tags such as `host` are replaced by `sqlserver_host` to avoid
+            getting mixed with other integraton tags.
 
   - template: logs
     example:

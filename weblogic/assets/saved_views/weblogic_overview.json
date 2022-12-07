@@ -1,0 +1,21 @@
+{
+    "name": "WebLogic logger overview",
+    "type": "logs",
+    "page": "analytics",
+    "query": "source:weblogic",
+    "timerange": {
+      "interval_ms": 3600000
+    },
+    "visible_facets": ["source", "host", "service", "status", "weblogic"],
+    "options": {
+      "group_bys": [
+        {"facet": "@weblogic.subsystem"},
+      ],
+      "aggregations": [
+        { "metric": "count", "type": "count" }
+      ],
+      "step_ms": "30000",
+      "limit": "50",
+      "widget": "timeseries"
+    }
+  }

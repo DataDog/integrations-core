@@ -14,11 +14,8 @@
       "showArguments"
     ],
     "filter": {
-      "text": "",
-      "groups": [],
-      "tags": [
-        "integration:gearmand"
-      ]
+      "query_filter": "integration:gearmand",
+      "groups": []
     },
     "selected_top_graph": "scatterplot",
     "enabled_columns": [

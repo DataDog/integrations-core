@@ -9,7 +9,7 @@ init_config:
     #
     # service: <SERVICE>
 
-## Every instance is scheduled independent of the others.
+## Every instance is scheduled independently of the others.
 #
 instances:
 
@@ -41,11 +41,27 @@ instances:
     #
     # dbname: <DBNAME>
 
+    ## @param reported_hostname - string - optional
+    ## Set the reported hostname for this instance. This value overrides the hostname detected by the Agent
+    ## and can be useful to set a custom hostname when connecting to a remote database through a proxy.
+    #
+    # reported_hostname: <REPORTED_HOSTNAME>
+
     ## @param dbstrict - boolean - optional - default: false
     ## Whether to restrict the scope of the check to just the database in question.
     ## Set to `true` if you only want to gather metrics from the database provided in the dbname parameter.
     #
     # dbstrict: false
+
+    ## @param ignore_databases - list of strings - optional
+    ## A list of database to ignore. No metrics or statement samples will be collected for these databases.
+    ## Each value can be a plain string or a Postgres pattern.
+    ## For more information on how patterns work, see https://www.postgresql.org/docs/12/functions-matching.html
+    #
+    # ignore_databases:
+    #   - template%
+    #   - rdsadmin
+    #   - azure_maintenance
 
     ## @param ssl - string - optional - default: false
     ## This option determines whether or not and with what priority a secure SSL TCP/IP connection
@@ -66,34 +82,79 @@ instances:
     #
     # ssl: 'false'
 
-    ## @param query_timeout - integer - optional
+    ## @param ssl_root_cert - string - optional - default: false
+    ## The path to the ssl root certificate.
+    ##
+    ## For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
+    #
+    # ssl_root_cert: /home/datadog/server-ca.pem
+
+    ## @param ssl_cert - string - optional - default: false
+    ## The path to the ssl certificate.
+    ##
+    ## For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
+    #
+    # ssl_cert: /home/datadog/client-cert.pem
+
+    ## @param ssl_key - string - optional - default: false
+    ## The path to the ssl client key.
+    ##
+    ## For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
+    #
+    # ssl_key: /home/datadog/client-key.pem
+
+    ## @param ssl_password - string - optional - default: false
+    ## The password for the secret key specified in ssl_key, allowing client certificate private keys to be stored
+    ## in encrypted form on disk.
+    ##
+    ## For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
+    #
+    # ssl_password: ssl_key_password
+
+    ## @param query_timeout - integer - optional - default: 5000
     ## Adds a statement_timeout https://www.postgresql.org/docs/current/runtime-config-client.html#GUC-STATEMENT-TIMEOUT
     ## to all metric collection queries. Aborts any statement that takes more than the specified number of milliseconds,
     ## starting from the time the command arrives at the server from the client. A value of zero turns this off.
     ## Cancelled queries won't log any metrics.
     #
-    # query_timeout: 1000
+    # query_timeout: 5000
 
     ## @param relations - (list of string or mapping) - optional
-    ## The list of relations/tables must be specified here to track per-relation (table) metrics.
+    ## The list of relations/tables must be specified here to track per-relation (table, index , view, etc.) metrics.
     ## If enabled, `dbname` should be specified to collect database-specific relations metrics.
     ## You can either specify a single relation by its exact name in 'relation_name' or use a regex to track metrics
     ## from all matching relations (useful in cases where relation names are dynamically generated, e.g. TimescaleDB).
     ## Each relation generates many metrics (10 + 10 per index).
+    ##
     ## By default all schemas are included. To track relations from specific schemas only,
     ## you can specify the `schemas` attribute and provide a list of schemas to use for filtering.
+    ##
+    ## Size metrics are collected only for ordinary tables. Index metrics are collected only for user indexes. Lock
+    ## metrics are collected for all relation types (table, index , view, etc.). The rest of the metrics are
+    ## collected only for user tables.
+    ## To track lock metrics for relations of a specific kind only, specify the `relkind` attribute
+    ## as a list of the options:
+    ## * r = ordinary table
+    ## * i = index
+    ## * S = sequence
+    ## * t = TOAST table
+    ## * m = materialized view
+    ## * c = composite type
+    ## * f = foreign table
+    ## * p = partitioned table
     ##
     ## Note: For compatibility reasons you can also use the following syntax to track relations metrics by specifying
     ## the list of table names. All schemas are included and regex are not supported.
     ## relations:
-    ##   - <TABLE_NAME1>
-    ##   - <TABLE_NAME2>
     #
     # relations:
     #   - relation_name: <TABLE_NAME>
     #     schemas:
     #     - <SCHEMA_NAME1>
     #   - relation_regex: <TABLE_PATTERN>
+    #     relkind:
+    #     - r
+    #     - p
 
     ## @param max_relations - integer - optional - default: 300
     ## Determines the maximum number of relations to fetch.
@@ -121,10 +182,27 @@ instances:
     #
     # collect_database_size_metrics: true
 
-    ## @param collect_default_database - boolean - optional - default: false
+    ## @param collect_default_database - boolean - optional - default: true
     ## Include statistics from the default database 'postgres' in the check metrics.
     #
-    # collect_default_database: false
+    # collect_default_database: true
+
+    ## @param collect_bloat_metrics - boolean - optional - default: false
+    ## Collect metrics about table bloat. Only available when `relation` metrics are enabled.
+    #
+    collect_bloat_metrics: false
+
+    ## @param collect_wal_metrics - boolean - optional - default: false
+    ## Collect metrics about WAL file age.
+    ## NOTE: You must be running the check local to your database if you want to enable this option.
+    #
+    # collect_wal_metrics: false
+
+    ## @param data_directory - string - optional - default: /usr/local/pgsql/data
+    ## The data directory of your postgres installation
+    ## Required when collecting WAL metrics.
+    #
+    # data_directory: /usr/local/pgsql/data
 
     ## @param tag_replication_role - boolean - optional - default: false
     ## Tag metrics and checks with `replication_role:<master|standby>`.
@@ -159,32 +237,10 @@ instances:
     #
     # application_name: datadog-agent
 
-    ## @param deep_database_monitoring - boolean - optional - default: false
-    ## Set to `true` to enable the ALPHA features for Deep Database Monitoring.
-    ##
-    ## If you would like to hear more about Deep Database Monitoring, please reach out to your customer
-    ## success manager or Datadog support.
+    ## @param dbm - boolean - optional - default: false
+    ## Set to `true` to enable Database Monitoring.
     #
-    # deep_database_monitoring: false
-
-    ## @param statement_metrics_limits - mapping - optional - default: false
-    ## Defines the top and bottom limits on queries to track for each metric. These limits apply only to the
-    ## ALPHA features of Deep Database Monitoring. It is recommended to leave these settings at their default
-    ## values unless instructed otherwise. This API may change in the future.
-    ##
-    ## If you would like to hear more about Deep Database Monitoring, please reach out to your customer
-    ## success manager or Datadog support.
-    #
-    # statement_metrics_limits:
-    #   calls:
-    #   - 100
-    #   - 0
-    #   time:
-    #   - 100
-    #   - 0
-    #   <METRIC_COLUMN>:
-    #   - <TOP_K_LIMIT>
-    #   - <BOTTOM_K_LIMIT>
+    # dbm: false
 
     ## @param pg_stat_statements_view - string - optional - default: show_pg_stat_statements()
     ## Set this value if you want to define a custom view or function to allow the datadog user to query the
@@ -193,49 +249,215 @@ instances:
     #
     # pg_stat_statements_view: show_pg_stat_statements()
 
-    ## Configure collection of statement samples
+    ## Configure collection of query metrics
     #
-    statement_samples:
+    # query_metrics:
 
-        ## @param enabled - boolean - optional - default: false
-        ## Enable collection of statement samples. Requires `deep_database_monitoring: true`.
+        ## @param enabled - boolean - optional - default: true
+        ## Enable collection of query metrics. Requires `dbm: true`.
         #
-        # enabled: false
+        # enabled: true
 
-        ## @param collections_per_second - number - optional - default: 1
-        ## Set the maximum statement sample collection rate. Each collection involves a single query to
-        ## `pg_stat_activity` followed by at most one `EXPLAIN` query per unique statement seen.
+        ## @param collection_interval - number - optional - default: 10
+        ## Set the query metric collection interval (in seconds). Each collection involves a single query to
+        ## `pg_stat_statements`. If a non-default value is chosen then that exact same value must be used for *every*
+        ## check instance. Running different instances with different collection intervals is not supported.
         #
-        # collections_per_second: 1
+        # collection_interval: 10
+
+        ## @param pg_stat_statements_max_warning_threshold - number - optional - default: 10000
+        ## Set the threshold for a safe value of `pg_stat_statements.max`. If the database is configured with a value
+        ## higher than this threshold, a warning is emitted to recommend lowering the setting value.
+        #
+        # pg_stat_statements_max_warning_threshold: 10000
+
+    ## Configure collection of query samples
+    #
+    # query_samples:
+
+        ## @param enabled - boolean - optional - default: true
+        ## Enable collection of query samples. Requires `dbm: true`.
+        #
+        # enabled: true
+
+        ## @param collection_interval - number - optional - default: 1
+        ## Set the query sample collection interval (in seconds). Each collection involves a single query to
+        ## `pg_stat_activity` followed by at most one `EXPLAIN` query per unique normalized query seen.
+        #
+        # collection_interval: 1
 
         ## @param explain_function - string - optional - default: datadog.explain_statement
-        ## Override the default function used to collect execution plans for statements.
+        ## Override the default function used to collect execution plans for queries.
         #
         # explain_function: datadog.explain_statement
 
-        ## @param explained_statements_per_hour_per_query - integer - optional - default: 60
-        ## Set the rate limit for how many execution plans will be collected per hour per normalized statement.
+        ## @param explained_queries_per_hour_per_query - integer - optional - default: 60
+        ## Set the rate limit for how many execution plans will be collected per hour per normalized query.
         #
-        # explained_statements_per_hour_per_query: 60
+        # explained_queries_per_hour_per_query: 60
 
         ## @param samples_per_hour_per_query - integer - optional - default: 15
-        ## Set the rate limit for how many statement sample events will be ingested per hour per normalized execution
+        ## Set the rate limit for how many query sample events will be ingested per hour per normalized execution
         ## plan.
         #
         # samples_per_hour_per_query: 15
 
-        ## @param explained_statements_cache_maxsize - integer - optional - default: 5000
-        ## Set the max size of the cache used for the explained_statements_per_hour_per_query rate limit. This should
+        ## @param explained_queries_cache_maxsize - integer - optional - default: 5000
+        ## Set the max size of the cache used for the explained_queries_per_hour_per_query rate limit. This should
         ## be increased for databases with a very large number unique normalized queries which exceed the cache's
         ## limit.
         #
-        # explained_statements_cache_maxsize: 5000
+        # explained_queries_cache_maxsize: 5000
 
         ## @param seen_samples_cache_maxsize - integer - optional - default: 10000
         ## Set the max size of the cache used for the samples_per_hour_per_query rate limit. This should be increased
         ## for databases with a very large number of unique normalized execution plans which exceed the cache's limit.
         #
         # seen_samples_cache_maxsize: 10000
+
+    ## Configure collection of query activity
+    #
+    # query_activity:
+
+        ## @param enabled - boolean - optional - default: true
+        ## Enable collection of query activity. Requires `dbm: true`, and enabling query_samples.
+        #
+        # enabled: true
+
+        ## @param collection_interval - number - optional - default: 10
+        ## Set the query activity collection interval (in seconds). This number cannot be smaller than
+        ## query_samples configured collection_interval.
+        #
+        # collection_interval: 10
+
+        ## @param payload_row_limit - number - optional - default: 3500
+        ## Set the query activity maximum number of pg_stat_activity rows you want to report. If the table is larger
+        ## than the maximum rows set, then the top N longest running transactions will be reported.
+        #
+        # payload_row_limit: 3500
+
+    ## This block defines the configuration for AWS RDS and Aurora instances. 
+    ##
+    ## Complete this section if you have installed the Datadog AWS Integration 
+    ## (https://docs.datadoghq.com/integrations/amazon_web_services) to enrich instances 
+    ## with Postgres integration telemetry.
+    ##
+    ## These values are only applied when `dbm: true` option is set.
+    #
+    # aws:
+
+        ## @param instance_endpoint - string - optional - default: mydb.cfxgae8cilcf.us-east-1.rds.amazonaws.com
+        ## Equal to the Endpoint.Address of the instance the agent is connecting to. 
+        ## This value is optional if the value of `host` is already configured to the instance endpoint.
+        ##
+        ## For more information on instance endpoints, 
+        ## see the AWS docs https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_Endpoint.html
+        #
+        # instance_endpoint: mydb.cfxgae8cilcf.us-east-1.rds.amazonaws.com
+
+    ## This block defines the configuration for Google Cloud SQL instances.
+    ##
+    ## Complete this section if you have installed the Datadog GCP Integration 
+    ## (https://docs.datadoghq.com/integrations/google_cloud_platform) to enrich instances 
+    ## with Postgres integration telemetry.
+    ##
+    ## These values are only applied when `dbm: true` option is set.
+    #
+    # gcp:
+
+        ## @param project_id - string - optional - default: foo-project
+        ## Equal to the GCP resource's project ID.
+        ##
+        ## For more information on project IDs,
+        ## See the GCP docs https://cloud.google.com/resource-manager/docs/creating-managing-projects
+        #
+        # project_id: foo-project
+
+        ## @param instance_id - string - optional - default: foo-database
+        ## Equal to the GCP resource's instance ID.
+        ##
+        ## For more information on instance IDs,
+        ## See the GCP docs https://cloud.google.com/sql/docs/postgres/instance-settings#instance-id-2ndgen
+        #
+        # instance_id: foo-database
+
+    ## This block defines the configuration for Azure Database for PostgreSQL.
+    ##
+    ## Complete this section if you have installed the Datadog Azure Integration 
+    ## (https://docs.datadoghq.com/integrations/azure) to enrich instances 
+    ## with Postgres integration telemetry.
+    ## These values are only applied when `dbm: true` option is set.
+    #
+    # azure:
+
+        ## @param deployment_type - string - optional - default: flexible_server
+        ## Equal to the deployment type for the managed database. 
+        ##
+        ## Acceptable values are:
+        ##   - `flexible_server` 
+        ##   - `single_server`
+        ##   - `virtual_machine`
+        ##
+        ## For more information on deployment types, 
+        ## see the Azure docs https://docs.microsoft.com/en-us/azure/postgresql/overview-postgres-choose-server-options
+        #
+        # deployment_type: flexible_server
+
+        ## @param name - string - optional - default: my-postgres-database
+        ## Equal to the name of the Azure PostgreSQL database.
+        #
+        # name: my-postgres-database
+
+    ## Configure how the SQL obfuscator behaves.
+    ## Note: This option only applies when `dbm` is enabled.
+    #
+    # obfuscator_options:
+
+        ## @param replace_digits - boolean - optional - default: false
+        ## Set to `true` to replace digits in identifiers and table names with question marks in your SQL statements.
+        ## Note: This option also applies to extracted tables using `collect_tables`.
+        #
+        # replace_digits: false
+
+        ## @param collect_metadata - boolean - optional - default: true
+        ## Set to `false` to disable the collection of metadata in your SQL statements.
+        ## Metadata includes things such as tables, commands, and comments.
+        #
+        # collect_metadata: true
+
+        ## @param collect_tables - boolean - optional - default: true
+        ## Set to `false` to disable the collection of tables in your SQL statements.
+        ## Requires `collect_metadata: true`.
+        #
+        # collect_tables: true
+
+        ## @param collect_commands - boolean - optional - default: true
+        ## Set to `false` to disable the collection of commands in your SQL statements.
+        ## Requires `collect_metadata: true`.
+        ##
+        ## Examples: SELECT, UPDATE, DELETE, etc.
+        #
+        # collect_commands: true
+
+        ## @param collect_comments - boolean - optional - default: true
+        ## Set to `false` to disable the collection of comments in your SQL statements.
+        ## Requires `collect_metadata: true`.
+        #
+        # collect_comments: true
+
+        ## @param keep_sql_alias - boolean - optional - default: true
+        ## Set to `true` to keep sql aliases in obfuscated SQL statements. Examples of aliases are
+        ## `with select 1 as alias`, `select column as other_name`, or `select * from table t`.
+        ## When `true` these aliases will not be removed.
+        #
+        # keep_sql_alias: true
+
+        ## @param keep_dollar_quoted_func - boolean - optional - default: true
+        ## Set to `true` to prevent dollar quoted function strings (e.g. `$func$`) from being removed.
+        ## When not removed, the sql content of dollar quoted func strings will be obfuscated.
+        ## Only strings with the tag `$func$` are supported.
+        #
+        # keep_dollar_quoted_func: true
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
@@ -266,14 +488,30 @@ instances:
     #
     # empty_default_hostname: false
 
+    ## @param disable_generic_tags - boolean - optional - default: false
+    ## The integration will stop sending server tag as is reduntant with host tag
+    #
+    disable_generic_tags: true
+
+    ## @param metric_patterns - mapping - optional
+    ## A mapping of metrics to include or exclude, with each entry being a regular expression.
+    ##
+    ## Metrics defined in `exclude` will take precedence in case of overlap.
+    #
+    # metric_patterns:
+    #   include:
+    #   - <INCLUDE_REGEX>
+    #   exclude:
+    #   - <EXCLUDE_REGEX>
+
 ## Log Section
 ##
-## type - required - Type of log input source (tcp / udp / file / windows_event)
+## type - required - Type of log input source (tcp / udp / file / windows_event).
 ## port / path / channel_path - required - Set port if type is tcp or udp.
 ##                                         Set path if type is file.
 ##                                         Set channel_path if type is windows_event.
-## source  - required - Attribute that defines which Integration sent the logs.
-## encoding - optional - For file specifies the file encoding, default is utf-8, other
+## source  - required - Attribute that defines which integration sent the logs.
+## encoding - optional - For file specifies the file encoding. Default is utf-8. Other
 ##                       possible values are utf-16-le and utf-16-be.
 ## service - optional - The name of the service that generates the log.
 ##                      Overrides any `service` defined in the `init_config` section.

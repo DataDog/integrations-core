@@ -1,20 +1,20 @@
-# Agent Check: Kafka Consumer
+# Kafka Consumer Integration
 
-![Kafka Dashboard][111]
+![Kafka Dashboard][1]
 
 ## Overview
 
 This Agent check only collects metrics for message offsets. If you want to collect JMX metrics from the Kafka brokers or Java-based consumers/producers, see the kafka check.
 
-This check fetches the highwater offsets from the Kafka brokers, consumer offsets that are stored in kafka or zookeeper (for old-style consumers), and the calculated consumer lag (which is the difference between the broker offset and the consumer offset).
+This check fetches the highwater offsets from the Kafka brokers, consumer offsets that are stored in Kafka or zookeeper (for old-style consumers), and the calculated consumer lag (which is the difference between the broker offset and the consumer offset).
 
-**Note:** This integration ensures that consumer offsets are checked before broker offsets because worst case is that consumer lag is a little overstated. Doing it the other way around can understate consumer lag to the point of having negative values, which is a dire scenario usually indicating messages are being skipped.
+**Note:** This integration ensures that consumer offsets are checked before broker offsets because worst case is that consumer lag is a little overstated. Doing it in reverse can understate consumer lag to the point of having negative values, which is a dire scenario usually indicating messages are being skipped.
 
 ## Setup
 
 ### Installation
 
-The Agent's Kafka consumer check is included in the [Datadog Agent][112] package, so you don't need to install anything else on your Kafka nodes.
+The Agent's Kafka consumer check is included in the [Datadog Agent][2] package. No additional installation is needed on your Kafka nodes.
 
 ### Configuration
 
@@ -27,33 +27,33 @@ To configure this check for an Agent running on a host:
 
 ##### Metric collection
 
-1. Edit the `kafka_consumer.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][114]. See the [sample kafka_consumer.d/conf.yaml][113] for all available configuration options.
+1. Edit the `kafka_consumer.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3]. See the [sample kafka_consumer.d/conf.yaml][4] for all available configuration options.
 
-2. [Restart the Agent][115].
+2. [Restart the Agent][5].
 
 ##### Log collection
 
-This check does not collect additional logs. To collect logs from Kafka brokers, see [log collection instructions for Kafka][116].
+This check does not collect additional logs. To collect logs from Kafka brokers, see [log collection instructions for Kafka][6].
 
 <!-- xxz tab xxx -->
 <!-- xxx tab "Containerized" xxx -->
 
 #### Containerized
 
-For containerized environments, see the [Autodiscovery with JMX][117] guide.
+For containerized environments, see the [Autodiscovery with JMX][7] guide.
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
 ### Validation
 
-[Run the Agent's status subcommand][118] and look for `kafka_consumer` under the Checks section.
+[Run the Agent's status subcommand][8] and look for `kafka_consumer` under the Checks section.
 
 ## Data Collected
 
 ### Metrics
 
-See [metadata.csv][119] for a list of metrics provided by this check.
+See [metadata.csv][9] for a list of metrics provided by this check.
 
 ### Events
 
@@ -66,28 +66,65 @@ The Kafka-consumer check does not include any service checks.
 
 ## Troubleshooting
 
-- [Troubleshooting and Deep Dive for Kafka][1110]
-- [Agent failed to retrieve RMIServer stub][1111]
-- [Producer and Consumer metrics don't appear in my Datadog application][1112]
+- [Troubleshooting and Deep Dive for Kafka][10]
+- [Agent failed to retrieve RMIServer stub][11]
+
+**Kerberos GSSAPI Authentication**
+
+Depending on your Kafka cluster's Kerberos setup, you may need to configure the following:
+
+* Kafka client configured for the Datadog Agent to connect to the Kafka broker. The Kafka client should be added as a Kerberos principal and added to a Kerberos keytab. The Kafka client should also have a valid kerberos ticket. 
+* TLS certificate to authenticate a secure connection to the Kafka broker.
+  * If JKS keystore is used, a certificate needs to be exported from the keystore and the file path should be configured with the applicable `tls_cert` and/or `tls_ca_cert` options. 
+  * If a private key is required to authenticate the certificate, it should be configured with the `tls_private_key` option. If applicable, the private key password should be configured with the `tls_private_key_password`. 
+* `KRB5_CLIENT_KTNAME` environment variable pointing to the Kafka client's Kerberos keytab location if it differs from the default path (for example, `KRB5_CLIENT_KTNAME=/etc/krb5.keytab`)
+* `KRB5CCNAME` environment variable pointing to the Kafka client's Kerberos credentials ticket cache if it differs from the default path (for example, `KRB5CCNAME=/tmp/krb5cc_xxx`)
+* If the Datadog Agent is unable to access the environment variables, configure the environment variables in a Datadog Agent service configuration override file for your operating system. The procedure for modifying the Datadog Agent service unit file may vary for different Linux operating systems. For example, in a Linux `systemd` environment: 
+
+**Linux Systemd Example**
+
+1. Configure the environment variables in an environment file.
+   For example: `/path/to/environment/file`
+
+  ```
+  KRB5_CLIENT_KTNAME=/etc/krb5.keytab
+  KRB5CCNAME=/tmp/krb5cc_xxx
+  ```
+
+2. Create a Datadog Agent service configuration override file: `sudo systemctl edit datadog-agent.service`
+
+3. Configure the following in the override file:
+
+  ```
+  [Service]
+  EnvironmentFile=/path/to/environment/file
+  ```
+
+4. Run the following commands to reload the systemd daemon, datadog-agent service, and Datadog Agent:
+
+```
+sudo systemctl daemon-reload
+sudo systemctl restart datadog-agent.service
+sudo service datadog-agent restart
+```
 
 ## Further Reading
 
-- [Monitoring Kafka performance metrics][1113]
-- [Collecting Kafka performance metrics][1114]
-- [Monitoring Kafka with Datadog][1115]
+- [Monitoring Kafka performance metrics][13]
+- [Collecting Kafka performance metrics][14]
+- [Monitoring Kafka with Datadog][15]
 
-[111]: https://raw.githubusercontent.com/DataDog/integrations-core/master/kafka_consumer/images/kafka_dashboard.png
-[112]: https://app.datadoghq.com/account/settings#agent
-[113]: https://github.com/DataDog/integrations-core/blob/master/kafka_consumer/datadog_checks/kafka_consumer/data/conf.yaml.example
-[114]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
-[115]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[116]: https://docs.datadoghq.com/integrations/kafka/#log-collection
-[117]: https://docs.datadoghq.com/agent/guide/autodiscovery-with-jmx/?tab=containerizedagent
-[118]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[119]: https://github.com/DataDog/integrations-core/blob/master/kafka_consumer/metadata.csv
-[1110]: https://docs.datadoghq.com/integrations/faq/troubleshooting-and-deep-dive-for-kafka/
-[1111]: https://docs.datadoghq.com/integrations/faq/agent-failed-to-retrieve-rmierver-stub/
-[1112]: https://docs.datadoghq.com/integrations/faq/producer-and-consumer-metrics-don-t-appear-in-my-datadog-application/
-[1113]: https://www.datadoghq.com/blog/monitoring-kafka-performance-metrics
-[1114]: https://www.datadoghq.com/blog/collecting-kafka-performance-metrics
-[1115]: https://www.datadoghq.com/blog/monitor-kafka-with-datadog
+[1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/kafka_consumer/images/kafka_dashboard.png
+[2]: https://app.datadoghq.com/account/settings#agent
+[3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
+[4]: https://github.com/DataDog/integrations-core/blob/master/kafka_consumer/datadog_checks/kafka_consumer/data/conf.yaml.example
+[5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[6]: https://docs.datadoghq.com/integrations/kafka/#log-collection
+[7]: https://docs.datadoghq.com/agent/guide/autodiscovery-with-jmx/?tab=containerizedagent
+[8]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[9]: https://github.com/DataDog/integrations-core/blob/master/kafka_consumer/metadata.csv
+[10]: https://docs.datadoghq.com/integrations/faq/troubleshooting-and-deep-dive-for-kafka/
+[11]: https://docs.datadoghq.com/integrations/guide/agent-failed-to-retrieve-rmiserver-stub/
+[13]: https://www.datadoghq.com/blog/monitoring-kafka-performance-metrics
+[14]: https://www.datadoghq.com/blog/collecting-kafka-performance-metrics
+[15]: https://www.datadoghq.com/blog/monitor-kafka-with-datadog

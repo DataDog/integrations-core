@@ -13,7 +13,59 @@ COMPOSE_FILE = os.path.join(HERE, 'docker', 'docker-compose.yaml')
 # get_docker_hostname is still useful to test locally.
 HOST = "127.0.0.1"
 PORT = 3000
+EXPORTER_PORT = 9145
 VERSION = os.environ.get('AEROSPIKE_VERSION')
+
+OPENMETRICS_V2_INSTANCE = {
+    'openmetrics_endpoint': 'http://{}:{}/metrics'.format(HOST, EXPORTER_PORT),
+    'tags': ['openmetrics_instance'],
+}
+
+EXPECTED_PROMETHEUS_METRICS = [
+    'aerospike.namespace.client_delete_error.count',
+    'aerospike.namespace.client_read_error.count',
+    'aerospike.namespace.client_udf_error.count',
+    'aerospike.namespace.client_write_error.count',
+    'aerospike.namespace.clock_skew_stop_writes',
+    'aerospike.namespace.dead_partitions',
+    'aerospike.namespace.device_available_pct',
+    'aerospike.namespace.hwm_breached',
+    'aerospike.namespace.memory_free_pct',
+    'aerospike.namespace.memory_used_bytes',
+    'aerospike.namespace.scan_aggr_error.count',
+    'aerospike.namespace.scan_basic_error.count',
+    'aerospike.namespace.scan_ops_bg_error.count',
+    'aerospike.namespace.scan_udf_bg_error.count',
+    'aerospike.namespace.stop_writes',
+    'aerospike.namespace.storage_engine_file_write_q',
+    'aerospike.namespace.unavailable_partitions',
+    'aerospike.node_stats.batch_index_error.count',
+    'aerospike.node_stats.client_connections',
+    'aerospike.node_stats.cluster_size',
+    'aerospike.node_stats.heap_efficiency_pct',
+    'aerospike.node_stats.rw_in_progress',
+    'aerospike.node_stats.system_free_mem_pct',
+    'aerospike.namespace.storage_engine_file_defrag_q',
+]
+
+EXPECTED_PROMETHEUS_METRICS_5_6 = [
+    'aerospike.node_stats.client_connections_opened.count',
+    'aerospike.node_stats.fabric_connections_opened.count',
+    'aerospike.node_stats.heartbeat_connections_opened.count',
+]
+
+PROMETHEUS_XDR_METRICS = [
+    'aerospike.xdr.abandoned.count',
+    'aerospike.xdr.lag',
+    'aerospike.xdr.lap_us',
+    'aerospike.xdr.latency_ms',
+    'aerospike.xdr.recoveries.count',
+    'aerospike.xdr.recoveries_pending',
+    'aerospike.xdr.retry_conn_reset.count',
+    'aerospike.xdr.retry_dest.count',
+    'aerospike.xdr.retry_no_node.count',
+    'aerospike.xdr.success.count',
+]
 
 NAMESPACE_METRICS = [
     'objects',
@@ -31,9 +83,19 @@ TPS_METRICS = [
     'tps.read',
 ]
 
-SET_METRICS = ['tombstones', 'memory_data_bytes', 'truncate_lut', 'objects', 'stop_writes_count']
+LEGACY_SET_METRICS = [
+    'tombstones',
+    'memory_data_bytes',
+    'truncate_lut',
+    'objects',
+    'stop_writes_count',
+    'disable_eviction',
+]
 
-ALL_METRICS = NAMESPACE_METRICS + SET_METRICS
+SET_METRICS = ['enable_index', 'index_populating', 'sindexes']
+SET_METRICS.extend(LEGACY_SET_METRICS)
+
+ALL_METRICS = NAMESPACE_METRICS + LEGACY_SET_METRICS
 
 STATS_METRICS = [
     'cluster_size',

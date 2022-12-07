@@ -35,6 +35,14 @@ files:
       value:
         type: boolean
         example: false
+    - name: detailed_index_stats
+      description: |
+        If you want to obtain index-specific stats, use this flag with `cluster_stats` and `pshard_stats` set to true.
+        Without this flag you only get stats from `_all`.
+        Do not use it if you are pointing to localhost.
+      value:
+        type: boolean
+        example: false
     - name: index_stats
       description: Set "index_stats" to true to collect metrics for individual indices.
       value:
@@ -55,7 +63,7 @@ files:
     - name: slm_stats
       description: | 
         Set "slm_stats" to true to collect statistics about Snapshot Lifcycle Management.
-        The user must have `manage_slm` cluster privilege to get these metrics.
+        The user must have the `read_slm` cluster privilege to get these metrics.
       value:
         type: boolean
         example: false
@@ -75,7 +83,7 @@ files:
         example: true
     - name: cat_allocation_stats
       description: |
-        Enable to collect Elastic Cat Allocation metrics. Available only for Elasticsearch 7.2 or higher.
+        Enable to collect Elastic Cat Allocation metrics. Available only for Elasticsearch 5.0 or higher.
         Ref: https://www.elastic.co/guide/en/elasticsearch/reference/current/cat-allocation.html.
       value:
         type: boolean
@@ -102,6 +110,78 @@ files:
         display_default: false
         example: true
       enabled: true
+    - name: custom_queries
+      description: |
+        Run custom queries for Elasticsearch. Each custom query endpoint can collect multiple metrics and tags.
+        Note: Each custom query requires an `endpoint`, `data_path`, and `columns` parameter. Each `columns` parameter
+        should have at least one value containing `name` and `value_path`.
+
+        Each query can have the following parameters:
+
+        1. endpoint - The Elasticsearch API endpoint to query.
+
+        2. data_path - The JSON path up to, but not including, the metric. For example, if querying for size of parent
+                       circuit breaker, the full path is 'breakers.parent.estimated_size_in_bytes', which means the
+                       `data_path` is 'breakers.parent'.
+
+        3. columns - The list representing the data to be collected from the JSON query. There are two required pieces
+                     of data:
+                       a. value_path - This is the JSON path from the `data_path` to the metric. For example, if
+                                       querying for size of parent circuit breaker, the `value_path` is
+                                       `estimated_size_in_bytes`.
+                       b. name - The full metric name sent to Datadog. If `type` is `tag`, this column is considered a
+                                 tag and applied to every metric collected by this particular query.
+
+                       c. type (optional) - An optional parameter to designates the type of data sent. Possible values
+                                            for `type` include `gauge`, `monotonic_count`, `rate`, and `tag`, with
+                                            `gauge` being the default.
+
+        4. payload (optional) - An optional payload can be included when querying the endpoint. This turns the GET
+                                request into a POST request, so a read-only user should be used when writing
+                                custom queries with a payload. Use YAML formatting when including a payload.
+
+        Example:
+        - endpoint: /_search
+          data_path: aggregations.genres.buckets
+          payload:
+            aggs:
+              genres:
+                terms:
+                  field: "id"
+          columns:
+          - value_path: key
+            name: id
+            type: tag
+          - value_path: doc_count
+            name: elasticsearch.doc_count
+          tags:
+          - custom_tag:1
+      value:
+        type: array
+        items:
+          type: object
+          properties:
+            - name: endpoint
+              type: string
+            - name: data_path
+              type: string
+            - name: payload
+              type: object
+            - name: columns
+              type: array
+              items:
+                type: object
+                properties:
+                  - name: value_path
+                    type: string
+                  - name: name
+                    type: string
+                  - name: type
+                    type: string
+            - name: tags
+              type: array
+              items:
+                type: string
     - template: instances/default
     - template: instances/http
   - template: logs

@@ -1,0 +1,103 @@
+Component,Origin,License,Copyright
+JPype1,PyPI,Apache-2.0,Steve Menard
+JayDeBeApi,PyPI,LGPL-3.0-only,Bastian Bowe
+PyJWT,PyPI,MIT,Jose Padilla
+PyMySQL,PyPI,MIT,yutaka.matsubara
+PySocks,PyPI,BSD-3-Clause,Anorov
+PyYAML,PyPI,MIT,Kirill Simonov
+Pyro4,PyPI,MIT,Irmen de Jong
+adodbapi,PyPI,LGPL-2.1-only,"Henrik Ekelund, Vernon Cole, et.al."
+aerospike,PyPI,Apache-2.0,"Aerospike, Inc."
+aws-requests-auth,PyPI,BSD-3-Clause,David Muller
+beautifulsoup4,PyPI,MIT,Leonard Richardson
+binary,PyPI,Apache-2.0,Ofek Lev
+binary,PyPI,MIT,Ofek Lev
+boto,PyPI,MIT,Mitch Garnaat
+boto3,PyPI,Apache-2.0,Amazon Web Services
+botocore,PyPI,Apache-2.0,Amazon Web Services
+cachetools,PyPI,MIT,Thomas Kemmer
+check-postgres,"https://github.com/bucardo/",BSD-2-Clause,Greg Sabino Mullane
+clickhouse-cityhash,PyPI,MIT,Alexander [Amper] Marshalov
+clickhouse-driver,PyPI,MIT,Konstantin Lebedev
+contextlib2,PyPI,PSF,Nick Coghlan
+cryptography,PyPI,Apache-2.0,The Python Cryptographic Authority and individual contributors | The cryptography developers
+cryptography,PyPI,BSD-3-Clause,The Python Cryptographic Authority and individual contributors | The cryptography developers
+cx-Oracle,PyPI,BSD-3-Clause,""Anthony Tuininga", | Anthony Tuininga"
+ddtrace,PyPI,BSD-3-Clause,"Datadog, Inc."
+dnspython,PyPI,ISC,Bob Halley
+enum34,PyPI,BSD-3-Clause,Ethan Furman
+flup,Vendor,BSD-3-Clause,Allan Saddi
+flup-py3,Vendor,BSD-3-Clause,Allan Saddi
+foundationdb,PyPI,Apache-2.0,FoundationDB
+futures,PyPI,PSF,Brian Quinlan
+gearman,PyPI,Apache-2.0,Matthew Tai
+gssapi,PyPI,ISC,The Python GSSAPI Team
+immutables,PyPI,Apache-2.0,MagicStack Inc
+in-toto,PyPI,Apache-2.0,New York University: Secure Systems Lab
+ipaddress,PyPI,PSF,Philipp Hagemeister
+jellyfish,PyPI,BSD-3-Clause,
+kafka-python,PyPI,Apache-2.0,Dana Powers
+kazoo,PyPI,Apache-2.0,Kazoo team
+keystoneauth1,PyPI,Apache-2.0,OpenStack
+kubernetes,PyPI,Apache-2.0,Kubernetes
+ldap3,PyPI,LGPL-3.0-only,Giovanni Cannata
+lxml,PyPI,BSD-3-Clause,lxml dev team
+lz4,PyPI,BSD-3-Clause,Jonathan Underwood
+mmh3,PyPI,CC0-1.0,Hajime Senuma
+oauthlib,PyPI,BSD-3-Clause,The OAuthlib Community
+openstacksdk,PyPI,Apache-2.0,OpenStack
+orjson,PyPI,Apache-2.0,ijl <ijl@mailbox.org>
+orjson,PyPI,MIT,ijl <ijl@mailbox.org>
+packaging,PyPI,Apache-2.0,Donald Stufft and individual contributors
+packaging,PyPI,BSD-2-Clause,Donald Stufft and individual contributors
+packaging,PyPI,BSD-3-Clause,Donald Stufft and individual contributors
+paramiko,PyPI,LGPL-2.1-only,Jeff Forcier
+ply,PyPI,BSD-3-Clause,David Beazley
+prometheus-client,PyPI,Apache-2.0,Brian Brazil
+protobuf,PyPI,BSD-3-Clause,protobuf@googlegroups.com
+psutil,PyPI,BSD-3-Clause,Giampaolo Rodola
+psycopg2-binary,PyPI,BSD-3-Clause,Federico Di Gregorio
+psycopg2-binary,PyPI,LGPL-3.0-only,Federico Di Gregorio
+pyasn1,PyPI,BSD-3-Clause,Ilya Etingof
+pycryptodomex,PyPI,BSD-2-Clause,Helder Eijs
+pycryptodomex,PyPI,Unlicense,Helder Eijs
+pydantic,PyPI,MIT,Samuel Colvin
+pymongo,PyPI,Apache-2.0,The MongoDB Python Team
+pymqi,PyPI,PSF,Zato Source s.r.o.
+pyodbc,PyPI,MIT,Michael Kleehammer
+pysmi,PyPI,BSD-3-Clause,Ilya Etingof
+pysnmp,PyPI,BSD-3-Clause,Ilya Etingof
+pysnmp-mibs,PyPI,BSD-3-Clause,Ilya Etingof <ilya@glas.net>
+python-binary-memcached,PyPI,MIT,Jayson Reis
+python-dateutil,PyPI,Apache-2.0,Gustavo Niemeyer
+python-dateutil,PyPI,BSD-3-Clause,Gustavo Niemeyer
+python3-gearman,PyPI,Apache-2.0,
+pyvmomi,PyPI,Apache-2.0,"VMware, Inc."
+pywin32,PyPI,PSF,Mark Hammond (et al)
+redis,PyPI,MIT,Andy McCurdy | Redis Inc.
+requests,PyPI,Apache-2.0,Kenneth Reitz
+requests-kerberos,PyPI,ISC,"Ian Cordasco, Cory Benfield, Michael Komitee"
+requests-oauthlib,PyPI,BSD-3-Clause,Kenneth Reitz
+requests-oauthlib,PyPI,ISC,Kenneth Reitz
+requests-toolbelt,PyPI,Apache-2.0,"Ian Cordasco, Cory Benfield"
+requests-unixsocket,PyPI,Apache-2.0,Marc Abramowitz
+requests_ntlm,PyPI,ISC,Ben Toews
+rethinkdb,PyPI,Apache-2.0,RethinkDB.
+scandir,PyPI,BSD-3-Clause,Ben Hoyt
+securesystemslib,PyPI,MIT,https://www.updateframework.com
+selectors34,PyPI,PSF,Berker Peksag
+semver,PyPI,BSD-3-Clause,Kostiantyn Rybnikov
+serpent,PyPI,MIT,Irmen de Jong
+service-identity,PyPI,MIT,Hynek Schlawack
+simplejson,PyPI,AFL-3.0,Bob Ippolito
+simplejson,PyPI,MIT,Bob Ippolito
+six,PyPI,MIT,Benjamin Peterson
+snowflake-connector-python,PyPI,Apache-2.0,"Snowflake, Inc"
+supervisor,PyPI,BSD-3-Clause-Modification,Chris McDonough
+tuf,PyPI,Apache-2.0,https://www.updateframework.com
+tuf,PyPI,MIT,https://www.updateframework.com
+typing,PyPI,PSF,"Guido van Rossum, Jukka Lehtosalo, Łukasz Langa, Ivan Levkivskyi"
+uptime,PyPI,BSD-2-Clause,Koen Crolla
+vertica-python,PyPI,Apache-2.0,"Justin Berka, Alex Kim, Siting Ren"
+win-inet-pton,PyPI,Unlicense,Ryan Vennell
+wrapt,PyPI,BSD-3-Clause,Graham Dumpleton

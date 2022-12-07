@@ -7,6 +7,7 @@ import time
 
 import pytest
 import requests
+from six import PY2
 
 from datadog_checks.dev import LazyFunction, TempDir, docker_run, run_command
 from datadog_checks.dev.ci import running_on_ci
@@ -15,8 +16,15 @@ from datadog_checks.dev.fs import create_file
 from datadog_checks.dev.utils import ON_WINDOWS
 from datadog_checks.vault import Vault
 
-from .common import COMPOSE_FILE, HEALTH_ENDPOINT, INSTANCES, get_vault_server_config_file
-from .utils import get_client_token_path, set_client_token_path
+from .common import COMPOSE_FILE, HEALTH_ENDPOINT, INSTANCES, VAULT_VERSION, get_vault_server_config_file
+
+
+@pytest.fixture
+def use_openmetrics(request):
+    if request.param and PY2:
+        pytest.skip('This version of the integration is only available when using Python 3.')
+
+    return request.param
 
 
 @pytest.fixture(scope='session')
@@ -32,10 +40,16 @@ def global_tags():
 
 
 @pytest.fixture(scope='session')
-def instance():
-    def get_instance():
+def instance(dd_get_state):
+    def get_instance(use_auth_file=True):
         inst = INSTANCES['main'].copy()
-        inst['client_token_path'] = get_client_token_path()
+
+        if use_auth_file:
+            inst['client_token_path'] = dd_get_state('client_token_path')
+        else:
+            with open(dd_get_state('client_token_path'), 'r') as auth_file:
+                inst['client_token'] = auth_file.read()
+
         return inst
 
     return get_instance
@@ -49,14 +63,22 @@ def no_token_instance():
 
 
 @pytest.fixture(scope='session')
-def e2e_instance():
-    inst = INSTANCES['main'].copy()
-    inst['client_token_path'] = '/home/vault-sink/token'
-    return inst
+def e2e_instance(dd_get_state):
+    def get_instance(use_auth_file=True):
+        inst = INSTANCES['main'].copy()
+
+        if use_auth_file:
+            inst['client_token_path'] = '/home/vault-sink/token'
+        else:
+            with open(dd_get_state('client_token_path'), 'r') as auth_file:
+                inst['client_token'] = auth_file.read()
+        return inst
+
+    return get_instance
 
 
 @pytest.fixture(scope='session')
-def dd_environment(e2e_instance):
+def dd_environment(e2e_instance, dd_save_state):
     with TempDir('vault-jwt') as jwt_dir, TempDir('vault-sink') as sink_dir:
         token_file = os.path.join(sink_dir, 'token')
 
@@ -67,14 +89,19 @@ def dd_environment(e2e_instance):
 
         with docker_run(
             COMPOSE_FILE,
-            env_vars={'JWT_DIR': jwt_dir, 'SINK_DIR': sink_dir, 'SERVER_CONFIG_FILE': get_vault_server_config_file()},
+            env_vars={
+                'JWT_DIR': jwt_dir,
+                'SINK_DIR': sink_dir,
+                'SERVER_CONFIG_FILE': get_vault_server_config_file(),
+                'VAULT_VERSION': VAULT_VERSION,
+            },
             conditions=[WaitAndUnsealVault(HEALTH_ENDPOINT), ApplyPermissions(token_file)],
             sleep=10,
             mount_logs=True,
         ):
-            set_client_token_path(token_file)
+            dd_save_state('client_token_path', token_file)
 
-            yield e2e_instance, {'docker_volumes': ['{}:/home/vault-sink'.format(sink_dir)]}
+            yield e2e_instance(), {'docker_volumes': ['{}:/home/vault-sink'.format(sink_dir)]}
 
 
 class ApplyPermissions(LazyFunction):

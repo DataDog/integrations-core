@@ -15,4 +15,9 @@ def dd_environment():
     with docker_run(
         compose_file=os.path.join(common.HERE, 'compose', 'docker-compose.yml'), endpoints=common.STATUS_URL
     ):
-        yield common.instance_1
+        yield common.openmetrics_instance
+
+
+@pytest.fixture
+def instance_openmetrics_v2():
+    return common.openmetrics_instance

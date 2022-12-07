@@ -1,0 +1,7 @@
+- name: use_localized_counters
+  description: |
+    Whether performance object and counter names should refer to their
+    locale-specific versions rather than their English name.
+  value:
+    example: false
+    type: boolean

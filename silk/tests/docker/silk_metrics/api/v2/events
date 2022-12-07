@@ -1,0 +1,367 @@
+{
+   "hits":[
+      {
+         "event_id":11,
+         "id":2,
+         "labels":"EVENT, ACTION",
+         "level":"INFO",
+         "message":"Event logging started",
+         "name":"EVENT_LOGGING_STARTED",
+         "timestamp":1638831003.782305,
+         "user":"Internal"
+      },
+      {
+         "event_id":259,
+         "id":6,
+         "labels":"ADMIN_CONNECTIVITY",
+         "level":"ERROR",
+         "message":"There is a problem sending events to: kaminario-support",
+         "name":"EVENT_SENDING_PROBLEM",
+         "timestamp":1638831064.073235,
+         "user":"Internal"
+      },
+      {
+         "event_id":59,
+         "id":8,
+         "labels":"HARDWARE, RECOVER",
+         "level":"INFO",
+         "message":"Standby management setup completed on server kblock01-knode02",
+         "name":"SMC_SETUP_COMPLETED",
+         "timestamp":1638831141.727602,
+         "user":"Internal"
+      },
+      {
+         "event_id":657,
+         "id":14,
+         "labels":"HARDWARE, RECOVER",
+         "level":"INFO",
+         "message":"Primary management setup completed on server kblock01-knode01",
+         "name":"PMC_SETUP_COMPLETED",
+         "timestamp":1638831160.6733799,
+         "user":"Internal"
+      },
+      {
+         "event_id":382,
+         "id":15,
+         "labels":"HARDWARE, ACTION",
+         "level":"INFO",
+         "message":"RAID format command issued on pair kblock01",
+         "name":"PAIR_RAID_FORMAT_CMD",
+         "timestamp":1638831255.5510681,
+         "user":"root"
+      },
+      {
+         "event_id":91,
+         "id":16,
+         "labels":"SYSTEM, STATE",
+         "level":"INFO",
+         "message":"System startup initiated",
+         "name":"SYSTEM_STARTUP_INITIATED",
+         "timestamp":1638831263.6104901,
+         "user":"root"
+      },
+      {
+         "event_id":453,
+         "id":19,
+         "labels":"HARDWARE",
+         "level":"INFO",
+         "message":"kblock01-knode01-fc02 link status has changed to up. (SN: CN895110FY)",
+         "name":"HW_NIC_PORT_LINK_CHANGED",
+         "timestamp":1638831534.0830541,
+         "user":"Internal"
+      },
+      {
+         "event_id":453,
+         "id":18,
+         "labels":"HARDWARE",
+         "level":"INFO",
+         "message":"kblock01-knode01-fc01 link status has changed to up. (SN: CN895110FY)",
+         "name":"HW_NIC_PORT_LINK_CHANGED",
+         "timestamp":1638831533.9846411,
+         "user":"Internal"
+      },
+      {
+         "event_id":453,
+         "id":23,
+         "labels":"HARDWARE",
+         "level":"INFO",
+         "message":"kblock01-knode02-fc01 link status has changed to up. (SN: CN80221126)",
+         "name":"HW_NIC_PORT_LINK_CHANGED",
+         "timestamp":1638831547.0073609,
+         "user":"Internal"
+      },
+      {
+         "event_id":90,
+         "id":22,
+         "labels":"SYSTEM, STATE",
+         "level":"INFO",
+         "message":"System startup completed successfully",
+         "name":"SYSTEM_STARTUP_COMPLETED",
+         "timestamp":1638831534.353842,
+         "user":"root"
+      },
+      {
+         "event_id":366,
+         "id":25,
+         "labels":"CONFIGURE",
+         "level":"INFO",
+         "message":"External IP configuration was changed. Current: ip=10.30.1.60, static1=10.30.1.61, static2=10.30.1.62, netmask=255.255.255.0",
+         "name":"EXTERNAL_IP_CHANGED",
+         "timestamp":1638831601.4552791,
+         "user":"Internal"
+      },
+      {
+         "event_id":453,
+         "id":24,
+         "labels":"HARDWARE",
+         "level":"INFO",
+         "message":"kblock01-knode02-fc02 link status has changed to up. (SN: CN80221126)",
+         "name":"HW_NIC_PORT_LINK_CHANGED",
+         "timestamp":1638831547.0584249,
+         "user":"Internal"
+      },
+      {
+         "event_id":453,
+         "id":27,
+         "labels":"HARDWARE",
+         "level":"INFO",
+         "message":"kblock01-knode01-dataport02 link status has changed to up. (SN: 0c:c4:7a:65:c1:02)",
+         "name":"HW_NIC_PORT_LINK_CHANGED",
+         "timestamp":1638831736.778002,
+         "user":"Internal"
+      },
+      {
+         "event_id":225,
+         "id":29,
+         "labels":"SYSTEM, CONFIGURE",
+         "level":"INFO",
+         "message":"System name changed to K2-5501",
+         "name":"SYSTEM_NAME_CHANGED",
+         "timestamp":1638831890.2539079,
+         "user":"root"
+      },
+      {
+         "event_id":660,
+         "id":30,
+         "labels":"SYSTEM, CONFIGURE",
+         "level":"INFO",
+         "message":"IP 192.168.201.20 with subnet-mask 255.255.255.0 was created on kblock01-knode01-dataport02 for replication",
+         "name":"NET_IP_CREATED",
+         "timestamp":1638831935.6217289,
+         "user":"Internal"
+      },
+      {
+         "event_id":585,
+         "id":33,
+         "labels":"SYSTEM, CONFIGURE",
+         "level":"INFO",
+         "message":"Peer wan port created for remote machine: 6310, with remote: name kblock01-knode01-wan01, ip 192.168.201.10, by user Internal.",
+         "name":"REPLICATION_WAN_PORT_CREATE",
+         "timestamp":1638831976.3300941,
+         "user":"Internal"
+      },
+      {
+         "event_id":569,
+         "id":32,
+         "labels":"REPLICATION_ARRAY, CONFIGURE",
+         "level":"INFO",
+         "message":"Peer array K2-6310 with mgmt-ip 10.10.1.200 and bandwidth limit 40000 Mb/s was created",
+         "name":"PEER_ARRAY_CREATED",
+         "timestamp":1638831975.6940711,
+         "user":"Internal"
+      },
+      {
+         "event_id":603,
+         "id":31,
+         "labels":"CONFIGURE",
+         "level":"INFO",
+         "message":"Peer array K2-5501 with mgmt-ip 10.30.1.60 and bandwidth limit 40000 Mb/s was created on target machine 6310",
+         "name":"PEER_ARRAY_CREATED_ON_PEER_ARRAY",
+         "timestamp":1638831975.2525971,
+         "user":"Internal"
+      },
+      {
+         "event_id":636,
+         "id":34,
+         "labels":"ADMIN_CONNECTIVITY, REPLICATION, REPLICATION_ARRAY",
+         "level":"INFO",
+         "message":"Peer 6310 full WAN connectivity",
+         "name":"PEER_WAN_FULL_CONNECTIVITY",
+         "timestamp":1638832015.9284639,
+         "user":"Internal"
+      },
+      {
+         "event_id":317,
+         "id":35,
+         "labels":"HOST",
+         "level":"INFO",
+         "message":"Host CentOS was created of os type Linux",
+         "name":"HOST_CREATED",
+         "timestamp":1638832744.8477719,
+         "user":"Internal"
+      },
+      {
+         "event_id":249,
+         "id":36,
+         "labels":"VG, CONFIGURE",
+         "level":"INFO",
+         "message":"Volume group centos-vg was created by admin.Quota-None, capacity reservation-False, capacity policy-None, dedup-False",
+         "name":"VG_CREATED",
+         "timestamp":1638832756.634028,
+         "user":"admin"
+      },
+      {
+         "event_id":27,
+         "id":38,
+         "labels":"VOLUME, CONFIGURE",
+         "level":"INFO",
+         "message":"Logical volume centos-vol1 of size 50.00 GB was created as part of centos-vg",
+         "name":"CREATE_VOLUME",
+         "timestamp":1638832771.3121791,
+         "user":"admin"
+      },
+      {
+         "event_id":27,
+         "id":42,
+         "labels":"VOLUME, CONFIGURE",
+         "level":"INFO",
+         "message":"Logical volume centos-vol3 of size 50.00 GB was created as part of centos-vg",
+         "name":"CREATE_VOLUME",
+         "timestamp":1638832771.9598401,
+         "user":"admin"
+      },
+      {
+         "event_id":27,
+         "id":44,
+         "labels":"VOLUME, CONFIGURE",
+         "level":"INFO",
+         "message":"Logical volume centos-vol4 of size 50.00 GB was created as part of centos-vg",
+         "name":"CREATE_VOLUME",
+         "timestamp":1638832772.3274209,
+         "user":"admin"
+      },
+      {
+         "event_id":27,
+         "id":40,
+         "labels":"VOLUME, CONFIGURE",
+         "level":"INFO",
+         "message":"Logical volume centos-vol2 of size 50.00 GB was created as part of centos-vg",
+         "name":"CREATE_VOLUME",
+         "timestamp":1638832771.640938,
+         "user":"admin"
+      },
+      {
+         "event_id":214,
+         "id":46,
+         "labels":"VOLUME, HOST, CONFIGURE, LUN_MASKING",
+         "level":"INFO",
+         "message":"centos-vol1 mapped to CentOS",
+         "name":"MAPPING_CREATED",
+         "timestamp":1638832779.0527339,
+         "user":"admin"
+      },
+      {
+         "event_id":214,
+         "id":49,
+         "labels":"VOLUME, HOST, CONFIGURE, LUN_MASKING",
+         "level":"INFO",
+         "message":"centos-vol2 mapped to CentOS",
+         "name":"MAPPING_CREATED",
+         "timestamp":1638832779.8748341,
+         "user":"admin"
+      },
+      {
+         "event_id":214,
+         "id":52,
+         "labels":"VOLUME, HOST, CONFIGURE, LUN_MASKING",
+         "level":"INFO",
+         "message":"centos-vol3 mapped to CentOS",
+         "name":"MAPPING_CREATED",
+         "timestamp":1638832780.6219709,
+         "user":"admin"
+      },
+      {
+         "event_id":214,
+         "id":55,
+         "labels":"VOLUME, HOST, CONFIGURE, LUN_MASKING",
+         "level":"INFO",
+         "message":"centos-vol4 mapped to CentOS",
+         "name":"MAPPING_CREATED",
+         "timestamp":1638832781.4359939,
+         "user":"admin"
+      },
+      {
+         "event_id":453,
+         "id":58,
+         "labels":"HARDWARE",
+         "level":"INFO",
+         "message":"kblock01-knode02-fc01 link status has changed to down. (SN: CN80221126)",
+         "name":"HW_NIC_PORT_LINK_CHANGED",
+         "timestamp":1638834150.020282,
+         "user":"Internal"
+      },
+      {
+         "event_id":453,
+         "id":59,
+         "labels":"HARDWARE",
+         "level":"INFO",
+         "message":"kblock01-knode01-fc01 link status has changed to down. (SN: CN895110FY)",
+         "name":"HW_NIC_PORT_LINK_CHANGED",
+         "timestamp":1638834156.7052381,
+         "user":"Internal"
+      },
+      {
+         "event_id":453,
+         "id":60,
+         "labels":"HARDWARE",
+         "level":"INFO",
+         "message":"kblock01-knode02-fc01 link status has changed to up. (SN: CN80221126)",
+         "name":"HW_NIC_PORT_LINK_CHANGED",
+         "timestamp":1638834290.2993691,
+         "user":"Internal"
+      },
+      {
+         "event_id":453,
+         "id":61,
+         "labels":"HARDWARE",
+         "level":"INFO",
+         "message":"kblock01-knode01-fc01 link status has changed to up. (SN: CN895110FY)",
+         "name":"HW_NIC_PORT_LINK_CHANGED",
+         "timestamp":1638834296.9491601,
+         "user":"Internal"
+      },
+      {
+         "event_id":573,
+         "id":62,
+         "labels":"REPLICATION, CONFIGURE",
+         "level":"INFO",
+         "message":"\"centos-vg_src\" session was created as \"Primary\" with array \"K2-6310\", rpo \"7200\", and retention policy type \"Replication_Retention\" for peer volume group \"dr_5501_centos-vg\", target exposure \"Mapped - Not Exposed\"",
+         "name":"SESSION_CREATED",
+         "timestamp":1638834574.5876369,
+         "user":"Internal"
+      },
+      {
+         "event_id":570,
+         "id":63,
+         "labels":"CONFIGURE",
+         "level":"INFO",
+         "message":"Peer Volumes \"dr_5501_centos-vol1,dr_5501_centos-vol2,dr_5501_centos-vol3,dr_5501_centos-vol4\" with peer array K2-6310 were created by admin.",
+         "name":"PEER_VOL_CREATED",
+         "timestamp":1638834575.3007171,
+         "user":"admin"
+      },
+      {
+         "event_id":574,
+         "id":64,
+         "labels":"REPLICATION, CONFIGURE",
+         "level":"INFO",
+         "message":"Starting Replication flow was started by Internal.session ['centos-vg_src'] started replication round",
+         "name":"START_REPLICATION",
+         "timestamp":1638834585.725384,
+         "user":"Internal"
+      }
+   ],
+   "limit":100,
+   "offset":0,
+   "total":36
+}

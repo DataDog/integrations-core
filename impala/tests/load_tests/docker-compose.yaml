@@ -1,0 +1,148 @@
+# This file is based on https://github.com/apache/impala/blob/master/docker/quickstart.yml with minor improvements to make it work OOTB
+
+version: "3"
+services:
+  hms:
+    image: apache/impala:${IMPALA_VERSION}-impala_quickstart_hms
+    # Give the HMS an explicit hostname to avoid issues with docker-compose-generated
+    # hostnames including underscore, which is rejected by Java's URL parser.
+    container_name: hive-metastore
+    command: ["hms"]
+    volumes:
+      # Volume used to store Apache Derby database.
+      - impala-warehouse:/var/lib/hive
+      # Warehouse directory. HMS does file operations so needs access to the
+      # shared volume.
+      - impala-warehouse:/user/hive/warehouse
+      - ./conf:/opt/hive/conf:ro
+    networks:
+      - impala-network
+  statestored:
+    container_name: statestored
+    image: apache/impala:${IMPALA_VERSION}-statestored
+    ports:
+      # Web debug UI
+      - "0.0.0.0:25010:25010"
+    command: ["-v=1"]
+    volumes:
+      - ./conf:/opt/impala/conf:ro
+      - ./logs/statestore:/opt/impala/logs/
+    networks:
+      - impala-network
+  catalogd:
+    container_name: catalogd
+    depends_on:
+      - statestored
+      - hms
+    image: apache/impala:${IMPALA_VERSION}-catalogd
+    ports:
+      # Web debug UI
+      - "0.0.0.0:25020:25020"
+    command: ["-v=1", "-hms_event_polling_interval_s=1", "-invalidate_tables_timeout_s=999999"]
+    volumes:
+      # Warehouse directory. Catalog does file operations so needs access to the
+      # shared volume.
+      - impala-warehouse:/user/hive/warehouse
+      - ./conf:/opt/impala/conf:ro
+      - ./logs/catalog:/opt/impala/logs/
+    networks:
+      - impala-network
+  impalad-1:
+    container_name: impalad-1
+    image: apache/impala:${IMPALA_VERSION}-impalad_coord_exec
+    depends_on:
+      - statestored
+      - catalogd
+    ports:
+      # Beeswax endpoint (deprecated)
+      - "0.0.0.0:21000:21000"
+      # HS2 endpoint
+      - "0.0.0.0:21050:21050"
+      # Web debug UI
+      - "0.0.0.0:25000:25000"
+      # HS2 over HTTP endpoint.
+      - "0.0.0.0:28000:28000"
+    command: [ "-v=1",
+              "-kudu_master_hosts=kudu-master-1:7051",
+              "-mt_dop_auto_fallback=true",
+              "-default_query_options=mt_dop=4,default_file_format=parquet,default_transactional_type=insert_only",
+              "-mem_limit=4gb"]
+    volumes:
+      - impala-warehouse:/user/hive/warehouse
+      - ./conf:/opt/impala/conf:ro
+      - ./logs/daemon-1:/opt/impala/logs/
+    networks:
+      - impala-network
+  impalad-2:
+    container_name: impalad-2
+    image: apache/impala:${IMPALA_VERSION}-impalad_coord_exec
+    depends_on:
+      - statestored
+      - catalogd
+    ports:
+      # Beeswax endpoint (deprecated)
+      - "0.0.0.0:21100:21000"
+      # HS2 endpoint
+      - "0.0.0.0:21150:21050"
+      # Web debug UI
+      - "0.0.0.0:25100:25000"
+      # HS2 over HTTP endpoint.
+      - "0.0.0.0:28100:28000"
+    command: [ "-v=1",
+              "-kudu_master_hosts=kudu-master-1:7051",
+              "-mt_dop_auto_fallback=true",
+              "-default_query_options=mt_dop=4,default_file_format=parquet,default_transactional_type=insert_only",
+              "-mem_limit=4gb"]
+    volumes:
+      - impala-warehouse:/user/hive/warehouse
+      - ./conf:/opt/impala/conf:ro
+      - ./logs/daemon-2:/opt/impala/logs/
+    networks:
+      - impala-network
+  impalad-3:
+    container_name: impalad-3
+    image: apache/impala:${IMPALA_VERSION}-impalad_coord_exec
+    depends_on:
+      - statestored
+      - catalogd
+    ports:
+      # Beeswax endpoint (deprecated)
+      - "0.0.0.0:21200:21000"
+      # HS2 endpoint
+      - "0.0.0.0:21250:21050"
+      # Web debug UI
+      - "0.0.0.0:25200:25000"
+      # HS2 over HTTP endpoint.
+      - "0.0.0.0:28200:28000"
+    command: [ "-v=1",
+              "-kudu_master_hosts=kudu-master-1:7051",
+              "-mt_dop_auto_fallback=true",
+              "-default_query_options=mt_dop=4,default_file_format=parquet,default_transactional_type=insert_only",
+              "-mem_limit=4gb"]
+    volumes:
+      - impala-warehouse:/user/hive/warehouse
+      - ./conf:/opt/impala/conf:ro
+      - ./logs/daemon-3:/opt/impala/logs
+    networks:
+      - impala-network
+  data-loader:
+    container_name: data-loader
+    build: data-loader
+    depends_on:
+      - impalad-1
+      - impalad-2
+      - impalad-3
+    command: ["load_tpcds"]
+    volumes:
+      - impala-warehouse:/user/hive/warehouse
+      - ./conf:/opt/impala/conf:ro
+    networks:
+      - impala-network
+
+volumes:
+  impala-warehouse:
+
+networks:
+  impala-network:
+    # If you do not force the name, it will use `docker_impala-network`, which is rejected by Java's URL parser
+    name: impala-network

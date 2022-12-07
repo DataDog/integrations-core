@@ -8,7 +8,7 @@
                 "type": "toplist",
                 "requests": [
                     {
-                        "q": "top(sum:kubernetes.memory.usage{$scope,$deployment,$daemonset,$cluster,$namespace,!pod_name:no_pod,$label,$service,$node} by {pod_name}, 10, 'mean', 'desc')",
+                        "q": "top(sum:kubernetes.memory.usage{$scope,$deployment,$statefulset,$replicaset,$daemonset,$cluster,$namespace,!pod_name:no_pod,$label,$service,$node} by {pod_name}, 10, 'mean', 'desc')",
                         "style": {
                             "palette": "cool"
                         }
@@ -35,7 +35,7 @@
                 "type": "toplist",
                 "requests": [
                     {
-                        "q": "top(sum:kubernetes.cpu.usage.total{$scope,$deployment,$daemonset,$cluster,$namespace,!pod_name:no_pod,$label,$service,$node} by {pod_name}, 10, 'mean', 'desc')",
+                        "q": "top(sum:kubernetes.cpu.usage.total{$scope,$deployment,$statefulset,$replicaset,$daemonset,$cluster,$namespace,!pod_name:no_pod,$label,$service,$node} by {pod_name}, 10, 'mean', 'desc')",
                         "style": {
                             "palette": "warm"
                         }
@@ -98,7 +98,7 @@
                 "type": "query_value",
                 "requests": [
                     {
-                        "q": "sum:kubernetes_state.deployment.replicas_available{$scope,$deployment,$daemonset,$cluster,$label,$namespace,$service,$node}",
+                        "q": "sum:kubernetes_state.deployment.replicas_available{$scope,$deployment,$cluster,$label,$namespace,$service,$node}",
                         "aggregator": "avg",
                         "conditional_formats": [
                             {
@@ -132,7 +132,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "sum:kubernetes_state.deployment.replicas_available{$scope,$deployment,$daemonset,$service,$label,$cluster,$namespace,$node} by {deployment}",
+                        "q": "sum:kubernetes_state.deployment.replicas_available{$scope,$deployment,$service,$label,$cluster,$namespace,$node} by {kube_deployment}",
                         "display_type": "area",
                         "style": {
                             "palette": "green",
@@ -164,7 +164,7 @@
                 "type": "query_value",
                 "requests": [
                     {
-                        "q": "sum:kubernetes_state.deployment.replicas_desired{$scope,$deployment,$daemonset,$cluster,$label,$namespace,$service,$node}",
+                        "q": "sum:kubernetes_state.deployment.replicas_desired{$scope,$deployment,$cluster,$label,$namespace,$service,$node}",
                         "aggregator": "avg",
                         "conditional_formats": [
                             {
@@ -199,7 +199,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "sum:kubernetes_state.deployment.replicas_desired{$scope,$deployment,$daemonset,$cluster,$label,$namespace,$service,$node} by {deployment}",
+                        "q": "sum:kubernetes_state.deployment.replicas_desired{$scope,$deployment,$cluster,$label,$namespace,$service,$node} by {kube_deployment}",
                         "display_type": "area",
                         "style": {
                             "palette": "purple",
@@ -231,7 +231,7 @@
                 "type": "query_value",
                 "requests": [
                     {
-                        "q": "sum:kubernetes_state.deployment.replicas_unavailable{$scope,$deployment,$daemonset,$cluster,$label,$namespace,$service,$node}",
+                        "q": "sum:kubernetes_state.deployment.replicas_unavailable{$scope,$deployment,$cluster,$label,$namespace,$service,$node}",
                         "aggregator": "avg",
                         "conditional_formats": [
                             {
@@ -270,7 +270,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "sum:kubernetes_state.deployment.replicas_unavailable{$scope,$deployment,$daemonset,$service,$label,$cluster,$namespace,$node} by {deployment}",
+                        "q": "sum:kubernetes_state.deployment.replicas_unavailable{$scope,$deployment,$service,$label,$cluster,$namespace,$node} by {kube_deployment}",
                         "display_type": "area",
                         "style": {
                             "palette": "orange",
@@ -338,8 +338,7 @@
             "id": 12,
             "definition": {
                 "type": "event_stream",
-                "query": "sources:kubernetes $node",
-                "tags_execution": "and",
+                "query": "source:kubernetes $node",
                 "event_size": "s",
                 "time": {
                     "live_span": "1w"
@@ -358,7 +357,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "sum:kubernetes.pods.running{$scope,$deployment,$daemonset,$label,$cluster,$namespace,$service,$node} by {host}",
+                        "q": "sum:kubernetes.pods.running{$scope,$deployment,$statefulset,$replicaset,$daemonset,$label,$cluster,$namespace,$service,$node} by {host}",
                         "display_type": "area",
                         "style": {
                             "palette": "dog_classic",
@@ -393,7 +392,7 @@
                 "type": "hostmap",
                 "requests": {
                     "fill": {
-                        "q": "sum:kubernetes.memory.usage{$scope,$deployment,$daemonset,$namespace,$cluster,$label,$service,$node} by {host}"
+                        "q": "sum:kubernetes.memory.usage{$scope,$deployment,$statefulset,$replicaset,$daemonset,$namespace,$cluster,$label,$service,$node} by {host}"
                     }
                 },
                 "custom_links": [],
@@ -427,21 +426,21 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "sum:kubernetes.network.rx_errors{$scope,$deployment,$daemonset,$namespace,$cluster,$label,$service,$node} by {host}",
+                        "q": "sum:kubernetes.network.rx_errors{$scope,$deployment,$statefulset,$replicaset,$daemonset,$namespace,$cluster,$label,$service,$node} by {host}",
                         "display_type": "bars",
                         "style": {
                             "palette": "warm"
                         }
                     },
                     {
-                        "q": "sum:kubernetes.network.tx_errors{$scope,$deployment,$daemonset,$namespace,$cluster,$label,$service,$node} by {host}",
+                        "q": "sum:kubernetes.network.tx_errors{$scope,$deployment,$statefulset,$replicaset,$daemonset,$namespace,$cluster,$label,$service,$node} by {host}",
                         "display_type": "bars",
                         "style": {
                             "palette": "warm"
                         }
                     },
                     {
-                        "q": "sum:kubernetes.network_errors{$scope,$deployment,$daemonset,$namespace,$cluster,$label,$service,$node} by {host}",
+                        "q": "sum:kubernetes.network_errors{$scope,$deployment,$statefulset,$replicaset,$daemonset,$namespace,$cluster,$label,$service,$node} by {host}",
                         "display_type": "bars",
                         "style": {
                             "palette": "warm",
@@ -473,7 +472,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "sum:kubernetes.cpu.requests{$scope,$deployment,$daemonset,$cluster,$namespace,$label,$service,$node} by {host}",
+                        "q": "sum:kubernetes.cpu.requests{$scope,$deployment,$statefulset,$replicaset,$daemonset,$cluster,$namespace,$label,$service,$node} by {host}",
                         "display_type": "line",
                         "style": {
                             "palette": "warm"
@@ -503,7 +502,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "sum:kubernetes.memory.requests{$scope,$deployment,$daemonset,$cluster,$namespace,$label,$service,$node} by {host}",
+                        "q": "sum:kubernetes.memory.requests{$scope,$deployment,$statefulset,$replicaset,$daemonset,$cluster,$namespace,$label,$service,$node} by {host}",
                         "display_type": "line",
                         "style": {
                             "palette": "cool"
@@ -552,7 +551,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "sum:kubernetes.network.rx_bytes{$scope,$deployment,$daemonset,$cluster,$namespace,$label,$service,$node} by {host}",
+                        "q": "sum:kubernetes.network.rx_bytes{$scope,$deployment,$statefulset,$replicaset,$daemonset,$cluster,$namespace,$label,$service,$node} by {host}",
                         "display_type": "line",
                         "style": {
                             "palette": "purple"
@@ -582,7 +581,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "sum:kubernetes.network.tx_bytes{$scope,$deployment,$daemonset,$namespace,$cluster,$label,$service,$node} by {host}",
+                        "q": "sum:kubernetes.network.tx_bytes{$scope,$deployment,$statefulset,$replicaset,$daemonset,$namespace,$cluster,$label,$service,$node} by {host}",
                         "display_type": "line",
                         "style": {
                             "palette": "green"
@@ -629,8 +628,7 @@
             "id": 22,
             "definition": {
                 "type": "event_timeline",
-                "query": "sources:kubernetes $node",
-                "tags_execution": "and",
+                "query": "source:kubernetes $node",
                 "title": "Number of Kubernetes events per node",
                 "title_size": "16",
                 "title_align": "left",
@@ -651,7 +649,7 @@
                 "type": "hostmap",
                 "requests": {
                     "fill": {
-                        "q": "sum:kubernetes.cpu.usage.total{$scope,$deployment,$daemonset,$namespace,$cluster,$label,$service,$node} by {host}"
+                        "q": "sum:kubernetes.cpu.usage.total{$scope,$deployment,$statefulset,$replicaset,$daemonset,$namespace,$cluster,$label,$service,$node} by {host}"
                     }
                 },
                 "custom_links": [],
@@ -704,7 +702,7 @@
                 "type": "query_value",
                 "requests": [
                     {
-                        "q": "sum:kubernetes_state.daemonset.desired{$scope,$deployment,$daemonset,$cluster,$label,$namespace,$service,$node}",
+                        "q": "sum:kubernetes_state.daemonset.desired{$scope,$daemonset,$cluster,$label,$namespace,$service,$node}",
                         "aggregator": "last",
                         "conditional_formats": [
                             {
@@ -739,7 +737,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "sum:kubernetes_state.daemonset.desired{$scope,$deployment,$daemonset,$service,$namespace,$label,$cluster,$node} by {daemonset}",
+                        "q": "sum:kubernetes_state.daemonset.desired{$scope,$daemonset,$service,$namespace,$label,$cluster,$node} by {kube_daemon_set}",
                         "display_type": "area",
                         "style": {
                             "palette": "purple",
@@ -771,7 +769,7 @@
                 "type": "query_value",
                 "requests": [
                     {
-                        "q": "sum:kubernetes_state.daemonset.ready{$scope,$deployment,$daemonset,$cluster,$label,$namespace,$service,$node}",
+                        "q": "sum:kubernetes_state.daemonset.ready{$scope,$daemonset,$cluster,$label,$namespace,$service,$node}",
                         "aggregator": "last",
                         "conditional_formats": [
                             {
@@ -832,7 +830,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "sum:kubernetes_state.container.running{$scope,$deployment,$daemonset,$service,$namespace,$label,$cluster,$node}",
+                        "q": "sum:kubernetes_state.container.running{$scope,$deployment,$statefulset,$replicaset,$daemonset,$service,$namespace,$label,$cluster,$node}",
                         "display_type": "line",
                         "style": {
                             "palette": "dog_classic",
@@ -841,7 +839,7 @@
                         }
                     },
                     {
-                        "q": "sum:kubernetes_state.container.waiting{$scope,$deployment,$daemonset,$service,$namespace,$label,$cluster,$node}",
+                        "q": "sum:kubernetes_state.container.waiting{$scope,$deployment,$statefulset,$replicaset,$daemonset,$service,$namespace,$label,$cluster,$node}",
                         "display_type": "line",
                         "style": {
                             "palette": "warm",
@@ -850,7 +848,7 @@
                         }
                     },
                     {
-                        "q": "sum:kubernetes_state.container.terminated{$scope,$deployment,$daemonset,$service,$namespace,$label,$cluster,$node}",
+                        "q": "sum:kubernetes_state.container.terminated{$scope,$deployment,$statefulset,$replicaset,$daemonset,$service,$namespace,$label,$cluster,$node}",
                         "display_type": "line",
                         "style": {
                             "palette": "grey",
@@ -859,7 +857,7 @@
                         }
                     },
                     {
-                        "q": "sum:kubernetes_state.container.ready{$scope,$deployment,$daemonset,$service,$namespace,$label,$cluster,$node}",
+                        "q": "sum:kubernetes_state.container.ready{$scope,$deployment,$statefulset,$replicaset,$daemonset,$service,$namespace,$label,$cluster,$node}",
                         "display_type": "line",
                         "style": {
                             "palette": "grey",
@@ -898,7 +896,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "sum:kubernetes_state.replicaset.replicas_ready{$scope,$daemonset,$service,$namespace,$deployment,$label,$cluster,$node} by {replicaset}",
+                        "q": "sum:kubernetes_state.replicaset.replicas_ready{$scope,$service,$namespace,$deployment,$replicaset,$label,$cluster,$node} by {kube_replica_set}",
                         "display_type": "area",
                         "style": {
                             "palette": "purple",
@@ -930,7 +928,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "sum:kubernetes_state.replicaset.replicas_desired{$scope,$daemonset,$service,$namespace,$deployment,$label,$cluster,$node} by {replicaset}-sum:kubernetes_state.replicaset.replicas_ready{$scope,$daemonset,$service,$namespace,$deployment,$label,$cluster,$node} by {replicaset}",
+                        "q": "sum:kubernetes_state.replicaset.replicas_desired{$scope,$service,$namespace,$deployment,$replicaset,$label,$cluster,$node} by {kube_replica_set}-sum:kubernetes_state.replicaset.replicas_ready{$scope,$service,$namespace,$deployment,$replicaset,$label,$cluster,$node} by {kube_replica_set}",
                         "display_type": "area",
                         "style": {
                             "palette": "orange",
@@ -962,7 +960,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "sum:kubernetes.io.read_bytes{$scope,$daemonset,$service,$namespace,$label,$cluster,$deployment,$node} by {replicaset,host}-avg:kubernetes_state.replicaset.replicas_ready{$scope,$daemonset,$service,$namespace,$label,$cluster,$deployment,$node} by {host}",
+                        "q": "sum:kubernetes.io.read_bytes{$scope,$service,$namespace,$deployment,$statefulset,$replicaset,$daemonset,$label,$cluster,$node} by {host}",
                         "display_type": "line",
                         "style": {
                             "palette": "grey",
@@ -994,7 +992,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "sum:kubernetes.io.write_bytes{$scope,$daemonset,$service,$namespace,$label,$cluster,$deployment,$node} by {replicaset,host}-avg:kubernetes_state.replicaset.replicas_ready{$scope,$daemonset,$service,$namespace,$label,$cluster,$deployment,$node} by {host}",
+                        "q": "sum:kubernetes.io.write_bytes{$scope,$service,$namespace,$deployment,$statefulset,$replicaset,$daemonset,$label,$cluster,$node} by {host}",
                         "display_type": "line",
                         "style": {
                             "palette": "grey",
@@ -1102,7 +1100,7 @@
                 "type": "query_value",
                 "requests": [
                     {
-                        "q": "sum:kubernetes_state.replicaset.replicas_ready{$scope,$deployment,$daemonset,$cluster,$label,$namespace,$service,$node}",
+                        "q": "sum:kubernetes_state.replicaset.replicas_ready{$scope,$deployment,$replicaset,$cluster,$label,$namespace,$service,$node}",
                         "aggregator": "last",
                         "conditional_formats": [
                             {
@@ -1137,7 +1135,7 @@
                 "type": "query_value",
                 "requests": [
                     {
-                        "q": "sum:kubernetes_state.replicaset.replicas_desired{$scope,$daemonset,$service,$namespace,$deployment,$label,$cluster,$node}-sum:kubernetes_state.replicaset.replicas_ready{$scope,$daemonset,$service,$namespace,$deployment,$label,$cluster,$node}",
+                        "q": "sum:kubernetes_state.replicaset.replicas_desired{$scope,$deployment,$replicaset,$service,$namespace,$label,$cluster,$node}-sum:kubernetes_state.replicaset.replicas_ready{$scope,$deployment,$replicaset,$service,$namespace,$label,$cluster,$node}",
                         "aggregator": "last",
                         "conditional_formats": [
                             {
@@ -1172,7 +1170,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "sum:kubernetes_state.daemonset.ready{$scope,$deployment,$daemonset,$service,$namespace,$label,$cluster,$node} by {daemonset}",
+                        "q": "sum:kubernetes_state.daemonset.ready{$scope,$daemonset,$service,$namespace,$label,$cluster,$node} by {kube_daemon_set}",
                         "display_type": "area",
                         "style": {
                             "palette": "green",
@@ -1204,7 +1202,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "sum:kubernetes.pods.running{$scope,$cluster,$namespace,$deployment,$daemonset,$label,$node,$service} by {cluster_name,kube_namespace}",
+                        "q": "sum:kubernetes.pods.running{$scope,$cluster,$namespace,$deployment,$statefulset,$replicaset,$daemonset,$label,$node,$service} by {kube_cluster_name,kube_namespace}",
                         "display_type": "area",
                         "style": {
                             "palette": "dog_classic",
@@ -1245,7 +1243,7 @@
                 "type": "toplist",
                 "requests": [
                     {
-                        "q": "top(sum:kubernetes_state.pod.status_phase{$scope,$cluster,$namespace,$deployment,$daemonset,!phase:running,!phase:succeeded,$label,$node,$service} by {cluster_name,kube_namespace,phase}, 100, 'last', 'desc')",
+                        "q": "top(sum:kubernetes_state.pod.status_phase{$scope,$cluster,$namespace,$deployment,$statefulset,$replicaset,$daemonset,!pod_phase:running,!pod_phase:succeeded,$label,$node,$service} by {kube_cluster_name,kube_namespace,pod_phase}, 100, 'last', 'desc')",
                         "conditional_formats": [
                             {
                                 "comparator": ">",
@@ -1278,7 +1276,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "sum:kubernetes_state.container.waiting{$cluster,$namespace,$deployment,reason:crashloopbackoff,$scope,$daemonset,$label,$node,$service} by {pod_name}",
+                        "q": "sum:kubernetes_state.container.waiting{$cluster,$namespace,$deployment,$statefulset,$replicaset,$daemonset,reason:crashloopbackoff,$scope,$daemonset,$label,$node,$service} by {pod_name}",
                         "display_type": "bars",
                         "style": {
                             "palette": "dog_classic",
@@ -1321,7 +1319,7 @@
                 "type": "toplist",
                 "requests": [
                     {
-                        "q": "top(sum:kubernetes.pods.running{$scope,$namespace,$deployment,$cluster,$daemonset,$label,$node,$service} by {cluster_name,kube_namespace}, 100, 'max', 'desc')",
+                        "q": "top(sum:kubernetes.pods.running{$scope,$namespace,$cluster,$deployment,$statefulset,$replicaset,$daemonset,$label,$node,$service} by {kube_cluster_name,kube_namespace}, 100, 'max', 'desc')",
                         "conditional_formats": [
                             {
                                 "comparator": ">",
@@ -1359,7 +1357,7 @@
                 "type": "toplist",
                 "requests": [
                     {
-                        "q": "top(sum:kubernetes_state.pod.ready{$scope,$cluster,$namespace,$deployment,condition:true,$daemonset,$label,$node,$service} by {kubernetes_cluster,host,nodepool}, 10, 'last', 'desc')",
+                        "q": "top(sum:kubernetes_state.pod.ready{$scope,$cluster,$namespace,$deployment,$statefulset,$replicaset,$daemonset,condition:true,$label,$node,$service} by {kubernetes_cluster,host,nodepool}, 10, 'last', 'desc')",
                         "conditional_formats": [
                             {
                                 "comparator": "<=",
@@ -1397,7 +1395,7 @@
                 "type": "query_value",
                 "requests": [
                     {
-                        "q": "count_nonzero(avg:kubernetes.pods.running{$scope,$label,$node,$service,$daemonset,$deployment,$namespace,$cluster} by {cluster_name})",
+                        "q": "count_nonzero(avg:kubernetes.pods.running{$scope,$label,$node,$service,$deployment,$statefulset,$replicaset,$daemonset,$namespace,$cluster} by {kube_cluster_name})",
                         "aggregator": "avg"
                     }
                 ],
@@ -1420,7 +1418,7 @@
                 "type": "query_value",
                 "requests": [
                     {
-                        "q": "count_nonzero(avg:kubernetes.pods.running{$scope,$label,$node,$service,$daemonset,$deployment,$namespace,$cluster} by {cluster_name,kube_namespace})",
+                        "q": "count_nonzero(avg:kubernetes.pods.running{$scope,$label,$node,$service,$deployment,$statefulset,$replicaset,$daemonset,$namespace,$cluster} by {kube_cluster_name,kube_namespace})",
                         "aggregator": "avg"
                     }
                 ],
@@ -1443,7 +1441,7 @@
                 "type": "query_value",
                 "requests": [
                     {
-                        "q": "count_nonzero(avg:kubernetes_state.deployment.replicas{$scope,$label,$node,$service,$daemonset,$deployment,$namespace,$cluster} by {cluster_name,kube_namespace,kube_deployment})",
+                        "q": "count_nonzero(avg:kubernetes_state.deployment.replicas{$scope,$label,$node,$service,$deployment,$replicaset,$namespace,$cluster} by {kube_cluster_name,kube_namespace,kube_deployment})",
                         "aggregator": "avg"
                     }
                 ],
@@ -1466,7 +1464,7 @@
                 "type": "query_value",
                 "requests": [
                     {
-                        "q": "sum:kubernetes_state.service.count{$scope,$label,$node,$service,$daemonset,$deployment,$namespace,$cluster}",
+                        "q": "sum:kubernetes_state.service.count{$scope,$label,$node,$service,$namespace,$cluster}",
                         "aggregator": "avg"
                     }
                 ],
@@ -1489,7 +1487,7 @@
                 "type": "query_value",
                 "requests": [
                     {
-                        "q": "count_nonzero(avg:kubernetes_state.daemonset.desired{$scope,$label,$node,$service,$daemonset,$deployment,$namespace,$cluster} by {cluster_name,kube_namespace,kube_daemon_set})",
+                        "q": "count_nonzero(avg:kubernetes_state.daemonset.desired{$scope,$label,$node,$service,$daemonset,$namespace,$cluster} by {kube_cluster_name,kube_namespace,kube_daemon_set})",
                         "aggregator": "avg"
                     }
                 ],
@@ -1512,7 +1510,7 @@
                 "type": "query_value",
                 "requests": [
                     {
-                        "q": "sum:kubernetes_state.node.count{$scope,$label,$node,$service,$daemonset,$deployment,$namespace,$cluster}",
+                        "q": "sum:kubernetes_state.node.count{$scope,$label,$node,$service,$namespace,$cluster}",
                         "aggregator": "avg"
                     }
                 ],
@@ -1535,7 +1533,7 @@
                 "type": "query_value",
                 "requests": [
                     {
-                        "q": "sum:kubernetes.pods.running{$scope,$label,$node,$service,$daemonset,$deployment,$namespace,$cluster}",
+                        "q": "sum:kubernetes.pods.running{$scope,$label,$node,$service,$deployment,$statefulset,$replicaset,$daemonset,$namespace,$cluster}",
                         "aggregator": "avg"
                     }
                 ],
@@ -1563,7 +1561,7 @@
                 "type": "query_value",
                 "requests": [
                     {
-                        "q": "sum:kubernetes.containers.running{$scope,$label,$node,$service,$daemonset,$deployment,$namespace,$cluster}",
+                        "q": "sum:kubernetes.containers.running{$scope,$label,$node,$service,$deployment,$statefulset,$replicaset,$daemonset,$namespace,$cluster}",
                         "aggregator": "avg"
                     }
                 ],
@@ -1586,7 +1584,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "sum:kubernetes.network.rx_errors{$scope,$deployment,$daemonset,$namespace,$cluster,$label,$service,$node} by {pod_name}",
+                        "q": "sum:kubernetes.network.rx_errors{$scope,$deployment,$statefulset,$replicaset,$daemonset,$namespace,$cluster,$label,$service,$node} by {pod_name}",
                         "display_type": "bars",
                         "style": {
                             "palette": "warm",
@@ -1595,7 +1593,7 @@
                         }
                     },
                     {
-                        "q": "sum:kubernetes.network.tx_errors{$scope,$deployment,$daemonset,$namespace,$cluster,$label,$service,$node} by {pod_name}",
+                        "q": "sum:kubernetes.network.tx_errors{$scope,$deployment,$statefulset,$replicaset,$daemonset,$namespace,$cluster,$label,$service,$node} by {pod_name}",
                         "display_type": "bars",
                         "style": {
                             "palette": "warm",
@@ -1638,7 +1636,7 @@
         {
             "name": "cluster",
             "default": "*",
-            "prefix": "cluster_name"
+            "prefix": "kube_cluster_name"
         },
         {
             "name": "namespace",
@@ -1654,6 +1652,16 @@
             "name": "daemonset",
             "default": "*",
             "prefix": "kube_daemon_set"
+        },
+        {
+            "name": "statefulset",
+            "default": "*",
+            "prefix": "kube_stateful_set"
+        },
+        {
+            "name": "replicaset",
+            "default": "*",
+            "prefix": "kube_replica_set"
         },
         {
             "name": "service",

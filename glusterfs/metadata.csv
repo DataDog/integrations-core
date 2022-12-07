@@ -1,30 +1,30 @@
-metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-glusterfs.brick.block_size,gauge,,byte,,Block Size of brick,0,glusterfs,brick block size
-glusterfs.brick.inodes.free,gauge,,byte,,Free inodes in brick,0,glusterfs,brick inode free
-glusterfs.brick.inodes.total,gauge,,byte,,Total inodes in brick,0,glusterfs,brick inode total
-glusterfs.brick.inodes.used,gauge,,byte,,Inode used in brick,0,glusterfs,brick inode used
-glusterfs.brick.online,gauge,,unit,,Number of bricks online,0,glusterfs,brick online
-glusterfs.brick.size.free,gauge,,byte,,Brick size free,0,glusterfs,brick size free
-glusterfs.brick.size.total,gauge,,byte,,Total brick size,0,glusterfs,brick size total
-glusterfs.brick.size.used,gauge,,byte,,Current bytes used in brick,0,glusterfs,brick size used
-glusterfs.cluster.nodes.active,gauge,,node,,Current active nodes,0,glusterfs,cluster nodes active
-glusterfs.cluster.nodes.count,gauge,,node,,Total number of nodes in cluster,0,glusterfs,cluster node total
-glusterfs.cluster.volumes.count,gauge,,unit,,Number of volumes in cluster,0,glusterfs,cluster volume count
-glusterfs.cluster.volumes.started,gauge,,unit,,Number of volumes started in cluster,0,glusterfs,cluster volume start
-glusterfs.subvol.disperse,gauge,,unit,,Disperse count of subvolume,0,glusterfs,subvol disperse
-glusterfs.subvol.disperse_redundancy,gauge,,unit,,Disperse redundancy of subvolume,0,glusterfs,subvol disperse redundancy
-glusterfs.subvol.replica,gauge,,unit,,Replicas in subvolume,0,glusterfs,subvol replica
-glusterfs.volume.bricks.count,gauge,,unit,,Number of bricks in volume,0,glusterfs,volume bricks
-glusterfs.volume.disperse,gauge,,unit,,Number of dispersed in volume,0,glusterfs,volume disperse
-glusterfs.volume.disperse_redundancy,gauge,,unit,,Number of disperse redundancy in volume,0,glusterfs,volume disperse redundancy
-glusterfs.volume.distribute,gauge,,unit,,Number of distributed,0,glusterfs,volume distribute
-glusterfs.volume.inodes.free,gauge,,byte,,Inodes free in volume,0,glusterfs,volume inode free
-glusterfs.volume.inodes.total,gauge,,byte,,Total size inodes in volume,0,glusterfs,volume inode total
-glusterfs.volume.inodes.used,gauge,,byte,,Used bytes of inodes in volume,0,glusterfs,volume inode used
-glusterfs.volume.online,gauge,,unit,,Number of volumes online,0,glusterfs,volume online
-glusterfs.volume.replica,gauge,,unit,,Replicas in volumes,0,glusterfs,volume replica
-glusterfs.volume.size.free,gauge,,byte,,Bytes free in volume,0,glusterfs,volume size free
-glusterfs.volume.size.total,gauge,,byte,,Bytes total in volume,0,glusterfs,volume size total
-glusterfs.volume.size.used,gauge,,byte,,Bytes used in volume,0,glusterfs,volume size used
-glusterfs.volume.snapshot.count,gauge,,byte,,number of snapshots of volume,0,glusterfs,volume snapshot count
-glusterfs.volume.used.percent,gauge,,percent,,percentage of volume used,0,glusterfs,volume used percent
+metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
+glusterfs.brick.block_size,gauge,,byte,,Block Size of brick,0,glusterfs,brick block size,
+glusterfs.brick.inodes.free,gauge,,byte,,Free inodes in brick,0,glusterfs,brick inode free,
+glusterfs.brick.inodes.total,gauge,,byte,,Total inodes in brick,0,glusterfs,brick inode total,
+glusterfs.brick.inodes.used,gauge,,byte,,Inode used in brick,0,glusterfs,brick inode used,
+glusterfs.brick.online,gauge,,unit,,Number of bricks online,0,glusterfs,brick online,
+glusterfs.brick.size.free,gauge,,byte,,Brick size free,0,glusterfs,brick size free,
+glusterfs.brick.size.total,gauge,,byte,,Total brick size,0,glusterfs,brick size total,
+glusterfs.brick.size.used,gauge,,byte,,Current bytes used in brick,0,glusterfs,brick size used,
+glusterfs.cluster.nodes.active,gauge,,node,,Current active nodes,0,glusterfs,cluster nodes active,
+glusterfs.cluster.nodes.count,gauge,,node,,Total number of nodes in cluster,0,glusterfs,cluster node total,
+glusterfs.cluster.volumes.count,gauge,,unit,,Number of volumes in cluster,0,glusterfs,cluster volume count,
+glusterfs.cluster.volumes.started,gauge,,unit,,Number of volumes started in cluster,0,glusterfs,cluster volume start,
+glusterfs.subvol.disperse,gauge,,unit,,Disperse count of subvolume,0,glusterfs,subvol disperse,
+glusterfs.subvol.disperse_redundancy,gauge,,unit,,Disperse redundancy of subvolume,0,glusterfs,subvol disperse redundancy,
+glusterfs.subvol.replica,gauge,,unit,,Replicas in subvolume,0,glusterfs,subvol replica,
+glusterfs.volume.bricks.count,gauge,,unit,,Number of bricks in volume,0,glusterfs,volume bricks,
+glusterfs.volume.disperse,gauge,,unit,,Number of dispersed in volume,0,glusterfs,volume disperse,
+glusterfs.volume.disperse_redundancy,gauge,,unit,,Number of disperse redundancy in volume,0,glusterfs,volume disperse redundancy,
+glusterfs.volume.distribute,gauge,,unit,,Number of distributed,0,glusterfs,volume distribute,
+glusterfs.volume.inodes.free,gauge,,byte,,Inodes free in volume,0,glusterfs,volume inode free,
+glusterfs.volume.inodes.total,gauge,,byte,,Total size inodes in volume,0,glusterfs,volume inode total,
+glusterfs.volume.inodes.used,gauge,,byte,,Used bytes of inodes in volume,0,glusterfs,volume inode used,
+glusterfs.volume.online,gauge,,unit,,Number of volumes online,0,glusterfs,volume online,
+glusterfs.volume.replica,gauge,,unit,,Replicas in volumes,0,glusterfs,volume replica,
+glusterfs.volume.size.free,gauge,,byte,,Bytes free in volume,0,glusterfs,volume size free,
+glusterfs.volume.size.total,gauge,,byte,,Bytes total in volume,0,glusterfs,volume size total,
+glusterfs.volume.size.used,gauge,,byte,,Bytes used in volume,0,glusterfs,volume size used,
+glusterfs.volume.snapshot.count,gauge,,byte,,number of snapshots of volume,0,glusterfs,volume snapshot count,
+glusterfs.volume.used.percent,gauge,,percent,,percentage of volume used,0,glusterfs,volume used percent,

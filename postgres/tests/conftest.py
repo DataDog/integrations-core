@@ -13,10 +13,18 @@ from semver import VersionInfo
 from datadog_checks.dev import WaitFor, docker_run
 from datadog_checks.postgres import PostgreSql
 
-from .common import DB_NAME, HOST, PASSWORD, PORT, USER
+from .common import DB_NAME, HOST, PASSWORD, PORT, POSTGRES_IMAGE, USER
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-INSTANCE = {'host': HOST, 'port': PORT, 'username': USER, 'password': PASSWORD, 'dbname': DB_NAME, 'tags': ['foo:bar']}
+INSTANCE = {
+    'host': HOST,
+    'port': PORT,
+    'username': USER,
+    'password': PASSWORD,
+    'dbname': DB_NAME,
+    'tags': ['foo:bar'],
+    'disable_generic_tags': True,
+}
 
 
 def connect_to_pg():
@@ -28,7 +36,11 @@ def dd_environment(e2e_instance):
     """
     Start a standalone postgres server requiring authentication.
     """
-    with docker_run(os.path.join(HERE, 'compose', 'docker-compose.yaml'), conditions=[WaitFor(connect_to_pg)]):
+    with docker_run(
+        os.path.join(HERE, 'compose', 'docker-compose.yaml'),
+        conditions=[WaitFor(connect_to_pg)],
+        env_vars={"POSTGRES_IMAGE": POSTGRES_IMAGE},
+    ):
         yield e2e_instance
 
 
@@ -55,7 +67,9 @@ def pg_instance():
 
 @pytest.fixture(scope='session')
 def e2e_instance():
-    return copy.deepcopy(INSTANCE)
+    instance = copy.deepcopy(INSTANCE)
+    instance['dbm'] = True
+    return instance
 
 
 @pytest.fixture()

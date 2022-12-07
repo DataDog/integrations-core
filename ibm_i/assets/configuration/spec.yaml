@@ -1,0 +1,114 @@
+name: IBM i
+files:
+- name: ibm_i.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/default
+  - template: instances
+    options:
+    - name: system
+      description: |
+        The name of the IBM i system.
+      value:
+        type: string
+    - name: hostname
+      description: |
+        Hostname used for this instance's metrics. If unset, HOST_NAME from SYSIBMADM.ENV_SYS_INFO will be used.
+      value:
+        type: string
+        minLength: 1
+        maxLength: 255
+    - name: username
+      description: |
+        The user profile name used to authenticate to the system.
+      value:
+        type: string
+    - name: password
+      description: |
+        The user profile password used to authenticate to the system.
+      value:
+        type: string
+    - name: driver
+      description: |
+        The name of the ODBC driver used to connect to the system.
+      value:
+        type: string
+        example: iSeries Access ODBC Driver
+    - name: connection_string
+      description: |
+        The raw connection string used to connect to the system, ignoring all of the above options.
+      value:
+        type: string
+    - name: severity_threshold
+      description: |
+        The minimum severity level for a message to be considered 'critical' (see ibm_i.message_queue.critical_size).
+      value:
+        type: integer
+        minimum: 0
+        maximum: 99
+        example: 50
+    - name: job_query_timeout
+      description: |
+        The timeout (in seconds) applied to queries on job views (ACTIVE_JOB_INFO, JOB_INFO) made on the IBM i system.
+      value:
+        type: integer
+        minimum: 0
+        exclusiveMinimum: true
+        example: 240
+    - name: system_mq_query_timeout
+      description: |
+        The timeout (in seconds) applied to queries on message queue views (MESSAGE_QUEUE_INFO) made on the IBM i system.
+      value:
+        type: integer
+        minimum: 0
+        exclusiveMinimum: true
+        example: 80
+    - name: query_timeout
+      description: |
+        The timeout (in seconds) applied to queries made on the IBM i system.
+      value:
+        type: integer
+        minimum: 0
+        exclusiveMinimum: true
+        example: 30
+    - name: queries
+      description: |
+         List of queries to be run against the IBM i system. By default, all queries are run.
+      value:
+        type: array
+        items: 
+          type: object
+          required: [name]
+          properties:
+            - name: name
+              type: string
+        example: &queries_default
+          - name: "disk_usage"
+          - name: "cpu_usage"
+          - name: "jobq_job_status"
+          - name: "active_job_status"
+          - name: "job_memory_usage"
+          - name: "memory_info"
+          - name: "subsystem"
+          - name: "job_queue"
+          - name: "message_queue_info"
+        default: *queries_default
+    - name: message_queue_info
+      description: |
+        A configuration mapping for the message_queue_info query.
+
+        selected_message_queues restricts the message_queue_info query to a subset of the queues.
+        This can reduce the CPU usage on the target IBM i machine. By default no filter is applied.
+      value:
+        example:
+          selected_message_queues:
+            - QSYSOPR
+            - QPGMR
+        type: object
+        properties:
+          - name: selected_message_queues
+            type: array
+            items:
+              type: string
+    - template: instances/default

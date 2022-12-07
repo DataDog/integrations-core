@@ -13,7 +13,7 @@ init_config:
     ## Those options are used when making vSphere REST API calls to retrieve vSphere tags
     ## when `collect_tags` instance config is enabled.
     #
-    rest_api_options:
+    # rest_api_options:
 
         ## @param proxy - mapping - optional
         ## Set HTTP or HTTPS proxies for all instances. Use the `no_proxy` list
@@ -47,7 +47,7 @@ init_config:
         #
         # timeout: 10
 
-## Every instance is scheduled independent of the others.
+## Every instance is scheduled independently of the others.
 #
 instances:
 
@@ -102,7 +102,7 @@ instances:
     #
     # collection_type: realtime
 
-    ## @param collect_events - boolean - optional - default: depends on collection_type value
+    ## @param collect_events - boolean - optional
     ## Whether or not to pull events data from vCenter.
     ## If you have multiple configuration instances collecting data from the same vCenter server (i.e if you collect
     ## realtime and historical metrics), you usually want to collect events only once.
@@ -138,14 +138,10 @@ instances:
     ## @param tls_ignore_warning - boolean - optional - default: false
     ## If `ssl_verify ` is disabled, security warnings are logged by the check when making http requests.
     ## Disable those by setting `tls_ignore_warning` to true.
-    ##
-    ## Note: `tls_ignore_warning` set to true is currently only reliable if used by one instance of one integration.
-    ## If enabled for multiple instances, spurious warnings might still appear even if `tls_ignore_warning` is set
-    ## to true.
     #
     # tls_ignore_warning: false
 
-    ## @param resource_filters - list of mappings - optional - default: no filter
+    ## @param resource_filters - list of mappings - optional
     ## Each filter in the list is composed of three parameters.
     ## 'resource' is one of vm/host/datastore/datacenter/cluster on which to apply the filter
     ## 'patterns' is a list of matching regex, if any of those matches, the resource will be monitored.
@@ -201,7 +197,7 @@ instances:
     #     patterns:
     #     - <INVENTORY_PATH_REGEX>
 
-    ## @param metric_filters - mapping - optional - default: all metrics
+    ## @param metric_filters - mapping - optional
     ## For each resource type (vm, host, datastore, datacenter, cluster) collected,
     ## you can choose which metric you want to collect using a list of regex.
     ## If you do not specify a regex for the resource, all metrics will be collected.
@@ -304,6 +300,8 @@ instances:
     ## not available, it will fallback to the VM name.
     ## Use this if you install the agent in VMs so that the hosts are not duplicated
     ## in the web application UI.
+    ## Note: If VMs are duplicated in the Infrastructure List, follow these troubleshooting steps
+    ##       https://docs.datadoghq.com/integrations/faq/troubleshooting-duplicated-hosts-with-vsphere/.
     #
     # use_guest_hostname: false
 
@@ -383,7 +381,7 @@ instances:
     ## The options are used when making vSphere REST API calls to retrieve vSphere tags
     ## when `collect_tags` instance config is enabled.
     #
-    rest_api_options:
+    # rest_api_options:
 
         ## @param proxy - mapping - optional
         ## This overrides the `proxy` setting in `init_config`.
@@ -533,13 +531,19 @@ instances:
         ##     path (required): The absolute path for the file to read from.
         ##     pattern: A regular expression pattern with a single capture group used to find the
         ##              token rather than using the entire file, for example: Your secret is (.+)
+        ##   - type: oauth
+        ##     url (required): The token endpoint.
+        ##     client_id (required): The client identifier.
+        ##     client_secret (required): The client secret.
+        ##     basic_auth: Whether the provider expects credentials to be transmitted in
+        ##                 an HTTP Basic Auth header. The default is: false
         ##
         ## The available writers are:
         ##
         ##   - type: header
         ##     name (required): The name of the field, for example: Authorization
         ##     value: The template value, for example `Bearer <TOKEN>`. The default is: <TOKEN>
-        ##     placeholder: The substring in `value` to replace by the token, defaults to: <TOKEN>
+        ##     placeholder: The substring in `value` to replace with the token, defaults to: <TOKEN>
         #
         # auth_token:
         #   reader:
@@ -560,6 +564,8 @@ instances:
 
         ## @param aws_host - string - optional
         ## If your services require AWS Signature Version 4 signing, set the host.
+        ## This only needs the hostname and does not require the protocol (HTTP, HTTPS, and more).
+        ## For example, if connecting to https://us-east-1.amazonaws.com/, set `aws_host` to `us-east-1.amazonaws.com`.
         ##
         ## Note: This setting is not necessary for official integrations.
         ##
@@ -590,10 +596,6 @@ instances:
         ## @param tls_ignore_warning - boolean - optional - default: false
         ## If `tls_verify` is disabled, security warnings are logged by the check.
         ## Disable those by setting `tls_ignore_warning` to true.
-        ##
-        ## Note: `tls_ignore_warning` set to true is currently only reliable if used by one instance of one integration.
-        ## If enabled for multiple instances, spurious warnings might still appear even if `tls_ignore_warning` is set
-        ## to true.
         #
         # tls_ignore_warning: false
 
@@ -617,6 +619,20 @@ instances:
         ## https://www.openssl.org/docs/manmaster/man3/SSL_CTX_load_verify_locations.html
         #
         # tls_ca_cert: <CA_CERT_PATH>
+
+        ## @param tls_protocols_allowed - list of strings - optional
+        ## The expected versions of TLS/SSL when fetching intermediate certificates.
+        ## Only `SSLv3`, `TLSv1.2`, `TLSv1.3` are allowed by default. The possible values are:
+        ##   SSLv3
+        ##   TLSv1
+        ##   TLSv1.1
+        ##   TLSv1.2
+        ##   TLSv1.3
+        #
+        # tls_protocols_allowed:
+        #   - SSLv3
+        #   - TLSv1.2
+        #   - TLSv1.3
 
         ## @param headers - mapping - optional
         ## The headers parameter allows you to send specific headers with every request.
@@ -653,15 +669,30 @@ instances:
         #
         # read_timeout: <READ_TIMEOUT>
 
+        ## @param request_size - number - optional - default: 16
+        ## The number of kibibytes (KiB) to read from streaming HTTP responses at a time.
+        #
+        # request_size: 16
+
         ## @param log_requests - boolean - optional - default: false
         ## Whether or not to debug log the HTTP(S) requests made, including the method and URL.
         #
         # log_requests: false
 
         ## @param persist_connections - boolean - optional - default: false
-        ## Whether or not to persist cookies and use connection pooling for increased performance.
+        ## Whether or not to persist cookies and use connection pooling for improved performance.
         #
         # persist_connections: false
+
+        ## @param allow_redirects - boolean - optional - default: true
+        ## Whether or not to allow URL redirection.
+        #
+        # allow_redirects: true
+
+    ## @param connection_reset_timeout - integer - optional - default: 900
+    ## The time interval in seconds at which the agent should re-authenticate using the provided credentials
+    #
+    # connection_reset_timeout: 900
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
@@ -684,3 +715,14 @@ instances:
     ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
     #
     # min_collection_interval: 15
+
+    ## @param metric_patterns - mapping - optional
+    ## A mapping of metrics to include or exclude, with each entry being a regular expression.
+    ##
+    ## Metrics defined in `exclude` will take precedence in case of overlap.
+    #
+    # metric_patterns:
+    #   include:
+    #   - <INCLUDE_REGEX>
+    #   exclude:
+    #   - <EXCLUDE_REGEX>

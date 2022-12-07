@@ -14,7 +14,6 @@ files:
           If the password contains special characters, be sure to escape them using percent encoding.
 
           See: https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNSTRING
-        required: true
         value:
           example: postgresql://<USERNAME>:<PASSWORD>@<HOSTNAME>:<PORT>/<DATABASE_URL>?sslmode=require
           type: string
@@ -39,6 +38,22 @@ files:
         description: Cache and re-use PostgreSQL connection or create a new one at each check run.
         value:
           example: true
+          type: boolean
+      - name: collect_per_client_metrics
+        description: |
+          Whether to collect detailed per-client metrics.
+
+          This is useful for detailed analysis of client behavior (e.g., wait time).
+        value:
+          example: false
+          type: boolean
+      - name: collect_per_server_metrics
+        description: |
+          Whether to collect detailed per-server metrics.
+
+          This is useful for detailed analysis of server behavior (e.g., last request time).
+        value:
+          example: false
           type: boolean
       - template: instances/default
   - template: logs

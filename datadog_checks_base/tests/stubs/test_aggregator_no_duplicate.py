@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from textwrap import dedent
+
 import pytest
 
 from datadog_checks.base import AgentCheck
@@ -15,24 +17,23 @@ def test_assert_no_duplicate_message(aggregator):
     check.gauge('check.metric.no_dup1', 5, tags=['aa'])
     check.gauge('check.metric.no_dup2', 6, tags=['aa'])
 
-    actual_msg = ""
+    actual_msg = "  "
     try:
         aggregator.assert_no_duplicate_metrics()
     except AssertionError as e:
-        actual_msg = str(e)
+        actual_msg += str(e).split("assert")[0].lstrip()
+    actual_msg = dedent(actual_msg)
 
     expected_msg = '''
 Duplicate metrics found:
-  - check.metric.dup1
-      MetricStub(name='check.metric.dup1', type=0, value=1.0, tags=['aa'], hostname='', device=None)
-      MetricStub(name='check.metric.dup1', type=0, value=2.0, tags=['aa'], hostname='', device=None)
-  - check.metric.dup2
-      MetricStub(name='check.metric.dup2', type=0, value=3.0, tags=['aa'], hostname='', device=None)
-      MetricStub(name='check.metric.dup2', type=0, value=4.0, tags=['aa'], hostname='', device=None)
-'''
-    print("\n===\n{}\n===\n".format(expected_msg.strip()))
-    print("\n===\n{}\n===\n".format(actual_msg.strip()))
-    assert expected_msg.strip() == actual_msg.split("assert")[0].strip()
+- check.metric.dup1
+    MetricStub(name='check.metric.dup1', type=0, value=1.0, tags=['aa'], hostname='', device=None, flush_first_value=False)
+    MetricStub(name='check.metric.dup1', type=0, value=2.0, tags=['aa'], hostname='', device=None, flush_first_value=False)
+- check.metric.dup2
+    MetricStub(name='check.metric.dup2', type=0, value=3.0, tags=['aa'], hostname='', device=None, flush_first_value=False)
+    MetricStub(name='check.metric.dup2', type=0, value=4.0, tags=['aa'], hostname='', device=None, flush_first_value=False)
+'''  # noqa: E501
+    assert expected_msg.strip() == actual_msg.strip()
 
 
 @pytest.mark.parametrize(
@@ -75,8 +76,6 @@ Duplicate metrics found:
             [
                 dict(type='count', name='metric.count', value=1, tags=['aa'], hostname='1'),
                 dict(type='count', name='metric.count', value=1, tags=['aa'], hostname='1'),
-                dict(type='monotonic_count', name='metric.monotonic_count', value=1, tags=['aa'], hostname='1'),
-                dict(type='monotonic_count', name='metric.monotonic_count', value=1, tags=['aa'], hostname='1'),
                 dict(type='increment', name='metric.increment', value=1, tags=['aa'], hostname='1'),
                 dict(type='increment', name='metric.increment', value=1, tags=['aa'], hostname='1'),
                 dict(type='decrement', name='metric.decrement', value=1, tags=['aa'], hostname='1'),
@@ -85,10 +84,26 @@ Duplicate metrics found:
             False,
         ),
         (
-            'duplicate metric',
+            'duplicate gauge metric',
             [
                 dict(type='gauge', name='metric.a', value=1, tags=['aa'], hostname='1'),
                 dict(type='gauge', name='metric.a', value=1, tags=['aa'], hostname='1'),
+            ],
+            True,
+        ),
+        (
+            'duplicate rate metric',
+            [
+                dict(type='rate', name='metric.a', value=1, tags=['aa'], hostname='1'),
+                dict(type='rate', name='metric.a', value=1, tags=['aa'], hostname='1'),
+            ],
+            True,
+        ),
+        (
+            'duplicate monotonic_count metric',
+            [
+                dict(type='monotonic_count', name='metric.a', value=1, tags=['aa'], hostname='1'),
+                dict(type='monotonic_count', name='metric.a', value=1, tags=['aa'], hostname='1'),
             ],
             True,
         ),
@@ -152,14 +167,6 @@ def test_assert_no_duplicate_metrics_cases(aggregator, case_name, metrics, expec
             [
                 dict(name="service.check.a", status=AgentCheck.OK, tags=['aa'], hostname='1'),
                 dict(name="service.check.a", status=AgentCheck.OK, tags=['aa'], hostname='1'),
-            ],
-            True,
-        ),
-        (
-            "duplicate metric with different values",
-            [
-                dict(name="service.check.a", status=AgentCheck.OK, tags=['aa'], hostname='1', message="aaa"),
-                dict(name="service.check.a", status=AgentCheck.OK, tags=['aa'], hostname='1', message="bbb"),
             ],
             True,
         ),

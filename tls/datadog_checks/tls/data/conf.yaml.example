@@ -23,7 +23,7 @@ init_config:
     #
     # service: <SERVICE>
 
-## Every instance is scheduled independent of the others.
+## Every instance is scheduled independently of the others.
 #
 instances:
 
@@ -127,6 +127,16 @@ instances:
     #
     # name: <NAME>
 
+    ## @param start_tls - string - optional
+    ## Send protocol-specific message(s) to switch to TLS for communication.
+    ## StartTLS is implemented on these protocols: smtp, pop3, imap, ftp, xmpp, xmpp-server,
+    ## irc, postgres, mysql, lmtp, nntp, sieve, and ldap.
+    ##
+    ## Currently this checks supports only the below protocols:
+    ##   postgres
+    #
+    # start_tls: <START_TLS>
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
@@ -155,6 +165,17 @@ instances:
     ## This is useful for cluster-level checks.
     #
     # empty_default_hostname: false
+
+    ## @param metric_patterns - mapping - optional
+    ## A mapping of metrics to include or exclude, with each entry being a regular expression.
+    ##
+    ## Metrics defined in `exclude` will take precedence in case of overlap.
+    #
+    # metric_patterns:
+    #   include:
+    #   - <INCLUDE_REGEX>
+    #   exclude:
+    #   - <EXCLUDE_REGEX>
 
     ## @param tls_verify - boolean - optional - default: true
     ## Instructs the check to validate the TLS certificate(s) of the service(s).

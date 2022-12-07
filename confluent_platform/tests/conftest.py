@@ -12,6 +12,8 @@ from datadog_checks.dev.conditions import CheckDockerLogs, WaitFor
 
 from .common import CHECK_CONFIG, HERE
 
+CONFLUENT_VERSION = os.getenv('CONFLUENT_VERSION')
+
 
 def create_connectors():
     # Create a dummy connector
@@ -28,6 +30,19 @@ def create_connectors():
             "tasks.max": "1",
         },
     }
+
+    data_sink = {
+        "name": "local-file-sink",
+        "config": {
+            "name": "local-file-sink",
+            "connector.class": "FileStreamSink",
+            "tasks.max": "1",
+            "file": "/tmp/test.sink.txt",
+            "topics": "pageviews",
+        },
+    }
+
+    requests.post('http://localhost:8083/connectors', data=json.dumps(data_sink), headers=headers)
     requests.post('http://localhost:8083/connectors', data=json.dumps(data), headers=headers)
 
 
@@ -38,14 +53,21 @@ def dd_environment():
         compose_file,
         conditions=[
             # Kafka Broker
-            CheckDockerLogs('broker', 'Monitored service is now ready'),
+            CheckDockerLogs('broker', 'Created log for partition _confluent'),
             # Kafka Schema Registry
-            CheckDockerLogs('schema-registry', 'Server started, listening for requests...', attempts=90),
+            CheckDockerLogs('schema-registry', 'Server started, listening for requests...', attempts=45, wait=2),
             # Kafka Connect
-            CheckDockerLogs('connect', 'Kafka Connect started', attempts=120),
+            CheckDockerLogs(
+                'connect',
+                [' Started KafkaBasedLog', 'INFO REST resources initialized', 'Kafka Connect started'],
+                matches='all',
+                attempts=60,
+                wait=3,
+            ),
             # Create connectors
             WaitFor(create_connectors),
-            CheckDockerLogs('connect', 'Finished commitOffsets successfully'),
+            CheckDockerLogs('connect', 'flushing 0 outstanding messages for offset commit'),
         ],
+        attempts=3,
     ):
         yield CHECK_CONFIG, {'use_jmx': True}

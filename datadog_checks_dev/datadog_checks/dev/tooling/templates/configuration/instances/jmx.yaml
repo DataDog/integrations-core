@@ -10,6 +10,15 @@
   value:
     type: integer
 
+- name: is_jmx
+  description: |
+   Whether or not this instance is a configuration for a JMX integration.
+   If `is_jmx` is set to true at the init_config level, this flag is ignored.
+  hidden: true
+  value:
+    example: false
+    type: boolean
+
 - name: jmx_url
   description: JMX URL to connect to. Can be used instead of host/port configs.
   hidden: true
@@ -32,13 +41,19 @@
     This requires the JDK to be installed and the path to tools.jar to be set below.
     Note: It needs to be set when process_name_regex parameter is set
     e.g. .*process_name.*
+
+    Note: tools.jar was removed in Java 9: https://openjdk.java.net/jeps/220.
+    This option is supported in Java 8 and below.
   value:
     type: string
 
 - name: tools_jar_path
   description: |
-    The tool.jar path to be used with the `process_name_regex` parameter,
-    for example: /usr/lib/jvm/java-11-openjdk-amd64/lib/tools.jar
+    The tools.jar path to be used with the `process_name_regex` parameter,
+    for example: /usr/lib/jvm/java-7-openjdk-amd64/lib/tools.jar
+
+    Note: tools.jar was removed in Java 9: https://openjdk.java.net/jeps/220.
+    This option is supported in Java 8 and below.
   value:
     type: string
 
@@ -112,4 +127,4 @@
     example: true
     type: boolean
 
-- template: instances/default
+- template: instances/all_integrations

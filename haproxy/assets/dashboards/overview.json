@@ -1,968 +1,1262 @@
 {
-    "title": "HAProxy - Overview",
-    "description": "This dashboard displays an overview of your HAProxy frontend and backend servers, helping you spot issues like rising error rates or disparities between your frontend and backend traffic. For more information, see:\n\n- [Monitoring HAProxy performance metrics](https://www.datadoghq.com/blog/monitoring-haproxy-performance-metrics/)\n\n- [Using built-in and third-party tools to collect HAProxy metrics](https://www.datadoghq.com/blog/how-to-collect-haproxy-metrics/)\n\n- [Monitor HAProxy with Datadog](https://www.datadoghq.com/blog/monitor-haproxy-with-datadog/)\n\n- [Datadog's HAProxy documentation](https://docs.datadoghq.com/integrations/haproxy/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
-    "widgets": [
-        {
-            "id": 0,
+  "title": "HAProxy - Overview",
+  "description": "This dashboard displays an overview of your HAProxy frontend and backend servers, helping you spot issues like rising error rates or disparities between your frontend and backend traffic. For more information, see:\n\n- [Monitoring HAProxy performance metrics](https://www.datadoghq.com/blog/monitoring-haproxy-performance-metrics/)\n\n- [Using built-in and third-party tools to collect HAProxy metrics](https://www.datadoghq.com/blog/how-to-collect-haproxy-metrics/)\n\n- [Monitor HAProxy with Datadog](https://www.datadoghq.com/blog/monitor-haproxy-with-datadog/)\n\n- [Datadog's HAProxy documentation](https://docs.datadoghq.com/integrations/haproxy/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
+  "widgets": [
+    {
+      "id": 7654339181439146,
+      "definition": {
+        "title": "About HAProxy",
+        "title_align": "left",
+        "type": "group",
+        "banner_img": "/static/images/integration_dashboard/haproxy_hero_1.png",
+        "show_title": false,
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 2451661469305854,
             "definition": {
-                "type": "timeseries",
-                "requests": [
+              "type": "note",
+              "content": "This dashboard provides a high-level overview of your HAProxy deployment so you can quickly identify the health of your frontend, backend and proxies.\n",
+              "background_color": "transparent",
+              "font_size": "14",
+              "text_align": "left",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left"
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 6085654256880802,
+            "definition": {
+              "type": "note",
+              "content": "**Refer to the following resources for more information**\n\n- [Official HAProxy documentation](https://www.haproxy.com/documentation/hapee/latest/onepage/)\n\n- [Available HAProxy metrics](https://docs.datadoghq.com/integrations/haproxy/?tab=host) \n\n- [Monitor HAProxy with Datadog](https://www.datadoghq.com/blog/monitor-haproxy-with-datadog/)",
+              "background_color": "transparent",
+              "font_size": "12",
+              "text_align": "left",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left"
+            },
+            "layout": {
+              "x": 4,
+              "y": 0,
+              "width": 4,
+              "height": 2
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 8,
+        "height": 5
+      }
+    },
+    {
+      "id": 7586892233042790,
+      "definition": {
+        "title": "Overview",
+        "type": "group",
+        "background_color": "blue",
+        "show_title": true,
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 6159692816877496,
+            "definition": {
+              "title": "Incoming Success Rate (non-5xx responses)",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
                     {
-                        "q": "sum:haproxy.frontend.session.current{$scope}",
-                        "display_type": "line",
-                        "style": {
-                            "palette": "purple"
-                        }
+                      "formula": "(query3 + query1 + query2) / (query3 + query1 + query2 + query4) * 100"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">=",
+                      "palette": "white_on_green",
+                      "value": 0.95
                     },
                     {
-                        "q": "sum:haproxy.frontend.session.limit{$scope}",
-                        "display_type": "line",
-                        "style": {
-                            "palette": "warm"
-                        }
+                      "comparator": "<",
+                      "palette": "white_on_yellow",
+                      "value": 0.95
                     }
-                ],
-                "custom_links": [],
-                "title": "Frontend Sessions",
-                "title_size": "16",
-                "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                },
-                "show_legend": false,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 55,
-                "y": 0,
-                "width": 36,
-                "height": 15
-            }
-        },
-        {
-            "id": 1,
-            "definition": {
-                "type": "query_value",
-                "requests": [
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
                     {
-                        "q": "avg:haproxy.backend.response.time{$scope}",
-                        "aggregator": "avg",
-                        "conditional_formats": [
-                            {
-                                "comparator": ">",
-                                "value": 500,
-                                "palette": "white_on_red"
-                            },
-                            {
-                                "comparator": "<=",
-                                "value": 350,
-                                "palette": "white_on_green"
-                            },
-                            {
-                                "comparator": ">=",
-                                "value": 351,
-                                "palette": "white_on_yellow"
-                            }
-                        ]
-                    }
-                ],
-                "custom_links": [],
-                "title": "Response Time",
-                "title_size": "16",
-                "title_align": "left",
-                "time": {
-                    "live_span": "1m"
-                },
-                "autoscale": true,
-                "precision": 2,
-                "text_align": "center"
-            },
-            "layout": {
-                "x": 0,
-                "y": 62,
-                "width": 16,
-                "height": 7
-            }
-        },
-        {
-            "id": 2,
-            "definition": {
-                "type": "query_value",
-                "requests": [
-                    {
-                        "q": "max:haproxy.backend.queue.current{$scope}",
-                        "aggregator": "max",
-                        "conditional_formats": [
-                            {
-                                "comparator": "<=",
-                                "value": 0,
-                                "palette": "white_on_green"
-                            },
-                            {
-                                "comparator": ">",
-                                "value": 1,
-                                "palette": "white_on_yellow"
-                            },
-                            {
-                                "comparator": ">",
-                                "value": 5,
-                                "palette": "white_on_red"
-                            }
-                        ]
-                    }
-                ],
-                "custom_links": [],
-                "title": "Backend Queue",
-                "title_size": "16",
-                "title_align": "left",
-                "time": {
-                    "live_span": "5m"
-                },
-                "autoscale": true,
-                "text_align": "center"
-            },
-            "layout": {
-                "x": 0,
-                "y": 47,
-                "width": 16,
-                "height": 6
-            }
-        },
-        {
-            "id": 3,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "sum:haproxy.count_per_status{*} by {status}",
-                        "display_type": "area",
-                        "style": {
-                            "palette": "dog_classic"
-                        }
-                    }
-                ],
-                "custom_links": [],
-                "title": "HAProxy Servers by Status",
-                "title_size": "16",
-                "title_align": "left",
-                "time": {
-                    "live_span": "2d"
-                },
-                "show_legend": false,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 18,
-                "y": 81,
-                "width": 108,
-                "height": 15
-            }
-        },
-        {
-            "id": 4,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "sum:haproxy.frontend.bytes.in_rate{$scope}",
-                        "display_type": "line",
-                        "style": {
-                            "palette": "purple"
-                        }
+                      "query": "sum:haproxy.backend.response.4xx{*,*,$backend} by {haproxy_service}",
+                      "data_source": "metrics",
+                      "name": "query3",
+                      "aggregator": "avg"
                     },
                     {
-                        "q": "sum:haproxy.frontend.bytes.out_rate{$scope}",
-                        "display_type": "line",
-                        "style": {
-                            "palette": "cool"
-                        }
-                    }
-                ],
-                "custom_links": [],
-                "title": "Frontend Network Traffic",
-                "title_size": "16",
-                "title_align": "left",
-                "time": {
-                    "live_span": "1h"
-                },
-                "show_legend": false,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 18,
-                "y": 0,
-                "width": 36,
-                "height": 15
-            }
-        },
-        {
-            "id": 5,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "sum:haproxy.backend.bytes.in_rate{$scope}",
-                        "display_type": "line",
-                        "style": {
-                            "palette": "cool"
-                        }
+                      "query": "sum:haproxy.backend.response.3xx{*,*,$backend} by {haproxy_service}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "avg"
                     },
                     {
-                        "q": "sum:haproxy.backend.bytes.out_rate{$scope}",
-                        "display_type": "line",
-                        "style": {
-                            "palette": "purple"
-                        }
-                    }
-                ],
-                "custom_links": [],
-                "title": "Backend Network Traffic",
-                "title_size": "16",
-                "title_align": "left",
-                "time": {
-                    "live_span": "1h"
-                },
-                "show_legend": false,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 18,
-                "y": 30,
-                "width": 36,
-                "height": 15
-            }
-        },
-        {
-            "id": 6,
-            "definition": {
-                "type": "query_value",
-                "requests": [
-                    {
-                        "q": "sum:haproxy.frontend.session.pct{$scope}",
-                        "aggregator": "last",
-                        "conditional_formats": [
-                            {
-                                "comparator": ">=",
-                                "value": 90,
-                                "palette": "white_on_red"
-                            },
-                            {
-                                "comparator": ">=",
-                                "value": 80,
-                                "palette": "white_on_yellow"
-                            },
-                            {
-                                "comparator": "<=",
-                                "value": 79,
-                                "palette": "white_on_green"
-                            }
-                        ]
-                    }
-                ],
-                "custom_links": [],
-                "title": "Front Sessions %",
-                "title_size": "16",
-                "title_align": "left",
-                "time": {
-                    "live_span": "1m"
-                },
-                "autoscale": true,
-                "precision": 2,
-                "text_align": "center"
-            },
-            "layout": {
-                "x": 0,
-                "y": 9,
-                "width": 16,
-                "height": 7
-            }
-        },
-        {
-            "id": 7,
-            "definition": {
-                "type": "query_value",
-                "requests": [
-                    {
-                        "q": "sum:haproxy.backend.session.pct{$scope}",
-                        "aggregator": "last",
-                        "conditional_formats": [
-                            {
-                                "comparator": ">=",
-                                "value": 90,
-                                "palette": "white_on_red"
-                            },
-                            {
-                                "comparator": ">=",
-                                "value": 80,
-                                "palette": "white_on_yellow"
-                            },
-                            {
-                                "comparator": "<",
-                                "value": 80,
-                                "palette": "white_on_green"
-                            }
-                        ]
-                    }
-                ],
-                "custom_links": [],
-                "title": "Back Sessions %",
-                "title_size": "16",
-                "title_align": "left",
-                "time": {
-                    "live_span": "1m"
-                },
-                "autoscale": true,
-                "precision": 2,
-                "text_align": "center"
-            },
-            "layout": {
-                "x": 0,
-                "y": 39,
-                "width": 16,
-                "height": 7
-            }
-        },
-        {
-            "id": 8,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "outliers(avg:haproxy.backend.response.time{$scope} by {host}, 'dbscan', 1.5)",
-                        "display_type": "line",
-                        "style": {
-                            "palette": "orange"
-                        }
-                    }
-                ],
-                "custom_links": [],
-                "markers": [
-                    {
-                        "value": "y < 350",
-                        "display_type": "ok dashed",
-                        "label": "target < 350 ms"
+                      "query": "sum:haproxy.backend.response.2xx{*,*,$backend} by {haproxy_service}",
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "aggregator": "avg"
                     },
                     {
-                        "value": "y > 500",
-                        "display_type": "error solid",
-                        "label": "error > 500 ms"
+                      "query": "sum:haproxy.backend.response.5xx{*,*,$backend} by {haproxy_service}",
+                      "data_source": "metrics",
+                      "name": "query4",
+                      "aggregator": "avg"
                     }
-                ],
-                "title": "Average Backend Response Time by Host (ms)",
-                "title_size": "16",
-                "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                },
-                "show_legend": false,
-                "legend_size": "0"
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "custom_unit": "%",
+              "precision": 2
             },
             "layout": {
-                "x": 129,
-                "y": 30,
-                "width": 36,
-                "height": 15
+              "x": 0,
+              "y": 0,
+              "width": 2,
+              "height": 2
             }
-        },
-        {
-            "id": 9,
+          },
+          {
+            "id": 5242882886523982,
             "definition": {
-                "type": "query_value",
-                "requests": [
+              "title": "Incoming Requests Volume",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
                     {
-                        "q": "(avg:haproxy.frontend.response.2xx{$scope}/ (avg:haproxy.frontend.response.4xx{$scope} + avg:haproxy.frontend.response.3xx{$scope} + avg:haproxy.frontend.response.2xx{$scope})) * 100",
-                        "aggregator": "last",
-                        "conditional_formats": [
-                            {
-                                "comparator": "<=",
-                                "value": 80,
-                                "palette": "white_on_red"
-                            },
-                            {
-                                "comparator": ">",
-                                "value": 80,
-                                "palette": "white_on_green"
-                            }
-                        ]
+                      "formula": "query1 + query3 + query2 + query4"
                     }
-                ],
-                "custom_links": [],
-                "title": "Front 2xx %",
-                "title_size": "16",
-                "title_align": "left",
-                "time": {
-                    "live_span": "1m"
-                },
-                "autoscale": true,
-                "precision": 2,
-                "text_align": "center"
-            },
-            "layout": {
-                "x": 0,
-                "y": 0,
-                "width": 16,
-                "height": 8
-            }
-        },
-        {
-            "id": 10,
-            "definition": {
-                "type": "query_value",
-                "requests": [
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
                     {
-                        "q": "(avg:haproxy.backend.response.2xx{$scope}/ (avg:haproxy.backend.response.4xx{$scope} + avg:haproxy.backend.response.3xx{$scope} + avg:haproxy.backend.response.2xx{$scope})) * 100",
-                        "aggregator": "last",
-                        "conditional_formats": [
-                            {
-                                "comparator": "<=",
-                                "value": 80,
-                                "palette": "white_on_red"
-                            },
-                            {
-                                "comparator": ">",
-                                "value": 80,
-                                "palette": "white_on_green"
-                            }
-                        ]
-                    }
-                ],
-                "custom_links": [],
-                "title": "Back 2xx %",
-                "title_size": "16",
-                "title_align": "left",
-                "time": {
-                    "live_span": "1m"
-                },
-                "autoscale": true,
-                "precision": 2,
-                "text_align": "center"
-            },
-            "layout": {
-                "x": 0,
-                "y": 30,
-                "width": 16,
-                "height": 8
-            }
-        },
-        {
-            "id": 11,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "sum:haproxy.frontend.requests.rate{$scope}",
-                        "display_type": "line",
-                        "style": {
-                            "palette": "purple"
-                        }
-                    }
-                ],
-                "custom_links": [],
-                "title": "Frontend Requests/second",
-                "title_size": "16",
-                "title_align": "left",
-                "time": {
-                    "live_span": "1h"
-                },
-                "show_legend": false,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 129,
-                "y": 0,
-                "width": 36,
-                "height": 15
-            }
-        },
-        {
-            "id": 12,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "sum:haproxy.backend.session.current{$scope}",
-                        "display_type": "line"
+                      "query": "sum:haproxy.backend.response.4xx{*,*,$backend}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "avg"
                     },
                     {
-                        "q": "sum:haproxy.backend.session.limit{$scope}",
-                        "display_type": "line",
-                        "style": {
-                            "palette": "warm"
-                        }
-                    }
-                ],
-                "custom_links": [],
-                "title": "Backend Sessions",
-                "title_size": "16",
-                "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                },
-                "show_legend": false,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 55,
-                "y": 30,
-                "width": 36,
-                "height": 15
-            }
-        },
-        {
-            "id": 13,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "sum:haproxy.frontend.session.rate{$scope}",
-                        "display_type": "line",
-                        "style": {
-                            "palette": "purple"
-                        }
-                    }
-                ],
-                "custom_links": [],
-                "title": "Frontend Sessions/second",
-                "title_size": "16",
-                "title_align": "left",
-                "time": {
-                    "live_span": "1h"
-                },
-                "show_legend": false,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 92,
-                "y": 0,
-                "width": 36,
-                "height": 15
-            }
-        },
-        {
-            "id": 14,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "avg:haproxy.backend.session.rate{$scope}",
-                        "display_type": "line"
-                    }
-                ],
-                "custom_links": [],
-                "title": "Backend Sessions/second",
-                "title_size": "16",
-                "title_align": "left",
-                "time": {
-                    "live_span": "1h"
-                },
-                "show_legend": false,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 92,
-                "y": 30,
-                "width": 36,
-                "height": 15
-            }
-        },
-        {
-            "id": 15,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "sum:haproxy.backend.response.3xx{$scope}",
-                        "display_type": "line"
+                      "query": "sum:haproxy.backend.response.3xx{*,*,$backend}",
+                      "data_source": "metrics",
+                      "name": "query3",
+                      "aggregator": "avg"
                     },
                     {
-                        "q": "sum:haproxy.frontend.response.3xx{$scope}",
-                        "display_type": "line"
-                    }
-                ],
-                "custom_links": [],
-                "title": "3xx Response Codes (F&B)",
-                "title_size": "16",
-                "title_align": "left",
-                "time": {
-                    "live_span": "1h"
-                },
-                "show_legend": false,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 18,
-                "y": 64,
-                "width": 36,
-                "height": 15
-            }
-        },
-        {
-            "id": 16,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "sum:haproxy.backend.response.4xx{$scope}",
-                        "display_type": "line"
+                      "query": "sum:haproxy.backend.response.2xx{*,*,$backend}",
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "aggregator": "avg"
                     },
                     {
-                        "q": "sum:haproxy.frontend.response.4xx{$scope}",
-                        "display_type": "line"
+                      "query": "sum:haproxy.backend.response.5xx{*,*,$backend}",
+                      "data_source": "metrics",
+                      "name": "query4",
+                      "aggregator": "avg"
                     }
-                ],
-                "custom_links": [],
-                "title": "4xx Codes (F&B)",
-                "title_size": "16",
-                "title_align": "left",
-                "time": {
-                    "live_span": "1h"
-                },
-                "show_legend": false,
-                "legend_size": "0"
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2
             },
             "layout": {
-                "x": 55,
-                "y": 64,
-                "width": 36,
-                "height": 15
+              "x": 2,
+              "y": 0,
+              "width": 2,
+              "height": 2
             }
-        },
-        {
-            "id": 17,
+          },
+          {
+            "id": 8944505110005692,
             "definition": {
-                "type": "timeseries",
-                "requests": [
+              "title": "Errors by Service",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "formulas": [
                     {
-                        "q": "sum:haproxy.backend.errors.resp_rate{$scope}",
-                        "display_type": "line"
+                      "formula": "query1"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "sum:haproxy.backend.response.errors.total{*,*,$backend} by {service}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "avg"
+                    }
+                  ]
+                }
+              ],
+              "type": "sunburst",
+              "legend": {
+                "type": "table"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 4,
+              "height": 2
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 8,
+        "y": 0,
+        "width": 4,
+        "height": 5
+      }
+    },
+    {
+      "id": 1149464068634540,
+      "definition": {
+        "title": "Frontend",
+        "type": "group",
+        "background_color": "vivid_purple",
+        "show_title": true,
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 2405318297618812,
+            "definition": {
+              "title": "Frontend Response Codes",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query2"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "query": "sum:haproxy.frontend.http.responses.total{$frontend,$release} by {code}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query2"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "area"
+                }
+              ],
+              "yaxis": {
+                "include_zero": false,
+                "scale": "log"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 6952725003844530,
+            "definition": {
+              "type": "note",
+              "content": "Keep an eye on peaks and drops to ensure continuous service availability. In the event of a traffic spike, clients might see increases in latency or even denied connections.",
+              "background_color": "purple",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": true,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 6,
+              "y": 0,
+              "width": 2,
+              "height": 4
+            }
+          },
+          {
+            "id": 5427394086713122,
+            "definition": {
+              "title": "2xx Frontend Responses",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "query": "sum:haproxy.frontend.response.2xx{*,*,$frontend,$release} by {haproxy_service,release}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "label": "",
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 3995670315964778,
+            "definition": {
+              "title": "3xx Frontend Responses",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "query": "sum:haproxy.frontend.response.3xx{*,*,$frontend,$release} by {haproxy_service,release}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "label": "",
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 4,
+              "y": 4,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 2047565335374142,
+            "definition": {
+              "title": "4xx Frontend Responses",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "query": "sum:haproxy.frontend.response.4xx{*,*,$frontend,$release} by {haproxy_service,release}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "orange",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "label": "",
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 0,
+              "y": 6,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 6295573771843224,
+            "definition": {
+              "title": "5xx Frontend Responses",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "query": "sum:haproxy.frontend.response.5xx{*,*,$frontend,$release} by {haproxy_service,release}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "warm",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "label": "",
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 4,
+              "y": 6,
+              "width": 4,
+              "height": 2
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 8,
+        "height": 9
+      }
+    },
+    {
+      "id": 4593425430940950,
+      "definition": {
+        "title": "Logs",
+        "type": "group",
+        "background_color": "purple",
+        "show_title": true,
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 5685665511884118,
+            "definition": {
+              "title": "HAProxy Logs",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "log_stream",
+              "indexes": [],
+              "query": "source:*haproxy*",
+              "sort": {
+                "column": "time",
+                "order": "desc"
+              },
+              "columns": [
+                "host",
+                "@service"
+              ],
+              "show_date_column": true,
+              "show_message_column": true,
+              "message_display": "expanded-md"
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 4,
+              "height": 8
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 8,
+        "y": 0,
+        "width": 4,
+        "height": 9
+      }
+    },
+    {
+      "id": 7179303075000462,
+      "definition": {
+        "title": "Backend",
+        "type": "group",
+        "background_color": "vivid_orange",
+        "show_title": true,
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 5946563995870284,
+            "definition": {
+              "title": "Backend Response Codes (% breakdown)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "vertical",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "2xx",
+                      "formula": "(query2 / query1) * 100"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "query": "sum:haproxy.backend.http.responses.total{service:ingress-haproxy*,*,*,*,*} by {haproxy_service}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query1"
                     },
                     {
-                        "q": "sum:haproxy.frontend.errors.req_rate{$scope}",
-                        "display_type": "line"
+                      "query": "sum:haproxy.backend.http.responses.total{service:ingress-haproxy*,*,*,*,*,code:2xx} by {haproxy_service}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query2"
                     }
-                ],
-                "custom_links": [],
-                "title": "Errors (F&B)",
-                "title_size": "16",
-                "title_align": "left",
-                "time": {
-                    "live_span": "1h"
+                  ],
+                  "style": {
+                    "palette": "warm",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
                 },
-                "show_legend": false,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 129,
-                "y": 64,
-                "width": 36,
-                "height": 15
-            }
-        },
-        {
-            "id": 18,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
+                {
+                  "formulas": [
                     {
-                        "q": "sum:haproxy.backend.warnings.retr_rate{$scope}",
-                        "display_type": "line"
+                      "alias": "3xx",
+                      "formula": "(query1 / query0) * 100"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "sum:haproxy.backend.http.responses.total{service:ingress-haproxy*,*,*,*,*} by {haproxy_service}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query0"
                     },
                     {
-                        "q": "sum:haproxy.backend.warnings.redis_rate{$scope}",
-                        "display_type": "line"
+                      "query": "sum:haproxy.backend.http.responses.total{service:ingress-haproxy*,*,*,*,*,code:3xx} by {haproxy_service}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query1"
                     }
-                ],
-                "custom_links": [],
-                "title": "Backend Retries and Redispatches",
-                "title_size": "16",
-                "title_align": "left",
-                "time": {
-                    "live_span": "1h"
-                },
-                "show_legend": false,
-                "legend_size": "0"
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "label": "",
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
             },
             "layout": {
-                "x": 55,
-                "y": 47,
-                "width": 36,
-                "height": 15
+              "x": 0,
+              "y": 0,
+              "width": 8,
+              "height": 3
             }
-        },
-        {
-            "id": 19,
+          },
+          {
+            "id": 3090788539548118,
             "definition": {
-                "type": "timeseries",
-                "requests": [
+              "title": "2xx Backend Responses by Release",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
                     {
-                        "q": "avg:haproxy.backend.connect.time{$scope}",
-                        "display_type": "line"
+                      "formula": "query1"
                     }
-                ],
-                "custom_links": [],
-                "markers": [
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
                     {
-                        "value": "y = 5",
-                        "display_type": "error dashed",
-                        "label": "Danger Zone"
+                      "query": "sum:haproxy.backend.response.2xx{*,*,$backend} by {haproxy_service}",
+                      "data_source": "metrics",
+                      "name": "query1"
                     }
-                ],
-                "title": "Time to Connect to Backend (in ms)",
-                "title_size": "16",
-                "title_align": "left",
-                "time": {
-                    "live_span": "1h"
-                },
-                "show_legend": false,
-                "legend_size": "0"
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "label": "",
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
             },
             "layout": {
-                "x": 18,
-                "y": 47,
-                "width": 36,
-                "height": 15
+              "x": 0,
+              "y": 3,
+              "width": 3,
+              "height": 2
             }
-        },
-        {
-            "id": 20,
+          },
+          {
+            "id": 3565399523481428,
             "definition": {
-                "type": "query_value",
-                "requests": [
+              "title": "3xx Backend Responses by Release",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
                     {
-                        "q": "sum:haproxy.backend.errors.con_rate{$scope}",
-                        "aggregator": "avg",
-                        "conditional_formats": [
-                            {
-                                "comparator": ">",
-                                "value": 1,
-                                "palette": "white_on_red"
-                            },
-                            {
-                                "comparator": "<=",
-                                "value": 0,
-                                "palette": "white_on_green"
-                            }
-                        ]
+                      "formula": "query1"
                     }
-                ],
-                "custom_links": [],
-                "title": "Connection Errors",
-                "title_size": "16",
-                "title_align": "left",
-                "time": {
-                    "live_span": "5m"
-                },
-                "autoscale": true,
-                "text_align": "center"
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "query": "sum:haproxy.backend.response.3xx{*,*,$backend} by {haproxy_service}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "label": "",
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
             },
             "layout": {
-                "x": 0,
-                "y": 54,
-                "width": 16,
-                "height": 7
+              "x": 3,
+              "y": 3,
+              "width": 3,
+              "height": 2
             }
-        },
-        {
-            "id": 21,
+          },
+          {
+            "id": 1863184948995790,
             "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "avg:haproxy.backend.queue.time{$scope}",
-                        "display_type": "line"
-                    }
-                ],
-                "custom_links": [],
-                "title": "Average Queue Time",
-                "title_size": "16",
-                "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                },
-                "show_legend": false,
-                "legend_size": "0"
+              "type": "note",
+              "content": "Ideally, all responses forwarded by HAProxy are class 2xx codes, so an unexpected surge in the number of other code classes could be a sign of trouble.\n\n\n**4xx:** HTTP client errors\n\n**5xx:** HTTP server errors",
+              "background_color": "orange",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": true,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
             },
             "layout": {
-                "x": 92,
-                "y": 47,
-                "width": 36,
-                "height": 15
+              "x": 6,
+              "y": 3,
+              "width": 2,
+              "height": 4
             }
-        },
-        {
-            "id": 22,
+          },
+          {
+            "id": 3540059407696954,
             "definition": {
-                "type": "timeseries",
-                "requests": [
+              "title": "4xx Backend Responses by Release",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
                     {
-                        "q": "sum:haproxy.backend.response.5xx{$scope}",
-                        "display_type": "line"
+                      "formula": "query1"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "query": "sum:haproxy.backend.response.4xx{*,*,$backend} by {haproxy_service}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "orange",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "label": "",
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 0,
+              "y": 5,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 5761243963570348,
+            "definition": {
+              "title": "5xx Backend Responses by Release",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "query": "sum:haproxy.backend.response.5xx{*,*,$backend} by {haproxy_service}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "warm",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "label": "",
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 3,
+              "y": 5,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 3773616402244664,
+            "definition": {
+              "type": "note",
+              "content": "Monitor the response times to identify latency issues before your customers are substantially impacted. \n\nConsider [creating alerts](https://www.datadoghq.com/blog/introducing-recovery-thresholds/) when your p95 response times pass acceptable thresholds.",
+              "background_color": "orange",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": true,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 7,
+              "width": 2,
+              "height": 3
+            }
+          },
+          {
+            "id": 5685875710364636,
+            "definition": {
+              "title": "Backend p99 Response Time",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "vertical",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "avg:haproxy.backend.response.time.average.seconds{*,*,*,*} by {release}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 2,
+              "y": 7,
+              "width": 6,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 8,
+        "height": 11
+      }
+    },
+    {
+      "id": 8133901540405098,
+      "definition": {
+        "title": "Pod Statistics",
+        "type": "group",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 7899500601949230,
+            "definition": {
+              "title": "Top Resource Consumers",
+              "type": "query_table",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "CPU Cores",
+                      "limit": {
+                        "count": 10,
+                        "order": "desc"
+                      },
+                      "formula": "query1"
                     },
                     {
-                        "q": "sum:haproxy.frontend.response.5xx{$scope}",
-                        "display_type": "line"
+                      "alias": "Memory",
+                      "formula": "query2"
                     }
-                ],
-                "custom_links": [],
-                "title": "5xx Codes (F&B)",
-                "title_size": "16",
-                "title_align": "left",
-                "time": {
-                    "live_span": "1h"
-                },
-                "show_legend": false,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 92,
-                "y": 64,
-                "width": 36,
-                "height": 15
-            }
-        },
-        {
-            "id": 23,
-            "definition": {
-                "type": "note",
-                "content": "Frontend Metrics",
-                "background_color": "yellow",
-                "font_size": "18",
-                "text_align": "center",
-                "show_tick": true,
-                "tick_pos": "50%",
-                "tick_edge": "top"
-            },
-            "layout": {
-                "x": 18,
-                "y": 17,
-                "width": 120,
-                "height": 5
-            }
-        },
-        {
-            "id": 24,
-            "definition": {
-                "type": "note",
-                "content": "Backend Metrics",
-                "background_color": "blue",
-                "font_size": "18",
-                "text_align": "center",
-                "show_tick": true,
-                "tick_pos": "50%",
-                "tick_edge": "bottom"
-            },
-            "layout": {
-                "x": 18,
-                "y": 22,
-                "width": 120,
-                "height": 5
-            }
-        },
-        {
-            "id": 25,
-            "definition": {
-                "type": "image",
-                "url": "/static/images/logos/haproxy_large.svg",
-                "sizing": "zoom"
-            },
-            "layout": {
-                "x": 0,
-                "y": 17,
-                "width": 16,
-                "height": 12
-            }
-        },
-        {
-            "id": 26,
-            "definition": {
-                "type": "note",
-                "content": "Shared\nMetrics",
-                "background_color": "white",
-                "font_size": "18",
-                "text_align": "left",
-                "show_tick": true,
-                "tick_pos": "50%",
-                "tick_edge": "right"
-            },
-            "layout": {
-                "x": 0,
-                "y": 70,
-                "width": 14,
-                "height": 24
-            }
-        },
-        {
-            "id": 27,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
                     {
-                        "q": "sum:haproxy.backend.denied.req_rate{$scope}",
-                        "display_type": "line"
+                      "query": "sum:kubernetes.cpu.usage.total{*,*,*,*,*,*,kube_namespace:ingress-haproxy,*,short_image:haproxy,*,*,*,*} by {pod_name}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "avg"
                     },
                     {
-                        "q": "sum:haproxy.backend.denied.resp_rate{$scope}",
-                        "display_type": "line"
+                      "query": "sum:kubernetes.memory.usage{*,*,*,*,*,*,kube_namespace:ingress-haproxy,*,short_image:haproxy,*,*,*,*} by {pod_name}",
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "aggregator": "avg"
                     }
-                ],
-                "custom_links": [],
-                "title": "Backend Denials",
-                "title_size": "16",
-                "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                },
-                "show_legend": false,
-                "legend_size": "0"
+                  ]
+                }
+              ]
             },
             "layout": {
-                "x": 129,
-                "y": 47,
-                "width": 36,
-                "height": 15
+              "x": 0,
+              "y": 0,
+              "width": 4,
+              "height": 4
             }
-        },
-        {
-            "id": 28,
+          },
+          {
+            "id": 6343835413534078,
             "definition": {
-                "type": "timeseries",
-                "requests": [
+              "title": "CPU Usage by Pod",
+              "show_legend": false,
+              "legend_size": "0",
+              "type": "timeseries",
+              "requests": [
+                {
+                  "q": "autosmooth(sum:kubernetes.cpu.usage.total{*,*,*,*,*,*,kube_namespace:ingress-haproxy,*,short_image:haproxy,*,*,*,*} by {pod_name})",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                },
+                {
+                  "q": "autosmooth(avg:kubernetes.cpu.limits{*,*,*,*,*,*,kube_namespace:ingress-haproxy,*,short_image:haproxy,*,*,*,*})",
+                  "style": {
+                    "palette": "warm",
+                    "line_type": "solid",
+                    "line_width": "thick"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "label": "",
+                "min": "auto",
+                "max": "auto"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 4358837757947092,
+            "definition": {
+              "title": "Memory Usage %",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
                     {
-                        "q": "sum:haproxy.frontend.denied.req_rate{$scope}",
-                        "display_type": "line"
+                      "formula": "query1 / query2 * 100"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "query": "max:kubernetes.memory.usage{team:logs,*,*,*,datacenter:us1.prod.dog,*,*,*,kube_container_name:*,short_image:envoy,*} by {release}",
+                      "data_source": "metrics",
+                      "name": "query1"
                     },
                     {
-                        "q": "sum:haproxy.frontend.denied.resp_rate{$scope}",
-                        "display_type": "line"
+                      "query": "avg:kubernetes.memory.limits{team:logs,*,*,*,datacenter:us1.prod.dog,*,*,*,kube_container_name:*,short_image:envoy,*} by {release}",
+                      "data_source": "metrics",
+                      "name": "query2"
                     }
-                ],
-                "custom_links": [],
-                "title": "Frontend Denials",
-                "title_size": "16",
-                "title_align": "left",
-                "time": {
-                    "live_span": "4h"
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "label": "",
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": [
+                {
+                  "value": "y > 100",
+                  "display_type": "error dashed"
                 },
-                "show_legend": false,
-                "legend_size": "0"
+                {
+                  "value": "80 < y < 100",
+                  "display_type": "warning dashed"
+                }
+              ]
             },
             "layout": {
-                "x": 166,
-                "y": 0,
-                "width": 36,
-                "height": 15
+              "x": 0,
+              "y": 6,
+              "width": 4,
+              "height": 2
             }
-        }
-    ],
-    "template_variables": [
-        {
-            "name": "scope",
-            "default": "*",
-            "prefix": null
-        }
-    ],
-    "layout_type": "free",
-    "is_read_only": true,
-    "notify_list": [],
-    "id": 28
+          },
+          {
+            "id": 4039511557654068,
+            "definition": {
+              "title": "Requests per Service",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query2"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "query": "sum:haproxy.process.current.tasks{*,*,*,*,*,kube_namespace:ingress-haproxy,*,*,*,*} by {service}.fill(null)",
+                      "data_source": "metrics",
+                      "name": "query2"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "area"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "label": "",
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 0,
+              "y": 8,
+              "width": 4,
+              "height": 2
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 8,
+        "y": 0,
+        "width": 4,
+        "height": 11
+      }
+    }
+  ],
+  "template_variables": [
+    {
+      "name": "frontend",
+      "default": "*",
+      "prefix": "haproxy_service",
+      "available_values": []
+    },
+    {
+      "name": "backend",
+      "default": "*",
+      "prefix": "haproxy_service",
+      "available_values": []
+    },
+    {
+      "name": "release",
+      "default": "*",
+      "prefix": "release",
+      "available_values": []
+    }
+  ],
+  "layout_type": "ordered",
+  "is_read_only": false,
+  "notify_list": [],
+  "reflow_type": "fixed",
+  "id": "sez-d3r-yhk"
 }

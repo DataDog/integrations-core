@@ -121,7 +121,7 @@
     "app-20201120094950-0000.driver.LiveListenerBus.queue.streams.size": {
       "value": 0
     },
-    "app-20201120094950-0000.driver.spark.streaming.e8e4803f-cc76-4b53-82f9-361b54448fc4.eventTime-watermark": {
+    "app-20201120094950-0000.driver.spark.streaming.my_named_query.eventTime-watermark": {
       "value": 12
     },
     "app-20201120094950-0000.driver.spark.streaming.e8e4803f-cc76-4b53-82f9-361b54448fc4.inputRate-total": {
@@ -130,13 +130,13 @@
     "app-20201120094950-0000.driver.spark.streaming.e8e4803f-cc76-4b53-82f9-361b54448fc4.latency": {
       "value": 12
     },
-    "app-20201120094950-0000.driver.spark.streaming.e8e4803f-cc76-4b53-82f9-361b54448fc4.processingRate-total": {
+    "app-20201120094950-0000.driver.spark.streaming.my_named_query.processingRate-total": {
       "value": 12
     },
-    "app-20201120094950-0000.driver.spark.streaming.e8e4803f-cc76-4b53-82f9-361b54448fc4.states-rowsTotal": {
+    "app-20201120094950-0000.driver.spark.streaming.my_named_query.states-rowsTotal": {
       "value": 12
     },
-    "app-20201120094950-0000.driver.spark.streaming.e8e4803f-cc76-4b53-82f9-361b54448fc4.states-usedBytes": {
+    "app-20201120094950-0000.driver.spark.streaming.my_named_query.states-usedBytes": {
       "value": 12
     }
   },

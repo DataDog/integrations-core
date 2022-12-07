@@ -1,8 +1,6 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import json
-
 import mock
 import pytest
 from six import PY3
@@ -23,7 +21,7 @@ def test_config(instance):
         m.assert_called_once_with(
             host=instance['server'],
             port=instance['port'],
-            user=instance['user'],
+            user=instance['username'],
             password=instance['password'],
             database='default',
             connect_timeout=10,
@@ -36,14 +34,7 @@ def test_config(instance):
         )
 
 
-def test_config_error():
-    check = ClickhouseCheck('clickhouse', {}, [{}])
-
-    error = check.run()
-    assert error and json.loads(error)[0]['message'] == 'the `server` setting is required'
-
-
-def test_error_query(instance):
+def test_error_query(instance, dd_run_check):
     check = ClickhouseCheck('clickhouse', {}, [instance])
     check.log = mock.MagicMock()
     del check.check_initializations[-2]
@@ -51,9 +42,8 @@ def test_error_query(instance):
     client = mock.MagicMock()
     client.execute_iter = raise_error
     check._client = client
-
-    check.run()
-    check.log.error.assert_any_call('Error querying %s: %s', 'system.metrics', mock.ANY)
+    with pytest.raises(Exception):
+        dd_run_check(check)
 
 
 @pytest.mark.latest_metrics

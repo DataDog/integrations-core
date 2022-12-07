@@ -2,7 +2,7 @@
 
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
+import os
 from itertools import chain
 
 from datadog_checks.dev import get_docker_hostname, get_here
@@ -13,12 +13,14 @@ from datadog_checks.sqlserver.const import (
     AO_METRICS_PRIMARY,
     AO_METRICS_SECONDARY,
     DATABASE_FRAGMENTATION_METRICS,
+    DATABASE_MASTER_FILES,
     DATABASE_METRICS,
-    FCI_METRICS,
+    DBM_MIGRATED_METRICS,
     INSTANCE_METRICS,
     INSTANCE_METRICS_TOTAL,
     TASK_SCHEDULER_METRICS,
 )
+from datadog_checks.sqlserver.queries import get_query_file_stats
 
 
 def get_local_driver():
@@ -38,19 +40,42 @@ def get_local_driver():
 HOST = get_docker_hostname()
 PORT = 1433
 DOCKER_SERVER = '{},{}'.format(HOST, PORT)
-LOCAL_SERVER = 'localhost,{}'.format(PORT)
 HERE = get_here()
 CHECK_NAME = "sqlserver"
 
 CUSTOM_METRICS = ['sqlserver.clr.execution', 'sqlserver.db.commit_table_entries', 'sqlserver.exec.in_progress']
-EXPECTED_DEFAULT_METRICS = [
-    m[0]
-    for m in chain(
-        INSTANCE_METRICS,
-        INSTANCE_METRICS_TOTAL,
-        DATABASE_METRICS,
-    )
+SERVER_METRICS = [
+    'sqlserver.server.committed_memory',
+    'sqlserver.server.cpu_count',
+    'sqlserver.server.physical_memory',
+    'sqlserver.server.target_memory',
+    'sqlserver.server.uptime',
+    'sqlserver.server.virtual_memory',
 ]
+
+SQLSERVER_MAJOR_VERSION = int(os.environ.get('SQLSERVER_MAJOR_VERSION'))
+
+
+def get_expected_file_stats_metrics():
+    query_file_stats = get_query_file_stats(SQLSERVER_MAJOR_VERSION)
+    return ["sqlserver." + c["name"] for c in query_file_stats["columns"] if c["type"] != "tag"]
+
+
+EXPECTED_FILE_STATS_METRICS = get_expected_file_stats_metrics()
+
+EXPECTED_DEFAULT_METRICS = (
+    [
+        m[0]
+        for m in chain(
+            INSTANCE_METRICS,
+            DBM_MIGRATED_METRICS,
+            INSTANCE_METRICS_TOTAL,
+            DATABASE_METRICS,
+        )
+    ]
+    + SERVER_METRICS
+    + EXPECTED_FILE_STATS_METRICS
+)
 EXPECTED_METRICS = (
     EXPECTED_DEFAULT_METRICS
     + [
@@ -58,61 +83,57 @@ EXPECTED_METRICS = (
         for m in chain(
             TASK_SCHEDULER_METRICS,
             DATABASE_FRAGMENTATION_METRICS,
-            FCI_METRICS,
+            DATABASE_MASTER_FILES,
         )
     ]
     + CUSTOM_METRICS
 )
 
+DBM_MIGRATED_METRICS_NAMES = set(m[0] for m in DBM_MIGRATED_METRICS)
+
+EXPECTED_METRICS_DBM_ENABLED = [m for m in EXPECTED_METRICS if m not in DBM_MIGRATED_METRICS_NAMES]
+
+# These AO metrics are collected using the new QueryExecutor API instead of BaseSqlServerMetric.
+EXPECTED_QUERY_EXECUTOR_AO_METRICS_PRIMARY = [
+    'sqlserver.ao.low_water_mark_for_ghosts',
+    'sqlserver.ao.secondary_lag_seconds',
+]
+EXPECTED_QUERY_EXECUTOR_AO_METRICS_SECONDARY = [
+    'sqlserver.ao.log_send_queue_size',
+    'sqlserver.ao.log_send_rate',
+    'sqlserver.ao.redo_queue_size',
+    'sqlserver.ao.redo_rate',
+    'sqlserver.ao.filestream_send_rate',
+]
+EXPECTED_QUERY_EXECUTOR_AO_METRICS_COMMON = [
+    'sqlserver.ao.is_primary_replica',
+    'sqlserver.ao.replica_status',
+    'sqlserver.ao.quorum_type',
+    'sqlserver.ao.quorum_state',
+    'sqlserver.ao.member.type',
+    'sqlserver.ao.member.state',
+]
+# Our test environment does not have failover clustering enabled, so these metrics are not expected.
+# To test them follow this guide:
+# https://cloud.google.com/compute/docs/instances/sql-server/configure-failover-cluster-instance
+UNEXPECTED_QUERY_EXECUTOR_AO_METRICS = ['sqlserver.ao.member.number_of_quorum_votes']
+UNEXPECTED_FCI_METRICS = [
+    'sqlserver.fci.status',
+    'sqlserver.fci.is_current_owner',
+]
+
 EXPECTED_AO_METRICS_PRIMARY = [m[0] for m in AO_METRICS_PRIMARY]
 EXPECTED_AO_METRICS_SECONDARY = [m[0] for m in AO_METRICS_SECONDARY]
 EXPECTED_AO_METRICS_COMMON = [m[0] for m in AO_METRICS]
 
-INSTANCE_DOCKER = {
-    'host': '{},1433'.format(HOST),
-    'connector': 'odbc',
-    'driver': get_local_driver(),
-    'username': 'sa',
-    'password': 'Password123',
-    'tags': ['optional:tag1'],
-    'include_task_scheduler_metrics': True,
-    'include_db_fragmentation_metrics': True,
-    'include_fci_metrics': True,
-    'include_ao_metrics': False,
-}
-
-INSTANCE_AO_DOCKER_SECONDARY = {
-    'host': '{},1434'.format(HOST),
-    'connector': 'odbc',
-    'driver': 'FreeTDS',
-    'username': 'sa',
-    'password': 'Password123',
-    'tags': ['optional:tag1'],
-    'include_ao_metrics': True,
-}
-
-CUSTOM_QUERY_A = {
-    'query': "SELECT letter, num FROM (VALUES (97, 'a'), (98, 'b'), (99, 'c')) AS t (num,letter)",
-    'columns': [{'name': 'customtag', 'type': 'tag'}, {'name': 'num', 'type': 'gauge'}],
-    'tags': ['query:custom'],
-}
-
-CUSTOM_QUERY_B = {
-    'query': "SELECT letter, num FROM (VALUES (97, 'a'), (98, 'b'), (99, 'c')) AS t (num,letter)",
-    'columns': [{'name': 'customtag', 'type': 'tag'}, {'name': 'num', 'type': 'gauge'}],
-    'tags': ['query:another_custom_one'],
-}
-
-INSTANCE_E2E = INSTANCE_DOCKER.copy()
-INSTANCE_E2E['driver'] = 'FreeTDS'
-
-INSTANCE_SQL2017_DEFAULTS = {
-    'host': LOCAL_SERVER,
+INSTANCE_SQL_DEFAULTS = {
+    'host': DOCKER_SERVER,
     'username': 'sa',
     'password': 'Password12!',
+    'disable_generic_tags': True,
 }
-INSTANCE_SQL2017 = INSTANCE_SQL2017_DEFAULTS.copy()
-INSTANCE_SQL2017.update(
+INSTANCE_SQL = INSTANCE_SQL_DEFAULTS.copy()
+INSTANCE_SQL.update(
     {
         'connector': 'odbc',
         'driver': '{ODBC Driver 17 for SQL Server}',
@@ -120,6 +141,8 @@ INSTANCE_SQL2017.update(
         'include_db_fragmentation_metrics': True,
         'include_fci_metrics': True,
         'include_ao_metrics': False,
+        'include_master_files_metrics': True,
+        'disable_generic_tags': True,
     }
 )
 
@@ -152,10 +175,10 @@ INIT_CONFIG_OBJECT_NAME = {
             'tags': ['optional_tag:tag1'],
         },
         {
-            'name': 'sqlserver.active_requests',
-            'counter_name': 'Active requests',
-            'instance_name': 'default',
-            'object_name': 'SQLServer:Workload Group Stats',
+            'name': 'sqlserver.broker_activation.tasks_running',
+            'counter_name': 'Tasks Running',
+            'instance_name': 'tempdb',
+            'object_name': 'SQLServer:Broker Activation',
             'tags': ['optional_tag:tag1'],
         },
     ]
@@ -176,24 +199,30 @@ INIT_CONFIG_ALT_TABLES = {
             'columns': ['num_of_reads', 'num_of_writes'],
         },
         {
-            'name': 'sqlserver.MEMORYCLERK_BITMAP',
+            'name': 'sqlserver.MEMORYCLERK_SQLGENERAL',
             'table': 'sys.dm_os_memory_clerks',
-            'counter_name': 'MEMORYCLERK_BITMAP',
+            'counter_name': 'MEMORYCLERK_SQLGENERAL',
             'columns': ['virtual_memory_reserved_kb', 'virtual_memory_committed_kb'],
         },
     ]
 }
 
-FULL_E2E_CONFIG = {"init_config": INIT_CONFIG, "instances": [INSTANCE_E2E]}
 
-
-def assert_metrics(aggregator, expected_tags):
+def assert_metrics(aggregator, expected_tags, dbm_enabled=False, hostname=None, database_autodiscovery=False):
     """
     Boilerplate asserting all the expected metrics and service checks.
     Make sure ALL custom metric is tagged by database.
     """
     aggregator.assert_metric_has_tag('sqlserver.db.commit_table_entries', 'db:master')
-    for mname in EXPECTED_METRICS:
-        aggregator.assert_metric(mname)
+    expected_metrics = EXPECTED_METRICS
+    if dbm_enabled:
+        dbm_excluded_metrics = [m[0] for m in DBM_MIGRATED_METRICS]
+        expected_metrics = [m for m in EXPECTED_METRICS if m not in dbm_excluded_metrics]
+    for mname in expected_metrics:
+        assert hostname is not None, "hostname must be explicitly specified for all metrics"
+        aggregator.assert_metric(mname, hostname=hostname)
     aggregator.assert_service_check('sqlserver.can_connect', status=SQLServer.OK, tags=expected_tags)
     aggregator.assert_all_metrics_covered()
+    if not database_autodiscovery:
+        # if we're autodiscovering other databases then there will be duplicate metrics, one per database
+        aggregator.assert_no_duplicate_metrics()

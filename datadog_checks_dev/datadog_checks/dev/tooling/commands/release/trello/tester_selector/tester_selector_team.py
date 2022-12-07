@@ -35,10 +35,10 @@ class TesterSelectorTeam:
         exclude_testers.add(author)
 
         # find a tester who is neither the author nor a reviewer
-        tester = self.__select_testers(lambda t: t in exclude_testers)
+        tester = self.__select_testers(user_excluded_fct=lambda t: t in exclude_testers)
         if tester is None:
             # find a tester who is not the author
-            tester = self.__select_testers(lambda t: t != author)
+            tester = self.__select_testers(user_excluded_fct=lambda t: t == author)
 
         if tester is not None:
             self.__prs_by_tester[tester].append(pr_num)

@@ -1,6 +1,94 @@
 # CHANGELOG - snmp
 
-## 5.1.0 / 2021-04-19
+## 5.10.0 / 2022-09-16 / Agent 7.40.0
+
+* [Added] Refactor tooling for getting the current env name. See [#12939](https://github.com/DataDog/integrations-core/pull/12939).
+* [Fixed] Add virtualdomain_index tag to fgFwPolStatsTable. See [#12760](https://github.com/DataDog/integrations-core/pull/12760).
+
+## 5.9.0 / 2022-08-05 / Agent 7.39.0
+
+* [Added] Add metrics for VPN Tunnels. See [#11977](https://github.com/DataDog/integrations-core/pull/11977). Thanks [jalmeroth](https://github.com/jalmeroth).
+* [Fixed] Dependency updates. See [#12653](https://github.com/DataDog/integrations-core/pull/12653).
+
+## 5.8.0 / 2022-05-15 / Agent 7.37.0
+
+* [Added] Add memory and cpu abstract metrics. See [#11781](https://github.com/DataDog/integrations-core/pull/11781).
+* [Fixed] Fix meraki profile mac address. See [#11871](https://github.com/DataDog/integrations-core/pull/11871).
+* [Fixed] Add format mac_address to profile interface metadata. See [#11870](https://github.com/DataDog/integrations-core/pull/11870).
+* [Fixed] Updating check documentation for timeout and retries. See [#11848](https://github.com/DataDog/integrations-core/pull/11848).
+
+## 5.7.0 / 2022-04-05 / Agent 7.36.0
+
+* [Added] Add metric_patterns options to filter all metric submission by a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
+* [Fixed] Support newer versions of `click`. See [#11746](https://github.com/DataDog/integrations-core/pull/11746).
+* [Fixed] Add `min_collection_interval` to snmp `init_config`. See [#11543](https://github.com/DataDog/integrations-core/pull/11543).
+
+## 5.6.0 / 2022-02-19 / Agent 7.35.0
+
+* [Added] Add `pyproject.toml` file. See [#11432](https://github.com/DataDog/integrations-core/pull/11432).
+* [Fixed] Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).
+
+## 5.5.0 / 2022-01-08 / Agent 7.34.0
+
+* [Added] Add `sysMultiHostCpuUsageRatio` to BIG-IP profile. See [#10924](https://github.com/DataDog/integrations-core/pull/10924). Thanks [kei6u](https://github.com/kei6u).
+* [Added] Add profile metadata for Isilon. See [#11022](https://github.com/DataDog/integrations-core/pull/11022).
+* [Added] Add metadata to Dell iDRAC profile. See [#11004](https://github.com/DataDog/integrations-core/pull/11004).
+* [Added] Add profile metadata for fortinet-fortigate. See [#11002](https://github.com/DataDog/integrations-core/pull/11002).
+* [Added] Add profile metadata for checkpoint_firewall. See [#10998](https://github.com/DataDog/integrations-core/pull/10998).
+* [Added] Add profile metadata for netapp. See [#10968](https://github.com/DataDog/integrations-core/pull/10968).
+* [Added] Add metrics to apc_ups profile. See [#10967](https://github.com/DataDog/integrations-core/pull/10967).
+* [Added] Add profile metadata for palo alto. See [#10956](https://github.com/DataDog/integrations-core/pull/10956).
+* [Added] Add profile metadata for arista. See [#10944](https://github.com/DataDog/integrations-core/pull/10944).
+* [Added] Add profile metadata for aruba. See [#10952](https://github.com/DataDog/integrations-core/pull/10952).
+* [Added] Add profile metadata for Juniper. See [#11005](https://github.com/DataDog/integrations-core/pull/11005).
+* [Added] Add apc_ups profile metadata. See [#10857](https://github.com/DataDog/integrations-core/pull/10857).
+* [Added] Add metadata to HP profiles. See [#10867](https://github.com/DataDog/integrations-core/pull/10867).
+* [Added] Add location to _base.yaml. See [#10822](https://github.com/DataDog/integrations-core/pull/10822).
+* [Added] Add use_device_id_as_hostname config. See [#10812](https://github.com/DataDog/integrations-core/pull/10812).
+* [Added] Add profile metadata for Cisco Catalyst and 3850. See [#10767](https://github.com/DataDog/integrations-core/pull/10767).
+* [Added] Add mac address as tag for meraki-cloud-controller  profile. See [#10779](https://github.com/DataDog/integrations-core/pull/10779).
+* [Added] Add profile metadata for f5. See [#10667](https://github.com/DataDog/integrations-core/pull/10667).
+* [Added] Add profile metadata for device and interface. See [#10666](https://github.com/DataDog/integrations-core/pull/10666).
+* [Fixed] Fix more SNMP illegal tabs. See [#11063](https://github.com/DataDog/integrations-core/pull/11063).
+* [Fixed] Fix SNMP illegal tab character. See [#11062](https://github.com/DataDog/integrations-core/pull/11062).
+* [Fixed] Fix default value for instance level oid_batch_size. See [#11018](https://github.com/DataDog/integrations-core/pull/11018).
+* [Fixed] Add .0 to juniper metadata OIDs. See [#11019](https://github.com/DataDog/integrations-core/pull/11019).
+* [Fixed] Fix netapp profile metrics. See [#10981](https://github.com/DataDog/integrations-core/pull/10981).
+* [Fixed] Update auth and priv protocols. See [#10866](https://github.com/DataDog/integrations-core/pull/10866).
+
+## 5.4.2 / 2021-10-07 / Agent 7.32.0
+
+* [Fixed] Hide collect_device_metadata by default. See [#10349](https://github.com/DataDog/integrations-core/pull/10349).
+
+## 5.4.1 / 2021-10-06
+
+* [Fixed] Remove python only mention from check discovery props. See [#10352](https://github.com/DataDog/integrations-core/pull/10352).
+
+## 5.4.0 / 2021-10-04
+
+* [Added] Update dependencies. See [#10258](https://github.com/DataDog/integrations-core/pull/10258).
+* [Added] Add autodiscovery integration configs. See [#10079](https://github.com/DataDog/integrations-core/pull/10079).
+* [Added] Add autodiscovery_subnet tag to discovered_devices_count metric. See [#10072](https://github.com/DataDog/integrations-core/pull/10072).
+* [Fixed] Better naming for testing environments. See [#10070](https://github.com/DataDog/integrations-core/pull/10070).
+* [Fixed] Bump base package requirement. See [#10078](https://github.com/DataDog/integrations-core/pull/10078).
+
+## 5.3.0 / 2021-08-22 / Agent 7.31.0
+
+* [Added] Add `ifNumber` to `_generic-if.yaml`. See [#9875](https://github.com/DataDog/integrations-core/pull/9875).
+* [Added] Refactor profile validators. See [#9741](https://github.com/DataDog/integrations-core/pull/9741).
+* [Fixed] Enclose community string using single quote. See [#9742](https://github.com/DataDog/integrations-core/pull/9742).
+* [Fixed] Test string float value in e2e. See [#9689](https://github.com/DataDog/integrations-core/pull/9689).
+
+## 5.2.0 / 2021-05-28 / Agent 7.29.0
+
+* [Added] Add collect device metadata config. See [#9393](https://github.com/DataDog/integrations-core/pull/9393).
+* [Added] Add rate type to error and discard counters. See [#9218](https://github.com/DataDog/integrations-core/pull/9218). Thanks [loganmc10](https://github.com/loganmc10).
+* [Fixed] Improve snmp example config. See [#9417](https://github.com/DataDog/integrations-core/pull/9417).
+* [Fixed] Revert "Add collect device metadata config". See [#9439](https://github.com/DataDog/integrations-core/pull/9439).
+* [Fixed] Fix mypy lint issue. See [#9288](https://github.com/DataDog/integrations-core/pull/9288).
+* [Fixed] Update conf.yaml.example - wrong file name. See [#7704](https://github.com/DataDog/integrations-core/pull/7704).
+
+## 5.1.0 / 2021-04-19 / Agent 7.28.0
 
 * [Added] Add doc for instance batch size config. See [#9109](https://github.com/DataDog/integrations-core/pull/9109).
 * [Added] Add python loader tag to telemetry metrics. See [#9038](https://github.com/DataDog/integrations-core/pull/9038).
@@ -325,41 +413,32 @@
 
 ## 1.4.2 / 2018-10-12 / Agent 6.6.0
 
-* [Fixed] Fix `enforce_mib_constraints` parameter having no effect.. See [#2340][1].
+* [Fixed] Fix `enforce_mib_constraints` parameter having no effect.. See [#2340](https://github.com/DataDog/integrations-core/pull/2340).
 
 ## 1.4.1 / 2018-09-04 / Agent 6.5.0
 
-* [Fixed] Add data files to the wheel package. See [#1727][2].
+* [Fixed] Add data files to the wheel package. See [#1727](https://github.com/DataDog/integrations-core/pull/1727).
 
 ## 1.4.0 / 2018-05-11
 
-* [IMPROVEMENT] Enhance error handling when metrics aren't defined or device cannot be reached. See [#1406][3]
+* [IMPROVEMENT] Enhance error handling when metrics aren't defined or device cannot be reached. See [#1406](https://github.com/DataDog/integrations-core/issues/1406)
 
 ## 1.3.1 / 2018-02-13
 
-* [BUGFIX] Fix warning service check reporting. See [#1041][4]
+* [BUGFIX] Fix warning service check reporting. See [#1041](https://github.com/DataDog/integrations-core/issues/1041)
 
 ## 1.3.0 / 2017-10-10
 
-* [FEATURE] Add support for SNMPv3 Contexts. See [#723][5]
+* [FEATURE] Add support for SNMPv3 Contexts. See [#723](https://github.com/DataDog/integrations-core/issues/723)
 
 ## 1.2.0 / 2017-07-18
 
-* [IMPROVEMENT] Drop dependency on pycrypto. See [#426][6]
+* [IMPROVEMENT] Drop dependency on pycrypto. See [#426](https://github.com/DataDog/integrations-core/issues/426)
 
 ## 1.1.0 / 2017-04-24
 
-* [FEATURE] Add individual metric tagging to OID and MIB Non-tabular data. See [#248][7]
+* [FEATURE] Add individual metric tagging to OID and MIB Non-tabular data. See [#248](https://github.com/DataDog/integrations-core/issues/248)
 
 ## 1.0.0 / 2017-03-22
 
 * [FEATURE] adds snmp integration.
-
-<!--- The following link definition list is generated by PimpMyChangelog --->
-[1]: https://github.com/DataDog/integrations-core/pull/2340
-[2]: https://github.com/DataDog/integrations-core/pull/1727
-[3]: https://github.com/DataDog/integrations-core/issues/1406
-[4]: https://github.com/DataDog/integrations-core/issues/1041
-[5]: https://github.com/DataDog/integrations-core/issues/723
-[6]: https://github.com/DataDog/integrations-core/issues/426
-[7]: https://github.com/DataDog/integrations-core/issues/248

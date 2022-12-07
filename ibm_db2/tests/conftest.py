@@ -15,7 +15,7 @@ from .common import COMPOSE_FILE, CONFIG, E2E_METADATA
 class DbManager(object):
     def __init__(self, config):
         self.target, self.username, self.password = IbmDb2Check.get_connection_data(
-            config['db'], config['username'], config['password'], config['host'], config['port'], None
+            config['db'], config['username'], config['password'], config['host'], config['port'], 'none', None
         )
         self.db_name = config['db']
         self.conn = None
@@ -59,7 +59,7 @@ class DbManager(object):
 def dd_environment():
     db = DbManager(CONFIG)
 
-    with docker_run(COMPOSE_FILE, conditions=[db.initialize, WaitFor(db.connect)]):
+    with docker_run(COMPOSE_FILE, conditions=[db.initialize, WaitFor(db.connect)], attempts=2):
         yield CONFIG, E2E_METADATA
 
 

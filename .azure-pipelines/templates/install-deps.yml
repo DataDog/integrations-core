@@ -7,6 +7,8 @@ parameters:
     default: null
   - name: run_py2_tests
     default: true
+  - name: dd_url
+    default: https://app.datadoghq.com
 
 steps:
 # Install the Python version with which to use globally last as
@@ -33,6 +35,7 @@ steps:
   # used as a base for future jobs that match this `key`.
   # For details, see: https://docs.microsoft.com/en-us/azure/devops/pipelines/release/caching
   - task: Cache@2
+    continueOnError: true
     inputs:
       key: ${{ parameters.pip_cache_config.key }}
       restoreKeys: ${{ parameters.pip_cache_config.restoreKeys }}
@@ -42,16 +45,19 @@ steps:
 - script: python -m pip install --disable-pip-version-check --upgrade pip setuptools wheel
   displayName: 'Upgrade Python packaging tools'
 
-- script: pip install --disable-pip-version-check git+git://github.com/ofek/codecov-python.git@datadog
-  displayName: 'Install Codecov'
-
 - ${{ if eq(parameters.repo, 'core') }}:
-  - script: pip install ./datadog_checks_dev[cli]
+  - script: |
+      pip install ./datadog_checks_dev[cli]
+      pip install ./ddev
     displayName: 'Install ddev from local folder'
 
 - ${{ if not(eq(parameters.repo, 'core')) }}:
   - script: pip install datadog-checks-dev[cli]
     displayName: 'Install ddev from PyPI'
 
-- script: ddev config set repos.${{ parameters.repo }} . && ddev config set repo ${{ parameters.repo }}
+- script: |
+    ddev config set repos.${{ parameters.repo }} .
+    ddev config set repo ${{ parameters.repo }}
+    ddev config set orgs.ci.dd_url ${{ parameters.dd_url}}
+    ddev config set org ci
   displayName: 'Configure ddev'

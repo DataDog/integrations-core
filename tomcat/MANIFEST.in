@@ -1,3 +1,0 @@
-include README.md
-include manifest.json
-graft datadog_checks

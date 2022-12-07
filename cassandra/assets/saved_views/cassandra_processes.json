@@ -14,11 +14,8 @@
       "showArguments"
     ],
     "filter": {
-      "text": "",
-      "groups": [],
-      "tags": [
-        "integration:cassandra"
-      ]
+      "query_filter": "integration:cassandra",
+      "groups": []
     },
     "selected_top_graph": "scatterplot",
     "enabled_columns": [

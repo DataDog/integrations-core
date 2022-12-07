@@ -5,6 +5,7 @@
 
 extends:
   - _base.yaml
+  - _hp-base.yaml
   - _hp-compaq-health.yaml
   - _hp-driver-stats.yaml
 
@@ -12,6 +13,14 @@ device:
   vendor: "hp"
 
 sysobjectid: 1.3.6.1.4.1.232.9.4.10
+
+metadata:
+  device:
+    fields:
+      product_name:
+        value: Integrated Lights-Out
+      model:
+        value: iLO4
 
 metrics:
   # iLO controller metrics.
@@ -147,7 +156,7 @@ metrics:
         # NOTE: this is zero if the value exceeds 4Gbps.
         OID: 1.3.6.1.4.1.232.18.2.3.1.1.33
         name: cpqNicIfPhysAdapterSpeed
-      - # Estimate of current bandwith in Mbps.
+      - # Estimate of current bandwidth in Mbps.
         OID: 1.3.6.1.4.1.232.18.2.3.1.1.36
         name: cpqNicIfPhysAdapterSpeedMbps
     # NOTE: no 'forced_type', as these are correctly sent as gauges.

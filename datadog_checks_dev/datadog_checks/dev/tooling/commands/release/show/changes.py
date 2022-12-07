@@ -7,11 +7,20 @@ from ....git import get_commits_since
 from ....github import get_changelog_types, get_pr, parse_pr_numbers
 from ....release import get_release_tag_string
 from ....utils import complete_valid_checks, get_valid_checks, get_version_string
-from ...console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_warning, validate_check_arg
+from ...console import (
+    CONTEXT_SETTINGS,
+    abort,
+    echo_debug,
+    echo_failure,
+    echo_info,
+    echo_success,
+    echo_warning,
+    validate_check_arg,
+)
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Show all the pending PRs for a given check.')
-@click.argument('check', autocompletion=complete_valid_checks, callback=validate_check_arg)
+@click.argument('check', shell_complete=complete_valid_checks, callback=validate_check_arg)
 @click.option('--organization', '-r', default='DataDog', help="The Github organization the repository belongs to")
 @click.option(
     '--tag-pattern',
@@ -25,8 +34,10 @@ from ...console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_su
 @click.option(
     '--since', default=None, help="The git ref to use instead of auto-detecting the tag to view changes since"
 )
+@click.option('--end')
+@click.option('--exclude-branch', default=None, help="Exclude changes comming from a specific branch")
 @click.pass_context
-def changes(ctx, check, tag_pattern, tag_prefix, dry_run, organization, since):
+def changes(ctx, check, tag_pattern, tag_prefix, dry_run, organization, since, end, exclude_branch):
     """Show all the pending PRs for a given check."""
     if not dry_run and check and check not in get_valid_checks():
         abort(f'Check `{check}` is not an Agent-based Integration')
@@ -41,44 +52,39 @@ def changes(ctx, check, tag_pattern, tag_prefix, dry_run, organization, since):
     target_tag = get_release_tag_string(check, cur_version)
 
     # get the diff from HEAD
-    diff_lines = get_commits_since(check, target_tag)
+    diff_lines = get_commits_since(check, target_tag, end=end, exclude_branch=exclude_branch)
 
     # for each PR get the title, we'll use it to populate the changelog
     pr_numbers = parse_pr_numbers(diff_lines)
     if not dry_run:
         echo_info(f'Found {len(pr_numbers)} PRs merged since tag: {target_tag}')
 
+    applicable_changelog_types = []
     user_config = ctx.obj
-    if dry_run:
-        changelog_types = []
-
-        for pr_num in pr_numbers:
-            try:
-                payload = get_pr(pr_num, user_config, org=organization)
-            except Exception as e:
-                echo_failure(f'Unable to fetch info for PR #{pr_num}: {e}')
-                continue
-            current_changelog_types = get_changelog_types(payload)
-            if not current_changelog_types:
+    echo_debug(f'Evaluating PRs: {pr_numbers}')
+    for pr_num in pr_numbers:
+        try:
+            payload = get_pr(pr_num, user_config, org=organization)
+        except Exception as e:
+            echo_failure(f'Unable to fetch info for PR #{pr_num}: {e}')
+            continue
+        changelog_types = get_changelog_types(payload)
+        if dry_run:
+            echo_debug('Running changes in dry run mode. Command will abort if there are invalid tags')
+            if not changelog_types:
+                echo_failure(f'No valid changelog labels found attached to PR #{pr_num}, please add one!')
                 abort(f'No valid changelog labels found attached to PR #{pr_num}, please add one!')
-            elif len(current_changelog_types) > 1:
+            elif len(changelog_types) > 1:
+                echo_failure(f'Multiple changelog labels found attached to PR #{pr_num}, please only use one!')
                 abort(f'Multiple changelog labels found attached to PR #{pr_num}, please only use one!')
 
-            current_changelog_type = current_changelog_types[0]
+            current_changelog_type = changelog_types[0]
             if current_changelog_type != 'no-changelog':
-                changelog_types.append(current_changelog_type)
-
-        return cur_version, changelog_types
-    else:
-        for pr_num in pr_numbers:
-            try:
-                payload = get_pr(pr_num, user_config, org=organization)
-            except Exception as e:
-                echo_failure(f'Unable to fetch info for PR #{pr_num}: {e}')
-                continue
-
-            changelog_types = get_changelog_types(payload)
-
+                echo_debug(f'Found change {current_changelog_type}')
+                applicable_changelog_types.append(current_changelog_type)
+            else:
+                echo_debug(f'Found no-changelog change for PR {pr_num}, skipping')
+        else:
             echo_success(payload.get('title'))
             echo_info(f" * Url: {payload.get('html_url')}")
 
@@ -89,3 +95,5 @@ def changes(ctx, check, tag_pattern, tag_prefix, dry_run, organization, since):
                 echo_warning(f"WARNING! Too many changelog labels attached: {', '.join(changelog_types)}\n")
             else:
                 echo_success(f'{changelog_types[0]}\n')
+
+    return cur_version, applicable_changelog_types

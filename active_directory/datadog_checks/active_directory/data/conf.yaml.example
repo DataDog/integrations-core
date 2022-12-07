@@ -2,6 +2,12 @@
 #
 init_config:
 
+    ## @param use_localized_counters - boolean - optional - default: false
+    ## Whether performance object and counter names should refer to their
+    ## locale-specific versions rather than their English name.
+    #
+    # use_localized_counters: false
+
     ## @param service - string - optional
     ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
     ##
@@ -9,54 +15,117 @@ init_config:
     #
     # service: <SERVICE>
 
-## Every instance is scheduled independent of the others.
+## Every instance is scheduled independently of the others.
 #
 instances:
 
-    ## @param host - string - required
-    ## The host the current check connects to.
-    ## "." means the current host
+  -
+    ## @param server - string - optional
+    ## The server with which to connect, defaulting to the local machine.
     #
-  - host: .
+    # server: <SERVER>
 
     ## @param username - string - optional
-    ## The username from the credentials needed to connect to the host.
+    ## The username used to connect to the `server`.
     #
     # username: <USERNAME>
 
     ## @param password - string - optional
-    ## The password from the credentials needed to connect to the host.
+    ## The password of `username`.
     #
     # password: <PASSWORD>
 
-    ## @param additional_metrics - list of lists - optional
-    ## The additional metrics is a list of items that represent additional counters to collect.
-    ## Each item is a list of strings, formatted as follows:
-    ##
-    ## ['<COUNTERSET_NAME>', <COUNTER_INSTANCE_NAME>, '<COUNTER_NAME>', <METRIC_NAME>, <METRIC_TYPE>]
-    ##
-    ## <COUNTERSET_NAME> is the name of the PDH counter set (the name of the counter).
-    ## <COUNTER_INSTANCE_NAME> is the specific counter instance to collect, for example
-    ##                         "Default Web Site".  Specify 'none' for all instances of
-    ##                         the counter.
-    ## <COUNTER_NAME> is the individual counter to report.
-    ## <METRIC_NAME> is the name that displays in Datadog.
-    ## <METRIC_TYPE> is from the standard choices for all Agent checks, such as gauge,
-    ##               rate, histogram, or count.
+    ## @param enable_health_service_check - boolean - optional - default: true
+    ## Whether or not to send a service check named `<NAMESPACE>.windows.perf.health`, which reports
+    ## the health of the `server`.
     #
-    # additional_metrics:
-    #   - [NTDS, none, DS % Writes from LDAP, active_directory.ds.writes_from_ldap, gauge]
+    # enable_health_service_check: true
 
-    ## @param counter_data_types - list of strings - optional
-    ## counter_data_types is a list of <METRIC_NAME>,<DATA_TYPE> elements that
-    ## allow the precision in which counters are queried on a per metric basis.
-    ## <METRIC_NAME>: The name of your metric
-    ## <DATA_TYPE>  : The type of your metric (int or float)
+    ## @param server_tag - string - optional
+    ## The name used for tagging `server`. The value defined here replaces the `server:` tag key.
     #
-    # counter_data_types:
-    #   - <METRIC_NAME>,<DATA_TYPE>
-    #   - active_directory.dra.inbound.bytes.total,int
-    #   - active_directory.ldap.bind_time,float
+    # server_tag: <SERVER_TAG>
+
+    ## @param extra_metrics - mapping - optional
+    ## This mapping defines which metrics to collect from the performance
+    ## counters on the `server`. For more information, see:
+    ## https://docs.microsoft.com/en-us/windows/win32/perfctrs/about-performance-counters
+    ##
+    ## The top-level keys are the names of the desired performance objects:
+    ##
+    ##   metrics:
+    ##     System:
+    ##       <OPTION_1>: ...
+    ##       <OPTION_2>: ...
+    ##     LogicalDisk:
+    ##       <OPTION_1>: ...
+    ##       <OPTION_2>: ...
+    ##
+    ## The available performance object options are:
+    ##
+    ##   name (required): This becomes the prefix of all metrics submitted for each counter.
+    ##   counters (required): This is the list of counters to collect.
+    ##   tag_name: This is the name of the tag used for instances. For example, if the tag name for
+    ##             the `LogicalDisk` performance object is `disk`, a possible tag would be `disk:C`.
+    ##             If not set, the default tag name is `instance`.
+    ##   include: This is the list of regular expressions used to select which instances to monitor.
+    ##            If not set, all instances are monitored.
+    ##   exclude: This is the list of regular expressions used to select which instances to ignore.
+    ##            If not set, no instances are ignored. Note: `_Total` instances are always ignored.
+    ##   include_fast: This is the list of wildcards or exact instance names used to select which
+    ##                 instances to monitor. It is faster than the regular expression `include` filter
+    ##                 because it relies on the Windows PDH built-in wildcard filtering.
+    ##   instance_counts: This is a mapping used to select the count of instances to submit, where each
+    ##                    key is a count type and the value is the metric name to use, ignoring `name`.
+    ##                    The `total` count type represents the total number of encountered instances.
+    ##                    The `monitored` count type represents the number of monitored instances after
+    ##                    `include`/`exclude` filtering. The `unique` count type represents the number
+    ##                    of unique instance names that are monitored.
+    ##   use_localized_counters: Whether or not performance object and counter names should refer to their
+    ##                           locale-specific versions rather than by their English name. This overrides
+    ##                           any defined value in `init_config`.
+    ##
+    ## The key for each counter object represents the name of the desired counter.
+    ## Counters can be defined in the following ways:
+    ##
+    ## 1. Mapping the counter name to a string. If a value is a string, then it represents the suffix of the sent metric
+    ##    name, for example:
+    ##
+    ##      counters:
+    ##      - '% Free Space': usable
+    ##      - Current Disk Queue Length: queue_length.current
+    ##
+    ## 2. Mapping the counter name to a set of options. If a value is a mapping, then it must have a `name` or
+    ##    `metric_name` key that represents the suffix or full metric name of the
+    ##    sent metric name, for example:
+    ##
+    ##      counters:
+    ##      - '% Free Space':
+    ##          name: usable
+    ##          type: rate
+    ##      - Current Disk Queue Length:
+    ##          metric_name: queue_length.current
+    ##          average: true
+    ##
+    ## The available counter options are:
+    ##
+    ##   type: This represents how the metric is handled, defaulting to `gauge`. The available types are:
+    ##         gauge, rate, count, monotonic_count, service_check, temporal_percent, and time_elapsed.
+    ##   average: When there are multiple values for the same instance name (for example, multiple processes
+    ##            spawned with the same name) the check submits the sum. Setting this option to `true`
+    ##            instructs the check to calculate the average instead.
+    ##   aggregate: Whether or not to send an additional metric that is the aggregation of all values for
+    ##              every monitored instance. If `average` is set to `true` the check submits the average as
+    ##              a metric suffixed by `avg`, otherwise it submits the sum as a metric suffixed by `sum`.
+    ##              If this is set to `only`, the check does not submit a metric per instance.
+    ##   metric_name: This represents the full metric name in lieu of a `name` key and is not be prefixed by
+    ##                the parent object's `name` key.
+    #
+    # extra_metrics:
+    #   NTDS:
+    #     name: ds
+    #     counters:
+    #     - DS % Writes from LDAP: writes_from_ldap
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
@@ -87,14 +156,25 @@ instances:
     #
     # empty_default_hostname: false
 
+    ## @param metric_patterns - mapping - optional
+    ## A mapping of metrics to include or exclude, with each entry being a regular expression.
+    ##
+    ## Metrics defined in `exclude` will take precedence in case of overlap.
+    #
+    # metric_patterns:
+    #   include:
+    #   - <INCLUDE_REGEX>
+    #   exclude:
+    #   - <EXCLUDE_REGEX>
+
 ## Log Section
 ##
-## type - required - Type of log input source (tcp / udp / file / windows_event)
+## type - required - Type of log input source (tcp / udp / file / windows_event).
 ## port / path / channel_path - required - Set port if type is tcp or udp.
 ##                                         Set path if type is file.
 ##                                         Set channel_path if type is windows_event.
-## source  - required - Attribute that defines which Integration sent the logs.
-## encoding - optional - For file specifies the file encoding, default is utf-8, other
+## source  - required - Attribute that defines which integration sent the logs.
+## encoding - optional - For file specifies the file encoding. Default is utf-8. Other
 ##                       possible values are utf-16-le and utf-16-be.
 ## service - optional - The name of the service that generates the log.
 ##                      Overrides any `service` defined in the `init_config` section.

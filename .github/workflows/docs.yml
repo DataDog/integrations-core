@@ -27,7 +27,9 @@ jobs:
       run: pip install --disable-pip-version-check --upgrade pip setuptools wheel
 
     - name: Install ddev
-      run: pip install -e ./datadog_checks_dev[cli]
+      run: |
+        pip install -e ./datadog_checks_dev[cli]
+        pip install -e ./ddev
 
     - name: Configure ddev
       run: |

@@ -1,0 +1,108 @@
+{
+  "frameworks": [
+    {
+      "slave_ids": [
+        "113c74e9-1c3f-4c7b-a2ac-0cbaa6a21d01-S2100"
+      ],
+      "TASK_UNREACHABLE": 85,
+      "TASK_ERROR": 0,
+      "TASK_LOST": 0,
+      "TASK_FAILED": 241,
+      "TASK_KILLED": 753,
+      "webui_url": "localhost:8080",
+      "hostname": "localhost",
+      "capabilities": [
+        "PARTITION_AWARE",
+        "REGION_AWARE",
+        "MULTI_ROLE"
+      ],
+      "offered_resources": {
+        "cpus": 0,
+        "gpus": 0,
+        "mem": 0,
+        "disk": 0
+      },
+      "used_resources": {
+        "ports": "[80-80]",
+        "cpus": 2732.63,
+        "gpus": 0,
+        "mem": 12606997,
+        "disk": 2000
+      },
+      "pid": "scheduler",
+      "name": "marathon",
+      "id": "113c74e9-1c3f-4c7b-a2ac-0cbaa6a21d01-0000",
+      "active": true,
+      "connected": true,
+      "recovered": false,
+      "TASK_STAGING": 0,
+      "TASK_STARTING": 0,
+      "TASK_RUNNING": 6616,
+      "TASK_KILLING": 0,
+      "TASK_FINISHED": 6
+    }
+  ],
+  "slaves": [
+    {
+      "framework_ids": [],
+      "TASK_UNREACHABLE": 0,
+      "TASK_ERROR": 0,
+      "TASK_LOST": 0,
+      "TASK_FAILED": 0,
+      "TASK_KILLED": 0,
+      "TASK_FINISHED": 0,
+      "TASK_KILLING": 0,
+      "TASK_RUNNING": 0,
+      "used_resources": {
+        "cpus": 0,
+        "gpus": 0,
+        "mem": 0,
+        "disk": 0
+      },
+      "resources": {
+        "ports": "[80-80, 2000-12000, 31000-32000]",
+        "cpus": 8,
+        "gpus": 0,
+        "mem": 28956,
+        "disk": 95536
+      },
+      "registered_time": 1623134184.212633,
+      "pid": "slave(1)@localhost:5051",
+      "attributes": {
+        "env": "prod",
+        "number": 29160,
+        "name": "agent",
+        "cluster": 48
+      },
+      "port": 5051,
+      "hostname": "localhost",
+      "id": "113c74e9-1c3f-4c7b-a2ac-0cbaa6a21d01-S2100",
+      "offered_resources": {
+        "cpus": 0,
+        "gpus": 0,
+        "mem": 0,
+        "disk": 0
+      },
+      "reserved_resources": {},
+      "unreserved_resources": {
+        "ports": "[80-80, 2000-12000, 31000-32000]",
+        "cpus": 8,
+        "gpus": 0,
+        "mem": 28956,
+        "disk": 95536
+      },
+      "active": true,
+      "version": "1.7.1",
+      "capabilities": [
+        "MULTI_ROLE",
+        "HIERARCHICAL_ROLE",
+        "RESERVATION_REFINEMENT",
+        "RESOURCE_PROVIDER",
+        "RESIZE_VOLUME"
+      ],
+      "TASK_STAGING": 0,
+      "TASK_STARTING": 0
+    }],
+  "cluster": "test-cluster",
+  "hostname": "localhost"
+}

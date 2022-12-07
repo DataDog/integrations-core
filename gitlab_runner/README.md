@@ -1,14 +1,13 @@
-# Gitlab Runner Integration
+# GitLab Runner Integration
 
 ## Overview
 
 Integration that allows to:
 
-- Visualize and monitor metrics collected via Gitlab Runners through Prometheus
-- Validate that the Gitlab Runner can connect to Gitlab
+- Visualize and monitor metrics collected with GitLab Runners through Prometheus
+- Validate that the GitLab Runner can connect to GitLab
 
-See the [Gitlab Runner documentation][1] for
-more information about Gitlab Runner and its integration with Prometheus
+For more information about the GitLab Runner and its integration with Prometheus, see the [GitLab Runner documentation][1].
 
 ## Setup
 
@@ -16,15 +15,13 @@ Follow the instructions below to install and configure this check for an Agent r
 
 ### Installation
 
-The Gitlab Runner check is included in the [Datadog Agent][3] package, so you don't need to install anything else on your Gitlab servers.
+The GitLab Runner check is included in the [Datadog Agent][3] package, so you don't need to install anything else on your GitLab servers.
 
 ### Configuration
 
-Edit the `gitlab_runner.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][4], to point to the Runner's Prometheus metrics endpoint and to the Gitlab master to have a service check. See the [sample gitlab_runner.d/conf.yaml][5] for all available configuration options.
+Edit the `gitlab_runner.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][4], to point to the Runner's Prometheus metrics endpoint and to the GitLab master to have a service check. See the [sample gitlab_runner.d/conf.yaml][5] for all available configuration options.
 
-**Note**: The `allowed_metrics` item in the `init_config` section allows to specify the metrics that should be extracted.
-
-**Remarks**: Some metrics should be reported as `rate` (i.e., `ci_runner_errors`)
+The `allowed_metrics` item in the `init_config` section allows you to specify the metrics that should be extracted. Some metrics should be reported as `rate`, for example: `ci_runner_errors`.
 
 ### Validation
 
@@ -39,7 +36,7 @@ See [metadata.csv][7] for a list of metrics provided by this integration.
 ### Log collection
 
 
-1. In your `gitlab_runner` [configuration file][8], change the log format to `json` (_Available for Gitlab Runner versions >=11.4.0_ ):
+1. In your `gitlab_runner` [configuration file][8], change the log format to `json` (_Available for GitLab Runner versions >=11.4.0_ ):
    ```toml
    log_format = "json"
    ```
@@ -55,7 +52,7 @@ See [metadata.csv][7] for a list of metrics provided by this integration.
    usermod -a -G systemd-journal dd-agent
    ```
 
-4. Add this configuration block to your `gitlab_runner.d/conf.yaml` file to start collecting your Gitlab Runner Logs:
+4. Add this configuration block to your `gitlab_runner.d/conf.yaml` file to start collecting your GitLab Runner Logs:
 
    ```yaml
    logs:
@@ -69,18 +66,17 @@ See [metadata.csv][7] for a list of metrics provided by this integration.
 
 ### Events
 
-The Gitlab Runner check does not include any events.
+The GitLab Runner check does not include any events.
 
 ### Service Checks
 
-The Gitlab Runner check provides a service check to ensure that the Runner can talk to the Gitlab master and another one to ensure that the
-local Prometheus endpoint is available.
+The GitLab Runner check provides a service check to confirm that the Runner can talk to the GitLab master and another one to ensure that the local Prometheus endpoint is available.
 
 ## Troubleshooting
 
 Need help? Contact [Datadog support][10].
 
-[1]: https://docs.gitlab.com/runner/monitoring/README.html
+[1]: https://docs.gitlab.com/runner/monitoring/
 [2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [3]: https://app.datadoghq.com/account/settings#agent
 [4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory

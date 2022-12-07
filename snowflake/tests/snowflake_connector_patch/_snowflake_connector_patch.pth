@@ -1,0 +1,1 @@
+import _snowflake_connector_patch;_snowflake_connector_patch.mock()

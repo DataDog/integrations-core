@@ -21,14 +21,14 @@ instance = {
 instance_new = {
     'openmetrics_endpoint': 'http://localhost:10249/metrics',
     'namespace': 'openmetrics',
-    'metrics': [{'metric1': 'renamed.metric1'}, 'metric2', 'counter1'],
+    'metrics': [{'metric1': 'renamed.metric1'}, 'metric2', 'counter1', 'counter2'],
     'collect_histogram_buckets': True,
 }
 
 
-def test_openmetrics_check(aggregator):
+def test_openmetrics_check(dd_run_check, aggregator):
     c = OpenMetricsCheck('openmetrics', {}, [instance])
-    c.check(instance)
+    dd_run_check(c)
     aggregator.assert_metric(
         CHECK_NAME + '.renamed.metric1',
         tags=['node:host1', 'flavor:test', 'matched_label:foobar'],
@@ -45,10 +45,10 @@ def test_openmetrics_check(aggregator):
     aggregator.assert_all_metrics_covered()
 
 
-def test_openmetrics_check_counter_gauge(aggregator):
+def test_openmetrics_check_counter_gauge(dd_run_check, aggregator):
     instance['send_monotonic_counter'] = False
     c = OpenMetricsCheck('openmetrics', {}, [instance])
-    c.check(instance)
+    dd_run_check(c)
     aggregator.assert_metric(
         CHECK_NAME + '.renamed.metric1',
         tags=['node:host1', 'flavor:test', 'matched_label:foobar'],
@@ -63,7 +63,7 @@ def test_openmetrics_check_counter_gauge(aggregator):
     aggregator.assert_all_metrics_covered()
 
 
-def test_invalid_metric(aggregator):
+def test_invalid_metric(dd_run_check, aggregator):
     """
     Testing that invalid values of metrics are discarded
     """
@@ -74,11 +74,11 @@ def test_invalid_metric(aggregator):
         'send_histograms_buckets': True,
     }
     c = OpenMetricsCheck('openmetrics', {}, [bad_metric_instance])
-    c.check(bad_metric_instance)
+    dd_run_check(c)
     assert aggregator.metrics('metric3') == []
 
 
-def test_openmetrics_wildcard(aggregator):
+def test_openmetrics_wildcard(dd_run_check, aggregator):
     instance_wildcard = {
         'prometheus_url': 'http://localhost:10249/metrics',
         'namespace': 'openmetrics',
@@ -86,7 +86,7 @@ def test_openmetrics_wildcard(aggregator):
     }
 
     c = OpenMetricsCheck('openmetrics', {}, [instance_wildcard])
-    c.check(instance)
+    dd_run_check(c)
     aggregator.assert_metric(
         CHECK_NAME + '.metric1',
         tags=['node:host1', 'flavor:test', 'matched_label:foobar'],
@@ -102,7 +102,10 @@ def test_openmetrics_wildcard(aggregator):
 
 @pytest.mark.skipif(PY2, reason='Test only available on Python 3')
 def test_linkerd_v2_new(aggregator, dd_run_check):
+    from datadog_checks.base.checks.openmetrics.v2.scraper import OpenMetricsScraper
+
     check = OpenMetricsCheck('openmetrics', {}, [instance_new])
+    scraper = OpenMetricsScraper(check, instance_new)
     dd_run_check(check)
 
     aggregator.assert_metric(
@@ -120,4 +123,12 @@ def test_linkerd_v2_new(aggregator, dd_run_check):
         tags=['endpoint:http://localhost:10249/metrics', 'node:host2'],
         metric_type=aggregator.MONOTONIC_COUNT,
     )
+    aggregator.assert_metric(
+        '{}.counter2.count'.format(CHECK_NAME),
+        tags=['endpoint:http://localhost:10249/metrics', 'node:host2'],
+        metric_type=aggregator.MONOTONIC_COUNT,
+    )
     aggregator.assert_all_metrics_covered()
+
+    assert check.http.options['headers']['Accept'] == '*/*'
+    assert scraper.http.options['headers']['Accept'] == 'text/plain'

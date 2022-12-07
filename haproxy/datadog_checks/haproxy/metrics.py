@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 METRIC_MAP = {
     'haproxy_backend_active_servers': 'backend.active.servers',
+    'haproxy_backend_agg_server_check_status': 'backend.agg.server.check.status',
     'haproxy_backend_backup_servers': 'backend.backup.servers',
     'haproxy_backend_bytes_in_total': 'backend.bytes.in.total',
     'haproxy_backend_bytes_out_total': 'backend.bytes.out.total',
@@ -205,3 +206,16 @@ METRIC_MAP = {
     'haproxy_sticktable_size': 'sticktable.size',
     'haproxy_sticktable_used': 'sticktable.used',
 }
+
+
+def construct_metrics_config(metric_map):
+    metrics = []
+    for raw_metric_name, metric_name in metric_map.items():
+        if raw_metric_name.endswith('_total'):
+            raw_metric_name = raw_metric_name[:-6]
+            metric_name = metric_name[:-6]
+
+        config = {raw_metric_name: {'name': metric_name}}
+        metrics.append(config)
+
+    return metrics

@@ -3,10 +3,11 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from ..._env import E2E_ENV_VAR_PREFIX, E2E_SET_UP, E2E_TEAR_DOWN
 from ...ci import get_ci_env_vars
-from ...fs import chdir, path_join
+from ...fs import chdir, file_exists, path_join
 from ...subprocess import run_command
 from ..commands.console import echo_debug
 from ..constants import get_root
+from ..utils import get_hatch_file
 from .format import parse_config_from_result
 
 
@@ -27,26 +28,32 @@ def _execute(check, command, env_vars):
 
 
 def start_environment(check, env):
-    command = f'tox --develop -e {env}'
-    env_vars = {
-        E2E_TEAR_DOWN: 'false',
-        'PYTEST_ADDOPTS': '--benchmark-skip --exitfirst',
-        'TOX_TESTENV_PASSENV': f"{E2E_TEAR_DOWN} PROGRAM* USERNAME PYTEST_ADDOPTS {' '.join(get_ci_env_vars())}",
-    }
+    env_vars = {E2E_TEAR_DOWN: 'false', 'PYTEST_ADDOPTS': '--exitfirst'}
+    if file_exists(get_hatch_file(check)):
+        command = f'hatch env run --env {env} test'
+    else:
+        command = f'tox --develop -e {env}'
+        env_vars['PYTEST_ADDOPTS'] += ' --benchmark-skip'
+        env_vars[
+            'TOX_TESTENV_PASSENV'
+        ] = f'{E2E_TEAR_DOWN} PROGRAM* USERNAME PYTEST_ADDOPTS {" ".join(get_ci_env_vars())}'
 
     result = _execute(check, command, env_vars)
     return parse_config_from_result(env, result)
 
 
 def stop_environment(check, env, metadata=None):
-    command = f'tox --develop -e {env}'
-    env_vars = {
-        E2E_SET_UP: 'false',
-        'PYTEST_ADDOPTS': '--benchmark-skip --exitfirst',
-        'TOX_TESTENV_PASSENV': '{}* {} PROGRAM* USERNAME PYTEST_ADDOPTS {}'.format(
-            E2E_ENV_VAR_PREFIX, E2E_SET_UP, ' '.join(get_ci_env_vars())
-        ),
-    }
+    env_vars = {E2E_SET_UP: 'false', 'PYTEST_ADDOPTS': '--exitfirst'}
+    if file_exists(get_hatch_file(check)):
+        command = f'hatch env run --env {env} test'
+        env_vars['PYTEST_ADDOPTS'] = '--exitfirst'
+    else:
+        command = f'tox --develop -e {env}'
+        env_vars['PYTEST_ADDOPTS'] += ' --benchmark-skip'
+        env_vars[
+            'TOX_TESTENV_PASSENV'
+        ] = f'{E2E_ENV_VAR_PREFIX}* {E2E_SET_UP} PROGRAM* USERNAME PYTEST_ADDOPTS {" ".join(get_ci_env_vars())}'
+
     env_vars.update((metadata or {}).get('env_vars', {}))
 
     result = _execute(check, command, env_vars)

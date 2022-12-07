@@ -6,6 +6,7 @@ files:
     options:
     - template: init_config/jmx
       overrides:
+        is_jmx.required: false
         is_jmx.value.example: false
     - template: init_config/http
   - template: instances
@@ -29,8 +30,10 @@ files:
           In Transition: WARNING
     - template: instances/jmx
       overrides:
+        host.required: false
         host.display_priority: 10
         host.description: Hazelcast or Hazelcast Management Center server with which to connect.
+        port.required: false
         port.display_priority: 9
         port.description: Hazelcast or Hazelcast Management Center port with which to connect.
         port.value.example: 1099

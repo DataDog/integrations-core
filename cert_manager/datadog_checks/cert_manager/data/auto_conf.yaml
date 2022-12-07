@@ -1,0 +1,10 @@
+ad_identifiers:
+  -  cert-manager-controller
+
+init_config:
+
+instances:
+    ## @param openmetrics_endpoint - string - required
+    ## The URL exposing metrics in the OpenMetrics format.
+    #
+    - openmetrics_endpoint: "http://%%host%%:9402/metrics"

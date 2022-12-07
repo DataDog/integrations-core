@@ -11,6 +11,7 @@ import pytest
 from datadog_checks.base.checks.kubelet_base.base import KubeletCredentials, urljoin
 from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.kubelet import PodListUtils, get_pod_by_uid, is_static_pending_pod
+from datadog_checks.kubelet.common import get_container_label
 
 from .test_kubelet import mock_from_file
 
@@ -89,6 +90,33 @@ def test_filter_staticpods(monkeypatch):
         )
         is True
     )
+
+
+def test_is_namespace_excluded(monkeypatch):
+    c_is_excluded = mock.Mock(return_value=False)
+    monkeypatch.setattr('datadog_checks.kubelet.common.c_is_excluded', c_is_excluded)
+
+    pods = json.loads(mock_from_file('pods.json'))
+    pod_list_utils = PodListUtils(pods)
+
+    # Test namespace=None
+    c_is_excluded.reset_mock()
+    assert pod_list_utils.is_namespace_excluded(None) is False
+    c_is_excluded.assert_not_called()
+
+    # Test excluded namespace
+    c_is_excluded.reset_mock()
+    c_is_excluded.return_value = True
+    assert pod_list_utils.is_namespace_excluded('an_excluded_namespace') is True
+    c_is_excluded.assert_called_once()
+    c_is_excluded.assert_called_with('', '', 'an_excluded_namespace')
+
+    # Test non-excluded namespace
+    c_is_excluded.reset_mock()
+    c_is_excluded.return_value = False
+    assert pod_list_utils.is_namespace_excluded('a_non_excluded_namespace') is False
+    c_is_excluded.assert_called_once()
+    c_is_excluded.assert_called_with('', '', 'a_non_excluded_namespace')
 
 
 def test_pod_by_uid():
@@ -188,3 +216,26 @@ def test_credentials_token_noverify():
     assert scraper_config['ssl_cert'] is None
     assert scraper_config['ssl_private_key'] is None
     assert scraper_config['extra_headers'] == {}
+
+
+def test_get_container_label():
+    labels = {"container_name": "POD", "id": "/kubepods/burstable/pod531c80d9-9fc4-11e7-ba8b-42010af002bb"}
+    assert get_container_label(labels, "container_name") == "POD"
+    assert get_container_label({}, "not-in") is None
+
+
+def test_get_cid_by_labels():
+    pods = json.loads(mock_from_file('podlist_containerd.json'))
+    pod_list_utils = PodListUtils(pods)
+
+    # k8s >= 1.16
+    labels = {"container": "datadog-agent", "namespace": "default", "pod": "datadog-agent-pbqt2"}
+    container_id = pod_list_utils.get_cid_by_labels(labels)
+    assert container_id == "containerd://51cba2ca229069039575750d44ed3a67e9b5ead651312ba7ff218dd9202fde64"
+
+    # k8s < 1.16
+    labels = {"container_name": "datadog-agent", "namespace": "default", "pod_name": "datadog-agent-pbqt2"}
+    container_id = pod_list_utils.get_cid_by_labels(labels)
+    assert container_id == "containerd://51cba2ca229069039575750d44ed3a67e9b5ead651312ba7ff218dd9202fde64"
+
+    assert pod_list_utils.get_cid_by_labels([]) is None

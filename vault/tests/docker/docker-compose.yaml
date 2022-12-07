@@ -3,7 +3,7 @@ version: '3'
 services:
   vault-leader:
     container_name: vault-leader
-    image: vault:latest
+    image: vault:${VAULT_VERSION}
     cap_add:
       - IPC_LOCK
     environment:
@@ -27,7 +27,7 @@ services:
 
   vault-replica:
     container_name: vault-replica
-    image: vault:latest
+    image: vault:${VAULT_VERSION}
     cap_add:
       - IPC_LOCK
     environment:

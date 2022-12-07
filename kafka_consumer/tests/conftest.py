@@ -56,7 +56,16 @@ def dd_environment(mock_local_kafka_hosts_dns, e2e_instance):
             'KAFKA_HOST': HOST_IP
         },
     ):
-        yield e2e_instance, {'custom_hosts': [('kafka1', '127.0.0.1'), ('kafka2', '127.0.0.1')]}
+        yield e2e_instance, E2E_METADATA
+
+
+E2E_METADATA = {
+    'custom_hosts': [('kafka1', '127.0.0.1'), ('kafka2', '127.0.0.1')],
+    'start_commands': [
+        'apt-get update',
+        'apt-get install -y build-essential',
+    ],
+}
 
 
 @pytest.fixture(scope='session')
@@ -76,6 +85,28 @@ def kafka_instance():
         'tags': ['optional:tag1'],
         'consumer_groups': {'my_consumer': {'marvel': [0]}},
         'broker_requests_batch_size': 1,
+    }
+
+
+# Dummy TLS certs
+CERTIFICATE_DIR = os.path.join(os.path.dirname(__file__), 'certificate')
+cert = os.path.join(CERTIFICATE_DIR, 'cert.cert')
+private_key = os.path.join(CERTIFICATE_DIR, 'server.pem')
+
+
+@pytest.fixture(scope='session')
+def kafka_instance_tls():
+    return {
+        'kafka_connect_str': KAFKA_CONNECT_STR,
+        'kafka_consumer_offsets': True,
+        'tags': ['optional:tag1'],
+        'consumer_groups': {'my_consumer': {'marvel': [0]}},
+        'broker_requests_batch_size': 1,
+        'use_tls': True,
+        'tls_validate_hostname': True,
+        'tls_cert': cert,
+        'tls_private_key': private_key,
+        'tls_ca_cert': CERTIFICATE_DIR,
     }
 
 

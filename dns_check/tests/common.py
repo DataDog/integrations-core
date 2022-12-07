@@ -1,7 +1,8 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
+from datadog_checks.dev.docker import using_windows_containers
+from datadog_checks.dev.utils import get_metadata_metrics
 
 INSTANCE_INTEGRATION = {'name': 'datadog', 'hostname': 'www.datadoghq.com', 'nameserver': '8.8.8.8'}
 
@@ -70,7 +71,10 @@ CONFIG_INVALID = [
     ),
 ]
 
+E2E_METADATA = {'docker_platform': 'windows' if using_windows_containers() else 'linux'}
+
 
 def _test_check(aggregator):
     aggregator.assert_metric('dns.response_time')
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())

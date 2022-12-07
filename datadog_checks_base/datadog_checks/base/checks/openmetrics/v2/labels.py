@@ -13,6 +13,9 @@ class LabelAggregator:
             self.populate = no_op
             return
 
+        self.cache_shared_labels = config.get('cache_shared_labels', True)
+        self.shared_labels_cached = False
+
         self.metric_config = {}
         for metric, config in share_labels.items():
             data = self.metric_config[metric] = {}
@@ -70,16 +73,40 @@ class LabelAggregator:
         self.unconditional_labels = {}
 
     def __call__(self, metrics):
-        # TODO: add new option to cache metrics until all configured ones are
-        # seen to avoid dependence on the order in which they are exposed
-        with self:
-            metric_config = self.metric_config.copy()
+        if self.cache_shared_labels:
+            if self.shared_labels_cached:
+                yield from metrics
+            else:
+                metric_config = self.metric_config.copy()
 
-            for metric in metrics:
-                if metric_config and metric.name in metric_config:
-                    self.collect(metric, metric_config.pop(metric.name))
+                for metric in metrics:
+                    if metric_config and metric.name in metric_config:
+                        self.collect(metric, metric_config.pop(metric.name))
 
-                yield metric
+                    yield metric
+
+                self.shared_labels_cached = True
+        else:
+            try:
+                metric_config = self.metric_config.copy()
+
+                # Cache every encountered metric until the desired labels have been collected
+                cached_metrics = []
+
+                for metric in metrics:
+                    if metric.name in metric_config:
+                        self.collect(metric, metric_config.pop(metric.name))
+
+                    cached_metrics.append(metric)
+
+                    if not metric_config:
+                        break
+
+                yield from cached_metrics
+                yield from metrics
+            finally:
+                self.label_sets.clear()
+                self.unconditional_labels.clear()
 
     def collect(self, metric, config):
         allowed_values = config.get('values')
@@ -146,13 +173,6 @@ class LabelAggregator:
     @property
     def configured(self):
         return self.populate is not no_op
-
-    def __enter__(self):
-        pass
-
-    def __exit__(self, exc_type, exc_value, traceback):
-        self.label_sets.clear()
-        self.unconditional_labels.clear()
 
 
 def canonicalize_numeric_label(label):

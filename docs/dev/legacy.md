@@ -3,11 +3,11 @@ title: Legacy Agent v5
 kind: documentation
 ---
 
-This documentation explains how to create an Agent check for Datadog Agent v5, which has been superseded by Agent v6. It is still possible to write your own local checks for v5, however no new integrations for v5 will be considered upstream. To learn more about creating integrations for Agent v6, [refer to the dedicated documentation for creating an Agent check for Datadog Agent v6][1].
+This documentation explains how to create an Agent check for Datadog Agent v5, which has been superseded by Agent v6. It is still possible to write your own local checks for v5, however no new integrations for v5 are considered upstream. To learn more about creating integrations for Agent v6, see [Create a New Integration][1].
 
 ## Requirements
 
-You need a working [Ruby][2] environment. For more information on installing Ruby, see the [Ruby installation documentation][3].
+You need a working [Ruby][2] environment. For more information on installing Ruby, see [Installing Ruby][3].
 
 You also need [Wget][4]. Wget is already installed on most Linux systems. Use [Homebrew][5] on Mac or [Chocolatey][6] on Windows.
 
@@ -25,15 +25,15 @@ Once the required Ruby gems have been installed by Bundler, create a Python envi
 
 2. Run `source venv/bin/activate` to activate the installed Python virtual environment. To exit the virtual environment, run `deactivate`. Learn more about the Python virtual environment on the [Virtualenv documentation][9].
 
-## Building an Integration
+## Building an integration
 
-Use rake to generate the skeleton for a new Integration by running: `rake generate:skeleton[my_integration]`, where _my_integration_ is the name of your new Integration (note: enclose your Integration name in square brackets).
+Use rake to generate the skeleton for a new integration by running: `rake generate:skeleton[my_integration]`, where _my_integration_ is the name of your new integration (note: enclose your integration name in square brackets).
 
-This creates a new directory, `my_integration`, that contains all the files required for your new Integration. This also creates an entry for your new Integration in the `.travis.yml` and `circle.yml` continuous integration files to ensure that your tests are run whenever new builds are created.
+This creates a new directory, `my_integration`, that contains all the files required for your new integration. This also creates an entry for your new integration in the `.travis.yml` and `circle.yml` continuous integration files to ensure that your tests are run whenever new builds are created.
 
 ### Integration files
 
-New Integrations should contain the following files:
+New integrations should contain the following files:
 
 #### `README.md`
 
@@ -53,7 +53,7 @@ The README file must provide the following sections:
 
 #### `check.py`
 
-The file where your check logic should reside. The skeleton function boilerplates an Integration class for your Integration, including a `check` method where you should place your check logic.
+The file where your check logic should reside. The skeleton function boilerplates an integration class for your integration, including a `check` method where you should place your check logic.
 
 For example:
 
@@ -81,7 +81,7 @@ class MyIntegrationCheck(AgentCheck):
     })
 ```
 
-For more information about writing checks and how to send metrics to the Datadog Agent, reference our [Writing an Agent check guide][11]
+For more information about writing integrations and sending metrics with the Datadog Agent, see [Introduction to Agent-based Integrations][11].
 
 If you need to import any third party libraries, add them to the `requirements.txt` file.
 
@@ -108,13 +108,13 @@ namespace :ci do
       $(docker run -p 80:80 --name my_int_container -d my_docker)
 ```
 
-For more information about writing integration tests, see [the documentation in the Datadog Agent repository][12]. You can also reference the [ci common library][13] for helper functions such as `install_requirements` and `sleep_for`.
+For more information about writing integration tests, see the documentation in the [Datadog Agent repository][12]. You can also reference the [ci common library][13] for helper functions such as `install_requirements` and `sleep_for`.
 
-A note about terminology: You may notice the variable `flavor` in this file and other areas of testing. *Flavor* is a term we use to denote variations of integrated software, typically versions. This allows you to write one set of tests, but target different *flavors*, variants or versions of the software you are integrating.
+**Note**: You may notice the variable `flavor` in this file and other areas of testing. _Flavor_ is a term used to denote variations of integrated software, typically versions. This allows you to write one set of tests, but target different _flavors_, variants, or versions of the software you are integrating.
 
 #### `conf.yaml.example`
 
-In order to install your Integration, users need to configure the Integration for their specific instances. To do this, they'll copy the `conf.yaml.example` file that you provide into their Agent's `conf.d` directory, then update it with their instance specific information.
+To install your integration, you need to configure it for your specific instances. To do this, copy the `conf.yaml.example` file into your Agent's `conf.d` directory, then update it with your instance specific information.
 
 Your `conf.yaml.example` file should provide two sections:
 
@@ -127,7 +127,7 @@ This JSON file provides metadata about your integration and should include:
 
 - **`maintainer`**: Provide a valid email address where you can be contacted regarding this integration.
 - **`manifest_version`**: The version of this manifest file.
-- **`max_agent_version`**: The maximum version of the Datadog Agent that is compatible with your integration. We do our best to maintain integration stability within major versions, so you should leave this at the number generated for you. If your integration breaks with a new release of the Datadog Agent, set this number and [submit an issue on the Datadog Agent project][14].
+- **`max_agent_version`**: The maximum version of the Datadog Agent that is compatible with your integration. Datadog tries to maintain integration stability within major versions, so you should leave this at the number generated for you. If your integration breaks with a new release of the Datadog Agent, set this number and [submit an issue on the Datadog Agent project][14].
 - **`min_agent_version`**: The minimum version of the Datadog Agent that is compatible with your integration.
 - **`name`**: The name of your integration.
 - **`short_description`**: Provide a short description of your integration.
@@ -136,7 +136,7 @@ This JSON file provides metadata about your integration and should include:
 - **`is_public`**: Boolean set to true if your integration is public
 - **`has_logo`**: Boolean set to true if there is a logo for this integration in `/src/images/integrations_logo`
 - **`type`**: **check**
-- **`categories`**: Categories to sort your integration, [current categories can be found on integrations dedicated documentation page][15]
+- **`categories`**: Categories to classify your [Integration][15] in the Datadog documentation.
 
 Reference one of the existing integrations [for an example of the manifest file][16].
 
@@ -146,12 +146,12 @@ The metadata CSV contains a list of the metrics your integration provides and ba
 
 The CSV should include a header row and the following columns:
 
-**`metric_name`** (required): The name of the metric as it should appear in the Datadog web application when creating dashboards or monitors. Often this name is a period delimited combination of the provider, service, and metric (e.g. `aws.ec2.disk_write_ops`) or the application, application feature, and metric (e.g. `apache.net.request_per_s`).
+**`metric_name`** (required): The name of the metric as it should appear on the Datadog site when creating dashboards or monitors. Often this name is a period delimited combination of the provider, service, and metric, for example: `aws.ec2.disk_write_ops`) or the application, application feature, and metric, for example: `apache.net.request_per_s`.
 
 **`metric_type`** (required): The type of metric you are reporting. This influences how the Datadog web application handles and displays your data. Accepted values are: `count`, `gauge`, or `rate`.
 
   - `count`: A count is the number of particular events that have occurred. When reporting a count, you should only submit the number of new events (delta) recorded since the previous submission. For example, the `aws.apigateway.5xxerror` metric is a `count` of the number of server-side errors.
-  - `gauge`: A gauge is a metric that tracks a value at a specific point in time. For example, `docker.io.read_bytes` is a `guage` of the number of bytes read per second.
+  - `gauge`: A gauge is a metric that tracks a value at a specific point in time. For example, `docker.io.read_bytes` is a `gauge` of the number of bytes read per second.
   - `rate`: A rate a metric over time (and as such, typically includes a `per_unit_name` value). For example, `lighttpd.response.status_2xx` is a `rate` metric capturing the number of 2xx status codes produced per second.
 
 **`interval`**: The interval used for conversion between rates and counts. This is required when the `metric_type` is set to the `rate` type.
@@ -183,24 +183,26 @@ If the unit name is not listed above, leave this value blank. To add a unit to t
   - `0` indicates no intrinsic preference in values. For example, `rabbitmq.queue.messages` or `postgresql.rows_inserted` where there is no preference for the size of the value or the preference depends on the business objectives of the system.
   - `1` indicates that larger values are better. For example, `mesos.stats.uptime_secs` where higher uptime or `mysql.performance.key_cache_utilization` where more cache hits are desired.
 
-**`integration`** (required): This must match the name of your integration. (e.g. "my_integration").
+**`integration`** (required): This must match the name of your integration, for example: "my_integration".
 
 **`short_name`**: A more human-readable and abbreviated version of the metric name. For example, `postgresql.index_blocks_read` might be set to `idx blks read`. Aim for human-readability and easy understandability over brevity. Don't repeat the integration name. If you can't make the `short_name` shorter and easier to understand than the `metric_name`, leave this field empty.
 
+**`curated_metric`**: To mark which metrics for an integration are noteworthy for a given type (`cpu` and `memory` are both accepted). These are displayed in the UI above the other integration metrics.
+
 #### `requirements.txt`
 
-If you require any additional Python libraries, you can list them here and they are automatically installed via pip when others use your integration.
+If you require any additional Python libraries, list them in `requirements.txt`. The libraries are automatically installed using pip when others use your integration.
 
 #### `test_my_integration.py`
 
 Integration tests ensure that the Datadog Agent is correctly receiving and recording metrics from the software you are integrating.
 
-Though we don't require test for each of the metrics collected by your integration, we strongly encourage you to provide as much coverage as possible. Run the `self.coverage_report()` method in your test to see which metrics are covered.
+Tests are not required for each of the metrics collected by your integration, but Datadog strongly encourages you to provide as much coverage as possible. Run the `self.coverage_report()` method in your test to see which metrics are covered.
 
 Here's an example `test_my_integration.py`:
 
 ```
-# Example test_my_integraion.py
+# Example test_my_integration.py
 from nose.plugins.attrib import attr
 from checks import AgentCheck
 from tests.checks.common import AgentCheckTest
@@ -217,7 +219,7 @@ For more information about tests and available test methods, reference the [Agen
 
 ## Libraries
 
-The [Datadog Agent][19] provides a number of useful libraries in the [`utils` directory][20]. These libraries can be helpful when building your integration and we encourage you to use them, but be aware that these libraries are moved in the upcoming Datadog Agent version 6.0.
+The [Datadog Agent][19] provides several useful libraries in the [`utils` directory][20]. These libraries can be helpful when building your integration, but be aware that these libraries are moved in the Datadog Agent v6.
 
 ## Testing your integration
 
@@ -225,12 +227,12 @@ As you build your check and test code, use the following to run your tests:
 
 - `rake lint`: Lint your code for potential errors
 - `rake ci:run[my_integration]`: Run the tests that you have written in your `test_my_integration.py` file and that have an `@attr(requires='my_integration')` annotation.
-- `rake ci:run[default]`: Run the tests you have written written in your `test_my_integration.py` file (without the `@attr(requires='my_integration')` annotation) in addition to some additional generic tests we have written.
+- `rake ci:run[default]`: Run the tests you have written written in your `test_my_integration.py` file (without the `@attr(requires='my_integration')` annotation) in addition to some additional generic tests.
 
 Travis CI automatically runs tests when you create a pull request. Ensure that you have thorough test coverage and that you are passing all tests prior to submitting pull requests.
 
 Add the `@attr(requires='my_integration')` annotation on the test classes or methods that require a full docker testing environment (see next section).
-Don't add this annotation to your unit and mock tests ; those run via `rake ci:run[default]` on Travis CI.
+Don't add this annotation to your unit and mock tests, run those with `rake ci:run[default]` on Travis CI.
 
 To iterate quickly on your unit and mock tests, instead of running all the tests with `rake ci:run[default]`, run:
 
@@ -241,41 +243,41 @@ $ bundle exec rake exec["nosetests my_integration/test/test_*.py -A 'not require
 
 ### Docker test environments
 
-At Datadog we're using Docker containers for testing environments and we highly encourage you to do the same. Containers are lightweight, easy to manage, and provide consistent, standardized environments for each test run.
+Datadog uses Docker containers for testing environments, which is the recommended approach. Containers are lightweight, easy to manage, and provide consistent, standardized environments for each test run.
 
-For example in our MySQL integration, the [`ci/mysql.rake` file][21] uses the [official MySQL container][22] and involves four main tasks
+For example, the Datadog MySQL integration, the [`ci/mysql.rake` file][21] uses the [official MySQL container][22] and involves four main tasks
 
-1. `before_install` - Prior to starting our new Docker test environment, we need to ensure that any previous Docker test environments are stopped and removed.
+1. `before_install` - Prior to starting the new Docker test environment, ensure that any previous Docker test environments are stopped and removed.
 2. `install` - The install task performs the Docker `run` which starts the MySQL test server.
-3. `before_script` - This task first ensures that the MySQL server is running, then connects to the server to perform some setup tasks. We highly recommend that you keep setup tasks in your `test_integration.py` file when possible, but we recognize that sometimes setup and configurations need to be performed prior to the python test script.
+3. `before_script` - This task first ensures that the MySQL server is running, then connects to the server to perform some setup tasks. Keep setup tasks in your `test_integration.py` file when possible, but sometimes setup and configurations need to be performed prior to the python test script.
 4. `cleanup` - After the tests are complete, the Docker test environment is stopped and removed.
 
-### Installing your Integration locally
+### Installing your integration locally
 
-When your Integration is merged into the `integrations-extras` repository, we generate packages so that others can easily install your Integration. However, you may want to install your Integration locally before it's merged.
+When your integration is merged into the `integrations-extras` repository, Datadog generates packages so that others can easily install your integration. However, you may want to install your integration locally before it's merged.
 
 To run locally, first copy your `check.py` file into the Datadog Agent's `checks.d` directory and rename it to `my_integration.py` (using the actual name of your integration).
 
 Next, copy your `conf.yaml.example` file into the Datadog Agent's `conf.d` directory and rename it to `my_integration.yaml` (again, using the actual name of your integration).
 
-See the Agent check guide for more information about the [Datadog Agent directory structure][11].
+See [Create a New Integration][1] for more information about the Datadog Agent directory structure.
 
 ### Teardown and cleanup
 
 When you have finished building your integration, run `rake clean_env` to remove the Python virtual environment.
 
-## Submitting your Integration
+## Submitting your integration
 
-Once you have completed the development of your integration, submit a [pull request][23] to have Datadog review your Integration. After we've reviewed your Integration, we approve and merge your pull request or provide feedback and next steps required for approval.
+Once you have completed the development of your integration, submit a [pull request][23] to have Datadog review your integration. After your integration is reviewed, Datadog approves and merges your pull request or provides feedback and next steps required for approval.
 
 ### Other considerations
 
-In our experience building integrations, we've also faced a number of challenges. As your write your tests, here are a few things to consider:
+Consider the following when writing tests:
 
-* Test clusters. Testing single instances of your software is often easier, but tests are more useful when run against setups that are representative of real-world uses. For example, MongoDB is typically used with sharding and replica set features, so [our tests reflect that][24].
-* Consider generating calculated metrics in addition to raw metrics. For example, many databases have slow, but less frequently run queries. So it's often useful to look at percentiles. For example, our MySQL integration includes a calculated metric for the [95th percentile query execution time][2].
+* Test clusters. Testing single instances of your software is often easier, but tests are more useful when run against setups that are representative of real-world uses. For example, MongoDB is typically used with sharding and replica set features, so the [tests][24] reflect that.
+* Consider generating calculated metrics in addition to raw metrics. For example, many databases have slow, but less frequently run queries. So it's often useful to look at percentiles. For example, the Datadog MySQL integration includes a calculated metric for the [95th percentile query execution time][2].
 
-[1]: https://github.com/DataDog/integrations-core/blob/master/docs/dev/new_check_howto.md
+[1]: https://docs.datadoghq.com/developers/integrations/new_check_howto
 [2]: https://www.ruby-lang.org
 [3]: https://www.ruby-lang.org/en/documentation/installation
 [4]: https://www.gnu.org/software/wget
@@ -285,7 +287,7 @@ In our experience building integrations, we've also faced a number of challenges
 [8]: https://github.com/DataDog/integrations-extras
 [9]: https://virtualenv.pypa.io/en/stable
 [10]: /developers/integrations/#new-integration-documentation
-[11]: https://docs.datadoghq.com/developers/agent_checks/
+[11]: https://docs.datadoghq.com/developers/integrations/
 [12]: https://github.com/DataDog/dd-agent/blob/master/tests/README.md#integration-tests
 [13]: https://github.com/DataDog/dd-agent/blob/master/ci/common.rb
 [14]: https://github.com/DataDog/dd-agent/blob/master/CONTRIBUTING.md#submitting-issues

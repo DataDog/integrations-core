@@ -1,38 +1,56 @@
 {
-  "categories": [
-    "web",
-    "log collection",
-    "autodiscovery"
-  ],
-  "creates_events": false,
-  "display_name": "IIS",
-  "guid": "6ad932f0-8816-467a-8860-72af44d4f3ba",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "iis.",
-  "metric_to_check": "iis.uptime",
-  "name": "iis",
-  "public_title": "Datadog-IIS Integration",
-  "short_description": "Track total or per-site metrics and monitor each site's up/down status.",
-  "support": "core",
-  "supported_os": [
-    "windows"
-  ],
-  "type": "check",
-  "integration_id": "iis",
+  "manifest_version": "2.0.0",
+  "app_uuid": "4620121f-b5ca-4b9c-aca2-c69bf18bc362",
+  "app_id": "iis",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Track total or per-site metrics and monitor each site's up/down status.",
+    "title": "IIS",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Windows",
+      "Category::Web",
+      "Category::Log Collection",
+      "Category::Autodiscovery"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "IIS",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "iis.",
+        "check": "iis.uptime",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {
+      "iis": "assets/dashboards/iis_dashboard.json",
+      "IIS-Overview": "assets/dashboards/iis_overview.json"
     },
     "monitors": {
       "[IIS] Anomalous amount of requests for site: {{site.name}}": "assets/monitors/req.json",
       "[IIS] Increase of not found error per second for site: {{site.name}}": "assets/monitors/err.json",
       "[IIS] Increase of locked error per second for site: {{site.name}}": "assets/monitors/lock.json"
-    },
-    "dashboards": {
-      "iis": "assets/dashboards/iis_dashboard.json",
-      "IIS-Overview": "assets/dashboards/iis_overview.json"
     },
     "saved_views": {
       "4xx_errors": "assets/saved_views/4xx_errors.json",
@@ -41,10 +59,8 @@
       "bot_errors": "assets/saved_views/bot_errors.json",
       "response_time_overview": "assets/saved_views/response_time.json"
     },
-    "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "iis"
-    },
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

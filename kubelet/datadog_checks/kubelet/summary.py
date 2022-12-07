@@ -32,12 +32,25 @@ class SummaryScraperMixin(object):
                 self.log.warning("Got incomplete results from '/stats/summary', missing data for POD: %s", pod)
                 continue
 
-            self._report_pod_stats(pod_namespace, pod_name, pod_uid, pod, instance_tags, main_stats_source)
+            if pod_list_utils.is_namespace_excluded(pod_namespace):
+                continue
+
+            self._report_pod_stats(
+                pod_namespace, pod_name, pod_uid, pod, pod_list_utils, instance_tags, main_stats_source
+            )
             self._report_container_stats(
                 pod_namespace, pod_name, pod.get('containers', []), pod_list_utils, instance_tags, main_stats_source
             )
 
-    def _report_pod_stats(self, pod_namespace, pod_name, pod_uid, pod, instance_tags, main_stats_source):
+    def _report_pod_stats(
+        self, pod_namespace, pod_name, pod_uid, pod, pod_list_utils, instance_tags, main_stats_source
+    ):
+        # avoid calling the tagger for pods that aren't running, as these are
+        # never stored
+        pod_phase = pod_list_utils.pods.get(pod_uid, {}).get('status', {}).get('phase', None)
+        if pod_phase != 'Running':
+            return
+
         pod_tags = tags_for_pod(pod_uid, tagger.ORCHESTRATOR)
         if not pod_tags:
             self.log.debug("Tags not found for pod: %s/%s - no metrics will be sent", pod_namespace, pod_name)

@@ -98,31 +98,69 @@ STATS_METRICS = {
     'elasticsearch.docs.deleted': ('gauge', 'indices.docs.deleted'),
     'elasticsearch.store.size': ('gauge', 'indices.store.size_in_bytes'),
     'elasticsearch.indexing.index.total': ('gauge', 'indices.indexing.index_total'),
+    'elasticsearch.indexing.index.total.count': ('monotonic_count', 'indices.indexing.index_total'),
     'elasticsearch.indexing.index.time': (
         'gauge',
         'indices.indexing.index_time_in_millis',
         lambda ms: ms_to_second(ms),
     ),
+    'elasticsearch.indexing.index.time.count': (
+        'monotonic_count',
+        'indices.indexing.index_time_in_millis',
+        lambda ms: ms_to_second(ms),
+    ),
     'elasticsearch.indexing.index.current': ('gauge', 'indices.indexing.index_current'),
     'elasticsearch.indexing.delete.total': ('gauge', 'indices.indexing.delete_total'),
+    'elasticsearch.indexing.delete.total.count': ('monotonic_count', 'indices.indexing.delete_total'),
     'elasticsearch.indexing.delete.time': (
         'gauge',
         'indices.indexing.delete_time_in_millis',
         lambda ms: ms_to_second(ms),
     ),
+    'elasticsearch.indexing.delete.time.count': (
+        'monotonic_count',
+        'indices.indexing.delete_time_in_millis',
+        lambda ms: ms_to_second(ms),
+    ),
     'elasticsearch.indexing.delete.current': ('gauge', 'indices.indexing.delete_current'),
     'elasticsearch.get.total': ('gauge', 'indices.get.total'),
+    'elasticsearch.get.total.count': ('monotonic_count', 'indices.get.total'),
     'elasticsearch.get.time': ('gauge', 'indices.get.time_in_millis', lambda ms: ms_to_second(ms)),
+    'elasticsearch.get.time.count': ('monotonic_count', 'indices.get.time_in_millis', lambda ms: ms_to_second(ms)),
     'elasticsearch.get.current': ('gauge', 'indices.get.current'),
     'elasticsearch.get.exists.total': ('gauge', 'indices.get.exists_total'),
+    'elasticsearch.get.exists.total.count': ('monotonic_count', 'indices.get.exists_total'),
     'elasticsearch.get.exists.time': ('gauge', 'indices.get.exists_time_in_millis', lambda ms: ms_to_second(ms)),
+    'elasticsearch.get.exists.time.count': (
+        'monotonic_count',
+        'indices.get.exists_time_in_millis',
+        lambda ms: ms_to_second(ms),
+    ),
     'elasticsearch.get.missing.total': ('gauge', 'indices.get.missing_total'),
+    'elasticsearch.get.missing.total.count': ('monotonic_count', 'indices.get.missing_total'),
     'elasticsearch.get.missing.time': ('gauge', 'indices.get.missing_time_in_millis', lambda ms: ms_to_second(ms)),
+    'elasticsearch.get.missing.time.count': (
+        'monotonic_count',
+        'indices.get.missing_time_in_millis',
+        lambda ms: ms_to_second(ms),
+    ),
     'elasticsearch.search.query.total': ('gauge', 'indices.search.query_total'),
+    'elasticsearch.search.query.total.count': ('monotonic_count', 'indices.search.query_total'),
     'elasticsearch.search.query.time': ('gauge', 'indices.search.query_time_in_millis', lambda ms: ms_to_second(ms)),
+    'elasticsearch.search.query.time.count': (
+        'monotonic_count',
+        'indices.search.query_time_in_millis',
+        lambda ms: ms_to_second(ms),
+    ),
     'elasticsearch.search.query.current': ('gauge', 'indices.search.query_current'),
     'elasticsearch.search.fetch.total': ('gauge', 'indices.search.fetch_total'),
+    'elasticsearch.search.fetch.total.count': ('monotonic_count', 'indices.search.fetch_total'),
     'elasticsearch.search.fetch.time': ('gauge', 'indices.search.fetch_time_in_millis', lambda ms: ms_to_second(ms)),
+    'elasticsearch.search.fetch.time.count': (
+        'monotonic_count',
+        'indices.search.fetch_time_in_millis',
+        lambda ms: ms_to_second(ms),
+    ),
     'elasticsearch.search.fetch.current': ('gauge', 'indices.search.fetch_current'),
     'elasticsearch.indices.segments.count': ('gauge', 'indices.segments.count'),
     'elasticsearch.indices.segments.memory_in_bytes': ('gauge', 'indices.segments.memory_in_bytes'),
@@ -130,61 +168,108 @@ STATS_METRICS = {
     'elasticsearch.merges.current.docs': ('gauge', 'indices.merges.current_docs'),
     'elasticsearch.merges.current.size': ('gauge', 'indices.merges.current_size_in_bytes'),
     'elasticsearch.merges.total': ('gauge', 'indices.merges.total'),
+    'elasticsearch.merges.total.count': ('monotonic_count', 'indices.merges.total'),
     'elasticsearch.merges.total.time': ('gauge', 'indices.merges.total_time_in_millis', lambda ms: ms_to_second(ms)),
+    'elasticsearch.merges.total.time.count': (
+        'monotonic_count',
+        'indices.merges.total_time_in_millis',
+        lambda ms: ms_to_second(ms),
+    ),
     'elasticsearch.merges.total.docs': ('gauge', 'indices.merges.total_docs'),
+    'elasticsearch.merges.total.docs.count': ('monotonic_count', 'indices.merges.total_docs'),
     'elasticsearch.merges.total.size': ('gauge', 'indices.merges.total_size_in_bytes'),
+    'elasticsearch.merges.total.size.count': ('monotonic_count', 'indices.merges.total_size_in_bytes'),
     'elasticsearch.refresh.total': ('gauge', 'indices.refresh.total'),
+    'elasticsearch.refresh.total.count': ('monotonic_count', 'indices.refresh.total'),
     'elasticsearch.refresh.total.time': ('gauge', 'indices.refresh.total_time_in_millis', lambda ms: ms_to_second(ms)),
+    'elasticsearch.refresh.total.time.count': (
+        'monotonic_count',
+        'indices.refresh.total_time_in_millis',
+        lambda ms: ms_to_second(ms),
+    ),
     'elasticsearch.flush.total': ('gauge', 'indices.flush.total'),
+    'elasticsearch.flush.total.count': ('monotonic_count', 'indices.flush.total'),
     'elasticsearch.flush.total.time': ('gauge', 'indices.flush.total_time_in_millis', lambda ms: ms_to_second(ms)),
+    'elasticsearch.flush.total.time.count': (
+        'monotonic_count',
+        'indices.flush.total_time_in_millis',
+        lambda ms: ms_to_second(ms),
+    ),
     'elasticsearch.process.open_fd': ('gauge', 'process.open_file_descriptors'),
     'elasticsearch.transport.rx_count': ('gauge', 'transport.rx_count'),
+    'elasticsearch.transport.rx_count.count': ('monotonic_count', 'transport.rx_count'),
     'elasticsearch.transport.tx_count': ('gauge', 'transport.tx_count'),
+    'elasticsearch.transport.tx_count.count': ('monotonic_count', 'transport.tx_count'),
     'elasticsearch.transport.rx_size': ('gauge', 'transport.rx_size_in_bytes'),
+    'elasticsearch.transport.rx_size.count': ('monotonic_count', 'transport.rx_size_in_bytes'),
     'elasticsearch.transport.tx_size': ('gauge', 'transport.tx_size_in_bytes'),
+    'elasticsearch.transport.tx_size.count': ('monotonic_count', 'transport.tx_size_in_bytes'),
     'elasticsearch.transport.server_open': ('gauge', 'transport.server_open'),
     'elasticsearch.thread_pool.flush.active': ('gauge', 'thread_pool.flush.active'),
     'elasticsearch.thread_pool.flush.threads': ('gauge', 'thread_pool.flush.threads'),
+    'elasticsearch.thread_pool.flush.threads.count': ('monotonic_count', 'thread_pool.flush.threads'),
     'elasticsearch.thread_pool.flush.queue': ('gauge', 'thread_pool.flush.queue'),
     'elasticsearch.thread_pool.flush.rejected': ('rate', 'thread_pool.flush.rejected'),
+    'elasticsearch.thread_pool.flush.rejected.count': ('monotonic_count', 'thread_pool.flush.rejected'),
     'elasticsearch.thread_pool.flush.completed': ('gauge', 'thread_pool.flush.completed'),
+    'elasticsearch.thread_pool.flush.completed.count': ('monotonic_count', 'thread_pool.flush.completed'),
     'elasticsearch.thread_pool.generic.active': ('gauge', 'thread_pool.generic.active'),
     'elasticsearch.thread_pool.generic.threads': ('gauge', 'thread_pool.generic.threads'),
+    'elasticsearch.thread_pool.generic.threads.count': ('monotonic_count', 'thread_pool.generic.threads'),
     'elasticsearch.thread_pool.generic.queue': ('gauge', 'thread_pool.generic.queue'),
     'elasticsearch.thread_pool.generic.rejected': ('rate', 'thread_pool.generic.rejected'),
+    'elasticsearch.thread_pool.generic.rejected.count': ('monotonic_count', 'thread_pool.generic.rejected'),
     'elasticsearch.thread_pool.generic.completed': ('gauge', 'thread_pool.generic.completed'),
+    'elasticsearch.thread_pool.generic.completed.count': ('monotonic_count', 'thread_pool.generic.completed'),
     'elasticsearch.thread_pool.get.active': ('gauge', 'thread_pool.get.active'),
     'elasticsearch.thread_pool.get.threads': ('gauge', 'thread_pool.get.threads'),
+    'elasticsearch.thread_pool.get.threads.count': ('monotonic_count', 'thread_pool.get.threads'),
     'elasticsearch.thread_pool.get.queue': ('gauge', 'thread_pool.get.queue'),
     'elasticsearch.thread_pool.get.rejected': ('rate', 'thread_pool.get.rejected'),
+    'elasticsearch.thread_pool.get.rejected.count': ('monotonic_count', 'thread_pool.get.rejected'),
     'elasticsearch.thread_pool.get.completed': ('gauge', 'thread_pool.get.completed'),
+    'elasticsearch.thread_pool.get.completed.count': ('monotonic_count', 'thread_pool.get.completed'),
     'elasticsearch.thread_pool.management.active': ('gauge', 'thread_pool.management.active'),
     'elasticsearch.thread_pool.management.threads': ('gauge', 'thread_pool.management.threads'),
+    'elasticsearch.thread_pool.management.threads.count': ('monotonic_count', 'thread_pool.management.threads'),
     'elasticsearch.thread_pool.management.queue': ('gauge', 'thread_pool.management.queue'),
     'elasticsearch.thread_pool.management.rejected': ('rate', 'thread_pool.management.rejected'),
+    'elasticsearch.thread_pool.management.rejected.count': ('monotonic_count', 'thread_pool.management.rejected'),
     'elasticsearch.thread_pool.management.completed': ('gauge', 'thread_pool.management.completed'),
+    'elasticsearch.thread_pool.management.completed.count': ('monotonic_count', 'thread_pool.management.completed'),
     'elasticsearch.thread_pool.refresh.active': ('gauge', 'thread_pool.refresh.active'),
     'elasticsearch.thread_pool.refresh.threads': ('gauge', 'thread_pool.refresh.threads'),
+    'elasticsearch.thread_pool.refresh.threads.count': ('monotonic_count', 'thread_pool.refresh.threads'),
     'elasticsearch.thread_pool.refresh.queue': ('gauge', 'thread_pool.refresh.queue'),
     'elasticsearch.thread_pool.refresh.rejected': ('rate', 'thread_pool.refresh.rejected'),
+    'elasticsearch.thread_pool.refresh.rejected.count': ('monotonic_count', 'thread_pool.refresh.rejected'),
     'elasticsearch.thread_pool.refresh.completed': ('gauge', 'thread_pool.refresh.completed'),
+    'elasticsearch.thread_pool.refresh.completed.count': ('monotonic_count', 'thread_pool.refresh.completed'),
     'elasticsearch.thread_pool.search.active': ('gauge', 'thread_pool.search.active'),
     'elasticsearch.thread_pool.search.threads': ('gauge', 'thread_pool.search.threads'),
+    'elasticsearch.thread_pool.search.threads.count': ('monotonic_count', 'thread_pool.search.threads'),
     'elasticsearch.thread_pool.search.queue': ('gauge', 'thread_pool.search.queue'),
     'elasticsearch.thread_pool.search.rejected': ('rate', 'thread_pool.search.rejected'),
+    'elasticsearch.thread_pool.search.rejected.count': ('monotonic_count', 'thread_pool.search.rejected'),
     'elasticsearch.thread_pool.search.completed': ('gauge', 'thread_pool.search.completed'),
+    'elasticsearch.thread_pool.search.completed.count': ('monotonic_count', 'thread_pool.search.completed'),
     'elasticsearch.thread_pool.snapshot.active': ('gauge', 'thread_pool.snapshot.active'),
     'elasticsearch.thread_pool.snapshot.threads': ('gauge', 'thread_pool.snapshot.threads'),
+    'elasticsearch.thread_pool.snapshot.threads.count': ('monotonic_count', 'thread_pool.snapshot.threads'),
     'elasticsearch.thread_pool.snapshot.queue': ('gauge', 'thread_pool.snapshot.queue'),
     'elasticsearch.thread_pool.snapshot.rejected': ('rate', 'thread_pool.snapshot.rejected'),
+    'elasticsearch.thread_pool.snapshot.rejected.count': ('monotonic_count', 'thread_pool.snapshot.rejected'),
     'elasticsearch.thread_pool.snapshot.completed': ('gauge', 'thread_pool.snapshot.completed'),
+    'elasticsearch.thread_pool.snapshot.completed.count': ('monotonic_count', 'thread_pool.snapshot.completed'),
     'elasticsearch.thread_pool.warmer.active': ('gauge', 'thread_pool.warmer.active'),
     'elasticsearch.thread_pool.warmer.threads': ('gauge', 'thread_pool.warmer.threads'),
     'elasticsearch.thread_pool.warmer.queue': ('gauge', 'thread_pool.warmer.queue'),
     'elasticsearch.thread_pool.warmer.rejected': ('rate', 'thread_pool.warmer.rejected'),
+    'elasticsearch.thread_pool.warmer.rejected.count': ('monotonic_count', 'thread_pool.warmer.rejected'),
     'elasticsearch.thread_pool.warmer.completed': ('gauge', 'thread_pool.warmer.completed'),
     'elasticsearch.http.current_open': ('gauge', 'http.current_open'),
     'elasticsearch.http.total_opened': ('gauge', 'http.total_opened'),
+    'elasticsearch.http.total_opened.count': ('monotonic_count', 'http.total_opened'),
     'jvm.mem.heap_committed': ('gauge', 'jvm.mem.heap_committed_in_bytes'),
     'jvm.mem.heap_used': ('gauge', 'jvm.mem.heap_used_in_bytes'),
     'jvm.mem.heap_in_use': ('gauge', 'jvm.mem.heap_used_percent'),
@@ -204,6 +289,21 @@ STATS_METRICS = {
     'elasticsearch.fs.total.available_in_bytes': ('gauge', 'fs.total.available_in_bytes'),
 }
 
+ADDITIONAL_METRICS_POST_7_9_0 = {
+    'elasticsearch.indexing_pressure.memory.current.coordinating_in_bytes': (
+        'gauge',
+        'indexing_pressure.memory.current.coordinating_in_bytes',
+    ),
+    'elasticsearch.indexing_pressure.memory.current.primary_in_bytes': (
+        'gauge',
+        'indexing_pressure.memory.current.primary_in_bytes',
+    ),
+    'elasticsearch.indexing_pressure.memory.current.replica_in_bytes': (
+        'gauge',
+        'indexing_pressure.memory.current.replica_in_bytes',
+    ),
+}
+
 ADDITIONAL_METRICS_POST_7_2_0 = {
     'elasticsearch.refresh.external.total': ('gauge', 'indices.refresh.external_total'),
     'elasticsearch.refresh.external.total.time': (
@@ -217,8 +317,11 @@ ADDITIONAL_METRICS_PRE_7_0_0 = {
     'elasticsearch.thread_pool.index.active': ('gauge', 'thread_pool.index.active'),
     'elasticsearch.thread_pool.index.queue': ('gauge', 'thread_pool.index.queue'),
     'elasticsearch.thread_pool.index.threads': ('gauge', 'thread_pool.index.threads'),
+    'elasticsearch.thread_pool.index.threads.count': ('monotonic_count', 'thread_pool.index.threads'),
     'elasticsearch.thread_pool.index.rejected': ('rate', 'thread_pool.index.rejected'),
+    'elasticsearch.thread_pool.index.rejected.count': ('monotonic_count', 'thread_pool.index.rejected'),
     'elasticsearch.thread_pool.index.completed': ('gauge', 'thread_pool.index.completed'),
+    'elasticsearch.thread_pool.index.completed.count': ('monotonic_count', 'thread_pool.index.completed'),
 }
 
 ADDITIONAL_METRICS_PRE_5_0_0 = {
@@ -226,10 +329,12 @@ ADDITIONAL_METRICS_PRE_5_0_0 = {
     'elasticsearch.thread_pool.percolate.threads': ('gauge', 'thread_pool.percolate.threads'),
     'elasticsearch.thread_pool.percolate.queue': ('gauge', 'thread_pool.percolate.queue'),
     'elasticsearch.thread_pool.percolate.rejected': ('rate', 'thread_pool.percolate.rejected'),
+    'elasticsearch.thread_pool.percolate.rejected.count': ('monotonic_count', 'thread_pool.percolate.rejected'),
     'elasticsearch.thread_pool.suggest.active': ('gauge', 'thread_pool.suggest.active'),
     'elasticsearch.thread_pool.suggest.threads': ('gauge', 'thread_pool.suggest.threads'),
     'elasticsearch.thread_pool.suggest.queue': ('gauge', 'thread_pool.suggest.queue'),
     'elasticsearch.thread_pool.suggest.rejected': ('rate', 'thread_pool.suggest.rejected'),
+    'elasticsearch.thread_pool.suggest.rejected.count': ('monotonic_count', 'thread_pool.suggest.rejected'),
 }
 
 # Metrics for index level
@@ -296,10 +401,12 @@ ADDITIONAL_METRICS_POST_0_90_5 = {
     'elasticsearch.search.fetch.open_contexts': ('gauge', 'indices.search.open_contexts'),
     'elasticsearch.fielddata.size': ('gauge', 'indices.fielddata.memory_size_in_bytes'),
     'elasticsearch.fielddata.evictions': ('gauge', 'indices.fielddata.evictions'),
+    'elasticsearch.fielddata.evictions.count': ('monotonic_count', 'indices.fielddata.evictions'),
 }
 
 ADDITIONAL_METRICS_POST_0_90_5_PRE_2_0 = {
     'elasticsearch.cache.filter.evictions': ('gauge', 'indices.filter_cache.evictions'),
+    'elasticsearch.cache.filter.evictions.count': ('monotonic_count', 'indices.filter_cache.evictions'),
     'elasticsearch.cache.filter.size': ('gauge', 'indices.filter_cache.memory_size_in_bytes'),
     'elasticsearch.id_cache.size': ('gauge', 'indices.id_cache.memory_size_in_bytes'),
 }
@@ -344,10 +451,18 @@ ADDITIONAL_METRICS_POST_1_4_0 = {
         'indices.indexing.throttle_time_in_millis',
         lambda ms: ms_to_second(ms),
     ),
+    'elasticsearch.indices.indexing.throttle_time.count': (
+        'monotonic_count',
+        'indices.indexing.throttle_time_in_millis',
+        lambda ms: ms_to_second(ms),
+    ),
     'elasticsearch.indices.query_cache.memory_size_in_bytes': ('gauge', 'indices.query_cache.memory_size_in_bytes'),
     'elasticsearch.indices.query_cache.hit_count': ('rate', 'indices.query_cache.hit_count'),
+    'elasticsearch.indices.query_cache.hit_count.count': ('monotonic_count', 'indices.query_cache.hit_count'),
     'elasticsearch.indices.query_cache.miss_count': ('rate', 'indices.query_cache.miss_count'),
+    'elasticsearch.indices.query_cache.miss_count.total': ('monotonic_count', 'indices.query_cache.miss_count'),
     'elasticsearch.indices.query_cache.evictions': ('rate', 'indices.query_cache.evictions'),
+    'elasticsearch.indices.query_cache.evictions.count': ('monotonic_count', 'indices.query_cache.evictions'),
     'elasticsearch.indices.segments.index_writer_max_memory_in_bytes': (
         'gauge',
         'indices.segments.index_writer_max_memory_in_bytes',
@@ -367,8 +482,10 @@ ADDITIONAL_METRICS_POST_1_4_0 = {
     'elasticsearch.breakers.request.tripped': ('rate', 'breakers.request.tripped'),
     'elasticsearch.thread_pool.listener.active': ('gauge', 'thread_pool.listener.active'),
     'elasticsearch.thread_pool.listener.threads': ('gauge', 'thread_pool.listener.threads'),
+    'elasticsearch.thread_pool.listener.threads.count': ('monotonic_count', 'thread_pool.listener.threads'),
     'elasticsearch.thread_pool.listener.queue': ('gauge', 'thread_pool.listener.queue'),
     'elasticsearch.thread_pool.listener.rejected': ('rate', 'thread_pool.listener.rejected'),
+    'elasticsearch.thread_pool.listener.rejected.count': ('monotonic_count', 'thread_pool.listener.rejected'),
 }
 
 ADDITIONAL_METRICS_POST_1_5_0 = {
@@ -376,6 +493,11 @@ ADDITIONAL_METRICS_POST_1_5_0 = {
     'elasticsearch.indices.recovery.current_as_target': ('gauge', 'indices.recovery.current_as_target'),
     'elasticsearch.indices.recovery.throttle_time': (
         'rate',
+        'indices.recovery.throttle_time_in_millis',
+        lambda ms: ms_to_second(ms),
+    ),
+    'elasticsearch.indices.recovery.throttle_time.count': (
+        'monotonic_count',
         'indices.recovery.throttle_time_in_millis',
         lambda ms: ms_to_second(ms),
     ),
@@ -421,16 +543,21 @@ ADDITIONAL_METRICS_POST_2_0 = {
     'elasticsearch.indices.segments.terms_memory_in_bytes': ('gauge', 'indices.segments.terms_memory_in_bytes'),
     'elasticsearch.indices.request_cache.memory_size_in_bytes': ('gauge', 'indices.request_cache.memory_size_in_bytes'),
     'elasticsearch.indices.request_cache.evictions': ('rate', 'indices.request_cache.evictions'),
+    'elasticsearch.indices.request_cache.evictions.count': ('monotonic_count', 'indices.request_cache.evictions'),
     'elasticsearch.indices.request_cache.hit_count': ('rate', 'indices.request_cache.hit_count'),
+    'elasticsearch.indices.request_cache.hit_count.count': ('monotonic_count', 'indices.request_cache.hit_count'),
     'elasticsearch.indices.request_cache.miss_count': ('rate', 'indices.request_cache.miss_count'),
+    'elasticsearch.indices.request_cache.miss_count.count': ('monotonic_count', 'indices.request_cache.miss_count'),
 }
 
 ADDITIONAL_METRICS_POST_2_1 = {
+    'elasticsearch.indices.indexing.index_failed.count': ('monotonic_count', 'indices.indexing.index_failed'),
     'elasticsearch.indices.indexing.index_failed': ('rate', 'indices.indexing.index_failed'),
     'elasticsearch.thread_pool.force_merge.active': ('gauge', 'thread_pool.force_merge.active'),
     'elasticsearch.thread_pool.force_merge.threads': ('gauge', 'thread_pool.force_merge.threads'),
     'elasticsearch.thread_pool.force_merge.queue': ('gauge', 'thread_pool.force_merge.queue'),
     'elasticsearch.thread_pool.force_merge.rejected': ('rate', 'thread_pool.force_merge.rejected'),
+    'elasticsearch.thread_pool.force_merge.rejected.count': ('monotonic_count', 'thread_pool.force_merge.rejected'),
 }
 
 ADDITIONAL_METRICS_5_x = {
@@ -446,24 +573,36 @@ ADDITIONAL_METRICS_5_x = {
         'breakers.in_flight_requests.estimated_size_in_bytes',
     ),
     'elasticsearch.search.scroll.total': ('gauge', 'indices.search.scroll_total'),
+    'elasticsearch.search.scroll.total.count': ('monotonic_count', 'indices.search.scroll_total'),
     'elasticsearch.search.scroll.time': ('gauge', 'indices.search.scroll_time_in_millis', lambda ms: ms_to_second(ms)),
+    'elasticsearch.search.scroll.time.count': (
+        'monotonic_count',
+        'indices.search.scroll_time_in_millis',
+        lambda ms: ms_to_second(ms),
+    ),
     'elasticsearch.search.scroll.current': ('gauge', 'indices.search.scroll_current'),
 }
 
 ADDITIONAL_METRICS_PRE_6_3 = {
     'elasticsearch.thread_pool.bulk.active': ('gauge', 'thread_pool.bulk.active'),
     'elasticsearch.thread_pool.bulk.threads': ('gauge', 'thread_pool.bulk.threads'),
+    'elasticsearch.thread_pool.bulk.threads.count': ('monotonic_count', 'thread_pool.bulk.threads'),
     'elasticsearch.thread_pool.bulk.queue': ('gauge', 'thread_pool.bulk.queue'),
     'elasticsearch.thread_pool.bulk.rejected': ('rate', 'thread_pool.bulk.rejected'),
+    'elasticsearch.thread_pool.bulk.rejected.count': ('monotonic_count', 'thread_pool.bulk.rejected'),
     'elasticsearch.thread_pool.bulk.completed': ('rate', 'thread_pool.bulk.completed'),
+    'elasticsearch.thread_pool.bulk.completed.count': ('monotonic_count', 'thread_pool.bulk.completed'),
 }
 
 ADDITIONAL_METRICS_POST_6_3 = {
     'elasticsearch.thread_pool.write.active': ('gauge', 'thread_pool.write.active'),
     'elasticsearch.thread_pool.write.threads': ('gauge', 'thread_pool.write.threads'),
+    'elasticsearch.thread_pool.write.threads.count': ('monotonic_count', 'thread_pool.write.threads'),
     'elasticsearch.thread_pool.write.queue': ('gauge', 'thread_pool.write.queue'),
     'elasticsearch.thread_pool.write.rejected': ('rate', 'thread_pool.write.rejected'),
+    'elasticsearch.thread_pool.write.rejected.count': ('monotonic_count', 'thread_pool.write.rejected'),
     'elasticsearch.thread_pool.write.completed': ('rate', 'thread_pool.write.completed'),
+    'elasticsearch.thread_pool.write.completed.count': ('monotonic_count', 'thread_pool.write.completed'),
 }
 
 CLUSTER_HEALTH_METRICS = {
@@ -598,6 +737,9 @@ def stats_for_version(version, jvm_rate=False):
 
     if version >= [7, 2, 0]:
         metrics.update(ADDITIONAL_METRICS_POST_7_2_0)
+
+    if version >= [7, 9, 0]:
+        metrics.update(ADDITIONAL_METRICS_POST_7_9_0)
 
     return metrics
 

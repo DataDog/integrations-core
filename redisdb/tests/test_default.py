@@ -4,11 +4,11 @@
 from __future__ import unicode_literals
 
 from copy import deepcopy
-from distutils.version import StrictVersion
 
 import mock
 import pytest
 import redis
+from packaging.version import Version
 
 from datadog_checks.redisdb import Redis
 
@@ -57,18 +57,21 @@ def test_aof_loading_metrics(aggregator, redis_instance):
         aggregator.assert_all_metrics_covered()
 
 
-def test_redis_default(aggregator, redis_auth, redis_instance):
+def test_redis_default(aggregator, dd_run_check, check, redis_auth, redis_instance):
     db = redis.Redis(port=PORT, db=14, password=PASSWORD, host=HOST)
     db.flushdb()
     db.lpush("test_list", 1)
     db.lpush("test_list", 2)
     db.lpush("test_list", 3)
+    version = Version(db.info().get('redis_version'))
+    if version >= Version('5.0.0'):
+        db.xadd("test_stream", {"foo": "bar"})
     db.set("key1", "value")
     db.set("key2", "value")
     db.setex("expirekey", 1000, "expirevalue")
 
-    redis_check = Redis('redisdb', {}, [redis_instance])
-    redis_check.check(redis_instance)
+    redis_check = check(redis_instance)
+    dd_run_check(redis_check)
 
     # check the aggregator received some metrics
     assert aggregator.metric_names, "No metrics returned"
@@ -85,46 +88,49 @@ def test_redis_default(aggregator, redis_auth, redis_instance):
             aggregator.assert_metric(name, tags=expected)
 
     aggregator.assert_metric('redis.key.length', 3, count=1, tags=expected_db + ['key:test_list', 'key_type:list'])
+    if version >= Version('5.0.0'):
+        aggregator.assert_metric(
+            'redis.key.length', 1, count=1, tags=expected_db + ['key:test_stream', 'key_type:stream']
+        )
     aggregator.assert_metric('redis.net.connections', count=1, tags=expected + ['source:unknown'])
 
     aggregator.assert_metric('redis.net.maxclients')
 
     # in the old tests these was explicitly asserted, keeping it like that
     assert 'redis.net.commands' in aggregator.metric_names
-    version = db.info().get('redis_version')
-    if StrictVersion(version) >= StrictVersion('2.6.0'):
+    if version >= Version('2.6.0'):
         # instantaneous_ops_per_sec info is only available on redis>=2.6
         assert 'redis.net.instantaneous_ops_per_sec' in aggregator.metric_names
     db.flushdb()
 
 
-def test_service_check(aggregator, redis_auth, redis_instance):
-    redis_check = Redis('redisdb', {}, [redis_instance])
-    redis_check.check(redis_instance)
+def test_service_check(aggregator, dd_run_check, check, redis_auth, redis_instance):
+    redis_check = check(redis_instance)
+    dd_run_check(redis_check)
 
     assert len(aggregator.service_checks('redis.can_connect')) == 1
     sc = aggregator.service_checks('redis.can_connect')[0]
-    assert sc.tags == ['foo:bar', 'redis_host:{}'.format(HOST), 'redis_port:6379', 'redis_role:master']
+    assert sc.tags == ['foo:bar', 'redis_host:{}'.format(HOST), 'redis_port:6379']
 
 
-def test_disabled_config_get(aggregator, redis_auth, redis_instance):
-    redis_check = Redis('redisdb', {}, [redis_instance])
+def test_disabled_config_get(aggregator, dd_run_check, check, redis_auth, redis_instance):
+    redis_check = check(redis_instance)
     with mock.patch.object(redis.client.Redis, 'config_get') as get:
         get.side_effect = redis.ResponseError()
-        redis_check.check(redis_instance)
+        dd_run_check(redis_check)
 
     assert len(aggregator.service_checks('redis.can_connect')) == 1
     sc = aggregator.service_checks('redis.can_connect')[0]
-    assert sc.tags == ['foo:bar', 'redis_host:{}'.format(HOST), 'redis_port:6379', 'redis_role:master']
+    assert sc.tags == ['foo:bar', 'redis_host:{}'.format(HOST), 'redis_port:6379']
 
 
 @requires_static_version
 @pytest.mark.usefixtures('dd_environment')
-def test_metadata(master_instance, datadog_agent):
-    redis_check = Redis('redisdb', {}, [master_instance])
+def test_metadata(dd_run_check, check, master_instance, datadog_agent):
+    redis_check = check(master_instance)
     redis_check.check_id = 'test:123'
 
-    redis_check.check(master_instance)
+    dd_run_check(redis_check)
 
     major, minor = REDIS_VERSION.split('.')
     version_metadata = {'version.scheme': 'semver', 'version.major': major, 'version.minor': minor}
@@ -135,16 +141,16 @@ def test_metadata(master_instance, datadog_agent):
     datadog_agent.assert_metadata_count(len(version_metadata) + 2)
 
 
-def test_redis_command_stats(aggregator, redis_instance):
+def test_redis_command_stats(aggregator, dd_run_check, check, redis_instance):
     db = redis.Redis(port=PORT, db=14, password=PASSWORD, host=HOST)
     version = db.info().get('redis_version')
-    if StrictVersion(version) < StrictVersion('2.6.0'):
+    if Version(version) < Version('2.6.0'):
         # Command stats only works with Redis >= 2.6.0
         return
 
     redis_instance['command_stats'] = True
-    redis_check = Redis('redisdb', {}, [redis_instance])
-    redis_check.check(redis_instance)
+    redis_check = check(redis_instance)
+    dd_run_check(redis_check)
 
     for name in STAT_METRICS:
         aggregator.assert_metric(name)

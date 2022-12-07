@@ -11,29 +11,36 @@ import pytest
 from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.dev import EnvVars
 from datadog_checks.sqlserver import SQLServer
+from datadog_checks.sqlserver.connection import split_sqlserver_host_port
+from datadog_checks.sqlserver.const import (
+    ENGINE_EDITION_SQL_DATABASE,
+    ENGINE_EDITION_STANDARD,
+    STATIC_INFO_ENGINE_EDITION,
+)
+from datadog_checks.sqlserver.metrics import SqlMasterDatabaseFileStats
 from datadog_checks.sqlserver.sqlserver import SQLConnectionError
-from datadog_checks.sqlserver.utils import set_default_driver_conf
+from datadog_checks.sqlserver.utils import parse_sqlserver_major_version, set_default_driver_conf
 
-from .common import CHECK_NAME, LOCAL_SERVER, assert_metrics
+from .common import CHECK_NAME, DOCKER_SERVER, assert_metrics
 from .utils import windows_ci
 
 # mark the whole module
 pytestmark = pytest.mark.unit
 
 
-def test_get_cursor(instance_sql2017):
+def test_get_cursor(instance_docker):
     """
     Ensure we don't leak connection info in case of a KeyError when the
     connection pool is empty or the params for `get_cursor` are invalid.
     """
-    check = SQLServer(CHECK_NAME, {}, [instance_sql2017])
+    check = SQLServer(CHECK_NAME, {}, [instance_docker])
     check.initialize_connection()
     with pytest.raises(SQLConnectionError):
         check.connection.get_cursor('foo')
 
 
-def test_missing_db(instance_sql2017, dd_run_check):
-    instance = copy.copy(instance_sql2017)
+def test_missing_db(instance_docker, dd_run_check):
+    instance = copy.copy(instance_docker)
     instance['ignore_missing_database'] = False
     with mock.patch('datadog_checks.sqlserver.connection.Connection.check_database', return_value=(False, 'db')):
         with pytest.raises(ConfigurationError):
@@ -50,7 +57,7 @@ def test_missing_db(instance_sql2017, dd_run_check):
 
 @mock.patch('datadog_checks.sqlserver.connection.Connection.open_managed_default_database')
 @mock.patch('datadog_checks.sqlserver.connection.Connection.get_cursor')
-def test_db_exists(get_cursor, mock_connect, instance_sql2017, dd_run_check):
+def test_db_exists(get_cursor, mock_connect, instance_docker_defaults, dd_run_check):
     Row = namedtuple('Row', 'name,collation_name')
     db_results = [
         Row('master', 'SQL_Latin1_General_CP1_CI_AS'),
@@ -66,7 +73,7 @@ def test_db_exists(get_cursor, mock_connect, instance_sql2017, dd_run_check):
     mock_results.__iter__.return_value = db_results
     get_cursor.return_value = mock_results
 
-    instance = copy.copy(instance_sql2017)
+    instance = copy.copy(instance_docker_defaults)
     # make sure check doesn't try to add metrics
     instance['stored_procedure'] = 'fake_proc'
 
@@ -151,6 +158,42 @@ def test_autodiscovery_exclude_override(instance_autodiscovery):
     assert check.databases == set(['tempdb'])
 
 
+@pytest.mark.parametrize(
+    'col_val_row_1, col_val_row_2, col_val_row_3',
+    [
+        pytest.param(256, 1024, 1720, id='Valid column value 0'),
+        pytest.param(0, None, 1024, id='NoneType column value 1, should not raise error'),
+        pytest.param(512, 0, 256, id='Valid column value 2'),
+        pytest.param(None, 256, 0, id='NoneType column value 3, should not raise error'),
+    ],
+)
+def test_SqlMasterDatabaseFileStats_fetch_metric(col_val_row_1, col_val_row_2, col_val_row_3):
+    Row = namedtuple('Row', ['name', 'file_id', 'type', 'physical_name', 'size', 'max_size', 'state', 'state_desc'])
+    mock_rows = [
+        Row('master', 1, 0, '/var/opt/mssql/data/master.mdf', col_val_row_1, -1, 0, 'ONLINE'),
+        Row('tempdb', 1, 0, '/var/opt/mssql/data/tempdb.mdf', col_val_row_2, -1, 0, 'ONLINE'),
+        Row('msdb', 1, 0, '/var/opt/mssql/data/MSDBData.mdf', col_val_row_3, -1, 0, 'ONLINE'),
+    ]
+    mock_cols = ['name', 'file_id', 'type', 'physical_name', 'size', 'max_size', 'state', 'state_desc']
+    mock_metric_obj = SqlMasterDatabaseFileStats(
+        cfg_instance=mock.MagicMock(dict),
+        base_name=None,
+        report_function=mock.MagicMock(),
+        column='size',
+        logger=None,
+    )
+    with mock.patch.object(
+        SqlMasterDatabaseFileStats, 'fetch_metric', wraps=mock_metric_obj.fetch_metric
+    ) as mock_fetch_metric:
+        errors = 0
+        try:
+            mock_fetch_metric(mock_rows, mock_cols)
+        except Exception as e:
+            errors += 1
+            raise AssertionError('{}'.format(e))
+        assert errors < 1
+
+
 def _mock_database_list():
     Row = namedtuple('Row', 'name')
     fetchall_results = [
@@ -191,20 +234,86 @@ def test_set_default_driver_conf():
 
 
 @windows_ci
-def test_check_local(aggregator, dd_run_check, init_config, instance_sql2017):
-    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_sql2017])
+def test_check_local(aggregator, dd_run_check, init_config, instance_docker):
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker])
     dd_run_check(sqlserver_check)
-    expected_tags = instance_sql2017.get('tags', []) + ['host:{}'.format(LOCAL_SERVER), 'db:master']
-    assert_metrics(aggregator, expected_tags)
+    expected_tags = instance_docker.get('tags', []) + ['sqlserver_host:{}'.format(DOCKER_SERVER), 'db:master']
+    assert_metrics(aggregator, expected_tags, hostname=sqlserver_check.resolved_hostname)
 
 
-@windows_ci
-@pytest.mark.parametrize('adoprovider', ['SQLOLEDB', 'SQLNCLI11'])
-def test_check_adoprovider(aggregator, dd_run_check, init_config, instance_sql2017, adoprovider):
-    instance = copy.deepcopy(instance_sql2017)
-    instance['adoprovider'] = adoprovider
+SQL_SERVER_2012_VERSION_EXAMPLE = """\
+Microsoft SQL Server 2012 (SP3) (KB3072779) - 11.0.6020.0 (X64)
+    Oct 20 2015 15:36:27
+    Copyright (c) Microsoft Corporation
+    Express Edition (64-bit) on Windows NT 6.3 <X64> (Build 17763: ) (Hypervisor)
+"""
 
-    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance])
-    dd_run_check(sqlserver_check)
-    expected_tags = instance.get('tags', []) + ['host:{}'.format(LOCAL_SERVER), 'db:master']
-    assert_metrics(aggregator, expected_tags)
+SQL_SERVER_2019_VERSION_EXAMPLE = """\
+Microsoft SQL Server 2019 (RTM-CU12) (KB5004524) - 15.0.4153.1 (X64)
+    Jul 19 2021 15:37:34
+    Copyright (C) 2019 Microsoft Corporation
+    Standard Edition (64-bit) on Windows Server 2016 Datacenter 10.0 <X64> (Build 14393: ) (Hypervisor)
+"""
+
+
+@pytest.mark.parametrize(
+    "version,expected_major_version", [(SQL_SERVER_2012_VERSION_EXAMPLE, 2012), (SQL_SERVER_2019_VERSION_EXAMPLE, 2019)]
+)
+def test_parse_sqlserver_major_version(version, expected_major_version):
+    assert parse_sqlserver_major_version(version) == expected_major_version
+
+
+@pytest.mark.parametrize(
+    "instance_host,split_host,split_port",
+    [
+        ("localhost,1433,some-typo", "localhost", "1433"),
+        ("localhost, 1433,some-typo", "localhost", "1433"),
+        ("localhost,1433", "localhost", "1433"),
+        ("localhost", "localhost", None),
+    ],
+)
+def test_split_sqlserver_host(instance_host, split_host, split_port):
+    s_host, s_port = split_sqlserver_host_port(instance_host)
+    assert (s_host, s_port) == (split_host, split_port)
+
+
+@pytest.mark.parametrize(
+    "dbm_enabled, instance_host, database, reported_hostname, engine_edition, expected_hostname",
+    [
+        (False, 'localhost,1433,some-typo', None, '', ENGINE_EDITION_STANDARD, 'stubbed.hostname'),
+        (True, 'localhost,1433', None, '', ENGINE_EDITION_STANDARD, 'stubbed.hostname'),
+        (False, 'localhost', None, '', ENGINE_EDITION_STANDARD, 'stubbed.hostname'),
+        (False, '8.8.8.8', None, '', ENGINE_EDITION_STANDARD, 'stubbed.hostname'),
+        (True, 'localhost', None, 'forced_hostname', ENGINE_EDITION_STANDARD, 'forced_hostname'),
+        (True, 'datadoghq.com,1433', None, '', ENGINE_EDITION_STANDARD, 'datadoghq.com'),
+        (True, 'datadoghq.com', None, '', ENGINE_EDITION_STANDARD, 'datadoghq.com'),
+        (True, 'datadoghq.com', None, 'forced_hostname', ENGINE_EDITION_STANDARD, 'forced_hostname'),
+        (True, '8.8.8.8,1433', None, '', ENGINE_EDITION_STANDARD, '8.8.8.8'),
+        (False, '8.8.8.8', None, 'forced_hostname', ENGINE_EDITION_STANDARD, 'forced_hostname'),
+        (True, 'foo.database.windows.net', None, None, ENGINE_EDITION_SQL_DATABASE, 'foo/master'),
+        (True, 'foo.database.windows.net', 'master', None, ENGINE_EDITION_SQL_DATABASE, 'foo/master'),
+        (True, 'foo.database.windows.net', 'bar', None, ENGINE_EDITION_SQL_DATABASE, 'foo/bar'),
+        (
+            True,
+            'foo.database.windows.net',
+            'bar',
+            'override-reported',
+            ENGINE_EDITION_SQL_DATABASE,
+            'override-reported',
+        ),
+        (True, 'foo-custom-dns', 'bar', None, ENGINE_EDITION_SQL_DATABASE, 'foo-custom-dns/bar'),
+    ],
+)
+def test_resolved_hostname(dbm_enabled, instance_host, database, reported_hostname, engine_edition, expected_hostname):
+    instance = {
+        'host': instance_host,
+        'dbm': dbm_enabled,
+    }
+    if database:
+        instance['database'] = database
+    if reported_hostname:
+        instance['reported_hostname'] = reported_hostname
+    sqlserver_check = SQLServer(CHECK_NAME, {}, [instance])
+    sqlserver_check.static_info_cache[STATIC_INFO_ENGINE_EDITION] = engine_edition
+    sqlserver_check._resolved_hostname = None
+    assert sqlserver_check.resolved_hostname == expected_hostname

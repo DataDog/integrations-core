@@ -1,0 +1,152 @@
+## All options defined here are available to all instances.
+#
+init_config:
+
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Additionally, this sets the default `service` for every log source.
+    #
+    # service: <SERVICE>
+
+## Every instance is scheduled independently of the others.
+#
+instances:
+
+    ## @param mq_server - string - required
+    ## The server IBM MQ is running on.
+    #
+  - mq_server: <MQ_SERVER>
+
+    ## @param mq_port - integer - required
+    ## The port IBM MQ is listening on.
+    #
+    mq_port: 1414
+
+    ## @param channel - string - required
+    ## The IBM MQ channel to use for subscriptions.
+    #
+    channel: <CHANNEL>
+
+    ## @param queue_manager - string - required
+    ## The IBM MQ queue manager to use.
+    #
+    queue_manager: <QUEUE_MANAGER>
+
+    ## @param mq_user - string - optional
+    ## The user with which to authenticate to IBM MQ.
+    #
+    # mq_user: <MQ_USER>
+
+    ## @param mq_password - string - optional
+    ## The password with which to authenticate to IBM MQ.
+    #
+    # mq_password: <MQ_PASSWORD>
+
+    ## @param resource_statistics - boolean - optional - default: true
+    ## Whether to collect resource statistics.
+    #
+    # resource_statistics: true
+
+    ## @param message_flows - boolean - optional - default: true
+    ## Whether to collect information about message flows.
+    #
+    # message_flows: true
+
+    ## @param persist_connections - boolean - optional - default: false
+    ## Whether to keep connections open rather than disconnecting after every check run.
+    #
+    # persist_connections: false
+
+    ## @param mqcd_version - integer - optional - default: 9
+    ## The channel definition version to use. Supported values are 1 to 9 (inclusive).
+    ## If you're having connection issues make sure it matches your IBM MQ version.
+    ## TLS encryption requires at least version 7 of MQCD.
+    #
+    # mqcd_version: 9
+
+    ## @param tls_auth - boolean - optional - default: false
+    ## Whether to use TLS auth while connecting to the channel.
+    #
+    # tls_auth: false
+
+    ## @param tls_cipher_spec - string - optional - default: TLS_RSA_WITH_AES_256_CBC_SHA
+    ## The TLS cipher to use. It should match the value of the channel's SSLCIPH attribute.
+    #
+    # tls_cipher_spec: TLS_RSA_WITH_AES_256_CBC_SHA
+
+    ## @param tls_key_repository_location - string - optional - default: /var/mqm/tls-db/client/KeyringClient
+    ## The location of the key database file in which keys and certificates are stored.
+    ## The key database file must have a file extension of `.kdb`.
+    ## The KeyRepository field contains the path to this file, along with the file name stem
+    ## (all characters in the file name up to but not including the final .kdb).
+    ## Each key database file has an associated password stash file. This holds encoded passwords that are used to
+    ## allow programmatic access to the key database. The password stash file must reside in the same directory and
+    ## have the same file stem as the key database, and must end with the extension `.sth`.
+    #
+    # tls_key_repository_location: /var/mqm/tls-db/client/KeyringClient
+
+    ## @param tls_certificate_label - string - optional
+    ## Certificate label used for TLS connection.
+    #
+    # tls_certificate_label: <TLS_CERTIFICATE_LABEL>
+
+    ## @param tags - list of strings - optional
+    ## A list of tags to attach to every metric and service check emitted by this instance.
+    ##
+    ## Learn more about tagging at https://docs.datadoghq.com/tagging
+    #
+    # tags:
+    #   - <KEY_1>:<VALUE_1>
+    #   - <KEY_2>:<VALUE_2>
+
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Overrides any `service` defined in the `init_config` section.
+    #
+    # service: <SERVICE>
+
+    ## @param min_collection_interval - number - optional - default: 15
+    ## This changes the collection interval of the check. For more information, see:
+    ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
+    #
+    # min_collection_interval: 15
+
+    ## @param empty_default_hostname - boolean - optional - default: false
+    ## This forces the check to send metrics with no hostname.
+    ##
+    ## This is useful for cluster-level checks.
+    #
+    # empty_default_hostname: false
+
+    ## @param metric_patterns - mapping - optional
+    ## A mapping of metrics to include or exclude, with each entry being a regular expression.
+    ##
+    ## Metrics defined in `exclude` will take precedence in case of overlap.
+    #
+    # metric_patterns:
+    #   include:
+    #   - <INCLUDE_REGEX>
+    #   exclude:
+    #   - <EXCLUDE_REGEX>
+
+## Log Section
+##
+## type - required - Type of log input source (tcp / udp / file / windows_event).
+## port / path / channel_path - required - Set port if type is tcp or udp.
+##                                         Set path if type is file.
+##                                         Set channel_path if type is windows_event.
+## source  - required - Attribute that defines which integration sent the logs.
+## encoding - optional - For file specifies the file encoding. Default is utf-8. Other
+##                       possible values are utf-16-le and utf-16-be.
+## service - optional - The name of the service that generates the log.
+##                      Overrides any `service` defined in the `init_config` section.
+## tags - optional - Add tags to the collected logs.
+##
+## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
+#
+# logs:
+#   - type: file
+#     source: ibm_ace
+#     path: /home/aceuser/ace-server/log/integration_server.txt

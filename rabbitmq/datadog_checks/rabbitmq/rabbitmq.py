@@ -4,134 +4,32 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import re
 import time
-import warnings
 from collections import defaultdict
 
 from requests.exceptions import RequestException
-from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from six import iteritems
 from six.moves.urllib.parse import quote_plus, urljoin, urlparse
 
-from datadog_checks.base import AgentCheck, is_affirmative
+from datadog_checks.base import AgentCheck, is_affirmative, to_native_string
 
-EVENT_TYPE = SOURCE_TYPE_NAME = 'rabbitmq'
-EXCHANGE_TYPE = 'exchanges'
-QUEUE_TYPE = 'queues'
-NODE_TYPE = 'nodes'
-CONNECTION_TYPE = 'connections'
-OVERVIEW_TYPE = 'overview'
-MAX_DETAILED_EXCHANGES = 50
-MAX_DETAILED_QUEUES = 200
-MAX_DETAILED_NODES = 100
-# Post an event in the stream when the number of queues or nodes to
-# collect is above 90% of the limit:
-ALERT_THRESHOLD = 0.9
-EXCHANGE_ATTRIBUTES = [
-    # Path, Name, Operation
-    ('message_stats/ack', 'messages.ack.count', float),
-    ('message_stats/ack_details/rate', 'messages.ack.rate', float),
-    ('message_stats/confirm', 'messages.confirm.count', float),
-    ('message_stats/confirm_details/rate', 'messages.confirm.rate', float),
-    ('message_stats/deliver_get', 'messages.deliver_get.count', float),
-    ('message_stats/deliver_get_details/rate', 'messages.deliver_get.rate', float),
-    ('message_stats/publish', 'messages.publish.count', float),
-    ('message_stats/publish_details/rate', 'messages.publish.rate', float),
-    ('message_stats/publish_in', 'messages.publish_in.count', float),
-    ('message_stats/publish_in_details/rate', 'messages.publish_in.rate', float),
-    ('message_stats/publish_out', 'messages.publish_out.count', float),
-    ('message_stats/publish_out_details/rate', 'messages.publish_out.rate', float),
-    ('message_stats/return_unroutable', 'messages.return_unroutable.count', float),
-    ('message_stats/return_unroutable_details/rate', 'messages.return_unroutable.rate', float),
-    ('message_stats/redeliver', 'messages.redeliver.count', float),
-    ('message_stats/redeliver_details/rate', 'messages.redeliver.rate', float),
-]
-QUEUE_ATTRIBUTES = [
-    # Path, Name, Operation
-    ('active_consumers', 'active_consumers', float),
-    ('consumers', 'consumers', float),
-    ('consumer_utilisation', 'consumer_utilisation', float),
-    ('head_message_timestamp', 'head_message_timestamp', int),
-    ('memory', 'memory', float),
-    ('messages', 'messages', float),
-    ('messages_details/rate', 'messages.rate', float),
-    ('messages_ready', 'messages_ready', float),
-    ('messages_ready_details/rate', 'messages_ready.rate', float),
-    ('messages_unacknowledged', 'messages_unacknowledged', float),
-    ('messages_unacknowledged_details/rate', 'messages_unacknowledged.rate', float),
-    ('message_stats/ack', 'messages.ack.count', float),
-    ('message_stats/ack_details/rate', 'messages.ack.rate', float),
-    ('message_stats/deliver', 'messages.deliver.count', float),
-    ('message_stats/deliver_details/rate', 'messages.deliver.rate', float),
-    ('message_stats/deliver_get', 'messages.deliver_get.count', float),
-    ('message_stats/deliver_get_details/rate', 'messages.deliver_get.rate', float),
-    ('message_stats/publish', 'messages.publish.count', float),
-    ('message_stats/publish_details/rate', 'messages.publish.rate', float),
-    ('message_stats/redeliver', 'messages.redeliver.count', float),
-    ('message_stats/redeliver_details/rate', 'messages.redeliver.rate', float),
-]
-
-NODE_ATTRIBUTES = [
-    ('fd_used', 'fd_used', float),
-    ('disk_free', 'disk_free', float),
-    ('mem_used', 'mem_used', float),
-    ('mem_limit', 'mem_limit', float),
-    ('run_queue', 'run_queue', float),
-    ('sockets_used', 'sockets_used', float),
-    ('partitions', 'partitions', len),
-    ('running', 'running', float),
-    ('mem_alarm', 'mem_alarm', float),
-    ('disk_free_alarm', 'disk_alarm', float),
-]
-
-OVERVIEW_ATTRIBUTES = [
-    ("object_totals/connections", "object_totals.connections", float),
-    ("object_totals/channels", "object_totals.channels", float),
-    ("object_totals/queues", "object_totals.queues", float),
-    ("object_totals/consumers", "object_totals.consumers", float),
-    ("queue_totals/messages", "queue_totals.messages.count", float),
-    ("queue_totals/messages_details/rate", "queue_totals.messages.rate", float),
-    ("queue_totals/messages_ready", "queue_totals.messages_ready.count", float),
-    ("queue_totals/messages_ready_details/rate", "queue_totals.messages_ready.rate", float),
-    ("queue_totals/messages_unacknowledged", "queue_totals.messages_unacknowledged.count", float),
-    ("queue_totals/messages_unacknowledged_details/rate", "queue_totals.messages_unacknowledged.rate", float),
-    ('message_stats/ack', 'messages.ack.count', float),
-    ('message_stats/ack_details/rate', 'messages.ack.rate', float),
-    ('message_stats/confirm', 'messages.confirm.count', float),
-    ('message_stats/confirm_details/rate', 'messages.confirm.rate', float),
-    ('message_stats/deliver_get', 'messages.deliver_get.count', float),
-    ('message_stats/deliver_get_details/rate', 'messages.deliver_get.rate', float),
-    ('message_stats/publish', 'messages.publish.count', float),
-    ('message_stats/publish_details/rate', 'messages.publish.rate', float),
-    ('message_stats/publish_in', 'messages.publish_in.count', float),
-    ('message_stats/publish_in_details/rate', 'messages.publish_in.rate', float),
-    ('message_stats/publish_out', 'messages.publish_out.count', float),
-    ('message_stats/publish_out_details/rate', 'messages.publish_out.rate', float),
-    ('message_stats/return_unroutable', 'messages.return_unroutable.count', float),
-    ('message_stats/return_unroutable_details/rate', 'messages.return_unroutable.rate', float),
-    ('message_stats/redeliver', 'messages.redeliver.count', float),
-    ('message_stats/redeliver_details/rate', 'messages.redeliver.rate', float),
-]
-
-ATTRIBUTES = {
-    EXCHANGE_TYPE: EXCHANGE_ATTRIBUTES,
-    QUEUE_TYPE: QUEUE_ATTRIBUTES,
-    NODE_TYPE: NODE_ATTRIBUTES,
-    OVERVIEW_TYPE: OVERVIEW_ATTRIBUTES,
-}
-
-TAG_PREFIX = 'rabbitmq'
-TAGS_MAP = {
-    EXCHANGE_TYPE: {'name': 'exchange', 'vhost': 'vhost', 'exchange_family': 'exchange_family'},
-    QUEUE_TYPE: {'node': 'node', 'name': 'queue', 'vhost': 'vhost', 'policy': 'policy', 'queue_family': 'queue_family'},
-    NODE_TYPE: {'name': 'node'},
-    OVERVIEW_TYPE: {'cluster_name': 'cluster'},
-}
-
-METRIC_SUFFIX = {EXCHANGE_TYPE: "exchange", QUEUE_TYPE: "queue", NODE_TYPE: "node", OVERVIEW_TYPE: "overview"}
-
-
-class RabbitMQException(Exception):
-    pass
+from .const import (
+    ALERT_THRESHOLD,
+    ATTRIBUTES,
+    CONNECTION_TYPE,
+    EVENT_TYPE,
+    EXCHANGE_TYPE,
+    MAX_DETAILED_EXCHANGES,
+    MAX_DETAILED_NODES,
+    MAX_DETAILED_QUEUES,
+    METRIC_SUFFIX,
+    NODE_TYPE,
+    OVERVIEW_TYPE,
+    QUEUE_TYPE,
+    SOURCE_TYPE_NAME,
+    TAG_PREFIX,
+    TAGS_MAP,
+    RabbitMQException,
+)
 
 
 class RabbitMQ(AgentCheck):
@@ -174,12 +72,6 @@ class RabbitMQ(AgentCheck):
             base_url = 'http://' + base_url
             parsed_url = urlparse(base_url)
 
-        suppress_warning = False
-        if not self.http.options['verify'] and parsed_url.scheme == 'https':
-            # Only allow suppressing the warning if not ssl_verify
-            suppress_warning = self.http.ignore_tls_warning
-            self.log.warning('Skipping TLS cert validation for %s based on configuration.', base_url)
-
         # Limit of queues/nodes to collect metrics from
         max_detailed = {
             EXCHANGE_TYPE: int(instance.get('max_detailed_exchanges', MAX_DETAILED_EXCHANGES)),
@@ -202,17 +94,12 @@ class RabbitMQ(AgentCheck):
                 if type(filter_objects) != list:
                     raise TypeError("{0} / {0}_regexes parameter must be a list".format(object_type))
 
-        return base_url, max_detailed, specified, custom_tags, suppress_warning, collect_nodes
+        return base_url, max_detailed, specified, custom_tags, collect_nodes
 
-    def _collect_metadata(self, base_url):
-        # Rabbit versions follow semantic versioning https://www.rabbitmq.com/changelog.html
-        # overview endpoint returns a json with rabbit version in rabbitmq_version field.
-        overview_url = urljoin(base_url, 'overview')
-        overview_response = self._get_data(overview_url)
-
-        # the response is has unicode in it so converting to a string below
-        version = str(overview_response['rabbitmq_version'])
+    def _collect_metadata(self, overview_response):
+        version = to_native_string(overview_response['rabbitmq_version'])
         if version:
+            # Rabbit versions follow semantic versioning https://www.rabbitmq.com/changelog.html
             self.set_metadata('version', version)
             self.log.debug("found rabbitmq version %s", version)
         else:
@@ -230,59 +117,51 @@ class RabbitMQ(AgentCheck):
         return vhosts
 
     def check(self, instance):
-        base_url, max_detailed, specified, custom_tags, suppress_warning, collect_node_metrics = self._get_config(
-            instance
-        )
+        base_url, max_detailed, specified, custom_tags, collect_node_metrics = self._get_config(instance)
         try:
-            with warnings.catch_warnings():
-                vhosts = self._get_vhosts(instance, base_url)
-                self.cached_vhosts[base_url] = vhosts
-                # this collects and sets versioning metadata
-                self._collect_metadata(base_url)
-                limit_vhosts = []
-                if self._limit_vhosts(instance):
-                    limit_vhosts = vhosts
+            vhosts = self._get_vhosts(instance, base_url)
+            self.cached_vhosts[base_url] = vhosts
+            limit_vhosts = []
+            if self._limit_vhosts(instance):
+                limit_vhosts = vhosts
 
-                # Suppress warnings from urllib3 only if ssl_verify is set to False and ssl_warning is set to False
-                if suppress_warning:
-                    warnings.simplefilter('ignore', InsecureRequestWarning)
+            self.get_overview_stats(base_url, custom_tags)
 
-                # Generate metrics from the status API.
+            # Generate metrics from the status API.
+            self.get_stats(
+                instance,
+                base_url,
+                EXCHANGE_TYPE,
+                max_detailed[EXCHANGE_TYPE],
+                specified[EXCHANGE_TYPE],
+                limit_vhosts,
+                custom_tags,
+            )
+            self.get_stats(
+                instance,
+                base_url,
+                QUEUE_TYPE,
+                max_detailed[QUEUE_TYPE],
+                specified[QUEUE_TYPE],
+                limit_vhosts,
+                custom_tags,
+            )
+            if collect_node_metrics:
                 self.get_stats(
                     instance,
                     base_url,
-                    EXCHANGE_TYPE,
-                    max_detailed[EXCHANGE_TYPE],
-                    specified[EXCHANGE_TYPE],
+                    NODE_TYPE,
+                    max_detailed[NODE_TYPE],
+                    specified[NODE_TYPE],
                     limit_vhosts,
                     custom_tags,
                 )
-                self.get_stats(
-                    instance,
-                    base_url,
-                    QUEUE_TYPE,
-                    max_detailed[QUEUE_TYPE],
-                    specified[QUEUE_TYPE],
-                    limit_vhosts,
-                    custom_tags,
-                )
-                if collect_node_metrics:
-                    self.get_stats(
-                        instance,
-                        base_url,
-                        NODE_TYPE,
-                        max_detailed[NODE_TYPE],
-                        specified[NODE_TYPE],
-                        limit_vhosts,
-                        custom_tags,
-                    )
-                self.get_overview_stats(base_url, custom_tags)
 
-                self.get_connections_stat(instance, base_url, CONNECTION_TYPE, vhosts, limit_vhosts, custom_tags)
+            self.get_connections_stat(instance, base_url, CONNECTION_TYPE, vhosts, limit_vhosts, custom_tags)
 
-                # Generate a service check from the aliveness API. In the case of an invalid response
-                # code or unparseable JSON this check will send no data.
-                self._check_aliveness(base_url, vhosts, custom_tags)
+            # Generate a service check from the aliveness API. In the case of an invalid response
+            # code or unparsable JSON this check will send no data.
+            self._check_aliveness(base_url, vhosts, custom_tags)
 
             # Generate a service check for the service status.
             self.service_check('rabbitmq.status', AgentCheck.OK, custom_tags)
@@ -549,6 +428,7 @@ class RabbitMQ(AgentCheck):
 
     def get_overview_stats(self, base_url, custom_tags):
         data = self._get_data(urljoin(base_url, "overview"))
+        self._collect_metadata(data)
         self._get_metrics(data, OVERVIEW_TYPE, custom_tags)
 
     def _get_metrics(self, data, object_type, custom_tags):
@@ -686,11 +566,11 @@ class RabbitMQ(AgentCheck):
             except Exception as e:
                 self.log.debug("Couldn't get aliveness status from vhost, %s: %s", vhost, e)
 
-            message = u"Response from aliveness API: {}".format(aliveness_response)
-
             if aliveness_response.get('status') == 'ok':
                 status = AgentCheck.OK
+                message = None
             else:
                 status = AgentCheck.CRITICAL
+                message = u"Response from aliveness API: {}".format(aliveness_response)
 
             self.service_check('rabbitmq.aliveness', status, tags, message=message)

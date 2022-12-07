@@ -1,40 +1,54 @@
 {
-  "display_name": "flink",
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "name": "flink",
-  "metric_prefix": "flink.",
-  "metric_to_check": "flink.taskmanager.Status.JVM.CPU.load",
-  "creates_events": false,
-  "short_description": "Track metrics for your flink jobs.",
-  "guid": "8b3e5591-533e-4504-aabb-e697f07461ca",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "public_title": "Datadog-Flink Integration",
-  "categories": [
-    "processing",
-    "log collection"
-  ],
-  "type": "check",
-  "is_public": true,
-  "integration_id": "flink",
+  "manifest_version": "2.0.0",
+  "app_uuid": "39d70c50-017c-407a-9117-2055d8e03427",
+  "app_id": "flink",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Track metrics for your flink jobs.",
+    "title": "Flink",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Processing",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
+    "integration": {
+      "source_type_name": "flink",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "flink.",
+        "check": "flink.taskmanager.Status.JVM.CPU.Load",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
     "dashboards": {
       "Flink Overview": "assets/dashboards/overview.json"
     },
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
-    },
-    "saved_views": {},
-    "monitors": {},
-    "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "flink"
-    },
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

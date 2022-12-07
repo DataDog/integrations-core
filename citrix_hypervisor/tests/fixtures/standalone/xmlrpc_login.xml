@@ -1,0 +1,23 @@
+<?xml version='1.0'?>
+<methodResponse>
+  <params>
+    <param>
+      <value>
+        <struct>
+          <member>
+            <name>Status</name>
+            <value>
+              <string>Success</string>
+            </value>
+          </member>
+          <member>
+            <name>Value</name>
+            <value>
+              <string>OpaqueRef:f5b60534-d03b-49dc-bb2b-bff7878165c3</string>
+            </value>
+          </member>
+        </struct>
+      </value>
+    </param>
+  </params>
+</methodResponse>

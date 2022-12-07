@@ -1,0 +1,10 @@
+[build-system]
+requires = ['hatchling']
+build-backend = 'hatchling.build'
+
+[project]
+name = 'snowflake-connector-patch'
+version = '0.0.1'
+
+[tool.hatch.build.targets.wheel]
+only-include = ['_snowflake_connector_patch', '_snowflake_connector_patch.pth']

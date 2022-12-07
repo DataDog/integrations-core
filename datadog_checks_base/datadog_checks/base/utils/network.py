@@ -10,7 +10,6 @@ if PY2:
     def closing(sock):
         return _closing(sock)
 
-
 else:
 
     def closing(sock):

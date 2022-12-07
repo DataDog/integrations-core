@@ -16,7 +16,7 @@ metrics:
   # <List of metrics to collect...>
 
 # metric_tags:
-#   <Optional list of tags to apply to collected metrics>
+#   <List of tags to apply to collected metrics. Required for table metrics, optional otherwise>
 ```
 
 ## Fields
@@ -153,7 +153,7 @@ exampleColumn2 OBJECT-TYPE
 -- ...
 ```
 
-In profiles, tables can be specified as entries containing the `MIB`, `table` and `symbols` fields:
+In profiles, tables can be specified as entries containing the `MIB`, `table` and `symbols` fields. The syntax for the value contained in each row is typically `<TABLE_OID>.1.<COLUMN_ID>.<INDEX>`:
 
 ```yaml
 metrics:
@@ -166,7 +166,7 @@ metrics:
     symbols:
       # List of symbols ('columns') to retrieve.
       # Same format as for a single OID.
-      # Each row in the table will emit these metrics.
+      # The value from each row (index) in the table will be collected `<TABLE_OID>.1.<COLUMN_ID>.<INDEX>`
       - OID: 1.3.6.1.4.1.10.1.1
         name: exampleColumn1
       - OID: 1.3.6.1.4.1.10.1.2
@@ -187,6 +187,7 @@ metrics:
 
 #### Table metrics tagging
 
+Table metrics require `metric_tags` to identify each row's metric. 
 It is possible to add tags to metrics retrieved from a table in three ways:
 
 ##### Using a column within the same table
@@ -277,36 +278,50 @@ External table indexes must be a subset of the indexes of the current table, or 
 
 ##### Using an index
 
-Important: "_index_" refers to one digit of the index part of the row OID. Example, if the column OID is `1.2.3.1.2` and the row OID is `1.2.3.1.2.7.8.9`, the full index is `7.8.9`. In this example, when using `index: 1`, we will refer to `7`, `index: 2` will refer to `8`, and so on.
+Important: "_index_" refers to one digit of the index part of the row OID. For example, if the column OID is `1.2.3.1.2` and the row OID is `1.2.3.1.2.7.8.9`, the full index is `7.8.9`. In this example, `index: 1` refers to `7` and `index: 2` refers to `8`, and so on.  
+
+Here is specific example of an OID with multiple positions in the index ([OID ref](http://oidref.com/1.3.6.1.4.1.9.9.147.1.2.2.2.1)):
+
+```
+cfwConnectionStatEntry OBJECT-TYPE
+    SYNTAX CfwConnectionStatEntry
+    ACCESS not-accessible
+    STATUS mandatory
+    DESCRIPTION
+        "An entry in the table, containing information about a
+        firewall statistic."
+    INDEX { cfwConnectionStatService, cfwConnectionStatType }
+    ::= { cfwConnectionStatTable 1 }
+```
+
+The index in the case is a combination of `cfwConnectionStatService` and `cfwConnectionStatType`. Inspecting the `OBJECT-TYPE` of `cfwConnectionStatService` reveals the `SYNTAX` as `Services` ([OID ref](http://oidref.com/1.3.6.1.4.1.9.9.147.1.2.2.2.1.1)):
+
+```
+cfwConnectionStatService OBJECT-TYPE
+        SYNTAX     Services
+        MAX-ACCESS not-accessible
+        STATUS     current
+        DESCRIPTION
+            "The identification of the type of connection providing
+            statistics."
+    ::= { cfwConnectionStatEntry 1 }
+```
+For example, when we fetch the value of `cfwConnectionStatValue`, the OID with the index is like `1.3.6.1.4.1.9.9.147.1.2.2.2.1.5.20.2` = `4087850099`, here the indexes are 20.2 (`1.3.6.1.4.1.9.9.147.1.2.2.2.1.5.<service type>.<stat type>`).  Here is how we would specify this configuration in the yaml (as seen in the [corresponding profile](https://github.com/DataDog/integrations-core/blob/3a7b1d1877b7a0dfcd16e2ff856e636c8717ef5b/snmp/datadog_checks/snmp/data/profiles/_cisco-asa.yaml#L7-L18) packaged with the agent): 
 
 ```yaml
 metrics:
-  - MIB: CISCO-PROCESS-MIB
+  - MIB: CISCO-FIREWALL-MIB
     table:
-      OID: 1.3.6.1.4.1.9.9.109.1.1.1
-      name: cpmCPUTotalTable
+      OID: 1.3.6.1.4.1.9.9.147.1.2.2.2
+      name: cfwConnectionStatTable
     symbols:
-      - OID: 1.3.6.1.4.1.9.9.109.1.1.1.1.12
-        name: cpmCPUMemoryUsed
+      - OID: 1.3.6.1.4.1.9.9.147.1.2.2.2.1.5
+        name: cfwConnectionStatValue
     metric_tags:
-      # This tagging method is more complex, so let's walk through an example...
-      #
-      # In CISCO-PROCESS-MIB, we can see that entries in the `cpmCPUTotalTable` are indexed by `cpmCPUTotalIndex`,
-      # which corresponds to some sort of CPU position for each row in the table:
-      #
-      #   cpmCPUTotalEntry OBJECT-TYPE
-      #      -- ...
-      #      INDEX    { cpmCPUTotalIndex }  # <-- See?
-      #
-      # We want to tag metrics in this table by this CPU position.
-      #
-      # To do this, we look up the position of this OID in `INDEX`. Here we see it's in 1st position.
-      # So we can reference it here using `index: 1`.
-      # (If there were two OIDs in `INDEX`, and we wanted to use the one in 2nd position, then we would have used `index: 2`.)
-      #
-      # NOTE: currently only indexes that refer to a column in the same table are supported.
-      - tag: cpu
-        index: 1
+      - index: 1 // capture first index digit
+        tag: service_type
+      - index: 2 // capture second index digit
+        tag: stat_type
 ```
 
 ##### Mapping index to tag string value
@@ -512,6 +527,27 @@ metrics:
 
 In the examples above, the OID value is a snmp OctetString value `22C` and we want `22` to be submitted as value for `snmp.temperature`.
 
+##### `extract_value` can be used to trim surrounding non-printable characters
+
+If the raw SNMP OctetString value contains leading or trailing non-printable characters, you can use `extract_value` regex like `([a-zA-Z0-9_]+)` to ignore them.
+
+```yaml
+metrics:
+  - MIB: IF-MIB
+    table:
+      OID: 1.3.6.1.2.1.2.2
+      name: ifTable
+    symbols:
+      - OID: 1.3.6.1.2.1.2.2.1.14
+        name: ifInErrors
+    metric_tags:
+      - tag: interface
+        column:
+          OID: 1.3.6.1.2.1.2.2.1.2
+          name: ifDescr
+          extract_value: '([a-zA-Z0-9_]+)' # will ignore surrounding non-printable characters
+```
+
 ### `metric_tags`
 
 _(Optional)_
@@ -533,3 +569,84 @@ metric_tags:
         device_type: \1
         host: \2
 ```
+
+### `metadata`
+
+_(Optional)_
+
+This `metadata` section is used to declare where and how metadata should be collected.
+
+General structure:
+
+```yaml
+metadata:
+  <RESOURCCE>:  # example: device, interface
+    fields:
+      <FIELD_NAME>: # example: vendor, model, serial_number, etc
+        value: "dell"
+```
+
+Supported resources and fields can be found here: [payload.go](https://github.com/DataDog/datadog-agent/blob/main/pkg/collector/corechecks/snmp/internal/metadata/payload.go)
+
+#### Value from a static value
+
+```yaml
+metadata:
+  device:
+    fields:
+      vendor:
+        value: "dell"
+```
+
+#### Value from an OID (symbol) value
+
+```yaml
+metadata:
+  device:
+    fields:
+      vendor:
+        value: "dell"
+      serial_number:
+        symbol:
+          OID: 1.3.6.1.4.1.12124.2.51.1.3.1
+          name: chassisSerialNumber
+```
+
+#### Value from an OID (symbol) value with regex match
+
+```yaml
+metadata:
+  device:
+    fields:
+      vendor:
+        value: "dell"
+      version:
+        symbol:
+          OID: 1.3.6.1.2.1.1.1.0
+          name: sysDescr
+          match_pattern: 'Isilon OneFS v(\S+)'
+          match_value: '$1'
+          # Will match `8.2.0.0` in `device-name-3 263829375 Isilon OneFS v8.2.0.0`
+```
+
+Regex groups captured in `match_pattern` can be used in `match_value`. `$1` is the first captured group, `$2` is the second captured group, and so on.
+
+#### Value from multiple OIDs (symbols)
+
+When the value might be from multiple symbols, we try to get the value from first symbol, if the value can't be fetched (e.g. OID not available from the device), we try to get the value from the second symbol, and so on.
+
+```yaml
+metadata:
+  device:
+    fields:
+      vendor:
+        value: "dell"
+      model:
+        symbols:
+          - OID: 1.3.6.100.0
+            name: someSymbolName
+          - OID: 1.3.6.101.0
+            name: someSymbolName
+```
+
+All OID values are fetched, even if they might not be used in the end. In the example above, both `1.3.6.100.0` and `1.3.6.101.0` are retrieved.

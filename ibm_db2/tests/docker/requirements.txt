@@ -1,0 +1,2 @@
+ibm_db==3.0.1; python_version < "3.0" 
+ibm_db==3.1.2; python_version > "3.0"

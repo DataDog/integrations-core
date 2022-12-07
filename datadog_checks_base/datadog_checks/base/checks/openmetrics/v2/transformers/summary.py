@@ -15,7 +15,7 @@ def get_summary(check, metric_name, modifiers, global_options):
     quantile_metric = f'{metric_name}.quantile'
 
     def summary(metric, sample_data, runtime_data):
-        has_successfully_executed = runtime_data['has_successfully_executed']
+        flush_first_value = runtime_data['flush_first_value']
 
         for sample, tags, hostname in sample_data:
             sample_name = sample.name
@@ -25,7 +25,7 @@ def get_summary(check, metric_name, modifiers, global_options):
                     sample.value,
                     tags=tags,
                     hostname=hostname,
-                    flush_first_value=has_successfully_executed,
+                    flush_first_value=flush_first_value,
                 )
             elif sample_name.endswith('_count'):
                 monotonic_count_method(
@@ -33,7 +33,7 @@ def get_summary(check, metric_name, modifiers, global_options):
                     sample.value,
                     tags=tags,
                     hostname=hostname,
-                    flush_first_value=has_successfully_executed,
+                    flush_first_value=flush_first_value,
                 )
             elif sample_name == metric.name:
                 gauge_method(quantile_metric, sample.value, tags=tags, hostname=hostname)

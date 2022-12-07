@@ -44,6 +44,7 @@ init_config:
     # service: <SERVICE>
 
 ## Every instance is scheduled independent of the others.
+## Everything under this section is sent as events.
 #
 instances:
 
@@ -98,6 +99,10 @@ instances:
     ##   - type > https://docs.microsoft.com/en-us/windows/win32/eventlog/event-types
     ##   - id > https://docs.microsoft.com/en-us/windows/win32/eventlog/event-identifiers
     ##
+    ##   /\ WARNING /\
+    ##   Due to a limitation in the Windows events API, the maximum filtering on event IDs is 20 IDs per instance.
+    ##   Because of this, you may need to split the ID filtering into multiple instances.
+    ##   
     ## For advanced and more granular filtering, define a `query`.
     ##
     ## If `filters` nor `query` is specified, then all events from the subscribed `path` will be collected.
@@ -244,7 +249,7 @@ instances:
     ##
     ## Note: This is only used when `legacy_mode` is set to `true`.
     #
-    # host: <REMOTE_HOSNAME>
+    # host: <REMOTE_HOSTNAME>
 
     ## @param log_file - list of strings - optional
     ## The `log_file` filter instructs the check to only capture events
@@ -263,7 +268,7 @@ instances:
     #
     # source_name: []
 
-    ## @param type - list of strings - optional - default: information
+    ## @param type - list of strings - optional - default: ['information']
     ## The `type` filter instructs the check to only capture events
     ## that have one of the specified Types.
     ## Standard values are: Critical, Error, Warning, Information, Audit Success, Audit Failure.
@@ -296,7 +301,7 @@ instances:
     #
     # message_filters: []
 
-    ## @param event_format - list of strings - optional - default: Message
+    ## @param event_format - list of strings - optional - default: ['Message']
     ## The `event_format` parameter instructs the check to generate
     ## Datadog's event bodies with the specified list of event properties.
     ## If unspecified, the EventLog's `Message` or `InsertionStrings` are used by default.
@@ -336,14 +341,25 @@ instances:
     #
     # empty_default_hostname: false
 
+    ## @param metric_patterns - mapping - optional
+    ## A mapping of metrics to include or exclude, with each entry being a regular expression.
+    ##
+    ## Metrics defined in `exclude` will take precedence in case of overlap.
+    #
+    # metric_patterns:
+    #   include:
+    #   - <INCLUDE_REGEX>
+    #   exclude:
+    #   - <EXCLUDE_REGEX>
+
 ## Log Section
 ##
-## type - required - Type of log input source (tcp / udp / file / windows_event)
+## type - required - Type of log input source (tcp / udp / file / windows_event).
 ## port / path / channel_path - required - Set port if type is tcp or udp.
 ##                                         Set path if type is file.
 ##                                         Set channel_path if type is windows_event.
-## source  - required - Attribute that defines which Integration sent the logs.
-## encoding - optional - For file specifies the file encoding, default is utf-8, other
+## source  - required - Attribute that defines which integration sent the logs.
+## encoding - optional - For file specifies the file encoding. Default is utf-8. Other
 ##                       possible values are utf-16-le and utf-16-be.
 ## service - optional - The name of the service that generates the log.
 ##                      Overrides any `service` defined in the `init_config` section.
@@ -354,7 +370,7 @@ instances:
 # logs:
 #   - type: windows_event
 #     channel_path: <CHANNEL_1>
-#     source: <CHANNEL_1>
+#     source: windows.events
 #   - type: windows_event
 #     channel_path: <CHANNEL_2>
-#     source: <CHANNEL_2>
+#     source: windows.events

@@ -15,6 +15,15 @@ def mock_blkid_output():
         return f.read(), '', ''
 
 
+def mock_lsblk_output():
+    """
+    Load fixtures from tests/fixtures/ folder and return a tuple matching the
+    return value of `get_subprocess_output`
+    """
+    with open(os.path.join(HERE, 'fixtures', 'lsblk'), 'r') as f:
+        return f.read(), '', ''
+
+
 def mock_blkid_cache_file():
     return os.path.join(HERE, 'fixtures', 'blkid_cache_file')
 

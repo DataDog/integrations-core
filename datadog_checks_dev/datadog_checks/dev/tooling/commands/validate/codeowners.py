@@ -5,18 +5,20 @@ import re
 
 import click
 
-from ...utils import get_codeowners, get_valid_integrations
-from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_success
+from ...utils import get_codeowners, get_codeowners_file, get_valid_integrations
+from ..console import CONTEXT_SETTINGS, abort, annotate_error, echo_failure, echo_success
 
 DIRECTORY_REGEX = re.compile(r"\/(.*)\/$")
 
 # Integrations that are known to be tiles and have email-based codeowners
 IGNORE_TILES = {
+    '1e',
     'auth0',
     'bluematador',
     'bonsai',
     'buddy',
     'concourse_ci',
+    'f5-distributed-cloud',
     'launchdarkly',
     'lacework',
     'gremlin',
@@ -57,19 +59,25 @@ def codeowners():
 
     has_failed = False
     codeowner_map = create_codeowners_map()
-
+    codeowners_file = get_codeowners_file()
     for integration, codeowner in codeowner_map.items():
         if not codeowner:
             has_failed = True
-            echo_failure(f"Integration {integration} does not have a valid `CODEOWNERS` entry.")
+            message = f"Integration {integration} does not have a valid `CODEOWNERS` entry."
+            echo_failure(message)
+            annotate_error(codeowners_file, message)
         elif codeowner == "empty":
             has_failed = True
-            echo_failure(f"Integration {integration} has a `CODEOWNERS` entry, but the codeowner is empty.")
+            message = f"Integration {integration} has a `CODEOWNERS` entry, but the codeowner is empty."
+            echo_failure(message)
+            annotate_error(codeowners_file, message)
         elif not codeowner.startswith("@") and integration not in IGNORE_TILES:
             has_failed = True
-            echo_failure(
+            message = (
                 f"Integration {integration} has a `CODEOWNERS` entry, but the codeowner is not a username or team."
             )
+            echo_failure(message)
+            annotate_error(codeowners_file, message)
 
     if not has_failed:
         echo_success("All integrations have valid codeowners.")

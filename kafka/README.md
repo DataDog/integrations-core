@@ -9,13 +9,12 @@ Connect Kafka to Datadog to:
 - Visualize the performance of your cluster in real time.
 - Correlate the performance of Kafka with the rest of your applications.
 
-This check has a limit of 350 metrics per instance. The number of returned metrics is indicated on the info page. Specify the metrics you are interested in by editing the configuration below. To learn how to customize the metrics to collect visit the [JMX Checks documentation][2] for more detailed instructions.
+This check has a limit of 350 metrics per instance. The number of returned metrics is indicated on the info page. Specify the metrics you are interested in by editing the configuration below. To learn how to customize the metrics to collect see the [JMX Checks documentation][2] for more detailed instructions.
 
 To collect Kafka consumer metrics, see the [kafka_consumer check][3].
 
-*Note*: This integration attached sample configuration works only for Kafka >= 0.8.2.
-If you are running a version older than that, you can refer to agent 5.2.x released
-sample files, https://raw.githubusercontent.com/DataDog/dd-agent/5.2.1/conf.d/kafka.yaml.example
+**Note**: This integration attached sample configuration works only for Kafka >= 0.8.2.
+If you are running a version older than that, see the [Agent v5.2.x released sample files][22].
 
 ## Setup
 
@@ -23,9 +22,9 @@ sample files, https://raw.githubusercontent.com/DataDog/dd-agent/5.2.1/conf.d/ka
 
 The Agent's Kafka check is included in the [Datadog Agent][4] package, so you don't need to install anything else on your Kafka nodes.
 
-The check collects metrics via JMX, so you need a JVM on each kafka node so the Agent can fork [jmxfetch][5]. You can use the same JVM that Kafka uses.
+The check collects metrics from JMX with [JMXFetch][5]. A JVM is needed on each kafka node so the Agent can run JMXFetch. The same JVM that Kafka uses can be used for this.
 
-**Note**: The Kafka check cannot be used with Managed Streaming for Apache Kafka (Amazon MSK). Please use the [Amazon MSK integration][6] instead.
+**Note**: The Kafka check cannot be used with Managed Streaming for Apache Kafka (Amazon MSK). Use the [Amazon MSK integration][6] instead.
 
 ### Configuration
 
@@ -56,7 +55,7 @@ _Available for Agent versions >6.0_
      log4j.appender.R.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n
    ```
 
-2. By default, our integration pipeline supports the following conversion patterns:
+2. By default, the Datadog integration pipeline supports the following conversion patterns:
 
    ```text
      %d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n
@@ -103,7 +102,7 @@ For containerized environments, see the [Autodiscovery with JMX][11] guide.
 
 _Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][12].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][12].
 
 | Parameter      | Value                                              |
 | -------------- | -------------------------------------------------- |
@@ -142,24 +141,23 @@ The Kafka check does not include any events.
 
 ### Service Checks
 
-**kafka.can_connect**:<br>
-Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored Kafka instance, otherwise returns `OK`.
+See [service_checks.json][15] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
-- [Troubleshooting and Deep Dive for Kafka][15]
-- [Agent failed to retrieve RMIServer stub][16]
-- [Producer and Consumer metrics don't appear in my Datadog application][17]
+- [Troubleshooting and Deep Dive for Kafka][16]
+- [Agent failed to retrieve RMIServer stub][17]
 
 ## Further Reading
 
-- [Monitoring Kafka performance metrics][18]
-- [Collecting Kafka performance metrics][19]
-- [Monitoring Kafka with Datadog][20]
+- [Monitoring Kafka performance metrics][19]
+- [Collecting Kafka performance metrics][20]
+- [Monitoring Kafka with Datadog][21]
+- [Kafka Overview on the Knowledge Center][23]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/kafka/images/kafka_dashboard.png
 [2]: https://docs.datadoghq.com/integrations/java/
-[3]: https://docs.datadoghq.com/integrations/kafka/#agent-check-kafka-consumer
+[3]: https://docs.datadoghq.com/integrations/kafka/?tab=host#kafka-consumer-integration
 [4]: https://app.datadoghq.com/account/settings#agent
 [5]: https://github.com/DataDog/jmxfetch
 [6]: https://docs.datadoghq.com/integrations/amazon_msk/#pagetitle
@@ -171,9 +169,11 @@ Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from
 [12]: https://docs.datadoghq.com/agent/kubernetes/log/
 [13]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [14]: https://github.com/DataDog/integrations-core/blob/master/kafka/metadata.csv
-[15]: https://docs.datadoghq.com/integrations/faq/troubleshooting-and-deep-dive-for-kafka/
-[16]: https://docs.datadoghq.com/integrations/faq/agent-failed-to-retrieve-rmierver-stub/
-[17]: https://docs.datadoghq.com/integrations/faq/producer-and-consumer-metrics-don-t-appear-in-my-datadog-application/
-[18]: https://www.datadoghq.com/blog/monitoring-kafka-performance-metrics
-[19]: https://www.datadoghq.com/blog/collecting-kafka-performance-metrics
-[20]: https://www.datadoghq.com/blog/monitor-kafka-with-datadog
+[15]: https://github.com/DataDog/integrations-core/blob/master/kafka/assets/service_checks.json
+[16]: https://docs.datadoghq.com/integrations/faq/troubleshooting-and-deep-dive-for-kafka/
+[17]: https://docs.datadoghq.com/integrations/guide/agent-failed-to-retrieve-rmiserver-stub/
+[19]: https://www.datadoghq.com/blog/monitoring-kafka-performance-metrics
+[20]: https://www.datadoghq.com/blog/collecting-kafka-performance-metrics
+[21]: https://www.datadoghq.com/blog/monitor-kafka-with-datadog
+[22]: https://raw.githubusercontent.com/DataDog/dd-agent/5.2.1/conf.d/kafka.yaml.example
+[23]: https://www.datadoghq.com/knowledge-center/apache-kafka/

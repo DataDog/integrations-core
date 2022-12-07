@@ -5,6 +5,350 @@ from .utils import make_metric_tree
 
 METRIC_PREFIX = 'envoy.'
 
+PROMETHEUS_METRICS_MAP = {
+    'envoy_cluster_assignment_stale': 'cluster.assignment_stale',
+    'envoy_cluster_assignment_timeout_received': 'cluster.assignment_timeout_received',
+    'envoy_cluster_bind_errors': 'cluster.bind_errors',
+    'envoy_cluster_default_total_match_count': 'cluster.default_total_match',
+    'envoy_cluster_ext_authz_ok': 'cluster.ext_authz.ok',
+    'envoy_cluster_ext_authz_error': 'cluster.ext_authz.error',
+    'envoy_cluster_ext_authz_denied': 'cluster.ext_authz.denied',
+    'envoy_cluster_ext_authz_disabled': 'cluster.ext_authz.disabled',
+    'envoy_cluster_ext_authz_failure_mode_allowed': 'cluster.ext_authz.failure_mode_allowed',
+    'envoy_cluster_http2_dropped_headers_with_underscores': 'cluster.http2.dropped_headers_with_underscores',
+    'envoy_cluster_http2_header_overflow': 'cluster.http2.header_overflow',
+    'envoy_cluster_http2_headers_cb_no_stream': 'cluster.http2.headers_cb_no_stream',
+    'envoy_cluster_http2_inbound_empty_frames_flood': 'cluster.http2.inbound_empty_frames_flood',
+    'envoy_cluster_http2_inbound_priority_frames_flood': 'cluster.http2.inbound_priority_frames_flood',
+    'envoy_cluster_http2_inbound_window_update_frames_flood': 'cluster.http2.inbound_window_update_frames_flood',
+    'envoy_cluster_http2_keepalive_timeout': 'cluster.http2.keepalive_timeout',
+    'envoy_cluster_http2_metadata_empty_frames': 'cluster.http2.metadata_empty_frames',
+    'envoy_cluster_http2_outbound_control_flood': 'cluster.http2.outbound_control_flood',
+    'envoy_cluster_http2_outbound_flood': 'cluster.http2.outbound_flood',
+    'envoy_cluster_http2_requests_rejected_with_underscores_in_headers': (
+        'cluster.http2.requests_rejected_with_underscores_in_headers'
+    ),
+    'envoy_cluster_http2_rx_messaging_error': 'cluster.http2.rx_messaging_error',
+    'envoy_cluster_http2_rx_reset': 'cluster.http2.rx_reset',
+    'envoy_cluster_http2_trailers': 'cluster.http2.trailers',
+    'envoy_cluster_http2_tx_flush_timeout': 'cluster.http2.tx_flush_timeout',
+    'envoy_cluster_http2_tx_reset': 'cluster.http2.tx_reset',
+    'envoy_cluster_internal_upstream_rq': 'cluster.internal.upstream_rq',
+    'envoy_cluster_internal_upstream_rq_completed': 'cluster.internal.upstream_rq_completed',
+    'envoy_cluster_internal_upstream_rq_xx': 'cluster.internal.upstream_rq_xx',
+    'envoy_cluster_lb_healthy_panic': 'cluster.lb_healthy_panic',
+    'envoy_cluster_lb_local_cluster_not_ok': 'cluster.lb_local_cluster_not_ok',
+    'envoy_cluster_lb_recalculate_zone_structures': 'cluster.lb_recalculate_zone_structures',
+    'envoy_cluster_lb_subsets_created': 'cluster.lb_subsets_created',
+    'envoy_cluster_lb_subsets_fallback': 'cluster.lb_subsets_fallback',
+    'envoy_cluster_lb_subsets_fallback_panic': 'cluster.lb_subsets_fallback_panic',
+    'envoy_cluster_lb_subsets_removed': 'cluster.lb_subsets_removed',
+    'envoy_cluster_lb_subsets_selected': 'cluster.lb_subsets_selected',
+    'envoy_cluster_lb_zone_cluster_too_small': 'cluster.lb_zone_cluster_too_small',
+    'envoy_cluster_lb_zone_no_capacity_left': 'cluster.lb_zone_no_capacity_left',
+    'envoy_cluster_lb_zone_number_differs': 'cluster.lb_zone_number_differs',
+    'envoy_cluster_lb_zone_routing_all_directly': 'cluster.lb_zone_routing_all_directly',
+    'envoy_cluster_lb_zone_routing_cross_zone': 'cluster.lb_zone_routing_cross_zone',
+    'envoy_cluster_lb_zone_routing_sampled': 'cluster.lb_zone_routing_sampled',
+    'envoy_cluster_membership_change': 'cluster.membership_change',
+    'envoy_cluster_original_dst_host_invalid': 'cluster.original_dst_host_invalid',
+    'envoy_cluster_ratelimit_ok': 'cluster.ratelimit.ok',
+    'envoy_cluster_ratelimit_error': 'cluster.ratelimit.error',
+    'envoy_cluster_ratelimit_over_limit': 'cluster.ratelimit.over_limit',
+    'envoy_cluster_ratelimit_failure_mode_allowed': 'cluster.ratelimit.failure_mode_allowed',
+    'envoy_cluster_retry_or_shadow_abandoned': 'cluster.retry_or_shadow_abandoned',
+    'envoy_cluster_update_attempt': 'cluster.update_attempt',
+    'envoy_cluster_update_empty': 'cluster.update_empty',
+    'envoy_cluster_update_failure': 'cluster.update_failure',
+    'envoy_cluster_update_no_rebuild': 'cluster.update_no_rebuild',
+    'envoy_cluster_update_success': 'cluster.update_success',
+    'envoy_cluster_upstream_cx_close_notify': 'cluster.upstream_cx_close_notify',
+    'envoy_cluster_upstream_cx_connect_attempts_exceeded': 'cluster.upstream_cx_connect_attempts_exceeded',
+    'envoy_cluster_upstream_cx_connect_fail': 'cluster.upstream_cx_connect_fail',
+    'envoy_cluster_upstream_cx_connect_timeout': 'cluster.upstream_cx_connect_timeout',
+    'envoy_cluster_upstream_cx_destroy': 'cluster.upstream_cx_destroy',
+    'envoy_cluster_upstream_cx_destroy_local': 'cluster.upstream_cx_destroy_local',
+    'envoy_cluster_upstream_cx_destroy_local_with_active_rq': 'cluster.upstream_cx_destroy_local_with_active_rq',
+    'envoy_cluster_upstream_cx_destroy_remote': 'cluster.upstream_cx_destroy_remote',
+    'envoy_cluster_upstream_cx_destroy_remote_with_active_rq': 'cluster.upstream_cx_destroy_with_active_rq',
+    'envoy_cluster_upstream_cx_destroy_with_active_rq': 'cluster.upstream_cx_destroy_with_active_rq',
+    'envoy_cluster_upstream_cx_http1_total': 'cluster.upstream_cx_http1_total',
+    'envoy_cluster_upstream_cx_http2_total': 'cluster.upstream_cx_http2_total',
+    'envoy_cluster_upstream_cx_http3_total': 'cluster.upstream_cx_http3_total',
+    'envoy_cluster_upstream_cx_idle_timeout': 'cluster.upstream_cx_idle_timeout',
+    'envoy_cluster_upstream_cx_max_requests': 'cluster.upstream_cx_max_requests',
+    'envoy_cluster_upstream_cx_none_healthy': 'cluster.upstream_cx_none_healthy',
+    'envoy_cluster_upstream_cx_overflow': 'cluster.upstream_cx_overflow',
+    'envoy_cluster_upstream_cx_pool_overflow': 'cluster.upstream_cx_pool_overflow',
+    'envoy_cluster_upstream_cx_protocol_error': 'cluster.upstream_cx_protocol_error',
+    'envoy_cluster_upstream_cx_rx_bytes_total': 'cluster.upstream_cx_rx_bytes_total',
+    'envoy_cluster_upstream_cx_total': 'cluster.upstream_cx',
+    'envoy_cluster_upstream_cx_tx_bytes_total': 'cluster.upstream_cx_tx_bytes_total',
+    'envoy_cluster_upstream_flow_control_backed_up_total': 'cluster.upstream_flow_control_backed_up_total',
+    'envoy_cluster_upstream_flow_control_drained_total': 'cluster.upstream_flow_control_drained_total',
+    'envoy_cluster_upstream_flow_control_paused_reading_total': 'cluster.upstream_flow_control_paused_reading_total',
+    'envoy_cluster_upstream_flow_control_resumed_reading_total': 'cluster.upstream_flow_control_resumed_reading_total',
+    'envoy_cluster_upstream_internal_redirect_failed_total': 'cluster.upstream_internal_redirect_failed_total',
+    'envoy_cluster_upstream_internal_redirect_succeeded_total': 'cluster.upstream_internal_redirect_succeeded_total',
+    'envoy_cluster_upstream_rq': 'cluster.upstream_rq',
+    'envoy_cluster_upstream_rq_cancelled': 'cluster.upstream_rq_cancelled',
+    'envoy_cluster_upstream_rq_completed': 'cluster.upstream_rq_completed',
+    'envoy_cluster_upstream_rq_maintenance_mode': 'cluster.upstream_rq_maintenance_mode',
+    'envoy_cluster_upstream_rq_max_duration_reached': 'cluster.upstream_rq_max_duration_reached',
+    'envoy_cluster_upstream_rq_pending_failure_eject': 'cluster.upstream_rq_pending_failure_eject',
+    'envoy_cluster_upstream_rq_pending_overflow': 'cluster.upstream_rq_pending_overflow',
+    'envoy_cluster_upstream_rq_pending_total': 'cluster.upstream_rq_pending_total',
+    'envoy_cluster_upstream_rq_per_try_timeout': 'cluster.upstream_rq_per_try_timeout',
+    'envoy_cluster_upstream_rq_retry': 'cluster.upstream_rq_retry',
+    'envoy_cluster_upstream_rq_retry_backoff_exponential': 'cluster.upstream_rq_retry_backoff_exponential',
+    'envoy_cluster_upstream_rq_retry_backoff_ratelimited': 'cluster.upstream_rq_retry_backoff_ratelimited',
+    'envoy_cluster_upstream_rq_retry_limit_exceeded': 'cluster.upstream_rq_retry_limit_exceeded',
+    'envoy_cluster_upstream_rq_retry_overflow': 'cluster.upstream_rq_retry_overflow',
+    'envoy_cluster_upstream_rq_retry_success': 'cluster.upstream_rq_retry_success',
+    'envoy_cluster_upstream_rq_rx_reset': 'cluster.upstream_rq_rx_reset',
+    'envoy_cluster_upstream_rq_timeout': 'cluster.upstream_rq_timeout',
+    'envoy_cluster_upstream_rq_total': 'cluster.upstream_rq_total',
+    'envoy_cluster_upstream_rq_tx_reset': 'cluster.upstream_rq_tx_reset',
+    'envoy_cluster_upstream_rq_xx': 'cluster.upstream_rq_xx',
+    'envoy_cluster_manager_cds_control_plane_rate_limit_enforced': (
+        'cluster_manager.cds.control_plane.rate_limit_enforced'
+    ),
+    'envoy_cluster_manager_cds_init_fetch_timeout': 'cluster_manager.cds.init_fetch_timeout',
+    'envoy_cluster_manager_cds_update_attempt': 'cluster_manager.cds.update_attempt',
+    'envoy_cluster_manager_cds_update_failure': 'cluster_manager.cds.update_failure',
+    'envoy_cluster_manager_cds_update_rejected': 'cluster_manager.cds.update_rejected',
+    'envoy_cluster_manager_cds_update_success': 'cluster_manager.cds.update_success',
+    'envoy_cluster_manager_cluster_added': 'cluster_manager.cluster_added',
+    'envoy_cluster_manager_cluster_modified': 'cluster_manager.cluster_modified',
+    'envoy_cluster_manager_cluster_removed': 'cluster_manager.cluster_removed',
+    'envoy_cluster_manager_cluster_updated': 'cluster_manager.cluster_updated',
+    'envoy_cluster_manager_cluster_updated_via_merge': 'cluster_manager.custer_updated_via_merge',
+    'envoy_cluster_manager_update_merge_cancelled': 'cluster_manager.update_merge_cancelled',
+    'envoy_cluster_manager_update_out_of_merge_window': 'cluster_manager.update_out_of_merge_window',
+    'envoy_filesystem_flushed_by_timer': 'filesystem.flushed_by_timer',
+    'envoy_filesystem_reopen_failed': 'filesystem.reopen_failed',
+    'envoy_filesystem_write_buffered': 'filesystem.write_buffered',
+    'envoy_filesystem_write_completed': 'filesystem.write_completed',
+    'envoy_filesystem_write_failed': 'filesystem.write_failed',
+    'envoy_http_downstream_cx_delayed_close_timeout': 'http.downstream_cx_delayed_close_timeout',
+    'envoy_http_downstream_cx_destroy': 'http.downstream_cx_destroy',
+    'envoy_http_downstream_cx_destroy_active_rq': 'http.downstream_cx_destroy_active_rq',
+    'envoy_http_downstream_cx_destroy_local': 'http.downstream_cx_destroy_local',
+    'envoy_http_downstream_cx_destroy_local_active_rq': 'http.downstream_cx_destroy_local_active_rq',
+    'envoy_http_downstream_cx_destroy_remote': 'http.downstream_cx_destroy_remote',
+    'envoy_http_downstream_cx_destroy_remote_active_rq': 'http.downstream_cx_destroy_remote_active_rq',
+    'envoy_http_downstream_cx_drain_close': 'http.downstream_cx_drain_close',
+    'envoy_http_downstream_cx_http1_total': 'http.downstream_cx_http1_total',
+    'envoy_http_downstream_cx_http2_total': 'http.downstream_cx_http2_total',
+    'envoy_http_downstream_cx_http3_total': 'http.downstream_cx_http3_total',
+    'envoy_http_downstream_cx_idle_timeout': 'http.downstream_cx_idle_timeout',
+    'envoy_http_downstream_cx_max_duration_reached': 'http.downstream_cx_max_duration_reached',
+    'envoy_http_downstream_cx_overload_disable_keepalive': 'http.downstream_cx_overload_disable_keepalive',
+    'envoy_http_downstream_cx_protocol_error': 'http.downstream_cx_protocol_error',
+    'envoy_http_downstream_cx_rx_bytes_total': 'http.downstream_cx_rx_bytes_total',
+    'envoy_http_downstream_cx_ssl_total': 'http.downstream_cx_ssl_total',
+    'envoy_http_downstream_cx_total': 'http.downstream_cx_total',
+    'envoy_http_downstream_cx_tx_bytes_total': 'http.downstream_cx_tx_bytes_total',
+    'envoy_http_downstream_cx_upgrades_total': 'http.downstream_cx_upgrades_total',
+    'envoy_http_downstream_flow_control_paused_reading_total': 'http.downstream_flow_control_paused_reading_total',
+    'envoy_http_downstream_flow_control_resumed_reading_total': 'http.downstream_flow_control_resumed_reading_total',
+    'envoy_http_downstream_rq_completed': 'http.downstream_rq_completed',
+    'envoy_http_downstream_rq_failed_path_normalization': 'http.downstream_rq_failed_path_normalization',
+    'envoy_http_downstream_rq_header_timeout': 'http.downstream_rq_header_timeout',
+    'envoy_http_downstream_rq_http1_total': 'http.downstream_rq_http1_total',
+    'envoy_http_downstream_rq_http2_total': 'http.downstream_rq_http2_total',
+    'envoy_http_downstream_rq_http3_total': 'http.downstream_rq_http3_total',
+    'envoy_http_downstream_rq_idle_timeout': 'http.downstream_rq_idle_timeout',
+    'envoy_http_downstream_rq_max_duration_reached': 'http.downstream_rq_max_duration_reached',
+    'envoy_http_downstream_rq_non_relative_path': 'http.downstream_rq_non_relative_path',
+    'envoy_http_downstream_rq_overload_close': 'http.downstream_rq_overload_close',
+    'envoy_http_downstream_rq_redirected_with_normalized_path': 'http.downstream_rq_redirected_with_normalized_path',
+    'envoy_http_downstream_rq_response_before_rq_complete': 'http.downstream_rq_response_before_rq_complete',
+    'envoy_http_downstream_rq_rx_reset': 'http.downstream_rq_rx_reset',
+    'envoy_http_downstream_rq_timeout': 'http.downstream_rq_timeout',
+    'envoy_http_downstream_rq_too_large': 'http.downstream_rq_too_large',
+    'envoy_http_downstream_rq_total': 'http.downstream_rq_total',
+    'envoy_http_downstream_rq_tx_reset': 'http.downstream_rq_tx_reset',
+    'envoy_http_downstream_rq_ws_on_non_ws_route': 'http.downstream_rq_ws_on_non_ws_route',
+    'envoy_http_downstream_rq_xx': 'http.downstream_rq_xx',
+    'envoy_http_no_cluster': 'http.no_cluster',
+    'envoy_http_no_route': 'http.no_route',
+    'envoy_http_passthrough_internal_redirect_bad_location': 'http.passthrough_internal_redirect_bad_location',
+    'envoy_http_passthrough_internal_redirect_no_route': 'http.passthrough_internal_redirect_no_route',
+    'envoy_http_passthrough_internal_redirect_predicate': 'http.passthrough_internal_redirect_predicate',
+    'envoy_http_passthrough_internal_redirect_too_many_redirects': (
+        'http.passthrough_internal_redirect_too_many_redirects'
+    ),
+    'envoy_http_passthrough_internal_redirect_unsafe_scheme': 'http.passthrough_internal_redirect_unsafe_scheme',
+    'envoy_http_rq_direct_response': 'http.rq_direct_response',
+    'envoy_http_rq_redirect': 'http.rq_redirect',
+    'envoy_http_rq_reset_after_downstream_response_started': 'http.rq_reset_after_downstream_response_started',
+    'envoy_http_rq_total': 'http.rq_total',
+    'envoy_http_rs_too_large': 'http.rs_too_large',
+    'envoy_http_tracing_client_enabled': 'http.tracing.client_enabled',
+    'envoy_http_tracing_health_check': 'http.tracing.health_check',
+    'envoy_http_tracing_not_traceable': 'http.tracing.not_traceable',
+    'envoy_http_tracing_random_sampling': 'http.tracing.random_sampling',
+    'envoy_http_tracing_service_forced': 'http.tracing.service_forced',
+    'envoy_http1_dropped_headers_with_underscores': 'cluster.http1.dropped_headers_with_underscores',
+    'envoy_http1_metadata_not_supported_error': 'cluster.http1.metadata_not_supported_error',
+    'envoy_http1_requests_rejected_with_underscores_in_headers': (
+        'cluster.http1.requests_rejected_with_underscores_in_headers'
+    ),
+    'envoy_http1_response_flood': 'cluster.http1.response_flood',
+    'envoy_listener_admin_downstream_cx_destroy': 'listener.admin.downstream_cx_destroy',
+    'envoy_listener_admin_downstream_cx_overflow': 'listener.admin.downstream_cx_overflow',
+    'envoy_listener_admin_downstream_cx_overload_reject': 'listener.admin.downstream_cx_overload_reject',
+    'envoy_listener_admin_downstream_cx_total': 'listener.admin.downstream_cx_total',
+    'envoy_listener_admin_downstream_global_cx_overflow': 'listener.admin.downstream_global_cx_overflow',
+    'envoy_listener_admin_downstream_pre_cx_timeout': 'listener.admin.downstream_pre_cx_timeout',
+    'envoy_listener_admin_http_downstream_rq_completed': 'listener.admin.http.downstream_rq_completed',
+    'envoy_listener_admin_http_downstream_rq_xx': 'listener.admin.http.downstream_rq_xx',
+    'envoy_listener_admin_no_filter_chain_match': 'listener.admin.no_filter_chain_match',
+    'envoy_listener_downstream_cx_destroy': 'listener.downstream_cx_destroy',
+    'envoy_listener_downstream_cx_overflow': 'listener.downstream_cx_overflow',
+    'envoy_listener_downstream_cx_overload_reject': 'listener.downstream_cx_overload_reject',
+    'envoy_listener_downstream_cx_total': 'listener.downstream_cx_total',
+    'envoy_listener_downstream_global_cx_overflow': 'listener.downstream_global_cx_overflow',
+    'envoy_listener_downstream_pre_cx_timeout': 'listener.downstream_pre_cx_timeout',
+    'envoy_listener_http_downstream_rq_completed': 'listener.http.downstream_rq_completed',
+    'envoy_listener_http_downstream_rq_xx': 'listener.http.downstream_rq_xx',
+    'envoy_listener_no_filter_chain_match': 'listener.no_filter_chain_match',
+    'envoy_listener_manager_lds_control_plane_rate_limit_enforced': (
+        'listener_manager.lds.control_plane.rate_limit_enforced'
+    ),
+    'envoy_listener_manager_lds_init_fetch_timeout': 'listener_manager.lds.init_fetch_timeout',
+    'envoy_listener_manager_lds_update_attempt': 'listener_manager.lds.update_attempt',
+    'envoy_listener_manager_lds_update_failure': 'listener_manager.lds.update_failure',
+    'envoy_listener_manager_lds_update_rejected': 'listener_manager.lds.update_rejected',
+    'envoy_listener_manager_lds_update_success': 'listener_manager.lds.update_success',
+    'envoy_listener_manager_listener_added': 'listener_manager.listener_added',
+    'envoy_listener_manager_listener_create_failure': 'listener_manager.listener_create_failure',
+    'envoy_listener_manager_listener_create_success': 'listener_manager.listener_create_success',
+    'envoy_listener_manager_listener_in_place_updated': 'listener_manager.listener_in_place_updated',
+    'envoy_listener_manager_listener_modified': 'listener_manager.listener_modified',
+    'envoy_listener_manager_listener_removed': 'listener_manager.listener_removed',
+    'envoy_listener_manager_listener_stopped': 'listener_manager.listener_stopped',
+    'envoy_runtime_deprecated_feature_use': 'runtime.deprecated_feature_use',
+    'envoy_runtime_load_error': 'runtime.load_error',
+    'envoy_runtime_load_success': 'runtime.load_success',
+    'envoy_runtime_override_dir_exists': 'runtime.override_dir_exists',
+    'envoy_runtime_override_dir_not_exists': 'runtime.override_dir_not_exists',
+    'envoy_server_debug_assertion_failures': 'server.debug_assertion_failures',
+    'envoy_server_dynamic_unknown_fields': 'server.dynamic_unknown_fields',
+    'envoy_server_envoy_bug_failures': 'server.envoy_bug_failure',
+    'envoy_server_static_unknown_fields': 'server.static_unknown_fields',
+    'envoy_vhost_vcluster_upstream_rq_retry': 'vhost.vcluster.upstream_rq_retry',
+    'envoy_vhost_vcluster_upstream_rq_retry_limit_exceeded': 'vhost.vcluster.upstream_rq_retry_limit_exceeded',
+    'envoy_vhost_vcluster_upstream_rq_retry_overflow': 'vhost.vcluster.upstream_rq_retry_overflow',
+    'envoy_vhost_vcluster_upstream_rq_retry_success': 'vhost.vcluster.upstream_rq_retry_success',
+    'envoy_vhost_vcluster_upstream_rq_timeout': 'vhost.vcluster.upstream_rq_timeout',
+    'envoy_vhost_vcluster_upstream_rq_total': 'vhost.vcluster.upstream_rq_total',
+    'envoy_cluster_http2_pending_send_bytes': 'cluster.http2.pending_send_bytes',
+    'envoy_cluster_http2_streams_active': 'cluster.http2.streams_active',
+    'envoy_cluster_lb_subsets_active': 'cluster.lb_subsets_active',
+    'envoy_cluster_max_host_weight': 'cluster.max_host_weight',
+    'envoy_cluster_membership_degraded': 'cluster.membership_degraded',
+    'envoy_cluster_membership_excluded': 'cluster.membership_excluded',
+    'envoy_cluster_membership_healthy': 'cluster.membership_healthy',
+    'envoy_cluster_membership_total': 'cluster.membership_total',
+    'envoy_cluster_version': 'cluster.version',
+    'envoy_cluster_upstream_cx_active': 'cluster.upstream_cx_active',
+    'envoy_cluster_upstream_cx_rx_bytes_buffered': 'cluster.upstream_cx_rx_bytes_buffered',
+    'envoy_cluster_upstream_cx_tx_bytes_buffered': 'cluster.upstream_cx_tx_bytes_total',
+    'envoy_cluster_upstream_rq_active': 'cluster.upstream_rq_active',
+    'envoy_cluster_upstream_rq_pending_active': 'cluster.upstream_rq_pending_active',
+    'envoy_cluster_manager_active_clusters': 'cluster_manager.active_clusters',
+    'envoy_cluster_manager_cds_control_plane_connected_state': 'cluster_manager.cds.control_plane.connected_state',
+    'envoy_cluster_manager_cds_control_plane_pending_requests': 'cluster_manager.cds.control_plane.pending_requests',
+    'envoy_cluster_manager_cds_update_time': 'cluster_manager.cds.update_time',
+    'envoy_cluster_manager_cds_version': 'cluster_manager.cds.version',
+    'envoy_cluster_manager_warming_clusters': 'cluster_manager.warming_clusters',
+    'envoy_filesystem_write_total_buffered': 'filesystem.write_total_buffered',
+    'envoy_http_downstream_cx_active': 'http.downstream_cx_active',
+    'envoy_http_downstream_cx_http1_active': 'http.downstream_cx_http1_active',
+    'envoy_http_downstream_cx_http2_active': 'http.downstream_cx_http2_active',
+    'envoy_http_downstream_cx_http3_active': 'http.downstream_cx_http3_active',
+    'envoy_http_downstream_cx_rx_bytes_buffered': 'http.downstream_cx_rx_bytes_buffered',
+    'envoy_http_downstream_cx_ssl_active': 'http.downstream_cx_ssl_active',
+    'envoy_http_downstream_cx_tx_bytes_buffered': 'http.downstream_cx_tx_bytes_buffered',
+    'envoy_http_downstream_cx_upgrades_active': 'http.downstream_cx_upgrades_active',
+    'envoy_http_downstream_rq_active': 'http.downstream_rq_active',
+    'envoy_listener_admin_downstream_cx_active': 'listener.admin.downstream_cx_active',
+    'envoy_listener_admin_downstream_pre_cx_active': 'listener.admin.downstream_pre_cx_active',
+    'envoy_listener_downstream_cx_active': 'listener.downstream_cx_active',
+    'envoy_listener_downstream_pre_cx_active': 'listener.downstream_pre_cx_active',
+    'envoy_listener_manager_lds_control_plane_connected_state': 'listener_manager.lds.control_plane.connected_state',
+    'envoy_listener_manager_lds_control_plane_pending_requests': 'listener_manager.lds.control_plane.pending_requests',
+    'envoy_listener_manager_lds_update_time': 'listener_manager.lds.update_time',
+    'envoy_listener_manager_lds_version': 'listener_manager.lds.version',
+    'envoy_listener_manager_total_filter_chains_draining': 'listener_manager.total_filter_chains_draining',
+    'envoy_listener_manager_total_listeners_active': 'listener_manager.total_listeners_active',
+    'envoy_listener_manager_total_listeners_draining': 'listener_manager.total_listeners_draining',
+    'envoy_listener_manager_total_listeners_warming': 'listener_manager.total_listeners_warming',
+    'envoy_listener_manager_workers_started': 'listener_manager.workers_started',
+    'envoy_runtime_admin_overrides_active': 'runtime.admin_overrides_active',
+    'envoy_runtime_deprecated_feature_seen_since_process_start': 'runtime.deprecated_feature_seen_since_process_start',
+    'envoy_runtime_num_keys': 'runtime.num_keys',
+    'envoy_runtime_num_layers': 'runtime.num_layers',
+    'envoy_server_compilation_settings_fips_mode': 'server.compilation_settings_fips_mode',
+    'envoy_server_concurrency': 'server.concurrency',
+    'envoy_server_days_until_first_cert_expiring': 'server.days_until_first_cert_expiring',
+    'envoy_server_hot_restart_epoch': 'server.hot_restart_epoch',
+    'envoy_server_hot_restart_generation': 'server.hot_restart_generation',
+    'envoy_server_live': 'server.live',
+    'envoy_server_memory_allocated': 'server.memory_allocated',
+    'envoy_server_memory_heap_size': 'server.memory_heap_size',
+    'envoy_server_memory_physical_size': 'server.memory_physical_size',
+    'envoy_server_parent_connections': 'server.parent_connections',
+    'envoy_server_seconds_until_first_ocsp_response_expiring': 'server.seconds_until_first_ocsp_response_expiring',
+    'envoy_server_state': 'server.state',
+    'envoy_server_stats_recent_lookups': 'server.stats_recent_lookups',
+    'envoy_server_total_connections': 'server.total_connections',
+    'envoy_server_uptime': 'server.uptime',
+    'envoy_server_version': 'server.version',
+    'envoy_wasm_remote_load_cache_entries': 'wasm.remote_load_cache_entries',
+    'envoy_wasm_envoy_wasm_runtime_null_active': 'wasm.envoy_wasm.runtime_null_active',
+    'envoy_wasm_remote_load_fetch_successes': 'wasm.remote_load_fetch_successes',
+    'envoy_wasm_remote_load_fetch_failures': 'wasm.remote_load_fetch_failures',
+    'envoy_wasm_remote_load_cache_negative_hits': 'wasm.remote_load_cache_negative_hits',
+    'envoy_wasm_remote_load_cache_misses': 'wasm.remote_load_cache_misses',
+    'envoy_wasm_remote_load_cache_hits': 'wasm.remote_load_cache_hits',
+    'envoy_wasm_envoy_wasm_runtime_null_created': 'wasm.envoy_wasm.runtime_null_created',
+    'envoy_metric_cache_count': 'metric_cache_count',
+    'envoy_server_dropped_stat_flushes': 'server.dropped_stat_flushes',
+    'envoy_cluster_upstream_rq_200': 'cluster.upstream_rq_200',
+    'envoy_cluster_http2_stream_refused_errors': 'cluster.http2.stream_refused_errors',
+    'envoy_cluster_internal_upstream_rq_200': 'cluster.internal.upstream_rq_200',
+    'envoy_cluster_upstream_cx_connect_ms': 'cluster.upstream_cx_connect_ms',
+    'envoy_cluster_upstream_cx_length_ms': 'cluster.upstream_cx_length_ms',
+    'envoy_cluster_manager_cds_update_duration': 'cluster_manager.cds.update_duration',
+    'envoy_http_downstream_cx_length_ms': 'listener.downstream_cx_length_ms',
+    'envoy_http_downstream_rq_time': 'http.downstream_rq_time',
+    'envoy_listener_admin_downstream_cx_length_ms': 'listener.admin.downstream_cx_length_ms',
+    'envoy_listener_downstream_cx_length_ms': 'listener.downstream_cx_length_ms',
+    'envoy_listener_manager_lds_update_duration': 'listener_manager.lds.update_duration',
+    'envoy_server_initialization_time_ms': 'server.initialization_time_ms',
+    'envoy_workers_watchdog_miss': 'workers.watchdog_miss',
+    'envoy_workers_watchdog_mega_miss': 'workers.watchdog_mega_miss',
+    'envoy_cluster_outlier_detection_ejections_active': 'cluster.outlier_detection.ejections_active',  # noqa: E501
+    'envoy_cluster_outlier_detection_ejections_overflow': 'cluster.outlier_detection.ejections_overflow',  # noqa: E501
+    'envoy_cluster_outlier_detection_ejections_enforced_consecutive_5xx': 'cluster.outlier_detection.ejections_enforced_consecutive_5xx',  # noqa: E501
+    'envoy_cluster_outlier_detection_ejections_detected_consecutive_5xx': 'cluster.outlier_detection.ejections_detected_consecutive_5xx',  # noqa: E501
+    'envoy_cluster_outlier_detection_ejections_enforced_success_rate': 'cluster.outlier_detection.ejections_enforced_success_rate',  # noqa: E501
+    'envoy_cluster_outlier_detection_ejections_detected_success_rate': 'cluster.outlier_detection.ejections_detected_success_rate',  # noqa: E501
+    'envoy_cluster_outlier_detection_ejections_enforced_consecutive_gateway_failure': 'cluster.outlier_detection.ejections_enforced_consecutive_gateway_failure',  # noqa: E501
+    'envoy_cluster_outlier_detection_ejections_detected_consecutive_gateway_failure': 'cluster.outlier_detection.ejections_detected_consecutive_gateway_failure',  # noqa: E501
+    'envoy_cluster_outlier_detection_ejections_enforced_consecutive_local_origin_failure': 'cluster.outlier_detection.ejections_enforced_consecutive_local_origin_failure',  # noqa: E501
+    'envoy_cluster_outlier_detection_ejections_detected_consecutive_local_origin_failure': 'cluster.outlier_detection.ejections_detected_consecutive_local_origin_failure',  # noqa: E501
+    'envoy_cluster_outlier_detection_ejections_enforced_local_origin_success_rate': 'cluster.outlier_detection.ejections_enforced_local_origin_success_rate',  # noqa: E501
+    'envoy_cluster_outlier_detection_ejections_detected_local_origin_success_rate': 'cluster.outlier_detection.ejections_detected_local_origin_success_rate',  # noqa: E501
+    'envoy_cluster_outlier_detection_ejections_enforced_failure_percentage': 'cluster.outlier_detection.ejections_enforced_failure_percentage',  # noqa: E501
+    'envoy_cluster_outlier_detection_ejections_detected_failure_percentage': 'cluster.outlier_detection.ejections_detected_failure_percentage',  # noqa: E501
+    'envoy_cluster_outlier_detection_ejections_enforced_failure_percentage_local_origin': 'cluster.outlier_detection.ejections_enforced_failure_percentage_local_origin',  # noqa: E501
+    'envoy_cluster_outlier_detection_ejections_detected_failure_percentage_local_origin': 'cluster.outlier_detection.ejections_detected_failure_percentage_local_origin',  # noqa: E501
+}
+
 # fmt: off
 METRICS = {
     'stats.overflow': {
@@ -264,6 +608,14 @@ METRICS = {
         ),
         'method': 'monotonic_count',
     },
+    'cluster_manager.cds.update_time': {
+        'tags': (
+            (),
+            (),
+            (),
+        ),
+        'method': 'gauge',
+    },
     'cluster_manager.cds.version': {
         'tags': (
             (),
@@ -337,7 +689,7 @@ METRICS = {
     'vhost.vcluster.upstream_rq_1xx': {
         'tags': (
             ('virtual_host_name', ),
-            ('virtual_cluster_name', ),
+            ('virtual_envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
@@ -345,7 +697,7 @@ METRICS = {
     'vhost.vcluster.upstream_rq_2xx': {
         'tags': (
             ('virtual_host_name', ),
-            ('virtual_cluster_name', ),
+            ('virtual_envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
@@ -353,7 +705,7 @@ METRICS = {
     'vhost.vcluster.upstream_rq_3xx': {
         'tags': (
             ('virtual_host_name', ),
-            ('virtual_cluster_name', ),
+            ('virtual_envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
@@ -361,7 +713,7 @@ METRICS = {
     'vhost.vcluster.upstream_rq_4xx': {
         'tags': (
             ('virtual_host_name', ),
-            ('virtual_cluster_name', ),
+            ('virtual_envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
@@ -369,7 +721,7 @@ METRICS = {
     'vhost.vcluster.upstream_rq_5xx': {
         'tags': (
             ('virtual_host_name', ),
-            ('virtual_cluster_name', ),
+            ('virtual_envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
@@ -377,7 +729,7 @@ METRICS = {
     'vhost.vcluster.upstream_rq_retry': {
         'tags': (
             ('virtual_host_name', ),
-            ('virtual_cluster_name', ),
+            ('virtual_envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
@@ -385,7 +737,7 @@ METRICS = {
     'vhost.vcluster.upstream_rq_retry_limit_exceeded': {
         'tags': (
             ('virtual_host_name', ),
-            ('virtual_cluster_name', ),
+            ('virtual_envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
@@ -393,7 +745,7 @@ METRICS = {
     'vhost.vcluster.upstream_rq_retry_overflow': {
         'tags': (
             ('virtual_host_name', ),
-            ('virtual_cluster_name', ),
+            ('virtual_envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
@@ -401,7 +753,7 @@ METRICS = {
     'vhost.vcluster.upstream_rq_retry_success': {
         'tags': (
             ('virtual_host_name', ),
-            ('virtual_cluster_name', ),
+            ('virtual_envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
@@ -409,7 +761,7 @@ METRICS = {
     'vhost.vcluster.upstream_rq_time': {
         'tags': (
             ('virtual_host_name', ),
-            ('virtual_cluster_name', ),
+            ('virtual_envoy_cluster', ),
             (),
         ),
         'method': 'histogram',
@@ -417,7 +769,7 @@ METRICS = {
     'vhost.vcluster.upstream_rq_timeout': {
         'tags': (
             ('virtual_host_name', ),
-            ('virtual_cluster_name', ),
+            ('virtual_envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
@@ -425,14 +777,54 @@ METRICS = {
     'vhost.vcluster.upstream_rq_total': {
         'tags': (
             ('virtual_host_name', ),
-            ('virtual_cluster_name', ),
+            ('virtual_envoy_cluster', ),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'cluster.ext_authz.ok': {
+        'tags': (
+            ('envoy_cluster', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'cluster.ext_authz.error': {
+        'tags': (
+            ('envoy_cluster', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'cluster.ext_authz.denied': {
+        'tags': (
+            ('envoy_cluster', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'cluster.ext_authz.disabled': {
+        'tags': (
+            ('envoy_cluster', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'cluster.ext_authz.failure_mode_allowed': {
+        'tags': (
+            ('envoy_cluster', ),
+            (),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.ratelimit.ok': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -440,7 +832,7 @@ METRICS = {
     },
     'cluster.ratelimit.error': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -448,7 +840,15 @@ METRICS = {
     },
     'cluster.ratelimit.over_limit': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'cluster.ratelimit.failure_mode_allowed': {
+        'tags': (
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -480,7 +880,7 @@ METRICS = {
     },
     'cluster.grpc.success': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             ('grpc_service', 'grpc_method', ),
             (),
         ),
@@ -488,7 +888,7 @@ METRICS = {
     },
     'cluster.grpc.failure': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             ('grpc_service', 'grpc_method', ),
             (),
         ),
@@ -496,7 +896,7 @@ METRICS = {
     },
     'cluster.grpc.total': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             ('grpc_service', 'grpc_method', ),
             (),
         ),
@@ -602,6 +1002,14 @@ METRICS = {
             (),
         ),
         'method': 'monotonic_count',
+    },
+    'http.rds.update_time': {
+        'tags': (
+            ('stat_prefix', ),
+            ('route_config_name', ),
+            (),
+        ),
+        'method': 'gauge',
     },
     'http.rds.version': {
         'tags': (
@@ -1496,6 +1904,14 @@ METRICS = {
         ),
         'method': 'monotonic_count',
     },
+    'listener_manager.lds.update_time': {
+        'tags': (
+            (),
+            (),
+            (),
+        ),
+        'method': 'gauge',
+    },
     'listener_manager.lds.version': {
         'tags': (
             (),
@@ -1560,6 +1976,13 @@ METRICS = {
         'method': 'monotonic_count',
     },
     'http.downstream_cx_http2_total': {
+        'tags': (
+            ('stat_prefix', ),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'http.downstream_cx_http3_total': {
         'tags': (
             ('stat_prefix', ),
             (),
@@ -1637,6 +2060,13 @@ METRICS = {
         'method': 'gauge',
     },
     'http.downstream_cx_http2_active': {
+        'tags': (
+            ('stat_prefix', ),
+            (),
+        ),
+        'method': 'gauge',
+    },
+    'http.downstream_cx_http3_active': {
         'tags': (
             ('stat_prefix', ),
             (),
@@ -1728,6 +2158,13 @@ METRICS = {
         'method': 'monotonic_count',
     },
     'http.downstream_rq_http2_total': {
+        'tags': (
+            ('stat_prefix', ),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'http.downstream_rq_http3_total': {
         'tags': (
             ('stat_prefix', ),
             (),
@@ -2023,308 +2460,322 @@ METRICS = {
     },
     'cluster.assignment_stale': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.assignment_timeout_received': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_cx_total': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_cx_active': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'gauge',
     },
     'cluster.upstream_cx_http1_total': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_cx_http2_total': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'cluster.upstream_cx_http3_total': {
+        'tags': (
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_cx_connect_fail': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_cx_connect_timeout': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_cx_connect_attempts_exceeded': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_cx_overflow': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_cx_connect_ms': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'histogram',
     },
     'cluster.upstream_cx_length_ms': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'histogram',
     },
     'cluster.upstream_cx_destroy': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_cx_destroy_local': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_cx_destroy_remote': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_cx_destroy_with_active_rq': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_cx_destroy_local_with_active_rq': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_cx_destroy_remote_with_active_rq': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_cx_close_notify': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_cx_rx_bytes_total': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_cx_rx_bytes_buffered': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'gauge',
     },
     'cluster.upstream_cx_tx_bytes_total': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_cx_tx_bytes_buffered': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'gauge',
     },
     'cluster.upstream_cx_protocol_error': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_cx_max_requests': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_cx_none_healthy': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_cx_idle_timeout': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count'
     },
     'cluster.upstream_cx_pool_overflow': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count'
     },
     'cluster.upstream_rq_total': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_rq_active': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'gauge',
     },
     'cluster.upstream_rq_pending_total': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_rq_pending_overflow': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_rq_pending_failure_eject': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_rq_pending_active': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'gauge',
     },
     'cluster.upstream_rq_cancelled': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_rq_maintenance_mode': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'cluster.upstream_rq_max_duration_reached': {
+        'tags': (
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_rq_timeout': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_rq_per_try_timeout': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_rq_rx_reset': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_rq_tx_reset': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_rq_retry': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_rq_retry_success': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_rq_retry_overflow': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.client_ssl_socket_factory.ssl_context_update_by_sds': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2332,7 +2783,7 @@ METRICS = {
     },
     'cluster.client_ssl_socket_factory.upstream_context_secrets_not_ready': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2340,7 +2791,7 @@ METRICS = {
     },
     'cluster.ssl.connection_error': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2348,7 +2799,7 @@ METRICS = {
     },
     'cluster.ssl.handshake': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2356,7 +2807,7 @@ METRICS = {
     },
     'cluster.ssl.session_reused': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2364,7 +2815,7 @@ METRICS = {
     },
     'cluster.ssl.no_certificate': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2372,7 +2823,7 @@ METRICS = {
     },
     'cluster.ssl.fail_no_sni_match': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2380,7 +2831,7 @@ METRICS = {
     },
     'cluster.ssl.fail_verify_no_cert': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2388,7 +2839,7 @@ METRICS = {
     },
     'cluster.ssl.fail_verify_error': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2396,7 +2847,7 @@ METRICS = {
     },
     'cluster.ssl.fail_verify_san': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2404,7 +2855,7 @@ METRICS = {
     },
     'cluster.ssl.fail_verify_cert_hash': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2412,7 +2863,7 @@ METRICS = {
     },
     'cluster.ssl.ciphers': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             ('cipher', ),
         ),
@@ -2420,7 +2871,7 @@ METRICS = {
     },
     'cluster.ssl.curves': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             ('curve', ),
         ),
@@ -2428,7 +2879,7 @@ METRICS = {
     },
     'cluster.ssl.sigalgs': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             ('sigalg', ),
         ),
@@ -2436,7 +2887,7 @@ METRICS = {
     },
     'cluster.ssl.versions': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             ('version', ),
         ),
@@ -2444,161 +2895,161 @@ METRICS = {
     },
     'cluster.upstream_flow_control_paused_reading_total': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_flow_control_resumed_reading_total': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_flow_control_backed_up_total': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_flow_control_drained_total': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_internal_redirect_failed_total': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count'
     },
     'cluster.upstream_internal_redirect_succeeded_total': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count'
     },
     'cluster.membership_change': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.membership_degraded': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'gauge',
     },
     'cluster.membership_excluded': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'gauge',
     },
     'cluster.membership_healthy': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'gauge',
     },
     'cluster.membership_total': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'gauge',
     },
     'cluster.retry_or_shadow_abandoned': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.config_reload': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.update_attempt': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.update_success': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.update_failure': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.update_empty': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.update_no_rebuild': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.version': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'gauge',
     },
     'cluster.max_host_weight': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'gauge',
     },
     'cluster.bind_errors': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.original_dst_host_invalid': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.health_check.attempt': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2606,7 +3057,7 @@ METRICS = {
     },
     'cluster.health_check.success': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2614,7 +3065,7 @@ METRICS = {
     },
     'cluster.health_check.failure': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2622,7 +3073,7 @@ METRICS = {
     },
     'cluster.health_check.passive_failure': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2630,7 +3081,7 @@ METRICS = {
     },
     'cluster.health_check.network_failure': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2638,7 +3089,7 @@ METRICS = {
     },
     'cluster.health_check.verify_cluster': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2646,7 +3097,7 @@ METRICS = {
     },
     'cluster.health_check.healthy': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2654,7 +3105,7 @@ METRICS = {
     },
     'cluster.outlier_detection.ejections_enforced_total': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2662,7 +3113,7 @@ METRICS = {
     },
     'cluster.outlier_detection.ejections_active': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2670,7 +3121,7 @@ METRICS = {
     },
     'cluster.outlier_detection.ejections_overflow': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2678,7 +3129,7 @@ METRICS = {
     },
     'cluster.outlier_detection.ejections_enforced_consecutive_5xx': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2686,7 +3137,7 @@ METRICS = {
     },
     'cluster.outlier_detection.ejections_detected_consecutive_5xx': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2694,7 +3145,7 @@ METRICS = {
     },
     'cluster.outlier_detection.ejections_enforced_success_rate': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2702,7 +3153,7 @@ METRICS = {
     },
     'cluster.outlier_detection.ejections_detected_success_rate': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2710,7 +3161,7 @@ METRICS = {
     },
     'cluster.outlier_detection.ejections_enforced_consecutive_gateway_failure': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2718,7 +3169,7 @@ METRICS = {
     },
     'cluster.outlier_detection.ejections_detected_consecutive_gateway_failure': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2726,7 +3177,7 @@ METRICS = {
     },
     'cluster.outlier_detection.ejections_enforced_consecutive_local_origin_failure': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2734,7 +3185,7 @@ METRICS = {
     },
     'cluster.outlier_detection.ejections_detected_consecutive_local_origin_failure': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2742,7 +3193,7 @@ METRICS = {
     },
     'cluster.outlier_detection.ejections_enforced_local_origin_success_rate': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2750,7 +3201,7 @@ METRICS = {
     },
     'cluster.outlier_detection.ejections_detected_local_origin_success_rate': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2758,7 +3209,7 @@ METRICS = {
     },
     'cluster.outlier_detection.ejections_enforced_failure_percentage': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2766,7 +3217,7 @@ METRICS = {
     },
     'cluster.outlier_detection.ejections_detected_failure_percentage': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2774,7 +3225,7 @@ METRICS = {
     },
     'cluster.outlier_detection.ejections_enforced_failure_percentage_local_origin': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2782,7 +3233,7 @@ METRICS = {
     },
     'cluster.outlier_detection.ejections_detected_failure_percentage_local_origin': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2790,7 +3241,7 @@ METRICS = {
     },
     'cluster.circuit_breakers.cx_open': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             ('priority', ),
             (),
         ),
@@ -2798,7 +3249,7 @@ METRICS = {
     },
     'cluster.circuit_breakers.cx_pool_open': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             ('priority', ),
             (),
         ),
@@ -2806,7 +3257,7 @@ METRICS = {
     },
     'cluster.circuit_breakers.rq_open': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             ('priority', ),
             (),
         ),
@@ -2814,7 +3265,7 @@ METRICS = {
     },
     'cluster.circuit_breakers.rq_pending_open': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             ('priority', ),
             (),
         ),
@@ -2822,7 +3273,7 @@ METRICS = {
     },
     'cluster.circuit_breakers.rq_retry_open': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             ('priority', ),
             (),
         ),
@@ -2830,7 +3281,7 @@ METRICS = {
     },
     'cluster.circuit_breakers.remaining_cx': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             ('priority', ),
             (),
         ),
@@ -2838,7 +3289,7 @@ METRICS = {
     },
     'cluster.circuit_breakers.remaining_pending': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             ('priority', ),
             (),
         ),
@@ -2846,7 +3297,7 @@ METRICS = {
     },
     'cluster.circuit_breakers.remaining_rq': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             ('priority', ),
             (),
         ),
@@ -2854,7 +3305,7 @@ METRICS = {
     },
     'cluster.circuit_breakers.remaining_retries': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             ('priority', ),
             (),
         ),
@@ -2862,56 +3313,56 @@ METRICS = {
     },
     'cluster.upstream_rq_completed': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_rq_1xx': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_rq_2xx': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_rq_3xx': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_rq_4xx': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_rq_5xx': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.upstream_rq_time': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'histogram',
     },
     'cluster.canary.upstream_rq_completed': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2919,7 +3370,7 @@ METRICS = {
     },
     'cluster.canary.upstream_rq_1xx': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2927,7 +3378,7 @@ METRICS = {
     },
     'cluster.canary.upstream_rq_2xx': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2935,7 +3386,7 @@ METRICS = {
     },
     'cluster.canary.upstream_rq_3xx': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2943,7 +3394,7 @@ METRICS = {
     },
     'cluster.canary.upstream_rq_4xx': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2951,7 +3402,7 @@ METRICS = {
     },
     'cluster.canary.upstream_rq_5xx': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2959,7 +3410,7 @@ METRICS = {
     },
     'cluster.canary.upstream_rq_time': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2967,7 +3418,7 @@ METRICS = {
     },
     'cluster.internal.upstream_rq_completed': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2975,7 +3426,7 @@ METRICS = {
     },
     'cluster.internal.upstream_rq_1xx': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2983,7 +3434,7 @@ METRICS = {
     },
     'cluster.internal.upstream_rq_2xx': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2991,7 +3442,7 @@ METRICS = {
     },
     'cluster.internal.upstream_rq_3xx': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -2999,7 +3450,7 @@ METRICS = {
     },
     'cluster.internal.upstream_rq_4xx': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -3007,7 +3458,7 @@ METRICS = {
     },
     'cluster.internal.upstream_rq_5xx': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -3015,7 +3466,7 @@ METRICS = {
     },
     'cluster.internal.upstream_rq_time': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -3023,7 +3474,7 @@ METRICS = {
     },
     'cluster.external.upstream_rq_completed': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -3031,7 +3482,7 @@ METRICS = {
     },
     'cluster.external.upstream_rq_1xx': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -3039,7 +3490,7 @@ METRICS = {
     },
     'cluster.external.upstream_rq_2xx': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -3047,7 +3498,7 @@ METRICS = {
     },
     'cluster.external.upstream_rq_3xx': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -3055,7 +3506,7 @@ METRICS = {
     },
     'cluster.external.upstream_rq_4xx': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -3063,7 +3514,7 @@ METRICS = {
     },
     'cluster.external.upstream_rq_5xx': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -3071,7 +3522,7 @@ METRICS = {
     },
     'cluster.external.upstream_rq_time': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -3079,7 +3530,7 @@ METRICS = {
     },
     'cluster.zone.upstream_rq_1xx': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             ('from_zone', 'to_zone', ),
             (),
         ),
@@ -3087,7 +3538,7 @@ METRICS = {
     },
     'cluster.zone.upstream_rq_2xx': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             ('from_zone', 'to_zone', ),
             (),
         ),
@@ -3095,7 +3546,7 @@ METRICS = {
     },
     'cluster.zone.upstream_rq_3xx': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             ('from_zone', 'to_zone', ),
             (),
         ),
@@ -3103,7 +3554,7 @@ METRICS = {
     },
     'cluster.zone.upstream_rq_4xx': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             ('from_zone', 'to_zone', ),
             (),
         ),
@@ -3111,7 +3562,7 @@ METRICS = {
     },
     'cluster.zone.upstream_rq_5xx': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             ('from_zone', 'to_zone', ),
             (),
         ),
@@ -3119,7 +3570,7 @@ METRICS = {
     },
     'cluster.zone.upstream_rq_time': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             ('from_zone', 'to_zone', ),
             (),
         ),
@@ -3127,112 +3578,112 @@ METRICS = {
     },
     'cluster.lb_recalculate_zone_structures': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.lb_healthy_panic': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.lb_zone_cluster_too_small': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.lb_zone_routing_all_directly': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.lb_zone_routing_sampled': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.lb_zone_routing_cross_zone': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.lb_local_cluster_not_ok': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.lb_zone_number_differs': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.lb_zone_no_capacity_left': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.lb_subsets_active': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'gauge',
     },
     'cluster.lb_subsets_created': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.lb_subsets_removed': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.lb_subsets_selected': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.lb_subsets_fallback': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.lb_subsets_fallback_panic': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
         ),
         'method': 'monotonic_count',
     },
     'cluster.http1.dropped_headers_with_underscores': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -3240,7 +3691,7 @@ METRICS = {
     },
     'cluster.http1.metadata_not_supported_error': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -3248,7 +3699,7 @@ METRICS = {
     },
     'cluster.http1.response_flood': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -3256,7 +3707,7 @@ METRICS = {
     },
     'cluster.http1.requests_rejected_with_underscores_in_headers': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -3264,7 +3715,7 @@ METRICS = {
     },
     'cluster.http2.header_overflow': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -3272,7 +3723,7 @@ METRICS = {
     },
     'cluster.http2.headers_cb_no_stream': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -3280,7 +3731,7 @@ METRICS = {
     },
     'cluster.http2.inbound_empty_frames_flood': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -3288,7 +3739,7 @@ METRICS = {
     },
     'cluster.http2.inbound_priority_frames_flood': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -3296,7 +3747,7 @@ METRICS = {
     },
     'cluster.http2.inbound_window_update_frames_flood': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -3304,7 +3755,7 @@ METRICS = {
     },
     'cluster.http2.outbound_control_flood': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -3312,7 +3763,7 @@ METRICS = {
     },
     'cluster.http2.outbound_flood': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -3320,7 +3771,7 @@ METRICS = {
     },
     'cluster.http2.rx_messaging_error': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -3328,7 +3779,7 @@ METRICS = {
     },
     'cluster.http2.rx_reset': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -3336,7 +3787,7 @@ METRICS = {
     },
     'cluster.http2.too_many_header_frames': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -3344,7 +3795,7 @@ METRICS = {
     },
     'cluster.http2.trailers': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
             (),
         ),
@@ -3352,8 +3803,15 @@ METRICS = {
     },
     'cluster.http2.tx_reset': {
         'tags': (
-            ('cluster_name', ),
+            ('envoy_cluster', ),
             (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'sds.key_rotation_failed': {
+        'tags': (
+            ('envoy_secret', ),
             (),
         ),
         'method': 'monotonic_count',

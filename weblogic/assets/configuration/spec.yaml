@@ -1,0 +1,47 @@
+name: WebLogic
+files:
+- name: weblogic.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/jmx
+  - template: instances
+    options:
+    - template: instances/jmx
+      overrides:
+        host.value.example: localhost
+        port.value.example: 9090
+  - template: logs
+    example:
+    - type: file
+      path: <DOMAIN_DIR>/servers/<ADMIN_SERVER_NAME>/logs/<ADMIN_SERVER_NAME>.log
+      source: weblogic
+      service: admin-server
+      log_processing_rules:
+        - type: multi_line
+          name: new_log_start_with_date
+          pattern: (\####)?<\w{3} (0?[1-9]|[12][0-9]|3[01]), \d{4}
+    - type: file
+      path: <DOMAIN_DIR>/servers/<ADMIN_SERVER_NAME>/logs/<DOMAIN_NAME>.log
+      source: weblogic
+      service: domain
+      log_processing_rules:
+        - type: multi_line
+          name: new_log_start_with_date
+          pattern: (\####)?<\w{3} (0?[1-9]|[12][0-9]|3[01]), \d{4}
+    - type: file
+      path: <DOMAIN_DIR>/servers/<SERVER_NAME>/logs/<SERVER_NAME>.log
+      source: weblogic
+      service: managed-server
+      log_processing_rules:
+        - type: multi_line
+          name: new_log_start_with_date
+          pattern: (\####)?<\w{3} (0?[1-9]|[12][0-9]|3[01]), \d{4}
+    - type: file
+      path: <DOMAIN_DIR>/servers/*/logs/access.log
+      source: weblogic
+      service: http-access
+      log_processing_rules:
+        - type: multi_line
+          name: new_log_start_with_date
+          pattern: .*\[\d{2}\/(\w{3}|\w{4})\/\d{4}:\d{2}:\d{2}:\d{2} (\+|-)\d{4}\]

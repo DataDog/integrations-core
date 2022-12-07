@@ -1,0 +1,58 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "2851c4fa-97d2-4949-9673-b21671b57b0a",
+  "app_id": "arangodb",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Track metrics for your ArangoDB configuration.",
+    "title": "ArangoDB",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Data Store",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
+  "assets": {
+    "integration": {
+      "source_type_name": "ArangoDB",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "arangodb.",
+        "check": "arangodb.process.system_time",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {
+      "ArangoDB Overview": "assets/dashboards/arangodb_overview.json"
+    },
+    "monitors": {
+      "[ArangoDB] High server Kernel mode percentage usage": "assets/recommended_monitors/high_server_kernel_mode.json",
+      "[ArangoDB] High server User mode percentage usage": "assets/recommended_monitors/high_server_user_mode.json"
+    },
+    "logs": {
+      "source": "arangodb"
+    }
+  }
+}

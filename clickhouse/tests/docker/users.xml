@@ -8,12 +8,6 @@
             </networks>
             <profile>default</profile>
             <quota>default</quota>
-            <allow_databases>
-                <database>default</database>
-            </allow_databases>
-            <allow_dictionaries>
-                <dictionary>test</dictionary>
-            </allow_dictionaries>
         </datadog>
     </users>
 </yandex>

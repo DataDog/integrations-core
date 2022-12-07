@@ -1,5 +1,5 @@
 ---
-title: Python environment for Agent integration development
+title: Python for Agent Integration Development
 kind: documentation
 ---
 
@@ -26,29 +26,29 @@ It is recommended to install an [environment manager](#virtual-environment-manag
 
 ### Linux
 
-All mainstream distributions of Linux come with Python pre-installed — likely one of an acceptable version level. It is recommended to install an [environment manager](#virtual-environment-manager) in order to preserve a clean system Python. Refer to your distribution's package management documentation for more information.
+All mainstream distributions of Linux come with Python pre-installed—likely one of an acceptable version level. It is recommended to install an [environment manager](#virtual-environment-manager) in order to preserve a clean system Python. See your distribution's package management documentation for more information.
 
 ### Windows
 
-Windows does not normally have a Python environment present. The [official Python documentation][6] contains detailed installation instructions and links to further documentation and tooling.
+Windows does not normally have a Python environment present. See [Using Python on Windows][6] for detailed installation instructions and links to further documentation and tooling.
 
 ## Virtual environment manager
 
 Each integration has its own set of dependencies that must be added to Python in order to run the tests, or just to try out the collection code. To avoid polluting your Python installation with libraries and packages that would only be used by an Integration, use a "virtual environment". A virtual environment is a self contained directory tree that contains an isolated Python installation. When a virtual environment is active, any package you install goes into that directory without affecting the system wide Python installation.
 
-### Virtualenv and Virtualenvwrapper
+### Virtualenv and virtualenvwrapper
 
 Datadog recommends using [Virtualenv][7] to manage Python virtual environments, and [virtualenvwrapper][8] to make the process smoother. There's a [comprehensive guide][9] in the Hitchhiker's Guide to Python describing how to set up these two tools.
 
 ### Miniconda
 
-If you're using Miniconda, a tool to manage virtual environments is included. Refer to the [official guide][10] for more information.
+If you're using Miniconda, a tool to manage virtual environments is included. See [Managing environments][10] for more information.
 
 [1]: https://github.com/DataDog/omnibus-software/blob/master/config/software/python.rb#L21
 [2]: https://brew.sh/#install
 [3]: https://docs.python-guide.org/en/latest/starting/install/osx/#doing-it-right
 [4]: https://repo.continuum.io/miniconda/Miniconda2-latest-MacOSX-x86_64.sh
-[5]: https://conda.io/docs/user-guide/install/macos.html
+[5]: https://docs.conda.io/projects/continuumio-conda/en/latest/user-guide/install/macos.html
 [6]: https://docs.python.org/2.7/using/windows.html
 [7]: https://pypi.python.org/pypi/virtualenv
 [8]: https://virtualenvwrapper.readthedocs.io/en/latest/index.html

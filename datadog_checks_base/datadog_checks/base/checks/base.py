@@ -12,7 +12,7 @@ import traceback
 import unicodedata
 from collections import deque
 from os.path import basename
-from typing import TYPE_CHECKING, Any, AnyStr, Callable, Deque, Dict, List, Optional, Sequence, Tuple, Union
+from typing import TYPE_CHECKING, Any, AnyStr, Callable, Deque, Dict, List, Optional, Sequence, Set, Tuple, Union
 
 import yaml
 from six import PY2, binary_type, iteritems, raise_from, text_type
@@ -35,7 +35,9 @@ from ..utils.http import RequestsWrapper
 from ..utils.limiter import Limiter
 from ..utils.metadata import MetadataManager
 from ..utils.secrets import SecretsSanitizer
+from ..utils.tagging import GENERIC_TAGS
 from ..utils.tls import TlsContextWrapper
+from ..utils.tracing import traced_class
 
 try:
     import datadog_agent
@@ -65,15 +67,17 @@ if datadog_agent.get_config('disable_unsafe_yaml'):
     monkey_patch_pyyaml()
 
 if not PY2:
-    from pydantic import ValidationError
+    from pydantic import BaseModel, ValidationError
 
 if TYPE_CHECKING:
     import ssl
 
 # Metric types for which it's only useful to submit once per set of tags
 ONE_PER_CONTEXT_METRIC_TYPES = [aggregator.GAUGE, aggregator.RATE, aggregator.MONOTONIC_COUNT]
+TYPO_SIMILARITY_THRESHOLD = 0.95
 
 
+@traced_class
 class AgentCheck(object):
     """
     The base class for any Agent based integration.
@@ -127,10 +131,6 @@ class AgentCheck(object):
     # a mapping type, then each key will be considered a `name` and will be sent with its (str) value.
     METADATA_TRANSFORMERS = None
 
-    # Default fields to whitelist for metadata submission
-    METADATA_DEFAULT_CONFIG_INIT_CONFIG = None
-    METADATA_DEFAULT_CONFIG_INSTANCE = None
-
     FIRST_CAP_RE = re.compile(br'(.)([A-Z][a-z]+)')
     ALL_CAP_RE = re.compile(br'([a-z0-9])([A-Z])')
     METRIC_REPLACEMENT = re.compile(br'([^a-zA-Z0-9_.]+)|(^[^a-zA-Z]+)')
@@ -146,6 +146,15 @@ class AgentCheck(object):
     # be sent to the aggregator, the rest are dropped. The state is reset after each run.
     # See https://github.com/DataDog/integrations-core/pull/2093 for more information.
     DEFAULT_METRIC_LIMIT = 0
+
+    # Allow tracing for classic integrations
+    def __init_subclass__(cls, *args, **kwargs):
+        try:
+            # https://github.com/python/mypy/issues/4660
+            super().__init_subclass__(*args, **kwargs)  # type: ignore
+            return traced_class(cls)
+        except Exception:
+            return cls
 
     def __init__(self, *args, **kwargs):
         # type: (*Any, **Any) -> None
@@ -188,12 +197,27 @@ class AgentCheck(object):
         self.instance = instance  # type: InstanceType
         self.instances = instances  # type: List[InstanceType]
         self.warnings = []  # type: List[str]
+        self.disable_generic_tags = (
+            is_affirmative(self.instance.get('disable_generic_tags', False)) if instance else False
+        )
+        self.debug_metrics = {}
+        if self.init_config is not None:
+            self.debug_metrics.update(self.init_config.get('debug_metrics', {}))
+        if self.instance is not None:
+            self.debug_metrics.update(self.instance.get('debug_metrics', {}))
 
         # `self.hostname` is deprecated, use `datadog_agent.get_hostname()` instead
         self.hostname = datadog_agent.get_hostname()  # type: str
 
         logger = logging.getLogger('{}.{}'.format(__name__, self.name))
         self.log = CheckLoggingAdapter(logger, self)
+
+        metric_patterns = self.instance.get('metric_patterns', {}) if instance else {}
+        if not isinstance(metric_patterns, dict):
+            raise ConfigurationError('Setting `metric_patterns` must be a mapping')
+
+        self.exclude_metrics_pattern = self._create_metrics_pattern(metric_patterns, 'exclude')
+        self.include_metrics_pattern = self._create_metrics_pattern(metric_patterns, 'include')
 
         # TODO: Remove with Agent 5
         # Set proxy settings
@@ -240,6 +264,13 @@ class AgentCheck(object):
                     'The default will become `true` and cannot be changed in Agent version 8.'
                 ),
             ),
+            '_config_renamed': (
+                False,
+                (
+                    'DEPRECATION NOTICE: The `%s` config option has been renamed '
+                    'to `%s` and will be removed in a future release.'
+                ),
+            ),
         }  # type: Dict[str, Tuple[bool, str]]
 
         # Setup metric limits
@@ -250,10 +281,35 @@ class AgentCheck(object):
         self._config_model_shared = None  # type: Any
 
         # Functions that will be called exactly once (if successful) before the first check run
-        self.check_initializations = deque([self.send_config_metadata])  # type: Deque[Callable[[], None]]
+        self.check_initializations = deque()  # type: Deque[Callable[[], None]]
 
         if not PY2:
             self.check_initializations.append(self.load_configuration_models)
+
+    def _create_metrics_pattern(self, metric_patterns, option_name):
+        all_patterns = metric_patterns.get(option_name, [])
+
+        if not isinstance(all_patterns, list):
+            raise ConfigurationError('Setting `{}` of `metric_patterns` must be an array'.format(option_name))
+
+        metrics_patterns = []
+        for i, entry in enumerate(all_patterns, 1):
+            if not isinstance(entry, str):
+                raise ConfigurationError(
+                    'Entry #{} of setting `{}` of `metric_patterns` must be a string'.format(i, option_name)
+                )
+            if not entry:
+                self.log.debug(
+                    'Entry #%s of setting `%s` of `metric_patterns` must not be empty, ignoring', i, option_name
+                )
+                continue
+
+            metrics_patterns.append(entry)
+
+        if metrics_patterns:
+            return re.compile('|'.join(metrics_patterns))
+
+        return None
 
     def _get_metric_limiter(self, name, instance=None):
         # type: (str, InstanceType) -> Optional[Limiter]
@@ -375,25 +431,69 @@ class AgentCheck(object):
         self._log_deprecation('in_developer_mode')
         return False
 
+    def log_typos_in_options(self, user_config, models_config, level):
+        # only import it when running in python 3
+        from jellyfish import jaro_winkler_similarity
+
+        user_configs = user_config or {}  # type: Dict[str, Any]
+        models_config = models_config or {}
+        typos = set()  # type: Set[str]
+
+        known_options = set([k for k, _ in models_config])  # type: Set[str]
+
+        if not PY2:
+
+            if isinstance(models_config, BaseModel):
+                # Also add aliases, if any
+                known_options.update(set(models_config.dict(by_alias=True)))
+
+        unknown_options = [option for option in user_configs.keys() if option not in known_options]  # type: List[str]
+
+        for unknown_option in unknown_options:
+            similar_known_options = []  # type: List[Tuple[str, int]]
+            for known_option in known_options:
+                ratio = jaro_winkler_similarity(unknown_option, known_option)
+                if ratio > TYPO_SIMILARITY_THRESHOLD:
+                    similar_known_options.append((known_option, ratio))
+                    typos.add(unknown_option)
+
+            if len(similar_known_options) > 0:
+                similar_known_options.sort(key=lambda option: option[1], reverse=True)
+                similar_known_options_names = [option[0] for option in similar_known_options]  # type: List[str]
+                message = (
+                    'Detected potential typo in configuration option in {}/{} section: `{}`. Did you mean {}?'
+                ).format(self.name, level, unknown_option, ', or '.join(similar_known_options_names))
+                self.log.warning(message)
+        return typos
+
     def load_configuration_models(self, package_path=None):
         if package_path is None:
             # 'datadog_checks.<PACKAGE>.<MODULE>...'
             module_parts = self.__module__.split('.')
             package_path = '{}.config_models'.format('.'.join(module_parts[:2]))
-
         if self._config_model_shared is None:
             raw_shared_config = self._get_config_model_initialization_data()
-            raw_shared_config.update(self._get_shared_config())
+            intg_shared_config = self._get_shared_config()
+            raw_shared_config.update(intg_shared_config)
 
             shared_config = self.load_configuration_model(package_path, 'SharedConfig', raw_shared_config)
+            try:
+                self.log_typos_in_options(intg_shared_config, shared_config, 'init_config')
+            except Exception as e:
+                self.log.debug("Failed to detect typos in `init_config` section: %s", e)
             if shared_config is not None:
                 self._config_model_shared = shared_config
 
         if self._config_model_instance is None:
             raw_instance_config = self._get_config_model_initialization_data()
-            raw_instance_config.update(self._get_instance_config())
+            intg_instance_config = self._get_instance_config()
+            raw_instance_config.update(intg_instance_config)
 
             instance_config = self.load_configuration_model(package_path, 'InstanceConfig', raw_instance_config)
+            try:
+                self.log_typos_in_options(intg_instance_config, instance_config, 'instances')
+            except Exception as e:
+                self.log.debug("Failed to detect typos in `instances` section: %s", e)
             if instance_config is not None:
                 self._config_model_instance = instance_config
 
@@ -477,8 +577,10 @@ class AgentCheck(object):
         # type: (int, str, Sequence[str], str) -> str
         return '{}-{}-{}-{}'.format(mtype, name, tags if tags is None else hash(frozenset(tags)), hostname)
 
-    def submit_histogram_bucket(self, name, value, lower_bound, upper_bound, monotonic, hostname, tags, raw=False):
-        # type: (str, float, int, int, bool, str, Sequence[str], bool) -> None
+    def submit_histogram_bucket(
+        self, name, value, lower_bound, upper_bound, monotonic, hostname, tags, raw=False, flush_first_value=False
+    ):
+        # type: (str, float, int, int, bool, str, Sequence[str], bool, bool) -> None
         if value is None:
             # ignore metric sample
             return
@@ -509,6 +611,7 @@ class AgentCheck(object):
             monotonic,
             hostname,
             tags,
+            flush_first_value,
         )
 
     def database_monitoring_query_sample(self, raw_event):
@@ -525,12 +628,38 @@ class AgentCheck(object):
 
         aggregator.submit_event_platform_event(self, self.check_id, to_native_string(raw_event), "dbm-metrics")
 
+    def database_monitoring_query_activity(self, raw_event):
+        # type: (str) -> None
+        if raw_event is None:
+            return
+
+        aggregator.submit_event_platform_event(self, self.check_id, to_native_string(raw_event), "dbm-activity")
+
+    def should_send_metric(self, metric_name):
+        return not self._metric_excluded(metric_name) and self._metric_included(metric_name)
+
+    def _metric_included(self, metric_name):
+        if self.include_metrics_pattern is None:
+            return True
+
+        return self.include_metrics_pattern.search(metric_name) is not None
+
+    def _metric_excluded(self, metric_name):
+        if self.exclude_metrics_pattern is None:
+            return False
+
+        return self.exclude_metrics_pattern.search(metric_name) is not None
+
     def _submit_metric(
         self, mtype, name, value, tags=None, hostname=None, device_name=None, raw=False, flush_first_value=False
     ):
         # type: (int, str, float, Sequence[str], str, str, bool, bool) -> None
         if value is None:
             # ignore metric sample
+            return
+
+        name = self._format_namespace(name, raw)
+        if not self.should_send_metric(name):
             return
 
         tags = self._normalize_tags_type(tags or [], device_name, name)
@@ -559,9 +688,7 @@ class AgentCheck(object):
             self.warning(err_msg)
             return
 
-        aggregator.submit_metric(
-            self, self.check_id, mtype, self._format_namespace(name, raw), value, tags, hostname, flush_first_value
-        )
+        aggregator.submit_metric(self, self.check_id, mtype, name, value, tags, hostname, flush_first_value)
 
     def gauge(self, name, value, tags=None, hostname=None, device_name=None, raw=False):
         # type: (str, float, Sequence[str], str, str, bool) -> None
@@ -756,13 +883,6 @@ class AgentCheck(object):
         :param options: keyword arguments to pass to any defined transformer
         """
         self.metadata_manager.submit(name, value, options)
-
-    def send_config_metadata(self):
-        # type: () -> None
-        self.set_metadata('config', self.instance, section='instance', whitelist=self.METADATA_DEFAULT_CONFIG_INSTANCE)
-        self.set_metadata(
-            'config', self.init_config, section='init_config', whitelist=self.METADATA_DEFAULT_CONFIG_INIT_CONFIG
-        )
 
     @staticmethod
     def is_metadata_collection_enabled():
@@ -965,46 +1085,62 @@ class AgentCheck(object):
     def run(self):
         # type: () -> str
         try:
-            while self.check_initializations:
-                initialization = self.check_initializations.popleft()
-                try:
-                    initialization()
-                except Exception:
-                    self.check_initializations.appendleft(initialization)
-                    raise
+            # Ignore check initializations if running in a separate process
+            if is_affirmative(self.instance.get('process_isolation', self.init_config.get('process_isolation', False))):
+                from ..utils.replay.execute import run_with_isolation
 
-            instance = copy.deepcopy(self.instances[0])
-
-            if 'set_breakpoint' in self.init_config:
-                from ..utils.agent.debug import enter_pdb
-
-                enter_pdb(self.check, line=self.init_config['set_breakpoint'], args=(instance,))
-            elif 'profile_memory' in self.init_config or (
-                datadog_agent.tracemalloc_enabled() and should_profile_memory(datadog_agent, self.name)
-            ):
-                from ..utils.agent.memory import profile_memory
-
-                metrics = profile_memory(
-                    self.check, self.init_config, namespaces=self.check_id.split(':', 1), args=(instance,)
-                )
-
-                tags = ['check_name:{}'.format(self.name), 'check_version:{}'.format(self.check_version)]
-                tags.extend(instance.get('__memory_profiling_tags', []))
-                for m in metrics:
-                    self.gauge(m.name, m.value, tags=tags, raw=True)
+                run_with_isolation(self, aggregator, datadog_agent)
             else:
-                self.check(instance)
+                while self.check_initializations:
+                    initialization = self.check_initializations.popleft()
+                    try:
+                        initialization()
+                    except Exception:
+                        self.check_initializations.appendleft(initialization)
+                        raise
 
-            result = ''
+                instance = copy.deepcopy(self.instances[0])
+
+                if 'set_breakpoint' in self.init_config:
+                    from ..utils.agent.debug import enter_pdb
+
+                    enter_pdb(self.check, line=self.init_config['set_breakpoint'], args=(instance,))
+                elif 'profile_memory' in self.init_config or (
+                    datadog_agent.tracemalloc_enabled() and should_profile_memory(datadog_agent, self.name)
+                ):
+                    from ..utils.agent.memory import profile_memory
+
+                    metrics = profile_memory(
+                        self.check, self.init_config, namespaces=self.check_id.split(':', 1), args=(instance,)
+                    )
+
+                    tags = self.get_debug_metric_tags()
+                    tags.extend(instance.get('__memory_profiling_tags', []))
+                    for m in metrics:
+                        self.gauge(m.name, m.value, tags=tags, raw=True)
+                else:
+                    self.check(instance)
+
+            error_report = ''
         except Exception as e:
             message = self.sanitize(str(e))
             tb = self.sanitize(traceback.format_exc())
-            result = json.dumps([{'message': message, 'traceback': tb}])
+            error_report = json.dumps([{'message': message, 'traceback': tb}])
         finally:
             if self.metric_limiter:
+                if is_affirmative(self.debug_metrics.get('metric_contexts', False)):
+                    debug_metrics = self.metric_limiter.get_debug_metrics()
+
+                    # Reset so we can actually submit the metrics
+                    self.metric_limiter.reset()
+
+                    tags = self.get_debug_metric_tags()
+                    for metric_name, value in debug_metrics:
+                        self.gauge(metric_name, value, tags=tags, raw=True)
+
                 self.metric_limiter.reset()
 
-        return result
+        return error_report
 
     def event(self, event):
         # type: (Event) -> None
@@ -1077,13 +1213,35 @@ class AgentCheck(object):
         for tag in tags:
             if tag is None:
                 continue
-
             try:
                 tag = to_native_string(tag)
             except UnicodeError:
                 self.log.warning('Encoding error with tag `%s` for metric `%s`, ignoring tag', tag, metric_name)
                 continue
-
-            normalized_tags.append(tag)
-
+            if self.disable_generic_tags:
+                normalized_tags.append(self.degeneralise_tag(tag))
+            else:
+                normalized_tags.append(tag)
         return normalized_tags
+
+    def degeneralise_tag(self, tag):
+        split_tag = tag.split(':', 1)
+        if len(split_tag) > 1:
+            tag_name, value = split_tag
+        else:
+            tag_name = tag
+            value = None
+
+        if tag_name in GENERIC_TAGS:
+            new_name = '{}_{}'.format(self.name, tag_name)
+            if value:
+                return '{}:{}'.format(new_name, value)
+            else:
+                return new_name
+        else:
+            return tag
+
+    def get_debug_metric_tags(self):
+        tags = ['check_name:{}'.format(self.name), 'check_version:{}'.format(self.check_version)]
+        tags.extend(self.instance.get('tags', []))
+        return tags

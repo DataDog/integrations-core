@@ -1,6 +1,6 @@
 # Elasticsearch Integration
 
-![Elasitc search dashboard][1]
+![Elastic search dashboard][1]
 
 ## Overview
 
@@ -41,7 +41,7 @@ To configure this check for an Agent running on a host:
     **Notes**:
 
       - If you're collecting Elasticsearch metrics from just one Datadog Agent running outside the cluster, such as using a hosted Elasticsearch, set `cluster_stats` to `true`.
-      - [Agent-level tags][21] are not applied to hosts in a cluster that is not running the Agent. Use integration level tags in `<integration>.d/conf.yaml` to ensure **ALL** metrics have consistent tags. For example:
+      - [Agent-level tags][5] are not applied to hosts in a cluster that is not running the Agent. Use integration level tags in `<integration>.d/conf.yaml` to ensure **ALL** metrics have consistent tags. For example:
 
         ```yaml
         init_config:
@@ -57,17 +57,58 @@ To configure this check for an Agent running on a host:
         ```
 
       - To use the Agent's Elasticsearch integration for the AWS Elasticsearch services, set the `url` parameter to point to your AWS Elasticsearch stats URL.
-      - All requests to the Amazon ES configuration API must be signed. See the [AWS documentation][19] for details.
-      - The `aws` auth type relies on [boto3][20] to automatically gather AWS credentials from `.aws/credentials`. Use `auth_type: basic` in the `conf.yaml` and define the credentials with `username: <USERNAME>` and `password: <PASSWORD>`.
+      - All requests to the Amazon ES configuration API must be signed. See the [Making and signing OpenSearch Service requests][6] for details.
+      - The `aws` auth type relies on [boto3][7] to automatically gather AWS credentials from `.aws/credentials`. Use `auth_type: basic` in the `conf.yaml` and define the credentials with `username: <USERNAME>` and `password: <PASSWORD>`.
+      - You must create a user and a role (if you don't already have them) in Elasticsearch with the proper permissions to monitor. This can be done through the REST API offered by Elasticsearch, or through the Kibana UI. Include the following properties in the created role:
+        ```json
+        name = "datadog"
+        indices {
+          names = [".monitoring-*", "metricbeat-*"]
+          privileges = ["read", "read_cross_cluster", "monitor"]
+        }
+        cluster = ["monitor"]
+        ```
+        Add the role to the user:
+        ```json
+        roles = [<created role>, "monitoring_user"]
+        ```
+        For more information, see [create or update roles][29] and [create or update users][30].
 
-2. [Restart the Agent][5].
+
+2. [Restart the Agent][8].
+
+###### Custom Queries
+
+The ElasticSearch integration allows you to collect custom metrics through custom queries by using the `custom_queries` configuration option. 
+
+**Note:** When running custom queries, use a read only account to ensure that the ElasticSearch instance does not change.
+
+```yaml
+custom_queries:
+ - endpoint: /_search
+   data_path: aggregations.genres.buckets
+   payload:
+     aggs:
+       genres:
+         terms:
+           field: "id"
+   columns:
+   - value_path: key
+     name: id
+     type: tag
+   - value_path: doc_count
+     name: elasticsearch.doc_count
+   tags:
+   - custom_tag:1
+```
+The custom query sends as a `GET` request. If you use an optional `payload` parameter, the request sends as a `POST` request. 
 
 ##### Trace collection
 
 Datadog APM integrates with Elasticsearch to see the traces across your distributed system. Trace collection is enabled by default in the Datadog Agent v6+. To start collecting traces:
 
-1. [Enable trace collection in Datadog][6].
-2. [Instrument your application that makes requests to ElasticSearch][7].
+1. [Enable trace collection in Datadog][9].
+2. [Instrument your application that makes requests to ElasticSearch][10].
 
 ##### Log collection
 
@@ -79,7 +120,7 @@ _Available for Agent versions >6.0_
    logs_enabled: true
    ```
 
-2. To collect search slow logs and index slow logs, [configure your Elasticsearch settings][14]. By default, slow logs are not enabled.
+2. To collect search slow logs and index slow logs, [configure your Elasticsearch settings][11]. By default, slow logs are not enabled.
 
    - To configure index slow logs for a given index `<INDEX>`:
 
@@ -91,7 +132,7 @@ _Available for Agent versions >6.0_
        "index.indexing.slowlog.threshold.index.trace": "0ms",
        "index.indexing.slowlog.level": "trace",
        "index.indexing.slowlog.source": "1000"
-     }
+     }'
      ```
 
    - To configure search slow logs for a given index `<INDEX>`:
@@ -106,7 +147,7 @@ _Available for Agent versions >6.0_
        "index.search.slowlog.threshold.fetch.info": "0ms",
        "index.search.slowlog.threshold.fetch.debug": "0ms",
        "index.search.slowlog.threshold.fetch.trace": "0ms"
-     }
+     }'
      ```
 
 3. Add this configuration block to your `elastic.d/conf.yaml` file to start collecting your Elasticsearch logs:
@@ -137,7 +178,7 @@ _Available for Agent versions >6.0_
 
      Change the `path` and `service` parameter values and configure them for your environment.
 
-4. [Restart the Agent][5].
+4. [Restart the Agent][8].
 
 <!-- xxz tab xxx -->
 <!-- xxx tab "Docker" xxx -->
@@ -148,20 +189,20 @@ To configure this check for an Agent running on a container:
 
 ##### Metric collection
 
-Set [Autodiscovery Integrations Templates][22] as Docker labels on your application container:
+Set [Autodiscovery Integrations Templates][12] as Docker labels on your application container:
 
 ```yaml
 LABEL "com.datadoghq.ad.check_names"='["elastic"]'
 LABEL "com.datadoghq.ad.init_configs"='[{}]'
-LABEL "com.datadoghq.ad.instances"='[{"url": "https://%%host%%:9200"}]'
+LABEL "com.datadoghq.ad.instances"='[{"url": "http://%%host%%:9200"}]'
 ```
 
 ##### Log collection
 
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Docker log collection documentation][23].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker Log Collection][13].
 
-Then, set [Log Integrations][24] as Docker labels:
+Then, set [Log Integrations][14] as Docker labels:
 
 ```yaml
 LABEL "com.datadoghq.ad.logs"='[{"source":"elasticsearch","service":"<SERVICE_NAME>"}]'
@@ -179,9 +220,9 @@ Required environment variables on the Agent container:
 | `<DD_APM_ENABLED>`      | true                                                              |
 | `<DD_APM_NON_LOCAL_TRAFFIC>`  | true |
 
-See [Tracing Kubernetes Applications][17] and the [Kubernetes Daemon Setup][18] for a complete list of available environment variables and configuration.
+See [Tracing Kubernetes Applications][15] and the [Kubernetes Daemon Setup][16] for a complete list of available environment variables and configuration.
 
-Then, [instrument your application container][7] and set `DD_AGENT_HOST` to the name of your Agent container.
+Then, [instrument your application container][10] and set `DD_AGENT_HOST` to the name of your Agent container.
 
 
 <!-- xxz tab xxx -->
@@ -193,7 +234,9 @@ To configure this check for an Agent running on Kubernetes:
 
 ##### Metric collection
 
-Set [Autodiscovery Integrations Templates][25] as pod annotations on your application container. Aside from this, templates can also be configured with [a file, a configmap, or a key-value store][26].
+Set [Autodiscovery Integrations Templates][17] as pod annotations on your application container. Aside from this, templates can also be configured with [a file, a configmap, or a key-value store][18].
+
+**Annotations v1** (for Datadog Agent < v7.36)
 
 ```yaml
 apiVersion: v1
@@ -201,14 +244,38 @@ kind: Pod
 metadata:
   name: elasticsearch
   annotations:
-    ad.datadoghq.com/elasticsearch.check_names: '["elasticsearch"]'
+    ad.datadoghq.com/elasticsearch.check_names: '["elastic"]'
     ad.datadoghq.com/elasticsearch.init_configs: '[{}]'
     ad.datadoghq.com/elasticsearch.instances: |
       [
         {
-          "url": "https://%%host%%:9200"
+          "url": "http://%%host%%:9200"
         }
       ]
+spec:
+  containers:
+    - name: elasticsearch
+```
+
+**Annotations v2** (for Datadog Agent v7.36+)
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: elasticsearch
+  annotations:
+    ad.datadoghq.com/elasticsearch.checks: |
+      {
+        "elastic": {
+          "init_config": {},
+          "instances": [
+            {
+              "url": "http://%%host%%:9200"
+            }
+          ]
+        }
+      }
 spec:
   containers:
     - name: elasticsearch
@@ -217,9 +284,11 @@ spec:
 ##### Log collection
 
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Kubernetes log collection documentation][27].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Kubernetes Log Collection][19].
 
-Then, set [Log Integrations][28] as pod annotations. This can also be configured with [a file, a configmap, or a key-value store][29].
+Then, set [Log Integrations][14] as pod annotations. This can also be configured with [a file, a configmap, or a key-value store][20].
+
+**Annotations v1/v2**
 
 ```yaml
 apiVersion: v1
@@ -245,9 +314,9 @@ Required environment variables on the Agent container:
 | `<DD_APM_ENABLED>`      | true                                                              |
 | `<DD_APM_NON_LOCAL_TRAFFIC>`  | true |
 
-See [Tracing Kubernetes Applications][17] and the [Kubernetes Daemon Setup][18] for a complete list of available environment variables and configuration.
+See [Tracing Kubernetes Applications][15] and the [Kubernetes Daemon Setup][16] for a complete list of available environment variables and configuration.
 
-Then, [instrument your application container][7] and set `DD_AGENT_HOST` to the name of your Agent container.
+Then, [instrument your application container][10] and set `DD_AGENT_HOST` to the name of your Agent container.
 
 <!-- xxz tab xxx -->
 <!-- xxx tab "ECS" xxx -->
@@ -258,7 +327,7 @@ To configure this check for an Agent running on ECS:
 
 ##### Metric collection
 
-Set [Autodiscovery Integrations Templates][30] as Docker labels on your application container:
+Set [Autodiscovery Integrations Templates][12] as Docker labels on your application container:
 
 ```json
 {
@@ -268,7 +337,7 @@ Set [Autodiscovery Integrations Templates][30] as Docker labels on your applicat
     "dockerLabels": {
       "com.datadoghq.ad.check_names": "[\"elastic\"]",
       "com.datadoghq.ad.init_configs": "[{}]",
-      "com.datadoghq.ad.instances": "[{\"url\": \"https://%%host%%:9200\"}]"
+      "com.datadoghq.ad.instances": "[{\"url\": \"http://%%host%%:9200\"}]"
     }
   }]
 }
@@ -277,9 +346,9 @@ Set [Autodiscovery Integrations Templates][30] as Docker labels on your applicat
 ##### Log collection
 
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [ECS log collection documentation][31].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [ECS Log Collection][21].
 
-Then, set [Log Integrations][32] as Docker labels:
+Then, set [Log Integrations][14] as Docker labels:
 
 ```json
 {
@@ -305,9 +374,9 @@ Required environment variables on the Agent container:
 | `<DD_APM_ENABLED>`      | true                                                              |
 | `<DD_APM_NON_LOCAL_TRAFFIC>`  | true |
 
-See [Tracing Kubernetes Applications][17] and the [Kubernetes Daemon Setup][18] for a complete list of available environment variables and configuration.
+See [Tracing Kubernetes Applications][15] and the [Kubernetes Daemon Setup][16] for a complete list of available environment variables and configuration.
 
-Then, [instrument your application container][7] and set `DD_AGENT_HOST` to the [EC2 private IP address][33].
+Then, [instrument your application container][10] and set `DD_AGENT_HOST` to the [EC2 private IP address][22].
 
 
 <!-- xxz tab xxx -->
@@ -315,7 +384,7 @@ Then, [instrument your application container][7] and set `DD_AGENT_HOST` to the 
 
 ### Validation
 
-[Run the Agent's status subcommand][10] and look for `elastic` under the Checks section.
+[Run the Agent's status subcommand][23] and look for `elastic` under the Checks section.
 
 ## Data Collected
 
@@ -325,63 +394,54 @@ By default, not all of the following metrics are sent by the Agent. To send all 
 - `index_stats` sends **elasticsearch.index.\*** metrics
 - `pending_task_stats` sends **elasticsearch.pending\_\*** metrics
 
-For version >=6.3.0, set `xpack.monitoring.collection.enabled` configuration to `true` in your Elasticsearch configuration in order to collect all `elasticsearch.thread_pool.write.*` metrics. See [Elasticsearch release notes - monitoring section][11].
-
 ### Metrics
 
-See [metadata.csv][12] for a list of metrics provided by this integration.
+See [metadata.csv][25] for a list of metrics provided by this integration.
 
 ### Events
 
 The Elasticsearch check emits an event to Datadog each time the overall status of your Elasticsearch cluster changes - red, yellow, or green.
 
-### Service checks
+### Service Checks
 
-**elasticsearch.cluster_health**:<br>
-Returns `OK` if the cluster status is green, `WARNING` if yellow, and `CRITICAL` otherwise.
-
-**elasticsearch.can_connect**:<br>
-Returns `CRITICAL` if the Agent cannot connect to Elasticsearch to collect metrics.
+See [service_checks.json][26] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
-- [Agent can't connect][13]
-- [Why isn't Elasticsearch sending all my metrics?][14]
+- [Agent can't connect][27]
+- [Why isn't Elasticsearch sending all my metrics?][11]
 
 ## Further Reading
 
-To get a better idea of how (or why) to integrate your Elasticsearch cluster with Datadog, check out our [series of blog posts][15] about it.
+- [How to monitor Elasticsearch performance][28]
+
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/elastic/images/elasticsearch-dash.png
 [2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [4]: https://github.com/DataDog/integrations-core/blob/master/elastic/datadog_checks/elastic/data/conf.yaml.example
-[5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[6]: https://docs.datadoghq.com/tracing/send_traces/
-[7]: https://docs.datadoghq.com/tracing/setup/
-[8]: https://docs.datadoghq.com/agent/kubernetes/integrations/
-[9]: https://docs.datadoghq.com/agent/kubernetes/log/
-[10]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[11]: https://www.elastic.co/guide/en/elasticsearch/reference/6.3/release-notes-6.3.0.html
-[12]: https://github.com/DataDog/integrations-core/blob/master/elastic/metadata.csv
-[13]: https://docs.datadoghq.com/integrations/faq/elastic-agent-can-t-connect/
-[14]: https://docs.datadoghq.com/integrations/faq/why-isn-t-elasticsearch-sending-all-my-metrics/
-[15]: https://www.datadoghq.com/blog/monitor-elasticsearch-performance-metrics
-[16]: https://www.elastic.co/guide/en/elasticsearch/reference/current/index-modules-slowlog.html
-[17]: https://docs.datadoghq.com/agent/kubernetes/apm/?tab=java
-[18]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/?tab=k8sfile#apm-and-distributed-tracing
-[19]: https://docs.aws.amazon.com/elasticsearch-service/latest/developerguide/es-ac.html#es-managedomains-signing-service-requests
-[20]: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#configuring-credentials
-[21]: https://docs.datadoghq.com/getting_started/tagging/assigning_tags?tab=noncontainerizedenvironments#file-location
-[22]: https://docs.datadoghq.com/agent/docker/integrations/?tab=docker
-[23]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#installation
-[24]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#log-integrations
-[25]: https://docs.datadoghq.com/agent/kubernetes/integrations/?tab=kubernetes
-[26]: https://docs.datadoghq.com/agent/kubernetes/integrations/?tab=kubernetes#configuration
-[27]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=containerinstallation#setup
-[28]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#log-integrations
-[29]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=daemonset#configuration
-[30]: https://docs.datadoghq.com/agent/docker/integrations/?tab=docker
-[31]: https://docs.datadoghq.com/agent/amazon_ecs/logs/?tab=linux
-[32]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#log-integrations
-[33]: https://docs.datadoghq.com/agent/amazon_ecs/apm/?tab=ec2metadataendpoint#setup
+[5]: https://docs.datadoghq.com/getting_started/tagging/assigning_tags?tab=noncontainerizedenvironments#file-location
+[6]: https://docs.aws.amazon.com/opensearch-service/latest/developerguide/ac.html#managedomains-signing-service-requests
+[7]: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#configuring-credentials
+[8]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[9]: https://docs.datadoghq.com/tracing/send_traces/
+[10]: https://docs.datadoghq.com/tracing/setup/
+[11]: https://docs.datadoghq.com/integrations/faq/why-isn-t-elasticsearch-sending-all-my-metrics/
+[12]: https://docs.datadoghq.com/agent/docker/integrations/?tab=docker
+[13]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#installation
+[14]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#log-integrations
+[15]: https://docs.datadoghq.com/agent/kubernetes/apm/?tab=java
+[16]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/?tab=k8sfile#apm-and-distributed-tracing
+[17]: https://docs.datadoghq.com/agent/kubernetes/integrations/?tab=kubernetes
+[18]: https://docs.datadoghq.com/agent/kubernetes/integrations/?tab=kubernetes#configuration
+[19]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=containerinstallation#setup
+[20]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=daemonset#configuration
+[21]: https://docs.datadoghq.com/agent/amazon_ecs/logs/?tab=linux
+[22]: https://docs.datadoghq.com/agent/amazon_ecs/apm/?tab=ec2metadataendpoint#setup
+[23]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[25]: https://github.com/DataDog/integrations-core/blob/master/elastic/metadata.csv
+[26]: https://github.com/DataDog/integrations-core/blob/master/elastic/assets/service_checks.json
+[27]: https://docs.datadoghq.com/integrations/faq/elastic-agent-can-t-connect/
+[28]: https://www.datadoghq.com/blog/monitor-elasticsearch-performance-metrics
+[29]: https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-put-role.html
+[30]: https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-put-user.html

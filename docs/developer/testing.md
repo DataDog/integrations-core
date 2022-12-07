@@ -140,6 +140,7 @@ There are a number of shortcut options available that correspond to [pytest opti
 - `--debug`/`-d` (`pytest`: `--log-level=debug -s`) - Set the log level to debug
 - `--pdb` (`pytest`: `--pdb -x`) - Drop to PDB on first failure, then end test session
 - `--verbose`/`-v` (`pytest`: `-v --tb=auto`) - Increase verbosity (can be used additively) and disables shortened tracebacks
+- `--ddtrace` (`pytest`: `--ddtrace`) - Submit test traces to a local Datadog Agent using the [`ddtrace`][pytest-ddtrace] Python package. For example:`ddev test --ddtrace consul`. This does not work if you are testing a Python 2 Windows environment.
 
 You may also pass arguments directly to `pytest` using the `--pytest-args`/`-pa` option. For example, you could
 re-write `-d` as `-pa "--log-level=debug -s"`.

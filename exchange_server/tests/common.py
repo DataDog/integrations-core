@@ -1,9 +1,12 @@
 # (C) Datadog, Inc. 2010-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-MINIMAL_INSTANCE = {'host': '.'}
+from datadog_checks.exchange_server.metrics import METRICS_CONFIG
 
 CHECK_NAME = 'exchange_server'
+MINIMAL_INSTANCE = {'host': '.'}
+
+INSTANCE = {'host': '.'}
 
 DATABASE_INSTANCES = [
     'Information Store/_Total',
@@ -208,3 +211,32 @@ METRIC_INSTANCES = {
     'exchange.workload_management.completed_tasks': WORKLOAD_INSTANCES,
     'exchange.workload_management.queued_tasks': WORKLOAD_INSTANCES,
 }
+
+PERFORMANCE_OBJECTS = {}
+for object_name, instances in (
+    ('MSExchange ADAccess Domain Controllers', ['win-k2olfvr52p5.croissant.datad0g.com']),
+    ('MSExchange ADAccess Processes', EXCHANGE_PROCESSES),
+    ('Processor', [None]),
+    ('System', [None]),
+    ('Memory', [None]),
+    ('Network Interface', ['AWS PV Network Device', 'isatap.{C7BAFAFE-DBF4-4C76-B406-8A25283E4CF9}']),
+    ('TCPv6', [None]),
+    ('TCPv4', [None]),
+    ('Netlogon', ['foo']),
+    ('MSExchange Database ==> Instances', DATABASE_INSTANCES),
+    ('MSExchange Active Manager', [None]),
+    ('MSExchange RpcClientAccess', [None]),
+    ('MSExchange HttpProxy', PROXY_INSTANCES),
+    ('MSExchangeIS Store', ['mailbox database 1266275882']),
+    ('MSExchangeIS Client Type', CLIENT_TYPE_INSTANCES),
+    ('MSExchange ActiveSync', [None]),
+    ('MSExchange OWA', [None]),
+    ('MSExchangeAutodiscover', [None]),
+    ('MSExchangeWS', [None]),
+    ('Web Service', WEB_SITE_INSTANCES),
+    ('MSExchange WorkloadManagement Workloads', WORKLOAD_INSTANCES),
+):
+    PERFORMANCE_OBJECTS[object_name] = (
+        instances,
+        {counter: [9000] * len(instances) for counter in METRICS_CONFIG[object_name]['counters'][0]},
+    )

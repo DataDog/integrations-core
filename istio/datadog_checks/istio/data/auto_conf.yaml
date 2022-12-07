@@ -1,20 +1,59 @@
+## @param ad_identifiers - list of strings - required
+## A list of container identifiers that are used by Autodiscovery to identify
+## which container the check should be run against. For more information, see:
+## https://docs.datadoghq.com/agent/guide/ad_identifiers/
+#
 ad_identifiers:
   - proxyv2
+  - proxyv2-rhel8
 
 ## All options defined here are available to all instances.
 #
 init_config:
 
-## Every instance is scheduled independent of the others.
+## Every instance is scheduled independently of the others.
 #
 instances:
 
-    ## @param send_histograms_buckets - boolean - required
+  -
+    ## @param use_openmetrics - boolean - optional - default: false
+    ## Use the latest OpenMetrics implementation for more features and better performance.
+    ## This implementation supports only Istio 1.5. Use `istiod_endpoint` or `istio_mesh_endpoint`.
+    #
+    # use_openmetrics: true
+
+    ## @param send_histograms_buckets - boolean - optional - default: true
     ## Set send_histograms_buckets to true to send the histograms bucket from Istio.
     #
-  - send_histograms_buckets: true
+    send_histograms_buckets: true
 
     ## @param istio_mesh_endpoint - string - optional
     ## To enable Istio metrics you must specify the url exposing the API.
     #
     istio_mesh_endpoint: http://%%host%%:15090/stats/prometheus
+
+    ## @param tag_by_endpoint - boolean - optional - default: true
+    ## Wether to include an endpoint tag or not. This only applies if `use openmentrics` is enabled.
+    #
+    tag_by_endpoint: false
+
+    ## @param exclude_labels - list of strings - optional
+    ## A list of labels to be excluded
+    #
+    exclude_labels:
+      - source_version
+      - destination_version
+      - source_canonical_revision
+      - destination_canonical_revision
+      - source_principal
+      - destination_principal
+      - source_cluster
+      - destination_cluster
+      - source_canonical_service
+      - destination_canonical_service
+      - source_workload_namespace
+      - destination_workload_namespace
+      - request_protocol
+      - connection_security_policy
+      - destination_service
+      - source_workload

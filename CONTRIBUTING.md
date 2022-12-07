@@ -61,21 +61,6 @@ The commit message should describe the reason for the change and give extra deta
 that will allow someone later on to understand in 5 seconds the thing you've been
 working on for a day.
 
-If your commit is only shipping documentation changes or example files, and is a
-complete no-op for the test suite, please prepend the commit message with the
-string `[skip ci]` to skip the build and test and give that slot to someone else
-who does need it.
-
-If your commit is testing possible backward-incompatible changes to the base package
-or many integrations at once, you can preface a commit message with `[ci run all]` to
-test everything at once in separate runners, thus avoiding timeouts.
-
-### Squash your commits
-
-Please rebase your changes on `master` and squash your commits whenever possible,
-it keeps history cleaner and it's easier to revert things. It also makes developers
-happier!
-
 ## Integrations Extras
 
 For new integrations, please open a pull request in the [integrations-extras][7] repo.

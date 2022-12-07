@@ -1,0 +1,43 @@
+version: '3'
+
+# https://pulsar.apache.org/docs/en/next/standalone-docker/
+services:
+  pulsar:
+    container_name: pulsar
+    image: apachepulsar/pulsar:${PULSAR_VERSION}
+    command:
+    - bash
+    - -c
+    - >
+      bin/apply-config-from-env-with-prefix.py BOOKKEEPER_ conf/bookkeeper.conf &&
+      bin/apply-config-from-env-with-prefix.py BROKER_ conf/broker.conf &&
+      bin/apply-config-from-env-with-prefix.py STANDALONE_ conf/standalone.conf &&
+      bin/apply-config-from-env-with-prefix.py ZOOKEEPER_ conf/zookeeper.conf &&
+      exec bin/pulsar standalone > /var/log/pulsar.log 2>&1
+    ports:
+    - '6650:6650'
+    - '8080:8080'
+    volumes:
+    - ${DD_LOG_1}:/var/log/pulsar.log
+    # Not everything is documented:
+    # https://pulsar.apache.org/docs/en/reference-configuration/
+    environment:
+    - BOOKKEEPER_enableStatistics=true
+    - BOOKKEEPER_prometheusStatsHttpPort=8080
+    - BROKER_exposeTopicLevelMetricsInPrometheus=true
+    - BROKER_exposeConsumerLevelMetricsInPrometheus=true
+    - BROKER_exposeProducerLevelMetricsInPrometheus=true
+    - BROKER_exposeManagedLedgerMetricsInPrometheus=true
+    - BROKER_exposeManagedCursorMetricsInPrometheus=true
+    - BROKER_exposePublisherStats=true
+    - BROKER_exposePreciseBacklogInPrometheus=true
+    - BROKER_splitTopicAndPartitionLabelInPrometheus=true
+    - STANDALONE_exposeTopicLevelMetricsInPrometheus=true
+    - STANDALONE_exposeConsumerLevelMetricsInPrometheus=true
+    - STANDALONE_exposeProducerLevelMetricsInPrometheus=true
+    - STANDALONE_exposeManagedLedgerMetricsInPrometheus=true
+    - STANDALONE_exposeManagedCursorMetricsInPrometheus=true
+    - STANDALONE_exposePublisherStats=true
+    - STANDALONE_exposePreciseBacklogInPrometheus=true
+    - STANDALONE_splitTopicAndPartitionLabelInPrometheus=true
+    - ZOOKEEPER_metricsProvider.httpPort=8080

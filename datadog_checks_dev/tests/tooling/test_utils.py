@@ -11,12 +11,15 @@ from datadog_checks.dev.tooling.utils import (
     complete_set_root,
     get_check_files,
     get_version_string,
+    has_process_signature,
     initialize_root,
     is_logs_only,
     parse_agent_req_file,
 )
 
 from ..common import not_windows_ci
+
+REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../..'))
 
 
 def test_parse_agent_req_file():
@@ -34,8 +37,14 @@ def test_get_version_string():
 
 @mock.patch('datadog_checks.dev.tooling.utils.get_root')
 def test_is_logs_only(get_root):
-    get_root.return_value = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../..'))
+    get_root.return_value = REPO_ROOT
     assert is_logs_only('flink')
+
+
+@mock.patch('datadog_checks.dev.tooling.utils.get_root')
+def test_has_process_signature(get_root):
+    get_root.return_value = REPO_ROOT
+    assert has_process_signature('rethinkdb')
 
 
 @mock.patch('datadog_checks.dev.tooling.utils.get_root')

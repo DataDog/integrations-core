@@ -4,43 +4,67 @@ files:
   options:
   - template: init_config
     options:
-    - template: init_config/openmetrics_legacy
+    - template: init_config/openmetrics
   - template: instances
     options:
     - name: use_prometheus
+      hidden: true
       value:
         example: false
         type: boolean
       description: |
-        Enable to preview the new version of the check which supports HAProxy version 2+ 
+        Enable to preview the new version of the check which supports HAProxy version 2+
         or environments using the HAProxy exporter.
 
         Prometheus-related options take effect only when this is set to `true`.
+    - name: use_openmetrics
+      value:
+        example: false
+        type: boolean
+      description: |
+        Enable to preview the new version of the check which supports HAProxy version 2+
+        or environments using the HAProxy exporter.
+
+        OpenMetrics-related options take effect only when this is set to `true`. 
+        
+        This check uses the latest OpenMetrics V2 implementation for more features and better performance.
+        Note: To see the configuration options for the OpenMetrics V1 implementation (Agent 7.34 or older),
+        https://github.com/DataDog/integrations-core/blob/7.34.x/haproxy/datadog_checks/haproxy/data/conf.yaml.example
+    - template: instances/openmetrics
+      overrides:
+        openmetrics_endpoint.required: false
+    - template: instances/openmetrics_legacy_base
+      hidden: true
+      overrides:
+        prometheus_url.required: false
     - name: url
-      required: true
+      enabled: true
       value:
         example: http://localhost/admin?stats
         type: string
+        display_default: null
       description: |
         Haproxy URL to connect to gather metrics.
         Set the according <USERNAME> and <PASSWORD> or use directly a unix stats
         or admin socket: unix:///var/run/haproxy.sock
 
-        NOTE: This only takes effect when `use_prometheus` is set to `false`.
+        NOTE: This only takes effect when `use_openmetrics` is set to `false`.
     - name: status_check
       value:
         example: false
         type: boolean
       description: |
-        This paramater instructs the check to send events on status changes in the backend.
+        This parameter instructs the check to send events on status changes in the backend.
         This is DEPRECATED in favor of the creation of a monitor on the service check status
         and will be removed in a future version.
 
-        NOTE: This only takes effect when `use_prometheus` is set to `false`.
+        NOTE: This only takes effect when `use_openmetrics` is set to `false`.
     - name: collect_aggregates_only
       value:
+        anyOf:
+          - type: boolean
+          - type: string
         example: true
-        type: boolean
       description: |
         This parameter instructs the check to collect metrics only from the aggregate frontend/backend
         status lines from the stats output instead of for each backend. With this parameter set to false the agent
@@ -50,7 +74,7 @@ files:
         result will be twice as expected. To get the correct result, you have to explicitly add some filters to the
         query.
 
-        NOTE: This only takes effect when `use_prometheus` is set to `false`.
+        NOTE: This only takes effect when `use_openmetrics` is set to `false`.
     - name: collect_status_metrics
       value:
         example: false
@@ -58,7 +82,7 @@ files:
       description: |
         This parameter instructs the check to collect metrics on status counts (e.g. haproxy.count_per_status)
 
-        NOTE: This only takes effect when `use_prometheus` is set to `false`.
+        NOTE: This only takes effect when `use_openmetrics` is set to `false`.
     - name: collect_status_metrics_by_host
       value:
         example: false
@@ -67,7 +91,7 @@ files:
         This parameter instructs the check to collect status metrics per host instead of per service.
         This only applies if `collect_status_metrics` is true.
 
-        NOTE: This only takes effect when `use_prometheus` is set to `false`.
+        NOTE: This only takes effect when `use_openmetrics` is set to `false`.
     - name: collate_status_tags_per_host
       value:
         example: true
@@ -76,7 +100,7 @@ files:
         This parameter collects `status` tags for `haproxy.count_per_status` up to one of
         (`available`, `unavailable`) for each discovered backend.
 
-        NOTE: This only takes effect when `use_prometheus` is set to `false`.
+        NOTE: This only takes effect when `use_openmetrics` is set to `false`.
     - name: count_status_by_service
       value:
         example: true
@@ -85,7 +109,7 @@ files:
         This parameter instructs the check to tag the status counts it collects by service in addition to by host.
         This only applies if `collect_status_metrics` is `true`.
 
-        NOTE: This only takes effect when `use_prometheus` is set to `false`.
+        NOTE: This only takes effect when `use_openmetrics` is set to `false`.
     - name: tag_service_check_by_host
       value:
         example: false
@@ -94,7 +118,7 @@ files:
         This parameter instructs the check to tag the service check status by host on top of other tags.
         The default case will only tag by backend and service.
 
-        NOTE: This only takes effect when `use_prometheus` is set to `false`.
+        NOTE: This only takes effect when `use_openmetrics` is set to `false`.
     - name: services_include
       value:
         example:
@@ -107,7 +131,7 @@ files:
         Filter metrics by services. If a tag matches an exclude rule, it won't be included
         unless it also matches an include rule.
 
-        NOTE: This only takes effect when `use_prometheus` is set to `false`.
+        NOTE: This only takes effect when `use_openmetrics` is set to `false`.
     - name: services_exclude
       value:
         example:
@@ -119,7 +143,7 @@ files:
         Filter metrics by services. If a service name matches an exclude rule, it won't be included
         unless it also matches an include rule.
 
-        NOTE: This only takes effect when `use_prometheus` is set to `false`.
+        NOTE: This only takes effect when `use_openmetrics` is set to `false`.
     - name: disable_legacy_service_tag
       value:
         example: false
@@ -128,7 +152,7 @@ files:
         Whether or not to stop submitting the tag `service` that has been renamed
         to `haproxy_service` and disable the associated deprecation warning.
 
-        NOTE: This only takes effect when `use_prometheus` is set to `false`.
+        NOTE: This only takes effect when `use_openmetrics` is set to `false`.
     - name: active_tag
       value:
         example: false
@@ -137,7 +161,7 @@ files:
         Includes the 'active' tag to metrics to denote whether a backend belongs to the
         "active" pool of connections normally used for servicing requests.
 
-        NOTE: This only takes effect when `use_prometheus` is set to `false`.
+        NOTE: This only takes effect when `use_openmetrics` is set to `false`.
     - name: enable_service_check
       value:
         example: false
@@ -156,7 +180,7 @@ files:
         would match service name be_edge_http_sre-prod_elk and include additional
         tags: ['team:sre','env:prod','app:elk']
 
-        NOTE: This only takes effect when `use_prometheus` is set to `false`.
+        NOTE: This only takes effect when `use_openmetrics` is set to `false`.
     - name: startup_grace_seconds
       value:
         example: 0
@@ -172,8 +196,7 @@ files:
         If this parameter is >0, no datapoints will be sent until the uptime of
         haproxy reaches this many seconds.
 
-        NOTE: This only takes effect when `use_prometheus` is set to `false`.
-    - template: instances/openmetrics_legacy
+        NOTE: This only takes effect when `use_openmetrics` is set to `false`.
   - template: logs
     example:
     - type: udp

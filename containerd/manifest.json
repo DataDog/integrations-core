@@ -1,29 +1,44 @@
 {
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "containerd.",
-  "metric_to_check": "containerd.cpu.user",
-  "name": "containerd",
-  "short_description": "Track all your Containerd metrics with Datadog",
-  "guid": "5cdc0363-a0df-469b-8346-2da4ab84128c",
-  "support": "core",
-  "supported_os": [
-    "linux"
-  ],
-  "public_title": "Datadog-Containerd Integration",
-  "categories": [
-    "containers"
-  ],
-  "type": "check",
-  "is_public": true,
-  "display_name": "Containerd",
-  "creates_events": true,
-  "integration_id": "containerd",
+  "manifest_version": "2.0.0",
+  "app_uuid": "206cf95f-1d2a-4ad5-b027-0de15431833b",
+  "app_id": "containerd",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Track all your Containerd metrics with Datadog",
+    "title": "Containerd",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Category::Containers"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "monitors": {},
-    "dashboards": {},
-    "service_checks": "assets/service_checks.json",
-    "logs": {},
-    "metrics_metadata": "metadata.csv"
+    "integration": {
+      "source_type_name": "Containerd",
+      "configuration": {},
+      "events": {
+        "creates_events": true
+      },
+      "metrics": {
+        "prefix": "containerd.",
+        "check": "containerd.cpu.user",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    }
   }
 }

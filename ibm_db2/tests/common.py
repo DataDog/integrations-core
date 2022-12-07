@@ -25,5 +25,13 @@ CONFIG = {
 }
 
 E2E_METADATA = {
-    'start_commands': ['apt-get update', 'apt-get install -y build-essential libxslt-dev', 'pip install ibm_db']
+    'env_vars': {
+        'IBM_DB_INSTALLER_URL': 'https://ddintegrations.blob.core.windows.net/ibm-db2/',
+    },
+    'docker_volumes': ['{}/requirements.txt:/dev/requirements.txt'.format(os.path.join(HERE, 'docker'))],
+    'start_commands': [
+        'apt-get update',
+        'apt-get install -y build-essential libxslt-dev',
+        'pip install -r /dev/requirements.txt',
+    ],
 }

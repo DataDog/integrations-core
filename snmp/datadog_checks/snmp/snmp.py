@@ -43,7 +43,7 @@ from .utils import (
 DEFAULT_OID_BATCH_SIZE = 10
 LOADER_TAG = 'loader:python'
 
-_MAX_FETCH_NUMBER = 10 ** 6
+_MAX_FETCH_NUMBER = 10**6
 
 
 def reply_invalid(oid):
@@ -370,7 +370,7 @@ class SnmpCheck(AgentCheck):
         self._thread.start()
         self._executor = futures.ThreadPoolExecutor(max_workers=self._config.workers)
 
-    def check(self, instance):
+    def check(self, _):
         # type: (Dict[str, Any]) -> None
         start_time = time.time()
         self._submitted_metrics = 0
@@ -386,16 +386,17 @@ class SnmpCheck(AgentCheck):
 
             sent = []
             for host, discovered in list(config.discovered_instances.items()):
-                future = executor.submit(self._check_device, discovered)
+                future = executor.submit(self._check_device, discovered)  # type: Any
                 sent.append(future)
                 future.add_done_callback(functools.partial(self._on_check_device_done, host))
             futures.wait(sent)
 
-            tags = ['network:{}'.format(config.ip_network)]
+            tags = ['network:{}'.format(config.ip_network), 'autodiscovery_subnet:{}'.format(config.ip_network)]
             tags.extend(config.tags)
             self.gauge('snmp.discovered_devices_count', len(config.discovered_instances), tags=tags)
         else:
-            _, tags = self._check_device(config)
+            error, tags = self._check_device(config)
+            # no need to handle error here since it's already handled inside `self._check_device`
 
         self.submit_telemetry_metrics(start_time, tags)
 
@@ -623,7 +624,7 @@ class SnmpCheck(AgentCheck):
             return
 
         try:
-            bandwidth_usage_value = (bits_value / (if_high_speed * (10 ** 6))) * 100
+            bandwidth_usage_value = (bits_value / (if_high_speed * (10**6))) * 100
         except ZeroDivisionError:
             self.log.debug('Zero value at ifHighSpeed, skipping this row. index=%s', index)
             return
@@ -651,7 +652,7 @@ class SnmpCheck(AgentCheck):
            index of the value we want to extract from the index tuple.
            cf. 1 for ipVersion in the IP-MIB::ipSystemStatsTable for example
          - Those specified in column_tags contain the name of a column, which
-           could be a potential result, to use as a tage
+           could be a potential result, to use as a tag
            cf. ifDescr in the IF-MIB::ifTable for example
         """
         tags = []  # type: List[str]
@@ -693,7 +694,7 @@ class SnmpCheck(AgentCheck):
 
     def monotonic_count_and_rate(self, metric, value, tags):
         # type: (str, Any, List[str]) -> None
-        """Specific submission method which sends a metric both as a monotonic cound and a rate."""
+        """Specific submission method which sends a metric both as a monotonic count and a rate."""
         self.monotonic_count(metric, value, tags=tags)
         self.rate("{}.rate".format(metric), value, tags=tags)
 

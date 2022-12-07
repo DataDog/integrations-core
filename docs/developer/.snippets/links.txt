@@ -14,14 +14,17 @@
 [black-github]: https://github.com/psf/black
 [click-github]: https://github.com/pallets/click
 [codecov-home]: https://codecov.io
-[config-spec-example-consumer]: https://github.com/DataDog/integrations-core/blob/master/datadog_checks_dev/datadog_checks/dev/tooling/specs/configuration/consumers/example.py
-[config-spec-model-consumer]: https://github.com/DataDog/integrations-core/blob/master/datadog_checks_dev/datadog_checks/dev/tooling/specs/configuration/consumers/model.py
-[config-spec-producer]: https://github.com/DataDog/integrations-core/blob/master/datadog_checks_dev/datadog_checks/dev/tooling/specs/configuration/core.py
+[config-spec-example-consumer]: https://github.com/DataDog/integrations-core/blob/master/datadog_checks_dev/datadog_checks/dev/tooling/configuration/consumers/example.py
+[config-spec-model-consumer]: https://github.com/DataDog/integrations-core/blob/master/datadog_checks_dev/datadog_checks/dev/tooling/configuration/consumers/model.py
+[config-spec-producer]: https://github.com/DataDog/integrations-core/blob/master/datadog_checks_dev/datadog_checks/dev/tooling/configuration/core.py
 [config-spec-template-init-config-http]: https://github.com/DataDog/integrations-core/blob/master/datadog_checks_dev/datadog_checks/dev/tooling/templates/configuration/init_config/http.yaml
 [config-spec-template-instances-http]: https://github.com/DataDog/integrations-core/blob/master/datadog_checks_dev/datadog_checks/dev/tooling/templates/configuration/instances/http.yaml
-[config-spec-template-init-config-openmetrics]: https://github.com/DataDog/integrations-core/blob/master/datadog_checks_dev/datadog_checks/dev/tooling/templates/configuration/init_config/openmetrics_legacy.yaml
-[config-spec-template-instances-openmetrics]: https://github.com/DataDog/integrations-core/blob/master/datadog_checks_dev/datadog_checks/dev/tooling/templates/configuration/instances/openmetrics_legacy.yaml
+[config-spec-template-init-config-openmetrics-legacy]: https://github.com/DataDog/integrations-core/blob/master/datadog_checks_dev/datadog_checks/dev/tooling/templates/configuration/init_config/openmetrics_legacy.yaml
+[config-spec-template-instances-openmetrics-legacy]: https://github.com/DataDog/integrations-core/blob/master/datadog_checks_dev/datadog_checks/dev/tooling/templates/configuration/instances/openmetrics_legacy.yaml
+[config-spec-template-instances-openmetrics]: https://github.com/DataDog/integrations-core/blob/master/datadog_checks_dev/datadog_checks/dev/tooling/templates/configuration/instances/openmetrics.yaml
+[config-spec-template-init-config-openmetrics]: https://github.com/DataDog/integrations-core/blob/master/datadog_checks_dev/datadog_checks/dev/tooling/templates/configuration/init_config/openmetrics.yaml
 [config-spec-templates]: https://github.com/DataDog/integrations-core/tree/master/datadog_checks_dev/datadog_checks/dev/tooling/templates/configuration
+[conf-yaml-example-share-labels]: https://github.com/DataDog/integrations-core/blob/7.32.x/openmetrics/datadog_checks/openmetrics/data/conf.yaml.example#L227
 [Datadog Agent]: https://docs.datadoghq.com/agent/
 [datadog-agent]: https://github.com/DataDog/datadog-agent
 [datadog-agent-flare]: https://docs.datadoghq.com/agent/troubleshooting/send_a_flare/
@@ -59,9 +62,6 @@
 [docs-snippets-abbreviations]: https://github.com/DataDog/integrations-core/blob/master/docs/developer/.snippets/abbrs.txt
 [docs-snippets-links]: https://github.com/DataDog/integrations-core/blob/master/docs/developer/.snippets/links.txt
 [docs-snippets-references]: https://github.com/DataDog/integrations-core/blob/master/docs/developer/.snippets/refs.txt
-[docs-spec-example-consumer]: https://github.com/DataDog/integrations-core/blob/master/datadog_checks_dev/datadog_checks/dev/tooling/specs/docs/consumers/example.py
-[docs-spec-producer]: https://github.com/DataDog/integrations-core/blob/master/datadog_checks_dev/datadog_checks/dev/tooling/specs/docs/core.py
-[docs-spec-templates]: https://github.com/DataDog/integrations-core/tree/master/datadog_checks_dev/datadog_checks/dev/tooling/templates/docs
 [docs-theme]: https://squidfunk.github.io/mkdocs-material/
 [flake8-bugbear-github]: https://github.com/PyCQA/flake8-bugbear
 [flake8-github]: https://github.com/PyCQA/flake8
@@ -104,6 +104,7 @@
 [pyenv-github]: https://github.com/pyenv/pyenv
 [pyflakes-github]: https://github.com/PyCQA/pyflakes
 [pytest-benchmark-github]: https://github.com/ionelmc/pytest-benchmark
+[pytest-ddtrace]: https://github.com/DataDog/dd-trace-py
 [pytest-fixtures]: https://docs.pytest.org/en/latest/fixture.html
 [pytest-github]: https://github.com/pytest-dev/pytest
 [pytest-markers]: http://doc.pytest.org/en/latest/example/markers.html
@@ -111,7 +112,6 @@
 [pytest-usage]: https://docs.pytest.org/en/latest/usage.html
 [python-bpo-af-unix-win]: https://bugs.python.org/issue33408
 [python-cprofile]: https://docs.python.org/3/library/profile.html#module-cProfile
-[python-downloads-windows]: https://www.python.org/downloads/windows
 [python-home]: https://www.python.org
 [python-markdown-extensions]: https://github.com/Python-Markdown/markdown/wiki/Third-Party-Extensions
 [python-pdb]: https://docs.python.org/3/library/pdb.html
