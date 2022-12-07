@@ -34,7 +34,7 @@ def dbm_instance(pg_instance):
         ),
     ],
 )
-def test_explain_parameterized_queries(integration_check, dbm_instance, aggregator, query, expected_explain_err_code):
+def test_explain_parameterized_queries(integration_check, dbm_instance, query, expected_explain_err_code):
     check = integration_check(dbm_instance)
     check._connect()
 
@@ -70,7 +70,7 @@ def test_explain_parameterized_queries(integration_check, dbm_instance, aggregat
     ],
 )
 def test_explain_parameterized_queries_generic_params(
-    integration_check, dbm_instance, aggregator, query, expected_generic_values
+    integration_check, dbm_instance, query, expected_generic_values
 ):
     check = integration_check(dbm_instance)
     check._connect()

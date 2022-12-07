@@ -11,8 +11,8 @@ logger = logging.getLogger(__name__)
 
 PREPARE_STATEMENT_QUERY = 'PREPARE dd_{query_signature} AS {statement}'
 
-PARAM_TYPES_FOR_PREPARED_STATEMENT_QUERY = '''\
-SELECT parameter_types FROM pg_prepared_statements WHERE name = 'dd_{query_signature}'
+PARAM_TYPES_COUNT_QUERY = '''\
+SELECT CARDINALITY(parameter_types) FROM pg_prepared_statements WHERE name = 'dd_{query_signature}'
 '''
 
 EXECUTE_PREPARED_STATEMENT_QUERY = 'EXECUTE dd_{prepared_statement}({generic_values})'
@@ -111,16 +111,9 @@ class ExplainParameterizedQueries:
     @tracked_method(agent_check_getter=agent_check_getter)
     def _get_number_of_parameters_for_prepared_statement(self, dbname, query_signature):
         rows = self._execute_query_and_fetch_rows(
-            dbname, PARAM_TYPES_FOR_PREPARED_STATEMENT_QUERY.format(query_signature=query_signature)
+            dbname, PARAM_TYPES_COUNT_QUERY.format(query_signature=query_signature)
         )
-        if rows:
-            # e.g. [['{integer,record,text,text}']] -> '{integer,record,text,text}'
-            param_types = rows[0][0]
-            # e.g. '{integer,record,text,text}' -> 'integer,record,text,text'
-            param_types = param_types.replace('{', '').replace('}', '')
-            # e.g. 'integer,record,text,text' -> ['integer', 'record', 'text', 'text']
-            return len(param_types.split(','))
-        return 0
+        return rows[0][0] if rows else 0
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _explain_prepared_statement(self, dbname, statement, obfuscated_statement, query_signature):
