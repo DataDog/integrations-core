@@ -2,6 +2,11 @@
 
 ## Overview
 
+Integration that allows to:
+
+- Visualize and monitor metrics collected with Gitlab through Prometheus
+
+See [Monitoring GitLab with Prometheus][1] for more information.
 
 ## Setup
 

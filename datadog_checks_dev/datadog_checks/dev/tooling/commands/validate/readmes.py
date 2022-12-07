@@ -105,11 +105,13 @@ def validate_readme(integration, repo, display_queue, files_failed, readme_count
 
     for header in ("Overview", "Setup"):
         validate_header(h2s, header, files_failed, readme_path, display_queue, soup)
-        validate_no_images
+        validate_no_images(h2s, header, files_failed, readme_path, display_queue, soup)
 
     if repo == 'marketplace':
         for header in ("Support", "Uninstallation"):
             validate_header(h2s, header, files_failed, readme_path, display_queue, soup)
+            if(header == "Support"):
+                validate_no_images(h2s, header, files_failed, readme_path, display_queue, soup)
 
     # Check all referenced images are in the `images` folder and that
     # they use the `raw.githubusercontent` format or relative paths to the `images` folder
@@ -147,16 +149,19 @@ def validate_header(h2s, header, files_failed, readme_path, display_queue, soup)
         curr_header = soup.find('h2', text=header)
         curr_instructions = curr_header.find_next()
         if curr_instructions.name == "h2":
-            rest=curr_header.find_next_siblings()
             files_failed[readme_path] = True
-            display_queue.append((echo_failure, f"     readme has an empty {header} H2 (##) section" + rest))
+            display_queue.append((echo_failure, f"     readme has an empty {header} H2 (##) section"))
 
-def validate_no_images(header, soup):
+def validate_no_images(h2s, header, files_failed, readme_path, display_queue, soup):
+    if header not in h2s:
+        return
     curr_header = soup.find('h2',text=header)
-    rest=curr_header.find_next_siblings()
-    print("hello")
-    print(rest)
-
+    curr_text=curr_header.find_next()
+    while(curr_text != None and curr_text.name!="h2"):
+        if curr_text.name == "img":
+            files_failed[readme_path] = True
+            display_queue.append((echo_failure, f"     readme has an empty {header} H2 (##) section"))
+        
     
 
 
