@@ -6,8 +6,8 @@
           "metadata": {
             "metricName": "last(service_time)",
             "entityName": "nvme0n1p1 (cod--qfdcinkqrzw-gateway0.agent-in.jfha-h5rc.a0.cloudera.site)",
-            "startTime": "2022-12-02T08:19:51.812Z",
-            "endTime": "2022-12-02T08:24:51.812Z",
+            "startTime": "2022-12-07T18:53:13.265Z",
+            "endTime": "2022-12-07T18:58:13.265Z",
             "attributes": {
               "clusterDisplayName": "cod--qfdcinkqrzw",
               "hostname": "cod--qfdcinkqrzw-gateway0.agent-in.jfha-h5rc.a0.cloudera.site",
@@ -25,14 +25,15 @@
               "ms"
             ],
             "unitDenominators": [],
-            "expression": "SELECT last(service_time) WHERE entityName = \"d8623d9457f4db06c5637c4fd4c02f5d:nvme0n1p1\" AND category = DISK",
+            "expression": "SELECT last(service_time) AS \"service_time\" WHERE entityName = \"d8623d9457f4db06c5637c4fd4c02f5d:nvme0n1p1\" AND category = DISK",
+            "alias": "service_time",
             "metricCollectionFrequencyMs": 0,
             "rollupUsed": "RAW"
           },
           "data": [
             {
-              "timestamp": "2022-12-02T08:24:27.000Z",
-              "value": 0.4460431654676259,
+              "timestamp": "2022-12-07T18:57:31.000Z",
+              "value": 0.4357142857142857,
               "type": "SAMPLE"
             }
           ]
@@ -41,8 +42,8 @@
           "metadata": {
             "metricName": "last(service_time)",
             "entityName": "nvme1n1 (cod--qfdcinkqrzw-gateway0.agent-in.jfha-h5rc.a0.cloudera.site)",
-            "startTime": "2022-12-02T08:19:51.812Z",
-            "endTime": "2022-12-02T08:24:51.812Z",
+            "startTime": "2022-12-07T18:53:13.265Z",
+            "endTime": "2022-12-07T18:58:13.265Z",
             "attributes": {
               "clusterDisplayName": "cod--qfdcinkqrzw",
               "hostname": "cod--qfdcinkqrzw-gateway0.agent-in.jfha-h5rc.a0.cloudera.site",
@@ -60,14 +61,15 @@
               "ms"
             ],
             "unitDenominators": [],
-            "expression": "SELECT last(service_time) WHERE entityName = \"d8623d9457f4db06c5637c4fd4c02f5d:nvme1n1\" AND category = DISK",
+            "expression": "SELECT last(service_time) AS \"service_time\" WHERE entityName = \"d8623d9457f4db06c5637c4fd4c02f5d:nvme1n1\" AND category = DISK",
+            "alias": "service_time",
             "metricCollectionFrequencyMs": 0,
             "rollupUsed": "RAW"
           },
           "data": [
             {
-              "timestamp": "2022-12-02T08:24:27.000Z",
-              "value": 0.47752808988764045,
+              "timestamp": "2022-12-07T18:57:31.000Z",
+              "value": 0.74375,
               "type": "SAMPLE"
             }
           ]
@@ -76,8 +78,8 @@
           "metadata": {
             "metricName": "last(service_time)",
             "entityName": "nvme0n1 (cod--qfdcinkqrzw-gateway0.agent-in.jfha-h5rc.a0.cloudera.site)",
-            "startTime": "2022-12-02T08:19:51.812Z",
-            "endTime": "2022-12-02T08:24:51.812Z",
+            "startTime": "2022-12-07T18:53:13.265Z",
+            "endTime": "2022-12-07T18:58:13.265Z",
             "attributes": {
               "clusterDisplayName": "cod--qfdcinkqrzw",
               "hostname": "cod--qfdcinkqrzw-gateway0.agent-in.jfha-h5rc.a0.cloudera.site",
@@ -95,14 +97,15 @@
               "ms"
             ],
             "unitDenominators": [],
-            "expression": "SELECT last(service_time) WHERE entityName = \"d8623d9457f4db06c5637c4fd4c02f5d:nvme0n1\" AND category = DISK",
+            "expression": "SELECT last(service_time) AS \"service_time\" WHERE entityName = \"d8623d9457f4db06c5637c4fd4c02f5d:nvme0n1\" AND category = DISK",
+            "alias": "service_time",
             "metricCollectionFrequencyMs": 0,
             "rollupUsed": "RAW"
           },
           "data": [
             {
-              "timestamp": "2022-12-02T08:24:27.000Z",
-              "value": 0.4460431654676259,
+              "timestamp": "2022-12-07T18:57:31.000Z",
+              "value": 0.4357142857142857,
               "type": "SAMPLE"
             }
           ]
@@ -111,8 +114,8 @@
           "metadata": {
             "metricName": "last(await_time)",
             "entityName": "nvme0n1p1 (cod--qfdcinkqrzw-gateway0.agent-in.jfha-h5rc.a0.cloudera.site)",
-            "startTime": "2022-12-02T08:19:51.812Z",
-            "endTime": "2022-12-02T08:24:51.812Z",
+            "startTime": "2022-12-07T18:53:13.265Z",
+            "endTime": "2022-12-07T18:58:13.265Z",
             "attributes": {
               "clusterDisplayName": "cod--qfdcinkqrzw",
               "hostname": "cod--qfdcinkqrzw-gateway0.agent-in.jfha-h5rc.a0.cloudera.site",
@@ -130,14 +133,15 @@
               "ms"
             ],
             "unitDenominators": [],
-            "expression": "SELECT last(await_time) WHERE entityName = \"d8623d9457f4db06c5637c4fd4c02f5d:nvme0n1p1\" AND category = DISK",
+            "expression": "SELECT last(await_time) AS \"await_time\" WHERE entityName = \"d8623d9457f4db06c5637c4fd4c02f5d:nvme0n1p1\" AND category = DISK",
+            "alias": "await_time",
             "metricCollectionFrequencyMs": 0,
             "rollupUsed": "RAW"
           },
           "data": [
             {
-              "timestamp": "2022-12-02T08:24:27.000Z",
-              "value": 0.8705035971223022,
+              "timestamp": "2022-12-07T18:57:31.000Z",
+              "value": 0.6071428571428571,
               "type": "SAMPLE"
             }
           ]
@@ -146,8 +150,8 @@
           "metadata": {
             "metricName": "last(await_time)",
             "entityName": "nvme1n1 (cod--qfdcinkqrzw-gateway0.agent-in.jfha-h5rc.a0.cloudera.site)",
-            "startTime": "2022-12-02T08:19:51.812Z",
-            "endTime": "2022-12-02T08:24:51.812Z",
+            "startTime": "2022-12-07T18:53:13.265Z",
+            "endTime": "2022-12-07T18:58:13.265Z",
             "attributes": {
               "clusterDisplayName": "cod--qfdcinkqrzw",
               "hostname": "cod--qfdcinkqrzw-gateway0.agent-in.jfha-h5rc.a0.cloudera.site",
@@ -165,14 +169,15 @@
               "ms"
             ],
             "unitDenominators": [],
-            "expression": "SELECT last(await_time) WHERE entityName = \"d8623d9457f4db06c5637c4fd4c02f5d:nvme1n1\" AND category = DISK",
+            "expression": "SELECT last(await_time) AS \"await_time\" WHERE entityName = \"d8623d9457f4db06c5637c4fd4c02f5d:nvme1n1\" AND category = DISK",
+            "alias": "await_time",
             "metricCollectionFrequencyMs": 0,
             "rollupUsed": "RAW"
           },
           "data": [
             {
-              "timestamp": "2022-12-02T08:24:27.000Z",
-              "value": 1.4157303370786516,
+              "timestamp": "2022-12-07T18:57:31.000Z",
+              "value": 1.775,
               "type": "SAMPLE"
             }
           ]
@@ -181,8 +186,8 @@
           "metadata": {
             "metricName": "last(await_time)",
             "entityName": "nvme0n1 (cod--qfdcinkqrzw-gateway0.agent-in.jfha-h5rc.a0.cloudera.site)",
-            "startTime": "2022-12-02T08:19:51.812Z",
-            "endTime": "2022-12-02T08:24:51.812Z",
+            "startTime": "2022-12-07T18:53:13.265Z",
+            "endTime": "2022-12-07T18:58:13.265Z",
             "attributes": {
               "clusterDisplayName": "cod--qfdcinkqrzw",
               "hostname": "cod--qfdcinkqrzw-gateway0.agent-in.jfha-h5rc.a0.cloudera.site",
@@ -200,14 +205,15 @@
               "ms"
             ],
             "unitDenominators": [],
-            "expression": "SELECT last(await_time) WHERE entityName = \"d8623d9457f4db06c5637c4fd4c02f5d:nvme0n1\" AND category = DISK",
+            "expression": "SELECT last(await_time) AS \"await_time\" WHERE entityName = \"d8623d9457f4db06c5637c4fd4c02f5d:nvme0n1\" AND category = DISK",
+            "alias": "await_time",
             "metricCollectionFrequencyMs": 0,
             "rollupUsed": "RAW"
           },
           "data": [
             {
-              "timestamp": "2022-12-02T08:24:27.000Z",
-              "value": 0.8705035971223022,
+              "timestamp": "2022-12-07T18:57:31.000Z",
+              "value": 0.6071428571428571,
               "type": "SAMPLE"
             }
           ]
@@ -216,8 +222,8 @@
           "metadata": {
             "metricName": "last(await_read_time)",
             "entityName": "nvme0n1p1 (cod--qfdcinkqrzw-gateway0.agent-in.jfha-h5rc.a0.cloudera.site)",
-            "startTime": "2022-12-02T08:19:51.812Z",
-            "endTime": "2022-12-02T08:24:51.812Z",
+            "startTime": "2022-12-07T18:53:13.265Z",
+            "endTime": "2022-12-07T18:58:13.265Z",
             "attributes": {
               "clusterDisplayName": "cod--qfdcinkqrzw",
               "hostname": "cod--qfdcinkqrzw-gateway0.agent-in.jfha-h5rc.a0.cloudera.site",
@@ -235,13 +241,14 @@
               "ms"
             ],
             "unitDenominators": [],
-            "expression": "SELECT last(await_read_time) WHERE entityName = \"d8623d9457f4db06c5637c4fd4c02f5d:nvme0n1p1\" AND category = DISK",
+            "expression": "SELECT last(await_read_time) AS \"await_read_time\" WHERE entityName = \"d8623d9457f4db06c5637c4fd4c02f5d:nvme0n1p1\" AND category = DISK",
+            "alias": "await_read_time",
             "metricCollectionFrequencyMs": 0,
             "rollupUsed": "RAW"
           },
           "data": [
             {
-              "timestamp": "2022-12-02T08:24:27.000Z",
+              "timestamp": "2022-12-07T18:57:31.000Z",
               "value": 0,
               "type": "SAMPLE"
             }
@@ -251,8 +258,8 @@
           "metadata": {
             "metricName": "last(await_read_time)",
             "entityName": "nvme1n1 (cod--qfdcinkqrzw-gateway0.agent-in.jfha-h5rc.a0.cloudera.site)",
-            "startTime": "2022-12-02T08:19:51.812Z",
-            "endTime": "2022-12-02T08:24:51.812Z",
+            "startTime": "2022-12-07T18:53:13.265Z",
+            "endTime": "2022-12-07T18:58:13.265Z",
             "attributes": {
               "clusterDisplayName": "cod--qfdcinkqrzw",
               "hostname": "cod--qfdcinkqrzw-gateway0.agent-in.jfha-h5rc.a0.cloudera.site",
@@ -270,13 +277,14 @@
               "ms"
             ],
             "unitDenominators": [],
-            "expression": "SELECT last(await_read_time) WHERE entityName = \"d8623d9457f4db06c5637c4fd4c02f5d:nvme1n1\" AND category = DISK",
+            "expression": "SELECT last(await_read_time) AS \"await_read_time\" WHERE entityName = \"d8623d9457f4db06c5637c4fd4c02f5d:nvme1n1\" AND category = DISK",
+            "alias": "await_read_time",
             "metricCollectionFrequencyMs": 0,
             "rollupUsed": "RAW"
           },
           "data": [
             {
-              "timestamp": "2022-12-02T08:24:27.000Z",
+              "timestamp": "2022-12-07T18:57:31.000Z",
               "value": 0,
               "type": "SAMPLE"
             }
@@ -286,8 +294,8 @@
           "metadata": {
             "metricName": "last(await_read_time)",
             "entityName": "nvme0n1 (cod--qfdcinkqrzw-gateway0.agent-in.jfha-h5rc.a0.cloudera.site)",
-            "startTime": "2022-12-02T08:19:51.812Z",
-            "endTime": "2022-12-02T08:24:51.812Z",
+            "startTime": "2022-12-07T18:53:13.265Z",
+            "endTime": "2022-12-07T18:58:13.265Z",
             "attributes": {
               "clusterDisplayName": "cod--qfdcinkqrzw",
               "hostname": "cod--qfdcinkqrzw-gateway0.agent-in.jfha-h5rc.a0.cloudera.site",
@@ -305,13 +313,14 @@
               "ms"
             ],
             "unitDenominators": [],
-            "expression": "SELECT last(await_read_time) WHERE entityName = \"d8623d9457f4db06c5637c4fd4c02f5d:nvme0n1\" AND category = DISK",
+            "expression": "SELECT last(await_read_time) AS \"await_read_time\" WHERE entityName = \"d8623d9457f4db06c5637c4fd4c02f5d:nvme0n1\" AND category = DISK",
+            "alias": "await_read_time",
             "metricCollectionFrequencyMs": 0,
             "rollupUsed": "RAW"
           },
           "data": [
             {
-              "timestamp": "2022-12-02T08:24:27.000Z",
+              "timestamp": "2022-12-07T18:57:31.000Z",
               "value": 0,
               "type": "SAMPLE"
             }
@@ -321,8 +330,8 @@
           "metadata": {
             "metricName": "last(await_write_time)",
             "entityName": "nvme0n1p1 (cod--qfdcinkqrzw-gateway0.agent-in.jfha-h5rc.a0.cloudera.site)",
-            "startTime": "2022-12-02T08:19:51.812Z",
-            "endTime": "2022-12-02T08:24:51.812Z",
+            "startTime": "2022-12-07T18:53:13.265Z",
+            "endTime": "2022-12-07T18:58:13.265Z",
             "attributes": {
               "clusterDisplayName": "cod--qfdcinkqrzw",
               "hostname": "cod--qfdcinkqrzw-gateway0.agent-in.jfha-h5rc.a0.cloudera.site",
@@ -340,14 +349,15 @@
               "ms"
             ],
             "unitDenominators": [],
-            "expression": "SELECT last(await_write_time) WHERE entityName = \"d8623d9457f4db06c5637c4fd4c02f5d:nvme0n1p1\" AND category = DISK",
+            "expression": "SELECT last(await_write_time) AS \"await_write_time\" WHERE entityName = \"d8623d9457f4db06c5637c4fd4c02f5d:nvme0n1p1\" AND category = DISK",
+            "alias": "await_write_time",
             "metricCollectionFrequencyMs": 0,
             "rollupUsed": "RAW"
           },
           "data": [
             {
-              "timestamp": "2022-12-02T08:24:27.000Z",
-              "value": 0.8705035971223022,
+              "timestamp": "2022-12-07T18:57:31.000Z",
+              "value": 0.6071428571428571,
               "type": "SAMPLE"
             }
           ]
@@ -356,8 +366,8 @@
           "metadata": {
             "metricName": "last(await_write_time)",
             "entityName": "nvme1n1 (cod--qfdcinkqrzw-gateway0.agent-in.jfha-h5rc.a0.cloudera.site)",
-            "startTime": "2022-12-02T08:19:51.812Z",
-            "endTime": "2022-12-02T08:24:51.812Z",
+            "startTime": "2022-12-07T18:53:13.265Z",
+            "endTime": "2022-12-07T18:58:13.265Z",
             "attributes": {
               "clusterDisplayName": "cod--qfdcinkqrzw",
               "hostname": "cod--qfdcinkqrzw-gateway0.agent-in.jfha-h5rc.a0.cloudera.site",
@@ -375,14 +385,15 @@
               "ms"
             ],
             "unitDenominators": [],
-            "expression": "SELECT last(await_write_time) WHERE entityName = \"d8623d9457f4db06c5637c4fd4c02f5d:nvme1n1\" AND category = DISK",
+            "expression": "SELECT last(await_write_time) AS \"await_write_time\" WHERE entityName = \"d8623d9457f4db06c5637c4fd4c02f5d:nvme1n1\" AND category = DISK",
+            "alias": "await_write_time",
             "metricCollectionFrequencyMs": 0,
             "rollupUsed": "RAW"
           },
           "data": [
             {
-              "timestamp": "2022-12-02T08:24:27.000Z",
-              "value": 1.4157303370786516,
+              "timestamp": "2022-12-07T18:57:31.000Z",
+              "value": 1.775,
               "type": "SAMPLE"
             }
           ]
@@ -391,8 +402,8 @@
           "metadata": {
             "metricName": "last(await_write_time)",
             "entityName": "nvme0n1 (cod--qfdcinkqrzw-gateway0.agent-in.jfha-h5rc.a0.cloudera.site)",
-            "startTime": "2022-12-02T08:19:51.812Z",
-            "endTime": "2022-12-02T08:24:51.812Z",
+            "startTime": "2022-12-07T18:53:13.265Z",
+            "endTime": "2022-12-07T18:58:13.265Z",
             "attributes": {
               "clusterDisplayName": "cod--qfdcinkqrzw",
               "hostname": "cod--qfdcinkqrzw-gateway0.agent-in.jfha-h5rc.a0.cloudera.site",
@@ -410,21 +421,22 @@
               "ms"
             ],
             "unitDenominators": [],
-            "expression": "SELECT last(await_write_time) WHERE entityName = \"d8623d9457f4db06c5637c4fd4c02f5d:nvme0n1\" AND category = DISK",
+            "expression": "SELECT last(await_write_time) AS \"await_write_time\" WHERE entityName = \"d8623d9457f4db06c5637c4fd4c02f5d:nvme0n1\" AND category = DISK",
+            "alias": "await_write_time",
             "metricCollectionFrequencyMs": 0,
             "rollupUsed": "RAW"
           },
           "data": [
             {
-              "timestamp": "2022-12-02T08:24:27.000Z",
-              "value": 0.8705035971223022,
+              "timestamp": "2022-12-07T18:57:31.000Z",
+              "value": 0.6071428571428571,
               "type": "SAMPLE"
             }
           ]
         }
       ],
       "warnings": [],
-      "timeSeriesQuery": "SELECT last(service_time),last(await_time),last(await_read_time),last(await_write_time) WHERE hostId=\"d8623d9457f4db06c5637c4fd4c02f5d\" AND category=DISK"
+      "timeSeriesQuery": "SELECT last(service_time) AS service_time,last(await_time) AS await_time,last(await_read_time) AS await_read_time,last(await_write_time) AS await_write_time WHERE hostId=\"d8623d9457f4db06c5637c4fd4c02f5d\" AND category=DISK"
     }
   ]
 }

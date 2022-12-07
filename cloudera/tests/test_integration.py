@@ -30,7 +30,6 @@ def test_given_api_v48_endpoint_when_check_runs_then_service_check_ok_and_metric
     instance,
 ):
     # Given
-    instance['api_url'] = "http://localhost:8080/api/v48"
     check = cloudera_check(instance)
     # When
     dd_run_check(check)

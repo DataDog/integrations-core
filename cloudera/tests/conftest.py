@@ -52,24 +52,21 @@ def api_response():
 
 
 def get_timeseries_resource():
-    def _get_timeseries_resource():
-        time_series = []
-        for category, metrics in TIMESERIES_METRICS.items():
-            for metric in metrics:
-                time_series.append(
-                    ApiTimeSeries(
-                        data=[
-                            ApiTimeSeriesData(value=49.7),
-                        ],
-                        metadata=ApiTimeSeriesMetadata(metric_name=f"last({metric})", entity_name=category),
-                    )
-                )
-
-        return_obj = ApiTimeSeriesResponseList(
+    return [
+        ApiTimeSeriesResponseList(
             items=[
-                ApiTimeSeriesResponse(time_series=time_series),
+                ApiTimeSeriesResponse(
+                    time_series=[
+                        ApiTimeSeries(
+                            data=[
+                                ApiTimeSeriesData(value=49.7),
+                            ],
+                            metadata=ApiTimeSeriesMetadata(entity_name=category, alias=metric),
+                        )
+                        for metric in metrics
+                    ]
+                ),
             ],
         )
-        return return_obj
-
-    return _get_timeseries_resource()
+        for category, metrics in TIMESERIES_METRICS.items()
+    ]

@@ -21,31 +21,32 @@ class ApiClientV7(ApiClient):
         self._log.debug("Full clusters response:")
         self._log.debug(read_clusters_response)
         for cluster in read_clusters_response.items:
-            self._log.debug('cluster: %s', cluster)
             cluster_name = cluster.name
-            cluster_tags = cluster.tags
             self._log.debug('cluster_name: %s', cluster_name)
+            self._log.debug('cluster: %s', cluster)
 
-            if cluster_name:
-                tags = [f'cloudera_cluster:{cluster_name}']
-
-            if cluster_tags:
-                for cluster_tag in cluster_tags:
-                    tags.append(f"{cluster_tag.name}:{cluster_tag.value}")
+            tags = self._collect_cluster_tags(cluster)
 
             self._collect_cluster_metrics(cluster_name, tags)
             self._collect_cluster_service_check(cluster, tags)
-
-            # host metrics will have different tags than the cluster metrics
             self._collect_hosts(cluster_name)
+
+    def _collect_cluster_tags(self, cluster):
+        tags = []
+        if cluster.name:
+            for cluster_tag in cluster.tags:
+                tags.append(f"{cluster_tag.name}:{cluster_tag.value}")
+        return tags
 
     def _collect_cluster_service_check(self, cluster, tags):
         cluster_entity_status = ENTITY_STATUS[cluster.entity_status]
         message = cluster.entity_status if cluster_entity_status != AgentCheck.OK else None
-        self._check.service_check(CLUSTER_HEALTH, cluster_entity_status, tags=tags, message=message)
+        self._check.service_check(
+            CLUSTER_HEALTH, cluster_entity_status, tags=tags + [f'cloudera_cluster:{cluster.name}'], message=message
+        )
 
     def _collect_cluster_metrics(self, cluster_name, tags):
-        metric_names = ','.join(f'last({metric})' for metric in TIMESERIES_METRICS['cluster'])
+        metric_names = ','.join(f'last({metric}) AS {metric}' for metric in TIMESERIES_METRICS['cluster'])
         query = f'SELECT {metric_names} WHERE clusterName="{cluster_name}" AND category=CLUSTER'
         self._query_time_series(query, category='cluster', tags=tags)
 
@@ -55,21 +56,25 @@ class ApiClientV7(ApiClient):
         self._log.debug("Full hosts response:")
         self._log.debug(list_hosts_response)
         for host in list_hosts_response.items:
-            tags = [
-                f'cloudera_hostname:{host.hostname}',
-                f'cloudera_rack_id:{host.rack_id}',
-                f'cloudera_host_id:{host.host_id}',
-                f'cloudera_cluster:{host.cluster_ref.cluster_name}',
-            ]
-
-            host_tags = host.tags
-            if host_tags:
-                for host_tag in host_tags:
-                    tags.append(f"{host_tag.name}:{host_tag.value}")
+            tags = self._collect_host_tags(host)
 
             if host.host_id:
                 self._collect_host_metrics(host, tags)
+                self._collect_role_metrics(host, tags)
+                self._collect_disk_metrics(host, tags)
                 self._collect_host_service_check(host, tags)
+
+    def _collect_host_tags(self, host):
+        tags = [
+            f'cloudera_rack_id:{host.rack_id}',
+            f'cloudera_cluster:{host.cluster_ref.cluster_name}',
+        ]
+
+        host_tags = host.tags
+        if host_tags:
+            for host_tag in host_tags:
+                tags.append(f"{host_tag.name}:{host_tag.value}")
+        return tags
 
     def _collect_host_service_check(self, host, tags):
         host_entity_status = ENTITY_STATUS[host.entity_status] if host.entity_status else None
@@ -77,11 +82,19 @@ class ApiClientV7(ApiClient):
         self._check.service_check(HOST_HEALTH, host_entity_status, tags=tags)
 
     def _collect_host_metrics(self, host, tags):
-        categories = TIMESERIES_METRICS.keys()
-        for category in categories:
-            metric_names = ','.join(f'last({metric})' for metric in TIMESERIES_METRICS[category])
-            query = f'SELECT {metric_names} WHERE hostId="{host.host_id}" AND category={category.upper()}'
-            self._query_time_series(query, category=category, tags=tags)
+        metric_names = ','.join(f'last({metric}) AS {metric}' for metric in TIMESERIES_METRICS['host'])
+        query = f'SELECT {metric_names} WHERE hostId="{host.host_id}" AND category=HOST'
+        self._query_time_series(query, category='host', tags=tags)
+
+    def _collect_role_metrics(self, host, tags):
+        metric_names = ','.join(f'last({metric}) AS {metric}' for metric in TIMESERIES_METRICS['role'])
+        query = f'SELECT {metric_names} WHERE hostId="{host.host_id}" AND category=ROLE'
+        self._query_time_series(query, category='role', tags=tags)
+
+    def _collect_disk_metrics(self, host, tags):
+        metric_names = ','.join(f'last({metric}) AS {metric}' for metric in TIMESERIES_METRICS['disk'])
+        query = f'SELECT {metric_names} WHERE hostId="{host.host_id}" AND category=DISK'
+        self._query_time_series(query, category='disk', tags=tags)
 
     def _query_time_series(self, query, category, tags):
         self._log.debug('query: %s', query)
@@ -91,11 +104,12 @@ class ApiClientV7(ApiClient):
         for item in query_time_series_response.items:
             for ts in item.time_series:
                 self._log.debug('ts: %s', ts)
-                raw_metric_name = ts.metadata.metric_name
-                metric_name = raw_metric_name[5:-1]
+                metric_name = ts.metadata.alias
                 full_metric_name = f'{category}.{metric_name}'
                 for d in ts.data:
                     value = d.value
                     self._log.debug('full_metric_name: %s', full_metric_name)
                     self._log.debug('value: %s', value)
-                    self._check.gauge(full_metric_name, value, tags=tags)
+                    self._check.gauge(
+                        full_metric_name, value, tags=tags + [f'cloudera_{category}:{ts.metadata.entity_name}']
+                    )
