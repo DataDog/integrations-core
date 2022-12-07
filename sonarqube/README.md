@@ -240,7 +240,7 @@ Include a maximum of `20` components and exclude those beginning with `temp`:
 components_discovery:
   limit: 20
   include:
-    '*':
+    '.*':
   exclude:
     - 'temp*'
 ```
