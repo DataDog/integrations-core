@@ -16,7 +16,6 @@ from in_toto.exceptions import LinkNotFoundError
 from in_toto.models.metadata import Metablock
 from packaging.version import parse as parse_version
 from securesystemslib import interface
-from tuf.api.exceptions import DownloadError
 from tuf.ngclient import Updater
 
 from .exceptions import (
@@ -30,6 +29,7 @@ from .exceptions import (
     NoSuchDatadogPackageVersion,
     PythonVersionMismatch,
     RevokedDeveloperOrMachine,
+    TargetNotFoundError,
 )
 from .parameters import substitute
 
@@ -101,6 +101,9 @@ class TUFDownloader:
 
     def __download_with_tuf(self, target_relpath):
         target = self.__updater.get_targetinfo(target_relpath)
+        if target is None:
+            raise TargetNotFoundError(f'Target at {target_relpath} not found')
+
         target_abspath = os.path.join(self.__targets_dir, target_relpath)
         local_relpath = self.__updater.find_cached_target(target, target_abspath)
 
@@ -273,7 +276,7 @@ class TUFDownloader:
         try:
             # NOTE: We do not perform in-toto inspection for simple indices; only for wheels.
             index_abspath, _ = self.__download_with_tuf(index_relpath)
-        except DownloadError:
+        except TargetNotFoundError:
             raise NoSuchDatadogPackage(standard_distribution_name)
 
         with open(index_abspath) as simple_index:

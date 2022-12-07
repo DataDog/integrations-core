@@ -25,7 +25,7 @@ from tuf.api.exceptions import DownloadError, ExpiredMetadataError, UnsignedMeta
 import datadog_checks.downloader
 from datadog_checks.downloader.cli import download
 from datadog_checks.downloader.download import REPOSITORY_URL_PREFIX
-from datadog_checks.downloader.exceptions import NonDatadogPackage
+from datadog_checks.downloader.exceptions import NonDatadogPackage, NoSuchDatadogPackage
 
 _LOGGER = logging.getLogger("test_downloader")
 
@@ -228,6 +228,23 @@ def test_local_wheels_signer_signature_leaf_error(distribution_name, distributio
             _do_run_downloader(argv)
 
     assert "wheels-signer-a was signed by 0/1 keys" in str(exc)
+
+
+@pytest.mark.offline
+@freeze_time(_LOCAL_TESTS_DATA_TIMESTAMP)
+def test_local_download_non_existing_package(capfd):
+    """Test local verification of a wheel file."""
+
+    with local_http_server("datadog-active-directory-1.10.0".format()) as http_url:
+        argv = [
+            "datadog-a-nonexisting",
+            "--version",
+            "1.0.0",
+            "--repository",
+            http_url,
+        ]
+        with pytest.raises(NoSuchDatadogPackage):
+            _do_run_downloader(argv)
 
 
 def delete_files(files):
