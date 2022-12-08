@@ -11,9 +11,9 @@ parameters:
   force_base_package: false
 
 steps:
-- ${{ if and(eq(parameters.test, 'true'), eq(parameters.coverage, 'true'), eq(parameters.force_base_package, 'false')) }}:
-  - script: ddev test --cov --junit ${{ parameters.ddtrace_flag }} ${{ parameters.check }}
-    displayName: 'Run Unit/Integration tests'
+# - ${{ if and(eq(parameters.test, 'true'), eq(parameters.coverage, 'true'), eq(parameters.force_base_package, 'false')) }}:
+#   - script: ddev test --cov --junit ${{ parameters.ddtrace_flag }} ${{ parameters.check }}
+#     displayName: 'Run Unit/Integration tests'
 
 - ${{ if and(eq(parameters.test, 'true'), not(eq(parameters.coverage, 'true'))) }}:
     - script: ddev test --junit ${{ parameters.ddtrace_flag }} ${{ parameters.check }}

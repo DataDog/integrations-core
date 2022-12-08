@@ -12,7 +12,7 @@ def parse_config_from_result(env, result):
     if 'NO E2E FIXTURE AVAILABLE' in result.stdout:
         return None, None, f'The environment fixture `{E2E_FIXTURE_NAME}` does not exist.'
 
-    if f'{env}: platform mismatch' in result.stdout or 'unsupported platform' in result.stdout:
+    if f'{env}: platform mismatch' in result.stdout or 'unsupported platform' in (result.stdout + result.stderr):
         return None, None, f'The environment `{env}` does not support this platform.'
 
     decoded = parse_encoded_config_data(result.stdout)
