@@ -60,7 +60,8 @@ class OpenMetricsBaseCheckV2(AgentCheck):
         """
         Perform an openmetrics-based check.
 
-        Subclasses should not need to override this, add custom scrapers instead.
+        Subclasses should typically not need to override this, as most common customization
+        needs are covered by the use of custom scrapers.
         Another thing to note is that this check ignores its instance argument completely.
         We take care of instance-level customization at initialization time.
         """
