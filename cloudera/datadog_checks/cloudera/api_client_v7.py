@@ -79,7 +79,7 @@ class ApiClientV7(ApiClient):
     def _collect_host_service_check(self, host, tags):
         host_entity_status = ENTITY_STATUS[host.entity_status] if host.entity_status else None
         self._log.debug('host_entity_status: %s', host_entity_status)
-        self._check.service_check(HOST_HEALTH, host_entity_status, tags=tags)
+        self._check.service_check(HOST_HEALTH, host_entity_status, tags=tags + [f'cloudera_hostname:{host.hostname}'])
 
     def _collect_host_metrics(self, host, tags):
         metric_names = ','.join(f'last({metric}) AS {metric}' for metric in TIMESERIES_METRICS['host'])
