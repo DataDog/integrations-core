@@ -1,5 +1,21 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 17.5.0 / 2022-12-08
+
+* [Added] Add `validate license-header` subcommand. See [#13417](https://github.com/DataDog/integrations-core/pull/13417).
+* [Added] Add new ddev create type for metrics crawler integrations. See [#13411](https://github.com/DataDog/integrations-core/pull/13411).
+* [Added] Implement multi-instance counters without Windows PdhEnumObjects API. See [#13243](https://github.com/DataDog/integrations-core/pull/13243).
+* [Added] Add an option to ignore failed environments in env start. See [#13443](https://github.com/DataDog/integrations-core/pull/13443).
+* [Added] add licences for python-oracledb. See [#13300](https://github.com/DataDog/integrations-core/pull/13300).
+* [Fixed] Fix parsing of E2E output for Hatch environments when warnings occur. See [#13479](https://github.com/DataDog/integrations-core/pull/13479).
+* [Fixed] Force the semver version to >=2.13.0. See [#13477](https://github.com/DataDog/integrations-core/pull/13477).
+* [Fixed] Re-raise the exception when the environment failed to start. See [#13472](https://github.com/DataDog/integrations-core/pull/13472).
+* [Fixed] Remove the --memray-show-report option. See [#13463](https://github.com/DataDog/integrations-core/pull/13463).
+* [Fixed] Bump pytest-memray version. See [#13462](https://github.com/DataDog/integrations-core/pull/13462).
+* [Fixed] Do not force pytest version. See [#13461](https://github.com/DataDog/integrations-core/pull/13461).
+* [Fixed] Update Snowflake connector and cryptography dependencies. See [#13367](https://github.com/DataDog/integrations-core/pull/13367).
+* [Fixed] Fix typo in platfrom-integrations team name. See [#13368](https://github.com/DataDog/integrations-core/pull/13368).
+
 ## 17.4.0 / 2022-11-23
 
 * [Added] Add a dummy `--memray` option to the pytest plugin. See [#13352](https://github.com/DataDog/integrations-core/pull/13352).
