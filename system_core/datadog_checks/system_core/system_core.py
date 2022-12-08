@@ -27,7 +27,7 @@ class SystemCore(AgentCheck):
 
         total_cpu_times = psutil.cpu_times()
         for key, value in iteritems(total_cpu_times._asdict()):
-            self.rate('system.core.{0}.total'.format(key), 100.0 * value /  n_cpus, tags=instance_tags)
+            self.rate('system.core.{0}.total'.format(key), 100.0 * value / n_cpus, tags=instance_tags)
 
         # https://psutil.readthedocs.io/en/latest/#psutil.cpu_freq
         # scpufreq(current=2236.812, min=800.0, max=3500.0)
