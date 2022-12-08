@@ -84,6 +84,13 @@ postgresql.queries.blk_read_time,count,,nanosecond,,"Total time spent reading bl
 postgresql.queries.blk_write_time,count,,nanosecond,,"Total time spent writing blocks per query_signature, db, and user. (DBM only)",0,postgres, postgres queries block write time,
 postgresql.queries.duration.max,gauge,,nanosecond,,"The age of the longest running query per user, db and app. (DBM only)",0,postgres,postgres queries duration max,
 postgresql.queries.duration.sum,gauge,,nanosecond,,"The sum of the age of all running queries per user, db and app. (DBM only)",0,postgres,postgres queries duration sum,
+postgresql.slru.blks_zeroed,count,,,,"Number of blocks zeroed during initializations of SLRU (simple least-recently-used) cache.",0,postgres,postgres slru zeroed
+postgresql.slru.blks_hit,count,,,,"Number of times disk blocks were found already in the SLRU (simple least-recently-used), so that a read was not necessary (this only includes hits in the SLRU, not the operating system's file system cache).",0,postgres,postgres slru hit
+postgresql.slru.blks_read,count,,,,"Number of disk blocks read for this SLRU (simple least-recently-used) cache.",0,postgres,postgres slru read
+postgresql.slru.blks_written,count,,,,"Number of disk blocks written for this SLRU (simple least-recently-used) cache.",0,postgres,postgres slru written
+postgresql.slru.blks_exists,count,,,,"Number of blocks checked for existence for this SLRU (simple least-recently-used) cache.",0,postgres,postgres slru exists
+postgresql.slru.flushes,count,,,,"Number of flushes of dirty data for this SLRU (simple least-recently-used) cache.",0,postgres,postgres slru flushes
+postgresql.slru.truncates,count,,,,"Number of truncates for this SLRU (simple least-recently-used) cache.",0,postgres,postgres slru truncates
 postgresql.transactions.duration.max,gauge,,nanosecond,,"The age of the longest running transaction per user, db and app. (DBM only)",0,postgres,postgres transactions duration max,
 postgresql.transactions.duration.sum,gauge,,nanosecond,,"The sum of the age of all running transactions per user, db and app. (DBM only)",0,postgres,postgres transactions duration sum,
 postgresql.wal_age,gauge,,second,,The age in seconds of the oldest WAL file.,0,postgres,wal age,
