@@ -105,13 +105,13 @@ def validate_readme(integration, repo, display_queue, files_failed, readme_count
 
     for header in ("Overview", "Setup"):
         validate_header(h2s, header, files_failed, readme_path, display_queue, soup)
-        validate_no_images(h2s, header, files_failed, readme_path, display_queue, soup)
+        if header == "Setup":
+            validate_no_images(h2s, header, files_failed, readme_path, display_queue, soup)
 
     if repo == 'marketplace':
         for header in ("Support", "Uninstallation"):
             validate_header(h2s, header, files_failed, readme_path, display_queue, soup)
-            if header == "Support":
-                validate_no_images(h2s, header, files_failed, readme_path, display_queue, soup)
+            validate_no_images(h2s, header, files_failed, readme_path, display_queue, soup)
 
     # Check all referenced images are in the `images` folder and that
     # they use the `raw.githubusercontent` format or relative paths to the `images` folder
