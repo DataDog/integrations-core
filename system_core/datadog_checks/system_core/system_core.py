@@ -12,9 +12,12 @@ class SystemCore(AgentCheck):
     def check(self, instance):
         instance_tags = instance.get('tags', [])
 
+        # https://psutil.readthedocs.io/en/latest/#psutil.cpu_count
+        n_cpus = psutil.cpu_count()
+        self.gauge('system.core.count', n_cpus, tags=instance_tags)
+
         # https://psutil.readthedocs.io/en/latest/#psutil.cpu_times
         cpu_times = psutil.cpu_times(percpu=True)
-        self.gauge('system.core.count', len(cpu_times), tags=instance_tags)
         self.log.debug('CPU times: %s', str(cpu_times))
 
         for i, cpu in enumerate(cpu_times):
@@ -24,7 +27,7 @@ class SystemCore(AgentCheck):
 
         total_cpu_times = psutil.cpu_times()
         for key, value in iteritems(total_cpu_times._asdict()):
-            self.rate('system.core.{0}.total'.format(key), 100.0 * value / len(cpu_times), tags=instance_tags)
+            self.rate('system.core.{0}.total'.format(key), 100.0 * value /  n_cpus, tags=instance_tags)
 
         # https://psutil.readthedocs.io/en/latest/#psutil.cpu_freq
         # scpufreq(current=2236.812, min=800.0, max=3500.0)
