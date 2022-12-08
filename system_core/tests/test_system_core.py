@@ -17,6 +17,7 @@ class TestSystemCore:
 
         with mock.patch('datadog_checks.system_core.system_core.psutil') as psutil_mock:
             psutil_mock.cpu_times.side_effect = fake_cpu_times
+            psutil_mock.cpu_count.return_value = common.MOCK_PSUTIL_CPU_COUNT
             psutil_mock.cpu_freq.return_value = common.MOCK_PSUTIL_CPU_FREQ
             c.check({})
 
