@@ -105,7 +105,7 @@ def validate_readme(integration, repo, display_queue, files_failed, readme_count
 
     for header in ("Overview", "Setup"):
         validate_header(h2s, header, files_failed, readme_path, display_queue, soup)
-        if header == "Setup":
+        if header == "Overview":
             validate_no_images(h2s, header, files_failed, readme_path, display_queue, soup)
 
     if repo == 'marketplace':
