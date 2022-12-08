@@ -3790,11 +3790,11 @@
                                     "display_type": "line",
                                     "metadata": [
                                         {
-                                            "alias_name": "network writes per node",
-                                            "expression": "sum:kubernetes.io.write_bytes{$scope,$cluster} by {kube_replica_set,host}-avg:kubernetes_state.replicaset.replicas_ready{$scope,$cluster} by {host}"
+                                            "alias_name": "IO writes per node ",
+                                            "expression": "sum:kubernetes.io.write_bytes{$scope,$cluster} by {host}"
                                         }
                                     ],
-                                    "q": "sum:kubernetes.io.write_bytes{$scope,$cluster} by {kube_replica_set,host}-avg:kubernetes_state.replicaset.replicas_ready{$scope,$cluster} by {host}",
+                                    "q": "sum:kubernetes.io.write_bytes{$scope,$cluster} by {host}",
                                     "style": {
                                         "line_type": "solid",
                                         "line_width": "normal",
@@ -3940,11 +3940,11 @@
                                     "display_type": "line",
                                     "metadata": [
                                         {
-                                            "alias_name": "disk reads per node ",
-                                            "expression": "sum:kubernetes.io.read_bytes{$scope,$cluster} by {kube_replica_set,host}-avg:kubernetes_state.replicaset.replicas_ready{$scope,$cluster} by {host}"
+                                            "alias_name": "disk reads per node",
+                                            "expression": "sum:kubernetes.io.read_bytes{$scope,$cluster} by {host}"
                                         }
                                     ],
-                                    "q": "sum:kubernetes.io.read_bytes{$scope,$cluster} by {kube_replica_set,host}-avg:kubernetes_state.replicaset.replicas_ready{$scope,$cluster} by {host}",
+                                    "q": "sum:kubernetes.io.read_bytes{$scope,$cluster} by {host}",
                                     "style": {
                                         "line_type": "solid",
                                         "line_width": "normal",

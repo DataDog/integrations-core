@@ -19,6 +19,7 @@ if Platform.is_mac():
         psutil._psosx.scputimes(user=7486.51, nice=0.0, system=5991.36, idle=40031.88),
         psutil._psosx.scputimes(user=3964.85, nice=0.0, system=2862.37, idle=46682.5),
     ]
+    MOCK_PSUTIL_CPU_FREQ = [psutil._common.scpufreq(current=2500, min=0.0, max=0.0)]
 elif Platform.is_unix():
     CHECK_RATES = [
         'system.core.idle',
@@ -82,6 +83,12 @@ elif Platform.is_unix():
             guest_nice=0.0,
         ),
     ]
+    MOCK_PSUTIL_CPU_FREQ = [
+        psutil._common.scpufreq(current=2500, min=0.0, max=0.0),
+        psutil._common.scpufreq(current=2500, min=0.0, max=0.0),
+        psutil._common.scpufreq(current=2500, min=0.0, max=0.0),
+        psutil._common.scpufreq(current=2500, min=0.0, max=0.0),
+    ]
 else:  # windows
     CHECK_RATES = [
         'system.core.user',
@@ -96,6 +103,7 @@ else:  # windows
         psutil._pswindows.scputimes(user=7486.51, system=5991.36, idle=40031.88, interrupt=0.05, dpc=0.0),
         psutil._pswindows.scputimes(user=3964.85, system=2862.37, idle=46682.50, interrupt=0.05, dpc=0.0),
     ]
+    MOCK_PSUTIL_CPU_FREQ = [psutil._common.scpufreq(current=2500, min=0.0, max=0.0)]
 
 
 EXPECTED_METRICS = CHECK_RATES

@@ -60,18 +60,15 @@ def test__get_connection_jdbc(instance, dd_run_check, aggregator, expected_tags,
     Test the _get_connection method using the JDBC client
     """
     check = Oracle(CHECK_NAME, {}, [instance])
-    check.use_oracle_client = False
-    con = mock.MagicMock()
+    check.can_use_jdbc = mock.Mock(return_value=True)
 
-    cx = mock.MagicMock(DatabaseError=RuntimeError)
-    cx.clientversion.side_effect = cx.DatabaseError()
+    con = mock.MagicMock()
 
     jdb = mock.MagicMock()
     jdb.connect.return_value = con
     jpype = mock.MagicMock(isJVMStarted=lambda: False)
 
     mocks = [
-        ('datadog_checks.oracle.oracle.cx_Oracle', cx),
         ('datadog_checks.oracle.oracle.jdb', jdb),
         ('datadog_checks.oracle.oracle.jpype', jpype),
         ('datadog_checks.oracle.oracle.JDBC_IMPORT_ERROR', None),
@@ -93,13 +90,11 @@ def test__get_connection_jdbc_query_fail(check, dd_run_check, aggregator):
     """
     Test the _get_connection method using the JDBC client and unsuccessfully query DB
     """
-    check.use_oracle_client = False
+    check.can_use_jdbc = mock.Mock(return_value=True)
     con = mock.MagicMock()
     expected_tags = ['server:localhost:1521', 'optional:tag1']
 
     check._query_manager.executor = mock_bad_executor()
-    cx = mock.MagicMock(DatabaseError=RuntimeError)
-    cx.clientversion.side_effect = cx.DatabaseError()
 
     jdb = mock.MagicMock()
     jdb.connect.return_value = con
@@ -108,7 +103,6 @@ def test__get_connection_jdbc_query_fail(check, dd_run_check, aggregator):
     check._query_errors = 1
 
     mocks = [
-        ('datadog_checks.oracle.oracle.cx_Oracle', cx),
         ('datadog_checks.oracle.oracle.jdb', jdb),
         ('datadog_checks.oracle.oracle.jpype', jpype),
         ('datadog_checks.oracle.oracle.JDBC_IMPORT_ERROR', None),

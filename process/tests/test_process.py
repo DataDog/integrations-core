@@ -98,7 +98,7 @@ def test_psutil_wrapper_accessors_fail(aggregator):
 
 
 @patch('psutil.process_iter', side_effect=[[NamedMockProcess("Process 1")], [NamedMockProcess("Process 2")]])
-def test_process_list_cache(aggregator, dd_run_check):
+def test_process_list_cache(aggregator, dd_run_check, caplog):
     config = {
         'instances': [{'name': 'python', 'search_string': ['python']}, {'name': 'python', 'search_string': ['python']}]
     }
@@ -106,8 +106,11 @@ def test_process_list_cache(aggregator, dd_run_check):
     process2 = ProcessCheck(common.CHECK_NAME, {}, [config['instances'][1]])
 
     with patch('datadog_checks.process.cache.ProcessListCache.reset'):
-        dd_run_check(process1)
-        dd_run_check(process2)
+        caplog.set_level(logging.DEBUG)
+        for process in (process1, process2):
+            dd_run_check(process)
+            assert "No matching process 'python' was found" in caplog.text
+            caplog.clear()
 
     # Should always succeed
     assert process1.process_list_cache.elements[0].name() == "Process 1"

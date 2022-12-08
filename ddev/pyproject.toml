@@ -30,8 +30,11 @@ classifiers = [
 dependencies = [
     "datadog-checks-dev[cli]>=17.4.0",
     "hatch>=1.6.3",
+    "jsonpointer",
     "pyperclip",
     "rich>=12.5.1",
+    "tomli; python_version < '3.11'",
+    "tomli-w",
     "tomlkit",
 ]
 dynamic = ["version"]
