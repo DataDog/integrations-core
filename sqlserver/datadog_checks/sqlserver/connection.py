@@ -316,6 +316,10 @@ class Connection(object):
                 # the message that is raised here (along with the exception stack trace)
                 # is what will be seen in the agent status output.
                 raise_from(SQLConnectionError(check_err_message), None)
+            else:
+                # if not the default db, we should still log this exception
+                # to give the customer an opportunity to fix the issue
+                self.log.debug(check_err_message)
 
     def _setup_new_connection(self, rawconn):
         with rawconn.cursor() as cursor:
@@ -580,6 +584,7 @@ class Connection(object):
         self.log.debug("Connection string (before password) %s", conn_str)
         if password:
             conn_str += 'PWD={};'.format(password)
+        conn_str += "TrustServerCertificate=yes"
         return conn_str
 
     def _conn_string_adodbapi(self, db_key, conn_key=None, db_name=None):
