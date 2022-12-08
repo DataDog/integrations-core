@@ -232,6 +232,12 @@ files:
       value:
         type: boolean
         example: false
+    - name: collect_slru_metrics
+      description: |
+        If set to true, collects metrics regarding simple least-recently-used cache from pg_stat_slru.
+      value:
+        type: boolean
+        example: false
     - name: collect_wal_metrics
       description: |
         Collect metrics about WAL file age.
