@@ -51,6 +51,7 @@ def dd_environment(config_e2e):
     logs_path = _mysql_logs_path()
 
     with TempDir('logs') as logs_host_path:
+        os.chmod(logs_host_path, 0o770)
         e2e_metadata = {'docker_volumes': ['{}:{}'.format(logs_host_path, logs_path)]}
 
         with docker_run(
