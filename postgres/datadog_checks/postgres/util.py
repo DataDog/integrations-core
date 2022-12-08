@@ -185,30 +185,31 @@ SELECT {metrics_columns}
 
 # Requires postgres 10+
 REPLICATION_STATS_METRICS = {
-    'descriptors': [('application_name', 'wal_app_name'), ('state', 'wal_state'), ('sync_state', 'wal_sync_state')],
+    'descriptors': [('application_name', 'wal_app_name'), ('state', 'wal_state'),
+                    ('sync_state', 'wal_sync_state'), ('client_addr', 'wal_ip')],
     'metrics': {
-        'max(GREATEST (0, EXTRACT(epoch from write_lag))) as write_lag': (
+        'GREATEST (0, EXTRACT(epoch from write_lag)) as write_lag': (
             'postgresql.replication.wal_write_lag',
             AgentCheck.gauge,
         ),
-        'max(GREATEST (0, EXTRACT(epoch from flush_lag))) AS flush_lag': (
+        'GREATEST (0, EXTRACT(epoch from flush_lag)) AS flush_lag': (
             'postgresql.replication.wal_flush_lag',
             AgentCheck.gauge,
         ),
-        'max(GREATEST (0, EXTRACT(epoch from replay_lag))) AS replay_lag': (
+        'GREATEST (0, EXTRACT(epoch from replay_lag)) AS replay_lag': (
             'postgresql.replication.wal_replay_lag',
             AgentCheck.gauge,
         ),
-        'max(GREATEST (0, age(backend_xmin))) as backend_xmin_age': (
+        'GREATEST (0, age(backend_xmin)) as backend_xmin_age': (
             'postgresql.replication.backend_xmin_age',
             AgentCheck.gauge,
         ),
     },
     'relation': False,
     'query': """
-SELECT application_name, state, sync_state, {metrics_columns}
+SELECT application_name, state, sync_state, client_addr, {metrics_columns}
 FROM pg_stat_replication
-GROUP BY application_name, state, sync_state""",
+""",
 }
 
 CONNECTION_METRICS = {
