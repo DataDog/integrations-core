@@ -50,6 +50,10 @@ def instance_collect_function_metrics(field, value):
     return False
 
 
+def instance_collect_slru_metrics(field, value):
+    return False
+
+
 def instance_collect_wal_metrics(field, value):
     return False
 

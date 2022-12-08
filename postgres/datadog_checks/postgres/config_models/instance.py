@@ -119,6 +119,7 @@ class InstanceConfig(BaseModel):
     collect_database_size_metrics: Optional[bool]
     collect_default_database: Optional[bool]
     collect_function_metrics: Optional[bool]
+    collect_slru_metrics: Optional[bool]
     collect_wal_metrics: Optional[bool]
     custom_queries: Optional[Sequence[Mapping[str, Any]]]
     data_directory: Optional[str]
