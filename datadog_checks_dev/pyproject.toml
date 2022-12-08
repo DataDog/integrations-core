@@ -76,7 +76,7 @@ cli = [
     "pyperclip>=1.7.0",
     "pysmi>=0.3.4",
     "securesystemslib[crypto]==0.20.1",
-    "semver",
+    "semver>=2.13.0",
     "tabulate>=0.8.9",
     "toml>=0.9.4, <1.0.0",
     "tomli>=1.1.0",
