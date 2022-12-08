@@ -35,6 +35,7 @@ ACTIVITY_METRICS = [
     'postgresql.active_queries',
     'postgresql.waiting_queries',
     'postgresql.active_waiting_queries',
+    'postgresql.activity.backend_xmin_age',
 ]
 
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]

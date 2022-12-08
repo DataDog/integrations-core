@@ -284,6 +284,7 @@ ACTIVITY_METRICS_9_6 = [
     "THEN 1 ELSE null END )",
     "COUNT(CASE WHEN wait_event is NOT NULL AND query !~ '^autovacuum:' THEN 1 ELSE null END )",
     "COUNT(CASE WHEN wait_event is NOT NULL AND query !~ '^autovacuum:' AND state = 'active' THEN 1 ELSE null END )",
+    "max(age(backend_xmin))",
 ]
 
 # The metrics we retrieve from pg_stat_activity when the postgres version >= 9.2
@@ -323,15 +324,17 @@ ACTIVITY_DD_METRICS = [
     ('postgresql.active_queries', AgentCheck.gauge),
     ('postgresql.waiting_queries', AgentCheck.gauge),
     ('postgresql.active_waiting_queries', AgentCheck.gauge),
+    # backend_xmin was introduced in PG 9.4.
+    # Earlier versions won't have backend_xmin in their ACTIVITY_METRICS_*
+    # so excessive elements when zipping won't have any effect.
+    ('postgresql.activity.backend_xmin_age', AgentCheck.gauge),
 ]
 
 # The base query for postgres version >= 10
 ACTIVITY_QUERY_10 = """
 SELECT datname,
     {metrics_columns}
-FROM pg_stat_activity
-WHERE backend_type = 'client backend'
-GROUP BY datid, datname
+FROM pg_stat_activity WHERE backend_type = 'client backend' GROUP BY datid, datname
 """
 
 # The base query for postgres version < 10
