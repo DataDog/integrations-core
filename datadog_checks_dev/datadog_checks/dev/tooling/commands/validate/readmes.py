@@ -159,9 +159,9 @@ def validate_no_images(h2s, header, files_failed, readme_path, display_queue, so
     curr_text=curr_header.find_next()
     while(curr_text != None and curr_text.name!="h2"):
         if curr_text.name == "img":
-            echo_info(f'testing printing this {curr_text}')
             files_failed[readme_path] = True
             display_queue.append((echo_failure, f"     readme has an image in {header} H2 (##) section"))
+        curr_text=curr_text.find_next()
     
         
     
