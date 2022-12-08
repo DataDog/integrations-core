@@ -317,7 +317,7 @@ instances:
 
         ## @param explain_parameterized_queries - boolean - optional - default: false
         ## Note, this is a BETA feature. This option will enable the ability to explain parameterized queries.
-        ## This is useful if your SQL clients are using the extended query protocol.
+        ## This is useful if your SQL clients are using the extended query protocol or prepared statements.
         #
         # explain_parameterized_queries: false
 
