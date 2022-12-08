@@ -40,8 +40,8 @@ text = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
+    "keystoneauth1==3.18.0; python_version < '3.0'",
     "openstacksdk==0.39.0; python_version < '3.0'",
-    "keystoneauth1==5.0.0; python_version < '3.0'",
     "openstacksdk==0.61.0; python_version > '3.0'",
 ]
 
