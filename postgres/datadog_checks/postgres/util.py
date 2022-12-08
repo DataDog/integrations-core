@@ -185,8 +185,12 @@ SELECT {metrics_columns}
 
 # Requires postgres 10+
 REPLICATION_STATS_METRICS = {
-    'descriptors': [('application_name', 'wal_app_name'), ('state', 'wal_state'),
-                    ('sync_state', 'wal_sync_state'), ('client_addr', 'wal_ip')],
+    'descriptors': [
+        ('application_name', 'wal_app_name'),
+        ('state', 'wal_state'),
+        ('sync_state', 'wal_sync_state'),
+        ('client_addr', 'wal_ip'),
+    ],
     'metrics': {
         'GREATEST (0, EXTRACT(epoch from write_lag)) as write_lag': (
             'postgresql.replication.wal_write_lag',
