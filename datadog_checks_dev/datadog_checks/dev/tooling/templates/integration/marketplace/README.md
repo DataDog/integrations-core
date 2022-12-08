@@ -1,6 +1,11 @@
 # {integration_name}
 
+## Overview
+High level overview of what this integration does.
 
+Screenshots should be absent for this section, instead put them in the media carousel with captions.
+
+All `###` headers are optional to showcase what this integration includes:
 
 ### Metrics
 
