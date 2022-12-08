@@ -105,13 +105,12 @@ def validate_readme(integration, repo, display_queue, files_failed, readme_count
 
     for header in ("Overview", "Setup"):
         validate_header(h2s, header, files_failed, readme_path, display_queue, soup)
-        if header == "Overview":
-            validate_no_images(h2s, header, files_failed, readme_path, display_queue, soup)
 
     if repo == 'marketplace':
         for header in ("Support", "Uninstallation"):
             validate_header(h2s, header, files_failed, readme_path, display_queue, soup)
-            validate_no_images(h2s, header, files_failed, readme_path, display_queue, soup)
+            if header == "Uninstallation":
+                validate_no_images(h2s, header, files_failed, readme_path, display_queue, soup)
 
     # Check all referenced images are in the `images` folder and that
     # they use the `raw.githubusercontent` format or relative paths to the `images` folder
@@ -141,6 +140,7 @@ def validate_readme(integration, repo, display_queue, files_failed, readme_count
 
             display_queue.append((echo_failure, error_msg))
 
+# Method to validate header exists and there is text under it
 def validate_header(h2s, header, files_failed, readme_path, display_queue, soup):
     if header not in h2s:
         files_failed[readme_path] = True
@@ -152,6 +152,7 @@ def validate_header(h2s, header, files_failed, readme_path, display_queue, soup)
             files_failed[readme_path] = True
             display_queue.append((echo_failure, f"     readme has an empty {header} H2 (##) section"))
 
+# Method to validate no images are present within the header
 def validate_no_images(h2s, header, files_failed, readme_path, display_queue, soup):
     if header not in h2s:
         return
