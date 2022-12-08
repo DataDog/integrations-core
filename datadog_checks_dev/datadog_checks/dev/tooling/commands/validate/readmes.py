@@ -164,10 +164,6 @@ def validate_no_images(h2s, header, files_failed, readme_path, display_queue, so
             display_queue.append((echo_failure, f"     readme has an image in {header} H2 (##) section"))
         curr_text=curr_text.find_next()
     
-        
-    
-
-
 def get_ascii_enforcement_error_lines(contents):
     errors_lines = []
     for i, line in enumerate(contents.splitlines()):
