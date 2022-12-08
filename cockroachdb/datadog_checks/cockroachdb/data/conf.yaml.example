@@ -586,6 +586,7 @@ instances:
     ## Learn more about tagging at https://docs.datadoghq.com/tagging
     #
     # tags:
+    #   - node:<NAME>
     #   - <KEY_1>:<VALUE_1>
     #   - <KEY_2>:<VALUE_2>
 

@@ -28,7 +28,9 @@
   "assets": {
     "integration": {
       "source_type_name": "Prometheus",
-      "configuration": {},
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
       "events": {
         "creates_events": false
       },

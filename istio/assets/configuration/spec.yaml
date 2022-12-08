@@ -9,8 +9,9 @@ files:
       options:
         - name: use_openmetrics
           description: |
-            Use the latest OpenMetrics implementation for more features and better performance.
-            This implementation supports only Istio 1.5. Use `istiod_endpoint` or `istio_mesh_endpoint`.
+            Use the OpenMetrics V2 implementation for more features and better performance.
+            This implementation is only available for Istio >= 1.5, and should be used with 
+            `istiod_endpoint` and/or `istio_mesh_endpoint`.
           value:
             example: true
             display_default: false
@@ -80,8 +81,9 @@ files:
       options:
       - name: use_openmetrics
         description: |
-          Use the latest OpenMetrics implementation for more features and better performance.
-          This implementation supports only Istio 1.5. Use `istiod_endpoint` or `istio_mesh_endpoint`.
+          Use the OpenMetrics V2 implementation for more features and better performance.
+          This implementation is only available for Istio >= 1.5, and should be used with 
+          `istiod_endpoint` and/or `istio_mesh_endpoint`.
         value:
           example: true
           display_default: false

@@ -15,11 +15,13 @@ class TestSystemCore:
     def test_system_core(self, aggregator):
         c = SystemCore('system_core', {}, {}, [{}])
 
-        psutil_mock = mock.MagicMock(side_effect=fake_cpu_times)
-        with mock.patch('datadog_checks.system_core.system_core.psutil.cpu_times', psutil_mock):
+        with mock.patch('datadog_checks.system_core.system_core.psutil') as psutil_mock:
+            psutil_mock.cpu_times.side_effect = fake_cpu_times
+            psutil_mock.cpu_freq.return_value = common.MOCK_PSUTIL_CPU_FREQ
             c.check({})
 
         aggregator.assert_metric('system.core.count', value=4, count=1)
+        aggregator.assert_metric('system.core.frequency', value=2500)
 
         for rate in common.CHECK_RATES:
             for i in range(4):
