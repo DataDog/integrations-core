@@ -18,6 +18,7 @@ class SystemCore(AgentCheck):
 
         # https://psutil.readthedocs.io/en/latest/#psutil.cpu_times
         cpu_times = psutil.cpu_times(percpu=True)
+        self.log.debug('CPU times: %s', str(cpu_times))
         for i, cpu in enumerate(cpu_times):
             tags = instance_tags + ['core:{0}'.format(i)]
             for key, value in iteritems(cpu._asdict()):
@@ -31,6 +32,7 @@ class SystemCore(AgentCheck):
         # scpufreq(current=2236.812, min=800.0, max=3500.0)
         # Ignore min/max as they are often reported as 0.0 if undetermined.
         cpu_freq = psutil.cpu_freq(percpu=True)
+        self.log.debug('CPU frequency: %s', str(cpu_freq))
         for i, cpu in enumerate(cpu_freq):
             if Platform.is_unix():
                 # Per-cpu frequency retrieval (Linux only)
