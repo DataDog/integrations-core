@@ -151,6 +151,7 @@ def test_collect_load_activity(
     assert 'statement_text' not in blocked_row, "statement_text field should not be forwarded"
     if is_proc:
         assert blocked_row['procedure_signature'], "missing procedure signature"
+        assert blocked_row['procedure_name'], "missing procedure name"
     assert re.match(match_pattern, blocked_row['text'], re.IGNORECASE), "incorrect blocked query"
     assert blocked_row['database_name'] == "datadog_test", "incorrect database_name"
     assert blocked_row['id'], "missing session id"

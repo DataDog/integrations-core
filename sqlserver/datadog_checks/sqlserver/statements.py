@@ -285,7 +285,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             try:
                 statement = obfuscate_sql_with_metadata(row['statement_text'], self.check.obfuscator_options)
                 procedure_statement = None
-                row['is_proc'] = is_statement_proc(row['text'])
+                row['is_proc'], procedure_name = is_statement_proc(row['text'])
                 if row['is_proc']:
                     procedure_statement = obfuscate_sql_with_metadata(row['text'], self.check.obfuscator_options)
             except Exception as e:
@@ -306,6 +306,8 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             if procedure_statement:
                 row['procedure_text'] = procedure_statement['query']
                 row['procedure_signature'] = compute_sql_signature(procedure_statement['query'])
+            if procedure_name:
+                row['procedure_name'] = procedure_name
             row['query_signature'] = compute_sql_signature(obfuscated_statement)
             row['query_hash'] = _hash_to_hex(row['query_hash'])
             row['query_plan_hash'] = _hash_to_hex(row['query_plan_hash'])
@@ -500,6 +502,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                         },
                         "query_signature": query_signature,
                         "procedure_signature": row.get('procedure_signature', None),
+                        "procedure_name": row.get('procedure_name', None),
                         "statement": row[text_key],
                         "metadata": {
                             "tables": row['dd_tables'],
