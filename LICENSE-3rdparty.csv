@@ -7,7 +7,7 @@ PySocks,PyPI,BSD-3-Clause,Anorov
 PyYAML,PyPI,MIT,Kirill Simonov
 Pyro4,PyPI,MIT,Irmen de Jong
 adodbapi,PyPI,LGPL-2.1-only,"Henrik Ekelund, Vernon Cole, et.al."
-aerospike,PyPI,Apache-2.0,"Aerospike, Inc."
+aerospike,PyPI,Apache-2.0,""Aerospike, Inc." <info@aerospike.com> | Aerospike, Inc."
 aws-requests-auth,PyPI,BSD-3-Clause,David Muller
 beautifulsoup4,PyPI,MIT,Leonard Richardson
 binary,PyPI,Apache-2.0,Ofek Lev
@@ -49,9 +49,9 @@ oracledb,PyPI,Apache-2.0,Anthony Tuininga
 oracledb,PyPI,UPL,Anthony Tuininga
 orjson,PyPI,Apache-2.0,ijl <ijl@mailbox.org>
 orjson,PyPI,MIT,ijl <ijl@mailbox.org>
-packaging,PyPI,Apache-2.0,Donald Stufft and individual contributors
-packaging,PyPI,BSD-2-Clause,Donald Stufft and individual contributors
-packaging,PyPI,BSD-3-Clause,Donald Stufft and individual contributors
+packaging,PyPI,Apache-2.0,Donald Stufft <donald@stufft.io> | Donald Stufft and individual contributors
+packaging,PyPI,BSD-2-Clause,Donald Stufft <donald@stufft.io> | Donald Stufft and individual contributors
+packaging,PyPI,BSD-3-Clause,Donald Stufft <donald@stufft.io> | Donald Stufft and individual contributors
 paramiko,PyPI,LGPL-2.1-only,Jeff Forcier
 ply,PyPI,BSD-3-Clause,David Beazley
 prometheus-client,PyPI,Apache-2.0,Brian Brazil
