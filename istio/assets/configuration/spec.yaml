@@ -35,7 +35,7 @@ files:
             istio_mesh_endpoint: http://istio-telemetry.istio-system:42422/metrics
           value:
             display_default: null
-            example: http://istio-proxy.istio-system:15090/stats/prometheus
+            example: http://istio-proxy.istio-system:15020/stats/prometheus
             type: string
         - template: instances/openmetrics
           overrides:
@@ -97,7 +97,7 @@ files:
         enabled: true
         value:
           display_default: null
-          example: http://%%host%%:15090/stats/prometheus
+          example: http://%%host%%:15020/stats/prometheus
           type: string
       - name: tag_by_endpoint
         description: Wether to include an endpoint tag or not. This only applies if `use openmentrics` is enabled.

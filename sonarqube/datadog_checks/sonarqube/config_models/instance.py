@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from typing import Any, Mapping, Optional, Sequence
 
-from pydantic import BaseModel, root_validator, validator
+from pydantic import BaseModel, Field, root_validator, validator
 
 from datadog_checks.base.utils.functions import identity
 from datadog_checks.base.utils.models import validation
@@ -36,6 +36,21 @@ class Components(BaseModel):
     tag: Optional[str]
 
 
+class ComponentsDiscovery(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    exclude: Optional[Sequence[str]] = Field(
+        None,
+        description="List of regular expressions with the patterns of components that will not be 'autodiscovered'\n",
+    )
+    include: Optional[Mapping[str, Any]] = Field(
+        None,
+        description="Mapping of regular expressions keys and component config values that will be 'autodiscovered'\n",
+    )
+    limit: Optional[int] = Field(None, description="Maximum number of components to be 'autodiscovered'\n")
+
+
 class Proxy(BaseModel):
     class Config:
         allow_mutation = False
@@ -57,6 +72,7 @@ class InstanceConfig(BaseModel):
     aws_service: Optional[str]
     collect_default_jvm_metrics: Optional[bool]
     components: Optional[Components]
+    components_discovery: Optional[ComponentsDiscovery]
     connect_timeout: Optional[float]
     default_exclude: Optional[Sequence[str]]
     default_include: Optional[Sequence[str]]

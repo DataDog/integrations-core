@@ -66,7 +66,7 @@ instances:
     ## When collecting mesh metrics in Istio < v1.5, use
     ## istio_mesh_endpoint: http://istio-telemetry.istio-system:42422/metrics
     #
-    # istio_mesh_endpoint: http://istio-proxy.istio-system:15090/stats/prometheus
+    # istio_mesh_endpoint: http://istio-proxy.istio-system:15020/stats/prometheus
 
     ## @param raw_metric_prefix - string - optional
     ## A prefix that will be removed from all exposed metric names, if present.
