@@ -5,9 +5,7 @@ import pytest
 
 from .common import POSTGRES_VERSION
 
-from datadog_checks.postgres.util import (
-    SLRU_METRICS
-)
+from datadog_checks.postgres.util import SLRU_METRICS
 
 
 @pytest.mark.integration
