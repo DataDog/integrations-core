@@ -189,7 +189,7 @@ REPLICATION_STATS_METRICS = {
         ('application_name', 'wal_app_name'),
         ('state', 'wal_state'),
         ('sync_state', 'wal_sync_state'),
-        ('client_addr', 'wal_ip'),
+        ('client_addr', 'wal_client_addr'),
     ],
     'metrics': {
         'GREATEST (0, EXTRACT(epoch from write_lag)) as write_lag': (
