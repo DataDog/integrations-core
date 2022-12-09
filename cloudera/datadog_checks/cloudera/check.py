@@ -29,7 +29,7 @@ class ClouderaCheck(AgentCheck, ConfigMixin):
         try:
             self.client = make_api_client(self, self.config)
         except Exception as e:
-            message = f"Cloudera API Client is none: {e}", e
+            message = f"Cloudera API Client is none: {e}"
             self.service_check(
                 CAN_CONNECT, AgentCheck.CRITICAL, message=message, tags=[f'api_url={self.config.api_url}']
             )

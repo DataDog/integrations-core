@@ -48,9 +48,12 @@ def test_given_cloudera_check_when_get_version_exception_from_cloudera_client_th
         match='Service not available',
     ):
         # Given
+        api_url = instance['api_url']
         check = cloudera_check(instance)
         # When
         dd_run_check(check)
+    # Then
+    aggregator.assert_service_check('cloudera.can_connect', AgentCheck.CRITICAL, tags=[f'api_url={api_url}'])
 
 
 def test_given_cloudera_check_when_version_field_not_found_then_emits_critical_service(
@@ -64,9 +67,17 @@ def test_given_cloudera_check_when_version_field_not_found_then_emits_critical_s
         match='Cloudera Manager Version is unsupported or unknown',
     ):
         # Given
+        api_url = instance['api_url']
         check = cloudera_check(instance)
         # When
         dd_run_check(check)
+    # Then
+    aggregator.assert_service_check(
+        'cloudera.can_connect',
+        AgentCheck.CRITICAL,
+        message="Cloudera API Client is none: Cloudera Manager Version is unsupported or unknown: None",
+        tags=[f'api_url={api_url}'],
+    )
 
 
 def test_given_cloudera_check_when_not_supported_version_then_emits_critical_service(
@@ -83,9 +94,17 @@ def test_given_cloudera_check_when_not_supported_version_then_emits_critical_ser
         match='Cloudera Manager Version is unsupported or unknown',
     ):
         # Given
+        api_url = instance['api_url']
         check = cloudera_check(instance)
         # When
         dd_run_check(check)
+    # Then
+    aggregator.assert_service_check(
+        'cloudera.can_connect',
+        AgentCheck.CRITICAL,
+        message="Cloudera API Client is none: Cloudera Manager Version is unsupported or unknown: 5.0.0",
+        tags=[f'api_url={api_url}'],
+    )
 
 
 def test_given_cloudera_check_when_supported_version_then_emits_ok_service(
@@ -159,12 +178,12 @@ def test_given_cloudera_check_when_v7_read_clusters_exception_from_cloudera_clie
         # When
         dd_run_check(check)
         # Then
-        aggregator.assert_service_check(
-            'cloudera.can_connect',
-            AgentCheck.CRITICAL,
-            tags=[f'api_url={api_url}'],
-            message="Cloudera check raised an exception: (Service not available)\nReason: None\n",
-        )
+    aggregator.assert_service_check(
+        'cloudera.can_connect',
+        AgentCheck.CRITICAL,
+        tags=[f'api_url={api_url}'],
+        message="Cloudera check raised an exception: (Service not available)\nReason: None\n",
+    )
 
 
 def test_given_cloudera_check_when_bad_health_cluster_then_emits_cluster_health_critical(
