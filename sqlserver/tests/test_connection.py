@@ -440,9 +440,7 @@ def test_connection_error_reporting(
     expected_link = "see {}#{} for more details".format(SUPPORT_LINK, expected_error.value)
     if expected_error == ConnectionErrorCode.tcp_connection_failed:
         user_link = "see {}#{} for more details".format(SUPPORT_LINK, ConnectionErrorCode.login_failed_for_user.value)
-        assert (
-            expected_link.lower() in message or user_link.lower() in message
-        )
+        assert expected_link.lower() in message or user_link.lower() in message
     else:
         assert expected_link.lower() in message
 
