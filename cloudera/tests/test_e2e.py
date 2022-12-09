@@ -17,3 +17,4 @@ def test_e2e(dd_agent_check, instance):
     # caddy test env is supposed to be in BAD_HEALTH
     aggregator.assert_service_check('cloudera.cluster.health', ClouderaCheck.CRITICAL, message="BAD_HEALTH")
     aggregator.assert_service_check('cloudera.host.health', ClouderaCheck.OK)
+    aggregator.assert_all_metrics_covered()
