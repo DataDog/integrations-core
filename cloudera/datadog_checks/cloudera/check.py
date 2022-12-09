@@ -26,22 +26,27 @@ class ClouderaCheck(AgentCheck, ConfigMixin):
 
     @AgentCheck.metadata_entrypoint
     def _create_client(self):
+        self.can_connect_tags = [f'api_url={self.config.api_url}']
+        
+        for tag in self.config.tags:
+            self.can_connect_tags.append(tag)
+
         try:
             self.client = make_api_client(self, self.config)
         except Exception as e:
             message = f"Cloudera API Client is none: {e}"
             self.service_check(
-                CAN_CONNECT, AgentCheck.CRITICAL, message=message, tags=[f'api_url={self.config.api_url}']
+                CAN_CONNECT, AgentCheck.CRITICAL, message=message, tags=self.can_connect_tags
             )
             raise
 
     def check(self, _):
         try:
             self.client.collect_data()
-            self.service_check(CAN_CONNECT, AgentCheck.OK, tags=[f'api_url={self.config.api_url}'])
+            self.service_check(CAN_CONNECT, AgentCheck.OK, tags=self.can_connect_tags)
         except Exception as e:
             message = f'Cloudera check raised an exception: {e}'
             self.service_check(
-                CAN_CONNECT, AgentCheck.CRITICAL, message=message, tags=[f'api_url={self.config.api_url}']
+                CAN_CONNECT, AgentCheck.CRITICAL, message=message, tags=self.can_connect_tags
             )
             self.log.error(message)

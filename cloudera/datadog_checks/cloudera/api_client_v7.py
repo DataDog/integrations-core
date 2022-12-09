@@ -25,15 +25,20 @@ class ApiClientV7(ApiClient):
             self._log.debug('cluster_name: %s', cluster_name)
             self._log.debug('cluster: %s', cluster)
 
-            tags = self._collect_cluster_tags(cluster)
+            tags = self._collect_cluster_tags(cluster, self._check.config.tags)
 
             self._collect_cluster_metrics(cluster_name, tags)
             self._collect_cluster_service_check(cluster, tags)
             self._collect_hosts(cluster_name)
 
     @staticmethod
-    def _collect_cluster_tags(cluster):
-        return [f"{cluster_tag.name}:{cluster_tag.value}" for cluster_tag in cluster.tags]
+    def _collect_cluster_tags(cluster, custom_tags):
+        cluster_tags = [f"{cluster_tag.name}:{cluster_tag.value}" for cluster_tag in cluster.tags]
+
+        for custom_tag in custom_tags:
+            cluster_tags.append(custom_tag)
+        
+        return cluster_tags
 
     def _collect_cluster_service_check(self, cluster, tags):
         cluster_entity_status = ENTITY_STATUS[cluster.entity_status]
@@ -53,7 +58,7 @@ class ApiClientV7(ApiClient):
         self._log.debug("Full hosts response:")
         self._log.debug(list_hosts_response)
         for host in list_hosts_response.items:
-            tags = self._collect_host_tags(host)
+            tags = self._collect_host_tags(host, self._check.config.tags)
 
             if host.host_id:
                 self._collect_host_metrics(host, tags)
@@ -61,7 +66,8 @@ class ApiClientV7(ApiClient):
                 self._collect_disk_metrics(host, tags)
                 self._collect_host_service_check(host, tags)
 
-    def _collect_host_tags(self, host):
+    @staticmethod
+    def _collect_host_tags(host, custom_tags):
         tags = [
             f'cloudera_rack_id:{host.rack_id}',
             f'cloudera_cluster:{host.cluster_ref.cluster_name}',
@@ -71,6 +77,10 @@ class ApiClientV7(ApiClient):
         if host_tags:
             for host_tag in host_tags:
                 tags.append(f"{host_tag.name}:{host_tag.value}")
+
+        for custom_tag in custom_tags:
+            tags.append(custom_tag)
+
         return tags
 
     def _collect_host_service_check(self, host, tags):
