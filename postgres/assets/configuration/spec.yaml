@@ -375,6 +375,13 @@ files:
           value:
             type: integer
             example: 10000
+        - name: explain_parameterized_queries
+          description: |
+            Note, this is a BETA feature. This option will enable the ability to explain parameterized queries.
+            This is useful if your SQL clients are using the extended query protocol or prepared statements.
+          value:
+            type: boolean
+            example: false
     - name: query_activity
       description: Configure collection of query activity
       options:

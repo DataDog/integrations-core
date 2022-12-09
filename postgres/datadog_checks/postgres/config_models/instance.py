@@ -88,6 +88,7 @@ class QuerySamples(BaseModel):
     collection_interval: Optional[float]
     enabled: Optional[bool]
     explain_function: Optional[str]
+    explain_parameterized_queries: Optional[bool]
     explained_queries_cache_maxsize: Optional[int]
     explained_queries_per_hour_per_query: Optional[int]
     samples_per_hour_per_query: Optional[int]
