@@ -1,5 +1,13 @@
 # CHANGELOG - postgres
 
+## 13.2.0 / 2022-12-09
+
+* [Added] Explain parameterized queries. See [#13434](https://github.com/DataDog/integrations-core/pull/13434).
+* [Added] Add deadlocks monotonic count metric. See [#13374](https://github.com/DataDog/integrations-core/pull/13374).
+* [Fixed] Update dependencies. See [#13478](https://github.com/DataDog/integrations-core/pull/13478).
+* [Fixed] Fix inflated query metrics when pg_stat_statements.max is set above 10k. See [#13426](https://github.com/DataDog/integrations-core/pull/13426).
+* [Fixed] Do not install psycopg2-binary on arm macs. See [#13343](https://github.com/DataDog/integrations-core/pull/13343).
+
 ## 13.1.0 / 2022-10-31
 
 * [Added] Improve DBM explain plan error collection errors. See [#13224](https://github.com/DataDog/integrations-core/pull/13224).
