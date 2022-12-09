@@ -63,10 +63,8 @@ trigger-agent-build:
       changes:
         - datadog_checks_base/datadog_checks/base/data/agent_requirements.in
       when: always
-    # TODO: Add this back once Cloudera is ready to merge
-    # This is stopping the trigger-agent-build to run since all pipelines run when cm-client is added
-    # - if: ($CI_COMMIT_BRANCH !~ /^7.[0-9]{2}.x/)
-    #   when: always
+    - if: ($CI_COMMIT_BRANCH !~ /^7.[0-9]{2}.x/)
+      when: always
   cache:
     <<: *slack-cache
   script:

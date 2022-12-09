@@ -2,11 +2,3 @@
 
 [[envs.default.matrix]]
 python = ["38"]
-
-
-# TODO: Remove this when cloudera is ready to merge
-# This is temporary to stop CI complaining
-[envs.default]
-dependencies = [
-  "cm-client",
-]
