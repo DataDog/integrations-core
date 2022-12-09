@@ -35,13 +35,14 @@ def is_statement_proc(text):
         if idx_proc < 0:
             idx_proc = _get_index_for_keyword(t, 'PROC')
         # ensure either PROC or PROCEDURE are found and CREATE occurs before PROCEDURE
-        return 0 <= idx_create < idx_proc and idx_proc >= 0, _get_procedure_name(t, idx_proc)
+        if 0 <= idx_create < idx_proc and idx_proc >= 0:
+            return True, _get_procedure_name(t, idx_proc)
     return False, None
 
 
 def _get_procedure_name(t, idx):
     if idx >= 0 and idx + 1 < len(t):
-        return t[idx + 1]
+        return t[idx + 1].lower()
     return None
 
 

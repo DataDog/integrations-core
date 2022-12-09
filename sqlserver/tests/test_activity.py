@@ -434,7 +434,7 @@ def test_get_estimated_row_size_bytes(dbm_instance, file):
 
 
 @pytest.mark.parametrize(
-    "query,is_proc",
+    "query,is_proc,expected_name",
     [
         [
             """\
@@ -444,6 +444,7 @@ def test_get_estimated_row_size_bytes(dbm_instance, file):
             END;
             """,
             True,
+            "bobProcedure",
         ],
         [
             """\
@@ -453,6 +454,7 @@ def test_get_estimated_row_size_bytes(dbm_instance, file):
             END;
             """,
             True,
+            "bobProcedure",
         ],
         [
             """\
@@ -462,6 +464,7 @@ def test_get_estimated_row_size_bytes(dbm_instance, file):
             end;
             """,
             True,
+            "bobProcedureLowercase",
         ],
         [
             """\
@@ -472,6 +475,7 @@ def test_get_estimated_row_size_bytes(dbm_instance, file):
             END;
             """,
             True,
+            "bobProcedure",
         ],
         [
             """\
@@ -481,6 +485,7 @@ def test_get_estimated_row_size_bytes(dbm_instance, file):
             END;
             """,
             True,
+            "bobProcedure",
         ],
         [
             """\
@@ -493,27 +498,34 @@ def test_get_estimated_row_size_bytes(dbm_instance, file):
             END;
             """,
             True,
+            "bobProcedure",
         ],
         [
             "CREATE TABLE bob_table",
             False,
+            None,
         ],
         [
             "Exec procedure",
             False,
+            None,
         ],
         [
             "CREATEprocedure",
             False,
+            None,
         ],
         [
             "procedure create",
             False,
+            None,
         ],
     ],
 )
-def test_is_statement_procedure(query, is_proc):
-    assert is_statement_proc(query) == is_proc
+def test_is_statement_procedure(query, is_proc, expected_name):
+    p, name = is_statement_proc(query)
+    assert p == is_proc
+    assert re.match(name, expected_name, re.IGNORECASE) if expected_name else expected_name == name
 
 
 def test_activity_collection_rate_limit(aggregator, dd_run_check, dbm_instance):
