@@ -37,7 +37,7 @@ class ApiClientV7(ApiClient):
 
         for custom_tag in custom_tags:
             cluster_tags.append(custom_tag)
-        
+
         return cluster_tags
 
     def _collect_cluster_service_check(self, cluster, tags):
