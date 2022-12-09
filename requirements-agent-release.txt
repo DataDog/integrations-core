@@ -155,11 +155,11 @@ datadog-tomcat==1.11.1
 datadog-traffic-server==1.1.0
 datadog-twemproxy==1.13.0
 datadog-twistlock==3.2.0
-datadog-varnish==1.14.1
+datadog-varnish==1.14.2
 datadog-vault==3.3.3
 datadog-vertica==3.4.1
 datadog-voltdb==2.1.2
-datadog-vsphere==6.2.0
+datadog-vsphere==6.2.1
 datadog-weblogic==1.1.1
 datadog-win32-event-log==2.13.2; sys_platform == 'win32'
 datadog-windows-performance-counters==1.4.0; sys_platform == 'win32'

@@ -1,5 +1,9 @@
 # CHANGELOG - varnish
 
+## 1.14.2 / 2022-12-09
+
+* [Fixed] Stop using deprecated distutils.version classes. See [#13408](https://github.com/DataDog/integrations-core/pull/13408).
+
 ## 1.14.1 / 2022-05-15 / Agent 7.37.0
 
 * [Fixed] Refactor methods. See [#11909](https://github.com/DataDog/integrations-core/pull/11909).
