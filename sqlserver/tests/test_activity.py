@@ -537,7 +537,7 @@ def _load_test_activity_json(filename):
 
 def _get_conn_for_user(instance_docker, user, _autocommit=False):
     # Make DB connection
-    conn_str = 'DRIVER={};Server={};Database=master;UID={};PWD={};TrustServerCertificate=yes;'.format(
+    conn_str = 'DRIVER={};Server={};Database=master;UID={};PWD={};'.format(
         instance_docker['driver'], instance_docker['host'], user, "Password12!"
     )
     conn = pyodbc.connect(conn_str, timeout=DEFAULT_TIMEOUT, autocommit=_autocommit)

@@ -122,7 +122,7 @@ def _common_pyodbc_connect(conn_str):
 @pytest.fixture
 def datadog_conn_docker(instance_docker):
     # Make DB connection
-    conn_str = 'DRIVER={};Server={};Database=master;UID={};PWD={};TrustServerCertificate=yes;'.format(
+    conn_str = 'DRIVER={};Server={};Database=master;UID={};PWD={};'.format(
         instance_docker['driver'], instance_docker['host'], instance_docker['username'], instance_docker['password']
     )
     conn = _common_pyodbc_connect(conn_str)
@@ -134,7 +134,7 @@ def datadog_conn_docker(instance_docker):
 def bob_conn(instance_docker):
     # Make DB connection
 
-    conn_str = 'DRIVER={};Server={};Database=master;UID={};PWD={};TrustServerCertificate=yes;'.format(
+    conn_str = 'DRIVER={};Server={};Database=master;UID={};PWD={};'.format(
         instance_docker['driver'], instance_docker['host'], "bob", "Password12!"
     )
     conn = SelfHealingConnection(conn_str)
@@ -190,7 +190,7 @@ class SelfHealingConnection:
 @pytest.fixture
 def sa_conn(instance_docker):
     # system administrator connection
-    conn_str = 'DRIVER={};Server={};Database=master;UID={};PWD={};TrustServerCertificate=yes;'.format(
+    conn_str = 'DRIVER={};Server={};Database=master;UID={};PWD={};'.format(
         instance_docker['driver'], instance_docker['host'], "sa", "Password123"
     )
     conn = _common_pyodbc_connect(conn_str)

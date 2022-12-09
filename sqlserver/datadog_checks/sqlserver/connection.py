@@ -584,7 +584,6 @@ class Connection(object):
         self.log.debug("Connection string (before password) %s", conn_str)
         if password:
             conn_str += 'PWD={};'.format(password)
-        conn_str += "TrustServerCertificate=yes"
         return conn_str
 
     def _conn_string_adodbapi(self, db_key, conn_key=None, db_name=None):
