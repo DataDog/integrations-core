@@ -26,7 +26,7 @@
       "groups": [
         "cloudera_cluster"
       ],
-      "name": "Can Authenticate with UAA",
+      "name": "Cloudera Cluster Health",
       "description": "Returns `OK` if the cluster is in good health or is starting, `WARNING` if the cluster is stopping or the health is concerning, `CRITICAL` if the cluster is down or in bad health, and `UNKNOWN` otherwise."
     },
     {
@@ -44,7 +44,7 @@
           "cloudera_rack_id",
           "cloudera_hostname"
         ],
-        "name": "Can Authenticate with UAA",
+        "name": "Cloudera Host Health",
         "description": "Returns `OK` if the host is in good health or is starting, `WARNING` if the host is stopping or the health is concerning, `CRITICAL` if the host is down or in bad health, and `UNKNOWN` otherwise."
     }
   ]
