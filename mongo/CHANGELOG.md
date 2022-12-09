@@ -1,5 +1,9 @@
 # CHANGELOG - mongo
 
+## 4.1.1 / 2022-12-09
+
+* [Fixed] Stop using deprecated distutils.version classes. See [#13408](https://github.com/DataDog/integrations-core/pull/13408).
+
 ## 4.1.0 / 2022-11-17
 
 * [Added] Added new opLatencies metrics with correct type. See [#13336](https://github.com/DataDog/integrations-core/pull/13336).
