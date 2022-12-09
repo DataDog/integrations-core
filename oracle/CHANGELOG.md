@@ -1,5 +1,11 @@
 # CHANGELOG - oracle
 
+## 4.0.0 / 2022-12-09
+
+* [Fixed] Update dependencies. See [#13478](https://github.com/DataDog/integrations-core/pull/13478).
+* [Fixed] Skip empty columns when metric_prefix is used for custom queries. See [#13234](https://github.com/DataDog/integrations-core/pull/13234).
+* [Changed] Update Oracle check to use python-oracledb library. See [#13298](https://github.com/DataDog/integrations-core/pull/13298).
+
 ## 3.9.5 / 2022-08-05 / Agent 7.39.0
 
 * [Fixed] Dependency updates. See [#12653](https://github.com/DataDog/integrations-core/pull/12653).
