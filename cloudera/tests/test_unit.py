@@ -326,6 +326,9 @@ def test_given_cloudera_check_when_good_health_cluster_then_emits_cluster_metric
                         cluster_name="cluster_1",
                         display_name="cluster_1",
                     ),
+                    num_cores=8,
+                    num_physical_cores=4,
+                    total_phys_mem_bytes=33079799808,
                 )
             ],
         ),
