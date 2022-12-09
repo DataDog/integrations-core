@@ -1,5 +1,9 @@
 # CHANGELOG - kong
 
+## 2.3.0 / 2022-12-09
+
+* [Added] Added metrics to support v3.0 of Kong. See [#13059](https://github.com/DataDog/integrations-core/pull/13059).
+
 ## 2.2.0 / 2022-09-16 / Agent 7.40.0
 
 * [Added] Update HTTP config spec templates. See [#12890](https://github.com/DataDog/integrations-core/pull/12890).
