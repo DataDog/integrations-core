@@ -59,7 +59,6 @@ class ApiClientV7(ApiClient):
             tags = self._collect_host_tags(host)
 
             if host.host_id:
-                self._collect_host_native_metrics(host, tags)
                 self._collect_host_metrics(host, tags)
                 self._collect_role_metrics(host, tags)
                 self._collect_disk_metrics(host, tags)
@@ -82,11 +81,15 @@ class ApiClientV7(ApiClient):
         self._log.debug('host_entity_status: %s', host_entity_status)
         self._check.service_check(HOST_HEALTH, host_entity_status, tags=tags)
 
+    def _collect_host_metrics(self, host, tags):
+        self._collect_host_native_metrics(host, tags)
+        self._collect_host_timeseries_metrics(host, tags)
+
     def _collect_host_native_metrics(self, host, tags):
         for metric in NATIVE_METRICS['host']:
             self._check.gauge(f"host.{metric}", getattr(host, metric), tags)
 
-    def _collect_host_metrics(self, host, tags):
+    def _collect_host_timeseries_metrics(self, host, tags):
         metric_names = ','.join(f'last({metric}) AS {metric}' for metric in TIMESERIES_METRICS['host'])
         query = f'SELECT {metric_names} WHERE hostId="{host.host_id}" AND category=HOST'
         self._query_time_series(query, category='host', tags=tags)
