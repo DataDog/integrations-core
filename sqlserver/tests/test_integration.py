@@ -191,18 +191,20 @@ def test_autodiscovery_db_service_checks(
     )
     # unavailable_db is an 'offline' database which prevents connections, so we expect this service check to be
     # critical but not cause a failure of the check
-
-    # TODO: bc we can't do regex matching.. this is my life.
+    # TODO: add support to the assert_service_check function to take a message regex pattern
+    # to match against, so this assertion does not require the exact string
     sc = aggregator.service_checks('sqlserver.database.can_connect')
-    assert len(sc) == 4
-    # todo: assert that this even exists with a stupid boolean
     db_critical_exists = False
     for c in sc:
         if c.status == SQLServer.CRITICAL:
             db_critical_exists = True
-            assert c.tags == ['db:unavailable_db', 'optional:tag1', 'sqlserver_host:{}'.format(check.resolved_hostname)]
-            assert c.count == extra_count
-    assert db_critical_exists
+            assert (
+                c.tags.sort()
+                == ['db:unavailable_db', 'optional:tag1', 'sqlserver_host:{}'.format(check.resolved_hostname)].sort()
+            )
+    if service_check_enabled:
+        assert db_critical_exists
+
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
