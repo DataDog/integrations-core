@@ -233,7 +233,7 @@ class PerfObject:
         # If they are not installed yet (see comment in refresh() method) counter type determination
         # will fail. Moreover, it will continue to fail no matter how many times it is called even after
         # the missing performance object and its counters have been installed.
-        counter_type = self._get_counters_type(counter_selector)
+        counter_type = self._get_counters_type()
         if counter_type == MultiCounter:
             self.has_multiple_instances = True
         elif counter_type == SingleCounter:
@@ -313,7 +313,7 @@ class PerfObject:
 
         self.counters.extend(counters.values())
 
-    def _get_counters_type(self, counter_selector):
+    def _get_counters_type(self):
         # Enumerate all counter to find if it is single or multiple instance counter
         # The very virst iteration should be sufficienmt, just in case enumerate all
         for i, entry in enumerate(self.counters_config, 1):
@@ -330,7 +330,7 @@ class PerfObject:
                     counter_name=counter_name,
                     instance_name='*',
                 )
-                if validate_path(self.connection.query_handle, counter_selector, possible_path):
+                if validate_path(self.connection.query_handle, self.use_localized_counters, possible_path):
                     return MultiCounter
 
                 # Check for single-instance counter path
@@ -339,7 +339,7 @@ class PerfObject:
                     object_name=self.name,
                     counter_name=counter_name,
                 )
-                if validate_path(self.connection.query_handle, counter_selector, possible_path):
+                if validate_path(self.connection.query_handle, self.use_localized_counters, possible_path):
                     return SingleCounter
 
         return None
