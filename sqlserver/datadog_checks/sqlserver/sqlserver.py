@@ -681,7 +681,7 @@ class SQLServer(AgentCheck):
         return self._dynamic_queries
 
     def collect_metrics(self):
-        """Fetch the metrics from all of the associated database tables."""
+        """Fetch the metrics from all the associated database tables."""
 
         with self.connection.open_managed_default_connection():
             with self.connection.get_managed_cursor() as cursor:
