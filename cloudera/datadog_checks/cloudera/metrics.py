@@ -1,3 +1,5 @@
+from collections import defaultdict
+
 TIMESERIES_METRICS = {
     'cluster': [
         'cpu_percent_across_hosts',
@@ -60,12 +62,12 @@ NATIVE_METRICS = {
 }
 
 
-def merge_dicts(dict_1, dict_2):
-    dict_3 = {**dict_1, **dict_2}
-    for key, values in dict_1.items():
-        for value in values:
-            dict_3[key].append(value)
-    return dict_3
+def merge_dicts(d1, d2):
+    merged_dict = defaultdict(list)
+    for d in (d1, d2):
+        for key, value in d.items():
+            merged_dict[key] += value
+    return merged_dict
 
 
 METRICS = merge_dicts(NATIVE_METRICS, TIMESERIES_METRICS)
