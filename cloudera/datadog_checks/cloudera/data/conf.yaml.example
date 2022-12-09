@@ -55,16 +55,24 @@ instances:
     #   - <EXCLUDE_REGEX>
 
     ## @param api_url - string - required
-    ## The Swagger API Url
+    ## The URL endpoint for the Cloudera Manager API. This can be found under the Endpoints tab for 
+    ## your Data Hub to monitor. 
+    ##
+    ## Note: The version of the Cloudera Manager API will need to be appended at the end of the URL. 
+    ## For example, using v48 of the API for Data Hub `cluster_1` should result with a URL similar 
+    ## to the following:
+    ## `https://cluster1.cloudera.site/cluster_1/cdp-proxy-api/cm-api/v48`
     #
     api_url: <API_URL>
 
     ## @param workload_username - string - required
-    ## The workload username
+    ## The Workload username. This value can be found in the `User Management` tab of the Management 
+    ## Console in the `Workload User Name`.
     #
     workload_username: <WORKLOAD_USERNAME>
 
     ## @param workload_password - string - required
-    ## The workload password
+    ## The Workload password. This value can be found in the `User Management` tab of the Management 
+    ## Console in the `Workload Password`.
     #
     workload_password: <WORKLOAD_PASSWORD>
