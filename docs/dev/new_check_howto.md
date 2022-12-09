@@ -487,7 +487,7 @@ After you've created your Agent-based integration, refer to this list to make su
 - A complete `manifest.json` file.
 - If the integration collects Service Checks, the `service_checks.json` must be complete as well.
 
-After you open a pull request in the `integrations-extras` repository, CI validation tests will run. These tests must be green before your pull request is merged and your integration tile is published.
+For more information, see [Integrations Assets Reference][20]. After you open a pull request in the `integrations-extras` repository, CI validation tests will run. These tests must be green before your pull request is merged and your integration tile is published.
 
 ## Further Reading
 
@@ -514,3 +514,4 @@ Additional helpful documentation, links, and articles:
 [17]: https://packaging.python.org/en/latest/tutorials/packaging-projects/
 [18]: https://docs.datadoghq.com/agent/
 [19]: https://www.datadoghq.com/blog/programmatically-manage-your-datadog-integrations/
+[20]: /developers/integrations/check_references/#manifest-file
