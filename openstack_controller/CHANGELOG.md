@@ -1,5 +1,10 @@
 # CHANGELOG - Openstack_controller
 
+## 2.1.3 / 2022-12-09
+
+* [Fixed] Update dependencies. See [#13478](https://github.com/DataDog/integrations-core/pull/13478).
+* [Fixed] Pin the keystoneauth1 version for py2. See [#13445](https://github.com/DataDog/integrations-core/pull/13445).
+
 ## 2.1.2 / 2022-08-05 / Agent 7.39.0
 
 * [Fixed] Dependency updates. See [#12653](https://github.com/DataDog/integrations-core/pull/12653).
