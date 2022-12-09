@@ -279,7 +279,7 @@ class SQLServer(AgentCheck):
         return self._agent_hostname
 
     def initialize_connection(self):
-        self.connection = Connection(self.init_config, self.instance, self.handle_service_check)
+        self.connection = Connection(self, self.init_config, self.instance, self.handle_service_check)
 
         # Pre-process the list of metrics to collect
         try:
@@ -640,7 +640,6 @@ class SQLServer(AgentCheck):
             if self.dbm_enabled:
                 self.statement_metrics.run_job_loop(self.tags)
                 self.activity.run_job_loop(self.tags)
-
         else:
             self.log.debug("Skipping check")
 
@@ -682,7 +681,7 @@ class SQLServer(AgentCheck):
         return self._dynamic_queries
 
     def collect_metrics(self):
-        """Fetch the metrics from all of the associated database tables."""
+        """Fetch the metrics from all the associated database tables."""
 
         with self.connection.open_managed_default_connection():
             with self.connection.get_managed_cursor() as cursor:
