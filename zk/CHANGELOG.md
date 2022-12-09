@@ -1,5 +1,10 @@
 # CHANGELOG - zk
 
+## 4.2.1 / 2022-12-09
+
+* [Fixed] Stop using deprecated distutils.version classes. See [#13408](https://github.com/DataDog/integrations-core/pull/13408).
+* [Fixed] Make version parsing more flexible to increase compatibility. See [#13171](https://github.com/DataDog/integrations-core/pull/13171). Thanks [pnovitskiy](https://github.com/pnovitskiy).
+
 ## 4.2.0 / 2022-04-05 / Agent 7.36.0
 
 * [Added] Add metric_patterns options to filter all metric submission by a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
