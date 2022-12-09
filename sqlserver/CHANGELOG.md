@@ -1,5 +1,12 @@
 # CHANGELOG - sqlserver
 
+## 10.1.0 / 2022-12-09
+
+* [Added] Add well formatted agent errors on common connection issues for SQL Server. See [#13436](https://github.com/DataDog/integrations-core/pull/13436).
+* [Added] Add procedure name on query metrics/events. See [#13484](https://github.com/DataDog/integrations-core/pull/13484).
+* [Fixed] Use Hatch to manage environments. See [#12766](https://github.com/DataDog/integrations-core/pull/12766).
+* [Fixed] Fix Query Metrics collection bug where we miss long running queries. See [#13335](https://github.com/DataDog/integrations-core/pull/13335).
+
 ## 10.0.1 / 2022-12-02
 
 * [Fixed] Revert "Fix exception thrown when database is null in config" as it was found to introduce a regression. See [#13446](https://github.com/DataDog/integrations-core/pull/13446).
