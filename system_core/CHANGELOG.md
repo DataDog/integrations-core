@@ -1,5 +1,10 @@
 # CHANGELOG - system_core
 
+## 2.0.0 / 2022-12-09
+
+* [Added] Adds `system.core.frequency` metric. See [#13349](https://github.com/DataDog/integrations-core/pull/13349).
+* [Changed] Collect the number of cpu cores using `psutil.cpu_count()`. See [#13483](https://github.com/DataDog/integrations-core/pull/13483).
+
 ## 1.14.0 / 2022-08-05 / Agent 7.39.0
 
 * [Added] Add total cpu percentages as a metric. See [#12525](https://github.com/DataDog/integrations-core/pull/12525).
