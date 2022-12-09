@@ -48,7 +48,7 @@ known_error_patterns = {
     # driver not installed on host
     "(can't open lib .* file not found|Provider cannot be found)": ConnectionErrorCode.driver_not_found,
     # Connection & login issues
-    "(cannot open database .* requested by the login. the login failed|"
+    "(cannot open database .* requested by the login|"
     "login timeout expired)": ConnectionErrorCode.tcp_connection_failed,
     "(login failed for user|The login is from an untrusted domain)": ConnectionErrorCode.login_failed_for_user,
     "ssl security error": ConnectionErrorCode.ssl_security_error,

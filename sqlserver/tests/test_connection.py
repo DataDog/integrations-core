@@ -435,10 +435,16 @@ def test_connection_error_reporting(
         with connection.open_managed_default_connection():
             pytest.fail("connection should not have succeeded")
 
-    message = str(excinfo.value)
-    assert re.search(expected_error_pattern, message)
+    message = str(excinfo.value).lower()
+    assert re.search(expected_error_pattern, message, re.IGNORECASE)
     expected_link = "see {}#{} for more details".format(SUPPORT_LINK, expected_error.value)
-    assert re.search(expected_link, message, re.IGNORECASE)
+    if expected_error == ConnectionErrorCode.tcp_connection_failed:
+        user_link = "see {}#{} for more details".format(SUPPORT_LINK, ConnectionErrorCode.login_failed_for_user.value)
+        assert (
+            expected_link.lower() in message or user_link.lower() in message
+        )
+    else:
+        assert expected_link.lower() in message
 
 
 @pytest.mark.unit
