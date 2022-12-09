@@ -82,7 +82,7 @@ datadog-kafka==2.13.1
 datadog-kong==2.3.0
 datadog-kube-apiserver-metrics==3.3.0
 datadog-kube-controller-manager==4.3.0
-datadog-kube-dns==3.3.1
+datadog-kube-dns==4.0.0
 datadog-kube-metrics-server==2.3.0
 datadog-kube-proxy==5.3.0
 datadog-kube-scheduler==4.5.0

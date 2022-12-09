@@ -1,5 +1,10 @@
 # CHANGELOG - Kube-dns
 
+## 4.0.0 / 2022-12-09
+
+* [Fixed] Update protobuf. See [#13262](https://github.com/DataDog/integrations-core/pull/13262).
+* [Changed] Add health check to kube_* integrations. See [#10668](https://github.com/DataDog/integrations-core/pull/10668).
+
 ## 3.3.1 / 2022-11-07 / Agent 7.40.1
 
 * [Fixed] Bump protobuf version to 3.20.2. See [#13269](https://github.com/DataDog/integrations-core/pull/13269).
