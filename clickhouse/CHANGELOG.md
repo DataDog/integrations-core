@@ -1,5 +1,9 @@
 # CHANGELOG - ClickHouse
 
+## 2.8.1 / 2022-12-09
+
+* [Fixed] Update dependencies. See [#13478](https://github.com/DataDog/integrations-core/pull/13478).
+
 ## 2.8.0 / 2022-08-05 / Agent 7.39.0
 
 * [Added] Add active parts metric and support clickhouse 22. See [#12104](https://github.com/DataDog/integrations-core/pull/12104). Thanks [spanneberg](https://github.com/spanneberg).
