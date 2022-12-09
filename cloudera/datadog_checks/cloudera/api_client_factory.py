@@ -18,6 +18,16 @@ def make_api_client(check, config):
     if response_version:
         cloudera_version = packaging.version.parse(response_version)
         check.log.debug('Cloudera Manager Version: %s', cloudera_version)
+        check.log.debug('micro: %s', cloudera_version.micro)
         if cloudera_version.major == 7:
+            version_raw = str(cloudera_version)
+            version_parts = {
+                'major': str(cloudera_version.major),
+                'minor': str(cloudera_version.minor),
+                'patch': str(cloudera_version.micro),
+            }
+            check.set_metadata('version', version_raw, scheme='parts', part_map=version_parts)
+
             return ApiClientV7(check, api_client)
+
     raise ConfigurationError(f'Cloudera Manager Version is unsupported or unknown: {response_version}')

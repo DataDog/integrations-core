@@ -24,6 +24,7 @@ class ClouderaCheck(AgentCheck, ConfigMixin):
         self.client = None
         self.check_initializations.append(self._create_client)
 
+    @AgentCheck.metadata_entrypoint
     def _create_client(self):
         try:
             self.client = make_api_client(self, self.config)
