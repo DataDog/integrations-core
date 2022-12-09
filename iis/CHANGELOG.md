@@ -1,5 +1,9 @@
 # CHANGELOG - iis
 
+## 2.18.0 / 2022-12-09
+
+* [Added] Implement multi-instance counters without Windows PdhEnumObjects API. See [#13243](https://github.com/DataDog/integrations-core/pull/13243).
+
 ## 2.17.0 / 2022-07-18 / Agent 7.39.0
 
 * [Added] Add functionality to load the legacy version of the integration. See [#12396](https://github.com/DataDog/integrations-core/pull/12396).
