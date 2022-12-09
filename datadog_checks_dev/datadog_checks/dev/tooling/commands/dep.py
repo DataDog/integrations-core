@@ -47,6 +47,8 @@ IGNORED_DEPS = {
     'lz4',  # Breaking clickhouse tests
     'pyodbc',  # Breaking sqlserver tests
     'psutil',  # Breaking disk tests
+    'keystoneauth1',  # Running our update command actually downgrades this 5.0.0 -> 3.18.0.
+    'aerospike',  # v8+ breaks agent build.
 }
 
 # Dependencies for the downloader that are security-related and should be updated separately from the others
