@@ -7,7 +7,7 @@ PySocks,PyPI,BSD-3-Clause,Anorov
 PyYAML,PyPI,MIT,Kirill Simonov
 Pyro4,PyPI,MIT,Irmen de Jong
 adodbapi,PyPI,LGPL-2.1-only,"Henrik Ekelund, Vernon Cole, et.al."
-aerospike,PyPI,Apache-2.0,""Aerospike, Inc." <info@aerospike.com> | Aerospike, Inc."
+aerospike,PyPI,Apache-2.0,"Aerospike, Inc."
 aws-requests-auth,PyPI,BSD-3-Clause,David Muller
 beautifulsoup4,PyPI,MIT,Leonard Richardson
 binary,PyPI,Apache-2.0,Ofek Lev
