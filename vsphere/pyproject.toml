@@ -9,7 +9,6 @@ build-backend = "hatchling.build"
 name = "datadog-vsphere"
 description = "The vSphere check"
 readme = "README.md"
-license = {text = "BSD-3-Clause"}
 keywords = [
     "datadog",
     "datadog agent",
@@ -36,9 +35,12 @@ dynamic = [
     "version",
 ]
 
+[project.license]
+text = "BSD-3-Clause"
+
 [project.optional-dependencies]
 deps = [
-    "futures==3.3.0; python_version < '3.0'",
+    "futures==3.4.0; python_version < '3.0'",
     "pyvmomi==7.0.3",
 ]
 

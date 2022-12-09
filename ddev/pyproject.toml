@@ -28,7 +28,7 @@ classifiers = [
     "Programming Language :: Python :: 3.8",
 ]
 dependencies = [
-    "datadog-checks-dev[cli]>=17.4.0",
+    "datadog-checks-dev[cli]>=17.5.0",
     "hatch>=1.6.3",
     "jsonpointer",
     "pyperclip",

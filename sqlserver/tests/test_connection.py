@@ -13,7 +13,13 @@ import pytest
 from datadog_checks.base import ConfigurationError
 from datadog_checks.dev.utils import running_on_windows_ci
 from datadog_checks.sqlserver import SQLServer
-from datadog_checks.sqlserver.connection import Connection, SQLConnectionError, parse_connection_string_properties
+from datadog_checks.sqlserver.connection import (
+    SUPPORT_LINK,
+    Connection,
+    SQLConnectionError,
+    parse_connection_string_properties,
+)
+from datadog_checks.sqlserver.connection_errors import ConnectionErrorCode, format_connection_exception
 
 from .common import CHECK_NAME, SQLSERVER_MAJOR_VERSION
 
@@ -66,7 +72,8 @@ def test_warn_trusted_connection_username_pass(instance_minimal_defaults, cs, us
     instance_minimal_defaults["connection_string"] = cs
     instance_minimal_defaults["username"] = username
     instance_minimal_defaults["password"] = password
-    connection = Connection({}, instance_minimal_defaults, None)
+    check = SQLServer(CHECK_NAME, {}, [instance_minimal_defaults])
+    connection = Connection(check, {}, instance_minimal_defaults, None)
     connection.log = mock.MagicMock()
     connection._connection_options_validation('somekey', 'somedb')
     if expect_warning:
@@ -88,7 +95,8 @@ def test_warn_trusted_connection_username_pass(instance_minimal_defaults, cs, us
 )
 def test_will_warn_parameters_for_the_wrong_connection(instance_minimal_defaults, connector, param):
     instance_minimal_defaults.update({'connector': connector, param: 'foo'})
-    connection = Connection({}, instance_minimal_defaults, None)
+    check = SQLServer(CHECK_NAME, {}, [instance_minimal_defaults])
+    connection = Connection(check, {}, instance_minimal_defaults, None)
     connection.log = mock.MagicMock()
     connection._connection_options_validation('somekey', 'somedb')
     connection.log.warning.assert_called_once_with(
@@ -120,7 +128,8 @@ def test_will_warn_parameters_for_the_wrong_connection(instance_minimal_defaults
 )
 def test_will_fail_for_duplicate_parameters(instance_minimal_defaults, connector, cs, param, should_fail):
     instance_minimal_defaults.update({'connector': connector, param: 'foo', 'connection_string': cs + "=foo"})
-    connection = Connection({}, instance_minimal_defaults, None)
+    check = SQLServer(CHECK_NAME, {}, [instance_minimal_defaults])
+    connection = Connection(check, {}, instance_minimal_defaults, None)
     if should_fail:
         match = (
             "%s has been provided both in the connection string and as a configuration option (%s), "
@@ -151,7 +160,8 @@ def test_will_fail_for_duplicate_parameters(instance_minimal_defaults, connector
 def test_will_fail_for_wrong_parameters_in_the_connection_string(instance_minimal_defaults, connector, cs):
     instance_minimal_defaults.update({'connector': connector, 'connection_string': cs + '=foo'})
     other_connector = 'odbc' if connector != 'odbc' else 'adodbapi'
-    connection = Connection({}, instance_minimal_defaults, None)
+    check = SQLServer(CHECK_NAME, {}, [instance_minimal_defaults])
+    connection = Connection(check, {}, instance_minimal_defaults, None)
     match = (
         "%s has been provided in the connection string. "
         "This option is only available for %s connections, however %s has been selected"
@@ -214,7 +224,8 @@ def test_will_fail_for_wrong_parameters_in_the_connection_string(instance_minima
 def test_config_with_and_without_port(instance_minimal_defaults, host, port, expected_host):
     instance_minimal_defaults["host"] = host
     instance_minimal_defaults["port"] = port
-    connection = Connection({}, instance_minimal_defaults, None)
+    check = SQLServer(CHECK_NAME, {}, [instance_minimal_defaults])
+    connection = Connection(check, {}, instance_minimal_defaults, None)
     _, result_host, _, _, _, _ = connection._get_access_info('somekey', 'somedb')
     assert result_host == expected_host
 
@@ -293,7 +304,9 @@ def test_connection_failure(aggregator, dd_run_check, instance_docker):
 
     try:
         # Break the connection
-        check.connection = Connection({}, {'host': '', 'username': '', 'password': ''}, check.handle_service_check)
+        check.connection = Connection(
+            check, {}, {'host': '', 'username': '', 'password': ''}, check.handle_service_check
+        )
         dd_run_check(check)
     except Exception:
         aggregator.assert_service_check(
@@ -312,12 +325,33 @@ def test_connection_failure(aggregator, dd_run_check, instance_docker):
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
-    "test_case_name, instance_overrides, expected_error_patterns",
+    "test_case_name,instance_overrides,expected_error_patterns,expected_error",
     [
         (
             "unknown_adoprovider",
             {'adoprovider': "fake"},
             {".*": "TCP-connection\\(OK\\).*Provider cannot be found. It may not be properly installed."},
+            ConnectionErrorCode.driver_not_found,
+        ),
+        (
+            "unknown_odbc_driver",
+            {'driver': "{SQL Driver For Fake Tests 2022}"},
+            {
+                "odbc-linux": "TCP-connection\\(OK\\).*"
+                "Can't open lib .* file not found .* configured odbc driver .* not in list of installed drivers",
+                "odbc-windows": "TCP-connection\\(OK\\).*"
+                "Data source name not found.* and no default driver specified",
+            },
+            ConnectionErrorCode.driver_not_found,
+        ),
+        (
+            "odbc_driver_incorrect_dsn",
+            {'dsn': "Not The Real DSN"},
+            {
+                "odbc-linux|odbc-windows": "TCP-connection\\(OK\\).*"
+                "Data source name not found.* and no default driver specified",
+            },
+            ConnectionErrorCode.driver_not_found,
         ),
         (
             "unknown_hostname",
@@ -327,9 +361,11 @@ def test_connection_failure(aggregator, dd_run_check, instance_docker):
                 "TCP Provider: No such host is known",
                 "SQLOLEDB|SQLNCLI11": "TCP-connection\\(ERROR: getaddrinfo failed\\).*"
                 "could not open database requested by login",
-                "odbc-linux": "TCP-connection\\(ERROR: Temporary failure in name resolution\\).*"
-                "Unable to connect to data source",
+                "odbc-linux": "(TCP-connection\\(ERROR: Temporary failure in name resolution\\).*"
+                "Unable to connect to data source|"
+                "TCP-connection\\(ERROR: Name or service not known\\).*Login timeout expired)",
             },
+            ConnectionErrorCode.tcp_connection_failed,
         ),
         (
             "failed_tcp_connection",
@@ -341,8 +377,9 @@ def test_connection_failure(aggregator, dd_run_check, instance_docker):
                 "because the target machine actively refused it\\).*"
                 "could not open database requested by login",
                 "odbc-linux": "TCP-connection\\(ERROR: Connection refused\\).*"
-                "Unable to connect: Adaptive Server is unavailable",
+                "(Unable to connect: Adaptive Server is unavailable|Login timeout expired*)",
             },
+            ConnectionErrorCode.tcp_connection_failed,
         ),
         (
             "unknown_database",
@@ -350,8 +387,10 @@ def test_connection_failure(aggregator, dd_run_check, instance_docker):
             {
                 "odbc-windows|MSOLEDBSQL": "TCP-connection\\(OK\\).*Cannot open database .* requested by the login.",
                 "SQLOLEDB|SQLNCLI11": "TCP-connection\\(OK\\).*could not open database requested by login",
-                "odbc-linux": "TCP-connection\\(OK\\).*Login failed for user",
+                "odbc-linux": "TCP-connection\\(OK\\).*"
+                "(Cannot open database .* requested by the login|Login failed for user)",
             },
+            ConnectionErrorCode.tcp_connection_failed,
         ),
         (
             "invalid_credentials",
@@ -360,6 +399,7 @@ def test_connection_failure(aggregator, dd_run_check, instance_docker):
                 "odbc-windows|odbc-linux|MSOLEDBSQL": "TCP-connection\\(OK\\).*Login failed for user",
                 "SQLOLEDB|SQLNCLI11": "TCP-connection\\(OK\\).*login failed for user",
             },
+            ConnectionErrorCode.login_failed_for_user,
         ),
     ],
 )
@@ -368,6 +408,7 @@ def test_connection_error_reporting(
     instance_docker,
     instance_overrides,
     expected_error_patterns,
+    expected_error,
 ):
     for key, value in instance_overrides.items():
         instance_docker[key] = value
@@ -377,6 +418,8 @@ def test_connection_error_reporting(
         adoprovider_override = instance_overrides['adoprovider'].upper()
         if adoprovider_override not in Connection.valid_adoproviders:
             Connection.valid_adoproviders.append(adoprovider_override)
+    if 'adoprovider' in instance_docker and ('driver' in instance_overrides or 'dsn' in instance_overrides):
+        pytest.skip("driver or DSN overrides is not relevant for the adoprovider")
 
     driver = "odbc" if instance_docker['connector'] == "odbc" else instance_docker['adoprovider']
     if driver == "odbc":
@@ -387,10 +430,64 @@ def test_connection_error_reporting(
     expected_error_pattern = matching_patterns[0]
 
     check = SQLServer(CHECK_NAME, {}, [instance_docker])
-    connection = Connection(check.init_config, check.instance, check.handle_service_check)
+    connection = Connection(check, check.init_config, check.instance, check.handle_service_check)
     with pytest.raises(SQLConnectionError) as excinfo:
         with connection.open_managed_default_connection():
             pytest.fail("connection should not have succeeded")
 
-    message = str(excinfo.value)
-    assert re.search(expected_error_pattern, message)
+    message = str(excinfo.value).lower()
+    assert re.search(expected_error_pattern, message, re.IGNORECASE)
+    expected_link = "see {}#{} for more details".format(SUPPORT_LINK, expected_error.value)
+    if expected_error == ConnectionErrorCode.tcp_connection_failed:
+        user_link = "see {}#{} for more details".format(SUPPORT_LINK, ConnectionErrorCode.login_failed_for_user.value)
+        assert expected_link.lower() in message or user_link.lower() in message
+    else:
+        assert expected_link.lower() in message
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "error_message,expected_error",
+    [
+        (
+            "OperationalError('08001', '[08001] "
+            "[Microsoft][ODBC SQL Server Driver][DBNETLIB]SSL Security error (18) "
+            "(SQLDriverConnect); [08001] [Microsoft][ODBC SQL Server Driver][DBNETLIB]ConnectionOpen "
+            "(SECCreateCredentials()). (1); [08001] "
+            "[Microsoft][ODBC SQL Server Driver]Invalid connection string attribute (0)')",
+            ConnectionErrorCode.ssl_security_error,
+        ),
+        (
+            "OperationalError(com_error(-2147352567, 'Exception occurred.', "
+            "(0, 'Microsoft OLE DB Driver 19 for SQL Server', "
+            "'SSL Provider: The certificate chain was issued by an authority that is not trusted.\\r\\n', "
+            "None, 0, -2147467259), None)",
+            ConnectionErrorCode.certificate_verify_failed,
+        ),
+        (
+            "InterfaceError('IM002', '[IM002] [Microsoft][ODBC Driver Manager] "
+            "Data source name not found and no default driver specified (0) (SQLDriverConnect)')",
+            ConnectionErrorCode.driver_not_found,
+        ),
+        (
+            "OperationalError(com_error(-2147352567, 'Exception occurred.', (0, 'Microsoft OLE DB Driver 19 "
+            "for SQL Server', 'Login failed. The login is from an untrusted domain and cannot be used with "
+            "Windows authentication.', None, 0, -2147467259), None)",
+            ConnectionErrorCode.login_failed_for_user,
+        ),
+        (
+            "OperationalError(com_error(-2147352567, 'Exception occurred.', (0, 'Microsoft OLE DB Driver 19 "
+            "for SQL Server', 'I can't say why I couldn't connect!', None, 0, -2147467259), None)",
+            ConnectionErrorCode.unknown,
+        ),
+    ],
+)
+def test_format_connection_error(
+    instance_docker,
+    error_message,
+    expected_error,
+):
+    driver = "odbc" if instance_docker['connector'] == "odbc" else instance_docker['adoprovider']
+    _, conn_err = format_connection_exception(error_message, driver)
+    assert conn_err
+    assert conn_err.value == expected_error.value

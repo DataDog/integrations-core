@@ -25,7 +25,6 @@ class TrelloClient:
         self.team_list_map = {
             'Containers': '5ae1cab495edd80852396c71',
             'Container App': '5e8b36a8060eeb1cb3fa5a9c',
-            'Core': '5ae1e3d62a5167779e65e87d',
             'Database Monitoring': '60ec3d30532b9072b44d3900',
             'Integrations': '5ae1e3e2c81fff836d00497e',
             'Triage': '5d9b687492952e6578ecf04d',  # unused
@@ -50,7 +49,6 @@ class TrelloClient:
         # Maps the team to the trello team label
         self.label_team_map = {
             'team/agent-apm': 'Trace',
-            'team/agent-core': 'Core',
             'team/agent-platform': 'Platform',
             'team/triage': 'Platform',
             'team/networks': 'Networks',
@@ -91,9 +89,6 @@ class TrelloClient:
             'team/container-ecosystems': 'container-ecosystems',
             'team/agent-metrics-logs': 'agent-metrics-logs',
             'team/agent-shared-components': 'agent-shared-components',
-            # 'agent-core' must be after 'agent-metrics-logs' and 'agent-shared-components'
-            # as the team of a user is the first team available.
-            'team/agent-core': 'agent-core',
             'team/windows-agent': 'windows-agent',
             'team/ebpf-platform': 'ebpf-platform',
             'team/usm': 'universal-service-monitoring',
@@ -105,7 +100,6 @@ class TrelloClient:
         self.label_map = {
             'Containers': '5e7910856f8e4363e3b51708',
             'Container App': '5e8b36f72f642272e75edd34',
-            'Core': '5e79105d4c45a45adb9e7730',
             'Integrations': '5e790ff25bd3dd48da67608d',
             'Database Monitoring': '60ec4973bd1b8652312af938',
             'Triage': '5e7910a45d711a6382f08bb9',  # unused
