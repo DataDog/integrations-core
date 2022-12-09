@@ -31,12 +31,9 @@ class ApiClientV7(ApiClient):
             self._collect_cluster_service_check(cluster, tags)
             self._collect_hosts(cluster_name)
 
-    def _collect_cluster_tags(self, cluster):
-        tags = []
-        if cluster.name:
-            for cluster_tag in cluster.tags:
-                tags.append(f"{cluster_tag.name}:{cluster_tag.value}")
-        return tags
+    @staticmethod
+    def _collect_cluster_tags(cluster):
+        return [f"{cluster_tag.name}:{cluster_tag.value}" for cluster_tag in cluster.tags]
 
     def _collect_cluster_service_check(self, cluster, tags):
         cluster_entity_status = ENTITY_STATUS[cluster.entity_status]
