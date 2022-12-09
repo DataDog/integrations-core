@@ -212,7 +212,7 @@ class SqlserverActivity(DBMAsyncJob):
             statement = obfuscate_sql_with_metadata(row['statement_text'], self.check.obfuscator_options)
             procedure_statement = None
             # sqlserver doesn't have a boolean data type so convert integer to boolean
-            row['is_proc'] = is_statement_proc(row['text'])
+            row['is_proc'], procedure_name = is_statement_proc(row['text'])
             if row['is_proc'] and 'text' in row:
                 procedure_statement = obfuscate_sql_with_metadata(row['text'], self.check.obfuscator_options)
             obfuscated_statement = statement['query']
@@ -225,6 +225,8 @@ class SqlserverActivity(DBMAsyncJob):
             # its related plan events
             if procedure_statement:
                 row['procedure_signature'] = compute_sql_signature(procedure_statement['query'])
+            if procedure_name:
+                row['procedure_name'] = procedure_name
         except Exception as e:
             if self.check.log_unobfuscated_queries:
                 raw_query_text = row['text'] if row.get('is_proc', False) else row['statement_text']
