@@ -31,12 +31,9 @@ class ApiClientV7(ApiClient):
             self._collect_cluster_service_check(cluster, tags)
             self._collect_hosts(cluster_name)
 
-    def _collect_cluster_tags(self, cluster):
-        tags = []
-        if cluster.name:
-            for cluster_tag in cluster.tags:
-                tags.append(f"{cluster_tag.name}:{cluster_tag.value}")
-        return tags
+    @staticmethod
+    def _collect_cluster_tags(cluster):
+        return [f"{cluster_tag.name}:{cluster_tag.value}" for cluster_tag in cluster.tags]
 
     def _collect_cluster_service_check(self, cluster, tags):
         cluster_entity_status = ENTITY_STATUS[cluster.entity_status]
@@ -79,7 +76,7 @@ class ApiClientV7(ApiClient):
     def _collect_host_service_check(self, host, tags):
         host_entity_status = ENTITY_STATUS[host.entity_status] if host.entity_status else None
         self._log.debug('host_entity_status: %s', host_entity_status)
-        self._check.service_check(HOST_HEALTH, host_entity_status, tags=tags)
+        self._check.service_check(HOST_HEALTH, host_entity_status, tags=tags + [f'cloudera_hostname:{host.hostname}'])
 
     def _collect_host_metrics(self, host, tags):
         self._collect_host_native_metrics(host, tags)
