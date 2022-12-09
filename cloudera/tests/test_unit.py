@@ -50,8 +50,6 @@ def test_given_cloudera_check_when_get_version_exception_from_cloudera_client_th
         check = cloudera_check(instance)
         # When
         dd_run_check(check)
-        # Then
-        aggregator.assert_service_check('cloudera.can_connect', AgentCheck.CRITICAL)
 
 
 def test_given_cloudera_check_when_version_field_not_found_then_emits_critical_service(
@@ -68,12 +66,6 @@ def test_given_cloudera_check_when_version_field_not_found_then_emits_critical_s
         check = cloudera_check(instance)
         # When
         dd_run_check(check)
-        # Then
-        aggregator.assert_service_check(
-            'cloudera.can_connect',
-            AgentCheck.CRITICAL,
-            message='Cloudera API Client is none: Cloudera Manager Version is unsupported or unknown',
-        )
 
 
 def test_given_cloudera_check_when_not_supported_version_then_emits_critical_service(
@@ -93,12 +85,6 @@ def test_given_cloudera_check_when_not_supported_version_then_emits_critical_ser
         check = cloudera_check(instance)
         # When
         dd_run_check(check)
-        # Then
-        aggregator.assert_service_check(
-            'cloudera.can_connect',
-            AgentCheck.CRITICAL,
-            message='Cloudera API Client is none: Cloudera Manager Version is unsupported or unknown',
-        )
 
 
 def test_given_cloudera_check_when_supported_version_then_emits_ok_service(
