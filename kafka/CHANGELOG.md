@@ -1,5 +1,9 @@
 # CHANGELOG - kafka
 
+## 2.13.1 / 2022-12-09
+
+* [Fixed] Fix kafka request metrics due to KIP 272. See [#13232](https://github.com/DataDog/integrations-core/pull/13232).
+
 ## 2.13.0 / 2022-06-27 / Agent 7.38.0
 
 * [Added] Add under min ISR partition count metric. See [#12108](https://github.com/DataDog/integrations-core/pull/12108). Thanks [OuesFa](https://github.com/OuesFa).

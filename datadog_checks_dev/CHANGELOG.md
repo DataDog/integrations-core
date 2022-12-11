@@ -1,5 +1,9 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 17.5.1 / 2022-12-09
+
+* [Fixed] Update dependencies. See [#13478](https://github.com/DataDog/integrations-core/pull/13478).
+
 ## 17.5.0 / 2022-12-09
 
 * [Added] Add `validate license-header` subcommand. See [#13417](https://github.com/DataDog/integrations-core/pull/13417).

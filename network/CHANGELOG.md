@@ -1,5 +1,9 @@
 # CHANGELOG - network
 
+## 2.9.3 / 2022-12-09
+
+* [Fixed] Fix network check for solaris. See [#13319](https://github.com/DataDog/integrations-core/pull/13319).
+
 ## 2.9.2 / 2022-10-28
 
 * [Fixed] Extract windows check to separate class. See [#13143](https://github.com/DataDog/integrations-core/pull/13143).

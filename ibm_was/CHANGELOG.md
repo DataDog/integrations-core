@@ -1,5 +1,9 @@
 # CHANGELOG - IBM WAS
 
+## 2.3.1 / 2022-12-09
+
+* [Fixed] Log that we collect stats only when we in fact do collect them. See [#13324](https://github.com/DataDog/integrations-core/pull/13324).
+
 ## 2.3.0 / 2022-09-16 / Agent 7.40.0
 
 * [Added] Update HTTP config spec templates. See [#12890](https://github.com/DataDog/integrations-core/pull/12890).

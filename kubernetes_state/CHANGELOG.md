@@ -1,5 +1,9 @@
 # CHANGELOG - kubernetes_state
 
+## 7.4.2 / 2022-12-09
+
+* [Fixed] Update protobuf. See [#13262](https://github.com/DataDog/integrations-core/pull/13262).
+
 ## 7.4.1 / 2022-11-08
 
 * [Fixed] Bump protobuf version to 3.20.2. See [#13271](https://github.com/DataDog/integrations-core/pull/13271).

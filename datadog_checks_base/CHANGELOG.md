@@ -1,5 +1,10 @@
 # CHANGELOG - datadog_checks_base
 
+## 28.0.0 / 2022-12-09
+
+* [Fixed] Update dependencies. See [#13478](https://github.com/DataDog/integrations-core/pull/13478).
+* [Changed] Update Oracle check to use python-oracledb library. See [#13298](https://github.com/DataDog/integrations-core/pull/13298).
+
 ## 27.5.0 / 2022-12-06
 
 * [Added] Implement multi-instance counters without Windows PdhEnumObjects API. See [#13243](https://github.com/DataDog/integrations-core/pull/13243).
