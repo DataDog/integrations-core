@@ -2,8 +2,7 @@
 
 ## 2.2.0 / 2022-12-09
 
-* [Added] Sonarqube 'auto-discover' all components. See [#13450](https://github.com/DataDog/integrations-core/pull/13450).
-* [Fixed] Add py2 tests for sonarqube. See [#13303](https://github.com/DataDog/integrations-core/pull/13303).
+* [Added] Add autodiscovery feature for components. See [#13450](https://github.com/DataDog/integrations-core/pull/13450).
 
 ## 2.1.0 / 2022-09-16 / Agent 7.40.0
 

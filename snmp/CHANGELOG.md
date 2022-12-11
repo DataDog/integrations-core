@@ -5,7 +5,6 @@
 * [Added] Add topology metadata e2e test (aos_lldp). See [#13373](https://github.com/DataDog/integrations-core/pull/13373).
 * [Fixed] Update dependencies. See [#13478](https://github.com/DataDog/integrations-core/pull/13478).
 * [Fixed] Remove invalid 'service' field in snmp example config. See [#13341](https://github.com/DataDog/integrations-core/pull/13341).
-* [Fixed] Rename check instance argument to _. See [#13384](https://github.com/DataDog/integrations-core/pull/13384).
 
 ## 5.10.0 / 2022-09-16 / Agent 7.40.0
 

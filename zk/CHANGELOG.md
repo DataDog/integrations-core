@@ -2,7 +2,7 @@
 
 ## 4.2.1 / 2022-12-09
 
-* [Fixed] Stop using deprecated distutils.version classes. See [#13408](https://github.com/DataDog/integrations-core/pull/13408).
+* [Fixed] Stop using deprecated `distutils.version` classes. See [#13408](https://github.com/DataDog/integrations-core/pull/13408).
 * [Fixed] Make version parsing more flexible to increase compatibility. See [#13171](https://github.com/DataDog/integrations-core/pull/13171). Thanks [pnovitskiy](https://github.com/pnovitskiy).
 
 ## 4.2.0 / 2022-04-05 / Agent 7.36.0

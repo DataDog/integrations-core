@@ -2,7 +2,7 @@
 
 ## 2.9.1 / 2022-12-09
 
-* [Fixed] Update Snowflake connector and cryptography dependencies. See [#13367](https://github.com/DataDog/integrations-core/pull/13367).
+* [Fixed] Update `cryptography` dependency. See [#13367](https://github.com/DataDog/integrations-core/pull/13367).
 * [Fixed] Remove `default_backend` parameter from cryptography calls. See [#13333](https://github.com/DataDog/integrations-core/pull/13333).
 
 ## 2.9.0 / 2022-08-05 / Agent 7.39.0
