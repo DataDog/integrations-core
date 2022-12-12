@@ -102,7 +102,6 @@ def tcps_instance():
 
 @pytest.fixture(scope='session')
 def dd_environment():
-
     instance = {
         'server': '{}:{}'.format(HOST, PORT),
         'username': USER,
@@ -141,13 +140,15 @@ def dd_environment():
 
 @pytest.fixture
 def bad_instance():
-    return {
-        "password": "badpassword",
-        "protocol": "TCP",
-        "server": "localhost:1521",
-        "service_name": "InfraDB.us.oracle.com",
-        "username": "datadog",
-    }
+    return deepcopy(
+        {
+            "password": "badpassword",
+            "protocol": "TCP",
+            "server": "localhost:1521",
+            "service_name": "InfraDB.us.oracle.com",
+            "username": "datadog",
+        }
+    )
 
 
 def create_user():
