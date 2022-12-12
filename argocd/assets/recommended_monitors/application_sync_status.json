@@ -1,0 +1,25 @@
+{
+    "name": "Application {{name.name}} is not Synced",
+    "type": "query alert",
+    "query": "avg(last_30m):avg:argocd.app_controller.app.info{!sync_status:synced} by {sync_status,name} >= 1",
+    "message": "{{#is_alert}}\nApplication {{name.name}} has been reporting with a sync_status:{{sync_status.name}} for the last 30 minutes.\n{{/is_alert}} \n\n{{#is_recovery}}\nApplication {{name.name}} is now synced.\n{{/is_recovery}} ",
+    "tags": [
+        "integration:argocd"
+    ],
+    "options": {
+        "thresholds": {
+            "critical": 1
+        },
+        "notify_audit": false,
+        "require_full_window": false,
+        "notify_no_data": false,
+        "renotify_interval": 0,
+        "include_tags": true,
+        "new_group_delay": 60
+    },
+    "priority": null,
+    "restricted_roles": null,
+    "recommended_monitor_metadata": {
+        "description": "Notify your team when your Applications are not in synced in Argo CD"
+    }
+}
