@@ -8,7 +8,7 @@
 
 * [Added] Added new opLatencies metrics with correct type. See [#13336](https://github.com/DataDog/integrations-core/pull/13336).
 
-## 4.0.4 / 2022-10-28
+## 4.0.4 / 2022-10-28 / Agent 7.41.0
 
 * [Fixed] Update dependencies. See [#13207](https://github.com/DataDog/integrations-core/pull/13207).
 

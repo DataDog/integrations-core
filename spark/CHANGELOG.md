@@ -4,7 +4,7 @@
 
 * [Fixed] Allow punctuation marks in query name when publishing spark structured streaming metrics. See [#13246](https://github.com/DataDog/integrations-core/pull/13246). Thanks [cpolito88](https://github.com/cpolito88).
 
-## 3.1.2 / 2022-10-28
+## 3.1.2 / 2022-10-28 / Agent 7.41.0
 
 * [Fixed] Add a log line when no running apps are found. See [#13067](https://github.com/DataDog/integrations-core/pull/13067).
 

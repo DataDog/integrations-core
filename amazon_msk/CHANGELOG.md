@@ -4,7 +4,7 @@
 
 * [Fixed] Update dependencies. See [#13478](https://github.com/DataDog/integrations-core/pull/13478).
 
-## 3.2.1 / 2022-10-28
+## 3.2.1 / 2022-10-28 / Agent 7.41.0
 
 * [Fixed] Update dependencies. See [#13205](https://github.com/DataDog/integrations-core/pull/13205).
 

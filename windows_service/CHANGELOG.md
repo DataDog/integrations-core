@@ -1,6 +1,6 @@
 # CHANGELOG - windows_service
 
-## 4.4.0 / 2022-10-28
+## 4.4.0 / 2022-10-28 / Agent 7.41.0
 
 * [Added] Add Windows service `startup_type` filter to config. See [#12940](https://github.com/DataDog/integrations-core/pull/12940).
 
