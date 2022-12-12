@@ -94,7 +94,8 @@ def validate_license_headers(
         # When file already existed, check whether the license has changed
         previous = get_previous(path)
         if previous:
-            if license_header != parse_license_header(previous):
+            previous_license_header = parse_license_header(previous)
+            if previous_license_header and license_header != previous_license_header:
                 return LicenseHeaderError("existing file has changed license", relpath)
         # When it's a new file, compare it to the current header template
         elif license_header != get_default_license_header():

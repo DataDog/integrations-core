@@ -201,6 +201,31 @@ import os
     assert errors[0].path == "setup.py"
 
 
+def test_validate_license_headers_accepts_any_header_when_previous_version_with_no_license_exists(tmp_path):
+    check_path = tmp_path / "check"
+    check_path.mkdir()
+
+    prev_contents = "\n\nimport os\n"
+
+    _write_string_to_file(
+        check_path / "setup.py",
+        """# (C) Foo, Inc. 2000-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
+import os
+""",
+    )
+
+    fake_get_previous = _make_get_previous(
+        {
+            pathlib.Path(check_path / "setup.py"): prev_contents,
+        }
+    )
+
+    assert validate_license_headers(check_path, get_previous=fake_get_previous) == []
+
+
 def _make_get_previous(d: dict = None):
     if d is None:
         d = {}
