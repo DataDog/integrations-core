@@ -1,4 +1,5 @@
 import cm_client
+import cm_client.rest
 import packaging.version
 
 from datadog_checks.base import ConfigurationError
@@ -9,7 +10,7 @@ def make_api_client(check, config):
     cm_client.configuration.username = config.workload_username
     cm_client.configuration.password = config.workload_password
     api_client = cm_client.ApiClient(config.api_url)
-
+    api_client.rest_client = cm_client.rest.RESTClientObject(maxsize=100)
     check.log.debug('Getting version from cloudera[%s]', config.api_url)
     cloudera_manager_resource_api = cm_client.ClouderaManagerResourceApi(api_client)
     get_version_response = cloudera_manager_resource_api.get_version()

@@ -61,7 +61,7 @@ def get_timeseries_resource():
                             data=[
                                 ApiTimeSeriesData(value=49.7),
                             ],
-                            metadata=ApiTimeSeriesMetadata(entity_name=category, alias=metric),
+                            metadata=ApiTimeSeriesMetadata(attributes={'category': category}, alias=metric),
                         )
                         for metric in metrics
                     ]
