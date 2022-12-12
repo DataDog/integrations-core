@@ -18,6 +18,7 @@ from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.cloudera.metrics import METRICS
 from datadog_checks.dev.utils import get_metadata_metrics
 
+from .common import CAN_CONNECT_TAGS, CLUSTER_HEALTH_TAGS
 from .conftest import get_timeseries_resource
 
 pytestmark = [pytest.mark.unit]
@@ -48,12 +49,15 @@ def test_given_cloudera_check_when_get_version_exception_from_cloudera_client_th
         match='Service not available',
     ):
         # Given
-        api_url = instance['api_url']
         check = cloudera_check(instance)
         # When
         dd_run_check(check)
     # Then
-    aggregator.assert_service_check('cloudera.can_connect', AgentCheck.CRITICAL, tags=[f'api_url={api_url}'])
+    aggregator.assert_service_check(
+        'cloudera.can_connect',
+        AgentCheck.CRITICAL,
+        tags=CAN_CONNECT_TAGS,
+    )
 
 
 def test_given_cloudera_check_when_version_field_not_found_then_emits_critical_service(
@@ -67,7 +71,6 @@ def test_given_cloudera_check_when_version_field_not_found_then_emits_critical_s
         match='Cloudera Manager Version is unsupported or unknown',
     ):
         # Given
-        api_url = instance['api_url']
         check = cloudera_check(instance)
         # When
         dd_run_check(check)
@@ -76,7 +79,7 @@ def test_given_cloudera_check_when_version_field_not_found_then_emits_critical_s
         'cloudera.can_connect',
         AgentCheck.CRITICAL,
         message="Cloudera API Client is none: Cloudera Manager Version is unsupported or unknown: None",
-        tags=[f'api_url={api_url}'],
+        tags=CAN_CONNECT_TAGS,
     )
 
 
@@ -94,7 +97,6 @@ def test_given_cloudera_check_when_not_supported_version_then_emits_critical_ser
         match='Cloudera Manager Version is unsupported or unknown',
     ):
         # Given
-        api_url = instance['api_url']
         check = cloudera_check(instance)
         # When
         dd_run_check(check)
@@ -103,7 +105,7 @@ def test_given_cloudera_check_when_not_supported_version_then_emits_critical_ser
         'cloudera.can_connect',
         AgentCheck.CRITICAL,
         message="Cloudera API Client is none: Cloudera Manager Version is unsupported or unknown: 5.0.0",
-        tags=[f'api_url={api_url}'],
+        tags=CAN_CONNECT_TAGS,
     )
 
 
@@ -122,7 +124,7 @@ def test_given_cloudera_check_when_supported_version_then_emits_ok_service(
         return_value=ApiClusterList(
             items=[
                 ApiCluster(
-                    name="cluster_1",
+                    name="cod--qfdcinkqrzw",
                     entity_status="GOOD_HEALTH",
                     tags=[
                         ApiEntityTag(name="_cldr_cb_clustertype", value="Data Hub"),
@@ -142,21 +144,24 @@ def test_given_cloudera_check_when_supported_version_then_emits_ok_service(
                 ApiHost(
                     host_id='host_1',
                     cluster_ref=ApiClusterRef(
-                        cluster_name="cluster_1",
-                        display_name="cluster_1",
+                        cluster_name="cod--qfdcinkqrzw",
+                        display_name="cod--qfdcinkqrzw",
                     ),
                 )
             ],
         ),
     ):
         # Given
-        api_url = instance['api_url']
         check = cloudera_check(instance)
         # When
         dd_run_check(check)
         # Then
         aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
-        aggregator.assert_service_check('cloudera.can_connect', AgentCheck.OK, tags=[f'api_url={api_url}'])
+        aggregator.assert_service_check(
+            'cloudera.can_connect',
+            AgentCheck.OK,
+            tags=CAN_CONNECT_TAGS,
+        )
 
 
 def test_given_cloudera_check_when_v7_read_clusters_exception_from_cloudera_client_then_emits_critical_service(
@@ -173,7 +178,6 @@ def test_given_cloudera_check_when_v7_read_clusters_exception_from_cloudera_clie
         side_effect=ApiException('Service not available'),
     ):
         # Given
-        api_url = instance['api_url']
         check = cloudera_check(instance)
         # When
         dd_run_check(check)
@@ -181,7 +185,7 @@ def test_given_cloudera_check_when_v7_read_clusters_exception_from_cloudera_clie
     aggregator.assert_service_check(
         'cloudera.can_connect',
         AgentCheck.CRITICAL,
-        tags=[f'api_url={api_url}'],
+        tags=CAN_CONNECT_TAGS,
         message="Cloudera check raised an exception: (Service not available)\nReason: None\n",
     )
 
@@ -201,7 +205,7 @@ def test_given_cloudera_check_when_bad_health_cluster_then_emits_cluster_health_
         return_value=ApiClusterList(
             items=[
                 ApiCluster(
-                    name="cluster_1",
+                    name="cod--qfdcinkqrzw",
                     entity_status="BAD_HEALTH",
                     tags=[
                         ApiEntityTag(name="_cldr_cb_clustertype", value="Data Hub"),
@@ -221,15 +225,14 @@ def test_given_cloudera_check_when_bad_health_cluster_then_emits_cluster_health_
                 ApiHost(
                     host_id='host_1',
                     cluster_ref=ApiClusterRef(
-                        cluster_name="cluster_1",
-                        display_name="cluster_1",
+                        cluster_name="cod--qfdcinkqrzw",
+                        display_name="cod--qfdcinkqrzw",
                     ),
                 )
             ],
         ),
     ):
         # Given
-        api_url = instance['api_url']
         check = cloudera_check(instance)
         # When
         dd_run_check(check)
@@ -237,9 +240,13 @@ def test_given_cloudera_check_when_bad_health_cluster_then_emits_cluster_health_
         aggregator.assert_service_check(
             'cloudera.cluster.health',
             AgentCheck.CRITICAL,
-            tags=['_cldr_cb_clustertype:Data Hub', '_cldr_cb_origin:cloudbreak', 'cloudera_cluster:cluster_1'],
+            tags=CLUSTER_HEALTH_TAGS,
         )
-        aggregator.assert_service_check('cloudera.can_connect', AgentCheck.OK, tags=[f'api_url={api_url}'])
+        aggregator.assert_service_check(
+            'cloudera.can_connect',
+            AgentCheck.OK,
+            tags=CAN_CONNECT_TAGS,
+        )
 
 
 def test_given_cloudera_check_when_good_health_cluster_then_emits_cluster_health_ok(
@@ -257,7 +264,7 @@ def test_given_cloudera_check_when_good_health_cluster_then_emits_cluster_health
         return_value=ApiClusterList(
             items=[
                 ApiCluster(
-                    name="cluster_1",
+                    name="cod--qfdcinkqrzw",
                     entity_status="GOOD_HEALTH",
                     tags=[
                         ApiEntityTag(name="_cldr_cb_clustertype", value="Data Hub"),
@@ -277,15 +284,14 @@ def test_given_cloudera_check_when_good_health_cluster_then_emits_cluster_health
                 ApiHost(
                     host_id='host_1',
                     cluster_ref=ApiClusterRef(
-                        cluster_name="cluster_1",
-                        display_name="cluster_1",
+                        cluster_name="cod--qfdcinkqrzw",
+                        display_name="cod--qfdcinkqrzw",
                     ),
                 )
             ],
         ),
     ):
         # Given
-        api_url = instance['api_url']
         check = cloudera_check(instance)
         # When
         dd_run_check(check)
@@ -293,9 +299,13 @@ def test_given_cloudera_check_when_good_health_cluster_then_emits_cluster_health
         aggregator.assert_service_check(
             'cloudera.cluster.health',
             AgentCheck.OK,
-            tags=['_cldr_cb_clustertype:Data Hub', '_cldr_cb_origin:cloudbreak', 'cloudera_cluster:cluster_1'],
+            tags=CLUSTER_HEALTH_TAGS,
         )
-        aggregator.assert_service_check('cloudera.can_connect', AgentCheck.OK, tags=[f'api_url={api_url}'])
+        aggregator.assert_service_check(
+            'cloudera.can_connect',
+            AgentCheck.OK,
+            tags=CAN_CONNECT_TAGS,
+        )
 
 
 def test_given_cloudera_check_when_good_health_cluster_then_emits_cluster_metrics(
@@ -313,7 +323,7 @@ def test_given_cloudera_check_when_good_health_cluster_then_emits_cluster_metric
         return_value=ApiClusterList(
             items=[
                 ApiCluster(
-                    name="cluster_1",
+                    name="cod--qfdcinkqrzw",
                     entity_status="GOOD_HEALTH",
                     tags=[
                         ApiEntityTag(name="_cldr_cb_clustertype", value="Data Hub"),
@@ -333,8 +343,8 @@ def test_given_cloudera_check_when_good_health_cluster_then_emits_cluster_metric
                 ApiHost(
                     host_id='host_1',
                     cluster_ref=ApiClusterRef(
-                        cluster_name="cluster_1",
-                        display_name="cluster_1",
+                        cluster_name="cod--qfdcinkqrzw",
+                        display_name="cod--qfdcinkqrzw",
                     ),
                     num_cores=8,
                     num_physical_cores=4,
@@ -344,7 +354,6 @@ def test_given_cloudera_check_when_good_health_cluster_then_emits_cluster_metric
         ),
     ):
         # Given
-        api_url = instance['api_url']
         check = cloudera_check(instance)
         # When
         dd_run_check(check)
@@ -353,9 +362,13 @@ def test_given_cloudera_check_when_good_health_cluster_then_emits_cluster_metric
             for metric in metrics:
                 aggregator.assert_metric(f'cloudera.{category}.{metric}')
 
-        aggregator.assert_service_check('cloudera.can_connect', AgentCheck.OK, tags=[f'api_url={api_url}'])
+        aggregator.assert_service_check(
+            'cloudera.can_connect',
+            AgentCheck.OK,
+            tags=CAN_CONNECT_TAGS,
+        )
         aggregator.assert_service_check(
             'cloudera.cluster.health',
             AgentCheck.OK,
-            tags=['_cldr_cb_clustertype:Data Hub', '_cldr_cb_origin:cloudbreak', 'cloudera_cluster:cluster_1'],
+            tags=CLUSTER_HEALTH_TAGS,
         )
