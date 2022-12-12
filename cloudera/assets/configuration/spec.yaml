@@ -35,3 +35,12 @@ files:
       required: true
       value:
         type: string
+    - name: max_connection_pool_size
+      description: | 
+        The maximum number of connections to keep in the pool when querying Cloudera Manager.
+        More information can be found here:
+        https://urllib3.readthedocs.io/en/latest/advanced-usage.html#customizing-pool-behavior
+      hidden: true
+      value:
+        type: integer
+        example: 100
