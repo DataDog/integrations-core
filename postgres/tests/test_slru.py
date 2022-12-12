@@ -3,9 +3,9 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import pytest
 
-from .common import POSTGRES_VERSION
-
 from datadog_checks.postgres.util import SLRU_METRICS
+
+from .common import POSTGRES_VERSION
 
 
 @pytest.mark.integration
