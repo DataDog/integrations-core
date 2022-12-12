@@ -81,10 +81,11 @@ def test_validate_license_headers_returns_error_for_a_file_without_license(tmp_p
 
     _write_file_without_license(check_path / "setup.py")
 
-    errors = validate_license_headers(check_path)
+    errors = validate_license_headers(check_path, get_previous=_make_get_previous())
     assert len(errors) == 1
     assert errors[0].message == "missing license header"
     assert errors[0].path == "setup.py"
+    assert errors[0].fixed == f"{get_license_header()}\n\nimport os\n"
 
 
 def test_validate_license_headers_when_all_files_have_valid_headers_returns_empty_list(tmp_path):
@@ -110,7 +111,7 @@ def test_validate_license_headers_works_with_arbitrary_nesting(tmp_path):
     nested_path.mkdir(parents=True)
     _write_file_without_license(nested_path / "check.py")
 
-    errors = validate_license_headers(check_path)
+    errors = validate_license_headers(check_path, get_previous=_make_get_previous())
     assert len(errors) == 1
     assert errors[0].message == "missing license header"
     assert errors[0].path == "datadog_checks/check/check.py"
@@ -227,6 +228,22 @@ import os
     assert validate_license_headers(check_path, get_previous=fake_get_previous) == []
 
 
+def test_validate_license_headers_does_not_suggest_fix_for_missing_header_when_file_is_not_new(tmp_path):
+    check_path = tmp_path / "check"
+    check_path.mkdir()
+
+    _write_file_without_license(check_path / "setup.py")
+    fake_get_previous = _make_get_previous(
+        {
+            pathlib.Path(check_path / "setup.py"): "",
+        }
+    )
+
+    errors = validate_license_headers(check_path, get_previous=fake_get_previous)
+    assert len(errors) == 1
+    assert errors[0].fixed is None
+
+
 def _make_get_previous(d: dict = None):
     if d is None:
         d = {}
@@ -249,7 +266,7 @@ def test_validate_license_headers_honors_gitignore_file_on_check_path(tmp_path):
 
     _write_file_without_license(target_path / "some.py")
 
-    assert validate_license_headers(check_path) == []
+    assert validate_license_headers(check_path, get_previous=_make_get_previous()) == []
 
 
 def test_validate_license_headers_honors_nested_gitignore_files_reincluding_file(tmp_path):
@@ -267,7 +284,7 @@ def test_validate_license_headers_honors_nested_gitignore_files_reincluding_file
 
     _write_file_without_license(target_path / "some.py")
 
-    assert validate_license_headers(check_path) == []
+    assert validate_license_headers(check_path, get_previous=_make_get_previous()) == []
 
 
 def test_validate_license_headers_honors_gitignore_relative_patterns(tmp_path):
@@ -284,14 +301,14 @@ def test_validate_license_headers_honors_gitignore_relative_patterns(tmp_path):
 
     _write_file_without_license(target_path / "some.py")
 
-    assert validate_license_headers(check_path) == []
+    assert validate_license_headers(check_path, get_previous=_make_get_previous()) == []
 
     # And the pattern lets a more nested build folder through
     target_path = check_path / "foo" / "deeper" / "build"
     target_path.mkdir(parents=True)
     _write_file_without_license(target_path / "some.py")
 
-    errors = validate_license_headers(check_path)
+    errors = validate_license_headers(check_path, get_previous=_make_get_previous())
     assert len(errors) > 0
     assert errors[0].path == (target_path / "some.py").relative_to(check_path).as_posix()
 
@@ -310,10 +327,10 @@ def test_validate_license_headers_honors_gitignore_from_parents(tmp_path):
 
     _write_file_without_license(target_path / "some.py")
 
-    errors = validate_license_headers(check_path, repo_root=tmp_path)
+    errors = validate_license_headers(check_path, repo_root=tmp_path, get_previous=_make_get_previous())
     assert len(errors) > 0
     assert errors[0].path == (target_path / "some.py").relative_to(check_path).as_posix()
 
     # If we override this in a subdir, we shouldn't get an error
     _write_string_to_file(check_path / ".gitignore", "foo/\n")
-    assert validate_license_headers(check_path, repo_root=tmp_path) == []
+    assert validate_license_headers(check_path, repo_root=tmp_path, get_previous=_make_get_previous()) == []

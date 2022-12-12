@@ -86,20 +86,26 @@ def validate_license_headers(
 
         license_header = parse_license_header(contents)
         relpath = path.relative_to(check_path).as_posix()
-
-        # License is missing altogether
-        if not license_header:
-            return LicenseHeaderError("missing license header", relpath, "")
-
-        # When file already existed, check whether the license has changed
         previous = get_previous(path)
-        if previous:
+
+        # When file already existed
+        if previous is not None:
             original_header = parse_license_header(previous)
+            # Check whether the license has changed
             if original_header and license_header != original_header:
                 return LicenseHeaderError(
                     "existing file has changed license", relpath, _replace_header(contents, original_header)
                 )
-        # When it's a new file, compare it to the current header template
+            # If the original file didn't have a header and the current one doesn't either
+            # we report as missing, but we can't suggest an automatic fix.
+            elif not original_header and not license_header:
+                return LicenseHeaderError("missing license header", relpath, None)
+
+        # License is missing altogether
+        elif not license_header:
+            return LicenseHeaderError("missing license header", relpath, f"{get_default_license_header()}\n{contents}")
+
+        # When it's a new file and a license header is found, compare it to the current header template
         elif license_header != get_default_license_header():
             return LicenseHeaderError(
                 "file does not match expected license format",
