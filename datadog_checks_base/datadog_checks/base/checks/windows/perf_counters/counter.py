@@ -8,7 +8,7 @@ import pywintypes
 import win32pdh
 
 from ....errors import ConfigTypeError, ConfigValueError
-from .constants import PDH_NO_DATA
+from .constants import PDH_CSTATUS_INVALID_DATA, PDH_INVALID_DATA
 from .transform import NATIVE_TRANSFORMERS, TRANSFORMERS
 from .utils import construct_counter_path, get_counter_value, get_counter_values, validate_path
 
@@ -331,6 +331,7 @@ class PerfObject:
                     instance_name='*',
                 )
                 if validate_path(self.connection.query_handle, self.use_localized_counters, possible_path):
+                    self.logger.debug('Performance object `%s` is multi-instance counter', self.name)
                     return MultiCounter
 
                 # Check for single-instance counter path
@@ -340,8 +341,10 @@ class PerfObject:
                     counter_name=counter_name,
                 )
                 if validate_path(self.connection.query_handle, self.use_localized_counters, possible_path):
+                    self.logger.debug('Performance object `%s` is single-instance counter', self.name)
                     return SingleCounter
 
+        self.logger.warning('Performance object `%s` type is not detected', self.name)
         return None
 
     def get_custom_transformers(self):
@@ -421,27 +424,31 @@ class CounterBase:
                 )
                 raise type(e)(error) from None
 
-    def handle_counter_value_error(self, error, instance=None):
+    def handle_counter_value_error(self, error):
         # Counter requires at least 2 data points to return a meaningful value, see:
         # https://docs.microsoft.com/en-us/windows/win32/api/pdh/nf-pdh-pdhgetformattedcountervalue#remarks
         #
         # https://github.com/mhammond/pywin32/blob/main/win32/src/PyWinTypesmodule.cpp#L278
-        if error.winerror != PDH_NO_DATA:
+
+        # PDH_INVALID_DATA error can normally happen only once for a single-instance counter
+        # which requires two PdhCollectQueryData (typically for the "rate" or "delta" counters).
+        # For multi-instances counters, because different API is used for collection, the
+        # mirror error is PDH_CSTATUS_INVALID_DATA.
+        #
+        # It is not 100% clear if these errors may happen in other circumstances. Currently, we
+        # do not track if one of these errors happens once or more. It is obviously Ok in the
+        # former case but possibly problematic in the latter case. If these errors are
+        # reported in the "Debug" logs again and again for the same counter, then the  "Debug"
+        # log should be promoted to "Error" log (which we will do if we will find it in
+        # production).
+        if error.winerror != PDH_INVALID_DATA and error.winerror != PDH_CSTATUS_INVALID_DATA:
             raise
 
-        if instance is None:
-            self.logger.debug(
-                'Waiting on another data point for counter `%s` of performance object `%s`',
-                self.name,
-                self.object_name,
-            )
-        else:
-            self.logger.debug(
-                'Waiting on another data point for instance `%s` of counter `%s` of performance object `%s`',
-                instance,
-                self.name,
-                self.object_name,
-            )
+        self.logger.debug(
+            'Waiting on another data point for counter `%s` of performance object `%s`',
+            self.name,
+            self.object_name,
+        )
 
 
 class SingleCounter(CounterBase):

@@ -45,7 +45,7 @@ def get_counter_values(counter_handle, duplicate_instances_exist):
 
 
 # Validate path function is using PdhValidatePath if the path is already localized
-# If not, it will convert English counter name into its localized version via 
+# If not, it will convert English counter name into its localized version via
 # intermediate calls to PdhAddEnglishCounter() and PdhGetCounterInfo()
 # If specified object and counter is using localized name then a user should configure
 # the check using `use_localized_counters` set to true. It is incorrect to use
@@ -58,7 +58,7 @@ def validate_path(query_handle, use_localized_counters, path):
         # If localized name is already used we can directly validate it
         if use_localized_counters:
             return True if win32pdh.ValidatePath(path) == 0 else False
-            
+
         # ... otherwise we need to localize English object/counter names
         counter_handle = win32pdh.AddEnglishCounter(query_handle, path)
         if counter_handle is not None:
@@ -70,7 +70,7 @@ def validate_path(query_handle, use_localized_counters, path):
                 counter_info = win32pdh.GetCounterInfo(counter_handle, False)
                 localized_path = counter_info[6]
                 return True if win32pdh.ValidatePath(localized_path) == 0 else False
-            
+
             except Exception:
                 pass
             finally:
