@@ -106,36 +106,36 @@ files:
                     - issues.
               exclude:
                 - temp*
-        value:
-          type: object
-          properties:
+        options:
           - name: limit
             description: |
               Maximum number of components to be 'autodiscovered'
-            type: integer
+            value:
+              type: integer
+              example: 10
           - name: include
             description: |
               Mapping of regular expressions keys and component config values that will be 'autodiscovered'
-            type: object
             value:
               type: object
-              properties:
-              - name: tag
+            properties:
+            - name: tag
+              type: string
+            - name: include
+              type: array
+              items:
                 type: string
-              - name: include
-                type: array
-                items:
-                  type: string
-              - name: exclude
-                type: array
-                items:
-                  type: string
+            - name: exclude
+              type: array
+              items:
+                type: string
           - name: exclude
             description: |
               List of regular expressions with the patterns of components that will not be 'autodiscovered'
-            type: array
-            items:
-              type: string
+            value:
+              type: array
+              items:
+                type: string
 
       - template: instances/http
         overrides:

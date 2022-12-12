@@ -145,7 +145,6 @@ instances:
     #
     # components: {}
 
-    ## @param components_discovery - mapping - optional
     ## The autodiscovery patterns for components.
     ## The following example collects all defect metrics for those components with names starting with "my_project"
     ## and only the metrics from the "issues" category for projects starting with "issue".
@@ -162,7 +161,22 @@ instances:
     ##     exclude:
     ##       - temp*
     #
-    # components_discovery: {}
+    # components_discovery:
+
+        ## @param limit - integer - optional - default: 10
+        ## Maximum number of components to be 'autodiscovered'
+        #
+        # limit: 10
+
+        ## @param include - mapping - optional
+        ## Mapping of regular expressions keys and component config values that will be 'autodiscovered'
+        #
+        # include: {}
+
+        ## @param exclude - list of strings - optional
+        ## List of regular expressions with the patterns of components that will not be 'autodiscovered'
+        #
+        # exclude: []
 
     ## @param proxy - mapping - optional
     ## This overrides the `proxy` setting in `init_config`.
