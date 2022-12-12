@@ -56,11 +56,19 @@ _Available for Agent >6.0_
 1. Flink uses the `log4j` logger by default. To activate logging to a file and customize the format edit the `log4j.properties`, `log4j-cli.properties`, `log4j-yarn-session.properties`, or `log4j-console.properties` file. See [Flink's repository][6] for default configurations. For example `log4j.properties` contains this configuration by default:
 
    ```conf
-   log4j.appender.file=org.apache.log4j.FileAppender
-   log4j.appender.file.file=${log.file}
-   log4j.appender.file.append=false
-   log4j.appender.file.layout=org.apache.log4j.PatternLayout
-   log4j.appender.file.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p %-60c %x - %m%n
+   appender.main.name = MainAppender
+   appender.main.type = RollingFile
+   appender.main.append = true
+   appender.main.fileName = ${sys:log.file}
+   appender.main.filePattern = ${sys:log.file}.%i
+   appender.main.layout.type = PatternLayout
+   appender.main.layout.pattern = %d{yyyy-MM-dd HH:mm:ss,SSS} %-5p %-60c %x - %m%n
+   appender.main.policies.type = Policies
+   appender.main.policies.size.type = SizeBasedTriggeringPolicy
+   appender.main.policies.size.size = 100MB
+   appender.main.policies.startup.type = OnStartupTriggeringPolicy
+   appender.main.strategy.type = DefaultRolloverStrategy
+   appender.main.strategy.max = ${env:MAX_LOG_FILE_NUMBER:-10}
    ```
 
 2. By default, the integration pipeline supports the following conversion pattern:
@@ -124,7 +132,7 @@ Need help? Contact [Datadog support][12].
 [3]: https://docs.datadoghq.com/api/?lang=bash#api-reference
 [4]: https://app.datadoghq.com/account/settings#agent
 [5]: https://app.datadoghq.com/organization-settings/api-keys
-[6]: https://github.com/apache/flink/tree/master/flink-dist/src/main/flink-bin/conf
+[6]: https://github.com/apache/flink/tree/release-1.16/flink-dist/src/main/flink-bin/conf
 [7]: https://docs.datadoghq.com/logs/processing/#integration-pipelines
 [8]: https://github.com/DataDog/integrations-core/blob/master/flink/datadog_checks/flink/data/conf.yaml.example
 [9]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
