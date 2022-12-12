@@ -18,10 +18,10 @@ No additional installation is needed on your server.
 
 1. Configure the [Datadog HTTP Reporter][2] in Flink.
 
-     Copy `<FLINK_HOME>/opt/flink-metrics-datadog-<DATADOG_REPORTER_VERSION>.jar` into your `<FLINK_HOME>/lib` folder. In your `<FLINK_HOME>/conf/flink-conf.yaml`, add these lines, replacing `<DATADOG_API_KEY>` with your Datadog [API key][5]:
+     In your `<FLINK_HOME>/conf/flink-conf.yaml`, add these lines, replacing `<DATADOG_API_KEY>` with your Datadog [API key][5]:
 
     ```yaml
-    metrics.reporter.dghttp.class: org.apache.flink.metrics.datadog.DatadogHttpReporter
+    metrics.reporter.dghttp.factory.class: org.apache.flink.metrics.datadog.DatadogHttpReporterFactory
     metrics.reporter.dghttp.apikey: <DATADOG_API_KEY>
     metrics.reporter.dghttp.dataCenter: {{< region-param key="dd_datacenter" >}}
     ```
@@ -42,7 +42,7 @@ No additional installation is needed on your server.
 3. Configure additional [tags][2] in `<FLINK_HOME>/conf/flink-conf.yaml`. Here is an example of custom tags:
 
     ```yaml
-    metrics.reporter.dghttp.tags: <KEY1>:<VALUE1>, <KEY1>:<VALUE2>
+    metrics.reporter.dghttp.scope.variables.additional: <KEY1>:<VALUE1>, <KEY1>:<VALUE2>
     ```
 
      **Note**: By default, any variables in metric names are sent as tags, so there is no need to add custom tags for `job_id`, `task_id`, etc.
@@ -120,7 +120,7 @@ Need help? Contact [Datadog support][12].
 
 
 [1]: https://flink.apache.org/
-[2]: https://ci.apache.org/projects/flink/flink-docs-release-1.9/monitoring/metrics.html#datadog-orgapacheflinkmetricsdatadogdatadoghttpreporter
+[2]: https://nightlies.apache.org/flink/flink-docs-release-1.16/docs/deployment/metric_reporters/#datadog
 [3]: https://docs.datadoghq.com/api/?lang=bash#api-reference
 [4]: https://app.datadoghq.com/account/settings#agent
 [5]: https://app.datadoghq.com/organization-settings/api-keys
