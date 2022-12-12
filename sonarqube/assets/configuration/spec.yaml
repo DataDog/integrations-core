@@ -79,7 +79,7 @@ files:
         options:
           - name: tag
             description: |
-              Custom tag for the defined component.
+              Custom tag for the specified component.
             value:
               type: string
           - name: include

@@ -145,7 +145,7 @@ instances:
     # components:
 
         ## @param tag - string - optional
-        ## Custom tag for the defined component.
+        ## Custom tag for the specified component.
         #
         # tag: <TAG>
 
