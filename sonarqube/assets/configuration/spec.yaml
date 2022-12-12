@@ -76,19 +76,26 @@ files:
 
           Note: This is required for all project checks, whether `is_jmx` is set to `true`
           or `false.
-        value:
-          type: object
-          properties:
+        options:
           - name: tag
-            type: string
+            description: |
+              Custom tag for the defined component.
+            value:
+              type: string
           - name: include
-            type: array
-            items:
-              type: string
+            description: |
+              List of metrics to include for the specified component.
+            value:
+              type: array
+              items:
+                type: string
           - name: exclude
-            type: array
-            items:
-              type: string
+            description: |
+              List of metrics to exclude for the specified component.
+            value:
+              type: array
+              items:
+                type: string
       - name: components_discovery
         description: |
           The autodiscovery patterns for components.
