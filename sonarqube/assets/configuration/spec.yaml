@@ -74,8 +74,7 @@ files:
                 exclude:
                   - issues.(false_positive_issues|reopened_issues)
 
-          Note: This is required for all project checks, whether `is_jmx` is set to `true`
-          or `false.
+          Note: Only one of `components`, `components_discovery`, or `is_jmx` may be configured in a single instance.
         options:
           - name: tag
             description: |
@@ -113,6 +112,7 @@ files:
                     - issues.
               exclude:
                 - temp*
+          Note: Only one of `components`, `components_discovery`, or `is_jmx` may be configured in a single instance.
         options:
           - name: limit
             description: |
@@ -163,6 +163,7 @@ files:
             If `is_jmx` is set to true at the init_config level, this flag is ignored.
 
             Note: Setting `is_jmx` to true disables some configuration options.
+            Note: Only one of `components`, `components_discovery`, or `is_jmx` may be configured in a single instance.
           user.description: |
             The user name for connecting to JMX (or HTTP if `is_jmx = false`).
           password.description: |

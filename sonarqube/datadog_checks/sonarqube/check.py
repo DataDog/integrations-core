@@ -162,6 +162,10 @@ class SonarqubeCheck(AgentCheck):
         self._default_tag = self.instance.get('default_tag', 'component')
         if not isinstance(self._default_tag, str):
             raise ConfigurationError('The `default_tag` setting must be a string')
+        if self.instance.get('components') and self.instance.get('components_discovery'):
+            raise ConfigurationError(
+                'Only one of `components` or `components_discovery` may be configured in each instance.'
+            )
         self._default_include = self.compile_metric_patterns(self.instance, 'default_include')
         self._default_exclude = self.compile_metric_patterns(self.instance, 'default_exclude')
 

@@ -139,8 +139,7 @@ instances:
     ##       exclude:
     ##         - issues.(false_positive_issues|reopened_issues)
     ##
-    ## Note: This is required for all project checks, whether `is_jmx` is set to `true`
-    ## or `false.
+    ## Note: Only one of `components`, `components_discovery`, or `is_jmx` may be configured in a single instance.
     #
     # components:
 
@@ -174,6 +173,7 @@ instances:
     ##           - issues.
     ##     exclude:
     ##       - temp*
+    ## Note: Only one of `components`, `components_discovery`, or `is_jmx` may be configured in a single instance.
     #
     # components_discovery:
 
@@ -500,6 +500,7 @@ instances:
     ## If `is_jmx` is set to true at the init_config level, this flag is ignored.
     ##
     ## Note: Setting `is_jmx` to true disables some configuration options.
+    ## Note: Only one of `components`, `components_discovery`, or `is_jmx` may be configured in a single instance.
     #
     # is_jmx: true
 
