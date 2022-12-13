@@ -11,7 +11,7 @@ CHECK_NAME = "kafka"
 HERE = get_here()
 HOST = get_docker_hostname()
 HOST_IP = socket.gethostbyname(HOST)
-COMPOSE_FILE = os.environ["DOCKER_COMPOSE_FILE"]
+KAFKA_VERSION = os.environ["KAFKA_VERSION"]
 
 
 """
