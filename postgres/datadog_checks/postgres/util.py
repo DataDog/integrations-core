@@ -284,6 +284,7 @@ ACTIVITY_METRICS_9_6 = [
     "THEN 1 ELSE null END )",
     "COUNT(CASE WHEN wait_event is NOT NULL AND query !~ '^autovacuum:' THEN 1 ELSE null END )",
     "COUNT(CASE WHEN wait_event is NOT NULL AND query !~ '^autovacuum:' AND state = 'active' THEN 1 ELSE null END )",
+    "max(EXTRACT(EPOCH FROM (clock_timestamp() - xact_start)))",
     "max(age(backend_xmin))",
 ]
 
@@ -295,6 +296,7 @@ ACTIVITY_METRICS_9_2 = [
     "THEN 1 ELSE null END )",
     "COUNT(CASE WHEN waiting = 't' AND query !~ '^autovacuum:' THEN 1 ELSE null END )",
     "COUNT(CASE WHEN waiting = 't' AND query !~ '^autovacuum:' AND state = 'active' THEN 1 ELSE null END )",
+    "max(EXTRACT(EPOCH FROM (clock_timestamp() - xact_start)))",
     "null",  # backend_xmin is not available
 ]
 
@@ -306,6 +308,7 @@ ACTIVITY_METRICS_8_3 = [
     "THEN 1 ELSE null END )",
     "COUNT(CASE WHEN waiting = 't' AND query !~ '^autovacuum:' THEN 1 ELSE null END )",
     "COUNT(CASE WHEN waiting = 't' AND query !~ '^autovacuum:' AND state = 'active' THEN 1 ELSE null END )",
+    "max(EXTRACT(EPOCH FROM (clock_timestamp() - xact_start)))",
     "null",  # backend_xmin is not available
 ]
 
@@ -317,28 +320,39 @@ ACTIVITY_METRICS_LT_8_3 = [
     "THEN 1 ELSE null END )",
     "COUNT(CASE WHEN waiting = 't' AND query !~ '^autovacuum:' THEN 1 ELSE null END )",
     "COUNT(CASE WHEN waiting = 't' AND query !~ '^autovacuum:' AND state = 'active' THEN 1 ELSE null END )",
+    "max(EXTRACT(EPOCH FROM (clock_timestamp() - query_start)))",
     "null",  # backend_xmin is not available
 ]
 
 # The metrics we collect from pg_stat_activity that we zip with one of the lists above
 ACTIVITY_DD_METRICS = [
-    ('postgresql.transactions.open', AgentCheck.gauge),
-    ('postgresql.transactions.idle_in_transaction', AgentCheck.gauge),
-    ('postgresql.active_queries', AgentCheck.gauge),
-    ('postgresql.waiting_queries', AgentCheck.gauge),
-    ('postgresql.active_waiting_queries', AgentCheck.gauge),
-    ('postgresql.activity.backend_xmin_age', AgentCheck.gauge),
+    ("postgresql.transactions.open", AgentCheck.gauge),
+    ("postgresql.transactions.idle_in_transaction", AgentCheck.gauge),
+    ("postgresql.active_queries", AgentCheck.gauge),
+    ("postgresql.waiting_queries", AgentCheck.gauge),
+    ("postgresql.active_waiting_queries", AgentCheck.gauge),
+    ("postgresql.activity.oldest_xact_start", AgentCheck.gauge),
+    ("postgresql.activity.backend_xmin_age", AgentCheck.gauge),
 ]
 
 # The base query for postgres version >= 10
 ACTIVITY_QUERY_10 = """
-SELECT datname,
+SELECT datname, application_name,
     {metrics_columns}
-FROM pg_stat_activity WHERE backend_type = 'client backend' GROUP BY datid, datname
+FROM pg_stat_activity WHERE backend_type = 'client backend'
+GROUP BY datid, datname, application_name
 """
 
 # The base query for postgres version < 10
 ACTIVITY_QUERY_LT_10 = """
+SELECT datname, application_name,
+    {metrics_columns}
+FROM pg_stat_activity
+GROUP BY datid, datname, application_name
+"""
+
+# The base query for postgres version < 9
+ACTIVITY_QUERY_LT_9 = """
 SELECT datname,
     {metrics_columns}
 FROM pg_stat_activity

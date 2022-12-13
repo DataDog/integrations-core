@@ -12,6 +12,7 @@ from .util import (
     ACTIVITY_METRICS_LT_8_3,
     ACTIVITY_QUERY_10,
     ACTIVITY_QUERY_LT_10,
+    ACTIVITY_QUERY_LT_9,
     COMMON_ARCHIVER_METRICS,
     COMMON_BGW_METRICS,
     COMMON_METRICS,
@@ -26,7 +27,7 @@ from .util import (
     REPLICATION_METRICS_10,
     REPLICATION_STATS_METRICS,
 )
-from .version_utils import V8_3, V9_1, V9_2, V9_4, V9_6, V10
+from .version_utils import V8_3, V9, V9_1, V9_2, V9_4, V9_6, V10
 
 logger = logging.getLogger(__name__)
 
@@ -187,7 +188,13 @@ class PostgresMetricsCache:
         metrics_data = self.activity_metrics
 
         if metrics_data is None:
-            query = ACTIVITY_QUERY_10 if version >= V10 else ACTIVITY_QUERY_LT_10
+            if version < V9:
+                query = ACTIVITY_QUERY_LT_9
+            elif version < V10:
+                query = ACTIVITY_QUERY_LT_10
+            else:
+                query = ACTIVITY_QUERY_10
+
             if version >= V9_6:
                 metrics_query = ACTIVITY_METRICS_9_6
             elif version >= V9_2:
@@ -197,13 +204,22 @@ class PostgresMetricsCache:
             else:
                 metrics_query = ACTIVITY_METRICS_LT_8_3
 
+            descriptors = [("datname", "db"), ("application_name", "application_name")]
+            if version < V9:
+                descriptors = [("datname", "db")]
+
             for i, q in enumerate(metrics_query):
-                if '{dd__user}' in q:
+                if "{dd__user}" in q:
                     metrics_query[i] = q.format(dd__user=self.config.user)
 
             metrics = {k: v for k, v in zip(metrics_query, ACTIVITY_DD_METRICS)}
-            self.activity_metrics = (metrics, query)
+            self.activity_metrics = (metrics, query, descriptors)
         else:
-            metrics, query = metrics_data
+            metrics, query, descriptors = metrics_data
 
-        return {'descriptors': [('datname', 'db')], 'metrics': metrics, 'query': query, 'relation': False}
+        return {
+            "descriptors": descriptors,
+            "metrics": metrics,
+            "query": query,
+            "relation": False,
+        }

@@ -39,6 +39,7 @@ def _get_activity_metrics():
         'postgresql.active_queries',
         'postgresql.waiting_queries',
         'postgresql.active_waiting_queries',
+        'postgresql.activity.oldest_xact_start',
     ]
     if POSTGRES_VERSION is None or float(POSTGRES_VERSION) >= 9.6:
         activity_metrics.append('postgresql.activity.backend_xmin_age')
@@ -160,7 +161,7 @@ def test_activity_metrics(aggregator, integration_check, pg_instance):
     check = integration_check(pg_instance)
     check.check(pg_instance)
 
-    expected_tags = pg_instance['tags'] + ['port:{}'.format(PORT), 'db:datadog_test']
+    expected_tags = pg_instance['tags'] + ['port:{}'.format(PORT), 'db:datadog_test', 'application_name:datadog-agent']
     activity_metrics = _get_activity_metrics()
     for name in activity_metrics:
         aggregator.assert_metric(name, count=1, tags=expected_tags)
