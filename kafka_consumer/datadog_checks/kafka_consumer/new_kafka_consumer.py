@@ -2,15 +2,15 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import json
-import six
 from collections import defaultdict
 from time import time
 
+import six
 from kafka import errors as kafka_errors
 from kafka.protocol.admin import ListGroupsRequest
+from kafka.protocol.commit import GroupCoordinatorRequest, OffsetFetchRequest
 from kafka.protocol.offset import OffsetRequest, OffsetResetStrategy, OffsetResponse
 from kafka.structs import TopicPartition
-from kafka.protocol.commit import GroupCoordinatorRequest, OffsetFetchRequest
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 
@@ -490,7 +490,7 @@ class NewKafkaConsumerCheck(object):
             )
         # Disable wakeup when sending request to prevent blocking send requests
         return self._send_request_to_node(broker_id, request, wakeup=False)
-    
+
     def _find_coordinator_id_send_request(self, group_id):
         """Send a FindCoordinatorRequest to a broker.
         :param group_id: The consumer group ID. This is typically the group
@@ -508,12 +508,11 @@ class NewKafkaConsumerCheck(object):
             request = GroupCoordinatorRequest[version](group_id)
         else:
             raise NotImplementedError(
-                "Support for GroupCoordinatorRequest_v{} has not yet been added to KafkaAdminClient."
-                .format(version))
+                "Support for GroupCoordinatorRequest_v{} has not yet been added to KafkaAdminClient.".format(version)
+            )
         return self._send_request_to_node(self.kafka_client._client.least_loaded_node(), request, wakeup=False)
 
-    def _list_consumer_group_offsets_send_request(self, group_id,
-                group_coordinator_id, partitions=None):
+    def _list_consumer_group_offsets_send_request(self, group_id, group_coordinator_id, partitions=None):
         """Send an OffsetFetchRequest to a broker.
         :param group_id: The consumer group id name for which to fetch offsets.
         :param group_coordinator_id: The node_id of the group's coordinator
@@ -528,7 +527,10 @@ class NewKafkaConsumerCheck(object):
                         """OffsetFetchRequest_v{} requires specifying the
                         partitions for which to fetch offsets. Omitting the
                         partitions is only supported on brokers >= 0.10.2.
-                        For details, see KIP-88.""".format(version))
+                        For details, see KIP-88.""".format(
+                            version
+                        )
+                    )
                 topics_partitions = None
             else:
                 # transform from [TopicPartition("t1", 1), TopicPartition("t1", 2)] to [("t1", [1, 2])]
@@ -539,6 +541,6 @@ class NewKafkaConsumerCheck(object):
             request = OffsetFetchRequest[version](group_id, topics_partitions)
         else:
             raise NotImplementedError(
-                "Support for OffsetFetchRequest_v{} has not yet been added to KafkaAdminClient."
-                .format(version))
+                "Support for OffsetFetchRequest_v{} has not yet been added to KafkaAdminClient.".format(version)
+            )
         return self._send_request_to_node(group_coordinator_id, request, wakeup=False)
