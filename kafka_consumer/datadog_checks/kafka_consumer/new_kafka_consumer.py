@@ -381,7 +381,7 @@ class NewKafkaConsumerCheck(object):
         elif self._consumer_groups:
             self.validate_consumer_groups()
             for consumer_group in self._consumer_groups:
-                find_coordinator_future = self.kafka_client._find_coordinator_id_send_request(consumer_group)
+                find_coordinator_future = self._find_coordinator_id_send_request(consumer_group)
                 find_coordinator_future.add_callback(self._find_coordinator_callback, consumer_group)
                 self._consumer_futures.append(find_coordinator_future)
         else:
@@ -510,7 +510,7 @@ class NewKafkaConsumerCheck(object):
             raise NotImplementedError(
                 "Support for GroupCoordinatorRequest_v{} has not yet been added to KafkaAdminClient."
                 .format(version))
-        return self._send_request_to_node(self._client.least_loaded_node(), request, wakeup=False)
+        return self._send_request_to_node(self.kafka_client._client.least_loaded_node(), request)
 
     def _list_consumer_group_offsets_send_request(self, group_id,
                 group_coordinator_id, partitions=None):
@@ -520,7 +520,7 @@ class NewKafkaConsumerCheck(object):
             broker.
         :return: A message future
         """
-        version = self._matching_api_version(OffsetFetchRequest)
+        version = self.kafka_client._matching_api_version(OffsetFetchRequest)
         if version <= 3:
             if partitions is None:
                 if version <= 1:
@@ -541,4 +541,4 @@ class NewKafkaConsumerCheck(object):
             raise NotImplementedError(
                 "Support for OffsetFetchRequest_v{} has not yet been added to KafkaAdminClient."
                 .format(version))
-        return self._send_request_to_node(group_coordinator_id, request, wakeup=False)
+        return self._send_request_to_node(group_coordinator_id, request)
