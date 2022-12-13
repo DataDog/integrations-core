@@ -1,5 +1,8 @@
 # CHANGELOG - kafka_consumer
 
+## 2.16.3-beta.2 / 2022-12-13
+
+
 ## 2.16.3-beta.1 / 2022-12-13
 
 
