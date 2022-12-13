@@ -33,6 +33,20 @@ class TestParseConfig:
         with pytest.raises(ConfigurationError, match='The `tag` setting must be a string'):
             check.parse_config()
 
+    def test_oneof_components_or_components_discovery(self, sonarqube_check):
+        check = sonarqube_check(
+            {
+                'components': {'foo': {'tag': 9000}},
+                'components_discovery': {'include': {'org.sonarqube:.*': {'tag': 'project'}}},
+            }
+        )
+
+        with pytest.raises(
+            ConfigurationError,
+            match='Only one of `components` or `components_discovery` may be configured in each instance.',
+        ):
+            check.parse_config()
+
 
 class TestPatternCompilation:
     def test_default_include_not_array(self, sonarqube_check):
