@@ -22,7 +22,7 @@ def instance_empty_default_hostname(field, value):
     return False
 
 
-def instance_max_connection_pool_size(field, value):
+def instance_max_parallel_requests(field, value):
     return 100
 
 
