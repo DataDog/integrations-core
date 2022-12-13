@@ -510,7 +510,7 @@ class NewKafkaConsumerCheck(object):
             raise NotImplementedError(
                 "Support for GroupCoordinatorRequest_v{} has not yet been added to KafkaAdminClient."
                 .format(version))
-        return self._send_request_to_node(self.kafka_client._client.least_loaded_node(), request)
+        return self._send_request_to_node(self.kafka_client._client.least_loaded_node(), request, wakeup=False)
 
     def _list_consumer_group_offsets_send_request(self, group_id,
                 group_coordinator_id, partitions=None):
@@ -541,4 +541,4 @@ class NewKafkaConsumerCheck(object):
             raise NotImplementedError(
                 "Support for OffsetFetchRequest_v{} has not yet been added to KafkaAdminClient."
                 .format(version))
-        return self._send_request_to_node(group_coordinator_id, request)
+        return self._send_request_to_node(group_coordinator_id, request, wakeup=False)
