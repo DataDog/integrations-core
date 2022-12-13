@@ -124,8 +124,26 @@ instances:
     #
     # default_exclude: []
 
-    ## The components for which metrics should be collected. Each object may override the default
-    ## options. The following example gathers all default metrics for "some-project",
+    ## @param components - mapping - optional
+    ## A mapping of components for which metrics should be collected. Each object may override the default
+    ## options. Each component key may be configured with an optional configuration mapping to filter the metrics 
+    ## that should be collected.
+    ##
+    ## The top-level keys are the names of the desired component objects:
+    ##
+    ## components:
+    ##   some-project:
+    ##   another-project:
+    ##     <OPTION_1>: ...
+    ##     <OPTION_2>: ...
+    ##
+    ## The available component object options are:
+    ##
+    ##   tag:      Custom tag for the specified component.
+    ##   include:  List of metrics to include for the specified component.
+    ##   exclude:  List of metrics to exclude for the specified component.
+    ##
+    ## The following example gathers all default metrics for "some-project",
     ## and only what is included/excluded for "another-project":
     ##
     ##   components:
@@ -142,24 +160,11 @@ instances:
     ## Note: This is required for all project checks, whether `is_jmx` is set to `true`
     ## or `false.
     #
-    # components:
+    # components: {}
 
-        ## @param tag - string - optional
-        ## Custom tag for the specified component.
-        #
-        # tag: <TAG>
-
-        ## @param include - list of strings - optional
-        ## List of metrics to include for the specified component.
-        #
-        # include: []
-
-        ## @param exclude - list of strings - optional
-        ## List of metrics to exclude for the specified component.
-        #
-        # exclude: []
-
-    ## The autodiscovery patterns for components.
+    ## A mapping of components autodiscovery patterns for which metrics should be collected. Each include key may 
+    ## be configured with an optional include object to filter the metrics that should be collected.  
+    ##
     ## The following example collects all defect metrics for those components with names starting with "my_project"
     ## and only the metrics from the "issues" category for projects starting with "issue".
     ## It also excludes projects starting with "temp" from autodiscovery.
@@ -178,12 +183,24 @@ instances:
     # components_discovery:
 
         ## @param limit - integer - optional - default: 10
-        ## Maximum number of components to be 'autodiscovered'
+        ## Maximum number of components to be 'autodiscovered'.
         #
         # limit: 10
 
         ## @param include - mapping - optional
-        ## Mapping of regular expressions keys and component config values that will be 'autodiscovered'
+        ## Mapping of regular expressions keys and component config values that will be 'autodiscovered'.
+        ##
+        ## The top-level keys are the regular expressions patterns for the desired component names. 
+        ##
+        ## include:
+        ##   my_project*:
+        ##   issue*:
+        ##     <OPTION_1>: ...
+        ##
+        ## The available include component object option is:
+        ##
+        ##   include:  List of metrics to include from the components matching the specified component 
+        ##             regular expressions pattern.
         #
         # include: {}
 
