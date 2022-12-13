@@ -7,7 +7,7 @@ services:
       - 2181:2181
 
   kafka:
-    image: "wurstmeister/kafka:latest"
+    image: wurstmeister/kafka:${KAFKA_VERSION}
     ports:
       - 9092:9092
       - 9999:9999

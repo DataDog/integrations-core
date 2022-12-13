@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import os
 import socket
 
 from datadog_checks.dev import get_docker_hostname, get_here
@@ -10,6 +11,7 @@ CHECK_NAME = "kafka"
 HERE = get_here()
 HOST = get_docker_hostname()
 HOST_IP = socket.gethostbyname(HOST)
+COMPOSE_FILE = os.environ["DOCKER_COMPOSE_FILE"]
 
 
 """
