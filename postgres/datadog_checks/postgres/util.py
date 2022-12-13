@@ -295,6 +295,7 @@ ACTIVITY_METRICS_9_2 = [
     "THEN 1 ELSE null END )",
     "COUNT(CASE WHEN waiting = 't' AND query !~ '^autovacuum:' THEN 1 ELSE null END )",
     "COUNT(CASE WHEN waiting = 't' AND query !~ '^autovacuum:' AND state = 'active' THEN 1 ELSE null END )",
+    "null",  # backend_xmin is not available
 ]
 
 # The metrics we retrieve from pg_stat_activity when the postgres version >= 8.3
@@ -305,6 +306,7 @@ ACTIVITY_METRICS_8_3 = [
     "THEN 1 ELSE null END )",
     "COUNT(CASE WHEN waiting = 't' AND query !~ '^autovacuum:' THEN 1 ELSE null END )",
     "COUNT(CASE WHEN waiting = 't' AND query !~ '^autovacuum:' AND state = 'active' THEN 1 ELSE null END )",
+    "null",  # backend_xmin is not available
 ]
 
 # The metrics we retrieve from pg_stat_activity when the postgres version < 8.3
@@ -315,6 +317,7 @@ ACTIVITY_METRICS_LT_8_3 = [
     "THEN 1 ELSE null END )",
     "COUNT(CASE WHEN waiting = 't' AND query !~ '^autovacuum:' THEN 1 ELSE null END )",
     "COUNT(CASE WHEN waiting = 't' AND query !~ '^autovacuum:' AND state = 'active' THEN 1 ELSE null END )",
+    "null",  # backend_xmin is not available
 ]
 
 # The metrics we collect from pg_stat_activity that we zip with one of the lists above
@@ -324,9 +327,6 @@ ACTIVITY_DD_METRICS = [
     ('postgresql.active_queries', AgentCheck.gauge),
     ('postgresql.waiting_queries', AgentCheck.gauge),
     ('postgresql.active_waiting_queries', AgentCheck.gauge),
-    # backend_xmin was introduced in PG 9.4.
-    # Earlier versions won't have backend_xmin in their ACTIVITY_METRICS_*
-    # so excessive elements when zipping won't have any effect.
     ('postgresql.activity.backend_xmin_age', AgentCheck.gauge),
 ]
 
