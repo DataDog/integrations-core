@@ -159,7 +159,7 @@ instances:
     #
     # components: {}
 
-    ## A mapping of components autodiscovery patterns for which metrics should be collected. Each include key may 
+    ## A mapping of components autodiscovery patterns for which metrics should be collected. Each included key may 
     ## be configured with an optional include object to filter the metrics that should be collected.  
     ##
     ## The following example collects all defect metrics for those components with names starting with "my_project"
