@@ -22,6 +22,10 @@ def instance_empty_default_hostname(field, value):
     return False
 
 
+def instance_max_parallel_requests(field, value):
+    return 100
+
+
 def instance_metric_patterns(field, value):
     return get_default_field_value(field, value)
 

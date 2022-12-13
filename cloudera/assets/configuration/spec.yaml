@@ -35,3 +35,10 @@ files:
       required: true
       value:
         type: string
+    - name: max_parallel_requests
+      description: | 
+        The maximum number of requests to Cloudera Manager that are allowed in parallel.
+      hidden: true
+      value:
+        type: integer
+        example: 100

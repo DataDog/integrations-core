@@ -34,6 +34,7 @@ class InstanceConfig(BaseModel):
     api_url: str
     disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
+    max_parallel_requests: Optional[int]
     metric_patterns: Optional[MetricPatterns]
     min_collection_interval: Optional[float]
     service: Optional[str]
