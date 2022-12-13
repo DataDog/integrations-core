@@ -751,25 +751,25 @@ class MySQLStatementSamples(DBMAsyncJob):
         self._log.debug("Found enabled performance_schema statements consumers: %s", enabled_consumers)
 
         # Nenad
-        events_statements_table = None
-        for table in self._preferred_events_statements_tables:
-            if table not in enabled_consumers:
-                continue
-            rows = self._get_new_events_statements(table, 1)
-            if not rows:
-                self._log.debug(
-                    "No statements found in %s table after checkpoint %d. checking next one.", table, self._checkpoint
-                )
-                continue
-            events_statements_table = table
-            break
-        if not events_statements_table:
-            self._log.warning(
-                "Cannot collect statement samples as all enabled events_statements_consumers %s are empty.",
-                enabled_consumers,
-            )
-            return None, None
-        # events_statements_table = 'events_statements_current'
+        # events_statements_table = None
+        # for table in self._preferred_events_statements_tables:
+        #     if table not in enabled_consumers:
+        #         continue
+        #     rows = self._get_new_events_statements(table, 1)
+        #     if not rows:
+        #         self._log.debug(
+        #             "No statements found in %s table after checkpoint %d. checking next one.", table, self._checkpoint
+        #         )
+        #         continue
+        #     events_statements_table = table
+        #     break
+        # if not events_statements_table:
+        #     self._log.warning(
+        #         "Cannot collect statement samples as all enabled events_statements_consumers %s are empty.",
+        #         enabled_consumers,
+        #     )
+        #     return None, None
+        events_statements_table = 'events_statements_current'
 
         collection_interval = self._configured_collection_interval
         if collection_interval < 0:
@@ -801,8 +801,8 @@ class MySQLStatementSamples(DBMAsyncJob):
         start_time = time.time()
 
         #Nenad
-        rows = self._get_new_events_statements(events_statements_table, self._events_statements_row_limit)
-        #rows = self._get_new_events_statements_current()
+        #rows = self._get_new_events_statements(events_statements_table, self._events_statements_row_limit)
+        rows = self._get_new_events_statements_current()
         rows = self._filter_valid_statement_rows(rows)
         events = self._collect_plans_for_statements(rows)
         submitted_count = 0
