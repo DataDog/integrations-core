@@ -2,7 +2,7 @@
 
 ## 17.6.0 / 2022-12-13
 
-* [Added] [MKT-412] Updating marketplace GitHub actions to validate new template fields. See [#13267](https://github.com/DataDog/integrations-core/pull/13267).
+* [Added] Update marketplace GitHub actions to validate new template fields. See [#13267](https://github.com/DataDog/integrations-core/pull/13267).
 * [Fixed] Fix style deps. See [#13495](https://github.com/DataDog/integrations-core/pull/13495).
 * [Fixed] Update integrations repo name. See [#13494](https://github.com/DataDog/integrations-core/pull/13494).
 
