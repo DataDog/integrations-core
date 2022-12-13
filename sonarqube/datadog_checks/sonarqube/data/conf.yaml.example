@@ -194,10 +194,10 @@ instances:
         ##   issue*:
         ##     include: [...]
         ##
-        ## The available include component object option is:
+        ## The available include component object options are:
         ##
-        ##   include:  List of metrics to include from the components matching the specified component 
-        ##             regular expressions pattern.
+        ##   include:  List of metrics regular expressions patterns to include from the matching components.
+        ##   exclude:  List of metrics regular expressions patterns to exclude from the matching components.
         #
         # include: {}
 
