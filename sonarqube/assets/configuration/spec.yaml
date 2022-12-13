@@ -127,11 +127,14 @@ files:
 
               include:
                 my_project*:
+                  <OPTION_1>: ...
                 issue*:
-                  include: [...]
+                  <OPTION_1>: ...
+                  <OPTION_2>: ...
 
               The available include component object options are:
 
+                tag:      Custom tag for the matching components.
                 include:  List of metrics regular expressions patterns to include from the matching components.
                 exclude:  List of metrics regular expressions patterns to exclude from the matching components.
             value:
