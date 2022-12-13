@@ -1,2 +1,1 @@
 -e ../datadog_checks_dev
-semver==2.13.0
