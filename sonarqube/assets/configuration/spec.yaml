@@ -76,19 +76,74 @@ files:
 
           Note: This is required for all project checks, whether `is_jmx` is set to `true`
           or `false.
-        value:
-          type: object
-          properties:
+        options:
           - name: tag
-            type: string
+            description: |
+              Custom tag for the specified component.
+            value:
+              type: string
           - name: include
-            type: array
-            items:
-              type: string
+            description: |
+              List of metrics to include for the specified component.
+            value:
+              type: array
+              items:
+                type: string
           - name: exclude
-            type: array
-            items:
+            description: |
+              List of metrics to exclude for the specified component.
+            value:
+              type: array
+              items:
+                type: string
+      - name: components_discovery
+        description: |
+          The autodiscovery patterns for components.
+          The following example collects all defect metrics for those components with names starting with "my_project"
+          and only the metrics from the "issues" category for projects starting with "issue".
+          It also excludes projects starting with "temp" from autodiscovery.
+          The maximum total number of projects processed by autodiscovery is 10.
+          
+            components_discovery:
+              limit: 10
+              include:
+                my_project*:
+                issue*:
+                  include:
+                    - issues.
+              exclude:
+                - temp*
+        options:
+          - name: limit
+            description: |
+              Maximum number of components to be 'autodiscovered'
+            value:
+              type: integer
+              example: 10
+          - name: include
+            description: |
+              Mapping of regular expressions keys and component config values that will be 'autodiscovered'
+            value:
+              type: object
+            properties:
+            - name: tag
               type: string
+            - name: include
+              type: array
+              items:
+                type: string
+            - name: exclude
+              type: array
+              items:
+                type: string
+          - name: exclude
+            description: |
+              List of regular expressions with the patterns of components that will not be 'autodiscovered'
+            value:
+              type: array
+              items:
+                type: string
+
       - template: instances/http
         overrides:
           password.hidden: true

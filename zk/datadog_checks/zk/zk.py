@@ -61,8 +61,8 @@ import socket
 import struct
 from collections import defaultdict
 from contextlib import closing
-from distutils.version import LooseVersion  # pylint: disable=E0611,E0401
 
+from packaging.version import Version
 from six import PY3, StringIO, iteritems
 
 from datadog_checks.base import AgentCheck, ensure_bytes, ensure_unicode, is_affirmative
@@ -101,7 +101,7 @@ class ZookeeperCheck(AgentCheck):
     # example match:
     # "Zookeeper version: 3.4.10-39d3a4f269333c922ed3db283be479f9deacaa0f, built on 03/23/2017 10:13 GMT"
     # This regex matches the entire version rather than <major>.<minor>.<patch>
-    METADATA_VERSION_PATTERN = re.compile('Zookeeper version: ([^,]+)')
+    METADATA_VERSION_PATTERN = re.compile(r'\w+ version: v?([^,]+)')
     METRIC_TAGGED_PATTERN = re.compile(r'(\w+){(\w+)="(.+)"}\s+(\S+)')
 
     SOURCE_TYPE_NAME = 'zookeeper'
@@ -187,7 +187,7 @@ class ZookeeperCheck(AgentCheck):
                 self.service_check('zookeeper.mode', status, message=message, tags=self.sc_tags)
 
         # Read metrics from the `mntr` output
-        if zk_version and LooseVersion(zk_version) > LooseVersion("3.4.0"):
+        if zk_version and Version(zk_version) > Version("3.4.0"):
             try:
                 mntr_out = self._send_command('mntr')
             except ZKConnectionFailure:
@@ -278,7 +278,7 @@ class ZookeeperCheck(AgentCheck):
             # grabs the entire version number for inventories.
             metadata_version = total_match.group(1)
             self.set_metadata('version', metadata_version)
-        has_connections_val = LooseVersion(version) > LooseVersion("3.4.4")
+        has_connections_val = Version(version) > Version("3.4.4")
 
         # Clients:
         buf.readline()  # skip the Clients: header

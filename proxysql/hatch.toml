@@ -1,0 +1,11 @@
+[env.collectors.datadog-checks]
+
+[[envs.default.matrix]]
+python = ["27", "38"]
+version = ["1.4", "2.0"]
+
+[envs.default.overrides]
+matrix.version.env-vars = [
+  { key = "PROXYSQL_VERSION", value = "1.4.10", if = ["1.4"] },
+  { key = "PROXYSQL_VERSION", value = "2.0.8", if = ["2.0"] },
+]

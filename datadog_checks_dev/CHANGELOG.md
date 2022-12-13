@@ -1,5 +1,31 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 17.5.1 / 2022-12-09
+
+* [Fixed] Update dependencies. See [#13478](https://github.com/DataDog/integrations-core/pull/13478).
+
+## 17.5.0 / 2022-12-09
+
+* [Added] Add `validate license-header` subcommand. See [#13417](https://github.com/DataDog/integrations-core/pull/13417).
+* [Added] Add new template for metrics crawler integrations. See [#13411](https://github.com/DataDog/integrations-core/pull/13411).
+* [Added] Add an option to ignore failed environments in env start. See [#13443](https://github.com/DataDog/integrations-core/pull/13443).
+* [Fixed] Fix parsing of E2E output for Hatch environments when warnings occur. See [#13479](https://github.com/DataDog/integrations-core/pull/13479).
+* [Fixed] Force the semver version to >=2.13.0. See [#13477](https://github.com/DataDog/integrations-core/pull/13477).
+* [Fixed] Re-raise the exception when the environment failed to start. See [#13472](https://github.com/DataDog/integrations-core/pull/13472).
+* [Fixed] Remove the `--memray-show-report` option. See [#13463](https://github.com/DataDog/integrations-core/pull/13463).
+* [Fixed] Bump pytest-memray version. See [#13462](https://github.com/DataDog/integrations-core/pull/13462).
+* [Fixed] Do not force pytest version. See [#13461](https://github.com/DataDog/integrations-core/pull/13461).
+* [Fixed] Fix typo in platfrom-integrations team name. See [#13368](https://github.com/DataDog/integrations-core/pull/13368).
+
+## 17.4.0 / 2022-11-23
+
+* [Added] Add a dummy `--memray` option to the pytest plugin. See [#13352](https://github.com/DataDog/integrations-core/pull/13352).
+* [Added] Add a dummy `--hide-memray-summary` option to the pytest plugin. See [#13358](https://github.com/DataDog/integrations-core/pull/13358).
+* [Added] Add an option to show the memray report. See [#13351](https://github.com/DataDog/integrations-core/pull/13351).
+* [Fixed] Support isolated installation. See [#13366](https://github.com/DataDog/integrations-core/pull/13366).
+* [Fixed] Allow `bench` as an env name for running benchmarks with hatch. See [#13316](https://github.com/DataDog/integrations-core/pull/13316).
+* [Fixed] Consider `hatch.toml` file in testable files for PR tests to run. See [#13303](https://github.com/DataDog/integrations-core/pull/13303).
+
 ## 17.3.2 / 2022-11-08
 
 * [Fixed] Update marketplace README template. See [#13249](https://github.com/DataDog/integrations-core/pull/13249).

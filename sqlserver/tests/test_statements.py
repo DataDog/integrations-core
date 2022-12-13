@@ -355,6 +355,7 @@ def test_statement_metrics_and_plans(
             assert row['is_proc'] == is_proc
         if is_proc and not is_encrypted:
             assert row['procedure_signature'], "missing proc signature"
+            assert row['procedure_name'], "missing proc name"
         if disable_secondary_tags:
             assert 'database_name' not in row
         else:
@@ -367,6 +368,7 @@ def test_statement_metrics_and_plans(
         assert all(row['plan_handle'] == matching_rows[0]['plan_handle'] for row in matching_rows)
     if is_proc and not is_encrypted:
         assert all(row['procedure_signature'] == matching_rows[0]['procedure_signature'] for row in matching_rows)
+        assert all(row['procedure_name'] == matching_rows[0]['procedure_name'] for row in matching_rows)
 
     dbm_samples = aggregator.get_event_platform_events("dbm-samples")
     assert dbm_samples, "should have collected at least one sample"
@@ -402,6 +404,7 @@ def test_statement_metrics_and_plans(
             assert event['sqlserver']['is_statement_encrypted']
         elif is_proc:
             assert event['db']['procedure_signature'], "missing proc signature"
+            assert event['db']['procedure_name'], "missing proc name"
             assert not event['db']['query_signature'], "procedure plans should not have query_signature field set"
         else:
             assert event['db']['plan']['definition'], "event plan definition missing"

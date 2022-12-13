@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 from functools import cached_property
-from typing import TYPE_CHECKING, Iterable
+from typing import TYPE_CHECKING, Dict, Iterable
 
 from ddev.integration.core import Integration
 from ddev.repo.constants import CONFIG_DIRECTORY
@@ -42,17 +42,13 @@ class Repository:
     def config(self) -> RepositoryConfig:
         from ddev.repo.config import RepositoryConfig
 
-        config_file = self.path / CONFIG_DIRECTORY / 'config.toml'
-        if not config_file.is_file():
-            return RepositoryConfig({})
-
-        return RepositoryConfig.from_toml_file(config_file)
+        return RepositoryConfig(self.path / CONFIG_DIRECTORY / 'config.toml')
 
 
 class IntegrationRegistry:
     def __init__(self, repo: Repository):
         self.__repo = repo
-        self.__cache = {}
+        self.__cache: Dict[str, Integration] = {}
 
     @property
     def repo(self) -> Repository:

@@ -15,6 +15,7 @@ from datadog_checks.dev.tooling.commands.validate.http import http
 from datadog_checks.dev.tooling.commands.validate.imports import imports
 from datadog_checks.dev.tooling.commands.validate.integration_style import integration_style
 from datadog_checks.dev.tooling.commands.validate.jmx_metrics import jmx_metrics
+from datadog_checks.dev.tooling.commands.validate.license_headers import license_headers
 from datadog_checks.dev.tooling.commands.validate.licenses import licenses
 from datadog_checks.dev.tooling.commands.validate.manifest import manifest
 from datadog_checks.dev.tooling.commands.validate.metadata import metadata
@@ -47,6 +48,7 @@ validate.add_command(imports)
 validate.add_command(integration_style)
 validate.add_command(jmx_metrics)
 validate.add_command(legacy_signature)
+validate.add_command(license_headers)
 validate.add_command(licenses)
 validate.add_command(manifest)
 validate.add_command(metadata)

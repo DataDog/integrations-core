@@ -13,5 +13,17 @@
         ],
         "name": "Kubernetes Metrics Server prometheus health",
         "description": "Returns `CRITICAL` if the check cannot access the metrics endpoint."
+    },
+    {
+        "agent_version": "7.42.0",
+        "integration": "Kube metrics server",
+        "check": "kube_metrics_server.up",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "groups": [],
+        "name": "Kubernetes Metrics Server health",
+        "description": "Returns `CRITICAL` if Kubernetes Metrics Server is not healthy."
     }
 ]

@@ -39,6 +39,29 @@ In addition, Windows, Container-Optimized OS, and CentOS/RHEL versions earlier t
 
 3. [Restart the Agent][3].
 
+### Configuration with Docker
+
+In addition to mounting `system-probe.yaml` and `oom_kill.d/conf.yaml` as described above, do the following configuration:
+
+1. Mount the following volumes to the Agent container:
+
+    ```
+    -v /sys/kernel/debug:/sys/kernel/debug 
+    -v /lib/modules:/lib/modules 
+    -v /usr/src:/usr/src
+    ```
+
+2. Add the following permission to enable BPF operations:
+
+    ```
+    --privileged
+    ```
+    
+    From kernel version 5.8, the `--privileged` parameter can be replaces by `--cap-add CAP_BPF`. 
+
+**Note**: `--privileged` mode is not supported in Docker swarm.
+
+
 ### Configuration with Helm
 
 With the [Datadog Helm chart][4], ensure that the `datadog.systemProbe` and `datadog.systemProbe.enableOOMKill` parameters are enabled in the `values.yaml` file.

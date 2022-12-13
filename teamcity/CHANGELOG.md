@@ -1,5 +1,9 @@
 # CHANGELOG - teamcity
 
+## 3.0.0 / 2022-12-06
+
+* [Changed] Support TeamCity metrics and service checks. See [#12852](https://github.com/DataDog/integrations-core/pull/12852).
+
 ## 2.2.0 / 2022-09-16 / Agent 7.40.0
 
 * [Added] Update HTTP config spec templates. See [#12890](https://github.com/DataDog/integrations-core/pull/12890).

@@ -6,6 +6,7 @@ from __future__ import annotations
 from typing import cast
 
 from ddev.config.model import RootConfig
+from ddev.config.utils import scrub_config
 from ddev.utils.fs import Path
 from ddev.utils.toml import load_toml_data
 
@@ -45,7 +46,8 @@ class ConfigFile:
         import tomli_w
 
         config = RootConfig(load_toml_data(self.read()))
-        config.raw_data.pop('publish', None)
+        scrub_config(config.raw_data)
+
         return tomli_w.dumps(config.raw_data)
 
     def restore(self):

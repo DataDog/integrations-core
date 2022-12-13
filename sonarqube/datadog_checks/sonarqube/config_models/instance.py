@@ -36,6 +36,15 @@ class Components(BaseModel):
     tag: Optional[str]
 
 
+class ComponentsDiscovery(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    exclude: Optional[Sequence[str]]
+    include: Optional[Mapping[str, Any]]
+    limit: Optional[int]
+
+
 class Proxy(BaseModel):
     class Config:
         allow_mutation = False
@@ -57,6 +66,7 @@ class InstanceConfig(BaseModel):
     aws_service: Optional[str]
     collect_default_jvm_metrics: Optional[bool]
     components: Optional[Components]
+    components_discovery: Optional[ComponentsDiscovery]
     connect_timeout: Optional[float]
     default_exclude: Optional[Sequence[str]]
     default_include: Optional[Sequence[str]]

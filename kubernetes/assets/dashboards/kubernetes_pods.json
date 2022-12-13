@@ -350,7 +350,7 @@
                 "type": "toplist",
                 "requests": [
                   {
-                    "q": "top(sum:kubernetes.pods.running{$scope,$namespace,$deployment,$cluster,$statefulset,$daemonset,$job} by {kubernetes_cluster,kube_namespace}, 100, 'max', 'desc')",
+                    "q": "top(sum:kubernetes.pods.running{$scope,$namespace,$deployment,$cluster,$statefulset,$daemonset,$job} by {kube_cluster_name,kube_namespace}, 100, 'max', 'desc')",
                     "conditional_formats": [
                       {
                         "comparator": ">",
@@ -383,7 +383,7 @@
                 "type": "toplist",
                 "requests": [
                   {
-                    "q": "top(sum:kubernetes_state.pod.ready{$scope,$cluster,$namespace,$deployment,condition:true,$statefulset,$daemonset,$job} by {kubernetes_cluster,host,nodepool}, 10, 'last', 'desc')",
+                    "q": "top(sum:kubernetes_state.pod.ready{$scope,$cluster,$namespace,$deployment,condition:true,$statefulset,$daemonset,$job} by {kube_cluster_name,host,nodepool}, 10, 'last', 'desc')",
                     "conditional_formats": [
                       {
                         "comparator": "<=",

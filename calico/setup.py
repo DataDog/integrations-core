@@ -50,7 +50,7 @@ setup(
     long_description_content_type='text/markdown',
     keywords='datadog agent calico check',
     # The project's main homepage.
-    url='https://github.com/DataDog/integrations-extras',
+    url='https://github.com/DataDog/integrations-core',
     # Author details
     author='Max',
     author_email='max@galadrim.fr',

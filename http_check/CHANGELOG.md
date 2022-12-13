@@ -1,5 +1,9 @@
 # CHANGELOG - http_check
 
+## 8.1.1 / 2022-12-09
+
+* [Fixed] Update cryptography dependency. See [#13367](https://github.com/DataDog/integrations-core/pull/13367).
+
 ## 8.1.0 / 2022-09-16 / Agent 7.40.0
 
 * [Added] Update HTTP config spec templates. See [#12890](https://github.com/DataDog/integrations-core/pull/12890).

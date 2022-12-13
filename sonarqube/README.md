@@ -207,6 +207,54 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
+#### Components Discovery
+
+You can configure how your components are discovered with the `components_discovery` parameter.
+
+`limit`
+: Maximum number of items to be autodiscovered.  
+**Default value**: `10`
+
+`include`
+: Mapping of regular expression keys and component config values to autodiscover.  
+**Default value**: empty map
+
+`exclude`
+: List of regular expressions with the patterns of components to exclude from autodiscovery.  
+**Default value**: empty list
+
+**Examples**:
+
+Include a maximum of `5` components with names starting with `my_project`:
+
+```yaml
+components_discovery:
+  limit: 5
+  include:
+    'my_project*':
+```
+
+Include a maximum of `20` components and exclude those beginning with `temp`:
+
+```yaml
+components_discovery:
+  limit: 20
+  include:
+    '.*':
+  exclude:
+    - 'temp*'
+```
+
+Include all components with names starting with `issues`, apply the `issues_project` tag, and only collect metrics belonging to the category `issues`. As `limit` is not defined, the number of components discovered is limited to the default value `10`:
+```yaml
+components_discovery:
+  include:
+    'issues*':
+       tag: issues_project
+       include:
+         - issues.
+```
+
 ### Validation
 
 [Run the Agent's status subcommand][13] and look for `sonarqube` under the **JMXFetch** section:

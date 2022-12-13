@@ -1,3 +1,10 @@
+## Datadog Agent version [7.40.1](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7401)
+
+* Gitlab Runner [3.3.1](https://github.com/DataDog/integrations-core/blob/master/gitlab_runner/CHANGELOG.md)
+* Gitlab [5.3.1](https://github.com/DataDog/integrations-core/blob/master/gitlab/CHANGELOG.md)
+* Kube DNS [3.3.1](https://github.com/DataDog/integrations-core/blob/master/kube_dns/CHANGELOG.md)
+* Kubernetes State [7.3.1](https://github.com/DataDog/integrations-core/blob/master/kubernetes_state/CHANGELOG.md)
+
 ## Datadog Agent version [7.40.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7400)
 
 * ActiveMQ XML [2.2.0](https://github.com/DataDog/integrations-core/blob/master/activemq_xml/CHANGELOG.md)

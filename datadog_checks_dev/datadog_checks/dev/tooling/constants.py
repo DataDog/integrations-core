@@ -32,7 +32,7 @@ REPO_CHOICES = {
     'internal': 'integrations-internal',
     'agent': 'datadog-agent',
     'marketplace': 'marketplace',
-    'integrations': 'integrations',
+    'integrations-internal-core': 'integrations-internal-core',
 }
 
 VERSION_BUMP = {
@@ -135,11 +135,22 @@ integration_type_links = {
     'jmx': JMX_LINKS,
     'snmp_tile': SNMP_TILE_LINKS,
     'tile': TILE_LINKS,
+    'metrics_pull': TILE_LINKS,
 }
 
 # If a file changes in a PR with any of these file extensions,
 # a test will run against the check containing the file
-TESTABLE_FILE_PATTERNS = ('*.py', '*.ini', '*.in', '*.txt', '*.yml', '*.yaml', '**/tests/*', '**/pyproject.toml')
+TESTABLE_FILE_PATTERNS = (
+    '*.py',
+    '*.ini',
+    '*.in',
+    '*.txt',
+    '*.yml',
+    '*.yaml',
+    '**/tests/*',
+    '**/pyproject.toml',
+    '**/hatch.toml',
+)
 NON_TESTABLE_FILES = ('auto_conf.yaml', 'agent_requirements.in')
 
 ROOT = ''

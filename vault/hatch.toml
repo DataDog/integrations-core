@@ -12,4 +12,7 @@ DDEV_SKIP_GENERIC_TAGS_CHECK = "true"
 matrix.version.env-vars = "VAULT_VERSION"
 matrix.auth.env-vars = "AUTH_TYPE"
 
-[envs.bench]
+[envs.bench.env-vars]
+VAULT_VERSION = "1.9.0"
+AUTH_TYPE = "token-auth"
+DDEV_SKIP_GENERIC_TAGS_CHECK = "true"

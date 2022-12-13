@@ -39,15 +39,26 @@ files:
                     - label_addonmanager_kubernetes_io_mode
           - name: labels_as_tags
             required: false
+            description: |
+              labels_as_tags allows to specify custom labels of kubernetes resources to be turned into Datadog tags attached the corresponding metrics.
             value:
               type: object
               example:
                 labels_as_tags:
                   pod:
-                    - "app_*"
+                    app.kubernetes.io/name: kube_app_name
                   node:
-                    - "zone"
-                    - "team_*"
+                    topology.kubernetes.io/region: kube_region
+          - name: annotations_as_tags
+            required: false
+            description: |
+              annotations_as_tags allows to specify custom annotations of kubernetes resources to be turned into Datadog tags attached the corresponding metrics.
+            value:
+              type: object
+              example:
+                annotations_as_tags:
+                  pod:
+                    my_pod_annotation: my_pod_tag
           - name: labels_mapper
             required: false
             description: |

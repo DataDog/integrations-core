@@ -3,7 +3,8 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 import os
-from distutils.version import LooseVersion  # pylint: disable=E0611,E0401
+
+from packaging.version import Version
 
 from datadog_checks.zk import ZookeeperCheck
 
@@ -35,7 +36,7 @@ def assert_mntr_metrics_by_version(aggregator, skip=None):
     zk_version = os.environ.get("ZK_VERSION") or "3.4.10"
     metrics_to_check = METRICS_34
     optional_metrics = []
-    if zk_version and LooseVersion(zk_version) >= LooseVersion("3.6"):
+    if zk_version and Version(zk_version) >= Version("3.6"):
         metrics_to_check = METRICS_36
         optional_metrics = METRICS_36_OPTIONAL
 

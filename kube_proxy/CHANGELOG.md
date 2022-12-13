@@ -1,5 +1,9 @@
 # CHANGELOG - Kube_proxy
 
+## 6.0.0 / 2022-12-09
+
+* [Changed] Add health check to kube_* integrations. See [#10668](https://github.com/DataDog/integrations-core/pull/10668).
+
 ## 5.3.0 / 2022-09-16 / Agent 7.40.0
 
 * [Added] Update HTTP config spec templates. See [#12890](https://github.com/DataDog/integrations-core/pull/12890).

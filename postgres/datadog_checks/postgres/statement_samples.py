@@ -24,6 +24,8 @@ from datadog_checks.base.utils.db.utils import (
 )
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.time import get_timestamp
+from datadog_checks.base.utils.tracking import tracked_method
+from datadog_checks.postgres.explain_parameterized_queries import ExplainParameterizedQueries
 
 from .util import DatabaseConfigurationError, warning_with_tags
 from .version_utils import V9_6
@@ -150,9 +152,16 @@ class DBExplainError(Enum):
     # search path may be different when the client executed a query from where we executed it.
     undefined_table = 'undefined_table'
 
+    # the statement was explained with the prepared statement workaround
+    explained_with_prepared_statement = 'explained_with_prepared_statement'
+
 
 DEFAULT_COLLECTION_INTERVAL = 1
 DEFAULT_ACTIVITY_COLLECTION_INTERVAL = 10
+
+
+def agent_check_getter(self):
+    return self._check
 
 
 class PostgresStatementSamples(DBMAsyncJob):
@@ -183,6 +192,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         self._activity_last_query_start = None
         # The value is loaded when connecting to the main database
         self._explain_function = config.statement_samples_config.get('explain_function', 'datadog.explain_statement')
+        self._explain_parameterized_queries = ExplainParameterizedQueries(check, config)
         self._obfuscate_options = to_native_string(json.dumps(self._config.obfuscator_options))
 
         self._collection_strategy_cache = TTLCache(
@@ -232,6 +242,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             t.extend(self._tags_no_db)
         return t
 
+    @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _get_active_connections(self):
         start_time = time.time()
         extra_filters, params = self._get_extra_filters_and_params()
@@ -247,6 +258,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         self._log.debug("Loaded %s rows from %s", len(rows), self._config.pg_stat_activity_view)
         return [dict(row) for row in rows]
 
+    @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _get_new_pg_stat_activity(self, available_activity_columns):
         start_time = time.time()
         extra_filters, params = self._get_extra_filters_and_params(filter_stale_idle_conn=True)
@@ -281,6 +293,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         self._pg_stat_activity_cols = self._get_available_activity_columns(expected_cols)
         return self._pg_stat_activity_cols
 
+    @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _get_available_activity_columns(self, all_expected_columns):
         with self._check._get_db(self._config.dbname).cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
             cursor.execute(
@@ -386,6 +399,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         self._tags_no_db = [t for t in self._tags if not t.startswith('db:')]
         self._collect_statement_samples()
 
+    @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_statement_samples(self):
         start_time = time.time()
         pg_activity_cols = self._get_pg_stat_activity_cols_cached(PG_STAT_ACTIVITY_COLS)
@@ -461,6 +475,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             return False
         return True
 
+    @tracked_method(agent_check_getter=agent_check_getter)
     def _get_db_explain_setup_state(self, dbname):
         # type: (str) -> Tuple[Optional[DBExplainError], Optional[Exception]]
         try:
@@ -526,6 +541,7 @@ class PostgresStatementSamples(DBMAsyncJob):
 
         return db_explain_error, err
 
+    @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _run_explain(self, dbname, statement, obfuscated_statement):
         start_time = time.time()
         with self._check._get_db(dbname).cursor() as cursor:
@@ -546,19 +562,21 @@ class PostgresStatementSamples(DBMAsyncJob):
                 return None
             return result[0][0]
 
+    @tracked_method(agent_check_getter=agent_check_getter)
     def _run_and_track_explain(self, dbname, statement, obfuscated_statement, query_signature):
         plan_dict, explain_err_code, err_msg = self._run_explain_safe(
             dbname, statement, obfuscated_statement, query_signature
         )
-        err_tag = "error:explain-{}".format(explain_err_code.value if explain_err_code else None)
-        if err_msg:
-            err_tag = err_tag + "-" + err_msg
-        self._check.count(
-            "dd.postgres.statement_samples.error",
-            1,
-            tags=self._dbtags(dbname, err_tag) + self._check._get_debug_tags(),
-            hostname=self._check.resolved_hostname,
-        )
+        if explain_err_code and explain_err_code != DBExplainError.explained_with_prepared_statement:
+            err_tag = "error:explain-{}".format(explain_err_code.value if explain_err_code else None)
+            if err_msg:
+                err_tag = err_tag + "-" + err_msg
+            self._check.count(
+                "dd.postgres.statement_samples.error",
+                1,
+                tags=self._dbtags(dbname, err_tag) + self._check._get_debug_tags(),
+                hostname=self._check.resolved_hostname,
+            )
         return plan_dict, explain_err_code, err_msg
 
     def _run_explain_safe(self, dbname, statement, obfuscated_statement, query_signature):
@@ -591,6 +609,10 @@ class PostgresStatementSamples(DBMAsyncJob):
                 " can't be explained due to the separation of the parsed query and raw bind parameters: %s",
                 repr(e),
             )
+            if is_affirmative(self._config.statement_samples_config.get('explain_parameterized_queries', False)):
+                plan = self._explain_parameterized_queries.explain_statement(dbname, statement, obfuscated_statement)
+                if plan:
+                    return plan, DBExplainError.explained_with_prepared_statement, None
             error_response = None, DBExplainError.parameterized_query, '{}'.format(type(e))
             self._explain_errors_cache[query_signature] = error_response
             self._emit_run_explain_error(dbname, DBExplainError.parameterized_query, e)
@@ -625,6 +647,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             hostname=self._check.resolved_hostname,
         )
 
+    @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_plan_for_statement(self, row):
         # limit the rate of explains done to the database
         cache_key = (row['datname'], row['query_signature'])

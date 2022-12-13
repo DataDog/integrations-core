@@ -9,7 +9,6 @@ build-backend = "hatchling.build"
 name = "datadog-pgbouncer"
 description = "The PGBouncer check"
 readme = "README.md"
-license = {text = "BSD-3-Clause"}
 keywords = [
     "datadog",
     "datadog agent",
@@ -36,9 +35,12 @@ dynamic = [
     "version",
 ]
 
+[project.license]
+text = "BSD-3-Clause"
+
 [project.optional-dependencies]
 deps = [
-    "psycopg2-binary==2.8.6",
+    "psycopg2-binary==2.8.6; sys_platform != 'darwin' or platform_machine != 'arm64'",
 ]
 
 [project.urls]
@@ -52,8 +54,6 @@ include = [
     "/datadog_checks",
     "/tests",
     "/manifest.json",
-    "/requirements-dev.txt",
-    "/tox.ini",
 ]
 
 [tool.hatch.build.targets.wheel]
