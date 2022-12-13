@@ -44,6 +44,7 @@ def test_given_api_v48_endpoint_when_check_runs_then_service_check_ok_and_metric
     aggregator.assert_all_metrics_covered()
 
 
+@pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
 def test_metadata(cloudera_check, instance, datadog_agent, dd_run_check):
     check = cloudera_check(instance)
