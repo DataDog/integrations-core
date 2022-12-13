@@ -109,6 +109,48 @@ CREATE_TEMP_TABLE = re.sub(
 """,
 ).strip()
 
+EVENTS_STATEMENTS_CURRENT_QUERY = re.sub(
+    r'\s+',
+    ' ',
+    """
+    SELECT
+        current_schema,
+        sql_text,
+        digest,
+        digest_text,
+        timer_start,
+        @startup_time_s+timer_end*1e-12 as timer_end_time_s,
+        timer_wait / 1000 AS timer_wait_ns,
+        lock_time / 1000 AS lock_time_ns,
+        rows_affected,
+        rows_sent,
+        rows_examined,
+        select_full_join,
+        select_full_range_join,
+        select_range,
+        select_range_check,
+        select_scan,
+        sort_merge_passes,
+        sort_range,
+        sort_rows,
+        sort_scan,
+        no_index_used,
+        no_good_index_used,
+        processlist_user,
+        processlist_host,
+        processlist_db
+    FROM performance_schema.events_statements_current E
+    LEFT JOIN performance_schema.threads as T
+        ON E.thread_id = T.thread_id
+    WHERE sql_text IS NOT NULL
+        AND event_name like 'statement/%%'
+        AND digest_text is NOT NULL
+        AND digest_text NOT LIKE 'EXPLAIN %%'
+        AND timer_start > %s
+        ORDER BY timer_wait DESC
+""",
+).strip()
+
 # neither window functions nor this variable-based window function emulation can be used directly on performance_schema
 # tables due to some underlying issue regarding how the performance_schema storage engine works (for some reason
 # many of the rows end up making it past the WHERE clause when they should have been filtered out)
@@ -409,6 +451,42 @@ class MySQLStatementSamples(DBMAsyncJob):
             raise
 
     @tracked_method(agent_check_getter=agent_check_getter)
+    def _get_new_events_statements_current(self):
+        start = time.time()
+        events_statements_table = "events_statements_current"
+        with closing(self._get_db_connection().cursor(pymysql.cursors.DictCursor)) as cursor:
+            self._cursor_run(
+                cursor,
+                "set @startup_time_s = {}".format(
+                    STARTUP_TIME_SUBQUERY.format(global_status_table=self._global_status_table)
+                ),
+            )
+            self._cursor_run(
+                cursor,
+                EVENTS_STATEMENTS_CURRENT_QUERY,
+                (self._checkpoint, )
+            )
+            rows = cursor.fetchall()
+            tags = (
+                self._tags
+                + ["events_statements_table:{}".format(events_statements_table)]
+                + self._check._get_debug_tags()
+            )
+            self._check.histogram(
+                "dd.mysql.get_new_events_statements.time",
+                (time.time() - start) * 1000,
+                tags=tags,
+                hostname=self._check.resolved_hostname,
+            )
+            self._check.histogram(
+                "dd.mysql.get_new_events_statements.rows", len(rows), tags=tags, hostname=self._check.resolved_hostname
+            )
+            self._log.debug(
+                "Read %s rows from %s after checkpoint %d", len(rows), events_statements_table, self._checkpoint
+            )
+            return rows
+
+    @tracked_method(agent_check_getter=agent_check_getter)
     def _get_new_events_statements(self, events_statements_table, row_limit):
         # Select the most recent events with a bias towards events which have higher wait times
         start = time.time()
@@ -672,6 +750,7 @@ class MySQLStatementSamples(DBMAsyncJob):
             return None, None
         self._log.debug("Found enabled performance_schema statements consumers: %s", enabled_consumers)
 
+        # Nenad
         events_statements_table = None
         for table in self._preferred_events_statements_tables:
             if table not in enabled_consumers:
@@ -690,6 +769,7 @@ class MySQLStatementSamples(DBMAsyncJob):
                 enabled_consumers,
             )
             return None, None
+        # events_statements_table = 'events_statements_current'
 
         collection_interval = self._configured_collection_interval
         if collection_interval < 0:
@@ -720,7 +800,9 @@ class MySQLStatementSamples(DBMAsyncJob):
 
         start_time = time.time()
 
+        #Nenad
         rows = self._get_new_events_statements(events_statements_table, self._events_statements_row_limit)
+        #rows = self._get_new_events_statements_current()
         rows = self._filter_valid_statement_rows(rows)
         events = self._collect_plans_for_statements(rows)
         submitted_count = 0
