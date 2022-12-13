@@ -124,7 +124,6 @@ instances:
     #
     # default_exclude: []
 
-    ## @param components - mapping - optional
     ## The components for which metrics should be collected. Each object may override the default
     ## options. The following example gathers all default metrics for "some-project",
     ## and only what is included/excluded for "another-project":
@@ -143,9 +142,23 @@ instances:
     ## Note: This is required for all project checks, whether `is_jmx` is set to `true`
     ## or `false.
     #
-    # components: {}
+    # components:
 
-    ## @param components_discovery - mapping - optional
+        ## @param tag - string - optional
+        ## Custom tag for the specified component.
+        #
+        # tag: <TAG>
+
+        ## @param include - list of strings - optional
+        ## List of metrics to include for the specified component.
+        #
+        # include: []
+
+        ## @param exclude - list of strings - optional
+        ## List of metrics to exclude for the specified component.
+        #
+        # exclude: []
+
     ## The autodiscovery patterns for components.
     ## The following example collects all defect metrics for those components with names starting with "my_project"
     ## and only the metrics from the "issues" category for projects starting with "issue".
@@ -162,7 +175,22 @@ instances:
     ##     exclude:
     ##       - temp*
     #
-    # components_discovery: {}
+    # components_discovery:
+
+        ## @param limit - integer - optional - default: 10
+        ## Maximum number of components to be 'autodiscovered'
+        #
+        # limit: 10
+
+        ## @param include - mapping - optional
+        ## Mapping of regular expressions keys and component config values that will be 'autodiscovered'
+        #
+        # include: {}
+
+        ## @param exclude - list of strings - optional
+        ## List of regular expressions with the patterns of components that will not be 'autodiscovered'
+        #
+        # exclude: []
 
     ## @param proxy - mapping - optional
     ## This overrides the `proxy` setting in `init_config`.
