@@ -156,9 +156,6 @@ instances:
     ##         - security.
     ##       exclude:
     ##         - issues.(false_positive_issues|reopened_issues)
-    ##
-    ## Note: This is required for all project checks, whether `is_jmx` is set to `true`
-    ## or `false.
     #
     # components: {}
 
@@ -195,7 +192,7 @@ instances:
         ## include:
         ##   my_project*:
         ##   issue*:
-        ##     <OPTION_1>: ...
+        ##     include: [...]
         ##
         ## The available include component object option is:
         ##
