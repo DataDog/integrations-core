@@ -25,7 +25,7 @@ from .common import (
     check_slru_metrics,
     requires_static_version,
 )
-from .utils import requires_over_10
+from .utils import requires_over_10, requires_over_96
 
 CONNECTION_METRICS = ['postgresql.max_connections', 'postgresql.percent_usage_connections']
 
@@ -39,9 +39,10 @@ def _get_activity_metrics():
         'postgresql.active_queries',
         'postgresql.waiting_queries',
         'postgresql.active_waiting_queries',
-        'postgresql.activity.oldest_xact_start',
+        'postgresql.activity.xact_start_age',
     ]
     if POSTGRES_VERSION is None or float(POSTGRES_VERSION) >= 9.6:
+        activity_metrics.append('postgresql.activity.backend_xid_age')
         activity_metrics.append('postgresql.activity.backend_xmin_age')
     return activity_metrics
 
@@ -165,6 +166,42 @@ def test_activity_metrics(aggregator, integration_check, pg_instance):
     activity_metrics = _get_activity_metrics()
     for name in activity_metrics:
         aggregator.assert_metric(name, count=1, tags=expected_tags)
+
+
+@requires_over_96
+def test_backend_transaction_age(aggregator, integration_check, pg_instance):
+    pg_instance['collect_activity_metrics'] = True
+    check = integration_check(pg_instance)
+
+    check.check(pg_instance)
+
+    dd_agent_tags = pg_instance['tags'] + ['port:{}'.format(PORT), 'db:datadog_test', 'application_name:datadog-agent']
+    test_tags = pg_instance['tags'] + ['port:{}'.format(PORT), 'db:datadog_test', 'application_name:test']
+    # No transaction in progress, we have 0
+    aggregator.assert_metric('postgresql.activity.backend_xmin_age', value=0, count=1, tags=dd_agent_tags)
+    aggregator.assert_metric('postgresql.activity.xact_start_age', count=1, tags=dd_agent_tags)
+
+    with psycopg2.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g", application_name="test") as conn:
+        cur = conn.cursor()
+        cur.execute('BEGIN TRANSACTION ISOLATION LEVEL REPEATABLE READ;')
+        # Assign txid, keep transaction opened
+        cur.execute('select txid_current();')
+
+        aggregator.reset()
+        check.check(pg_instance)
+        aggregator.assert_metric('postgresql.activity.backend_xid_age', value=1, count=1, tags=test_tags)
+        aggregator.assert_metric('postgresql.activity.backend_xmin_age', value=1, count=1, tags=dd_agent_tags)
+
+        with psycopg2.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g", application_name="test") as conn2:
+            # Open a new session and assign a new txid to it.
+            snd_cursor = conn2.cursor()
+            snd_cursor.execute('select txid_current()')
+
+            # Check that the backend_xmin is 2 tx old
+            aggregator.reset()
+            check.check(pg_instance)
+            aggregator.assert_metric('postgresql.activity.backend_xid_age', value=2, count=1, tags=test_tags)
+            aggregator.assert_metric('postgresql.activity.backend_xmin_age', value=2, count=1, tags=dd_agent_tags)
 
 
 @requires_over_10
