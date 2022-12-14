@@ -2,6 +2,7 @@
 
 ## Overview
 
+This integration connects to your TeamCity server to submit metrics, service checks, and events, allowing you to monitor the health of your TeamCity projects' build configurations, build runs, server resources, and more.
 
 ## Setup
 
