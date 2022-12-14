@@ -161,7 +161,10 @@ def test_check_cert_expiration_self_signed(http_check):
     status, days_left, seconds_left, msg = http_check.check_cert_expiration(instance, 10, cert_path)
 
     assert status == AgentCheck.UNKNOWN
-    assert "certificate verify failed: self signed certificate" in msg
+    if PY2:
+        assert "certificate verify failed" in msg
+    else:
+        assert "certificate verify failed: self signed certificate" in msg
 
 
 @pytest.mark.usefixtures("dd_environment")
