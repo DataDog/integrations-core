@@ -8,7 +8,7 @@ import re
 
 import mock
 import pytest
-from six import PY3
+from six import PY2, PY3
 
 from datadog_checks.zk import ZookeeperCheck
 
@@ -123,8 +123,9 @@ def test_metadata_regex(datadog_agent, get_test_instance):
     check = ZookeeperCheck(conftest.CHECK_NAME, {}, [get_test_instance])
     check.check_id = 'test:123'
     check.check(get_test_instance)
-    if not PY3:
+    if PY2:
         import StringIO
+
         buf = StringIO.StringIO(common.ZK_CLICKHOUSE_PAYLOAD)
     else:
         buf = io.StringIO(common.ZK_CLICKHOUSE_PAYLOAD)
