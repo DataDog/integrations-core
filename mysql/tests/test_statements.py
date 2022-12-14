@@ -540,7 +540,9 @@ def test_performance_schema_disabled(dbm_instance, dd_run_check):
         ),
     ],
 )
-def test_statement_metadata(aggregator, dd_run_check, dbm_instance, datadog_agent, metadata, expected_metadata_payload):
+def test_statement_metadata(
+    aggregator, dd_run_check, dbm_instance, datadog_agent, metadata, expected_metadata_payload, root_conn
+):
     mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
 
     test_query = '''
@@ -556,9 +558,8 @@ def test_statement_metadata(aggregator, dd_run_check, dbm_instance, datadog_agen
         return json.dumps({'query': query, 'metadata': metadata})
 
     def run_query(q):
-        with mysql_check._connect() as db:
-            with closing(db.cursor()) as cursor:
-                cursor.execute(q)
+        with closing(root_conn.cursor()) as cursor:
+            cursor.execute(q)
 
     # Execute the query with the mocked obfuscate_sql. The result should produce an event payload with the metadata.
     with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
@@ -819,7 +820,7 @@ def test_statement_samples_max_per_digest(dd_run_check, dbm_instance):
     mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
     for _ in range(3):
         dd_run_check(mysql_check)
-    rows = mysql_check._statement_samples._get_new_events_statements('events_statements_history_long', 1000)
+    rows = mysql_check._statement_samples._get_new_events_statements_current()
     count_by_digest = Counter(r['digest'] for r in rows)
     for _, count in count_by_digest.items():
         assert count == 1, "we should be reading exactly one row per digest out of the database"

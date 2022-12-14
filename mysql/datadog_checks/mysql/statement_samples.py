@@ -151,6 +151,26 @@ EVENTS_STATEMENTS_CURRENT_QUERY = re.sub(
 """,
 ).strip()
 
+TEST_QUERY = re.sub(
+    r'\s+',
+    ' ',
+    """
+    SELECT
+        thread_id,
+        sql_text,
+        digest,
+        timer_start,
+        timer_wait / 1000 AS timer_wait_ns
+    FROM performance_schema.events_statements_history_long E
+    WHERE sql_text IS NOT NULL
+        AND event_name like 'statement/%%'
+        AND digest_text is NOT NULL
+        AND digest_text NOT LIKE 'EXPLAIN %%'
+        AND timer_start > %s
+        ORDER BY thread_id, timer_start DESC
+""",
+).strip()
+
 # neither window functions nor this variable-based window function emulation can be used directly on performance_schema
 # tables due to some underlying issue regarding how the performance_schema storage engine works (for some reason
 # many of the rows end up making it past the WHERE clause when they should have been filtered out)
@@ -461,85 +481,8 @@ class MySQLStatementSamples(DBMAsyncJob):
                     STARTUP_TIME_SUBQUERY.format(global_status_table=self._global_status_table)
                 ),
             )
-            self._cursor_run(
-                cursor,
-                EVENTS_STATEMENTS_CURRENT_QUERY,
-                (self._checkpoint, )
-            )
+            self._cursor_run(cursor, EVENTS_STATEMENTS_CURRENT_QUERY, (self._checkpoint,))
             rows = cursor.fetchall()
-            tags = (
-                self._tags
-                + ["events_statements_table:{}".format(events_statements_table)]
-                + self._check._get_debug_tags()
-            )
-            self._check.histogram(
-                "dd.mysql.get_new_events_statements.time",
-                (time.time() - start) * 1000,
-                tags=tags,
-                hostname=self._check.resolved_hostname,
-            )
-            self._check.histogram(
-                "dd.mysql.get_new_events_statements.rows", len(rows), tags=tags, hostname=self._check.resolved_hostname
-            )
-            self._log.debug(
-                "Read %s rows from %s after checkpoint %d", len(rows), events_statements_table, self._checkpoint
-            )
-            return rows
-
-    @tracked_method(agent_check_getter=agent_check_getter)
-    def _get_new_events_statements(self, events_statements_table, row_limit):
-        # Select the most recent events with a bias towards events which have higher wait times
-        start = time.time()
-        drop_temp_table_query = "DROP TEMPORARY TABLE IF EXISTS {}".format(self._events_statements_temp_table)
-        params = (self._checkpoint, row_limit)
-        with closing(self._get_db_connection().cursor(pymysql.cursors.DictCursor)) as cursor:
-            # silence expected warnings to avoid spam
-            cursor.execute('SET @@SESSION.sql_notes = 0')
-            try:
-                self._cursor_run(cursor, drop_temp_table_query)
-                self._cursor_run(
-                    cursor,
-                    CREATE_TEMP_TABLE.format(
-                        temp_table=self._events_statements_temp_table,
-                        statements_table="performance_schema." + events_statements_table,
-                    ),
-                    params,
-                )
-            except pymysql.err.DatabaseError as e:
-                self._check.count(
-                    "dd.mysql.query_samples.error",
-                    1,
-                    tags=self._tags + ["error:create-temp-table-{}".format(type(e))] + self._check._get_debug_tags(),
-                    hostname=self._check.resolved_hostname,
-                )
-                raise
-            if self._has_window_functions:
-                sub_select = SUB_SELECT_EVENTS_WINDOW
-            else:
-                self._cursor_run(cursor, "set @row_num = 0")
-                self._cursor_run(cursor, "set @current_digest = ''")
-                sub_select = SUB_SELECT_EVENTS_NUMBERED
-            self._cursor_run(
-                cursor,
-                "set @startup_time_s = {}".format(
-                    STARTUP_TIME_SUBQUERY.format(global_status_table=self._global_status_table)
-                ),
-            )
-            self._cursor_run(
-                cursor,
-                EVENTS_STATEMENTS_QUERY.format(
-                    statements_numbered=sub_select.format(statements_table=self._events_statements_temp_table)
-                ),
-                params,
-            )
-            self._log.debug(
-                "Fetching all rows from events statements query, table %s. Using window function? %s",
-                events_statements_table,
-                self._has_window_functions,
-            )
-            rows = cursor.fetchall()
-
-            self._cursor_run(cursor, drop_temp_table_query)
             tags = (
                 self._tags
                 + ["events_statements_table:{}".format(events_statements_table)]
@@ -561,7 +504,6 @@ class MySQLStatementSamples(DBMAsyncJob):
 
     def _filter_valid_statement_rows(self, rows):
         num_sent = 0
-
         for row in rows:
             if not row or not all(row):
                 self._log.debug('Row was unexpectedly truncated or the events_statements table is not enabled')
@@ -750,25 +692,6 @@ class MySQLStatementSamples(DBMAsyncJob):
             return None, None
         self._log.debug("Found enabled performance_schema statements consumers: %s", enabled_consumers)
 
-        # Nenad
-        # events_statements_table = None
-        # for table in self._preferred_events_statements_tables:
-        #     if table not in enabled_consumers:
-        #         continue
-        #     rows = self._get_new_events_statements(table, 1)
-        #     if not rows:
-        #         self._log.debug(
-        #             "No statements found in %s table after checkpoint %d. checking next one.", table, self._checkpoint
-        #         )
-        #         continue
-        #     events_statements_table = table
-        #     break
-        # if not events_statements_table:
-        #     self._log.warning(
-        #         "Cannot collect statement samples as all enabled events_statements_consumers %s are empty.",
-        #         enabled_consumers,
-        #     )
-        #     return None, None
         events_statements_table = 'events_statements_current'
 
         collection_interval = self._configured_collection_interval
@@ -800,8 +723,6 @@ class MySQLStatementSamples(DBMAsyncJob):
 
         start_time = time.time()
 
-        #Nenad
-        #rows = self._get_new_events_statements(events_statements_table, self._events_statements_row_limit)
         rows = self._get_new_events_statements_current()
         rows = self._filter_valid_statement_rows(rows)
         events = self._collect_plans_for_statements(rows)
