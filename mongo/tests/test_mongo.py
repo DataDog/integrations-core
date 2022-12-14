@@ -222,6 +222,27 @@ def test_mongo_custom_query_with_empty_result_set(aggregator, check, instance_us
     aggregator.assert_metric('dd.custom.mongo.query_a.amount', count=0)
 
 
+@common.standalone
+@pytest.mark.parametrize(
+    'instance',
+    [
+        pytest.param(common.INSTANCE_CUSTOM_QUERIES_WITH_DATE, id='Date'),
+        pytest.param(common.INSTANCE_CUSTOM_QUERIES_WITH_ISODATE, id='ISODate'),
+    ],
+)
+def test_mongo_custom_query_with_date(aggregator, check, instance, dd_run_check):
+    check = check(instance)
+    dd_run_check(check)
+
+    aggregator.assert_metric("dd.custom.mongo.aggregate.total", value=500, count=2, metric_type=aggregator.COUNT)
+
+    aggregator.assert_metric_has_tag("dd.custom.mongo.aggregate.total", 'collection:orders', count=2)
+    aggregator.assert_metric_has_tag("dd.custom.mongo.aggregate.total", 'cluster_id:abc1', count=1)
+    aggregator.assert_metric_has_tag("dd.custom.mongo.aggregate.total", 'cluster_id:xyz1', count=1)
+    aggregator.assert_metric_has_tag("dd.custom.mongo.aggregate.total", 'tag1:val1', count=2)
+    aggregator.assert_metric_has_tag("dd.custom.mongo.aggregate.total", 'tag2:val2', count=2)
+
+
 @common.shard
 def test_mongo_replset(instance_shard, aggregator, check, dd_run_check):
     mongo_check = check(instance_shard)

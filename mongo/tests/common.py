@@ -126,6 +126,76 @@ INSTANCE_CUSTOM_QUERIES = {
     ],
 }
 
+INSTANCE_CUSTOM_QUERIES_WITH_DATE = {
+    'hosts': ['{}:{}'.format(HOST, PORT1)],
+    'database': 'test',
+    'username': 'testUser2',
+    'password': 'testPass2',
+    'custom_queries': [
+        {
+            'query': {
+                'aggregate': 'orders',
+                'pipeline': [
+                    {
+                        '$match': {
+                            'status': 'A',
+                            "created_time": {
+                                "$gte": "new Date(ISODate().getTime() - 60000)",
+                                "$lt": "Date()",
+                            },
+                        }
+                    },
+                    {'$group': {'_id': '$cust_id', 'total': {'$sum': '$amount'}}},
+                    {'$sort': {'total': -1}},
+                ],
+                'cursor': {},
+            },
+            'database': 'test2',
+            'fields': [
+                {'field_name': 'total', 'name': 'total', 'type': 'count'},
+                {'field_name': '_id', 'name': 'cluster_id', 'type': 'tag'},
+            ],
+            'metric_prefix': 'dd.custom.mongo.aggregate',
+            'tags': ['tag1:val1', 'tag2:val2'],
+        }
+    ],
+}
+
+INSTANCE_CUSTOM_QUERIES_WITH_ISODATE = {
+    'hosts': ['{}:{}'.format(HOST, PORT1)],
+    'database': 'test',
+    'username': 'testUser2',
+    'password': 'testPass2',
+    'custom_queries': [
+        {
+            'query': {
+                'aggregate': 'orders',
+                'pipeline': [
+                    {
+                        '$match': {
+                            'status': 'A',
+                            "created_time": {
+                                "$gte": "ISODate('2000-01-01T00:00:00.000+0000')",
+                                "$lt": "ISODate()",
+                            },
+                        }
+                    },
+                    {'$group': {'_id': '$cust_id', 'total': {'$sum': '$amount'}}},
+                    {'$sort': {'total': -1}},
+                ],
+                'cursor': {},
+            },
+            'database': 'test2',
+            'fields': [
+                {'field_name': 'total', 'name': 'total', 'type': 'count'},
+                {'field_name': '_id', 'name': 'cluster_id', 'type': 'tag'},
+            ],
+            'metric_prefix': 'dd.custom.mongo.aggregate',
+            'tags': ['tag1:val1', 'tag2:val2'],
+        }
+    ],
+}
+
 TLS_METADATA = {
     'docker_volumes': [
         '{}:/certs'.format(TLS_CERTS_FOLDER),
