@@ -101,7 +101,7 @@ logs:
 
 ##### Tailing the same journal multiple times
 
-In some situations it may be desirable to tail the same journal more than once in order to report different units with different source or service tags. 
+If you want to report units with different source or service tags, these must appear in separate journald configs.
 
 In order to do this you must uniquely identify the journal config with a `config_id` (available in agent `7.41.0`+)
 
