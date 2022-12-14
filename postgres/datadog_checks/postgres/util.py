@@ -330,14 +330,14 @@ ACTIVITY_METRICS_LT_8_3 = [
 
 # The metrics we collect from pg_stat_activity that we zip with one of the lists above
 ACTIVITY_DD_METRICS = [
-    ("postgresql.transactions.open", AgentCheck.gauge),
-    ("postgresql.transactions.idle_in_transaction", AgentCheck.gauge),
-    ("postgresql.active_queries", AgentCheck.gauge),
-    ("postgresql.waiting_queries", AgentCheck.gauge),
-    ("postgresql.active_waiting_queries", AgentCheck.gauge),
-    ("postgresql.activity.xact_start_age", AgentCheck.gauge),
-    ("postgresql.activity.backend_xid_age", AgentCheck.gauge),
-    ("postgresql.activity.backend_xmin_age", AgentCheck.gauge),
+    ('postgresql.transactions.open', AgentCheck.gauge),
+    ('postgresql.transactions.idle_in_transaction', AgentCheck.gauge),
+    ('postgresql.active_queries', AgentCheck.gauge),
+    ('postgresql.waiting_queries', AgentCheck.gauge),
+    ('postgresql.active_waiting_queries', AgentCheck.gauge),
+    ('postgresql.activity.xact_start_age', AgentCheck.gauge),
+    ('postgresql.activity.backend_xid_age', AgentCheck.gauge),
+    ('postgresql.activity.backend_xmin_age', AgentCheck.gauge),
 ]
 
 # The base query for postgres version >= 10

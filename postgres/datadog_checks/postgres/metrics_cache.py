@@ -209,7 +209,7 @@ class PostgresMetricsCache:
                 descriptors = [("datname", "db")]
 
             for i, q in enumerate(metrics_query):
-                if "{dd__user}" in q:
+                if '{dd__user}' in q:
                     metrics_query[i] = q.format(dd__user=self.config.user)
 
             metrics = {k: v for k, v in zip(metrics_query, ACTIVITY_DD_METRICS)}
@@ -218,8 +218,8 @@ class PostgresMetricsCache:
             metrics, query, descriptors = metrics_data
 
         return {
-            "descriptors": descriptors,
-            "metrics": metrics,
-            "query": query,
-            "relation": False,
+            'descriptors': descriptors,
+            'metrics': metrics,
+            'query': query,
+            'relation': False,
         }

@@ -181,7 +181,9 @@ def test_backend_transaction_age(aggregator, integration_check, pg_instance):
     aggregator.assert_metric('postgresql.activity.backend_xmin_age', value=0, count=1, tags=dd_agent_tags)
     aggregator.assert_metric('postgresql.activity.xact_start_age', count=1, tags=dd_agent_tags)
 
-    with psycopg2.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g", application_name="test") as conn:
+    with psycopg2.connect(
+        host=HOST, dbname=DB_NAME, user="postgres", password="datad0g", application_name="test"
+    ) as conn:
         cur = conn.cursor()
         cur.execute('BEGIN TRANSACTION ISOLATION LEVEL REPEATABLE READ;')
         # Assign txid, keep transaction opened
@@ -192,7 +194,9 @@ def test_backend_transaction_age(aggregator, integration_check, pg_instance):
         aggregator.assert_metric('postgresql.activity.backend_xid_age', value=1, count=1, tags=test_tags)
         aggregator.assert_metric('postgresql.activity.backend_xmin_age', value=1, count=1, tags=dd_agent_tags)
 
-        with psycopg2.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g", application_name="test") as conn2:
+        with psycopg2.connect(
+            host=HOST, dbname=DB_NAME, user="postgres", password="datad0g", application_name="test"
+        ) as conn2:
             # Open a new session and assign a new txid to it.
             snd_cursor = conn2.cursor()
             snd_cursor.execute('select txid_current()')
