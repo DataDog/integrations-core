@@ -33,8 +33,23 @@ from .conftest import mock_get_ca_certs_path
 def test_check_cert_expiration_up(http_check):
     cert_path = os.path.join(HERE, 'fixtures', 'cacert.pem')
     instance = {'url': 'https://valid.mock/'}
+    http_check.instance = instance
 
     status, days_left, seconds_left, msg = http_check.check_cert_expiration(instance, 10, cert_path)
+
+    assert status == AgentCheck.OK
+    assert days_left > 0
+    assert seconds_left > 0
+
+
+@pytest.mark.usefixtures("dd_environment")
+def test_check_cert_expiration_up_tls_verify_false(http_check):
+    cert_path = os.path.join(HERE, 'fixtures', 'cacert.pem')
+    instance = {'url': 'https://valid.mock/', 'tls_verify': False}
+    http_check.instance = instance
+
+    status, days_left, seconds_left, msg = http_check.check_cert_expiration(instance, 10, cert_path)
+
     assert status == AgentCheck.OK
     assert days_left > 0
     assert seconds_left > 0
@@ -44,8 +59,9 @@ def test_check_cert_expiration_up(http_check):
 def test_cert_expiration_no_cert(http_check):
     cert_path = os.path.join(HERE, 'fixtures', 'cacert.pem')
     instance = {'url': 'https://valid.mock/'}
+    http_check.instance = instance
 
-    with mock.patch('ssl.SSLSocket.getpeercert', return_value={}):
+    with mock.patch('ssl.SSLSocket.getpeercert', return_value=None):
 
         status, days_left, seconds_left, msg = http_check.check_cert_expiration(instance, 10, cert_path)
         assert status == AgentCheck.UNKNOWN
@@ -62,6 +78,7 @@ def test_cert_expiration_no_cert(http_check):
 def test_check_cert_expiration_bad_hostname(http_check):
     cert_path = os.path.join(HERE, 'fixtures', 'cacert.pem')
     instance = {'url': 'https://wronghost.mock/'}
+    http_check.instance = instance
     status, days_left, seconds_left, msg = http_check.check_cert_expiration(instance, 10, cert_path)
     assert status == AgentCheck.UNKNOWN
     assert days_left is None
@@ -73,6 +90,7 @@ def test_check_cert_expiration_bad_hostname(http_check):
 def test_check_cert_expiration_site_down(http_check):
     cert_path = os.path.join(HERE, 'fixtures', 'cacert.pem')
     instance = {'url': 'https://this.does.not.exist.foo'}
+    http_check.instance = instance
     status, days_left, seconds_left, msg = http_check.check_cert_expiration(instance, 10, cert_path)
     assert status == AgentCheck.UNKNOWN
     assert days_left is None
@@ -83,6 +101,7 @@ def test_check_cert_expiration_site_down(http_check):
 def test_check_cert_expiration_cert_expired(http_check):
     cert_path = os.path.join(HERE, 'fixtures', 'cacert.pem')
     instance = {'url': 'https://expired.mock/'}
+    http_check.instance = instance
     status, days_left, seconds_left, msg = http_check.check_cert_expiration(instance, 10, cert_path)
     if sys.version_info[0] < 3:
         # Python 2 returns ambiguous "[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed"
@@ -131,6 +150,31 @@ def test_check_cert_expiration_warning(http_check):
     status, days_left, seconds_left, msg = http_check.check_cert_expiration(instance, 10, cert_path)
     assert status == AgentCheck.WARNING
     assert 0 < seconds_left < seconds_warning
+
+
+@pytest.mark.usefixtures("dd_environment")
+def test_check_cert_expiration_self_signed(http_check):
+    cert_path = os.path.join(HERE, 'fixtures', 'cacert.pem')
+    instance = {'url': 'https://selfsigned.mock/'}
+    http_check.instance = instance
+
+    status, days_left, seconds_left, msg = http_check.check_cert_expiration(instance, 10, cert_path)
+
+    assert status == AgentCheck.UNKNOWN
+    assert "certificate verify failed: self signed certificate" in msg
+
+
+@pytest.mark.usefixtures("dd_environment")
+def test_check_cert_expiration_self_signed_tls_verify_false(http_check):
+    cert_path = os.path.join(HERE, 'fixtures', 'cacert.pem')
+    instance = {'url': 'https://selfsigned.mock/', 'tls_verify': False}
+    http_check.instance = instance
+
+    status, days_left, seconds_left, msg = http_check.check_cert_expiration(instance, 10, cert_path)
+
+    assert status == AgentCheck.OK
+    assert days_left > 0
+    assert seconds_left > 0
 
 
 @pytest.mark.usefixtures("dd_environment")
@@ -183,11 +227,10 @@ def test_check_tsl_ca_cert(aggregator, dd_run_check):
 
 
 @pytest.mark.usefixtures("dd_environment")
-def test_check_ssl_expire_error(aggregator, dd_run_check):
+def test_check_ssl_expire_error(aggregator, http_check):
     with mock.patch('ssl.SSLSocket.getpeercert', side_effect=Exception()):
         # Run the check for the one instance configured with days left
-        http_check = HTTPCheck('', {}, [CONFIG_EXPIRED_SSL['instances'][0]])
-        dd_run_check(http_check)
+        http_check.check(CONFIG_EXPIRED_SSL['instances'][0])
 
     expired_cert_tags = ['url:https://valid.mock', 'instance:expired_cert']
     aggregator.assert_service_check(HTTPCheck.SC_STATUS, status=HTTPCheck.OK, tags=expired_cert_tags, count=1)

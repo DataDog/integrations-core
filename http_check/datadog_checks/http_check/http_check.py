@@ -10,6 +10,7 @@ import time
 from datetime import datetime
 
 import requests
+from cryptography import x509
 from requests import Response
 from six import PY2, string_types
 from six.moves.urllib.parse import urlparse
@@ -302,9 +303,11 @@ class HTTPCheck(AgentCheck):
             context.load_verify_locations(instance_ca_certs)
 
             ssl_sock = context.wrap_socket(sock, server_hostname=server_name)
-            cert = ssl_sock.getpeercert()
-            if cert:
-                exp_date = datetime.strptime(cert['notAfter'], "%b %d %H:%M:%S %Y %Z")
+            binary_cert = ssl_sock.getpeercert(True)
+
+            if binary_cert:
+                cert = x509.load_der_x509_certificate(binary_cert)
+                exp_date = cert.not_valid_after
             else:
                 raise Exception("Empty or no certificate found.")
         except Exception as e:
