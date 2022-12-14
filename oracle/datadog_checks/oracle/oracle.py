@@ -87,7 +87,6 @@ class Oracle(AgentCheck):
         )
 
         self.check_initializations.append(self._query_manager.compile_queries)
-        self.check_initializations.append(self.can_use_jdbc)
 
         self._query_errors = 0
         self._connection_errors = 0
