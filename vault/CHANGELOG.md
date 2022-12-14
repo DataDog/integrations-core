@@ -1,6 +1,6 @@
 # CHANGELOG - Vault
 
-## 3.3.3 / 2022-10-28
+## 3.3.3 / 2022-10-28 / Agent 7.41.0
 
 * [Fixed] Ensure X-Vault-Request header is set to `true` on all requests. See [#13006](https://github.com/DataDog/integrations-core/pull/13006).
 

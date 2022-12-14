@@ -13,7 +13,7 @@
 * [Fixed] Remove `default_backend` parameter from cryptography calls. See [#13333](https://github.com/DataDog/integrations-core/pull/13333).
 * [Fixed] Update protobuf. See [#13262](https://github.com/DataDog/integrations-core/pull/13262).
 
-## 27.4.2 / 2022-10-28
+## 27.4.2 / 2022-10-28 / Agent 7.41.0
 
 * [Fixed] Update dependencies. See [#13205](https://github.com/DataDog/integrations-core/pull/13205) and [#13207](https://github.com/DataDog/integrations-core/pull/13207).
 * [Fixed] Make OpenMetrics checks honor `empty_default_hostname` option. See [#13146](https://github.com/DataDog/integrations-core/pull/13146).
