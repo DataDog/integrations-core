@@ -184,6 +184,7 @@ class MetricToCheckValidator(BaseManifestValidator):
                     # there are cases of metadata.csv files with just a header but no metrics
                     if row:
                         self.fail('  metric_to_check not included in manifest.json')
+                        break
 
 
 class ImmutableAttributesValidator(BaseManifestValidator):
