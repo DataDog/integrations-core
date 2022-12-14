@@ -204,9 +204,9 @@ class PostgresMetricsCache:
             else:
                 metrics_query = ACTIVITY_METRICS_LT_8_3
 
-            descriptors = [("datname", "db"), ("application_name", "application_name")]
+            descriptors = [('datname', 'db'), ('application_name', 'application_name')]
             if version < V9:
-                descriptors = [("datname", "db")]
+                descriptors = [('datname', 'db')]
 
             for i, q in enumerate(metrics_query):
                 if '{dd__user}' in q:
