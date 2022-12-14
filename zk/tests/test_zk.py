@@ -119,17 +119,15 @@ def test_metadata(datadog_agent, get_test_instance):
     datadog_agent.assert_metadata('test:123', version_metadata)
 
 
-# def test_metadata_regex(get_test_instance):
-#     zk = ZookeeperCheck('conftest.CHECK_NAME', {}, [get_test_instance])
-#     buf = io.StringIO(common.ZK_CLICKHOUSE_PAYLOAD)
-#     _, _, _, version = zk.parse_stat(buf)
-#     assert version == "22.9.1.15416"
-
 def test_metadata_regex(datadog_agent, get_test_instance):
     check = ZookeeperCheck(conftest.CHECK_NAME, {}, [get_test_instance])
-    check.check_id = 'test:123'    
+    check.check_id = 'test:123'
     check.check(get_test_instance)
-    buf = io.StringIO(common.ZK_CLICKHOUSE_PAYLOAD)
+    if not PY3:
+        import StringIO
+        buf = StringIO.StringIO(common.ZK_CLICKHOUSE_PAYLOAD)
+    else:
+        buf = io.StringIO(common.ZK_CLICKHOUSE_PAYLOAD)
     check.parse_stat(buf)
     expected_version = {
         'version.scheme': 'semver',
