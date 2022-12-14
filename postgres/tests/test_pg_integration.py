@@ -3,6 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import socket
 
+import time
 import mock
 import psycopg2
 import pytest
@@ -168,6 +169,15 @@ def test_activity_metrics(aggregator, integration_check, pg_instance):
         aggregator.assert_metric(name, count=1, tags=expected_tags)
 
 
+def assert_metric_at_least(aggregator, metric_name, expected_tag, count, lower_bound):
+    found_values = 0
+    for metric in aggregator.metrics(metric_name):
+        if expected_tag in metric.tags:
+            assert metric.value >= lower_bound
+            found_values += 1
+    assert found_values == count
+
+
 @requires_over_96
 def test_backend_transaction_age(aggregator, integration_check, pg_instance):
     pg_instance['collect_activity_metrics'] = True
@@ -181,31 +191,36 @@ def test_backend_transaction_age(aggregator, integration_check, pg_instance):
     aggregator.assert_metric('postgresql.activity.backend_xmin_age', value=0, count=1, tags=dd_agent_tags)
     aggregator.assert_metric('postgresql.activity.xact_start_age', count=1, tags=dd_agent_tags)
 
-    with psycopg2.connect(
-        host=HOST, dbname=DB_NAME, user="postgres", password="datad0g", application_name="test"
-    ) as conn:
-        cur = conn.cursor()
-        cur.execute('BEGIN TRANSACTION ISOLATION LEVEL REPEATABLE READ;')
-        # Assign txid, keep transaction opened
-        cur.execute('select txid_current();')
+    conn1 = psycopg2.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g", application_name="test")
+    cur = conn1.cursor()
 
-        aggregator.reset()
-        check.check(pg_instance)
-        aggregator.assert_metric('postgresql.activity.backend_xid_age', value=1, count=1, tags=test_tags)
-        aggregator.assert_metric('postgresql.activity.backend_xmin_age', value=1, count=1, tags=dd_agent_tags)
+    conn2 = psycopg2.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g", application_name="test")
+    cur2 = conn2.cursor()
 
-        with psycopg2.connect(
-            host=HOST, dbname=DB_NAME, user="postgres", password="datad0g", application_name="test"
-        ) as conn2:
-            # Open a new session and assign a new txid to it.
-            snd_cursor = conn2.cursor()
-            snd_cursor.execute('select txid_current()')
+    # Start a transaction in repeatable read to force pinning of backend_xmin
+    cur.execute('BEGIN TRANSACTION ISOLATION LEVEL REPEATABLE READ;')
+    # Force assignement of a txid and keep the transaction opened
+    cur.execute('select txid_current();')
+    start_transaction_time = time.time()
 
-            # Check that the backend_xmin is 2 tx old
-            aggregator.reset()
-            check.check(pg_instance)
-            aggregator.assert_metric('postgresql.activity.backend_xid_age', value=2, count=1, tags=test_tags)
-            aggregator.assert_metric('postgresql.activity.backend_xmin_age', value=2, count=1, tags=dd_agent_tags)
+    aggregator.reset()
+    check.check(pg_instance)
+    aggregator.assert_metric('postgresql.activity.backend_xid_age', value=1, count=1, tags=test_tags)
+    aggregator.assert_metric('postgresql.activity.backend_xmin_age', value=1, count=1, tags=dd_agent_tags)
+
+    # Open a new session and assign a new txid to it.
+    cur2.execute('select txid_current()')
+
+    # Check that the xmin and xid is 2 tx old
+    transaction_age = time.time() - start_transaction_time
+    aggregator.reset()
+    check.check(pg_instance)
+    aggregator.assert_metric('postgresql.activity.backend_xid_age', value=2, count=1, tags=test_tags)
+    aggregator.assert_metric('postgresql.activity.backend_xmin_age', value=2, count=1, tags=test_tags)
+    aggregator.assert_metric('postgresql.activity.backend_xmin_age', value=2, count=1, tags=dd_agent_tags)
+    assert_metric_at_least(
+        aggregator, 'postgresql.activity.xact_start_age', 'application_name:test', 1, transaction_age
+    )
 
 
 @requires_over_10
