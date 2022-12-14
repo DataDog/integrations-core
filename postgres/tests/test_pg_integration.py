@@ -206,6 +206,9 @@ def test_backend_transaction_age(aggregator, integration_check, pg_instance):
     aggregator.reset()
     check.check(pg_instance)
     aggregator.assert_metric('postgresql.activity.backend_xid_age', value=1, count=1, tags=test_tags)
+    aggregator.assert_metric('postgresql.activity.backend_xmin_age', value=1, count=1, tags=test_tags)
+
+    aggregator.assert_metric('postgresql.activity.backend_xid_age', count=0, tags=dd_agent_tags)
     aggregator.assert_metric('postgresql.activity.backend_xmin_age', value=1, count=1, tags=dd_agent_tags)
 
     # Open a new session and assign a new txid to it.
@@ -217,7 +220,10 @@ def test_backend_transaction_age(aggregator, integration_check, pg_instance):
     check.check(pg_instance)
     aggregator.assert_metric('postgresql.activity.backend_xid_age', value=2, count=1, tags=test_tags)
     aggregator.assert_metric('postgresql.activity.backend_xmin_age', value=2, count=1, tags=test_tags)
+
+    aggregator.assert_metric('postgresql.activity.backend_xid_age', count=0, tags=dd_agent_tags)
     aggregator.assert_metric('postgresql.activity.backend_xmin_age', value=2, count=1, tags=dd_agent_tags)
+
     assert_metric_at_least(
         aggregator, 'postgresql.activity.xact_start_age', 'application_name:test', 1, transaction_age
     )
