@@ -85,7 +85,7 @@ instances:
     ##           extra_metrics:
     ##           - <EXPOSED_METRIC_1>: <SENT_METRIC_1>
     ##           - <EXPOSED_METRIC_2>: <SENT_METRIC_2>
-    ##      b. If a value is a mapping, then it must have a `name` and/or `type` key.
+    ##      b. If a value is a mapping, then it must have a `name` and `type` key.
     ##         The `name` represents the sent metric name, and the `type` represents how
     ##         the metric should be handled, overriding any type information the endpoint
     ##         may provide. For example:
@@ -230,7 +230,7 @@ instances:
     ## For example, the following configuration instructs the check to apply all labels from `metric_a`
     ## to all other metrics, the `node` label from `metric_b` to only those metrics that have a `pod`
     ## label value that matches the `pod` label value of `metric_b`, and all labels from `metric_c`
-    ## to all other metrics if its value is equal to `23` or `42`.
+    ## to all other metrics if their values are equal to `23` or `42`.
     ##
     ##   share_labels:
     ##     metric_a: true
