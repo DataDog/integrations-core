@@ -323,7 +323,7 @@ def test_e2e_core_detect_metrics_using_apc_ups_metrics(dd_agent_check):
         'firmware_version:2.0.3-test',
         'serial_num:test_serial',
         'ups_name:testIdentName',
-        # metric_tags from _base.yaml
+        # metric_tags from _base.yaml...
         'snmp_host:APC_UPS_NAME',
     ]
 
