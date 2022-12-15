@@ -225,7 +225,6 @@ VALID_UNIT_NAMES = {
     'exception',
     'run',
     'hop',
-    'io',
 }
 
 ALLOWED_PREFIXES = ['system', 'jvm', 'http', 'datadog', 'sftp']
