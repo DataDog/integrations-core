@@ -114,6 +114,44 @@ CLASSIFIER_TO_HIGHEST_SPDX = {
 
 EXTRA_LICENSES = {'BSD-2-Clause'}
 
+COPYRIGHT_FORMATS = {
+    'AFL-3.0': '',
+    'AFPL': '',
+    'Apache-2.0': f'Copyright {year} {author}',
+    'APSL-2.0': 'Portions Copyright (c) 1999-2003 Apple Computer, Inc. All Rights Reserved.',
+    'Artistic-2.0': 'Copyright (c) 2000-2006, The Perl Foundation.',
+    'AAL': f'Copyright (c) {year} by {author}\n{package_name} {project_url}',
+    'BSD-3-Clause': f'Copyright {year} {author}',
+    'BSL-1.0': '',
+    'CC0-1.0': '',
+    'CECILL-2.1': '',
+    'CECILL-B': '',
+    'CECILL-C': '',
+    'CDDL-1.0': '',
+    'CPL-1.0': '',
+    'EPL-1.0': '',
+    'EFL-2.0': '',
+    'EUPL-1.1': '',
+    'EUPL-1.2': '',
+    'AGPL-3.0-only': f'Copyright (C) {year} {author}',
+    'AGPL-3.0-or-later': f'Copyright (C) {year} {author}',
+    'GPL-2.0-only': f'Copyright (C) {year} {author}',
+    'GPL-2.0-or-later': f'Copyright (C) {year} {author}',
+    'GPL-3.0-only': f'Copyright (C) {year} {author}',
+    'LGPL-3.0-only': f'Copyright (C) {year} {author}',
+    'LGPL-3.0-or-later': f'Copyright (C) {year} {author}',
+    'MIT': f'Copyright (c) {year} {author}',
+    'MPL-1.0': '',
+    'MPL-1.1': '',
+    'MPL-2.0': '',
+    'NPL-1.1': '',
+    'UPL': '',
+    'W3C': '',
+    'ZPL-2.1': '',
+
+
+}
+
 VALID_LICENSES = (
     EXTRA_LICENSES
     | set(KNOWN_LICENSES.values())
