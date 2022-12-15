@@ -206,6 +206,11 @@ files:
         Note: Custom queries are ignored by default when the mongo node is a secondary of a replica set.
         You can add `run_on_secondary: true` for each query that you want to run on both primaries and secondaries.
         See https://docs.datadoghq.com/integrations/guide/mongo-custom-query-collection to learn more.
+        Note: For MongoDB date types you can use functions matching any of these regular expressions:
+        "ISODate\(\s*\'(.*?)\'\s*\)" (e.g. "ISODate('2022-12-15T08:26:00.969Z')")
+        "ISODate\(\s*\)|Date\(\s*\)" (e.g. "Date()")
+        "new\s*Date\(ISODate\(\s*\)\.getTime\(\s*\)((\s*[+\-*\/]\s*(\d+))*)\s*\)" 
+          (e.g. "new Date(ISODate().getTime() - 60 * 1000)")
       value:
         type: array
         items:
