@@ -61,18 +61,12 @@ collect_per_instance_filters:
 
 This check watches vCenter's Event Manager for events and emits them to Datadog. It emits the following event types:
 
-- AlarmStatusChangedEvent:Gray
+- AlarmStatusChangedEvent
 - VmBeingHotMigratedEvent
 - VmReconfiguredEvent
 - VmPoweredOnEvent
 - VmMigratedEvent
-- TaskEvent:Initialize powering On
-- TaskEvent:Power Off virtual machine
-- TaskEvent:Power On virtual machine
-- TaskEvent:Reconfigure virtual machine
-- TaskEvent:Relocate virtual machine
-- TaskEvent:Suspend virtual machine
-- TaskEvent:Migrate virtual machine
+- TaskEvent
 - VmMessageEvent
 - VmSuspendedEvent
 - VmPoweredOffEvent
