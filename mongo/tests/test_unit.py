@@ -154,6 +154,33 @@ def test_emits_ok_service_check_when_alibaba_replicaset_role_configsvr_deploymen
     mock_server_info.assert_called_once()
     mock_list_database_names.assert_called_once()
 
+@mock.patch(
+    'pymongo.database.Database.command',
+    side_effect=[
+        {'ok': 1},
+        Exception('getCmdLineOpts exception'),
+        {},
+        {'configsvr': True, 'set': 'replset', "myState": 3},
+    ],
+)
+@mock.patch('pymongo.mongo_client.MongoClient.server_info', return_value={'version': '5.0.0'})
+@mock.patch('pymongo.mongo_client.MongoClient.list_database_names', return_value=[])
+def test_when_replicaset_state_recovering_then_database_names_not_called(
+    mock_list_database_names, mock_server_info, mock_command, dd_run_check, aggregator
+):
+    # Given
+    check = MongoDb('mongo', {}, [{'hosts': ['localhost']}])
+    check.refresh_collectors = mock.MagicMock()
+    # When
+    dd_run_check(check)
+    # Then
+    aggregator.assert_service_check('mongodb.can_connect', MongoDb.OK)
+    mock_command.assert_has_calls(
+        [mock.call('ping'), mock.call('getCmdLineOpts'), mock.call('isMaster'), mock.call('replSetGetStatus')]
+    )
+    mock_server_info.assert_called_once()
+    mock_list_database_names.assert_not_called()
+
 
 @pytest.mark.parametrize(
     'test_case, additional_metrics, expected_length, expected_warnings',
