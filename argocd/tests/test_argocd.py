@@ -92,9 +92,6 @@ def test_app_controller_service_check(dd_run_check, aggregator, mock_http_respon
 @patch('datadog_checks.argocd.check.PY2', True)
 def test_py2(dd_run_check):
     # Test to ensure that a ConfigurationError is raised when running with Python 2.
-    try:
+    with pytest.raises(ConfigurationError, match="This version of the integration is only available when using py3."):
         check = ArgocdCheck('argocd', {}, [MOCKED_APP_CONTROLLER_INSTANCE])
         dd_run_check(check)
-    except Exception as e:
-        assert type(e) == ConfigurationError
-        assert "This version of the integration is only available when using py3" in str(e)
