@@ -15,7 +15,7 @@ MOCKED_API_SERVER_INSTANCE = {'api_server_endpoint': 'http://api_server:8083'}
 
 MOCKED_REPO_SERVER_INSTANCE = {'repo_server_endpoint': 'http://repo_server:8084'}
 
-app_controller_ns, api_server_ns, repo_server_ns = ["argocd.app_controller", "argocd.api_server", "argocd.repo_server"]
+app_controller_ns, api_server_ns, repo_server_ns = "argocd.app_controller", "argocd.api_server", "argocd.repo_server"
 
 general_gauges = [
     'go.goroutines',
