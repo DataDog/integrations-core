@@ -53,7 +53,7 @@ argocd.app_controller.cluster.api.resources,gauge,,resource,,The number of monit
 argocd.app_controller.cluster.cache.age.seconds,gauge,,second,,The age of the cluster cache in seconds,0,argocd,app_controller cluster cache age seconds,
 argocd.app_controller.cluster.connection.status,gauge,,,,The current Kubernetes cluster connection status,0,argocd,app_controller cluster connection status,
 argocd.app_controller.cluster.events.count,count,,event,,The number of processed Kubernetes resource events,0,argocd,app_controller cluster events,
-argocd.app_controller.cluster.info,gauge,,,,,0,argocd,app_controller cluster info,
+argocd.app_controller.cluster.info,gauge,,,,Information about cluster.,0,argocd,app_controller cluster info,
 argocd.app_controller.go.gc.duration.seconds.quantile,gauge,,second,,A summary of the pause duration of garbage collection cycles in the Application Controller,0,argocd,app_controller go gc duration seconds,
 argocd.app_controller.go.gc.duration.seconds.count,count,,second,,The summary count of garbage collection cycles in the Repo Server Application Controller,0,argocd,app_controller go gc duration seconds count,
 argocd.app_controller.go.gc.duration.seconds.sum,count,,second,,The sum of the pause duration of garbage collection cycles in the Application Controller,0,argocd,app_controller go gc duration seconds sum,
