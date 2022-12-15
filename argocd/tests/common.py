@@ -129,23 +129,10 @@ repo_server_histograms = [
 ]
 
 NOT_EXPOSED_METRICS = [
-    'argocd.api_server.redis.request.duration.bucket',
-    'argocd.api_server.redis.request.duration.count',
-    'argocd.api_server.redis.request.duration.sum',
-    'argocd.api_server.redis.request.count',
     'argocd.app_controller.cluster.api.resource_objects',
     'argocd.app_controller.cluster.api.resources',
     'argocd.app_controller.cluster.cache.age.seconds',
-    'argocd.app_controller.kubectl.exec.pending',
     'argocd.app_controller.redis.request.duration',
-    'argocd.repo_server.redis.request.count',
-    'argocd.repo_server.git.request.count',
-    'argocd.repo_server.git.request.duration.seconds.bucket',
-    'argocd.repo_server.git.request.duration.seconds.count',
-    'argocd.repo_server.git.request.duration.seconds.sum',
-    'argocd.repo_server.redis.request.duration.seconds.bucket',
-    'argocd.repo_server.redis.request.duration.seconds.count',
-    'argocd.repo_server.redis.request.duration.seconds.sum',
 ]
 
 # Additional metrics that aren't exposed in the E2E environment
@@ -158,7 +145,21 @@ E2E_NOT_EXPOSED_METRICS = [
     'argocd.app_controller.app.reconcile.bucket',
     'argocd.app_controller.app.reconcile.count',
     'argocd.app_controller.app.reconcile.sum',
+    'argocd.app_controller.kubectl.exec.pending',
+    'argocd.api_server.redis.request.duration.bucket',
+    'argocd.api_server.redis.request.duration.count',
+    'argocd.api_server.redis.request.duration.sum',
+    'argocd.api_server.redis.request.count',
+    'argocd.app_controller.kubectl.exec.pending',
     'argocd.repo_server.repo.pending.request.total',
+    'argocd.repo_server.git.request.count',
+    'argocd.repo_server.git.request.duration.seconds.bucket',
+    'argocd.repo_server.git.request.duration.seconds.count',
+    'argocd.repo_server.git.request.duration.seconds.sum',
+    'argocd.repo_server.redis.request.duration.seconds.bucket',
+    'argocd.repo_server.redis.request.duration.seconds.count',
+    'argocd.repo_server.redis.request.duration.seconds.sum',
+    'argocd.repo_server.redis.request.count',
 ]
 
 general = general_gauges + general_counters + general_summaries

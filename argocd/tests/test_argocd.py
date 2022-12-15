@@ -41,7 +41,7 @@ def test_app_controller(dd_run_check, aggregator, mock_http_response, namespace,
 
     for metric in metrics:
         if metric in NOT_EXPOSED_METRICS:
-            aggregator.assert_metric(metric, at_least=0)
+            aggregator.assert_metric(metric, count=0)
         elif metric == 'argocd.{}.go.memstats.alloc_bytes'.format(namespace):
             aggregator.assert_metric(metric, metric_type=aggregator.GAUGE, tags=tags)
         else:
