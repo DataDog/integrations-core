@@ -464,6 +464,7 @@ Need help? Contact [Datadog support][14].
 
 
 
+
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/oracle/images/oracle_dashboard.png
 [2]: https://oracle.github.io/python-oracledb/
 [3]: https://github.com/DataDog/integrations-core/tree/7.41.x/oracle#oracle-instant-client
