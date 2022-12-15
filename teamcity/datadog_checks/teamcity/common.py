@@ -79,7 +79,7 @@ def filter_build_configs(check, build_configs_list, project_pattern, config):
     )
 
 
-def construct_event(check, new_build):
+def construct_event(check, new_build, build_config_type):
     """
     Construct event based on build status.
     """
@@ -92,9 +92,8 @@ def construct_event(check, new_build):
     event_tags = deepcopy(check.build_tags)
     event_tags.extend(['build_id:{}'.format(build_id), 'build_number:{}'.format(build_number)])
 
-    if check.is_deployment:
+    if check.is_deployment or build_config_type == 'deployment':
         teamcity_event = deepcopy(DEPLOYMENT_EVENT)
-        teamcity_event['tags'].append('type:deployment')
     else:
         teamcity_event = deepcopy(BUILD_EVENT)
         teamcity_event['tags'].append('build')
