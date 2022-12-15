@@ -29,3 +29,5 @@ def test_e2e_openmetrics_v1(dd_agent_check):
             aggregator.assert_metric(metric, count=0)
         else:
             aggregator.assert_metric(metric)
+
+    aggregator.assert_all_metrics_covered()
