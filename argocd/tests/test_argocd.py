@@ -8,6 +8,7 @@ from mock import patch
 from datadog_checks.argocd import ArgocdCheck
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.base.errors import ConfigurationError
+from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import (
     API_SERVER_METRICS,
@@ -48,6 +49,7 @@ def test_app_controller(dd_run_check, aggregator, mock_http_response, namespace,
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_service_check(f'argocd.{namespace}.openmetrics.health', ServiceCheck.OK)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 def test_empty_instance(dd_run_check):

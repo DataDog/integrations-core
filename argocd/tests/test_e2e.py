@@ -4,6 +4,7 @@
 import pytest
 
 from datadog_checks.base.constants import ServiceCheck
+from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import (
     API_SERVER_METRICS,
@@ -20,9 +21,9 @@ def test_e2e_openmetrics_v1(dd_agent_check):
     metrics = APP_CONTROLLER_METRICS + API_SERVER_METRICS + REPO_SERVER_METRICS
     not_exposed_metrics = E2E_NOT_EXPOSED_METRICS + NOT_EXPOSED_METRICS
 
-    aggregator.assert_service_check('argocd.api_server.openmetrics.health', ServiceCheck.OK)
-    aggregator.assert_service_check('argocd.repo_server.openmetrics.health', ServiceCheck.OK)
-    aggregator.assert_service_check('argocd.app_controller.openmetrics.health', ServiceCheck.OK)
+    aggregator.assert_service_check('argocd.api_server.openmetrics.health', ServiceCheck.OK, count=2)
+    aggregator.assert_service_check('argocd.repo_server.openmetrics.health', ServiceCheck.OK, count=2)
+    aggregator.assert_service_check('argocd.app_controller.openmetrics.health', ServiceCheck.OK, count=2)
 
     for metric in metrics:
         if metric in not_exposed_metrics:
@@ -31,3 +32,4 @@ def test_e2e_openmetrics_v1(dd_agent_check):
             aggregator.assert_metric(metric)
 
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
