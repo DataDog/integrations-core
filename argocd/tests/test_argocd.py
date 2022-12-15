@@ -8,7 +8,6 @@ from mock import patch
 from datadog_checks.argocd import ArgocdCheck
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.base.errors import ConfigurationError
-from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import (
     API_SERVER_METRICS,
