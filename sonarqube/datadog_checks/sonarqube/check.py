@@ -64,6 +64,12 @@ class SonarqubeCheck(AgentCheck):
         for pattern, (should_collect_component, tag_name, should_collect_metric) in components_discovery.items():
             self.log.debug('processing pattern `%s`', pattern)
             for component in available_components:
+                if component in self._components:
+                    self.log.debug(
+                        'component `%s` included in `components`, it will not be processed by `components_discovery`',
+                        component,
+                    )
+                    continue
                 self.log.debug('processing component `%s`', component)
                 if should_collect_component(component):
                     self.collect_metrics_from_component(available_metrics, component, tag_name, should_collect_metric)

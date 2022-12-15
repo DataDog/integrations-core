@@ -172,5 +172,26 @@ def test_service_check_ok_with_autodiscovery_include_all_and_limit(
         global_tags.extend(web_instance_with_autodiscovery_include_all_and_limit['tags'])
         dd_run_check(check)
         for metric_name in WEB_METRICS:
-            aggregator.assert_metric(metric_name)
+            aggregator.assert_metric(metric_name, count=1)
+        aggregator.assert_service_check('sonarqube.api_access', status=check.OK, tags=global_tags)
+
+
+def test_service_check_ok_with_component_and_autodiscovery(
+    aggregator, dd_run_check, sonarqube_check, web_instance_with_component_and_autodiscovery
+):
+    with mock.patch('datadog_checks.sonarqube.check.SonarqubeCheck.http') as mock_http:
+        mock_http.get.side_effect = [
+            MockResponse(file_path=os.path.join(HERE, 'api_responses', 'version')),
+            MockResponse(file_path=os.path.join(HERE, 'api_responses', 'metrics_search_p_1')),
+            MockResponse(file_path=os.path.join(HERE, 'api_responses', 'metrics_search_p_2')),
+            MockResponse(file_path=os.path.join(HERE, 'api_responses', 'measures_component')),
+            MockResponse(file_path=os.path.join(HERE, 'api_responses', 'components_search')),
+            MockResponse(file_path=os.path.join(HERE, 'api_responses', 'measures_component')),
+        ]
+        check = sonarqube_check(web_instance_with_component_and_autodiscovery)
+        global_tags = ['endpoint:{}'.format(web_instance_with_component_and_autodiscovery['web_endpoint'])]
+        global_tags.extend(web_instance_with_component_and_autodiscovery['tags'])
+        dd_run_check(check)
+        for metric_name in WEB_METRICS:
+            aggregator.assert_metric(metric_name, count=1)
         aggregator.assert_service_check('sonarqube.api_access', status=check.OK, tags=global_tags)
