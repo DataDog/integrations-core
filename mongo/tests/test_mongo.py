@@ -243,8 +243,6 @@ def test_mongo_custom_query_with_date(aggregator, check, instance, dd_run_check)
     aggregator.assert_metric_has_tag("dd.custom.mongo.aggregate.total", 'tag1:val1', count=2)
     aggregator.assert_metric_has_tag("dd.custom.mongo.aggregate.total", 'tag2:val2', count=2)
 
-    assert False
-
 
 @common.shard
 def test_mongo_replset(instance_shard, aggregator, check, dd_run_check):
