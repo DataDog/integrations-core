@@ -27,15 +27,6 @@ class AuthToken(BaseModel):
     writer: Optional[Mapping[str, Any]]
 
 
-class Components(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    exclude: Optional[Sequence[str]]
-    include: Optional[Sequence[str]]
-    tag: Optional[str]
-
-
 class Include(BaseModel):
     class Config:
         allow_mutation = False
@@ -74,7 +65,7 @@ class InstanceConfig(BaseModel):
     aws_region: Optional[str]
     aws_service: Optional[str]
     collect_default_jvm_metrics: Optional[bool]
-    components: Optional[Mapping[str, Components]]
+    components: Optional[Mapping[str, Any]]
     components_discovery: Optional[ComponentsDiscovery]
     connect_timeout: Optional[float]
     default_exclude: Optional[Sequence[str]]
