@@ -50,13 +50,13 @@ def test_app_controller(dd_run_check, aggregator, mock_http_response, namespace,
 
 
 def test_empty_instance(dd_run_check):
-    try:
+    with pytest.raises(
+        Exception,
+        match="Must specify at least one of the following:"
+        "`app_controller_endpoint`, `repo_server_endpoint` or `api_server_endpoint`.",
+    ):
         check = ArgocdCheck('argocd', {}, [{}])
         dd_run_check(check)
-    except Exception as e:
-        assert "Must specify at least one of the following:`app_controller_endpoint`, `repo_server_endpoint` or" in str(
-            e
-        )
 
 
 def test_app_controller_service_check(dd_run_check, aggregator, mock_http_response):
