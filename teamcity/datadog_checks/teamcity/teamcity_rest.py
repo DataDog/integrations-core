@@ -185,9 +185,9 @@ class TeamCityRest(AgentCheck):
             self.log.debug("Initializing multi-build configuration monitoring.")
             self._initialize_multi_build_config()
 
-    def _send_events(self, new_build):
+    def _send_events(self, new_build, build_config_type):
         self.log.debug('Sending build event...')
-        teamcity_event = construct_event(self, new_build)
+        teamcity_event = construct_event(self, new_build, build_config_type)
         self.log.trace('Submitting event: %s', teamcity_event)
         self.event(teamcity_event)
         self.service_check(
@@ -327,7 +327,7 @@ class TeamCityRest(AgentCheck):
                             build['number'],
                         )
                         if self.collect_events:
-                            self._send_events(build)
+                            self._send_events(build, build_config_type)
                         if self.collect_build_metrics:
                             self._collect_build_stats(build)
                         if self.collect_test_health_checks:
