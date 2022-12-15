@@ -103,7 +103,7 @@ logs:
 
 If you want to report units with different source or service tags, these must appear in separate journald configs.
 
-In order to do this you must uniquely identify the journal config with a `config_id` (available in agent `7.41.0`+)
+In order to do this you must uniquely identify the journal config with a `config_id` (available in agent `7.41.0`+).
 
 ```yaml
 logs:
