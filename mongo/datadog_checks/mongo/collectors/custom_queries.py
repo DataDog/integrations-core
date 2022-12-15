@@ -37,7 +37,7 @@ def replace_datetime(obj, log):
                 m = re.match(expression, v)
                 if m:
                     log.debug("match: %s", v)
-                    log.debug("groups: %s", v, m.groups())
+                    log.debug("groups: %s", m.groups())
                     new_v = f(m)
                     break
             obj[k] = new_v
