@@ -26,6 +26,6 @@ def test_e2e_openmetrics_v1(dd_agent_check):
 
     for metric in metrics:
         if metric in not_exposed_metrics:
-            aggregator.assert_metric(metric, at_least=0)
+            aggregator.assert_metric(metric, count=0)
         else:
             aggregator.assert_metric(metric)

@@ -71,6 +71,7 @@ app_controller_counters = [
     'kubectl.exec.count',
     'workqueue.adds.count',
     'workqueue.retries.count',
+    'process.cpu.seconds.count',
 ]
 
 app_controller_gauges = [
@@ -152,7 +153,6 @@ NOT_EXPOSED_METRICS = [
 # Additional metrics that aren't exposed in the E2E environment
 E2E_NOT_EXPOSED_METRICS = [
     'argocd.app_controller.app.k8s.request.count',
-    'argocd.app_controller.process.cpu.seconds.count',
     'argocd.app_controller.app.sync.count',
     'argocd.app_controller.cluster.events.count',
     'argocd.app_controller.kubectl.exec.count',
