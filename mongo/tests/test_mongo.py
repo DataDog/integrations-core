@@ -227,6 +227,7 @@ def test_mongo_custom_query_with_empty_result_set(aggregator, check, instance_us
     'instance',
     [
         pytest.param(common.INSTANCE_CUSTOM_QUERIES_WITH_DATE, id='Date'),
+        pytest.param(common.INSTANCE_CUSTOM_QUERIES_WITH_DATE_AND_OPERATION, id='DateAndOperation'),
         pytest.param(common.INSTANCE_CUSTOM_QUERIES_WITH_ISODATE, id='ISODate'),
     ],
 )
@@ -241,6 +242,8 @@ def test_mongo_custom_query_with_date(aggregator, check, instance, dd_run_check)
     aggregator.assert_metric_has_tag("dd.custom.mongo.aggregate.total", 'cluster_id:xyz1', count=1)
     aggregator.assert_metric_has_tag("dd.custom.mongo.aggregate.total", 'tag1:val1', count=2)
     aggregator.assert_metric_has_tag("dd.custom.mongo.aggregate.total", 'tag2:val2', count=2)
+
+    assert False
 
 
 @common.shard

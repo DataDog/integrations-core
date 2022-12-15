@@ -161,6 +161,43 @@ INSTANCE_CUSTOM_QUERIES_WITH_DATE = {
     ],
 }
 
+
+INSTANCE_CUSTOM_QUERIES_WITH_DATE_AND_OPERATION = {
+    'hosts': ['{}:{}'.format(HOST, PORT1)],
+    'database': 'test',
+    'username': 'testUser2',
+    'password': 'testPass2',
+    'custom_queries': [
+        {
+            'query': {
+                'aggregate': 'orders',
+                'pipeline': [
+                    {
+                        '$match': {
+                            'status': 'A',
+                            "created_time": {
+                                "$gte": "new Date(ISODate().getTime() - 60 * 1000)",
+                                "$lt": "Date()",
+                            },
+                        }
+                    },
+                    {'$group': {'_id': '$cust_id', 'total': {'$sum': '$amount'}}},
+                    {'$sort': {'total': -1}},
+                ],
+                'cursor': {},
+            },
+            'database': 'test2',
+            'fields': [
+                {'field_name': 'total', 'name': 'total', 'type': 'count'},
+                {'field_name': '_id', 'name': 'cluster_id', 'type': 'tag'},
+            ],
+            'metric_prefix': 'dd.custom.mongo.aggregate',
+            'tags': ['tag1:val1', 'tag2:val2'],
+        }
+    ],
+}
+
+
 INSTANCE_CUSTOM_QUERIES_WITH_ISODATE = {
     'hosts': ['{}:{}'.format(HOST, PORT1)],
     'database': 'test',
