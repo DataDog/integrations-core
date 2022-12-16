@@ -1,5 +1,9 @@
 # CHANGELOG - datadog_checks_base
 
+## 28.0.1 / 2022-12-16
+
+* [Fixed] Fixed incorrect counter type determination and error reporting on the first collection. See [#13489](https://github.com/DataDog/integrations-core/pull/13489).
+
 ## 28.0.0 / 2022-12-09
 
 * [Fixed] Update dependencies. See [#13478](https://github.com/DataDog/integrations-core/pull/13478).
