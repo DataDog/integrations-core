@@ -361,6 +361,23 @@ def test_backend_transaction_age(aggregator, integration_check, pg_instance):
     )
 
 
+def test_database_conflicts_metrics(aggregator, integration_check, pg_instance):
+    check = integration_check(pg_instance)
+    check.check(pg_instance)
+
+    conflict_metrics = [
+        'postgresql.conflicts.tablespace',
+        'postgresql.conflicts.lock',
+        'postgresql.conflicts.snapshot',
+        'postgresql.conflicts.bufferpin',
+        'postgresql.conflicts.deadlock',
+    ]
+
+    expected_tags = pg_instance['tags'] + ['port:{}'.format(PORT), 'db:datadog_test']
+    for name in conflict_metrics:
+        aggregator.assert_metric(name, count=1, tags=expected_tags)
+
+
 @requires_over_10
 def test_wrong_version(aggregator, integration_check, pg_instance):
     check = integration_check(pg_instance)
