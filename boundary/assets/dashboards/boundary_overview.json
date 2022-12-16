@@ -1320,7 +1320,8 @@
     ],
     "template_variables": [],
     "layout_type": "ordered",
+    "is_read_only": false,
     "notify_list": [],
     "reflow_type": "fixed",
-    "id": "yvw-cfw-2gd"
+    "id": "83i-2r7-egb"
 }
