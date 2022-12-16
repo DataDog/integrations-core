@@ -558,10 +558,6 @@ SPARK_STRUCTURED_STREAMING_METRIC_VALUES = {
     'spark.structured_streaming.processing_rate': 12,
     'spark.structured_streaming.rows_count': 12,
     'spark.structured_streaming.used_bytes': 12,
-    # Metric to test for punctuation in the query names of stream metrics.
-    'spark.structured_streaming.input_rate': 100,
-    'spark.structured_streaming.latency': 100,
-    'spark.structured_streaming.processing_rate': 100,
 }
 
 SPARK_STRUCTURED_STREAMING_METRIC_NO_TAGS = {
@@ -569,6 +565,12 @@ SPARK_STRUCTURED_STREAMING_METRIC_NO_TAGS = {
     'spark.structured_streaming.latency',
 }
 
+SPARK_STRUCTURED_STREAMING_METRIC_PUNCTUATED_TAGS = {
+    # Metric to test for punctuation in the query names of stream metrics.
+    'spark.structured_streaming.input_rate': 100,
+    'spark.structured_streaming.latency': 100,
+    'spark.structured_streaming.processing_rate': 100,
+}
 
 @pytest.mark.unit
 def test_yarn(aggregator, dd_run_check):
@@ -1039,10 +1041,13 @@ def test_enable_query_name_tag_for_structured_streaming(
 
         for metric, value in iteritems(SPARK_STRUCTURED_STREAMING_METRIC_VALUES):
             tags = base_tags
-            if metric in SPARK_STRUCTURED_STREAMING_METRIC_VALUES and value == 100:
-                tags = base_tags + ["query_name:my.app.punctuation"]
-            elif metric not in SPARK_STRUCTURED_STREAMING_METRIC_NO_TAGS:
+            if metric not in SPARK_STRUCTURED_STREAMING_METRIC_NO_TAGS:
                 tags = base_tags + ["query_name:my_named_query"]
+
+            aggregator.assert_metric(metric, value=value, tags=tags)
+
+        for metric, value in iteritems(SPARK_STRUCTURED_STREAMING_METRIC_PUNCTUATED_TAGS):
+            tags = base_tags + ["query_name:my.app.punctuation"]
 
             aggregator.assert_metric(metric, value=value, tags=tags)
 
