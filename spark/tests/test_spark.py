@@ -572,6 +572,7 @@ SPARK_STRUCTURED_STREAMING_METRIC_PUNCTUATED_TAGS = {
     'spark.structured_streaming.processing_rate': 100,
 }
 
+
 @pytest.mark.unit
 def test_yarn(aggregator, dd_run_check):
     with mock.patch('requests.get', yarn_requests_get_mock):
