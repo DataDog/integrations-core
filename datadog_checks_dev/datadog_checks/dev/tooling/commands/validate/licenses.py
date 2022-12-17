@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import asyncio
 import os
+import re
 from collections import defaultdict
 
 import click
@@ -14,8 +15,53 @@ from packaging.requirements import Requirement
 
 from ....fs import file_exists, read_file_lines, write_file_lines
 from ...constants import get_agent_requirements, get_license_attribution_file
+from ...github import get_auth_info
 from ...utils import get_extra_license_files, read_license_file_rows
 from ..console import CONTEXT_SETTINGS, abort, annotate_error, echo_failure, echo_info, echo_success
+
+# Files searched for COPYRIGHT_RE
+COPYRIGHT_LOCATIONS = [
+    'license',
+    'LICENSE',
+    'license.md',
+    'LICENSE.md',
+    'LICENSE.txt',
+    'License.txt',
+    'COPYING',
+    'NOTICE',
+    'README',
+    'README.md',
+    'README.mdown',
+    'README.markdown',
+    'COPYRIGHT',
+    'COPYRIGHT.txt',
+    'COPYING.txt',
+    'LICENSE-APACHE',
+    'LICENSE.APACHE',
+    'LICENSE.BSD',
+    'LICENSE.PSF',
+    'LICENSE-MIT',
+]
+
+
+# General match for anything that looks like a copyright declaration
+COPYRIGHT_RE = re.compile(r'copyright\s+(?:©|\(c\)\s+)?(?:(?:[0-9 ,-]|present)+\s+)?(?:by\s+)?(.*)', re.I)
+
+# Copyright strings to ignore, as they are not owners.  Most of these are from
+# boilerplate license files.
+#
+# These match at the beginning of the copyright (the result of COPYRIGHT_RE).
+COPYRIGHT_IGNORE_RES = [
+    re.compile(r'copyright(:? and license)?$', re.I),
+    re.compile(r'copyright (:?holder|owner|notice|license|statement)', re.I),
+    re.compile(r'Copyright & License -'),
+    re.compile(r'copyright .yyyy. .name of copyright owner.', re.I),
+    re.compile(r'copyright .yyyy. .name of copyright owner.', re.I),
+    re.compile(r'i.e., "Copyright \(c\)', re.I),
+]
+
+# Match for various suffixes that need not be included
+STRIP_SUFFIXES_RE = []
 
 EXPLICIT_LICENSES = {
     # https://github.com/baztian/jaydebeapi/blob/master/COPYING
@@ -114,42 +160,32 @@ CLASSIFIER_TO_HIGHEST_SPDX = {
 
 EXTRA_LICENSES = {'BSD-2-Clause'}
 
-COPYRIGHT_FORMATS = {
-    'AFL-3.0': '',
-    'AFPL': '',
-    'Apache-2.0': f'Copyright {year} {author}',
-    'APSL-2.0': 'Portions Copyright (c) 1999-2003 Apple Computer, Inc. All Rights Reserved.',
-    'Artistic-2.0': 'Copyright (c) 2000-2006, The Perl Foundation.',
-    'AAL': f'Copyright (c) {year} by {author}\n{package_name} {project_url}',
-    'BSD-3-Clause': f'Copyright {year} {author}',
-    'BSL-1.0': '',
-    'CC0-1.0': '',
-    'CECILL-2.1': '',
-    'CECILL-B': '',
-    'CECILL-C': '',
-    'CDDL-1.0': '',
-    'CPL-1.0': '',
-    'EPL-1.0': '',
-    'EFL-2.0': '',
-    'EUPL-1.1': '',
-    'EUPL-1.2': '',
-    'AGPL-3.0-only': f'Copyright (C) {year} {author}',
-    'AGPL-3.0-or-later': f'Copyright (C) {year} {author}',
-    'GPL-2.0-only': f'Copyright (C) {year} {author}',
-    'GPL-2.0-or-later': f'Copyright (C) {year} {author}',
-    'GPL-3.0-only': f'Copyright (C) {year} {author}',
-    'LGPL-3.0-only': f'Copyright (C) {year} {author}',
-    'LGPL-3.0-or-later': f'Copyright (C) {year} {author}',
-    'MIT': f'Copyright (c) {year} {author}',
-    'MPL-1.0': '',
-    'MPL-1.1': '',
-    'MPL-2.0': '',
-    'NPL-1.1': '',
-    'UPL': '',
-    'W3C': '',
-    'ZPL-2.1': '',
-
-
+PACKAGE_REPO_OVERRIDES = {
+    'pyyaml': 'https://github.com/yaml/pyyaml',
+    'pyro4': 'https://github.com/irmen/Pyro4',
+    'adodbapi': 'https://github.com/mhammond/pywin32/tree/main/adodbapi',
+    'aerospike': 'https://github.com/aerospike/aerospike-client-python',
+    'check-postgres': 'https://github.com/bucardo/check_postgres',
+    'contextlib2': 'https://github.com/jazzband/contextlib2',
+    'dnspython': 'https://github.com/rthalley/dnspython',
+    'foundationdb': 'https://github.com/apple/foundationdb',
+    'in-toto': 'https://github.com/in-toto/in-toto',
+    'kazoo': 'https://github.com/python-zk/kazoo',
+    'keystoneauth1': 'https://github.com/openstack/keystoneauth',
+    'lxml': 'https://github.com/lxml/lxml',
+    'oracledb': 'https://github.com/oracle/python-oracledb',
+    'packaging': 'https://github.com/pypa/packaging',
+    'paramiko': 'https://github.com/paramiko/paramiko',
+    'protobuf': 'https://github.com/protocolbuffers/protobuf',
+    'psycopg2-binary': 'https://github.com/psycopg/psycopg2',
+    'pycryptodomex': 'https://github.com/Legrandin/pycryptodome',
+    'requests': 'https://github.com/psf/requests',
+    'requests-toolbelt': 'https://github.com/requests/toolbelt',
+    'service-identity': 'https://github.com/pyca/service-identity',
+    'snowflake-connector-python': 'https://github.com/snowflakedb/snowflake-connector-python',
+    'supervisor': 'https://github.com/Supervisor/supervisor',
+    'tuf': 'https://github.com/theupdateframework/python-tuf',
+    'typing': 'https://github.com/python/typing',
 }
 
 VALID_LICENSES = (
@@ -198,15 +234,18 @@ async def get_data(url):
                 info['name'],
                 info['author'] or info['maintainer'] or info['author_email'] or info['maintainer_email'] or '',
                 info['license'],
+                info['home_page'],
                 {extract_classifier_value(c) for c in info['classifiers'] if c.startswith('License ::')},
             )
 
 
-async def scrape_license_data(urls):
+async def scrape_license_data(urls, ctx):
     package_data = defaultdict(lambda: {'copyright': set(), 'licenses': [], 'classifiers': set()})
 
     async with Pool() as pool:
-        async for package_name, package_copyright, package_license, license_classifiers in pool.map(get_data, urls):
+        async for package_name, package_copyright, package_license, home_page, license_classifiers in pool.map(
+            get_data, urls
+        ):
             data = package_data[package_name]
             if package_copyright:
                 data['copyright'].add(package_copyright)
@@ -218,7 +257,45 @@ async def scrape_license_data(urls):
                 else:
                     data['licenses'].append(package_license)
 
+            repo_url = home_page if home_page.__contains__('github.com/') else PACKAGE_REPO_OVERRIDES.get(package_name)
+
+            if repo_url:
+                cp = scrape_copyright_data(repo_url, ctx)
+            if cp:
+                data['copyright'].add(cp)
     return package_data
+
+
+def scrape_copyright_data(url, ctx):
+    if url.endswith('/'):
+        url = url[:-1]
+    owner_repo = re.sub(r'.*github.com/', '', url)
+    repo_api_url = f'https://api.github.com/repos/{owner_repo}'
+    repo_res = requests.get(repo_api_url, auth=get_auth_info(ctx.obj)).json()
+    def_branch = repo_res.get('default_branch')
+
+    for loc in COPYRIGHT_LOCATIONS:
+        path = f'https://raw.githubusercontent.com/{owner_repo}/{def_branch}/{loc}'
+        res = requests.get(path)
+        if res:
+            text = res.text
+            for line in text.split('\n'):
+                m = COPYRIGHT_RE.search(line)
+                if not m:
+                    continue
+                cpy = m.group(0)
+
+                # ignore a few spurious matches from license boilerplate
+                if any(ign.match(cpy) for ign in COPYRIGHT_IGNORE_RES):
+                    continue
+
+                # strip some suffixes
+                for suff_re in STRIP_SUFFIXES_RE:
+                    cpy = suff_re.sub('', cpy)
+
+                cpy = cpy.strip().rstrip('.')
+                if cpy:
+                    return cpy
 
 
 def validate_extra_licenses():
@@ -303,7 +380,7 @@ def licenses(ctx, sync):
         for version in versions:
             api_urls.append(f'https://pypi.org/pypi/{package}/{version}/json')
 
-    package_data = asyncio.run(scrape_license_data(api_urls))
+    package_data = asyncio.run(scrape_license_data(api_urls, ctx))
     known_spdx_licenses = {license_id.lower(): license_id for license_id in get_known_spdx_licenses()}
 
     package_license_errors = defaultdict(list)
