@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from datadog_checks.base.log import CheckLoggingAdapter
 
 
-def get_queue_manager_connection(config, logger):
+def get_queue_manager_connection(config, logger, direct=False):
     # type: (IBMMQConfig, CheckLoggingAdapter) -> pymqi.QueueManager
     """
     Get the queue manager connection
@@ -24,7 +24,7 @@ def get_queue_manager_connection(config, logger):
         # By testing with a normal connection first, we avoid making unnecessary SSL connections.
         # This does not fix the memory leak but mitigate its likelihood.
         # Details: https://github.com/dsuch/pymqi/issues/208
-        if config.try_basic_auth:
+        if config.try_basic_auth and not direct:
             try:
                 get_normal_connection(config, logger)
             except pymqi.MQMIError as e:
