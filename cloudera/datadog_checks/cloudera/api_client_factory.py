@@ -13,13 +13,16 @@ def make_api_client(check, config):
     api_client.rest_client = cm_client.rest.RESTClientObject(maxsize=(config.max_parallel_requests))
     check.log.debug('Getting version from cloudera API URL: %s', config.api_url)
     cloudera_manager_resource_api = cm_client.ClouderaManagerResourceApi(api_client)
-    get_version_response = cloudera_manager_resource_api.get_version()
+    try:
+        get_version_response = cloudera_manager_resource_api.get_version()
+    except Exception:
+        check.log.warn("Unable to get the version of Cloudera Manager, please check that the URL is valid and API version is appended at the end")
+        raise
     check.log.debug('get_version_response: %s', get_version_response)
     response_version = get_version_response.version
     if response_version:
         cloudera_version = packaging.version.parse(response_version)
         check.log.debug('Cloudera Manager Version: %s', cloudera_version)
-        check.log.debug('micro: %s', cloudera_version.micro)
         if cloudera_version.major == 7:
             version_raw = str(cloudera_version)
             version_parts = {
