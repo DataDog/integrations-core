@@ -20,13 +20,10 @@ class ApiClientV7(ApiClient):
     def _collect_clusters(self):
         clusters_resource_api = cm_client.ClustersResourceApi(self._api_client)
         read_clusters_response = clusters_resource_api.read_clusters(cluster_type='any', view='full')
-        self._log.debug("Full clusters response:")
-        self._log.debug(read_clusters_response)
+        self._log.debug("Cloudera full clusters response:\n%s", read_clusters_response)
         with ThreadPoolExecutor(max_workers=len(read_clusters_response.items) * 3) as executor:
             for cluster in read_clusters_response.items:
                 cluster_name = cluster.name
-                self._log.debug('cluster_name: %s', cluster_name)
-                self._log.debug('cluster: %s', cluster)
 
                 tags = self._collect_cluster_tags(cluster, self._check.config.tags)
 
@@ -58,8 +55,7 @@ class ApiClientV7(ApiClient):
     def _collect_hosts(self, cluster_name):
         clusters_resource_api = cm_client.ClustersResourceApi(self._api_client)
         list_hosts_response = clusters_resource_api.list_hosts(cluster_name, view='full')
-        self._log.debug("Full hosts response:")
-        self._log.debug(list_hosts_response)
+        self._log.debug("Cloudera full hosts response:\n%s", list_hosts_response)
         with ThreadPoolExecutor(max_workers=len(list_hosts_response.items) * 4) as executor:
             for host in list_hosts_response.items:
                 tags = self._collect_host_tags(host, self._check.config.tags)
@@ -88,7 +84,7 @@ class ApiClientV7(ApiClient):
 
     def _collect_host_service_check(self, host, tags):
         host_entity_status = ENTITY_STATUS[host.entity_status] if host.entity_status else None
-        self._log.debug('host_entity_status: %s', host_entity_status)
+        self._log.debug('Cloudera host_entity_status: %s', host_entity_status)
         self._check.service_check(HOST_HEALTH, host_entity_status, tags=tags)
 
     def _collect_host_metrics(self, host, tags):
@@ -116,10 +112,10 @@ class ApiClientV7(ApiClient):
         self._query_time_series(query, tags=tags)
 
     def _query_time_series(self, query, tags):
-        self._log.debug('query: %s', query)
+        self._log.debug('Cloudera timeseries query: %s', query)
         time_series_resource_api = cm_client.TimeSeriesResourceApi(self._api_client)
         query_time_series_response = time_series_resource_api.query_time_series(query=query)
-        self._log.debug('query_time_series_response: %s', query_time_series_response)
+        self._log.debug('Cloudera query_time_series_response: %s', query_time_series_response)
         for item in query_time_series_response.items:
             for ts in item.time_series:
                 self._log.debug('ts: %s', ts)
@@ -128,8 +124,6 @@ class ApiClientV7(ApiClient):
                 full_metric_name = f'{category_name}.{metric_name}'
                 for d in ts.data:
                     value = d.value
-                    self._log.debug('full_metric_name: %s', full_metric_name)
-                    self._log.debug('value: %s', value)
                     self._check.gauge(
                         full_metric_name, value, tags=tags + [f'cloudera_{category_name}:{ts.metadata.entity_name}']
                     )

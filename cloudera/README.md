@@ -41,7 +41,7 @@ No additional installation is needed on your server.
         ## The URL endpoint for the Cloudera Manager API. This can be found under the Endpoints tab for 
         ## your Data Hub to monitor. 
         ##
-        ## Note: The version of the Cloudera Manager API will need to be appended at the end of the URL. 
+        ## Note: The version of the Cloudera Manager API needs to be appended at the end of the URL. 
         ## For example, using v48 of the API for Data Hub `cluster_1` should result with a URL similar 
         ## to the following:
         ## `https://cluster1.cloudera.site/cluster_1/cdp-proxy-api/cm-api/v48`
