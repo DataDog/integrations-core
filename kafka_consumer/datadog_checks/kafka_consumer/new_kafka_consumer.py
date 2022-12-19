@@ -497,19 +497,8 @@ class NewKafkaConsumerCheck(object):
             name as a string.
         :return: A message future
         """
-        # TODO add support for dynamically picking version of
-        # GroupCoordinatorRequest which was renamed to FindCoordinatorRequest.
-        # When I experimented with this, the coordinator value returned in
-        # GroupCoordinatorResponse_v1 didn't match the value returned by
-        # GroupCoordinatorResponse_v0 and I couldn't figure out why.
         version = 0
-        # version = self._matching_api_version(GroupCoordinatorRequest)
-        if version <= 0:
-            request = GroupCoordinatorRequest[version](group_id)
-        else:
-            raise NotImplementedError(
-                "Support for GroupCoordinatorRequest_v{} has not yet been added to KafkaAdminClient.".format(version)
-            )
+        request = GroupCoordinatorRequest[version](group_id)
         return self._send_request_to_node(self.kafka_client._client.least_loaded_node(), request, wakeup=False)
 
     def _list_consumer_group_offsets_send_request(self, group_id, group_coordinator_id, partitions=None):
