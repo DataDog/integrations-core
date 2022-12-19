@@ -183,9 +183,9 @@ class ConfigBlock:
 
 
 def _get_end_of_param_declaration_block(start, end, config_lines, indent, errors, is_list=False):
-    """Here we suppose the config block is correctly formatted (@param, description, empty comment then the actual content)
-    and try to return the line of any data coming after. In case of a object we point to its first member. In case
-    of a list or a simple variable we point to the next element.
+    """Here we suppose the config block is correctly formatted (@param, description, empty comment then the
+    actual content) and try to return the line of any data coming after. In case of an object we point to its first
+    member. In case of a list or a simple variable we point to the next element.
     """
 
     if not is_exactly_indented(config_lines[start], indent):
