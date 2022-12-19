@@ -19,10 +19,10 @@ No additional installation is needed on your server.
 1. In Cloudera Data Platform, navigate to the Management Console and click on the **User Management** tab.
 ![User Management][10]
 
-2. Click on **Actions**, then **Create Machine User** to create the machine user that will query the Cloudera Manager via the Datadog Agent.
+2. Click on **Actions**, then **Create Machine User** to create the machine user that queries the Cloudera Manager through the Datadog Agent.
 ![Create Machine User][11]
 
-3. After the user is created, click on **Set Workload Password** if the workload password is not set yet.
+3. If the workload password hasn't been set, click on **Set Workload Password** after the user is created.
 ![Set Workload Password][12]
 
 <!-- xxx tabs xxx -->
