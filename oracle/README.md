@@ -94,26 +94,26 @@ To configure this check for an Agent running on a host:
    init_config:
 
    instances:
-     ## @param server - string - required
-     ## The IP address or hostname of the Oracle Database Server.
-     #
-     - server: localhost:1521
-
-      ## @param service_name - string - required
-      ## The Oracle Database service name. To view the services available on your server,
-      ## run the following query: `SELECT value FROM v$parameter WHERE name='service_names'`
+      ## @param server - string - required
+      ## The IP address or hostname of the Oracle Database Server.
       #
-      service_name: <SERVICE_NAME>
+      - server: localhost:1521
 
-      ## @param username - string - required
-      ## The username for the Datadog user account.
-      #
-      username: <USERNAME>
+        ## @param service_name - string - required
+        ## The Oracle Database service name. To view the services available on your server,
+        ## run the following query: `SELECT value FROM v$parameter WHERE name='service_names'`
+        #
+        service_name: <SERVICE_NAME>
 
-      ## @param password - string - required
-      ## The password for the Datadog user account.
-      #
-      password: <PASSWORD>
+        ## @param username - string - required
+        ## The username for the Datadog user account.
+        #
+        username: <USERNAME>
+
+        ## @param password - string - required
+        ## The password for the Datadog user account.
+        #
+        password: <PASSWORD>
    ```
 
 2. [Restart the Agent][7].
