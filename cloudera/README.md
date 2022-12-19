@@ -68,7 +68,7 @@ No additional installation is needed on your server.
 
 #### Containerized
 
-For containerized environments, see the [Autodiscovery Integration Templates][9] for guidance on applying the parameters below.
+For containerized environments, see the [Autodiscovery Integration Templates][3] for guidance on applying the parameters below.
 
 | Parameter            | Value                                                                                                            |
 | -------------------- | ---------------------------------------------------------------------------------------------------------------- |
