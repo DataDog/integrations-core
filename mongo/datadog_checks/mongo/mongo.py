@@ -221,7 +221,7 @@ class MongoDb(AgentCheck):
         if isinstance(deployment, ReplicaSetDeployment) and deployment.is_arbiter:
             self.log.debug("Replicaset and arbiter deployment, no databases will be checked")
             dbnames = []
-        elif deployment.replset_state == 3:
+        elif isinstance(deployment, ReplicaSetDeployment) and deployment.replset_state == 3:
             self.log.debug("Replicaset is in recovering state, will skip reading database names")
             dbnames = []
         else:
