@@ -1,0 +1,15 @@
+[env.collectors.datadog-checks]
+check-types = true
+mypy-args = [
+    "--py2",
+    "--install-types",
+    "--non-interactive",
+    "datadog_checks/",
+    "tests/",
+]
+mypy-deps = [
+    "types-mock==0.1.5",
+]
+
+[[envs.default.matrix]]
+python = ["27", "38"]
