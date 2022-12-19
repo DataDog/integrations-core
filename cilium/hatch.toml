@@ -1,0 +1,23 @@
+[env.collectors.datadog-checks]
+
+[[envs.default.matrix]]
+python = ["27", "38"]
+legacy = ["true"]
+version = ["1.9"]
+
+[[envs.default.matrix]]
+python = ["38"]
+legacy = ["false"]
+version = ["1.9", "1.10", "1.11"]
+
+[envs.default.env-vars]
+DDEV_SKIP_GENERIC_TAGS_CHECK = "true"
+
+[envs.default.overrides]
+matrix.version.env-vars = [
+  { key = "CILIUM_VERSION", value = "1.9.10", if = ["1.9"] },
+  { key = "CILIUM_VERSION", value = "1.10.6", if = ["1.10"] },
+  { key = "CILIUM_VERSION", value = "1.11.0", if = ["1.11"] },
+]
+matrix.legacy.env-vars = "CILIUM_LEGACY"
+matrix.legacy.e2e-env = { value = false, if = ["true"] }
