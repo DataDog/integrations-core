@@ -16,7 +16,10 @@ def make_api_client(check, config):
     try:
         get_version_response = cloudera_manager_resource_api.get_version()
     except Exception:
-        check.log.warn("Unable to get the version of Cloudera Manager, please check that the URL is valid and API version is appended at the end")
+        check.log.warning(
+            "Unable to get the version of Cloudera Manager, please check that the URL is valid and API version \
+                is appended at the end"
+        )
         raise
     check.log.debug('get_version_response: %s', get_version_response)
     response_version = get_version_response.version
