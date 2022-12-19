@@ -26,14 +26,23 @@ E_METRICS = [
     'rabbitmq.exchange.messages.publish_out.rate',
 ]
 
-# Only present in 3.5
-if RABBITMQ_VERSION == version.parse('3.5'):
+# Only present in 3.5 or greater
+if RABBITMQ_VERSION >= version.parse('3.5'):
     E_METRICS.extend(
         [
             'rabbitmq.exchange.messages.confirm.count',
             'rabbitmq.exchange.messages.confirm.rate',
             'rabbitmq.exchange.messages.return_unroutable.count',
             'rabbitmq.exchange.messages.return_unroutable.rate',
+        ]
+    )
+
+# Only present in 3.8 or greater
+if RABBITMQ_VERSION >= version.parse('3.8'):
+    E_METRICS.extend(
+        [
+            'rabbitmq.exchange.messages.drop_unroutable.count',
+            'rabbitmq.exchange.messages.drop_unroutable.rate',
         ]
     )
 
@@ -82,6 +91,8 @@ OVERVIEW_METRICS_MESSAGES = [
     'rabbitmq.overview.messages.publish_in.rate',
     'rabbitmq.overview.messages.publish_out.count',
     'rabbitmq.overview.messages.publish_out.rate',
+    'rabbitmq.overview.messages.drop_unroutable.count',
+    'rabbitmq.overview.messages.drop_unroutable.rate',
     'rabbitmq.overview.messages.return_unroutable.count',
     'rabbitmq.overview.messages.return_unroutable.rate',
     'rabbitmq.overview.messages.redeliver.count',
