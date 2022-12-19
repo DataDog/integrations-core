@@ -72,27 +72,36 @@ def test_unknown_service_check(aggregator, get_check, instance, caplog, dd_run_c
 def test_check_cant_connect(aggregator, get_check, instance, dd_run_check):
     # Late import to ignore missing library for e2e
     from datadog_checks.ibm_mq import IbmMqCheck
-    from datadog_checks.ibm_mq.collectors import ChannelMetricCollector
+    from datadog_checks.ibm_mq.collectors import QueueMetricCollector
 
     instance['queue_manager'] = "not_real"
 
     with pytest.raises(Exception, match=r'MQI Error'):
-        check = get_check(instance)
-        dd_run_check(check)
+        dd_run_check(get_check(instance))
 
-        tags = [
-            'connection_name:{}({})'.format(common.HOST, common.PORT),
-            'foo:bar',
-            'port:{}'.format(common.PORT),
-            'queue_manager:not_real',
-            'channel:{}'.format(common.CHANNEL),
-        ]
-        hostname = common.HOST
+    tags = [
+        'channel:{}'.format(common.CHANNEL),
+        'connection_name:{}({})'.format(common.HOST, common.PORT),
+        'foo:bar',
+        'port:{}'.format(common.PORT),
+        'queue_manager:not_real',
+        'mq_host:{}'.format(common.HOST),
+    ]
 
-        aggregator.assert_service_check(IbmMqCheck.SERVICE_CHECK, check.CRITICAL, tags=tags, count=1, hostname=hostname)
-        aggregator.assert_service_check(
-            ChannelMetricCollector.CHANNEL_SERVICE_CHECK, check.CRITICAL, tags=tags, count=1, hostname=hostname
-        )
+    aggregator.assert_service_check(
+        IbmMqCheck.SERVICE_CHECK,
+        IbmMqCheck.CRITICAL,
+        tags=tags,
+        count=1,
+        message="cannot connect to queue manager: MQI Error. Comp: 2, Reason 2058: FAILED: MQRC_Q_MGR_NAME_ERROR",
+    )
+    aggregator.assert_service_check(
+        QueueMetricCollector.QUEUE_MANAGER_SERVICE_CHECK,
+        IbmMqCheck.CRITICAL,
+        tags=tags,
+        count=1,
+        message="cannot connect to queue manager: MQI Error. Comp: 2, Reason 2058: FAILED: MQRC_Q_MGR_NAME_ERROR",
+    )
 
 
 def test_errors_are_logged(get_check, instance, caplog, dd_run_check):
@@ -153,7 +162,14 @@ def test_check_metrics_and_service_checks(aggregator, get_check, instance, seed_
     aggregator.assert_service_check(QueueMetricCollector.QUEUE_SERVICE_CHECK, check.OK, queue_tags, hostname=hostname)
 
     bad_channel_tags = tags + ['channel:{}'.format(common.BAD_CHANNEL)]
-    aggregator.assert_service_check('ibm_mq.channel', check.CRITICAL, tags=bad_channel_tags, count=1, hostname=hostname)
+    aggregator.assert_service_check(
+        'ibm_mq.channel',
+        check.CRITICAL,
+        tags=bad_channel_tags,
+        count=1,
+        hostname=hostname,
+        message="MQI Error. Comp: 2, Reason 3065: FAILED: MQRCCF_CHL_STATUS_NOT_FOUND",
+    )
 
     discoverable_tags = tags + ['channel:*']
     aggregator.assert_service_check('ibm_mq.channel', check.OK, tags=discoverable_tags, count=1, hostname=hostname)
