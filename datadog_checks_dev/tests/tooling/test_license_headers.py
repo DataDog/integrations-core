@@ -57,6 +57,20 @@ def test_parse_license_header_different_licenses(license_line):
     assert parse_license_header(file_contents) == expected_header
 
 
+def _write_string_to_file(path, contents):
+    with open(path, "w") as f:
+        f.write(contents)
+
+
+def _write_file_without_license(path):
+    _write_string_to_file(
+        path,
+        """
+import os
+""",
+    )
+
+
 def test_validate_license_headers_returns_no_errors_when_directory_is_empty(tmp_path):
     assert validate_license_headers(tmp_path) == []
 
@@ -65,12 +79,7 @@ def test_validate_license_headers_returns_error_for_a_file_without_license(tmp_p
     check_path = tmp_path / "check"
     check_path.mkdir()
 
-    with open(check_path / "setup.py", "w") as f:
-        f.write(
-            """
-import os
-"""
-        )
+    _write_file_without_license(check_path / "setup.py")
 
     errors = validate_license_headers(check_path)
     assert len(errors) == 1
@@ -82,13 +91,13 @@ def test_validate_license_headers_when_all_files_have_valid_headers_returns_empt
     check_path = tmp_path / "check"
     check_path.mkdir()
 
-    with open(check_path / "setup.py", "w") as f:
-        f.write(
-            f"""{get_license_header()}
+    _write_string_to_file(
+        check_path / "setup.py",
+        f"""{get_license_header()}
 
 import os
-"""
-        )
+""",
+    )
 
     assert validate_license_headers(check_path, get_previous=_make_get_previous()) == []
 
@@ -99,12 +108,7 @@ def test_validate_license_headers_works_with_arbitrary_nesting(tmp_path):
 
     nested_path = check_path / "datadog_checks/check"
     nested_path.mkdir(parents=True)
-    with open(nested_path / "check.py", "w") as f:
-        f.write(
-            """
-import os
-"""
-        )
+    _write_file_without_license(nested_path / "check.py")
 
     errors = validate_license_headers(check_path)
     assert len(errors) == 1
@@ -116,8 +120,7 @@ def test_validate_license_headers_skips_non_python_files(tmp_path):
     check_path = tmp_path / "check"
     check_path.mkdir()
 
-    with open(check_path / "pyproject.toml", "w") as f:
-        f.write("[something]\n")
+    _write_string_to_file(check_path / "pyproject.toml", "[something]\n")
 
     assert validate_license_headers(check_path) == []
 
@@ -136,8 +139,7 @@ def test_validate_license_headers_skips_blacklisted_folders(tmp_path, relpath):
     target_path = check_path / relpath
     target_path.mkdir(parents=True)
 
-    with open(target_path / "some.py", "w") as f:
-        f.write("import os\n")
+    _write_file_without_license(target_path / "some.py")
 
     assert validate_license_headers(check_path, ignore=[pathlib.Path("tests/docker")]) == []
 
@@ -146,15 +148,15 @@ def test_validate_license_headers_returns_error_on_new_file_with_header_not_matc
     check_path = tmp_path / "check"
     check_path.mkdir()
 
-    with open(check_path / "setup.py", "w") as f:
-        f.write(
-            """# (C) Foo, Inc. 1999-present
+    _write_string_to_file(
+        check_path / "setup.py",
+        """# (C) Foo, Inc. 1999-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import os
-"""
-        )
+""",
+    )
 
     errors = validate_license_headers(check_path, get_previous=_make_get_previous())
     assert len(errors) == 1
@@ -173,15 +175,15 @@ def test_validate_license_headers_returns_error_on_existing_file_with_changed_he
 
     prev_contents = f"{original_license}\n\nimport os\n"
 
-    with open(check_path / "setup.py", "w") as f:
-        f.write(
-            """# (C) Foo, Inc. 2000-present
+    _write_string_to_file(
+        check_path / "setup.py",
+        """# (C) Foo, Inc. 2000-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import os
-"""
-        )
+""",
+    )
 
     with open(check_path / "unchanged_file.py", "w") as f:
         f.write(prev_contents)
@@ -207,3 +209,85 @@ def _make_get_previous(d: dict = None):
         return d.get(path)
 
     return _fake_get_previous
+
+
+def test_validate_license_headers_honors_gitignore_file_on_check_path(tmp_path):
+    check_path = tmp_path / "check"
+    check_path.mkdir()
+
+    # .gitignore at check_path
+    _write_string_to_file(check_path / ".gitignore", "build/\n")
+
+    target_path = check_path / "foo" / "build"
+    target_path.mkdir(parents=True)
+
+    _write_file_without_license(target_path / "some.py")
+
+    assert validate_license_headers(check_path) == []
+
+
+def test_validate_license_headers_honors_nested_gitignore_files_reincluding_file(tmp_path):
+    check_path = tmp_path / "check"
+    check_path.mkdir()
+
+    # .gitignore at check_path allows `build/`
+    _write_string_to_file(check_path / ".gitignore", "!build/\n")
+
+    target_path = check_path / "foo" / "build"
+    target_path.mkdir(parents=True)
+
+    # .gitignore at subfolder matches `build/`, overriding the parent's gitignore
+    _write_string_to_file(check_path / "foo" / ".gitignore", "build/\n")
+
+    _write_file_without_license(target_path / "some.py")
+
+    assert validate_license_headers(check_path) == []
+
+
+def test_validate_license_headers_honors_gitignore_relative_patterns(tmp_path):
+    # This refers to gitignore patterns that contain separators at the beginning
+    # or middle of the pattern, as those patterns are relative to the folder
+    # where the .gitignore file that defines them is.
+    check_path = tmp_path / "check"
+
+    target_path = check_path / "foo" / "build"
+    target_path.mkdir(parents=True)
+
+    # .gitignore defines '/build', which must be assumed to be relative to its folder
+    _write_string_to_file(check_path / "foo" / ".gitignore", "/build/\n")
+
+    _write_file_without_license(target_path / "some.py")
+
+    assert validate_license_headers(check_path) == []
+
+    # And the pattern lets a more nested build folder through
+    target_path = check_path / "foo" / "deeper" / "build"
+    target_path.mkdir(parents=True)
+    _write_file_without_license(target_path / "some.py")
+
+    errors = validate_license_headers(check_path)
+    assert len(errors) > 0
+    assert errors[0].path == (target_path / "some.py").relative_to(check_path).as_posix()
+
+
+def test_validate_license_headers_honors_gitignore_from_parents(tmp_path):
+    # tmp_path is going to be our repo root.
+    # In all of our integration repos the check is always directly under the root,
+    # but we're assuming that the function we're testing doesn't know this, hence
+    # the extra level here for this test.
+    check_path = tmp_path / "some_folder" / "check"
+
+    target_path = check_path / "foo"
+    target_path.mkdir(parents=True)
+
+    _write_string_to_file(tmp_path / ".gitignore", "!foo\n")
+
+    _write_file_without_license(target_path / "some.py")
+
+    errors = validate_license_headers(check_path, repo_root=tmp_path)
+    assert len(errors) > 0
+    assert errors[0].path == (target_path / "some.py").relative_to(check_path).as_posix()
+
+    # If we override this in a subdir, we shouldn't get an error
+    _write_string_to_file(check_path / ".gitignore", "foo/\n")
+    assert validate_license_headers(check_path, repo_root=tmp_path) == []
