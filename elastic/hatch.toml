@@ -1,0 +1,35 @@
+[env.collectors.datadog-checks]
+
+[[envs.default.matrix]]
+python = ["27", "38"]
+flavor = ["elasticsearch"]
+version = ["7.2", "7.7", "7.9"]
+
+[[envs.default.matrix]]
+python = ["27", "38"]
+# Opensearch, compatible with elasticsearch
+flavor = ["opensearch"]
+version = ["1.1"]
+
+[envs.default.env-vars]
+DDEV_SKIP_GENERIC_TAGS_CHECK = "true"
+
+[envs.default.overrides]
+matrix.version.env-vars = [
+    { key = "ELASTIC_IMAGE", value = "1.1.0", if = ["1.1"] },
+    # EOL 2020-12-25
+    { key = "ELASTIC_IMAGE", value = "7.2.0", if = ["7.2"] },
+    # EOL 2021-11-13
+    { key = "ELASTIC_IMAGE", value = "7.7.0", if = ["7.7"] },
+    # EOL 2021-12-09
+    { key = "ELASTIC_IMAGE", value = "7.9.0", if = ["7.9"] },
+]
+matrix.flavor.env-vars = [
+    { key = "ELASTIC_REGISTRY", value = "docker.elastic.co/elasticsearch/elasticsearch", if = ["elasticsearch"] },
+    { key = "ELASTIC_REGISTRY", value = "opensearchproject/opensearch", if = ["opensearch"] },
+]
+
+[envs.bench.env-vars]
+ELASTIC_REGISTRY = "docker.elastic.co/elasticsearch/elasticsearch"
+ELASTIC_IMAGE = "6.4.2"
+DDEV_SKIP_GENERIC_TAGS_CHECK = "true"
