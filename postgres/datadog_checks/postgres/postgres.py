@@ -224,6 +224,7 @@ class PostgreSql(AgentCheck):
                 self._resolved_hostname = self.resolve_db_host()
             else:
                 self._resolved_hostname = self.agent_hostname
+        self.set_metadata('resolved_hostname', self._resolved_hostname)
         return self._resolved_hostname
 
     @property

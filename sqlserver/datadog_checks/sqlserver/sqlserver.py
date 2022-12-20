@@ -206,7 +206,7 @@ class SQLServer(AgentCheck):
             if self.reported_hostname:
                 self._resolved_hostname = self.reported_hostname
             elif self.dbm_enabled:
-                host, port = split_sqlserver_host_port(self.instance.get('host'))
+                host, _ = split_sqlserver_host_port(self.instance.get('host'))
                 self._resolved_hostname = resolve_db_host(host)
                 engine_edition = self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION)
                 if engine_edition == ENGINE_EDITION_SQL_DATABASE:
@@ -231,6 +231,7 @@ class SQLServer(AgentCheck):
                     self._resolved_hostname = "{}/{}".format(host, configured_database)
             else:
                 self._resolved_hostname = self.agent_hostname
+        self.set_metadata('resolved_hostname', self._resolved_hostname)
         return self._resolved_hostname
 
     def load_static_information(self):
