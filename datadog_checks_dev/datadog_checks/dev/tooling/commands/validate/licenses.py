@@ -57,7 +57,7 @@ COPYRIGHT_IGNORE_RES = [
     re.compile(r'Copyright & License -'),
     re.compile(r'copyright .yyyy. .name of copyright owner.', re.I),
     re.compile(r'copyright .yyyy. .name of copyright owner.', re.I),
-    re.compile(r'i.e., "Copyright \(c\)', re.I),
+    re.compile(r'Copyright and Related(:? or neighboring)? Rights', re.I),
 ]
 
 # Match for various suffixes that need not be included
