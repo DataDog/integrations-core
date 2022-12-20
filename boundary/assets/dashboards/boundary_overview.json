@@ -758,12 +758,9 @@
                     {
                         "id": 3705246529984506,
                         "definition": {
-                            "title": "Total Sessions per Month",
+                            "title": "Total Sessions",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {
-                                "live_span": "1mo"
-                            },
                             "requests": [
                                 {
                                     "formulas": [
@@ -774,25 +771,25 @@
                                     "response_format": "scalar",
                                     "queries": [
                                         {
-                                            "data_source": "logs",
-                                            "name": "query1",
                                             "search": {
                                                 "query": "source:boundary @http.url_details.path:*authorize-session @duration:*"
                                             },
-                                            "indexes": [
-                                                "*"
-                                            ],
+                                            "data_source": "logs",
                                             "compute": {
                                                 "aggregation": "count"
                                             },
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
                                             "group_by": [
                                                 {
                                                     "facet": "@http.status_code",
-                                                    "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
                                                         "order": "desc"
-                                                    }
+                                                    },
+                                                    "limit": 10
                                                 }
                                             ]
                                         }
@@ -1095,7 +1092,6 @@
                             "title": "Targets Accessed",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "query_table",
                             "requests": [
                                 {
@@ -1103,36 +1099,36 @@
                                         {
                                             "alias": "Times Accessed",
                                             "conditional_formats": [],
-                                            "cell_display_mode": "bar",
-                                            "formula": "query1",
                                             "limit": {
                                                 "count": 10,
                                                 "order": "desc"
-                                            }
+                                            },
+                                            "cell_display_mode": "bar",
+                                            "formula": "query1"
                                         }
                                     ],
                                     "response_format": "scalar",
                                     "queries": [
                                         {
-                                            "data_source": "logs",
-                                            "name": "query1",
                                             "search": {
                                                 "query": "source:boundary @http.url_details.path:*authorize-session @http.status_code:200"
                                             },
-                                            "indexes": [
-                                                "*"
-                                            ],
+                                            "data_source": "logs",
                                             "compute": {
                                                 "aggregation": "count"
                                             },
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
                                             "group_by": [
                                                 {
                                                     "facet": "@data.response.details.item.target_id",
-                                                    "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
                                                         "order": "desc"
-                                                    }
+                                                    },
+                                                    "limit": 10
                                                 }
                                             ]
                                         }
