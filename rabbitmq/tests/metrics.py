@@ -39,6 +39,7 @@ if RABBITMQ_VERSION == version.parse('3.5'):
 
 Q_METRICS = [
     'rabbitmq.queue.consumers',
+    'rabbitmq.queue.consumer_utilisation',
     'rabbitmq.queue.bindings.count',
     'rabbitmq.queue.memory',
     'rabbitmq.queue.messages',
