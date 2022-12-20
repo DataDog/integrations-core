@@ -96,10 +96,10 @@ class ArgocdCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         for endpoint in endpoints:
             if endpoint == "app_controller_endpoint":
                 self.scrapers[self.instance[endpoint]].metric_transformer.add_custom_transformer(
-                    ("argocd_cluster_connection_status"),
+                    "argocd_cluster_connection_status",
                     self.configure_transformer_argocd_cluster_connection_status("cluster.connection.status"),
                 )
             self.scrapers[self.instance[endpoint]].metric_transformer.add_custom_transformer(
-                ("go_memstats_alloc_bytes"),
+                "go_memstats_alloc_bytes",
                 self.configure_transformer_go_memstats_alloc_bytes("go.memstats.alloc_bytes"),
             )
