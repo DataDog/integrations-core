@@ -100,8 +100,6 @@ EXCHANGE_MESSAGE_STATS = {
     'publish_in_details': {'rate': 1.0},
     'publish_out': 1.0,
     'publish_out_details': {'rate': 1.0},
-    'drop_unroutable': 1.0,
-    'drop_unroutable_details': {'rate': 1.0},
     'return_unroutable': 1.0,
     'return_unroutable_details': {'rate': 1.0},
     'redeliver': 1.0,

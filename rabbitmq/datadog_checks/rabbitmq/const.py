@@ -28,8 +28,6 @@ EXCHANGE_ATTRIBUTES = [
     ('message_stats/publish_in_details/rate', 'messages.publish_in.rate', float),
     ('message_stats/publish_out', 'messages.publish_out.count', float),
     ('message_stats/publish_out_details/rate', 'messages.publish_out.rate', float),
-    ('message_stats/drop_unroutable', 'messages.drop_unroutable.count', float),
-    ('message_stats/drop_unroutable_details/rate', 'messages.drop_unroutable.rate', float),
     ('message_stats/return_unroutable', 'messages.return_unroutable.count', float),
     ('message_stats/return_unroutable_details/rate', 'messages.return_unroutable.rate', float),
     ('message_stats/redeliver', 'messages.redeliver.count', float),

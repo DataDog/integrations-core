@@ -17,8 +17,6 @@ rabbitmq.exchange.messages.deliver_get.count,gauge,,message,,"Sum of messages in
 rabbitmq.exchange.messages.deliver_get.rate,gauge,,message,,"Rate per second of the sum of exchange messages delivered in acknowledgement mode to consumers, in no-acknowledgement mode to consumers, in acknowledgement mode in response to basic.get, and in no-acknowledgement mode in response to basic.get",0,rabbitmq,xchng msgs dlv get rate,
 rabbitmq.exchange.messages.redeliver.count,gauge,,message,,Count of subset of messages in exchanges in deliver_get which had the redelivered flag set,0,rabbitmq,xchng msgs redlv,
 rabbitmq.exchange.messages.redeliver.rate,gauge,,message,,Rate of subset of messages in exchanges in deliver_get which had the redelivered flag set per second ,0,rabbitmq,xchng msgs redlv rate,
-rabbitmq.exchange.messages.drop_unroutable.count,gauge,,message,,Count of messages in exchanges dropped as unroutable,0,rabbitmq,xchng msgs drop unroutable,
-rabbitmq.exchange.messages.drop_unroutable.rate,gauge,,message,,Rate of messages in exchanges dropped as unroutable per second,0,rabbitmq,xchng msgs drop unroutable rate,
 rabbitmq.exchange.messages.return_unroutable.count,gauge,,message,,Count of messages in exchanges returned to publisher as unroutable,0,rabbitmq,xchng msgs ret unroutable,
 rabbitmq.exchange.messages.return_unroutable.rate,gauge,,message,,Rate of messages in exchanges returned to publisher as unroutable per second,0,rabbitmq,xchng msgs ret unroutable rate,
 rabbitmq.exchange.messages.publish.count,gauge,,message,,Count of messages in exchanges published,0,rabbitmq,xchng msgs pub,
