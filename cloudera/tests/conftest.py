@@ -25,10 +25,7 @@ def dd_environment():
     conditions = [
         CheckDockerLogs(identifier='cloudera', patterns=['server running']),
     ]
-    with docker_run(
-        compose_file,
-        conditions=conditions,
-    ):
+    with docker_run(compose_file, conditions=conditions):
         yield common.INSTANCE
 
 
