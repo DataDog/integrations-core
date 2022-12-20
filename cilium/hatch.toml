@@ -2,12 +2,11 @@
 
 [[envs.default.matrix]]
 python = ["27", "38"]
-legacy = ["true"]
+impl = ["legacy"]
 version = ["1.9"]
 
 [[envs.default.matrix]]
 python = ["38"]
-legacy = ["false"]
 version = ["1.9", "1.10", "1.11"]
 
 [envs.default.env-vars]
@@ -19,5 +18,7 @@ matrix.version.env-vars = [
   { key = "CILIUM_VERSION", value = "1.10.6", if = ["1.10"] },
   { key = "CILIUM_VERSION", value = "1.11.0", if = ["1.11"] },
 ]
-matrix.legacy.env-vars = "CILIUM_LEGACY"
-matrix.legacy.e2e-env = { value = false, if = ["true"] }
+matrix.impl.env-vars = [
+  { key = "CILIUM_LEGACY", if = ["legacy"] },
+]
+matrix.impl.e2e-env = { value = false, if = ["legacy"] }
