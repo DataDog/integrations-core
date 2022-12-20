@@ -39,7 +39,6 @@ if RABBITMQ_VERSION == version.parse('3.5'):
 
 Q_METRICS = [
     'rabbitmq.queue.consumers',
-    'rabbitmq.queue.consumer_utilisation',
     'rabbitmq.queue.bindings.count',
     'rabbitmq.queue.memory',
     'rabbitmq.queue.messages',
@@ -56,6 +55,10 @@ Q_METRICS = [
 # Present from 3.6
 if RABBITMQ_VERSION >= version.parse('3.6'):
     Q_METRICS.extend(['rabbitmq.queue.head_message_timestamp'])
+
+# Present from 3.8
+if RABBITMQ_VERSION >= version.parse('3.8'):
+    Q_METRICS.extend(['rabbitmq.queue.consumer_utilisation'])
 
 OVERVIEW_METRICS_TOTALS = [
     'rabbitmq.overview.object_totals.connections',
