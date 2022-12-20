@@ -220,7 +220,7 @@ Configure one or more filters for the event log. A filter allows you to choose w
       log_processing_rules:
       - type: include_at_match
         name: relevant_security_events
-        pattern: '"EventID":"(1102|4624|4625|4634|4648|4728|4732|4735|4737|4740|4755|4756)"'
+        pattern: '"EventID":(?:{"value":)?"(1102|4624|4625|4634|4648|4728|4732|4735|4737|4740|4755|4756)"'
 
     - type: windows_event
       channel_path: Security
@@ -229,7 +229,7 @@ Configure one or more filters for the event log. A filter allows you to choose w
       log_processing_rules:
       - type: exclude_at_match
         name: relevant_security_events
-        pattern: '"EventID":"(1102|4624)"'
+        pattern: '"EventID":(?:{"value":)?"(1102|4624)"'
 
     - type: windows_event
       channel_path: System
@@ -261,7 +261,7 @@ Configure one or more filters for the event log. A filter allows you to choose w
       log_processing_rules:
         - type: include_at_match
           name: include_x01
-          pattern: '"EventID":"(101|201|301)"'
+          pattern: '"EventID":(?:{"value":)?"(101|201|301)"'
   ```
 
   **Note**: The pattern may vary based on the format of the logs. The [Agent `stream-logs` subcommand][15] can be used to view this format.
