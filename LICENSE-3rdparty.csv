@@ -4,12 +4,12 @@ JayDeBeApi,PyPI,LGPL-3.0-only,"Bastian Bowe | Copyright (C) 2007 Free Software F
 PyJWT,PyPI,MIT,Copyright (c) 2015-2022 José Padilla | Jose Padilla
 PyMySQL,PyPI,MIT,"Copyright (c) 2010, 2013 PyMySQL contributors | yutaka.matsubara"
 PySocks,PyPI,BSD-3-Clause,Anorov | Copyright 2006 Dan-Haim. All rights reserved
-PyYAML,PyPI,MIT,Kirill Simonov
-Pyro4,PyPI,MIT,Irmen de Jong
-adodbapi,PyPI,LGPL-2.1-only,"Henrik Ekelund, Vernon Cole, et.al."
-aerospike,PyPI,Apache-2.0,"Aerospike, Inc."
+PyYAML,PyPI,MIT,Copyright (c) 2017-2021 Ingy döt Net | Kirill Simonov
+Pyro4,PyPI,MIT,Copyright (c) 2016 Irmen de Jong | Irmen de Jong
+adodbapi,PyPI,LGPL-2.1-only,"Copyright (C) 2002 Henrik Ekelund, version 2.1 by Vernon Cole | Henrik Ekelund, Vernon Cole, et.al."
+aerospike,PyPI,Apache-2.0,"Aerospike, Inc. | Copyright 2013-2021 Aerospike, Inc"
 aws-requests-auth,PyPI,BSD-3-Clause,Copyright (c) David Muller | David Muller
-beautifulsoup4,PyPI,MIT,Leonard Richardson
+beautifulsoup4,PyPI,MIT,Copyright (c) 2004-2022 Leonard Richardson | Leonard Richardson
 binary,PyPI,Apache-2.0,Copyright 2018 Ofek Lev | Ofek Lev
 binary,PyPI,MIT,Copyright 2018 Ofek Lev | Ofek Lev
 boto,PyPI,MIT,Mitch Garnaat
@@ -28,7 +28,7 @@ enum34,PyPI,BSD-3-Clause,Ethan Furman
 flup,Vendor,BSD-3-Clause,Allan Saddi
 flup-py3,Vendor,BSD-3-Clause,Allan Saddi
 foundationdb,PyPI,Apache-2.0,FoundationDB
-futures,PyPI,PSF,Brian Quinlan
+futures,PyPI,PSF,Brian Quinlan | Copyright 2009 Brian Quinlan. All Rights Reserved
 gearman,PyPI,Apache-2.0,Copyright 2010 Yelp <python-gearman@yelp.com> | Matthew Tai
 gssapi,PyPI,ISC,"Copyright (c) 2014, The Python GSSAPI Team | The Python GSSAPI Team"
 immutables,PyPI,Apache-2.0,Copyright 2018-present Contributors to the immutables project | MagicStack Inc

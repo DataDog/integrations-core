@@ -5,6 +5,7 @@ import asyncio
 import os
 import re
 from collections import defaultdict
+from copy import deepcopy
 
 import click
 import orjson
@@ -27,6 +28,7 @@ COPYRIGHT_LOCATIONS = [
     'LICENSE.md',
     'LICENSE.txt',
     'License.txt',
+    'license.txt',
     'COPYING',
     'NOTICE',
     'README',
@@ -53,14 +55,10 @@ COPYRIGHT_RE = re.compile(r'^(?!i\.e\.,.*$)(Copyright\s+(?:©|\(c\)\s+)?(?:(?:[0
 # These match at the beginning of the copyright (the result of COPYRIGHT_RE).
 COPYRIGHT_IGNORE_RES = [
     re.compile(r'copyright(:? and license)?$', re.I),
-    re.compile(r'copyright (:?holder|owner|notice|license|statement)', re.I),
+    re.compile(r'copyright (:?holder|owner|notice|license|statement|law|on the Program|and Related)', re.I),
     re.compile(r'Copyright & License -'),
     re.compile(r'copyright .yyyy. .name of copyright owner.', re.I),
     re.compile(r'copyright .yyyy. .name of copyright owner.', re.I),
-    re.compile(r'Copyright and Related(:? or neighboring)? Rights', re.I),
-    re.compile(r'copyright on the Program', re.I),
-    re.compile(r'copyright law', re.I),
-    re.compile(r'copyright notice', re.I),
 ]
 
 # Match for various suffixes that need not be included
@@ -163,10 +161,17 @@ CLASSIFIER_TO_HIGHEST_SPDX = {
 
 EXTRA_LICENSES = {'BSD-2-Clause'}
 
+
+EXPLICIT_CP_ATTR_PATHS = {
+    'adodbapi': 'https://raw.githubusercontent.com/mhammond/pywin32/main/adodbapi/__init__.py',
+    'aerospike': 'https://raw.githubusercontent.com/aerospike/aerospike-client-python/master/setup.py',
+    'beautifulsoup4': 'https://bazaar.launchpad.net/~leonardr/beautifulsoup/bs4/download/head:/LICENSE',
+    'futures': 'https://raw.githubusercontent.com/agronholm/pythonfutures/master/concurrent/futures/__init__.py'
+}
+
 PACKAGE_REPO_OVERRIDES = {
-    'pyyaml': 'https://github.com/yaml/pyyaml',
-    'pyro4': 'https://github.com/irmen/Pyro4',
-    'aerospike': 'https://github.com/aerospike/aerospike-client-python',
+    'PyYAML': 'https://github.com/yaml/pyyaml',
+    'Pyro4': 'https://github.com/irmen/Pyro4',
     'check-postgres': 'https://github.com/bucardo/check_postgres',
     'contextlib2': 'https://github.com/jazzband/contextlib2',
     'dnspython': 'https://github.com/rthalley/dnspython',
@@ -261,43 +266,64 @@ async def scrape_license_data(urls, ctx):
 
             repo_url = home_page if home_page.__contains__('github.com/') else PACKAGE_REPO_OVERRIDES.get(package_name)
 
-            if repo_url:
-                cp = scrape_copyright_data(repo_url, ctx)
+            if repo_url or package_name in EXPLICIT_CP_ATTR_PATHS:
+                cp = scrape_copyright_data(package_name, repo_url, ctx)
                 if cp:
                     data['copyright'].add(cp)
     return package_data
 
 
-def scrape_copyright_data(url, ctx):
+def find_license_file(url, ctx):
     if url.endswith('/'):
         url = url[:-1]
     owner_repo = re.sub(r'.*github.com/', '', url)
     repo_api_url = f'https://api.github.com/repos/{owner_repo}'
     repo_res = requests.get(repo_api_url, auth=get_auth_info(ctx.obj)).json()
     def_branch = repo_res.get('default_branch')
+    path = f'https://raw.githubusercontent.com/{owner_repo}/{def_branch}'
+    return path
 
-    for loc in COPYRIGHT_LOCATIONS:
-        path = f'https://raw.githubusercontent.com/{owner_repo}/{def_branch}/{loc}'
-        res = requests.get(path)
+
+def scrape_copyright_data(package_name, url_path, ctx):
+    if package_name in EXPLICIT_CP_ATTR_PATHS:
+        res = requests.get(EXPLICIT_CP_ATTR_PATHS.get(package_name))
         if res:
-            text = res.text
-            for line in text.split('\n'):
-                line = line.strip()
-                m = COPYRIGHT_RE.search(line)
-                if not m:
-                    continue
-                cpy = m.group(0)
-                # ignore a few spurious matches from license boilerplate
-                if any(ign.match(cpy) for ign in COPYRIGHT_IGNORE_RES):
-                    continue
+            cp = find_cpy(res.text)
+            if cp:
+                return cp
+    else:
+        license_path = find_license_file(url_path, ctx)
+        path = deepcopy(license_path)
+        for loc in COPYRIGHT_LOCATIONS:
+            if path.__contains__('raw.githubusercontent.com'):
+                path = f'{license_path}/{loc}'
+            res = requests.get(path)
+            if res:
+                cp = find_cpy(res.text)
+                if cp:
+                    return cp
+    return None
 
-                # strip some suffixes
-                for suff_re in STRIP_SUFFIXES_RE:
-                    cpy = suff_re.sub('', cpy)
 
-                cpy = cpy.strip().rstrip('.')
-                if cpy:
-                    return cpy
+def find_cpy(text):
+    for line in text.split('\n'):
+        line = re.sub(r'.*#', '', line)
+        line = line.strip()
+        m = COPYRIGHT_RE.search(line)
+        if not m:
+            continue
+        cpy = m.group(0)
+        # ignore a few spurious matches from license boilerplate
+        if any(ign.match(cpy) for ign in COPYRIGHT_IGNORE_RES):
+            continue
+
+        # strip some suffixes
+        for suff_re in STRIP_SUFFIXES_RE:
+            cpy = suff_re.sub('', cpy)
+
+        cpy = cpy.strip().rstrip('.')
+        if cpy:
+            return cpy
 
 
 def validate_extra_licenses():
