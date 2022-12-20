@@ -15,12 +15,12 @@ class ApiClientV7(ApiClient):
         super(ApiClientV7, self).__init__(check, api_client)
 
     def collect_data(self):
-        self._collect_clusters()
-
-    def _collect_clusters(self):
         clusters_resource_api = cm_client.ClustersResourceApi(self._api_client)
         read_clusters_response = clusters_resource_api.read_clusters(cluster_type='any', view='full')
         self._log.debug("Cloudera full clusters response:\n%s", read_clusters_response)
+
+        # Use len(read_clusters_response.items) * 3 workers since
+        # for each cluster, we are executing 3 tasks in parallel.
         with ThreadPoolExecutor(max_workers=len(read_clusters_response.items) * 3) as executor:
             for cluster in read_clusters_response.items:
                 cluster_name = cluster.name
@@ -35,8 +35,7 @@ class ApiClientV7(ApiClient):
     def _collect_cluster_tags(cluster, custom_tags):
         cluster_tags = [f"{cluster_tag.name}:{cluster_tag.value}" for cluster_tag in cluster.tags]
 
-        for custom_tag in custom_tags:
-            cluster_tags.append(custom_tag)
+        cluster_tags.extend(custom_tags)
 
         return cluster_tags
 
@@ -44,7 +43,7 @@ class ApiClientV7(ApiClient):
         cluster_entity_status = ENTITY_STATUS[cluster.entity_status]
         message = cluster.entity_status if cluster_entity_status != AgentCheck.OK else None
         self._check.service_check(
-            CLUSTER_HEALTH, cluster_entity_status, tags=tags + [f'cloudera_cluster:{cluster.name}'], message=message
+            CLUSTER_HEALTH, cluster_entity_status, tags=[f'cloudera_cluster:{cluster.name}', *tags], message=message
         )
 
     def _collect_cluster_metrics(self, cluster_name, tags):
@@ -56,6 +55,9 @@ class ApiClientV7(ApiClient):
         clusters_resource_api = cm_client.ClustersResourceApi(self._api_client)
         list_hosts_response = clusters_resource_api.list_hosts(cluster_name, view='full')
         self._log.debug("Cloudera full hosts response:\n%s", list_hosts_response)
+
+        # Use len(list_hosts_response.items) * 4 workers since
+        # for each host, we are executing 4 tasks in parallel.
         with ThreadPoolExecutor(max_workers=len(list_hosts_response.items) * 4) as executor:
             for host in list_hosts_response.items:
                 tags = self._collect_host_tags(host, self._check.config.tags)
@@ -77,8 +79,7 @@ class ApiClientV7(ApiClient):
             for host_tag in host_tags:
                 tags.append(f"{host_tag.name}:{host_tag.value}")
 
-        for custom_tag in custom_tags:
-            tags.append(custom_tag)
+        tags.extend(custom_tags)
 
         return tags
 
@@ -88,6 +89,7 @@ class ApiClientV7(ApiClient):
         self._check.service_check(HOST_HEALTH, host_entity_status, tags=tags)
 
     def _collect_host_metrics(self, host, tags):
+        # Use 2 workers since we are executing 2 tasks in parallel.
         with ThreadPoolExecutor(max_workers=2) as executor:
             executor.submit(self._collect_host_native_metrics, host, tags)
             executor.submit(self._collect_host_timeseries_metrics, host, tags)
@@ -125,5 +127,5 @@ class ApiClientV7(ApiClient):
                 for d in ts.data:
                     value = d.value
                     self._check.gauge(
-                        full_metric_name, value, tags=tags + [f'cloudera_{category_name}:{ts.metadata.entity_name}']
+                        full_metric_name, value, tags=[f'cloudera_{category_name}:{ts.metadata.entity_name}', *tags]
                     )

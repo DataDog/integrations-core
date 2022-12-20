@@ -1,6 +1,6 @@
 import cm_client
-import cm_client.rest
-import packaging.version
+from cm_client.rest import RESTClientObject
+from packaging.version import parse
 
 from datadog_checks.base import ConfigurationError
 from datadog_checks.cloudera.api_client_v7 import ApiClientV7
@@ -10,7 +10,7 @@ def make_api_client(check, config):
     cm_client.configuration.username = config.workload_username
     cm_client.configuration.password = config.workload_password
     api_client = cm_client.ApiClient(config.api_url)
-    api_client.rest_client = cm_client.rest.RESTClientObject(maxsize=(config.max_parallel_requests))
+    api_client.rest_client = RESTClientObject(maxsize=(config.max_parallel_requests))
     check.log.debug('Getting version from cloudera API URL: %s', config.api_url)
     cloudera_manager_resource_api = cm_client.ClouderaManagerResourceApi(api_client)
     try:
@@ -24,7 +24,7 @@ def make_api_client(check, config):
     check.log.debug('get_version_response: %s', get_version_response)
     response_version = get_version_response.version
     if response_version:
-        cloudera_version = packaging.version.parse(response_version)
+        cloudera_version = parse(response_version)
         check.log.debug('Cloudera Manager Version: %s', cloudera_version)
         if cloudera_version.major == 7:
             version_raw = str(cloudera_version)

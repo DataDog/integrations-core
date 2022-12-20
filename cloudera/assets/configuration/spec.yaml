@@ -7,7 +7,6 @@ files:
     - template: init_config/default
   - template: instances
     options:
-    - template: instances/default
     - name: api_url
       required: true
       description: |
@@ -42,3 +41,4 @@ files:
       value:
         type: integer
         example: 100
+    - template: instances/default

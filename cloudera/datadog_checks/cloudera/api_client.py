@@ -1,7 +1,7 @@
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 
 
-class ApiClient:
+class ApiClient(ABC):
     def __init__(self, check, api_client):
         self._check = check
         self._log = check.log
@@ -9,4 +9,5 @@ class ApiClient:
 
     @abstractmethod
     def collect_data(self):
-        raise NotImplementedError
+        """Collect metrics and service checks via the Cloudera API Client"""
+        pass

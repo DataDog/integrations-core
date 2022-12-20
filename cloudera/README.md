@@ -29,7 +29,7 @@ No additional installation is needed on your server.
 <!-- xxx tab "Host" xxx -->
 
 #### Host
-1. Edit the `cloudera.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Cloudera cluster and host data. See the [sample cloudera.d/conf.yaml][4] for all available configuration options.
+1. Edit the `cloudera.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Cloudera cluster and host data. See the [sample cloudera.d/conf.yaml][4] for all available configuration options. Note that the `api_url` should contain the API version at the end.
 
    ```yaml
    init_config:
@@ -68,7 +68,7 @@ No additional installation is needed on your server.
 
 #### Containerized
 
-For containerized environments, see the [Autodiscovery Integration Templates][3] for guidance on applying the parameters below.
+For containerized environments, see the [Autodiscovery Integration Templates][9] for guidance on applying the parameters below.
 
 | Parameter            | Value                                                                                                            |
 | -------------------- | ---------------------------------------------------------------------------------------------------------------- |
@@ -104,7 +104,7 @@ Need help? Contact [Datadog support][9].
 
 [1]: https://www.cloudera.com/products/cloudera-data-platform.html
 [2]: https://app.datadoghq.com/account/settings#agent
-[3]: https://docs.datadoghq.com/containers/kubernetes/integrations/
+[3]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [4]: https://github.com/DataDog/integrations-core/blob/master/cloudera/datadog_checks/cloudera/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information

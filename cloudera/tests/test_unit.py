@@ -4,7 +4,6 @@
 
 import mock
 import pytest
-import six
 from cm_client.models.api_cluster import ApiCluster
 from cm_client.models.api_cluster_list import ApiClusterList
 from cm_client.models.api_cluster_ref import ApiClusterRef
@@ -14,7 +13,7 @@ from cm_client.models.api_host_list import ApiHostList
 from cm_client.models.api_version_info import ApiVersionInfo
 from cm_client.rest import ApiException
 
-from datadog_checks.base import AgentCheck, ConfigurationError
+from datadog_checks.base import AgentCheck
 from datadog_checks.cloudera.metrics import METRICS
 from datadog_checks.dev.utils import get_metadata_metrics
 
@@ -22,17 +21,6 @@ from .common import CAN_CONNECT_TAGS, CLUSTER_HEALTH_TAGS
 from .conftest import get_timeseries_resource
 
 pytestmark = [pytest.mark.unit]
-
-
-def test_given_cloudera_check_when_py2_then_raises_exception(
-    cloudera_check,
-    instance,
-):
-    with mock.patch.object(six, 'PY2'), pytest.raises(
-        ConfigurationError,
-        match='This version of the integration is only available when using py3',
-    ):
-        cloudera_check(instance)
 
 
 def test_given_cloudera_check_when_get_version_exception_from_cloudera_client_then_emits_critical_service(

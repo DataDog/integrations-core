@@ -1,9 +1,8 @@
 # (C) Datadog, Inc. 2022-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import six
 
-from datadog_checks.base import AgentCheck, ConfigurationError
+from datadog_checks.base import AgentCheck
 
 from .api_client_factory import make_api_client
 from .common import CAN_CONNECT
@@ -14,12 +13,6 @@ class ClouderaCheck(AgentCheck, ConfigMixin):
     __NAMESPACE__ = 'cloudera'
 
     def __init__(self, name, init_config, instances):
-        if six.PY2:
-            raise ConfigurationError(
-                "This version of the integration is only available when using py3. "
-                "Check https://docs.datadoghq.com/agent/guide/agent-v6-python-3 "
-                "for more information."
-            )
         super(ClouderaCheck, self).__init__(name, init_config, instances)
         self.client = None
         self.check_initializations.append(self._create_client)
