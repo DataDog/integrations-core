@@ -20,6 +20,6 @@ matrix.version.env-vars = [
   { key = "CILIUM_VERSION", value = "1.11.0", if = ["1.11"] },
 ]
 matrix.impl.env-vars = [
-  { key = "CILIUM_LEGACY", value = true, if = ["legacy"] },
+  { key = "CILIUM_LEGACY", value = "true", if = ["legacy"] },
 ]
 matrix.impl.e2e-env = { value = false, if = ["legacy"] }
