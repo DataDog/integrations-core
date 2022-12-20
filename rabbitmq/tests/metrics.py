@@ -93,7 +93,9 @@ OVERVIEW_METRICS_MESSAGES = [
 ]
 
 if RABBITMQ_VERSION >= version.parse('3.8'):
-    OVERVIEW_METRICS_MESSAGES.extend([
-        'rabbitmq.overview.messages.drop_unroutable.count',
-        'rabbitmq.overview.messages.drop_unroutable.rate',
-    ])
+    OVERVIEW_METRICS_MESSAGES.extend(
+        [
+            'rabbitmq.overview.messages.drop_unroutable.count',
+            'rabbitmq.overview.messages.drop_unroutable.rate',
+        ]
+    )
