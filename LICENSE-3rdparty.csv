@@ -9,7 +9,7 @@ Pyro4,PyPI,MIT,Irmen de Jong
 adodbapi,PyPI,LGPL-2.1-only,"Henrik Ekelund, Vernon Cole, et.al."
 aerospike,PyPI,Apache-2.0,"Aerospike, Inc."
 aws-requests-auth,PyPI,BSD-3-Clause,Copyright (c) David Muller | David Muller
-beautifulsoup4,PyPI,MIT,Copyright (c) David Muller | Leonard Richardson
+beautifulsoup4,PyPI,MIT,Leonard Richardson
 binary,PyPI,Apache-2.0,Copyright 2018 Ofek Lev | Ofek Lev
 binary,PyPI,MIT,Copyright 2018 Ofek Lev | Ofek Lev
 boto,PyPI,MIT,Mitch Garnaat
@@ -19,21 +19,21 @@ cachetools,PyPI,MIT,Copyright (c) 2014-2022 Thomas Kemmer | Thomas Kemmer
 check-postgres,"https://github.com/bucardo/",BSD-2-Clause,Greg Sabino Mullane
 clickhouse-cityhash,PyPI,MIT,"Alexander [Amper] Marshalov | Copyright (c) 2011, Alexander Marshalov <alone.amper@gmail.com>,"
 clickhouse-driver,PyPI,MIT,Copyright (c) 2017 by Konstantin Lebedev | Konstantin Lebedev
-contextlib2,PyPI,PSF,"Copyright (c) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, | Nick Coghlan"
+contextlib2,PyPI,PSF,Nick Coghlan
 cryptography,PyPI,Apache-2.0,Copyright (c) Individual contributors | The Python Cryptographic Authority and individual contributors | The cryptography developers
 cryptography,PyPI,BSD-3-Clause,Copyright (c) Individual contributors | The Python Cryptographic Authority and individual contributors | The cryptography developers
 ddtrace,PyPI,BSD-3-Clause,"Copyright 2016-Present Datadog, Inc | Datadog, Inc."
 dnspython,PyPI,ISC,Bob Halley | Copyright (C) Dnspython Contributors
-enum34,PyPI,BSD-3-Clause,Copyright (C) Dnspython Contributors | Ethan Furman
+enum34,PyPI,BSD-3-Clause,Ethan Furman
 flup,Vendor,BSD-3-Clause,Allan Saddi
 flup-py3,Vendor,BSD-3-Clause,Allan Saddi
 foundationdb,PyPI,Apache-2.0,FoundationDB
-futures,PyPI,PSF,Brian Quinlan | Copyright (c)
+futures,PyPI,PSF,Brian Quinlan
 gearman,PyPI,Apache-2.0,Copyright 2010 Yelp <python-gearman@yelp.com> | Matthew Tai
 gssapi,PyPI,ISC,"Copyright (c) 2014, The Python GSSAPI Team | The Python GSSAPI Team"
 immutables,PyPI,Apache-2.0,Copyright 2018-present Contributors to the immutables project | MagicStack Inc
 in-toto,PyPI,Apache-2.0,Copyright 2018 New York University | New York University: Secure Systems Lab
-ipaddress,PyPI,PSF,"Copyright (c) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, | Philipp Hagemeister"
+ipaddress,PyPI,PSF,Philipp Hagemeister
 jellyfish,PyPI,BSD-3-Clause,"Copyright (c) 2015, James Turk"
 kafka-python,PyPI,Apache-2.0,Copyright 2015 David Arthur | Dana Powers
 kazoo,PyPI,Apache-2.0,Kazoo team
@@ -42,18 +42,18 @@ kubernetes,PyPI,Apache-2.0,Copyright 2014 The Kubernetes Authors | Kubernetes
 ldap3,PyPI,LGPL-3.0-only,"Copyright (C) 2007 Free Software Foundation, Inc. <http://fsf.org/> | Giovanni Cannata"
 lxml,PyPI,BSD-3-Clause,Copyright (c) 2004 Infrae. All rights reserved | lxml dev team
 lz4,PyPI,BSD-3-Clause,"Copyright (c) 2012-2013, Steeve Morin | Jonathan Underwood"
-mmh3,PyPI,CC0-1.0,"Copyright (c) 2012-2013, Steeve Morin | Hajime Senuma"
+mmh3,PyPI,CC0-1.0,Hajime Senuma
 oauthlib,PyPI,BSD-3-Clause,Copyright (c) 2019 The OAuthlib Community | The OAuthlib Community
-openstacksdk,PyPI,Apache-2.0,Copyright (c) 2019 The OAuthlib Community | OpenStack
+openstacksdk,PyPI,Apache-2.0,OpenStack
 oracledb,PyPI,Apache-2.0,"Anthony Tuininga | Copyright (c) 2016, 2022 Oracle and/or its affiliates"
 oracledb,PyPI,UPL,"Anthony Tuininga | Copyright (c) 2016, 2022 Oracle and/or its affiliates"
-orjson,PyPI,Apache-2.0,"copyright 2018 - 2022, licensed | ijl <ijl@mailbox.org>"
-orjson,PyPI,MIT,"copyright 2018 - 2022, licensed | ijl <ijl@mailbox.org>"
+orjson,PyPI,Apache-2.0,ijl <ijl@mailbox.org>
+orjson,PyPI,MIT,ijl <ijl@mailbox.org>
 packaging,PyPI,Apache-2.0,Copyright (c) Donald Stufft and individual contributors | Donald Stufft <donald@stufft.io> | Donald Stufft and individual contributors
 packaging,PyPI,BSD-2-Clause,Copyright (c) Donald Stufft and individual contributors | Donald Stufft <donald@stufft.io> | Donald Stufft and individual contributors
 packaging,PyPI,BSD-3-Clause,Copyright (c) Donald Stufft and individual contributors | Donald Stufft <donald@stufft.io> | Donald Stufft and individual contributors
 paramiko,PyPI,LGPL-2.1-only,"Copyright (C) 1991, 1999 Free Software Foundation, Inc | Jeff Forcier"
-ply,PyPI,BSD-3-Clause,"Copyright (C) 1991, 1999 Free Software Foundation, Inc | David Beazley"
+ply,PyPI,BSD-3-Clause,David Beazley
 prometheus-client,PyPI,Apache-2.0,Brian Brazil | Copyright 2015 The Prometheus Authors
 protobuf,PyPI,BSD-3-Clause,Copyright 2008 Google Inc.  All rights reserved | protobuf@googlegroups.com
 psutil,PyPI,BSD-3-Clause,"Copyright (c) 2009, Jay Loden, Dave Daeschler, Giampaolo Rodola' | Giampaolo Rodola"
@@ -68,7 +68,7 @@ pymqi,PyPI,PSF,Zato Source s.r.o.
 pyodbc,PyPI,MIT,Michael Kleehammer
 pysmi,PyPI,BSD-3-Clause,"Copyright (c) 2015-2020, [Ilya Etingof](mailto:etingof@gmail.com) | Ilya Etingof"
 pysnmp,PyPI,BSD-3-Clause,"Copyright (c) 2005-2019, [Ilya Etingof](mailto:etingof@gmail.com). All rights reserved | Ilya Etingof"
-pysnmp-mibs,PyPI,BSD-3-Clause,"Copyright (c) 2015-2020, [Ilya Etingof](mailto:etingof@gmail.com) | Ilya Etingof <ilya@glas.net>"
+pysnmp-mibs,PyPI,BSD-3-Clause,Ilya Etingof <ilya@glas.net>
 python-binary-memcached,PyPI,MIT,Copyright (c) 2011 Jayson Reis <santosdosreis@gmail.com> | Jayson Reis
 python-dateutil,PyPI,Apache-2.0,Copyright 2017- Paul Ganssle <paul@ganssle.io> | Gustavo Niemeyer
 python-dateutil,PyPI,BSD-3-Clause,Copyright 2017- Paul Ganssle <paul@ganssle.io> | Gustavo Niemeyer
@@ -86,7 +86,7 @@ requests_ntlm,PyPI,ISC,Ben Toews | Copyright (c) 2013 Ben Toews
 rethinkdb,PyPI,Apache-2.0,RethinkDB.
 scandir,PyPI,BSD-3-Clause,"Ben Hoyt | Copyright (c) 2012, Ben Hoyt"
 securesystemslib,PyPI,MIT,Copyright (c) 2016 Santiago Torres | https://www.updateframework.com
-selectors34,PyPI,PSF,"Berker Peksag | Copyright (c) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010,"
+selectors34,PyPI,PSF,"Berker Peksag | Copyright (c) 1991 - 1995, Stichting Mathematisch Centrum Amsterdam,"
 semver,PyPI,BSD-3-Clause,"Copyright (c) 2013, Konstantine Rybnikov | Kostiantyn Rybnikov"
 serpent,PyPI,MIT,Copyright (c) by Irmen de Jong | Irmen de Jong
 service-identity,PyPI,MIT,Copyright (c) 2014 Hynek Schlawack | Hynek Schlawack
@@ -94,10 +94,10 @@ simplejson,PyPI,AFL-3.0,Bob Ippolito | Copyright (c) 2006 Bob Ippolito
 simplejson,PyPI,MIT,Bob Ippolito | Copyright (c) 2006 Bob Ippolito
 six,PyPI,MIT,Benjamin Peterson | Copyright (c) 2010-2020 Benjamin Peterson
 snowflake-connector-python,PyPI,Apache-2.0,"Copyright (c) 2013-2019 Snowflake Computing, Inc | Snowflake, Inc"
-supervisor,PyPI,BSD-3-Clause-Modification,Chris McDonough | Copyright (c) 2006-2015 Agendaless Consulting and Contributors
+supervisor,PyPI,BSD-3-Clause-Modification,Chris McDonough
 tuf,PyPI,Apache-2.0,Copyright (c) 2010 New York University | https://www.updateframework.com
 tuf,PyPI,MIT,Copyright (c) 2010 New York University | https://www.updateframework.com
-typing,PyPI,PSF,"Copyright (c) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, | Guido van Rossum, Jukka Lehtosalo, Łukasz Langa, Ivan Levkivskyi"
+typing,PyPI,PSF,"Copyright (c) 1991 - 1995, Stichting Mathematisch Centrum Amsterdam, | Guido van Rossum, Jukka Lehtosalo, Łukasz Langa, Ivan Levkivskyi"
 uptime,PyPI,BSD-2-Clause,"Copyright (c) 2012, Koen Crolla | Koen Crolla"
 vertica-python,PyPI,Apache-2.0,"Justin Berka, Alex Kim, Siting Ren"
 win-inet-pton,PyPI,Unlicense,Ryan Vennell

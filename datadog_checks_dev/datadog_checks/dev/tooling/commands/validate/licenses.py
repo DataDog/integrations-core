@@ -45,7 +45,7 @@ COPYRIGHT_LOCATIONS = [
 
 
 # General match for anything that looks like a copyright declaration
-COPYRIGHT_RE = re.compile(r'copyright\s+(?:©|\(c\)\s+)?(?:(?:[0-9 ,-]|present)+\s+)?(?:by\s+)?(.*)', re.I)
+COPYRIGHT_RE = re.compile(r'^(?!i\.e\.,.*$)(Copyright\s+(?:©|\(c\)\s+)?(?:(?:[0-9 ,-]|present)+\s+)?(?:by\s+)?(.*))$', re.I)
 
 # Copyright strings to ignore, as they are not owners.  Most of these are from
 # boilerplate license files.
@@ -58,6 +58,9 @@ COPYRIGHT_IGNORE_RES = [
     re.compile(r'copyright .yyyy. .name of copyright owner.', re.I),
     re.compile(r'copyright .yyyy. .name of copyright owner.', re.I),
     re.compile(r'Copyright and Related(:? or neighboring)? Rights', re.I),
+    re.compile(r'copyright on the Program', re.I),
+    re.compile(r'copyright law', re.I),
+    re.compile(r'copyright notice', re.I),
 ]
 
 # Match for various suffixes that need not be included
@@ -163,7 +166,6 @@ EXTRA_LICENSES = {'BSD-2-Clause'}
 PACKAGE_REPO_OVERRIDES = {
     'pyyaml': 'https://github.com/yaml/pyyaml',
     'pyro4': 'https://github.com/irmen/Pyro4',
-    'adodbapi': 'https://github.com/mhammond/pywin32/tree/main/adodbapi',
     'aerospike': 'https://github.com/aerospike/aerospike-client-python',
     'check-postgres': 'https://github.com/bucardo/check_postgres',
     'contextlib2': 'https://github.com/jazzband/contextlib2',
@@ -261,8 +263,8 @@ async def scrape_license_data(urls, ctx):
 
             if repo_url:
                 cp = scrape_copyright_data(repo_url, ctx)
-            if cp:
-                data['copyright'].add(cp)
+                if cp:
+                    data['copyright'].add(cp)
     return package_data
 
 
@@ -280,11 +282,11 @@ def scrape_copyright_data(url, ctx):
         if res:
             text = res.text
             for line in text.split('\n'):
+                line = line.strip()
                 m = COPYRIGHT_RE.search(line)
                 if not m:
                     continue
                 cpy = m.group(0)
-
                 # ignore a few spurious matches from license boilerplate
                 if any(ign.match(cpy) for ign in COPYRIGHT_IGNORE_RES):
                     continue
