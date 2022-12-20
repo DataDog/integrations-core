@@ -14,10 +14,9 @@ from cm_client.models.api_version_info import ApiVersionInfo
 from cm_client.rest import ApiException
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.cloudera.metrics import METRICS
 from datadog_checks.dev.utils import get_metadata_metrics
 
-from .common import CAN_CONNECT_TAGS, CLUSTER_HEALTH_TAGS
+from .common import CAN_CONNECT_TAGS, CLUSTER_HEALTH_TAGS, METRICS
 from .conftest import get_timeseries_resource
 
 pytestmark = [pytest.mark.unit]

@@ -1,5 +1,7 @@
 import os
+from collections import defaultdict
 
+from datadog_checks.cloudera.metrics import NATIVE_METRICS, TIMESERIES_METRICS
 from datadog_checks.dev import get_docker_hostname, get_here
 
 HOST = get_docker_hostname()
@@ -25,3 +27,14 @@ CLUSTER_HEALTH_TAGS = [
     'cloudera_cluster:cod--qfdcinkqrzw',
     'test1',
 ]
+
+
+def merge_dicts(d1, d2):
+    merged_dict = defaultdict(list)
+    for d in (d1, d2):
+        for key, value in d.items():
+            merged_dict[key] += value
+    return merged_dict
+
+
+METRICS = merge_dicts(NATIVE_METRICS, TIMESERIES_METRICS)

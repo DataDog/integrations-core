@@ -1,9 +1,9 @@
 import pytest
 
 from datadog_checks.cloudera import ClouderaCheck
-from datadog_checks.cloudera.metrics import METRICS, TIMESERIES_METRICS
+from datadog_checks.cloudera.metrics import TIMESERIES_METRICS
 
-from .common import CAN_CONNECT_TAGS, CLUSTER_HEALTH_TAGS
+from .common import CAN_CONNECT_TAGS, CLUSTER_HEALTH_TAGS, METRICS
 
 
 @pytest.mark.usefixtures('dd_environment')
