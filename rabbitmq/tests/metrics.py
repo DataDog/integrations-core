@@ -82,10 +82,14 @@ OVERVIEW_METRICS_MESSAGES = [
     'rabbitmq.overview.messages.publish_in.rate',
     'rabbitmq.overview.messages.publish_out.count',
     'rabbitmq.overview.messages.publish_out.rate',
-    'rabbitmq.overview.messages.drop_unroutable.count',
-    'rabbitmq.overview.messages.drop_unroutable.rate',
     'rabbitmq.overview.messages.return_unroutable.count',
     'rabbitmq.overview.messages.return_unroutable.rate',
     'rabbitmq.overview.messages.redeliver.count',
     'rabbitmq.overview.messages.redeliver.rate',
 ]
+
+if RABBITMQ_VERSION >= version.parse('3.8'):
+    OVERVIEW_METRICS_MESSAGES.extend([
+        'rabbitmq.overview.messages.drop_unroutable.count',
+        'rabbitmq.overview.messages.drop_unroutable.rate',
+    ])
