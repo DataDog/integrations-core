@@ -72,6 +72,7 @@ cli = [
     "orjson",
     "packaging",
     "pip-tools",
+    "pathspec>=0.10.0",
     "platformdirs>=2.0.0a3",
     "pyperclip>=1.7.0",
     "pysmi>=0.3.4",

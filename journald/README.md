@@ -99,6 +99,29 @@ logs:
           - sshd.service
 ```
 
+##### Tailing the same journal multiple times
+
+If you want to report units with different source or service tags, these must appear in separate journald configs.
+
+In order to do this you must uniquely identify the journal config with a `config_id` (available in agent `7.41.0`+).
+
+```yaml
+logs:
+    - type: journald
+      config_id: my-app1
+      source: my-app1
+      service: my-app1
+      include_units:
+          - my-app1.service
+
+    - type: journald
+      config_id: my-app2
+      source: my-app2
+      service: my-app2
+      include_units:
+          - my-app2.service
+```
+
 ##### Collect container tags
 
 Tags are critical for finding information in highly dynamic containerized environments, which is why the Agent can collect container tags in journald logs.

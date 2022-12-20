@@ -1,5 +1,9 @@
 # CHANGELOG - teamcity
 
+## 3.0.1 / 2022-12-16
+
+* [Fixed] Fix event tagging. See [#13537](https://github.com/DataDog/integrations-core/pull/13537).
+
 ## 3.0.0 / 2022-12-06
 
 * [Changed] Support TeamCity metrics and service checks. See [#12852](https://github.com/DataDog/integrations-core/pull/12852).
