@@ -1,4 +1,5 @@
 [env.collectors.datadog-checks]
+base-package-features = ["deps", "http"]
 
 [[envs.default.matrix]]
 python = ["27", "38"]
