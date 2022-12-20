@@ -154,6 +154,7 @@ def test_emits_ok_service_check_when_alibaba_replicaset_role_configsvr_deploymen
     mock_server_info.assert_called_once()
     mock_list_database_names.assert_called_once()
 
+
 @mock.patch(
     'pymongo.database.Database.command',
     side_effect=[
