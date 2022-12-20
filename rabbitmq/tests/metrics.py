@@ -92,6 +92,7 @@ OVERVIEW_METRICS_MESSAGES = [
     'rabbitmq.overview.messages.redeliver.rate',
 ]
 
+# Present from 3.8
 if RABBITMQ_VERSION >= version.parse('3.8'):
     OVERVIEW_METRICS_MESSAGES.extend(
         [
