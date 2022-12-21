@@ -59,8 +59,25 @@ files:
             type: string
       - name: components
         description: |
-          The components for which metrics should be collected. Each object may override the default
-          options. The following example gathers all default metrics for "some-project",
+          A mapping of components for which metrics should be collected. Each object may override the default
+          options. Each component key may be configured with an optional configuration mapping to filter the metrics 
+          that should be collected.
+          
+          The top-level keys are the names of the desired component objects:
+          
+          components:
+            some-project:
+            another-project:
+              <OPTION_1>: ...
+              <OPTION_2>: ...
+          
+          The available component object options are:
+
+            tag:      Custom tag for the specified component.
+            include:  List of metrics to include for the specified component.
+            exclude:  List of metrics to exclude for the specified component.
+          
+          The following example gathers all default metrics for "some-project",
           and only what is included/excluded for "another-project":
 
             components:
@@ -73,32 +90,14 @@ files:
                   - security.
                 exclude:
                   - issues.(false_positive_issues|reopened_issues)
-
-          Note: This is required for all project checks, whether `is_jmx` is set to `true`
-          or `false.
-        options:
-          - name: tag
-            description: |
-              Custom tag for the specified component.
-            value:
-              type: string
-          - name: include
-            description: |
-              List of metrics to include for the specified component.
-            value:
-              type: array
-              items:
-                type: string
-          - name: exclude
-            description: |
-              List of metrics to exclude for the specified component.
-            value:
-              type: array
-              items:
-                type: string
+        value:
+          type: object
+          additionalProperties: true
       - name: components_discovery
         description: |
-          The autodiscovery patterns for components.
+          A mapping of components autodiscovery patterns for which metrics should be collected. Each included key may 
+          be configured with an optional `include` object to filter the metrics that should be collected.  
+          
           The following example collects all defect metrics for those components with names starting with "my_project"
           and only the metrics from the "issues" category for projects starting with "issue".
           It also excludes projects starting with "temp" from autodiscovery.
@@ -116,26 +115,31 @@ files:
         options:
           - name: limit
             description: |
-              Maximum number of components to be 'autodiscovered'
+              Maximum number of components to be 'autodiscovered'.
             value:
               type: integer
               example: 10
           - name: include
             description: |
-              Mapping of regular expressions keys and component config values that will be 'autodiscovered'
+              Mapping of regular expressions keys and component config values that will be 'autodiscovered'.
+              
+              The top-level keys are the regular expressions patterns for the desired component names. 
+
+              include:
+                my_project*:
+                  <OPTION_1>: ...
+                issue*:
+                  <OPTION_1>: ...
+                  <OPTION_2>: ...
+
+              The available include component object options are:
+
+                tag:      Custom tag for the matching components.
+                include:  List of metrics regular expressions patterns to include from the matching components.
+                exclude:  List of metrics regular expressions patterns to exclude from the matching components.
             value:
               type: object
-            properties:
-            - name: tag
-              type: string
-            - name: include
-              type: array
-              items:
-                type: string
-            - name: exclude
-              type: array
-              items:
-                type: string
+              additionalProperties: true
           - name: exclude
             description: |
               List of regular expressions with the patterns of components that will not be 'autodiscovered'

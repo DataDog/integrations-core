@@ -70,6 +70,11 @@ def web_instance_with_autodiscovery_include_all_and_limit():
 
 
 @pytest.fixture
+def web_instance_with_autodiscovery_config_none():
+    return deepcopy(common.WEB_INSTANCE_WITH_AUTODISCOVERY_CONFIG_NONE)
+
+
+@pytest.fixture
 def web_instance_with_component_and_autodiscovery():
     return deepcopy(common.WEB_INSTANCE_WITH_COMPONENT_AND_AUTODISCOVERY)
 
