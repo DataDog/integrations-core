@@ -13,59 +13,126 @@ aliases:
 This guide provides instructions for creating a Datadog Agent integration in the `integrations-extras` repository. For more information about why you would want to create an Agent-based integration, see [Creating your own solution][1].
 
 ## Setup
+
 ### Prerequisites
 
 The required Datadog Agent integration development tools include:
 
-- Python v3.8 or later
+- Python v3.8 and [pipx][99]
 - [Docker][2] to run the full test suite
+- [git][100].
+
+#### Install Python
 
 Many operating systems come with a pre-installed version of Python. However, the version of Python installed by default may be older than the version used in the Agent, and may lack some required tools and dependencies. To ensure that you've everything you need to get an integration running, install a dedicated Python interpreter.
 
-There are several options for installing Python, including:
+{{< tabs >}}
 
-- Following the [official Python documentation][3] to download and install the Python interpreter.
-- Using a Python version manager like [pyenv][4].
+{{% tab "MacOS" %}}
+Install Python 3.8 using [Homebrew][1]:
 
-Python v3.3 or later comes with a pre-installed version manager called `venv`, which is used on this page. Debian or Ubuntu installations do not come packaged with `venv`. You can install the `venv` package by running `sudo apt-get install python3-venv`.
+1. Update Homebrew:
+   {{< code-block >}}brew update{{< /code-block >}}
+1. Install Python:
+   {{< code-block >}}brew install python@3.8{{< /code-block >}}
+1. Check the Homebrew installation output and run any additional commands recommended by the installation script.
+1. Verify that the Python binary is installed in your `PATH` and that you've installed the correct version:
+   {{< code-block >}}python --version{{< /code-block >}}
 
-## Prepare your development environment
+[1]: https://brew.sh/
+{{% /tab %}}
 
-Follow these instructions to set up your development environment:
+{{% tab "Windows" %}}
+1. Download the [Python 3.8 64-bit executable installer][1] and run it.
+1. Select the option to add Python to your PATH.
+1. Click **Install Now**.
+1. After the installation has completed, restart your machine.
+1. Verify that the Python binary is installed in your `PATH` and that you've installed the correct version:
+   {{< code-block >}}python --version{{< /code-block >}}
 
-1. Create the `dd` directory and clone the [`integrations-extras` repo][5].
+[1]: https://www.python.org/downloads/release/python-3810/
+{{% /tab %}}
+
+{{% tab "Linux" %}}
+For Linux installations, avoid modifying your system Python. Instead, install Python 3.8 using [pyenv][1] or [miniconda][2].
+
+[1]: https://github.com/pyenv/pyenv#automatic-installer
+[2]: https://conda.io/projects/conda/en/stable/user-guide/install/linux.html
+{{% /tab %}}
+
+{{< /tabs >}}
+
+#### Install pipx
+
+{{< tabs >}}
+
+The `pipx` python package is required the `ddev` command line tools.
+
+{{% tab "MacOS" %}}
+1. Install pipx:
+   {{< code-block >}}brew install pipx{{< /code-block >}}
+1. Check the Homebrew installation output and run any additional commands recommended by the installation script.
+1. Verify that pipx is installed:
+   {{< code-block >}}pipx --version{{< /code-block >}}
+{{% /tab %}}
+
+{{% tab "Windows" %}}
+1. Install pipx:
+   {{< code-block >}}python -m pip install pipx{{< /code-block >}}
+1. Verify that pipx is installed:
+   {{< code-block >}}pipx --version{{< /code-block >}}
+{{% /tab %}}
+
+{{% tab "Linux" %}}
+1. Install pipx:
+   {{< code-block >}}python -m pip install pipx{{< /code-block >}}
+1. Verify that pipx is installed:
+   {{< code-block >}}pipx --version{{< /code-block >}}
+{{< /tabs >}}
+
+## Set up your integrations-extra repo:
+
+Follow these instructions to set up your repo for integration development:
+
+1. Create the `dd` directory:
 
    The Datadog Development Toolkit expects you to work in the `$HOME/dd/` directory. This is not mandatory, but working in a different directory requires additional configuration steps.
 
    To create the `dd` directory and clone the `integrations-extras` repo:
-   ```shell
-   mkdir $HOME/dd && cd $HOME/dd
-   git clone https://github.com/DataDog/integrations-extras.git
-   ```
+   {{< code-block >}}mkdir $HOME/dd && cd $HOME/dd{{< /code-block >}}
 
-1. Optionally, set up a [Python virtual environment][6] to isolate your development environment:
+1. Fork the the [`integrations-extras` repo][5].
 
-   ```shell
-   cd $HOME/dd/integrations-extras
-   python3 -m venv venv
-   . venv/bin/activate
-   ```
+1. Clone your fork into the `dd` directory:
+   {{< code-block >}}git clone git@github.com:&lt;YOUR USERNAME&gt;/integrations-extras.git{{< /code-block >}}
 
-   **Tip**: If you ever need to exit the virtual environment, run `deactivate`.
+## Install the Development Toolkit
 
-1. Ensure the Python `wheel` package is installed and up-to-date:
+{{% tab "MacOS" %}}
 
-   ```shell
-   pip3 install wheel
-   ```
+1. Run the following command and remove any executables shown in the output:
+   {{< code-block >}}which -a ddev{{< /code-block >}}
+1. Make sure there are no virtual environments running:
+   1. Run the following command:
+      {{< code-block >}}echo VIRTUAL_ENV{{< /code-block >}}
+   1. If the command returns output, a virtual environment is running. Run `deactivate` to exit the virtual environment.
+1. Install `ddev`:
+   <div class="alert alert-warning">>Do not run this command with `sudo`.</a></div>
+   {{< code-block >}}pipx install ddev --python /usr/local/opt/python@3.8/bin/python3.8{{< /code-block >}}
+{{% /tab %}}
 
-1. Install the [Developer Toolkit][7]:
+{{% tab "Windows" %}}
+To install `ddev`, run:
+{{< code-block >}}pipx install ddev{{< /code-block >}}
+{{% /tab %}}
 
-   ```bash
-   pip3 install "datadog-checks-dev[cli]"
-   ```
+{{% tab "Linux" %}}
+To install `ddev`, run:
+<div class="alert alert-warning">>Do not run this command with `sudo`.</a></div>
+{{< code-block >}}pipx install ddev{{< /code-block >}}
+{{< /tabs >}}
 
-1. Optionally, if you cloned the `integrations-extras` to somewhere other than `$HOME/dd/`, adjust the configuration file:
+1. Optionally, if your `integrations-extras` repo is somewhere other than `$HOME/dd/`, adjust the `ddev` configuration file:
 
    ```shell
    ddev config set extras "/path/to/integrations-extras"
@@ -462,7 +529,7 @@ sudo datadog-agent integration install -w /path/to/wheel.whl
 
 <details>
   <summary>Agent <code>v6.11</code> or earlier</summary>
-  
+
   ```ps
   & "C:\Program Files\Datadog\Datadog Agent\embedded\agent.exe" integration install -w /path/to/wheel.whl
   ```
@@ -487,7 +554,11 @@ After you've created your Agent-based integration, refer to this list to make su
 - A complete `manifest.json` file.
 - If the integration collects Service Checks, the `service_checks.json` must be complete as well.
 
-After you open a pull request in the `integrations-extras` repository, CI validation tests will run. These tests must be green before your pull request is merged and your integration tile is published.
+Before you open a pull request, run the following command to catch any problems with your integration:
+
+{{< code-block >}}ddev validate all changes{{< /code-block >}}
+
+After you've created your pull request, automatic checks run to verify that your pull request is in good shape and contains all the required content to be updated.
 
 ## Further Reading
 
@@ -501,7 +572,6 @@ Additional helpful documentation, links, and articles:
 [4]: https://github.com/pyenv/pyenv
 [5]: https://github.com/DataDog/integrations-extras
 [6]: https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/
-[7]: https://github.com/DataDog/integrations-core/tree/master/datadog_checks_dev
 [8]: https://docs.datadoghq.com/developers/metrics/agent_metrics_submission/
 [9]: https://github.com/DataDog/datadog-agent/blob/6.2.x/docs/dev/checks/python/check_api.md
 [10]: https://docs.pytest.org/en/latest
@@ -514,3 +584,5 @@ Additional helpful documentation, links, and articles:
 [17]: https://packaging.python.org/en/latest/tutorials/packaging-projects/
 [18]: https://docs.datadoghq.com/agent/
 [19]: https://www.datadoghq.com/blog/programmatically-manage-your-datadog-integrations/
+[99]: https://github.com/pypa/pipx
+[100]: https://git-scm.com/book/en/v2/Getting-Started-Installing-Git
