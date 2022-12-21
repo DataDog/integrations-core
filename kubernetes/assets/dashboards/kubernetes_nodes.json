@@ -1030,7 +1030,7 @@
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "sum:kubernetes_state.container.cpu_requested{{$cluster,$host} by {kube_cluster_name}/sum:kubernetes_state.node.cpu_capacity{$cluster,$host} by {kube_cluster_name}*100",
+                        "q": "sum:kubernetes_state.container.cpu_requested{$cluster,$host} by {kube_cluster_name}/sum:kubernetes_state.node.cpu_capacity{$cluster,$host} by {kube_cluster_name}*100",
                         "display_type": "line",
                         "style": {
                             "palette": "dog_classic",
