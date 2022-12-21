@@ -100,6 +100,37 @@ See [service_checks.json][8] for a list of service checks provided by this integ
 
 ## Troubleshooting
 
+### Collecting metrics of Datadog integrations on Cloudera hosts
+To install the Datadog Agent on a Cloudera host, make sure that the security group associated with the host allows SSH access. 
+Then, you need to use the [root user `cloudbreak`][13] when accessing the host with the SSH key generated during the environment creation:
+
+```
+sudo ssh -i "/path/to/key.pem" cloudbreak@<HOST_IP_ADDRESS>
+```
+
+Note that the workload username and password can be used to access Cloudera hosts via SSH, although only the `cloudbreak` user can install the Datadog Agent. 
+Trying to do so will result in the following error:
+```
+<NON_CLOUDBREAK_USER> is not allowed to run sudo on <CLOUDERA_HOSTNAME>.  This incident will be reported.
+```
+
+If you something similar to the following in the Agent status:
+
+```
+  Config Errors
+  ==============
+    zk
+    --
+      open /etc/datadog-agent/conf.d/zk.d/conf.yaml: permission denied
+```
+
+you will need to change the ownership of the `conf.yaml` to `dd-agent`:
+
+```
+[cloudbreak@<CLOUDERA_HOSTNAME> etc]$ sudo chown -R dd-agent:dd-agent /etc/datadog-agent/conf.d/zk.d/conf.yaml
+```
+
+
 Need help? Contact [Datadog support][9].
 
 
@@ -115,3 +146,4 @@ Need help? Contact [Datadog support][9].
 [10]: https://raw.githubusercontent.com/DataDog/integrations-core/master/cloudera/images/user_management.png
 [11]: https://raw.githubusercontent.com/DataDog/integrations-core/master/cloudera/images/create_machine_user.png
 [12]: https://raw.githubusercontent.com/DataDog/integrations-core/master/cloudera/images/set_workload_password.png
+[13]: https://docs.cloudera.com/data-hub/cloud/access-clusters/topics/mc-accessing-cluster-via-ssh.html
