@@ -265,19 +265,6 @@ instances:
         #
         # collection_interval: 10
 
-        ## @param pg_stat_statements_max_warning_threshold - number - optional - default: 10000
-        ## Set the threshold for a safe value of `pg_stat_statements.max`. If the database is configured with a value
-        ## higher than this threshold, a warning is emitted to recommend lowering the setting value.
-        #
-        # pg_stat_statements_max_warning_threshold: 10000
-
-        ## @param enable_pg_stat_statements_query_text_length_telemetry - boolean - optional - default: false
-        ## Enables distribution metrics for monitoring query text length from pg_stat_statements. 
-        ## This is useful for debugging purposes, but it shouldn't be left enabled because this could 
-        ## degrade the integration's performance.
-        #
-        # enable_pg_stat_statements_query_text_length_telemetry: false
-
     ## Configure collection of query samples
     #
     # query_samples:
