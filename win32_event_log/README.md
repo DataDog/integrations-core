@@ -69,7 +69,8 @@ init_config:
 instances:
   - # WMI - Legacy mode (default)
     legacy_mode: true
-    log_file: Security
+    log_file:
+      - Security
 
   - # Event Log API (better performance)
     path: Security

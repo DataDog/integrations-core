@@ -4,7 +4,7 @@
 
 * [Fixed] Disable socket wakeup when sending requests. See [#13221](https://github.com/DataDog/integrations-core/pull/13221).
 
-## 2.16.1 / 2022-10-28
+## 2.16.1 / 2022-10-28 / Agent 7.41.0
 
 * [Fixed] Update dependencies. See [#13205](https://github.com/DataDog/integrations-core/pull/13205).
 * [Fixed] Fix sensitive client_secret config specification. See [#12983](https://github.com/DataDog/integrations-core/pull/12983).

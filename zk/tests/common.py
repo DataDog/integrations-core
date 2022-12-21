@@ -12,6 +12,20 @@ from .metrics import LATENCY_METRICS, METRICS_34, METRICS_36, METRICS_36_OPTIONA
 
 ZK_VERSION = os.environ['ZK_VERSION']
 
+ZK_CLICKHOUSE_PAYLOAD = """ZClickHouse Keeper version: v22.9.1.15416-testing-6156f9cd99b5efd5fe1eeab391571deb4176e2af
+Clients:
+/172.29.0.1:60620[1](queued=0,recved=1,sent=0)
+
+Latency min/avg/max: 0/0.0/0
+Received: 2
+Sent: 1
+Connections: 1
+Outstanding: 0
+Zxid: 0x0
+Mode: standalone
+Node count: 5
+"""
+
 
 def assert_service_checks_ok(aggregator):
     aggregator.assert_service_check("zookeeper.ruok", status=ZookeeperCheck.OK)
