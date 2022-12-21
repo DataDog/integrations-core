@@ -131,6 +131,8 @@ class SQLServer(AgentCheck):
             self.cloud_metadata.update({'gcp': gcp})
         if azure:
             self.cloud_metadata.update({'azure': azure})
+
+        self.set_metadata('driver', self.instance.get('driver', None))
         obfuscator_options_config = self.instance.get('obfuscator_options', {}) or {}
         self.obfuscator_options = to_native_string(
             json.dumps(
