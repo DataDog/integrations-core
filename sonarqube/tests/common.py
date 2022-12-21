@@ -44,7 +44,7 @@ WEB_INSTANCE_WITH_AUTODISCOVERY_INCLUDE_ALL_AND_LIMIT = {
 WEB_INSTANCE_WITH_AUTODISCOVERY_CONFIG_NONE = {
     'web_endpoint': 'http://{}:{}'.format(HOST, PORT),
     'components_discovery': {'include': {'org.sonarqube:.*': None}},
-
+    'tags': ['foo:bar'],
 }
 WEB_INSTANCE_WITH_COMPONENT_AND_AUTODISCOVERY = {
     'web_endpoint': 'http://{}:{}'.format(HOST, PORT),

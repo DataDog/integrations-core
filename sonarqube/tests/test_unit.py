@@ -197,7 +197,9 @@ def test_service_check_ok_with_component_and_autodiscovery(
         aggregator.assert_service_check('sonarqube.api_access', status=check.OK, tags=global_tags)
 
 
-def test_service_check_ok_with_autodiscovery_config_none(aggregator, dd_run_check, sonarqube_check, web_instance_with_autodiscovery_config_none):
+def test_service_check_ok_with_autodiscovery_config_none(
+    aggregator, dd_run_check, sonarqube_check, web_instance_with_autodiscovery_config_none
+):
     with mock.patch('datadog_checks.sonarqube.check.SonarqubeCheck.http') as mock_http:
         mock_http.get.side_effect = [
             MockResponse(file_path=os.path.join(HERE, 'api_responses', 'version')),
