@@ -7,10 +7,10 @@ from .common import CAN_CONNECT_TAGS, CLUSTER_HEALTH_TAGS, METRICS
 
 
 @pytest.mark.e2e
-def test_e2e(dd_agent_check, instance):
+def test_e2e(dd_agent_check, config):
     # Given
     # When
-    aggregator = dd_agent_check(instance)
+    aggregator = dd_agent_check(config)
     # Then
     for category, metrics in METRICS.items():
         for metric in metrics:

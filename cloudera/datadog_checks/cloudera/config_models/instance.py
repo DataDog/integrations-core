@@ -39,8 +39,6 @@ class InstanceConfig(BaseModel):
     min_collection_interval: Optional[float]
     service: Optional[str]
     tags: Optional[Sequence[str]]
-    workload_password: str
-    workload_username: str
 
     @root_validator(pre=True)
     def _initial_validation(cls, values):

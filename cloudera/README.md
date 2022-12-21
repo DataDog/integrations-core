@@ -33,32 +33,33 @@ No additional installation is needed on your server.
 
    ```yaml
    init_config:
-   
+
+      ## @param workload_username - string - required
+      ## The Workload username. This value can be found in the `User Management` tab of the Management 
+      ## Console in the `Workload User Name`.
+      #
+      workload_username: <WORKLOAD_USERNAME>
+
+      ## @param workload_password - string - required
+      ## The Workload password. This value can be found in the `User Management` tab of the Management 
+      ## Console in the `Workload Password`.
+      #
+      workload_password: <WORKLOAD_PASSWORD>
+
+   ## Every instance is scheduled independently of the others.
+   #
    instances:
 
-    - 
-        ## @param api_url - string - required
-        ## The URL endpoint for the Cloudera Manager API. This can be found under the Endpoints tab for 
-        ## your Data Hub to monitor. 
-        ##
-        ## Note: The version of the Cloudera Manager API needs to be appended at the end of the URL. 
-        ## For example, using v48 of the API for Data Hub `cluster_1` should result with a URL similar 
-        ## to the following:
-        ## `https://cluster1.cloudera.site/cluster_1/cdp-proxy-api/cm-api/v48`
-        #
-        api_url: <API_URL>
-
-        ## @param workload_username - string - required
-        ## The Workload username. This value can be found in the `User Management` tab of the Management 
-        ## Console in the `Workload User Name`.
-        #
-        workload_username: <WORKLOAD_USERNAME>
-
-        ## @param workload_password - string - required
-        ## The Workload password. This value can be found in the `User Management` tab of the Management 
-        ## Console in the `Workload Password`.
-        #
-        workload_password: <WORKLOAD_PASSWORD>
+      ## @param api_url - string - required
+      ## The URL endpoint for the Cloudera Manager API. This can be found under the Endpoints tab for 
+      ## your Data Hub to monitor. 
+      ##
+      ## Note: The version of the Cloudera Manager API needs to be appended at the end of the URL. 
+      ## For example, using v48 of the API for Data Hub `cluster_1` should result with a URL similar 
+      ## to the following:
+      ## `https://cluster1.cloudera.site/cluster_1/cdp-proxy-api/cm-api/v48`
+      #
+      - api_url: <API_URL>
    ```
 
 2. [Restart the Agent][5] to start collecting and sending Cloudera Data Hub cluster data to Datadog.
@@ -73,8 +74,8 @@ For containerized environments, see the [Autodiscovery Integration Templates][9]
 | Parameter            | Value                                                                                                            |
 | -------------------- | ---------------------------------------------------------------------------------------------------------------- |
 | `<INTEGRATION_NAME>` | `cloudera`                                                                                                       |
-| `<INIT_CONFIG>`      | blank or `{}`                                                                                                    |
-| `<INSTANCE_CONFIG>`  | `{"api_url": <API_URL>", "workload_username": "<WORKLOAD_USERNAME>", 'workload_password": "<WORKLOAD_PASSWORD>" `|
+| `<INIT_CONFIG>`      | `{"workload_username": "<WORKLOAD_USERNAME>", 'workload_password": "<WORKLOAD_PASSWORD>"}`                       |
+| `<INSTANCE_CONFIG>`  | `{"api_url": <API_URL>"}`                                                                                        |
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->

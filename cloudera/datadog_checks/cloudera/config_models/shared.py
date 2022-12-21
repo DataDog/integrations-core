@@ -24,6 +24,8 @@ class SharedConfig(BaseModel):
         allow_mutation = False
 
     service: Optional[str]
+    workload_password: str
+    workload_username: str
 
     @root_validator(pre=True)
     def _initial_validation(cls, values):

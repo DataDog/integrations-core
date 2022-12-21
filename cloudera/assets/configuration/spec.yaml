@@ -4,6 +4,20 @@ files:
   options:
   - template: init_config
     options:
+    - name: workload_username
+      description: |
+        The Workload username. This value can be found in the `User Management` tab of the Management 
+        Console in the `Workload User Name`.
+      required: true
+      value:
+        type: string
+    - name: workload_password
+      description: |
+        The Workload password. This value can be found in the `User Management` tab of the Management 
+        Console in the `Workload Password`.
+      required: true
+      value:
+        type: string
     - template: init_config/default
   - template: instances
     options:
@@ -18,20 +32,6 @@ files:
         to the following:
         `https://cluster1.cloudera.site/cluster_1/cdp-proxy-api/cm-api/v48`
 
-      value:
-        type: string
-    - name: workload_username
-      description: |
-        The Workload username. This value can be found in the `User Management` tab of the Management 
-        Console in the `Workload User Name`.
-      required: true
-      value:
-        type: string
-    - name: workload_password
-      description: |
-        The Workload password. This value can be found in the `User Management` tab of the Management 
-        Console in the `Workload Password`.
-      required: true
       value:
         type: string
     - name: max_parallel_requests

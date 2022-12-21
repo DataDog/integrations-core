@@ -2,6 +2,18 @@
 #
 init_config:
 
+    ## @param workload_username - string - required
+    ## The Workload username. This value can be found in the `User Management` tab of the Management 
+    ## Console in the `Workload User Name`.
+    #
+    workload_username: <WORKLOAD_USERNAME>
+
+    ## @param workload_password - string - required
+    ## The Workload password. This value can be found in the `User Management` tab of the Management 
+    ## Console in the `Workload Password`.
+    #
+    workload_password: <WORKLOAD_PASSWORD>
+
     ## @param service - string - optional
     ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
     ##
@@ -23,18 +35,6 @@ instances:
     ## `https://cluster1.cloudera.site/cluster_1/cdp-proxy-api/cm-api/v48`
     #
   - api_url: <API_URL>
-
-    ## @param workload_username - string - required
-    ## The Workload username. This value can be found in the `User Management` tab of the Management 
-    ## Console in the `Workload User Name`.
-    #
-    workload_username: <WORKLOAD_USERNAME>
-
-    ## @param workload_password - string - required
-    ## The Workload password. This value can be found in the `User Management` tab of the Management 
-    ## Console in the `Workload Password`.
-    #
-    workload_password: <WORKLOAD_PASSWORD>
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.

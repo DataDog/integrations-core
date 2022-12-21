@@ -19,17 +19,17 @@ class ApiClientV7(ApiClient):
         read_clusters_response = clusters_resource_api.read_clusters(cluster_type='any', view='full')
         self._log.debug("Cloudera full clusters response:\n%s", read_clusters_response)
 
-        # Use len(read_clusters_response.items) * 3 workers since
-        # for each cluster, we are executing 3 tasks in parallel.
-        with ThreadPoolExecutor(max_workers=len(read_clusters_response.items) * 3) as executor:
+        # Use len(read_clusters_response.items) * 2 workers since
+        # for each cluster, we are executing 2 tasks in parallel.
+        with ThreadPoolExecutor(max_workers=len(read_clusters_response.items) * 2) as executor:
             for cluster in read_clusters_response.items:
                 cluster_name = cluster.name
 
                 tags = self._collect_cluster_tags(cluster, self._check.config.tags)
 
                 executor.submit(self._collect_cluster_metrics, cluster_name, tags)
-                executor.submit(self._collect_cluster_service_check, cluster, tags)
                 executor.submit(self._collect_hosts, cluster_name)
+                self._collect_cluster_service_check(cluster, tags)
 
     @staticmethod
     def _collect_cluster_tags(cluster, custom_tags):

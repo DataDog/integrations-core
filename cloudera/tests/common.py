@@ -8,10 +8,13 @@ HOST = get_docker_hostname()
 PORT = 7180
 
 INSTANCE = {
-    'workload_username': '~',
-    'workload_password': '~',
     'api_url': 'http://localhost:8080/api/v48/',
     'tags': ['test1'],
+}
+
+INIT_CONFIG = {
+    'workload_username': '~',
+    'workload_password': '~',
 }
 
 HERE = get_here()
