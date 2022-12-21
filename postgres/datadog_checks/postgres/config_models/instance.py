@@ -77,6 +77,7 @@ class QueryMetrics(BaseModel):
         allow_mutation = False
 
     collection_interval: Optional[float]
+    enable_pg_stat_statements_query_text_length_telemetry: Optional[bool]
     enabled: Optional[bool]
     pg_stat_statements_max_warning_threshold: Optional[float]
 
