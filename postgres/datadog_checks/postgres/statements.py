@@ -394,12 +394,17 @@ class PostgresStatementMetrics(DBMAsyncJob):
     def _normalize_queries(self, rows):
         normalized_rows = []
         for row in rows:
-            self._check.histogram(
-                "postgresql.pg_stat_statements.query_text_length",
-                len(row['query']),
-                tags=self._tags,
-                hostname=self._check.resolved_hostname,
-            )
+            if is_affirmative(
+                self._config.statement_metrics_config.get(
+                    'enable_pg_stat_statements_query_text_length_telemetry', False
+                )
+            ):
+                self._check.histogram(
+                    "postgresql.pg_stat_statements.query_text_length",
+                    len(row['query']),
+                    tags=self._tags,
+                    hostname=self._check.resolved_hostname,
+                )
             normalized_row = dict(copy.copy(row))
             try:
                 statement = obfuscate_sql_with_metadata(row['query'], self._obfuscate_options)
