@@ -45,6 +45,7 @@ WEB_INSTANCE_WITH_AUTODISCOVERY_CONFIG_NONE = {
     'web_endpoint': 'http://{}:{}'.format(HOST, PORT),
     'components_discovery': {'include': {'org.sonarqube:.*': None}},
 
+}
 WEB_INSTANCE_WITH_COMPONENT_AND_AUTODISCOVERY = {
     'web_endpoint': 'http://{}:{}'.format(HOST, PORT),
     'components': {PROJECT: {'tag': 'project'}},
