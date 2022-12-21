@@ -139,19 +139,7 @@ files:
                 exclude:  List of metrics regular expressions patterns to exclude from the matching components.
             value:
               type: object
-              additionalProperties:
-                type: object
-                properties:
-                  - name: tag
-                    type: string
-                  - name: include
-                    type: array
-                    items:
-                      type: string
-                  - name: exclude
-                    type: array
-                    items:
-                      type: string
+              additionalProperties: true
           - name: exclude
             description: |
               List of regular expressions with the patterns of components that will not be 'autodiscovered'

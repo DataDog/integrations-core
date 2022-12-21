@@ -27,21 +27,12 @@ class AuthToken(BaseModel):
     writer: Optional[Mapping[str, Any]]
 
 
-class Include(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    exclude: Optional[Sequence[str]]
-    include: Optional[Sequence[str]]
-    tag: Optional[str]
-
-
 class ComponentsDiscovery(BaseModel):
     class Config:
         allow_mutation = False
 
     exclude: Optional[Sequence[str]]
-    include: Optional[Mapping[str, Include]]
+    include: Optional[Mapping[str, Any]]
     limit: Optional[int]
 
 
