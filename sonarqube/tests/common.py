@@ -16,6 +16,42 @@ WEB_INSTANCE = {
     'components': {PROJECT: {'tag': 'project'}},
     'tags': ['foo:bar'],
 }
+WEB_INSTANCE_CONFIG_NONE = {
+    'web_endpoint': 'http://{}:{}'.format(HOST, PORT),
+    'components': {PROJECT: None},
+    'tags': ['foo:bar'],
+}
+WEB_INSTANCE_AND_EXCLUDE_METRICS = {
+    'web_endpoint': 'http://{}:{}'.format(HOST, PORT),
+    'components': {PROJECT: {'tag': 'project', 'exclude': ['coverage.metric2']}},
+    'tags': ['foo:bar'],
+}
+WEB_INSTANCE_WITH_AUTODISCOVERY_ONLY_INCLUDE = {
+    'web_endpoint': 'http://{}:{}'.format(HOST, PORT),
+    'components_discovery': {'include': {'org.sonarqube:.*': {'tag': 'project'}}},
+    'tags': ['foo:bar'],
+}
+WEB_INSTANCE_WITH_AUTODISCOVERY_INCLUDE_ALL_AND_EXCLUDE = {
+    'web_endpoint': 'http://{}:{}'.format(HOST, PORT),
+    'components_discovery': {'include': {'.*': {'tag': 'project'}}, 'exclude': ['tmp_.*']},
+    'tags': ['foo:bar'],
+}
+WEB_INSTANCE_WITH_AUTODISCOVERY_INCLUDE_ALL_AND_LIMIT = {
+    'web_endpoint': 'http://{}:{}'.format(HOST, PORT),
+    'components_discovery': {'limit': 1, 'include': {'.*': {'tag': 'project'}}},
+    'tags': ['foo:bar'],
+}
+WEB_INSTANCE_WITH_AUTODISCOVERY_CONFIG_NONE = {
+    'web_endpoint': 'http://{}:{}'.format(HOST, PORT),
+    'components_discovery': {'include': {'org.sonarqube:.*': None}},
+    'tags': ['foo:bar'],
+}
+WEB_INSTANCE_WITH_COMPONENT_AND_AUTODISCOVERY = {
+    'web_endpoint': 'http://{}:{}'.format(HOST, PORT),
+    'components': {PROJECT: {'tag': 'project'}},
+    'components_discovery': {'include': {'.*': {'tag': 'project'}}},
+    'tags': ['foo:bar'],
+}
 
 COMPOSE_FILE = os.getenv('COMPOSE_FILE')
 

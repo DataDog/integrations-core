@@ -1,5 +1,28 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 17.6.0 / 2022-12-13
+
+* [Added] Update marketplace GitHub actions to validate new template fields. See [#13267](https://github.com/DataDog/integrations-core/pull/13267).
+* [Fixed] Fix style deps. See [#13495](https://github.com/DataDog/integrations-core/pull/13495).
+* [Fixed] Update integrations repo name. See [#13494](https://github.com/DataDog/integrations-core/pull/13494).
+
+## 17.5.1 / 2022-12-09
+
+* [Fixed] Update dependencies. See [#13478](https://github.com/DataDog/integrations-core/pull/13478).
+
+## 17.5.0 / 2022-12-09
+
+* [Added] Add `validate license-header` subcommand. See [#13417](https://github.com/DataDog/integrations-core/pull/13417).
+* [Added] Add new template for metrics crawler integrations. See [#13411](https://github.com/DataDog/integrations-core/pull/13411).
+* [Added] Add an option to ignore failed environments in env start. See [#13443](https://github.com/DataDog/integrations-core/pull/13443).
+* [Fixed] Fix parsing of E2E output for Hatch environments when warnings occur. See [#13479](https://github.com/DataDog/integrations-core/pull/13479).
+* [Fixed] Force the semver version to >=2.13.0. See [#13477](https://github.com/DataDog/integrations-core/pull/13477).
+* [Fixed] Re-raise the exception when the environment failed to start. See [#13472](https://github.com/DataDog/integrations-core/pull/13472).
+* [Fixed] Remove the `--memray-show-report` option. See [#13463](https://github.com/DataDog/integrations-core/pull/13463).
+* [Fixed] Bump pytest-memray version. See [#13462](https://github.com/DataDog/integrations-core/pull/13462).
+* [Fixed] Do not force pytest version. See [#13461](https://github.com/DataDog/integrations-core/pull/13461).
+* [Fixed] Fix typo in platfrom-integrations team name. See [#13368](https://github.com/DataDog/integrations-core/pull/13368).
+
 ## 17.4.0 / 2022-11-23
 
 * [Added] Add a dummy `--memray` option to the pytest plugin. See [#13352](https://github.com/DataDog/integrations-core/pull/13352).

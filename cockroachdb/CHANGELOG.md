@@ -1,6 +1,10 @@
 # CHANGELOG - CockroachDB
 
-## 2.4.1 / 2022-10-28
+## 2.5.0 / 2022-12-09
+
+* [Added] Collect additional metrics. See [#13339](https://github.com/DataDog/integrations-core/pull/13339).
+
+## 2.4.1 / 2022-10-28 / Agent 7.41.0
 
 * [Fixed] Remove metrics limit from legacy version of the integration. See [#13038](https://github.com/DataDog/integrations-core/pull/13038).
 

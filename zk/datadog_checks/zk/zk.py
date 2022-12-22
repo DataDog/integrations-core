@@ -61,8 +61,8 @@ import socket
 import struct
 from collections import defaultdict
 from contextlib import closing
-from distutils.version import LooseVersion  # pylint: disable=E0611,E0401
 
+from packaging.version import Version
 from six import PY3, StringIO, iteritems
 
 from datadog_checks.base import AgentCheck, ensure_bytes, ensure_unicode, is_affirmative
@@ -187,7 +187,7 @@ class ZookeeperCheck(AgentCheck):
                 self.service_check('zookeeper.mode', status, message=message, tags=self.sc_tags)
 
         # Read metrics from the `mntr` output
-        if zk_version and LooseVersion(zk_version) > LooseVersion("3.4.0"):
+        if zk_version and Version(zk_version) > Version("3.4.0"):
             try:
                 mntr_out = self._send_command('mntr')
             except ZKConnectionFailure:
@@ -278,7 +278,7 @@ class ZookeeperCheck(AgentCheck):
             # grabs the entire version number for inventories.
             metadata_version = total_match.group(1)
             self.set_metadata('version', metadata_version)
-        has_connections_val = LooseVersion(version) > LooseVersion("3.4.4")
+        has_connections_val = Version(version) > Version("3.4.4")
 
         # Clients:
         buf.readline()  # skip the Clients: header

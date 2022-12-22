@@ -5,7 +5,7 @@ import itertools
 import threading
 from contextlib import closing
 
-import cx_Oracle
+import oracledb
 from six import PY2
 
 from datadog_checks.base import AgentCheck, ConfigurationError
@@ -50,6 +50,12 @@ class Oracle(AgentCheck):
     SERVICE_CHECK_CAN_QUERY = "can_query"
 
     def __init__(self, name, init_config, instances):
+        if PY2:
+            raise ConfigurationError(
+                "This version of the integration is only available when using py3. "
+                "Check https://docs.datadoghq.com/agent/guide/agent-v6-python-3 "
+                "for more information."
+            )
         super(Oracle, self).__init__(name, init_config, instances)
         self._server = self.instance.get('server')
         self._user = self.instance.get('username') or self.instance.get('user')
@@ -80,9 +86,6 @@ class Oracle(AgentCheck):
             tags=self._tags,
         )
 
-        # Runtime validations are only py3, so this is for manually validating config on py2
-        if PY2:
-            self.check_initializations.append(self.validate_config)
         self.check_initializations.append(self._query_manager.compile_queries)
 
         self._query_errors = 0
@@ -103,26 +106,6 @@ class Oracle(AgentCheck):
                 for column in query.get('columns', []):
                     if column.get('type') != 'tag' and column.get('name'):
                         column['name'] = '{}.{}'.format(prefix, column['name'])
-
-    def validate_config(self):
-        if not self._server or not self._user:
-            raise ConfigurationError("Oracle host and user are needed")
-
-        if not self._protocol or self._protocol.upper() not in VALID_PROTOCOLS:
-            raise ConfigurationError("Protocol %s is not valid, must either be TCP or TCPS" % self._protocol)
-
-        if self._jdbc_driver and self._protocol.upper() == PROTOCOL_TCPS:
-            if not (self._jdbc_truststore_type and self._jdbc_truststore_path):
-                raise ConfigurationError(
-                    "TCPS connections to Oracle via JDBC requires both `jdbc_truststore_type` and "
-                    "`jdbc_truststore_path` configuration options "
-                )
-
-            if self._jdbc_truststore_type and self._jdbc_truststore_type.upper() not in VALID_TRUSTSTORE_TYPES:
-                raise ConfigurationError(
-                    "Truststore type %s is not valid, must be one of %s"
-                    % (self._jdbc_truststore_type, VALID_TRUSTSTORE_TYPES)
-                )
 
     def execute_query_raw(self, query):
         with closing(self._connection.cursor()) as cursor:
@@ -165,44 +148,40 @@ class Oracle(AgentCheck):
 
     @property
     def _connection(self):
-        """Creates a connection or raises an exception"""
         if self._cached_connection is None:
-            if self.can_use_oracle_client():
-                self._cached_connection = self._oracle_client_connect()
-            elif JDBC_IMPORT_ERROR:
-                self._connection_errors += 1
+            if self.can_use_jdbc():
+                try:
+                    self._cached_connection = self._jdbc_connect()
+                except Exception as e:
+                    self.log.error("The JDBC connection failed with the following error: %s", str(e))
+                    self._connection_errors += 1
+            else:
+                self._cached_connection = self._oracle_connect()
+        return self._cached_connection
+
+    def can_use_jdbc(self):
+        if self._jdbc_driver:
+            if JDBC_IMPORT_ERROR is not None:
                 self.log.error(
-                    "Oracle client is unavailable and the integration is unable to import JDBC libraries. You may not "
-                    "have the Microsoft Visual C++ Runtime 2015 installed on your system. Please double check your "
+                    "The integration is unable to import JDBC libraries. Please double check your "
                     "installation and refer to the Datadog documentation for more information."
                 )
                 raise JDBC_IMPORT_ERROR
             else:
-                self._cached_connection = self._jdbc_connect()
-        return self._cached_connection
-
-    def can_use_oracle_client(self):
-        try:
-            # Check if the instantclient is available
-            cx_Oracle.clientversion()
-        except cx_Oracle.DatabaseError as e:
-            # Fallback to JDBC
-            self.log.debug('Oracle instant client unavailable, falling back to JDBC: %s', e)
-            return False
+                return True
         else:
-            self.log.debug('Running cx_Oracle version %s', cx_Oracle.version)
-            return True
+            return False
 
-    def _oracle_client_connect(self):
+    def _oracle_connect(self):
         dsn = self._get_dsn()
-        self.log.debug("Connecting via Oracle Instant Client with DSN: %s", dsn)
+        self.log.debug("Connecting to Oracle with DSN: %s", dsn)
         try:
-            connection = cx_Oracle.connect(user=self._user, password=self._password, dsn=dsn)
-            self.log.debug("Connected to Oracle DB using Oracle Instant Client")
+            connection = oracledb.connect(user=self._user, password=self._password, dsn=dsn)
+            self.log.debug("Connected to Oracle DB using Python Oracle")
             return connection
-        except cx_Oracle.DatabaseError as e:
+        except oracledb.DatabaseError as e:
             self._connection_errors += 1
-            self.log.error("Failed to connect to Oracle DB using Oracle Instant Client, error: %s", str(e))
+            self.log.error("Failed to connect to Oracle DB, error: %s", str(e))
             raise
 
     def _get_dsn(self):
@@ -222,7 +201,7 @@ class Oracle(AgentCheck):
             )
             return dsn
         else:
-            return cx_Oracle.makedsn(host, port, service_name=self._service)
+            return oracledb.makedsn(host, port, service_name=self._service)
 
     def _jdbc_connect(self):
         jdbc_connect_properties = {'user': self._user, 'password': self._password}

@@ -506,7 +506,6 @@ def construct_pytest_options(
     e2e=False,
     ddtrace=False,
     memray=False,
-    memray_show_report=False,
 ):
     # Prevent no verbosity
     pytest_options = f'--verbosity={verbose or 1}'
@@ -565,9 +564,6 @@ def construct_pytest_options(
             abort('\nThe `--memray` option can only be used on Linux or MacOS!')
 
         pytest_options += ' --memray'
-
-        if not memray_show_report:
-            pytest_options += ' --hide-memray-summary'
 
     if marker:
         pytest_options += f' -m "{marker}"'

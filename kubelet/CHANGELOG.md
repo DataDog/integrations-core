@@ -1,6 +1,10 @@
 # CHANGELOG - kubelet
 
-## 7.5.1 / 2022-10-28
+## 7.5.2 / 2022-12-09
+
+* [Fixed] Set the `prometheus_url` for the kubelet endpoints in the `__init__` function. See [#13360](https://github.com/DataDog/integrations-core/pull/13360).
+
+## 7.5.1 / 2022-10-28 / Agent 7.41.0
 
 * [Fixed] Ignore aberrant values for `kubernetes.memory.rss`. See [#13076](https://github.com/DataDog/integrations-core/pull/13076).
 

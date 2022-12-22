@@ -40,7 +40,8 @@ text = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
-    "clickhouse-cityhash==1.0.2.3",
+    "clickhouse-cityhash==1.0.2.3; python_version < '3.0'",
+    "clickhouse-cityhash==1.0.2.4; python_version > '3.0'",
     "clickhouse-driver==0.2.0; python_version < '3.0'",
     "clickhouse-driver==0.2.3; python_version > '3.0'",
     "lz4==2.2.1; python_version < '3.0'",

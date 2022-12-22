@@ -40,7 +40,7 @@ text = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
-    "futures==3.3.0; python_version < '3.0'",
+    "futures==3.4.0; python_version < '3.0'",
     "ipaddress==1.0.23; python_version < '3.0'",
     "ply==3.11",
     "pyasn1==0.4.6",
@@ -61,8 +61,6 @@ include = [
     "/datadog_checks",
     "/tests",
     "/manifest.json",
-    "/requirements-dev.txt",
-    "/tox.ini",
 ]
 
 [tool.hatch.build.targets.wheel]

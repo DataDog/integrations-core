@@ -79,9 +79,9 @@ def _parse_init_config(config_lines, init_config_start_line, errors):
 
 
 def _parse_for_config_blocks(config_lines, start, end, errors):
-    """The function basically do all the work. It reads the config from start, removes blank lines first then when it first
-    sees data, it sets the 'indent' variable once for all. All blocks read in a given function call must have the same
-    indentation. Sub-blocks are parsed recursively and thus the 'indent' variable is given a new value.
+    """The function basically do all the work. It reads the config from start, removes blank lines first then when
+    it first sees data, it sets the 'indent' variable once for all. All blocks read in a given function call must
+    have the same indentation. Sub-blocks are parsed recursively and thus the 'indent' variable is given a new value.
     Once a block is parsed the function will either recurse if the block requires it (see ConfigBlock), or it will go
     to the next block and iterate.
     """

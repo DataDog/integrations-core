@@ -4,11 +4,11 @@
 from __future__ import unicode_literals
 
 from copy import deepcopy
-from distutils.version import StrictVersion
 
 import mock
 import pytest
 import redis
+from packaging.version import Version
 
 from datadog_checks.redisdb import Redis
 
@@ -63,8 +63,8 @@ def test_redis_default(aggregator, dd_run_check, check, redis_auth, redis_instan
     db.lpush("test_list", 1)
     db.lpush("test_list", 2)
     db.lpush("test_list", 3)
-    version = StrictVersion(db.info().get('redis_version'))
-    if version >= StrictVersion('5.0.0'):
+    version = Version(db.info().get('redis_version'))
+    if version >= Version('5.0.0'):
         db.xadd("test_stream", {"foo": "bar"})
     db.set("key1", "value")
     db.set("key2", "value")
@@ -88,7 +88,7 @@ def test_redis_default(aggregator, dd_run_check, check, redis_auth, redis_instan
             aggregator.assert_metric(name, tags=expected)
 
     aggregator.assert_metric('redis.key.length', 3, count=1, tags=expected_db + ['key:test_list', 'key_type:list'])
-    if version >= StrictVersion('5.0.0'):
+    if version >= Version('5.0.0'):
         aggregator.assert_metric(
             'redis.key.length', 1, count=1, tags=expected_db + ['key:test_stream', 'key_type:stream']
         )
@@ -98,7 +98,7 @@ def test_redis_default(aggregator, dd_run_check, check, redis_auth, redis_instan
 
     # in the old tests these was explicitly asserted, keeping it like that
     assert 'redis.net.commands' in aggregator.metric_names
-    if version >= StrictVersion('2.6.0'):
+    if version >= Version('2.6.0'):
         # instantaneous_ops_per_sec info is only available on redis>=2.6
         assert 'redis.net.instantaneous_ops_per_sec' in aggregator.metric_names
     db.flushdb()
@@ -144,7 +144,7 @@ def test_metadata(dd_run_check, check, master_instance, datadog_agent):
 def test_redis_command_stats(aggregator, dd_run_check, check, redis_instance):
     db = redis.Redis(port=PORT, db=14, password=PASSWORD, host=HOST)
     version = db.info().get('redis_version')
-    if StrictVersion(version) < StrictVersion('2.6.0'):
+    if Version(version) < Version('2.6.0'):
         # Command stats only works with Redis >= 2.6.0
         return
 

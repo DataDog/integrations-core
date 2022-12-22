@@ -97,8 +97,8 @@ class ValidationTracker:
         leaf.label.append_text(Text(message, style=style))
 
     def __construct(self, tree: Tree, branches: dict):
-        for node, branches in sorted(branches.items()):
-            self.__construct(tree.add(node.label), branches)
+        for node, node_branches in sorted(branches.items()):
+            self.__construct(tree.add(node.label), node_branches)
 
     def __finalize(self, tree: Tree, branches: dict):
         if self.__finalized:

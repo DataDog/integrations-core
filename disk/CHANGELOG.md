@@ -1,5 +1,9 @@
 # CHANGELOG - disk
 
+## 4.8.0 / 2022-12-09
+
+* [Added] Allow device-specific tags for all device-specific metrics. See [#13233](https://github.com/DataDog/integrations-core/pull/13233).
+
 ## 4.7.1 / 2022-08-05 / Agent 7.39.0
 
 * [Fixed] Dependency updates. See [#12653](https://github.com/DataDog/integrations-core/pull/12653).

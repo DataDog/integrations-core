@@ -32,7 +32,7 @@ REPO_CHOICES = {
     'internal': 'integrations-internal',
     'agent': 'datadog-agent',
     'marketplace': 'marketplace',
-    'integrations': 'integrations',
+    'integrations-internal-core': 'integrations-internal-core',
 }
 
 VERSION_BUMP = {
@@ -135,6 +135,7 @@ integration_type_links = {
     'jmx': JMX_LINKS,
     'snmp_tile': SNMP_TILE_LINKS,
     'tile': TILE_LINKS,
+    'metrics_pull': TILE_LINKS,
 }
 
 # If a file changes in a PR with any of these file extensions,

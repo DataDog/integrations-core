@@ -318,13 +318,22 @@ files:
             type: number
             example: 10
         - name: pg_stat_statements_max_warning_threshold
+          hidden: true
           description: |
             Set the threshold for a safe value of `pg_stat_statements.max`. If the database is configured with a value
             higher than this threshold, a warning is emitted to recommend lowering the setting value.
           value:
             type: number
             example: 10000
-            hidden: true
+        - name: enable_pg_stat_statements_query_text_length_telemetry
+          hidden: true
+          description: |
+            Enables distribution metrics for monitoring query text length from pg_stat_statements. 
+            This is useful for debugging purposes, but it shouldn't be left enabled because this could 
+            degrade the integration's performance.
+          value:
+            type: boolean
+            example: false
     - name: query_samples
       description: Configure collection of query samples
       options:
@@ -375,6 +384,13 @@ files:
           value:
             type: integer
             example: 10000
+        - name: explain_parameterized_queries
+          description: |
+            Note, this is a BETA feature. This option will enable the ability to explain parameterized queries.
+            This is useful if your SQL clients are using the extended query protocol or prepared statements.
+          value:
+            type: boolean
+            example: false
     - name: query_activity
       description: Configure collection of query activity
       options:

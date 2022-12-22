@@ -1,6 +1,10 @@
 # CHANGELOG - IBM MQ
 
-## 4.0.0 / 2022-10-28
+## 4.0.1 / 2022-12-09
+
+* [Fixed] Add messaging to service checks. See [#13355](https://github.com/DataDog/integrations-core/pull/13355).
+
+## 4.0.0 / 2022-10-28 / Agent 7.41.0
 
 * [Added] Add `queue_manager_process` option. See [#13107](https://github.com/DataDog/integrations-core/pull/13107).
 * [Fixed] Add back channels_to_skip for channel status metrics. See [#13113](https://github.com/DataDog/integrations-core/pull/13113).

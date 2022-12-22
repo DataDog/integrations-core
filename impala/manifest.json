@@ -2,7 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "faf33df8-b1e0-4529-a281-7e176b2365ec",
   "app_id": "impala",
-  "display_on_public_website": false,
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",

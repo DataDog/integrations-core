@@ -12,8 +12,6 @@ from datadog_checks.base.log import get_check_logger
 
 try:
     import adodbapi
-    from adodbapi.apibase import OperationalError
-    from pywintypes import com_error
 except ImportError:
     adodbapi = None
 
@@ -22,16 +20,13 @@ try:
 except ImportError:
     pyodbc = None
 
+from .connection_errors import ConnectionErrorCode, SQLConnectionError, error_with_tags, format_connection_exception
+
 logger = logging.getLogger(__file__)
 
 DATABASE_EXISTS_QUERY = 'select name, collation_name from sys.databases;'
 DEFAULT_CONN_PORT = 1433
-
-
-class SQLConnectionError(Exception):
-    """Exception raised for SQL instance connection issues"""
-
-    pass
+SUPPORT_LINK = "https://docs.datadoghq.com/database_monitoring/setup_sql_server/troubleshooting"
 
 
 def split_sqlserver_host_port(host):
@@ -131,57 +126,23 @@ def parse_connection_string_properties(cs):
     return params
 
 
-known_hresult_codes = {
-    -2147352567: "unable to connect",
-    -2147217843: "login failed for user",
-    # this error can also be caused by a failed TCP connection but we are already reporting on the TCP
-    # connection status via test_network_connectivity so we don't need to explicitly state that
-    # as an error condition in this message
-    -2147467259: "could not open database requested by login",
-}
-
-
-def _format_connection_exception(e):
-    """
-    Formats the provided database connection exception.
-    If the exception comes from an ADO Provider and contains a misleading 'Invalid connection string attribute' message
-    then the message is replaced with more descriptive messages based on the contained HResult error codes.
-    """
-    if adodbapi is not None:
-        if isinstance(e, OperationalError) and e.args and isinstance(e.args[0], com_error):
-            e_comm = e.args[0]
-            hresult = e_comm.hresult
-            sub_hresult = None
-            internal_message = None
-            if e_comm.args and len(e_comm.args) == 4:
-                internal_args = e_comm.args[2]
-                if len(internal_args) == 6:
-                    internal_message = internal_args[2]
-                    sub_hresult = internal_args[5]
-            if internal_message == 'Invalid connection string attribute':
-                base_message = known_hresult_codes.get(hresult)
-                sub_message = known_hresult_codes.get(sub_hresult)
-                if base_message and sub_message:
-                    return base_message + ": " + sub_message
-    return repr(e)
-
-
 class Connection(object):
     """Manages the connection to a SQL Server instance."""
 
     DEFAULT_COMMAND_TIMEOUT = 5
     DEFAULT_DATABASE = 'master'
-    DEFAULT_DRIVER = 'SQL Server'
+    DEFAULT_DRIVER = '{ODBC Driver 18 for SQL Server}'
     DEFAULT_DB_KEY = 'database'
     DEFAULT_SQLSERVER_VERSION = 1e9
     SQLSERVER_2014 = 2014
     PROC_GUARD_DB_KEY = 'proc_only_if_database'
 
     valid_adoproviders = ['SQLOLEDB', 'MSOLEDBSQL', 'MSOLEDBSQL19', 'SQLNCLI11']
-    default_adoprovider = 'SQLOLEDB'
+    default_adoprovider = 'MSOLEDBSQL'
 
-    def __init__(self, init_config, instance_config, service_check_handler):
+    def __init__(self, check, init_config, instance_config, service_check_handler):
         self.instance = instance_config
+        self._check = check
         self.service_check_handler = service_check_handler
         self.log = get_check_logger()
 
@@ -293,7 +254,7 @@ class Connection(object):
         """
         conn_key = self._conn_key(db_key, db_name, key_prefix)
 
-        _, host, _, _, database, _ = self._get_access_info(db_key, db_name)
+        _, host, _, _, database, driver = self._get_access_info(db_key, db_name)
 
         cs = self.instance.get('connection_string', '')
         cs += ';' if cs != '' else ''
@@ -325,19 +286,40 @@ class Connection(object):
         except Exception as e:
             error_message = self.test_network_connectivity()
             tcp_connection_status = error_message if error_message else "OK"
-            message = "Unable to connect to SQL Server (host={} database={}). TCP-connection({}). Exception: {}".format(
-                host, database, tcp_connection_status, _format_connection_exception(e)
-            )
+            exception_msg, conn_warn_msg = format_connection_exception(e, driver)
+            if tcp_connection_status != "OK" and conn_warn_msg is ConnectionErrorCode.unknown:
+                conn_warn_msg = ConnectionErrorCode.tcp_connection_failed
 
             password = self.instance.get('password')
             if password is not None:
-                message = message.replace(password, "*" * 6)
+                exception_msg = exception_msg.replace(password, "*" * 6)
 
-            self.service_check_handler(AgentCheck.CRITICAL, host, database, message, is_default=is_default)
+            check_err_message = error_with_tags(
+                "Unable to connect to SQL Server, see %s#%s for more details on how to debug this issue. "
+                "TCP-connection(%s), Exception: %s",
+                SUPPORT_LINK,
+                conn_warn_msg.value,
+                tcp_connection_status,
+                exception_msg,
+                host=self._check.resolved_hostname,
+                database=database,
+                code=conn_warn_msg.value,
+                connector=self.connector,
+                driver=driver,
+            )
+            self.service_check_handler(
+                AgentCheck.CRITICAL, self._check.resolved_hostname, database, check_err_message, is_default=is_default
+            )
 
             # Only raise exception on the default instance database
             if is_default:
-                raise_from(SQLConnectionError(message), None)
+                # the message that is raised here (along with the exception stack trace)
+                # is what will be seen in the agent status output.
+                raise_from(SQLConnectionError(check_err_message), None)
+            else:
+                # if not the default db, we should still log this exception
+                # to give the customer an opportunity to fix the issue
+                self.log.debug(check_err_message)
 
     def _setup_new_connection(self, rawconn):
         with rawconn.cursor() as cursor:
@@ -394,7 +376,7 @@ class Connection(object):
                 self.close_cursor(cursor)
 
         exists = False
-        if database and database.lower() in self.existing_databases:
+        if database.lower() in self.existing_databases:
             case_insensitive, cased_name = self.existing_databases[database.lower()]
             if case_insensitive or database == cased_name:
                 exists = True

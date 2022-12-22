@@ -77,6 +77,7 @@ class QueryMetrics(BaseModel):
         allow_mutation = False
 
     collection_interval: Optional[float]
+    enable_pg_stat_statements_query_text_length_telemetry: Optional[bool]
     enabled: Optional[bool]
     pg_stat_statements_max_warning_threshold: Optional[float]
 
@@ -88,6 +89,7 @@ class QuerySamples(BaseModel):
     collection_interval: Optional[float]
     enabled: Optional[bool]
     explain_function: Optional[str]
+    explain_parameterized_queries: Optional[bool]
     explained_queries_cache_maxsize: Optional[int]
     explained_queries_per_hour_per_query: Optional[int]
     samples_per_hour_per_query: Optional[int]
