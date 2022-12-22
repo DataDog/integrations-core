@@ -111,9 +111,8 @@ def local_clone(isolation, local_repo) -> Generator[ClonedRepo, None, None]:
     with cloned_repo_path.as_cwd():
         PLATFORM.check_command_output(['git', 'config', 'user.name', 'Foo Bar'])
         PLATFORM.check_command_output(['git', 'config', 'user.email', 'foo@bar.baz'])
-        branch = PLATFORM.check_command_output(['git', 'rev-parse', '--abbrev-ref', 'HEAD']).strip()
 
-    cloned_repo = ClonedRepo(cloned_repo_path, f'origin/{branch}', 'ddev-testing')
+    cloned_repo = ClonedRepo(cloned_repo_path, 'origin/master', 'ddev-testing')
     cloned_repo.reset_branch()
 
     yield cloned_repo
