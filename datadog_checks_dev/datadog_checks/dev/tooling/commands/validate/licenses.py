@@ -75,8 +75,6 @@ COPYRIGHT_ATTR_TEMPLATES = {
     'PSF': 'Copyright (c) {year}{author}',
 }
 
-# Match for various suffixes that need not be included
-STRIP_SUFFIXES_RE = []
 
 EXPLICIT_LICENSES = {
     # https://github.com/baztian/jaydebeapi/blob/master/COPYING
@@ -321,10 +319,6 @@ def find_cpy(text):
         # ignore a few spurious matches from license boilerplate
         if any(ign.match(cpy) for ign in COPYRIGHT_IGNORE_RES):
             continue
-
-        # strip some suffixes
-        for suff_re in STRIP_SUFFIXES_RE:
-            cpy = suff_re.sub('', cpy)
 
         cpy = cpy.strip().rstrip(',')
         if cpy:
