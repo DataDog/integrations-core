@@ -159,6 +159,10 @@ instances:
     ## May be used in conjunction with `include_labels`.
     ## Labels defined in `exclude_labels` will take precedence in case of overlap.
     ##
+    ## Special care need to be taken when using this option. It can cause data to be inaccurately
+    ## aggregated. For reference, see: https://github.com/DataDog/integrations-core/pull/13567
+    ## for reason why this is disabled by default.
+    ##
     ## Note: Label filtering happens before `rename_labels`.
     #
     # exclude_labels:
