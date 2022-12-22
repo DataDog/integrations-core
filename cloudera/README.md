@@ -109,7 +109,7 @@ sudo ssh -i "/path/to/key.pem" cloudbreak@<HOST_IP_ADDRESS>
 ```
 
 The workload username and password can be used to access Cloudera hosts via SSH, although only the `cloudbreak` user can install the Datadog Agent. 
-Trying to use any user that is not `cloudbreak` may results in the following error:
+Trying to use any user that is not `cloudbreak` may result in the following error:
 ```
 <NON_CLOUDBREAK_USER> is not allowed to run sudo on <CLOUDERA_HOSTNAME>.  This incident will be reported.
 ```
