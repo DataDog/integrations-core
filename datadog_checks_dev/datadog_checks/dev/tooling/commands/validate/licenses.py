@@ -47,7 +47,9 @@ COPYRIGHT_LOCATIONS = [
 
 
 # General match for anything that looks like a copyright declaration
-COPYRIGHT_RE = re.compile(r'^(?!i\.e\.,.*$)(Copyright\s+(?:©|\(c\)\s+)?(?:(?:[0-9 ,-]|present)+\s+)?(?:by\s+)?(.*))$', re.I)
+COPYRIGHT_RE = re.compile(
+    r'^(?!i\.e\.,.*$)(Copyright\s+(?:©|\(c\)\s+)?(?:(?:[0-9 ,-]|present)+\s+)?(?:by\s+)?(.*))$', re.I
+)
 
 # Copyright strings to ignore, as they are not owners.  Most of these are from
 # boilerplate license files.
@@ -58,8 +60,20 @@ COPYRIGHT_IGNORE_RES = [
     re.compile(r'copyright (:?holder|owner|notice|license|statement|law|on the Program|and Related)', re.I),
     re.compile(r'Copyright & License -'),
     re.compile(r'copyright .yyyy. .name of copyright owner.', re.I),
-    re.compile(r'copyright .yyyy. .name of copyright owner.', re.I),
+    re.compile(r'copyright \(c\) <year>\s{2}<name of author>', re.I),
+    re.compile(r'.*\sFree Software Foundation', re.I),
 ]
+
+COPYRIGHT_ATTR_TEMPLATES = {
+    'Apache-2.0': 'Copyright {year}{author}',
+    'BSD-2-Clause': 'Copyright {year}{author}',
+    'BSD-3-Clause': 'Copyright {year}{author}',
+    'BSD-3-Clause-Modification': 'Copyright {year}{author}',
+    'LGPL-2.1-only': 'Copyright (C) {year}{author}',
+    'LGPL-3.0-only': 'Copyright (C) {year}{author}',
+    'MIT': 'Copyright (c) {year}{author}',
+    'PSF': 'Copyright (c) {year}{author}',
+}
 
 # Match for various suffixes that need not be included
 STRIP_SUFFIXES_RE = []
@@ -161,18 +175,9 @@ CLASSIFIER_TO_HIGHEST_SPDX = {
 
 EXTRA_LICENSES = {'BSD-2-Clause'}
 
-
-EXPLICIT_CP_ATTR_PATHS = {
-    'adodbapi': 'https://raw.githubusercontent.com/mhammond/pywin32/main/adodbapi/__init__.py',
-    'aerospike': 'https://raw.githubusercontent.com/aerospike/aerospike-client-python/master/setup.py',
-    'beautifulsoup4': 'https://bazaar.launchpad.net/~leonardr/beautifulsoup/bs4/download/head:/LICENSE',
-    'futures': 'https://raw.githubusercontent.com/agronholm/pythonfutures/master/concurrent/futures/__init__.py'
-}
-
 PACKAGE_REPO_OVERRIDES = {
     'PyYAML': 'https://github.com/yaml/pyyaml',
     'Pyro4': 'https://github.com/irmen/Pyro4',
-    'check-postgres': 'https://github.com/bucardo/check_postgres',
     'contextlib2': 'https://github.com/jazzband/contextlib2',
     'dnspython': 'https://github.com/rthalley/dnspython',
     'foundationdb': 'https://github.com/apple/foundationdb',
@@ -205,8 +210,8 @@ VALID_LICENSES = (
 HEADERS = ['Component', 'Origin', 'License', 'Copyright']
 
 ADDITIONAL_LICENSES = [
-    'flup,Vendor,BSD-3-Clause,Allan Saddi\n',
-    'flup-py3,Vendor,BSD-3-Clause,Allan Saddi\n',
+    'flup,Vendor,BSD-3-Clause,Copyright (c) 2005 Allan Saddi. All Rights Reserved.\n',
+    'flup-py3,Vendor,BSD-3-Clause,"Copyright (c) 2005, 2006 Allan Saddi <allan@saddi.com> All rights reserved."\n',
 ]
 
 
@@ -254,9 +259,6 @@ async def scrape_license_data(urls, ctx):
             get_data, urls
         ):
             data = package_data[package_name]
-            if package_copyright:
-                data['copyright'].add(package_copyright)
-
             data['classifiers'].update(license_classifiers)
             if package_license:
                 if ' :: ' in package_license:
@@ -266,43 +268,46 @@ async def scrape_license_data(urls, ctx):
 
             repo_url = home_page if home_page.__contains__('github.com/') else PACKAGE_REPO_OVERRIDES.get(package_name)
 
-            if repo_url or package_name in EXPLICIT_CP_ATTR_PATHS:
-                cp = scrape_copyright_data(package_name, repo_url, ctx)
+            created_date = ''
+
+            if repo_url:
+                cp, created_date = scrape_copyright_data(repo_url, ctx)
                 if cp:
                     data['copyright'].add(cp)
+
+            if package_copyright and len(data['copyright']) < 1 or package_license == 'PSF':
+                cp = 'Copyright {}{}'.format(created_date, package_copyright)
+                if package_license in COPYRIGHT_ATTR_TEMPLATES:
+                    cp = COPYRIGHT_ATTR_TEMPLATES[package_license].format(year=created_date, author=package_copyright)
+
+                data['copyright'].add(cp)
     return package_data
 
 
-def find_license_file(url, ctx):
+def probe_github(url, ctx):
     if url.endswith('/'):
         url = url[:-1]
     owner_repo = re.sub(r'.*github.com/', '', url)
     repo_api_url = f'https://api.github.com/repos/{owner_repo}'
     repo_res = requests.get(repo_api_url, auth=get_auth_info(ctx.obj)).json()
     def_branch = repo_res.get('default_branch')
+    created_date = repo_res.get('created_at')[:4] + ' '
     path = f'https://raw.githubusercontent.com/{owner_repo}/{def_branch}'
-    return path
+    return path, created_date
 
 
-def scrape_copyright_data(package_name, url_path, ctx):
-    if package_name in EXPLICIT_CP_ATTR_PATHS:
-        res = requests.get(EXPLICIT_CP_ATTR_PATHS.get(package_name))
+def scrape_copyright_data(url_path, ctx):
+    license_path, created_date = probe_github(url_path, ctx)
+    path = deepcopy(license_path)
+    for loc in COPYRIGHT_LOCATIONS:
+        if path.__contains__('raw.githubusercontent.com'):
+            path = f'{license_path}/{loc}'
+        res = requests.get(path)
         if res:
             cp = find_cpy(res.text)
             if cp:
-                return cp
-    else:
-        license_path = find_license_file(url_path, ctx)
-        path = deepcopy(license_path)
-        for loc in COPYRIGHT_LOCATIONS:
-            if path.__contains__('raw.githubusercontent.com'):
-                path = f'{license_path}/{loc}'
-            res = requests.get(path)
-            if res:
-                cp = find_cpy(res.text)
-                if cp:
-                    return cp
-    return None
+                return cp, ''
+    return None, created_date
 
 
 def find_cpy(text):
@@ -321,7 +326,7 @@ def find_cpy(text):
         for suff_re in STRIP_SUFFIXES_RE:
             cpy = suff_re.sub('', cpy)
 
-        cpy = cpy.strip().rstrip('.')
+        cpy = cpy.strip().rstrip(',')
         if cpy:
             return cpy
 
