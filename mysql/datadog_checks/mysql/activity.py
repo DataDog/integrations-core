@@ -121,6 +121,8 @@ class MySQLActivity(DBMAsyncJob):
         self._db = None
         self._db_version = None
         self._obfuscator_options = to_native_string(json.dumps(self._config.obfuscator_options))
+        # Nenad temp
+        self.min_collection_interval = config.min_collection_interval
 
     def run_job(self):
         # type: () -> None

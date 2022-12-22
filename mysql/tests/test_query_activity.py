@@ -361,14 +361,13 @@ def test_activity_collection_rate_limit(aggregator, dd_run_check, dbm_instance):
     dbm_instance['query_activity']['collection_interval'] = collection_interval
     dbm_instance['query_activity']['run_sync'] = False
     check = MySql(CHECK_NAME, {}, [dbm_instance])
-    dd_run_check(check)
     sleep_time = 1
+    dd_run_check(check)
     time.sleep(sleep_time)
-    max_collections = int(1 / collection_interval * sleep_time) + 1
     check.cancel()
+    max_collections = int(1 / collection_interval * sleep_time) + 1
     metrics = aggregator.metrics("dd.mysql.activity.collect_activity.payload_size")
-    assert dbm_instance['query_activity']['collection_interval'] == 97
-    #assert max_collections / 2.0 <= len(metrics) <= max_collections
+    assert max_collections / 2.0 <= len(metrics) <= max_collections 
 
 
 @pytest.mark.integration
