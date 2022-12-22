@@ -36,7 +36,6 @@ from datadog_checks.couchbase.couchbase_consts import (
 )
 
 
-
 class Couchbase(AgentCheck):
     """
     Extracts stats from Couchbase via its REST API
