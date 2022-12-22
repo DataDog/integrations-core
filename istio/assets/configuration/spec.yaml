@@ -42,6 +42,24 @@ files:
           overrides:
             openmetrics_endpoint.required: false
             openmetrics_endpoint.hidden: true
+            exclude_labels.enabled: false
+            exclude_labels.value.example:
+              - source_version
+              - destination_version
+              - source_canonical_revision
+              - destination_canonical_revision
+              - source_principal
+              - destination_principal
+              - source_cluster
+              - destination_cluster
+              - source_canonical_service
+              - destination_canonical_service
+              - source_workload_namespace
+              - destination_workload_namespace
+              - request_protocol
+              - connection_security_policy
+              - destination_service
+              - source_workload
             tag_by_endpoint.hidden: false
             tag_by_endpoint.enabled: true
             tag_by_endpoint.value.example: true
