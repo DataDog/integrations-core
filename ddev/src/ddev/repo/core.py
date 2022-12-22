@@ -69,56 +69,80 @@ class IntegrationRegistry:
         self.__cache[name] = integration
         return integration
 
-    def iter(self) -> Iterable[Integration]:
+    def iter(self, selection: Iterable[str] = ()) -> Iterable[Integration]:
+        selected = self.__finalize_selection(selection)
         for path in sorted(self.repo.path.iterdir()):
             integration = self.__get_from_path(path)
-            if integration.is_integration:
+            if selected and integration.name not in selected:
+                continue
+            elif integration.is_integration:
                 yield integration
 
-    def iter_all(self) -> Iterable[Integration]:
+    def iter_all(self, selection: Iterable[str] = ()) -> Iterable[Integration]:
+        selected = self.__finalize_selection(selection)
         for path in sorted(self.repo.path.iterdir()):
             integration = self.__get_from_path(path)
-            if integration.is_valid:
+            if selected and integration.name not in selected:
+                continue
+            elif integration.is_valid:
                 yield integration
 
-    def iter_packages(self) -> Iterable[Integration]:
+    def iter_packages(self, selection: Iterable[str] = ()) -> Iterable[Integration]:
+        selected = self.__finalize_selection(selection)
         for path in sorted(self.repo.path.iterdir()):
             integration = self.__get_from_path(path)
-            if integration.is_package:
+            if selected and integration.name not in selected:
+                continue
+            elif integration.is_package:
                 yield integration
 
-    def iter_tiles(self) -> Iterable[Integration]:
+    def iter_tiles(self, selection: Iterable[str] = ()) -> Iterable[Integration]:
+        selected = self.__finalize_selection(selection)
         for path in sorted(self.repo.path.iterdir()):
             integration = self.__get_from_path(path)
-            if integration.is_tile:
+            if selected and integration.name not in selected:
+                continue
+            elif integration.is_tile:
                 yield integration
 
-    def iter_testable(self) -> Iterable[Integration]:
+    def iter_testable(self, selection: Iterable[str] = ()) -> Iterable[Integration]:
+        selected = self.__finalize_selection(selection)
         for path in sorted(self.repo.path.iterdir()):
             integration = self.__get_from_path(path)
-            if integration.is_testable:
+            if selected and integration.name not in selected:
+                continue
+            elif integration.is_testable:
                 yield integration
 
-    def iter_shippable(self) -> Iterable[Integration]:
+    def iter_shippable(self, selection: Iterable[str] = ()) -> Iterable[Integration]:
+        selected = self.__finalize_selection(selection)
         for path in sorted(self.repo.path.iterdir()):
             integration = self.__get_from_path(path)
-            if integration.is_shippable:
+            if selected and integration.name not in selected:
+                continue
+            elif integration.is_shippable:
                 yield integration
 
-    def iter_agent_checks(self) -> Iterable[Integration]:
+    def iter_agent_checks(self, selection: Iterable[str] = ()) -> Iterable[Integration]:
+        selected = self.__finalize_selection(selection)
         for path in sorted(self.repo.path.iterdir()):
             integration = self.__get_from_path(path)
-            if integration.is_agent_check:
+            if selected and integration.name not in selected:
+                continue
+            elif integration.is_agent_check:
                 yield integration
 
-    def iter_jmx_checks(self) -> Iterable[Integration]:
+    def iter_jmx_checks(self, selection: Iterable[str] = ()) -> Iterable[Integration]:
+        selected = self.__finalize_selection(selection)
         for path in sorted(self.repo.path.iterdir()):
             integration = self.__get_from_path(path)
-            if integration.is_jmx_check:
+            if selected and integration.name not in selected:
+                continue
+            elif integration.is_jmx_check:
                 yield integration
 
     def iter_changed(self) -> Iterable[Integration]:
-        changed_root_entries = {relative_path.split('/', 1)[0] for relative_path in self.repo.git.changed_files}
+        changed_root_entries = self.__get_changed_root_entries()
         for path in sorted(self.repo.path.iterdir()):
             integration = self.__get_from_path(path)
             if integration.is_valid and integration.name in changed_root_entries:
@@ -132,3 +156,14 @@ class IntegrationRegistry:
             self.__cache[path.name] = integration
 
         return integration
+
+    def __finalize_selection(self, selection: Iterable[str]) -> set[str]:
+        if not selection:
+            return self.__get_changed_root_entries()
+        elif 'all' in selection:
+            return set()
+        else:
+            return set(selection)
+
+    def __get_changed_root_entries(self) -> set[str]:
+        return {relative_path.split('/', 1)[0] for relative_path in self.repo.git.changed_files}
