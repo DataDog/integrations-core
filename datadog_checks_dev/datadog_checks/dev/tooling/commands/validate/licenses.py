@@ -289,7 +289,9 @@ def probe_github(url, ctx):
     repo_api_url = f'https://api.github.com/repos/{owner_repo}'
     repo_res = requests.get(repo_api_url, auth=get_auth_info(ctx.obj)).json()
     def_branch = repo_res.get('default_branch')
-    created_date = repo_res.get('created_at')[:4] + ' '
+    created_date = repo_res.get('created_at') or ''
+    if created_date:
+        created_date = created_date[:4] + ' '
     path = f'https://raw.githubusercontent.com/{owner_repo}/{def_branch}'
     return path, created_date
 
