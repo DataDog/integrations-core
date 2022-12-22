@@ -108,13 +108,14 @@ Then, you need to use the [root user `cloudbreak`][13] when accessing the host w
 sudo ssh -i "/path/to/key.pem" cloudbreak@<HOST_IP_ADDRESS>
 ```
 
-Note that the workload username and password can be used to access Cloudera hosts via SSH, although only the `cloudbreak` user can install the Datadog Agent. 
-Trying to do so will result in the following error:
+The workload username and password can be used to access Cloudera hosts via SSH, although only the `cloudbreak` user can install the Datadog Agent. 
+Trying to use any user that is not `cloudbreak` may results in the following error:
 ```
 <NON_CLOUDBREAK_USER> is not allowed to run sudo on <CLOUDERA_HOSTNAME>.  This incident will be reported.
 ```
 
-If you something similar to the following in the Agent status:
+### Config errors when collecting Datadog metrics
+If you something similar to the following in the Agent status when collecting metrics from your Cloudera host:
 
 ```
   Config Errors
@@ -124,10 +125,10 @@ If you something similar to the following in the Agent status:
       open /etc/datadog-agent/conf.d/zk.d/conf.yaml: permission denied
 ```
 
-you will need to change the ownership of the `conf.yaml` to `dd-agent`:
+you need to change the ownership of the `conf.yaml` to `dd-agent`:
 
 ```
-[cloudbreak@<CLOUDERA_HOSTNAME> etc]$ sudo chown -R dd-agent:dd-agent /etc/datadog-agent/conf.d/zk.d/conf.yaml
+[cloudbreak@<CLOUDERA_HOSTNAME> ~]$ sudo chown -R dd-agent:dd-agent /etc/datadog-agent/conf.d/zk.d/conf.yaml
 ```
 
 
