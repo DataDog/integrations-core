@@ -40,7 +40,4 @@ def test_e2e(dd_agent_check, config):
         tags=CLUSTER_HEALTH_TAGS,
     )
     aggregator.assert_service_check('cloudera.host.health', ClouderaCheck.OK)
-    aggregator.assert_event(
-        "ExecutionException running extraction tasks for service 'cod--qfdcinkqrzw::yarn'.", count=1
-    )
     aggregator.assert_all_metrics_covered()
