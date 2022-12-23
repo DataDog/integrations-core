@@ -8,7 +8,7 @@ import mock
 import pytest
 
 from datadog_checks.base.stubs import aggregator
-from datadog_checks.base.utils.tracing import traced_class
+from datadog_checks.base.utils.tracing import INTEGRATION_TRACING_SERVICE_NAME, traced_class
 
 
 class MockAgentCheck(object):
@@ -44,8 +44,8 @@ def test_traced_class(traces_enabled):
         if os.environ['DDEV_TRACE_ENABLED'] == 'true':
             tracer.trace.assert_has_calls(
                 [
-                    mock.call('__init__', resource='__init__', service='dummy-integration'),
-                    mock.call('check', resource='check', service='dummy-integration'),
+                    mock.call('__init__', resource='dummy', service=INTEGRATION_TRACING_SERVICE_NAME),
+                    mock.call('check', resource='dummy', service=INTEGRATION_TRACING_SERVICE_NAME),
                 ],
                 any_order=True,
             )
