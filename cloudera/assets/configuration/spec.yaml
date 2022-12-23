@@ -1,0 +1,44 @@
+name: Cloudera
+files:
+- name: cloudera.yaml
+  options:
+  - template: init_config
+    options:
+    - name: workload_username
+      description: |
+        The Workload username. This value can be found in the `User Management` tab of the Management 
+        Console in the `Workload User Name`.
+      required: true
+      value:
+        type: string
+    - name: workload_password
+      description: |
+        The Workload password. This value can be found in the `User Management` tab of the Management 
+        Console in the `Workload Password`.
+      required: true
+      value:
+        type: string
+    - template: init_config/default
+  - template: instances
+    options:
+    - name: api_url
+      required: true
+      description: |
+        The URL endpoint for the Cloudera Manager API. This can be found under the Endpoints tab for 
+        your Data Hub to monitor. 
+
+        Note: The version of the Cloudera Manager API needs to be appended at the end of the URL. 
+        For example, using v48 of the API for Data Hub `cluster_1` should result with a URL similar 
+        to the following:
+        `https://cluster1.cloudera.site/cluster_1/cdp-proxy-api/cm-api/v48`
+
+      value:
+        type: string
+    - name: max_parallel_requests
+      description: | 
+        The maximum number of requests to Cloudera Manager that are allowed in parallel.
+      hidden: true
+      value:
+        type: integer
+        example: 100
+    - template: instances/default

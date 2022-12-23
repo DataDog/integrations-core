@@ -1,0 +1,72 @@
+{
+    debug
+    admin :2019
+}
+:80 {
+    root * /usr/share/caddy/
+    @get_version {
+        method GET
+        path /api/v48/cm/version
+    }
+    route @get_version {
+        rewrite /api/v48/cm/version api/v48/cm/version/get
+        file_server
+    }
+    @get_clusters {
+        method GET
+        path /api/v48/clusters
+    }
+    route @get_clusters {
+        rewrite /api/v48/clusters api/v48/clusters/get
+        file_server
+    }
+    @get_metrics_from_cluster {
+        method GET
+        path /api/v48/timeseries
+        expression {query}.contains('SELECT+last%28cpu_percent_across_hosts%29%2Clast%28total_read_bytes_rate_across_disks%29%2Clast%28total_write_bytes_rate_across_disks%29%2Clast%28total_bytes_receive_rate_across_network_interfaces%29%2Clast%28total_bytes_transmit_rate_across_network_interfaces')
+        expression {query}.contains('category%3DCLUSTER')
+    }
+    route @get_metrics_from_cluster {
+        rewrite /api/v48/timeseries /api/v48/timeseries/get_metrics_from_cluster
+        file_server
+    }
+    @get_hosts {
+        method GET
+        path /api/v48/clusters/cod--qfdcinkqrzw/hosts
+    }
+    route @get_hosts {
+        rewrite /api/v48/clusters/cod--qfdcinkqrzw/hosts /api/v48/clusters/cod--qfdcinkqrzw/hosts/get
+        file_server
+    }
+    @get_metrics_from_host {
+        method GET
+        path /api/v48/timeseries
+        expression {query}.contains('SELECT+last%28cpu_user_rate%29%2Clast%28cpu_system_rate%29%2Clast%28cpu_nice_rate%29%2Clast%28cpu_iowait_rate%29%2Clast%28cpu_irq_rate%29%2Clast%28cpu_soft_irq_rate%29%2Clast%28cpu_steal_rate%29%2Clast%28load_1%29%2Clast%28load_5%29%2Clast%28load_15%29%2Clast%28swap_used%29%2Clast%28swap_out_rate%29%2Clast%28physical_memory_used%29%2Clast%28physical_memory_total%29%2Clast%28physical_memory_cached%29%2Clast%28physical_memory_buffers%29%2Clast%28total_bytes_receive_rate_across_network_interfaces%29%2Clast%28total_bytes_transmit_rate_across_network_interfaces%29%2Clast%28total_read_bytes_rate_across_disks%29%2Clast%28total_write_bytes_rate_across_disks%29%2Clast%28total_read_ios_rate_across_disks%29%2Clast%28total_write_ios_rate_across_disks%29%2Clast%28health_good_rate%29%2Clast%28health_concerning_rate%29%2Clast%28health_bad_rate%29%2Clast%28health_disabled_rate%29%2Clast%28health_unknown_rate%29%2Clast%28alerts_rate%29%2Clast%28events_critical_rate%29%2Clast%28events_important_rate')
+        expression {query}.contains('category%3DHOST')
+    }
+    route @get_metrics_from_host {
+        rewrite /api/v48/timeseries /api/v48/timeseries/get_metrics_from_host
+        file_server
+    }
+    @get_metrics_from_role {
+        method GET
+        path /api/v48/timeseries
+        expression {query}.contains('SELECT+last%28mem_rss%29%2Clast%28cpu_user_rate%29%2Clast%28cpu_system_rate')
+        expression {query}.contains('category%3DROLE')
+    }
+    route @get_metrics_from_role {
+        rewrite /api/v48/timeseries /api/v48/timeseries/get_metrics_from_role
+        file_server
+    }
+    @get_metrics_from_disk {
+        method GET
+        path /api/v48/timeseries
+        expression {query}.contains('SELECT+last%28service_time%29%2Clast%28await_time%29%2Clast%28await_read_time%29%2Clast%28await_write_time')
+        expression {query}.contains('category%3DDISK')
+    }
+    route @get_metrics_from_disk {
+        rewrite /api/v48/timeseries /api/v48/timeseries/get_metrics_from_disk
+        file_server
+    }
+    file_server browse
+}

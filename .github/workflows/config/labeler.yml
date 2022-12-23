@@ -94,6 +94,8 @@ integration/clickhouse:
 - clickhouse/**/*
 integration/cloud_foundry_api:
 - cloud_foundry_api/**/*
+integration/cloudera:
+- cloudera/**/*
 integration/cockroachdb:
 - cockroachdb/**/*
 integration/confluent_platform:
