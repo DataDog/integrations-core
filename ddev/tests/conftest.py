@@ -9,6 +9,7 @@ from typing import Generator
 
 import pytest
 from click.testing import CliRunner as __CliRunner
+from datadog_checks.dev.tooling.utils import set_root
 
 from ddev.config.constants import AppEnvVars, ConfigEnvVars
 from ddev.config.file import ConfigFile
@@ -126,6 +127,7 @@ def repository(local_clone, config_file) -> Generator[ClonedRepo, None, None]:
     try:
         yield local_clone
     finally:
+        set_root('')
         local_clone.reset_branch()
 
 
