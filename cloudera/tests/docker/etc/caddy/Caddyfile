@@ -68,5 +68,14 @@
         rewrite /api/v48/timeseries /api/v48/timeseries/get_metrics_from_disk
         file_server
     }
+    @get_events {
+        method GET
+        path /api/v48/events
+        expression {query}.contains('query=timeOccurred')
+    }
+    route @get_events {
+        rewrite /api/v48/events /api/v48/events/get_events
+        file_server
+    }
     file_server browse
 }

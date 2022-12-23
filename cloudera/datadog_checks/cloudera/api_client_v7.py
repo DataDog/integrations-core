@@ -1,10 +1,13 @@
 from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime
 
 import cm_client
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.utils.time import get_timestamp
 from datadog_checks.cloudera.api_client import ApiClient
 from datadog_checks.cloudera.entity_status import ENTITY_STATUS
+from datadog_checks.cloudera.event import ClouderaEvent
 from datadog_checks.cloudera.metrics import NATIVE_METRICS, TIMESERIES_METRICS
 
 from .common import CLUSTER_HEALTH, HOST_HEALTH
@@ -15,6 +18,10 @@ class ApiClientV7(ApiClient):
         super(ApiClientV7, self).__init__(check, api_client)
 
     def collect_data(self):
+        self._collect_clusters()
+        self._collect_events()
+
+    def _collect_clusters(self):
         clusters_resource_api = cm_client.ClustersResourceApi(self._api_client)
         read_clusters_response = clusters_resource_api.read_clusters(cluster_type='any', view='full')
         self._log.debug("Cloudera full clusters response:\n%s", read_clusters_response)
@@ -30,6 +37,28 @@ class ApiClientV7(ApiClient):
                 executor.submit(self._collect_cluster_metrics, cluster_name, tags)
                 executor.submit(self._collect_hosts, cluster_name)
                 self._collect_cluster_service_check(cluster, tags)
+
+    def _collect_events(self):
+        events_resource_api = cm_client.EventsResourceApi(self._api_client)
+        now_utc = get_timestamp()
+
+        start_time_iso = datetime.utcfromtimestamp(self._check.latest_event_query_utc).isoformat()
+        end_time_iso = datetime.utcfromtimestamp(now_utc).isoformat()
+
+        query = f"timeOccurred=ge={start_time_iso};timeOccurred=le={end_time_iso}"
+        self._check.log.info("Cloudera event query: %s", query)
+        try:
+            event_resource_response = events_resource_api.read_events(query=query)
+            for item in event_resource_response.items:
+                self._log.debug('content: %s', item.content)
+                self._log.debug('timestamp: %s', item.time_occurred)
+                self._log.debug('id: %s', item.id)
+                self._log.debug('category: %s', item.category)
+                event_payload = ClouderaEvent(item).get_event()
+                self._check.event(event_payload)
+            self._check.latest_event_query_utc = now_utc
+        except Exception as e:
+            self._log.error("Cloudera unable to process event collection: %s", e)
 
     @staticmethod
     def _collect_cluster_tags(cluster, custom_tags):
