@@ -325,6 +325,32 @@ PROMETHEUS_METRICS = [
     "cluster.outlier_detection.ejections_detected_failure_percentage.count",
 ]
 
+COUNT_METRICS = {
+    "envoy.cluster.upstream_cx.count",
+    "envoy.cluster.upstream_cx_http1.count",
+    "envoy.cluster.upstream_cx_http2.count",
+    "envoy.cluster.upstream_cx_http3.count",
+    "envoy.cluster.upstream_cx_rx_bytes.count",
+    "envoy.cluster.upstream_cx_tx_bytes.count",
+    "envoy.cluster.upstream_flow_control_backed_up.count",
+    "envoy.cluster.upstream_flow_control_drained.count",
+    "envoy.cluster.upstream_flow_control_paused_reading.count",
+    "envoy.cluster.upstream_flow_control_resumed_reading.count",
+    "envoy.cluster.upstream_internal_redirect_failed.count",
+    "envoy.cluster.upstream_internal_redirect_succeeded.count",
+    "envoy.cluster.upstream_rq_pending.count",
+    "envoy.cluster.upstream_rq_time.bucket",
+    "envoy.cluster.upstream_rq_time.count",
+    "envoy.cluster.upstream_rq_time.sum",
+    "envoy.http.downstream_cx.count",
+    "envoy.http.downstream_cx_http1.count",
+    "envoy.http.downstream_cx_http2.count",
+    "envoy.http.downstream_cx_http3.count",
+    "envoy.http.downstream_cx_rx_bytes.count",
+    "envoy.http.downstream_cx_ssl.count",
+    "envoy.http.downstream_cx_tx_bytes.count",
+}
+
 FLAKY_METRICS = {
     "listener.downstream_cx_active",
     "listener.downstream_cx_destroy.count",
