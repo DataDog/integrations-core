@@ -325,15 +325,6 @@ files:
           value:
             type: number
             example: 10000
-        - name: enable_pg_stat_statements_query_text_length_telemetry
-          hidden: true
-          description: |
-            Enables distribution metrics for monitoring query text length from pg_stat_statements. 
-            This is useful for debugging purposes, but it shouldn't be left enabled because this could 
-            degrade the integration's performance.
-          value:
-            type: boolean
-            example: false
     - name: query_samples
       description: Configure collection of query samples
       options:
