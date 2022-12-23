@@ -29,7 +29,8 @@ No additional installation is needed on your server.
 <!-- xxx tab "Host" xxx -->
 
 #### Host
-1. Edit the `cloudera.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Cloudera cluster and host data. See the [sample cloudera.d/conf.yaml][4] for all available configuration options. Note that the `api_url` should contain the API version at the end.
+1. Edit the `cloudera.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Cloudera cluster and host data. See the [sample cloudera.d/conf.yaml][4] for all available configuration options.  
+**Note**: The `api_url` should contain the API version at the end.
 
    ```yaml
    init_config:
@@ -69,7 +70,7 @@ No additional installation is needed on your server.
 
 #### Containerized
 
-For containerized environments, see the [Autodiscovery Integration Templates][9] for guidance on applying the parameters below.
+For containerized environments, see the [Autodiscovery Integration Templates][3] for guidance on applying the parameters below.
 
 | Parameter            | Value                                                                                                            |
 | -------------------- | ---------------------------------------------------------------------------------------------------------------- |
@@ -108,14 +109,14 @@ Then, you need to use the [root user `cloudbreak`][13] when accessing the host w
 sudo ssh -i "/path/to/key.pem" cloudbreak@<HOST_IP_ADDRESS>
 ```
 
-The workload username and password can be used to access Cloudera hosts via SSH, although only the `cloudbreak` user can install the Datadog Agent. 
+The workload username and password can be used to access Cloudera hosts through SSH, although only the `cloudbreak` user can install the Datadog Agent. 
 Trying to use any user that is not `cloudbreak` may result in the following error:
 ```
 <NON_CLOUDBREAK_USER> is not allowed to run sudo on <CLOUDERA_HOSTNAME>.  This incident will be reported.
 ```
 
 ### Config errors when collecting Datadog metrics
-If you something similar to the following in the Agent status when collecting metrics from your Cloudera host:
+If you see something similar to the following in the Agent status when collecting metrics from your Cloudera host:
 
 ```
   Config Errors
@@ -125,7 +126,7 @@ If you something similar to the following in the Agent status when collecting me
       open /etc/datadog-agent/conf.d/zk.d/conf.yaml: permission denied
 ```
 
-you need to change the ownership of the `conf.yaml` to `dd-agent`:
+You need to change the ownership of the `conf.yaml` to `dd-agent`:
 
 ```
 [cloudbreak@<CLOUDERA_HOSTNAME> ~]$ sudo chown -R dd-agent:dd-agent /etc/datadog-agent/conf.d/zk.d/conf.yaml
