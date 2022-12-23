@@ -417,7 +417,6 @@ def test_statement_samples_collect(
     matching = [e for e in events if expected_statement_prefix.startswith(e['db']['statement'])]
     assert len(matching) > 0, "should have collected an event"
 
-
     with_plans = [e for e in matching if e['db']['plan']['definition'] is not None]
     if schema == 'testdb' and explain_strategy == 'FQ_PROCEDURE':
         # explain via the FQ_PROCEDURE will fail if a query contains non-fully-qualified tables because it will

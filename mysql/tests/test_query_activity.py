@@ -367,7 +367,7 @@ def test_activity_collection_rate_limit(aggregator, dd_run_check, dbm_instance):
     check.cancel()
     max_collections = int(1 / collection_interval * sleep_time) + 1
     metrics = aggregator.metrics("dd.mysql.activity.collect_activity.payload_size")
-    assert max_collections / 2.0 <= len(metrics) <= max_collections 
+    assert max_collections / 2.0 <= len(metrics) <= max_collections
 
 
 @pytest.mark.integration
