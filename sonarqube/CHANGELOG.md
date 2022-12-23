@@ -1,5 +1,9 @@
 # CHANGELOG - SonarQube
 
+## 2.2.2 / 2022-12-23
+
+* [Fixed] Fix config spec to allow additionalProperties. See [#13512](https://github.com/DataDog/integrations-core/pull/13512).
+
 ## 2.2.1 / 2022-12-16
 
 * [Fixed] Projects processed in `components` excluded from `components_discovery`. See [#13531](https://github.com/DataDog/integrations-core/pull/13531).
