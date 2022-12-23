@@ -346,6 +346,15 @@ PROMETHEUS_METRICS = [
     "http.downstream_cx_rx_bytes.count",
     "http.downstream_cx_ssl.count",
     "http.downstream_cx_tx_bytes.count",
+    "http.downstream_cx_upgrades.count",
+    "http.downstream_flow_control_paused_reading.count",
+    "http.downstream_flow_control_resumed_reading.count",
+    "http.downstream_rq.count",
+    "http.downstream_rq_http1.count",
+    "http.downstream_rq_http2.count",
+    "http.downstream_rq_http3.count",
+    "http.rq.count",
+    "vhost.vcluster.upstream_rq.count",
 ]
 
 
