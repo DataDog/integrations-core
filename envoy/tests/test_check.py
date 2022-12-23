@@ -4,7 +4,6 @@ from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.envoy.metrics import METRIC_PREFIX, METRICS
 
 from .common import (
-    COUNT_METRICS,
     DEFAULT_INSTANCE,
     ENVOY_VERSION,
     FLAKY_METRICS,
@@ -28,9 +27,7 @@ def test_check(aggregator, dd_run_check, check):
     dd_run_check(c)
     dd_run_check(c)
 
-    metrics_list = COUNT_METRICS + PROMETHEUS_METRICS
-
-    for metric in metrics_list:
+    for metric in PROMETHEUS_METRICS:
         formatted_metric = "envoy.{}".format(metric)
         if metric in FLAKY_METRICS:
             aggregator.assert_metric(formatted_metric, at_least=0)
