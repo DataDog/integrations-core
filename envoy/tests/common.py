@@ -108,7 +108,7 @@ PROMETHEUS_METRICS = [
     "cluster.upstream_cx_pool_overflow.count",
     "cluster.upstream_cx_protocol_error.count",
     "cluster.upstream_cx_rx_bytes_buffered",
-    "cluster.upstream_cx_tx_bytes_total",
+    "cluster.upstream_cx_tx_bytes_buffered",
     "cluster.upstream_rq.count",
     "cluster.upstream_rq_active",
     "cluster.upstream_rq_cancelled.count",
