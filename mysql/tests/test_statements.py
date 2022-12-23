@@ -289,7 +289,7 @@ def test_statement_metrics_cloud_metadata(aggregator, dd_run_check, dbm_instance
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize(
     "events_statements_table",
-    ["events_statements_history_long"],
+    ["events_statements_current"],
 )
 @pytest.mark.parametrize("explain_strategy", ['PROCEDURE', 'FQ_PROCEDURE', 'STATEMENT', None])
 @pytest.mark.parametrize(
@@ -416,6 +416,7 @@ def test_statement_samples_collect(
 
     matching = [e for e in events if expected_statement_prefix.startswith(e['db']['statement'])]
     assert len(matching) > 0, "should have collected an event"
+
 
     with_plans = [e for e in matching if e['db']['plan']['definition'] is not None]
     if schema == 'testdb' and explain_strategy == 'FQ_PROCEDURE':
@@ -654,7 +655,7 @@ def test_statement_samples_failed_explain_handling(
     db_error_count,
 ):
     # pin the table we use for consistency
-    dbm_instance['query_samples']['events_statements_table'] = "events_statements_history_long"
+    dbm_instance['query_samples']['events_statements_table'] = "events_statements_current"
     mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
 
     dd_run_check(mysql_check)
@@ -816,7 +817,7 @@ def test_async_job_enabled(dd_run_check, dbm_instance, statement_samples_enabled
 @mock.patch.dict('os.environ', {'DDEV_SKIP_GENERIC_TAGS_CHECK': 'true'})
 def test_statement_samples_max_per_digest(dd_run_check, dbm_instance):
     # clear out any events from previous test runs
-    dbm_instance['query_samples']['events_statements_table'] = 'events_statements_history_long'
+    dbm_instance['query_samples']['events_statements_table'] = 'events_statements_current'
     mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
     for _ in range(3):
         dd_run_check(mysql_check)
@@ -829,7 +830,7 @@ def test_statement_samples_max_per_digest(dd_run_check, dbm_instance):
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 @mock.patch.dict('os.environ', {'DDEV_SKIP_GENERIC_TAGS_CHECK': 'true'})
-def test_statement_samples_invalid_explain_procedure(aggregator, dd_run_check, dbm_instance):
+def test_statement_samples_invalid_explain_procedure(aggregator, dd_run_check, dbm_instance, bob_conn):
     dbm_instance['query_samples']['explain_procedure'] = 'hello'
     mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
     dd_run_check(mysql_check)

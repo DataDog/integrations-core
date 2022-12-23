@@ -70,45 +70,6 @@ EVENTS_STATEMENTS_SAMPLE_EXCLUDE_KEYS = {
     'processlist_host',
 }
 
-CREATE_TEMP_TABLE = re.sub(
-    r'\s+',
-    ' ',
-    """
-    CREATE TEMPORARY TABLE {temp_table} SELECT
-        current_schema,
-        sql_text,
-        digest,
-        digest_text,
-        timer_start,
-        timer_end,
-        timer_wait,
-        lock_time,
-        rows_affected,
-        rows_sent,
-        rows_examined,
-        select_full_join,
-        select_full_range_join,
-        select_range,
-        select_range_check,
-        select_scan,
-        sort_merge_passes,
-        sort_range,
-        sort_rows,
-        sort_scan,
-        no_index_used,
-        no_good_index_used,
-        event_name,
-        thread_id
-     FROM {statements_table}
-        WHERE sql_text IS NOT NULL
-        AND event_name like 'statement/%%'
-        AND digest_text is NOT NULL
-        AND digest_text NOT LIKE 'EXPLAIN %%'
-        AND timer_start > %s
-    LIMIT %s
-""",
-).strip()
-
 EVENTS_STATEMENTS_CURRENT_QUERY = re.sub(
     r'\s+',
     ' ',
@@ -151,53 +112,6 @@ EVENTS_STATEMENTS_CURRENT_QUERY = re.sub(
 """,
 ).strip()
 
-TEST_QUERY = re.sub(
-    r'\s+',
-    ' ',
-    """
-    SELECT
-        thread_id,
-        sql_text,
-        digest,
-        timer_start,
-        timer_wait / 1000 AS timer_wait_ns
-    FROM performance_schema.events_statements_history_long E
-    WHERE sql_text IS NOT NULL
-        AND event_name like 'statement/%%'
-        AND digest_text is NOT NULL
-        AND digest_text NOT LIKE 'EXPLAIN %%'
-        AND timer_start > %s
-        ORDER BY thread_id, timer_start DESC
-""",
-).strip()
-
-# neither window functions nor this variable-based window function emulation can be used directly on performance_schema
-# tables due to some underlying issue regarding how the performance_schema storage engine works (for some reason
-# many of the rows end up making it past the WHERE clause when they should have been filtered out)
-SUB_SELECT_EVENTS_NUMBERED = re.sub(
-    r'\s+',
-    ' ',
-    """
-    (SELECT
-        *,
-        @row_num := IF(@current_digest = digest, @row_num + 1, 1) AS row_num,
-        @current_digest := digest
-    FROM {statements_table}
-    ORDER BY digest, timer_wait)
-""",
-).strip()
-
-SUB_SELECT_EVENTS_WINDOW = re.sub(
-    r'\s+',
-    ' ',
-    """
-    (SELECT
-        *,
-        row_number() over (partition by digest order by timer_wait desc) as row_num
-    FROM {statements_table})
-""",
-).strip()
-
 STARTUP_TIME_SUBQUERY = re.sub(
     r'\s+',
     ' ',
@@ -205,47 +119,6 @@ STARTUP_TIME_SUBQUERY = re.sub(
     (SELECT UNIX_TIMESTAMP()-VARIABLE_VALUE
     FROM {global_status_table}
     WHERE VARIABLE_NAME='UPTIME')
-""",
-).strip()
-
-EVENTS_STATEMENTS_QUERY = re.sub(
-    r'\s+',
-    ' ',
-    """
-    SELECT
-        current_schema,
-        sql_text,
-        digest,
-        digest_text,
-        timer_start,
-        @startup_time_s+timer_end*1e-12 as timer_end_time_s,
-        timer_wait / 1000 AS timer_wait_ns,
-        lock_time / 1000 AS lock_time_ns,
-        rows_affected,
-        rows_sent,
-        rows_examined,
-        select_full_join,
-        select_full_range_join,
-        select_range,
-        select_range_check,
-        select_scan,
-        sort_merge_passes,
-        sort_range,
-        sort_rows,
-        sort_scan,
-        no_index_used,
-        no_good_index_used,
-        processlist_user,
-        processlist_host,
-        processlist_db
-    FROM {statements_numbered} as E
-    LEFT JOIN performance_schema.threads as T
-        ON E.thread_id = T.thread_id
-    WHERE sql_text IS NOT NULL
-        AND timer_start > %s
-        AND row_num = 1
-    ORDER BY timer_wait DESC
-    LIMIT %s
 """,
 ).strip()
 
@@ -380,7 +253,7 @@ class MySQLStatementSamples(DBMAsyncJob):
         # explained_statements_cache: limit how often we try to re-explain the same query
         self._explained_statements_ratelimiter = RateLimitingTTLCache(
             maxsize=self._config.statement_samples_config.get('explained_queries_cache_maxsize', 5000),
-            ttl=60 * 60 / self._config.statement_samples_config.get('explained_queries_per_hour_per_query', 60),
+            ttl=75 * 60 / self._config.statement_samples_config.get('explained_queries_per_hour_per_query', 60),
         )
 
         # explain_error_states_cache. cache {(schema, query_signature) -> [explain_error_state])
