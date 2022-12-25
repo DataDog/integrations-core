@@ -131,6 +131,7 @@ envoy.http.downstream_cx_idle_timeout.count,count,,,,[OpenMetrics V2] Total conn
 envoy.http.downstream_cx_max_duration_reached.count,count,,,,[OpenMetrics V2] Total connections closed due to max connection duration,0,envoy,,
 envoy.http.downstream_cx_overload_disable_keepalive.count,count,,,,[OpenMetrics V2] Total connections for which HTTP 1.x keepalive has been disabled due to Envoy overload,0,envoy,,
 envoy.http.downstream_cx_protocol_error.count,count,,,,[OpenMetrics V2] Total protocol errors,0,envoy,,
+envoy.http.downstream_cx_upgrades.count,count,,,,[OpenMetrics V2] Count of successfully upgraded connections,0,envoy,,
 envoy.http.downstream_cx_upgrades_active,gauge,,,,[OpenMetrics V2] Total active upgraded connections. These are also counted as active http1/http2 connections.,0,envoy,,
 envoy.http.downstream_rq_completed.count,count,,request,,[OpenMetrics V2] Total requests that resulted in a response (e.g. does not include aborted requests),0,envoy,,
 envoy.http.downstream_rq_failed_path_normalization.count,count,,,,[OpenMetrics V2] Total requests redirected due to different original and normalized URL paths or when path normalization failed. This action is configured by setting the path_with_escaped_slashes_action config option.,0,envoy,,
@@ -421,11 +422,16 @@ envoy.listener_manager.lds.control_plane.connected_state,gauge,,connection,,[Leg
 envoy.listener_manager.lds.control_plane.pending_requests,gauge,,request,,[Legacy] Total number of pending requests when the rate limit was enforced,0,envoy,lds pending control plane requests,
 envoy.listener_manager.lds.control_plane.rate_limit_enforced,count,,occurrence,,[Legacy] Total number of times rate limit was enforced for management server requests,0,envoy,lds rate limit enforcements,
 envoy.http.downstream_cx_total,count,,connection,,[Legacy] Total connections,0,envoy,,
+envoy.http.downstream_cx.count,count,,connection,,[OpenMetrics V2] Count of connections,0,envoy,,
 envoy.http.downstream_cx_ssl_total,count,,connection,,[Legacy] Total TLS connections,0,envoy,,
+envoy.http.downstream_cx_ssl.count,count,,connection,,[OpenMetrics V2] Count of TLS connections,0,envoy,,
 envoy.http.downstream_cx_http1_total,count,,connection,,[Legacy] Total HTTP/1.1 connections,0,envoy,,
-envoy.http.downstream_cx_websocket_total,count,,connection,,[Legacy] Total WebSocket connections,0,envoy,,
 envoy.http.downstream_cx_http2_total,count,,connection,,[Legacy] Total HTTP/2 connections,0,envoy,,
 envoy.http.downstream_cx_http3_total,count,,connection,,[Legacy] [API v3 only] Total HTTP/3 connections,0,envoy,,
+envoy.http.downstream_cx_http1.count,count,,connection,,[OpenMetrics V2] Count of HTTP/1.1 connections,0,envoy,,
+envoy.http.downstream_cx_http2.count,count,,connection,,[OpenMetrics V2] Count of HTTP/2 connections,0,envoy,,
+envoy.http.downstream_cx_http3.count,count,,connection,,[OpenMetrics V2] Count of HTTP/3 connections,0,envoy,,
+envoy.http.downstream_cx_websocket_total,count,,connection,,[Legacy] Total WebSocket connections,0,envoy,,
 envoy.http.downstream_cx_destroy,count,,connection,,[Legacy] Total connections destroyed,0,envoy,,
 envoy.http.downstream_cx_destroy_remote,count,,connection,,[Legacy] Total connections destroyed due to remote close,0,envoy,,
 envoy.http.downstream_cx_destroy_local,count,,connection,,[Legacy] Total connections destroyed due to local close,0,envoy,,
@@ -440,14 +446,19 @@ envoy.http.downstream_cx_http2_active,gauge,,connection,,[Legacy] Total active H
 envoy.http.downstream_cx_http3_active,gauge,,connection,,[Legacy] [API v3 only] Total active HTTP/3 connections,0,envoy,,
 envoy.http.downstream_cx_protocol_error,count,,error,,[Legacy] Total protocol errors,-1,envoy,,
 envoy.http.downstream_cx_rx_bytes_total,count,,byte,,[Legacy] Total bytes received,0,envoy,,
+envoy.http.downstream_cx_rx_bytes.count,count,,byte,,[OpenMetrics V2] Count of bytes received,0,envoy,,
 envoy.http.downstream_cx_rx_bytes_buffered,gauge,,byte,,[Legacy] Total received bytes currently buffered,0,envoy,,
 envoy.http.downstream_cx_tx_bytes_total,count,,byte,,[Legacy] Total bytes sent,0,envoy,,
+envoy.http.downstream_cx_tx_bytes.count,count,,byte,,[OpenMetrics V2] Count of bytes sent,0,envoy,,
 envoy.http.downstream_cx_tx_bytes_buffered,gauge,,byte,,[Legacy] Total sent bytes currently buffered,0,envoy,,
 envoy.http.downstream_cx_drain_close,count,,connection,,[Legacy] Total connections closed due to draining,0,envoy,,
 envoy.http.downstream_cx_idle_timeout,count,,connection,,[Legacy] Total connections closed due to idle timeout,0,envoy,,
 envoy.http.downstream_flow_control_paused_reading_total,count,,occurrence,,[Legacy] Total number of times reads were disabled due to flow control,0,envoy,,
+envoy.http.downstream_flow_control_paused_reading.count,count,,occurrence,,[OpenMetrics V2] Count of times reads were disabled due to flow control,0,envoy,,
 envoy.http.downstream_flow_control_resumed_reading_total,count,,occurrence,,[Legacy] Total number of times reads were enabled on the connection due to flow control,0,envoy,,
+envoy.http.downstream_flow_control_resumed_reading.count,count,,occurrence,,[OpenMetrics V2] Count of times reads were enabled on the connection due to flow control,0,envoy,,
 envoy.http.downstream_rq_total,count,,request,,[Legacy] Total requests,0,envoy,,
+envoy.http.downstream_rq.count,count,,request,,[OpenMetrics V2] Count of requests,0,envoy,,
 envoy.http.downstream_rq_http1_total,count,,request,,[Legacy] Total HTTP/1.1 requests,0,envoy,,
 envoy.http.downstream_rq_http2_total,count,,request,,[Legacy] Total HTTP/2 requests,0,envoy,,
 envoy.http.downstream_rq_http3_total,count,,request,,[Legacy] [API v3 only] Total HTTP/3 requests,0,envoy,,
@@ -487,10 +498,14 @@ envoy.cluster_manager.warming_clusters,gauge,,node,,[Legacy] Number of currently
 envoy.cluster.assignment_stale,count,,,,[Legacy] Number of times the received assignments went stale before new assignments arrived.,0,envoy,,
 envoy.cluster.assignment_timeout_received,count,,occurrence,,[Legacy] Total assignments received with endpoint lease information.,0,envoy,,
 envoy.cluster.upstream_cx_total,count,,connection,,[Legacy] Total connections,0,envoy,,
+envoy.cluster.upstream_cx.count,count,,connection,,[OpenMetrics V2] Count of connections,0,envoy,,
 envoy.cluster.upstream_cx_active,gauge,,connection,,[Legacy] Total active connections,0,envoy,,
 envoy.cluster.upstream_cx_http1_total,count,,connection,,[Legacy] Total HTTP/1.1 connections,0,envoy,,
 envoy.cluster.upstream_cx_http2_total,count,,connection,,[Legacy] Total HTTP/2 connections,0,envoy,,
 envoy.cluster.upstream_cx_http3_total,count,,connection,,[Legacy] [API v3 only] Total HTTP/3 connections,0,envoy,,
+envoy.cluster.upstream_cx_http1.count,count,,connection,,[OpenMetrics V2] Count of HTTP/1.1 connections,0,envoy,,
+envoy.cluster.upstream_cx_http2.count,count,,connection,,[OpenMetrics V2] Count of HTTP/2 connections,0,envoy,,
+envoy.cluster.upstream_cx_http3.count,count,,connection,,[OpenMetrics V2] Count of HTTP/3 connections,0,envoy,,
 envoy.cluster.upstream_cx_connect_fail,count,,error,,[Legacy] Total connection failures,-1,envoy,,
 envoy.cluster.upstream_cx_connect_timeout,count,,timeout,,[Legacy] Total connection timeouts,-1,envoy,,
 envoy.cluster.upstream_cx_connect_attempts_exceeded,count,,error,,[Legacy] Total consecutive connection failures exceeding configured connection attempts,-1,envoy,,
@@ -503,8 +518,10 @@ envoy.cluster.upstream_cx_destroy_local_with_active_rq,count,,connection,,[Legac
 envoy.cluster.upstream_cx_destroy_remote_with_active_rq,count,,connection,,[Legacy] Total connections destroyed remotely with active requests,-1,envoy,,
 envoy.cluster.upstream_cx_close_notify,count,,connection,,[Legacy] Total connections closed via HTTP/1.1 connection close header or HTTP/2 GOAWAY,0,envoy,,
 envoy.cluster.upstream_cx_rx_bytes_total,count,,byte,,[Legacy] Total received connection bytes,0,envoy,,
+envoy.cluster.upstream_cx_rx_bytes.count,count,,byte,,[OpenMetrics V2] Count of received connection bytes,0,envoy,,
 envoy.cluster.upstream_cx_rx_bytes_buffered,gauge,,byte,,[Legacy] Received connection bytes currently buffered,0,envoy,,
-envoy.cluster.upstream_cx_tx_bytes_total,gauge,,byte,,[OpenMetrics V2 and Legacy] Total sent connection bytes,0,envoy,,
+envoy.cluster.upstream_cx_tx_bytes_total,count,,byte,,[Legacy] Total sent connection bytes,0,envoy,,
+envoy.cluster.upstream_cx_tx_bytes.count,count,,byte,,[OpenMetrics V2] Count of sent connection bytes,0,envoy,,
 envoy.cluster.upstream_cx_tx_bytes_buffered,gauge,,byte,,[Legacy] Send connection bytes currently buffered,0,envoy,,
 envoy.cluster.upstream_cx_protocol_error,count,,error,,[Legacy] Total connection protocol errors,-1,envoy,,
 envoy.cluster.upstream_cx_max_requests,count,,connection,,[Legacy] Total connections closed due to maximum requests,-1,envoy,,
@@ -514,6 +531,7 @@ envoy.cluster.upstream_cx_pool_overflow,count,,,,[Legacy] Total times that the c
 envoy.cluster.upstream_rq_total,count,,request,,[Legacy] Total requests,0,envoy,,
 envoy.cluster.upstream_rq_active,gauge,,request,,[Legacy] Total active requests,0,envoy,,
 envoy.cluster.upstream_rq_pending_total,count,,request,,[Legacy] Total requests pending a connection pool connection,0,envoy,,
+envoy.cluster.upstream_rq_pending.count,count,,request,,[Openmetrics V2] Count of requests pending a connection pool connection,0,envoy,,
 envoy.cluster.upstream_rq_pending_overflow,count,,request,,[Legacy] Total requests that overflowed connection pool circuit breaking and were failed,-1,envoy,,
 envoy.cluster.upstream_rq_pending_failure_eject,count,,request,,[Legacy] Total requests that were failed due to a connection pool connection failure,-1,envoy,,
 envoy.cluster.upstream_rq_pending_active,gauge,,request,,[Legacy] Total active requests pending a connection pool connection,-1,envoy,,
@@ -528,7 +546,9 @@ envoy.cluster.upstream_rq_retry,count,,request,,[Legacy] Total request retries,0
 envoy.cluster.upstream_rq_retry_success,count,,request,,[Legacy] Total request retry successes,1,envoy,,
 envoy.cluster.upstream_rq_retry_overflow,count,,request,,[Legacy] Total requests not retried due to circuit breaking,-1,envoy,,
 envoy.cluster.upstream_internal_redirect_failed_total,count,,,,[Legacy] Total number of times failed internal redirects resulted in redirects being passed downstream,0,envoy,,
+envoy.cluster.upstream_internal_redirect_failed.count,count,,,,[OpenMetrics V2] Count of times failed internal redirects resulted in redirects being passed downstream,0,envoy,,
 envoy.cluster.upstream_internal_redirect_succeeded_total,count,,,,[Legacy] Total number of times internal redirects resulted in a second upstream request,0,envoy,,
+envoy.cluster.upstream_internal_redirect_succeeded.count,count,,,,[Openmetrics V2] Count of times internal redirects resulted in a second upstream request,0,envoy,,
 envoy.cluster.client_ssl_socket_factory.ssl_context_update_by_sds,count,,,,[Legacy] Total number of ssl context has been updated,0,envoy,,
 envoy.cluster.client_ssl_socket_factory.upstream_context_secrets_not_ready,count,,connection,,[Legacy] Total number of upstream connections reset due to empty ssl certificate,-1,envoy,,
 envoy.cluster.ssl.connection_error,count,,error,,[Legacy] Total TLS connection errors not including failed certificate verifications,-1,envoy,,
@@ -545,9 +565,13 @@ envoy.cluster.ssl.versions,count,,connection,,[Legacy] Total successful TLS conn
 envoy.cluster.ssl.curves,count,,connection,,[Legacy] Total successful TLS connections that used ECDHE curve tag,0,envoy,,
 envoy.cluster.ssl.sigalgs,count,,connection,,[Legacy] Total successful TLS connections that used signature algorithm sigalg tag,0,envoy,,
 envoy.cluster.upstream_flow_control_paused_reading_total,count,,occurrence,,[Legacy] Total number of times flow control paused reading from upstream,0,envoy,,
+envoy.cluster.upstream_flow_control_paused_reading.count,count,,occurrence,,[OpenMetrics V2] Count of times flow control paused reading from upstream,0,envoy,,
 envoy.cluster.upstream_flow_control_resumed_reading_total,count,,occurrence,,[Legacy] Total number of times flow control resumed reading from upstream,0,envoy,,
+envoy.cluster.upstream_flow_control_resumed_reading.count,count,,occurrence,,[Opnemetrics V2] Count of times flow control resumed reading from upstream,0,envoy,,
 envoy.cluster.upstream_flow_control_backed_up_total,count,,occurrence,,[Legacy] Total number of times the upstream connection backed up and paused reads from downstream,0,envoy,,
+envoy.cluster.upstream_flow_control_backed_up.count,count,,occurrence,,[OpenMetrics V2] Count of times the upstream connection backed up and paused reads from downstream,0,envoy,,
 envoy.cluster.upstream_flow_control_drained_total,count,,occurrence,,[Legacy] Total number of times the upstream connection drained and resumed reads from downstream,0,envoy,,
+envoy.cluster.upstream_flow_control_drained.count,count,,occurrence,,[OpenMetrics V2] Count of times the upstream connection drained and resumed reads from downstream,0,envoy,,
 envoy.cluster.membership_change,count,,event,,[Legacy] Total cluster membership changes,0,envoy,,
 envoy.cluster.membership_degraded,gauge,,node,,[Legacy] Current cluster degraded total,-1,envoy,,
 envoy.cluster.membership_excluded,gauge,,node,,[Legacy] Current cluster membership excluded,0,envoy,,
@@ -864,6 +888,9 @@ envoy.cluster.upstream_rq_time.99percentile,gauge,,millisecond,,[Legacy] Request
 envoy.cluster.upstream_rq_time.99_5percentile,gauge,,millisecond,,[Legacy] Request time in milliseconds 99-percentile,-1,envoy,,
 envoy.cluster.upstream_rq_time.99_9percentile,gauge,,millisecond,,[Legacy] Request time in milliseconds 99.9-percentile,-1,envoy,,
 envoy.cluster.upstream_rq_time.100percentile,gauge,,millisecond,,[Legacy] Request time in milliseconds 100-percentile,-1,envoy,,
+envoy.cluster.upstream_rq_time.bucket,count,,requests,,[OpenMetrics v2] Count of requests in the histogram bucket,-1,envoy,,
+envoy.cluster.upstream_rq_time.count,count,,requests,,[OpenMetrics v2] Total count of requests,-1,envoy,,
+envoy.cluster.upstream_rq_time.sum,gauge,,millisecond,,[OpenMetrics v2] Sum of all the requests durations in milliseconds,-1,envoy,,
 envoy.cluster.canary.upstream_rq_time.0percentile,gauge,,millisecond,,[Legacy] Upstream canary request time in milliseconds 0-percentile,-1,envoy,,
 envoy.cluster.canary.upstream_rq_time.25percentile,gauge,,millisecond,,[Legacy] Upstream canary request time in milliseconds 25-percentile,-1,envoy,,
 envoy.cluster.canary.upstream_rq_time.50percentile,gauge,,millisecond,,[Legacy] Upstream canary request time in milliseconds 50-percentile,-1,envoy,,
@@ -902,3 +929,23 @@ envoy.cluster.zone.upstream_rq_time.99percentile,gauge,,millisecond,,[Legacy] Zo
 envoy.cluster.zone.upstream_rq_time.99_9percentile,gauge,,millisecond,,[Legacy] Zone request time in milliseconds 99.9-percentile,-1,envoy,,
 envoy.cluster.zone.upstream_rq_time.100percentile,gauge,,millisecond,,[Legacy] Zone request time in milliseconds 100-percentile,-1,envoy,,
 envoy.sds.key_rotation_failed,count,,,,[Legacy] [API v3 only] Total number of filesystem key rotations that failed outside of an SDS update.,-1,envoy,,
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
