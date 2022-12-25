@@ -934,12 +934,3 @@ envoy.cluster.zone.upstream_rq_time.99percentile,gauge,,millisecond,,[Legacy] Zo
 envoy.cluster.zone.upstream_rq_time.99_9percentile,gauge,,millisecond,,[Legacy] Zone request time in milliseconds 99.9-percentile,-1,envoy,,
 envoy.cluster.zone.upstream_rq_time.100percentile,gauge,,millisecond,,[Legacy] Zone request time in milliseconds 100-percentile,-1,envoy,,
 envoy.sds.key_rotation_failed,count,,,,[Legacy] [API v3 only] Total number of filesystem key rotations that failed outside of an SDS update.,-1,envoy,,
-
-
-
-
-envoy.http.downstream_rq_http1.count,count,,request,,[OpenMetrics V2] Count of HTTP/1.1 requests,0,envoy,,
-envoy.http.downstream_rq_http2.count,count,,request,,[OpenMetrics V2] Count of HTTP/2 requests,0,envoy,,
-envoy.http.downstream_rq_http3.count,count,,request,,[OpenMetrics V2] Count of HTTP/3 requests,0,envoy,,
-envoy.http.rq.count,count,,request,,[OpenMetrics V2] Count of routed requests,0,envoy,,
-envoy.vhost.vcluster.upstream_rq.count,count,,request,,[OpenMetrics V2] Count of requests initiated by the router to the upstream,0,envoy,vhost requests total,
