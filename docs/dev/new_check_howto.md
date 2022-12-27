@@ -18,9 +18,9 @@ This guide provides instructions for creating a Datadog Agent integration in the
 
 The required Datadog Agent integration development tools include:
 
-- Python v3.8 and [pipx][99]
-- [Docker][2] to run the full test suite
-- [git][100].
+- Python v3.8 and [pipx][2]
+- [Docker][3] to run the full test suite
+- [git][4]
 
 #### Install Python
 
@@ -32,12 +32,18 @@ Many operating systems come with a pre-installed version of Python. However, the
 Install Python 3.8 using [Homebrew][1]:
 
 1. Update Homebrew:
-   {{< code-block >}}brew update{{< /code-block >}}
+   ```
+   brew update
+   ```
 1. Install Python:
-   {{< code-block >}}brew install python@3.8{{< /code-block >}}
+   ```
+   brew install python@3.8
+   ```
 1. Check the Homebrew installation output and run any additional commands recommended by the installation script.
 1. Verify that the Python binary is installed in your `PATH` and that you've installed the correct version:
-   {{< code-block >}}python --version{{< /code-block >}}
+   ```
+   python --version
+   ```
 
 [1]: https://brew.sh/
 {{% /tab %}}
@@ -48,13 +54,15 @@ Install Python 3.8 using [Homebrew][1]:
 1. Click **Install Now**.
 1. After the installation has completed, restart your machine.
 1. Verify that the Python binary is installed in your `PATH` and that you've installed the correct version:
-   {{< code-block >}}python --version{{< /code-block >}}
+   ```
+   python --version
+   ```
 
 [1]: https://www.python.org/downloads/release/python-3810/
 {{% /tab %}}
 
 {{% tab "Linux" %}}
-For Linux installations, avoid modifying your system Python. Instead, install Python 3.8 using [pyenv][1] or [miniconda][2].
+For Linux installations, avoid modifying your system Python. Datadog recommends installing Python 3.8 using [pyenv][1] or [miniconda][2].
 
 [1]: https://github.com/pyenv/pyenv#automatic-installer
 [2]: https://conda.io/projects/conda/en/stable/user-guide/install/linux.html
@@ -64,33 +72,45 @@ For Linux installations, avoid modifying your system Python. Instead, install Py
 
 #### Install pipx
 
+The `pipx` python package is required for the `ddev` command line tools.
+
 {{< tabs >}}
-
-The `pipx` python package is required the `ddev` command line tools.
-
 {{% tab "MacOS" %}}
 1. Install pipx:
-   {{< code-block >}}brew install pipx{{< /code-block >}}
+   ```
+   brew install pipx
+   ```
 1. Check the Homebrew installation output and run any additional commands recommended by the installation script.
 1. Verify that pipx is installed:
-   {{< code-block >}}pipx --version{{< /code-block >}}
+   ```
+   pipx --version
+   ```
 {{% /tab %}}
 
 {{% tab "Windows" %}}
 1. Install pipx:
-   {{< code-block >}}python -m pip install pipx{{< /code-block >}}
+   ```
+   python -m pip install pipx
+   ```
 1. Verify that pipx is installed:
-   {{< code-block >}}pipx --version{{< /code-block >}}
+   ```
+   pipx --version
+   ```
 {{% /tab %}}
 
 {{% tab "Linux" %}}
 1. Install pipx:
-   {{< code-block >}}python -m pip install pipx{{< /code-block >}}
+   ```
+   python -m pip install pipx
+   ```
 1. Verify that pipx is installed:
-   {{< code-block >}}pipx --version{{< /code-block >}}
+   ```
+   pipx --version
+   ```
+{{% /tab %}}
 {{< /tabs >}}
 
-## Set up your integrations-extra repo:
+## Set up your integrations-extra repo
 
 Follow these instructions to set up your repo for integration development:
 
@@ -99,50 +119,92 @@ Follow these instructions to set up your repo for integration development:
    The Datadog Development Toolkit expects you to work in the `$HOME/dd/` directory. This is not mandatory, but working in a different directory requires additional configuration steps.
 
    To create the `dd` directory and clone the `integrations-extras` repo:
-   {{< code-block >}}mkdir $HOME/dd && cd $HOME/dd{{< /code-block >}}
+   ```
+   mkdir $HOME/dd && cd $HOME/dd
+   ```
 
 1. Fork the the [`integrations-extras` repo][5].
 
 1. Clone your fork into the `dd` directory:
-   {{< code-block >}}git clone git@github.com:&lt;YOUR USERNAME&gt;/integrations-extras.git{{< /code-block >}}
+   ```
+	git clone git@github.com:&lt;YOUR USERNAME&gt;/integrations-extras.git
+   ```
 
 ## Install the Development Toolkit
 
+{{< tabs >}}
 {{% tab "MacOS" %}}
 
 1. Run the following command and remove any executables shown in the output:
-   {{< code-block >}}which -a ddev{{< /code-block >}}
+   ```
+	which -a ddev
+   ```
 1. Make sure there are no virtual environments running:
    1. Run the following command:
-      {{< code-block >}}echo VIRTUAL_ENV{{< /code-block >}}
+      ```
+	   echo VIRTUAL_ENV
+      ```
    1. If the command returns output, a virtual environment is running. Run `deactivate` to exit the virtual environment.
 1. Install `ddev`:
-   <div class="alert alert-warning">>Do not run this command with `sudo`.</a></div>
-   {{< code-block >}}pipx install ddev --python /usr/local/opt/python@3.8/bin/python3.8{{< /code-block >}}
-{{% /tab %}}
-
-{{% tab "Windows" %}}
-To install `ddev`, run:
-{{< code-block >}}pipx install ddev{{< /code-block >}}
-{{% /tab %}}
-
-{{% tab "Linux" %}}
-To install `ddev`, run:
-<div class="alert alert-warning">>Do not run this command with `sudo`.</a></div>
-{{< code-block >}}pipx install ddev{{< /code-block >}}
-{{< /tabs >}}
-
+   <div class="alert alert-warning">Do not run this command with `sudo`.</a></div>
+   
+   ```
+	pipx install ddev --python /usr/local/opt/python@3.8/bin/python3.8
+   ```
 1. Optionally, if your `integrations-extras` repo is somewhere other than `$HOME/dd/`, adjust the `ddev` configuration file:
 
-   ```shell
+   ```
    ddev config set extras "/path/to/integrations-extras"
    ```
 
 1. Set `integrations-extras` as the default working repository:
 
-   ```shell
+   ```
    ddev config set repo extras
    ```
+{{% /tab %}}
+
+{{% tab "Windows" %}}
+1. To install `ddev`, run:
+   ```
+   pipx install ddev
+   ```
+
+1. Optionally, if your `integrations-extras` repo is somewhere other than `$HOME/dd/`, adjust the `ddev` configuration file:
+
+   ```
+   ddev config set extras "/path/to/integrations-extras"
+   ```
+
+1. Set `integrations-extras` as the default working repository:
+
+   ```
+   ddev config set repo extras
+   ```
+
+{{% /tab %}}
+
+{{% tab "Linux" %}}
+1. To install `ddev`, run:
+   <div class="alert alert-warning">Do not run this command with `sudo`.</a></div>
+   
+   ```
+   pipx install ddev
+   ```
+
+1. Optionally, if your `integrations-extras` repo is somewhere other than `$HOME/dd/`, adjust the `ddev` configuration file:
+
+   ```
+   ddev config set extras "/path/to/integrations-extras"
+   ```
+
+1. Set `integrations-extras` as the default working repository:
+
+   ```
+   ddev config set repo extras
+   ```
+{{% /tab %}}
+{{< /tabs >}}
 
 ## Create your integration
 
@@ -154,7 +216,7 @@ The `ddev create` command runs an interactive tool that creates the basic file a
 
 1. Before you create your first integration directory, try a dry-run using the `-n/--dry-run` flag, which doesn't write anything to the disk:
 
-   ```bash
+   ```
    ddev create -n Awesome
    ```
 
@@ -162,7 +224,7 @@ The `ddev create` command runs an interactive tool that creates the basic file a
 
 1. Run the command without the `-n` flag. The tool asks you for an email and name and then creates the files you need to get started with an integration.
 
-   ```shell
+   ```
    ddev create Awesome
    ```
 
@@ -179,7 +241,7 @@ At the core of each Agent-based integration is an *Agent Check* that periodicall
 
 ### Implement check logic
 
-For Awesome, the Agent Check is composed of a Service Check named `awesome.search` that searches for a string on a web page. It results in `OK` if the string is present, `WARNING` if the page is accessible but the string was not found, and `CRITICAL` if the page is inaccessible. To learn how to submit metrics with your Agent Check, see [Custom Agent Check][8].
+For Awesome, the Agent Check is composed of a Service Check named `awesome.search` that searches for a string on a web page. It results in `OK` if the string is present, `WARNING` if the page is accessible but the string was not found, and `CRITICAL` if the page is inaccessible. To learn how to submit metrics with your Agent Check, see [Custom Agent Check][6].
 
 The code contained within `awesome/datadog_checks/awesome/check.py` looks something like this:
 
@@ -218,7 +280,7 @@ class AwesomeCheck(AgentCheck):
                 self.service_check('awesome.search', self.WARNING)
 {{< /code-block >}}
 
-To learn more about the base Python class, see [Anatomy of a Python Check][9].
+To learn more about the base Python class, see [Anatomy of a Python Check][7].
 
 ## Write validation tests
 
@@ -227,7 +289,7 @@ There are two basic types of tests:
 - [Unit tests for specific functionality.](#write-a-unit-test)
 - [Integration tests that execute the `check` method and verify proper metrics collection.](#write-an-integration-test)
 
-[pytest][10] and [hatch][11] are used to run the tests. Tests are required if you want your integration to be included in the `integrations-extras` repository.
+[pytest][8] and [hatch][9] are used to run the tests. Tests are required if you want your integration to be included in the `integrations-extras` repository.
 
 ### Write a unit test
 
@@ -269,7 +331,7 @@ The scaffolding is set up to run all the tests located in `awesome/tests`.
 
 To run the tests, run:
 
-```bash
+```
 ddev test awesome
 ```
 
@@ -291,6 +353,7 @@ services:
     image: nginx:stable-alpine
     ports:
       - "8000:80"
+
 {{< /code-block >}}
 
 Next, open the file at `awesome/tests/conftest.py` and replace the contents with the following:
@@ -347,7 +410,7 @@ def test_service_check(aggregator, instance):
 
 To speed up development, use the `-m/--marker` option to run integration tests only:
 
-```bash
+```
 ddev test -m integration awesome
 ```
 
@@ -361,19 +424,19 @@ The set of assets created by the `ddev` scaffolding must be populated in order f
 : This contains the documentation for your Agent Check, how to set it up, which data it collects, and support information.
 
 `spec.yaml`
-: This is used to generate the `conf.yaml.example` using the `ddev` tooling (see the **Configuration template** tab below). For more information, see [Configuration specification][12].
+: This is used to generate the `conf.yaml.example` using the `ddev` tooling (see the **Configuration template** tab below). For more information, see [Configuration specification][10].
 
 `conf.yaml.example`
-: This contains default (or example) configuration options for your Agent Check. **Do not edit this file by hand!** It is generated from the contents of `spec.yaml`. For more information, see the [Configuration file reference][13].
+: This contains default (or example) configuration options for your Agent Check. **Do not edit this file by hand!** It is generated from the contents of `spec.yaml`. For more information, see the [Configuration file reference][11].
 
 `manifest.json`
-: This contains the metadata for your Agent Check such as the title and categories. For more information, see the [Manifest file reference][14].
+: This contains the metadata for your Agent Check such as the title and categories. For more information, see the [Manifest file reference][12].
 
 `metadata.csv`
-: This contains the list of all metrics collected by your Agent Check. For more information, see the [Metrics metadata file reference][15].
+: This contains the list of all metrics collected by your Agent Check. For more information, see the [Metrics metadata file reference][13].
 
 `service_check.json`
-: This contains the list of all Service Checks collected by your Agent Check. For more information, see the [Service check file reference][16].
+: This contains the list of all Service Checks collected by your Agent Check. For more information, see the [Service check file reference][14].
 
 {{< tabs >}}
 {{% tab "Configuration template" %}}
@@ -502,7 +565,7 @@ For this example, the Awesome integration contains a Service Check, so you need 
 
 The `pyproject.toml` file provides the metadata that is used to package and build the wheel. The wheel contains the files necessary for the functioning of the integration itself, which includes the Check, configuration example file, and artifacts generated during the build of the wheel.
 
-All additional elements, including the metadata files, are not meant to be contained within the wheel, and are used elsewhere by the Datadog platform and ecosystem. To learn more about Python packaging, see [Packaging Python Projects][17].
+All additional elements, including the metadata files, are not meant to be contained within the wheel, and are used elsewhere by the Datadog platform and ecosystem. To learn more about Python packaging, see [Packaging Python Projects][15].
 
 Once your `pyproject.toml` is ready, create a wheel:
 
@@ -511,7 +574,7 @@ Once your `pyproject.toml` is ready, create a wheel:
 
 ## Install the wheel
 
-The wheel is installed using the Agent `integration` command, available in [Agent v6.10.0 and up][18]. Depending on your environment, you may need to execute this command as a specific user or with specific privileges:
+The wheel is installed using the Agent `integration` command, available in [Agent v6.10.0 and up][16]. Depending on your environment, you may need to execute this command as a specific user or with specific privileges:
 
 **Linux** (as `dd-agent`):
 
@@ -556,7 +619,9 @@ After you've created your Agent-based integration, refer to this list to make su
 
 Before you open a pull request, run the following command to catch any problems with your integration:
 
-{{< code-block >}}ddev validate all changes{{< /code-block >}}
+```
+ddev validate all changes
+```
 
 After you've created your pull request, automatic checks run to verify that your pull request is in good shape and contains all the required content to be updated.
 
@@ -564,25 +629,22 @@ After you've created your pull request, automatic checks run to verify that your
 
 Additional helpful documentation, links, and articles:
 
-- [Manage integrations via API calls][19]
+- [Manage integrations via API calls][17]
 
 [1]: https://docs.datadoghq.com/developers/#creating-your-own-solution
-[2]: https://docs.docker.com/get-docker/
-[3]: https://wiki.python.org/moin/BeginnersGuide/Download
-[4]: https://github.com/pyenv/pyenv
-[5]: https://github.com/DataDog/integrations-extras
-[6]: https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/
-[8]: https://docs.datadoghq.com/developers/metrics/agent_metrics_submission/
-[9]: https://github.com/DataDog/datadog-agent/blob/6.2.x/docs/dev/checks/python/check_api.md
-[10]: https://docs.pytest.org/en/latest
-[11]: https://github.com/pypa/hatch
-[12]: https://datadoghq.dev/integrations-core/meta/config-specs/
-[13]: https://docs.datadoghq.com/developers/integrations/check_references/#configuration-file
-[14]: https://docs.datadoghq.com/developers/integrations/check_references/#manifest-file
-[15]: https://docs.datadoghq.com/developers/integrations/check_references/#metrics-metadata-file
-[16]: https://docs.datadoghq.com/developers/integrations/check_references/#service-check-file
-[17]: https://packaging.python.org/en/latest/tutorials/packaging-projects/
-[18]: https://docs.datadoghq.com/agent/
-[19]: https://www.datadoghq.com/blog/programmatically-manage-your-datadog-integrations/
-[99]: https://github.com/pypa/pipx
-[100]: https://git-scm.com/book/en/v2/Getting-Started-Installing-Git
+[2]: https://github.com/pypa/pipx
+[3]: https://docs.docker.com/get-docker/
+[4]: https://git-scm.com/book/en/v2/Getting-Started-Installing-Git
+[5]: https://github.com/datadog/integrations-extras
+[6]: /metrics/custom_metrics/agent_metrics_submission/?tab=count
+[7]: https://github.com/DataDog/datadog-agent/blob/6.2.x/docs/dev/checks/python/check_api.md
+[8]: https://docs.pytest.org/en/latest
+[9]: https://github.com/pypa/hatch
+[10]: https://datadoghq.dev/integrations-core/meta/config-specs/
+[11]: /developers/integrations/check_references/#configuration-file
+[12]: /developers/integrations/check_references/#manifest-file
+[13]: /developers/integrations/check_references/#metrics-metadata-file
+[14]: /developers/integrations/check_references/#service-check-file
+[15]: https://packaging.python.org/en/latest/tutorials/packaging-projects/
+[16]: https://docs.datadoghq.com/agent/
+[17]: https://www.datadoghq.com/blog/programmatically-manage-your-datadog-integrations/
