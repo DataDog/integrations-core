@@ -36,6 +36,18 @@ class KubeProxyCheck(OpenMetricsBaseCheck):
     DEFAULT_METRIC_LIMIT = 0
 
     def __init__(self, name, init_config, instances):
+        if instances is not None:
+            for instance in instances:
+                url = instance.get('health_url')
+                prometheus_url = instance.get('prometheus_url')
+
+                # healthz url uses port 10256 by default
+                # https://kubernetes.io/docs/reference/command-line-tools-reference/kube-proxy/
+                if url is None and re.search(r':[0-9]+/metrics$', prometheus_url):
+                    url = re.sub(r':[0-9]+/metrics$', ':10256/healthz', prometheus_url)
+
+                instance['health_url'] = url
+
         super(KubeProxyCheck, self).__init__(
             name,
             init_config,
@@ -52,22 +64,6 @@ class KubeProxyCheck(OpenMetricsBaseCheck):
             },
             default_namespace="kubeproxy",
         )
-        print("before")
-        print(instances)
-
-        if instances is not None:
-            for instance in instances:
-                url = instance.get('health_url')
-                prometheus_url = instance.get('prometheus_url')
-
-                # healthz url uses port 10256 by default
-                # https://kubernetes.io/docs/reference/command-line-tools-reference/kube-proxy/
-                if url is None and re.search(r':[0-9]+/metrics$', prometheus_url):
-                    url = re.sub(r':[0-9]+/metrics$', ':10256/healthz', prometheus_url)
-
-                instance['health_url'] = url
-        print("after")
-        print(instances)
 
     def check(self, instance):
         scraper_config = self.get_scraper_config(instance)
@@ -76,7 +72,6 @@ class KubeProxyCheck(OpenMetricsBaseCheck):
         self._perform_service_check(instance)
 
     def _perform_service_check(self, instance):
-        print(instance)
         url = instance.get('health_url')
         if url is None:
             return
