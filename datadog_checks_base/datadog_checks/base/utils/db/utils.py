@@ -60,7 +60,7 @@ def _traced_dbm_async_job_method(f):
                     # resources appear in the resource list alongside the main check resource
                     "run",
                     service=INTEGRATION_TRACING_SERVICE_NAME,
-                    resource="{}.{}".format(self._check.name, type(self).__name__),
+                    resource="{}.{}".format(self._check.name, self._job_name),
                 ):
                     self.run_job()
 
