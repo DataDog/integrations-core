@@ -12,7 +12,6 @@ from six import iteritems, itervalues
 
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.utils.common import pattern_filter
-from datadog_checks.base.utils.tracing import traced
 
 from .api import ApiFactory
 from .exceptions import (
@@ -661,7 +660,6 @@ class OpenStackControllerCheck(AgentCheck):
             # Fast fail in the absence of an api
             raise IncompleteConfig("Could not initialise Openstack API")
 
-    @traced
     def check(self, instance):
         # Initialize global variable that are per instances
         self.external_host_tags = {}
