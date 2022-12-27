@@ -2,7 +2,6 @@
 
 ## 17.7.0 / 2022-12-27
 
-* [Added] Add Cloudera integration. See [#13244](https://github.com/DataDog/integrations-core/pull/13244).
 * [Added] Add hidden option to ignore manifest schema validation. See [#13569](https://github.com/DataDog/integrations-core/pull/13569).
 * [Added] Add `--fix` flag to `ddev validate license-headers` for automatically fixing errors. See [#13507](https://github.com/DataDog/integrations-core/pull/13507).
 * [Fixed] Properly account for other integration repos. See [#13581](https://github.com/DataDog/integrations-core/pull/13581).
