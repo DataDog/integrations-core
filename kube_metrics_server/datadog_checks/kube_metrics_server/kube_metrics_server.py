@@ -93,6 +93,16 @@ class KubeMetricsServerCheck(OpenMetricsBaseCheck):
     DEFAULT_METRIC_LIMIT = 0
 
     def __init__(self, name, init_config, instances):
+        if instances is not None:
+            for instance in instances:
+                url = instance.get('health_url')
+                prometheus_url = instance.get('prometheus_url')
+
+                if url is None and re.search(r'/metrics$', prometheus_url):
+                    url = re.sub(r'/metrics$', '/livez', prometheus_url)
+
+                instance['health_url'] = url
+
         super(KubeMetricsServerCheck, self).__init__(
             name,
             init_config,
@@ -106,16 +116,6 @@ class KubeMetricsServerCheck(OpenMetricsBaseCheck):
             },
             default_namespace=KUBE_METRICS_SERVER_NAMESPACE,
         )
-
-        if instances is not None:
-            for instance in instances:
-                url = instance.get('health_url')
-                prometheus_url = instance.get('prometheus_url')
-
-                if url is None and re.search(r'/metrics$', prometheus_url):
-                    url = re.sub(r'/metrics$', '/livez', prometheus_url)
-
-                instance['health_url'] = url
 
     def check(self, instance):
         # Get the configuration for this specific instance
