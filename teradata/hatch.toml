@@ -8,12 +8,14 @@ python = ["3.8"]
 setup = ["sandbox"]
 
 [envs.default.overrides]
-matrix.setup.e2e-env = { value = false, if = ["sandbox"], env = ["TERADATA_SERVER"] }
+name."^py3.8$".e2e-env = { value = true }
+matrix.setup.e2e-env = { value = true, if = ["sandbox"], env = ["TERADATA_SERVER"] }
 matrix.setup.env-vars = [
   { key = "USE_TD_SANDBOX", value = "true", if = ["sandbox"] },
 ]
 
 [envs.default]
+e2e-env = false
 dependencies = [
   "teradatasql==17.10.0.12",
 ]
