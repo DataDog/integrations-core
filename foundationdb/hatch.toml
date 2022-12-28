@@ -3,5 +3,12 @@
 [[envs.default.matrix]]
 python = ["3.8"]
 
+[[envs.default.matrix]]
+python = ["3.8"]
+protocol = ["tls"]
+
 [envs.default]
+dependencies = [
+  "foundationdb==6.3.24",
+]
 e2e-env = false
