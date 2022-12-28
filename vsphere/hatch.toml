@@ -29,6 +29,6 @@ platforms = [
 
 [envs.default.overrides]
 matrix.version.env-vars = [
-    { key = "VSPHERE_VERSION", value = "6.7.0", if = ["6.7"] },
-    { key = "VSPHERE_VERSION", value = "7.0.2", if = ["7.0"] },
+  { key = "VSPHERE_VERSION", value = "6.7.0", if = ["6.7"] },
+  { key = "VSPHERE_VERSION", value = "7.0.2", if = ["7.0"] },
 ]
