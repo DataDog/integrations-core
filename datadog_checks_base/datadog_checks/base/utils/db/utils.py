@@ -19,7 +19,7 @@ from datadog_checks.base import is_affirmative
 from datadog_checks.base.log import get_check_logger
 from datadog_checks.base.utils.db.types import Transformer
 from datadog_checks.base.utils.serialization import json
-from datadog_checks.base.utils.tracing import INTEGRATION_TRACING_SERVICE_NAME
+from datadog_checks.base.utils.tracing import INTEGRATION_TRACING_SERVICE_NAME, tracing_enabled
 
 from ..common import to_native_string
 
@@ -46,10 +46,8 @@ SUBMISSION_METHODS = {
 
 
 def _traced_dbm_async_job_method(f):
-    # traces DBMAsyncJob.run_job only if tracing is enabled
-    if os.getenv('DDEV_TRACE_ENABLED', 'false') == 'true' or is_affirmative(
-        datadog_agent.get_config('integration_tracing')
-    ):
+    integration_tracing, _ = tracing_enabled()
+    if integration_tracing:
         try:
             from ddtrace import tracer
 
