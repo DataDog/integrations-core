@@ -5,6 +5,10 @@ python = ["2.7", "3.8"]
 
 [envs.default]
 e2e-env = false
+platforms = [
+  "linux",
+  "macos",
+]
 
 [envs.default.env-vars]
 DDEV_SKIP_GENERIC_TAGS_CHECK = "true"
