@@ -2,3 +2,12 @@
 
 [[envs.default.matrix]]
 python = ["2.7", "3.8"]
+# We do not test IBM WAS v8. IBM themselves no longer build a docker image for this
+# version and we don't see the need to build and host an image ourselves. For reference:
+# https://github.com/WASdev/ci.docker.websphere-traditional/issues/198
+version = ["9"]
+
+[envs.default.overrides]
+matrix.version.env-vars = [
+  { key = "IBM_WAS_VERSION", value = "9.0.5.9", if = ["9"] },
+]
