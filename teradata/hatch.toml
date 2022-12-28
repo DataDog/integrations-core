@@ -1,11 +1,4 @@
 [env.collectors.datadog-checks]
-check-types = true
-mypy-args = [
-  "--disallow-untyped-defs",
-  "--follow-imports",
-  "silent",
-  "datadog_checks/teradata",
-]
 
 [[envs.default.matrix]]
 python = ["3.8"]
