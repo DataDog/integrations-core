@@ -22,3 +22,8 @@ matrix.setup.e2e-env = { value = false, if = ["sandbox"], env = ["TERADATA_SERVE
 matrix.setup.env-vars = [
   { key = "USE_TD_SANDBOX", value = "true", if = ["sandbox"] },
 ]
+
+[envs.default]
+dependencies = [
+  "teradatasql==17.10.0.12",
+]
