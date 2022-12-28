@@ -2,3 +2,10 @@
 
 [[envs.default.matrix]]
 python = ["2.7", "3.8"]
+version = ["11.1"]
+
+[envs.default.env-vars]
+DB2_VERSION = "{matrix:version:11.1}"
+IBM_DB_INSTALLER_URL = "https://ddintegrations.blob.core.windows.net/ibm-db2/"
+
+[envs.bench]
