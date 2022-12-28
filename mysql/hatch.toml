@@ -3,7 +3,7 @@ base-package-features = ["deps", "db", "json"]
 check-types = true
 mypy-args = [
   "--py2",
-  "--disallow-untyped-defs",
+  "--check-untyped-defs",
   "--follow-imports",
   "silent",
   "datadog_checks/mysql/statements.py",
