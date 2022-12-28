@@ -44,6 +44,9 @@ deps = [
     "jpype1==1.4.1; python_version > '3.0'",
     "oracledb==1.2.1; python_version >= '3.8'",
 ]
+client-only = [
+    "oracledb==1.2.1; python_version >= '3.8'",
+]
 
 [project.urls]
 Source = "https://github.com/DataDog/integrations-core"
