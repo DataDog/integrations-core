@@ -40,17 +40,24 @@ Follow these instructions to set up your repo for integration development:
 
 1. Clone your fork into the `dd` directory:
    ```
-	git clone git@github.com:&lt;YOUR USERNAME&gt;/integrations-extras.git
+	 git clone git@github.com:&lt;YOUR USERNAME&gt;/integrations-extras.git
+   ```
+1. Create a feature branch for development purposes.
+   ```
+   git switch -c &lt;YOUR INTEGRATION NAME&gt; origin/master
    ```
 
 ## Install the Development Toolkit
+
+Before you install the Development Toolkit, make sure you've [installed Python and pipx][3].
 
 {{< tabs >}}
 {{% tab "MacOS" %}}
 
 1. Run the following command and remove any executables shown in the output:
+
    ```
-	which -a ddev
+	 which -a ddev
    ```
 1. Make sure there are no virtual environments running:
    1. Run the following command:
@@ -60,9 +67,9 @@ Follow these instructions to set up your repo for integration development:
    1. If the command returns output, a virtual environment is running. Run `deactivate` to exit the virtual environment.
 1. Install `ddev`:
    <div class="alert alert-warning">Do not run this command with `sudo`.</a></div>
-   
+
    ```
-	pipx install ddev --python /usr/local/opt/python@3.8/bin/python3.8
+	 pipx install ddev --python /usr/local/opt/python@3.8/bin/python3.8
    ```
 1. Optionally, if your `integrations-extras` repo is somewhere other than `$HOME/dd/`, adjust the `ddev` configuration file:
 
@@ -75,10 +82,12 @@ Follow these instructions to set up your repo for integration development:
    ```
    ddev config set repo extras
    ```
+
 {{% /tab %}}
 
 {{% tab "Windows" %}}
 1. To install `ddev`, run:
+
    ```
    pipx install ddev
    ```
@@ -100,7 +109,7 @@ Follow these instructions to set up your repo for integration development:
 {{% tab "Linux" %}}
 1. To install `ddev`, run:
    <div class="alert alert-warning">Do not run this command with `sudo`.</a></div>
-   
+
    ```
    pipx install ddev
    ```
@@ -543,6 +552,7 @@ After you've created your pull request, automatic checks run to verify that your
 Additional helpful documentation, links, and articles:
 
 - [Manage integrations via API calls][18]
+- [Python for Agent-based Integration Development][3]
 
 [1]: https://docs.datadoghq.com/developers/#creating-your-own-solution
 [2]: https://github.com/pypa/pipx
