@@ -36,9 +36,16 @@ ALL_RESOURCES = [
     vim.ComputeResource,
     vim.Folder,
 ]
-REALTIME_RESOURCES = [vim.VirtualMachine, vim.HostSystem]
-HISTORICAL_RESOURCES = [vim.Datacenter, vim.Datastore, vim.ClusterComputeResource]
-ALL_RESOURCES_WITH_METRICS = REALTIME_RESOURCES + HISTORICAL_RESOURCES
+
+HOST_RESOURCES = [vim.VirtualMachine, vim.HostSystem]
+
+ALL_RESOURCES_WITH_METRICS = [
+    vim.VirtualMachine,
+    vim.HostSystem,
+    vim.Datacenter,
+    vim.Datastore,
+    vim.ClusterComputeResource,
+]
 
 REALTIME_METRICS_INTERVAL_ID = 20
 

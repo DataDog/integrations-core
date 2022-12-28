@@ -9,6 +9,7 @@ from collections import defaultdict
 from concurrent.futures import as_completed
 from concurrent.futures.thread import ThreadPoolExecutor
 from typing import Any, Callable, Dict, Generator, Iterable, List, Optional, Set, Type, cast  # noqa: F401
+from itertools import chain
 
 from pyVmomi import vim, vmodl
 from six import iteritems
@@ -22,15 +23,14 @@ from datadog_checks.vsphere.cache import InfrastructureCache, MetricsMetadataCac
 from datadog_checks.vsphere.config import VSphereConfig
 from datadog_checks.vsphere.constants import (
     DEFAULT_MAX_QUERY_METRICS,
-    HISTORICAL_RESOURCES,
+    HOST_RESOURCES,
     MAX_QUERY_METRICS_OPTION,
     PROPERTY_COUNT_METRICS,
     REALTIME_METRICS_INTERVAL_ID,
-    REALTIME_RESOURCES,
     SIMPLE_PROPERTIES_BY_RESOURCE_TYPE,
 )
 from datadog_checks.vsphere.event import VSphereEvent
-from datadog_checks.vsphere.metrics import ALLOWED_METRICS_FOR_MOR, PERCENT_METRICS
+from datadog_checks.vsphere.metrics import ALLOWED_METRICS_FOR_MOR, PERCENT_METRICS, is_metric_allowed
 from datadog_checks.vsphere.resource_filters import TagFilter
 from datadog_checks.vsphere.types import (
     CounterId,  # noqa: F401
@@ -151,9 +151,9 @@ class VSphereCheck(AgentCheck):
             allowed_counters = []
             for c in counters:
                 metric_name = format_metric_name(c)
-                if metric_name in ALLOWED_METRICS_FOR_MOR[mor_type] and not is_metric_excluded_by_filters(
-                    metric_name, mor_type, self._config.metric_filters
-                ):
+                if is_metric_allowed(
+                    mor_type, metric_name, self._config.collection_type
+                ) and not is_metric_excluded_by_filters(metric_name, mor_type, self._config.metric_filters):
                     allowed_counters.append(c)
             metadata = {c.key: format_metric_name(c) for c in allowed_counters}  # type: Dict[CounterId, MetricName]
             self.metrics_metadata_cache.set_metadata(mor_type, metadata)
@@ -424,7 +424,7 @@ class VSphereCheck(AgentCheck):
                 vsphere_tags = self.infrastructure_cache.get_mor_tags(results_per_mor.entity)
                 mor_tags = mor_props['tags'] + vsphere_tags
 
-                if resource_type in HISTORICAL_RESOURCES:
+                if resource_type not in HOST_RESOURCES:
                     # Tags are attached to the metrics
                     tags.extend(mor_tags)
                     hostname = None
@@ -477,7 +477,8 @@ class VSphereCheck(AgentCheck):
         for resource_type in self._config.collected_resource_types:
             mors = self.infrastructure_cache.get_mors(resource_type)
             counters = self.metrics_metadata_cache.get_metadata(resource_type)
-            metric_ids = []  # type: List[vim.PerformanceManager.MetricId]
+            historical_metric_ids = []  # type: List[vim.PerformanceManager.MetricId]
+            realtime_metric_ids = []  # type: List[vim.PerformanceManager.MetricId]
             for counter_key, metric_name in iteritems(counters):
                 # PerformanceManager.MetricId `instance` kwarg:
                 # - An asterisk (*) to specify all instances of the metric for the specified counterId
@@ -488,21 +489,33 @@ class VSphereCheck(AgentCheck):
                 else:
                     instance = ''
 
-                metric_ids.append(vim.PerformanceManager.MetricId(counterId=counter_key, instance=instance))
-
-            for batch in self.make_batch(mors, metric_ids, resource_type):
+                if metric_name in ALLOWED_METRICS_FOR_MOR[resource_type]['historical']:
+                    historical_metric_ids.append(
+                        vim.PerformanceManager.MetricId(counterId=counter_key, instance=instance)
+                    )
+                else:
+                    realtime_metric_ids.append(
+                        vim.PerformanceManager.MetricId(counterId=counter_key, instance=instance)
+                    )
+            historical_metrics = self.make_batch(mors, historical_metric_ids, resource_type, is_historical=True)
+            realtime_metrics = self.make_batch(mors, realtime_metric_ids, resource_type)
+            all_metrics = chain(historical_metrics, realtime_metrics)
+            historical_metric_ids = [metric.counterId for metric in historical_metric_ids]
+            for batch in all_metrics:
                 query_specs = []
                 for mor, metrics in iteritems(batch):
                     query_spec = vim.PerformanceManager.QuerySpec()  # type: vim.PerformanceManager.QuerySpec
                     query_spec.entity = mor
                     query_spec.metricId = metrics
-                    if resource_type in REALTIME_RESOURCES:
+                    is_historical = False
+                    for metric_id in metrics:
+                        if metric_id.counterId in historical_metric_ids:
+                            is_historical = True
+                    if is_historical:
+                        query_spec.startTime = server_current_time - dt.timedelta(hours=2)
+                    else:
                         query_spec.intervalId = REALTIME_METRICS_INTERVAL_ID
                         query_spec.maxSample = 1  # Request a single datapoint
-                    else:
-                        # We cannot use `maxSample` for historical metrics, let's specify a timewindow that will
-                        # contain at least one element
-                        query_spec.startTime = server_current_time - dt.timedelta(hours=2)
                     query_specs.append(query_spec)
                 if query_specs:
                     yield query_specs
@@ -547,6 +560,7 @@ class VSphereCheck(AgentCheck):
         mors,  # type: Iterable[vim.ManagedEntity]
         metric_ids,  # type: List[vim.PerformanceManager.MetricId]
         resource_type,  # type: Type[vim.ManagedEntity]
+        is_historical=False,  # type: bool
     ):  # type: (...) -> Generator[MorBatch, None, None]
         """Iterates over mor and generate batches with a fixed number of metrics to query.
         Querying multiple resource types in the same call is error prone if we query a cluster metric. Indeed,
@@ -560,7 +574,7 @@ class VSphereCheck(AgentCheck):
         if resource_type == vim.ClusterComputeResource:
             # Cluster metrics are unpredictable and a single call can max out the limit. Always collect them one by one.
             max_batch_size = 1  # type: float
-        elif resource_type in REALTIME_RESOURCES or self._config.max_historical_metrics < 0:
+        elif is_historical or self._config.max_historical_metrics < 0:
             # Queries are not limited by vCenter
             max_batch_size = self._config.metrics_per_query
         else:
@@ -590,7 +604,7 @@ class VSphereCheck(AgentCheck):
         only VMs and Hosts appear as 'datadog hosts'."""
         external_host_tags = []
 
-        for resource_type in REALTIME_RESOURCES:
+        for resource_type in HOST_RESOURCES:
             for mor in self.infrastructure_cache.get_mors(resource_type):
                 mor_props = self.infrastructure_cache.get_mor_props(mor)
                 mor_tags = self.infrastructure_cache.get_mor_tags(mor)
