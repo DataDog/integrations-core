@@ -2,3 +2,8 @@
 
 [[envs.default.matrix]]
 python = ["3.8"]
+
+[envs.default]
+platforms = [
+  "win32",
+]
