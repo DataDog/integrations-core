@@ -20,45 +20,6 @@ EXCLUDED_MODULES = ['threading']
 INTEGRATION_TRACING_SERVICE_NAME = "datadog-agent-integrations"
 
 
-def traced(fn):
-    """
-    Traced decorator is intended to be used on a method of AgentCheck subclasses.
-
-    Example:
-
-        class MyCheck(AgentCheck):
-
-            @traced
-            def check(self, instance):
-                self.gauge('dummy.metric', 10)
-
-            @traced
-            def submit(self):
-                self.gauge('dummy.metric', 10)
-    """
-
-    @functools.wraps(fn)
-    def traced_wrapper(self, *args, **kwargs):
-        if datadog_agent is None:
-            return fn(self, *args, **kwargs)
-
-        trace_check = is_affirmative(self.init_config.get('trace_check'))
-        integration_tracing = is_affirmative(datadog_agent.get_config('integration_tracing'))
-
-        if integration_tracing and trace_check:
-            try:
-                from ddtrace import patch_all, tracer
-
-                patch_all()
-                with tracer.trace(fn.__name__, service='{}-integration'.format(self.name), resource=fn.__name__):
-                    return fn(self, *args, **kwargs)
-            except Exception:
-                pass
-        return fn(self, *args, **kwargs)
-
-    return traced_wrapper
-
-
 def _get_integration_name(function_name, self, *args, **kwargs):
     integration_name = None
     if self and hasattr(self, "name"):
