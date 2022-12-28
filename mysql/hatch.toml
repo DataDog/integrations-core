@@ -42,6 +42,11 @@ MYSQL_FLAVOR = "{matrix:flavor:mysql}"
 MYSQL_REPLICATION = "{matrix:replication:classic}"
 MYSQL_VERSION = "{matrix:version}"
 
+[envs.default]
+dependencies = [
+  "psutil",
+]
+
 [envs.latest.env-vars]
 COMPOSE_FILE = "mysql8.yaml"
 MYSQL_FLAVOR = "mysql"
