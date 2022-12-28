@@ -1,4 +1,12 @@
 [env.collectors.datadog-checks]
+check-types = true
+mypy-args = [
+    "--py2",
+    "--disallow-untyped-defs",
+    "--follow-imports",
+    "silent",
+    "datadog_checks/wmi_check/wmi_check.py",
+]
 
 [[envs.default.matrix]]
 python = ["2.7", "3.8"]
