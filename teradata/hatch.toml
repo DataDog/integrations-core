@@ -5,8 +5,6 @@ mypy-args = [
   "--disallow-untyped-defs",
   "--follow-imports",
   "silent",
-  "--install-types",
-  "--non-interactive",
   "datadog_checks/teradata",
 ]
 
