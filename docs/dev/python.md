@@ -1,56 +1,95 @@
 ---
 title: Python for Agent Integration Development
 kind: documentation
+
 ---
 
 This document covers how to setup a Python environment to work on Agent-based Integrations, including installing the interpreter and ensuring all of the required dependencies are present.
 
-## Python 2 or Python 3?
-
-Integrations run either within the Agent's embedded Python environment or within the testing environment. The current version of the embedded environment is recorded in the [Omnibus code][1]. The Agent and testing environments are Python 2 for Agent v6, and Python 3 for Agent v7. Make sure your Integrations are compatible with both versions.
-
 ## Install Python
 
-Many operating systems come with Python pre-installed. If your system Python is too old, or if it is not pre-installed, you must install an appropriate version. The installation and maintenance of Python in every operating system is outside the scope of this document, however, some pointers are provided for your benefit.
+Many operating systems come with a pre-installed version of Python. However, the version of Python installed by default may be older than the version used in the Agent, and may lack some required tools and dependencies. To ensure that you've everything you need to get an integration running, install a dedicated Python interpreter.
 
-### macOS
+{{< tabs >}}
 
-Any recent version of macOS comes with Python pre-installed, however, it may be older than the version used in the Agent, and might also lack required tools and dependencies. You must install a fresh, dedicated Python interpreter that you can manage _without_ the App Store.
+{{% tab "MacOS" %}}
+Install Python 3.8 using [Homebrew][1]:
 
-Some options include:
+1. Update Homebrew:
+   ```
+   brew update
+   ```
+1. Install Python:
+   ```
+   brew install python@3.8
+   ```
+1. Check the Homebrew installation output and run any additional commands recommended by the installation script.
+1. Verify that the Python binary is installed in your `PATH` and that you've installed the correct version:
+   ```
+   python --version
+   ```
 
-- [Homebrew][2]: Follow the "[Doing it Right][3]" instructions.
-- [Miniconda][4]: Follow the "[Conda installation][5]" instructions.
+[1]: https://brew.sh/
+{{% /tab %}}
 
-It is recommended to install an [environment manager](#virtual-environment-manager) in order to preserve a clean system Python.
+{{% tab "Windows" %}}
+1. Download the [Python 3.8 64-bit executable installer][1] and run it.
+1. Select the option to add Python to your PATH.
+1. Click **Install Now**.
+1. After the installation has completed, restart your machine.
+1. Verify that the Python binary is installed in your `PATH` and that you've installed the correct version:
+   ```
+   python --version
+   ```
 
-### Linux
+[1]: https://www.python.org/downloads/release/python-3810/
+{{% /tab %}}
 
-All mainstream distributions of Linux come with Python pre-installed—likely one of an acceptable version level. It is recommended to install an [environment manager](#virtual-environment-manager) in order to preserve a clean system Python. See your distribution's package management documentation for more information.
+{{% tab "Linux" %}}
+For Linux installations, avoid modifying your system Python. Datadog recommends installing Python 3.8 using [pyenv][1] or [miniconda][2].
 
-### Windows
+[1]: https://github.com/pyenv/pyenv#automatic-installer
+[2]: https://conda.io/projects/conda/en/stable/user-guide/install/linux.html
+{{% /tab %}}
 
-Windows does not normally have a Python environment present. See [Using Python on Windows][6] for detailed installation instructions and links to further documentation and tooling.
+{{< /tabs >}}
 
-## Virtual environment manager
+## Install pipx
 
-Each integration has its own set of dependencies that must be added to Python in order to run the tests, or just to try out the collection code. To avoid polluting your Python installation with libraries and packages that would only be used by an Integration, use a "virtual environment". A virtual environment is a self contained directory tree that contains an isolated Python installation. When a virtual environment is active, any package you install goes into that directory without affecting the system wide Python installation.
+The `pipx` python package is required for the `ddev` command line tools.
 
-### Virtualenv and virtualenvwrapper
+{{< tabs >}}
+{{% tab "MacOS" %}}
+1. Install pipx:
+   ```
+   brew install pipx
+   ```
+1. Check the Homebrew installation output and run any additional commands recommended by the installation script.
+1. Verify that pipx is installed:
+   ```
+   pipx --version
+   ```
+{{% /tab %}}
 
-Datadog recommends using [Virtualenv][7] to manage Python virtual environments, and [virtualenvwrapper][8] to make the process smoother. There's a [comprehensive guide][9] in the Hitchhiker's Guide to Python describing how to set up these two tools.
+{{% tab "Windows" %}}
+1. Install pipx:
+   ```
+   python -m pip install pipx
+   ```
+1. Verify that pipx is installed:
+   ```
+   pipx --version
+   ```
+{{% /tab %}}
 
-### Miniconda
-
-If you're using Miniconda, a tool to manage virtual environments is included. See [Managing environments][10] for more information.
-
-[1]: https://github.com/DataDog/omnibus-software/blob/master/config/software/python.rb#L21
-[2]: https://brew.sh/#install
-[3]: https://docs.python-guide.org/en/latest/starting/install/osx/#doing-it-right
-[4]: https://repo.continuum.io/miniconda/Miniconda2-latest-MacOSX-x86_64.sh
-[5]: https://docs.conda.io/projects/continuumio-conda/en/latest/user-guide/install/macos.html
-[6]: https://docs.python.org/2.7/using/windows.html
-[7]: https://pypi.python.org/pypi/virtualenv
-[8]: https://virtualenvwrapper.readthedocs.io/en/latest/index.html
-[9]: https://docs.python-guide.org/en/latest/dev/virtualenvs/#lower-level-virtualenv
-[10]: https://conda.io/docs/user-guide/tasks/manage-environments.html
+{{% tab "Linux" %}}
+1. Install pipx:
+   ```
+   python -m pip install pipx
+   ```
+1. Verify that pipx is installed:
+   ```
+   pipx --version
+   ```
+{{% /tab %}}
+{{< /tabs >}}
