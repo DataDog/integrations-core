@@ -1,4 +1,21 @@
 [env.collectors.datadog-checks]
 
 [[envs.default.matrix]]
-python = ["2.7", "3.8"]
+python = ["2.7"]
+version = ["19.9"]
+
+[[envs.default.matrix]]
+python = ["3.8"]
+version = ["19.9", "20.1"]
+
+[envs.default.overrides]
+matrix.version.env-vars = [
+  { key = "GUNICORN_VERSION", value = "19.9.0", if = ["19.9"] },
+  { key = "GUNICORN_VERSION", value = "20.1.0", if = ["20.1"] },
+]
+
+[envs.default]
+platforms = [
+  "linux",
+  "macos",
+]
