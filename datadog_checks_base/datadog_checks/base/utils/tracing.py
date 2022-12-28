@@ -17,6 +17,8 @@ except ImportError:
 
 EXCLUDED_MODULES = ['threading']
 
+INTEGRATION_TRACING_SERVICE_NAME = "datadog-agent-integrations"
+
 
 def traced(fn):
     """
@@ -57,39 +59,34 @@ def traced(fn):
     return traced_wrapper
 
 
+def _get_integration_name(function_name, self, *args, **kwargs):
+    integration_name = None
+    if self and hasattr(self, "name"):
+        integration_name = self.name
+    elif function_name == "__init__":
+        # copy the logic that the AgentCheck init method uses to determine the check name
+        integration_name = kwargs.get('name', '')
+        if len(args) > 0:
+            integration_name = args[0]
+
+    return integration_name if integration_name else "UNKNOWN_INTEGRATION"
+
+
 def tracing_method(f, tracer):
     if (PY2 and 'self' in inspect.getargspec(f).args) or (PY3 and inspect.signature(f).parameters.get('self')):
 
         @functools.wraps(f)
         def wrapper(self, *args, **kwargs):
-            service_name = None
-            if hasattr(self, "name"):
-                service_name = "{}-integration".format(self.name)
-            elif f.__name__ == "__init__":
-                # copy the logic that the AgentCheck init method uses to determine the check name
-                name = kwargs.get('name', '')
-                if len(args) > 0:
-                    name = args[0]
-                if name:
-                    service_name = "{}-integration".format(name)
-
-            with tracer.trace(f.__name__, resource=f.__name__, service=service_name):
+            integration_name = _get_integration_name(f.__name__, self, *args, **kwargs)
+            with tracer.trace(f.__name__, service=INTEGRATION_TRACING_SERVICE_NAME, resource=integration_name):
                 return f(self, *args, **kwargs)
 
     else:
 
         @functools.wraps(f)
         def wrapper(*args, **kwargs):
-            service_name = None
-            if f.__name__ == "__init__":
-                # copy the logic that the AgentCheck init method uses to determine the check name
-                name = kwargs.get('name', '')
-                if len(args) > 0:
-                    name = args[0]
-                if name:
-                    service_name = "{}-integration".format(name)
-
-            with tracer.trace(f.__name__, resource=f.__name__, service=service_name):
+            integration_name = _get_integration_name(f.__name__, None, *args, **kwargs)
+            with tracer.trace(f.__name__, service=INTEGRATION_TRACING_SERVICE_NAME, resource=integration_name):
                 return f(*args, **kwargs)
 
     return wrapper
