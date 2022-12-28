@@ -40,11 +40,12 @@ Follow these instructions to set up your repo for integration development:
 
 1. Clone your fork into the `dd` directory:
    ```
-	 git clone git@github.com:&lt;YOUR USERNAME&gt;/integrations-extras.git
+   git clone git@github.com:<YOUR USERNAME>/integrations-extras.git
    ```
-1. Create a feature branch for development purposes.
+
+1. Create a feature branch to work in:
    ```
-   git switch -c &lt;YOUR INTEGRATION NAME&gt; origin/master
+   git switch -c <YOUR INTEGRATION NAME> origin/master
    ```
 
 ## Install the Development Toolkit
@@ -55,30 +56,31 @@ Before you install the Development Toolkit, make sure you've [installed Python a
 {{% tab "MacOS" %}}
 
 1. Run the following command and remove any executables shown in the output:
-
    ```
 	 which -a ddev
    ```
+
 1. Make sure there are no virtual environments running:
    1. Run the following command:
       ```
-	   echo VIRTUAL_ENV
+	    echo VIRTUAL_ENV
       ```
+
    1. If the command returns output, a virtual environment is running. Run `deactivate` to exit the virtual environment.
+
 1. Install `ddev`:
    <div class="alert alert-warning">Do not run this command with `sudo`.</a></div>
-
+   
    ```
 	 pipx install ddev --python /usr/local/opt/python@3.8/bin/python3.8
    ```
-1. Optionally, if your `integrations-extras` repo is somewhere other than `$HOME/dd/`, adjust the `ddev` configuration file:
 
+1. Optionally, if your `integrations-extras` repo is somewhere other than `$HOME/dd/`, adjust the `ddev` configuration file:
    ```
    ddev config set extras "/path/to/integrations-extras"
    ```
 
 1. Set `integrations-extras` as the default working repository:
-
    ```
    ddev config set repo extras
    ```
@@ -87,19 +89,16 @@ Before you install the Development Toolkit, make sure you've [installed Python a
 
 {{% tab "Windows" %}}
 1. To install `ddev`, run:
-
    ```
    pipx install ddev
    ```
 
 1. Optionally, if your `integrations-extras` repo is somewhere other than `$HOME/dd/`, adjust the `ddev` configuration file:
-
    ```
    ddev config set extras "/path/to/integrations-extras"
    ```
 
 1. Set `integrations-extras` as the default working repository:
-
    ```
    ddev config set repo extras
    ```
@@ -109,22 +108,21 @@ Before you install the Development Toolkit, make sure you've [installed Python a
 {{% tab "Linux" %}}
 1. To install `ddev`, run:
    <div class="alert alert-warning">Do not run this command with `sudo`.</a></div>
-
+   
    ```
    pipx install ddev
    ```
 
 1. Optionally, if your `integrations-extras` repo is somewhere other than `$HOME/dd/`, adjust the `ddev` configuration file:
-
    ```
    ddev config set extras "/path/to/integrations-extras"
    ```
 
 1. Set `integrations-extras` as the default working repository:
-
    ```
    ddev config set repo extras
    ```
+
 {{% /tab %}}
 {{< /tabs >}}
 
@@ -137,7 +135,6 @@ Once you've downloaded Docker, installed an appropriate version of Python, and p
 The `ddev create` command runs an interactive tool that creates the basic file and path structure (or "scaffolding") necessary for a new Agent-based integration.
 
 1. Before you create your first integration directory, try a dry-run using the `-n/--dry-run` flag, which doesn't write anything to the disk:
-
    ```
    ddev create -n Awesome
    ```
@@ -145,7 +142,6 @@ The `ddev create` command runs an interactive tool that creates the basic file a
    This command displays the path where the files would have been written, as well as the structure itself. Make sure the path in the first line of output matches your `integrations-extras` repository location.
 
 1. Run the command without the `-n` flag. The tool asks you for an email and name and then creates the files you need to get started with an integration.
-
    ```
    ddev create Awesome
    ```
@@ -252,7 +248,6 @@ def test_config():
 The scaffolding is set up to run all the tests located in `awesome/tests`.
 
 To run the tests, run:
-
 ```
 ddev test awesome
 ```
@@ -364,7 +359,6 @@ The set of assets created by the `ddev` scaffolding must be populated in order f
 {{% tab "Configuration template" %}}
 
 For this example, the `awesome/assets/configuration/spec.yaml` used to generate `awesome/datadog_checks/awesome/data/conf.yaml.example` appears in the following format:
-
 ```yaml
 name: Awesome
 files:
@@ -400,7 +394,6 @@ files:
 ```
 
 To generate `conf.yaml.example` using `ddev`, run:
-
 ```bash
 ddev validate config --sync awesome
 ```
@@ -409,7 +402,6 @@ ddev validate config --sync awesome
 {{% tab "Manifest" %}}
 
 For this example, the `awesome/manifest.json` for the Awesome Service Check appears in the following format:
-
 ```json
 {
   "manifest_version": "2.0.0",
@@ -465,7 +457,6 @@ For this example, the Awesome integration doesn't provide any metrics, so in thi
 {{% tab "Service Check" %}}
 
 For this example, the Awesome integration contains a Service Check, so you need to add it to the `awesome/assets/service_checks.json` file:
-
 ```json
 [
   {
@@ -499,13 +490,11 @@ Once your `pyproject.toml` is ready, create a wheel:
 The wheel is installed using the Agent `integration` command, available in [Agent v6.10.0 and up][17]. Depending on your environment, you may need to execute this command as a specific user or with specific privileges:
 
 **Linux** (as `dd-agent`):
-
 ```bash
 sudo -u dd-agent datadog-agent integration install -w /path/to/wheel.whl
 ```
 
 **OSX** (as admin):
-
 ```bash
 sudo datadog-agent integration install -w /path/to/wheel.whl
 ```
@@ -514,7 +503,7 @@ sudo datadog-agent integration install -w /path/to/wheel.whl
 
 <details>
   <summary>Agent <code>v6.11</code> or earlier</summary>
-
+  
   ```ps
   & "C:\Program Files\Datadog\Datadog Agent\embedded\agent.exe" integration install -w /path/to/wheel.whl
   ```
@@ -523,7 +512,7 @@ sudo datadog-agent integration install -w /path/to/wheel.whl
 
 <details open>
   <summary>Agent<code>v6.12</code> or later</summary>
-
+  
   ```ps
   & "C:\Program Files\Datadog\Datadog Agent\bin\agent.exe" integration install -w /path/to/wheel.whl
   ```
@@ -540,7 +529,6 @@ After you've created your Agent-based integration, refer to this list to make su
 - If the integration collects Service Checks, the `service_checks.json` must be complete as well.
 
 Before you open a pull request, run the following command to catch any problems with your integration:
-
 ```
 ddev validate all changes
 ```
