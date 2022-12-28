@@ -29,8 +29,10 @@ matrix.impl.env-vars = [
 ]
 
 [envs.default.env-vars]
+HAPROXY_LEGACY = "false"
 DDEV_SKIP_GENERIC_TAGS_CHECK = "true"
 
 [envs.latest.env-vars]
+HAPROXY_LEGACY = "false"
 HAPROXY_VERSION = "latest"
 DDEV_SKIP_GENERIC_TAGS_CHECK = "true"
