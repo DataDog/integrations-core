@@ -2,3 +2,18 @@
 
 [[envs.default.matrix]]
 python = ["3.8"]
+version = ["12"]
+
+[envs.default.overrides]
+matrix.version.env-vars = [
+  { key = "IBM_ACE_VERSION", value = "12.0.3.0-r1", if = ["12"] },
+]
+platform.windows.e2e-env = { value = false }
+platform.windows.env-vars = [
+  { key = "LD_LIBRARY_PATH", value = "C:\\ibm_mq{;}{env:LD_LIBRARY_PATH:}" },
+]
+
+[envs.default.env-vars]
+IBM_MQ_VERSION = "9.2.4.0-r1"
+LD_LIBRARY_PATH = "/opt/mqm/lib64{;}/opt/mqm/lib{;}{env:LD_LIBRARY_PATH:}"
+MQ_FILE_PATH = "C:\\ibm_mq"
