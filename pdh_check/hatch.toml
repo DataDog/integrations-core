@@ -1,0 +1,12 @@
+[env.collectors.datadog-checks]
+
+[[envs.default.matrix]]
+python = ["2.7", "3.8"]
+
+[envs.default]
+dependencies = [
+  "datadog_checks_tests_helper @ {root:uri}/../datadog_checks_tests_helper",
+]
+platforms = [
+  "win32",
+]
