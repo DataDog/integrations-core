@@ -1,0 +1,34 @@
+[env.collectors.datadog-checks]
+check-types = true
+mypy-args = [
+  "--py2",
+  "--disallow-untyped-defs",
+  "--follow-imports",
+  "silent",
+  "--install-types",
+  "--non-interactive",
+  "datadog_checks/vsphere/api.py",
+  "datadog_checks/vsphere/api_rest.py",
+  "datadog_checks/vsphere/cache.py",
+  "datadog_checks/vsphere/config.py",
+  "datadog_checks/vsphere/constants.py",
+  "datadog_checks/vsphere/metrics.py",
+  "datadog_checks/vsphere/utils.py",
+  "datadog_checks/vsphere/vsphere.py",
+]
+
+[[envs.default.matrix]]
+python = ["2.7", "3.8"]
+version = ["6.7", "7.0"]
+
+[envs.default]
+platforms = [
+  "linux",
+  "macos",
+]
+
+[envs.default.overrides]
+matrix.version.env-vars = [
+  { key = "VSPHERE_VERSION", value = "6.7.0", if = ["6.7"] },
+  { key = "VSPHERE_VERSION", value = "7.0.2", if = ["7.0"] },
+]
