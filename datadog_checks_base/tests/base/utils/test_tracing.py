@@ -45,7 +45,7 @@ class DummyCheck(MockAgentCheck):
 def traced_mock_classes():
     # temporarily unset the DDEV_TRACE_ENABLED flag to enable testing
     # the exhaustive tracing option
-    ddev_tracce_enabled = os.environ.pop('DDEV_TRACE_ENABLED', None)
+    ddev_trace_enabled = os.environ.pop('DDEV_TRACE_ENABLED', None)
     # the mock classes must be traced within a single test execution in order for
     # us to be able to control the parameters used by the traced_class wrapper
     # The regular AgentCheck common base class applies traced_class but here
@@ -56,7 +56,7 @@ def traced_mock_classes():
     yield
     MockAgentCheck, DummyCheck = orig_mock_agent, orig_dummy
     if ddev_tracce_enabled:
-        os.environ['DDEV_TRACE_ENABLED'] = ddev_tracce_enabled
+        os.environ['DDEV_TRACE_ENABLED'] = ddev_trace_enabled
 
 
 @pytest.mark.parametrize(
