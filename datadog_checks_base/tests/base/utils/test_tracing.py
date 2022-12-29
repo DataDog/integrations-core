@@ -55,7 +55,8 @@ def traced_mock_classes():
     MockAgentCheck, DummyCheck = traced_class(MockAgentCheck), traced_class(DummyCheck)
     yield
     MockAgentCheck, DummyCheck = orig_mock_agent, orig_dummy
-    os.environ['DDEV_TRACE_ENABLED'] = ddev_tracce_enabled
+    if ddev_tracce_enabled:
+        os.environ['DDEV_TRACE_ENABLED'] = ddev_tracce_enabled
 
 
 @pytest.mark.parametrize(
