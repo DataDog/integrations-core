@@ -1,0 +1,48 @@
+[env.collectors.datadog-checks]
+check-types = true
+mypy-args = [
+  "--py2",
+  "--install-types",
+  "--non-interactive",
+  "datadog_checks/",
+  "tests/",
+]
+mypy-deps = [
+  "types-mock==0.1.5",
+]
+
+[[envs.default.matrix]]
+python = ["2.7", "3.8"]
+version = ["9"]
+
+[[envs.default.matrix]]
+python = ["2.7", "3.8"]
+version = ["9"]
+setup = ["cluster"]
+
+[envs.default.overrides]
+matrix.version.env-vars = [
+  { key = "IBM_MQ_VERSION_RAW", value = "9.1.1.0", if = ["9"] },
+]
+platform.windows.e2e-env = { value = false }
+platform.windows.env-vars = [
+  { key = "LD_LIBRARY_PATH", value = "C:\\ibm_mq{;}{env:LD_LIBRARY_PATH:}" },
+]
+name."^py3.8-9$".platforms = [
+  "windows",
+]
+name."9-cluster$".env-vars = [
+  { key = "IBM_MQ_COMPOSE_VERSION", value = "9cluster" },
+]
+
+[envs.default.env-vars]
+IBM_MQ_COMPOSE_VERSION = "{matrix:version}"
+IBM_MQ_VERSION = "{matrix:version}"
+LD_LIBRARY_PATH = "/opt/mqm/lib64{;}/opt/mqm/lib{;}{env:LD_LIBRARY_PATH:}"
+MQ_FILE_PATH = "C:\\ibm_mq"
+
+[envs.default]
+platforms = [
+  "linux",
+  "macos",
+]
