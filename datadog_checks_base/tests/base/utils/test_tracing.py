@@ -9,7 +9,11 @@ import mock
 import pytest
 
 from datadog_checks.base.stubs import aggregator
-from datadog_checks.base.utils.tracing import INTEGRATION_TRACING_SERVICE_NAME, traced_class
+from datadog_checks.base.utils.tracing import (
+    AGENT_CHECK_DEFAULT_TRACED_METHODS,
+    INTEGRATION_TRACING_SERVICE_NAME,
+    traced_class,
+)
 
 
 class MockAgentCheck(object):
@@ -28,6 +32,9 @@ class MockAgentCheck(object):
     def gauge(self, name, value):
         aggregator.submit_metric(self, self.check_id, aggregator.GAUGE, name, value, [], 'hostname', False)
 
+    def warning(self, warning_message, *args, **kwargs):
+        return
+
 
 class DummyCheck(MockAgentCheck):
     def __init__(self, *args, **kwargs):
@@ -39,6 +46,7 @@ class DummyCheck(MockAgentCheck):
 
     def dummy_method(self):
         self.gauge('foo', 10)
+        self.warning("whoops %s", "oh no")
 
 
 @contextmanager
@@ -74,7 +82,6 @@ def test_traced_class(integration_tracing, integration_tracing_exhaustive, datad
         }.get(key, None)
 
     with mock.patch.object(datadog_agent, 'get_config', _get_config), mock.patch('ddtrace.tracer') as tracer:
-
         with traced_mock_classes():
             check = DummyCheck('dummy', {}, [{}])
             check.run()
@@ -84,9 +91,14 @@ def test_traced_class(integration_tracing, integration_tracing_exhaustive, datad
             called_methods = set([c.args[0] for c in tracer.trace.mock_calls if c.args])
 
             assert called_services == {INTEGRATION_TRACING_SERVICE_NAME}
-            assert 'run' in called_methods, "'run' must always be traced"
+            for m in AGENT_CHECK_DEFAULT_TRACED_METHODS:
+                assert m in called_methods
 
-            exhaustive_only_methods = {'__init__', 'check', 'dummy_method'}
+            warning_span_tag_calls = tracer.trace().__enter__().set_tag.call_args_list
+            assert mock.call('error.msg', 'whoops oh no') in warning_span_tag_calls
+            assert mock.call('error.type', 'AgentCheck.warning') in warning_span_tag_calls
+
+            exhaustive_only_methods = {'__init__', 'dummy_method'}
             if integration_tracing_exhaustive:
                 for m in exhaustive_only_methods:
                     assert m in called_methods

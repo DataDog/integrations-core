@@ -8,6 +8,7 @@ import os
 from six import PY2, PY3
 
 from ..config import is_affirmative
+from ..utils.common import to_native_string
 
 try:
     import datadog_agent
@@ -15,6 +16,14 @@ except ImportError:
     from ..stubs import datadog_agent
 
 EXCLUDED_MODULES = ['threading']
+
+# During regular continuous tracing we trace only the check's top-level 'run' and
+# 'check' methods. This is because some checks may make 1000s of calls to various
+# internal methods, creating many 1000s of spans, generating excessive overhead.
+# All methods are traced only if exhaustive tracing is enabled. This is generally
+# done only during a single manually triggered check run, during which such overhead
+# is acceptable.
+AGENT_CHECK_DEFAULT_TRACED_METHODS = {'check', 'run', 'warning'}
 
 INTEGRATION_TRACING_SERVICE_NAME = "datadog-agent-integrations"
 
@@ -50,6 +59,37 @@ def tracing_method(f, tracer):
                 return f(*args, **kwargs)
 
     return wrapper
+
+
+def traced_warning(f, tracer):
+    """
+    Traces the AgentCheck.warning method
+    The span is always an error span, including the current stack trace.
+    The error message is set to the warning message.
+    """
+    try:
+        from ddtrace.ext import errors
+
+        def wrapper(self, warning_message, *args, **kwargs):
+            integration_name = _get_integration_name(f.__name__, self, *args, **kwargs)
+            with tracer.trace(
+                "warning",
+                service=INTEGRATION_TRACING_SERVICE_NAME,
+                resource=integration_name,
+            ) as span:
+                # duplicate message formatting logic from AgentCheck.warning
+                _formatted_message = to_native_string(warning_message)
+                if args:
+                    _formatted_message = _formatted_message % args
+                span.set_tag(errors.ERROR_MSG, _formatted_message)
+                span.set_tag(errors.ERROR_TYPE, "AgentCheck.warning")
+                span.set_traceback()
+                span.error = 1
+                return f(self, warning_message, *args, **kwargs)
+
+        return wrapper
+    except Exception:
+        return f
 
 
 def tracing_enabled():
@@ -93,15 +133,13 @@ def traced_class(cls):
                     if getattr(attribute, '__module__', 'threading') in EXCLUDED_MODULES:
                         continue
 
-                    # During regular continuous tracing we trace only the check's top-level 'run' method.
-                    # This is because some checks may make 1000s of calls to various internal methods,
-                    # creating many 1000s of spans, generating excessive overhead. All methods are traced
-                    # only if exhaustive tracing is enabled. This is generally done only during a single
-                    # manually triggered check run, during which such overhead is acceptable.
-                    if not integration_tracing_exhaustive and attr != 'run':
+                    if not integration_tracing_exhaustive and attr not in AGENT_CHECK_DEFAULT_TRACED_METHODS:
                         continue
 
-                    setattr(cls, attr, tracing_method(attribute, tracer))
+                    if attr == 'warning':
+                        setattr(cls, attr, traced_warning(attribute, tracer))
+                    else:
+                        setattr(cls, attr, tracing_method(attribute, tracer))
                 return cls
 
             return decorate(cls)
