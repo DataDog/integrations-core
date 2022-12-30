@@ -54,8 +54,6 @@ path = "datadog_checks/downloader/__about__.py"
 include = [
     "/datadog_checks",
     "/tests",
-    "/requirements-dev.txt",
-    "/tox.ini",
 ]
 
 [tool.hatch.build.targets.wheel]
