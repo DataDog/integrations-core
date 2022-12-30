@@ -12,8 +12,7 @@ from ..config import is_affirmative
 try:
     import datadog_agent
 except ImportError:
-    # Integration Tracing is only available with Agent 6
-    datadog_agent = None
+    from ..stubs import datadog_agent
 
 EXCLUDED_MODULES = ['threading']
 
@@ -53,11 +52,27 @@ def tracing_method(f, tracer):
     return wrapper
 
 
+def tracing_enabled():
+    """
+    :return: (integration_tracing, integration_tracing_exhaustive)
+    """
+    integration_tracing = is_affirmative(datadog_agent.get_config('integration_tracing'))
+    integration_tracing_exhaustive = is_affirmative(datadog_agent.get_config('integration_tracing_exhaustive'))
+
+    # tests always use exhaustive tracing
+    if os.getenv('DDEV_TRACE_ENABLED', 'false') == 'true':
+        integration_tracing = True
+        integration_tracing_exhaustive = True
+
+    return integration_tracing, integration_tracing_exhaustive
+
+
 def traced_class(cls):
-    if os.getenv('DDEV_TRACE_ENABLED', 'false') == 'true' or (
-        datadog_agent is not None and is_affirmative(datadog_agent.get_config('integration_tracing'))
-    ):
+    integration_tracing, integration_tracing_exhaustive = tracing_enabled()
+    if integration_tracing:
         try:
+            integration_tracing_exhaustive = is_affirmative(datadog_agent.get_config('integration_tracing_exhaustive'))
+
             from ddtrace import patch_all, tracer
 
             patch_all()
@@ -65,17 +80,28 @@ def traced_class(cls):
             def decorate(cls):
                 for attr in cls.__dict__:
                     attribute = getattr(cls, attr)
+
+                    if not callable(attribute) or inspect.isclass(attribute):
+                        continue
+
                     # Ignoring staticmethod and classmethod because they don't need cls in args
                     # also ignore nested classes
-                    if (
-                        callable(attribute)
-                        and not inspect.isclass(attribute)
-                        and not isinstance(cls.__dict__[attr], staticmethod)
-                        and not isinstance(cls.__dict__[attr], classmethod)
-                        # Get rid of SnmpCheck._thread_factory and related
-                        and getattr(attribute, '__module__', 'threading') not in EXCLUDED_MODULES
-                    ):
-                        setattr(cls, attr, tracing_method(attribute, tracer))
+                    if isinstance(cls.__dict__[attr], staticmethod) or isinstance(cls.__dict__[attr], classmethod):
+                        continue
+
+                    # Get rid of SnmpCheck._thread_factory and related
+                    if getattr(attribute, '__module__', 'threading') in EXCLUDED_MODULES:
+                        continue
+
+                    # During regular continuous tracing we trace only the check's top-level 'run' method.
+                    # This is because some checks may make 1000s of calls to various internal methods,
+                    # creating many 1000s of spans, generating excessive overhead. All methods are traced
+                    # only if exhaustive tracing is enabled. This is generally done only during a single
+                    # manually triggered check run, during which such overhead is acceptable.
+                    if not integration_tracing_exhaustive and attr != 'run':
+                        continue
+
+                    setattr(cls, attr, tracing_method(attribute, tracer))
                 return cls
 
             return decorate(cls)

@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import os
+from contextlib import contextmanager
 
 import mock
 import pytest
@@ -18,6 +19,12 @@ class MockAgentCheck(object):
         self.instances = args[2]
         self.check_id = ''
 
+    def run(self):
+        self.check(self.instances[0])
+
+    def check(self, instance):
+        raise NotImplementedError
+
     def gauge(self, name, value):
         aggregator.submit_metric(self, self.check_id, aggregator.GAUGE, name, value, [], 'hostname', False)
 
@@ -25,29 +32,66 @@ class MockAgentCheck(object):
 class DummyCheck(MockAgentCheck):
     def __init__(self, *args, **kwargs):
         super(DummyCheck, self).__init__(*args, **kwargs)
-        self.checked = False
 
-    def check(self, instance):
+    def check(self, _):
         self.gauge('dummy.metric', 10)
+        self.dummy_method()
+
+    def dummy_method(self):
+        self.gauge('foo', 10)
 
 
-@pytest.mark.parametrize('traces_enabled', [pytest.param('false'), (pytest.param('true'))])
-def test_traced_class(traces_enabled):
-    with mock.patch.dict(os.environ, {'DDEV_TRACE_ENABLED': traces_enabled}, clear=True), mock.patch(
-        'ddtrace.tracer'
-    ) as tracer:
-        TracedDummyClass = traced_class(DummyCheck)
+@contextmanager
+def traced_mock_classes():
+    # temporarily unset the DDEV_TRACE_ENABLED flag to enable testing
+    # the exhaustive tracing option
+    ddev_trace_enabled = os.environ.pop('DDEV_TRACE_ENABLED', None)
+    # the mock classes must be traced within a single test execution in order for
+    # us to be able to control the parameters used by the traced_class wrapper
+    # The regular AgentCheck common base class applies traced_class but here
+    # in the test to keep things simple we trace both base and child classes directly
+    global MockAgentCheck, DummyCheck
+    orig_mock_agent, orig_dummy = MockAgentCheck, DummyCheck
+    MockAgentCheck, DummyCheck = traced_class(MockAgentCheck), traced_class(DummyCheck)
+    yield
+    MockAgentCheck, DummyCheck = orig_mock_agent, orig_dummy
+    if ddev_trace_enabled:
+        os.environ['DDEV_TRACE_ENABLED'] = ddev_trace_enabled
 
-        check = TracedDummyClass('dummy', {}, [{}])
-        check.check({})
 
-        if os.environ['DDEV_TRACE_ENABLED'] == 'true':
-            tracer.trace.assert_has_calls(
-                [
-                    mock.call('__init__', resource='dummy', service=INTEGRATION_TRACING_SERVICE_NAME),
-                    mock.call('check', resource='dummy', service=INTEGRATION_TRACING_SERVICE_NAME),
-                ],
-                any_order=True,
-            )
+@pytest.mark.parametrize(
+    'integration_tracing', [pytest.param(False, id="tracing_false"), pytest.param(True, id="tracing_true")]
+)
+@pytest.mark.parametrize(
+    'integration_tracing_exhaustive',
+    [pytest.param(False, id="exhaustive_false"), pytest.param(True, id="exhaustive_true")],
+)
+def test_traced_class(integration_tracing, integration_tracing_exhaustive, datadog_agent):
+    def _get_config(key):
+        return {
+            'integration_tracing': str(integration_tracing).lower(),
+            'integration_tracing_exhaustive': str(integration_tracing_exhaustive).lower(),
+        }.get(key, None)
+
+    with mock.patch.object(datadog_agent, 'get_config', _get_config), mock.patch('ddtrace.tracer') as tracer:
+
+        with traced_mock_classes():
+            check = DummyCheck('dummy', {}, [{}])
+            check.run()
+
+        if integration_tracing:
+            called_services = set([c.kwargs['service'] for c in tracer.trace.mock_calls if 'service' in c.kwargs])
+            called_methods = set([c.args[0] for c in tracer.trace.mock_calls if c.args])
+
+            assert called_services == {INTEGRATION_TRACING_SERVICE_NAME}
+            assert 'run' in called_methods, "'run' must always be traced"
+
+            exhaustive_only_methods = {'__init__', 'check', 'dummy_method'}
+            if integration_tracing_exhaustive:
+                for m in exhaustive_only_methods:
+                    assert m in called_methods
+            else:
+                for m in exhaustive_only_methods:
+                    assert m not in called_methods
         else:
             tracer.trace.assert_not_called()
