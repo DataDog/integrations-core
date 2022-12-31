@@ -1,0 +1,17 @@
+[env.collectors.datadog-checks]
+
+[[envs.default.matrix]]
+python = ["2.7", "3.8"]
+version = ["11.1"]
+
+[envs.default.env-vars]
+DB2_VERSION = "{matrix:version:11.1}"
+IBM_DB_INSTALLER_URL = "https://ddintegrations.blob.core.windows.net/ibm-db2/"
+
+[envs.default]
+dependencies = [
+  "ibm_db==3.0.1; python_version < '3.0'",
+  "ibm_db==3.1.2; python_version > '3.0'",
+]
+
+[envs.bench]
