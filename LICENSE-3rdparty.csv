@@ -50,9 +50,8 @@ oracledb,PyPI,Apache-2.0,Anthony Tuininga
 oracledb,PyPI,UPL,Anthony Tuininga
 orjson,PyPI,Apache-2.0,ijl <ijl@mailbox.org>
 orjson,PyPI,MIT,ijl <ijl@mailbox.org>
-packaging,PyPI,Apache-2.0,Donald Stufft <donald@stufft.io> | Donald Stufft and individual contributors
-packaging,PyPI,BSD-2-Clause,Donald Stufft <donald@stufft.io> | Donald Stufft and individual contributors
-packaging,PyPI,BSD-3-Clause,Donald Stufft <donald@stufft.io> | Donald Stufft and individual contributors
+packaging,PyPI,Apache-2.0,Donald Stufft <donald@stufft.io>
+packaging,PyPI,BSD-3-Clause,Donald Stufft <donald@stufft.io>
 paramiko,PyPI,LGPL-2.1-only,Jeff Forcier
 ply,PyPI,BSD-3-Clause,David Beazley
 prometheus-client,PyPI,Apache-2.0,Brian Brazil
