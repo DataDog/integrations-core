@@ -50,10 +50,10 @@ Or you may leave the version unspecified to download the latest version:
 python -m datadog_checks.downloader -vvvv datadog-$INTEGRATION
 ```
 
-To run the tests, [install tox][8] and just run:
+You can use `ddev` to run the tests:
 
 ```shell
-tox
+ddev test datadog_checks_downloader
 ```
 
 You can select between online and offline tests when running testsuite using
@@ -77,9 +77,9 @@ To run checks against content served from own local directory where TUF, in-toto
 pytest -vvvv --local-dir=/path/to/dir --distribution-name datadog-active-directory --distribution-version 1.10.0
 ```
 
-Data used for offline tests can be used by running:
+Data used for offline tests can be regenerated (for a new repo version) by running:
 ```shell
-tox -e make-test-data
+hatch run test-data:create
 ```
 
 This will run the script under `tests/scripts/download_test_data.py`, which will get a partial copy from
