@@ -1,8 +1,6 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from copy import deepcopy
-
 import pytest
 
 from datadog_checks.dev import WaitFor, docker_run, run_command
@@ -74,30 +72,26 @@ def tcps_check(tcps_instance):
 
 @pytest.fixture
 def instance():
-    return deepcopy(
-        {
-            'server': 'localhost:1521',
-            'username': 'system',
-            'password': 'oracle',
-            'service_name': 'xe',
-            'protocol': 'TCP',
-            'tags': ['optional:tag1'],
-        }
-    )
+    return {
+        'server': 'localhost:1521',
+        'username': 'system',
+        'password': 'oracle',
+        'service_name': 'xe',
+        'protocol': 'TCP',
+        'tags': ['optional:tag1'],
+    }
 
 
 @pytest.fixture
 def tcps_instance():
-    return deepcopy(
-        {
-            'server': 'localhost:2484',
-            'username': 'system',
-            'password': 'oracle',
-            'service_name': 'xe',
-            'protocol': 'TCPS',
-            'tags': ['optional:tag1'],
-        }
-    )
+    return {
+        'server': 'localhost:2484',
+        'username': 'system',
+        'password': 'oracle',
+        'service_name': 'xe',
+        'protocol': 'TCPS',
+        'tags': ['optional:tag1'],
+    }
 
 
 @pytest.fixture(scope='session')
@@ -140,15 +134,13 @@ def dd_environment():
 
 @pytest.fixture
 def bad_instance():
-    return deepcopy(
-        {
-            "password": "badpassword",
-            "protocol": "TCP",
-            "server": "localhost:1521",
-            "service_name": "InfraDB.us.oracle.com",
-            "username": "datadog",
-        }
-    )
+    return {
+        "password": "badpassword",
+        "protocol": "TCP",
+        "server": "localhost:1521",
+        "service_name": "InfraDB.us.oracle.com",
+        "username": "datadog",
+    }
 
 
 def create_user():
