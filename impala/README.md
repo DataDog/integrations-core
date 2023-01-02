@@ -80,7 +80,57 @@ See [service_checks.json][8] for a list of service checks provided by this integ
 
 ### Logs
 
-The Impala integration can collect logs from the Impala services and forward them to Datadog. See [the example configuration file][10] on how to collect all logs.
+The Impala integration can collect logs from the Impala services and forward them to Datadog. 
+
+1. Collecting logs is disabled by default in the Datadog Agent. Enable it in your `datadog.yaml` file:
+
+   ```yaml
+   logs_enabled: true
+   ```
+
+2. Uncomment and edit the logs configuration block in your `impalad.d/conf.yaml` file. Here's an example with the daemon process:
+
+   ```yaml
+   logs:
+     - type: file
+       path: /var/log/impala/impalad.INFO
+       source: impala
+       tags:
+       - service_type:daemon
+       log_processing_rules:
+       - type: multi_line
+         pattern: ^[IWEF]\d{4} (\d{2}:){2}\d{2}
+         name: new_log_start_with_log_level_and_date
+     - type: file
+       path: /var/log/impala/impalad.WARNING
+       source: impala
+       tags:
+       - service_type:daemon
+       log_processing_rules:
+       - type: multi_line
+         pattern: ^[IWEF]\d{4} (\d{2}:){2}\d{2}
+         name: new_log_start_with_log_level_and_date
+     - type: file
+       path: /var/log/impala/impalad.ERROR
+       source: impala
+       tags:
+       - service_type:daemon
+       log_processing_rules:
+       - type: multi_line
+         pattern: ^[IWEF]\d{4} (\d{2}:){2}\d{2}
+         name: new_log_start_with_log_level_and_date
+     - type: file
+       path: /var/log/impala/impalad.FATAL
+       source: impala
+       tags:
+       - service_type:daemon
+       log_processing_rules:
+       - type: multi_line
+         pattern: ^[IWEF]\d{4} (\d{2}:){2}\d{2}
+         name: new_log_start_with_log_level_and_date
+   ```
+
+See [the example configuration file][10] on how to collect all logs.
 
 ## Troubleshooting
 
