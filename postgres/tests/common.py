@@ -110,4 +110,6 @@ def check_slru_metrics(aggregator, expected_tags, count=1):
     for (metric_name, _) in SLRU_METRICS['metrics'].values():
         for slru_cache in slru_caches:
             if float(POSTGRES_VERSION) >= 13.0:
-                aggregator.assert_metric(metric_name, count=count, tags=expected_tags + ['slru_name:{}'.format(slru_cache)])
+                aggregator.assert_metric(
+                    metric_name, count=count, tags=expected_tags + ['slru_name:{}'.format(slru_cache)]
+                )
