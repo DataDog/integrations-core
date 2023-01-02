@@ -61,5 +61,5 @@ dev-mode-dirs = [
 ]
 
 [tool.pytest.ini_options]
-norecursedirs = "tests/docker"
+norecursedirs = "/tests/docker"
 
