@@ -192,11 +192,6 @@ instances:
     #
     collect_bloat_metrics: false
 
-    ## @param collect_slru_metrics - boolean - optional - default: false
-    ## If set to true, collects metrics regarding simple least-recently-used cache from pg_stat_slru.
-    #
-    # collect_slru_metrics: false
-
     ## @param collect_wal_metrics - boolean - optional - default: false
     ## Collect metrics about WAL file age.
     ## NOTE: You must be running the check local to your database if you want to enable this option.

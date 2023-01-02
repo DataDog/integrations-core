@@ -369,7 +369,7 @@ class PostgreSql(AgentCheck):
             metric_scope.append(FUNCTION_METRICS)
         if self._config.collect_count_metrics:
             metric_scope.append(self.metrics_cache.get_count_metrics())
-        if self._config.collect_slru_metrics and self.version >= V13:
+        if self.version >= V13:
             metric_scope.append(SLRU_METRICS)
 
         # Do we need relation-specific metrics?
