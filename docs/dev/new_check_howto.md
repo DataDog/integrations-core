@@ -19,9 +19,9 @@ This guide provides instructions for creating a Datadog Agent integration in the
 
 The required Datadog Agent integration development tools include:
 
-- Python v3.8 and [pipx][2]: For instructions on installing Python and pipx, see [Python for Agent Integration Development][3].
+- Python v3.8 and [pipx][2]. For instructions on installing Python and pipx, see [Python for Agent Integration Development][3].
 - [Docker][4] to run the full test suite
-- [git][5]
+- The git [command-line][5] or [GitHub desktop client][19]
 
 ## Set up your integrations-extra repo
 
@@ -57,22 +57,22 @@ Before you install the Development Toolkit, make sure you've [installed Python a
 
 1. Run the following command and remove any executables shown in the output:
    ```
-	 which -a ddev
+   which -a ddev
    ```
 
 1. Make sure there are no virtual environments running:
    1. Run the following command:
       ```
-	    echo VIRTUAL_ENV
+      echo VIRTUAL_ENV
       ```
 
    1. If the command returns output, a virtual environment is running. Run `deactivate` to exit the virtual environment.
 
 1. Install `ddev`:
    <div class="alert alert-warning">Do not run this command with `sudo`.</a></div>
-   
+
    ```
-	 pipx install ddev --python /usr/local/opt/python@3.8/bin/python3.8
+   pipx install ddev --python /usr/local/opt/python@3.8/bin/python3.8
    ```
 
 1. Optionally, if your `integrations-extras` repo is somewhere other than `$HOME/dd/`, adjust the `ddev` configuration file:
@@ -560,3 +560,4 @@ Additional helpful documentation, links, and articles:
 [16]: https://packaging.python.org/en/latest/tutorials/packaging-projects/
 [17]: https://docs.datadoghq.com/agent/
 [18]: https://www.datadoghq.com/blog/programmatically-manage-your-datadog-integrations/
+[19]: https://desktop.github.com/
