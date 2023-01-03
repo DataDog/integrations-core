@@ -50,7 +50,7 @@ Follow these instructions to set up your repo for integration development:
 
 ## Install the Development Toolkit
 
-Before you install the Development Toolkit, make sure you've [installed Python and pipx][3].
+Assuming you've [installed Python and pipx][3], install the Development Toolkit for your operating system:
 
 {{< tabs >}}
 {{% tab "MacOS" %}}
@@ -69,7 +69,7 @@ Before you install the Development Toolkit, make sure you've [installed Python a
    1. If the command returns output, a virtual environment is running. Run `deactivate` to exit the virtual environment.
 
 1. Install `ddev`:
-   <div class="alert alert-warning">Do not run this command with `sudo`.</a></div>
+   <div class="alert alert-warning">Do not run this command with <code>sudo</code>.</a></div>
 
    ```
    pipx install ddev --python /usr/local/opt/python@3.8/bin/python3.8
