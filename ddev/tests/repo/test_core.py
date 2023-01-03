@@ -3,6 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 
+import pytest
+
 from ddev.integration.core import Integration
 from ddev.repo.config import RepositoryConfig
 from ddev.repo.constants import NOT_SHIPPABLE
@@ -42,413 +44,95 @@ class TestGetIntegration:
         assert isinstance(integration, Integration)
 
 
-class TestIterationOnlyIntegrations:
-    def test_default_changed(self, repository):
-        repo = Repository(repository.path.name, str(repository.path))
-
-        integration_names = []
-        for path in repository.path.iterdir():
-            if (path / 'manifest.json').is_file():
-                integration_names.append(path.name)
-        integration_names.sort()
-
-        integration = integration_names[0]
-        (repository.path / integration / 'foo.txt').touch()
-
-        changed = [integration]
-        integrations = list(repo.integrations.iter())
-
-        assert [integration.name for integration in integrations] == changed
-        assert list(repo.integrations.iter()) == integrations
-
-    def test_selection(self, local_repo):
-        repo = Repository(local_repo.name, str(local_repo))
-
-        integration_names = []
-        for path in local_repo.iterdir():
-            if (path / 'manifest.json').is_file():
-                integration_names.append(path.name)
-        integration_names.sort()
-
-        selection = [integration_names[0]]
-        integrations = list(repo.integrations.iter(selection))
-
-        assert [integration.name for integration in integrations] == selection
-        assert list(repo.integrations.iter(selection)) == integrations
-
-    def test_all(self, local_repo):
-        repo = Repository(local_repo.name, str(local_repo))
-
-        integration_names = []
-        for path in local_repo.iterdir():
-            if (path / 'manifest.json').is_file():
-                integration_names.append(path.name)
-        integration_names.sort()
-
-        selection = ['all']
-        integrations = list(repo.integrations.iter(selection))
-
-        assert [integration.name for integration in integrations] == integration_names
-        assert list(repo.integrations.iter(selection)) == integrations
-
-
-class TestIterationAllValid:
-    def test_default_changed(self, repository):
-        repo = Repository(repository.path.name, str(repository.path))
-
-        integration_names = []
-        for path in repository.path.iterdir():
-            if (path / 'manifest.json').is_file() or (path / 'pyproject.toml').is_file():
-                integration_names.append(path.name)
-        integration_names.sort()
-
-        integration = integration_names[0]
-        (repository.path / integration / 'foo.txt').touch()
-
-        changed = [integration]
-        integrations = list(repo.integrations.iter_all())
-
-        assert [integration.name for integration in integrations] == changed
-        assert list(repo.integrations.iter_all()) == integrations
-
-    def test_selection(self, local_repo):
-        repo = Repository(local_repo.name, str(local_repo))
-
-        integration_names = []
-        for path in local_repo.iterdir():
-            if (path / 'manifest.json').is_file() or (path / 'pyproject.toml').is_file():
-                integration_names.append(path.name)
-        integration_names.sort()
-
-        selection = [integration_names[0]]
-        integrations = list(repo.integrations.iter_all(selection))
-
-        assert [integration.name for integration in integrations] == selection
-        assert list(repo.integrations.iter_all(selection)) == integrations
-
-    def test_all(self, local_repo):
-        repo = Repository(local_repo.name, str(local_repo))
-
-        integration_names = []
-        for path in local_repo.iterdir():
-            if (path / 'manifest.json').is_file() or (path / 'pyproject.toml').is_file():
-                integration_names.append(path.name)
-        integration_names.sort()
-
-        selection = ['all']
-        integrations = list(repo.integrations.iter_all(selection))
-
-        assert [integration.name for integration in integrations] == integration_names
-        assert list(repo.integrations.iter_all(selection)) == integrations
-
-
-class TestIterationPackages:
-    def test_default_changed(self, repository):
-        repo = Repository(repository.path.name, str(repository.path))
-
-        integration_names = []
-        for path in repository.path.iterdir():
-            if (path / 'pyproject.toml').is_file():
-                integration_names.append(path.name)
-        integration_names.sort()
-
-        integration = integration_names[0]
-        (repository.path / integration / 'foo.txt').touch()
-
-        changed = [integration]
-        integrations = list(repo.integrations.iter_packages())
-
-        assert [integration.name for integration in integrations] == changed
-        assert list(repo.integrations.iter_packages()) == integrations
-
-    def test_selection(self, local_repo):
-        repo = Repository(local_repo.name, str(local_repo))
-
-        integration_names = []
-        for path in local_repo.iterdir():
-            if (path / 'pyproject.toml').is_file():
-                integration_names.append(path.name)
-        integration_names.sort()
-
-        selection = [integration_names[0]]
-        integrations = list(repo.integrations.iter_packages(selection))
-
-        assert [integration.name for integration in integrations] == selection
-        assert list(repo.integrations.iter_packages(selection)) == integrations
-
-    def test_all(self, local_repo):
-        repo = Repository(local_repo.name, str(local_repo))
-
-        integration_names = []
-        for path in local_repo.iterdir():
-            if (path / 'pyproject.toml').is_file():
-                integration_names.append(path.name)
-        integration_names.sort()
-
-        selection = ['all']
-        integrations = list(repo.integrations.iter_packages(selection))
-
-        assert [integration.name for integration in integrations] == integration_names
-        assert list(repo.integrations.iter_packages(selection)) == integrations
-
-
-class TestIterationTiles:
-    def test_default_changed(self, repository):
-        repo = Repository(repository.path.name, str(repository.path))
-
-        integration_names = []
-        for path in repository.path.iterdir():
-            if (path / 'manifest.json').is_file() and not (path / 'pyproject.toml').is_file():
-                integration_names.append(path.name)
-        integration_names.sort()
-
-        integration = integration_names[0]
-        (repository.path / integration / 'foo.txt').touch()
-
-        changed = [integration]
-        integrations = list(repo.integrations.iter_tiles())
-
-        assert [integration.name for integration in integrations] == changed
-        assert list(repo.integrations.iter_tiles()) == integrations
-
-    def test_selection(self, local_repo):
-        repo = Repository(local_repo.name, str(local_repo))
-
-        integration_names = []
-        for path in local_repo.iterdir():
-            if (path / 'manifest.json').is_file() and not (path / 'pyproject.toml').is_file():
-                integration_names.append(path.name)
-        integration_names.sort()
-
-        selection = [integration_names[0]]
-        integrations = list(repo.integrations.iter_tiles(selection))
-
-        assert [integration.name for integration in integrations] == selection
-        assert list(repo.integrations.iter_tiles(selection)) == integrations
-
-    def test_all(self, local_repo):
-        repo = Repository(local_repo.name, str(local_repo))
-
-        integration_names = []
-        for path in local_repo.iterdir():
-            if (path / 'manifest.json').is_file() and not (path / 'pyproject.toml').is_file():
-                integration_names.append(path.name)
-        integration_names.sort()
-
-        selection = ['all']
-        integrations = list(repo.integrations.iter_tiles(selection))
-
-        assert [integration.name for integration in integrations] == integration_names
-        assert list(repo.integrations.iter_tiles(selection)) == integrations
-
-
-class TestIterationTestable:
-    def test_default_changed(self, repository):
-        repo = Repository(repository.path.name, str(repository.path))
-
-        integration_names = []
-        for path in repository.path.iterdir():
-            # TODO: remove tox when the Hatch migration is complete
-            if (path / 'hatch.toml').is_file() or (path / 'tox.ini').is_file():
-                integration_names.append(path.name)
-        integration_names.sort()
-
-        integration = integration_names[0]
-        (repository.path / integration / 'foo.txt').touch()
-
-        changed = [integration]
-        integrations = list(repo.integrations.iter_testable())
-
-        assert [integration.name for integration in integrations] == changed
-        assert list(repo.integrations.iter_testable()) == integrations
-
-    def test_selection(self, local_repo):
-        repo = Repository(local_repo.name, str(local_repo))
-
-        integration_names = []
-        for path in local_repo.iterdir():
-            # TODO: remove tox when the Hatch migration is complete
-            if (path / 'hatch.toml').is_file() or (path / 'tox.ini').is_file():
-                integration_names.append(path.name)
-        integration_names.sort()
-
-        selection = [integration_names[0]]
-        integrations = list(repo.integrations.iter_testable(selection))
-
-        assert [integration.name for integration in integrations] == selection
-        assert list(repo.integrations.iter_testable(selection)) == integrations
-
-    def test_all(self, local_repo):
-        repo = Repository(local_repo.name, str(local_repo))
-
-        integration_names = []
-        for path in local_repo.iterdir():
-            # TODO: remove tox when the Hatch migration is complete
-            if (path / 'hatch.toml').is_file() or (path / 'tox.ini').is_file():
-                integration_names.append(path.name)
-        integration_names.sort()
-
-        selection = ['all']
-        integrations = list(repo.integrations.iter_testable(selection))
-
-        assert [integration.name for integration in integrations] == integration_names
-        assert list(repo.integrations.iter_testable(selection)) == integrations
-
-
-class TestIterationShippable:
-    def test_default_changed(self, repository):
-        repo = Repository(repository.path.name, str(repository.path))
-
-        integration_names = []
-        for path in repository.path.iterdir():
-            if (path / 'pyproject.toml').is_file() and path.name not in NOT_SHIPPABLE:
-                integration_names.append(path.name)
-        integration_names.sort()
-
-        integration = integration_names[0]
-        (repository.path / integration / 'foo.txt').touch()
-
-        changed = [integration]
-        integrations = list(repo.integrations.iter_shippable())
-
-        assert [integration.name for integration in integrations] == changed
-        assert list(repo.integrations.iter_shippable()) == integrations
-
-    def test_selection(self, local_repo):
-        repo = Repository(local_repo.name, str(local_repo))
-
-        integration_names = []
-        for path in local_repo.iterdir():
-            if (path / 'pyproject.toml').is_file() and path.name not in NOT_SHIPPABLE:
-                integration_names.append(path.name)
-        integration_names.sort()
-
-        selection = [integration_names[0]]
-        integrations = list(repo.integrations.iter_shippable(selection))
-
-        assert [integration.name for integration in integrations] == selection
-        assert list(repo.integrations.iter_shippable(selection)) == integrations
-
-    def test_all(self, local_repo):
-        repo = Repository(local_repo.name, str(local_repo))
-
-        integration_names = []
-        for path in local_repo.iterdir():
-            if (path / 'pyproject.toml').is_file() and path.name not in NOT_SHIPPABLE:
-                integration_names.append(path.name)
-        integration_names.sort()
-
-        selection = ['all']
-        integrations = list(repo.integrations.iter_shippable(selection))
-
-        assert [integration.name for integration in integrations] == integration_names
-        assert list(repo.integrations.iter_shippable(selection)) == integrations
-
-
-class TestIterationAgentChecks:
-    def test_default_changed(self, repository):
-        repo = Repository(repository.path.name, str(repository.path))
-
-        integration_names = []
-        for path in repository.path.iterdir():
-            if (
+class TestIntegrationsIteration:
+
+    iter_test_params = [
+        pytest.param("iter", lambda path: (path / 'manifest.json').is_file(), id="only integrations"),
+        pytest.param(
+            "iter_all",
+            lambda path: (path / 'manifest.json').is_file() or (path / 'pyproject.toml').is_file(),
+            id="all valid",
+        ),
+        pytest.param("iter_packages", lambda path: (path / 'pyproject.toml').is_file(), id="packages"),
+        pytest.param(
+            "iter_tiles",
+            lambda path: (path / 'manifest.json').is_file() and not (path / 'pyproject.toml').is_file(),
+            id="tiles",
+        ),
+        # TODO: remove tox when the Hatch migration is complete
+        pytest.param(
+            "iter_testable", lambda path: (path / 'hatch.toml').is_file() or (path / 'tox.ini').is_file(), id="testable"
+        ),
+        pytest.param(
+            "iter_shippable",
+            lambda path: (path / 'pyproject.toml').is_file() and path.name not in NOT_SHIPPABLE,
+            id="shippable",
+        ),
+        pytest.param(
+            "iter_agent_checks",
+            lambda path: (
                 package_root := path / 'datadog_checks' / path.name.replace('-', '_') / '__init__.py'
-            ).is_file() and package_root.read_text().count('import ') > 1:
-                integration_names.append(path.name)
-        integration_names.sort()
+            ).is_file()
+            and package_root.read_text().count('import ') > 1,
+            id="agent checks",
+        ),
+        pytest.param(
+            "iter_jmx_checks",
+            lambda path: (path / 'datadog_checks' / path.name.replace('-', '_') / 'data' / 'metrics.yaml').is_file(),
+            id="jmx checks",
+        ),
+    ]
 
-        integration = integration_names[0]
-        (repository.path / integration / 'foo.txt').touch()
-
-        changed = [integration]
-        integrations = list(repo.integrations.iter_agent_checks())
-
-        assert [integration.name for integration in integrations] == changed
-        assert list(repo.integrations.iter_agent_checks()) == integrations
-
-    def test_selection(self, local_repo):
-        repo = Repository(local_repo.name, str(local_repo))
-
-        integration_names = []
-        for path in local_repo.iterdir():
-            if (
-                package_root := path / 'datadog_checks' / path.name.replace('-', '_') / '__init__.py'
-            ).is_file() and package_root.read_text().count('import ') > 1:
-                integration_names.append(path.name)
-        integration_names.sort()
-
-        selection = [integration_names[0]]
-        integrations = list(repo.integrations.iter_agent_checks(selection))
-
-        assert [integration.name for integration in integrations] == selection
-        assert list(repo.integrations.iter_agent_checks(selection)) == integrations
-
-    def test_all(self, local_repo):
-        repo = Repository(local_repo.name, str(local_repo))
-
-        integration_names = []
-        for path in local_repo.iterdir():
-            if (
-                package_root := path / 'datadog_checks' / path.name.replace('-', '_') / '__init__.py'
-            ).is_file() and package_root.read_text().count('import ') > 1:
-                integration_names.append(path.name)
-        integration_names.sort()
-
-        selection = ['all']
-        integrations = list(repo.integrations.iter_agent_checks(selection))
-
-        assert [integration.name for integration in integrations] == integration_names
-        assert list(repo.integrations.iter_agent_checks(selection)) == integrations
-
-
-class TestIterationJMXChecks:
-    def test_default_changed(self, repository):
+    @pytest.mark.parametrize(
+        "method_name, integration_filter",
+        iter_test_params,
+    )
+    def test_integrations_iteration_default_changed(self, method_name, integration_filter, repository):
         repo = Repository(repository.path.name, str(repository.path))
 
-        integration_names = []
-        for path in repository.path.iterdir():
-            if (path / 'datadog_checks' / path.name.replace('-', '_') / 'data' / 'metrics.yaml').is_file():
-                integration_names.append(path.name)
-        integration_names.sort()
+        integration_names = sorted(path.name for path in repository.path.iterdir() if integration_filter(path))
 
         integration = integration_names[0]
-        (repository.path / integration / 'foo.txt').touch()
+        (repo.path / integration / 'foo.txt').touch()
 
         changed = [integration]
-        integrations = list(repo.integrations.iter_jmx_checks())
+        iter_method = getattr(repo.integrations, method_name)
+        integrations = list(iter_method())
 
         assert [integration.name for integration in integrations] == changed
-        assert list(repo.integrations.iter_jmx_checks()) == integrations
+        assert list(iter_method()) == integrations
 
-    def test_selection(self, local_repo):
+    @pytest.mark.parametrize(
+        "method_name, integration_filter",
+        iter_test_params,
+    )
+    def test_integrations_iteration_selection(self, method_name, integration_filter, local_repo):
         repo = Repository(local_repo.name, str(local_repo))
 
-        integration_names = []
-        for path in local_repo.iterdir():
-            if (path / 'datadog_checks' / path.name.replace('-', '_') / 'data' / 'metrics.yaml').is_file():
-                integration_names.append(path.name)
-        integration_names.sort()
+        integration_names = sorted(path.name for path in local_repo.iterdir() if integration_filter(path))
 
         selection = [integration_names[0]]
-        integrations = list(repo.integrations.iter_jmx_checks(selection))
+        iter_method = getattr(repo.integrations, method_name)
+        integrations = list(iter_method(selection))
 
         assert [integration.name for integration in integrations] == selection
-        assert list(repo.integrations.iter_jmx_checks(selection)) == integrations
+        assert list(iter_method(selection)) == integrations
 
-    def test_all(self, local_repo):
+    @pytest.mark.parametrize(
+        "method_name, integration_filter",
+        iter_test_params,
+    )
+    def test_integrations_iteration_select_all(self, method_name, integration_filter, local_repo):
         repo = Repository(local_repo.name, str(local_repo))
 
-        integration_names = []
-        for path in local_repo.iterdir():
-            if (path / 'datadog_checks' / path.name.replace('-', '_') / 'data' / 'metrics.yaml').is_file():
-                integration_names.append(path.name)
-        integration_names.sort()
+        integration_names = sorted(path.name for path in local_repo.iterdir() if integration_filter(path))
 
         selection = ['all']
-        integrations = list(repo.integrations.iter_jmx_checks(selection))
+        iter_method = getattr(repo.integrations, method_name)
+        integrations = list(iter_method(selection))
 
         assert [integration.name for integration in integrations] == integration_names
-        assert list(repo.integrations.iter_jmx_checks(selection)) == integrations
+        assert list(iter_method(selection)) == integrations
 
 
 class TestIterationChanged:
