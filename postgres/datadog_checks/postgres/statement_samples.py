@@ -541,7 +541,6 @@ class PostgresStatementSamples(DBMAsyncJob):
 
         return db_explain_error, err
 
-    @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _run_explain(self, dbname, statement, obfuscated_statement):
         start_time = time.time()
         with self._check._get_db(dbname).cursor() as cursor:

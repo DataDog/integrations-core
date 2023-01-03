@@ -152,7 +152,6 @@ class PostgresStatementMetrics(DBMAsyncJob):
             self._stat_column_cache = []
             raise e
 
-    @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _get_pg_stat_statements_columns(self):
         """
         Load the list of the columns available under the `pg_stat_statements` table. This must be queried because
@@ -345,7 +344,6 @@ class PostgresStatementMetrics(DBMAsyncJob):
 
             return []
 
-    @tracked_method(agent_check_getter=agent_check_getter)
     def _emit_pg_stat_statements_metrics(self):
         query = PG_STAT_STATEMENTS_COUNT_QUERY_LT_9_4 if self._check.version < V9_4 else PG_STAT_STATEMENTS_COUNT_QUERY
         try:
