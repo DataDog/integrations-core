@@ -2,26 +2,25 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
-import sys
 import warnings
 from typing import Callable
 
+import sys
 from six import PY2, text_type
 from urllib3.exceptions import InsecureRequestWarning
 
 from .utils.common import to_native_string
+from .utils.tracing import tracing_enabled
 
 try:
     import datadog_agent
 except ImportError:
     from .stubs import datadog_agent
 
-
 # Arbitrary number less than 10 (DEBUG)
 TRACE_LEVEL = 7
 
 LOGGER_FRAME_SEARCH_MAX_DEPTH = 50
-
 
 DEFAULT_FALLBACK_LOGGER = logging.getLogger(__name__)
 
@@ -62,7 +61,6 @@ class CheckLoggingAdapter(logging.LoggerAdapter):
         self.log(TRACE_LEVEL, msg, *args, **kwargs)
 
     if PY2:
-
         def warn(self, msg, *args, **kwargs):
             self.log(logging.WARNING, msg, *args, **kwargs)
 
@@ -74,16 +72,30 @@ class CheckLoggingAdapter(logging.LoggerAdapter):
 
 
 class CheckLogFormatter(logging.Formatter):
+
+    def __init__(self):
+        super(CheckLogFormatter, self).__init__()
+        integration_tracing, _ = tracing_enabled()
+        self.integration_tracing_enabled = integration_tracing
+
     def format(self, record):
         # type: (logging.LogRecord) -> str
         message = to_native_string(super(CheckLogFormatter, self).format(record))
-        return "{} | ({}:{}) | {}".format(
+
+        attributes = {
             # Default to `-` for non-check logs
-            getattr(record, '_check_id', '-'),
-            getattr(record, '_filename', record.filename),
-            getattr(record, '_lineno', record.lineno),
-            message,
-        )
+            'check_id': getattr(record, '_check_id', '-'),
+            'filename': getattr(record, '_filename', record.filename),
+            'lineno': getattr(record, '_lineno', record.lineno),
+            'message': message
+        }
+
+        if not self.integration_tracing_enabled:
+            return "{check_id} | ({filename}:{lineno}) | {message}".format(**attributes)
+
+        attributes['trace_id'] = getattr(record, 'dd.trace_id', 0)
+        attributes['span_id'] = getattr(record, 'dd.span_id', 0)
+        return "{check_id} | ({filename}:{lineno}) | dd.trace_id={trace_id} dd.span_id={span_id} | {message}".format(**attributes)
 
 
 class AgentLogHandler(logging.Handler):
