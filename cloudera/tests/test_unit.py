@@ -225,12 +225,12 @@ def test_given_cloudera_check_when_good_health_cluster_then_emits_cluster_metric
             AgentCheck.OK,
             tags=CLUSTER_HEALTH_TAGS,
         )
-        expected_content = (
+        expected_msg_text = (
             'Interceptor for {http://yarn.extractor.cdx.cloudera.com/}YarnHistoryClient '
             'has thrown exception, unwinding now'
         )
 
-        aggregator.assert_event(msg_text=expected_content, count=1)
+        aggregator.assert_event(msg_text=expected_msg_text, count=1)
         aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
         aggregator.assert_all_metrics_covered()
 

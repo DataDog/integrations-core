@@ -46,7 +46,7 @@ class ApiClientV7(ApiClient):
         end_time_iso = datetime.utcfromtimestamp(now_utc).isoformat()
 
         query = f"timeOccurred=ge={start_time_iso};timeOccurred=le={end_time_iso}"
-        self._check.log.info("Cloudera event query: %s", query)
+        self._log.info("Cloudera event query: %s", query)
         try:
             event_resource_response = events_resource_api.read_events(query=query)
             for item in event_resource_response.items:

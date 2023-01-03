@@ -20,10 +20,15 @@ class ClouderaEvent:
 
         payload = {
             "timestamp": utc_timestamp,
-            "event_type": EVENT_TYPES[self._item.severity],
+            "event_type": self._item.category,
             "alert_type": EVENT_TYPES[self._item.severity],
             "tags": [],
             "msg_title": self._item.content,
             "msg_text": self._item.content,
         }
+
+        for attribute in self._item.attributes:
+            for value in attribute.values:
+                payload['tags'].append(f"{attribute.name}:{value}")
+
         return payload

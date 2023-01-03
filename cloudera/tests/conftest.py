@@ -8,6 +8,7 @@ from copy import deepcopy
 import pytest
 from cm_client.models.api_cluster_ref import ApiClusterRef
 from cm_client.models.api_event import ApiEvent
+from cm_client.models.api_event_attribute import ApiEventAttribute
 from cm_client.models.api_event_query_result import ApiEventQueryResult
 from cm_client.models.api_host import ApiHost
 from cm_client.models.api_host_list import ApiHostList
@@ -58,12 +59,7 @@ def init_config():
 
 @pytest.fixture(scope='session')
 def cloudera_check():
-    return lambda instance: ClouderaCheck('cloudera', init_config=common.INIT_CONFIG, instances=[instance])
-
-
-@pytest.fixture(scope='session')
-def cloudera_check_():
-    return deepcopy(ClouderaCheck('cloudera', init_config=common.INIT_CONFIG, instances=[common.INSTANCE]))
+    return lambda instance: deepcopy(ClouderaCheck('cloudera', init_config=common.INIT_CONFIG, instances=[instance]))
 
 
 @pytest.fixture
@@ -73,25 +69,6 @@ def api_response():
             return json.load(f)
 
     return _response
-
-
-@pytest.fixture
-def dummy_event():
-    content = (
-        'Interceptor for {http://yarn.extractor.cdx.cloudera.com/}YarnHistoryClient has thrown exception, unwinding now'
-    )
-    dummy_event = ApiEvent(
-        time_occurred='2022-11-30T21:06:39.870Z',
-        severity='IMPORTANT',
-        content=content,
-        category='LOG_EVENT',
-        attributes=[
-            {'name': 'ROLE', 'values': ['TELEMETRYPUBLISHER']},
-            {'name': 'CLUSTER', 'values': ['cod--qfdcinkqrzw']},
-            {'name': 'ROLE_DISPLAY_NAME', 'values': ['Telemetry Publisher (cod--qfdcinkqrzw-gateway0)']},
-        ],
-    )
-    return dummy_event
 
 
 def get_timeseries_resource():
@@ -144,9 +121,9 @@ def read_events_resource():
         content=content,
         category='LOG_EVENT',
         attributes=[
-            {'name': 'ROLE', 'values': ['TELEMETRYPUBLISHER']},
-            {'name': 'CLUSTER', 'values': ['cod--qfdcinkqrzw']},
-            {'name': 'ROLE_DISPLAY_NAME', 'values': ['Telemetry Publisher (cod--qfdcinkqrzw-gateway0)']},
+            ApiEventAttribute(name='ROLE', values=['TELEMETRYPUBLISHER']),
+            ApiEventAttribute(name='CLUSTER', values=['cod--qfdcinkqrzw']),
+            ApiEventAttribute(name='ROLE_DISPLAY_NAME', values=['Telemetry Publisher (cod--qfdcinkqrzw-gateway0)']),
         ],
     )
     return ApiEventQueryResult(items=[dummy_event])
