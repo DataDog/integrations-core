@@ -224,10 +224,8 @@ def test_local_wheels_signer_signature_leaf_error(distribution_name, distributio
             http_url,
         ]
 
-        with pytest.raises(UnsignedMetadataError) as exc:
+        with pytest.raises(UnsignedMetadataError, match="^wheels-signer-a was signed by 0/1 keys$"):
             _do_run_downloader(argv)
-
-    assert "wheels-signer-a was signed by 0/1 keys" in str(exc)
 
 
 @pytest.mark.offline
