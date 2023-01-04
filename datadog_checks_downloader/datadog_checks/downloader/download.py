@@ -16,9 +16,7 @@ from in_toto.exceptions import LinkNotFoundError
 from in_toto.models.metadata import Metablock
 from packaging.version import parse as parse_version
 from securesystemslib import interface
-from tuf import settings as tuf_settings
-from tuf.client.updater import Updater
-from tuf.exceptions import UnknownTargetError
+from tuf.ngclient import Updater
 
 from .exceptions import (
     DuplicatePackage,
@@ -31,12 +29,9 @@ from .exceptions import (
     NoSuchDatadogPackageVersion,
     PythonVersionMismatch,
     RevokedDeveloperOrMachine,
-    UpdatedTargetsError,
+    TargetNotFoundError,
 )
 from .parameters import substitute
-
-# Increase requests timeout.
-tuf_settings.SOCKET_TIMEOUT = 60
 
 # After we import everything we need, shut off all existing loggers.
 logging.config.dictConfig({'disable_existing_loggers': True, 'version': 1})
@@ -73,8 +68,6 @@ class TUFDownloader:
         assert level in range(10, 70, 10), level
         logging.basicConfig(format='%(levelname)-8s: %(message)s', level=level)
 
-        tuf_settings.repositories_directory = REPOSITORIES_DIR
-
         self.__root_layout_type = root_layout_type
         self.__root_layout = ROOT_LAYOUTS[self.__root_layout_type]
 
@@ -86,52 +79,44 @@ class TUFDownloader:
         # NOTE: Build a TUF updater which stores metadata in (1) the given
         # directory, and (2) uses the following mirror configuration,
         # respectively.
-        # https://github.com/theupdateframework/tuf/blob/aa2ab218f22d8682e03c992ea98f88efd155cffd/tuf/client/updater.py#L628-L683
         # NOTE: This updater will store files under:
         # os.path.join(REPOSITORIES_DIR, REPOSITORY_DIR)
         self.__updater = Updater(
-            REPOSITORY_DIR,
-            {
-                'repo': {
-                    'url_prefix': repository_url_prefix,
-                    'metadata_path': 'metadata.staged',
-                    'targets_path': 'targets',
-                    'confined_target_dirs': [''],
-                }
-            },
+            metadata_dir=os.path.join(REPOSITORIES_DIR, REPOSITORY_DIR, 'metadata'),
+            metadata_base_url=f'{repository_url_prefix}/metadata.staged/',
+            target_base_url=f'{repository_url_prefix}/targets/',
+            target_dir=self.__targets_dir,
         )
+
+        # Increase requests timeout.
+        # There's no officially supported way to do this without either writing our own
+        # fetcher from scratch or relying on internals. We're choosing the latter for now.
+        # - https://github.com/theupdateframework/python-tuf/blob/v2.0.0/tuf/ngclient/updater.py#L99
+        # - https://github.com/theupdateframework/python-tuf/blob/v2.0.0/tuf/ngclient/_internal/requests_fetcher.py#L49
+        self.__updater._fetcher.socket_timeout = 60
 
         # NOTE: Update to the latest top-level role metadata only ONCE, so that
         # we use the same consistent snapshot to download targets.
         self.__updater.refresh()
 
     def __download_with_tuf(self, target_relpath):
-        target = self.__updater.get_one_valid_targetinfo(target_relpath)
-        updated_targets = self.__updater.updated_targets((target,), self.__targets_dir)
+        target = self.__updater.get_targetinfo(target_relpath)
+        if target is None:
+            raise TargetNotFoundError(f'Target at {target_relpath} not found')
+
+        target_abspath = os.path.join(self.__targets_dir, target_relpath)
+        local_relpath = self.__updater.find_cached_target(target, target_abspath)
 
         # Either the target has not been updated...
-        if not len(updated_targets):
+        if local_relpath:
             logger.debug('%s has not been updated', target_relpath)
-        # or, it has been updated, in which case...
+        # or, it has been updated, in which case we download the new version
         else:
-            # First, we use TUF to download and verify the target.
-            if len(updated_targets) != 1:
-                raise UpdatedTargetsError(
-                    'Expecting only one target {!r} to be updated; got: {}'.format(target, ', '.join(updated_targets))
-                )
-
-            updated_target = updated_targets[0]
-
-            if updated_target != target:
-                raise UpdatedTargetsError(
-                    'Unknown target updated, expected {!r} but got {!r}'.format(target, updated_target)
-                )
-
-            self.__updater.download_target(updated_target, self.__targets_dir)
+            os.makedirs(os.path.dirname(target_abspath), exist_ok=True)
+            self.__updater.download_target(target, target_abspath)
 
         logger.info('TUF verified %s', target_relpath)
 
-        target_abspath = os.path.join(self.__targets_dir, target_relpath)
         return target_abspath, target
 
     def __download_in_toto_root_layout(self):
@@ -147,8 +132,7 @@ class TUFDownloader:
         # A set to collect where in-toto pubkeys / links live.
         target_abspaths = set()
 
-        fileinfo = target.get('fileinfo', {})
-        custom = fileinfo.get('custom', {})
+        custom = target.custom
 
         root_layout_type = custom.get('root-layout-type', DEFAULT_ROOT_LAYOUT_TYPE)
         if root_layout_type != self.__root_layout_type:
@@ -292,7 +276,7 @@ class TUFDownloader:
         try:
             # NOTE: We do not perform in-toto inspection for simple indices; only for wheels.
             index_abspath, _ = self.__download_with_tuf(index_relpath)
-        except UnknownTargetError:
+        except TargetNotFoundError:
             raise NoSuchDatadogPackage(standard_distribution_name)
 
         with open(index_abspath) as simple_index:
