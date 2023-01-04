@@ -19,8 +19,7 @@ from zipfile import ZipFile
 REPOSITORY_BASE_URL = 'https://dd-integrations-core-wheels-build-stable.datadoghq.com/'
 INTEGRATION = 'active-directory'
 INTEGRATION_VERSION = '1.10.0'
-GOOD_REPO_ZIP_FILENAME = f'datadog-{INTEGRATION}-{INTEGRATION_VERSION}.zip'
-BAD_REPO_ZIP_FILENAME = f'datadog-{INTEGRATION}-{INTEGRATION_VERSION}-signature-wheels-signer-a.zip'
+ZIP_FILENAME = f'datadog-{INTEGRATION}-{INTEGRATION_VERSION}.zip'
 TARGET_DIR = Path(__file__).parent.parent / 'data'
 
 
@@ -116,15 +115,7 @@ def main():
         for filename in filenames_for_target('targets.json', latest_in_toto_root_layout):
             download_file(filename)
 
-        zip_files(GOOD_REPO_ZIP_FILENAME)
-
-        # Manipulate a file to write a bad signature and zip that too.
-        signer_metadata = load_json(tempdir / 'metadata.staged' / versioned_metadata_files['wheels-signer-a.json'])
-        signer_metadata['signatures'][0]['sig'] = 'f' * 64
-        with open(tempdir / 'metadata.staged' / versioned_metadata_files['wheels-signer-a.json'], 'w') as f:
-            signer_metadata = json.dump(signer_metadata, f)
-
-        zip_files(BAD_REPO_ZIP_FILENAME)
+        zip_files(ZIP_FILENAME)
 
         print('Done!')
 

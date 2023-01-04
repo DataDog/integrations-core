@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import json
 import logging
 import os
 import random
@@ -214,8 +215,18 @@ def test_local_wheels_signer_signature_leaf_error(distribution_name, distributio
 
     The wheel-signer-{a-z} metadata has to have wrong signature.
     """
-    test_data = "{}-{}-signature-wheels-signer-a".format(distribution_name, distribution_version)
-    with local_http_server(test_data) as http_url:
+
+    def tamper(repo_dir):
+        """Modify a signature to make it incorrect"""
+        file_to_change = next((repo_dir / 'metadata.staged').glob('*.wheels-signer-a.json'))
+        with open(file_to_change) as f:
+            signer_metadata = json.load(f)
+
+        signer_metadata['signatures'][0]['sig'] = 'f' * 64
+        with open(file_to_change, 'w') as f:
+            json.dump(signer_metadata, f)
+
+    with local_http_server("{}-{}".format(distribution_name, distribution_version), tamper=tamper) as http_url:
         argv = [
             distribution_name,
             "--version",
@@ -230,7 +241,7 @@ def test_local_wheels_signer_signature_leaf_error(distribution_name, distributio
 
 @pytest.mark.offline
 @freeze_time(_LOCAL_TESTS_DATA_TIMESTAMP)
-def test_local_download_non_existing_package(capfd):
+def test_local_download_non_existing_package():
     """Test local verification of a wheel file."""
 
     with local_http_server("datadog-active-directory-1.10.0".format()) as http_url:

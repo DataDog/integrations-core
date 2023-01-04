@@ -5,6 +5,7 @@
 import contextlib
 import logging
 import os
+import pathlib
 import shutil
 import tempfile
 import time
@@ -42,7 +43,7 @@ def _do_local_http_server(queue, directory, port):
 
 
 @contextlib.contextmanager
-def local_http_server(test_case, port=_DEFAULT_PORT):
+def local_http_server(test_case, port=_DEFAULT_PORT, tamper=None):
     """Use a zip file with tests and start a local HTTP server for E2E tests."""
     zip_file_path = os.path.join(_E2E_TESTS_DATA_DIR, test_case + ".zip")
     served_dir = tempfile.mkdtemp(prefix=test_case)
@@ -50,6 +51,11 @@ def local_http_server(test_case, port=_DEFAULT_PORT):
     try:
         with zipfile.ZipFile(zip_file_path) as tests_zip_file:
             tests_zip_file.extractall(path=served_dir)
+
+        # Hook to let a test tamper with the files in the repo to simulate various
+        # scenarios
+        if tamper:
+            tamper(pathlib.Path(served_dir))
 
         with local_http_server_local_dir(served_dir, port=port) as server_url:
             yield server_url
