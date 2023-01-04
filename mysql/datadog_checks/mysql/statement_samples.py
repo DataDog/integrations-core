@@ -107,7 +107,6 @@ EVENTS_STATEMENTS_CURRENT_QUERY = re.sub(
         AND event_name like 'statement/%%'
         AND digest_text is NOT NULL
         AND digest_text NOT LIKE 'EXPLAIN %%'
-        AND timer_start > %s
         ORDER BY timer_wait DESC
 """,
 ).strip()
@@ -204,8 +203,6 @@ class MySQLStatementSamples(DBMAsyncJob):
         self._config = config
         self._version_processed = False
         self._connection_args = connection_args
-        # checkpoint at zero so we pull the whole history table on the first run
-        self._checkpoint = 0
         self._last_check_run = 0
         self._db = None
         self._configured_collection_interval = self._config.statement_samples_config.get('collection_interval', -1)
@@ -354,7 +351,7 @@ class MySQLStatementSamples(DBMAsyncJob):
                     STARTUP_TIME_SUBQUERY.format(global_status_table=self._global_status_table)
                 ),
             )
-            self._cursor_run(cursor, EVENTS_STATEMENTS_CURRENT_QUERY, (self._checkpoint,))
+            self._cursor_run(cursor, EVENTS_STATEMENTS_CURRENT_QUERY)
             rows = cursor.fetchall()
             tags = (
                 self._tags
@@ -371,7 +368,7 @@ class MySQLStatementSamples(DBMAsyncJob):
                 "dd.mysql.get_new_events_statements.rows", len(rows), tags=tags, hostname=self._check.resolved_hostname
             )
             self._log.debug(
-                "Read %s rows from %s after checkpoint %d", len(rows), events_statements_table, self._checkpoint
+                "Read %s rows from %s", len(rows), events_statements_table
             )
             return rows
 
@@ -385,10 +382,6 @@ class MySQLStatementSamples(DBMAsyncJob):
             if not sql_text:
                 continue
             yield row
-            # only save the checkpoint for rows that we have successfully processed
-            # else rows that we ignore can push the checkpoint forward causing us to miss some on the next run
-            if row['timer_start'] > self._checkpoint:
-                self._checkpoint = row['timer_start']
             num_sent += 1
 
     def _collect_plan_for_statement(self, row):

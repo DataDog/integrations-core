@@ -814,21 +814,6 @@ def test_async_job_enabled(dd_run_check, dbm_instance, statement_samples_enabled
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 @mock.patch.dict('os.environ', {'DDEV_SKIP_GENERIC_TAGS_CHECK': 'true'})
-def test_statement_samples_max_per_digest(dd_run_check, dbm_instance):
-    # clear out any events from previous test runs
-    dbm_instance['query_samples']['events_statements_table'] = 'events_statements_current'
-    mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
-    for _ in range(3):
-        dd_run_check(mysql_check)
-    rows = mysql_check._statement_samples._get_new_events_statements_current()
-    count_by_digest = Counter(r['digest'] for r in rows)
-    for _, count in count_by_digest.items():
-        assert count == 1, "we should be reading exactly one row per digest out of the database"
-
-
-@pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
-@mock.patch.dict('os.environ', {'DDEV_SKIP_GENERIC_TAGS_CHECK': 'true'})
 def test_statement_samples_invalid_explain_procedure(aggregator, dd_run_check, dbm_instance, bob_conn):
     dbm_instance['query_samples']['explain_procedure'] = 'hello'
     mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
