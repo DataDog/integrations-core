@@ -365,9 +365,7 @@ class MySQLStatementSamples(DBMAsyncJob):
             self._check.histogram(
                 "dd.mysql.get_new_events_statements.rows", len(rows), tags=tags, hostname=self._check.resolved_hostname
             )
-            self._log.debug(
-                "Read %s rows from %s", len(rows), events_statements_table
-            )
+            self._log.debug("Read %s rows from %s", len(rows), events_statements_table)
             return rows
 
     def _filter_valid_statement_rows(self, rows):
