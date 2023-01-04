@@ -50,6 +50,18 @@ def test_check_cert_expiration_up_tls_verify_false(http_check):
 
     status, days_left, seconds_left, msg = http_check.check_cert_expiration(instance, 10, cert_path)
 
+    assert status == AgentCheck.UNKNOWN
+    assert "Empty or no certificate found" in msg
+
+
+@pytest.mark.usefixtures("dd_environment")
+def test_check_cert_expiration_up_tls_verify_false_tls_retrieve_non_validated_cert_true(http_check):
+    cert_path = os.path.join(HERE, 'fixtures', 'cacert.pem')
+    instance = {'url': 'https://valid.mock/', 'tls_verify': False, "tls_retrieve_non_validated_cert": True}
+    http_check.instance = instance
+
+    status, days_left, seconds_left, msg = http_check.check_cert_expiration(instance, 10, cert_path)
+
     assert status == AgentCheck.OK
     assert days_left > 0
     assert seconds_left > 0
@@ -168,9 +180,9 @@ def test_check_cert_expiration_self_signed(http_check):
 
 
 @pytest.mark.usefixtures("dd_environment")
-def test_check_cert_expiration_self_signed_tls_verify_false(http_check):
+def test_check_cert_expiration_self_signed_tls_verify_false_tls_retrieve_non_validated_cert_true(http_check):
     cert_path = os.path.join(HERE, 'fixtures', 'cacert.pem')
-    instance = {'url': 'https://selfsigned.mock/', 'tls_verify': False}
+    instance = {'url': 'https://selfsigned.mock/', 'tls_verify': False, "tls_retrieve_non_validated_cert": True}
     http_check.instance = instance
 
     status, days_left, seconds_left, msg = http_check.check_cert_expiration(instance, 10, cert_path)
@@ -178,6 +190,30 @@ def test_check_cert_expiration_self_signed_tls_verify_false(http_check):
     assert status == AgentCheck.OK
     assert days_left > 0
     assert seconds_left > 0
+
+
+@pytest.mark.usefixtures("dd_environment")
+def test_check_cert_expiration_self_signed_tls_verify_false_tls_retrieve_non_validated_cert_false(http_check):
+    cert_path = os.path.join(HERE, 'fixtures', 'cacert.pem')
+    instance = {'url': 'https://selfsigned.mock/', 'tls_verify': False, "tls_retrieve_non_validated_cert": False}
+    http_check.instance = instance
+
+    status, days_left, seconds_left, msg = http_check.check_cert_expiration(instance, 10, cert_path)
+
+    assert status == AgentCheck.UNKNOWN
+    assert "Empty or no certificate found" in msg
+
+
+@pytest.mark.usefixtures("dd_environment")
+def test_check_cert_expiration_self_signed_tls_verify_false_tls_retrieve_non_validated_cert_default(http_check):
+    cert_path = os.path.join(HERE, 'fixtures', 'cacert.pem')
+    instance = {'url': 'https://selfsigned.mock/', 'tls_verify': False}
+    http_check.instance = instance
+
+    status, days_left, seconds_left, msg = http_check.check_cert_expiration(instance, 10, cert_path)
+
+    assert status == AgentCheck.UNKNOWN
+    assert "Empty or no certificate found" in msg
 
 
 @pytest.mark.usefixtures("dd_environment")
@@ -230,10 +266,15 @@ def test_check_tsl_ca_cert(aggregator, dd_run_check):
 
 
 @pytest.mark.usefixtures("dd_environment")
-def test_check_ssl_expire_error(aggregator, http_check):
+def test_check_ssl_expire_error(aggregator, dd_run_check):
     with mock.patch('ssl.SSLSocket.getpeercert', side_effect=Exception()):
-        # Run the check for the one instance configured with days left
-        http_check.check(CONFIG_EXPIRED_SSL['instances'][0])
+        with mock.patch(
+            'datadog_checks.http_check.http_check.get_ca_certs_path',
+            new=lambda: os.path.join(HERE, 'fixtures', 'cacert.pem'),
+        ):
+            # Run the check for the one instance configured with days left
+            http_check = HTTPCheck('', {}, [CONFIG_EXPIRED_SSL['instances'][0]])
+            dd_run_check(http_check)
 
     expired_cert_tags = ['url:https://valid.mock', 'instance:expired_cert']
     aggregator.assert_service_check(HTTPCheck.SC_STATUS, status=HTTPCheck.OK, tags=expired_cert_tags, count=1)

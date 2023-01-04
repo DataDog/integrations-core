@@ -21,7 +21,7 @@ RUN openssl genrsa -out valid.mock.key 2048 \
 
 ## Generate a self-signed non-expired certificate for selfsigned.mock
 
-RUN openssl req -nodes -new -x509 -days 20 -keyout selfsigned.mock.key -out selfsigned.mock.cert -subj "/C=US/ST=NY/O=foo/CN=selfsigned.mock"
+RUN openssl req -nodes -new -x509 -days 200 -keyout selfsigned.mock.key -out selfsigned.mock.cert -subj "/C=US/ST=NY/O=foo/CN=selfsigned.mock"
 
 
 ## Generate a valid but expired certificate for expired.mock
