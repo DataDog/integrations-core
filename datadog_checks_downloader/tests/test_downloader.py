@@ -21,7 +21,7 @@ from freezegun import freeze_time
 from packaging.version import parse as parse_version
 from tenacity import retry, stop_after_attempt, wait_exponential
 from tests.local_http import local_http_server, local_http_server_local_dir
-from tuf.api.exceptions import DownloadError, ExpiredMetadataError, UnsignedMetadataError
+from tuf.api.exceptions import DownloadError, ExpiredMetadataError, RepositoryError, UnsignedMetadataError
 
 import datadog_checks.downloader
 from datadog_checks.downloader.cli import download
@@ -236,6 +236,38 @@ def test_local_wheels_signer_signature_leaf_error(distribution_name, distributio
         ]
 
         with pytest.raises(UnsignedMetadataError, match="^wheels-signer-a was signed by 0/1 keys$"):
+            _do_run_downloader(argv)
+
+
+@pytest.mark.offline
+@freeze_time(_LOCAL_TESTS_DATA_TIMESTAMP)
+def test_local_tampered_target_triggers_failure():
+
+    distribution_name = "datadog-active-directory"
+    distribution_version = "1.10.0"
+
+    def tamper(repo_dir):
+        """Modify the target that we want to download."""
+        files_to_change = (repo_dir / 'targets' / 'simple' / 'datadog-active-directory').glob(
+            '*.datadog_active_directory-1.10.0-*.whl'
+        )
+
+        for path in files_to_change:
+            # We make a modification that doesn't change the length so that we
+            # don't trigger an error based simply on length.
+            with open(path, 'r+b') as f:
+                f.write(b'garbage')
+
+    with local_http_server("{}-{}".format(distribution_name, distribution_version), tamper=tamper) as http_url:
+        argv = [
+            distribution_name,
+            "--version",
+            distribution_version,
+            "--repository",
+            http_url,
+        ]
+
+        with pytest.raises(RepositoryError, match="does not match expected hash"):
             _do_run_downloader(argv)
 
 
