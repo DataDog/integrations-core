@@ -220,7 +220,6 @@ class MySQLStatementSamples(DBMAsyncJob):
             'events_statements_enable_procedure', 'datadog.enable_events_statements_consumers'
         )
         self._preferred_events_statements_tables = EVENTS_STATEMENTS_PREFERRED_TABLES
-        self._has_window_functions = False
         events_statements_table = self._config.statement_samples_config.get('events_statements_table', None)
         if events_statements_table:
             if events_statements_table in DEFAULT_EVENTS_STATEMENTS_COLLECTION_INTERVAL:
@@ -271,7 +270,6 @@ class MySQLStatementSamples(DBMAsyncJob):
 
     def _read_version_info(self):
         if not self._version_processed and self._check.version:
-            self._has_window_functions = self._check.version.version_compatible((8, 0, 0))
             if self._check.version.flavor == "MariaDB" or not self._check.version.version_compatible((5, 7, 0)):
                 self._global_status_table = "information_schema.global_status"
             else:
