@@ -6,11 +6,11 @@ dependencies = [
 ]
 
 [[envs.default.matrix]]
-python = ["27"]
+python = ["2.7"]
 api-version = ["2"]
 
 [[envs.default.matrix]]
-python = ["38"]
+python = ["3.8"]
 api-version = ["2", "3"]
 
 [envs.default.overrides]
