@@ -235,7 +235,7 @@ def instance_tls_protocols_allowed(field, value):
 
 
 def instance_tls_retrieve_non_validated_cert(field, value):
-    return False
+    return True
 
 
 def instance_tls_use_host_header(field, value):
