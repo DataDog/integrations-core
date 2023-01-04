@@ -37,8 +37,8 @@ def test_default_scrubbed(ddev, config_file, helpers):
         [orgs.default]
         api_key = "*****"
         app_key = "*****"
-        site = ""
-        dd_url = ""
+        site = "datadoghq.com"
+        dd_url = "https://app.datadoghq.com"
         log_url = ""
 
         [github]
@@ -98,8 +98,8 @@ def test_reveal(ddev, config_file, helpers):
         [orgs.default]
         api_key = "foo"
         app_key = "bar"
-        site = ""
-        dd_url = ""
+        site = "datadoghq.com"
+        dd_url = "https://app.datadoghq.com"
         log_url = ""
 
         [github]
