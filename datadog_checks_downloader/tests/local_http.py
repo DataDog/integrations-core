@@ -31,15 +31,10 @@ class _CustomTCPServer(TCPServer):
 
 def _do_local_http_server(queue, directory, port):
     """Serve requests in a separate thread."""
-    curr_dir = os.getcwd()
-    os.chdir(directory)
-    try:
-        httpd = _CustomTCPServer(("", port), partial(SimpleHTTPRequestHandler))
-        queue.put(httpd)
-        httpd.serve_forever()
-        queue.task_done()
-    finally:
-        os.chdir(curr_dir)
+    httpd = _CustomTCPServer(("", port), partial(SimpleHTTPRequestHandler, directory=directory))
+    queue.put(httpd)
+    httpd.serve_forever()
+    queue.task_done()
 
 
 @contextlib.contextmanager
