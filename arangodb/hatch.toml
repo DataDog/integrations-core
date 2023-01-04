@@ -2,7 +2,7 @@
 
 [[envs.default.matrix]]
 python = ["38"]
-version = ["38"]
+version = ["3.8"]
 
 [envs.default.overrides]
 matrix.version.env-vars = "ARANGODB_VERSION"
