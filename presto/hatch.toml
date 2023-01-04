@@ -6,4 +6,4 @@ dependencies = [
 ]
 
 [[envs.default.matrix]]
-python = ["38"]
+python = ["3.8"]
