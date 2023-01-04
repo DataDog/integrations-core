@@ -124,15 +124,15 @@ class ApiClientV7(ApiClient):
                 metric_name = ts.metadata.alias
                 category_name = ts.metadata.attributes['category'].lower()
                 full_metric_name = f'{category_name}.{metric_name}'
-                
+                entity_tag = f'cloudera_{category_name}:{ts.metadata.entity_name}'
+
+                # host timeseries metrics shouldn't include `cloudera_host` tag
+                # since `cloudera_hostname` is already included.
                 if category_name != "host":
                     entity_tag = f'cloudera_{category_name}:{ts.metadata.entity_name}'
                 else:
                     entity_tag = None
-                
+
                 for d in ts.data:
                     value = d.value
-                    self._check.gauge(
-                        full_metric_name, value, tags=[entity_tag, *tags]
-                    )
-# cloudera.host.load_15
+                    self._check.gauge(full_metric_name, value, tags=[entity_tag, *tags])
