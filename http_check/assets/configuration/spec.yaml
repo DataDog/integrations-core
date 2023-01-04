@@ -115,12 +115,12 @@ files:
         example: true
     - name: tls_retrieve_non_validated_cert
       description: |
-        This (optional) option allows certificates to be retrieved even when
-        "tls_verify" is set to false and there is no validation of the certificate
-        sent from the peer.
+        When set to true, this (optional) option allows certificates to be retrieved from a peer
+        whether or not "tls_verify" is set to true or false. This allows the certificate to be
+        examined for an expiration date in either case.
       value:
         type: boolean
-        example: true
+        example: false
     - name: days_warning
       description: Express warning threshold for the HTTP check in days
       value:
