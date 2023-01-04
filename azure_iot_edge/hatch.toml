@@ -12,10 +12,10 @@ mypy-args = [
 ]
 
 [[envs.default.matrix]]
-python = ["2.7", "3.8"]
+python = ["27", "38"]
 
 [[envs.default.matrix]]
-python = ["2.7", "3.8"]
+python = ["27", "38"]
 protocol = ["tls"]
 
 [envs.default.overrides]

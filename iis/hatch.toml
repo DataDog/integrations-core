@@ -1,7 +1,7 @@
 [env.collectors.datadog-checks]
 
 [[envs.default.matrix]]
-python = ["2.7", "3.8"]
+python = ["27", "38"]
 
 [envs.default]
 dependencies = [
@@ -13,4 +13,4 @@ platforms = [
 ]
 
 [envs.default.overrides]
-matrix.python.e2e-env = { value = true, if = ["3.8"] }
+matrix.python.e2e-env = { value = true, if = ["38"] }

@@ -1,13 +1,13 @@
 [env.collectors.datadog-checks]
 
 [[envs.default.matrix]]
-python = ["2.7", "3.8"]
+python = ["27", "38"]
 # Note: 0.9 is for testing legacy pre-0.10.2 implementation
 version = ["0.9"]
 offset-storage = ["kafka", "zk"]
 
 [[envs.default.matrix]]
-python = ["3.8"]
+python = ["38"]
 version = ["0.11", "1.1", "2.3"]
 offset-storage = ["kafka", "zk"]
 

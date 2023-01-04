@@ -1,12 +1,12 @@
 [env.collectors.datadog-checks]
 
 [[envs.default.matrix]]
-python = ["3.8"]
+python = ["38"]
 version = ["12.2"]
 library = ["oracle", "jdbc"]
 
 [[envs.default.matrix]]
-python = ["3.8"]
+python = ["38"]
 version = ["12.2"]
 library = ["oracle", "jdbc"]
 protocol = ["tcps"]

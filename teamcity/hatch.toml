@@ -1,11 +1,11 @@
 [env.collectors.datadog-checks]
 
 [[envs.default.matrix]]
-python = ["2.7"]
+python = ["27"]
 impl = ["legacy"]
 
 [[envs.default.matrix]]
-python = ["3.8"]
+python = ["38"]
 impl = ["legacy", "openmetrics"]
 
 [envs.default.overrides]
