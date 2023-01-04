@@ -253,7 +253,7 @@ class MySQLStatementSamples(DBMAsyncJob):
         # explained_statements_cache: limit how often we try to re-explain the same query
         self._explained_statements_ratelimiter = RateLimitingTTLCache(
             maxsize=self._config.statement_samples_config.get('explained_queries_cache_maxsize', 5000),
-            ttl=75 * 60 / self._config.statement_samples_config.get('explained_queries_per_hour_per_query', 60),
+            ttl=45 * 60 / self._config.statement_samples_config.get('explained_queries_per_hour_per_query', 60),
         )
 
         # explain_error_states_cache. cache {(schema, query_signature) -> [explain_error_state])
