@@ -82,7 +82,7 @@ class TUFDownloader:
         # NOTE: This updater will store files under:
         # os.path.join(REPOSITORIES_DIR, REPOSITORY_DIR)
         self.__updater = Updater(
-            metadata_dir=os.path.join(REPOSITORIES_DIR, REPOSITORY_DIR, 'metadata/current'),
+            metadata_dir=os.path.join(REPOSITORIES_DIR, REPOSITORY_DIR, 'metadata'),
             metadata_base_url=f'{repository_url_prefix}/metadata.staged/',
             target_base_url=f'{repository_url_prefix}/targets/',
             target_dir=self.__targets_dir,
