@@ -71,7 +71,7 @@ def local_repo() -> Path:
 @pytest.fixture(scope='session')
 def valid_integrations(local_repo) -> list[str]:
     repo = Repository(local_repo.name, str(local_repo))
-    return [path.name for path in repo.integrations.iter_all(('all',))]
+    return [path.name for path in repo.integrations.iter_all(['all'])]
 
 
 @pytest.fixture
