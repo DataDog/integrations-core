@@ -2,8 +2,8 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import socket
-
 import time
+
 import mock
 import psycopg2
 import pytest
@@ -19,6 +19,7 @@ from .common import (
     HOST,
     PORT,
     POSTGRES_VERSION,
+    check_activity_metrics,
     check_bgw_metrics,
     check_common_metrics,
     check_connection_metrics,
@@ -31,21 +32,6 @@ from .utils import requires_over_10, requires_over_96
 CONNECTION_METRICS = ['postgresql.max_connections', 'postgresql.percent_usage_connections']
 
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
-
-
-def _get_activity_metrics():
-    activity_metrics = [
-        'postgresql.transactions.open',
-        'postgresql.transactions.idle_in_transaction',
-        'postgresql.active_queries',
-        'postgresql.waiting_queries',
-        'postgresql.active_waiting_queries',
-        'postgresql.activity.xact_start_age',
-    ]
-    if POSTGRES_VERSION is None or float(POSTGRES_VERSION) >= 9.6:
-        activity_metrics.append('postgresql.activity.backend_xid_age')
-        activity_metrics.append('postgresql.activity.backend_xmin_age')
-    return activity_metrics
 
 
 def test_common_metrics(aggregator, integration_check, pg_instance):
@@ -164,9 +150,7 @@ def test_activity_metrics(aggregator, integration_check, pg_instance):
     check.check(pg_instance)
 
     expected_tags = pg_instance['tags'] + ['port:{}'.format(PORT), 'db:datadog_test', 'application_name:datadog-agent']
-    activity_metrics = _get_activity_metrics()
-    for name in activity_metrics:
-        aggregator.assert_metric(name, count=1, tags=expected_tags)
+    check_activity_metrics(aggregator, expected_tags)
 
 
 def assert_metric_at_least(aggregator, metric_name, expected_tag, count, lower_bound):
@@ -316,7 +300,6 @@ def test_correct_hostname(dbm_enabled, reported_hostname, expected_hostname, agg
     pg_instance['disable_generic_tags'] = False  # This flag also affects the hostname
     pg_instance['reported_hostname'] = reported_hostname
     check = PostgreSql('test_instance', {}, [pg_instance])
-    activity_metrics = _get_activity_metrics()
 
     with mock.patch(
         'datadog_checks.postgres.PostgreSql.resolve_db_host', return_value='resolved.hostname'
@@ -329,11 +312,13 @@ def test_correct_hostname(dbm_enabled, reported_hostname, expected_hostname, agg
 
     expected_tags_no_db = pg_instance['tags'] + ['server:{}'.format(HOST), 'port:{}'.format(PORT)]
     expected_tags_with_db = expected_tags_no_db + ['db:datadog_test']
+    expected_tags_with_db_and_app = expected_tags_with_db + ['application_name:datadog-agent']
     c_metrics = COMMON_METRICS
     if not dbm_enabled:
         c_metrics = c_metrics + DBM_MIGRATED_METRICS
-    for name in c_metrics + activity_metrics:
+    for name in c_metrics:
         aggregator.assert_metric(name, count=1, tags=expected_tags_with_db, hostname=expected_hostname)
+    check_activity_metrics(aggregator, tags=expected_tags_with_db_and_app, hostname=expected_hostname)
 
     for name in CONNECTION_METRICS:
         aggregator.assert_metric(name, count=1, tags=expected_tags_no_db, hostname=expected_hostname)

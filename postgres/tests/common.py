@@ -95,6 +95,22 @@ def check_connection_metrics(aggregator, expected_tags, count=1):
             aggregator.assert_metric(name, count=count, tags=db_tags)
 
 
+def check_activity_metrics(aggregator, tags, hostname=None, count=1):
+    activity_metrics = [
+        'postgresql.transactions.open',
+        'postgresql.transactions.idle_in_transaction',
+        'postgresql.active_queries',
+        'postgresql.waiting_queries',
+        'postgresql.active_waiting_queries',
+        'postgresql.activity.xact_start_age',
+    ]
+    if POSTGRES_VERSION is None or float(POSTGRES_VERSION) >= 9.6:
+        # Query won't have xid assigned so postgresql.activity.backend_xid_age won't be emitted
+        activity_metrics.append('postgresql.activity.backend_xmin_age')
+    for name in activity_metrics:
+        aggregator.assert_metric(name, count=1, tags=tags, hostname=hostname)
+
+
 def check_bgw_metrics(aggregator, expected_tags, count=1):
     for name in COMMON_BGW_METRICS:
         aggregator.assert_metric(name, count=count, tags=expected_tags)
