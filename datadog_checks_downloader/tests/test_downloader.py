@@ -335,7 +335,7 @@ def _do_download(package, version=None, root_layout_type="core"):
     # -vvvv:  INFO
     # -vvvvv: DEBUG
     cmd = [
-        "python",
+        sys.executable,
         "-m",
         "datadog_checks.downloader",
         "-vvvv",
