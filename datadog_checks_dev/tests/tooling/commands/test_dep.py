@@ -9,7 +9,7 @@ import pytest
 from mock import MagicMock
 
 from datadog_checks.dev.testing import requires_py3
-from datadog_checks.dev.tooling.commands.dep import scrape_version_data
+
 
 class AsyncIterator:
     def __init__(self, urls):
@@ -120,6 +120,9 @@ def mock_map(_, func, urls):
 @requires_py3
 @pytest.mark.asyncio
 async def test_scrape_version_data(mock_request, pypi_response, expected_result):
+    # It should be at the top of the file, but it breaks the `test_agent.test_get_agent_tags` test.
+    from datadog_checks.dev.tooling.commands.dep import scrape_version_data
+
     mock_request.return_value = MagicMock()
     mock_request.return_value.read.return_value = asyncio.Future()
     mock_request.return_value.read.return_value.set_result(json.dumps(pypi_response))
