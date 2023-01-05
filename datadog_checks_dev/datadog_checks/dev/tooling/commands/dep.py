@@ -149,6 +149,7 @@ def sync():
 def filter_releases(releases):
     filtered_releases = []
     for version, artifacts in releases.items():
+
         parsed_version = parse_version(version)
         if not parsed_version.is_prerelease:
             filtered_releases.append((parsed_version, artifacts))
@@ -189,6 +190,9 @@ async def scrape_version_data(urls):
                 versions.append(version)
 
                 for artifact in artifacts:
+                    if artifact.get("yanked", False):
+                        continue
+
                     if latest_py2 is None and artifact_compatible_with_python(artifact, '2'):
                         latest_py2 = version
                     if latest_py3 is None and artifact_compatible_with_python(artifact, '3'):
