@@ -19,9 +19,7 @@ instances:
     ## socket. Specify as many hosts as appropriate for your deployment topology:
     ##
     ##   - For a standalone, specify the hostname of the standalone mongod instance.
-    ##   - For a replica set, specify the hostname of a mongod instance as listed in
-    ##     the replica set configuration. You need one check instance per mongod instance
-    ##     in order to collect replication metrics and events.
+    ##   - For a replica set, specify the hostname of the mongod instance on that replica.
     ##   - For a sharded cluster, you need one check instance for each mongod instance in
     ##     each shard (including the configsvr shard) as well as one additional check instance
     ##     that connects to one (or more) mongos node.
