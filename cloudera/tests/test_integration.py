@@ -46,6 +46,11 @@ def test_given_api_v48_endpoint_when_check_runs_then_service_check_ok_and_metric
             if category != 'cluster':
                 aggregator.assert_metric_has_tag_prefix(f'cloudera.{category}.{metric}', "cloudera_rack_id")
 
+            # Host metrics should not have a cloudera_host tag, since cloudera_hostname already exists
+            if category == "host":
+                aggregator.assert_metric_has_tag_prefix(f'cloudera.{category}.{metric}', "cloudera_host:", count=0)
+                aggregator.assert_metric_has_tag_prefix(f'cloudera.{category}.{metric}', "cloudera_hostname")
+
     # All timeseries metrics should have cloudera_{category} tag
     for category, metrics in TIMESERIES_METRICS.items():
         for metric in metrics:
