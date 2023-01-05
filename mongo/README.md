@@ -56,7 +56,7 @@ db.createUser({
 You only need a single agent, preferably running on the same node, to collect all the available mongo metrics. See below for configuration options.
 <!-- xxz tab xxx -->
 <!-- xxx tab "Replica Set" xxx -->
-#### Replica Set
+#### Replica set
 
 To configure this integration for a MongoDB replica set:
 
@@ -85,11 +85,9 @@ db.createUser({
 
 ##### Configure the agents
 
-For replica sets, install the Datadog Agent on each host in the MongoDB replica set and configure the Agent to connect to the replica on that host (`localhost`). Running an Agent on each host results in lower latency and execution times, and ensures that data is still connected in the event that one of the hosts fails.
+Install the Datadog Agent on each host in the MongoDB replica set and configure the Agent to connect to the replica on that host (`localhost`). Running an Agent on each host results in lower latency and execution times, and ensures that data is still connected in the event a host fails.
 
-For example:
-
-On the primary node:
+For example, on the primary node:
 
 ```yaml
 init_config:
@@ -101,8 +99,6 @@ instances:
 On the secondary node:
 
 ```yaml
-Agent on Machine 2 :
-
 init_config:
 instances:
   - hosts:
