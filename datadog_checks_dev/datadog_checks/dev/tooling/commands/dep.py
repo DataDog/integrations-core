@@ -149,7 +149,6 @@ def sync():
 def filter_releases(releases):
     filtered_releases = []
     for version, artifacts in releases.items():
-
         parsed_version = parse_version(version)
         if not parsed_version.is_prerelease:
             filtered_releases.append((parsed_version, artifacts))
