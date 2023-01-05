@@ -2,10 +2,10 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
+import sys
 import warnings
 from typing import Callable
 
-import sys
 from six import PY2, text_type
 from urllib3.exceptions import InsecureRequestWarning
 
@@ -61,6 +61,7 @@ class CheckLoggingAdapter(logging.LoggerAdapter):
         self.log(TRACE_LEVEL, msg, *args, **kwargs)
 
     if PY2:
+
         def warn(self, msg, *args, **kwargs):
             self.log(logging.WARNING, msg, *args, **kwargs)
 
@@ -72,7 +73,6 @@ class CheckLoggingAdapter(logging.LoggerAdapter):
 
 
 class CheckLogFormatter(logging.Formatter):
-
     def __init__(self):
         super(CheckLogFormatter, self).__init__()
         integration_tracing, _ = tracing_enabled()
@@ -87,7 +87,7 @@ class CheckLogFormatter(logging.Formatter):
             'check_id': getattr(record, '_check_id', '-'),
             'filename': getattr(record, '_filename', record.filename),
             'lineno': getattr(record, '_lineno', record.lineno),
-            'message': message
+            'message': message,
         }
 
         if not self.integration_tracing_enabled:
@@ -95,7 +95,9 @@ class CheckLogFormatter(logging.Formatter):
 
         attributes['trace_id'] = getattr(record, 'dd.trace_id', 0)
         attributes['span_id'] = getattr(record, 'dd.span_id', 0)
-        return "{check_id} | ({filename}:{lineno}) | dd.trace_id={trace_id} dd.span_id={span_id} | {message}".format(**attributes)
+        return "{check_id} | ({filename}:{lineno}) | dd.trace_id={trace_id} dd.span_id={span_id} | {message}".format(
+            **attributes
+        )
 
 
 class AgentLogHandler(logging.Handler):
