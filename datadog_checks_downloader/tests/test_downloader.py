@@ -5,6 +5,7 @@
 import json
 import logging
 import os
+import pathlib
 import random
 import re
 import shutil
@@ -83,7 +84,10 @@ def test_download(capfd, distribution_name, distribution_version, temporary_loca
     assert len(output) == 1, "Only one output line expected, got {}:\n\t{}".format(len(output), stdout)
 
     expected_output = r"{}/repo/targets/simple/{}/{}-{}-.*?\.whl".format(
-        temporary_local_repo, distribution_name, distribution_name.replace("-", "_"), distribution_version
+        pathlib.PurePath(temporary_local_repo).as_posix(),
+        distribution_name,
+        distribution_name.replace("-", "_"),
+        distribution_version,
     )
     assert re.match(expected_output, output[0]), "Expected '{}' to match '{}'".format(output[0], expected_output)
 
