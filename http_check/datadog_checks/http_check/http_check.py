@@ -15,9 +15,8 @@ from requests import Response
 from six import PY2, string_types
 from six.moves.urllib.parse import urlparse
 
-from datadog_checks.base import AgentCheck, ensure_unicode
+from datadog_checks.base import AgentCheck, ensure_unicode, is_affirmative
 
-from datadog_checks_base.datadog_checks.base import is_affirmative
 from .config import DEFAULT_EXPECTED_CODE, from_instance
 from .utils import get_ca_certs_path
 
@@ -335,7 +334,8 @@ class HTTPCheck(AgentCheck):
             # To maintain backwards compatability, if we aren't validating tls/certs, do not process
             # the returned binary cert unless specifically configured to with tls_retrieve_non_validated_cert
             if (
-                instance.get("tls_verify") is False and is_affirmative(instance.get("tls_retrieve_non_validated_cert", False))
+                instance.get("tls_verify") is False
+                and not is_affirmative(instance.get("tls_retrieve_non_validated_cert", False))
             ) or not binary_cert:
                 raise Exception("Empty or no certificate found.")
 
