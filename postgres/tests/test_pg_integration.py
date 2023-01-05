@@ -185,6 +185,8 @@ def test_backend_transaction_age(aggregator, integration_check, pg_instance):
     cur.execute('BEGIN TRANSACTION ISOLATION LEVEL REPEATABLE READ;')
     # Force assignement of a txid and keep the transaction opened
     cur.execute('select txid_current();')
+    # Make sure to fetch the result to make sure we start the timer after the transaction started
+    cur.fetchall()
     start_transaction_time = time.time()
 
     aggregator.reset()
@@ -198,18 +200,20 @@ def test_backend_transaction_age(aggregator, integration_check, pg_instance):
     # Open a new session and assign a new txid to it.
     cur2.execute('select txid_current()')
 
-    # Check that the xmin and xid is 2 tx old
-    transaction_age = time.time() - start_transaction_time
     aggregator.reset()
+    transaction_age_lower_bound = time.time() - start_transaction_time
     check.check(pg_instance)
+
+    # Check that the xmin and xid is 2 tx old
     aggregator.assert_metric('postgresql.activity.backend_xid_age', value=2, count=1, tags=test_tags)
     aggregator.assert_metric('postgresql.activity.backend_xmin_age', value=2, count=1, tags=test_tags)
 
     aggregator.assert_metric('postgresql.activity.backend_xid_age', count=0, tags=dd_agent_tags)
     aggregator.assert_metric('postgresql.activity.backend_xmin_age', value=2, count=1, tags=dd_agent_tags)
 
+    # Check that xact_start_age has a value greater than the trasaction_age lower bound
     assert_metric_at_least(
-        aggregator, 'postgresql.activity.xact_start_age', 'application_name:test', 1, transaction_age
+        aggregator, 'postgresql.activity.xact_start_age', 'application_name:test', 1, transaction_age_lower_bound
     )
 
 
