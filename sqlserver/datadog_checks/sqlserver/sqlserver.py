@@ -131,6 +131,7 @@ class SQLServer(AgentCheck):
             self.cloud_metadata.update({'gcp': gcp})
         if azure:
             self.cloud_metadata.update({'azure': azure})
+
         obfuscator_options_config = self.instance.get('obfuscator_options', {}) or {}
         self.obfuscator_options = to_native_string(
             json.dumps(
@@ -160,6 +161,8 @@ class SQLServer(AgentCheck):
             # cache these for a full day
             ttl=60 * 60 * 24,
         )
+
+        self.check_initializations.append(self.set_resolved_hostname_metadata)
 
         # Query declarations
         self.server_state_queries = self._new_query_executor([QUERY_SERVER_STATIC_INFO])
@@ -200,13 +203,16 @@ class SQLServer(AgentCheck):
             hostname=self.resolved_hostname,
         )
 
+    def set_resolved_hostname_metadata(self):
+        self.set_metadata('resolved_hostname', self.resolved_hostname)
+
     @property
     def resolved_hostname(self):
         if self._resolved_hostname is None:
             if self.reported_hostname:
                 self._resolved_hostname = self.reported_hostname
             elif self.dbm_enabled:
-                host, port = split_sqlserver_host_port(self.instance.get('host'))
+                host, _ = split_sqlserver_host_port(self.instance.get('host'))
                 self._resolved_hostname = resolve_db_host(host)
                 engine_edition = self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION)
                 if engine_edition == ENGINE_EDITION_SQL_DATABASE:
