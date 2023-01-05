@@ -66,7 +66,7 @@ def get_test_envs(
 
     checks_seen = set()
 
-    env_filter = os.environ.get("TOX_SKIP_ENV")
+    env_filter = os.environ.get("SKIP_ENV_NAME")
     env_filter_re = re.compile(env_filter) if env_filter is not None else None
 
     for check in checks:
