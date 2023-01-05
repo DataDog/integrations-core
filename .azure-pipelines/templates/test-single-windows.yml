@@ -45,9 +45,9 @@ jobs:
 
     # Generic tag check disabled on non-core repo
     ${{ if not(eq(parameters.run_py2_tests, 'true')) }}:
-      TOX_SKIP_ENV: py2.*  # Don't run py2 tests
+      SKIP_ENV_NAME: py2.*  # Don't run py2 tests
     ${{ if not(eq(parameters.run_py3_tests, 'true')) }}:
-      TOX_SKIP_ENV: py3.*  # Don't run py3 tests
+      SKIP_ENV_NAME: py3.*  # Don't run py3 tests
     ${{ if eq(parameters.ddtrace_flag, '--ddtrace') }}:
       DD_ENV: ci
       DD_SERVICE: ddev-integrations-${{ parameters.repo }}
