@@ -115,9 +115,9 @@ files:
         example: true
     - name: tls_retrieve_non_validated_cert
       description: |
-        When set to true, this option allows certificates to be retrieved from a peer
-        whether or not `tls_verify` is set to true or false. This allows the certificate to be
-        examined for an expiration date in either case.
+        When set to true along with enabling `check_certificate_expiration`, this option allows certificates
+        to be retrieved from a peer whether or not `tls_verify` is set to true or false. This allows the
+        certificate to be examined for an expiration date in either case.
       value:
         type: boolean
         example: false
