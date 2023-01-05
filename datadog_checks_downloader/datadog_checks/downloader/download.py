@@ -100,6 +100,7 @@ class TUFDownloader:
         self.__updater.refresh()
 
     def __download_with_tuf(self, target_relpath):
+        # FIX: It looks like something might be going wrong here on Windows
         target = self.__updater.get_targetinfo(target_relpath)
         if target is None:
             raise TargetNotFoundError(f'Target at {target_relpath} not found')
