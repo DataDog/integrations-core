@@ -54,6 +54,13 @@ DEFAULT_ROOT_LAYOUT_TYPE = 'core'
 logger = logging.getLogger(__name__)
 
 
+def relative_target_path(*parts):
+    # This needs to be a path-relative-URL string
+    # (https://url.spec.whatwg.org/#path-relative-url-string), which means the path
+    # separator *must* be `/` and only `/`.
+    return '/'.join([IN_TOTO_METADATA_DIR, *parts])
+
+
 class TUFDownloader:
     def __init__(
         self, repository_url_prefix=REPOSITORY_URL_PREFIX, root_layout_type=DEFAULT_ROOT_LAYOUT_TYPE, verbose=0
@@ -101,9 +108,6 @@ class TUFDownloader:
         self.__updater.refresh()
 
     def __download_with_tuf(self, target_relpath):
-        # NOTE: `target_relpath` needs to be a path-relative-URL string
-        # (https://url.spec.whatwg.org/#path-relative-url-string), which means the path
-        # separator *must* be `/` and only `/`.
         target = self.__updater.get_targetinfo(target_relpath)
         if target is None:
             raise TargetNotFoundError(f'Target at {target_relpath} not found')
@@ -129,7 +133,7 @@ class TUFDownloader:
         # expected version of the root layout. This is so that, for example, we
         # can introduce new parameters w/o breaking old downloaders that don't
         # know how to substitute them.
-        target_relpath = f'{IN_TOTO_METADATA_DIR}/{self.__root_layout}'
+        target_relpath = relative_target_path(self.__root_layout)
         return self.__download_with_tuf(target_relpath)
 
     def __download_custom(self, target, extension):
