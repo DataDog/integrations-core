@@ -126,7 +126,7 @@ class TUFDownloader:
         # expected version of the root layout. This is so that, for example, we
         # can introduce new parameters w/o breaking old downloaders that don't
         # know how to substitute them.
-        target_relpath = os.path.join(IN_TOTO_METADATA_DIR, self.__root_layout)
+        target_relpath = f'{IN_TOTO_METADATA_DIR}/{self.__root_layout}'
         return self.__download_with_tuf(target_relpath)
 
     def __download_custom(self, target, extension):
