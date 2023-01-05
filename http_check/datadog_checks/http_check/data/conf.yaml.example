@@ -137,8 +137,8 @@ instances:
     # check_certificate_expiration: true
 
     ## @param tls_retrieve_non_validated_cert - boolean - optional - default: false
-    ## When set to true, this (optional) option allows certificates to be retrieved from a peer
-    ## whether or not "tls_verify" is set to true or false. This allows the certificate to be
+    ## When set to true, this option allows certificates to be retrieved from a peer
+    ## whether or not `tls_verify` is set to true or false. This allows the certificate to be
     ## examined for an expiration date in either case.
     #
     # tls_retrieve_non_validated_cert: false
