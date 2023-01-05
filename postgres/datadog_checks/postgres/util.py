@@ -185,7 +185,12 @@ SELECT {metrics_columns}
 
 # Requires postgres 10+
 REPLICATION_STATS_METRICS = {
-    'descriptors': [('application_name', 'wal_app_name'), ('state', 'wal_state'), ('sync_state', 'wal_sync_state')],
+    'descriptors': [
+        ('application_name', 'wal_app_name'),
+        ('state', 'wal_state'),
+        ('sync_state', 'wal_sync_state'),
+        ('client_addr', 'wal_client_addr'),
+    ],
     'metrics': {
         'GREATEST (0, EXTRACT(epoch from write_lag)) as write_lag': (
             'postgresql.replication.wal_write_lag',
@@ -199,9 +204,16 @@ REPLICATION_STATS_METRICS = {
             'postgresql.replication.wal_replay_lag',
             AgentCheck.gauge,
         ),
+        'GREATEST (0, age(backend_xmin)) as backend_xmin_age': (
+            'postgresql.replication.backend_xmin_age',
+            AgentCheck.gauge,
+        ),
     },
     'relation': False,
-    'query': 'SELECT application_name, state, sync_state, {metrics_columns} FROM pg_stat_replication',
+    'query': """
+SELECT application_name, state, sync_state, client_addr, {metrics_columns}
+FROM pg_stat_replication
+""",
 }
 
 CONNECTION_METRICS = {

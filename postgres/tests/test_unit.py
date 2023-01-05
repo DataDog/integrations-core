@@ -243,11 +243,16 @@ def test_replication_stats(aggregator, integration_check, pg_instance):
     check = integration_check(pg_instance)
     check.check(pg_instance)
     base_tags = ['foo:bar', 'port:5432']
-    app1_tags = base_tags + ['wal_sync_state:async', 'wal_state:streaming', 'wal_app_name:app1']
-    app2_tags = base_tags + ['wal_sync_state:sync', 'wal_state:backup', 'wal_app_name:app2']
+    app1_tags = base_tags + [
+        'wal_sync_state:async',
+        'wal_state:streaming',
+        'wal_app_name:app1',
+        'wal_client_addr:1.1.1.1',
+    ]
+    app2_tags = base_tags + ['wal_sync_state:sync', 'wal_state:backup', 'wal_app_name:app2', 'wal_client_addr:1.1.1.1']
 
     aggregator.assert_metric('postgresql.db.count', 0, base_tags)
-    for suffix in ('wal_write_lag', 'wal_flush_lag', 'wal_replay_lag'):
+    for suffix in ('wal_write_lag', 'wal_flush_lag', 'wal_replay_lag', 'backend_xmin_age'):
         metric_name = 'postgresql.replication.{}'.format(suffix)
         aggregator.assert_metric(metric_name, 12, app1_tags)
         aggregator.assert_metric(metric_name, 13, app2_tags)
