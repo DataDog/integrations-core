@@ -6,6 +6,7 @@ import glob
 import logging
 import logging.config
 import os
+import pathlib
 import re
 import shutil
 import sys
@@ -100,7 +101,6 @@ class TUFDownloader:
         self.__updater.refresh()
 
     def __download_with_tuf(self, target_relpath):
-        # FIX: It looks like something might be going wrong here on Windows
         target = self.__updater.get_targetinfo(target_relpath)
         if target is None:
             raise TargetNotFoundError(f'Target at {target_relpath} not found')
@@ -264,7 +264,9 @@ class TUFDownloader:
             If download over TUF and in-toto is successful, this function will
             return the complete filepath to the desired target.
         """
-        return self.__download_with_tuf_in_toto(target_relpath)
+        target_abspath = self.__download_with_tuf_in_toto(target_relpath)
+        # Always return the posix version of the path for consistency across platforms
+        return pathlib.Path(target_abspath).as_posix()
 
     def __get_versions(self, standard_distribution_name):
         index_relpath = 'simple/{}/index.html'.format(standard_distribution_name)
