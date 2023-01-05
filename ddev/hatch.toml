@@ -5,7 +5,7 @@ mypy-args = [
 ]
 
 [envs.default]
-python = "38"
+python = "3.8"
 e2e-env = false
 # TODO: remove this when the old CLI is gone
 pre-install-commands = [

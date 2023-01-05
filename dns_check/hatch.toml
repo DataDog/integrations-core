@@ -7,4 +7,4 @@ mypy-args = [
 ]
 
 [[envs.default.matrix]]
-python = ["27", "38"]
+python = ["2.7", "3.8"]
