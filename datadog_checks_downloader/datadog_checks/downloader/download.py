@@ -101,6 +101,9 @@ class TUFDownloader:
         self.__updater.refresh()
 
     def __download_with_tuf(self, target_relpath):
+        # NOTE: `target_relpath` needs to be a path-relative-URL string
+        # (https://url.spec.whatwg.org/#path-relative-url-string), which means the path
+        # separator *must* be `/` and only `/`.
         target = self.__updater.get_targetinfo(target_relpath)
         if target is None:
             raise TargetNotFoundError(f'Target at {target_relpath} not found')
