@@ -28,9 +28,10 @@ def test_no_dd_url(ddev, repository, helpers, config_file):
     )
 
 
-def test_error_single_integration(ddev, repository, helpers):
-    check = 'mongo'
+def test_error_single_integration(ddev, repository, helpers, network_replay):
+    network_replay('fixtures/network/manifest/missing_app_uuid.yaml', record_mode='new_episodes')
 
+    check = 'mongo'
     manifest_file = repository.path / check / 'manifest.json'
     manifest = json.loads(manifest_file.read_text())
     del manifest['app_uuid']
@@ -52,7 +53,9 @@ def test_error_single_integration(ddev, repository, helpers):
     )
 
 
-def test_error_multiple_integrations(ddev, repository, helpers):
+def test_error_multiple_integrations(ddev, repository, helpers, network_replay):
+    network_replay('fixtures/network/manifest/missing_app_uuid.yaml', record_mode='new_episodes')
+
     for check in ('mongo', 'vsphere'):
         manifest_file = repository.path / check / 'manifest.json'
         manifest = json.loads(manifest_file.read_text())
@@ -79,7 +82,9 @@ def test_error_multiple_integrations(ddev, repository, helpers):
     )
 
 
-def test_passing(ddev, repository, helpers):
+def test_passing(ddev, repository, helpers, network_replay):
+    network_replay('fixtures/network/manifest/success.yaml', record_mode='new_episodes')
+
     result = ddev('validate', 'manifest', 'postgres')
 
     assert result.exit_code == 0, result.output
