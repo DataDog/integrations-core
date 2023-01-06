@@ -344,7 +344,8 @@ ACTIVITY_DD_METRICS = [
 ACTIVITY_QUERY_10 = """
 SELECT {aggregation_columns_select}
     {{metrics_columns}}
-FROM pg_stat_activity WHERE backend_type = 'client backend'
+FROM pg_stat_activity
+WHERE backend_type = 'client backend'
 GROUP BY datid {aggregation_columns_group}
 """
 
