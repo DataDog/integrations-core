@@ -34,7 +34,7 @@ def agent_check_getter(self):
 SUPPORTED_EXPLAIN_STATEMENTS = frozenset({'select', 'table', 'delete', 'insert', 'replace', 'update', 'with'})
 
 EVENTS_STATEMENTS_TABLE = 'events_statements_current'
-        
+
 # default sampling settings for events_statements_* tables
 # collection interval is in seconds
 # {table -> interval}
