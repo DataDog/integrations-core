@@ -33,18 +33,8 @@ def agent_check_getter(self):
 
 SUPPORTED_EXPLAIN_STATEMENTS = frozenset({'select', 'table', 'delete', 'insert', 'replace', 'update', 'with'})
 
-# unless a specific table is configured, we try all of the events_statements tables in descending order of
-# preference
-EVENTS_STATEMENTS_PREFERRED_TABLES = [
-    'events_statements_history_long',
-    'events_statements_current',
-    # events_statements_history is the lowest in preference because it keeps the history only as long as the thread
-    # exists, which means if an application uses only short-lived connections that execute a single query then we
-    # won't be able to catch any samples of it. By querying events_statements_current we at least guarantee we'll
-    # be able to catch queries from short-lived connections.
-    'events_statements_history',
-]
-
+EVENTS_STATEMENTS_TABLE = 'events_statements_current'
+        
 # default sampling settings for events_statements_* tables
 # collection interval is in seconds
 # {table -> interval}
@@ -329,7 +319,6 @@ class MySQLStatementSamples(DBMAsyncJob):
     @tracked_method(agent_check_getter=agent_check_getter)
     def _get_new_events_statements_current(self):
         start = time.time()
-        events_statements_table = "events_statements_current"
         with closing(self._get_db_connection().cursor(pymysql.cursors.DictCursor)) as cursor:
             self._cursor_run(
                 cursor,
@@ -341,7 +330,7 @@ class MySQLStatementSamples(DBMAsyncJob):
             rows = cursor.fetchall()
             tags = (
                 self._tags
-                + ["events_statements_table:{}".format(events_statements_table)]
+                + ["events_statements_table:{}".format(EVENTS_STATEMENTS_TABLE)]
                 + self._check._get_debug_tags()
             )
             self._check.histogram(
@@ -353,7 +342,7 @@ class MySQLStatementSamples(DBMAsyncJob):
             self._check.histogram(
                 "dd.mysql.get_new_events_statements.rows", len(rows), tags=tags, hostname=self._check.resolved_hostname
             )
-            self._log.debug("Read %s rows from %s", len(rows), events_statements_table)
+            self._log.debug("Read %s rows from %s", len(rows), EVENTS_STATEMENTS_TABLE)
             return rows
 
     def _filter_valid_statement_rows(self, rows):
@@ -542,19 +531,17 @@ class MySQLStatementSamples(DBMAsyncJob):
             return None, None
         self._log.debug("Found enabled performance_schema statements consumers: %s", enabled_consumers)
 
-        events_statements_table = 'events_statements_current'
-
         collection_interval = self._configured_collection_interval
         if collection_interval < 0:
-            collection_interval = DEFAULT_EVENTS_STATEMENTS_COLLECTION_INTERVAL[events_statements_table]
+            collection_interval = DEFAULT_EVENTS_STATEMENTS_COLLECTION_INTERVAL[EVENTS_STATEMENTS_TABLE]
 
         # cache only successful strategies
         # should be short enough that we'll reflect updates relatively quickly
         # i.e., an aurora replica becomes a master (or vice versa).
-        strategy = (events_statements_table, collection_interval)
+        strategy = (EVENTS_STATEMENTS_TABLE, collection_interval)
         self._log.debug(
             "Chose plan collection strategy: events_statements_table=%s, collection_interval=%s",
-            events_statements_table,
+            EVENTS_STATEMENTS_TABLE,
             collection_interval,
         )
         self._collection_strategy_cache["events_statements_strategy"] = strategy
