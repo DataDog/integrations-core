@@ -75,28 +75,28 @@ class CheckLoggingAdapter(logging.LoggerAdapter):
 class CheckLogFormatter(logging.Formatter):
     def __init__(self):
         super(CheckLogFormatter, self).__init__()
-        integration_tracing, _ = tracing_enabled()
-        self.integration_tracing_enabled = integration_tracing
+        self.integration_tracing_enabled, _ = tracing_enabled()
 
     def format(self, record):
         # type: (logging.LogRecord) -> str
         message = to_native_string(super(CheckLogFormatter, self).format(record))
 
-        attributes = {
-            # Default to `-` for non-check logs
-            'check_id': getattr(record, '_check_id', '-'),
-            'filename': getattr(record, '_filename', record.filename),
-            'lineno': getattr(record, '_lineno', record.lineno),
-            'message': message,
-        }
-
         if not self.integration_tracing_enabled:
-            return "{check_id} | ({filename}:{lineno}) | {message}".format(**attributes)
+            return "{} | ({}:{}) | {}".format(
+                # Default to `-` for non-check logs
+                getattr(record, '_check_id', '-'),
+                getattr(record, '_filename', record.filename),
+                getattr(record, '_lineno', record.lineno),
+                message,
+            )
 
-        attributes['trace_id'] = getattr(record, 'dd.trace_id', 0)
-        attributes['span_id'] = getattr(record, 'dd.span_id', 0)
-        return "{check_id} | ({filename}:{lineno}) | dd.trace_id={trace_id} dd.span_id={span_id} | {message}".format(
-            **attributes
+        return "{} | ({}:{}) | dd.trace_id={} dd.span_id={} | {}".format(
+            getattr(record, '_check_id', '-'),
+            getattr(record, '_filename', record.filename),
+            getattr(record, '_lineno', record.lineno),
+            getattr(record, 'dd.trace_id', 0),
+            getattr(record, 'dd.span_id', 0),
+            message,
         )
 
 
