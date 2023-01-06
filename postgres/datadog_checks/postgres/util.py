@@ -342,24 +342,16 @@ ACTIVITY_DD_METRICS = [
 
 # The base query for postgres version >= 10
 ACTIVITY_QUERY_10 = """
-SELECT datname, application_name,
-    {metrics_columns}
+SELECT {aggregation_columns_select}
+    {{metrics_columns}}
 FROM pg_stat_activity WHERE backend_type = 'client backend'
-GROUP BY datid, datname, application_name
+GROUP BY datid {aggregation_columns_group}
 """
 
 # The base query for postgres version < 10
 ACTIVITY_QUERY_LT_10 = """
-SELECT datname, application_name,
-    {metrics_columns}
+SELECT {aggregation_columns_select}
+    {{metrics_columns}}
 FROM pg_stat_activity
-GROUP BY datid, datname, application_name
-"""
-
-# The base query for postgres version < 9
-ACTIVITY_QUERY_LT_9 = """
-SELECT datname,
-    {metrics_columns}
-FROM pg_stat_activity
-GROUP BY datid, datname
+GROUP BY datid {aggregation_columns_group}
 """

@@ -11,7 +11,6 @@ from .util import (
     ACTIVITY_METRICS_9_6,
     ACTIVITY_METRICS_LT_8_3,
     ACTIVITY_QUERY_10,
-    ACTIVITY_QUERY_LT_9,
     ACTIVITY_QUERY_LT_10,
     COMMON_ARCHIVER_METRICS,
     COMMON_BGW_METRICS,
@@ -188,12 +187,22 @@ class PostgresMetricsCache:
         metrics_data = self.activity_metrics
 
         if metrics_data is None:
+            excluded_aggregations = self.config.activity_metrics_excluded_aggregations
             if version < V9:
-                query = ACTIVITY_QUERY_LT_9
-            elif version < V10:
+                excluded_aggregations.append('application_name')
+
+            default_aggregations = ['datname', 'application_name']
+            aggregation_columns = [a for a in default_aggregations if a not in excluded_aggregations]
+
+            if version < V10:
                 query = ACTIVITY_QUERY_LT_10
             else:
                 query = ACTIVITY_QUERY_10
+            if not aggregation_columns:
+                query = query.format(aggregation_columns_select='', aggregation_columns_group='')
+            else:
+                query = query.format(aggregation_columns_select=', '.join(aggregation_columns) + ',',
+                                     aggregation_columns_group=',' + ', '.join(aggregation_columns))
 
             if version >= V9_6:
                 metrics_query = ACTIVITY_METRICS_9_6
@@ -204,10 +213,8 @@ class PostgresMetricsCache:
             else:
                 metrics_query = ACTIVITY_METRICS_LT_8_3
 
-            descriptors = [('datname', 'db'), ('application_name', 'application_name')]
-            if version < V9:
-                descriptors = [('datname', 'db')]
-
+            default_descriptors = [('datname', 'db'), ('application_name', 'application_name')]
+            descriptors = [d for d in default_descriptors if d[0] not in excluded_aggregations]
             for i, q in enumerate(metrics_query):
                 if '{dd__user}' in q:
                     metrics_query[i] = q.format(dd__user=self.config.user)
