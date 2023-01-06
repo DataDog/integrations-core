@@ -121,6 +121,7 @@ class VSphereRestAPI(object):
         """
         tags = {}
         categories = {}
+        self.log.warning("Query tags-get for each URN")
         for tag_id in tag_ids:
             try:
                 tag = self._client.tagging_tags_get(tag_id)
