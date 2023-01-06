@@ -153,6 +153,26 @@ def test_activity_metrics(aggregator, integration_check, pg_instance):
     check_activity_metrics(aggregator, expected_tags)
 
 
+def test_activity_metrics_no_application_aggregation(aggregator, integration_check, pg_instance):
+    pg_instance['collect_activity_metrics'] = True
+    pg_instance['activity_metrics_excluded_aggregations'] = ['application_name']
+    check = integration_check(pg_instance)
+    check.check(pg_instance)
+
+    expected_tags = pg_instance['tags'] + ['port:{}'.format(PORT), 'db:datadog_test']
+    check_activity_metrics(aggregator, expected_tags)
+
+
+def test_activity_metrics_no_aggregations(aggregator, integration_check, pg_instance):
+    pg_instance['collect_activity_metrics'] = True
+    pg_instance['activity_metrics_excluded_aggregations'] = ['datname', 'application_name']
+    check = integration_check(pg_instance)
+    check.check(pg_instance)
+
+    expected_tags = pg_instance['tags'] + ['port:{}'.format(PORT)]
+    check_activity_metrics(aggregator, expected_tags)
+
+
 def assert_metric_at_least(aggregator, metric_name, expected_tag, count, lower_bound):
     found_values = 0
     for metric in aggregator.metrics(metric_name):
