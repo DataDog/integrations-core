@@ -3,10 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import asyncio
 import json
-from unittest.mock import patch
 
 import pytest
-from mock import MagicMock
+from mock import MagicMock, patch
 
 from datadog_checks.dev.testing import requires_py3
 
