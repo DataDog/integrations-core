@@ -175,10 +175,10 @@ def test_backend_transaction_age(aggregator, integration_check, pg_instance):
     aggregator.assert_metric('postgresql.activity.backend_xmin_age', value=0, count=1, tags=dd_agent_tags)
     aggregator.assert_metric('postgresql.activity.xact_start_age', count=1, tags=dd_agent_tags)
 
-    conn1 = psycopg2.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g", application_name="test")
+    conn1 = psycopg2.connect(host=HOST, dbname=DB_NAME, user="datadog", password="datadog", application_name="test")
     cur = conn1.cursor()
 
-    conn2 = psycopg2.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g", application_name="test")
+    conn2 = psycopg2.connect(host=HOST, dbname=DB_NAME, user="datadog", password="datadog", application_name="test")
     cur2 = conn2.cursor()
 
     # Start a transaction in repeatable read to force pinning of backend_xmin
@@ -191,8 +191,10 @@ def test_backend_transaction_age(aggregator, integration_check, pg_instance):
 
     aggregator.reset()
     check.check(pg_instance)
+
     aggregator.assert_metric('postgresql.activity.backend_xid_age', value=1, count=1, tags=test_tags)
     aggregator.assert_metric('postgresql.activity.backend_xmin_age', value=1, count=1, tags=test_tags)
+    aggregator.assert_metric('postgresql.activity.xact_start_age', count=1, tags=test_tags)
 
     aggregator.assert_metric('postgresql.activity.backend_xid_age', count=0, tags=dd_agent_tags)
     aggregator.assert_metric('postgresql.activity.backend_xmin_age', value=1, count=1, tags=dd_agent_tags)
@@ -212,6 +214,7 @@ def test_backend_transaction_age(aggregator, integration_check, pg_instance):
     aggregator.assert_metric('postgresql.activity.backend_xmin_age', value=2, count=1, tags=dd_agent_tags)
 
     # Check that xact_start_age has a value greater than the trasaction_age lower bound
+    aggregator.assert_metric('postgresql.activity.xact_start_age', count=1, tags=test_tags)
     assert_metric_at_least(
         aggregator, 'postgresql.activity.xact_start_age', 'application_name:test', 1, transaction_age_lower_bound
     )
