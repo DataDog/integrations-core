@@ -20,6 +20,9 @@ from .common import (
     POSTGRES_VERSION,
     check_bgw_metrics,
     check_common_metrics,
+    check_connection_metrics,
+    check_db_count,
+    check_slru_metrics,
     requires_static_version,
 )
 from .utils import requires_over_10
@@ -42,10 +45,13 @@ def test_common_metrics(aggregator, integration_check, pg_instance):
     check.check(pg_instance)
 
     expected_tags = pg_instance['tags'] + ['port:{}'.format(PORT)]
-    check_bgw_metrics(aggregator, expected_tags)
-
-    expected_tags += ['db:{}'.format(DB_NAME)]
     check_common_metrics(aggregator, expected_tags=expected_tags)
+    check_bgw_metrics(aggregator, expected_tags)
+    check_connection_metrics(aggregator, expected_tags=expected_tags)
+    check_db_count(aggregator, expected_tags=expected_tags)
+    check_slru_metrics(aggregator, expected_tags=expected_tags)
+
+    aggregator.assert_all_metrics_covered()
 
 
 def test_common_metrics_without_size(aggregator, integration_check, pg_instance):
@@ -78,7 +84,6 @@ def test_unsupported_replication(aggregator, integration_check, pg_instance):
     expected_tags = pg_instance['tags'] + ['port:{}'.format(PORT)]
     check_bgw_metrics(aggregator, expected_tags)
 
-    expected_tags += ['db:{}'.format(DB_NAME)]
     check_common_metrics(aggregator, expected_tags=expected_tags)
 
 

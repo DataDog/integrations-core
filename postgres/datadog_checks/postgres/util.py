@@ -230,6 +230,24 @@ SELECT {metrics_columns}
 """,
 }
 
+SLRU_METRICS = {
+    'descriptors': [('name', 'slru_name')],
+    'metrics': {
+        'blks_zeroed': ('postgresql.slru.blks_zeroed', AgentCheck.monotonic_count),
+        'blks_hit': ('postgresql.slru.blks_hit', AgentCheck.monotonic_count),
+        'blks_read': ('postgresql.slru.blks_read', AgentCheck.monotonic_count),
+        'blks_written ': ('postgresql.slru.blks_written', AgentCheck.monotonic_count),
+        'blks_exists': ('postgresql.slru.blks_exists', AgentCheck.monotonic_count),
+        'flushes': ('postgresql.slru.flushes', AgentCheck.monotonic_count),
+        'truncates': ('postgresql.slru.truncates', AgentCheck.monotonic_count),
+    },
+    'relation': False,
+    'query': """
+SELECT name, {metrics_columns}
+  FROM pg_stat_slru
+""",
+}
+
 FUNCTION_METRICS = {
     'descriptors': [('schemaname', 'schema'), ('funcname', 'function')],
     'metrics': {
