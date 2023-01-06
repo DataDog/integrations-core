@@ -27,7 +27,7 @@ from .common import (
     check_slru_metrics,
     requires_static_version,
 )
-from .utils import requires_over_10, requires_over_96
+from .utils import requires_over_10
 
 CONNECTION_METRICS = ['postgresql.max_connections', 'postgresql.percent_usage_connections']
 
@@ -182,7 +182,6 @@ def assert_metric_at_least(aggregator, metric_name, expected_tag, count, lower_b
     assert found_values == count
 
 
-@requires_over_96
 def test_backend_transaction_age(aggregator, integration_check, pg_instance):
     pg_instance['collect_activity_metrics'] = True
     check = integration_check(pg_instance)
@@ -192,7 +191,10 @@ def test_backend_transaction_age(aggregator, integration_check, pg_instance):
     dd_agent_tags = pg_instance['tags'] + ['port:{}'.format(PORT), 'db:datadog_test', 'application_name:datadog-agent']
     test_tags = pg_instance['tags'] + ['port:{}'.format(PORT), 'db:datadog_test', 'application_name:test']
     # No transaction in progress, we have 0
-    aggregator.assert_metric('postgresql.activity.backend_xmin_age', value=0, count=1, tags=dd_agent_tags)
+    if float(POSTGRES_VERSION) >= 9.6:
+        aggregator.assert_metric('postgresql.activity.backend_xmin_age', value=0, count=1, tags=dd_agent_tags)
+    else:
+        aggregator.assert_metric('postgresql.activity.backend_xmin_age', count=0, tags=dd_agent_tags)
     aggregator.assert_metric('postgresql.activity.xact_start_age', count=1, tags=dd_agent_tags)
 
     conn1 = psycopg2.connect(host=HOST, dbname=DB_NAME, user="datadog", password="datadog", application_name="test")
@@ -212,12 +214,20 @@ def test_backend_transaction_age(aggregator, integration_check, pg_instance):
     aggregator.reset()
     check.check(pg_instance)
 
-    aggregator.assert_metric('postgresql.activity.backend_xid_age', value=1, count=1, tags=test_tags)
-    aggregator.assert_metric('postgresql.activity.backend_xmin_age', value=1, count=1, tags=test_tags)
-    aggregator.assert_metric('postgresql.activity.xact_start_age', count=1, tags=test_tags)
+    if float(POSTGRES_VERSION) >= 9.6:
+        aggregator.assert_metric('postgresql.activity.backend_xid_age', value=1, count=1, tags=test_tags)
+        aggregator.assert_metric('postgresql.activity.backend_xmin_age', value=1, count=1, tags=test_tags)
 
-    aggregator.assert_metric('postgresql.activity.backend_xid_age', count=0, tags=dd_agent_tags)
-    aggregator.assert_metric('postgresql.activity.backend_xmin_age', value=1, count=1, tags=dd_agent_tags)
+        aggregator.assert_metric('postgresql.activity.backend_xid_age', count=0, tags=dd_agent_tags)
+        aggregator.assert_metric('postgresql.activity.backend_xmin_age', value=1, count=1, tags=dd_agent_tags)
+    else:
+        aggregator.assert_metric('postgresql.activity.backend_xid_age', count=0, tags=test_tags)
+        aggregator.assert_metric('postgresql.activity.backend_xmin_age', count=0, tags=test_tags)
+
+        aggregator.assert_metric('postgresql.activity.backend_xid_age', count=0, tags=dd_agent_tags)
+        aggregator.assert_metric('postgresql.activity.backend_xmin_age', count=0, tags=dd_agent_tags)
+
+    aggregator.assert_metric('postgresql.activity.xact_start_age', count=1, tags=test_tags)
 
     # Open a new session and assign a new txid to it.
     cur2.execute('select txid_current()')
@@ -226,12 +236,13 @@ def test_backend_transaction_age(aggregator, integration_check, pg_instance):
     transaction_age_lower_bound = time.time() - start_transaction_time
     check.check(pg_instance)
 
-    # Check that the xmin and xid is 2 tx old
-    aggregator.assert_metric('postgresql.activity.backend_xid_age', value=2, count=1, tags=test_tags)
-    aggregator.assert_metric('postgresql.activity.backend_xmin_age', value=2, count=1, tags=test_tags)
+    if float(POSTGRES_VERSION) >= 9.6:
+        # Check that the xmin and xid is 2 tx old
+        aggregator.assert_metric('postgresql.activity.backend_xid_age', value=2, count=1, tags=test_tags)
+        aggregator.assert_metric('postgresql.activity.backend_xmin_age', value=2, count=1, tags=test_tags)
 
-    aggregator.assert_metric('postgresql.activity.backend_xid_age', count=0, tags=dd_agent_tags)
-    aggregator.assert_metric('postgresql.activity.backend_xmin_age', value=2, count=1, tags=dd_agent_tags)
+        aggregator.assert_metric('postgresql.activity.backend_xid_age', count=0, tags=dd_agent_tags)
+        aggregator.assert_metric('postgresql.activity.backend_xmin_age', value=2, count=1, tags=dd_agent_tags)
 
     # Check that xact_start_age has a value greater than the trasaction_age lower bound
     aggregator.assert_metric('postgresql.activity.xact_start_age', count=1, tags=test_tags)
