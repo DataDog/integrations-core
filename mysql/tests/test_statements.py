@@ -287,10 +287,6 @@ def test_statement_metrics_cloud_metadata(aggregator, dd_run_check, dbm_instance
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-@pytest.mark.parametrize(
-    "events_statements_table",
-    ["events_statements_current"],
-)
 @pytest.mark.parametrize("explain_strategy", ['PROCEDURE', 'FQ_PROCEDURE', 'STATEMENT', None])
 @pytest.mark.parametrize(
     "schema,statement,expected_collection_errors,expected_statement_truncated",
@@ -347,7 +343,6 @@ def test_statement_samples_collect(
     dd_run_check,
     dbm_instance,
     bob_conn,
-    events_statements_table,
     explain_strategy,
     schema,
     statement,
@@ -361,8 +356,6 @@ def test_statement_samples_collect(
     caplog.set_level(logging.DEBUG, logger="datadog_checks")
     caplog.set_level(logging.DEBUG, logger="tests.test_mysql")
 
-    # try to collect a sample from all supported events_statements tables using all possible strategies
-    dbm_instance['query_samples']['events_statements_table'] = events_statements_table
     mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
     if explain_strategy:
         mysql_check._statement_samples._preferred_explain_strategies = [explain_strategy]
@@ -653,8 +646,6 @@ def test_statement_samples_failed_explain_handling(
     total_error_count,
     db_error_count,
 ):
-    # pin the table we use for consistency
-    dbm_instance['query_samples']['events_statements_table'] = "events_statements_current"
     mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
 
     dd_run_check(mysql_check)
@@ -708,8 +699,6 @@ def test_statement_samples_unique_plans_rate_limits(aggregator, dd_run_check, bo
     # test unique sample ingestion rate limiting
     cache_max_size = 20
     dbm_instance['query_samples']['run_sync'] = True
-    # fix the table to 'events_statements_current' to ensure we don't pull in historical queries from other tests
-    dbm_instance['query_samples']['events_statements_table'] = 'events_statements_current'
     dbm_instance['query_samples']['seen_samples_cache_maxsize'] = cache_max_size
     # samples_per_hour_per_query set very low so that within this test we will have at most one sample per
     # (query, plan)
