@@ -111,6 +111,4 @@ def check_slru_metrics(aggregator, expected_tags, count=1):
     slru_caches = ['Subtrans', 'Serial', 'MultiXactMember', 'Xact', 'other', 'Notify', 'CommitTs', 'MultiXactOffset']
     for (metric_name, _) in SLRU_METRICS['metrics'].values():
         for slru_cache in slru_caches:
-            aggregator.assert_metric(
-                metric_name, count=count, tags=expected_tags + ['slru_name:{}'.format(slru_cache)]
-            )
+            aggregator.assert_metric(metric_name, count=count, tags=expected_tags + ['slru_name:{}'.format(slru_cache)])
