@@ -219,18 +219,6 @@ class MySQLStatementSamples(DBMAsyncJob):
         self._events_statements_enable_procedure = self._config.statement_samples_config.get(
             'events_statements_enable_procedure', 'datadog.enable_events_statements_consumers'
         )
-        self._preferred_events_statements_tables = EVENTS_STATEMENTS_PREFERRED_TABLES
-        events_statements_table = self._config.statement_samples_config.get('events_statements_table', None)
-        if events_statements_table:
-            if events_statements_table in DEFAULT_EVENTS_STATEMENTS_COLLECTION_INTERVAL:
-                self._log.debug("Configured preferred events_statements_table: %s", events_statements_table)
-                self._preferred_events_statements_tables = [events_statements_table]
-            else:
-                self._log.warning(
-                    "Invalid events_statements_table: %s. Must be one of %s. Falling back to trying all tables.",
-                    events_statements_table,
-                    ', '.join(DEFAULT_EVENTS_STATEMENTS_COLLECTION_INTERVAL.keys()),
-                )
         self._explain_strategies = {
             'PROCEDURE': self._run_explain_procedure,
             'FQ_PROCEDURE': self._run_fully_qualified_explain_procedure,
