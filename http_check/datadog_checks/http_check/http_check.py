@@ -334,7 +334,7 @@ class HTTPCheck(AgentCheck):
             # To maintain backwards compatability, if we aren't validating tls/certs, do not process
             # the returned binary cert unless specifically configured to with tls_retrieve_non_validated_cert
             if (
-                instance.get("tls_verify") is False
+                not is_affirmative(instance.get("tls_verify", True))
                 and not is_affirmative(instance.get("tls_retrieve_non_validated_cert", False))
             ) or not binary_cert:
                 raise Exception("Empty or no certificate found.")
