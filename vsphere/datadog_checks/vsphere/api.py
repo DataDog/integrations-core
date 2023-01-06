@@ -286,7 +286,7 @@ class VSphereAPI(object):
         # type: (List[vim.PerformanceManager.QuerySpec]) -> List[vim.PerformanceManager.EntityMetricBase]
         perf_manager = self._conn.content.perfManager
         values = perf_manager.QueryPerf(query_specs)
-        self.log.warn("Received %s values from QueryPerf", len(values))
+        self.log.warning("Received %s values from QueryPerf", len(values))
         self.log.trace(
             "Query metrics:\n=== QUERY ===\n%s\n=== RESPONSE ===\n%s\n=== END QUERY ===",
             query_specs,
