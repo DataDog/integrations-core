@@ -201,8 +201,10 @@ class PostgresMetricsCache:
             if not aggregation_columns:
                 query = query.format(aggregation_columns_select='', aggregation_columns_group='')
             else:
-                query = query.format(aggregation_columns_select=', '.join(aggregation_columns) + ',',
-                                     aggregation_columns_group=',' + ', '.join(aggregation_columns))
+                query = query.format(
+                    aggregation_columns_select=', '.join(aggregation_columns) + ',',
+                    aggregation_columns_group=',' + ', '.join(aggregation_columns),
+                )
 
             if version >= V9_6:
                 metrics_query = ACTIVITY_METRICS_9_6
