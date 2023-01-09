@@ -6,6 +6,7 @@ import glob
 import logging
 import logging.config
 import os
+import pathlib
 import re
 import shutil
 import sys
@@ -100,22 +101,28 @@ class TUFDownloader:
         self.__updater.refresh()
 
     def __download_with_tuf(self, target_relpath):
-        target = self.__updater.get_targetinfo(target_relpath)
+        # The path used to query TUF needs to be a path-relative-URL string
+        # (https://url.spec.whatwg.org/#path-relative-url-string), which means the path
+        # separator *must* be `/` and only `/`.
+        # This is a defensive measure to make things work even if the provided `target_relpath`
+        # is a platform-specific filesystem path.
+        tuf_target_path = pathlib.PurePath(target_relpath).as_posix()
+        target = self.__updater.get_targetinfo(tuf_target_path)
         if target is None:
-            raise TargetNotFoundError(f'Target at {target_relpath} not found')
+            raise TargetNotFoundError(f'Target at {tuf_target_path} not found')
 
-        target_abspath = os.path.join(self.__targets_dir, target_relpath)
+        target_abspath = os.path.join(self.__targets_dir, tuf_target_path)
         local_relpath = self.__updater.find_cached_target(target, target_abspath)
 
         # Either the target has not been updated...
         if local_relpath:
-            logger.debug('%s has not been updated', target_relpath)
+            logger.debug('%s has not been updated', tuf_target_path)
         # or, it has been updated, in which case we download the new version
         else:
             os.makedirs(os.path.dirname(target_abspath), exist_ok=True)
             self.__updater.download_target(target, target_abspath)
 
-        logger.info('TUF verified %s', target_relpath)
+        logger.info('TUF verified %s', tuf_target_path)
 
         return target_abspath, target
 
@@ -125,7 +132,7 @@ class TUFDownloader:
         # expected version of the root layout. This is so that, for example, we
         # can introduce new parameters w/o breaking old downloaders that don't
         # know how to substitute them.
-        target_relpath = os.path.join(IN_TOTO_METADATA_DIR, self.__root_layout)
+        target_relpath = f'{IN_TOTO_METADATA_DIR}/{self.__root_layout}'
         return self.__download_with_tuf(target_relpath)
 
     def __download_custom(self, target, extension):
@@ -263,7 +270,9 @@ class TUFDownloader:
             If download over TUF and in-toto is successful, this function will
             return the complete filepath to the desired target.
         """
-        return self.__download_with_tuf_in_toto(target_relpath)
+        target_abspath = self.__download_with_tuf_in_toto(target_relpath)
+        # Always return the posix version of the path for consistency across platforms
+        return pathlib.Path(target_abspath).as_posix()
 
     def __get_versions(self, standard_distribution_name):
         index_relpath = 'simple/{}/index.html'.format(standard_distribution_name)
