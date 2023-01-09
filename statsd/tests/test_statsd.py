@@ -17,6 +17,7 @@ HOST = get_docker_hostname()
 PORT = 8126
 HERE = os.path.dirname(os.path.abspath(__file__))
 URL = "http://{}:{}".format(HOST, PORT)
+STATSD_VERSION = os.environ["STATSD_VERSION"]
 
 METRICS = [
     'statsd.uptime',
@@ -42,7 +43,10 @@ def instance():
 @pytest.fixture(scope='session')
 def dd_environment():
     with docker_run(
-        compose_file=os.path.join(HERE, 'compose', 'statsd.yaml'), log_patterns=['server is up'], mount_logs=True
+        compose_file=os.path.join(HERE, 'compose', 'statsd.yaml'),
+        env_vars={"STATSD_VERSION": STATSD_VERSION},
+        log_patterns=['server is up'],
+        mount_logs=True,
     ):
         yield DEFAULT_INSTANCE
 
@@ -64,8 +68,8 @@ def test_e2e(dd_agent_check, instance):
 def assert_metrics_covered(aggregator):
     expected_tags = ["host:{}".format(HOST), "port:{}".format(PORT)]
 
-    for mname in METRICS:
-        aggregator.assert_metric(mname, count=1, tags=expected_tags)
+    for name in METRICS:
+        aggregator.assert_metric(name, count=1, tags=expected_tags)
 
     aggregator.assert_service_check(SERVICE_CHECK_NAME, status=StatsCheck.OK, count=1, tags=expected_tags)
     aggregator.assert_service_check(SERVICE_CHECK_NAME_HEALTH, status=StatsCheck.OK, count=1, tags=expected_tags)
