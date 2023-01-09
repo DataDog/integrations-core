@@ -15,7 +15,7 @@ class Filter:
         if self._include is None:
             return
         key = self._key or (lambda item: item)
-        discovered_item_keys = []
+        discovered_item_keys = set()
         excluded_item_keys = (
             [key(item) for item in items if re.search(self._exclude, key(item))] if self._exclude else []
         )
@@ -28,5 +28,5 @@ class Filter:
                     and key(item) not in discovered_item_keys
                     and re.search(pattern, key(item))
                 ):
-                    discovered_item_keys.append(key(item))
+                    discovered_item_keys.add(key(item))
                     yield pattern, key(item), item, config
