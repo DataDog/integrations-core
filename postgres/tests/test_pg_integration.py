@@ -149,7 +149,7 @@ def test_activity_metrics(aggregator, integration_check, pg_instance):
     check = integration_check(pg_instance)
     check.check(pg_instance)
 
-    expected_tags = pg_instance['tags'] + ['port:{}'.format(PORT), 'db:datadog_test', 'application_name:datadog-agent']
+    expected_tags = pg_instance['tags'] + ['port:{}'.format(PORT), 'db:datadog_test', 'app:datadog-agent']
     check_activity_metrics(aggregator, expected_tags)
 
 
@@ -188,8 +188,8 @@ def test_backend_transaction_age(aggregator, integration_check, pg_instance):
 
     check.check(pg_instance)
 
-    dd_agent_tags = pg_instance['tags'] + ['port:{}'.format(PORT), 'db:datadog_test', 'application_name:datadog-agent']
-    test_tags = pg_instance['tags'] + ['port:{}'.format(PORT), 'db:datadog_test', 'application_name:test']
+    dd_agent_tags = pg_instance['tags'] + ['port:{}'.format(PORT), 'db:datadog_test', 'app:datadog-agent']
+    test_tags = pg_instance['tags'] + ['port:{}'.format(PORT), 'db:datadog_test', 'app:test']
     # No transaction in progress, we have 0
     if float(POSTGRES_VERSION) >= 9.6:
         aggregator.assert_metric('postgresql.activity.backend_xmin_age', value=0, count=1, tags=dd_agent_tags)
@@ -247,7 +247,7 @@ def test_backend_transaction_age(aggregator, integration_check, pg_instance):
     # Check that xact_start_age has a value greater than the trasaction_age lower bound
     aggregator.assert_metric('postgresql.activity.xact_start_age', count=1, tags=test_tags)
     assert_metric_at_least(
-        aggregator, 'postgresql.activity.xact_start_age', 'application_name:test', 1, transaction_age_lower_bound
+        aggregator, 'postgresql.activity.xact_start_age', 'app:test', 1, transaction_age_lower_bound
     )
 
 
@@ -350,7 +350,7 @@ def test_correct_hostname(dbm_enabled, reported_hostname, expected_hostname, agg
 
     expected_tags_no_db = pg_instance['tags'] + ['server:{}'.format(HOST), 'port:{}'.format(PORT)]
     expected_tags_with_db = expected_tags_no_db + ['db:datadog_test']
-    expected_tags_with_db_and_app = expected_tags_with_db + ['application_name:datadog-agent']
+    expected_tags_with_db_and_app = expected_tags_with_db + ['app:datadog-agent']
     c_metrics = COMMON_METRICS
     if not dbm_enabled:
         c_metrics = c_metrics + DBM_MIGRATED_METRICS

@@ -215,7 +215,7 @@ class PostgresMetricsCache:
             else:
                 metrics_query = ACTIVITY_METRICS_LT_8_3
 
-            default_descriptors = [('datname', 'db'), ('application_name', 'application_name')]
+            default_descriptors = [('datname', 'db'), ('application_name', 'app')]
             descriptors = [d for d in default_descriptors if d[0] not in excluded_aggregations]
             for i, q in enumerate(metrics_query):
                 if '{dd__user}' in q:
