@@ -73,10 +73,14 @@ COPYRIGHT_ATTR_TEMPLATES = {
     'LGPL-3.0-only': 'Copyright (C) {year}{author}',
     'MIT': 'Copyright (c) {year}{author}',
     'PSF': 'Copyright (c) {year}{author}',
+    'CC0-1.0': '{author}. {package_name} is dedicated to the public domain under {license}.',
+    'Unlicense': '{author}. {package_name} is dedicated to the public domain under {license}.',
 }
 
 
 EXPLICIT_LICENSES = {
+    # https://github.com/aerospike/aerospike-client-python/blob/master/LICENSE
+    'aerospike': ['Apache-2.0'],
     # https://github.com/baztian/jaydebeapi/blob/master/COPYING
     'JayDeBeApi': ['LGPL-3.0-only'],
     # https://github.com/mhammond/pywin32/blob/master/adodbapi/license.txt
@@ -91,8 +95,12 @@ EXPLICIT_LICENSES = {
     'cm-client': ['Apache-2.0'],
     # https://github.com/oauthlib/oauthlib/blob/master/LICENSE
     'oauthlib': ['BSD-3-Clause'],
+    # https://github.com/hajimes/mmh3/blob/master/LICENSE
+    'mmh3': ['CC0-1.0'],
     # https://github.com/paramiko/paramiko/blob/master/LICENSE
     'paramiko': ['LGPL-2.1-only'],
+    # https://github.com/oracle/python-oracledb/blob/main/LICENSE.txt
+    'oracledb': ['Apache-2.0'],
     # https://github.com/psycopg/psycopg2/blob/master/LICENSE
     # https://github.com/psycopg/psycopg2/blob/master/doc/COPYING.LESSER
     'psycopg2-binary': ['LGPL-3.0-only', 'BSD-3-Clause'],
@@ -104,6 +112,8 @@ EXPLICIT_LICENSES = {
     'requests_ntlm': ['ISC'],
     # https://github.com/rethinkdb/rethinkdb-python/blob/master/LICENSE
     'rethinkdb': ['Apache-2.0'],
+    # https://github.com/simplejson/simplejson/blob/master/LICENSE.txt
+    'simplejson': ['MIT'],
     # https://github.com/Supervisor/supervisor/blob/master/LICENSES.txt
     'supervisor': ['BSD-3-Clause-Modification'],
     # https://github.com/Cairnarvon/uptime/blob/master/COPYING.txt
@@ -189,6 +199,7 @@ PACKAGE_REPO_OVERRIDES = {
     'protobuf': 'https://github.com/protocolbuffers/protobuf',
     'psycopg2-binary': 'https://github.com/psycopg/psycopg2',
     'pycryptodomex': 'https://github.com/Legrandin/pycryptodome',
+    'redis': 'https://github.com/redis/redis-py',
     'requests': 'https://github.com/psf/requests',
     'requests-toolbelt': 'https://github.com/requests/toolbelt',
     'service-identity': 'https://github.com/pyca/service-identity',
@@ -214,7 +225,6 @@ ADDITIONAL_LICENSES = [
 
 
 def format_attribution_line(package_name, license_id, package_copyright):
-    package_copyright = ' | '.join(sorted(package_copyright))
     if ',' in package_copyright:
         package_copyright = f'"{package_copyright}"'
 
@@ -249,37 +259,46 @@ async def get_data(url):
             )
 
 
-async def scrape_license_data(urls, ctx):
-    package_data = defaultdict(lambda: {'copyright': set(), 'licenses': [], 'classifiers': set()})
+async def scrape_license_data(urls):
+    package_data = defaultdict(
+        lambda: {'copyright': dict(), 'licenses': set(), 'classifiers': set(), 'home_page': None, 'author': None}
+    )
 
     async with Pool() as pool:
-        async for package_name, package_copyright, package_license, home_page, license_classifiers in pool.map(
+        async for package_name, package_author, package_license, home_page, license_classifiers in pool.map(
             get_data, urls
         ):
             data = package_data[package_name]
+            if package_author:
+                data['author'] = package_author
+
             data['classifiers'].update(license_classifiers)
             if package_license:
                 if ' :: ' in package_license:
                     data['classifiers'].add(extract_classifier_value(package_license))
                 else:
-                    data['licenses'].append(package_license)
+                    data['licenses'].add(package_license)
 
-            repo_url = home_page if home_page.__contains__('github.com/') else PACKAGE_REPO_OVERRIDES.get(package_name)
+            if home_page:
+                data['home_page'] = home_page
 
-            created_date = ''
-
-            if repo_url:
-                cp, created_date = scrape_copyright_data(repo_url, ctx)
-                if cp:
-                    data['copyright'].add(cp)
-
-            if package_copyright and len(data['copyright']) < 1 or package_license == 'PSF':
-                cp = 'Copyright {}{}'.format(created_date, package_copyright)
-                if package_license in COPYRIGHT_ATTR_TEMPLATES:
-                    cp = COPYRIGHT_ATTR_TEMPLATES[package_license].format(year=created_date, author=package_copyright)
-
-                data['copyright'].add(cp)
     return package_data
+
+
+def update_copyrights(package_name, license_id, data, ctx):
+    home_page = data['home_page']
+    repo_url = PACKAGE_REPO_OVERRIDES.get(package_name) if PACKAGE_REPO_OVERRIDES.get(package_name) else home_page
+    if repo_url:
+        cp, created_date = scrape_copyright_data(repo_url, ctx)
+        if cp:
+            data['copyright'][license_id] = cp
+    if data['author'] and not data['copyright'].get(license_id):
+        cp = 'Copyright {}{}'.format(created_date, data['author'])
+        if license_id in COPYRIGHT_ATTR_TEMPLATES:
+            cp = COPYRIGHT_ATTR_TEMPLATES[license_id].format(
+                year=created_date, author=data['author'], package_name=package_name, license=license_id
+            )
+        data['copyright'][license_id] = cp
 
 
 def probe_github(url, ctx):
@@ -409,7 +428,7 @@ def licenses(ctx, sync):
         for version in versions:
             api_urls.append(f'https://pypi.org/pypi/{package}/{version}/json')
 
-    package_data = asyncio.run(scrape_license_data(api_urls, ctx))
+    package_data = asyncio.run(scrape_license_data(api_urls))
     known_spdx_licenses = {license_id.lower(): license_id for license_id in get_known_spdx_licenses()}
 
     package_license_errors = defaultdict(list)
@@ -420,8 +439,9 @@ def licenses(ctx, sync):
     for package_name, data in sorted(package_data.items()):
         if package_name in EXPLICIT_LICENSES:
             for license_id in sorted(EXPLICIT_LICENSES[package_name]):
-                lines.append(format_attribution_line(package_name, license_id, data['copyright']))
-
+                data['licenses'].add(license_id)
+                update_copyrights(package_name, license_id, data, ctx)
+                lines.append(format_attribution_line(package_name, license_id, data['copyright'].get(license_id)))
             continue
 
         license_ids = set()
@@ -458,7 +478,8 @@ def licenses(ctx, sync):
 
         if license_ids:
             for license_id in sorted(license_ids):
-                lines.append(format_attribution_line(package_name, license_id, data['copyright']))
+                update_copyrights(package_name, license_id, data, ctx)
+                lines.append(format_attribution_line(package_name, license_id, data['copyright'][license_id]))
         else:
             package_license_errors[package_name].append('no license information')
 
