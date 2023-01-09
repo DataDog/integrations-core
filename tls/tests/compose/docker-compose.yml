@@ -11,7 +11,7 @@ services:
   # nginx serving valid.mock, expired.mock and selfsigned.mock
   nginx-main:
     container_name: nginx-main
-    image: nginx:alpine
+    image: nginx:1.23.3-alpine
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf
       - certs:/etc/nginx/certs/:ro
@@ -23,7 +23,7 @@ services:
   # Serves tls-v1-2.valid.mock
   nginx-tls1-2:
     container_name: nginx-tls1-2
-    image: nginx:alpine
+    image: nginx:1.23.3-alpine
     volumes:
       - ./nginx-tls1-2.conf:/etc/nginx/conf.d/default.conf
       - certs:/etc/nginx/certs/:ro
@@ -35,7 +35,7 @@ services:
   # Serves tls-v1-3.valid.mock
   nginx-tls1-3:
     container_name: nginx-tls1-3
-    image: nginx:alpine
+    image: nginx:1.23.3-alpine
     volumes:
       - ./nginx-tls1-3.conf:/etc/nginx/conf.d/default.conf
       - certs:/etc/nginx/certs/:ro
