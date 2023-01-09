@@ -6,9 +6,7 @@ from .filter import Filter
 
 
 class Discovery:
-    def __init__(
-        self, get_items_func, limit=None, include=None, exclude=None, interval=None, key=None
-    ):
+    def __init__(self, get_items_func, limit=None, include=None, exclude=None, interval=None, key=None):
         self._filter = Filter(limit, include, exclude, key)
         self._cache = Cache(get_items_func, interval)
 
