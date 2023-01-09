@@ -32,7 +32,7 @@ def dd_environment():
 
         with docker_run(
             os.path.join(common.HERE, 'compose', 'docker-compose.yaml'),
-            env_vars={'NAGIOS_LOGS_PATH': nagios_var_log, 'NAGIOS_VERSION': common.NAGIOS_VERSION},
+            env_vars={'NAGIOS_LOGS_PATH': nagios_var_log},
             build=True,
             mount_logs=True,
         ):
