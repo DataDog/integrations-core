@@ -106,6 +106,4 @@ METRICS = [
     "presto.failure_detector.active_count",
 ]
 
-OPTIONAL_METRICS = (
-    "presto.execution.executor.active_count",
-)
+OPTIONAL_METRICS = ("presto.execution.executor.active_count",)
