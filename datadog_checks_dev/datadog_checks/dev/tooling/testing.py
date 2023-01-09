@@ -268,28 +268,41 @@ def select_hatch_envs(
     latest,
     env_filter_re,
 ):
+
+    available_envs = get_available_hatch_envs(check, sort, e2e_tests_only=e2e_tests_only)
+
     if style or format_style:
         envs_selected[:] = ['lint']
     elif benchmark:
         envs_selected[:] = [
             env_name
-            for env_name, config in get_available_hatch_envs(check, e2e_tests_only=e2e_tests_only).items()
+            for env_name, config in available_envs.items()
             if env_name == 'bench' or config.get('benchmark-env', False)
         ]
     elif latest:
         envs_selected[:] = [
             env_name
-            for env_name, config in get_available_hatch_envs(check, e2e_tests_only=e2e_tests_only).items()
+            for env_name, config in available_envs.items()
             if env_name == 'latest' or config.get('latest-env', False)
         ]
     elif not envs_selected:
-        envs_selected[:] = [
-            env_name
-            for env_name, config in get_available_hatch_envs(check, e2e_tests_only=e2e_tests_only).items()
-            if config.get('test-env', False)
-        ]
+        envs_selected[:] = [env_name for env_name, config in available_envs.items() if config.get('test-env', False)]
         if not e2e_tests_only:
             envs_selected.append('lint')
+    elif every:
+        envs_selected[:] = available_envs.keys()
+    else:
+        available = set(envs_selected) & available_envs.keys()
+        selected = []
+
+        # Retain order and remove duplicates
+        for env in envs_selected:
+            # TODO: support globs or regex
+            if env in available:
+                selected.append(env)
+                available.remove(env)
+
+        envs_selected[:] = selected
 
     if env_filter_re:
         envs_selected[:] = [e for e in envs_selected if not env_filter_re.match(e)]
