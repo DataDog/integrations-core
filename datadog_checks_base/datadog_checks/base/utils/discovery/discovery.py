@@ -6,10 +6,18 @@ from .filter import Filter
 
 
 class Discovery:
-    def __init__(self, get_items_func, limit=None, include=None, exclude=None, interval=None, key=None):
+    def __init__(
+        self,
+        get_items_func: callable,
+        limit: int = None,
+        include: dict = None,
+        exclude: list = None,
+        interval: int = None,
+        key: callable = None,
+    ) -> None:
         self._filter = Filter(limit, include, exclude, key)
         self._cache = Cache(get_items_func, interval)
 
-    def get_items(self):
+    def get_items(self) -> list:
         items = self._cache.get_items()
         return self._filter.get_items(items)

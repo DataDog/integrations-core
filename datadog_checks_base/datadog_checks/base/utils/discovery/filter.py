@@ -5,13 +5,13 @@ import re
 
 
 class Filter:
-    def __init__(self, limit, include, exclude, key):
+    def __init__(self, limit: int, include: dict, exclude: list, key: callable) -> None:
         self._limit = limit
         self._include = include
         self._exclude = re.compile('|'.join(exclude)) if exclude else None
         self._key = key
 
-    def get_items(self, items):
+    def get_items(self, items) -> list:
         if self._include is None:
             return
         key = self._key or (lambda item: item)
