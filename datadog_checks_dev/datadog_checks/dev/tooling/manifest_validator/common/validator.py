@@ -275,7 +275,7 @@ class LogsCategoryValidator(BaseManifestValidator):
     IGNORE_LIST = {
         'databricks',  # Logs are provided by Spark
         'docker_daemon',
-        'ecs_fargate',  # Logs are provided by FireLens or awslogs
+        'ecs_fargate',  # Logs are provided by FireLens or awslogs 
         'cassandra_nodetool',  # Logs are provided by cassandra
         'jmeter',
         'kafka_consumer',  # Logs are provided by kafka
