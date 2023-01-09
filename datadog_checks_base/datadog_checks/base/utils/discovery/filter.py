@@ -11,7 +11,7 @@ class Filter:
         self._exclude = re.compile('|'.join(exclude)) if exclude else None
         self._key = key
 
-    def get_items(self, items) -> list:
+    def get_items(self, items: list) -> list:
         if self._include is None:
             return
         key = self._key or (lambda item: item)
