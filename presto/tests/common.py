@@ -40,13 +40,12 @@ METRICS = [
     "presto.execution.cpu_input_byte_rate.one_minute.total",
     "presto.execution.execution_time.all_time.count",
     "presto.execution.executor.blocked_splits",
-    "presto.execution.executor.completed_task_count",
-    "presto.execution.executor.core_pool_size",
-    "presto.execution.executor.pool_size",
+
+
     "presto.execution.executor.processor_executor.queued_task_count",
-    "presto.execution.executor.queued_task_count",
+
     "presto.execution.executor.running_splits",
-    "presto.execution.executor.task_count",
+
     "presto.execution.executor.total_splits",
     "presto.execution.executor.waiting_splits",
     "presto.execution.external_failures.one_minute.count",
@@ -67,9 +66,9 @@ METRICS = [
     "presto.execution.internal_failures.one_minute.count",
     "presto.execution.internal_failures.one_minute.rate",
     "presto.execution.internal_failures.total_count",
-    "presto.execution.management_executor.active_count",
-    "presto.execution.management_executor.completed_task_count",
-    "presto.execution.management_executor.queued_task_count",
+
+
+
     "presto.execution.output_data_size.one_minute.count",
     "presto.execution.output_data_size.one_minute.rate",
     "presto.execution.output_data_size.total_count",
@@ -103,7 +102,18 @@ METRICS = [
     "presto.memory.reserved_revocable_bytes",
     "presto.memory.reserved_revocable_distributed_bytes",
     "presto.memory.total_distributed_bytes",
-    "presto.failure_detector.active_count",
+
 ]
 
-OPTIONAL_METRICS = ("presto.execution.executor.active_count",)
+OPTIONAL_METRICS = (
+    "presto.execution.executor.active_count",
+    "presto.execution.executor.completed_task_count",
+    "presto.execution.executor.core_pool_size",
+    "presto.execution.executor.pool_size",
+    "presto.execution.executor.queued_task_count",
+    "presto.execution.executor.task_count",
+    "presto.execution.management_executor.active_count",
+    "presto.execution.management_executor.completed_task_count",
+    "presto.execution.management_executor.queued_task_count",
+    "presto.failure_detector.active_count",
+)
