@@ -191,8 +191,11 @@ class PostgresMetricsCache:
             if version < V9:
                 excluded_aggregations.append('application_name')
 
-            default_aggregations = ['datname', 'application_name']
+            default_descriptors = [('application_name', 'app'), ('datname', 'db'), ('usename', 'user')]
+            default_aggregations = [d[0] for d in default_descriptors]
+
             aggregation_columns = [a for a in default_aggregations if a not in excluded_aggregations]
+            descriptors = [d for d in default_descriptors if d[0] not in excluded_aggregations]
 
             if version < V10:
                 query = ACTIVITY_QUERY_LT_10
@@ -215,8 +218,6 @@ class PostgresMetricsCache:
             else:
                 metrics_query = ACTIVITY_METRICS_LT_8_3
 
-            default_descriptors = [('datname', 'db'), ('application_name', 'app')]
-            descriptors = [d for d in default_descriptors if d[0] not in excluded_aggregations]
             for i, q in enumerate(metrics_query):
                 if '{dd__user}' in q:
                     metrics_query[i] = q.format(dd__user=self.config.user)

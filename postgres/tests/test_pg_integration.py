@@ -149,7 +149,12 @@ def test_activity_metrics(aggregator, integration_check, pg_instance):
     check = integration_check(pg_instance)
     check.check(pg_instance)
 
-    expected_tags = pg_instance['tags'] + ['port:{}'.format(PORT), 'db:datadog_test', 'app:datadog-agent']
+    expected_tags = pg_instance['tags'] + [
+        'port:{}'.format(PORT),
+        'db:datadog_test',
+        'app:datadog-agent',
+        'user:datadog',
+    ]
     check_activity_metrics(aggregator, expected_tags)
 
 
@@ -159,13 +164,13 @@ def test_activity_metrics_no_application_aggregation(aggregator, integration_che
     check = integration_check(pg_instance)
     check.check(pg_instance)
 
-    expected_tags = pg_instance['tags'] + ['port:{}'.format(PORT), 'db:datadog_test']
+    expected_tags = pg_instance['tags'] + ['port:{}'.format(PORT), 'db:datadog_test', 'user:datadog']
     check_activity_metrics(aggregator, expected_tags)
 
 
 def test_activity_metrics_no_aggregations(aggregator, integration_check, pg_instance):
     pg_instance['collect_activity_metrics'] = True
-    pg_instance['activity_metrics_excluded_aggregations'] = ['datname', 'application_name']
+    pg_instance['activity_metrics_excluded_aggregations'] = ['datname', 'application_name', 'usename']
     check = integration_check(pg_instance)
     check.check(pg_instance)
 
@@ -188,8 +193,13 @@ def test_backend_transaction_age(aggregator, integration_check, pg_instance):
 
     check.check(pg_instance)
 
-    dd_agent_tags = pg_instance['tags'] + ['port:{}'.format(PORT), 'db:datadog_test', 'app:datadog-agent']
-    test_tags = pg_instance['tags'] + ['port:{}'.format(PORT), 'db:datadog_test', 'app:test']
+    dd_agent_tags = pg_instance['tags'] + [
+        'port:{}'.format(PORT),
+        'db:datadog_test',
+        'app:datadog-agent',
+        'user:datadog',
+    ]
+    test_tags = pg_instance['tags'] + ['port:{}'.format(PORT), 'db:datadog_test', 'app:test', 'user:datadog']
     # No transaction in progress, we have 0
     if float(POSTGRES_VERSION) >= 9.6:
         aggregator.assert_metric('postgresql.activity.backend_xmin_age', value=0, count=1, tags=dd_agent_tags)
@@ -246,9 +256,7 @@ def test_backend_transaction_age(aggregator, integration_check, pg_instance):
 
     # Check that xact_start_age has a value greater than the trasaction_age lower bound
     aggregator.assert_metric('postgresql.activity.xact_start_age', count=1, tags=test_tags)
-    assert_metric_at_least(
-        aggregator, 'postgresql.activity.xact_start_age', 'app:test', 1, transaction_age_lower_bound
-    )
+    assert_metric_at_least(aggregator, 'postgresql.activity.xact_start_age', 'app:test', 1, transaction_age_lower_bound)
 
 
 @requires_over_10
@@ -350,13 +358,13 @@ def test_correct_hostname(dbm_enabled, reported_hostname, expected_hostname, agg
 
     expected_tags_no_db = pg_instance['tags'] + ['server:{}'.format(HOST), 'port:{}'.format(PORT)]
     expected_tags_with_db = expected_tags_no_db + ['db:datadog_test']
-    expected_tags_with_db_and_app = expected_tags_with_db + ['app:datadog-agent']
+    expected_activity_tags = expected_tags_with_db + ['app:datadog-agent', 'user:datadog']
     c_metrics = COMMON_METRICS
     if not dbm_enabled:
         c_metrics = c_metrics + DBM_MIGRATED_METRICS
     for name in c_metrics:
         aggregator.assert_metric(name, count=1, tags=expected_tags_with_db, hostname=expected_hostname)
-    check_activity_metrics(aggregator, tags=expected_tags_with_db_and_app, hostname=expected_hostname)
+    check_activity_metrics(aggregator, tags=expected_activity_tags, hostname=expected_hostname)
 
     for name in CONNECTION_METRICS:
         aggregator.assert_metric(name, count=1, tags=expected_tags_no_db, hostname=expected_hostname)
