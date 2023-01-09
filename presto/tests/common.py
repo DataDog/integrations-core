@@ -39,7 +39,6 @@ METRICS = [
     "presto.execution.cpu_input_byte_rate.one_minute.p95",
     "presto.execution.cpu_input_byte_rate.one_minute.total",
     "presto.execution.execution_time.all_time.count",
-    "presto.execution.executor.active_count",
     "presto.execution.executor.blocked_splits",
     "presto.execution.executor.completed_task_count",
     "presto.execution.executor.core_pool_size",
@@ -106,3 +105,7 @@ METRICS = [
     "presto.memory.total_distributed_bytes",
     "presto.failure_detector.active_count",
 ]
+
+OPTIONAL_METRICS = (
+    "presto.execution.executor.active_count",
+)
