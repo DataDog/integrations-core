@@ -37,7 +37,7 @@ def mock_local_http_dns():
         yield
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope='function')
 def http_check():
     # Patch the function to return the certs located in the `tests/` folder
     with patch('datadog_checks.http_check.http_check.get_ca_certs_path', new=mock_get_ca_certs_path):
