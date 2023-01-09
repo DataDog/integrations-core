@@ -3,7 +3,7 @@ trigger: none
 pr:
   branches:
     include:
-    - master
+    - '*'
   paths:
     exclude:
     - datadog_checks_base/datadog_checks/*
