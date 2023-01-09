@@ -35,7 +35,8 @@ def test_exclude_is_subset_of_include():
     mock_get_items = mock.Mock(return_value=['a', 'b', 'c', 'd', 'e', 'f', 'g'])
     d = Discovery(mock_get_items, include={'.*': None}, exclude=['b.*'])
     assert list(d.get_items()) == [('.*', 'a', 'a', None), ('.*', 'c', 'c', None),
-                                   ('.*', 'd', 'd', None), ('.*', 'e', 'e', None), ('.*', 'f', 'f', None), ('.*', 'g', 'g', None)]
+                                   ('.*', 'd', 'd', None), ('.*', 'e', 'e', None),
+                                   ('.*', 'f', 'f', None), ('.*', 'g', 'g', None)]
     assert mock_get_items.call_count == 1
 
 
@@ -57,7 +58,8 @@ def test_limit_none():
     mock_get_items = mock.Mock(return_value=['a', 'b', 'c', 'd', 'e', 'f', 'g'])
     d = Discovery(mock_get_items, limit=None, include={'.*': None})
     assert list(d.get_items()) == [('.*', 'a', 'a', None), ('.*', 'b', 'b', None), ('.*', 'c', 'c', None),
-                                   ('.*', 'd', 'd', None), ('.*', 'e', 'e', None), ('.*', 'f', 'f', None), ('.*', 'g', 'g', None)]
+                                   ('.*', 'd', 'd', None), ('.*', 'e', 'e', None), ('.*', 'f', 'f', None),
+                                   ('.*', 'g', 'g', None)]
     assert mock_get_items.call_count == 1
 
 
@@ -65,7 +67,8 @@ def test_limit_greater_than_zero():
     mock_get_items = mock.Mock(return_value=['a', 'b', 'c', 'd', 'e', 'f', 'g'])
     d = Discovery(mock_get_items, limit=5, include={'.*': {'value': 5}})
     assert list(d.get_items()) == [('.*', 'a', 'a', {'value': 5}), ('.*', 'b', 'b', {'value': 5}),
-                                   ('.*', 'c', 'c', {'value': 5}), ('.*', 'd', 'd', {'value': 5}), ('.*', 'e', 'e', {'value': 5})]
+                                   ('.*', 'c', 'c', {'value': 5}), ('.*', 'd', 'd', {'value': 5}),
+                                   ('.*', 'e', 'e', {'value': 5})]
     assert mock_get_items.call_count == 1
 
 
@@ -73,7 +76,8 @@ def test_limit_greater_than_items_len():
     mock_get_items = mock.Mock(return_value=['a', 'b', 'c', 'd', 'e', 'f', 'g'])
     d = Discovery(mock_get_items, limit=10, include={'.*': None})
     assert list(d.get_items()) == [('.*', 'a', 'a', None), ('.*', 'b', 'b', None), ('.*', 'c', 'c', None),
-                                   ('.*', 'd', 'd', None), ('.*', 'e', 'e', None), ('.*', 'f', 'f', None), ('.*', 'g', 'g', None)]
+                                   ('.*', 'd', 'd', None), ('.*', 'e', 'e', None), ('.*', 'f', 'f', None),
+                                   ('.*', 'g', 'g', None)]
     assert mock_get_items.call_count == 1
 
 
