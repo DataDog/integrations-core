@@ -1,0 +1,1367 @@
+{
+    "title": "Cloudera Data Platform - Overview",
+    "description": "This dashboard provides a high-level overview of your Cloudera Data Platform Data Hub clusters. You can use this dashboard to keep track of your Cloudera clusters, hosts, and disks to be ready to deal with any potential issues.\n\nFurther reading on monitoring Cloudera Data Platform:\n\n- [Datadog's Cloudera integration docs](https://docs.datadoghq.com/integrations/cloudera/)\n",
+    "widgets": [
+        {
+            "id": 2546624466281714,
+            "definition": {
+                "title": "",
+                "type": "group",
+                "banner_img": "/static/images/logos/cloudera_large.svg",
+                "show_title": false,
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 5744851153096022,
+                        "definition": {
+                            "type": "note",
+                            "content": "This dashboard provides a high-level overview of your Cloudera Data Platform Data Hub clusters. You can use this dashboard to keep track of your Cloudera clusters, hosts, and disks to be ready to deal with any potential issues.\n\n\nFurther reading on monitoring Cloudera Data Platform:\n- [Datadog's Cloudera integration docs](https://docs.datadoghq.com/integrations/cloudera/)\n",
+                            "background_color": "white",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "vertical_align": "top",
+                            "show_tick": false,
+                            "tick_pos": "50%",
+                            "tick_edge": "left",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 6,
+                            "height": 2
+                        }
+                    }
+                ],
+                "template_variables": []
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 6,
+                "height": 5
+            }
+        },
+        {
+            "id": 6911913340390426,
+            "definition": {
+                "title": "Overview",
+                "type": "group",
+                "background_color": "orange",
+                "show_title": true,
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 8386113730793410,
+                        "definition": {
+                            "title": "Cloudera Manager Connection",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "check_status",
+                            "check": "cloudera.can_connect",
+                            "grouping": "cluster",
+                            "group_by": [],
+                            "tags": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 3106059528243756,
+                        "definition": {
+                            "title": "Cloudera Hosts Health",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "check_status",
+                            "check": "cloudera.host.health",
+                            "grouping": "cluster",
+                            "group_by": [
+                                "cloudera_hostname"
+                            ],
+                            "tags": []
+                        },
+                        "layout": {
+                            "x": 2,
+                            "y": 0,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 3836727373962032,
+                        "definition": {
+                            "title": "Cloudera Clusters Health",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "check_status",
+                            "check": "cloudera.cluster.health",
+                            "grouping": "cluster",
+                            "group_by": [
+                                "cloudera_cluster"
+                            ],
+                            "tags": []
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 0,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 3482880370138196,
+                        "definition": {
+                            "title": "Cloudera Host Number of Physical Cores",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "avg:cloudera.host.num_physical_cores{$cloudera_cluster,$cloudera_hostname}",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "area",
+                                "yaxis": {
+                                    "include_zero": true
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 2,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 2044028203438588,
+                        "definition": {
+                            "title": "Cloudera Host Number of Cores",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "avg:cloudera.host.num_cores{$cloudera_cluster,$cloudera_hostname}",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 2,
+                            "y": 2,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 7508501830293294,
+                        "definition": {
+                            "title": "Host Health Rates",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "vertical",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Bath Health Rate",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Good Health Rate",
+                                            "formula": "query2"
+                                        },
+                                        {
+                                            "alias": "Concerning Health Rate",
+                                            "formula": "query3"
+                                        },
+                                        {
+                                            "alias": "Disabled Heath Rate",
+                                            "formula": "query4"
+                                        },
+                                        {
+                                            "alias": "Unknown Health Rate",
+                                            "formula": "query5"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:cloudera.host.health_bad_rate{$cloudera_cluster,$cloudera_hostname} by {cloudera_cluster,cloudera_hostname}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:cloudera.host.health_good_rate{$cloudera_cluster,$cloudera_hostname} by {cloudera_cluster,cloudera_hostname}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "query": "avg:cloudera.host.health_concerning_rate{$cloudera_cluster,$cloudera_hostname} by {cloudera_cluster,cloudera_hostname}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query4",
+                                            "query": "avg:cloudera.host.health_disabled_rate{$cloudera_cluster,$cloudera_hostname} by {cloudera_cluster,cloudera_hostname}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query5",
+                                            "query": "avg:cloudera.host.health_unknown_rate{$cloudera_cluster,$cloudera_hostname} by {cloudera_cluster,cloudera_hostname}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "area"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 2,
+                            "width": 2,
+                            "height": 2
+                        }
+                    }
+                ],
+                "template_variables": []
+            },
+            "layout": {
+                "x": 6,
+                "y": 0,
+                "width": 6,
+                "height": 5
+            }
+        },
+        {
+            "id": 3970053669666454,
+            "definition": {
+                "title": "Cluster",
+                "type": "group",
+                "background_color": "purple",
+                "show_title": true,
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 8089918260533140,
+                        "definition": {
+                            "title": "Cluster CPU",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "vertical",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Host CPU Usage Across Hosts",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "avg:cloudera.cluster.cpu_percent_across_hosts{$cloudera_cluster} by {cloudera_cluster}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "purple",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 1546862525660902,
+                        "definition": {
+                            "title": "Cluster Disk IO",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "vertical",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Total Disks Bytes Read Across Disks",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Total Disk Bytes Written Across Disks",
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "avg:cloudera.cluster.total_write_bytes_rate_across_disks{$cloudera_cluster} by {cloudera_cluster}"
+                                        },
+                                        {
+                                            "name": "query2",
+                                            "data_source": "metrics",
+                                            "query": "avg:cloudera.cluster.total_read_bytes_rate_across_disks{$cloudera_cluster} by {cloudera_cluster}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "purple",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "area"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 3,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 1220120923277704,
+                        "definition": {
+                            "title": "Cluster Network IO",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "vertical",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Total Bytes Received Across Network Interfaces",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Total Bytes Transmitted Across Network Interfaces",
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "avg:cloudera.host.total_bytes_receive_rate_across_network_interfaces{$cloudera_cluster} by {cloudera_cluster}"
+                                        },
+                                        {
+                                            "name": "query2",
+                                            "data_source": "metrics",
+                                            "query": "avg:cloudera.cluster.total_bytes_transmit_rate_across_network_interfaces{$cloudera_cluster} by {cloudera_cluster}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "purple",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 6,
+                            "width": 6,
+                            "height": 3
+                        }
+                    }
+                ],
+                "template_variables": []
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 6,
+                "height": 10
+            }
+        },
+        {
+            "id": 4209946924530560,
+            "definition": {
+                "type": "note",
+                "content": "**Note:** By default, Cloudera Manager only refreshes metrics from Cloudera Data Platform [every minute](https://docs.cloudera.com/cloudera-manager/7.4.2/metrics/topics/cm-metrics-reference.html), which may result in repeated data. To change the frequency that the Datadog Agent collects from Cloudera, use the `min_collection_interval` instance configuration option.",
+                "background_color": "yellow",
+                "font_size": "16",
+                "text_align": "left",
+                "vertical_align": "center",
+                "show_tick": true,
+                "tick_pos": "50%",
+                "tick_edge": "bottom",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 6,
+                "y": 0,
+                "width": 6,
+                "height": 3
+            }
+        },
+        {
+            "id": 1604841426772752,
+            "definition": {
+                "title": "Disk",
+                "type": "group",
+                "background_color": "vivid_green",
+                "show_title": true,
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 6455707247511826,
+                        "definition": {
+                            "title": "Disk Await Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "vertical",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "avg:cloudera.disk.await_read_time{$cloudera_cluster,$cloudera_hostname,$cloudera_disk} by {cloudera_cluster,cloudera_hostname,cloudera_disk}"
+                                        },
+                                        {
+                                            "name": "query2",
+                                            "data_source": "metrics",
+                                            "query": "avg:cloudera.disk.await_write_time{$cloudera_cluster,$cloudera_hostname,$cloudera_disk} by {cloudera_cluster,cloudera_hostname,cloudera_disk}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "area"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 7044436537681398,
+                        "definition": {
+                            "title": "Disk Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "vertical",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Disk Service Time",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Disk Await Time",
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "avg:cloudera.disk.service_time{$cloudera_cluster,$cloudera_hostname,$cloudera_disk} by {cloudera_cluster,cloudera_hostname,cloudera_disk}"
+                                        },
+                                        {
+                                            "name": "query2",
+                                            "data_source": "metrics",
+                                            "query": "avg:cloudera.disk.await_time{$cloudera_cluster,$cloudera_hostname,$cloudera_disk} by {cloudera_cluster,cloudera_hostname,cloudera_disk}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 3,
+                            "width": 6,
+                            "height": 3
+                        }
+                    }
+                ],
+                "template_variables": []
+            },
+            "layout": {
+                "x": 6,
+                "y": 3,
+                "width": 6,
+                "height": 7
+            }
+        },
+        {
+            "id": 3197365202169052,
+            "definition": {
+                "title": "Hosts",
+                "type": "group",
+                "background_color": "orange",
+                "show_title": true,
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 5644642916351956,
+                        "definition": {
+                            "title": "Host CPU Usage (In Percentage)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "vertical",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "CPU User Rate Percent",
+                                            "formula": "(query2 / query9) * 100"
+                                        },
+                                        {
+                                            "alias": "CPU System Rate Percent",
+                                            "formula": "(query3 / query9) * 100"
+                                        },
+                                        {
+                                            "alias": "CPU Nice Rate Percent",
+                                            "formula": "(query4 / query9) * 100"
+                                        },
+                                        {
+                                            "alias": "CPU IOWait Rate Percent",
+                                            "formula": "(query5 / query9) * 100"
+                                        },
+                                        {
+                                            "alias": "CPU IRQ Rate Percent",
+                                            "formula": "(query6 / query9) * 100"
+                                        },
+                                        {
+                                            "alias": "CPU Soft IRQ Rate Percent",
+                                            "formula": "(query7 / query9) * 100"
+                                        },
+                                        {
+                                            "alias": "CPU Steal Rate Percent",
+                                            "formula": "(query8 / query9) * 100"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query2",
+                                            "data_source": "metrics",
+                                            "query": "avg:cloudera.host.cpu_user_rate{$cloudera_hostname,$cloudera_cluster} by {cloudera_hostname,cloudera_cluster}"
+                                        },
+                                        {
+                                            "name": "query9",
+                                            "data_source": "metrics",
+                                            "query": "avg:cloudera.host.num_cores{$cloudera_hostname,$cloudera_cluster} by {cloudera_hostname,cloudera_cluster}"
+                                        },
+                                        {
+                                            "name": "query3",
+                                            "data_source": "metrics",
+                                            "query": "avg:cloudera.host.cpu_system_rate{$cloudera_hostname,$cloudera_cluster} by {cloudera_hostname,cloudera_cluster}"
+                                        },
+                                        {
+                                            "name": "query4",
+                                            "data_source": "metrics",
+                                            "query": "avg:cloudera.host.cpu_nice_rate{$cloudera_hostname,$cloudera_cluster} by {cloudera_hostname,cloudera_cluster}"
+                                        },
+                                        {
+                                            "name": "query5",
+                                            "data_source": "metrics",
+                                            "query": "avg:cloudera.host.cpu_iowait_rate{$cloudera_hostname,$cloudera_cluster} by {cloudera_hostname,cloudera_cluster}"
+                                        },
+                                        {
+                                            "name": "query6",
+                                            "data_source": "metrics",
+                                            "query": "avg:cloudera.host.cpu_irq_rate{$cloudera_hostname,$cloudera_cluster} by {cloudera_hostname,cloudera_cluster}"
+                                        },
+                                        {
+                                            "name": "query7",
+                                            "data_source": "metrics",
+                                            "query": "avg:cloudera.host.cpu_soft_irq_rate{$cloudera_hostname,$cloudera_cluster} by {cloudera_hostname,cloudera_cluster}"
+                                        },
+                                        {
+                                            "name": "query8",
+                                            "data_source": "metrics",
+                                            "query": "avg:cloudera.host.cpu_steal_rate{$cloudera_hostname,$cloudera_cluster} by {cloudera_hostname,cloudera_cluster}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 7039978264190320,
+                        "definition": {
+                            "title": "Roles CPU Usage (WIP)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "avg:cloudera.role.cpu_user_rate{$cloudera_cluster,$cloudera_role,$cloudera_hostname} by {cloudera_cluster,cloudera_role,cloudera_hostname}"
+                                        },
+                                        {
+                                            "name": "query2",
+                                            "data_source": "metrics",
+                                            "query": "avg:cloudera.role.cpu_system_rate{$cloudera_cluster,$cloudera_role,$cloudera_hostname} by {cloudera_cluster,cloudera_role,cloudera_hostname}"
+                                        },
+                                        {
+                                            "name": "query3",
+                                            "data_source": "metrics",
+                                            "query": "avg:cloudera.host.num_cores{$cloudera_cluster,$cloudera_hostname} by {cloudera_cluster,cloudera_hostname}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 0,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 3106406627453400,
+                        "definition": {
+                            "title": "Host Memory Usage",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "vertical",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Swap Used",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Physical Memory Used",
+                                            "formula": "query2"
+                                        },
+                                        {
+                                            "alias": "Physical Memory Caches",
+                                            "formula": "query3"
+                                        },
+                                        {
+                                            "alias": "Physical Memory Buffers",
+                                            "formula": "query5"
+                                        },
+                                        {
+                                            "alias": "Physical Memory Capacity",
+                                            "formula": "query6"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "avg:cloudera.host.swap_used{$cloudera_cluster,$cloudera_hostname} by {cloudera_cluster,cloudera_hostname}"
+                                        },
+                                        {
+                                            "name": "query2",
+                                            "data_source": "metrics",
+                                            "query": "avg:cloudera.host.physical_memory_used{$cloudera_cluster,$cloudera_hostname} by {cloudera_cluster,cloudera_hostname}"
+                                        },
+                                        {
+                                            "name": "query3",
+                                            "data_source": "metrics",
+                                            "query": "avg:cloudera.host.physical_memory_cached{$cloudera_cluster,$cloudera_hostname} by {cloudera_cluster,cloudera_hostname}"
+                                        },
+                                        {
+                                            "name": "query5",
+                                            "data_source": "metrics",
+                                            "query": "avg:cloudera.host.physical_memory_buffers{$cloudera_cluster,$cloudera_hostname} by {cloudera_cluster,cloudera_hostname}"
+                                        },
+                                        {
+                                            "name": "query6",
+                                            "data_source": "metrics",
+                                            "query": "avg:cloudera.host.physical_memory_total{$cloudera_cluster,$cloudera_hostname} by {cloudera_cluster,cloudera_hostname}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 3,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 2867689295827502,
+                        "definition": {
+                            "title": "Host Swap Rate",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "vertical",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "avg:cloudera.host.swap_out_rate{$cloudera_cluster,$cloudera_hostname} by {cloudera_cluster,cloudera_hostname}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 3,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 3448590146236216,
+                        "definition": {
+                            "title": "Host Network Throughput",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "vertical",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Total Bytes Received Across Network Interfaces",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Total Bytes Transmitted Across Network Interfaces",
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "avg:cloudera.host.total_bytes_receive_rate_across_network_interfaces{$cloudera_cluster,$cloudera_hostname} by {cloudera_cluster,cloudera_hostname}"
+                                        },
+                                        {
+                                            "name": "query2",
+                                            "data_source": "metrics",
+                                            "query": "avg:cloudera.host.total_bytes_transmit_rate_across_network_interfaces{$cloudera_cluster,$cloudera_hostname} by {cloudera_cluster,cloudera_hostname}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 6,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 8174567770076950,
+                        "definition": {
+                            "title": "Aggregate Disk Throughput",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "vertical",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Total Disk Bytes Read Across Disks",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Total Disk Bytes Written Across Disks",
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "avg:cloudera.host.total_read_bytes_rate_across_disks{$cloudera_cluster,$cloudera_hostname} by {cloudera_cluster,cloudera_hostname}"
+                                        },
+                                        {
+                                            "name": "query2",
+                                            "data_source": "metrics",
+                                            "query": "avg:cloudera.host.total_write_bytes_rate_across_disks{$cloudera_cluster,$cloudera_hostname} by {cloudera_cluster,cloudera_hostname}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 6,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 278125503097742,
+                        "definition": {
+                            "title": "Aggregate Disk IOPS",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "vertical",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Total Disk Reads Across Disks",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Total Disk Writes Across Disks",
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "avg:cloudera.host.total_read_ios_rate_across_disks{$cloudera_cluster,$cloudera_hostname} by {cloudera_cluster,cloudera_hostname}"
+                                        },
+                                        {
+                                            "name": "query2",
+                                            "data_source": "metrics",
+                                            "query": "avg:cloudera.host.total_write_ios_rate_across_disks{$cloudera_cluster,$cloudera_hostname} by {cloudera_cluster,cloudera_hostname}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 9,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 7557732216927674,
+                        "definition": {
+                            "title": "Load Average",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "vertical",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Load Average (15m)",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Load Average (1m)",
+                                            "formula": "query2"
+                                        },
+                                        {
+                                            "alias": "Load Average (5m)",
+                                            "formula": "query3"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "avg:cloudera.host.load_15{$cloudera_cluster,$cloudera_hostname} by {cloudera_cluster,cloudera_hostname}"
+                                        },
+                                        {
+                                            "name": "query2",
+                                            "data_source": "metrics",
+                                            "query": "avg:cloudera.host.load_1{$cloudera_cluster,$cloudera_hostname} by {cloudera_cluster,cloudera_hostname}"
+                                        },
+                                        {
+                                            "name": "query3",
+                                            "data_source": "metrics",
+                                            "query": "avg:cloudera.host.load_5{$cloudera_cluster,$cloudera_hostname} by {cloudera_cluster,cloudera_hostname}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 9,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 5350132952185186,
+                        "definition": {
+                            "title": "Disk Latency",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "vertical",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Disk Service Time",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Disk Await Time",
+                                            "formula": "query2"
+                                        },
+                                        {
+                                            "alias": "Disk Await Read Time",
+                                            "formula": "query3"
+                                        },
+                                        {
+                                            "alias": "Disk Await Write Time",
+                                            "formula": "query4"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "avg:cloudera.disk.service_time{$cloudera_cluster,$cloudera_hostname,$cloudera_disk} by {cloudera_cluster,cloudera_hostname,cloudera_disk}"
+                                        },
+                                        {
+                                            "name": "query2",
+                                            "data_source": "metrics",
+                                            "query": "avg:cloudera.disk.await_time{$cloudera_cluster,$cloudera_hostname,$cloudera_disk} by {cloudera_cluster,cloudera_hostname,cloudera_disk}"
+                                        },
+                                        {
+                                            "name": "query3",
+                                            "data_source": "metrics",
+                                            "query": "avg:cloudera.disk.await_read_time{$cloudera_cluster,$cloudera_hostname,$cloudera_disk} by {cloudera_cluster,cloudera_hostname,cloudera_disk}"
+                                        },
+                                        {
+                                            "name": "query4",
+                                            "data_source": "metrics",
+                                            "query": "avg:cloudera.disk.await_write_time{$cloudera_cluster,$cloudera_hostname,$cloudera_disk} by {cloudera_cluster,cloudera_hostname,cloudera_disk}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 12,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 3059757538856880,
+                        "definition": {
+                            "title": "Roles Resident Memory",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "vertical",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Resident Memory",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "avg:cloudera.role.mem_rss{$cloudera_cluster,$cloudera_hostname,$cloudera_role} by {cloudera_cluster,cloudera_hostname,cloudera_role}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "area"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 12,
+                            "width": 6,
+                            "height": 3
+                        }
+                    }
+                ],
+                "template_variables": []
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 12,
+                "height": 16,
+                "is_column_break": true
+            }
+        },
+        {
+            "id": 6314679250853594,
+            "definition": {
+                "title": "Cloudera Events",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "query": {
+                            "data_source": "event_stream",
+                            "query_string": "source:cloudera",
+                            "event_size": "s"
+                        },
+                        "response_format": "event_list",
+                        "columns": []
+                    }
+                ],
+                "type": "list_stream"
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 12,
+                "height": 5
+            }
+        }
+    ],
+    "template_variables": [
+        {
+            "name": "cloudera_cluster",
+            "prefix": "cloudera_cluster",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "cloudera_hostname",
+            "prefix": "cloudera_hostname",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "cloudera_disk",
+            "prefix": "cloudera_disk",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "cloudera_rack_id",
+            "prefix": "cloudera_rack_id",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "cloudera_role",
+            "prefix": "cloudera_role",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "api_url",
+            "prefix": "api_url",
+            "available_values": [],
+            "default": "*"
+        }
+    ],
+    "layout_type": "ordered",
+    "notify_list": [],
+    "reflow_type": "fixed"
+}
