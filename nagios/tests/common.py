@@ -22,6 +22,8 @@ INSTANCE_INTEGRATION = {
 CHECK_NAME = 'nagios'
 CUSTOM_TAGS = ['optional:tag1']
 
+NAGIOS_VERSION = os.environ['NAGIOS_VERSION']
+
 NAGIOS_TEST_LOG = os.path.join(HERE, 'fixtures', 'nagios')
 NAGIOS_TEST_HOST = os.path.join(HERE, 'fixtures', 'host-perfdata')
 NAGIOS_TEST_SVC = os.path.join(HERE, 'fixtures', 'service-perfdata')

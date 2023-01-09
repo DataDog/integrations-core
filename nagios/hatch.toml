@@ -2,3 +2,12 @@
 
 [[envs.default.matrix]]
 python = ["2.7", "3.8"]
+version = ["4.4"]
+
+[envs.default.overrides]
+matrix.version.env-vars = [
+  { key = "NAGIOS_VERSION", value = "4.4.8", if = ["4.4"] },
+]
+
+[envs.latest.env-vars]
+NAGIOS_VERSION = "latest"
