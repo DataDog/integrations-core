@@ -17,7 +17,6 @@ HOST = get_docker_hostname()
 PORT = 8126
 HERE = os.path.dirname(os.path.abspath(__file__))
 URL = "http://{}:{}".format(HOST, PORT)
-STATSD_VERSION = os.environ["STATSD_VERSION"]
 
 METRICS = [
     'statsd.uptime',
