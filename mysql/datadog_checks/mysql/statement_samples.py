@@ -33,17 +33,7 @@ def agent_check_getter(self):
 
 SUPPORTED_EXPLAIN_STATEMENTS = frozenset({'select', 'table', 'delete', 'insert', 'replace', 'update', 'with'})
 
-# unless a specific table is configured, we try all of the events_statements tables in descending order of
-# preference
-EVENTS_STATEMENTS_PREFERRED_TABLES = [
-    'events_statements_history_long',
-    'events_statements_current',
-    # events_statements_history is the lowest in preference because it keeps the history only as long as the thread
-    # exists, which means if an application uses only short-lived connections that execute a single query then we
-    # won't be able to catch any samples of it. By querying events_statements_current we at least guarantee we'll
-    # be able to catch queries from short-lived connections.
-    'events_statements_history',
-]
+EVENTS_STATEMENTS_TABLE = 'events_statements_current'
 
 # default sampling settings for events_statements_* tables
 # collection interval is in seconds
@@ -70,83 +60,7 @@ EVENTS_STATEMENTS_SAMPLE_EXCLUDE_KEYS = {
     'processlist_host',
 }
 
-CREATE_TEMP_TABLE = re.sub(
-    r'\s+',
-    ' ',
-    """
-    CREATE TEMPORARY TABLE {temp_table} SELECT
-        current_schema,
-        sql_text,
-        digest,
-        digest_text,
-        timer_start,
-        timer_end,
-        timer_wait,
-        lock_time,
-        rows_affected,
-        rows_sent,
-        rows_examined,
-        select_full_join,
-        select_full_range_join,
-        select_range,
-        select_range_check,
-        select_scan,
-        sort_merge_passes,
-        sort_range,
-        sort_rows,
-        sort_scan,
-        no_index_used,
-        no_good_index_used,
-        event_name,
-        thread_id
-     FROM {statements_table}
-        WHERE sql_text IS NOT NULL
-        AND event_name like 'statement/%%'
-        AND digest_text is NOT NULL
-        AND digest_text NOT LIKE 'EXPLAIN %%'
-        AND timer_start > %s
-    LIMIT %s
-""",
-).strip()
-
-# neither window functions nor this variable-based window function emulation can be used directly on performance_schema
-# tables due to some underlying issue regarding how the performance_schema storage engine works (for some reason
-# many of the rows end up making it past the WHERE clause when they should have been filtered out)
-SUB_SELECT_EVENTS_NUMBERED = re.sub(
-    r'\s+',
-    ' ',
-    """
-    (SELECT
-        *,
-        @row_num := IF(@current_digest = digest, @row_num + 1, 1) AS row_num,
-        @current_digest := digest
-    FROM {statements_table}
-    ORDER BY digest, timer_wait)
-""",
-).strip()
-
-SUB_SELECT_EVENTS_WINDOW = re.sub(
-    r'\s+',
-    ' ',
-    """
-    (SELECT
-        *,
-        row_number() over (partition by digest order by timer_wait desc) as row_num
-    FROM {statements_table})
-""",
-).strip()
-
-STARTUP_TIME_SUBQUERY = re.sub(
-    r'\s+',
-    ' ',
-    """
-    (SELECT UNIX_TIMESTAMP()-VARIABLE_VALUE
-    FROM {global_status_table}
-    WHERE VARIABLE_NAME='UPTIME')
-""",
-).strip()
-
-EVENTS_STATEMENTS_QUERY = re.sub(
+EVENTS_STATEMENTS_CURRENT_QUERY = re.sub(
     r'\s+',
     ' ',
     """
@@ -176,14 +90,24 @@ EVENTS_STATEMENTS_QUERY = re.sub(
         processlist_user,
         processlist_host,
         processlist_db
-    FROM {statements_numbered} as E
+    FROM performance_schema.events_statements_current E
     LEFT JOIN performance_schema.threads as T
         ON E.thread_id = T.thread_id
     WHERE sql_text IS NOT NULL
-        AND timer_start > %s
-        AND row_num = 1
-    ORDER BY timer_wait DESC
-    LIMIT %s
+        AND event_name like 'statement/%%'
+        AND digest_text is NOT NULL
+        AND digest_text NOT LIKE 'EXPLAIN %%'
+        ORDER BY timer_wait DESC
+""",
+).strip()
+
+STARTUP_TIME_SUBQUERY = re.sub(
+    r'\s+',
+    ' ',
+    """
+    (SELECT UNIX_TIMESTAMP()-VARIABLE_VALUE
+    FROM {global_status_table}
+    WHERE VARIABLE_NAME='UPTIME')
 """,
 ).strip()
 
@@ -269,8 +193,6 @@ class MySQLStatementSamples(DBMAsyncJob):
         self._config = config
         self._version_processed = False
         self._connection_args = connection_args
-        # checkpoint at zero so we pull the whole history table on the first run
-        self._checkpoint = 0
         self._last_check_run = 0
         self._db = None
         self._configured_collection_interval = self._config.statement_samples_config.get('collection_interval', -1)
@@ -287,19 +209,6 @@ class MySQLStatementSamples(DBMAsyncJob):
         self._events_statements_enable_procedure = self._config.statement_samples_config.get(
             'events_statements_enable_procedure', 'datadog.enable_events_statements_consumers'
         )
-        self._preferred_events_statements_tables = EVENTS_STATEMENTS_PREFERRED_TABLES
-        self._has_window_functions = False
-        events_statements_table = self._config.statement_samples_config.get('events_statements_table', None)
-        if events_statements_table:
-            if events_statements_table in DEFAULT_EVENTS_STATEMENTS_COLLECTION_INTERVAL:
-                self._log.debug("Configured preferred events_statements_table: %s", events_statements_table)
-                self._preferred_events_statements_tables = [events_statements_table]
-            else:
-                self._log.warning(
-                    "Invalid events_statements_table: %s. Must be one of %s. Falling back to trying all tables.",
-                    events_statements_table,
-                    ', '.join(DEFAULT_EVENTS_STATEMENTS_COLLECTION_INTERVAL.keys()),
-                )
         self._explain_strategies = {
             'PROCEDURE': self._run_explain_procedure,
             'FQ_PROCEDURE': self._run_fully_qualified_explain_procedure,
@@ -318,7 +227,7 @@ class MySQLStatementSamples(DBMAsyncJob):
         # explained_statements_cache: limit how often we try to re-explain the same query
         self._explained_statements_ratelimiter = RateLimitingTTLCache(
             maxsize=self._config.statement_samples_config.get('explained_queries_cache_maxsize', 5000),
-            ttl=60 * 60 / self._config.statement_samples_config.get('explained_queries_per_hour_per_query', 60),
+            ttl=45 * 60 / self._config.statement_samples_config.get('explained_queries_per_hour_per_query', 60),
         )
 
         # explain_error_states_cache. cache {(schema, query_signature) -> [explain_error_state])
@@ -339,7 +248,6 @@ class MySQLStatementSamples(DBMAsyncJob):
 
     def _read_version_info(self):
         if not self._version_processed and self._check.version:
-            self._has_window_functions = self._check.version.version_compatible((8, 0, 0))
             if self._check.version.flavor == "MariaDB" or not self._check.version.version_compatible((5, 7, 0)):
                 self._global_status_table = "information_schema.global_status"
             else:
@@ -409,62 +317,20 @@ class MySQLStatementSamples(DBMAsyncJob):
             raise
 
     @tracked_method(agent_check_getter=agent_check_getter)
-    def _get_new_events_statements(self, events_statements_table, row_limit):
-        # Select the most recent events with a bias towards events which have higher wait times
+    def _get_new_events_statements_current(self):
         start = time.time()
-        drop_temp_table_query = "DROP TEMPORARY TABLE IF EXISTS {}".format(self._events_statements_temp_table)
-        params = (self._checkpoint, row_limit)
         with closing(self._get_db_connection().cursor(pymysql.cursors.DictCursor)) as cursor:
-            # silence expected warnings to avoid spam
-            cursor.execute('SET @@SESSION.sql_notes = 0')
-            try:
-                self._cursor_run(cursor, drop_temp_table_query)
-                self._cursor_run(
-                    cursor,
-                    CREATE_TEMP_TABLE.format(
-                        temp_table=self._events_statements_temp_table,
-                        statements_table="performance_schema." + events_statements_table,
-                    ),
-                    params,
-                )
-            except pymysql.err.DatabaseError as e:
-                self._check.count(
-                    "dd.mysql.query_samples.error",
-                    1,
-                    tags=self._tags + ["error:create-temp-table-{}".format(type(e))] + self._check._get_debug_tags(),
-                    hostname=self._check.resolved_hostname,
-                )
-                raise
-            if self._has_window_functions:
-                sub_select = SUB_SELECT_EVENTS_WINDOW
-            else:
-                self._cursor_run(cursor, "set @row_num = 0")
-                self._cursor_run(cursor, "set @current_digest = ''")
-                sub_select = SUB_SELECT_EVENTS_NUMBERED
             self._cursor_run(
                 cursor,
                 "set @startup_time_s = {}".format(
                     STARTUP_TIME_SUBQUERY.format(global_status_table=self._global_status_table)
                 ),
             )
-            self._cursor_run(
-                cursor,
-                EVENTS_STATEMENTS_QUERY.format(
-                    statements_numbered=sub_select.format(statements_table=self._events_statements_temp_table)
-                ),
-                params,
-            )
-            self._log.debug(
-                "Fetching all rows from events statements query, table %s. Using window function? %s",
-                events_statements_table,
-                self._has_window_functions,
-            )
+            self._cursor_run(cursor, EVENTS_STATEMENTS_CURRENT_QUERY)
             rows = cursor.fetchall()
-
-            self._cursor_run(cursor, drop_temp_table_query)
             tags = (
                 self._tags
-                + ["events_statements_table:{}".format(events_statements_table)]
+                + ["events_statements_table:{}".format(EVENTS_STATEMENTS_TABLE)]
                 + self._check._get_debug_tags()
             )
             self._check.histogram(
@@ -476,14 +342,11 @@ class MySQLStatementSamples(DBMAsyncJob):
             self._check.histogram(
                 "dd.mysql.get_new_events_statements.rows", len(rows), tags=tags, hostname=self._check.resolved_hostname
             )
-            self._log.debug(
-                "Read %s rows from %s after checkpoint %d", len(rows), events_statements_table, self._checkpoint
-            )
+            self._log.debug("Read %s rows from %s", len(rows), EVENTS_STATEMENTS_TABLE)
             return rows
 
     def _filter_valid_statement_rows(self, rows):
         num_sent = 0
-
         for row in rows:
             if not row or not all(row):
                 self._log.debug('Row was unexpectedly truncated or the events_statements table is not enabled')
@@ -492,10 +355,6 @@ class MySQLStatementSamples(DBMAsyncJob):
             if not sql_text:
                 continue
             yield row
-            # only save the checkpoint for rows that we have successfully processed
-            # else rows that we ignore can push the checkpoint forward causing us to miss some on the next run
-            if row['timer_start'] > self._checkpoint:
-                self._checkpoint = row['timer_start']
             num_sent += 1
 
     def _collect_plan_for_statement(self, row):
@@ -672,36 +531,17 @@ class MySQLStatementSamples(DBMAsyncJob):
             return None, None
         self._log.debug("Found enabled performance_schema statements consumers: %s", enabled_consumers)
 
-        events_statements_table = None
-        for table in self._preferred_events_statements_tables:
-            if table not in enabled_consumers:
-                continue
-            rows = self._get_new_events_statements(table, 1)
-            if not rows:
-                self._log.debug(
-                    "No statements found in %s table after checkpoint %d. checking next one.", table, self._checkpoint
-                )
-                continue
-            events_statements_table = table
-            break
-        if not events_statements_table:
-            self._log.warning(
-                "Cannot collect statement samples as all enabled events_statements_consumers %s are empty.",
-                enabled_consumers,
-            )
-            return None, None
-
         collection_interval = self._configured_collection_interval
         if collection_interval < 0:
-            collection_interval = DEFAULT_EVENTS_STATEMENTS_COLLECTION_INTERVAL[events_statements_table]
+            collection_interval = DEFAULT_EVENTS_STATEMENTS_COLLECTION_INTERVAL[EVENTS_STATEMENTS_TABLE]
 
         # cache only successful strategies
         # should be short enough that we'll reflect updates relatively quickly
         # i.e., an aurora replica becomes a master (or vice versa).
-        strategy = (events_statements_table, collection_interval)
+        strategy = (EVENTS_STATEMENTS_TABLE, collection_interval)
         self._log.debug(
             "Chose plan collection strategy: events_statements_table=%s, collection_interval=%s",
-            events_statements_table,
+            EVENTS_STATEMENTS_TABLE,
             collection_interval,
         )
         self._collection_strategy_cache["events_statements_strategy"] = strategy
@@ -720,7 +560,7 @@ class MySQLStatementSamples(DBMAsyncJob):
 
         start_time = time.time()
 
-        rows = self._get_new_events_statements(events_statements_table, self._events_statements_row_limit)
+        rows = self._get_new_events_statements_current()
         rows = self._filter_valid_statement_rows(rows)
         events = self._collect_plans_for_statements(rows)
         submitted_count = 0

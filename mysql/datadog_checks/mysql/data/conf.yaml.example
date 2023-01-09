@@ -374,13 +374,6 @@ instances:
         #
         # events_statements_row_limit: 5000
 
-        ## @param events_statements_table - string - optional
-        ## Forces a specific events statements table. Must be one of events_statements_current,
-        ## events_statements_history, events_statements_history_long. If not set then the agent will choose
-        ## the best available table that is enabled and not empty.
-        #
-        # events_statements_table: events_statements_history_long
-
         ## @param explain_procedure - string - optional - default: explain_statement
         ## Overrides the default procedure used for collecting execution plans. The agent will use this
         ## procedure in each schema where it exists: `{schema}.explain_statement({statement})`.
