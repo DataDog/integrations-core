@@ -333,6 +333,7 @@ class OpenStackControllerCheck(AgentCheck):
             'state': server.get('status'),
             'server_name': server.get('name'),
             'hypervisor_hostname': server.get('OS-EXT-SRV-ATTR:hypervisor_hostname'),
+            'instance_name': server.get('OS-EXT-SRV-ATTR:instance_name'),
             'tenant_id': server.get('tenant_id'),
             'availability_zone': server.get('OS-EXT-AZ:availability_zone'),
             'project_name': tenant_to_name.get(server.get('tenant_id')),
@@ -398,6 +399,7 @@ class OpenStackControllerCheck(AgentCheck):
         tags = copy.deepcopy(tags)
         tags.append("nova_managed_server")
         hypervisor_hostname = server_details.get('hypervisor_hostname')
+        instance_name = server_details.get('instance_name')
         host_tags = self._get_host_aggregate_tag(hypervisor_hostname, use_shortname=use_shortname)
         host_tags.append('availability_zone:{}'.format(server_details.get('availability_zone', 'NA')))
         self.external_host_tags[server_details.get('server_name')] = host_tags
@@ -429,6 +431,8 @@ class OpenStackControllerCheck(AgentCheck):
                 tags.append("project_name:{}".format(project_name))
             if hypervisor_hostname:
                 tags.append("hypervisor:{}".format(hypervisor_hostname))
+            if instance_name:
+                tags.append("instance_name:{}".format(instance_name))
             if server_name:
                 tags.append("server_name:{}".format(server_name))
 
@@ -506,6 +510,7 @@ class OpenStackControllerCheck(AgentCheck):
         tags = copy.deepcopy(tags)
         tags.append("nova_managed_server")
         hypervisor_hostname = server_details.get('hypervisor_hostname')
+        instance_name = server_details.get('instance_name')
         host_tags = self._get_host_aggregate_tag(hypervisor_hostname, use_shortname=use_shortname)
         host_tags.append('availability_zone:{}'.format(server_details.get('availability_zone', 'NA')))
         self.external_host_tags[server_details.get('server_name')] = host_tags
@@ -529,6 +534,8 @@ class OpenStackControllerCheck(AgentCheck):
             tags.append("project_name:{}".format(project_name))
         if hypervisor_hostname:
             tags.append("hypervisor:{}".format(hypervisor_hostname))
+        if instance_name:
+            tags.append("instance_name:{}".format(instance_name))
         if server_name:
             tags.append("server_name:{}".format(server_name))
 
