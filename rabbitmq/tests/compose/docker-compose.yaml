@@ -2,6 +2,9 @@ version: '3'
 services:
 
   rabbitmq:
+    # We always pull an image with the management plugin enabled for testing to keep our setup simple.
+    # We don't need the plugin when testing openmetrics, but the image exposes the openmetrics endpoint
+    # in addition to the management one.
     image: rabbitmq:${RABBITMQ_VERSION}-management
     ports:
       - 5672:5672
