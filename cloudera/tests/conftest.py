@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
 import os
+from copy import deepcopy
 
 import pytest
 from cm_client.models.api_time_series import ApiTimeSeries
@@ -42,22 +43,22 @@ def config():
 
 @pytest.fixture
 def instance():
-    return common.INSTANCE
+    return deepcopy(common.INSTANCE)
 
 
 @pytest.fixture
 def instance_autodiscover_include():
-    return common.INSTANCE_AUTODISCOVER_INCLUDE
+    return deepcopy(common.INSTANCE_AUTODISCOVER_INCLUDE)
 
 
 @pytest.fixture
 def instance_autodiscover_exclude():
-    return common.INSTANCE_AUTODISCOVER_EXCLUDE
+    return deepcopy(common.INSTANCE_AUTODISCOVER_EXCLUDE)
 
 
 @pytest.fixture
 def init_config():
-    return common.INIT_CONFIG
+    return deepcopy(common.INIT_CONFIG)
 
 
 @pytest.fixture(scope='session')
