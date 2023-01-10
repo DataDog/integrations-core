@@ -94,7 +94,7 @@ def test_connection_uses_tls():
 
     with mock.patch('aerospike.client') as client:
         check.get_client()
-        assert client.assert_called_with({'host': [check._host], 'tls': tls_config})
+        client.assert_called_with({'hosts': [check._host], 'tls': tls_config})
 
 
 @pytest.mark.parametrize(
