@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import asyncio
+import difflib
 import os
 import re
 from collections import defaultdict
@@ -18,7 +19,7 @@ from ....fs import file_exists, read_file_lines, write_file_lines
 from ...constants import get_agent_requirements, get_license_attribution_file
 from ...github import get_auth_info
 from ...utils import get_extra_license_files, read_license_file_rows
-from ..console import CONTEXT_SETTINGS, abort, annotate_error, echo_failure, echo_info, echo_success
+from ..console import CONTEXT_SETTINGS, abort, annotate_error, echo_failure, echo_info, echo_success, echo_warning
 
 # Files searched for COPYRIGHT_RE
 COPYRIGHT_LOCATIONS = [
@@ -503,6 +504,10 @@ def licenses(ctx, sync):
         else:
             echo_success('Success!')
     elif read_file_lines(license_attribution_file) != lines:
+        echo_warning('Found diff between current file vs expected file:')
+        difference = difflib.unified_diff(read_file_lines(license_attribution_file), lines)
+        for item in difference:
+            echo_warning(item)
         abort('Out of sync, run again with the --sync flag')
     elif any_errors:
         abort()
