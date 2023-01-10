@@ -285,6 +285,8 @@ def test_given_cloudera_check_when_no_events_response_then_no_event_collection(
             'Interceptor for {http://yarn.extractor.cdx.cloudera.com/}YarnHistoryClient '
             'has thrown exception, unwinding now'
         )
+        # verify that event is not collected, but check still works normally
+        aggregator.assert_event(msg_text=expected_content, count=0)
 
 
 def test_given_cloudera_check_when_autodiscover_configured_then_emits_configured_cluster_metrics(
@@ -293,6 +295,7 @@ def test_given_cloudera_check_when_autodiscover_configured_then_emits_configured
     cloudera_check,
     api_response,
     instance_autodiscover_include,
+    list_hosts_resource,
 ):
     with mock.patch(
         'cm_client.ClouderaManagerResourceApi.get_version',
@@ -326,20 +329,7 @@ def test_given_cloudera_check_when_autodiscover_configured_then_emits_configured
         side_effect=get_timeseries_resource(),
     ), mock.patch(
         'cm_client.ClustersResourceApi.list_hosts',
-        return_value=ApiHostList(
-            items=[
-                ApiHost(
-                    host_id='host_1',
-                    cluster_ref=ApiClusterRef(
-                        cluster_name="cod--qfdcinkqrzw",
-                        display_name="cod--qfdcinkqrzw",
-                    ),
-                    num_cores=8,
-                    num_physical_cores=4,
-                    total_phys_mem_bytes=33079799808,
-                )
-            ],
-        ),
+        return_value=list_hosts_resource,
     ):
         # Given
         check = cloudera_check(instance_autodiscover_include)
@@ -360,6 +350,7 @@ def test_given_cloudera_check_when_autodiscover_exclude_configured_then_emits_co
     cloudera_check,
     api_response,
     instance_autodiscover_exclude,
+    list_hosts_resource,
 ):
     with mock.patch(
         'cm_client.ClouderaManagerResourceApi.get_version',
@@ -393,20 +384,7 @@ def test_given_cloudera_check_when_autodiscover_exclude_configured_then_emits_co
         side_effect=get_timeseries_resource(),
     ), mock.patch(
         'cm_client.ClustersResourceApi.list_hosts',
-        return_value=ApiHostList(
-            items=[
-                ApiHost(
-                    host_id='host_1',
-                    cluster_ref=ApiClusterRef(
-                        cluster_name="cod--qfdcinkqrzw",
-                        display_name="cod--qfdcinkqrzw",
-                    ),
-                    num_cores=8,
-                    num_physical_cores=4,
-                    total_phys_mem_bytes=33079799808,
-                )
-            ],
-        ),
+        return_value=list_hosts_resource,
     ):
         # Given
         check = cloudera_check(instance_autodiscover_exclude)
@@ -427,6 +405,7 @@ def test_given_cloudera_check_when_autodiscover_empty_clusters_then_emits_none_c
     cloudera_check,
     api_response,
     instance_autodiscover_include,
+    list_hosts_resource,
 ):
     with mock.patch(
         'cm_client.ClouderaManagerResourceApi.get_version',
@@ -451,20 +430,7 @@ def test_given_cloudera_check_when_autodiscover_empty_clusters_then_emits_none_c
         side_effect=get_timeseries_resource(),
     ), mock.patch(
         'cm_client.ClustersResourceApi.list_hosts',
-        return_value=ApiHostList(
-            items=[
-                ApiHost(
-                    host_id='host_1',
-                    cluster_ref=ApiClusterRef(
-                        cluster_name="cod--qfdcinkqrzw",
-                        display_name="cod--qfdcinkqrzw",
-                    ),
-                    num_cores=8,
-                    num_physical_cores=4,
-                    total_phys_mem_bytes=33079799808,
-                )
-            ],
-        ),
+        return_value=list_hosts_resource,
     ):
         # Given
         check = cloudera_check(instance_autodiscover_include)
