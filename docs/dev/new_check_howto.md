@@ -530,7 +530,7 @@ After you've created your Agent-based integration, refer to this list to make su
 
 Before you open a pull request, run the following command to catch any problems with your integration:
 ```
-ddev validate all changes
+ddev validate all <INTEGRATION_NAME>
 ```
 
 After you've created your pull request, automatic checks run to verify that your pull request is in good shape and contains all the required content to be updated.
