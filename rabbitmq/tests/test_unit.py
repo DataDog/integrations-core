@@ -103,7 +103,7 @@ def test__get_metrics_3_1(check, aggregator):
 
 
 @pytest.mark.unit
-@mock.patch.object(datadog_checks.rabbitmq.RabbitMQ, '_get_object_data')
+@mock.patch.object(datadog_checks.rabbitmq.rabbitmq.RabbitMQManagement, '_get_object_data')
 def test_get_stats_empty_exchanges(mock__get_object_data, instance, check, aggregator):
     data = [
         {'name': 'ex1', 'message_stats': EXCHANGE_MESSAGE_STATS},
