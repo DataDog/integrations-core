@@ -441,7 +441,7 @@ def licenses(ctx, sync):
             for license_id in sorted(EXPLICIT_LICENSES[package_name]):
                 data['licenses'].add(license_id)
                 update_copyrights(package_name, license_id, data, ctx)
-                lines.append(format_attribution_line(package_name, license_id, data['copyright'].get(license_id)))
+                lines.append(format_attribution_line(package_name, license_id, data['copyright'].get(license_id, '')))
             continue
 
         license_ids = set()
@@ -479,7 +479,7 @@ def licenses(ctx, sync):
         if license_ids:
             for license_id in sorted(license_ids):
                 update_copyrights(package_name, license_id, data, ctx)
-                lines.append(format_attribution_line(package_name, license_id, data['copyright'][license_id]))
+                lines.append(format_attribution_line(package_name, license_id, data['copyright'].get(license_id, '')))
         else:
             package_license_errors[package_name].append('no license information')
 
