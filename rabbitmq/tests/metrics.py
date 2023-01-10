@@ -55,6 +55,9 @@ Q_METRICS = [
 # Present from 3.6
 if RABBITMQ_VERSION >= version.parse('3.6'):
     Q_METRICS.extend(['rabbitmq.queue.head_message_timestamp'])
+# Present from 3.8
+if RABBITMQ_VERSION >= version.parse('3.8'):
+    Q_METRICS.append('rabbitmq.queue.consumer_utilisation')
 
 # Present from 3.8
 if RABBITMQ_VERSION >= version.parse('3.8'):

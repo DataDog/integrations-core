@@ -154,6 +154,10 @@ def instance_queues_regexes(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_rabbitmq_api_url(field, value):
+    return 'http://localhost:15672/api/'
+
+
 def instance_read_timeout(field, value):
     return get_default_field_value(field, value)
 

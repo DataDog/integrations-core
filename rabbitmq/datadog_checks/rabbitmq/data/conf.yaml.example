@@ -45,11 +45,12 @@ init_config:
 #
 instances:
 
-    ## @param rabbitmq_api_url - string - required
+  -
+    ## @param rabbitmq_api_url - string - optional - default: http://localhost:15672/api/
     ## For every instance a 'rabbitmq_api_url' must be provided, pointing to the api
     ## url of the RabbitMQ Management Plugin (http://www.rabbitmq.com/management.html).
     #
-  - rabbitmq_api_url: http://localhost:15672/api/
+    # rabbitmq_api_url: http://localhost:15672/api/
 
     ## @param tag_families - boolean - optional - default: false
     ## To tag queue "families" based off of regex matching.
