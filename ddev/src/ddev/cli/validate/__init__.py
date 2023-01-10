@@ -17,7 +17,6 @@ from datadog_checks.dev.tooling.commands.validate.integration_style import integ
 from datadog_checks.dev.tooling.commands.validate.jmx_metrics import jmx_metrics
 from datadog_checks.dev.tooling.commands.validate.license_headers import license_headers
 from datadog_checks.dev.tooling.commands.validate.licenses import licenses
-from datadog_checks.dev.tooling.commands.validate.manifest import manifest
 from datadog_checks.dev.tooling.commands.validate.metadata import metadata
 from datadog_checks.dev.tooling.commands.validate.models import models
 from datadog_checks.dev.tooling.commands.validate.package import package
@@ -26,6 +25,8 @@ from datadog_checks.dev.tooling.commands.validate.recommended_monitors import re
 from datadog_checks.dev.tooling.commands.validate.saved_views import saved_views
 from datadog_checks.dev.tooling.commands.validate.service_checks import service_checks
 from datadog_checks.dev.tooling.commands.validate.typos import typos
+
+from ddev.cli.validate.manifest import manifest
 
 
 @click.group(short_help='Verify certain aspects of the repo')
