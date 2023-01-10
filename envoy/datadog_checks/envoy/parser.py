@@ -1,3 +1,7 @@
+# (C) Datadog, Inc. 2018-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
 import re
 from math import isnan
 from typing import Any, Dict, List, Tuple

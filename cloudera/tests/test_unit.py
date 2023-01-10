@@ -6,10 +6,7 @@ import mock
 import pytest
 from cm_client.models.api_cluster import ApiCluster
 from cm_client.models.api_cluster_list import ApiClusterList
-from cm_client.models.api_cluster_ref import ApiClusterRef
 from cm_client.models.api_entity_tag import ApiEntityTag
-from cm_client.models.api_host import ApiHost
-from cm_client.models.api_host_list import ApiHostList
 from cm_client.models.api_version_info import ApiVersionInfo
 from cm_client.rest import ApiException
 
@@ -96,61 +93,6 @@ def test_given_cloudera_check_when_not_supported_version_then_emits_critical_ser
     )
 
 
-def test_given_cloudera_check_when_supported_version_then_emits_ok_service(
-    aggregator,
-    dd_run_check,
-    cloudera_check,
-    api_response,
-    instance,
-):
-    with mock.patch(
-        'cm_client.ClouderaManagerResourceApi.get_version',
-        return_value=ApiVersionInfo(version="7.0.0"),
-    ), mock.patch(
-        'cm_client.ClustersResourceApi.read_clusters',
-        return_value=ApiClusterList(
-            items=[
-                ApiCluster(
-                    name="cod--qfdcinkqrzw",
-                    entity_status="GOOD_HEALTH",
-                    tags=[
-                        ApiEntityTag(name="_cldr_cb_clustertype", value="Data Hub"),
-                        ApiEntityTag(name="_cldr_cb_origin", value="cloudbreak"),
-                    ],
-                    **api_response('cluster_good_health'),
-                ),
-            ],
-        ),
-    ), mock.patch(
-        'cm_client.TimeSeriesResourceApi.query_time_series',
-        side_effect=get_timeseries_resource(),
-    ), mock.patch(
-        'cm_client.ClustersResourceApi.list_hosts',
-        return_value=ApiHostList(
-            items=[
-                ApiHost(
-                    host_id='host_1',
-                    cluster_ref=ApiClusterRef(
-                        cluster_name="cod--qfdcinkqrzw",
-                        display_name="cod--qfdcinkqrzw",
-                    ),
-                )
-            ],
-        ),
-    ):
-        # Given
-        check = cloudera_check(instance)
-        # When
-        dd_run_check(check)
-        # Then
-        aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
-        aggregator.assert_service_check(
-            'cloudera.can_connect',
-            AgentCheck.OK,
-            tags=CAN_CONNECT_TAGS,
-        )
-
-
 def test_given_cloudera_check_when_v7_read_clusters_exception_from_cloudera_client_then_emits_critical_service(
     aggregator,
     dd_run_check,
@@ -183,6 +125,7 @@ def test_given_cloudera_check_when_bad_health_cluster_then_emits_cluster_health_
     cloudera_check,
     api_response,
     instance,
+    list_hosts_resource,
 ):
     with mock.patch(
         'cm_client.ClouderaManagerResourceApi.get_version',
@@ -207,17 +150,7 @@ def test_given_cloudera_check_when_bad_health_cluster_then_emits_cluster_health_
         side_effect=get_timeseries_resource(),
     ), mock.patch(
         'cm_client.ClustersResourceApi.list_hosts',
-        return_value=ApiHostList(
-            items=[
-                ApiHost(
-                    host_id='host_1',
-                    cluster_ref=ApiClusterRef(
-                        cluster_name="cod--qfdcinkqrzw",
-                        display_name="cod--qfdcinkqrzw",
-                    ),
-                )
-            ],
-        ),
+        return_value=list_hosts_resource,
     ):
         # Given
         check = cloudera_check(instance)
@@ -236,71 +169,14 @@ def test_given_cloudera_check_when_bad_health_cluster_then_emits_cluster_health_
         )
 
 
-def test_given_cloudera_check_when_good_health_cluster_then_emits_cluster_health_ok(
-    aggregator,
-    dd_run_check,
-    cloudera_check,
-    api_response,
-    instance,
-):
-    with mock.patch(
-        'cm_client.ClouderaManagerResourceApi.get_version',
-        return_value=ApiVersionInfo(version="7.0.0"),
-    ), mock.patch(
-        'cm_client.ClustersResourceApi.read_clusters',
-        return_value=ApiClusterList(
-            items=[
-                ApiCluster(
-                    name="cod--qfdcinkqrzw",
-                    entity_status="GOOD_HEALTH",
-                    tags=[
-                        ApiEntityTag(name="_cldr_cb_clustertype", value="Data Hub"),
-                        ApiEntityTag(name="_cldr_cb_origin", value="cloudbreak"),
-                    ],
-                    **api_response('cluster_good_health'),
-                ),
-            ],
-        ),
-    ), mock.patch(
-        'cm_client.TimeSeriesResourceApi.query_time_series',
-        side_effect=get_timeseries_resource(),
-    ), mock.patch(
-        'cm_client.ClustersResourceApi.list_hosts',
-        return_value=ApiHostList(
-            items=[
-                ApiHost(
-                    host_id='host_1',
-                    cluster_ref=ApiClusterRef(
-                        cluster_name="cod--qfdcinkqrzw",
-                        display_name="cod--qfdcinkqrzw",
-                    ),
-                )
-            ],
-        ),
-    ):
-        # Given
-        check = cloudera_check(instance)
-        # When
-        dd_run_check(check)
-        # Then
-        aggregator.assert_service_check(
-            'cloudera.cluster.health',
-            AgentCheck.OK,
-            tags=CLUSTER_HEALTH_TAGS,
-        )
-        aggregator.assert_service_check(
-            'cloudera.can_connect',
-            AgentCheck.OK,
-            tags=CAN_CONNECT_TAGS,
-        )
-
-
 def test_given_cloudera_check_when_good_health_cluster_then_emits_cluster_metrics(
     aggregator,
     dd_run_check,
     cloudera_check,
     api_response,
+    read_events_resource,
     instance,
+    list_hosts_resource,
 ):
     with mock.patch(
         'cm_client.ClouderaManagerResourceApi.get_version',
@@ -325,20 +201,10 @@ def test_given_cloudera_check_when_good_health_cluster_then_emits_cluster_metric
         side_effect=get_timeseries_resource(),
     ), mock.patch(
         'cm_client.ClustersResourceApi.list_hosts',
-        return_value=ApiHostList(
-            items=[
-                ApiHost(
-                    host_id='host_1',
-                    cluster_ref=ApiClusterRef(
-                        cluster_name="cod--qfdcinkqrzw",
-                        display_name="cod--qfdcinkqrzw",
-                    ),
-                    num_cores=8,
-                    num_physical_cores=4,
-                    total_phys_mem_bytes=33079799808,
-                )
-            ],
-        ),
+        return_value=list_hosts_resource,
+    ), mock.patch(
+        'cm_client.EventsResourceApi.read_events',
+        return_value=read_events_resource,
     ):
         # Given
         check = cloudera_check(instance)
@@ -358,6 +224,66 @@ def test_given_cloudera_check_when_good_health_cluster_then_emits_cluster_metric
             'cloudera.cluster.health',
             AgentCheck.OK,
             tags=CLUSTER_HEALTH_TAGS,
+        )
+        expected_msg_text = (
+            'Interceptor for {http://yarn.extractor.cdx.cloudera.com/}YarnHistoryClient '
+            'has thrown exception, unwinding now'
+        )
+
+        aggregator.assert_event(msg_text=expected_msg_text, count=1)
+        aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+        aggregator.assert_all_metrics_covered()
+
+
+def test_given_cloudera_check_when_no_events_response_then_no_event_collection(
+    aggregator,
+    dd_run_check,
+    cloudera_check,
+    api_response,
+    instance,
+    list_hosts_resource,
+):
+    with mock.patch(
+        'cm_client.ClouderaManagerResourceApi.get_version',
+        return_value=ApiVersionInfo(version="7.0.0"),
+    ), mock.patch(
+        'cm_client.ClustersResourceApi.read_clusters',
+        return_value=ApiClusterList(
+            items=[
+                ApiCluster(
+                    name="cod--qfdcinkqrzw",
+                    entity_status="GOOD_HEALTH",
+                    tags=[
+                        ApiEntityTag(name="_cldr_cb_clustertype", value="Data Hub"),
+                        ApiEntityTag(name="_cldr_cb_origin", value="cloudbreak"),
+                    ],
+                    **api_response('cluster_good_health'),
+                ),
+            ],
+        ),
+    ), mock.patch(
+        'cm_client.TimeSeriesResourceApi.query_time_series',
+        side_effect=get_timeseries_resource(),
+    ), mock.patch(
+        'cm_client.ClustersResourceApi.list_hosts',
+        return_value=list_hosts_resource,
+    ), mock.patch(
+        'cm_client.EventsResourceApi.read_events',
+        side_effect=Exception,
+    ):
+        # Given
+        check = cloudera_check(instance)
+        # When
+        dd_run_check(check)
+        # Then
+        aggregator.assert_service_check(
+            'cloudera.can_connect',
+            AgentCheck.OK,
+            tags=CAN_CONNECT_TAGS,
+        )
+        expected_content = (
+            'Interceptor for {http://yarn.extractor.cdx.cloudera.com/}YarnHistoryClient '
+            'has thrown exception, unwinding now'
         )
 
 
