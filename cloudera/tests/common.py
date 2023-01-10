@@ -12,6 +12,27 @@ INSTANCE = {
     'tags': ['test1'],
 }
 
+INSTANCE_AUTODISCOVER_INCLUDE = {
+    'api_url': 'http://localhost:8080/api/v48/',
+    'tags': ['test1'],
+    'clusters': {
+        'include': {
+            '^cod--.*': {'hosts': {}},
+        },
+    },
+}
+
+INSTANCE_AUTODISCOVER_EXCLUDE = {
+    'api_url': 'http://localhost:8080/api/v48/',
+    'tags': ['test1'],
+    'clusters': {
+        'include': {
+            '.*': {},
+        },
+        'exclude': ['^tmp.*'],
+    },
+}
+
 INIT_CONFIG = {
     'workload_username': '~',
     'workload_password': '~',

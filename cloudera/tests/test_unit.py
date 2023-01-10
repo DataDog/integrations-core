@@ -359,3 +359,195 @@ def test_given_cloudera_check_when_good_health_cluster_then_emits_cluster_metric
             AgentCheck.OK,
             tags=CLUSTER_HEALTH_TAGS,
         )
+
+
+def test_given_cloudera_check_when_autodiscover_configured_then_emits_configured_cluster_metrics(
+    aggregator,
+    dd_run_check,
+    cloudera_check,
+    api_response,
+    instance_autodiscover_include,
+):
+    with mock.patch(
+        'cm_client.ClouderaManagerResourceApi.get_version',
+        return_value=ApiVersionInfo(version="7.0.0"),
+    ), mock.patch(
+        'cm_client.ClustersResourceApi.read_clusters',
+        return_value=ApiClusterList(
+            items=[
+                ApiCluster(
+                    name="cod--qfdcinkqrzw",
+                    entity_status="GOOD_HEALTH",
+                    tags=[
+                        ApiEntityTag(name="_cldr_cb_clustertype", value="Data Hub"),
+                        ApiEntityTag(name="_cldr_cb_origin", value="cloudbreak"),
+                    ],
+                    **api_response('cluster_good_health'),
+                ),
+                ApiCluster(
+                    name="tmp_cluster",
+                    entity_status="GOOD_HEALTH",
+                    tags=[
+                        ApiEntityTag(name="_cldr_cb_clustertype", value="Data Hub"),
+                        ApiEntityTag(name="_cldr_cb_origin", value="cloudbreak"),
+                    ],
+                    **api_response('cluster_good_health'),
+                ),
+            ],
+        ),
+    ), mock.patch(
+        'cm_client.TimeSeriesResourceApi.query_time_series',
+        side_effect=get_timeseries_resource(),
+    ), mock.patch(
+        'cm_client.ClustersResourceApi.list_hosts',
+        return_value=ApiHostList(
+            items=[
+                ApiHost(
+                    host_id='host_1',
+                    cluster_ref=ApiClusterRef(
+                        cluster_name="cod--qfdcinkqrzw",
+                        display_name="cod--qfdcinkqrzw",
+                    ),
+                    num_cores=8,
+                    num_physical_cores=4,
+                    total_phys_mem_bytes=33079799808,
+                )
+            ],
+        ),
+    ):
+        # Given
+        check = cloudera_check(instance_autodiscover_include)
+        # When
+        dd_run_check(check)
+        # Then
+        for category, metrics in METRICS.items():
+            for metric in metrics:
+                aggregator.assert_metric(f'cloudera.{category}.{metric}')
+
+        aggregator.assert_service_check('cloudera.can_connect', AgentCheck.OK, tags=CAN_CONNECT_TAGS)
+        aggregator.assert_service_check('cloudera.cluster.health', AgentCheck.OK, tags=CLUSTER_HEALTH_TAGS, count=1)
+
+
+def test_given_cloudera_check_when_autodiscover_exclude_configured_then_emits_configured_cluster_metrics(
+    aggregator,
+    dd_run_check,
+    cloudera_check,
+    api_response,
+    instance_autodiscover_exclude,
+):
+    with mock.patch(
+        'cm_client.ClouderaManagerResourceApi.get_version',
+        return_value=ApiVersionInfo(version="7.0.0"),
+    ), mock.patch(
+        'cm_client.ClustersResourceApi.read_clusters',
+        return_value=ApiClusterList(
+            items=[
+                ApiCluster(
+                    name="cod--qfdcinkqrzw",
+                    entity_status="GOOD_HEALTH",
+                    tags=[
+                        ApiEntityTag(name="_cldr_cb_clustertype", value="Data Hub"),
+                        ApiEntityTag(name="_cldr_cb_origin", value="cloudbreak"),
+                    ],
+                    **api_response('cluster_good_health'),
+                ),
+                ApiCluster(
+                    name="tmp_cluster",
+                    entity_status="GOOD_HEALTH",
+                    tags=[
+                        ApiEntityTag(name="_cldr_cb_clustertype", value="Data Hub"),
+                        ApiEntityTag(name="_cldr_cb_origin", value="cloudbreak"),
+                    ],
+                    **api_response('cluster_good_health'),
+                ),
+            ],
+        ),
+    ), mock.patch(
+        'cm_client.TimeSeriesResourceApi.query_time_series',
+        side_effect=get_timeseries_resource(),
+    ), mock.patch(
+        'cm_client.ClustersResourceApi.list_hosts',
+        return_value=ApiHostList(
+            items=[
+                ApiHost(
+                    host_id='host_1',
+                    cluster_ref=ApiClusterRef(
+                        cluster_name="cod--qfdcinkqrzw",
+                        display_name="cod--qfdcinkqrzw",
+                    ),
+                    num_cores=8,
+                    num_physical_cores=4,
+                    total_phys_mem_bytes=33079799808,
+                )
+            ],
+        ),
+    ):
+        # Given
+        check = cloudera_check(instance_autodiscover_exclude)
+        # When
+        dd_run_check(check)
+        # Then
+        for category, metrics in METRICS.items():
+            for metric in metrics:
+                aggregator.assert_metric(f'cloudera.{category}.{metric}')
+
+        aggregator.assert_service_check('cloudera.can_connect', AgentCheck.OK, tags=CAN_CONNECT_TAGS)
+        aggregator.assert_service_check('cloudera.cluster.health', AgentCheck.OK, tags=CLUSTER_HEALTH_TAGS, count=1)
+
+
+def test_given_cloudera_check_when_autodiscover_empty_clusters_then_emits_none_cluster_metrics(
+    aggregator,
+    dd_run_check,
+    cloudera_check,
+    api_response,
+    instance_autodiscover_include,
+):
+    with mock.patch(
+        'cm_client.ClouderaManagerResourceApi.get_version',
+        return_value=ApiVersionInfo(version="7.0.0"),
+    ), mock.patch(
+        'cm_client.ClustersResourceApi.read_clusters',
+        return_value=ApiClusterList(
+            items=[
+                ApiCluster(
+                    name="tmp_cluster",
+                    entity_status="GOOD_HEALTH",
+                    tags=[
+                        ApiEntityTag(name="_cldr_cb_clustertype", value="Data Hub"),
+                        ApiEntityTag(name="_cldr_cb_origin", value="cloudbreak"),
+                    ],
+                    **api_response('cluster_good_health'),
+                ),
+            ],
+        ),
+    ), mock.patch(
+        'cm_client.TimeSeriesResourceApi.query_time_series',
+        side_effect=get_timeseries_resource(),
+    ), mock.patch(
+        'cm_client.ClustersResourceApi.list_hosts',
+        return_value=ApiHostList(
+            items=[
+                ApiHost(
+                    host_id='host_1',
+                    cluster_ref=ApiClusterRef(
+                        cluster_name="cod--qfdcinkqrzw",
+                        display_name="cod--qfdcinkqrzw",
+                    ),
+                    num_cores=8,
+                    num_physical_cores=4,
+                    total_phys_mem_bytes=33079799808,
+                )
+            ],
+        ),
+    ):
+        # Given
+        check = cloudera_check(instance_autodiscover_include)
+        # When
+        dd_run_check(check)
+        # Then
+        for category, metrics in METRICS.items():
+            for metric in metrics:
+                aggregator.assert_metric(f'cloudera.{category}.{metric}', count=0)
+
+        aggregator.assert_service_check('cloudera.can_connect', AgentCheck.OK, tags=CAN_CONNECT_TAGS)
+        aggregator.assert_service_check('cloudera.cluster.health', AgentCheck.OK, tags=CLUSTER_HEALTH_TAGS, count=0)

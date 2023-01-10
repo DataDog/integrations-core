@@ -46,6 +46,16 @@ def instance():
 
 
 @pytest.fixture
+def instance_autodiscover_include():
+    return common.INSTANCE_AUTODISCOVER_INCLUDE
+
+
+@pytest.fixture
+def instance_autodiscover_exclude():
+    return common.INSTANCE_AUTODISCOVER_EXCLUDE
+
+
+@pytest.fixture
 def init_config():
     return common.INIT_CONFIG
 

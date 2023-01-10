@@ -41,4 +41,21 @@ files:
       value:
         type: integer
         example: 100
+    - name: clusters
+      description: |
+        Autodiscover clusters config.
+      value:
+        type: object
+        properties:
+          - name: limit
+            type: integer
+          - name: include
+            type: object
+          - name: exclude
+            type: array
+            items:
+              type: string
+          - name: interval
+            type: integer
+        example: {}
     - template: instances/default

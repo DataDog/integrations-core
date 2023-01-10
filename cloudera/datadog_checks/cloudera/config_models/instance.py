@@ -9,7 +9,7 @@
 
 from __future__ import annotations
 
-from typing import Optional, Sequence
+from typing import Any, Mapping, Optional, Sequence
 
 from pydantic import BaseModel, root_validator, validator
 
@@ -17,6 +17,16 @@ from datadog_checks.base.utils.functions import identity
 from datadog_checks.base.utils.models import validation
 
 from . import defaults, validators
+
+
+class Clusters(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    exclude: Optional[Sequence[str]]
+    include: Optional[Mapping[str, Any]]
+    interval: Optional[int]
+    limit: Optional[int]
 
 
 class MetricPatterns(BaseModel):
@@ -32,6 +42,7 @@ class InstanceConfig(BaseModel):
         allow_mutation = False
 
     api_url: str
+    clusters: Optional[Clusters]
     disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
     max_parallel_requests: Optional[int]
