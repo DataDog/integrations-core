@@ -19,6 +19,7 @@ cachetools,PyPI,MIT,Copyright (c) 2014-2022 Thomas Kemmer
 check-postgres,"https://github.com/bucardo/",BSD-2-Clause,Copyright 2007 - 2022 Greg Sabino Mullane
 clickhouse-cityhash,PyPI,MIT,"Copyright (c) 2011, Alexander Marshalov <alone.amper@gmail.com>"
 clickhouse-driver,PyPI,MIT,Copyright (c) 2017 by Konstantin Lebedev.
+cm-client,PyPI,Apache-2.0,
 contextlib2,PyPI,PSF,Copyright (c) 2016 Nick Coghlan
 cryptography,PyPI,Apache-2.0,Copyright (c) Individual contributors.
 cryptography,PyPI,BSD-3-Clause,Copyright (c) Individual contributors.
@@ -49,7 +50,6 @@ oracledb,PyPI,Apache-2.0,"Copyright (c) 2016, 2022 Oracle and/or its affiliates.
 orjson,PyPI,Apache-2.0,Copyright 2018 ijl <ijl@mailbox.org>
 orjson,PyPI,MIT,Copyright (c) 2018 ijl <ijl@mailbox.org>
 packaging,PyPI,Apache-2.0,Copyright (c) Donald Stufft and individual contributors.
-packaging,PyPI,BSD-2-Clause,Copyright (c) Donald Stufft and individual contributors.
 packaging,PyPI,BSD-3-Clause,Copyright (c) Donald Stufft and individual contributors.
 paramiko,PyPI,LGPL-2.1-only,Copyright (C) 2009 Jeff Forcier
 ply,PyPI,BSD-3-Clause,Copyright David Beazley
