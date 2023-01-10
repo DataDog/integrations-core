@@ -9,7 +9,6 @@ files:
   - template: instances
     options:
     - name: rabbitmq_api_url
-      required: true
       description: |
         For every instance a 'rabbitmq_api_url' must be provided, pointing to the api
         url of the RabbitMQ Management Plugin (http://www.rabbitmq.com/management.html).

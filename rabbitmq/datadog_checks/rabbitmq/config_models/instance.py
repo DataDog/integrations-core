@@ -80,7 +80,7 @@ class InstanceConfig(BaseModel):
     proxy: Optional[Proxy]
     queues: Optional[Sequence[str]]
     queues_regexes: Optional[Sequence[str]]
-    rabbitmq_api_url: str
+    rabbitmq_api_url: Optional[str]
     read_timeout: Optional[float]
     request_size: Optional[float]
     service: Optional[str]
