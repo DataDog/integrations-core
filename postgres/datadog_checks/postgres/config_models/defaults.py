@@ -14,6 +14,10 @@ def shared_service(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_activity_metrics_excluded_aggregations(field, value):
+    return []
+
+
 def instance_application_name(field, value):
     return 'datadog-agent'
 
