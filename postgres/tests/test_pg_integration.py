@@ -26,6 +26,7 @@ from .common import (
     check_bgw_metrics,
     check_common_metrics,
     check_connection_metrics,
+    check_conflict_metrics,
     check_db_count,
     check_replication_slots,
     check_slru_metrics,
@@ -48,6 +49,7 @@ def test_common_metrics(aggregator, integration_check, pg_instance):
     check_common_metrics(aggregator, expected_tags=expected_tags)
     check_bgw_metrics(aggregator, expected_tags)
     check_connection_metrics(aggregator, expected_tags=expected_tags)
+    check_conflict_metrics(aggregator, expected_tags=expected_tags)
     check_db_count(aggregator, expected_tags=expected_tags)
     check_slru_metrics(aggregator, expected_tags=expected_tags)
     check_stat_replication(aggregator, expected_tags=expected_tags)
@@ -359,23 +361,6 @@ def test_backend_transaction_age(aggregator, integration_check, pg_instance):
         count=1,
         lower_bound=transaction_age_lower_bound,
     )
-
-
-def test_database_conflicts_metrics(aggregator, integration_check, pg_instance):
-    check = integration_check(pg_instance)
-    check.check(pg_instance)
-
-    conflict_metrics = [
-        'postgresql.conflicts.tablespace',
-        'postgresql.conflicts.lock',
-        'postgresql.conflicts.snapshot',
-        'postgresql.conflicts.bufferpin',
-        'postgresql.conflicts.deadlock',
-    ]
-
-    expected_tags = pg_instance['tags'] + ['port:{}'.format(PORT), 'db:datadog_test']
-    for name in conflict_metrics:
-        aggregator.assert_metric(name, count=1, tags=expected_tags)
 
 
 @requires_over_10
