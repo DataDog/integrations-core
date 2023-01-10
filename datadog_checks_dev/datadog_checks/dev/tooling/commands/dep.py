@@ -37,7 +37,6 @@ IGNORED_DEPS = {
     'cryptography',
     'dnspython',
     'pymysql',  # https://github.com/DataDog/integrations-core/pull/12612
-    'protobuf',  # Breaking datadog_checks_base
     'foundationdb',  # Breaking datadog_checks_base tests
     'openstacksdk',  # Breaking openstack_controller tests
     'pyasn1',  # Breaking snmp tests
