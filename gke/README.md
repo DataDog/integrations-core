@@ -86,7 +86,9 @@ You can deploy the Agent with a [Helm chart][8] or directly with a [DaemonSet][9
 
   See the [Datadog helm-charts repository][10] for a full list of configurable values.
 
-
+ **A note on the Admission Controller**
+ 
+ If you wish to use the [admission controller]([url](https://docs.datadoghq.com/containers/cluster_agent/admission_controller/?tab=operator)) with Autopilot, you must set the `configMode` of the admission controller to either `service` or `hostip` ([setting here]([url](https://github.com/DataDog/helm-charts/blob/main/charts/datadog/values.yaml#L922))). This is because the `socket` mode is not allowed due to autopilot restrictions. Instead, we recommend using `service` (with `hostip` as a fallback), to provide a more robust layer of abstraction for the controller. 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
