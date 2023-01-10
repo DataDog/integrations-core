@@ -211,7 +211,7 @@
                                 {
                                     "formulas": [
                                         {
-                                            "alias": "Bath Health Rate",
+                                            "alias": "Bad Health Rate",
                                             "formula": "query1"
                                         },
                                         {
