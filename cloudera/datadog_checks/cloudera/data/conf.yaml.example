@@ -36,6 +36,11 @@ instances:
     #
   - api_url: <API_URL>
 
+    ## @param clusters - mapping - optional
+    ## Autodiscover clusters config.
+    #
+    # clusters: {}
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
