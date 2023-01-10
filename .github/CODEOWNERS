@@ -107,9 +107,12 @@ assets/               @DataDog/agent-integrations
 # Platform Integrations
 /openstack/                             @DataDog/platform-integrations @DataDog/agent-integrations
 /openstack/*.md                         @DataDog/platform-integrations @DataDog/agent-integrations
+/openstack/manifest.json                @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
 /openstack_controller/                  @DataDog/platform-integrations @DataDog/agent-integrations
+/openstack_controller/manifest.json     @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
 /openstack_controller/*.md              @DataDog/platform-integrations @DataDog/agent-integrations
 /vsphere/                               @DataDog/platform-integrations @DataDog/agent-integrations
+/vsphere/manifest.json                  @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
 /vsphere/*.md                           @DataDog/platform-integrations @DataDog/agent-integrations
 
 # System checks
