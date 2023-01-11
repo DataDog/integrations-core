@@ -737,7 +737,7 @@
                     {
                         "id": 7039978264190320,
                         "definition": {
-                            "title": "Roles CPU Usage (WIP)",
+                            "title": "Roles CPU Usage",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,
