@@ -19,9 +19,9 @@ This guide provides instructions for creating a Datadog Agent integration in the
 
 The required Datadog Agent integration development tools include:
 
-- Python v3.8 and [pipx][2]. For instructions on installing Python and pipx, see [Python for Agent Integration Development][3].
-- [Docker][4] to run the full test suite
-- The git [command-line][5] or [GitHub desktop client][19]
+- Python v3.8, [pipx][2] and the Agent Development Toolkit (`ddev`). For installation instructions, see [Install the Datadog Agent Integration Developer Tool][3].
+- [Docker][4] to run the full test suite.
+- The git [command-line][5] or [GitHub desktop client][19].
 
 ## Set up your integrations-extra repo
 
@@ -48,32 +48,9 @@ Follow these instructions to set up your repo for integration development:
    git switch -c <YOUR INTEGRATION NAME> origin/master
    ```
 
-## Install the Development Toolkit
+## Configure the Development Toolkit
 
-Assuming you've [installed Python and pipx][3], install the Development Toolkit for your operating system:
-
-{{< tabs >}}
-{{% tab "MacOS" %}}
-
-1. Run the following command and remove any executables shown in the output:
-   ```
-   which -a ddev
-   ```
-
-1. Make sure there are no virtual environments running:
-   1. Run the following command:
-      ```
-      echo VIRTUAL_ENV
-      ```
-
-   1. If the command returns output, a virtual environment is running. Run `deactivate` to exit the virtual environment.
-
-1. Install `ddev`:
-   <div class="alert alert-warning">Do not run this command with <code>sudo</code>.</a></div>
-
-   ```
-   pipx install ddev --python /usr/local/opt/python@3.8/bin/python3.8
-   ```
+Assuming you've installed [the Agent Integration Developer Tool][3], configure the Development Toolkit for the `integrations-extras` repo:
 
 1. Optionally, if your `integrations-extras` repo is somewhere other than `$HOME/dd/`, adjust the `ddev` configuration file:
    ```
@@ -84,47 +61,6 @@ Assuming you've [installed Python and pipx][3], install the Development Toolkit 
    ```
    ddev config set repo extras
    ```
-
-{{% /tab %}}
-
-{{% tab "Windows" %}}
-1. To install `ddev`, run:
-   ```
-   pipx install ddev
-   ```
-
-1. Optionally, if your `integrations-extras` repo is somewhere other than `$HOME/dd/`, adjust the `ddev` configuration file:
-   ```
-   ddev config set extras "/path/to/integrations-extras"
-   ```
-
-1. Set `integrations-extras` as the default working repository:
-   ```
-   ddev config set repo extras
-   ```
-
-{{% /tab %}}
-
-{{% tab "Linux" %}}
-1. To install `ddev`, run:
-   <div class="alert alert-warning">Do not run this command with `sudo`.</a></div>
-   
-   ```
-   pipx install ddev
-   ```
-
-1. Optionally, if your `integrations-extras` repo is somewhere other than `$HOME/dd/`, adjust the `ddev` configuration file:
-   ```
-   ddev config set extras "/path/to/integrations-extras"
-   ```
-
-1. Set `integrations-extras` as the default working repository:
-   ```
-   ddev config set repo extras
-   ```
-
-{{% /tab %}}
-{{< /tabs >}}
 
 ## Create your integration
 
