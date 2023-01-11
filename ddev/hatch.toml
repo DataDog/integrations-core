@@ -16,4 +16,5 @@ pre-install-commands = [
 ]
 env-exclude = [
   "DD_GITHUB_USER",  # Used in `ddev config show` tests
+  "DD_SITE",  # Used in `ddev config show` tests
 ]
