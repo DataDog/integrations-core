@@ -13,9 +13,7 @@ aliases:
 
 This guide provides instructions for creating a Datadog Agent integration in the `integrations-extras` repository. For more information about why you would want to create an Agent-based integration, see [Creating your own solution][1].
 
-## Setup
-
-### Prerequisites
+## Prerequisites
 
 The required Datadog Agent integration development tools include:
 
