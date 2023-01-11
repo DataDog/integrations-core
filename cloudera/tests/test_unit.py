@@ -338,7 +338,7 @@ def test_given_cloudera_check_when_autodiscover_configured_then_emits_configured
         # Then
         for category, metrics in METRICS.items():
             for metric in metrics:
-                aggregator.assert_metric(f'cloudera.{category}.{metric}')
+                aggregator.assert_metric(f'cloudera.{category}.{metric}', count=1)
 
         aggregator.assert_service_check('cloudera.can_connect', AgentCheck.OK, tags=CAN_CONNECT_TAGS)
         aggregator.assert_service_check('cloudera.cluster.health', AgentCheck.OK, tags=CLUSTER_HEALTH_TAGS, count=1)
@@ -393,13 +393,13 @@ def test_given_cloudera_check_when_autodiscover_exclude_configured_then_emits_co
         # Then
         for category, metrics in METRICS.items():
             for metric in metrics:
-                aggregator.assert_metric(f'cloudera.{category}.{metric}')
+                aggregator.assert_metric(f'cloudera.{category}.{metric}', count=1)
 
         aggregator.assert_service_check('cloudera.can_connect', AgentCheck.OK, tags=CAN_CONNECT_TAGS)
         aggregator.assert_service_check('cloudera.cluster.health', AgentCheck.OK, tags=CLUSTER_HEALTH_TAGS, count=1)
 
 
-def test_given_cloudera_check_when_autodiscover_empty_clusters_then_emits_none_cluster_metrics(
+def test_given_cloudera_check_when_autodiscover_empty_clusters_then_emits_zero_cluster_metrics(
     aggregator,
     dd_run_check,
     cloudera_check,
@@ -413,17 +413,7 @@ def test_given_cloudera_check_when_autodiscover_empty_clusters_then_emits_none_c
     ), mock.patch(
         'cm_client.ClustersResourceApi.read_clusters',
         return_value=ApiClusterList(
-            items=[
-                ApiCluster(
-                    name="tmp_cluster",
-                    entity_status="GOOD_HEALTH",
-                    tags=[
-                        ApiEntityTag(name="_cldr_cb_clustertype", value="Data Hub"),
-                        ApiEntityTag(name="_cldr_cb_origin", value="cloudbreak"),
-                    ],
-                    **api_response('cluster_good_health'),
-                ),
-            ],
+            items=[],
         ),
     ), mock.patch(
         'cm_client.TimeSeriesResourceApi.query_time_series',
