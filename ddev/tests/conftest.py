@@ -96,7 +96,7 @@ def config_file(tmp_path, monkeypatch) -> ConfigFile:
         monkeypatch.delenv(env_var, raising=False)
 
     path = Path(tmp_path, 'config.toml')
-    os.environ[ConfigEnvVars.CONFIG] = str(path)
+    monkeypatch.setenv(ConfigEnvVars.CONFIG) = str(path)
     config = ConfigFile(path)
     config.restore()
     return config
