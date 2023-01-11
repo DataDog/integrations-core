@@ -19,7 +19,7 @@ This guide provides instructions for creating a Datadog Agent integration in the
 
 The required Datadog Agent integration development tools include:
 
-- Python v3.8, [pipx][2] and the Agent Development Toolkit (`ddev`). For installation instructions, see [Install the Datadog Agent Integration Developer Tool][3].
+- Python v3.8, [pipx][2] and the Agent Integration Developer Tool (`ddev`). For installation instructions, see [Install the Datadog Agent Integration Developer Tool][3].
 - [Docker][4] to run the full test suite.
 - The git [command-line][5] or [GitHub desktop client][19].
 
@@ -48,9 +48,9 @@ Follow these instructions to set up your repo for integration development:
    git switch -c <YOUR INTEGRATION NAME> origin/master
    ```
 
-## Configure the Development Toolkit
+## Configure the developer tool
 
-Assuming you've installed [the Agent Integration Developer Tool][3], configure the Development Toolkit for the `integrations-extras` repo:
+Assuming you've installed [the Agent Integration Developer Tool][3], configure the tool for the `integrations-extras` repo:
 
 1. Optionally, if your `integrations-extras` repo is somewhere other than `$HOME/dd/`, adjust the `ddev` configuration file:
    ```
