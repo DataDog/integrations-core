@@ -11,5 +11,5 @@ platforms = [
 
 [envs.default.overrides]
 matrix.python.scripts = [
-  { key = "test", value = "_dd-test tests/legacy", if = ["2.7"] },
+  { key = "test", value = "pytest -v --benchmark-skip tests/legacy", if = ["2.7"] },
 ]
