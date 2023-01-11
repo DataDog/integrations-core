@@ -1,7 +1,5 @@
 from pathlib import Path
 
-import pytest
-
 from datadog_checks.rabbitmq import RabbitMQ
 
 from .common import HERE
@@ -216,20 +214,14 @@ def test_aggregated_endpoint(aggregator, dd_run_check, mock_http_response):
                 ("other", 16062681),
             ]
         ]
-        # TODO: This doesn't match even though all the fields are the same.
-        # + [
-        #     dict(
-        #         name='rabbitmq.erlang.vm.allocators',
-        #         value=0,
-        #         metric_type=aggregator.GAUGE,
-        #         hostname='',
-        #         flush_first_value=False,
-        #         tags=["alloc:sl_alloc", 'usage:blocks', f"instance_node:{node}", f"kind:{kind}"],
-        #     )
-        #     for node, kind in product([1, 2, 3, 4, 5], ['sbcs', 'mbcs'])
-        # ]
     )
 
     for m in expected_metrics:
         kwargs = {**m, "tags": ["endpoint:localhost:15692/metrics"] + m.get('tags', [])}
         aggregator.assert_metric(**kwargs)
+    aggregator.assert_metric(
+        name='rabbitmq.erlang.vm.allocators',
+        value=0.0,
+        metric_type=aggregator.GAUGE,
+        at_least=392,
+    )
