@@ -88,6 +88,10 @@ jobs:
       run: |
         ddev validate licenses
 
+    - name: Run license header validation
+      run: |
+        ddev validate license-headers $CHANGED
+
     - name: Run metadata validation
       run: |
         ddev validate metadata $CHANGED
