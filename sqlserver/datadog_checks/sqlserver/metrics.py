@@ -90,8 +90,9 @@ class BaseSqlServerMetric(object):
 class SqlSimpleMetric(BaseSqlServerMetric):
     TABLE = 'sys.dm_os_performance_counters'
     DEFAULT_METRIC_TYPE = None  # can be either rate or gauge
-    QUERY_BASE = """select counter_name, instance_name, object_name, cntr_value
-                    from {table} where counter_name in ({{placeholders}})""".format(
+    QUERY_BASE = """select counter_name, COALESCE(dbs.name, t.instance_name) as instance_name, object_name, cntr_value
+                    from {table} t left outer join sys.databases dbs 
+                    on t.instance_name=dbs.physical_database_name where counter_name in ({{placeholders}})""".format(
         table=TABLE
     )
 
