@@ -14,3 +14,6 @@ dependencies = [
 pre-install-commands = [
   "python -m pip install --disable-pip-version-check {verbosity:flag:-1} -e ../datadog_checks_dev[cli]",
 ]
+env-exclude = [
+  "DD_GITHUB_USER",  # Used in `ddev config show` tests
+]
