@@ -12,6 +12,11 @@ INSTANCE = {
     'tags': ['test1'],
 }
 
+INSTANCE_BAD_URL = {
+    'api_url': 'http://bad_host:8080/api/v48/',
+    'tags': ['test1'],
+}
+
 INSTANCE_AUTODISCOVER_INCLUDE = {
     'api_url': 'http://localhost:8080/api/v48/',
     'tags': ['test1'],

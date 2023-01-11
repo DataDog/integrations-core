@@ -12,12 +12,11 @@ def test_given_bad_url_when_check_runs_then_service_check_critical(
     aggregator,
     dd_run_check,
     cloudera_check,
-    instance,
+    instance_bad_url,
 ):
-    instance['api_url'] = 'http://bad_host:8080/api/v48/'
     with pytest.raises(Exception):
         # Given
-        check = cloudera_check(instance)
+        check = cloudera_check(instance_bad_url)
         # When
         dd_run_check(check)
     # Then

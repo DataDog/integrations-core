@@ -53,6 +53,11 @@ def instance():
 
 
 @pytest.fixture
+def instance_bad_url():
+    return deepcopy(common.INSTANCE_BAD_URL)
+
+
+@pytest.fixture
 def instance_autodiscover_include():
     return deepcopy(common.INSTANCE_AUTODISCOVER_INCLUDE)
 
