@@ -106,7 +106,7 @@ assets/               @DataDog/agent-integrations
 
 # Platform Integrations
 /openstack/                             @DataDog/platform-integrations @DataDog/agent-integrations
-/openstack/*.md                         @DataDog/platform-integrations @DataDog/agent-integrations
+/openstack/*.md                         @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
 /openstack/manifest.json                @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
 /openstack_controller/                  @DataDog/platform-integrations @DataDog/agent-integrations
 /openstack_controller/manifest.json     @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
