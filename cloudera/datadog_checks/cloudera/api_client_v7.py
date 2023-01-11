@@ -17,31 +17,35 @@ from .common import CLUSTER_HEALTH, HOST_HEALTH
 class ApiClientV7(ApiClient):
     def __init__(self, check, api_client):
         super(ApiClientV7, self).__init__(check, api_client)
-
-    def collect_data(self):
-        self._collect_clusters()
-        self._collect_events()
-
-    def _collect_clusters(self):
-        clusters_resource_api = cm_client.ClustersResourceApi(self._api_client)
-        read_clusters_response = clusters_resource_api.read_clusters(cluster_type='any', view='full')
-        self._log.debug("Cloudera full clusters response:\n%s", read_clusters_response)
-
-        if self._check.config.clusters:
-            self._log.debug("clusters config: %s", self._check.config.clusters)
-            d = Discovery(
-                lambda: clusters_resource_api.read_clusters(cluster_type='any', view='full').items,
+        self._log.debug("clusters config: %s", self._check.config.clusters)
+        self._clusters_discovery = (
+            Discovery(
+                lambda: cm_client.ClustersResourceApi(self._api_client)
+                .read_clusters(cluster_type='any', view='full')
+                .items,
                 limit=self._check.config.clusters.limit,
                 include=self._check.config.clusters.include,
                 exclude=self._check.config.clusters.exclude,
                 interval=self._check.config.clusters.interval,
                 key=lambda cluster: cluster.name,
             )
-            discovered_clusters = list(d.get_items())
+            if self._check.config.clusters
+            else None
+        )
+
+    def collect_data(self):
+        self._collect_clusters()
+        self._collect_events()
+
+    def _collect_clusters(self):
+        if self._clusters_discovery:
+            discovered_clusters = list(self._clusters_discovery.get_items())
         else:
             discovered_clusters = [
                 (None, cluster.name, cluster, None)
-                for cluster in clusters_resource_api.read_clusters(cluster_type='any', view='full').items
+                for cluster in cm_client.ClustersResourceApi(self._api_client)
+                .read_clusters(cluster_type='any', view='full')
+                .items
             ]
         self._log.debug("discovered clusters:\n%s", discovered_clusters)
         # Use len(read_clusters_response.items) * 2 workers since
