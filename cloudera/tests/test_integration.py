@@ -14,13 +14,14 @@ def test_given_bad_url_when_check_runs_then_service_check_critical(
     cloudera_check,
     instance,
 ):
+    instance['api_url'] = 'http://bad_host:8080/api/v48/'
     with pytest.raises(Exception):
         # Given
         check = cloudera_check(instance)
         # When
         dd_run_check(check)
-        # Then
-        aggregator.assert_service_check('cloudera.can_connect', ClouderaCheck.CRITICAL)
+    # Then
+    aggregator.assert_service_check('cloudera.can_connect', ClouderaCheck.CRITICAL)
 
 
 @pytest.mark.usefixtures('dd_environment')
