@@ -169,6 +169,7 @@ The `pipx` python package is required for the `ddev` command line tools.
 {{% tab "Linux" %}}
 1. To install `ddev`, run:
    <div class="alert alert-warning">Do not run this command with `sudo`.</a></div>
+   
    ```
    pipx install ddev
    ```
