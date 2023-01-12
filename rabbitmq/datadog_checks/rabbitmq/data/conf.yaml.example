@@ -143,13 +143,13 @@ instances:
     #   - <VHOST_NAME_1>
     #   - <VHOST_NAME_2>
 
-    ## Settings for talking to the prometheus plugin of rabbitmq.
-    ## Specify this section to trigger metric collection from the prometheus plugin endpoints.
+    ## Settings for talking to the Prometheus plugin of RabbitMQ.
+    ## Specify this section to trigger metric collection from the Prometheus plugin endpoints.
     #
     # prometheus_plugin:
 
         ## @param url - string - required
-        ## Base URL for openmetrics endpoints.
+        ## Base URL for OpenMetrics endpoints.
         #
         url: http://localhost:15692
 
@@ -157,15 +157,6 @@ instances:
         ## Whether or not to include metrics from the aggregated endpoint (/metrics).
         #
         # include_aggregated_endpoint: true
-
-        ## @param unaggregated_endpoint - string - optional - default: ?family=queue_coarse_metrics&vhost=vhost-1
-        ## Which unaggregated endpoint to use.
-        ## The possible values are:
-        ##   - Unspecified, which means we don't use any endpoint.
-        ##   - 'per-object', which means we use the /metrics/per-object endpoint.
-        ##   - A url query for the /detailed endpoint.
-        #
-        # unaggregated_endpoint: ?family=queue_coarse_metrics&vhost=vhost-1
 
     ## @param raw_metric_prefix - string - optional
     ## A prefix that will be removed from all exposed metric names, if present.
