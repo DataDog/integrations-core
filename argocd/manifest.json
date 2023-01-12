@@ -42,7 +42,7 @@
     },
     "logs": {},
     "dashboards": {
-      "ArgoCD": "assets/dashboards/argocd.json"
+      "ArgoCD": "assets/dashboards/overview.json"
     }
   },
   "author": {
