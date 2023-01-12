@@ -120,9 +120,14 @@ The latest released version may be installed from [PyPI][].
 === "macOS"
     Remove any executables shown in the output of `which -a ddev` and make sure that there is no active virtual environment, then run:
 
-    ```
-    pipx install ddev --python /usr/local/opt/python@3.8/bin/python3.8
-    ```
+    === "ARM"
+        ```
+        pipx install ddev --python /opt/homebrew/bin/python3.8
+        ```
+    === "Intel"
+        ```
+        pipx install ddev --python /usr/local/bin/python3.8
+        ```
 
 === "Windows"
     Run:
