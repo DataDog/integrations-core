@@ -111,6 +111,52 @@ def check_activity_metrics(aggregator, tags, hostname=None, count=1):
         aggregator.assert_metric(name, count=1, tags=tags, hostname=hostname)
 
 
+def is_tag_in_excluded(tag, excluded_tags):
+    for excluded_tag in excluded_tags:
+        if tag.startswith(excluded_tag):
+            return True
+    return False
+
+
+def set_tag_to_value(tag, tags_to_replace, replace_value):
+    for tag_to_replace in tags_to_replace:
+        if tag.startswith(tag_to_replace):
+            if replace_value is None:
+                return None
+            else:
+                return '{}:{}'.format(tag_to_replace, replace_value)
+    return tag
+
+
+def check_wait_event_metrics(aggregator, tags, hostname=None, count=1):
+    launch_wait_event_tuple = [
+        'backend_type:logical replication launcher',
+        'wait_event:LogicalLauncherMain',
+        'wait_event_type:Activity',
+    ]
+    system_wait_event_tuples = [
+        ['backend_type:walwriter', 'wait_event:WalWriterMain', 'wait_event_type:Activity'],
+        ['backend_type:background writer', 'wait_event:BgWriterMain', 'wait_event_type:Activity'],
+        ['backend_type:checkpointer', 'wait_event:CheckpointerMain', 'wait_event_type:Activity'],
+        ['backend_type:autovacuum launcher', 'wait_event:AutoVacuumMain', 'wait_event_type:Activity'],
+    ]
+    system_tags = [set_tag_to_value(t, ['db', 'user', 'app'], None) for t in tags]
+    system_tags = [t for t in system_tags if t]
+
+    launch_tags = [set_tag_to_value(t, ['user'], 'postgres') for t in tags]
+    launch_tags = [set_tag_to_value(t, ['db', 'app'], None) for t in launch_tags]
+    launch_tags = [t for t in launch_tags if t]
+
+    for wait_event_tag in system_wait_event_tuples:
+        aggregator.assert_metric(
+            'postgresql.activity.wait_event_count', count=1, tags=system_tags + wait_event_tag, hostname=hostname
+        )
+
+    aggregator.assert_metric(
+        'postgresql.activity.wait_event_count', count=1, tags=launch_tags + launch_wait_event_tuple, hostname=hostname
+    )
+
+
 def check_bgw_metrics(aggregator, expected_tags, count=1):
     for name in COMMON_BGW_METRICS:
         aggregator.assert_metric(name, count=count, tags=expected_tags)

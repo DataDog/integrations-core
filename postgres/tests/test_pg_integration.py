@@ -25,6 +25,7 @@ from .common import (
     check_connection_metrics,
     check_db_count,
     check_slru_metrics,
+    check_wait_event_metrics,
     requires_static_version,
 )
 from .utils import requires_over_10
@@ -148,7 +149,6 @@ def test_activity_metrics(aggregator, integration_check, pg_instance):
     pg_instance['collect_activity_metrics'] = True
     check = integration_check(pg_instance)
     check.check(pg_instance)
-
     expected_tags = pg_instance['tags'] + [
         'port:{}'.format(PORT),
         'db:datadog_test',
@@ -156,6 +156,29 @@ def test_activity_metrics(aggregator, integration_check, pg_instance):
         'user:datadog',
     ]
     check_activity_metrics(aggregator, expected_tags)
+    check_wait_event_metrics(aggregator, expected_tags)
+
+
+def test_wait_event_metric(aggregator, integration_check, pg_instance):
+    pg_instance['collect_activity_metrics'] = True
+
+    # Keep a query in Client read
+    conn = psycopg2.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g", application_name='test')
+    cur = conn.cursor()
+    cur.execute('select 1;')
+
+    check = integration_check(pg_instance)
+    check.check(pg_instance)
+    wait_event_client_tags = pg_instance['tags'] + [
+        'port:{}'.format(PORT),
+        'db:datadog_test',
+        'app:test',
+        'user:postgres',
+        'backend_type:client backend',
+        'wait_event:ClientRead',
+        'wait_event_type:Client',
+    ]
+    aggregator.assert_metric('postgresql.activity.wait_event_count', count=1, tags=wait_event_client_tags)
 
 
 def test_activity_metrics_no_application_aggregation(aggregator, integration_check, pg_instance):
@@ -166,6 +189,7 @@ def test_activity_metrics_no_application_aggregation(aggregator, integration_che
 
     expected_tags = pg_instance['tags'] + ['port:{}'.format(PORT), 'db:datadog_test', 'user:datadog']
     check_activity_metrics(aggregator, expected_tags)
+    check_wait_event_metrics(aggregator, expected_tags)
 
 
 def test_activity_metrics_no_aggregations(aggregator, integration_check, pg_instance):
@@ -176,6 +200,7 @@ def test_activity_metrics_no_aggregations(aggregator, integration_check, pg_inst
 
     expected_tags = pg_instance['tags'] + ['port:{}'.format(PORT)]
     check_activity_metrics(aggregator, expected_tags)
+    check_wait_event_metrics(aggregator, expected_tags)
 
 
 def assert_metric_at_least(aggregator, metric_name, expected_tag, count, lower_bound):
