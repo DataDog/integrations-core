@@ -5,8 +5,8 @@ import asyncio
 import difflib
 import os
 import re
+import tarfile
 from collections import defaultdict
-from copy import deepcopy
 
 import click
 import orjson
@@ -16,7 +16,7 @@ from aiomultiprocess import Pool
 from packaging.requirements import Requirement
 
 from ....fs import file_exists, read_file_lines, write_file_lines
-from ...constants import get_agent_requirements, get_license_attribution_file
+from ...constants import get_agent_requirements, get_copyright_ignore_re, get_copyright_re, get_license_attribution_file
 from ...github import get_auth_info
 from ...utils import get_extra_license_files, read_license_file_rows
 from ..console import CONTEXT_SETTINGS, abort, annotate_error, echo_failure, echo_info, echo_success, echo_warning
@@ -46,24 +46,6 @@ COPYRIGHT_LOCATIONS = [
     'LICENSE-MIT',
 ]
 
-
-# General match for anything that looks like a copyright declaration
-COPYRIGHT_RE = re.compile(
-    r'^(?!i\.e\.,.*$)(Copyright\s+(?:©|\(c\)\s+)?(?:(?:[0-9 ,-]|present)+\s+)?(?:by\s+)?(.*))$', re.I
-)
-
-# Copyright strings to ignore, as they are not owners.  Most of these are from
-# boilerplate license files.
-#
-# These match at the beginning of the copyright (the result of COPYRIGHT_RE).
-COPYRIGHT_IGNORE_RES = [
-    re.compile(r'copyright(:? and license)?$', re.I),
-    re.compile(r'copyright (:?holder|owner|notice|license|statement|law|on the Program|and Related)', re.I),
-    re.compile(r'Copyright & License -'),
-    re.compile(r'copyright .yyyy. .name of copyright owner.', re.I),
-    re.compile(r'copyright \(c\) <year>\s{2}<name of author>', re.I),
-    re.compile(r'.*\sFree Software Foundation', re.I),
-]
 
 COPYRIGHT_ATTR_TEMPLATES = {
     'Apache-2.0': 'Copyright {year}{author}',
@@ -288,11 +270,17 @@ async def scrape_license_data(urls):
 
 def update_copyrights(package_name, license_id, data, ctx):
     home_page = data['home_page']
-    repo_url = PACKAGE_REPO_OVERRIDES.get(package_name) if PACKAGE_REPO_OVERRIDES.get(package_name) else home_page
+    repo_url = PACKAGE_REPO_OVERRIDES.get(package_name)
+    created_date = ''
+
+    if not repo_url:
+        repo_url = home_page
+
     if repo_url:
         cp, created_date = scrape_copyright_data(repo_url, ctx)
         if cp:
             data['copyright'][license_id] = cp
+
     if data['author'] and not data['copyright'].get(license_id):
         cp = 'Copyright {}{}'.format(created_date, data['author'])
         if license_id in COPYRIGHT_ATTR_TEMPLATES:
@@ -305,41 +293,67 @@ def update_copyrights(package_name, license_id, data, ctx):
 def probe_github(url, ctx):
     if url.endswith('/'):
         url = url[:-1]
+    if 'github.com' not in url:
+        return None, ''
     owner_repo = re.sub(r'.*github.com/', '', url)
     repo_api_url = f'https://api.github.com/repos/{owner_repo}'
     repo_res = requests.get(repo_api_url, auth=get_auth_info(ctx.obj)).json()
     def_branch = repo_res.get('default_branch')
-    created_date = repo_res.get('created_at') or ''
+    created_date = repo_res.get('created_at', '')
     if created_date:
         created_date = created_date[:4] + ' '
-    path = f'https://raw.githubusercontent.com/{owner_repo}/{def_branch}'
-    return path, created_date
+    tar_path = f'https://github.com/{owner_repo}/archive/refs/heads/{def_branch}.tar.gz'
+    return tar_path, created_date
+
+
+def parse_license_path(tar_file_name):
+    file_name_parts = tar_file_name.split("/")
+    # Look at only the root-level files
+    if len(file_name_parts) == 2:
+        for part in file_name_parts:
+            if part in COPYRIGHT_LOCATIONS:
+                return "".join(file_name_parts[1:])
+    return None
+
+
+def generate_tarfiles(tar_path):
+    stream = requests.get(tar_path, stream=True)
+    with tarfile.open(fileobj=stream.raw, mode="r|gz") as tar_file:
+        for tar_info in tar_file:
+            if not tar_info.islnk() and not tar_info.issym():
+                yield tar_info, tar_file
+    stream.close()
 
 
 def scrape_copyright_data(url_path, ctx):
-    license_path, created_date = probe_github(url_path, ctx)
-    path = deepcopy(license_path)
-    for loc in COPYRIGHT_LOCATIONS:
-        if path.__contains__('raw.githubusercontent.com'):
-            path = f'{license_path}/{loc}'
-        res = requests.get(path)
-        if res:
-            cp = find_cpy(res.text)
-            if cp:
-                return cp, ''
+    tar_path, created_date = probe_github(url_path, ctx)
+    if tar_path:
+        for tar_info, tar_file in generate_tarfiles(tar_path):
+            local_path = parse_license_path(tar_info.name)
+            if local_path:
+                file = tar_file.extractfile(tar_info)
+                for loc in COPYRIGHT_LOCATIONS:
+                    if loc in local_path:
+                        cp = find_cpy(file.read())
+                        if cp:
+                            file.close()
+                            return cp, created_date
+                if file:
+                    file.close()
     return None, created_date
 
 
-def find_cpy(text):
-    for line in text.split('\n'):
+def find_cpy(data):
+    text = str(data, 'UTF-8')
+    for line in text.splitlines():
         line = re.sub(r'.*#', '', line)
         line = line.strip()
-        m = COPYRIGHT_RE.search(line)
+        m = get_copyright_re().search(line)
         if not m:
             continue
         cpy = m.group(0)
         # ignore a few spurious matches from license boilerplate
-        if any(ign.match(cpy) for ign in COPYRIGHT_IGNORE_RES):
+        if any(ign.match(cpy) for ign in get_copyright_ignore_re()):
             continue
 
         cpy = cpy.strip().rstrip(',')

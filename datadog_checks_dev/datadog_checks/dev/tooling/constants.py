@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+import re
 
 import semver
 
@@ -155,6 +156,24 @@ NON_TESTABLE_FILES = ('auto_conf.yaml', 'agent_requirements.in')
 
 ROOT = ''
 
+# General match for anything that looks like a copyright declaration
+COPYRIGHT_RE = re.compile(
+    r'^(?!i\.e\.,.*$)(Copyright\s+(?:©|\(c\)\s+)?(?:(?:[0-9 ,-]|present)+\s+)?(?:by\s+)?(.*))$', re.I
+)
+
+# Copyright strings to ignore, as they are not owners.  Most of these are from
+# boilerplate license files.
+#
+# These match at the beginning of the copyright (the result of COPYRIGHT_RE).
+COPYRIGHT_IGNORE_RES = [
+    re.compile(r'copyright(:? and license)?$', re.I),
+    re.compile(r'copyright (:?holder|owner|notice|license|statement|law|on the Program|and Related)', re.I),
+    re.compile(r'Copyright & License -'),
+    re.compile(r'copyright .yyyy. .name of copyright owner.', re.I),
+    re.compile(r'copyright \(c\) <year>\s{2}<name of author>', re.I),
+    re.compile(r'.*\sFree Software Foundation', re.I),
+]
+
 
 def get_root():
     return ROOT
@@ -206,3 +225,11 @@ def get_integration_changelog(check):
 
 def get_license_attribution_file():
     return os.path.join(get_root(), 'LICENSE-3rdparty.csv')
+
+
+def get_copyright_re():
+    return COPYRIGHT_RE
+
+
+def get_copyright_ignore_re():
+    return COPYRIGHT_IGNORE_RES
