@@ -86,11 +86,11 @@ jobs:
 
     - name: Run licenses validation
       if: ${{ github.event.pull_request.head.repo.full_name == github.repository }} # only PRs from this repo
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      continue-on-error: true
       run: |
         ddev validate licenses
-      continue-on-error: true
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Run metadata validation
       run: |
