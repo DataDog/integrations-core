@@ -303,7 +303,7 @@
                         },
                         "id": 7617765285986134,
                         "layout": {
-                            "height": 4,
+                            "height": 3,
                             "width": 6,
                             "x": 0,
                             "y": 4
@@ -351,7 +351,7 @@
                         },
                         "id": 8732078285048376,
                         "layout": {
-                            "height": 4,
+                            "height": 3,
                             "width": 6,
                             "x": 6,
                             "y": 4
@@ -399,7 +399,7 @@
                         },
                         "id": 4491005302659932,
                         "layout": {
-                            "height": 4,
+                            "height": 3,
                             "width": 6,
                             "x": 0,
                             "y": 8
@@ -447,7 +447,7 @@
                         },
                         "id": 3479937394251732,
                         "layout": {
-                            "height": 4,
+                            "height": 3,
                             "width": 6,
                             "x": 6,
                             "y": 8
@@ -816,7 +816,7 @@
                                     }
                                 }
                             ],
-                            "show_legend": false,
+                            "show_legend": true,
                             "title": "Count of Kubernetes Requests Executed",
                             "title_align": "left",
                             "title_size": "16",
