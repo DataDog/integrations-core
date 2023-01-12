@@ -16,50 +16,16 @@ from aiomultiprocess import Pool
 from packaging.requirements import Requirement
 
 from ....fs import file_exists, read_file_lines, write_file_lines
-from ...constants import get_agent_requirements, get_copyright_ignore_re, get_copyright_re, get_license_attribution_file
+from ...constants import (
+    get_agent_requirements,
+    get_copyright_ignore_re,
+    get_copyright_locations_re,
+    get_copyright_re,
+    get_license_attribution_file,
+)
 from ...github import get_auth_info
 from ...utils import get_extra_license_files, read_license_file_rows
 from ..console import CONTEXT_SETTINGS, abort, annotate_error, echo_failure, echo_info, echo_success, echo_warning
-
-# Files searched for COPYRIGHT_RE
-COPYRIGHT_LOCATIONS = [
-    'license',
-    'LICENSE',
-    'license.md',
-    'LICENSE.md',
-    'LICENSE.txt',
-    'License.txt',
-    'license.txt',
-    'COPYING',
-    'NOTICE',
-    'README',
-    'README.md',
-    'README.mdown',
-    'README.markdown',
-    'COPYRIGHT',
-    'COPYRIGHT.txt',
-    'COPYING.txt',
-    'LICENSE-APACHE',
-    'LICENSE.APACHE',
-    'LICENSE.BSD',
-    'LICENSE.PSF',
-    'LICENSE-MIT',
-]
-
-
-COPYRIGHT_ATTR_TEMPLATES = {
-    'Apache-2.0': 'Copyright {year}{author}',
-    'BSD-2-Clause': 'Copyright {year}{author}',
-    'BSD-3-Clause': 'Copyright {year}{author}',
-    'BSD-3-Clause-Modification': 'Copyright {year}{author}',
-    'LGPL-2.1-only': 'Copyright (C) {year}{author}',
-    'LGPL-3.0-only': 'Copyright (C) {year}{author}',
-    'MIT': 'Copyright (c) {year}{author}',
-    'PSF': 'Copyright (c) {year}{author}',
-    'CC0-1.0': '{author}. {package_name} is dedicated to the public domain under {license}.',
-    'Unlicense': '{author}. {package_name} is dedicated to the public domain under {license}.',
-}
-
 
 EXPLICIT_LICENSES = {
     # https://github.com/aerospike/aerospike-client-python/blob/master/LICENSE
@@ -166,6 +132,20 @@ CLASSIFIER_TO_HIGHEST_SPDX = {
 
 EXTRA_LICENSES = {'BSD-2-Clause'}
 
+VALID_LICENSES = (
+    EXTRA_LICENSES
+    | set(KNOWN_LICENSES.values())
+    | set(CLASSIFIER_TO_HIGHEST_SPDX.values())
+    | set(KNOWN_CLASSIFIERS.values())
+)
+
+HEADERS = ['Component', 'Origin', 'License', 'Copyright']
+
+ADDITIONAL_LICENSES = [
+    'flup,Vendor,BSD-3-Clause,Copyright (c) 2005 Allan Saddi. All Rights Reserved.\n',
+    'flup-py3,Vendor,BSD-3-Clause,"Copyright (c) 2005, 2006 Allan Saddi <allan@saddi.com> All rights reserved."\n',
+]
+
 PACKAGE_REPO_OVERRIDES = {
     'PyYAML': 'https://github.com/yaml/pyyaml',
     'Pyro4': 'https://github.com/irmen/Pyro4',
@@ -192,19 +172,18 @@ PACKAGE_REPO_OVERRIDES = {
     'typing': 'https://github.com/python/typing',
 }
 
-VALID_LICENSES = (
-    EXTRA_LICENSES
-    | set(KNOWN_LICENSES.values())
-    | set(CLASSIFIER_TO_HIGHEST_SPDX.values())
-    | set(KNOWN_CLASSIFIERS.values())
-)
-
-HEADERS = ['Component', 'Origin', 'License', 'Copyright']
-
-ADDITIONAL_LICENSES = [
-    'flup,Vendor,BSD-3-Clause,Copyright (c) 2005 Allan Saddi. All Rights Reserved.\n',
-    'flup-py3,Vendor,BSD-3-Clause,"Copyright (c) 2005, 2006 Allan Saddi <allan@saddi.com> All rights reserved."\n',
-]
+COPYRIGHT_ATTR_TEMPLATES = {
+    'Apache-2.0': 'Copyright {year}{author}',
+    'BSD-2-Clause': 'Copyright {year}{author}',
+    'BSD-3-Clause': 'Copyright {year}{author}',
+    'BSD-3-Clause-Modification': 'Copyright {year}{author}',
+    'LGPL-2.1-only': 'Copyright (C) {year}{author}',
+    'LGPL-3.0-only': 'Copyright (C) {year}{author}',
+    'MIT': 'Copyright (c) {year}{author}',
+    'PSF': 'Copyright (c) {year}{author}',
+    'CC0-1.0': '{author}. {package_name} is dedicated to the public domain under {license}.',
+    'Unlicense': '{author}. {package_name} is dedicated to the public domain under {license}.',
+}
 
 
 def format_attribution_line(package_name, license_id, package_copyright):
@@ -269,6 +248,9 @@ async def scrape_license_data(urls):
 
 
 def update_copyrights(package_name, license_id, data, ctx):
+    """
+    Update package data with scraped copyright attributions.
+    """
     home_page = data['home_page']
     repo_url = PACKAGE_REPO_OVERRIDES.get(package_name)
     created_date = ''
@@ -291,6 +273,11 @@ def update_copyrights(package_name, license_id, data, ctx):
 
 
 def probe_github(url, ctx):
+    """
+    Probe GitHub API for package's repo creation date and default branch.
+    Generates URL path for downloading the repo's tarball archive file.
+    Returns tarball path and repo creation date.
+    """
     if url.endswith('/'):
         url = url[:-1]
     if 'github.com' not in url:
@@ -310,16 +297,22 @@ def probe_github(url, ctx):
 
 
 def parse_license_path(tar_file_name):
+    """
+    Parses filepath name and returns the filepath if it is a potential copyright attribution location.
+    """
     file_name_parts = tar_file_name.split("/")
     # Look at only the root-level files
     if len(file_name_parts) == 2:
-        for part in file_name_parts:
-            if part in COPYRIGHT_LOCATIONS:
-                return "".join(file_name_parts[1:])
+        m = get_copyright_locations_re().search(file_name_parts[1])
+        if m:
+            return file_name_parts[1]
     return None
 
 
 def generate_tarfiles(tar_path):
+    """
+    Streams tarball archive and generates tarfile for each file.
+    """
     stream = requests.get(tar_path, stream=True)
     with tarfile.open(fileobj=stream.raw, mode="r|gz") as tar_file:
         for tar_info in tar_file:
@@ -329,24 +322,29 @@ def generate_tarfiles(tar_path):
 
 
 def scrape_copyright_data(url_path, ctx):
+    """
+    Scrapes each tarfile for copyright attributions.
+    """
     tar_path, created_date = probe_github(url_path, ctx)
     if tar_path:
         for tar_info, tar_file in generate_tarfiles(tar_path):
             local_path = parse_license_path(tar_info.name)
             if local_path:
                 file = tar_file.extractfile(tar_info)
-                for loc in COPYRIGHT_LOCATIONS:
-                    if loc in local_path:
-                        cp = find_cpy(file.read())
-                        if cp:
-                            file.close()
-                            return cp, created_date
+                cp = find_cpy(file.read())
+                if cp:
+                    file.close()
+                    return cp, created_date
                 if file:
                     file.close()
     return None, created_date
 
 
 def find_cpy(data):
+    """
+    Performs pattern matching on input data to find copyright attributions.
+    Returns the copyright attribution if found.
+    """
     text = str(data, 'UTF-8')
     for line in text.splitlines():
         line = re.sub(r'.*#', '', line)

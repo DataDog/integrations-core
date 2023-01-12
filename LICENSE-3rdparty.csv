@@ -23,7 +23,7 @@ cm-client,PyPI,Apache-2.0,
 contextlib2,PyPI,PSF,Copyright (c) 2016 Nick Coghlan
 cryptography,PyPI,Apache-2.0,Copyright (c) Individual contributors.
 cryptography,PyPI,BSD-3-Clause,Copyright (c) Individual contributors.
-ddtrace,PyPI,BSD-3-Clause,"Copyright 2016-Present Datadog, Inc."
+ddtrace,PyPI,BSD-3-Clause,"Copyright 2016 Datadog, Inc."
 dnspython,PyPI,ISC,Copyright (C) Dnspython Contributors
 enum34,PyPI,BSD-3-Clause,Copyright Ethan Furman
 flup,Vendor,BSD-3-Clause,Copyright (c) 2005 Allan Saddi. All Rights Reserved.
@@ -40,7 +40,7 @@ kafka-python,PyPI,Apache-2.0,Copyright 2015 David Arthur
 kazoo,PyPI,Apache-2.0,Copyright 2012 Kazoo team
 keystoneauth1,PyPI,Apache-2.0,Copyright (c) 2009 Jacob Kaplan-Moss - initial codebase (< v2.1)
 kubernetes,PyPI,Apache-2.0,Copyright 2014 The Kubernetes Authors.
-ldap3,PyPI,LGPL-3.0-only,Copyright (C) 2014 Giovanni Cannata
+ldap3,PyPI,LGPL-3.0-only,Copyright 2013 - 2020 Giovanni Cannata
 lxml,PyPI,BSD-3-Clause,Copyright (c) 2004 Infrae. All rights reserved.
 lz4,PyPI,BSD-3-Clause,"Copyright (c) 2012-2013, Steeve Morin"
 mmh3,PyPI,CC0-1.0,Hajime Senuma. mmh3 is dedicated to the public domain under CC0-1.0.
@@ -58,21 +58,21 @@ protobuf,PyPI,BSD-3-Clause,Copyright 2008 Google Inc.  All rights reserved.
 psutil,PyPI,BSD-3-Clause,"Copyright (c) 2009, Jay Loden, Dave Daeschler, Giampaolo Rodola'"
 psycopg2-binary,PyPI,BSD-3-Clause,Copyright 2013 Federico Di Gregorio
 psycopg2-binary,PyPI,LGPL-3.0-only,Copyright (C) 2013 Federico Di Gregorio
-pyasn1,PyPI,BSD-3-Clause,"Copyright (c) 2005-2020, [Ilya Etingof](mailto:etingof@gmail.com)."
+pyasn1,PyPI,BSD-3-Clause,"Copyright (c) 2005-2020, Ilya Etingof <etingof@gmail.com>"
 pycryptodomex,PyPI,BSD-2-Clause,Copyright 2014 Helder Eijs
 pycryptodomex,PyPI,Unlicense,Helder Eijs. pycryptodomex is dedicated to the public domain under Unlicense.
 pydantic,PyPI,MIT,Copyright (c) 2017 - 2022 Samuel Colvin and other contributors
 pymongo,PyPI,Apache-2.0,Copyright 2009 The MongoDB Python Team
 pymqi,PyPI,PSF,Copyright (c) Zato Source s.r.o.
 pyodbc,PyPI,MIT,Copyright (c) 2008 Michael Kleehammer
-pysmi,PyPI,BSD-3-Clause,"Copyright (c) 2015-2020, [Ilya Etingof](mailto:etingof@gmail.com)."
-pysnmp,PyPI,BSD-3-Clause,"Copyright (c) 2005-2019, [Ilya Etingof](mailto:etingof@gmail.com). All rights reserved."
+pysmi,PyPI,BSD-3-Clause,Copyright (c) 2015-2020 Ilya Etingof <etingof@gmail.com>
+pysnmp,PyPI,BSD-3-Clause,"Copyright (c) 2005-2019, Ilya Etingof <etingof@gmail.com>"
 pysnmp-mibs,PyPI,BSD-3-Clause,Copyright Ilya Etingof <ilya@glas.net>
 python-binary-memcached,PyPI,MIT,Copyright (c) 2011 Jayson Reis <santosdosreis@gmail.com>
 python-dateutil,PyPI,Apache-2.0,Copyright 2017- Paul Ganssle <paul@ganssle.io>
 python-dateutil,PyPI,BSD-3-Clause,Copyright 2017- Paul Ganssle <paul@ganssle.io>
 python3-gearman,PyPI,Apache-2.0,Copyright 2018 Josiah Walton
-pyvmomi,PyPI,Apache-2.0,"Copyright 2013 VMware, Inc."
+pyvmomi,PyPI,Apache-2.0,"Copyright (c) 2005-2021 VMware, Inc. All Rights Reserved."
 pywin32,PyPI,PSF,Copyright (c) 2017 Mark Hammond (et al)
 redis,PyPI,MIT,"Copyright (c) 2022, Redis, inc."
 requests,PyPI,Apache-2.0,Copyright 2019 Kenneth Reitz
@@ -92,7 +92,7 @@ service-identity,PyPI,MIT,Copyright (c) 2014 Hynek Schlawack
 simplejson,PyPI,MIT,Copyright (c) 2006 Bob Ippolito
 six,PyPI,MIT,Copyright (c) 2010-2020 Benjamin Peterson
 snowflake-connector-python,PyPI,Apache-2.0,"Copyright (c) 2013-2019 Snowflake Computing, Inc."
-supervisor,PyPI,BSD-3-Clause-Modification,Copyright 2010 Chris McDonough
+supervisor,PyPI,BSD-3-Clause-Modification,"Copyright (c) 2002-2005, Daniel Krech, http://eikeon.com/"
 tuf,PyPI,Apache-2.0,Copyright (c) 2010 New York University
 tuf,PyPI,MIT,Copyright (c) 2010 New York University
 typing,PyPI,PSF,"Copyright (c) 1991 - 1995, Stichting Mathematisch Centrum Amsterdam"

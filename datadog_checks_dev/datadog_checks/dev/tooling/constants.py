@@ -156,6 +156,9 @@ NON_TESTABLE_FILES = ('auto_conf.yaml', 'agent_requirements.in')
 
 ROOT = ''
 
+# Files searched for COPYRIGHT_RE
+COPYRIGHT_LOCATIONS_RE = re.compile(r'^(license.*|notice.*|copying.*|copyright.*|readme.*)$', re.I)
+
 # General match for anything that looks like a copyright declaration
 COPYRIGHT_RE = re.compile(
     r'^(?!i\.e\.,.*$)(Copyright\s+(?:©|\(c\)\s+)?(?:(?:[0-9 ,-]|present)+\s+)?(?:by\s+)?(.*))$', re.I
@@ -165,7 +168,7 @@ COPYRIGHT_RE = re.compile(
 # boilerplate license files.
 #
 # These match at the beginning of the copyright (the result of COPYRIGHT_RE).
-COPYRIGHT_IGNORE_RES = [
+COPYRIGHT_IGNORE_RE = [
     re.compile(r'copyright(:? and license)?$', re.I),
     re.compile(r'copyright (:?holder|owner|notice|license|statement|law|on the Program|and Related)', re.I),
     re.compile(r'Copyright & License -'),
@@ -227,9 +230,13 @@ def get_license_attribution_file():
     return os.path.join(get_root(), 'LICENSE-3rdparty.csv')
 
 
+def get_copyright_locations_re():
+    return COPYRIGHT_LOCATIONS_RE
+
+
 def get_copyright_re():
     return COPYRIGHT_RE
 
 
 def get_copyright_ignore_re():
-    return COPYRIGHT_IGNORE_RES
+    return COPYRIGHT_IGNORE_RE
