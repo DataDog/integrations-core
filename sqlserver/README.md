@@ -8,6 +8,8 @@ The SQL Server check tracks the performance of your SQL Server instances. It col
 
 You can also create your own metrics by having the check run custom queries.
 
+Supports SQL Server 2012 and above, all editions.
+
 ## Setup
 
 <div class="alert alert-info">This page describes the SQL Server Agent integration. If you are looking for the Database Monitoring product for SQL Server, see <a href="https://docs.datadoghq.com/database_monitoring" target="_blank">Datadog Database Monitoring</a>.</div>
