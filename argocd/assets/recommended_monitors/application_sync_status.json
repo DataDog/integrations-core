@@ -20,6 +20,6 @@
     "priority": null,
     "restricted_roles": null,
     "recommended_monitor_metadata": {
-        "description": "Notify your team when your Applications are not in synced in Argo CD"
+        "description": "Notify your team when your applications are not synced in Argo CD"
     }
 }
