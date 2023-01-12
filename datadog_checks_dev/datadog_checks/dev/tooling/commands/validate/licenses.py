@@ -525,3 +525,5 @@ def licenses(ctx, sync):
         abort('Out of sync, run again with the --sync flag')
     elif any_errors:
         abort()
+    else:
+        echo_success('Licenses file is valid!')
