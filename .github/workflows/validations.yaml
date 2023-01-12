@@ -87,7 +87,7 @@ jobs:
     - name: Run licenses validation
       if: ${{ github.event.pull_request.head.repo.full_name == github.repository }} # only PRs from this repo
       env:
-        DD_GITHUB_USER: ${{ vars.GITHUB_ACTOR }}
+        DD_GITHUB_USER: ${{ GITHUB_ACTOR }}
         DD_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       continue-on-error: true
       run: |
