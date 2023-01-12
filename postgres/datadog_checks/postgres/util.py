@@ -276,6 +276,18 @@ SELECT s.schemaname,
     'relation': False,
 }
 
+WAIT_EVENT_QUERY = """
+SELECT wait_event_type, wait_event, backend_type, {aggregation_columns_select}
+    {{metrics_columns}}
+FROM pg_stat_activity
+WHERE wait_event is not null
+GROUP BY datid, wait_event_type, wait_event, backend_type {aggregation_columns_group}
+"""
+
+WAIT_EVENT_METRICS = {
+    'count(*)': ('postgresql.activity.wait_event_count', AgentCheck.gauge),
+}
+
 # The metrics we retrieve from pg_stat_activity when the postgres version >= 9.6
 ACTIVITY_METRICS_9_6 = [
     "SUM(CASE WHEN xact_start IS NOT NULL THEN 1 ELSE 0 END)",

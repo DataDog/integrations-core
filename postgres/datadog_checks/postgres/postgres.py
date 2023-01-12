@@ -403,7 +403,10 @@ class PostgreSql(AgentCheck):
 
         if self._config.collect_activity_metrics:
             activity_metrics = self.metrics_cache.get_activity_metrics(self.version)
+            wait_event_metrics = self.metrics_cache.get_wait_event_metrics(self.version)
+
             self._query_scope(cursor, activity_metrics, instance_tags, False)
+            self._query_scope(cursor, wait_event_metrics, instance_tags, False)
 
         for scope in list(metric_scope) + self._config.custom_metrics:
             self._query_scope(cursor, scope, instance_tags, scope in self._config.custom_metrics)

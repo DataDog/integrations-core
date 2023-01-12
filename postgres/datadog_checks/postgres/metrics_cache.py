@@ -25,6 +25,8 @@ from .util import (
     REPLICATION_METRICS_9_2,
     REPLICATION_METRICS_10,
     REPLICATION_STATS_METRICS,
+    WAIT_EVENT_METRICS,
+    WAIT_EVENT_QUERY,
 )
 from .version_utils import V8_3, V9, V9_1, V9_2, V9_4, V9_6, V10
 
@@ -42,6 +44,7 @@ class PostgresMetricsCache:
         self.replication_metrics = None
         self.replication_stats_metrics = None
         self.activity_metrics = None
+        self.wait_event_metrics = None
         self._count_metrics = None
 
     def clean_state(self):
@@ -51,6 +54,7 @@ class PostgresMetricsCache:
         self.replication_metrics = None
         self.replication_stats_metrics = None
         self.activity_metrics = None
+        self.wait_event_metrics = None
 
     def get_instance_metrics(self, version):
         """
@@ -179,6 +183,42 @@ class PostgresMetricsCache:
             self.replication_stats_metrics = dict(REPLICATION_STATS_METRICS)
         return self.replication_stats_metrics
 
+    def get_wait_event_metrics(self, version):
+        metrics_data = self.wait_event_metrics
+        if metrics_data is None:
+            excluded_aggregations = self.config.activity_metrics_excluded_aggregations
+
+            default_descriptors = [('application_name', 'app'), ('datname', 'db'), ('usename', 'user')]
+            default_aggregations = [d[0] for d in default_descriptors]
+
+            aggregation_columns = [
+                "CASE WHEN {} != '' THEN {} ELSE null END".format(a, a)
+                for a in default_aggregations
+                if a not in excluded_aggregations
+            ]
+            descriptors = [
+                ('wait_event_type', 'wait_event_type'),
+                ('wait_event', 'wait_event'),
+                ('backend_type', 'backend_type'),
+            ] + [d for d in default_descriptors if d[0] not in excluded_aggregations]
+
+            if not aggregation_columns:
+                query = WAIT_EVENT_QUERY.format(aggregation_columns_select='', aggregation_columns_group='')
+            else:
+                query = WAIT_EVENT_QUERY.format(
+                    aggregation_columns_select=', '.join(aggregation_columns) + ',',
+                    aggregation_columns_group=',' + ', '.join(aggregation_columns),
+                )
+            self.wait_event_metrics = (query, descriptors)
+        else:
+            query, descriptors = metrics_data
+        return {
+            'descriptors': descriptors,
+            'metrics': WAIT_EVENT_METRICS,
+            'query': query,
+            'relation': False,
+        }
+
     def get_activity_metrics(self, version):
         """Use ACTIVITY_METRICS_LT_8_3 or ACTIVITY_METRICS_8_3 or ACTIVITY_METRICS_9_2
         depending on the postgres version in conjunction with ACTIVITY_QUERY_10 or ACTIVITY_QUERY_LT_10.
@@ -191,7 +231,11 @@ class PostgresMetricsCache:
             if version < V9:
                 excluded_aggregations.append('application_name')
 
-            default_descriptors = [('application_name', 'app'), ('datname', 'db'), ('usename', 'user')]
+            default_descriptors = [
+                ('application_name', 'app'),
+                ('datname', 'db'),
+                ('usename', 'user'),
+            ]
             default_aggregations = [d[0] for d in default_descriptors]
 
             aggregation_columns = [a for a in default_aggregations if a not in excluded_aggregations]
