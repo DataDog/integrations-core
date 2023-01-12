@@ -18,7 +18,7 @@ def test_given_bad_url_when_check_runs_then_service_check_critical(
     cloudera_check,
     instance_bad_url,
 ):
-    with pytest.raises(Exception):
+    with pytest.raises(Exception, match="HTTPConnectionPool"):
         # Given
         check = cloudera_check(instance_bad_url)
         # When
