@@ -135,7 +135,7 @@ files:
         - name: url
           required: true
           description: |
-            Base URL for openmetrics endpoints.
+            Base URL for OpenMetrics endpoints.
           value:
             type: string
             example: 'http://localhost:15692'
