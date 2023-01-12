@@ -1,5 +1,5 @@
 {
-    "name": "Application {{name.name}} is not synced",
+    "name": "[ArgoCD] Application Synced Status",
     "type": "query alert",
     "query": "avg(last_30m):avg:argocd.app_controller.app.info{!sync_status:synced} by {sync_status,name} >= 1",
     "message": "{{#is_alert}}\nApplication {{name.name}} has been reporting with a sync_status:{{sync_status.name}} for the last 30 minutes.\n{{/is_alert}}",
