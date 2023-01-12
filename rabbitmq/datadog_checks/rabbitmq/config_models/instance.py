@@ -58,7 +58,6 @@ class PrometheusPlugin(BaseModel):
         allow_mutation = False
 
     include_aggregated_endpoint: Optional[bool]
-    unaggregated_endpoint: Optional[str]
     url: Optional[str]
 
 
