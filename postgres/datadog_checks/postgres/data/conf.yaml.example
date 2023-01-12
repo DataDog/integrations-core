@@ -177,6 +177,15 @@ instances:
     #
     # collect_activity_metrics: false
 
+    ## @param activity_metrics_excluded_aggregations - list of strings - optional
+    ## A list of columns to remove from the pg_stat_activity aggregation.
+    ## By default, datname, usename and application_name will be used.
+    ## If applications with different application_name are creating a lot of short-lived queries,
+    ## removing application_name from the aggregation can help generate more stable metrics.
+    #
+    # activity_metrics_excluded_aggregations:
+    #   - application_name
+
     ## @param collect_database_size_metrics - boolean - optional - default: true
     ## Collect database size metrics.
     #
