@@ -160,6 +160,7 @@ def test_given_cloudera_check_when_bad_health_cluster_then_emits_cluster_health_
         aggregator.assert_service_check(
             'cloudera.cluster.health',
             AgentCheck.CRITICAL,
+            message='BAD_HEALTH',
             tags=CLUSTER_HEALTH_TAGS,
         )
         aggregator.assert_service_check(
@@ -339,7 +340,7 @@ def test_given_cloudera_check_when_autodiscover_configured_then_emits_configured
         for category, metrics in METRICS.items():
             for metric in metrics:
                 aggregator.assert_metric(f'cloudera.{category}.{metric}', count=1)
-
+                aggregator.assert_metric_has_tag_prefix(f'cloudera.{category}.{metric}', "cloudera_cluster")
         aggregator.assert_service_check('cloudera.can_connect', AgentCheck.OK, tags=CAN_CONNECT_TAGS)
         aggregator.assert_service_check('cloudera.cluster.health', AgentCheck.OK, tags=CLUSTER_HEALTH_TAGS, count=1)
 
@@ -394,7 +395,7 @@ def test_given_cloudera_check_when_autodiscover_exclude_configured_then_emits_co
         for category, metrics in METRICS.items():
             for metric in metrics:
                 aggregator.assert_metric(f'cloudera.{category}.{metric}', count=1)
-
+                aggregator.assert_metric_has_tag_prefix(f'cloudera.{category}.{metric}', "cloudera_cluster")
         aggregator.assert_service_check('cloudera.can_connect', AgentCheck.OK, tags=CAN_CONNECT_TAGS)
         aggregator.assert_service_check('cloudera.cluster.health', AgentCheck.OK, tags=CLUSTER_HEALTH_TAGS, count=1)
 
