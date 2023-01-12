@@ -15,7 +15,6 @@ binary,PyPI,MIT,Copyright 2018 Ofek Lev
 boto,PyPI,MIT,Copyright (c) 2010 Mitch Garnaat
 boto3,PyPI,Apache-2.0,"Copyright 2013-2017 Amazon.com, Inc. or its affiliates. All Rights Reserved."
 botocore,PyPI,Apache-2.0,"Copyright 2012-2022 Amazon.com, Inc. or its affiliates. All Rights Reserved."
-cachetools,PyPI,MIT,Copyright (c) 2014-2022 Thomas Kemmer
 check-postgres,"https://github.com/bucardo/",BSD-2-Clause,Copyright 2007 - 2022 Greg Sabino Mullane
 clickhouse-cityhash,PyPI,MIT,"Copyright (c) 2011, Alexander Marshalov <alone.amper@gmail.com>"
 clickhouse-driver,PyPI,MIT,Copyright (c) 2017 by Konstantin Lebedev.
