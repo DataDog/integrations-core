@@ -23,6 +23,27 @@ def test_aggregated_endpoint(aggregator, dd_run_check, mock_http_response):
     expected_metrics = (
         [
             dict(
+                name='rabbitmq.build_info',
+                value=1,
+                metric_type=aggregator.GAUGE,
+                tags=[
+                    'erlang_version:25.1.2',
+                    'prometheus_client_version:4.9.1',
+                    'prometheus_plugin_version:3.11.3',
+                    'rabbitmq_version:3.11.3',
+                ],
+            ),
+            dict(
+                name='rabbitmq.identity_info',
+                value=1,
+                metric_type=aggregator.GAUGE,
+                tags=[
+                    'rabbitmq_node:rabbit@54cfac2199f1',
+                    "rabbitmq_cluster:rabbit@54cfac2199f1",
+                    "rabbitmq_cluster_permanent_id:rabbitmq-cluster-id-cyw_z6c4UMIBoK51iVq9rw",
+                ],
+            ),
+            dict(
                 name='rabbitmq.erlang.mnesia.committed_transactions.count',
                 value=63,
                 metric_type=aggregator.MONOTONIC_COUNT,
@@ -55,25 +76,25 @@ def test_aggregated_endpoint(aggregator, dd_run_check, mock_http_response):
             dict(name='rabbitmq.erlang.vm.logical_processors.available', value=5, metric_type=aggregator.GAUGE),
             dict(name='rabbitmq.erlang.vm.logical_processors.online', value=5, metric_type=aggregator.GAUGE),
             dict(
-                name='rabbitmq.erlang.vm.memory.atom_bytes',
+                name='rabbitmq.erlang.vm.memory.atom_bytes_total',
                 value=1444606,
                 metric_type=aggregator.GAUGE,
                 tags=['usage:used'],
             ),
             dict(
-                name='rabbitmq.erlang.vm.memory.atom_bytes',
+                name='rabbitmq.erlang.vm.memory.atom_bytes_total',
                 value=22099,
                 metric_type=aggregator.GAUGE,
                 tags=['usage:free'],
             ),
             dict(
-                name='rabbitmq.erlang.vm.memory.bytes',
+                name='rabbitmq.erlang.vm.memory.bytes_total',
                 value=56494241,
                 metric_type=aggregator.GAUGE,
                 tags=["kind:system"],
             ),
             dict(
-                name='rabbitmq.erlang.vm.memory.bytes',
+                name='rabbitmq.erlang.vm.memory.bytes_total',
                 value=20014032,
                 metric_type=aggregator.GAUGE,
                 tags=["kind:processes"],
@@ -81,13 +102,13 @@ def test_aggregated_endpoint(aggregator, dd_run_check, mock_http_response):
             dict(name='rabbitmq.erlang.vm.memory.dets_tables', value=5, metric_type=aggregator.GAUGE),
             dict(name='rabbitmq.erlang.vm.memory.ets_tables', value=199, metric_type=aggregator.GAUGE),
             dict(
-                name='rabbitmq.erlang.vm.memory.processes_bytes',
+                name='rabbitmq.erlang.vm.memory.processes_bytes_total',
                 value=20010912,
                 metric_type=aggregator.GAUGE,
                 tags=["usage:used"],
             ),
             dict(
-                name='rabbitmq.erlang.vm.memory.processes_bytes',
+                name='rabbitmq.erlang.vm.memory.processes_bytes_total',
                 value=3120,
                 metric_type=aggregator.GAUGE,
                 tags=["usage:free"],
@@ -123,8 +144,26 @@ def test_aggregated_endpoint(aggregator, dd_run_check, mock_http_response):
                 value=149674,
                 metric_type=aggregator.MONOTONIC_COUNT,
             ),
+            dict(
+                name='rabbitmq.auth_attempts.failed.count',
+                value=0,
+                metric_type=aggregator.MONOTONIC_COUNT,
+                tags=["protocol:amqp091"],
+            ),
+            dict(
+                name='rabbitmq.auth_attempts.succeeded.count',
+                value=1,
+                metric_type=aggregator.MONOTONIC_COUNT,
+                tags=["protocol:amqp091"],
+            ),
+            dict(
+                name='rabbitmq.auth_attempts.count',
+                value=1,
+                metric_type=aggregator.MONOTONIC_COUNT,
+                tags=["protocol:amqp091"],
+            ),
             dict(name='rabbitmq.erlang.vm.thread_pool_size', value=1, metric_type=aggregator.GAUGE),
-            dict(name='rabbitmq.erlang.vm.wordbytes', value=8, metric_type=aggregator.GAUGE),
+            dict(name='rabbitmq.erlang.vm.wordsize_bytes', value=8, metric_type=aggregator.GAUGE),
             dict(name='rabbitmq.process_start_time_seconds', value=1673261085, metric_type=aggregator.GAUGE),
             dict(name='rabbitmq.channel.acks_uncommitted', value=0, metric_type=aggregator.GAUGE),
             dict(name='rabbitmq.channel.consumers', value=0, metric_type=aggregator.GAUGE),
@@ -132,6 +171,8 @@ def test_aggregated_endpoint(aggregator, dd_run_check, mock_http_response):
             dict(name='rabbitmq.channel.messages.uncommitted', value=0, metric_type=aggregator.GAUGE),
             dict(name='rabbitmq.channel.messages.unconfirmed', value=0, metric_type=aggregator.GAUGE),
             dict(name='rabbitmq.channel.prefetch', value=0, metric_type=aggregator.GAUGE),
+            dict(name='rabbitmq.channel.get.ack.count', value=99, metric_type=aggregator.MONOTONIC_COUNT),
+            dict(name='rabbitmq.channel.get.empty.count', value=55, metric_type=aggregator.MONOTONIC_COUNT),
             dict(name='rabbitmq.channels', value=1, metric_type=aggregator.GAUGE),
             dict(name='rabbitmq.connection.channels', value=1, metric_type=aggregator.GAUGE),
             dict(name='rabbitmq.connection.pending_packets', value=0, metric_type=aggregator.GAUGE),
@@ -168,12 +209,133 @@ def test_aggregated_endpoint(aggregator, dd_run_check, mock_http_response):
             dict(name='rabbitmq.queue.messages.unacked_bytes', value=0, metric_type=aggregator.GAUGE),
             dict(name='rabbitmq.queue.messages.unacked_ram', value=0, metric_type=aggregator.GAUGE),
             dict(name='rabbitmq.queue.process.memory_bytes', value=104736, metric_type=aggregator.GAUGE),
+            dict(name='rabbitmq.channel.messages.acked.count', value=99, metric_type=aggregator.MONOTONIC_COUNT),
+            dict(name='rabbitmq.channel.messages.confirmed.count', value=0, metric_type=aggregator.MONOTONIC_COUNT),
+            dict(name='rabbitmq.channel.messages.delivered.ack.count', value=0, metric_type=aggregator.MONOTONIC_COUNT),
+            dict(
+                name='rabbitmq.channel.messages.delivered.total.count', value=0, metric_type=aggregator.MONOTONIC_COUNT
+            ),
+            dict(name='rabbitmq.channel.messages.published.count', value=100, metric_type=aggregator.MONOTONIC_COUNT),
+            dict(
+                name='rabbitmq.channel.messages.redelivered.total.count',
+                value=0,
+                metric_type=aggregator.MONOTONIC_COUNT,
+            ),
+            dict(
+                name='rabbitmq.channel.messages.unroutable.dropped.count',
+                value=0,
+                metric_type=aggregator.MONOTONIC_COUNT,
+            ),
+            dict(
+                name='rabbitmq.channel.messages.unroutable.returned.count',
+                value=0,
+                metric_type=aggregator.MONOTONIC_COUNT,
+            ),
+            dict(name='rabbitmq.channel.process_reductions.count', value=79928, metric_type=aggregator.MONOTONIC_COUNT),
+            dict(name='rabbitmq.channels.closed.count', value=0, metric_type=aggregator.MONOTONIC_COUNT),
+            dict(name='rabbitmq.channels.opened.count', value=1, metric_type=aggregator.MONOTONIC_COUNT),
+            dict(name='rabbitmq.connection.incoming_bytes.count', value=12400, metric_type=aggregator.MONOTONIC_COUNT),
+            dict(name='rabbitmq.connection.incoming_packets.count', value=201, metric_type=aggregator.MONOTONIC_COUNT),
+            dict(name='rabbitmq.connection.outgoing_bytes.count', value=8800, metric_type=aggregator.MONOTONIC_COUNT),
+            dict(name='rabbitmq.connection.outgoing_packets.count', value=163, metric_type=aggregator.MONOTONIC_COUNT),
+            dict(
+                name='rabbitmq.connection.process_reductions.count', value=60375, metric_type=aggregator.MONOTONIC_COUNT
+            ),
+            dict(name='rabbitmq.connections.closed.count', value=0, metric_type=aggregator.MONOTONIC_COUNT),
+            dict(name='rabbitmq.connections.opened.count', value=1, metric_type=aggregator.MONOTONIC_COUNT),
+            dict(
+                name='rabbitmq.erlang.gc.reclaimed_bytes.count', value=572338064, metric_type=aggregator.MONOTONIC_COUNT
+            ),
+            dict(name='rabbitmq.erlang.gc.runs.count', value=18033, metric_type=aggregator.MONOTONIC_COUNT),
+            dict(
+                name='rabbitmq.erlang.scheduler.context_switches.count',
+                value=300962,
+                metric_type=aggregator.MONOTONIC_COUNT,
+            ),
+            dict(
+                name='rabbitmq.global.messages.acknowledged.count',
+                value=99,
+                metric_type=aggregator.MONOTONIC_COUNT,
+                tags=["protocol:amqp091", "queue_type:rabbit_classic_queue"],
+            ),
+            dict(
+                name='rabbitmq.global.messages.acknowledged.count',
+                value=0,
+                metric_type=aggregator.MONOTONIC_COUNT,
+                tags=["protocol:amqp091", "queue_type:rabbit_quorum_queue"],
+            ),
+            dict(
+                name='rabbitmq.global.messages.acknowledged.count',
+                value=0,
+                metric_type=aggregator.MONOTONIC_COUNT,
+                tags=["protocol:amqp091", "queue_type:rabbit_stream_queue"],
+            ),
+            dict(
+                name='rabbitmq.global.messages.confirmed.count',
+                value=0,
+                metric_type=aggregator.MONOTONIC_COUNT,
+                tags=["protocol:amqp091"],
+            ),
+            dict(
+                name='rabbitmq.global.messages.dead_lettered.confirmed.count',
+                value=0,
+                metric_type=aggregator.MONOTONIC_COUNT,
+                tags=["queue_type:rabbit_quorum_queue", "dead_letter_strategy:at_least_once"],
+            ),
+            dict(
+                name='rabbitmq.global.messages.dead_lettered.delivery_limit.count',
+                value=0,
+                metric_type=aggregator.MONOTONIC_COUNT,
+                tags=["queue_type:rabbit_quorum_queue", "dead_letter_strategy:at_least_once"],
+            ),
+            dict(
+                name='rabbitmq.global.messages.dead_lettered.delivery_limit.count',
+                value=0,
+                metric_type=aggregator.MONOTONIC_COUNT,
+                tags=["queue_type:rabbit_quorum_queue", "dead_letter_strategy:at_most_once"],
+            ),
+            dict(
+                name='rabbitmq.global.messages.dead_lettered.delivery_limit.count',
+                value=0,
+                metric_type=aggregator.MONOTONIC_COUNT,
+                tags=["queue_type:rabbit_quorum_queue", "dead_letter_strategy:disabled"],
+            ),
+            dict(
+                name='rabbitmq.global.messages.dead_lettered.expired.count',
+                value=0,
+                metric_type=aggregator.MONOTONIC_COUNT,
+                tags=["queue_type:rabbit_quorum_queue", "dead_letter_strategy:at_least_once"],
+            ),
+            dict(
+                name='rabbitmq.global.messages.dead_lettered.expired.count',
+                value=0,
+                metric_type=aggregator.MONOTONIC_COUNT,
+                tags=["queue_type:rabbit_quorum_queue", "dead_letter_strategy:at_most_once"],
+            ),
+            dict(
+                name='rabbitmq.global.messages.dead_lettered.expired.count',
+                value=0,
+                metric_type=aggregator.MONOTONIC_COUNT,
+                tags=["queue_type:rabbit_quorum_queue", "dead_letter_strategy:disabled"],
+            ),
+            dict(
+                name='rabbitmq.global.messages.dead_lettered.expired.count',
+                value=0,
+                metric_type=aggregator.MONOTONIC_COUNT,
+                tags=["queue_type:rabbit_classic_queue", "dead_letter_strategy:at_most_once"],
+            ),
+            dict(
+                name='rabbitmq.global.messages.dead_lettered.expired.count',
+                value=0,
+                metric_type=aggregator.MONOTONIC_COUNT,
+                tags=["queue_type:rabbit_classic_queue", "dead_letter_strategy:disabled"],
+            ),
             dict(name='rabbitmq.queues', value=3, metric_type=aggregator.GAUGE),
             dict(name='rabbitmq.raft.entry_commit_latency_seconds', value=0, metric_type=aggregator.GAUGE),
-            dict(name='rabbitmq.raft.log_commit_index', value=0, metric_type=aggregator.GAUGE),
-            dict(name='rabbitmq.raft.log_last_applied_index', value=0, metric_type=aggregator.GAUGE),
-            dict(name='rabbitmq.raft.log_last_written_index', value=0, metric_type=aggregator.GAUGE),
-            dict(name='rabbitmq.raft.log_snapshot_index', value=0, metric_type=aggregator.GAUGE),
+            dict(name='rabbitmq.raft.log.commit_index', value=0, metric_type=aggregator.GAUGE),
+            dict(name='rabbitmq.raft.log.last_applied_index', value=0, metric_type=aggregator.GAUGE),
+            dict(name='rabbitmq.raft.log.last_written_index', value=0, metric_type=aggregator.GAUGE),
+            dict(name='rabbitmq.raft.log.snapshot_index', value=0, metric_type=aggregator.GAUGE),
             dict(name='rabbitmq.resident_memory_limit_bytes', value=3293159424, metric_type=aggregator.GAUGE),
         ]
         + [
@@ -201,7 +363,7 @@ def test_aggregated_endpoint(aggregator, dd_run_check, mock_http_response):
         ]
         + [
             dict(
-                name='rabbitmq.erlang.vm.memory.system_bytes',
+                name='rabbitmq.erlang.vm.memory.system_bytes_total',
                 value=v,
                 metric_type=aggregator.GAUGE,
                 tags=[f"usage:{usage}"],
@@ -224,4 +386,10 @@ def test_aggregated_endpoint(aggregator, dd_run_check, mock_http_response):
         value=0.0,
         metric_type=aggregator.GAUGE,
         at_least=392,
+    )
+    aggregator.assert_metric(
+        name='rabbitmq.erlang.vm.msacc.alloc_seconds.count',
+        value=0,
+        metric_type=aggregator.MONOTONIC_COUNT,
+        at_least=23,
     )
