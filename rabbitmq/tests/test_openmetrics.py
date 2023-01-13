@@ -4,7 +4,7 @@ from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.rabbitmq import RabbitMQ
 
 from .common import DEFAULT_OM_TAGS, HERE
-from .metrics import DEFAULT_OPENMETRICS
+from .metrics import DEFAULT_OPENMETRICS, MISSING_OPENMETRICS
 
 OPENMETRICS_RESPONSE_FIXTURES = HERE / Path('fixtures')
 
@@ -36,6 +36,9 @@ def test_aggregated_endpoint(aggregator, dd_run_check, mock_http_response):
 
     for m in DEFAULT_OPENMETRICS:
         aggregator.assert_metric(m)
+
+    for m in MISSING_OPENMETRICS:
+        aggregator.assert_metric(m, at_least=0)
 
     aggregator.assert_metric('rabbitmq.build_info', tags=DEFAULT_OM_TAGS + build_info_tags)
     aggregator.assert_metric('rabbitmq.identity_info', tags=DEFAULT_OM_TAGS + identity_info_tags)
