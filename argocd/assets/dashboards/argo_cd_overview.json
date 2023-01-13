@@ -14,9 +14,27 @@
             "default": "*",
             "name": "kube_cluster_name",
             "prefix": "kube_cluster_name"
+        },
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "kube_namespace",
+            "prefix": "kube_namespace"
+        },
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "health_status",
+            "prefix": "health_status"
+        },
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "repo",
+            "prefix": "repo"
         }
     ],
-    "title": "ArgoCD",
+    "title": "Argo CD Overview",
     "widgets": [
         {
             "definition": {
@@ -29,8 +47,8 @@
                     {
                         "definition": {
                             "background_color": "transparent",
-                            "content": "\n# Our Argo CD dashboard gives you broad visibility into your Argo CD Clusters\n\nThis dashboard provides a high-level overview of your Argo CD clusters so that you can monitor its deployments, performance and and the overall health of the cluster.",
-                            "font_size": "16",
+                            "content": "This dashboard provides a high-level overview of your Argo CD clusters so that you can monitor its deployments, performance and and the overall health of the cluster\n\nUsing the dashboard, you can monitor the health of\n* Application Controller\n* API Server\n* Repository Server",
+                            "font_size": "14",
                             "has_padding": true,
                             "show_tick": false,
                             "text_align": "left",
@@ -41,8 +59,8 @@
                         },
                         "id": 7137252396065106,
                         "layout": {
-                            "height": 2,
-                            "width": 6,
+                            "height": 3,
+                            "width": 4,
                             "x": 0,
                             "y": 0
                         }
@@ -50,8 +68,8 @@
                     {
                         "definition": {
                             "background_color": "transparent",
-                            "content": "\n# Useful Links\n\n- [Datadog Argo CD Integration Documentation](https://docs.datadoghq.com/integrations/argocd/)\n- [Argo CD Official Documentation](https://argo-cd.readthedocs.io/en/latest/)",
-                            "font_size": "16",
+                            "content": "\n### Useful Links\n- [Datadog Argo CD Integration Documentation](https://docs.datadoghq.com/integrations/argocd/)\n- [Argo CD Official Documentation](https://argo-cd.readthedocs.io/en/latest/)",
+                            "font_size": "14",
                             "has_padding": true,
                             "show_tick": false,
                             "text_align": "left",
@@ -63,16 +81,16 @@
                         "id": 5723783152443636,
                         "layout": {
                             "height": 2,
-                            "width": 6,
+                            "width": 4,
                             "x": 0,
-                            "y": 2
+                            "y": 3
                         }
                     }
                 ]
             },
             "id": 8741772350597652,
             "layout": {
-                "height": 7,
+                "height": 8,
                 "width": 6,
                 "x": 0,
                 "y": 0
@@ -80,140 +98,158 @@
         },
         {
             "definition": {
-                "autoscale": true,
-                "precision": 2,
-                "requests": [
+                "background_color": "vivid_purple",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Overview",
+                "type": "group",
+                "widgets": [
                     {
-                        "formulas": [
-                            {
-                                "formula": "query1"
-                            }
-                        ],
-                        "queries": [
-                            {
-                                "aggregator": "max",
-                                "data_source": "metrics",
-                                "name": "query1",
-                                "query": "count:argocd.api_server.go.goroutines{$host,$kube_cluster_name}"
-                            }
-                        ],
-                        "response_format": "scalar"
-                    }
-                ],
-                "title": "# of Application Controllers",
-                "title_align": "left",
-                "title_size": "16",
-                "type": "query_value"
-            },
-            "id": 8391951914104866,
-            "layout": {
-                "height": 2,
-                "width": 2,
-                "x": 6,
-                "y": 0
-            }
-        },
-        {
-            "definition": {
-                "autoscale": true,
-                "precision": 2,
-                "requests": [
+                        "definition": {
+                            "autoscale": true,
+                            "precision": 2,
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "max",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "count:argocd.api_server.go.goroutines{$host,$kube_cluster_name,$kube_namespace}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "title": "# of Application Controllers",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 8391951914104866,
+                        "layout": {
+                            "height": 2,
+                            "width": 2,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
                     {
-                        "formulas": [
-                            {
-                                "formula": "query1"
-                            }
-                        ],
-                        "queries": [
-                            {
-                                "aggregator": "max",
-                                "data_source": "metrics",
-                                "name": "query1",
-                                "query": "count:argocd.api_server.go.goroutines{$host,$kube_cluster_name}"
-                            }
-                        ],
-                        "response_format": "scalar"
-                    }
-                ],
-                "title": "# of API Servers",
-                "title_align": "left",
-                "title_size": "16",
-                "type": "query_value"
-            },
-            "id": 2764269609392968,
-            "layout": {
-                "height": 2,
-                "width": 2,
-                "x": 8,
-                "y": 0
-            }
-        },
-        {
-            "definition": {
-                "autoscale": true,
-                "precision": 2,
-                "requests": [
+                        "definition": {
+                            "autoscale": true,
+                            "precision": 2,
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "max",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "count:argocd.repo_server.go.goroutines{$host,$kube_cluster_name,$kube_namespace}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "title": "# of Repository Servers",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 3083362413703058,
+                        "layout": {
+                            "height": 2,
+                            "width": 2,
+                            "x": 2,
+                            "y": 0
+                        }
+                    },
                     {
-                        "formulas": [
-                            {
-                                "formula": "query1"
-                            }
-                        ],
-                        "queries": [
-                            {
-                                "aggregator": "max",
-                                "data_source": "metrics",
-                                "name": "query1",
-                                "query": "count:argocd.repo_server.go.goroutines{$host,$kube_cluster_name}"
-                            }
-                        ],
-                        "response_format": "scalar"
+                        "definition": {
+                            "autoscale": true,
+                            "precision": 2,
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "max",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "count:argocd.api_server.go.goroutines{$host,$kube_cluster_name,$kube_namespace}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "title": "# of API Servers",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 2764269609392968,
+                        "layout": {
+                            "height": 2,
+                            "width": 2,
+                            "x": 4,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "group": [
+                                "cluster_name"
+                            ],
+                            "no_group_hosts": true,
+                            "no_metric_hosts": true,
+                            "node_type": "host",
+                            "requests": {
+                                "fill": {
+                                    "q": "avg:system.load.1{field:apps:argocd,$host,$kube_cluster_name,$kube_namespace} by {host}"
+                                }
+                            },
+                            "scope": [
+                                "field:apps:argocd"
+                            ],
+                            "style": {
+                                "palette": "green_to_orange",
+                                "palette_flip": false
+                            },
+                            "title": "Host Reporting Argo CD Metrics by Cluster",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "hostmap"
+                        },
+                        "id": 148852812141642,
+                        "layout": {
+                            "height": 5,
+                            "width": 6,
+                            "x": 0,
+                            "y": 2
+                        }
                     }
-                ],
-                "title": "# of Repository Servers",
-                "title_align": "left",
-                "title_size": "16",
-                "type": "query_value"
+                ]
             },
-            "id": 3083362413703058,
+            "id": 2293131439045202,
             "layout": {
-                "height": 2,
-                "width": 2,
-                "x": 10,
-                "y": 0
-            }
-        },
-        {
-            "definition": {
-                "group": [
-                    "cluster_name"
-                ],
-                "no_group_hosts": true,
-                "no_metric_hosts": true,
-                "node_type": "host",
-                "requests": {
-                    "fill": {
-                        "q": "avg:system.load.1{field:apps:argocd,$host,$kube_cluster_name} by {host}"
-                    }
-                },
-                "scope": [
-                    "field:apps:argocd"
-                ],
-                "style": {
-                    "palette": "green_to_orange",
-                    "palette_flip": false
-                },
-                "title": "Host Reporting Argo CD Metrics by Cluster",
-                "title_align": "left",
-                "title_size": "16",
-                "type": "hostmap"
-            },
-            "id": 148852812141642,
-            "layout": {
-                "height": 5,
+                "height": 8,
                 "width": 6,
                 "x": 6,
-                "y": 2
+                "y": 0
             }
         },
         {
@@ -242,7 +278,7 @@
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "count:argocd.app_controller.app.info{$host,$kube_cluster_name} by {repo,host}"
+                                            "query": "count:argocd.app_controller.app.info{$host,$kube_cluster_name,$health_status,$kube_namespace,$repo} by {repo,host,name}"
                                         }
                                     ],
                                     "response_format": "scalar"
@@ -284,14 +320,14 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:argocd.app_controller.app.info{$host,$kube_cluster_name} by {host}"
+                                            "query": "sum:argocd.app_controller.app.info{$host,$kube_cluster_name,$health_status,$kube_namespace,$repo} by {host}"
                                         }
                                     ],
                                     "response_format": "timeseries",
                                     "style": {
                                         "line_type": "solid",
                                         "line_width": "normal",
-                                        "palette": "dog_classic"
+                                        "palette": "blue"
                                     }
                                 }
                             ],
@@ -324,7 +360,7 @@
                                     "display_type": "bars",
                                     "formulas": [
                                         {
-                                            "alias": "Number of Unsynced Applications",
+                                            "alias": "Application not Synced",
                                             "formula": "query1"
                                         }
                                     ],
@@ -332,7 +368,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:argocd.app_controller.app.info{!sync_status:synced,$host,$kube_cluster_name} by {sync_status,host}"
+                                            "query": "sum:argocd.app_controller.app.info{!sync_status:synced,$host,$kube_cluster_name,$health_status,$kube_namespace,$repo} by {sync_status,host,name}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -344,7 +380,7 @@
                                 }
                             ],
                             "show_legend": true,
-                            "title": "Number of Applications out of Sync",
+                            "title": "Applications Not in Sync by Status",
                             "title_align": "left",
                             "title_size": "16",
                             "type": "timeseries"
@@ -380,14 +416,14 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:argocd.app_controller.app.sync.count{$host,$kube_cluster_name} by {host}.as_count()"
+                                            "query": "sum:argocd.app_controller.app.sync.count{$host,$kube_cluster_name,$health_status,$kube_namespace,$repo} by {host}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
                                     "style": {
                                         "line_type": "solid",
                                         "line_width": "normal",
-                                        "palette": "dog_classic"
+                                        "palette": "blue"
                                     }
                                 }
                             ],
@@ -402,7 +438,7 @@
                             "height": 3,
                             "width": 6,
                             "x": 0,
-                            "y": 8
+                            "y": 7
                         }
                     },
                     {
@@ -428,14 +464,14 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:argocd.app_controller.app.sync.count{!phase:succeeded,$host,$kube_cluster_name} by {phase,host}.as_count()"
+                                            "query": "sum:argocd.app_controller.app.sync.count{!phase:succeeded,$host,$kube_cluster_name,$health_status,$kube_namespace,$repo} by {phase,host}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
                                     "style": {
                                         "line_type": "solid",
                                         "line_width": "normal",
-                                        "palette": "dog_classic"
+                                        "palette": "blue"
                                     }
                                 }
                             ],
@@ -450,7 +486,7 @@
                             "height": 3,
                             "width": 6,
                             "x": 6,
-                            "y": 8
+                            "y": 7
                         }
                     },
                     {
@@ -471,7 +507,7 @@
                             "height": 1,
                             "width": 12,
                             "x": 0,
-                            "y": 12
+                            "y": 10
                         }
                     },
                     {
@@ -497,7 +533,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:argocd.app_controller.go.memstats.heap.alloc_bytes{$host,$kube_cluster_name} by {cluster_name,host}"
+                                            "query": "avg:argocd.app_controller.go.memstats.heap.alloc_bytes{$host,$kube_cluster_name,$kube_namespace} by {cluster_name,host}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -519,7 +555,7 @@
                             "height": 3,
                             "width": 4,
                             "x": 0,
-                            "y": 13
+                            "y": 11
                         }
                     },
                     {
@@ -545,7 +581,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:argocd.app_controller.go.goroutines{$host,$kube_cluster_name} by {kube_namespace,host}"
+                                            "query": "avg:argocd.app_controller.go.goroutines{$host,$kube_cluster_name,$kube_namespace} by {kube_namespace,host}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -567,7 +603,7 @@
                             "height": 3,
                             "width": 4,
                             "x": 4,
-                            "y": 13
+                            "y": 11
                         }
                     },
                     {
@@ -593,7 +629,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:argocd.app_controller.process.cpu.seconds.count{$host,$kube_cluster_name} by {kube_namespace,host}.as_count()"
+                                            "query": "sum:argocd.app_controller.process.cpu.seconds.count{$host,$kube_cluster_name,$kube_namespace} by {kube_namespace,host}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -615,17 +651,17 @@
                             "height": 3,
                             "width": 4,
                             "x": 8,
-                            "y": 13
+                            "y": 11
                         }
                     }
                 ]
             },
             "id": 3103904444573384,
             "layout": {
-                "height": 17,
+                "height": 1,
                 "width": 12,
                 "x": 0,
-                "y": 7
+                "y": 8
             }
         },
         {
@@ -659,14 +695,14 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:argocd.app_controller.app.reconcile.count{$host,$kube_cluster_name} by {namespace,host}.as_count()"
+                                            "query": "sum:argocd.app_controller.app.reconcile.count{$host,$kube_cluster_name,$kube_namespace} by {namespace,host}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
                                     "style": {
                                         "line_type": "solid",
                                         "line_width": "normal",
-                                        "palette": "dog_classic"
+                                        "palette": "orange"
                                     }
                                 }
                             ],
@@ -707,14 +743,14 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:argocd.app_controller.app.reconcile.bucket{$host,$kube_cluster_name} by {upper_bound,host}.as_count()"
+                                            "query": "sum:argocd.app_controller.app.reconcile.bucket{$host,$kube_cluster_name,$kube_namespace} by {upper_bound,host}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
                                     "style": {
                                         "line_type": "solid",
                                         "line_width": "normal",
-                                        "palette": "dog_classic"
+                                        "palette": "orange"
                                     }
                                 }
                             ],
@@ -755,12 +791,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:argocd.app_controller.workqueue.depth{$host,$kube_cluster_name} by {host,kube_cluster_name}"
+                                            "query": "sum:argocd.app_controller.workqueue.depth{$host,$kube_cluster_name,$kube_namespace} by {host,kube_cluster_name}"
                                         }
                                     ],
                                     "response_format": "timeseries",
                                     "style": {
-                                        "palette": "dog_classic"
+                                        "palette": "orange"
                                     }
                                 }
                             ],
@@ -807,12 +843,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:argocd.app_controller.app.k8s.request.count{$host,$kube_cluster_name} by {host,kube_cluster_name}.as_count()"
+                                            "query": "sum:argocd.app_controller.app.k8s.request.count{$host,$kube_cluster_name,$kube_namespace} by {host,kube_cluster_name}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
                                     "style": {
-                                        "palette": "dog_classic"
+                                        "palette": "orange"
                                     }
                                 }
                             ],
@@ -859,12 +895,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:argocd.app_controller.kubectl.exec.count{$host,$kube_cluster_name} by {host,kube_cluster_name}.as_count()"
+                                            "query": "sum:argocd.app_controller.kubectl.exec.count{$host,$kube_cluster_name,$kube_namespace} by {host,kube_cluster_name}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
                                     "style": {
-                                        "palette": "dog_classic"
+                                        "palette": "orange"
                                     }
                                 }
                             ],
@@ -911,12 +947,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:argocd.app_controller.kubectl.exec.pending{$host,$kube_cluster_name} by {host,kube_cluster_name}"
+                                            "query": "sum:argocd.app_controller.kubectl.exec.pending{$host,$kube_cluster_name,$kube_namespace} by {host,kube_cluster_name}"
                                         }
                                     ],
                                     "response_format": "timeseries",
                                     "style": {
-                                        "palette": "dog_classic"
+                                        "palette": "orange"
                                     }
                                 }
                             ],
@@ -944,15 +980,15 @@
             },
             "id": 8970831812548910,
             "layout": {
-                "height": 10,
+                "height": 1,
                 "width": 12,
                 "x": 0,
-                "y": 24
+                "y": 9
             }
         },
         {
             "definition": {
-                "background_color": "vivid_blue",
+                "background_color": "vivid_purple",
                 "layout_type": "ordered",
                 "show_title": true,
                 "title": "Server Stats",
@@ -981,14 +1017,14 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:argocd.api_server.grpc.server.handled.count{$host,$kube_cluster_name} by {grpc_service,kube_cluster_name,host}.as_count()"
+                                            "query": "sum:argocd.api_server.grpc.server.handled.count{$host,$kube_cluster_name,$kube_namespace} by {grpc_service,kube_cluster_name,host}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
                                     "style": {
                                         "line_type": "solid",
                                         "line_width": "normal",
-                                        "palette": "dog_classic"
+                                        "palette": "purple"
                                     }
                                 }
                             ],
@@ -1029,14 +1065,14 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:argocd.api_server.grpc.server.handled.count{grpc_service:cluster.clusterservice,$host,$kube_cluster_name} by {grpc_code,grpc_method,host,kube_cluster_name}.as_count()"
+                                            "query": "sum:argocd.api_server.grpc.server.handled.count{grpc_service:cluster.clusterservice,$host,$kube_cluster_name,$kube_namespace} by {grpc_code,grpc_method,host,kube_cluster_name}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
                                     "style": {
                                         "line_type": "solid",
                                         "line_width": "normal",
-                                        "palette": "dog_classic"
+                                        "palette": "purple"
                                     }
                                 }
                             ],
@@ -1077,14 +1113,14 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:argocd.api_server.grpc.server.handled.count{grpc_service:application.applicationservice,$host,$kube_cluster_name} by {grpc_code,grpc_method,host,kube_cluster_name}.as_count()"
+                                            "query": "sum:argocd.api_server.grpc.server.handled.count{grpc_service:application.applicationservice,$host,$kube_cluster_name,$kube_namespace} by {grpc_code,grpc_method,host,kube_cluster_name}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
                                     "style": {
                                         "line_type": "solid",
                                         "line_width": "normal",
-                                        "palette": "dog_classic"
+                                        "palette": "purple"
                                     }
                                 }
                             ],
@@ -1125,14 +1161,14 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:argocd.api_server.grpc.server.handled.count{grpc_service:repository.repositoryservice,$host,$kube_cluster_name} by {grpc_code,grpc_method,kube_cluster_name,host}.as_count()"
+                                            "query": "sum:argocd.api_server.grpc.server.handled.count{grpc_service:repository.repositoryservice,$host,$kube_cluster_name,$kube_namespace} by {grpc_code,grpc_method,kube_cluster_name,host}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
                                     "style": {
                                         "line_type": "solid",
                                         "line_width": "normal",
-                                        "palette": "dog_classic"
+                                        "palette": "purple"
                                     }
                                 }
                             ],
@@ -1173,14 +1209,14 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:argocd.api_server.grpc.server.handled.count{grpc_service:session.sessionservice,$host,$kube_cluster_name} by {grpc_code,grpc_method,kube_cluster_name,host}.as_count()"
+                                            "query": "sum:argocd.api_server.grpc.server.handled.count{grpc_service:session.sessionservice,$host,$kube_cluster_name,$kube_namespace} by {grpc_code,grpc_method,kube_cluster_name,host}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
                                     "style": {
                                         "line_type": "solid",
                                         "line_width": "normal",
-                                        "palette": "dog_classic"
+                                        "palette": "purple"
                                     }
                                 }
                             ],
@@ -1221,14 +1257,14 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:argocd.api_server.grpc.server.handled.count{grpc_service:version.versionservice,$host,$kube_cluster_name} by {grpc_code,grpc_method,kube_cluster_name}.as_count()"
+                                            "query": "sum:argocd.api_server.grpc.server.handled.count{grpc_service:version.versionservice,$host,$kube_cluster_name,$kube_namespace} by {grpc_code,grpc_method,kube_cluster_name}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
                                     "style": {
                                         "line_type": "solid",
                                         "line_width": "normal",
-                                        "palette": "dog_classic"
+                                        "palette": "purple"
                                     }
                                 }
                             ],
@@ -1269,14 +1305,14 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:argocd.api_server.grpc.server.handled.count{grpc_service:account.accountservice,$host,$kube_cluster_name} by {grpc_code,grpc_method,kube_cluster_name,host}.as_count()"
+                                            "query": "sum:argocd.api_server.grpc.server.handled.count{grpc_service:account.accountservice,$host,$kube_cluster_name,$kube_namespace} by {grpc_code,grpc_method,kube_cluster_name,host}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
                                     "style": {
                                         "line_type": "solid",
                                         "line_width": "normal",
-                                        "palette": "dog_classic"
+                                        "palette": "purple"
                                     }
                                 }
                             ],
@@ -1317,14 +1353,14 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:argocd.api_server.grpc.server.handled.count{grpc_service:cluster.settingsservice,$host,$kube_cluster_name} by {grpc_code,grpc_method,host,kube_cluster_name}.as_count()"
+                                            "query": "sum:argocd.api_server.grpc.server.handled.count{grpc_service:cluster.settingsservice,$host,$kube_cluster_name,$kube_namespace} by {grpc_code,grpc_method,host,kube_cluster_name}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
                                     "style": {
                                         "line_type": "solid",
                                         "line_width": "normal",
-                                        "palette": "dog_classic"
+                                        "palette": "purple"
                                     }
                                 }
                             ],
@@ -1344,7 +1380,7 @@
                     },
                     {
                         "definition": {
-                            "background_color": "blue",
+                            "background_color": "purple",
                             "content": "API Server Telemetry",
                             "font_size": "18",
                             "has_padding": true,
@@ -1386,7 +1422,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:argocd.api_server.go.memstats.heap.alloc_bytes{$host,$kube_cluster_name} by {host,kube_cluster_name}"
+                                            "query": "avg:argocd.api_server.go.memstats.heap.alloc_bytes{$host,$kube_cluster_name,$kube_namespace} by {host,kube_cluster_name}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1434,7 +1470,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:argocd.api_server.go.goroutines{$host,$kube_cluster_name} by {host,kube_cluster_name}"
+                                            "query": "avg:argocd.api_server.go.goroutines{$host,$kube_cluster_name,$kube_namespace} by {host,kube_cluster_name}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1482,7 +1518,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:argocd.api_server.process.cpu.seconds.count{$host,$kube_cluster_name} by {host,kube_cluster_name}.as_count()"
+                                            "query": "sum:argocd.api_server.process.cpu.seconds.count{$host,$kube_cluster_name,$kube_namespace} by {host,kube_cluster_name}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1511,18 +1547,18 @@
             },
             "id": 2661663506447074,
             "layout": {
-                "height": 17,
+                "height": 1,
                 "width": 12,
                 "x": 0,
-                "y": 34
+                "y": 10
             }
         },
         {
             "definition": {
-                "background_color": "vivid_orange",
+                "background_color": "vivid_green",
                 "layout_type": "ordered",
                 "show_title": true,
-                "title": "Repo Server Stats",
+                "title": "Repository Server Stats",
                 "type": "group",
                 "widgets": [
                     {
@@ -1548,7 +1584,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:argocd.repo_server.git.request.count{request_type:ls-remote,$host,$kube_cluster_name} by {host,kube_cluster_name}.as_count()"
+                                            "query": "sum:argocd.repo_server.git.request.count{request_type:ls-remote,$host,$kube_cluster_name,$kube_namespace} by {host,kube_cluster_name}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1595,7 +1631,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:argocd.repo_server.git.request.duration.seconds.bucket{request_type:ls-remote,$host,$kube_cluster_name} by {upper_bound,kube_cluster_name}.as_count()"
+                                            "query": "sum:argocd.repo_server.git.request.duration.seconds.bucket{request_type:ls-remote,$host,$kube_cluster_name,$kube_namespace} by {upper_bound,kube_cluster_name}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1641,7 +1677,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:argocd.repo_server.git.request.count{request_type:fetch,$host,$kube_cluster_name}.as_count()"
+                                            "query": "sum:argocd.repo_server.git.request.count{request_type:fetch,$host,$kube_cluster_name,$kube_namespace}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1688,7 +1724,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:argocd.repo_server.git.request.duration.seconds.bucket{request_type:fetch,kube_cluster_name,$host,$kube_cluster_name}.as_count()"
+                                            "query": "sum:argocd.repo_server.git.request.duration.seconds.bucket{request_type:fetch,kube_cluster_name,$host,$kube_cluster_name,$kube_namespace}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1734,7 +1770,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:argocd.api_server.redis.request.count{$host,$kube_cluster_name} by {host,kube_cluster_name}.as_count()"
+                                            "query": "sum:argocd.api_server.redis.request.count{$host,$kube_cluster_name,$kube_namespace} by {host,kube_cluster_name}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1782,7 +1818,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:argocd.api_server.redis.request.count{failed:true,$host,$kube_cluster_name} by {host,kube_cluster_name}.as_count()"
+                                            "query": "sum:argocd.api_server.redis.request.count{failed:true,$host,$kube_cluster_name,$kube_namespace} by {host,kube_cluster_name}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1809,7 +1845,7 @@
                     },
                     {
                         "definition": {
-                            "background_color": "orange",
+                            "background_color": "green",
                             "content": "Repository Server Telemetry",
                             "font_size": "18",
                             "has_padding": true,
@@ -1851,7 +1887,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:argocd.repo_server.go.memstats.heap.alloc_bytes{$host,$kube_cluster_name} by {kube_cluster_name,host}"
+                                            "query": "avg:argocd.repo_server.go.memstats.heap.alloc_bytes{$host,$kube_cluster_name,$kube_namespace} by {kube_cluster_name,host}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1899,7 +1935,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:argocd.repo_server.go.goroutines{$host,$kube_cluster_name} by {host,kube_cluster_name}"
+                                            "query": "avg:argocd.repo_server.go.goroutines{$host,$kube_cluster_name,$kube_namespace} by {host,kube_cluster_name}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1947,7 +1983,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:argocd.repo_server.process.cpu.seconds.count{$host,$kube_cluster_name} by {host,kube_cluster_name}.as_count()"
+                                            "query": "sum:argocd.repo_server.process.cpu.seconds.count{$host,$kube_cluster_name,$kube_namespace} by {host,kube_cluster_name}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1976,15 +2012,15 @@
             },
             "id": 444244913319832,
             "layout": {
-                "height": 14,
+                "height": 1,
                 "width": 12,
                 "x": 0,
-                "y": 51
+                "y": 11
             }
         },
         {
             "definition": {
-                "background_color": "vivid_green",
+                "background_color": "vivid_orange",
                 "layout_type": "ordered",
                 "show_title": true,
                 "title": "Cluster Stats",
@@ -2013,14 +2049,14 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:argocd.app_controller.cluster.api.resource_objects{$host,$kube_cluster_name} by {host,kube_cluster_name}"
+                                            "query": "avg:argocd.app_controller.cluster.api.resource_objects{$host,$kube_cluster_name,$kube_namespace} by {host,kube_cluster_name}"
                                         }
                                     ],
                                     "response_format": "timeseries",
                                     "style": {
                                         "line_type": "solid",
                                         "line_width": "normal",
-                                        "palette": "dog_classic"
+                                        "palette": "green"
                                     }
                                 }
                             ],
@@ -2061,14 +2097,14 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:argocd.app_controller.cluster_api_resources{$host,$kube_cluster_name} by {host,kube_cluster_name}"
+                                            "query": "avg:argocd.app_controller.cluster_api_resources{$host,$kube_cluster_name,$kube_namespace} by {host,kube_cluster_name}"
                                         }
                                     ],
                                     "response_format": "timeseries",
                                     "style": {
                                         "line_type": "solid",
                                         "line_width": "normal",
-                                        "palette": "dog_classic"
+                                        "palette": "green"
                                     }
                                 }
                             ],
@@ -2109,14 +2145,14 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:argocd.app_controller.cluster.events.count{$host,$kube_cluster_name} by {host,kube_cluster_name}"
+                                            "query": "avg:argocd.app_controller.cluster.events.count{$host,$kube_cluster_name,$kube_namespace} by {host,kube_cluster_name}"
                                         }
                                     ],
                                     "response_format": "timeseries",
                                     "style": {
                                         "line_type": "solid",
                                         "line_width": "normal",
-                                        "palette": "dog_classic"
+                                        "palette": "green"
                                     }
                                 }
                             ],
@@ -2157,14 +2193,14 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:argocd.app_controller.cluster.cache.age.seconds{$host,$kube_cluster_name} by {host,kube_cluster_name}"
+                                            "query": "avg:argocd.app_controller.cluster.cache.age.seconds{$host,$kube_cluster_name,$kube_namespace} by {host,kube_cluster_name}"
                                         }
                                     ],
                                     "response_format": "timeseries",
                                     "style": {
                                         "line_type": "solid",
                                         "line_width": "normal",
-                                        "palette": "dog_classic"
+                                        "palette": "green"
                                     }
                                 }
                             ],
@@ -2186,11 +2222,11 @@
             },
             "id": 5257189791506674,
             "layout": {
-                "height": 7,
+                "height": 1,
                 "is_column_break": true,
                 "width": 12,
                 "x": 0,
-                "y": 65
+                "y": 12
             }
         }
     ]
