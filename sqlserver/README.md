@@ -8,7 +8,7 @@ The SQL Server check tracks the performance of your SQL Server instances. It col
 
 You can also create your own metrics by having the check run custom queries.
 
-Supports SQL Server 2012 and above, all editions.
+All editions of SQL Server 2012 and above are supported.
 
 ## Setup
 
