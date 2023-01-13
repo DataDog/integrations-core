@@ -171,7 +171,8 @@ def instance():
 
 def pytest_collection_modifyitems(config, items):
     for item in items:
-        if "openmetrics" in os.path.relpath(item.fspath, start=config.rootdir):
+        rootdir = str(config.rootdir)  # We convert config.rootdir to str for PY2 compatibility.
+        if "openmetrics" in os.path.relpath(item.fspath, start=rootdir):
             item.add_marker(
                 pytest.mark.skipif(
                     RABBITMQ_VERSION < version.parse("3.8"),
