@@ -184,6 +184,9 @@ class PostgresMetricsCache:
         return self.replication_stats_metrics
 
     def get_wait_event_metrics(self, version):
+        if version < V9_6:
+            return
+
         metrics_data = self.wait_event_metrics
         if metrics_data is None:
             excluded_aggregations = self.config.activity_metrics_excluded_aggregations
