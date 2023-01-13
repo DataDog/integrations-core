@@ -169,13 +169,7 @@ def instance():
     return CONFIG
 
 
-def pytest_collection_modifyitems(config, items):
-    for item in items:
-        rootdir = str(config.rootdir)  # We convert config.rootdir to str for PY2 compatibility.
-        if "openmetrics" in os.path.relpath(item.fspath, start=rootdir):
-            item.add_marker(
-                pytest.mark.skipif(
-                    RABBITMQ_VERSION < version.parse("3.8"),
-                    reason='No openmetrics support in rabbitmq <3.8',
-                )
-            )
+# https://docs.pytest.org/en/7.1.x/example/pythoncollection.html#customizing-test-collection
+collect_ignore_glob = []
+if RABBITMQ_VERSION < version.parse("3.8"):
+    collect_ignore_glob.append("*openmetrics*")
