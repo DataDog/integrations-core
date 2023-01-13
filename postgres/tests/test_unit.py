@@ -11,6 +11,11 @@ from pytest import fail
 from semver import VersionInfo
 from six import iteritems
 
+from .common import (
+    DB_NAME,
+    PORT,
+)
+
 from datadog_checks.postgres import PostgreSql, util
 from datadog_checks.postgres.version_utils import VersionUtils
 
@@ -260,6 +265,33 @@ def test_replication_stats(aggregator, integration_check, pg_instance):
     aggregator.assert_all_metrics_covered()
 
 
+def test_replication_tag(aggregator, integration_check, pg_instance):
+    REPLICATION_TAG_TEST_METRIC = 'postgresql.db.count'
+   
+    expected_tags = pg_instance['tags'] + ['port:{}'.format(PORT)]
+    check = integration_check(pg_instance)
+    
+    #default configuration (no replication)
+    check.check(pg_instance)
+    aggregator.assert_metric(REPLICATION_TAG_TEST_METRIC, tags=expected_tags) 
+    aggregator.reset()
+    
+    #role = master
+    pg_instance['tag_replication_role'] = True
+    check = integration_check(pg_instance)
+
+    check.check(pg_instance)
+    ROLE_TAG = "replication_role:master"
+    aggregator.assert_metric(REPLICATION_TAG_TEST_METRIC, tags=expected_tags + [ROLE_TAG]) 
+    aggregator.reset()
+   
+    #switchover: master -> standby
+    STANDBY = "standby"
+    check._get_replication_role = MagicMock(return_value=STANDBY)
+    check.check(pg_instance)
+    ROLE_TAG = "replication_role:{}".format(STANDBY)
+    aggregator.assert_metric(REPLICATION_TAG_TEST_METRIC, tags=expected_tags + [ROLE_TAG]) 
+    
 def test_query_timeout_connection_string(aggregator, integration_check, pg_instance):
     pg_instance['password'] = ''
     pg_instance['query_timeout'] = 1000
