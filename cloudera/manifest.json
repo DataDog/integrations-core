@@ -34,6 +34,9 @@
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       }
+    },
+    "dashboards": {
+      "Cloudera Data Platform Overview": "assets/dashboards/cloudera_overview.json"
     }
   },
   "author": {
