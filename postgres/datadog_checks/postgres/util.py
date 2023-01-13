@@ -276,17 +276,16 @@ SELECT s.schemaname,
     'relation': False,
 }
 
-WAIT_EVENT_QUERY = """
-SELECT wait_event_type, wait_event, backend_type, {aggregation_columns_select}
-    {{metrics_columns}}
-FROM pg_stat_activity
-WHERE wait_event is not null
-GROUP BY datid, wait_event_type, wait_event, backend_type {aggregation_columns_group}
-"""
-
-WAIT_EVENT_METRICS = {
-    'count(*)': ('postgresql.activity.wait_event_count', AgentCheck.gauge),
-}
+# Default descriptors and aggregations for wait_event_metrics
+# and activity_metrics
+# Elements in the activity_metrics_excluded_aggregations list
+# will be excluded
+ACTIVITY_DEFAULT_DESCRIPTORS = [
+    ('application_name', 'app'),
+    ('datname', 'db'),
+    ('usename', 'user'),
+]
+ACTIVITY_DEFAULT_AGGREGATIONS = [d[0] for d in ACTIVITY_DEFAULT_DESCRIPTORS]
 
 # The metrics we retrieve from pg_stat_activity when the postgres version >= 9.6
 ACTIVITY_METRICS_9_6 = [
@@ -368,3 +367,15 @@ SELECT {aggregation_columns_select}
 FROM pg_stat_activity
 GROUP BY datid {aggregation_columns_group}
 """
+
+ACTIVITY_WAIT_EVENT_QUERY = """
+SELECT wait_event_type, wait_event, backend_type, {aggregation_columns_select}
+    {{metrics_columns}}
+FROM pg_stat_activity
+WHERE wait_event is not null
+GROUP BY datid, wait_event_type, wait_event, backend_type {aggregation_columns_group}
+"""
+
+ACTIVITY_WAIT_EVENT_METRICS = {
+    'count(*)': ('postgresql.activity.wait_event_count', AgentCheck.gauge),
+}
