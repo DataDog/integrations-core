@@ -145,7 +145,8 @@ def check_wait_event_metrics(aggregator, tags, hostname=None, count=1):
         ]
     system_wait_event_tuples = [
         ['backend_type:walwriter', 'wait_event:WalWriterMain', 'wait_event_type:Activity'],
-        ['backend_type:background writer', 'wait_event:BgWriterMain', 'wait_event_type:Activity'],
+        # Background writer may be hibernating
+        # ['backend_type:background writer', 'wait_event:BgWriterMain', 'wait_event_type:Activity'],
         ['backend_type:checkpointer', 'wait_event:CheckpointerMain', 'wait_event_type:Activity'],
         ['backend_type:autovacuum launcher', 'wait_event:AutoVacuumMain', 'wait_event_type:Activity'],
     ]
