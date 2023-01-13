@@ -129,6 +129,9 @@ def set_tag_to_value(tag, tags_to_replace, replace_value):
 
 
 def check_wait_event_metrics(aggregator, tags, hostname=None, count=1):
+    if float(POSTGRES_VERSION) < 9.6:
+        return
+
     launch_wait_event_tuple = [
         'backend_type:logical replication launcher',
         'wait_event:LogicalLauncherMain',

@@ -28,7 +28,7 @@ from .common import (
     check_wait_event_metrics,
     requires_static_version,
 )
-from .utils import requires_over_10
+from .utils import requires_over_10, requires_over_96
 
 CONNECTION_METRICS = ['postgresql.max_connections', 'postgresql.percent_usage_connections']
 
@@ -159,7 +159,8 @@ def test_activity_metrics(aggregator, integration_check, pg_instance):
     check_wait_event_metrics(aggregator, expected_tags)
 
 
-def test_wait_event_metric(aggregator, integration_check, pg_instance):
+@requires_over_96
+def test_wait_event_client_read(aggregator, integration_check, pg_instance):
     pg_instance['collect_activity_metrics'] = True
 
     # Keep a query in Client read
