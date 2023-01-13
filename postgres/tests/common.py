@@ -137,6 +137,12 @@ def check_wait_event_metrics(aggregator, tags, hostname=None, count=1):
         'wait_event:LogicalLauncherMain',
         'wait_event_type:Activity',
     ]
+    if float(POSTGRES_VERSION) < 11.0:
+        launch_wait_event_tuple = [
+            'backend_type:background worker',
+            'wait_event:LogicalLauncherMain',
+            'wait_event_type:Activity',
+        ]
     system_wait_event_tuples = [
         ['backend_type:walwriter', 'wait_event:WalWriterMain', 'wait_event_type:Activity'],
         ['backend_type:background writer', 'wait_event:BgWriterMain', 'wait_event_type:Activity'],
