@@ -11,6 +11,8 @@ from datadog_checks.base.utils.common import get_docker_hostname
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))
 
+USE_OPENMETRICS = os.environ.get('USE_OPENMETRICS', False)
+
 RABBITMQ_VERSION_RAW = os.environ['RABBITMQ_VERSION']
 RABBITMQ_VERSION = version.parse(RABBITMQ_VERSION_RAW)
 
@@ -18,8 +20,10 @@ CHECK_NAME = 'rabbitmq'
 
 HOST = get_docker_hostname()
 PORT = 15672
+OPENMETRICS_PORT = 15692
 
 URL = 'http://{}:{}/api/'.format(HOST, PORT)
+OPENMETRICS_URL = 'http://{}:{}'.format(HOST, OPENMETRICS_PORT)
 
 CONFIG = {
     'rabbitmq_api_url': URL,
@@ -105,3 +109,5 @@ EXCHANGE_MESSAGE_STATS = {
     'redeliver': 1.0,
     'redeliver_details': {'rate': 1.0},
 }
+
+OPENMETRICS_CONFIG = {"prometheus_plugin": {"url": OPENMETRICS_URL, "include_aggregated_endpoint": True}}

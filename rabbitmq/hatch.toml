@@ -8,10 +8,15 @@ dependencies = [
 [[envs.default.matrix]]
 python = ["2.7", "3.8"]
 version = ["3.5", "3.6", "3.7"]
+impl = ["legacy"]
 
 [[envs.default.matrix]]
 python = ["3.8"]
 version = ["3.8", "3.9", "3.10", "3.11"]
+impl = ["legacy", "openmetrics"]
 
 [envs.default.overrides]
 matrix.version.env-vars = "RABBITMQ_VERSION"
+matrix.impl.env-vars = [
+  { key = "USE_OPENMETRICS", value = "true", if = ["openmetrics"] },
+]
