@@ -105,3 +105,5 @@ EXCHANGE_MESSAGE_STATS = {
     'redeliver': 1.0,
     'redeliver_details': {'rate': 1.0},
 }
+
+DEFAULT_OM_TAGS = ["endpoint:localhost:15692/metrics"]
