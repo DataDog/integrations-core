@@ -221,9 +221,6 @@ _GAUGES = {
     "rabbitmq_raft_log_last_written_index": "raft.log.last_written_index",
     "rabbitmq_raft_log_snapshot_index": "raft.log.snapshot_index",
     "rabbitmq_resident_memory_limit_bytes": "resident_memory_limit_bytes",
-    "telemetry_scrape_duration_seconds": "telemetry.scrape.duration_seconds",
-    "telemetry_scrape_encoded_size_bytes": "telemetry.scrape.encoded_size_bytes",
-    "telemetry_scrape_size_bytes": "telemetry.scrape.size_bytes",
     "rabbitmq_build_info": {
         'name': 'build_info',
         "type": 'gauge',
@@ -233,5 +230,10 @@ _GAUGES = {
         "type": 'gauge',
     },
 }
+_SUMMARIES = {
+    "telemetry_scrape_duration_seconds": "telemetry.scrape.duration_seconds",
+    "telemetry_scrape_encoded_size_bytes": "telemetry.scrape.encoded_size_bytes",
+    "telemetry_scrape_size_bytes": "telemetry.scrape.size_bytes",
+}
 
-RENAME_RABBITMQ_TO_DATADOG = {**{re.sub("_total$", "", k): v for k, v in _COUNTS.items()}, **_GAUGES}
+RENAME_RABBITMQ_TO_DATADOG = {**{re.sub("_total$", "", k): v for k, v in _COUNTS.items()}, **_GAUGES, **_SUMMARIES}
