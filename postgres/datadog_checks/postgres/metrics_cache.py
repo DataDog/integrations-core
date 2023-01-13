@@ -207,7 +207,7 @@ class PostgresMetricsCache:
         return (descriptors, aggregation_columns)
 
     def get_wait_event_metrics(self, version):
-        if version < V9_6:
+        if version < V10:
             return
         metrics_data = self.wait_event_metrics
         if metrics_data is None:
