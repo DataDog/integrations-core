@@ -328,7 +328,7 @@ class PostgreSql(AgentCheck):
             column_values = row[len(descriptors) :]
 
             # build a map of descriptors and their values
-            desc_map = {name: value for (_, name), value in zip(descriptors, descriptor_values) if value}
+            desc_map = {name: value for (_, name), value in zip(descriptors, descriptor_values) if value is not None}
 
             # Build tags.
 
