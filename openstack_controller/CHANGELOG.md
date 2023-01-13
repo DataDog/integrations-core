@@ -1,5 +1,8 @@
 # CHANGELOG - Openstack_controller
 
+## 2.2.0-beta.1 / 2023-01-13
+
+
 ## 2.1.3 / 2022-12-09
 
 * [Fixed] Update dependencies. See [#13478](https://github.com/DataDog/integrations-core/pull/13478).
