@@ -85,6 +85,10 @@ jobs:
         ddev validate legacy-signature $CHANGED
 
     - name: Run licenses validation
+      if: ${{ github.event.pull_request.head.repo.full_name == github.repository }} # only PRs from this repo
+      env:
+        DD_GITHUB_USER: ${{ github.actor }}
+        DD_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         ddev validate licenses
 
