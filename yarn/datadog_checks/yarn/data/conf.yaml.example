@@ -105,7 +105,7 @@ instances:
 
     ## @param collect_apps_all_states - boolean - optional - default: false
     ## Enable this parameter when using `collect_app_metrics` to collect metrics from applications of all states.
-    ## For example, collect metrics from applications with 'PENDING', 'FINISHED', etc. states.
+    ## For example, collect metrics from applications with 'PENDING', 'FINISHED', and other states.
     #
     # collect_apps_all_states: false
 
