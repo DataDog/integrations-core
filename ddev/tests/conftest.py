@@ -83,9 +83,20 @@ def valid_integration(valid_integrations) -> str:
 
 
 @pytest.fixture(autouse=True)
-def config_file(tmp_path) -> ConfigFile:
+def config_file(tmp_path, monkeypatch) -> ConfigFile:
+    for env_var in (
+        'DD_GITHUB_USER',
+        'DD_GITHUB_TOKEN',
+        'DD_SITE',
+        'DD_LOGS_CONFIG_DD_URL',
+        'DD_DD_URL',
+        'DD_API_KEY',
+        'DD_APP_KEY',
+    ):
+        monkeypatch.delenv(env_var, raising=False)
+
     path = Path(tmp_path, 'config.toml')
-    os.environ[ConfigEnvVars.CONFIG] = str(path)
+    monkeypatch.setenv(ConfigEnvVars.CONFIG, str(path))
     config = ConfigFile(path)
     config.restore()
     return config
