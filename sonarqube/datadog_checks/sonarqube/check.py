@@ -108,43 +108,45 @@ class SonarqubeCheck(AgentCheck):
 
     def discover_available_metrics(self):
         available_metrics = {}
-
         page = 1
         seen = 0
         total = -1
-
         while seen != total:
             response = self.http.get('{}/api/metrics/search'.format(self._web_endpoint), params={'p': page})
             response.raise_for_status()
             self.log.debug('/api/metrics/search response: %s', response.json())
             search_results = response.json()
-
             total = search_results['total']
             for metric in search_results['metrics']:
                 seen += 1
-
                 if not self.is_valid_metric(metric):
                     continue
-
                 domain = metric['domain']
                 key = metric['key']
-
                 category = CATEGORIES.get(domain)
                 if category is None:
                     self.log.warning('Unknown metric category: %s', domain)
                     continue
-
                 available_metrics[key] = '{}.{}'.format(category, key)
-
             page += 1
-
         return available_metrics
 
     def discover_available_components(self):
-        response = self.http.get('{}/api/components/search'.format(self._web_endpoint), params={'qualifiers': 'TRK'})
-        response.raise_for_status()
-        self.log.debug('/api/components/search response: %s', response.json())
-        return [project['key'] for project in response.json()['components']]
+        available_components = []
+        page = 1
+        seen = 0
+        total = -1
+        while seen != total:
+            response = self.http.get('{}/api/components/search'.format(self._web_endpoint), params={'qualifiers': 'TRK', 'p': page})
+            response.raise_for_status()
+            self.log.debug('/api/components/search response: %s', response.json())
+            search_results = response.json()
+            total = search_results['paging']['total']
+            for component in search_results['components']:
+                seen += 1
+                available_components.append(component['key'])
+            page += 1
+        return available_components
 
     def collect_version(self):
         response = self.http.get('{}/api/server/version'.format(self._web_endpoint))
