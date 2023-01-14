@@ -70,8 +70,8 @@ files:
               type: boolean
           - name: collect_apps_all_states
             description: |
-              Set this parameter when using `collect_app_metrics` to collect metrics from applications with states
-              other than 'RUNNING', for example, 'PENDING', 'FINISHED', etc.
+              Enable this parameter when using `collect_app_metrics` to collect metrics from applications of all states.
+              For example, collect metrics from applications with 'PENDING', 'FINISHED', etc. states.
             value:
               example: false
               type: boolean

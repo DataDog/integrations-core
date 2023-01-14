@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# https://github.com/sequenceiq/hadoop-docker#testing
+# Run demo application every 5 minutes
+
 cd $HADOOP_PREFIX
 
 while :
