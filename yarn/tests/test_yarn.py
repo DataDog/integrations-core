@@ -348,6 +348,6 @@ def test_collect_apps_all_states(dd_run_check, aggregator, mocked_request):
     dd_run_check(yarn)
 
     for app in YARN_APPS_ALL_STATES:
+        app_tags = ['app_name:{}'.format(app['app_name']), 'app_queue:default']
         for metric, value in iteritems(app['metric_values']):
-            app_tags = ['app_name:{}'.format(app['app_name']), 'app_queue:default']
             aggregator.assert_metric(metric, value=value, tags=app_tags + EXPECTED_TAGS, count=1)
