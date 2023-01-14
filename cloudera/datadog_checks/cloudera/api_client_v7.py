@@ -16,26 +16,28 @@ from datadog_checks.cloudera.event import ClouderaEvent
 from datadog_checks.cloudera.metrics import NATIVE_METRICS, TIMESERIES_METRICS
 
 from .common import CLUSTER_HEALTH, HOST_HEALTH
+from .config import normalize_config_clusters_include
 
 
 class ApiClientV7(ApiClient):
     def __init__(self, check, api_client):
         super(ApiClientV7, self).__init__(check, api_client)
         self._log.debug("clusters config: %s", self._check.config.clusters)
-        self._clusters_discovery = (
-            Discovery(
+        config_clusters_include = normalize_config_clusters_include(self._log, self._check.config.clusters)
+        self._log.debug("config_clusters_include: %s", config_clusters_include)
+        if config_clusters_include:
+            self._clusters_discovery = Discovery(
                 lambda: cm_client.ClustersResourceApi(self._api_client)
                 .read_clusters(cluster_type='any', view='full')
                 .items,
                 limit=self._check.config.clusters.limit,
-                include=self._check.config.clusters.include,
+                include=config_clusters_include,
                 exclude=self._check.config.clusters.exclude,
                 interval=self._check.config.clusters.interval,
                 key=lambda cluster: cluster.name,
             )
-            if self._check.config.clusters
-            else None
-        )
+        else:
+            self._clusters_discovery = None
 
     def collect_data(self):
         self._collect_clusters()
@@ -61,9 +63,7 @@ class ApiClientV7(ApiClient):
                         "discovered item: [pattern:%s, key:%s, item:%s, config:%s]", pattern, key, item, config
                     )
                     cluster_name = key
-
                     tags = self._collect_cluster_tags(item, self._check.config.tags)
-
                     executor.submit(self._collect_cluster_metrics, cluster_name, tags)
                     executor.submit(self._collect_hosts, cluster_name)
                     self._collect_cluster_service_check(item, tags)

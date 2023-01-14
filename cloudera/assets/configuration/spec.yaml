@@ -50,7 +50,11 @@ files:
           - name: limit
             type: integer
           - name: include
-            type: object
+            type: array
+            items:
+              anyOf:
+                - type: string
+                - type: object
           - name: exclude
             type: array
             items:

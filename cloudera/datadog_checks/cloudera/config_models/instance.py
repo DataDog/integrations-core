@@ -9,7 +9,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Mapping, Optional, Sequence
+from typing import Any, Mapping, Optional, Sequence, Union
 
 from pydantic import BaseModel, root_validator, validator
 
@@ -24,7 +24,7 @@ class Clusters(BaseModel):
         allow_mutation = False
 
     exclude: Optional[Sequence[str]]
-    include: Optional[Mapping[str, Any]]
+    include: Optional[Sequence[Union[str, Mapping[str, Any]]]]
     interval: Optional[int]
     limit: Optional[int]
 

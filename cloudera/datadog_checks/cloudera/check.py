@@ -27,7 +27,7 @@ class ClouderaCheck(AgentCheck, ConfigMixin):
             self.can_connect_tags.append(tag)
 
         try:
-            self.client = make_api_client(self, self.config, self.shared_config)
+            self.client = make_api_client(self)
         except Exception as e:
             message = f"Cloudera API Client is none: {e}"
             self.service_check(CAN_CONNECT, AgentCheck.CRITICAL, message=message, tags=self.can_connect_tags)
