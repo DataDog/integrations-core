@@ -1,6 +1,8 @@
 # Go Expvar Integration
 
-![Go graph][1]
+<p align="center">
+   <img src="https://raw.githubusercontent.com/DataDog/integrations-core/master/go_expvar/images/go_graph.png"> 
+</p>
 
 ## Overview
 
