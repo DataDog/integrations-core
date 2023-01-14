@@ -66,6 +66,10 @@ def instance_collect_app_metrics(field, value):
     return True
 
 
+def instance_collect_apps_all_states(field, value):
+    return False
+
+
 def instance_collect_node_metrics(field, value):
     return True
 

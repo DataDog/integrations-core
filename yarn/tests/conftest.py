@@ -9,7 +9,7 @@ import pytest
 from mock import patch
 from requests.exceptions import SSLError
 
-from datadog_checks.dev import docker_run
+from datadog_checks.dev import docker_run, run_command
 from datadog_checks.dev.conditions import CheckEndpoints
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.yarn import YarnCheck
@@ -34,6 +34,7 @@ def dd_environment():
         mount_logs=True,
         conditions=[CheckEndpoints(INSTANCE_INTEGRATION['resourcemanager_uri'], attempts=240)],
     ):
+        run_command(['docker', 'exec', '-d', 'dd-yarn', '/bin/bash', '/run_app.sh'])
         yield INSTANCE_INTEGRATION
 
 

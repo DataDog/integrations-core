@@ -21,10 +21,12 @@ from .common import (
     RM_ADDRESS,
     YARN_APP_METRICS_TAGS,
     YARN_APP_METRICS_VALUES,
+    YARN_APPS_ALL_STATES,
     YARN_AUTH_CONFIG,
     YARN_CLUSTER_METRICS_TAGS,
     YARN_CLUSTER_METRICS_VALUES,
     YARN_CLUSTER_TAG,
+    YARN_COLLECT_APPS_ALL_STATES_CONFIG,
     YARN_CONFIG,
     YARN_CONFIG_EXCLUDING_APP,
     YARN_CONFIG_SPLIT_APPLICATION_TAGS,
@@ -337,3 +339,15 @@ def test_metadata(aggregator, instance, datadog_agent):
     }
 
     datadog_agent.assert_metadata("test:123", version_metadata)
+
+
+def test_collect_apps_all_states(dd_run_check, aggregator, mocked_request):
+    instance = YARN_COLLECT_APPS_ALL_STATES_CONFIG['instances'][0]
+    yarn = YarnCheck('yarn', {}, [instance])
+
+    dd_run_check(yarn)
+
+    for app in YARN_APPS_ALL_STATES:
+        for metric, value in iteritems(app['metric_values']):
+            app_tags = ['app_name:{}'.format(app['app_name']), 'app_queue:default']
+            aggregator.assert_metric(metric, value=value, tags=app_tags + EXPECTED_TAGS, count=1)

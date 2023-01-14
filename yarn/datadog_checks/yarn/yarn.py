@@ -48,6 +48,7 @@ DEFAULT_APPLICATION_STATUS_MAPPING = {
     'SUBMITTED': 'ok',
     'ACCEPTED': 'ok',
     YARN_APPLICATION_RUNNING: 'ok',
+    'PENDING': 'ok',
     'FINISHED': 'ok',
     'FAILED': 'critical',
     'KILLED': 'critical',
@@ -234,13 +235,15 @@ class YarnCheck(AgentCheck):
         """
         Get metrics for running applications
         """
+        collect_apps_all_states = self.instance.get('collect_apps_all_states', False)
+
         metrics_json = self._rest_request_to_json(rm_address, YARN_APPS_PATH, addl_tags)
 
         if metrics_json and metrics_json.get('apps') and metrics_json['apps'].get('app') is not None:
             for app_json in metrics_json['apps']['app']:
                 tags = self._get_app_tags(app_json, app_tags) + addl_tags
 
-                if app_json['state'] == YARN_APPLICATION_RUNNING:
+                if collect_apps_all_states or app_json['state'] == YARN_APPLICATION_RUNNING:
                     self._set_yarn_metrics_from_json(tags, app_json, DEPRECATED_YARN_APP_METRICS)
                     self._set_yarn_metrics_from_json(tags, app_json, YARN_APP_METRICS)
 

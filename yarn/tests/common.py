@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import os
+from copy import deepcopy
 
 from datadog_checks.dev import get_docker_hostname
 from datadog_checks.yarn.yarn import YARN_APPS_PATH, YARN_CLUSTER_METRICS_PATH, YARN_NODES_PATH, YARN_SCHEDULER_PATH
@@ -201,6 +202,19 @@ YARN_SSL_VERIFY_FALSE_CONFIG = {
     ]
 }
 
+YARN_COLLECT_APPS_ALL_STATES_CONFIG = {
+    'instances': [
+        {
+            'resourcemanager_uri': RM_ADDRESS,
+            'cluster_name': CLUSTER_NAME,
+            'tags': list(CUSTOM_TAGS),
+            'application_tags': {'app_id': 'id', 'app_queue': 'queue'},
+            'ssl_verify': False,
+            'collect_apps_all_states': True,
+        }
+    ]
+}
+
 YARN_CLUSTER_METRICS_VALUES = {
     'yarn.metrics.apps_submitted': 0,
     'yarn.metrics.apps_completed': 0,
@@ -252,6 +266,15 @@ YARN_APP_METRICS_VALUES = {
     'yarn.apps.memory_seconds_gauge': 151730,
     'yarn.apps.vcore_seconds_gauge': 103,
 }
+
+YARN_APPS_ALL_STATES_VALUES = deepcopy(YARN_APP_METRICS_VALUES)
+YARN_APPS_ALL_STATES_VALUES['yarn.apps.progress_gauge'] = 30
+
+YARN_APPS_ALL_STATES = [
+    {'app_name': 'word count', 'metric_values': YARN_APP_METRICS_VALUES},
+    {'app_name': 'dead app', 'metric_values': YARN_APPS_ALL_STATES_VALUES},
+    {'app_name': 'new app', 'metric_values': YARN_APPS_ALL_STATES_VALUES},
+]
 
 YARN_APP_METRICS_TAGS = ['app_name:word count', 'app_queue:default'] + YARN_CLUSTER_METRICS_TAGS
 
