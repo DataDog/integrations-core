@@ -137,7 +137,9 @@ class SonarqubeCheck(AgentCheck):
         seen = 0
         total = -1
         while seen != total:
-            response = self.http.get('{}/api/components/search'.format(self._web_endpoint), params={'qualifiers': 'TRK', 'p': page})
+            response = self.http.get(
+                '{}/api/components/search'.format(self._web_endpoint), params={'qualifiers': 'TRK', 'p': page}
+            )
             response.raise_for_status()
             self.log.debug('/api/components/search response: %s', response.json())
             search_results = response.json()
