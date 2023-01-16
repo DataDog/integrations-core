@@ -4,8 +4,9 @@
 import os
 
 from semver import VersionInfo
-from ...git import git_show_file
+
 from ...constants import get_agent_release_requirements
+from ...git import git_show_file
 from ...release import DATADOG_PACKAGE_PREFIX, get_folder_name, get_package_name
 from ...utils import parse_agent_req_file
 
@@ -16,6 +17,7 @@ def get_agent_tags(since, to):
     sorted by more recent first.
     """
     from ...git import git_tag_list
+
     agent_tags = sorted(VersionInfo.parse(t) for t in git_tag_list(r'^\d+\.\d+\.\d+$'))
 
     # default value for `to` is the latest tag
