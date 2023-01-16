@@ -32,6 +32,9 @@ SKIPPED_CORE_ONLY_METRICS = [
     'snmp.memory.free',
     'snmp.memory.usage',
     'snmp.cpu.usage',
+    'snmp.device.reachable',
+    'snmp.device.unreachable',
+    'snmp.interface.status',
 ]
 
 DEFAULT_TAGS_TO_SKIP = ['loader']
@@ -530,7 +533,7 @@ def assert_python_vs_core(
     core_config = deepcopy(config)
     core_config['init_config']['loader'] = 'core'
     core_config['init_config']['collect_device_metadata'] = 'false'
-    metrics_to_skip = metrics_to_skip or []
+    metrics_to_skip = (metrics_to_skip or []) + SKIPPED_CORE_ONLY_METRICS
     tags_to_skip = tags_to_skip or []
     tags_to_skip += DEFAULT_TAGS_TO_SKIP
 

@@ -147,6 +147,9 @@ def test_e2e_core_metadata_f5(dd_agent_check):
                     u'oper_status': 4,
                 },
             ],
+            "ip_addresses": [
+                {"interface_id": "default:{}:32".format(device_ip), "ip_address": "10.164.0.51", "prefixlen": 32}
+            ],
             u'namespace': u'default',
             u'subnet': u'',
         },
