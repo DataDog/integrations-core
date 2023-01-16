@@ -41,7 +41,7 @@ class RabbitMQOpenMetrics(OpenMetricsBaseCheckV2):
                 )
             )
         if 'per-object' in unagg_ep:
-            endpoints.append((f"/metrics/per-object", {'metrics': [metrics.RENAME_RABBITMQ_TO_DATADOG]}))
+            endpoints.append(("/metrics/per-object", {'metrics': [metrics.RENAME_RABBITMQ_TO_DATADOG]}))
         for ep, ep_config in endpoints:
             self.scraper_configs.append(
                 {
