@@ -34,7 +34,7 @@ Follow these instructions to set up your repo for integration development:
    mkdir $HOME/dd && cd $HOME/dd
    ```
 
-1. Fork the the [`integrations-extras` repo][6].
+1. Fork the [`integrations-extras` repo][6].
 
 1. Clone your fork into the `dd` directory:
    ```
