@@ -20,12 +20,14 @@ from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import (
     BUCKET_NAME,
+    BY_BUCKET_METRICS,
     CHECK_TAGS,
     COUCHBASE_MAJOR_VERSION,
     INDEX_STATS_COUNT_METRICS,
     INDEX_STATS_GAUGE_METRICS,
     INDEX_STATS_INDEXER_METRICS,
     INDEX_STATS_TAGS,
+    OPTIONAL_BY_BUCKET_METRICS,
     PORT,
     QUERY_STATS_ALWAYS_PRESENT,
     SYNC_GATEWAY_METRICS,
@@ -180,17 +182,11 @@ def test_metadata(instance_query, dd_run_check, datadog_agent):
 
 
 def _assert_bucket_metrics(aggregator, tags, device=None):
-    # Assert 'couchbase.by_bucket.' metrics
-    #  Because some metrics are deprecated, we can just see if we get an arbitrary number
-    #  of bucket metrics. If there are more than that number, we assume that we're getting
-    #  all the bucket metrics we should be getting
-    bucket_metrics = []
-    for metric in aggregator.metric_names:
-        if metric.find('couchbase.by_bucket.') == 0:
-            aggregator.assert_metric(metric, tags=tags, count=1, device=device)
-            bucket_metrics.append(metric)
+    for metric in BY_BUCKET_METRICS:
+        aggregator.assert_metric(metric, tags=tags, device=device, count=1)
 
-    assert len(bucket_metrics) > 2, "Expected at least 3 bucket metrics found: " + str(bucket_metrics)
+    for metric in OPTIONAL_BY_BUCKET_METRICS:
+        aggregator.assert_metric(metric, tags=tags, device=device, at_least=0)
 
 
 def _assert_stats(aggregator, node_tags, device=None):
