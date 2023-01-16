@@ -445,3 +445,58 @@ elif COUCHBASE_MAJOR_VERSION == 7:
         'couchbase.by_bucket.vb_replica_queue_fill',
         'couchbase.by_bucket.xdc_ops',
     ]
+
+
+NODE_STATS = [
+    'cmd_get',
+    'curr_items',
+    'curr_items_tot',
+    'couch_docs_data_size',
+    'couch_docs_actual_disk_size',
+    'couch_spatial_data_size',
+    'couch_spatial_disk_size',
+    'couch_views_data_size',
+    'couch_views_actual_disk_size',
+    'ep_bg_fetched',
+    'get_hits',
+    'mem_used',
+    'ops',
+    'vb_active_num_non_resident',
+    'vb_replica_curr_items',
+]
+
+if COUCHBASE_MAJOR_VERSION == 7:
+    NODE_STATS += ['index_data_size', 'index_disk_size']
+
+TOTAL_STATS = [
+    'hdd.free',
+    'hdd.used',
+    'hdd.total',
+    'hdd.quota_total',
+    'hdd.used_by_data',
+    'ram.used',
+    'ram.total',
+    'ram.quota_total',
+    'ram.quota_total_per_node',
+    'ram.quota_used_per_node',
+    'ram.quota_used',
+    'ram.used_by_data',
+]
+
+BUCKET_TAGS = CHECK_TAGS + ['bucket:{}'.format(BUCKET_NAME)]
+
+
+def _assert_bucket_metrics(aggregator, tags, device=None):
+    for metric in BY_BUCKET_METRICS:
+        aggregator.assert_metric(metric, tags=tags, device=device, count=1)
+
+    for metric in OPTIONAL_BY_BUCKET_METRICS:
+        aggregator.assert_metric(metric, tags=tags, device=device, at_least=0)
+
+
+def _assert_stats(aggregator, node_tags, device=None):
+    for mname in NODE_STATS:
+        aggregator.assert_metric('couchbase.by_node.{}'.format(mname), tags=node_tags, count=1, device=device)
+    # Assert 'couchbase.' metrics
+    for mname in TOTAL_STATS:
+        aggregator.assert_metric('couchbase.{}'.format(mname), tags=CHECK_TAGS, count=1)
