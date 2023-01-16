@@ -1,19 +1,13 @@
 {
 	"paging": {
-		"pageIndex": 1,
-		"pageSize": 100,
-		"total": 1
+		"pageIndex": 2,
+		"pageSize": 1,
+		"total": 2
 	},
 	"components": [{
 		"key": "org.sonarqube:sonarqube-scanner",
 		"name": "Example of SonarQube Scanner Usage",
 		"qualifier": "TRK",
 		"project": "org.sonarqube:sonarqube-scanner"
-	},
-	{
-		"key": "tmp_project",
-		"name": "Example of temporal project",
-		"qualifier": "TRK",
-		"project": "tmp_project"
 	}]
 }

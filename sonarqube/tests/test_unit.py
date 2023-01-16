@@ -144,7 +144,8 @@ def test_service_check_ok_with_autodiscovery_include_all_and_exclude(
             MockResponse(file_path=os.path.join(HERE, 'api_responses', 'version')),
             MockResponse(file_path=os.path.join(HERE, 'api_responses', 'metrics_search_p_1')),
             MockResponse(file_path=os.path.join(HERE, 'api_responses', 'metrics_search_p_2')),
-            MockResponse(file_path=os.path.join(HERE, 'api_responses', 'components_search_with_tmp')),
+            MockResponse(file_path=os.path.join(HERE, 'api_responses', 'components_search_with_tmp_p1')),
+            MockResponse(file_path=os.path.join(HERE, 'api_responses', 'components_search_with_tmp_p2')),
             MockResponse(file_path=os.path.join(HERE, 'api_responses', 'measures_component')),
         ]
         check = sonarqube_check(web_instance_with_autodiscovery_include_all_and_exclude)
@@ -152,7 +153,9 @@ def test_service_check_ok_with_autodiscovery_include_all_and_exclude(
         global_tags.extend(web_instance_with_autodiscovery_include_all_and_exclude['tags'])
         dd_run_check(check)
         for metric_name in WEB_METRICS:
-            aggregator.assert_metric(metric_name)
+            aggregator.assert_metric(
+                metric_name, count=1, tags=global_tags + ['project:org.sonarqube:sonarqube-scanner']
+            )
         aggregator.assert_service_check('sonarqube.api_access', status=check.OK, tags=global_tags)
 
 
@@ -164,7 +167,8 @@ def test_service_check_ok_with_autodiscovery_include_all_and_limit(
             MockResponse(file_path=os.path.join(HERE, 'api_responses', 'version')),
             MockResponse(file_path=os.path.join(HERE, 'api_responses', 'metrics_search_p_1')),
             MockResponse(file_path=os.path.join(HERE, 'api_responses', 'metrics_search_p_2')),
-            MockResponse(file_path=os.path.join(HERE, 'api_responses', 'components_search_with_tmp')),
+            MockResponse(file_path=os.path.join(HERE, 'api_responses', 'components_search_with_tmp_p1')),
+            MockResponse(file_path=os.path.join(HERE, 'api_responses', 'components_search_with_tmp_p2')),
             MockResponse(file_path=os.path.join(HERE, 'api_responses', 'measures_component')),
         ]
         check = sonarqube_check(web_instance_with_autodiscovery_include_all_and_limit)
@@ -172,7 +176,7 @@ def test_service_check_ok_with_autodiscovery_include_all_and_limit(
         global_tags.extend(web_instance_with_autodiscovery_include_all_and_limit['tags'])
         dd_run_check(check)
         for metric_name in WEB_METRICS:
-            aggregator.assert_metric(metric_name, count=1)
+            aggregator.assert_metric(metric_name, count=1, tags=global_tags + ['project:tmp_project'])
         aggregator.assert_service_check('sonarqube.api_access', status=check.OK, tags=global_tags)
 
 
