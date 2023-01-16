@@ -7,9 +7,6 @@ parameters:
   ddtrace_flag: ''
   benchmark: true
   latest: false
-  validate: false
-  validate_changed: ''
-  validate_codeowners: false
   repo: 'core'
   ispr: false
   run_py2_tests: true  # Whether or not to run python2 tests.
@@ -55,15 +52,6 @@ jobs:
   - template: './set-up-integrations.yml'
     parameters:
       check: ${{ parameters.check }}
-
-  - ${{ if eq(parameters.validate, 'true') }}:
-    - template: './run-validations.yml'
-      parameters:
-        validate_changed: ${{ parameters.validate_changed }}
-        check: ${{ parameters.check }}
-        repo: ${{ parameters.repo }}
-        ispr: ${{ parameters.ispr }}
-        validate_codeowners: ${{ parameters.validate_codeowners }}
 
   - template: './run-tests.yml'
     parameters:
