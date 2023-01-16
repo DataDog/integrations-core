@@ -931,14 +931,20 @@ def test_e2e_core_metadata_aos_lldp(dd_agent_check):
     device_id = u'default:' + device_ip
 
     topology_link1 = {
-        "local": {"device": {"id": device_id, "id_type": "ndm"}, "interface": {"id": "e1"}},
+        "local": {
+            "device": {"id": device_id, "id_type": "ndm"},
+            'interface': {'id': 'default:172.18.0.2:1', 'id_type': 'ndm'},
+        },
         "remote": {
             "device": {"id": "00:80:9f:85:78:8e", "id_type": "mac_address"},
             "interface": {"id": "00:80:9f:85:78:8e", "id_type": "mac_address"},
         },
     }
     topology_link2 = {
-        "local": {"device": {"id": device_id, "id_type": "ndm"}, "interface": {"id": "e11"}},
+        "local": {
+            "device": {"id": device_id, "id_type": "ndm"},
+            'interface': {'id': 'default:172.18.0.2:11', 'id_type': 'ndm'},
+        },
         "remote": {
             "device": {"id": "00:80:9f:86:0d:d8", "id_type": "mac_address"},
             "interface": {"id": "00:80:9f:86:0d:d8", "id_type": "mac_address"},
@@ -947,7 +953,6 @@ def test_e2e_core_metadata_aos_lldp(dd_agent_check):
     events = get_events(aggregator)
 
     print("TOPOLOGY LINKS: " + json.dumps(events[0]['links'], indent=4))
-
 
     assert events[0]['links'][0] == topology_link1
     assert events[0]['links'][1] == topology_link2
