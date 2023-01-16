@@ -83,10 +83,12 @@ If your journal is located elsewhere, add a `path` parameter with the correspond
 
 ##### Filter journal units
 
-It's possible to filter in and out specific units by using these parameters:
+It's possible to filter in and out specific system-level units by using these parameters:
 
-- `include_units`: Includes all units specified.
-- `exclude_units`: Excludes all units specified.
+- `include_units`: Includes all system-level units specified.
+- `exclude_units`: Excludes all system-level units specified.
+
+Note:
 
 Example:
 
@@ -98,6 +100,12 @@ logs:
           - docker.service
           - sshd.service
 ```
+
+As of Datadog Agent version `7.37.0`+, user-level unit filtering can done by using these parameters:
+
+- `include_user_units`: Includes all user-level units specified.
+- `exclude_user_units`: Excludes all user-level units specified.
+- **Note**: A wildcard `*` can also be used in in either `exclude_units` or `exclude_user_units` if only a particular Journald log log is desired.
 
 ##### Tailing the same journal multiple times
 
