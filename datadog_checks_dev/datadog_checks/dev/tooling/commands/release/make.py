@@ -18,10 +18,13 @@ from .show import changes
 
 
 def validate_version(ctx, param, value):
-    if re.match("^\\d+\\.\\d+\\.\\d+(-(rc|pre|alpha|beta)\\.\\d+)?$", value):
-        return value
+    if value is not None:
+        if re.match("^\\d+\\.\\d+\\.\\d+(-(rc|pre|alpha|beta)\\.\\d+)?$", value):
+            return value
 
-    raise click.BadParameter('must match `^\\d+\\.\\d+\\.\\d+(-(rc|pre|alpha|beta)\\.\\d+)?$`')
+        raise click.BadParameter('must match `^\\d+\\.\\d+\\.\\d+(-(rc|pre|alpha|beta)\\.\\d+)?$`')
+
+    return None
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Release one or more checks')
