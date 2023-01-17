@@ -1,8 +1,6 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from copy import deepcopy
-
 import mock
 import pytest
 
@@ -35,7 +33,7 @@ def test_camel_case_to_joined_lower(instance):
 def test_extract_seconds_value(instance):
     couchbase = Couchbase('couchbase', {}, [instance])
 
-    EXTRACT_SECONDS_TEST_PAIRS = {
+    extract_seconds_test_pairs = {
         '3.45s': 3.45,
         '12ms': 0.012,
         '700.5us': 0.0007005,
@@ -43,7 +41,7 @@ def test_extract_seconds_value(instance):
         '0': 0,
     }
 
-    for test_input, expected_output in EXTRACT_SECONDS_TEST_PAIRS.items():
+    for test_input, expected_output in extract_seconds_test_pairs.items():
         test_output = couchbase.extract_seconds_value(test_input)
         assert test_output == expected_output, 'Input was {}, expected output was {}, actual output was {}'.format(
             test_input, expected_output, test_output
@@ -71,7 +69,6 @@ def test__get_query_monitoring_data(instance_query):
     ],
 )
 def test_config(test_case, dd_run_check, extra_config, expected_http_kwargs, instance):
-    instance = deepcopy(instance)
     instance.update(extra_config)
     check = Couchbase('couchbase', {}, [instance])
 
