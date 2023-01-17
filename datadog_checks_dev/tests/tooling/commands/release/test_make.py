@@ -43,6 +43,7 @@ def test_release_make_with_invalid_input_version(version):
         "1.2.3-beta.1",
         "1.2.3-rc.1",
         "1.2.3-pre.1",
+        None,
     ],
 )
 # TODO: replace this test with a one that calls `ddev release make` directly
