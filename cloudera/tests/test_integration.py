@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import logging
 import pytest
 
 from datadog_checks.cloudera import ClouderaCheck
@@ -96,3 +97,100 @@ def test_metadata(cloudera_check, instance, datadog_agent, dd_run_check):
     }
 
     datadog_agent.assert_metadata('test:123', version_metadata)
+
+
+# def test_given_custom_queries_then_retrieve_metrics(
+#     aggregator,
+#     dd_run_check,
+#     cloudera_check,
+#     instance,
+# ):
+#     # Given
+#     instance['custom_queries'] = [
+#         {
+#             'query': "select foo, bar",
+#             'tags': ["baz"],
+#         },
+#         {
+#             'query': "select test1",
+#             'tags': ["tag1"],
+#         }
+#     ]
+    
+#     check = cloudera_check(instance)
+#     # When
+#     dd_run_check(check)
+#     # Then
+#     aggregator.assert_metric("cloudera.foo", tags=["baz"], count=1)
+#     aggregator.assert_metric("cloudera.bar", tags=["baz"], count=1)
+#     aggregator.assert_metric("cloudera.test1", tags=["tag1"], count=1)
+
+# def test_given_custom_queries_alias_then_retrieve_metrics_alias(
+#     aggregator,
+#     dd_run_check,
+#     cloudera_check,
+#     instance,
+# ):
+#     # Given
+#     instance['custom_queries'] = [
+#         {
+#             'query': "select foo as bar",
+#             'tags': ["baz"],
+#         }
+#     ]
+    
+#     check = cloudera_check(instance)
+#     # When
+#     dd_run_check(check)
+#     # Then
+#     aggregator.assert_metric("cloudera.foo", tags=["baz"], count=0)
+#     aggregator.assert_metric("cloudera.bar", tags=["baz"], count=1)
+    
+# def test_given_non_existent_custom_query_then_output_no_metric(
+#     aggregator,
+#     dd_run_check,
+#     cloudera_check,
+#     instance,
+# ):
+#     # Given
+#     instance['custom_queries'] = [
+#         {
+#             'query': "select fake_foo",  # fake_foo doesn't exist
+#             'tags': ["baz"],
+#         }
+#     ]
+    
+#     check = cloudera_check(instance)
+#     # When
+#     dd_run_check(check)
+#     # Then
+#     aggregator.assert_metric("cloudera.fake_foo", tags=["baz"], count=0)
+
+# def test_given_incorrect_formatting_custom_query_then_output_no_metric(    aggregator,
+#     dd_run_check,
+#     cloudera_check,
+#     instance,
+#     caplog,
+# ):
+#     # Given
+#     instance['custom_queries'] = [
+#         {
+#             'query': "selec",
+#             'tags': ["baz"],
+#         }
+#     ]
+#     caplog.clear()
+#     caplog.set_level(logging.WARNING)
+
+#     check = cloudera_check(instance)
+#     # When
+#     dd_run_check(check)
+#     # Then
+#     # No custom metrics, but rest of check is OK
+#     aggregator.assert_service_check(
+#         'cloudera.can_connect',
+#         ClouderaCheck.OK,
+#         tags=CAN_CONNECT_TAGS,
+#     )
+#     # Look for error log
+#     assert "Formatting error in custom queries" in caplog.text
