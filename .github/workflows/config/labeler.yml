@@ -394,6 +394,8 @@ integration/tcp_queue_length:
 - tcp_queue_length/**/*
 integration/teamcity:
 - teamcity/**/*
+integration/temporal:
+- temporal/**/*
 integration/tenable:
 - tenable/**/*
 integration/teradata:
