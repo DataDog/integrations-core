@@ -36,9 +36,9 @@
                         "id": 8131082657770196,
                         "definition": {
                             "type": "note",
-                            "content": "#### Further reading on the CockroachDB integration:",
-                            "background_color": "transparent",
-                            "font_size": "16",
+                            "content": "#### Optimize your CockroachDB integration configuration for monitoring\n1. Configure `cluster`, `node`, and `region` tags in your `cockroachdb.d/conf.yaml` file:\n\n    ```\n    - openmetrics_endpoint: http://localhost:8080/_status/vars\n      tags:\n        - cluster:prod\n        - node:1\n        - region:us-east-1\n    - openmetrics_endpoint: http://localhost:8081/_status/vars\n      tags:\n        - cluster:prod\n        - node:2\n        - region:us-east-1\n    - openmetrics_endpoint: http://localhost:8082/_status/vars\n      tags:\n        - cluster:dev\n        - node:1\n        - region:us-east-2\n    ```",
+                            "background_color": "yellow",
+                            "font_size": "14",
                             "text_align": "left",
                             "vertical_align": "center",
                             "show_tick": false,
@@ -74,7 +74,7 @@
                     {
                         "id": 3023253906623898,
                         "definition": {
-                            "title": "Capacity Available",
+                            "title": "Capacity Available by Node",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_table",
@@ -97,13 +97,13 @@
                                     "response_format": "scalar",
                                     "queries": [
                                         {
-                                            "query": "sum:cockroachdb.capacity.available{$store,$host} by {store}",
+                                            "query": "sum:cockroachdb.capacity.available{$store,$host,$cluster,$node,$region} by {store}",
                                             "data_source": "metrics",
                                             "name": "query1",
                                             "aggregator": "last"
                                         },
                                         {
-                                            "query": "sum:cockroachdb.capacity.used{$store,$host} by {store}",
+                                            "query": "sum:cockroachdb.capacity.used{$store,$host,$cluster,$node,$region} by {store}",
                                             "data_source": "metrics",
                                             "name": "query2",
                                             "aggregator": "last"
@@ -136,7 +136,7 @@
                                     "response_format": "scalar",
                                     "queries": [
                                         {
-                                            "query": "p99:cockroachdb.sql.service.latency{$host,$store}",
+                                            "query": "p99:cockroachdb.sql.service.latency{$host,$store,$cluster,$node,$region}",
                                             "data_source": "metrics",
                                             "name": "query1",
                                             "aggregator": "percentile"
@@ -172,7 +172,7 @@
                                     "response_format": "scalar",
                                     "queries": [
                                         {
-                                            "query": "min:cockroachdb.liveness.livenodes{$store,$host}",
+                                            "query": "min:cockroachdb.liveness.livenodes{$store,$host,$cluster,$node,$region}",
                                             "data_source": "metrics",
                                             "name": "query1",
                                             "aggregator": "last"
@@ -207,7 +207,7 @@
                                     "response_format": "scalar",
                                     "queries": [
                                         {
-                                            "query": "sum:cockroachdb.sql.conns{$store,$host}",
+                                            "query": "sum:cockroachdb.sql.conns{$store,$host,$cluster,$node,$region}",
                                             "data_source": "metrics",
                                             "name": "query1",
                                             "aggregator": "last"
@@ -235,7 +235,7 @@
                             "display_format": "countsAndList",
                             "color_preference": "text",
                             "hide_zero_counts": false,
-                            "query": "metric:cockroachdb.* $store $host",
+                            "query": "metric:cockroachdb.* $store $host $cluster $node $region",
                             "sort": "status,asc",
                             "count": 50,
                             "start": 0,
@@ -267,7 +267,7 @@
                                     "response_format": "scalar",
                                     "queries": [
                                         {
-                                            "query": "sum:cockroachdb.capacity.available{$store,$host}",
+                                            "query": "sum:cockroachdb.capacity.available{$store,$host,$cluster,$node,$region}",
                                             "data_source": "metrics",
                                             "name": "query1",
                                             "aggregator": "last"
@@ -302,7 +302,7 @@
                                     "response_format": "scalar",
                                     "queries": [
                                         {
-                                            "query": "avg:cockroachdb.sys.cpu.combined.percent.normalized{$store,$host}",
+                                            "query": "avg:cockroachdb.sys.cpu.combined.percent.normalized{$store,$host,$cluster,$node,$region}",
                                             "data_source": "metrics",
                                             "name": "query1",
                                             "aggregator": "avg"
@@ -338,7 +338,7 @@
                                     "response_format": "scalar",
                                     "queries": [
                                         {
-                                            "query": "avg:cockroachdb.sys.rss{$store,$host}",
+                                            "query": "avg:cockroachdb.sys.rss{$store,$host,$cluster,$node,$region}",
                                             "data_source": "metrics",
                                             "name": "query1",
                                             "aggregator": "avg"
@@ -420,7 +420,7 @@
                                     ],
                                     "queries": [
                                         {
-                                            "query": "p99:cockroachdb.sql.service.latency{$host,$store}",
+                                            "query": "p99:cockroachdb.sql.service.latency{$host,$store,$cluster,$node,$region}",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -459,7 +459,7 @@
                                     "response_format": "scalar",
                                     "queries": [
                                         {
-                                            "query": "p99:cockroachdb.sql.service.latency{$store,$host}",
+                                            "query": "p99:cockroachdb.sql.service.latency{$store,$host,$cluster,$node,$region}",
                                             "data_source": "metrics",
                                             "name": "query1",
                                             "aggregator": "percentile"
@@ -524,7 +524,7 @@
                                     ],
                                     "queries": [
                                         {
-                                            "query": "p99:cockroachdb.sql.txn.latency.bucket{$host,$store}",
+                                            "query": "p99:cockroachdb.sql.txn.latency.bucket{$host,$store,$cluster,$node,$region}",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -563,7 +563,7 @@
                                     "response_format": "scalar",
                                     "queries": [
                                         {
-                                            "query": "p99:cockroachdb.sql.txn.latency{$store,$host}",
+                                            "query": "p99:cockroachdb.sql.txn.latency{$store,$host,$cluster,$node,$region}",
                                             "data_source": "metrics",
                                             "name": "query1",
                                             "aggregator": "percentile"
@@ -628,7 +628,7 @@
                                     ],
                                     "queries": [
                                         {
-                                            "query": "p99:cockroachdb.sql.conn.latency{$store,$host}",
+                                            "query": "p99:cockroachdb.sql.conn.latency{$store,$host,$cluster,$node,$region}",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -667,7 +667,7 @@
                                     "response_format": "scalar",
                                     "queries": [
                                         {
-                                            "query": "p99:cockroachdb.sql.conn.latency{$store,$host}",
+                                            "query": "p99:cockroachdb.sql.conn.latency{$store,$host,$cluster,$node,$region}",
                                             "data_source": "metrics",
                                             "name": "query1",
                                             "aggregator": "percentile"
@@ -750,7 +750,7 @@
                                     ],
                                     "queries": [
                                         {
-                                            "query": "avg:cockroachdb.sql.conns{$host,$store}",
+                                            "query": "avg:cockroachdb.sql.conns{$host,$store,$cluster,$node,$region}",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -799,7 +799,7 @@
                                     "response_format": "timeseries",
                                     "queries": [
                                         {
-                                            "query": "sum:cockroachdb.sql.insert.count{$store,$host}.as_rate().rollup(sum, 30)",
+                                            "query": "sum:cockroachdb.sql.insert.count{$store,$host,$cluster,$node,$region}.as_rate().rollup(sum, 30)",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -821,7 +821,7 @@
                                     "response_format": "timeseries",
                                     "queries": [
                                         {
-                                            "query": "sum:cockroachdb.sql.select.count{$store,$host}.as_rate().rollup(sum, 30)",
+                                            "query": "sum:cockroachdb.sql.select.count{$store,$host,$cluster,$node,$region}.as_rate().rollup(sum, 30)",
                                             "data_source": "metrics",
                                             "name": "query0"
                                         }
@@ -843,7 +843,7 @@
                                     "response_format": "timeseries",
                                     "queries": [
                                         {
-                                            "query": "sum:cockroachdb.sql.update.count{$store,$host}.as_rate().rollup(sum, 30)",
+                                            "query": "sum:cockroachdb.sql.update.count{$store,$host,$cluster,$node,$region}.as_rate().rollup(sum, 30)",
                                             "data_source": "metrics",
                                             "name": "query0"
                                         }
@@ -865,7 +865,7 @@
                                     "response_format": "timeseries",
                                     "queries": [
                                         {
-                                            "query": "sum:cockroachdb.sql.delete.count{$store,$host}.as_rate().rollup(sum, 30)",
+                                            "query": "sum:cockroachdb.sql.delete.count{$store,$host,$cluster,$node,$region}.as_rate().rollup(sum, 30)",
                                             "data_source": "metrics",
                                             "name": "query0"
                                         }
@@ -912,7 +912,7 @@
                                     ],
                                     "queries": [
                                         {
-                                            "query": "sum:cockroachdb.sql.failure.count{$host,$store}.as_rate().rollup(sum, 30)",
+                                            "query": "sum:cockroachdb.sql.failure.count{$host,$store,$cluster,$node,$region}.as_rate().rollup(sum, 30)",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -960,7 +960,7 @@
                                     "increase_good": false,
                                     "queries": [
                                         {
-                                            "query": "sum:cockroachdb.sql.failure.count{$host,$store}.as_count()",
+                                            "query": "sum:cockroachdb.sql.failure.count{$host,$store,$cluster,$node,$region}.as_count()",
                                             "data_source": "metrics",
                                             "name": "query1",
                                             "aggregator": "avg"
@@ -1020,7 +1020,7 @@
                                     ],
                                     "queries": [
                                         {
-                                            "query": "sum:cockroachdb.sys.cpu.combined.percent.normalized{$host,$store} by {node}",
+                                            "query": "sum:cockroachdb.sys.cpu.combined.percent.normalized{$host,$store,$cluster,$node,$region} by {node}",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -1067,7 +1067,7 @@
                                     ],
                                     "queries": [
                                         {
-                                            "query": "sum:cockroachdb.sys.rss{$host,$store}",
+                                            "query": "sum:cockroachdb.sys.rss{$host,$store,$cluster,$node,$region}",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -1138,27 +1138,27 @@
                                     ],
                                     "queries": [
                                         {
-                                            "query": "sum:cockroachdb.sys.rss{$host,$store}",
+                                            "query": "sum:cockroachdb.sys.rss{$host,$store,$cluster,$node,$region}",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         },
                                         {
-                                            "query": "sum:cockroachdb.sys.go.allocbytes{$host,$store}",
+                                            "query": "sum:cockroachdb.sys.go.allocbytes{$host,$store,$cluster,$node,$region}",
                                             "data_source": "metrics",
                                             "name": "query2"
                                         },
                                         {
-                                            "query": "sum:cockroachdb.sys.go.totalbytes{$host,$store}",
+                                            "query": "sum:cockroachdb.sys.go.totalbytes{$host,$store,$cluster,$node,$region}",
                                             "data_source": "metrics",
                                             "name": "query3"
                                         },
                                         {
-                                            "query": "sum:cockroachdb.sys.cgo.allocbytes{$host,$store}",
+                                            "query": "sum:cockroachdb.sys.cgo.allocbytes{$host,$store,$cluster,$node,$region}",
                                             "data_source": "metrics",
                                             "name": "query4"
                                         },
                                         {
-                                            "query": "sum:cockroachdb.sys.cgo.totalbytes{$host,$store}",
+                                            "query": "sum:cockroachdb.sys.cgo.totalbytes{$host,$store,$cluster,$node,$region}",
                                             "data_source": "metrics",
                                             "name": "query5"
                                         }
@@ -1224,7 +1224,7 @@
                                     ],
                                     "queries": [
                                         {
-                                            "query": "sum:cockroachdb.capacity.available{$store,$host}",
+                                            "query": "sum:cockroachdb.capacity.available{$store,$host,$cluster,$node,$region}",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -1281,17 +1281,17 @@
                                     "response_format": "timeseries",
                                     "queries": [
                                         {
-                                            "query": "sum:cockroachdb.capacity{$store,$host}",
+                                            "query": "sum:cockroachdb.capacity{$store,$host,$cluster,$node,$region}",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         },
                                         {
-                                            "query": "sum:cockroachdb.capacity.available{$store,$host}",
+                                            "query": "sum:cockroachdb.capacity.available{$store,$host,$cluster,$node,$region}",
                                             "data_source": "metrics",
                                             "name": "query2"
                                         },
                                         {
-                                            "query": "sum:cockroachdb.capacity.used{$store,$host}",
+                                            "query": "sum:cockroachdb.capacity.used{$store,$host,$cluster,$node,$region}",
                                             "data_source": "metrics",
                                             "name": "query3"
                                         }
@@ -1343,12 +1343,12 @@
                                     "response_format": "timeseries",
                                     "queries": [
                                         {
-                                            "query": "sum:cockroachdb.livebytes{$store,$host}",
+                                            "query": "sum:cockroachdb.livebytes{$store,$host,$cluster,$node,$region}",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         },
                                         {
-                                            "query": "sum:cockroachdb.sysbytes{$store,$host}",
+                                            "query": "sum:cockroachdb.sysbytes{$store,$host,$cluster,$node,$region}",
                                             "data_source": "metrics",
                                             "name": "query2"
                                         }
@@ -1412,7 +1412,7 @@
                                     ],
                                     "queries": [
                                         {
-                                            "query": "sum:cockroachdb.replicas.total{$store,$host} by {store}",
+                                            "query": "sum:cockroachdb.replicas.total{$store,$host,$cluster,$node,$region} by {store}",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -1472,22 +1472,22 @@
                                     ],
                                     "queries": [
                                         {
-                                            "query": "sum:cockroachdb.admission.wait.sum.kv.count{$host,$store}.as_rate()",
+                                            "query": "sum:cockroachdb.admission.wait.sum.kv.count{$host,$store,$cluster,$node,$region}.as_rate()",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         },
                                         {
-                                            "query": "sum:cockroachdb.admission.wait.sum.kv_stores.count{$host,$store}.as_rate()",
+                                            "query": "sum:cockroachdb.admission.wait.sum.kv_stores.count{$host,$store,$cluster,$node,$region}.as_rate()",
                                             "data_source": "metrics",
                                             "name": "query2"
                                         },
                                         {
-                                            "query": "sum:cockroachdb.admission.wait.sum.sql_kv.response.count{$host,$store}.as_rate()",
+                                            "query": "sum:cockroachdb.admission.wait.sum.sql_kv.response.count{$host,$store,$cluster,$node,$region}.as_rate()",
                                             "data_source": "metrics",
                                             "name": "query3"
                                         },
                                         {
-                                            "query": "sum:cockroachdb.admission.wait.sum.sql_sql.response.count{$host,$store}.as_rate()",
+                                            "query": "sum:cockroachdb.admission.wait.sum.sql_sql.response.count{$host,$store,$cluster,$node,$region}.as_rate()",
                                             "data_source": "metrics",
                                             "name": "query4"
                                         }
@@ -1550,6 +1550,24 @@
         {
             "name": "host",
             "prefix": "host",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "cluster",
+            "prefix": "cluster",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "node",
+            "prefix": "node",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "region",
+            "prefix": "region",
             "available_values": [],
             "default": "*"
         }
