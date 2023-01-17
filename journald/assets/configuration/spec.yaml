@@ -3,6 +3,68 @@ files:
 - name: journald.yaml
   options:
   - template: logs
-    example:
-    - type: journald
-      container_mode: true
+    multiple: true
+    options:
+      - name: type
+        description: ''
+        required: true
+        enabled: true
+        value:
+          type: string
+          example: journald
+          display_default: journald
+      - name: container_mode
+        description: |
+          Automatically sets the source attribute to the corresponding short image
+            name of the container for logs coming from Docker containers.
+
+          Available from Datadog Agent 7.17.0 and above.
+        value:
+          type: boolean
+          display_default: false
+          example: true
+      - name: include_units
+        description: |
+          List of system-level service units to include from log collection.
+        value:
+          type: array
+          items:
+            type: string
+          example:
+            - docker.service
+            - sshd.service
+      - name: exclude_units
+        description: |
+          List of system-level service units to exclude from log collection.
+          Note: The excluded units will take precedence over include_units.
+
+          From Datadog Agent 7.37.0+, a wildcard can be used to exclude all
+            system-level unit log thereby collecting only user-level unit logs.
+        value:
+          type: array
+          items:
+            type: string
+          example:
+            - '*'
+      - name: include_user_units
+        description: |
+          List of user-level service units to include from log collection.
+        value:
+          type: array
+          items:
+            type: string
+          example:
+            - linger-example.service
+      - name: exclude_user_units
+        description: |
+          List of user-level service units to exclude from log collection.
+          Note: The excluded units will take precedence over include_user_units.
+
+          From Datadog Agent 7.37.0+, a wildcard can be used to exclude all
+            user-level unit log thereby collecting only system-level unit logs.
+        value:
+          type: array
+          items:
+            type: string
+          example:
+            - '*'
