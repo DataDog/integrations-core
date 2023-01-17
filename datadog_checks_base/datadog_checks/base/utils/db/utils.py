@@ -59,7 +59,8 @@ def _traced_dbm_async_job_method(f):
                     "run",
                     service=INTEGRATION_TRACING_SERVICE_NAME,
                     resource="{}.{}".format(self._check.name, self._job_name),
-                ):
+                ) as span:
+                    span.set_tag('origin', INTEGRATION_TRACING_SERVICE_NAME)
                     self.run_job()
 
             return wrapper
