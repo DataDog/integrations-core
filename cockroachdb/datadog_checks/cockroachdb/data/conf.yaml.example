@@ -586,7 +586,9 @@ instances:
     ## Learn more about tagging at https://docs.datadoghq.com/tagging
     #
     # tags:
-    #   - node:<NAME>
+    #   - node:<NODE>
+    #   - cluster:<CLUSTER>
+    #   - region:<REGION>
     #   - <KEY_1>:<VALUE_1>
     #   - <KEY_2>:<VALUE_2>
 
