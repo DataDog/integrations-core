@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018-present
+# (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -20,60 +20,23 @@ from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import (
     BUCKET_NAME,
-    BY_BUCKET_METRICS,
+    BUCKET_TAGS,
     CHECK_TAGS,
     COUCHBASE_MAJOR_VERSION,
     INDEX_STATS_COUNT_METRICS,
     INDEX_STATS_GAUGE_METRICS,
     INDEX_STATS_INDEXER_METRICS,
     INDEX_STATS_TAGS,
-    OPTIONAL_BY_BUCKET_METRICS,
     PORT,
     QUERY_STATS_ALWAYS_PRESENT,
     SYNC_GATEWAY_METRICS,
+    _assert_bucket_metrics,
+    _assert_stats,
 )
 
-NODE_STATS = [
-    'cmd_get',
-    'curr_items',
-    'curr_items_tot',
-    'couch_docs_data_size',
-    'couch_docs_actual_disk_size',
-    'couch_spatial_data_size',
-    'couch_spatial_disk_size',
-    'couch_views_data_size',
-    'couch_views_actual_disk_size',
-    'ep_bg_fetched',
-    'get_hits',
-    'mem_used',
-    'ops',
-    'vb_active_num_non_resident',
-    'vb_replica_curr_items',
-]
-
-if COUCHBASE_MAJOR_VERSION == 7:
-    NODE_STATS += ['index_data_size', 'index_disk_size']
-
-TOTAL_STATS = [
-    'hdd.free',
-    'hdd.used',
-    'hdd.total',
-    'hdd.quota_total',
-    'hdd.used_by_data',
-    'ram.used',
-    'ram.total',
-    'ram.quota_total',
-    'ram.quota_total_per_node',
-    'ram.quota_used_per_node',
-    'ram.quota_used',
-    'ram.used_by_data',
-]
-
-BUCKET_TAGS = CHECK_TAGS + ['bucket:{}'.format(BUCKET_NAME)]
+pytestmark = [pytest.mark.usefixtures("dd_environment"), pytest.mark.integration]
 
 
-@pytest.mark.integration
-@pytest.mark.usefixtures("dd_environment")
 def test_service_check(aggregator, instance, couchbase_container_ip):
     """
     Assert the OK service check
@@ -93,27 +56,6 @@ def test_service_check(aggregator, instance, couchbase_container_ip):
     )
 
 
-@pytest.mark.e2e
-def test_e2e(dd_agent_check, instance, couchbase_container_ip):
-    """
-    Test couchbase metrics not including 'couchbase.query.'
-    """
-    aggregator = dd_agent_check(instance)
-
-    # Assert each type of metric (buckets, nodes, totals) except query
-    _assert_bucket_metrics(aggregator, BUCKET_TAGS, device=BUCKET_NAME)
-
-    # Assert 'couchbase.by_node.' metrics
-    node_tags = CHECK_TAGS + ['node:{}:{}'.format(couchbase_container_ip, PORT)]
-    device = '{}:{}'.format(couchbase_container_ip, PORT)
-    _assert_stats(aggregator, node_tags, device=device)
-
-    aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
-
-
-@pytest.mark.integration
-@pytest.mark.usefixtures("dd_environment")
 def test_query_monitoring_metrics(aggregator, dd_run_check, instance_query, couchbase_container_ip):
     """
     Test system vitals metrics (prefixed "couchbase.query.")
@@ -129,8 +71,6 @@ def test_query_monitoring_metrics(aggregator, dd_run_check, instance_query, couc
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
-@pytest.mark.integration
-@pytest.mark.usefixtures("dd_environment")
 def test_sync_gateway_metrics(aggregator, dd_run_check, instance_sg, couchbase_container_ip):
     """
     Test Sync Gateway metrics (prefixed "couchbase.sync_gateway.")
@@ -148,8 +88,6 @@ def test_sync_gateway_metrics(aggregator, dd_run_check, instance_sg, couchbase_c
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
-@pytest.mark.integration
-@pytest.mark.usefixtures("dd_environment")
 def test_metadata(instance_query, dd_run_check, datadog_agent):
     check = Couchbase('couchbase', {}, [instance_query])
     check.check_id = 'test:123'
@@ -181,25 +119,7 @@ def test_metadata(instance_query, dd_run_check, datadog_agent):
     datadog_agent.assert_metadata('test:123', version_metadata)
 
 
-def _assert_bucket_metrics(aggregator, tags, device=None):
-    for metric in BY_BUCKET_METRICS:
-        aggregator.assert_metric(metric, tags=tags, device=device, count=1)
-
-    for metric in OPTIONAL_BY_BUCKET_METRICS:
-        aggregator.assert_metric(metric, tags=tags, device=device, at_least=0)
-
-
-def _assert_stats(aggregator, node_tags, device=None):
-    for mname in NODE_STATS:
-        aggregator.assert_metric('couchbase.by_node.{}'.format(mname), tags=node_tags, count=1, device=device)
-    # Assert 'couchbase.' metrics
-    for mname in TOTAL_STATS:
-        aggregator.assert_metric('couchbase.{}'.format(mname), tags=CHECK_TAGS, count=1)
-
-
 @pytest.mark.skipif(COUCHBASE_MAJOR_VERSION < 7, reason='Index metrics are only available for Couchbase 7+')
-@pytest.mark.integration
-@pytest.mark.usefixtures("dd_environment")
 def test_index_stats_metrics(aggregator, dd_run_check, instance_index_stats, couchbase_container_ip):
     """
     Test Index Statistics metrics (prefixed "couchbase.index." and "couchbase.indexer.")
@@ -219,8 +139,6 @@ def test_index_stats_metrics(aggregator, dd_run_check, instance_index_stats, cou
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
-@pytest.mark.integration
-@pytest.mark.usefixtures("dd_environment")
 def test_metrics(aggregator, dd_run_check, instance, couchbase_container_ip):
     """
     Test couchbase metrics not including 'couchbase.query.'
