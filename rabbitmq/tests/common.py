@@ -11,8 +11,6 @@ from datadog_checks.base.utils.common import get_docker_hostname
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))
 
-USE_OPENMETRICS = os.environ.get('USE_OPENMETRICS', False)
-
 RABBITMQ_VERSION_RAW = os.environ['RABBITMQ_VERSION']
 RABBITMQ_VERSION = version.parse(RABBITMQ_VERSION_RAW)
 

@@ -8,6 +8,7 @@ from contextlib import closing
 
 import pika
 import pytest
+from packaging import version
 
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.rabbitmq import RabbitMQ
@@ -17,11 +18,24 @@ from . import common, metrics
 log = logging.getLogger(__file__)
 
 
+@pytest.mark.skipif(
+    common.RABBITMQ_VERSION >= version.parse("3.8"), reason="Test legacy check on rabbitmq versions < 3.8"
+)
 @pytest.mark.e2e
-def test_rabbitm_e2e(dd_agent_check):
+def test_rabbitmq_e2e(dd_agent_check):
     aggregator = dd_agent_check(common.CONFIG)
     assert_metric_covered(aggregator)
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+
+# TODO uncomment this to add openmetrics e2e test
+# @pytest.mark.skipif(
+#     common.RABBITMQ_VERSION < version.parse("3.8"), reason="Test openmetrics check on rabbitmq versions >= 3.8"
+# )
+# @pytest.mark.e2e
+# def test_rabbitmq_e2e_openmetrics(dd_agent_check):
+#     aggregator = dd_agent_check(common.OPENMETRICS_CONFIG)
+#     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 @pytest.mark.integration
