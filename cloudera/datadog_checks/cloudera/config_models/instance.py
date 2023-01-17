@@ -19,6 +19,14 @@ from datadog_checks.base.utils.models import validation
 from . import defaults, validators
 
 
+class CustomQuery(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    query: Optional[str]
+    tags: Optional[Sequence[str]]
+
+
 class MetricPatterns(BaseModel):
     class Config:
         allow_mutation = False
@@ -32,6 +40,7 @@ class InstanceConfig(BaseModel):
         allow_mutation = False
 
     api_url: str
+    custom_queries: Optional[Sequence[CustomQuery]]
     disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
     max_parallel_requests: Optional[int]

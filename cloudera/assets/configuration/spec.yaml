@@ -41,4 +41,17 @@ files:
       value:
         type: integer
         example: 100
+    - name: custom_queries
+      description: custom queries
+      value:
+        type: array
+        items:
+          type: object
+          properties:
+            - name: query
+              type: string
+            - name: tags
+              type: array
+              items:
+                type: string
     - template: instances/default
