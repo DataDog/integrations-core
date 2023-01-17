@@ -469,6 +469,9 @@ def test_statement_samples_collect(
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_missing_explain_procedure(dbm_instance, dd_run_check, aggregator, statement, schema, expected_warnings):
+    # This feature is being deprecated, it's disabled here because otherwise this warning gets surfaced before the
+    # explain procedure warning.
+    dbm_instance['options']['extra_performance_metrics'] = False
     # Disable query samples to avoid interference from query samples getting picked up from db and triggering
     # explain plans
     dbm_instance['query_samples']['enabled'] = False
