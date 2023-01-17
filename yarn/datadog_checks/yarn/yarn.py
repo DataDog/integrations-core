@@ -254,7 +254,7 @@ class YarnCheck(AgentCheck):
 
                 if (
                     collect_apps_all_states
-                    or (collect_apps_states and app_state in collect_apps_states)
+                    or app_state in collect_apps_states
                     or (not collect_apps_states and app_state == YARN_APPLICATION_RUNNING)
                 ):
                     self._set_yarn_metrics_from_json(tags, app_json, DEPRECATED_YARN_APP_METRICS)
