@@ -5,7 +5,7 @@ import os
 
 import pytest
 
-from datadog_checks.dev import get_here, docker_run
+from datadog_checks.dev import docker_run, get_here
 
 
 @pytest.fixture(scope='session')
@@ -14,8 +14,8 @@ def dd_environment():
     conditions = []
 
     with docker_run(
-            compose_file=compose_file,
-            conditions=conditions,
+        compose_file=compose_file,
+        conditions=conditions,
     ):
         yield {}
 

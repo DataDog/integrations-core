@@ -534,6 +534,10 @@ coverage:
         target: 75
         flags:
         - teamcity
+      Temporal:
+        target: 75
+        flags:
+        - temporal
       Teradata:
         target: 75
         flags:
@@ -1295,6 +1299,11 @@ flags:
     paths:
     - teamcity/datadog_checks/teamcity
     - teamcity/tests
+  temporal:
+    carryforward: true
+    paths:
+    - temporal/datadog_checks/temporal
+    - temporal/tests
   teradata:
     carryforward: true
     paths:
