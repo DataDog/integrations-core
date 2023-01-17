@@ -48,7 +48,7 @@ def tracing_method(f, tracer):
         def wrapper(self, *args, **kwargs):
             integration_name = _get_integration_name(f.__name__, self, *args, **kwargs)
             with tracer.trace(f.__name__, service=INTEGRATION_TRACING_SERVICE_NAME, resource=integration_name) as span:
-                span.set_tag('origin', INTEGRATION_TRACING_SERVICE_NAME)
+                span.set_tag('_dd.origin', INTEGRATION_TRACING_SERVICE_NAME)
                 return f(self, *args, **kwargs)
 
     else:
@@ -57,7 +57,7 @@ def tracing_method(f, tracer):
         def wrapper(*args, **kwargs):
             integration_name = _get_integration_name(f.__name__, None, *args, **kwargs)
             with tracer.trace(f.__name__, service=INTEGRATION_TRACING_SERVICE_NAME, resource=integration_name) as span:
-                span.set_tag('origin', INTEGRATION_TRACING_SERVICE_NAME)
+                span.set_tag('_dd.origin', INTEGRATION_TRACING_SERVICE_NAME)
                 return f(*args, **kwargs)
 
     return wrapper
@@ -83,7 +83,7 @@ def traced_warning(f, tracer):
                 _formatted_message = to_native_string(warning_message)
                 if args:
                     _formatted_message = _formatted_message % args
-                span.set_tag('origin', INTEGRATION_TRACING_SERVICE_NAME)
+                span.set_tag('_dd.origin', INTEGRATION_TRACING_SERVICE_NAME)
                 span.set_tag(errors.ERROR_MSG, _formatted_message)
                 span.set_tag(errors.ERROR_TYPE, "AgentCheck.warning")
                 span.set_traceback()
