@@ -81,6 +81,44 @@ For containerized environments, see the [Autodiscovery Integration Templates][3]
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
+#### Clusters Discovery
+
+You can configure how your clusters are discovered with the `clusters` parameter.
+
+`limit`
+: Maximum number of items to be autodiscovered.  
+**Default value**: `None` (all clusters will be processed)
+
+`include`
+: Mapping of regular expression keys and component config values to autodiscover.  
+**Default value**: empty map
+
+`exclude`
+: List of regular expressions with the patterns of components to exclude from autodiscovery.  
+**Default value**: empty list
+
+**Examples**:
+
+Process a maximum of `5` clusters with names starting with `my_cluster`:
+
+```yaml
+clusters:
+  limit: 5
+  include:
+    - 'my_cluster.*'
+```
+
+Process a maximum of `20` clusters and exclude those beginning with `tmp_`:
+
+```yaml
+components_discovery:
+  limit: 20
+  include:
+    - '.*'
+  exclude:
+    - 'tmp_.*'
+```
+
 ### Validation
 
 [Run the Agent's status subcommand][6] and look for `cloudera` under the Checks section.
