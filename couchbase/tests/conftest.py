@@ -69,7 +69,6 @@ def dd_environment():
         compose_file=os.path.join(HERE, 'compose', 'standalone.compose'),
         env_vars={'CB_CONTAINER_NAME': CB_CONTAINER_NAME},
         conditions=conditions,
-        attempts=2,
     ):
         yield deepcopy(DEFAULT_INSTANCE)
 
