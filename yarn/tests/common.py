@@ -209,7 +209,7 @@ YARN_COLLECT_APPS_ALL_STATES_CONFIG = {
             'cluster_name': CLUSTER_NAME,
             'tags': list(CUSTOM_TAGS),
             'application_tags': {'app_id': 'id', 'app_queue': 'queue'},
-            'ssl_verify': False,
+            'queue_blacklist': ['nofollowqueue'],
             'collect_apps_all_states': True,
         }
     ]
