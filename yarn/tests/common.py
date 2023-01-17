@@ -271,12 +271,24 @@ YARN_APPS_ALL_STATES_VALUES = deepcopy(YARN_APP_METRICS_VALUES)
 YARN_APPS_ALL_STATES_VALUES['yarn.apps.progress_gauge'] = 30
 
 YARN_APPS_ALL_STATES = [
-    {'app_name': 'word count', 'metric_values': YARN_APP_METRICS_VALUES},
-    {'app_name': 'dead app', 'metric_values': YARN_APPS_ALL_STATES_VALUES},
-    {'app_name': 'new app', 'metric_values': YARN_APPS_ALL_STATES_VALUES},
+    {
+        'app_name': 'word count',
+        'metric_values': YARN_APP_METRICS_VALUES,
+        'tags': ['app_name:word count', 'app_queue:default', 'state:RUNNING'],
+    },
+    {
+        'app_name': 'dead app',
+        'metric_values': YARN_APPS_ALL_STATES_VALUES,
+        'tags': ['app_name:dead app', 'app_queue:default', 'state:KILLED'],
+    },
+    {
+        'app_name': 'new app',
+        'metric_values': YARN_APPS_ALL_STATES_VALUES,
+        'tags': ['app_name:new app', 'app_queue:default', 'state:NEW'],
+    },
 ]
 
-YARN_APP_METRICS_TAGS = ['app_name:word count', 'app_queue:default'] + YARN_CLUSTER_METRICS_TAGS
+YARN_APP_METRICS_TAGS = ['app_name:word count', 'app_queue:default', 'state:RUNNING'] + YARN_CLUSTER_METRICS_TAGS
 
 YARN_NODE_METRICS_VALUES = {
     'yarn.node.last_health_update': 1324056895432,

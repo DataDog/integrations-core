@@ -59,6 +59,7 @@ class InstanceConfig(BaseModel):
     cluster_name: Optional[str]
     collect_app_metrics: Optional[bool]
     collect_apps_all_states: Optional[bool]
+    collect_apps_states_list: Optional[Sequence[str]]
     collect_node_metrics: Optional[bool]
     connect_timeout: Optional[float]
     disable_generic_tags: Optional[bool]

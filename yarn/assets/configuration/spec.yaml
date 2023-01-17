@@ -6,6 +6,24 @@ files:
         options:
           - template: init_config/http
           - template: init_config/default
+          - name: collect_apps_all_states
+            description: |
+              Enable this parameter when using `collect_app_metrics` to collect metrics from applications of all states.
+              For example, collect metrics from applications with 'NEW', 'SUBMITTED', 'FINISHED', and other states.
+            value:
+              example: false
+              type: boolean
+          - name: collect_apps_states_list
+            description: |
+              Configure the application states of which to collect application metrics.
+            value:
+              type: array
+              items:
+                type: string
+              example:
+                - "RUNNING"
+                - "FINISHED"
+                - "FAILED"
       - template: instances
         options:
           - name: resourcemanager_uri
@@ -71,10 +89,21 @@ files:
           - name: collect_apps_all_states
             description: |
               Enable this parameter when using `collect_app_metrics` to collect metrics from applications of all states.
-              For example, collect metrics from applications with 'PENDING', 'FINISHED', and other states.
+              For example, collect metrics from applications with 'NEW', 'SUBMITTED', 'FINISHED', and other states.
             value:
               example: false
               type: boolean
+          - name: collect_apps_states_list
+            description: |
+              Configure the application states of which to collect application metrics.
+            value:
+              type: array
+              items:
+                type: string
+              example:
+                - "RUNNING"
+                - "FINISHED"
+                - "FAILED"
           - name: collect_node_metrics
             description: Set this parameter to false to remove yarn.node metrics from metric collection.
             value:

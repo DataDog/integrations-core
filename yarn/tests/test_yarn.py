@@ -3,7 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
 import os
+import re
 
+import pytest
 from requests.exceptions import SSLError
 from six import iteritems
 
@@ -65,19 +67,19 @@ def test_check(aggregator, mocked_request):
     aggregator.assert_service_check(
         APPLICATION_STATUS_SERVICE_CHECK,
         status=YarnCheck.OK,
-        tags=['app_queue:default', 'app_name:word count'] + EXPECTED_TAGS,
+        tags=['app_queue:default', 'app_name:word count', 'state:RUNNING'] + EXPECTED_TAGS,
     )
 
     aggregator.assert_service_check(
         APPLICATION_STATUS_SERVICE_CHECK,
         status=YarnCheck.CRITICAL,
-        tags=['app_queue:default', 'app_name:dead app'] + EXPECTED_TAGS,
+        tags=['app_queue:default', 'app_name:dead app', 'state:KILLED'] + EXPECTED_TAGS,
     )
 
     aggregator.assert_service_check(
         APPLICATION_STATUS_SERVICE_CHECK,
         status=YarnCheck.OK,
-        tags=['app_queue:default', 'app_name:new app'] + EXPECTED_TAGS,
+        tags=['app_queue:default', 'app_name:new app', 'state:NEW'] + EXPECTED_TAGS,
     )
 
     # Check the YARN Cluster Metrics
@@ -131,19 +133,19 @@ def test_check_mapping(aggregator, mocked_request):
     aggregator.assert_service_check(
         APPLICATION_STATUS_SERVICE_CHECK,
         status=YarnCheck.OK,
-        tags=['app_queue:default', 'app_name:word count'] + EXPECTED_TAGS,
+        tags=['app_queue:default', 'app_name:word count', 'state:RUNNING'] + EXPECTED_TAGS,
     )
 
     aggregator.assert_service_check(
         APPLICATION_STATUS_SERVICE_CHECK,
         status=YarnCheck.WARNING,
-        tags=['app_queue:default', 'app_name:dead app'] + EXPECTED_TAGS,
+        tags=['app_queue:default', 'app_name:dead app', 'state:KILLED'] + EXPECTED_TAGS,
     )
 
     aggregator.assert_service_check(
         APPLICATION_STATUS_SERVICE_CHECK,
         status=YarnCheck.OK,
-        tags=['app_queue:default', 'app_name:new app'] + EXPECTED_TAGS,
+        tags=['app_queue:default', 'app_name:new app', 'state:NEW'] + EXPECTED_TAGS,
     )
 
 
@@ -181,19 +183,19 @@ def test_custom_mapping(aggregator, mocked_request):
     aggregator.assert_service_check(
         APPLICATION_STATUS_SERVICE_CHECK,
         status=YarnCheck.OK,
-        tags=['app_queue:default', 'app_name:word count'] + EXPECTED_TAGS,
+        tags=['app_queue:default', 'app_name:word count', 'state:RUNNING'] + EXPECTED_TAGS,
     )
 
     aggregator.assert_service_check(
         APPLICATION_STATUS_SERVICE_CHECK,
         status=YarnCheck.WARNING,
-        tags=['app_queue:default', 'app_name:dead app'] + EXPECTED_TAGS,
+        tags=['app_queue:default', 'app_name:dead app', 'state:KILLED'] + EXPECTED_TAGS,
     )
 
     aggregator.assert_service_check(
         APPLICATION_STATUS_SERVICE_CHECK,
         status=YarnCheck.UNKNOWN,
-        tags=['app_queue:default', 'app_name:new app'] + EXPECTED_TAGS,
+        tags=['app_queue:default', 'app_name:new app', 'state:NEW'] + EXPECTED_TAGS,
     )
 
 
@@ -210,12 +212,7 @@ def test_check_splits_yarn_application_tags(aggregator, mocked_request):
     aggregator.assert_service_check(
         APPLICATION_STATUS_SERVICE_CHECK,
         status=YarnCheck.OK,
-        tags=[
-            'app_queue:default',
-            'app_name:word count',
-            'app_key1:value1',
-            'app_key2:value2',
-        ]
+        tags=['app_queue:default', 'app_name:word count', 'app_key1:value1', 'app_key2:value2', 'state:RUNNING']
         + EXPECTED_TAGS,
     )
 
@@ -223,13 +220,7 @@ def test_check_splits_yarn_application_tags(aggregator, mocked_request):
     aggregator.assert_service_check(
         APPLICATION_STATUS_SERVICE_CHECK,
         status=YarnCheck.WARNING,
-        tags=[
-            'app_queue:default',
-            'app_name:dead app',
-            'app_tag1',
-            'app_tag2',
-        ]
-        + EXPECTED_TAGS,
+        tags=['app_queue:default', 'app_name:dead app', 'app_tag1', 'app_tag2', 'state:KILLED'] + EXPECTED_TAGS,
     )
 
 
@@ -248,25 +239,14 @@ def test_disable_legacy_cluster_tag(aggregator, mocked_request):
     aggregator.assert_service_check(
         APPLICATION_STATUS_SERVICE_CHECK,
         status=YarnCheck.OK,
-        tags=[
-            'app_queue:default',
-            'app_name:word count',
-            'app_key1:value1',
-            'app_key2:value2',
-        ]
+        tags=['app_queue:default', 'app_name:word count', 'app_key1:value1', 'app_key2:value2', 'state:RUNNING']
         + expected_tags,
     )
 
     aggregator.assert_service_check(
         APPLICATION_STATUS_SERVICE_CHECK,
         status=YarnCheck.WARNING,
-        tags=[
-            'app_queue:default',
-            'app_name:dead app',
-            'app_tag1',
-            'app_tag2',
-        ]
-        + expected_tags,
+        tags=['app_queue:default', 'app_name:dead app', 'app_tag1', 'app_tag2', 'state:KILLED'] + expected_tags,
     )
 
 
@@ -348,6 +328,33 @@ def test_collect_apps_all_states(dd_run_check, aggregator, mocked_request):
     dd_run_check(yarn)
 
     for app in YARN_APPS_ALL_STATES:
-        app_tags = ['app_name:{}'.format(app['app_name']), 'app_queue:default']
         for metric, value in iteritems(app['metric_values']):
-            aggregator.assert_metric(metric, value=value, tags=app_tags + EXPECTED_TAGS, count=1)
+            aggregator.assert_metric(metric, value=value, tags=app['tags'] + EXPECTED_TAGS, count=1)
+
+
+@pytest.mark.parametrize(
+    'config',
+    [
+        pytest.param(['RUNNING', 'NEW'], id='RUNNING and NEW'),
+        pytest.param(['NEW'], id='NEW only'),
+        pytest.param(['NEW', 'KILLED'], id='NEW and KILLED'),
+        pytest.param(['RUNNING', 'NEW', 'KILLED'], id='RUNNING, NEW, and KILLED'),
+    ],
+)
+def test_collect_apps_states_list(dd_run_check, aggregator, mocked_request, config):
+    instance = YARN_CONFIG['instances'][0]
+    instance['collect_apps_states_list'] = config
+    state_tags = ['state:{}'.format(state) for state in config]
+    yarn = YarnCheck('yarn', {}, [instance])
+    dd_run_check(yarn)
+    state_tag_re = re.compile(r'state:.*')
+
+    for app in YARN_APPS_ALL_STATES:
+        for metric, value in iteritems(app['metric_values']):
+            m = re.search(state_tag_re, app['tags'][2])
+            if m:
+                state_tag = m.group(0)
+                if state_tag in state_tags:
+                    aggregator.assert_metric(metric, value=value, tags=app['tags'] + EXPECTED_TAGS, count=1)
+                else:
+                    aggregator.assert_metric(metric, tags=app['tags'] + EXPECTED_TAGS, count=0)

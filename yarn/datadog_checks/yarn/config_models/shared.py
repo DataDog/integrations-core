@@ -32,6 +32,8 @@ class SharedConfig(BaseModel):
     class Config:
         allow_mutation = False
 
+    collect_apps_all_states: Optional[bool]
+    collect_apps_states_list: Optional[Sequence[str]]
     proxy: Optional[Proxy]
     service: Optional[str]
     skip_proxy: Optional[bool]
