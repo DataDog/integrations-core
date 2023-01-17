@@ -59,7 +59,7 @@
                         },
                         "id": 7137252396065106,
                         "layout": {
-                            "height": 2,
+                            "height": 3,
                             "width": 6,
                             "x": 0,
                             "y": 0
@@ -80,17 +80,17 @@
                         },
                         "id": 5723783152443636,
                         "layout": {
-                            "height": 1,
+                            "height": 2,
                             "width": 6,
                             "x": 0,
-                            "y": 2
+                            "y": 3
                         }
                     }
                 ]
             },
             "id": 8741772350597652,
             "layout": {
-                "height": 6,
+                "height": 8,
                 "width": 6,
                 "x": 0,
                 "y": 0
@@ -139,6 +139,7 @@
                                 }
                             ],
                             "show_legend": true,
+                            "time": {},
                             "title": "Number of Applications",
                             "title_align": "left",
                             "title_size": "16",
@@ -181,7 +182,7 @@
                         },
                         "id": 8391951914104866,
                         "layout": {
-                            "height": 1,
+                            "height": 2,
                             "width": 2,
                             "x": 0,
                             "y": 2
@@ -216,7 +217,7 @@
                         },
                         "id": 3083362413703058,
                         "layout": {
-                            "height": 1,
+                            "height": 2,
                             "width": 2,
                             "x": 2,
                             "y": 2
@@ -251,7 +252,7 @@
                         },
                         "id": 2764269609392968,
                         "layout": {
-                            "height": 1,
+                            "height": 2,
                             "width": 2,
                             "x": 4,
                             "y": 2
@@ -284,17 +285,17 @@
                         },
                         "id": 148852812141642,
                         "layout": {
-                            "height": 2,
+                            "height": 3,
                             "width": 6,
                             "x": 0,
-                            "y": 3
+                            "y": 4
                         }
                     }
                 ]
             },
             "id": 2293131439045202,
             "layout": {
-                "height": 6,
+                "height": 8,
                 "width": 6,
                 "x": 6,
                 "y": 0
@@ -706,10 +707,10 @@
             },
             "id": 3103904444573384,
             "layout": {
-                "height": 1,
+                "height": 15,
                 "width": 12,
                 "x": 0,
-                "y": 6
+                "y": 8
             }
         },
         {
@@ -1031,7 +1032,7 @@
                 "height": 1,
                 "width": 12,
                 "x": 0,
-                "y": 7
+                "y": 23
             }
         },
         {
@@ -1598,7 +1599,7 @@
                 "height": 1,
                 "width": 12,
                 "x": 0,
-                "y": 8
+                "y": 24
             }
         },
         {
@@ -2060,10 +2061,10 @@
             },
             "id": 444244913319832,
             "layout": {
-                "height": 14,
+                "height": 1,
                 "width": 12,
                 "x": 0,
-                "y": 9
+                "y": 25
             }
         },
         {
@@ -2274,7 +2275,7 @@
                 "is_column_break": true,
                 "width": 12,
                 "x": 0,
-                "y": 23
+                "y": 26
             }
         },
         {
@@ -2341,10 +2342,10 @@
             },
             "id": 5039638453713644,
             "layout": {
-                "height": 1,
+                "height": 4,
                 "width": 12,
                 "x": 0,
-                "y": 24
+                "y": 27
             }
         }
     ]
