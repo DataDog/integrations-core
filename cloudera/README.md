@@ -111,7 +111,7 @@ clusters:
 Process a maximum of `20` clusters and exclude those beginning with `tmp_`:
 
 ```yaml
-components_discovery:
+clusters:
   limit: 20
   include:
     - '.*'
