@@ -47,7 +47,7 @@
                     {
                         "definition": {
                             "background_color": "transparent",
-                            "content": "This dashboard provides a high-level overview of your Argo CD clusters so that you can monitor its deployments, performance and and the overall health of the cluster\n\nUsing the dashboard, you can monitor the health of\n* Application Controller\n* API Server\n* Repository Server",
+                            "content": "This dashboard provides a high-level overview of your Argo CD clusters so that you can monitor its deployments, performance and the overall health of the cluster\n\nUsing the dashboard, you can monitor the health of\n* Application Controller\n* API Server\n* Repository Server",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": false,
@@ -59,8 +59,8 @@
                         },
                         "id": 7137252396065106,
                         "layout": {
-                            "height": 3,
-                            "width": 4,
+                            "height": 2,
+                            "width": 6,
                             "x": 0,
                             "y": 0
                         }
@@ -68,7 +68,7 @@
                     {
                         "definition": {
                             "background_color": "transparent",
-                            "content": "\n### Useful Links\n- [Datadog Argo CD Integration Documentation](https://docs.datadoghq.com/integrations/argocd/)\n- [Argo CD Official Documentation](https://argo-cd.readthedocs.io/en/latest/)",
+                            "content": "\n### Useful Links\n- [Datadog ArgoCD Integration Documentation](https://docs.datadoghq.com/integrations/argocd/)\n- [ArgoCD Official Documentation](https://argo-cd.readthedocs.io/en/latest/)",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": false,
@@ -80,17 +80,17 @@
                         },
                         "id": 5723783152443636,
                         "layout": {
-                            "height": 2,
-                            "width": 4,
+                            "height": 1,
+                            "width": 6,
                             "x": 0,
-                            "y": 3
+                            "y": 2
                         }
                     }
                 ]
             },
             "id": 8741772350597652,
             "layout": {
-                "height": 8,
+                "height": 6,
                 "width": 6,
                 "x": 0,
                 "y": 0
@@ -98,12 +98,60 @@
         },
         {
             "definition": {
-                "background_color": "vivid_purple",
+                "background_color": "vivid_blue",
                 "layout_type": "ordered",
                 "show_title": true,
                 "title": "Overview",
                 "type": "group",
                 "widgets": [
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Number of Applications",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:argocd.app_controller.app.info{$host,$kube_cluster_name,$health_status,$kube_namespace,$repo} by {host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "blue"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Number of Applications",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 1107851890687136,
+                        "layout": {
+                            "height": 2,
+                            "width": 6,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
                     {
                         "definition": {
                             "autoscale": true,
@@ -126,17 +174,17 @@
                                     "response_format": "scalar"
                                 }
                             ],
-                            "title": "# of Application Controllers",
+                            "title": "App Controllers",
                             "title_align": "left",
                             "title_size": "16",
                             "type": "query_value"
                         },
                         "id": 8391951914104866,
                         "layout": {
-                            "height": 2,
+                            "height": 1,
                             "width": 2,
                             "x": 0,
-                            "y": 0
+                            "y": 2
                         }
                     },
                     {
@@ -161,17 +209,17 @@
                                     "response_format": "scalar"
                                 }
                             ],
-                            "title": "# of Repository Servers",
+                            "title": "Repository Servers",
                             "title_align": "left",
                             "title_size": "16",
                             "type": "query_value"
                         },
                         "id": 3083362413703058,
                         "layout": {
-                            "height": 2,
+                            "height": 1,
                             "width": 2,
                             "x": 2,
-                            "y": 0
+                            "y": 2
                         }
                     },
                     {
@@ -196,17 +244,17 @@
                                     "response_format": "scalar"
                                 }
                             ],
-                            "title": "# of API Servers",
+                            "title": "API Servers",
                             "title_align": "left",
                             "title_size": "16",
                             "type": "query_value"
                         },
                         "id": 2764269609392968,
                         "layout": {
-                            "height": 2,
+                            "height": 1,
                             "width": 2,
                             "x": 4,
-                            "y": 0
+                            "y": 2
                         }
                     },
                     {
@@ -236,17 +284,17 @@
                         },
                         "id": 148852812141642,
                         "layout": {
-                            "height": 5,
+                            "height": 2,
                             "width": 6,
                             "x": 0,
-                            "y": 2
+                            "y": 3
                         }
                     }
                 ]
             },
             "id": 2293131439045202,
             "layout": {
-                "height": 8,
+                "height": 6,
                 "width": 6,
                 "x": 6,
                 "y": 0
@@ -306,7 +354,7 @@
                                 "value",
                                 "sum"
                             ],
-                            "legend_layout": "auto",
+                            "legend_layout": "horizontal",
                             "requests": [
                                 {
                                     "display_type": "bars",
@@ -320,14 +368,14 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:argocd.app_controller.app.info{$host,$kube_cluster_name,$health_status,$kube_namespace,$repo} by {host}"
+                                            "query": "sum:argocd.app_controller.app.info{$host,$kube_cluster_name,$health_status,$kube_namespace,$repo} by {sync_status}"
                                         }
                                     ],
                                     "response_format": "timeseries",
                                     "style": {
                                         "line_type": "solid",
                                         "line_width": "normal",
-                                        "palette": "blue"
+                                        "palette": "dog_classic"
                                     }
                                 }
                             ],
@@ -380,7 +428,7 @@
                                 }
                             ],
                             "show_legend": true,
-                            "title": "Applications Not in Sync by Status",
+                            "title": "Applications Not in Sync by Sync_Status & Host",
                             "title_align": "left",
                             "title_size": "16",
                             "type": "timeseries"
@@ -661,7 +709,7 @@
                 "height": 1,
                 "width": 12,
                 "x": 0,
-                "y": 8
+                "y": 6
             }
         },
         {
@@ -983,7 +1031,7 @@
                 "height": 1,
                 "width": 12,
                 "x": 0,
-                "y": 9
+                "y": 7
             }
         },
         {
@@ -1550,12 +1598,12 @@
                 "height": 1,
                 "width": 12,
                 "x": 0,
-                "y": 10
+                "y": 8
             }
         },
         {
             "definition": {
-                "background_color": "vivid_green",
+                "background_color": "vivid_orange",
                 "layout_type": "ordered",
                 "show_title": true,
                 "title": "Repository Server Stats",
@@ -1845,7 +1893,7 @@
                     },
                     {
                         "definition": {
-                            "background_color": "green",
+                            "background_color": "orange",
                             "content": "Repository Server Telemetry",
                             "font_size": "18",
                             "has_padding": true,
@@ -2012,15 +2060,15 @@
             },
             "id": 444244913319832,
             "layout": {
-                "height": 1,
+                "height": 14,
                 "width": 12,
                 "x": 0,
-                "y": 11
+                "y": 9
             }
         },
         {
             "definition": {
-                "background_color": "vivid_orange",
+                "background_color": "vivid_green",
                 "layout_type": "ordered",
                 "show_title": true,
                 "title": "Cluster Stats",
@@ -2226,7 +2274,77 @@
                 "is_column_break": true,
                 "width": 12,
                 "x": 0,
-                "y": 12
+                "y": 23
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_blue",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Logs",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "columns": [
+                                        {
+                                            "field": "status_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "timestamp",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "host",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "service",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "content",
+                                            "width": "compact"
+                                        }
+                                    ],
+                                    "query": {
+                                        "data_source": "logs_stream",
+                                        "indexes": [],
+                                        "query_string": "source:argocd",
+                                        "sort": {
+                                            "column": "timestamp",
+                                            "order": "desc"
+                                        },
+                                        "storage": "hot"
+                                    },
+                                    "response_format": "event_list"
+                                }
+                            ],
+                            "title": "",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "list_stream"
+                        },
+                        "id": 7799454257481500,
+                        "layout": {
+                            "height": 3,
+                            "width": 12,
+                            "x": 0,
+                            "y": 0
+                        }
+                    }
+                ]
+            },
+            "id": 5039638453713644,
+            "layout": {
+                "height": 1,
+                "width": 12,
+                "x": 0,
+                "y": 24
             }
         }
     ]
