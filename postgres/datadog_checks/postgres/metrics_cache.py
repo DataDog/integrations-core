@@ -72,12 +72,11 @@ class PostgresMetricsCache:
             if not self.config.dbm_enabled:
                 c_metrics = dict(c_metrics, **DBM_MIGRATED_METRICS)
             # select the right set of metrics to collect depending on postgres version
+            self.instance_metrics = dict(c_metrics)
+            if version >= V9_2:
+                self.instance_metrics = dict(self.instance_metrics, **NEWER_92_METRICS)
             if version >= V14:
-                self.instance_metrics = dict(c_metrics, **NEWER_92_METRICS, **NEWER_14_METRICS)
-            elif version >= V9_2:
-                self.instance_metrics = dict(c_metrics, **NEWER_92_METRICS)
-            else:
-                self.instance_metrics = dict(c_metrics)
+                self.instance_metrics = dict(self.instance_metrics, **NEWER_14_METRICS)
 
             # add size metrics if needed
             if self.config.collect_database_size_metrics:
