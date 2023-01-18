@@ -93,7 +93,7 @@ You can configure how your clusters are discovered with the `clusters` configura
 : Mapping of regular expression keys and component config values to autodiscover.  
 **Default value**: empty map
 
-`exclude`
+- `exclude`
 : List of regular expressions with the patterns of components to exclude from autodiscovery.  
 **Default value**: empty list
 
