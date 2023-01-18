@@ -11,7 +11,7 @@ from cm_client.models.api_entity_tag import ApiEntityTag
 from cm_client.models.api_version_info import ApiVersionInfo
 from cm_client.rest import ApiException
 
-from datadog_checks.cloudera import ClouderaCheck
+from datadog_checks.base import AgentCheck
 from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import CAN_CONNECT_TAGS, CLUSTER_HEALTH_TAGS, METRICS
@@ -40,7 +40,7 @@ def test_given_cloudera_check_when_get_version_exception_from_cloudera_client_th
     # Then
     aggregator.assert_service_check(
         'cloudera.can_connect',
-        ClouderaCheck.CRITICAL,
+        AgentCheck.CRITICAL,
         tags=CAN_CONNECT_TAGS,
     )
 
@@ -62,7 +62,7 @@ def test_given_cloudera_check_when_version_field_not_found_then_emits_critical_s
     # Then
     aggregator.assert_service_check(
         'cloudera.can_connect',
-        ClouderaCheck.CRITICAL,
+        AgentCheck.CRITICAL,
         message="Cloudera API Client is none: Cloudera Manager Version is unsupported or unknown: None",
         tags=CAN_CONNECT_TAGS,
     )
@@ -88,7 +88,7 @@ def test_given_cloudera_check_when_not_supported_version_then_emits_critical_ser
     # Then
     aggregator.assert_service_check(
         'cloudera.can_connect',
-        ClouderaCheck.CRITICAL,
+        AgentCheck.CRITICAL,
         message="Cloudera API Client is none: Cloudera Manager Version is unsupported or unknown: 5.0.0",
         tags=CAN_CONNECT_TAGS,
     )
@@ -114,7 +114,7 @@ def test_given_cloudera_check_when_v7_read_clusters_exception_from_cloudera_clie
         # Then
     aggregator.assert_service_check(
         'cloudera.can_connect',
-        ClouderaCheck.CRITICAL,
+        AgentCheck.CRITICAL,
         tags=CAN_CONNECT_TAGS,
         message="Cloudera check raised an exception: (Service not available)\nReason: None\n",
     )
@@ -160,12 +160,12 @@ def test_given_cloudera_check_when_bad_health_cluster_then_emits_cluster_health_
         # Then
         aggregator.assert_service_check(
             'cloudera.cluster.health',
-            ClouderaCheck.CRITICAL,
+            AgentCheck.CRITICAL,
             tags=CLUSTER_HEALTH_TAGS,
         )
         aggregator.assert_service_check(
             'cloudera.can_connect',
-            ClouderaCheck.OK,
+            AgentCheck.OK,
             tags=CAN_CONNECT_TAGS,
         )
 
@@ -218,12 +218,12 @@ def test_given_cloudera_check_when_good_health_cluster_then_emits_cluster_metric
 
         aggregator.assert_service_check(
             'cloudera.can_connect',
-            ClouderaCheck.OK,
+            AgentCheck.OK,
             tags=CAN_CONNECT_TAGS,
         )
         aggregator.assert_service_check(
             'cloudera.cluster.health',
-            ClouderaCheck.OK,
+            AgentCheck.OK,
             tags=CLUSTER_HEALTH_TAGS,
         )
         expected_msg_text = (
@@ -279,7 +279,7 @@ def test_given_cloudera_check_when_no_events_response_then_no_event_collection(
         # Then
         aggregator.assert_service_check(
             'cloudera.can_connect',
-            ClouderaCheck.OK,
+            AgentCheck.OK,
             tags=CAN_CONNECT_TAGS,
         )
         expected_content = (
