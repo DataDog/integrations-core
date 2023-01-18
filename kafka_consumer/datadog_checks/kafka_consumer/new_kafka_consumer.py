@@ -263,7 +263,11 @@ class NewKafkaConsumerCheck(object):
         self.log.debug("Reporting consumer offsets and lag metrics")
         for (consumer_group, topic, partition), consumer_offset in self._consumer_offsets.items():
             if reported_contexts >= contexts_limit:
-                self.log.debug("Reported contexts number %s greater than or equal to contexts limit of %s, returning", str(reported_contexts), str(contexts_limit))
+                self.log.debug(
+                    "Reported contexts number %s greater than or equal to contexts limit of %s, returning",
+                    str(reported_contexts),
+                    str(contexts_limit),
+                )
                 return
             consumer_group_tags = ['topic:%s' % topic, 'partition:%s' % partition, 'consumer_group:%s' % consumer_group]
             consumer_group_tags.extend(self._custom_tags)
