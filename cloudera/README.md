@@ -97,7 +97,7 @@ You can configure how your clusters are discovered with the `clusters` configura
 : List of regular expressions with the patterns of components to exclude from autodiscovery.  
 **Default value**: empty list
 
-- `limit`
+- `interval`
 : Validity time in seconds of the last list of clusters obtained through the endpoint.  
 **Default value**: `None` (no cache used)
 
