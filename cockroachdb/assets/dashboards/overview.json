@@ -17,7 +17,7 @@
                             "type": "note",
                             "content": "This dashboard provides a high-level view of your CockroachDB cluster, including:\n- A high-level view of SQL performance & latency.\n- Information about resource consumption to help aid in capacity planning.",
                             "background_color": "transparent",
-                            "font_size": "16",
+                            "font_size": "14",
                             "text_align": "left",
                             "vertical_align": "center",
                             "show_tick": false,
@@ -29,14 +29,14 @@
                             "x": 0,
                             "y": 0,
                             "width": 6,
-                            "height": 2
+                            "height": 1
                         }
                     },
                     {
                         "id": 8131082657770196,
                         "definition": {
                             "type": "note",
-                            "content": "#### Optimize your CockroachDB integration configuration for monitoring\n1. Configure `cluster`, `node`, and `region` tags in your `cockroachdb.d/conf.yaml` [file](https://github.com/DataDog/integrations-core/blob/7f091cbd40dfa13ec713d00d53caa2273a6cc7f6/cockroachdb/datadog_checks/cockroachdb/data/conf.yaml.example#L583-L591):\n\n    ```\n    instances:\n      - openmetrics_endpoint: http://localhost:8080/_status/vars\n        tags:\n          - cluster:prod\n          - node:1\n          - region:us-east-1\n      - openmetrics_endpoint: http://localhost:8081/_status/vars\n        tags:\n          - cluster:prod\n          - node:2\n          - region:us-east-1\n      - openmetrics_endpoint: http://localhost:8082/_status/vars\n        tags:\n          - cluster:dev\n          - node:1\n          - region:us-east-2\n    ```\n2a. Configure `histogram_buckets_as_distributions: true` in the `cockroachdb.d/conf.yaml` [file](https://github.com/DataDog/integrations-core/blob/7f091cbd40dfa13ec713d00d53caa2273a6cc7f6/cockroachdb/datadog_checks/cockroachdb/data/conf.yaml.example#L185-L192).\n  \n2b. [Enable Advanced Query Functionality](https://docs.datadoghq.com/metrics/distributions/#enabling-advanced-query-functionality). Go to the [Metrics Summary](/metric/summary) page and for each distribution metric, click `Advanced` > `Enable percentiles and threshold queries`.",
+                            "content": "#### Optimize your CockroachDB integration configuration for monitoring\n1. Configure `cluster`, `node`, and `region` tags in your `cockroachdb.d/conf.yaml` [file](https://github.com/DataDog/integrations-core/blob/7f091cbd40dfa13ec713d00d53caa2273a6cc7f6/cockroachdb/datadog_checks/cockroachdb/data/conf.yaml.example#L583-L591):\n\n    ```\n    instances:\n      - openmetrics_endpoint: http://localhost:8080/_status/vars\n        tags: [\"cluster:prod\", \"node:1\", \"region:us-east-1\"]\n      - openmetrics_endpoint: http://localhost:8082/_status/vars\n        tags: [\"cluster:dev\", \"node:1\", \"region:us-east-2\"]\n    ```",
                             "background_color": "yellow",
                             "font_size": "14",
                             "text_align": "left",
@@ -48,9 +48,9 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 2,
+                            "y": 1,
                             "width": 6,
-                            "height": 2
+                            "height": 3
                         }
                     }
                 ]
@@ -690,7 +690,7 @@
                         "id": 3441793203761396,
                         "definition": {
                             "type": "note",
-                            "content": "Enable `histogram_buckets_as_distributions: true` to populate these widgets.",
+                            "content": "To populate these widgets, 1) configure `histogram_buckets_as_distributions: true` in the `cockroachdb.d/conf.yaml` and 2) enable [Advanced Query Functionality](https://docs.datadoghq.com/metrics/distributions/#enabling-advanced-query-functionality): Go to the [Metrics Summary](/metric/summary) page and for each distribution metric, click `Advanced` > `Enable percentiles and threshold queries`.",
                             "background_color": "vivid_blue",
                             "font_size": "14",
                             "text_align": "left",
@@ -1430,7 +1430,7 @@
                         "layout": {
                             "x": 0,
                             "y": 0,
-                            "width": 6,
+                            "width": 5,
                             "height": 4
                         }
                     },
@@ -1503,9 +1503,9 @@
                             ]
                         },
                         "layout": {
-                            "x": 6,
+                            "x": 5,
                             "y": 0,
-                            "width": 4,
+                            "width": 5,
                             "height": 4
                         }
                     },
@@ -1542,14 +1542,8 @@
     ],
     "template_variables": [
         {
-            "name": "store",
-            "prefix": "store",
-            "available_values": [],
-            "default": "*"
-        },
-        {
-            "name": "host",
-            "prefix": "host",
+            "name": "region",
+            "prefix": "region",
             "available_values": [],
             "default": "*"
         },
@@ -1566,8 +1560,14 @@
             "default": "*"
         },
         {
-            "name": "region",
-            "prefix": "region",
+            "name": "store",
+            "prefix": "store",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "host",
+            "prefix": "host",
             "available_values": [],
             "default": "*"
         }
