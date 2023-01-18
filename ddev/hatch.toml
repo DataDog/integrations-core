@@ -1,12 +1,15 @@
 [env.collectors.datadog-checks]
 check-types = true
 mypy-args = [
-    "src/ddev",
+  "src/ddev",
 ]
 
 [envs.default]
-python = "38"
+python = "3.8"
 e2e-env = false
+dependencies = [
+  "vcrpy",
+]
 # TODO: remove this when the old CLI is gone
 pre-install-commands = [
   "python -m pip install --disable-pip-version-check {verbosity:flag:-1} -e ../datadog_checks_dev[cli]",

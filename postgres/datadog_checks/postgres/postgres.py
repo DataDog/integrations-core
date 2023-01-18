@@ -24,11 +24,12 @@ from .util import (
     FUNCTION_METRICS,
     QUERY_PG_STAT_DATABASE,
     REPLICATION_METRICS,
+    SLRU_METRICS,
     DatabaseConfigurationError,
     fmt,
     get_schema_field,
 )
-from .version_utils import V9, V9_2, V10, VersionUtils
+from .version_utils import V9, V9_2, V10, V13, VersionUtils
 
 try:
     import datadog_agent
@@ -368,6 +369,8 @@ class PostgreSql(AgentCheck):
             metric_scope.append(FUNCTION_METRICS)
         if self._config.collect_count_metrics:
             metric_scope.append(self.metrics_cache.get_count_metrics())
+        if self.version >= V13:
+            metric_scope.append(SLRU_METRICS)
 
         # Do we need relation-specific metrics?
         if self._config.relations:
@@ -631,7 +634,13 @@ class PostgreSql(AgentCheck):
             # Check version
             self._connect()
             if self._config.tag_replication_role:
-                tags.extend(["replication_role:{}".format(self._get_replication_role())])
+                replication_role_tag = "replication_role:{}".format(self._get_replication_role())
+                tags.append(replication_role_tag)
+                self.tags_without_db = [
+                    t for t in copy.copy(self.tags_without_db) if not t.startswith("replication_role:")
+                ]
+                self.tags_without_db.append(replication_role_tag)
+
             self.log.debug("Running check against version %s: is_aurora: %s", str(self.version), str(self.is_aurora))
             self._collect_stats(tags)
             self._collect_custom_queries(tags)

@@ -10,11 +10,11 @@ mypy-args = [
 ]
 
 [[envs.default.matrix]]
-python = ["27"]
+python = ["2.7"]
 snmplistener = ["false"]
 
 [[envs.default.matrix]]
-python = ["38"]
+python = ["3.8"]
 snmplistener = ["false", "true"]
 
 [envs.default.overrides]

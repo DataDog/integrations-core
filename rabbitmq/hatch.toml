@@ -6,8 +6,8 @@ dependencies = [
 ]
 
 [[envs.default.matrix]]
-python = ["27", "38"]
-version = ["3.5", "3.6", "3.7"]
+python = ["2.7", "3.8"]
+version = ["3.5", "3.6", "3.7", "3.8"]
 
 [envs.default.overrides]
 matrix.version.env-vars = "RABBITMQ_VERSION"

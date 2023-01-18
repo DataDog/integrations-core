@@ -30,8 +30,8 @@ def test_default():
             'default': {
                 'api_key': os.getenv('DD_API_KEY', ''),
                 'app_key': os.getenv('DD_APP_KEY', ''),
-                'site': os.getenv('DD_SITE', ''),
-                'dd_url': os.getenv('DD_DD_URL', ''),
+                'site': os.getenv('DD_SITE', 'datadoghq.com'),
+                'dd_url': os.getenv('DD_DD_URL', 'https://app.datadoghq.com'),
                 'log_url': os.getenv('DD_LOGS_CONFIG_DD_URL', ''),
             },
         },
@@ -329,8 +329,8 @@ class TestOrg:
         org_config = {
             'api_key': os.getenv('DD_API_KEY', ''),
             'app_key': os.getenv('DD_APP_KEY', ''),
-            'site': os.getenv('DD_SITE', ''),
-            'dd_url': os.getenv('DD_DD_URL', ''),
+            'site': os.getenv('DD_SITE', 'datadoghq.com'),
+            'dd_url': os.getenv('DD_DD_URL', 'https://app.datadoghq.com'),
             'log_url': os.getenv('DD_LOGS_CONFIG_DD_URL', ''),
         }
         assert config.org.name == config.org.name == 'default'
@@ -415,8 +415,8 @@ class TestOrg:
             'config': {
                 'api_key': os.getenv('DD_API_KEY', ''),
                 'app_key': os.getenv('DD_APP_KEY', ''),
-                'site': os.getenv('DD_SITE', ''),
-                'dd_url': os.getenv('DD_DD_URL', ''),
+                'site': os.getenv('DD_SITE', 'datadoghq.com'),
+                'dd_url': os.getenv('DD_DD_URL', 'https://app.datadoghq.com'),
                 'log_url': os.getenv('DD_LOGS_CONFIG_DD_URL', ''),
             },
         }
@@ -632,8 +632,8 @@ class TestOrgs:
             'default': {
                 'api_key': os.getenv('DD_API_KEY', ''),
                 'app_key': os.getenv('DD_APP_KEY', ''),
-                'site': os.getenv('DD_SITE', ''),
-                'dd_url': os.getenv('DD_DD_URL', ''),
+                'site': os.getenv('DD_SITE', 'datadoghq.com'),
+                'dd_url': os.getenv('DD_DD_URL', 'https://app.datadoghq.com'),
                 'log_url': os.getenv('DD_LOGS_CONFIG_DD_URL', ''),
             },
         }

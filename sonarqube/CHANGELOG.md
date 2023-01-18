@@ -1,5 +1,18 @@
 # CHANGELOG - SonarQube
 
+## 2.2.3 / 2023-01-16
+
+* [Fixed] Support components from paginated endpoint. See [#13699](https://github.com/DataDog/integrations-core/pull/13699).
+
+## 2.2.2 / 2022-12-23
+
+* [Fixed] Fix config spec to allow additionalProperties. See [#13512](https://github.com/DataDog/integrations-core/pull/13512).
+
+## 2.2.1 / 2022-12-16
+
+* [Fixed] Projects processed in `components` excluded from `components_discovery`. See [#13531](https://github.com/DataDog/integrations-core/pull/13531).
+* [Fixed] Fix configuration spec. See [#13504](https://github.com/DataDog/integrations-core/pull/13504).
+
 ## 2.2.0 / 2022-12-09
 
 * [Added] Add autodiscovery feature for components. See [#13450](https://github.com/DataDog/integrations-core/pull/13450).

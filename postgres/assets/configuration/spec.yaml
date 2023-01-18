@@ -216,6 +216,19 @@ files:
       value:
         type: boolean
         example: false
+    - name: activity_metrics_excluded_aggregations
+      description: |
+        A list of columns to remove from the pg_stat_activity aggregation.
+        By default, datname, usename and application_name will be used.
+        If applications with different application_name are creating a lot of short-lived queries,
+        removing application_name from the aggregation can help generate more stable metrics.
+      value:
+        type: array
+        items:
+          type: string
+        example:
+          - application_name
+        default: []
     - name: collect_database_size_metrics
       description: Collect database size metrics.
       value:
@@ -318,13 +331,13 @@ files:
             type: number
             example: 10
         - name: pg_stat_statements_max_warning_threshold
+          hidden: true
           description: |
             Set the threshold for a safe value of `pg_stat_statements.max`. If the database is configured with a value
             higher than this threshold, a warning is emitted to recommend lowering the setting value.
           value:
             type: number
             example: 10000
-            hidden: true
     - name: query_samples
       description: Configure collection of query samples
       options:
@@ -405,7 +418,7 @@ files:
           value:
             type: number
             example: 3500
-            
+
     - name: aws
       description: |
         This block defines the configuration for AWS RDS and Aurora instances. 

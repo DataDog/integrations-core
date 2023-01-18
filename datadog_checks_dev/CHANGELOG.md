@@ -1,5 +1,19 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 17.7.0 / 2022-12-27
+
+* [Added] Add hidden option to ignore manifest schema validation. See [#13569](https://github.com/DataDog/integrations-core/pull/13569).
+* [Added] Add `--fix` flag to `ddev validate license-headers` for automatically fixing errors. See [#13507](https://github.com/DataDog/integrations-core/pull/13507).
+* [Fixed] Properly account for other integration repos. See [#13581](https://github.com/DataDog/integrations-core/pull/13581).
+* [Fixed] Make `ddev validate license-header` honor gitignore files. See [#13439](https://github.com/DataDog/integrations-core/pull/13439).
+* [Fixed] Fix style. See [#13518](https://github.com/DataDog/integrations-core/pull/13518).
+
+## 17.6.0 / 2022-12-13
+
+* [Added] Update marketplace GitHub actions to validate new template fields. See [#13267](https://github.com/DataDog/integrations-core/pull/13267).
+* [Fixed] Fix style deps. See [#13495](https://github.com/DataDog/integrations-core/pull/13495).
+* [Fixed] Update integrations repo name. See [#13494](https://github.com/DataDog/integrations-core/pull/13494).
+
 ## 17.5.1 / 2022-12-09
 
 * [Fixed] Update dependencies. See [#13478](https://github.com/DataDog/integrations-core/pull/13478).

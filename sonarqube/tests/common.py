@@ -41,6 +41,17 @@ WEB_INSTANCE_WITH_AUTODISCOVERY_INCLUDE_ALL_AND_LIMIT = {
     'components_discovery': {'limit': 1, 'include': {'.*': {'tag': 'project'}}},
     'tags': ['foo:bar'],
 }
+WEB_INSTANCE_WITH_AUTODISCOVERY_CONFIG_NONE = {
+    'web_endpoint': 'http://{}:{}'.format(HOST, PORT),
+    'components_discovery': {'include': {'org.sonarqube:.*': None}},
+    'tags': ['foo:bar'],
+}
+WEB_INSTANCE_WITH_COMPONENT_AND_AUTODISCOVERY = {
+    'web_endpoint': 'http://{}:{}'.format(HOST, PORT),
+    'components': {PROJECT: {'tag': 'project'}},
+    'components_discovery': {'include': {'.*': {'tag': 'project'}}},
+    'tags': ['foo:bar'],
+}
 
 COMPOSE_FILE = os.getenv('COMPOSE_FILE')
 

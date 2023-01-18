@@ -5,7 +5,7 @@
 * [Fixed] Update dependencies. See [#13478](https://github.com/DataDog/integrations-core/pull/13478).
 * [Fixed] Update cryptography dependency. See [#13367](https://github.com/DataDog/integrations-core/pull/13367).
 
-## 9.0.0 / 2022-10-28
+## 9.0.0 / 2022-10-28 / Agent 7.41.0
 
 * [Added] Add Agent settings to log original unobfuscated strings. See [#12941](https://github.com/DataDog/integrations-core/pull/12941).
 * [Fixed] Fix non-specific troubleshooting link on explain_plan_procedure_missing configuration error. See [#13215](https://github.com/DataDog/integrations-core/pull/13215).

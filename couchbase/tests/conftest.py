@@ -16,7 +16,6 @@ from .common import (
     BUCKET_NAME,
     CB_CONTAINER_NAME,
     COUCHBASE_MAJOR_VERSION,
-    CUSTOM_TAGS,
     DEFAULT_INSTANCE,
     HERE,
     INDEX_STATS_URL,
@@ -35,39 +34,21 @@ def instance():
 
 
 @pytest.fixture
-def instance_query():
-    return {
-        'server': URL,
-        'user': USER,
-        'password': PASSWORD,
-        'timeout': 1,
-        'tags': CUSTOM_TAGS,
-        'query_monitoring_url': QUERY_URL,
-    }
+def instance_query(instance):
+    instance['query_monitoring_url'] = QUERY_URL
+    return instance
 
 
 @pytest.fixture
-def instance_sg():
-    return {
-        'server': URL,
-        'user': USER,
-        'password': PASSWORD,
-        'timeout': 1,
-        'tags': CUSTOM_TAGS,
-        'sync_gateway_url': SG_URL,
-    }
+def instance_sg(instance):
+    instance['sync_gateway_url'] = SG_URL
+    return instance
 
 
 @pytest.fixture
-def instance_index_stats():
-    return {
-        'server': URL,
-        'user': USER,
-        'password': PASSWORD,
-        'timeout': 1,
-        'tags': CUSTOM_TAGS,
-        'index_stats_url': INDEX_STATS_URL,
-    }
+def instance_index_stats(instance):
+    instance['index_stats_url'] = INDEX_STATS_URL
+    return instance
 
 
 @pytest.fixture(scope="session")
@@ -90,7 +71,7 @@ def dd_environment():
         conditions=conditions,
         attempts=2,
     ):
-        yield DEFAULT_INSTANCE
+        yield deepcopy(DEFAULT_INSTANCE)
 
 
 @pytest.fixture()
@@ -129,7 +110,9 @@ def couchbase_setup():
         '--bucket-ramsize',
         '100',
     ]
-    subprocess.check_call(create_bucket_args)
+
+    with open(os.devnull, 'w') as FNULL:
+        subprocess.check_call(create_bucket_args, stdout=FNULL)
 
 
 def couchbase_container():
@@ -149,7 +132,9 @@ def couchbase_container():
         '-p',
         PASSWORD,
     ]
-    return subprocess.call(status_args) == 0
+
+    with open(os.devnull, 'w') as FNULL:
+        return subprocess.call(status_args, stdout=FNULL) == 0
 
 
 def couchbase_init():
@@ -209,7 +194,8 @@ def load_sample_bucket():
         '-m',
         '256',
     ]
-    subprocess.check_call(bucket_loader_args)
+    with open(os.devnull, 'w') as FNULL:
+        subprocess.check_call(bucket_loader_args, stdout=FNULL)
 
 
 def node_stats():
@@ -219,7 +205,7 @@ def node_stats():
     r = requests.get('{}/pools/default'.format(URL), auth=(USER, PASSWORD))
     r.raise_for_status()
     stats = r.json()
-    return all(len(node_stats['interestingStats']) > 0 for node_stats in stats['nodes'])
+    return all(len(stats['interestingStats']) > 0 for stats in stats['nodes'])
 
 
 def bucket_stats():

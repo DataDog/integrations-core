@@ -38,6 +38,7 @@ dependencies = [
     "psutil",
     "py>=1.8.2; python_version < '3.0'",  # https://github.com/ionelmc/pytest-benchmark/issues/226
     "pytest",
+    "pytest-asyncio>=0.20.3; python_version > '3.0'",
     "pytest-benchmark[histogram]<4.0.0; python_version < '3.0'",
     "pytest-benchmark[histogram]>=4.0.0; python_version > '3.0'",
     "pytest-cov>=2.6.1",
@@ -72,6 +73,7 @@ cli = [
     "orjson",
     "packaging",
     "pip-tools",
+    "pathspec>=0.10.0",
     "platformdirs>=2.0.0a3",
     "pyperclip>=1.7.0",
     "pysmi>=0.3.4",

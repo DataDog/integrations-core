@@ -166,6 +166,9 @@ class IBMMQConfig:
 
             pattern = pattern.replace('<queue_manager>', re.escape(self.queue_manager_name))
             self.queue_manager_process_pattern = re.compile(pattern)
+
+            # Implied immunity to IBM MQ's memory leak
+            self.try_basic_auth = False
         else:
             self.queue_manager_process_pattern = None
 

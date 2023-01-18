@@ -1,7 +1,7 @@
 [env.collectors.datadog-checks]
 
 [[envs.default.matrix]]
-python = ["27", "38"]
+python = ["2.7", "3.8"]
 version = ["3.7", "4.0"]
 
 [envs.default.overrides]
@@ -15,6 +15,3 @@ matrix.version.env-vars = [
   { key = "POWERDNS_HOST_PORT_0", value = "28082", if = ["4.0"] },
   { key = "POWERDNS_HOST_PORT_1", value = "25353", if = ["4.0"] },
 ]
-
-[envs.latest.env-vars]
-POSTGRES_VERSION = "latest"

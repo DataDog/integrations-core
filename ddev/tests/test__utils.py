@@ -13,4 +13,10 @@ def test_cloned_repo(repository, local_repo):
         entry.name for entry in local_repo.iterdir() if (local_repo / entry.name / 'manifest.json').is_file()
     )
 
-    assert integrations == expected_integrations
+    # Note: We are checking that the number of integrations is +- 1 from the `master`
+    # branch as a workaround for scenarios where the current branch adds/removes
+    # an integration and there has a different integration count than master.
+    if len(integrations) != len(expected_integrations):
+        assert abs(len(integrations) - len(expected_integrations)) == 1
+    else:
+        assert integrations == expected_integrations

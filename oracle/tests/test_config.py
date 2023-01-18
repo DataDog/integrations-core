@@ -11,7 +11,7 @@ from datadog_checks.oracle import Oracle
 from .common import CHECK_NAME
 
 
-def test__get_config(check, instance):
+def test__get_config(instance):
     """
     Test the _get_config method
     """

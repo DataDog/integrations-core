@@ -710,7 +710,7 @@
                                                     "limit": 5
                                                 },
                                                 {
-                                                    "facet": "@data.auth.user_info.id",
+                                                    "facet": "@usr.id",
                                                     "sort": {
                                                         "aggregation": "count",
                                                         "order": "desc"
@@ -758,12 +758,9 @@
                     {
                         "id": 3705246529984506,
                         "definition": {
-                            "title": "Total Sessions per Month",
+                            "title": "Total Sessions",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {
-                                "live_span": "1mo"
-                            },
                             "requests": [
                                 {
                                     "formulas": [
@@ -832,7 +829,7 @@
                                     "queries": [
                                         {
                                             "search": {
-                                                "query": "source:boundary @http.url_details.path:*authorize-session @http.status_code:401 @duration:*"
+                                                "query": "source:boundary @http.url_details.path:*authorize-session @http.status_code:401"
                                             },
                                             "data_source": "logs",
                                             "compute": {
@@ -980,7 +977,7 @@
                                                     "limit": 5
                                                 },
                                                 {
-                                                    "facet": "@target.id",
+                                                    "facet": "@data.response.details.item.target_id",
                                                     "sort": {
                                                         "aggregation": "count",
                                                         "order": "desc"
@@ -988,7 +985,7 @@
                                                     "limit": 5
                                                 },
                                                 {
-                                                    "facet": "@target.user_id",
+                                                    "facet": "@usr.id",
                                                     "sort": {
                                                         "aggregation": "count",
                                                         "order": "desc"
@@ -996,7 +993,7 @@
                                                     "limit": 5
                                                 },
                                                 {
-                                                    "facet": "@target.host_id",
+                                                    "facet": "@data.response.details.item.host_id",
                                                     "sort": {
                                                         "aggregation": "count",
                                                         "order": "desc"
@@ -1004,7 +1001,7 @@
                                                     "limit": 5
                                                 },
                                                 {
-                                                    "facet": "@target.host_set_id",
+                                                    "facet": "@data.response.details.item.host_set_id",
                                                     "sort": {
                                                         "aggregation": "count",
                                                         "order": "desc"
@@ -1126,7 +1123,7 @@
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@target.id",
+                                                    "facet": "@data.response.details.item.target_id",
                                                     "sort": {
                                                         "aggregation": "count",
                                                         "order": "desc"
@@ -1185,7 +1182,6 @@
                                         "storage": "hot",
                                         "indexes": []
                                     },
-                                    "response_format": "event_list",
                                     "columns": [
                                         {
                                             "field": "status_line",
@@ -1207,7 +1203,8 @@
                                             "field": "content",
                                             "width": "compact"
                                         }
-                                    ]
+                                    ],
+                                    "response_format": "event_list"
                                 }
                             ],
                             "type": "list_stream"

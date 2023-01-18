@@ -7,7 +7,7 @@ import ctypes
 import pywintypes
 import win32pdh
 
-from .constants import PDH_CSTATUS_NEW_DATA, PDH_CSTATUS_VALID_DATA, PDH_MORE_DATA, PDH_NO_DATA
+from .constants import PDH_CSTATUS_INVALID_DATA, PDH_CSTATUS_NEW_DATA, PDH_CSTATUS_VALID_DATA, PDH_MORE_DATA
 
 #  If the PERF_TYPE_COUNTER value was selected then select one of the
 #  following to indicate the type of counter
@@ -77,26 +77,21 @@ def GetFormattedCounterArray(counter_handle, format):
     item_count = ctypes.wintypes.DWORD(0)
     handle = ctypes.wintypes.HANDLE(counter_handle)
     result = PdhGetFormattedCounterArrayW_fn(handle, format, ctypes.byref(buffer_size), ctypes.byref(item_count), None)
-
-    # Perfectly valid of not having data yet (win32pdh.CollectQueryData call only once or counter
-    # provider is not running yet)
-    if result == PDH_NO_DATA:
-        # To simulate real win32/win32pdh error/exception
-        raise pywintypes.error(result, 'PdhGetFormattedCounterArrayW', 'The data is not valid.')
-
     if result != PDH_MORE_DATA:
         # To simulate real win32/win32pdh error/exception - no need to convert error to its real string for this
         # temporary function like it is done in
         #      https://github.com/mhammond/pywin32/blob/main/win32/src/PyWinTypesmodule.cpp#L278
-        raise pywintypes.error(result, 'PdhGetFormattedCounterArrayW', 'Failed to retrieve counters values.')
+        raise pywintypes.error(result, 'PdhGetFormattedCounterArray', 'Failed to retrieve counters values.')
 
     # Then get items for real
     items_buffer = (ctypes.c_byte * buffer_size.value)()
     result = PdhGetFormattedCounterArrayW_fn(
         handle, format, ctypes.byref(buffer_size), ctypes.byref(item_count), items_buffer
     )
+    if result == PDH_CSTATUS_INVALID_DATA:
+        raise pywintypes.error(result, 'PdhGetFormattedCounterArray', 'The returned data is not valid.')
     if result != PDH_CSTATUS_VALID_DATA:
-        raise pywintypes.error(result, 'PdhGetFormattedCounterArrayW', 'Failed to retrieve counters values.')
+        raise pywintypes.error(result, 'PdhGetFormattedCounterArray', 'Failed to retrieve counters values.')
 
     # Instance values is a dictionary with instance name as a key and value could be a single
     # atomic value or list of them for non-unique instances
@@ -122,12 +117,15 @@ def GetFormattedCounterArray(counter_handle, format):
                 continue
 
             # Get instance value pair
-            if format & win32pdh.PDH_FMT_LONG:
+            if format & win32pdh.PDH_FMT_DOUBLE:
+                # Check this format first since it is hardcoded format (see COUNTER_VALUE_FORMAT)
+                instance_value = item.contents.FmtValue.value.doubleValue
+            elif format & win32pdh.PDH_FMT_LONG:
                 instance_value = item.contents.FmtValue.value.longValue
             elif format & win32pdh.PDH_FMT_LARGE:
                 instance_value = item.contents.FmtValue.value.largeValue
-            elif format & win32pdh.PDH_FMT_DOUBLE:
-                instance_value = item.contents.FmtValue.value.doubleValue
+            else:
+                raise pywintypes.error(-1, 'GetFormattedCounterArray', 'Not supported value of format is specified.')
 
             # Get instance name
             instance_name = item.contents.szName

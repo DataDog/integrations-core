@@ -5,10 +5,13 @@ from __future__ import annotations
 
 import os
 import random
+from contextlib import ExitStack
 from typing import Generator
 
 import pytest
+import vcr
 from click.testing import CliRunner as __CliRunner
+from datadog_checks.dev.tooling.utils import set_root
 
 from ddev.config.constants import AppEnvVars, ConfigEnvVars
 from ddev.config.file import ConfigFile
@@ -71,7 +74,7 @@ def local_repo() -> Path:
 @pytest.fixture(scope='session')
 def valid_integrations(local_repo) -> list[str]:
     repo = Repository(local_repo.name, str(local_repo))
-    return [path.name for path in repo.integrations.iter_all()]
+    return [path.name for path in repo.integrations.iter_all(['all'])]
 
 
 @pytest.fixture
@@ -80,9 +83,20 @@ def valid_integration(valid_integrations) -> str:
 
 
 @pytest.fixture(autouse=True)
-def config_file(tmp_path) -> ConfigFile:
+def config_file(tmp_path, monkeypatch) -> ConfigFile:
+    for env_var in (
+        'DD_GITHUB_USER',
+        'DD_GITHUB_TOKEN',
+        'DD_SITE',
+        'DD_LOGS_CONFIG_DD_URL',
+        'DD_DD_URL',
+        'DD_API_KEY',
+        'DD_APP_KEY',
+    ):
+        monkeypatch.delenv(env_var, raising=False)
+
     path = Path(tmp_path, 'config.toml')
-    os.environ[ConfigEnvVars.CONFIG] = str(path)
+    monkeypatch.setenv(ConfigEnvVars.CONFIG, str(path))
     config = ConfigFile(path)
     config.restore()
     return config
@@ -111,6 +125,7 @@ def local_clone(isolation, local_repo) -> Generator[ClonedRepo, None, None]:
     with cloned_repo_path.as_cwd():
         PLATFORM.check_command_output(['git', 'config', 'user.name', 'Foo Bar'])
         PLATFORM.check_command_output(['git', 'config', 'user.email', 'foo@bar.baz'])
+        PLATFORM.check_command_output(['git', 'config', 'commit.gpgsign', 'false'])
 
     cloned_repo = ClonedRepo(cloned_repo_path, 'origin/master', 'ddev-testing')
     cloned_repo.reset_branch()
@@ -126,7 +141,21 @@ def repository(local_clone, config_file) -> Generator[ClonedRepo, None, None]:
     try:
         yield local_clone
     finally:
+        set_root('')
         local_clone.reset_branch()
+
+
+@pytest.fixture
+def network_replay(local_repo):
+    stack = ExitStack()
+
+    def add_cassette(relative_path, *args, **kwargs):
+        cassette = vcr.use_cassette(str(local_repo / relative_path), *args, **kwargs)
+        stack.enter_context(cassette)
+        return cassette
+
+    with stack:
+        yield add_cassette
 
 
 @pytest.fixture(scope='session')

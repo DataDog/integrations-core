@@ -1,6 +1,6 @@
 # CHANGELOG - directory
 
-## 1.14.0 / 2022-10-28
+## 1.14.0 / 2022-10-28 / Agent 7.41.0
 
 * [Added] Add count of folders in the directory check. See [#12107](https://github.com/DataDog/integrations-core/pull/12107).
 * [Fixed] Improve error message. See [#13093](https://github.com/DataDog/integrations-core/pull/13093).

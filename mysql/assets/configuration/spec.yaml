@@ -405,15 +405,6 @@ files:
                 value:
                   type: integer
                   example: 5000
-              - name: events_statements_table
-                description: |
-                  Forces a specific events statements table. Must be one of events_statements_current,
-                  events_statements_history, events_statements_history_long. If not set then the agent will choose
-                  the best available table that is enabled and not empty.
-                value:
-                  type: string
-                  example: events_statements_history_long
-                  display_default: null
               - name: explain_procedure
                 description: |
                   Overrides the default procedure used for collecting execution plans. The agent will use this

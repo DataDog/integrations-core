@@ -162,7 +162,7 @@ def check_root():
     return False
 
 
-def initialize_root(config, agent=False, core=False, extras=False, marketplace=False, here=False):
+def initialize_root(config, agent=False, core=False, extras=False, marketplace=False, here=False, **kwargs):
     """Initialize root directory based on config and options"""
     if check_root():
         return

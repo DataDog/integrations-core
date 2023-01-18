@@ -71,6 +71,11 @@ if [[ \${DB_IS_DRIVER} = "TRUE" ]]; then
   # ENABLE LOGS IN datadog.yaml TO COLLECT DRIVER LOGS
   sed -i '/.*logs_enabled:.*/a logs_enabled: true' /etc/datadog-agent/datadog.yaml
 
+  # CONFIGURE HOSTNAME EXPLICITLY IN datadog.yaml TO PREVENT AGENT FROM FAILING ON VERSION 7.40+
+  # SEE https://github.com/DataDog/datadog-agent/issues/14152 FOR CHANGE
+  hostname=\$(hostname | xargs)
+  echo "hostname: \$hostname" >> /etc/datadog-agent/datadog.yaml
+
   # WAITING UNTIL MASTER PARAMS ARE LOADED, THEN GRABBING IP AND PORT
   while [ -z \$gotparams ]; do
     if [ -e "/tmp/master-params" ]; then
@@ -156,6 +161,11 @@ if [[ \${DB_IS_DRIVER} = "TRUE" ]]; then
 
   # ENABLE LOGS IN datadog.yaml TO COLLECT DRIVER LOGS
   sed -i '/.*logs_enabled:.*/a logs_enabled: true' /etc/datadog-agent/datadog.yaml
+
+  # CONFIGURE HOSTNAME EXPLICITLY IN datadog.yaml TO PREVENT AGENT FROM FAILING ON VERSION 7.40+
+  # SEE https://github.com/DataDog/datadog-agent/issues/14152 FOR CHANGE
+  hostname=\$(hostname | xargs)
+  echo "hostname: \$hostname" >> /etc/datadog-agent/datadog.yaml
 
   while [ -z \$gotparams ]; do
     if [ -e "/tmp/driver-env.sh" ]; then
@@ -248,6 +258,11 @@ if [ \$DB_IS_DRIVER ]; then
 
   # ENABLE LOGS IN datadog.yaml TO COLLECT DRIVER LOGS
   sed -i '/.*logs_enabled:.*/a logs_enabled: true' /etc/datadog-agent/datadog.yaml
+
+  # CONFIGURE HOSTNAME EXPLICITLY IN datadog.yaml TO PREVENT AGENT FROM FAILING ON VERSION 7.40+
+  # SEE https://github.com/DataDog/datadog-agent/issues/14152 FOR CHANGE
+  hostname=\$(hostname | xargs)
+  echo "hostname: \$hostname" >> /etc/datadog-agent/datadog.yaml
 
   while [ -z \$gotparams ]; do
     if [ -e "/tmp/driver-env.sh" ]; then

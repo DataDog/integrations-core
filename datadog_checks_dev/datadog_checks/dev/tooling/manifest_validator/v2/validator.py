@@ -245,8 +245,8 @@ class ChangelogValidator(BaseManifestValidator):
                 self.fail(f"{os.path.join(check_name, changelog)} does not exist.")
 
 
-def get_v2_validators(ctx, is_extras, is_marketplace):
-    return [
+def get_v2_validators(ctx, is_extras, is_marketplace, ignore_schema=False):
+    validators = [
         common.MaintainerValidator(
             is_extras, is_marketplace, check_in_extras=False, check_in_marketplace=False, version=V2
         ),
@@ -258,6 +258,9 @@ def get_v2_validators(ctx, is_extras, is_marketplace):
         TileDescriptionValidator(is_marketplace=is_marketplace, is_extras=is_extras, version=V2),
         MediaGalleryValidator(is_marketplace=is_marketplace, is_extras=is_extras, version=V2),
         ChangelogValidator(version=V2),
-        # keep SchemaValidator last, and avoid running this validation if errors already found
-        SchemaValidator(ctx=ctx, version=V2, skip_if_errors=True),
     ]
+    if not ignore_schema:
+        # keep SchemaValidator last, and avoid running this validation if errors already found
+        validators.append(SchemaValidator(ctx=ctx, version=V2, skip_if_errors=True))
+
+    return validators

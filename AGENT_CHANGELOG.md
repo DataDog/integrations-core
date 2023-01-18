@@ -1,3 +1,27 @@
+## Datadog Agent version [7.41.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7410)
+
+* Aerospike [1.17.2](https://github.com/DataDog/integrations-core/blob/master/aerospike/CHANGELOG.md)
+* Amazon Kafka [3.2.1](https://github.com/DataDog/integrations-core/blob/master/amazon_msk/CHANGELOG.md)
+* datadog_checks_base [27.4.2](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/CHANGELOG.md)
+* datadog_checks_downloader [3.10.0](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_downloader/CHANGELOG.md)
+* Cloud Foundry API [2.2.1](https://github.com/DataDog/integrations-core/blob/master/cloud_foundry_api/CHANGELOG.md)
+* CockroachDB [2.4.1](https://github.com/DataDog/integrations-core/blob/master/cockroachdb/CHANGELOG.md)
+* Directory [1.14.0](https://github.com/DataDog/integrations-core/blob/master/directory/CHANGELOG.md)
+* IBM i [1.5.0](https://github.com/DataDog/integrations-core/blob/master/ibm_i/CHANGELOG.md)
+* IBM MQ [4.0.0](https://github.com/DataDog/integrations-core/blob/master/ibm_mq/CHANGELOG.md) **BREAKING CHANGE**
+* Kafka Consumer [2.16.1](https://github.com/DataDog/integrations-core/blob/master/kafka_consumer/CHANGELOG.md)
+* Kubelet [7.5.1](https://github.com/DataDog/integrations-core/blob/master/kubelet/CHANGELOG.md)
+* Kubernetes State [7.4.1](https://github.com/DataDog/integrations-core/blob/master/kubernetes_state/CHANGELOG.md)
+* MongoDB [4.0.4](https://github.com/DataDog/integrations-core/blob/master/mongo/CHANGELOG.md)
+* MySQL [9.0.0](https://github.com/DataDog/integrations-core/blob/master/mysql/CHANGELOG.md) **BREAKING CHANGE**
+* Network [2.9.2](https://github.com/DataDog/integrations-core/blob/master/network/CHANGELOG.md)
+* Postgres [13.1.0](https://github.com/DataDog/integrations-core/blob/master/postgres/CHANGELOG.md) **BREAKING CHANGE**
+* Process [2.3.2](https://github.com/DataDog/integrations-core/blob/master/process/CHANGELOG.md)
+* Spark [3.1.2](https://github.com/DataDog/integrations-core/blob/master/spark/CHANGELOG.md)
+* SQL Server [10.0.1](https://github.com/DataDog/integrations-core/blob/master/sqlserver/CHANGELOG.md)
+* Vault [3.3.3](https://github.com/DataDog/integrations-core/blob/master/vault/CHANGELOG.md)
+* Windows Service [4.4.0](https://github.com/DataDog/integrations-core/blob/master/windows_service/CHANGELOG.md)
+
 ## Datadog Agent version [7.40.1](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7401)
 
 * Gitlab Runner [3.3.1](https://github.com/DataDog/integrations-core/blob/master/gitlab_runner/CHANGELOG.md)

@@ -8,7 +8,7 @@ import pywintypes
 import win32pdh
 
 from ....errors import ConfigTypeError, ConfigValueError
-from .constants import PDH_NO_DATA
+from .constants import PDH_CSTATUS_INVALID_DATA, PDH_INVALID_DATA
 from .transform import NATIVE_TRANSFORMERS, TRANSFORMERS
 from .utils import construct_counter_path, get_counter_value, get_counter_values, validate_path
 
@@ -168,7 +168,17 @@ class PerfObject:
 
     def collect(self):
         for counter in self.counters:
-            counter.collect()
+            try:
+                counter.collect()
+            except Exception as e:
+                # If one counter fails to be collected we still should try to collect
+                # the rest of the counters. Log the error and move on.
+                self.logger.error(
+                    'Error collecting counter `%s` for object `%s`: `%s`',
+                    counter.name,
+                    self.name,
+                    e,
+                )
 
         # Collect "instance" metrics directly from a MultiCounter counter object
         if self.has_multiple_instances and len(self.counters) > 0:
@@ -213,11 +223,31 @@ class PerfObject:
             self._configure_counters()
             if self.counters:
                 for counter in self.counters:
-                    counter.refresh()
+                    try:
+                        counter.refresh()
+                    except Exception as e:
+                        # If one counter fails to be refreshed (created) we still should try to refresh
+                        # the rest of the counters. Log the error and move on.
+                        self.logger.error(
+                            'Error refreshing counter `%s` for object `%s`: `%s`',
+                            counter.name,
+                            self.name,
+                            e,
+                        )
 
     def clear(self):
         for counter in self.counters:
-            counter.clear()
+            try:
+                counter.clear()
+            except Exception as e:
+                # If one counter fails to be cleared we still should try to clear
+                # the rest of the counters. Log the error and move on.
+                self.logger.error(
+                    'Error clearing counter `%s` for object `%s`: `%s`',
+                    counter.name,
+                    self.name,
+                    e,
+                )
 
     def _configure_counters(self):
         if self.use_localized_counters:
@@ -233,7 +263,7 @@ class PerfObject:
         # If they are not installed yet (see comment in refresh() method) counter type determination
         # will fail. Moreover, it will continue to fail no matter how many times it is called even after
         # the missing performance object and its counters have been installed.
-        counter_type = self._get_counters_type(counter_selector)
+        counter_type = self._get_counters_type()
         if counter_type == MultiCounter:
             self.has_multiple_instances = True
         elif counter_type == SingleCounter:
@@ -313,7 +343,7 @@ class PerfObject:
 
         self.counters.extend(counters.values())
 
-    def _get_counters_type(self, counter_selector):
+    def _get_counters_type(self):
         # Enumerate all counter to find if it is single or multiple instance counter
         # The very virst iteration should be sufficienmt, just in case enumerate all
         for i, entry in enumerate(self.counters_config, 1):
@@ -330,7 +360,8 @@ class PerfObject:
                     counter_name=counter_name,
                     instance_name='*',
                 )
-                if validate_path(self.connection.query_handle, counter_selector, possible_path):
+                if validate_path(self.connection.query_handle, self.use_localized_counters, possible_path):
+                    self.logger.debug('Performance object `%s` is multi-instance counter', self.name)
                     return MultiCounter
 
                 # Check for single-instance counter path
@@ -339,9 +370,11 @@ class PerfObject:
                     object_name=self.name,
                     counter_name=counter_name,
                 )
-                if validate_path(self.connection.query_handle, counter_selector, possible_path):
+                if validate_path(self.connection.query_handle, self.use_localized_counters, possible_path):
+                    self.logger.debug('Performance object `%s` is single-instance counter', self.name)
                     return SingleCounter
 
+        self.logger.warning('Performance object `%s` type is not detected', self.name)
         return None
 
     def get_custom_transformers(self):
@@ -421,27 +454,31 @@ class CounterBase:
                 )
                 raise type(e)(error) from None
 
-    def handle_counter_value_error(self, error, instance=None):
+    def handle_counter_value_error(self, error):
         # Counter requires at least 2 data points to return a meaningful value, see:
         # https://docs.microsoft.com/en-us/windows/win32/api/pdh/nf-pdh-pdhgetformattedcountervalue#remarks
         #
         # https://github.com/mhammond/pywin32/blob/main/win32/src/PyWinTypesmodule.cpp#L278
-        if error.winerror != PDH_NO_DATA:
+
+        # PDH_INVALID_DATA error can normally happen only once for a single-instance counter
+        # which requires two PdhCollectQueryData (typically for the "rate" or "delta" counters).
+        # For multi-instances counters, because different API is used for collection, the
+        # mirror error is PDH_CSTATUS_INVALID_DATA.
+        #
+        # It is not 100% clear if these errors may happen in other circumstances. Currently, we
+        # do not track if one of these errors happens once or more. It is obviously Ok in the
+        # former case but possibly problematic in the latter case. If these errors are
+        # reported in the "Debug" logs again and again for the same counter, then the  "Debug"
+        # log should be promoted to "Error" log (which we will do if we will find it in
+        # production).
+        if error.winerror != PDH_INVALID_DATA and error.winerror != PDH_CSTATUS_INVALID_DATA:
             raise
 
-        if instance is None:
-            self.logger.debug(
-                'Waiting on another data point for counter `%s` of performance object `%s`',
-                self.name,
-                self.object_name,
-            )
-        else:
-            self.logger.debug(
-                'Waiting on another data point for instance `%s` of counter `%s` of performance object `%s`',
-                instance,
-                self.name,
-                self.object_name,
-            )
+        self.logger.debug(
+            'Waiting on another data point for counter `%s` of performance object `%s`',
+            self.name,
+            self.object_name,
+        )
 
 
 class SingleCounter(CounterBase):
@@ -458,12 +495,13 @@ class SingleCounter(CounterBase):
         self.counter_handle = None
 
     def collect(self):
-        try:
-            value = get_counter_value(self.counter_handle)
-        except pywintypes.error as error:
-            self.handle_counter_value_error(error)
-        else:
-            self.transformer(value, tags=self.tags)
+        if self.counter_handle is not None:
+            try:
+                value = get_counter_value(self.counter_handle)
+            except pywintypes.error as error:
+                self.handle_counter_value_error(error)
+            else:
+                self.transformer(value, tags=self.tags)
 
     def refresh(self):
         if self.counter_handle is None:

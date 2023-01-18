@@ -15,9 +15,7 @@ MOCKED_API_SERVER_INSTANCE = {'api_server_endpoint': 'http://api_server:8083'}
 
 MOCKED_REPO_SERVER_INSTANCE = {'repo_server_endpoint': 'http://repo_server:8084'}
 
-EMPTY_INSTANCE = {''}
-
-app_controller_ns, api_server_ns, repo_server_ns = ["argocd.app_controller", "argocd.api_server", "argocd.repo_server"]
+app_controller_ns, api_server_ns, repo_server_ns = "argocd.app_controller", "argocd.api_server", "argocd.repo_server"
 
 general_gauges = [
     'go.goroutines',
@@ -71,6 +69,7 @@ app_controller_counters = [
     'kubectl.exec.count',
     'workqueue.adds.count',
     'workqueue.retries.count',
+    'process.cpu.seconds.count',
 ]
 
 app_controller_gauges = [
@@ -130,29 +129,15 @@ repo_server_histograms = [
 ]
 
 NOT_EXPOSED_METRICS = [
-    'argocd.api_server.redis.request.duration.bucket',
-    'argocd.api_server.redis.request.duration.count',
-    'argocd.api_server.redis.request.duration.sum',
-    'argocd.api_server.redis.request.count',
     'argocd.app_controller.cluster.api.resource_objects',
     'argocd.app_controller.cluster.api.resources',
     'argocd.app_controller.cluster.cache.age.seconds',
-    'argocd.app_controller.kubectl.exec.pending',
     'argocd.app_controller.redis.request.duration',
-    'argocd.repo_server.redis.request.count',
-    'argocd.repo_server.git.request.count',
-    'argocd.repo_server.git.request.duration.seconds.bucket',
-    'argocd.repo_server.git.request.duration.seconds.count',
-    'argocd.repo_server.git.request.duration.seconds.sum',
-    'argocd.repo_server.redis.request.duration.seconds.bucket',
-    'argocd.repo_server.redis.request.duration.seconds.count',
-    'argocd.repo_server.redis.request.duration.seconds.sum',
 ]
 
 # Additional metrics that aren't exposed in the E2E environment
 E2E_NOT_EXPOSED_METRICS = [
     'argocd.app_controller.app.k8s.request.count',
-    'argocd.app_controller.process.cpu.seconds.count',
     'argocd.app_controller.app.sync.count',
     'argocd.app_controller.cluster.events.count',
     'argocd.app_controller.kubectl.exec.count',
@@ -160,7 +145,21 @@ E2E_NOT_EXPOSED_METRICS = [
     'argocd.app_controller.app.reconcile.bucket',
     'argocd.app_controller.app.reconcile.count',
     'argocd.app_controller.app.reconcile.sum',
+    'argocd.app_controller.kubectl.exec.pending',
+    'argocd.api_server.redis.request.duration.bucket',
+    'argocd.api_server.redis.request.duration.count',
+    'argocd.api_server.redis.request.duration.sum',
+    'argocd.api_server.redis.request.count',
+    'argocd.app_controller.kubectl.exec.pending',
     'argocd.repo_server.repo.pending.request.total',
+    'argocd.repo_server.git.request.count',
+    'argocd.repo_server.git.request.duration.seconds.bucket',
+    'argocd.repo_server.git.request.duration.seconds.count',
+    'argocd.repo_server.git.request.duration.seconds.sum',
+    'argocd.repo_server.redis.request.duration.seconds.bucket',
+    'argocd.repo_server.redis.request.duration.seconds.count',
+    'argocd.repo_server.redis.request.duration.seconds.sum',
+    'argocd.repo_server.redis.request.count',
 ]
 
 general = general_gauges + general_counters + general_summaries

@@ -1,3 +1,7 @@
+# (C) Datadog, Inc. 2018-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
 import os
 
 import pytest
@@ -108,7 +112,7 @@ PROMETHEUS_METRICS = [
     "cluster.upstream_cx_pool_overflow.count",
     "cluster.upstream_cx_protocol_error.count",
     "cluster.upstream_cx_rx_bytes_buffered",
-    "cluster.upstream_cx_tx_bytes_total",
+    "cluster.upstream_cx_tx_bytes_buffered",
     "cluster.upstream_rq.count",
     "cluster.upstream_rq_active",
     "cluster.upstream_rq_cancelled.count",
@@ -323,7 +327,40 @@ PROMETHEUS_METRICS = [
     "cluster.outlier_detection.ejections_detected_local_origin_success_rate.count",
     "cluster.outlier_detection.ejections_enforced_failure_percentage.count",
     "cluster.outlier_detection.ejections_detected_failure_percentage.count",
+    "cluster.upstream_cx.count",
+    "cluster.upstream_cx_http1.count",
+    "cluster.upstream_cx_http2.count",
+    "cluster.upstream_cx_http3.count",
+    "cluster.upstream_cx_rx_bytes.count",
+    "cluster.upstream_cx_tx_bytes.count",
+    "cluster.upstream_flow_control_backed_up.count",
+    "cluster.upstream_flow_control_drained.count",
+    "cluster.upstream_flow_control_paused_reading.count",
+    "cluster.upstream_flow_control_resumed_reading.count",
+    "cluster.upstream_internal_redirect_failed.count",
+    "cluster.upstream_internal_redirect_succeeded.count",
+    "cluster.upstream_rq_pending.count",
+    "cluster.upstream_rq_time.bucket",
+    "cluster.upstream_rq_time.count",
+    "cluster.upstream_rq_time.sum",
+    "http.downstream_cx.count",
+    "http.downstream_cx_http1.count",
+    "http.downstream_cx_http2.count",
+    "http.downstream_cx_http3.count",
+    "http.downstream_cx_rx_bytes.count",
+    "http.downstream_cx_ssl.count",
+    "http.downstream_cx_tx_bytes.count",
+    "http.downstream_cx_upgrades.count",
+    "http.downstream_flow_control_paused_reading.count",
+    "http.downstream_flow_control_resumed_reading.count",
+    "http.downstream_rq.count",
+    "http.downstream_rq_http1.count",
+    "http.downstream_rq_http2.count",
+    "http.downstream_rq_http3.count",
+    "http.rq.count",
+    "vhost.vcluster.upstream_rq.count",
 ]
+
 
 FLAKY_METRICS = {
     "listener.downstream_cx_active",

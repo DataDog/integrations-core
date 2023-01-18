@@ -37,11 +37,6 @@ class KubeDNSCheck(OpenMetricsBaseCheck):
         # Create instances we can use in OpenMetricsBaseCheck
         generic_instances = None
         if instances is not None:
-            generic_instances = self.create_generic_instances(instances)
-
-        super(KubeDNSCheck, self).__init__(name, init_config, instances=generic_instances)
-
-        if instances is not None:
             for instance in instances:
                 url = instance.get('health_url')
                 prometheus_endpoint = instance.get('prometheus_endpoint')
@@ -50,6 +45,9 @@ class KubeDNSCheck(OpenMetricsBaseCheck):
                     url = re.sub(r':[0-9]+/metrics$', ':8081/readiness', prometheus_endpoint)
 
                 instance['health_url'] = url
+            generic_instances = self.create_generic_instances(instances)
+
+        super(KubeDNSCheck, self).__init__(name, init_config, instances=generic_instances)
 
     def check(self, instance):
         endpoint = instance.get('prometheus_endpoint')

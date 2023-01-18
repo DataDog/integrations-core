@@ -55,8 +55,8 @@ db.createUser({
 ##### Configure the agents
 You only need a single agent, preferably running on the same node, to collect all the available mongo metrics. See below for configuration options.
 <!-- xxz tab xxx -->
-<!-- xxx tab "ReplicaSet" xxx -->
-#### ReplicaSet
+<!-- xxx tab "Replica Set" xxx -->
+#### Replica set
 
 To configure this integration for a MongoDB replica set:
 
@@ -84,8 +84,35 @@ db.createUser({
 ```
 
 ##### Configure the agents
-You need to configure one check instance for each member. See below for configuration options.
-**Note**: Monitoring of arbiter nodes is not supported remotely as mentioned in [MongoDB documentation][3]. Yet, any status change of an arbiter node is reported by the Agent connected to the primary.
+
+Install the Datadog Agent on each host in the MongoDB replica set and configure the Agent to connect to the replica on that host (`localhost`). Running an Agent on each host results in lower latency and execution times, and ensures that data is still connected in the event a host fails.
+
+For example, on the primary node:
+
+```yaml
+init_config:
+instances:
+  - hosts:
+      - mongo-primary:27017
+```
+
+On the secondary node:
+
+```yaml
+init_config:
+instances:
+  - hosts:
+      - mongo-secondary:27017
+```
+
+On the tertiary node:
+
+```yaml
+init_config:
+instances:
+  - hosts:
+      - mongo-tertiary:27017
+```
 
 <!-- xxz tab xxx -->
 <!-- xxx tab "Sharding" xxx -->

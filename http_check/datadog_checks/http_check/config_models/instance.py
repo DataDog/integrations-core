@@ -101,6 +101,7 @@ class InstanceConfig(BaseModel):
     tls_private_key: Optional[str]
     tls_private_key_password: Optional[str]
     tls_protocols_allowed: Optional[Sequence[str]]
+    tls_retrieve_non_validated_cert: Optional[bool]
     tls_use_host_header: Optional[bool]
     tls_validate_hostname: Optional[bool]
     tls_verify: Optional[bool]

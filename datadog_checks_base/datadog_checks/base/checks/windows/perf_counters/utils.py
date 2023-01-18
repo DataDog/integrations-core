@@ -44,23 +44,40 @@ def get_counter_values(counter_handle, duplicate_instances_exist):
     return GetFormattedCounterArray(counter_handle, COUNTER_VALUE_FORMAT)
 
 
-# Validate path function is using one of the very few localization-aware PDH functions
-# PdhAdd[English]Counter. Also is put some responsobility on the user configuration.
+# Validate path function is using PdhValidatePath if the path is already localized
+# If not, it will convert English counter name into its localized version via
+# intermediate calls to PdhAddEnglishCounter() and PdhGetCounterInfo()
 # If specified object and counter is using localized name then a user should configure
-# the check using `use_localized_counters` set to true. No mixing objecty and counters
-# as localized and English is allowed (and not possible in principle).
-def validate_path(query_handle, counter_selector, path):
+# the check using `use_localized_counters` set to true. It is incorrect to use
+# PdhAddEnglishCounter() or PdhAddCounter() for path validation because these
+# are not validating functions and many invalid path will not be validated until
+# corresponding data is queried.
+#
+def validate_path(query_handle, use_localized_counters, path):
     try:
-        counter_handle = counter_selector(query_handle, path)
+        # If localized name is already used we can directly validate it
+        if use_localized_counters:
+            return True if win32pdh.ValidatePath(path) == 0 else False
+
+        # ... otherwise we need to localize English object/counter names
+        counter_handle = win32pdh.AddEnglishCounter(query_handle, path)
         if counter_handle is not None:
             try:
-                # https://docs.microsoft.com/en-us/windows/win32/api/pdh/nf-pdh-pdhremovecounter
-                # https://mhammond.github.io/pywin32/win32pdh__RemoveCounter_meth.html
-                win32pdh.RemoveCounter(counter_handle)
-                return True
+                # https://learn.microsoft.com/en-us/windows/win32/api/pdh/nf-pdh-pdhgetcounterinfoa
+                # https://mhammond.github.io/pywin32/win32pdh__GetCounterInfo_meth.html
+                # win32pdh.GetCounterInfo() return tuples forming listr of PDH_COUNTER_INFO fields
+                #    https://learn.microsoft.com/en-us/windows/win32/api/pdh/ns-pdh-pdh_counter_info_a
+                counter_info = win32pdh.GetCounterInfo(counter_handle, False)
+                localized_path = counter_info[6]
+                return True if win32pdh.ValidatePath(localized_path) == 0 else False
 
             except Exception:
                 pass
+            finally:
+                # https://docs.microsoft.com/en-us/windows/win32/api/pdh/nf-pdh-pdhremovecounter
+                # https://mhammond.github.io/pywin32/win32pdh__RemoveCounter_meth.html
+                win32pdh.RemoveCounter(counter_handle)
+
     except Exception:
         pass
 

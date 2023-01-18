@@ -8,6 +8,7 @@ from mock import patch
 from datadog_checks.argocd import ArgocdCheck
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.base.errors import ConfigurationError
+from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import (
     API_SERVER_METRICS,
@@ -40,23 +41,25 @@ def test_app_controller(dd_run_check, aggregator, mock_http_response, namespace,
 
     for metric in metrics:
         if metric in NOT_EXPOSED_METRICS:
-            aggregator.assert_metric(metric, at_least=0)
+            aggregator.assert_metric(metric, count=0)
         elif metric == 'argocd.{}.go.memstats.alloc_bytes'.format(namespace):
             aggregator.assert_metric(metric, metric_type=aggregator.GAUGE, tags=tags)
         else:
             aggregator.assert_metric(metric)
 
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_service_check(f'argocd.{namespace}.openmetrics.health', ServiceCheck.OK)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 def test_empty_instance(dd_run_check):
-    try:
+    with pytest.raises(
+        Exception,
+        match="Must specify at least one of the following:"
+        "`app_controller_endpoint`, `repo_server_endpoint` or `api_server_endpoint`.",
+    ):
         check = ArgocdCheck('argocd', {}, [{}])
         dd_run_check(check)
-    except Exception as e:
-        assert "Must specify at least one of the following:`app_controller_endpoint`, `repo_server_endpoint` or" in str(
-            e
-        )
 
 
 def test_app_controller_service_check(dd_run_check, aggregator, mock_http_response):
@@ -89,11 +92,7 @@ def test_app_controller_service_check(dd_run_check, aggregator, mock_http_respon
 
 
 @patch('datadog_checks.argocd.check.PY2', True)
-def test_py2(dd_run_check):
+def test_py2():
     # Test to ensure that a ConfigurationError is raised when running with Python 2.
-    try:
-        check = ArgocdCheck('argocd', {}, [MOCKED_APP_CONTROLLER_INSTANCE])
-        dd_run_check(check)
-    except Exception as e:
-        assert type(e) == ConfigurationError
-        assert "This version of the integration is only available when using py3" in str(e)
+    with pytest.raises(ConfigurationError, match="This version of the integration is only available when using py3."):
+        ArgocdCheck('argocd', {}, [MOCKED_APP_CONTROLLER_INSTANCE])

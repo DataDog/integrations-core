@@ -1,6 +1,6 @@
 # CHANGELOG - Cloud Foundry API
 
-## 2.2.1 / 2022-10-28
+## 2.2.1 / 2022-10-28 / Agent 7.41.0
 
 * [Fixed] Fix deprecation warnings with `semver`. See [#12967](https://github.com/DataDog/integrations-core/pull/12967).
 

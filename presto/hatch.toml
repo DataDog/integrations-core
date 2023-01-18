@@ -6,4 +6,11 @@ dependencies = [
 ]
 
 [[envs.default.matrix]]
-python = ["38"]
+python = ["3.8"]
+version = ["346"]
+
+[envs.default.overrides]
+matrix.version.env-vars = "PRESTO_VERSION"
+
+[envs.latest.env-vars]
+PRESTO_VERSION = "latest"

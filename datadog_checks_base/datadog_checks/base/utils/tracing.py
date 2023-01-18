@@ -8,53 +8,37 @@ import os
 from six import PY2, PY3
 
 from ..config import is_affirmative
+from ..utils.common import to_native_string
 
 try:
     import datadog_agent
 except ImportError:
-    # Integration Tracing is only available with Agent 6
-    datadog_agent = None
+    from ..stubs import datadog_agent
 
 EXCLUDED_MODULES = ['threading']
 
+# During regular continuous tracing we trace only the check's top-level 'run' and
+# 'check' methods. This is because some checks may make 1000s of calls to various
+# internal methods, creating many 1000s of spans, generating excessive overhead.
+# All methods are traced only if exhaustive tracing is enabled. This is generally
+# done only during a single manually triggered check run, during which such overhead
+# is acceptable.
+AGENT_CHECK_DEFAULT_TRACED_METHODS = {'check', 'run', 'warning'}
 
-def traced(fn):
-    """
-    Traced decorator is intended to be used on a method of AgentCheck subclasses.
+INTEGRATION_TRACING_SERVICE_NAME = "datadog-agent-integrations"
 
-    Example:
 
-        class MyCheck(AgentCheck):
+def _get_integration_name(function_name, self, *args, **kwargs):
+    integration_name = None
+    if self and hasattr(self, "name"):
+        integration_name = self.name
+    elif function_name == "__init__":
+        # copy the logic that the AgentCheck init method uses to determine the check name
+        integration_name = kwargs.get('name', '')
+        if len(args) > 0:
+            integration_name = args[0]
 
-            @traced
-            def check(self, instance):
-                self.gauge('dummy.metric', 10)
-
-            @traced
-            def submit(self):
-                self.gauge('dummy.metric', 10)
-    """
-
-    @functools.wraps(fn)
-    def traced_wrapper(self, *args, **kwargs):
-        if datadog_agent is None:
-            return fn(self, *args, **kwargs)
-
-        trace_check = is_affirmative(self.init_config.get('trace_check'))
-        integration_tracing = is_affirmative(datadog_agent.get_config('integration_tracing'))
-
-        if integration_tracing and trace_check:
-            try:
-                from ddtrace import patch_all, tracer
-
-                patch_all()
-                with tracer.trace(fn.__name__, service='{}-integration'.format(self.name), resource=fn.__name__):
-                    return fn(self, *args, **kwargs)
-            except Exception:
-                pass
-        return fn(self, *args, **kwargs)
-
-    return traced_wrapper
+    return integration_name if integration_name else "UNKNOWN_INTEGRATION"
 
 
 def tracing_method(f, tracer):
@@ -62,44 +46,73 @@ def tracing_method(f, tracer):
 
         @functools.wraps(f)
         def wrapper(self, *args, **kwargs):
-            service_name = None
-            if hasattr(self, "name"):
-                service_name = "{}-integration".format(self.name)
-            elif f.__name__ == "__init__":
-                # copy the logic that the AgentCheck init method uses to determine the check name
-                name = kwargs.get('name', '')
-                if len(args) > 0:
-                    name = args[0]
-                if name:
-                    service_name = "{}-integration".format(name)
-
-            with tracer.trace(f.__name__, resource=f.__name__, service=service_name):
+            integration_name = _get_integration_name(f.__name__, self, *args, **kwargs)
+            with tracer.trace(f.__name__, service=INTEGRATION_TRACING_SERVICE_NAME, resource=integration_name):
                 return f(self, *args, **kwargs)
 
     else:
 
         @functools.wraps(f)
         def wrapper(*args, **kwargs):
-            service_name = None
-            if f.__name__ == "__init__":
-                # copy the logic that the AgentCheck init method uses to determine the check name
-                name = kwargs.get('name', '')
-                if len(args) > 0:
-                    name = args[0]
-                if name:
-                    service_name = "{}-integration".format(name)
-
-            with tracer.trace(f.__name__, resource=f.__name__, service=service_name):
+            integration_name = _get_integration_name(f.__name__, None, *args, **kwargs)
+            with tracer.trace(f.__name__, service=INTEGRATION_TRACING_SERVICE_NAME, resource=integration_name):
                 return f(*args, **kwargs)
 
     return wrapper
 
 
+def traced_warning(f, tracer):
+    """
+    Traces the AgentCheck.warning method
+    The span is always an error span, including the current stack trace.
+    The error message is set to the warning message.
+    """
+    try:
+        from ddtrace.ext import errors
+
+        def wrapper(self, warning_message, *args, **kwargs):
+            integration_name = _get_integration_name(f.__name__, self, *args, **kwargs)
+            with tracer.trace(
+                "warning",
+                service=INTEGRATION_TRACING_SERVICE_NAME,
+                resource=integration_name,
+            ) as span:
+                # duplicate message formatting logic from AgentCheck.warning
+                _formatted_message = to_native_string(warning_message)
+                if args:
+                    _formatted_message = _formatted_message % args
+                span.set_tag(errors.ERROR_MSG, _formatted_message)
+                span.set_tag(errors.ERROR_TYPE, "AgentCheck.warning")
+                span.set_traceback()
+                span.error = 1
+                return f(self, warning_message, *args, **kwargs)
+
+        return wrapper
+    except Exception:
+        return f
+
+
+def tracing_enabled():
+    """
+    :return: (integration_tracing, integration_tracing_exhaustive)
+    """
+    integration_tracing = is_affirmative(datadog_agent.get_config('integration_tracing'))
+    integration_tracing_exhaustive = is_affirmative(datadog_agent.get_config('integration_tracing_exhaustive'))
+
+    # tests always use exhaustive tracing
+    if os.getenv('DDEV_TRACE_ENABLED', 'false') == 'true':
+        integration_tracing = True
+        integration_tracing_exhaustive = True
+
+    return integration_tracing, integration_tracing_exhaustive
+
+
 def traced_class(cls):
-    if os.getenv('DDEV_TRACE_ENABLED', 'false') == 'true' or (
-        datadog_agent is not None and is_affirmative(datadog_agent.get_config('integration_tracing'))
-    ):
+    integration_tracing, integration_tracing_exhaustive = tracing_enabled()
+    if integration_tracing:
         try:
+            integration_tracing_exhaustive = is_affirmative(datadog_agent.get_config('integration_tracing_exhaustive'))
+
             from ddtrace import patch_all, tracer
 
             patch_all()
@@ -107,16 +120,25 @@ def traced_class(cls):
             def decorate(cls):
                 for attr in cls.__dict__:
                     attribute = getattr(cls, attr)
+
+                    if not callable(attribute) or inspect.isclass(attribute):
+                        continue
+
                     # Ignoring staticmethod and classmethod because they don't need cls in args
                     # also ignore nested classes
-                    if (
-                        callable(attribute)
-                        and not inspect.isclass(attribute)
-                        and not isinstance(cls.__dict__[attr], staticmethod)
-                        and not isinstance(cls.__dict__[attr], classmethod)
-                        # Get rid of SnmpCheck._thread_factory and related
-                        and getattr(attribute, '__module__', 'threading') not in EXCLUDED_MODULES
-                    ):
+                    if isinstance(cls.__dict__[attr], staticmethod) or isinstance(cls.__dict__[attr], classmethod):
+                        continue
+
+                    # Get rid of SnmpCheck._thread_factory and related
+                    if getattr(attribute, '__module__', 'threading') in EXCLUDED_MODULES:
+                        continue
+
+                    if not integration_tracing_exhaustive and attr not in AGENT_CHECK_DEFAULT_TRACED_METHODS:
+                        continue
+
+                    if attr == 'warning':
+                        setattr(cls, attr, traced_warning(attribute, tracer))
+                    else:
                         setattr(cls, attr, tracing_method(attribute, tracer))
                 return cls
 

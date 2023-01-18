@@ -69,60 +69,60 @@ class IntegrationRegistry:
         self.__cache[name] = integration
         return integration
 
-    def iter(self) -> Iterable[Integration]:
-        for path in sorted(self.repo.path.iterdir()):
-            integration = self.__get_from_path(path)
+    def iter(self, selection: Iterable[str] = ()) -> Iterable[Integration]:
+        for integration in self.__iter_filtered(selection):
             if integration.is_integration:
                 yield integration
 
-    def iter_all(self) -> Iterable[Integration]:
-        for path in sorted(self.repo.path.iterdir()):
-            integration = self.__get_from_path(path)
+    def iter_all(self, selection: Iterable[str] = ()) -> Iterable[Integration]:
+        for integration in self.__iter_filtered(selection):
             if integration.is_valid:
                 yield integration
 
-    def iter_packages(self) -> Iterable[Integration]:
-        for path in sorted(self.repo.path.iterdir()):
-            integration = self.__get_from_path(path)
+    def iter_packages(self, selection: Iterable[str] = ()) -> Iterable[Integration]:
+        for integration in self.__iter_filtered(selection):
             if integration.is_package:
                 yield integration
 
-    def iter_tiles(self) -> Iterable[Integration]:
-        for path in sorted(self.repo.path.iterdir()):
-            integration = self.__get_from_path(path)
+    def iter_tiles(self, selection: Iterable[str] = ()) -> Iterable[Integration]:
+        for integration in self.__iter_filtered(selection):
             if integration.is_tile:
                 yield integration
 
-    def iter_testable(self) -> Iterable[Integration]:
-        for path in sorted(self.repo.path.iterdir()):
-            integration = self.__get_from_path(path)
+    def iter_testable(self, selection: Iterable[str] = ()) -> Iterable[Integration]:
+        for integration in self.__iter_filtered(selection):
             if integration.is_testable:
                 yield integration
 
-    def iter_shippable(self) -> Iterable[Integration]:
-        for path in sorted(self.repo.path.iterdir()):
-            integration = self.__get_from_path(path)
+    def iter_shippable(self, selection: Iterable[str] = ()) -> Iterable[Integration]:
+        for integration in self.__iter_filtered(selection):
             if integration.is_shippable:
                 yield integration
 
-    def iter_agent_checks(self) -> Iterable[Integration]:
-        for path in sorted(self.repo.path.iterdir()):
-            integration = self.__get_from_path(path)
+    def iter_agent_checks(self, selection: Iterable[str] = ()) -> Iterable[Integration]:
+        for integration in self.__iter_filtered(selection):
             if integration.is_agent_check:
                 yield integration
 
-    def iter_jmx_checks(self) -> Iterable[Integration]:
-        for path in sorted(self.repo.path.iterdir()):
-            integration = self.__get_from_path(path)
+    def iter_jmx_checks(self, selection: Iterable[str] = ()) -> Iterable[Integration]:
+        for integration in self.__iter_filtered(selection):
             if integration.is_jmx_check:
                 yield integration
 
     def iter_changed(self) -> Iterable[Integration]:
-        changed_root_entries = {relative_path.split('/', 1)[0] for relative_path in self.repo.git.changed_files}
+        yield from self.iter_all()
+
+    def __iter_filtered(self, selection: Iterable[str] = ()) -> Iterable[Integration]:
+        selected = self.__finalize_selection(selection)
+        if selected is None:
+            return
+
         for path in sorted(self.repo.path.iterdir()):
             integration = self.__get_from_path(path)
-            if integration.is_valid and integration.name in changed_root_entries:
-                yield integration
+            if selected and integration.name not in selected:
+                continue
+
+            yield integration
 
     def __get_from_path(self, path: Path) -> Integration:
         if path.name in self.__cache:
@@ -132,3 +132,14 @@ class IntegrationRegistry:
             self.__cache[path.name] = integration
 
         return integration
+
+    def __finalize_selection(self, selection: Iterable[str]) -> set[str] | None:
+        if not selection:
+            return self.__get_changed_root_entries() or None
+        elif 'all' in selection:
+            return set()
+        else:
+            return set(selection)
+
+    def __get_changed_root_entries(self) -> set[str]:
+        return {relative_path.split('/', 1)[0] for relative_path in self.repo.git.changed_files}
