@@ -86,6 +86,16 @@ NEWER_92_METRICS = {
     'temp_files': ('postgresql.temp_files', AgentCheck.rate),
 }
 
+NEWER_14_METRICS = {
+    'session_time': ('postgresql.sessions.session_time', AgentCheck.monotonic_count),
+    'active_time': ('postgresql.sessions.active_time', AgentCheck.monotonic_count),
+    'idle_in_transaction_time': ('postgresql.sessions.idle_in_transaction_time', AgentCheck.monotonic_count),
+    'sessions': ('postgresql.sessions.count', AgentCheck.gauge),
+    'sessions_abandoned': ('postgresql.sessions.abandoned', AgentCheck.gauge),
+    'sessions_fatal': ('postgresql.sessions.fatal', AgentCheck.gauge),
+    'sessions_killed': ('postgresql.sessions.killed', AgentCheck.gauge),
+}
+
 QUERY_PG_STAT_DATABASE = {
     'name': 'pg_stat_database',
     'query': """
