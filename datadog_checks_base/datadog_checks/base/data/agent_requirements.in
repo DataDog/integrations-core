@@ -58,7 +58,7 @@ ply==3.11
 prometheus-client==0.12.0; python_version < '3.0'
 prometheus-client==0.15.0; python_version > '3.0'
 protobuf==3.17.3; python_version < '3.0'
-protobuf==3.20.3; python_version > '3.0'
+protobuf==3.20.2; python_version > '3.0'
 psutil==5.9.0
 psycopg2-binary==2.8.6; sys_platform != 'darwin' or platform_machine != 'arm64'
 pyasn1==0.4.6

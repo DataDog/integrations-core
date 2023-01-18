@@ -41,7 +41,7 @@ text = "BSD-3-Clause"
 [project.optional-dependencies]
 deps = [
     "protobuf==3.17.3; python_version < '3.0'",
-    "protobuf==3.20.3; python_version > '3.0'",
+    "protobuf==3.20.2; python_version > '3.0'",
 ]
 
 [project.urls]
