@@ -83,7 +83,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][3]
 
 #### Clusters Discovery
 
-You can configure how your clusters are discovered with the `clusters` parameter.
+You can configure how your clusters are discovered with the `clusters` configuration option with the following parameters:
 
 `limit`
 : Maximum number of items to be autodiscovered.  
