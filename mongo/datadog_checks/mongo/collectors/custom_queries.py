@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import datetime
+import re
 from copy import deepcopy
 
 import dateutil.parser
