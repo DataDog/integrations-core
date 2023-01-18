@@ -1,6 +1,6 @@
 # CHANGELOG - IBM MQ
 
-## 4.0.1 / 2022-12-09
+## 4.0.1 / 2022-12-09 / Agent 7.42.0
 
 * [Fixed] Add messaging to service checks. See [#13355](https://github.com/DataDog/integrations-core/pull/13355).
 

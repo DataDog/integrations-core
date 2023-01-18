@@ -1,6 +1,6 @@
 # CHANGELOG - Kube Metrics Server
 
-## 3.0.0 / 2022-12-09
+## 3.0.0 / 2022-12-09 / Agent 7.42.0
 
 * [Changed] Add health check to kube_* integrations. See [#10668](https://github.com/DataDog/integrations-core/pull/10668).
 

@@ -1,6 +1,6 @@
 # CHANGELOG - sqlserver
 
-## 10.1.0 / 2022-12-09
+## 10.1.0 / 2022-12-09 / Agent 7.42.0
 
 * [Added] Add well formatted agent errors on common connection issues for SQL Server. See [#13436](https://github.com/DataDog/integrations-core/pull/13436).
 * [Added] Add procedure name on query metrics/events. See [#13484](https://github.com/DataDog/integrations-core/pull/13484).

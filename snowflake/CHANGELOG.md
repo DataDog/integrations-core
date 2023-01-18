@@ -1,6 +1,6 @@
 # CHANGELOG - Snowflake
 
-## 4.4.5 / 2022-11-28
+## 4.4.5 / 2022-11-28 / Agent 7.42.0
 
 * [Fixed] Update Snowflake connector and cryptography dependencies. See [#13367](https://github.com/DataDog/integrations-core/pull/13367).
 * [Fixed] Remove `default_backend` parameter from cryptography calls. See [#13333](https://github.com/DataDog/integrations-core/pull/13333).

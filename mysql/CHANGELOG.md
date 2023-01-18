@@ -1,6 +1,6 @@
 # CHANGELOG - mysql
 
-## 9.0.1 / 2022-12-09
+## 9.0.1 / 2022-12-09 / Agent 7.42.0
 
 * [Fixed] Update dependencies. See [#13478](https://github.com/DataDog/integrations-core/pull/13478).
 * [Fixed] Update cryptography dependency. See [#13367](https://github.com/DataDog/integrations-core/pull/13367).

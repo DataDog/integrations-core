@@ -10,7 +10,7 @@
 * [Changed] Improve integration tracing of warnings & errors. See [#13620](https://github.com/DataDog/integrations-core/pull/13620).
 * [Removed] Update TUF to 2.0.0. See [#13331](https://github.com/DataDog/integrations-core/pull/13331).
 
-## 28.0.1 / 2022-12-16
+## 28.0.1 / 2022-12-16 / Agent 7.42.0
 
 * [Fixed] Fixed incorrect counter type determination and error reporting on the first collection. See [#13489](https://github.com/DataDog/integrations-core/pull/13489).
 

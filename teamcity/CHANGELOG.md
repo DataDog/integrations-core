@@ -1,6 +1,6 @@
 # CHANGELOG - teamcity
 
-## 3.0.1 / 2022-12-16
+## 3.0.1 / 2022-12-16 / Agent 7.42.0
 
 * [Fixed] Fix event tagging. See [#13537](https://github.com/DataDog/integrations-core/pull/13537).
 

@@ -1,6 +1,6 @@
 # CHANGELOG - kafka_consumer
 
-## 2.16.2 / 2022-11-22
+## 2.16.2 / 2022-11-22 / Agent 7.42.0
 
 * [Fixed] Disable socket wakeup when sending requests. See [#13221](https://github.com/DataDog/integrations-core/pull/13221).
 

@@ -1,6 +1,6 @@
 # CHANGELOG - mongo
 
-## 4.1.1 / 2022-12-09
+## 4.1.1 / 2022-12-09 / Agent 7.42.0
 
 * [Fixed] Stop using deprecated `distutils.version` classes. See [#13408](https://github.com/DataDog/integrations-core/pull/13408).
 
