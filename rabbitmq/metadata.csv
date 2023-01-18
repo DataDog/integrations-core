@@ -277,8 +277,8 @@ rabbitmq.queue.messages.ready,gauge
 rabbitmq.queue.messages.unacked_bytes,gauge
 rabbitmq.queue.messages.unacked_ram,gauge
 rabbitmq.queue.messages.unacked,gauge
-rabbitmq.queue.process.memory_bytes,gauge
-rabbitmq.queue.process.reductions.count,count
+rabbitmq.queue.process_memory_bytes,gauge
+rabbitmq.queue.process_reductions.count,count
 rabbitmq.queues.created.count,count
 rabbitmq.queues.declared.count,count
 rabbitmq.queues.deleted.count,count
