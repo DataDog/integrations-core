@@ -108,7 +108,7 @@ clusters:
     - 'my_cluster.*'
 ```
 
-Process a maximum of `20` clusters and exclude those beginning with `tmp_`:
+Process a maximum of `20` clusters and exclude those with names that start with `tmp_`:
 
 ```yaml
 clusters:
