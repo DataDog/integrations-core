@@ -16,6 +16,7 @@ from datadog_checks.postgres.util import (
     SLRU_METRICS,
 )
 from datadog_checks.postgres.version_utils import VersionUtils
+from datadog_checks.postgres.util import NEWER_14_METRICS, SLRU_METRICS
 
 HOST = get_docker_hostname()
 PORT = '5432'
@@ -108,6 +109,10 @@ def check_common_metrics(aggregator, expected_tags, count=1):
         db_tags = expected_tags + ['db:{}'.format(db)]
         for name in COMMON_METRICS:
             aggregator.assert_metric(name, count=count, tags=db_tags)
+        if POSTGRES_VERSION is None or float(POSTGRES_VERSION) >= 14.0:
+            for metrics in NEWER_14_METRICS.values():
+                metric_name = metrics[0]
+                aggregator.assert_metric(metric_name, count=count, tags=db_tags)
 
 
 def check_db_count(aggregator, expected_tags, count=1):
