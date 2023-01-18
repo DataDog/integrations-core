@@ -21,7 +21,7 @@ class ClouderaCheck(AgentCheck, ConfigMixin):
 
     @AgentCheck.metadata_entrypoint
     def _create_client(self):
-        self.can_connect_tags = [f'api_url={self.config.api_url}']
+        self.can_connect_tags = [f'api_url:{self.config.api_url}']
 
         for tag in self.config.tags:
             self.can_connect_tags.append(tag)

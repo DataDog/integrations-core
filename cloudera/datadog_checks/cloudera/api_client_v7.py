@@ -22,8 +22,10 @@ class ApiClientV7(ApiClient):
         super(ApiClientV7, self).__init__(check, api_client)
 
     def collect_data(self):
-        self._collect_clusters()
-        self._collect_events()
+        # self._collect_clusters()
+        # self._collect_events()
+        if self._check.config.custom_queries:
+            self._collect_custom_queries()
 
     def _collect_clusters(self):
         clusters_resource_api = cm_client.ClustersResourceApi(self._api_client)
@@ -167,3 +169,37 @@ class ApiClientV7(ApiClient):
                 for d in ts.data:
                     value = d.value
                     self._check.gauge(full_metric_name, value, tags=[entity_tag, *tags])
+
+    def _collect_custom_queries(self):
+        for custom_query in self._check.config.custom_queries:
+            try:
+                self._run_custom_query(custom_query.query, custom_query.tags)
+            except Exception as e:
+                self._log.error("Skipping custom query %s due to the following exception: %s", custom_query, e)
+
+    def _run_custom_query(self, custom_query, tags):
+        self._log.debug('Running Cloudera custom query: %s', custom_query)
+        time_series_resource_api = cm_client.TimeSeriesResourceApi(self._api_client)
+        query_time_series_response = time_series_resource_api.query_time_series(query=custom_query)
+        self._log.debug('Cloudera custom query result: %s', query_time_series_response)
+        for item in query_time_series_response.items:
+            for ts in item.time_series:
+                self._log.debug('custom query ts result: %s', ts)
+
+                if ts.metadata.alias:
+                    metric_name = ts.metadata.alias
+                else:
+                    metric_name = ts.metadata.metric_name
+
+                category_name = ts.metadata.attributes['category'].lower()
+                full_metric_name = f'{category_name}.{metric_name}'
+                entity_tag = f'cloudera_{category_name}:{ts.metadata.entity_name}'
+
+                value = ts.data[0].value
+                timestamp = ts.data[0].timestamp
+                for d in ts.data:
+                    current_timestamp = d.timestamp
+                    if current_timestamp > timestamp:
+                        value = d.value
+
+                self._check.gauge(full_metric_name, value, tags=[entity_tag, *tags])

@@ -25,7 +25,7 @@ HERE = get_here()
 COMPOSE_FILE = os.path.join(HERE, 'docker', 'docker-compose.yaml')
 
 CAN_CONNECT_TAGS = [
-    'api_url=http://localhost:8080/api/v48/',
+    'api_url:http://localhost:8080/api/v48/',
     'test1',
 ]
 CLUSTER_HEALTH_TAGS = [
@@ -45,3 +45,5 @@ def merge_dicts(d1, d2):
 
 
 METRICS = merge_dicts(NATIVE_METRICS, TIMESERIES_METRICS)
+
+CUSTOM_TIMESERIES_METRICS = {'cluster': ['foo', 'bar'], 'host': ['test1']}
