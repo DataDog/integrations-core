@@ -5,6 +5,9 @@ from datetime import timedelta
 from temporalio import activity, workflow
 from temporalio.client import Client
 from temporalio.worker import Worker
+from temporalio.runtime import Runtime, TelemetryConfig, PrometheusConfig
+
+
 
 
 @activity.defn
@@ -22,7 +25,8 @@ class SayHello:
 
 
 async def main():
-    client = await Client.connect("temporal:7233", namespace="default")
+    new_runtime = Runtime(telemetry=TelemetryConfig(metrics=PrometheusConfig(bind_address="0.0.0.0:8002")))
+    client = await Client.connect("temporal:7233", namespace="default", runtime=new_runtime)
     # Run the worker
     worker = Worker(
         client, task_queue="python-task-queue", workflows=[SayHello], activities=[say_hello]

@@ -103,6 +103,8 @@ services:
       temporal:
         condition: service_healthy
     container_name: temporal-python-worker
+    ports:
+      - 8002:8002
     networks:
       - temporal-network
   temporal-java-worker:
