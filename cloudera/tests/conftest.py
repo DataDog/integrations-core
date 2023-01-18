@@ -129,31 +129,23 @@ def read_events_resource():
     return ApiEventQueryResult(items=[dummy_event])
 
 
+@pytest.fixture
 def get_custom_timeseries_resource():
-    return [
-        ApiTimeSeriesResponseList(
-            items=[
-                ApiTimeSeriesResponse(
-                    time_series=[
-                        ApiTimeSeries(
-                            data=[
-                                ApiTimeSeriesData(
-                                    value=49.7,
-                                    timestamp="2023-01-18T18:41:09.449Z"),
-                                ApiTimeSeriesData(
-                                    value=49.7,
-                                    timestamp="2023-01-18T18:41:09.449Z"),
-                            ],
-                            metadata=ApiTimeSeriesMetadata(
-                                attributes={'category': category},
-                                alias=metric,
-                                entity_name=metric,
-                            ),
-                        )
-                        for metric in metrics
-                    ]
-                ),
-            ],
-        )
-        for category, metrics in common.CUSTOM_TIMESERIES_METRICS.items()
-    ]
+    return ApiTimeSeriesResponseList(
+        items=[
+            ApiTimeSeriesResponse(
+                time_series=[
+                    ApiTimeSeries(
+                        data=[
+                            ApiTimeSeriesData(value=49.7, timestamp="2023-01-18T18:41:09.449Z"),
+                        ],
+                        metadata=ApiTimeSeriesMetadata(
+                            attributes={'category': "cluster"},
+                            alias="foo",
+                            entity_name="foo",
+                        ),
+                    )
+                ]
+            )
+        ],
+    )

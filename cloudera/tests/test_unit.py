@@ -15,7 +15,7 @@ from datadog_checks.cloudera import ClouderaCheck
 from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import CAN_CONNECT_TAGS, CLUSTER_HEALTH_TAGS, METRICS
-from .conftest import get_custom_timeseries_resource, get_timeseries_resource
+from .conftest import get_timeseries_resource
 
 pytestmark = [pytest.mark.unit]
 
@@ -290,199 +290,43 @@ def test_given_cloudera_check_when_no_events_response_then_no_event_collection(
         aggregator.assert_event(msg_text=expected_content, count=0)
 
 
-# def test_given_custom_queries_then_retrieve_metrics_unit(
-#     aggregator,
-#     dd_run_check,
-#     cloudera_check,
-#     api_response,
-#     instance,
-# ):
-#    with mock.patch(
-#         'cm_client.ClouderaManagerResourceApi.get_version',
-#         return_value=ApiVersionInfo(version="7.0.0"),
-#     ), mock.patch(
-#         'cm_client.ClustersResourceApi.read_clusters',
-#         return_value=ApiClusterList(
-#             items=[
-#                 ApiCluster(
-#                     name="cod--qfdcinkqrzw",
-#                     entity_status="GOOD_HEALTH",
-#                     tags=[
-#                         ApiEntityTag(name="_cldr_cb_clustertype", value="Data Hub"),
-#                         ApiEntityTag(name="_cldr_cb_origin", value="cloudbreak"),
-#                     ],
-#                     **api_response('cluster_good_health'),
-#                 ),
-#             ],
-#         ),
-#     ), mock.patch(
-#         'cm_client.TimeSeriesResourceApi.query_time_series',
-#         side_effect=get_custom_timeseries_resource(),
-#     ):
-#         # Given
-#         instance['custom_queries'] = [
-#             {   # foo and bar are given category of cluster in common.py
-#                 'query': "select foo, bar"
-#             },
-#         ]
+def test_given_custom_queries_then_retrieve_metrics_unit(
+    aggregator,
+    dd_run_check,
+    cloudera_check,
+    api_response,
+    instance,
+    get_custom_timeseries_resource,
+):
+    with mock.patch(
+        'cm_client.ClouderaManagerResourceApi.get_version',
+        return_value=ApiVersionInfo(version="7.0.0"),
+    ), mock.patch(
+        'cm_client.ClustersResourceApi.read_clusters',
+        return_value=ApiClusterList(
+            items=[
+                ApiCluster(
+                    name="cod--qfdcinkqrzw",
+                    entity_status="GOOD_HEALTH",
+                    tags=[
+                        ApiEntityTag(name="_cldr_cb_clustertype", value="Data Hub"),
+                        ApiEntityTag(name="_cldr_cb_origin", value="cloudbreak"),
+                    ],
+                    **api_response('cluster_good_health'),
+                ),
+            ],
+        ),
+    ), mock.patch(
+        'cm_client.TimeSeriesResourceApi.query_time_series',
+        return_value=get_custom_timeseries_resource,
+    ):
+        # Given
+        instance['custom_queries'] = [
+            {'query': "select foo"},  # foo is given category of cluster in common.py
+        ]
 
-#         check = cloudera_check(instance)
-#         # When
-#         dd_run_check(check)
-#         # Then
-#         aggregator.assert_metric("cloudera.cluster.foo", count=1)
-#         aggregator.assert_metric("cloudera.cluster.bar", count=1)
-
-# def test_given_custom_queries_alias_then_retrieve_metrics_alias(
-#     aggregator,
-#     dd_run_check,
-#     cloudera_check,
-#     api_response,
-#     instance,
-#     list_hosts_resource,
-# ):
-#     with mock.patch(
-#         'cm_client.ClouderaManagerResourceApi.get_version',
-#         return_value=ApiVersionInfo(version="7.0.0"),
-#     ), mock.patch(
-#         'cm_client.ClustersResourceApi.read_clusters',
-#         return_value=ApiClusterList(
-#             items=[
-#                 ApiCluster(
-#                     name="cod--qfdcinkqrzw",
-#                     entity_status="GOOD_HEALTH",
-#                     tags=[
-#                         ApiEntityTag(name="_cldr_cb_clustertype", value="Data Hub"),
-#                         ApiEntityTag(name="_cldr_cb_origin", value="cloudbreak"),
-#                     ],
-#                     **api_response('cluster_good_health'),
-#                 ),
-#             ],
-#         ),
-#     ), mock.patch(
-#         'cm_client.TimeSeriesResourceApi.query_time_series',
-#         side_effect=get_custom_timeseries_resource(),
-#     ):
-#         # Given
-#         instance['custom_queries'] = [
-#             {
-#                 'query': "select foo as bar",
-#                 'tags': ["baz"],
-#             }
-#         ]
-
-#         check = cloudera_check(instance)
-#         # When
-#         dd_run_check(check)
-#         # Then
-#         aggregator.assert_metric("cloudera.cluster.foo", CLUSTER_HEALTH_TAGS.append("baz"), count=0)
-#         aggregator.assert_metric("cloudera.cluster.bar", CLUSTER_HEALTH_TAGS.append("baz"), count=1)
-
-# def test_given_non_existent_custom_query_then_output_no_metric(
-#     aggregator,
-#     dd_run_check,
-#     cloudera_check,
-#     api_response,
-#     instance,
-#     list_hosts_resource,
-# ):
-#     with mock.patch(
-#         'cm_client.ClouderaManagerResourceApi.get_version',
-#         return_value=ApiVersionInfo(version="7.0.0"),
-#     ), mock.patch(
-#         'cm_client.ClustersResourceApi.read_clusters',
-#         return_value=ApiClusterList(
-#             items=[
-#                 ApiCluster(
-#                     name="cod--qfdcinkqrzw",
-#                     entity_status="GOOD_HEALTH",
-#                     tags=[
-#                         ApiEntityTag(name="_cldr_cb_clustertype", value="Data Hub"),
-#                         ApiEntityTag(name="_cldr_cb_origin", value="cloudbreak"),
-#                     ],
-#                     **api_response('cluster_good_health'),
-#                 ),
-#             ],
-#         ),
-#     ), mock.patch(
-#         'cm_client.TimeSeriesResourceApi.query_time_series',
-#         side_effect=get_timeseries_resource(),
-#     ), mock.patch(
-#         'cm_client.ClustersResourceApi.list_hosts',
-#         return_value=list_hosts_resource,
-#     ), mock.patch(
-#         'cm_client.EventsResourceApi.read_events',
-#         side_effect=Exception,
-#     ):
-#         # Given
-#         instance['custom_queries'] = [
-#             {
-#                 'query': "select fake_foo",  # fake_foo doesn't exist
-#                 'tags': ["baz"],
-#             }
-#         ]
-
-#         check = cloudera_check(instance)
-#         # When
-#         dd_run_check(check)
-#         # Then
-#         aggregator.assert_metric("cloudera.fake_foo", tags=["baz"], count=0)
-
-# def test_given_incorrect_formatting_custom_query_then_output_no_metric(    aggregator,
-#     dd_run_check,
-#     cloudera_check,
-#     api_response,
-#     instance,
-#     list_hosts_resource,
-#     caplog,
-# ):
-#     with mock.patch(
-#         'cm_client.ClouderaManagerResourceApi.get_version',
-#         return_value=ApiVersionInfo(version="7.0.0"),
-#     ), mock.patch(
-#         'cm_client.ClustersResourceApi.read_clusters',
-#         return_value=ApiClusterList(
-#             items=[
-#                 ApiCluster(
-#                     name="cod--qfdcinkqrzw",
-#                     entity_status="GOOD_HEALTH",
-#                     tags=[
-#                         ApiEntityTag(name="_cldr_cb_clustertype", value="Data Hub"),
-#                         ApiEntityTag(name="_cldr_cb_origin", value="cloudbreak"),
-#                     ],
-#                     **api_response('cluster_good_health'),
-#                 ),
-#             ],
-#         ),
-#     ), mock.patch(
-#         'cm_client.TimeSeriesResourceApi.query_time_series',
-#         side_effect=get_timeseries_resource(),
-#     ), mock.patch(
-#         'cm_client.ClustersResourceApi.list_hosts',
-#         return_value=list_hosts_resource,
-#     ), mock.patch(
-#         'cm_client.EventsResourceApi.read_events',
-#         side_effect=Exception,
-#     ):
-#         # Given
-#         instance['custom_queries'] = [
-#             {
-#                 'query': "selec",
-#                 'tags': ["baz"],
-#             }
-#         ]
-#         caplog.clear()
-#         caplog.set_level(logging.WARNING)
-
-#         check = cloudera_check(instance)
-#         # When
-#         dd_run_check(check)
-#         # Then
-#         # No custom metrics, but rest of check is OK
-#         aggregator.assert_service_check(
-#             'cloudera.can_connect',
-#             ClouderaCheck.OK,
-#             tags=CAN_CONNECT_TAGS,
-#         )
-#         # Look for error log
-#         assert "Formatting error in custom queries" in caplog.text
+        check = cloudera_check(instance)
+        # When
+        dd_run_check(check)
+        # Then
+        aggregator.assert_metric("cloudera.cluster.foo")

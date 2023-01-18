@@ -22,8 +22,8 @@ class ApiClientV7(ApiClient):
         super(ApiClientV7, self).__init__(check, api_client)
 
     def collect_data(self):
-        # self._collect_clusters()
-        # self._collect_events()
+        self._collect_clusters()
+        self._collect_events()
         if self._check.config.custom_queries:
             self._collect_custom_queries()
 
@@ -173,7 +173,8 @@ class ApiClientV7(ApiClient):
     def _collect_custom_queries(self):
         for custom_query in self._check.config.custom_queries:
             try:
-                self._run_custom_query(custom_query.query, custom_query.tags)
+                tags = custom_query.tags if custom_query.tags else []
+                self._run_custom_query(custom_query.query, tags)
             except Exception as e:
                 self._log.error("Skipping custom query %s due to the following exception: %s", custom_query, e)
 
@@ -184,8 +185,6 @@ class ApiClientV7(ApiClient):
         self._log.debug('Cloudera custom query result: %s', query_time_series_response)
         for item in query_time_series_response.items:
             for ts in item.time_series:
-                self._log.debug('custom query ts result: %s', ts)
-
                 if ts.metadata.alias:
                     metric_name = ts.metadata.alias
                 else:

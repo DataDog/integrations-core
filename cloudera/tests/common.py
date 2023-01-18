@@ -45,5 +45,3 @@ def merge_dicts(d1, d2):
 
 
 METRICS = merge_dicts(NATIVE_METRICS, TIMESERIES_METRICS)
-
-CUSTOM_TIMESERIES_METRICS = {'cluster': ['foo', 'bar'], 'host': ['test1']}
