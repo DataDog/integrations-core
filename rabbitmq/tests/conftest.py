@@ -12,7 +12,7 @@ from packaging import version
 from datadog_checks.dev import docker_run, temp_dir
 from datadog_checks.rabbitmq import RabbitMQ
 
-from .common import CHECK_NAME, CONFIG, HERE, HOST, PORT, RABBITMQ_VERSION
+from .common import CHECK_NAME, CONFIG, HERE, HOST, OPENMETRICS_CONFIG, PORT, RABBITMQ_VERSION
 
 
 @pytest.fixture(scope="session")
@@ -34,7 +34,10 @@ def dd_environment():
     with docker_run(
         compose_file, log_patterns='Server startup complete', env_vars=env, conditions=[setup_rabbitmq], sleep=5
     ):
-        yield CONFIG
+        if RABBITMQ_VERSION >= version.parse("3.8"):
+            yield OPENMETRICS_CONFIG
+        else:
+            yield CONFIG
 
 
 def setup_rabbitmq():
