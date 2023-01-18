@@ -26,7 +26,6 @@ files:
               - 'FINISHED'
               - 'FAILED'
               - 'KILLED'
-              default: *yarn_app_states_init
               items:
                 type: string
                 enum: *yarn_app_states_init
@@ -116,7 +115,6 @@ files:
               - 'FINISHED'
               - 'FAILED'
               - 'KILLED'
-              default: *yarn_app_states
               items:
                 type: string
                 enum: *yarn_app_states

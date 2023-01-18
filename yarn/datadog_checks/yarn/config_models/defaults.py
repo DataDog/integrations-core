@@ -15,7 +15,7 @@ def shared_collect_apps_all_states(field, value):
 
 
 def shared_collect_apps_states_list(field, value):
-    return ['ALL', 'NEW', 'NEW_SAVING', 'SUBMITTED', 'ACCEPTED', 'RUNNING', 'FINISHED', 'FAILED', 'KILLED']
+    return get_default_field_value(field, value)
 
 
 def shared_proxy(field, value):
@@ -79,7 +79,7 @@ def instance_collect_apps_all_states(field, value):
 
 
 def instance_collect_apps_states_list(field, value):
-    return ['ALL', 'NEW', 'NEW_SAVING', 'SUBMITTED', 'ACCEPTED', 'RUNNING', 'FINISHED', 'FAILED', 'KILLED']
+    return get_default_field_value(field, value)
 
 
 def instance_collect_node_metrics(field, value):
