@@ -113,6 +113,7 @@ class TUFDownloader:
 
         target_abspath = os.path.join(self.__targets_dir, tuf_target_path)
         local_relpath = self.__updater.find_cached_target(target, target_abspath)
+        # hello world
 
         # Either the target has not been updated...
         if local_relpath:
