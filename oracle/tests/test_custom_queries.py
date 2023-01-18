@@ -24,7 +24,7 @@ def test_if_only_custom_queries_default_queries_are_not_set(instance, only_custo
     assert len(check._query_manager.queries) == expected_default_queries
 
 
-def test_custom_queries(aggregator, check, dd_run_check, instance):
+def test_custom_queries(aggregator, dd_run_check, instance):
     con = mock.MagicMock()
     cursor = mock.MagicMock()
     data = [[["tag_value1", "1"]], [[1, 2, "tag_value2"]]]
@@ -77,7 +77,7 @@ def test_custom_queries(aggregator, check, dd_run_check, instance):
     )
 
 
-def test_custom_queries_multiple_results(aggregator, check, dd_run_check, instance):
+def test_custom_queries_multiple_results(aggregator, dd_run_check, instance):
     con = mock.MagicMock()
     cursor = mock.MagicMock()
     data = [["tag_value1", "1"], ["tag_value2", "2"]]
@@ -111,7 +111,7 @@ def test_custom_queries_multiple_results(aggregator, check, dd_run_check, instan
     )
 
 
-def test_custom_queries_metric_prefix_skip_column(aggregator, check, dd_run_check, instance):
+def test_custom_queries_metric_prefix_skip_column(aggregator, dd_run_check, instance):
     con = mock.MagicMock()
     cursor = mock.MagicMock()
     data = [[["tag_value1", "1"]], [[1, 2, "tag_value2"]]]

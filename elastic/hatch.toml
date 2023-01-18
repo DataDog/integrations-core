@@ -2,12 +2,12 @@
 base-package-features = ["deps", "http"]
 
 [[envs.default.matrix]]
-python = ["27", "38"]
+python = ["2.7", "3.8"]
 flavor = ["elasticsearch"]
 version = ["7.2", "7.7", "7.9"]
 
 [[envs.default.matrix]]
-python = ["27", "38"]
+python = ["2.7", "3.8"]
 # Opensearch, compatible with elasticsearch
 flavor = ["opensearch"]
 version = ["1.1"]

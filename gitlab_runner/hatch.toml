@@ -4,7 +4,7 @@
 DDEV_SKIP_GENERIC_TAGS_CHECK = "true"
 
 [[envs.default.matrix]]
-python = ["27", "38"]
+python = ["2.7", "3.8"]
 version = ["10.8.0"]
 
 [envs.default.overrides]

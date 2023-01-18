@@ -110,6 +110,7 @@ class InstanceConfig(BaseModel):
     class Config:
         allow_mutation = False
 
+    activity_metrics_excluded_aggregations: Optional[Sequence[str]]
     application_name: Optional[str]
     aws: Optional[Aws]
     azure: Optional[Azure]

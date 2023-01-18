@@ -10,18 +10,17 @@ from six import PY2, text_type
 from urllib3.exceptions import InsecureRequestWarning
 
 from .utils.common import to_native_string
+from .utils.tracing import tracing_enabled
 
 try:
     import datadog_agent
 except ImportError:
     from .stubs import datadog_agent
 
-
 # Arbitrary number less than 10 (DEBUG)
 TRACE_LEVEL = 7
 
 LOGGER_FRAME_SEARCH_MAX_DEPTH = 50
-
 
 DEFAULT_FALLBACK_LOGGER = logging.getLogger(__name__)
 
@@ -74,14 +73,29 @@ class CheckLoggingAdapter(logging.LoggerAdapter):
 
 
 class CheckLogFormatter(logging.Formatter):
+    def __init__(self):
+        super(CheckLogFormatter, self).__init__()
+        self.integration_tracing_enabled, _ = tracing_enabled()
+
     def format(self, record):
         # type: (logging.LogRecord) -> str
         message = to_native_string(super(CheckLogFormatter, self).format(record))
-        return "{} | ({}:{}) | {}".format(
-            # Default to `-` for non-check logs
+
+        if not self.integration_tracing_enabled:
+            return "{} | ({}:{}) | {}".format(
+                # Default to `-` for non-check logs
+                getattr(record, '_check_id', '-'),
+                getattr(record, '_filename', record.filename),
+                getattr(record, '_lineno', record.lineno),
+                message,
+            )
+
+        return "{} | ({}:{}) | dd.trace_id={} dd.span_id={} | {}".format(
             getattr(record, '_check_id', '-'),
             getattr(record, '_filename', record.filename),
             getattr(record, '_lineno', record.lineno),
+            getattr(record, 'dd.trace_id', 0),
+            getattr(record, 'dd.span_id', 0),
             message,
         )
 

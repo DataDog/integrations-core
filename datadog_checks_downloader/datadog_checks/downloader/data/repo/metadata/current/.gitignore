@@ -1,5 +1,0 @@
-# Ignore everything except the TUF root role metadata, and this .gitignore
-# file: https://jasonstitt.com/gitignore-whitelisting-patterns
-*
-!root.json
-!.gitignore

@@ -81,7 +81,7 @@ def validate_license_headers(
                 yield child
 
     def validate_license_header(path):
-        with open(path) as f:
+        with open(path, encoding='utf-8-sig') as f:
             contents = f.read()
 
         license_header = parse_license_header(contents)

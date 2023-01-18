@@ -37,7 +37,6 @@ IGNORED_DEPS = {
     'cryptography',
     'dnspython',
     'pymysql',  # https://github.com/DataDog/integrations-core/pull/12612
-    'protobuf',  # Breaking datadog_checks_base
     'foundationdb',  # Breaking datadog_checks_base tests
     'openstacksdk',  # Breaking openstack_controller tests
     'pyasn1',  # Breaking snmp tests
@@ -189,6 +188,9 @@ async def scrape_version_data(urls):
                 versions.append(version)
 
                 for artifact in artifacts:
+                    if artifact.get("yanked", False):
+                        continue
+
                     if latest_py2 is None and artifact_compatible_with_python(artifact, '2'):
                         latest_py2 = version
                     if latest_py3 is None and artifact_compatible_with_python(artifact, '3'):

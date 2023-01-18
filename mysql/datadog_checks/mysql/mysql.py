@@ -423,6 +423,10 @@ class MySql(AgentCheck):
             and above_560
             and self.performance_schema_enabled
         ):
+            self.warning(
+                "[Deprecated] The `extra_performance_metrics` option will be removed in a future release. "
+                "Utilize the `custom_queries` feature if the functionality is needed.",
+            )
             results['perf_digest_95th_percentile_avg_us'] = self._get_query_exec_time_95th_us(db)
             results['query_run_time_avg'] = self._query_exec_time_per_schema(db)
             metrics.update(PERFORMANCE_VARS)

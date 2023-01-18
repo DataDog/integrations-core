@@ -104,6 +104,17 @@ assets/               @DataDog/agent-integrations
 /datadog_checks_dev/datadog_checks/dev/tooling/commands/meta/snmp/ @DataDog/network-device-monitoring @DataDog/agent-integrations
 /docs/developer/tutorials/snmp/                                    @DataDog/network-device-monitoring @DataDog/agent-integrations @DataDog/documentation
 
+# Platform Integrations
+/openstack/                             @DataDog/platform-integrations @DataDog/agent-integrations
+/openstack/*.md                         @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
+/openstack/manifest.json                @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
+/openstack_controller/                  @DataDog/platform-integrations @DataDog/agent-integrations
+/openstack_controller/manifest.json     @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
+/openstack_controller/*.md              @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
+/vsphere/                               @DataDog/platform-integrations @DataDog/agent-integrations
+/vsphere/manifest.json                  @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
+/vsphere/*.md                           @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
+
 # System checks
 /disk/                                    @DataDog/agent-integrations @DataDog/windows-agent
 /disk/*.md                                @DataDog/agent-integrations @DataDog/windows-agent @DataDog/documentation

@@ -14,9 +14,9 @@ try:
         # handle thread monitoring as an additional option
         # See: http://pypi.datadoghq.com/trace/docs/other_integrations.html#futures
         if datadog_agent.get_config('integration_tracing_futures'):
-            patch(requests=True, futures=True)
+            patch(logging=True, requests=True, futures=True)
         else:
-            patch(requests=True)
+            patch(logging=True, requests=True)
 
     if is_affirmative(datadog_agent.get_config('integration_profiling')):
         from ddtrace.profiling import Profiler

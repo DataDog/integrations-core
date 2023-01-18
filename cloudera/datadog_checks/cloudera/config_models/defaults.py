@@ -14,6 +14,10 @@ def shared_service(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_clusters(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_disable_generic_tags(field, value):
     return False
 
