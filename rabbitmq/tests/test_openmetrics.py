@@ -4,6 +4,7 @@ from pathlib import Path
 from datadog_checks.dev.utils import get_metadata_metrics
 import pytest
 
+from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.rabbitmq import RabbitMQ
 
@@ -11,6 +12,7 @@ from .common import DEFAULT_OM_TAGS, HERE
 from .metrics import DEFAULT_OPENMETRICS, MISSING_OPENMETRICS
 
 OPENMETRICS_RESPONSE_FIXTURES = HERE / Path('fixtures')
+TEST_URL = "http://localhost:15692"
 
 
 def test_aggregated_endpoint(aggregator, dd_run_check, mock_http_response):
@@ -22,7 +24,7 @@ def test_aggregated_endpoint(aggregator, dd_run_check, mock_http_response):
     check = RabbitMQ(
         "rabbitmq",
         {},
-        [{'prometheus_plugin': {'url': "localhost:15692", "include_aggregated_endpoint": True}, "metrics": [".+"]}],
+        [{'prometheus_plugin': {'url': TEST_URL, "include_aggregated_endpoint": True}, "metrics": [".+"]}],
     )
     dd_run_check(check)
 
@@ -62,7 +64,7 @@ def test_bare_detailed_endpoint(aggregator, dd_run_check, mock_http_response):
         [
             {
                 'prometheus_plugin': {
-                    'url': "localhost:15692",
+                    'url': TEST_URL,
                     'unaggregated_endpoint': 'detailed',
                 },
                 "metrics": [".+"],
@@ -94,7 +96,7 @@ def test_bare_detailed_endpoint(aggregator, dd_run_check, mock_http_response):
         ),
     ]
     for m in expected_metrics:
-        kwargs = {**m, "tags": ["endpoint:localhost:15692/metrics/detailed"] + m.get('tags', [])}
+        kwargs = {**m, "tags": [f"endpoint:{TEST_URL}/metrics/detailed"] + m.get('tags', [])}
         aggregator.assert_metric(**kwargs)
 
 
@@ -107,7 +109,7 @@ def test_detailed_endpoint_queue_coarse_metrics(aggregator, dd_run_check, mock_h
         [
             {
                 'prometheus_plugin': {
-                    'url': "localhost:15692",
+                    'url': TEST_URL,
                     'unaggregated_endpoint': 'detailed?family=queue_coarse_metrics',
                 },
                 "metrics": [".+"],
@@ -174,7 +176,7 @@ def test_detailed_endpoint_queue_coarse_metrics(aggregator, dd_run_check, mock_h
     for m in expected_metrics:
         kwargs = {
             **m,
-            "tags": ["endpoint:localhost:15692/metrics/detailed?family=queue_coarse_metrics"] + m.get('tags', []),
+            "tags": [f"endpoint:{TEST_URL}/metrics/detailed?family=queue_coarse_metrics"] + m.get('tags', []),
         }
         aggregator.assert_metric(**kwargs)
 
@@ -188,7 +190,7 @@ def test_per_object(aggregator, dd_run_check, mock_http_response):
         [
             {
                 'prometheus_plugin': {
-                    'url': "localhost:15692",
+                    'url': TEST_URL,
                     'unaggregated_endpoint': 'per-object',
                 },
                 "metrics": [".+"],
@@ -255,7 +257,7 @@ def test_per_object(aggregator, dd_run_check, mock_http_response):
     for m in expected_metrics:
         kwargs = {
             **m,
-            "tags": ["endpoint:localhost:15692/metrics/per-object"] + m.get('tags', []),
+            "tags": [f"endpoint:{TEST_URL}/metrics/per-object"] + m.get('tags', []),
         }
         aggregator.assert_metric(**kwargs)
 
@@ -338,3 +340,42 @@ def test_aggregated_and_detailed_endpoints(query, metrics, aggregator, dd_run_ch
     for m in ['rabbitmq.build_info', 'rabbitmq.identity_info']:
         aggregator.assert_metric_has_tag(m, f'endpoint:http://localhost:15692/metrics/{detailed_ep}', count=1)
         aggregator.assert_metric_has_tag(m, 'endpoint:http://localhost:15692/metrics', count=1)
+
+
+@pytest.mark.parametrize(
+    'plugin_config, err',
+    [
+        pytest.param({}, r'prometheus_plugin\.url field is required\.', id="No URL supplied."),
+        pytest.param(
+            {'url': 'localhost'},
+            r'prometheus_plugin\.url field must be an HTTP or HTTPS URL\.',
+            id="URL supplied without HTTP(S) protocol.",
+        ),
+        pytest.param(
+            {'url': "http://localhost", "unaggregated_endpoint": "detailed?"},
+            r"prometheus_plugin\.unaggregated_endpoint must be either 'per-object' "
+            + r"or 'detailed' or 'detailed\?<QUERY>'\.",
+            id="Invalid nonempty unaggregated_endpoint value.",
+        ),
+        pytest.param(
+            {'url': "http://localhost", "unaggregated_endpoint": ""},
+            r"prometheus_plugin\.unaggregated_endpoint must be either 'per-object' "
+            + r"or 'detailed' or 'detailed\?<QUERY>'\.",
+            id="Empty unaggregated_endpoint value is invalid.",
+        ),
+        pytest.param(
+            {'url': "http://localhost", "unaggregated_endpoint": []},
+            r"prometheus_plugin\.unaggregated_endpoint must be a string\.",
+            id="Unaggregated_endpoint value must be a string.",
+        ),
+        pytest.param(
+            {'url': "http://localhost", "include_aggregated_endpoint": 1},
+            r"prometheus_plugin\.include_aggregated_endpoint must be a boolean\.",
+            id="Aggregated_endpoint must be a boolean.",
+        ),
+    ],
+)
+def test_config(plugin_config, err):
+    check = RabbitMQ("rabbitmq", {}, [{'prometheus_plugin': plugin_config}])
+    with pytest.raises(ConfigurationError, match=err):
+        check.load_configuration_models()
