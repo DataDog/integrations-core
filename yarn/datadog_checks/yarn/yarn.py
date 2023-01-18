@@ -250,7 +250,9 @@ class YarnCheck(AgentCheck):
         if metrics_json and metrics_json.get('apps') and metrics_json['apps'].get('app') is not None:
             for app_json in metrics_json['apps']['app']:
                 app_state = app_json['state']
-                tags = self._get_app_tags(app_json, app_tags) + addl_tags + ['state:{}'.format(app_state)]
+                tags = self._get_app_tags(app_json, app_tags)
+                tags.extend(addl_tags)
+                tags.append('state:{}'.format(app_state))
 
                 if (
                     collect_apps_all_states
