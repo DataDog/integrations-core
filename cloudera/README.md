@@ -89,7 +89,7 @@ You can configure how your clusters are discovered with the `clusters` configura
 : Maximum number of items to be autodiscovered.  
 **Default value**: `None` (all clusters will be processed)
 
-`include`
+- `include`
 : Mapping of regular expression keys and component config values to autodiscover.  
 **Default value**: empty map
 
