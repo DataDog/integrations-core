@@ -127,11 +127,6 @@ def cloudera_version(request):
 
 
 @pytest.fixture
-def cloudera_version_5_0_0():
-    return ApiVersionInfo(version='5.0.0')
-
-
-@pytest.fixture
 def cloudera_version_7_0_0():
     return ApiVersionInfo(version='7.0.0')
 
