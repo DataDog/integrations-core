@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-
 import mock
 import pytest
 from cm_client.models.api_cluster import ApiCluster
