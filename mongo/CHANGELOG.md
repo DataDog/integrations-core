@@ -1,5 +1,9 @@
 # CHANGELOG - mongo
 
+## 4.2.0-beta.1 / 2023-01-18
+
+* [Fixed] Skip checking database names when replica is recovering. See [#13535](https://github.com/DataDog/integrations-core/pull/13535).
+
 ## 4.1.1 / 2022-12-09
 
 * [Fixed] Stop using deprecated `distutils.version` classes. See [#13408](https://github.com/DataDog/integrations-core/pull/13408).
