@@ -99,7 +99,7 @@ You can configure how your clusters are discovered with the `clusters` configura
 
 **Examples**:
 
-Process a maximum of `5` clusters with names starting with `my_cluster`:
+Process a maximum of `5` clusters with names that start with `my_cluster`:
 
 ```yaml
 clusters:
