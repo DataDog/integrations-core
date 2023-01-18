@@ -50,7 +50,7 @@ files:
         and the configuration to be applied to each of them. If no configuration associated with the key is indicated
         with the regular expression, they will be processed with the default configuration.
         The clusters will be processed in the order indicated in the 'include'. 
-        If a cluster is matched on an include key, it will only be processed there and not in a later include
+        If a cluster is matched on an 'include' key, it will only be processed there and not in a later 'include'
         that it might match on.
         
         The 'exclude' key will indicate the regular expressions of those clusters for which metrics
