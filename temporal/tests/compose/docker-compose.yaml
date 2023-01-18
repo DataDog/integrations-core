@@ -1,5 +1,5 @@
 # https://github.com/temporalio/docker-compose
-version: "3.5"
+version: "3.9"
 services:
   elasticsearch:
     container_name: temporal-elasticsearch
@@ -50,6 +50,19 @@ services:
       kompose.volume.type: configMap
     volumes:
       - ./config:/etc/temporal/config/dynamicconfig
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "tctl",
+          "--address",
+          "temporal:7233",
+          "workflow",
+          "list"
+        ]
+      interval: 1s
+      timeout: 5s
+      retries: 30
   temporal-admin-tools:
     container_name: temporal-admin-tools
     depends_on:
@@ -73,6 +86,33 @@ services:
       - temporal-network
     ports:
       - 8080:8080
+  temporal-python-worker:
+    build:
+      context: workers/python
+    depends_on:
+      temporal:
+        condition: service_healthy
+    container_name: temporal-python-worker
+    networks:
+      - temporal-network
+  temporal-java-worker:
+    build:
+      context: workers/java
+    depends_on:
+      temporal:
+        condition: service_healthy
+    container_name: temporal-java-worker
+    networks:
+      - temporal-network
+  temporal-go-worker:
+    build:
+      context: workers/go
+    depends_on:
+      temporal:
+        condition: service_healthy
+    container_name: temporal-go-worker
+    networks:
+      - temporal-network
 networks:
   temporal-network:
     name: temporal-network
