@@ -13,7 +13,7 @@
 ##
 ## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
 #
-# logs:
+logs:
 
     ## @param type - string - required
     #
@@ -39,7 +39,7 @@
     ## Note: The excluded units will take precedence over include_units.
     ##
     ## From Datadog Agent 7.37.0+, a wildcard can be used to exclude all
-    ##   system-level unit log thereby collecting only user-level unit logs.
+    ##   system-level unit logs, thereby collecting only user-level unit logs.
     #
     # exclude_units:
     #   - '*'
@@ -55,7 +55,7 @@
     ## Note: The excluded units will take precedence over include_user_units.
     ##
     ## From Datadog Agent 7.37.0+, a wildcard can be used to exclude all
-    ##   user-level unit log thereby collecting only system-level unit logs.
+    ##   user-level unit logs, thereby collecting only system-level unit logs.
     #
     # exclude_user_units:
     #   - '*'

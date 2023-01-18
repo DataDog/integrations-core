@@ -83,7 +83,7 @@ If your journal is located elsewhere, add a `path` parameter with the correspond
 
 ##### Filter journal units
 
-You can filter in and out specific _system-level_ units by using these parameters:
+You can filter specific _system-level_ units by using these parameters:
 
 - `include_units`: Includes all system-level units specified.
 - `exclude_units`: Excludes all system-level units specified.

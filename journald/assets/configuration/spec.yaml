@@ -3,6 +3,7 @@ files:
 - name: journald.yaml
   options:
   - template: logs
+    enabled: true
     multiple: true
     options:
       - name: type
@@ -39,7 +40,7 @@ files:
           Note: The excluded units will take precedence over include_units.
 
           From Datadog Agent 7.37.0+, a wildcard can be used to exclude all
-            system-level unit log thereby collecting only user-level unit logs.
+            system-level unit logs, thereby collecting only user-level unit logs.
         value:
           type: array
           items:
@@ -61,7 +62,7 @@ files:
           Note: The excluded units will take precedence over include_user_units.
 
           From Datadog Agent 7.37.0+, a wildcard can be used to exclude all
-            user-level unit log thereby collecting only system-level unit logs.
+            user-level unit logs, thereby collecting only system-level unit logs.
         value:
           type: array
           items:
