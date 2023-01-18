@@ -4,8 +4,6 @@ files:
     options:
       - template: init_config
         options:
-          - template: init_config/http
-          - template: init_config/default
           - name: collect_apps_all_states
             description: |
               Enable this parameter when using `collect_app_metrics` to collect metrics from applications of all states.
@@ -18,12 +16,22 @@ files:
               Configure the application states of which to collect application metrics.
             value:
               type: array
+              example: &yarn_app_states_init
+              - 'ALL'
+              - 'NEW'
+              - 'NEW_SAVING'
+              - 'SUBMITTED'
+              - 'ACCEPTED'
+              - 'RUNNING'
+              - 'FINISHED'
+              - 'FAILED'
+              - 'KILLED'
+              default: *yarn_app_states_init
               items:
                 type: string
-              example:
-                - "RUNNING"
-                - "FINISHED"
-                - "FAILED"
+                enum: *yarn_app_states_init
+          - template: init_config/http
+          - template: init_config/default
       - template: instances
         options:
           - name: resourcemanager_uri
@@ -98,12 +106,20 @@ files:
               Configure the application states of which to collect application metrics.
             value:
               type: array
+              example: &yarn_app_states
+              - 'ALL'
+              - 'NEW'
+              - 'NEW_SAVING'
+              - 'SUBMITTED'
+              - 'ACCEPTED'
+              - 'RUNNING'
+              - 'FINISHED'
+              - 'FAILED'
+              - 'KILLED'
+              default: *yarn_app_states
               items:
                 type: string
-              example:
-                - "RUNNING"
-                - "FINISHED"
-                - "FAILED"
+                enum: *yarn_app_states
           - name: collect_node_metrics
             description: Set this parameter to false to remove yarn.node metrics from metric collection.
             value:
