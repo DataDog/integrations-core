@@ -8,6 +8,7 @@ from datetime import datetime
 import cm_client
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.utils.discovery import Discovery
 from datadog_checks.base.utils.time import get_timestamp
 from datadog_checks.cloudera.api_client import ApiClient
 from datadog_checks.cloudera.entity_status import ENTITY_STATUS
@@ -15,32 +16,57 @@ from datadog_checks.cloudera.event import ClouderaEvent
 from datadog_checks.cloudera.metrics import NATIVE_METRICS, TIMESERIES_METRICS
 
 from .common import CLUSTER_HEALTH, HOST_HEALTH
+from .config import normalize_config_clusters_include
 
 
 class ApiClientV7(ApiClient):
     def __init__(self, check, api_client):
         super(ApiClientV7, self).__init__(check, api_client)
+        self._log.debug("clusters config: %s", self._check.config.clusters)
+        config_clusters_include = normalize_config_clusters_include(self._log, self._check.config.clusters)
+        self._log.debug("config_clusters_include: %s", config_clusters_include)
+        if config_clusters_include:
+            self._clusters_discovery = Discovery(
+                lambda: cm_client.ClustersResourceApi(self._api_client)
+                .read_clusters(cluster_type='any', view='full')
+                .items,
+                limit=self._check.config.clusters.limit,
+                include=config_clusters_include,
+                exclude=self._check.config.clusters.exclude,
+                interval=self._check.config.clusters.interval,
+                key=lambda cluster: cluster.name,
+            )
+        else:
+            self._clusters_discovery = None
 
     def collect_data(self):
         self._collect_clusters()
         self._collect_events()
 
     def _collect_clusters(self):
-        clusters_resource_api = cm_client.ClustersResourceApi(self._api_client)
-        read_clusters_response = clusters_resource_api.read_clusters(cluster_type='any', view='full')
-        self._log.debug("Cloudera full clusters response:\n%s", read_clusters_response)
-
+        if self._clusters_discovery:
+            discovered_clusters = list(self._clusters_discovery.get_items())
+        else:
+            discovered_clusters = [
+                (None, cluster.name, cluster, None)
+                for cluster in cm_client.ClustersResourceApi(self._api_client)
+                .read_clusters(cluster_type='any', view='full')
+                .items
+            ]
+        self._log.debug("discovered clusters:\n%s", discovered_clusters)
         # Use len(read_clusters_response.items) * 2 workers since
         # for each cluster, we are executing 2 tasks in parallel.
-        with ThreadPoolExecutor(max_workers=len(read_clusters_response.items) * 2) as executor:
-            for cluster in read_clusters_response.items:
-                cluster_name = cluster.name
-
-                tags = self._collect_cluster_tags(cluster, self._check.config.tags)
-
-                executor.submit(self._collect_cluster_metrics, cluster_name, tags)
-                executor.submit(self._collect_hosts, cluster_name)
-                self._collect_cluster_service_check(cluster, tags)
+        if len(discovered_clusters) > 0:
+            with ThreadPoolExecutor(max_workers=len(discovered_clusters) * 2) as executor:
+                for pattern, key, item, config in discovered_clusters:
+                    self._log.debug(
+                        "discovered item: [pattern:%s, key:%s, item:%s, config:%s]", pattern, key, item, config
+                    )
+                    cluster_name = key
+                    tags = self._collect_cluster_tags(item, self._check.config.tags)
+                    executor.submit(self._collect_cluster_metrics, cluster_name, tags)
+                    executor.submit(self._collect_hosts, cluster_name)
+                    self._collect_cluster_service_check(item, tags)
 
     def _collect_events(self):
         events_resource_api = cm_client.EventsResourceApi(self._api_client)

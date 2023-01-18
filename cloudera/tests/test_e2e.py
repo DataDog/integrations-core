@@ -7,7 +7,7 @@ import pytest
 from datadog_checks.cloudera import ClouderaCheck
 from datadog_checks.cloudera.metrics import TIMESERIES_METRICS
 
-from .common import CAN_CONNECT_TAGS, CLUSTER_HEALTH_TAGS, METRICS
+from .common import CAN_CONNECT_TAGS, CLUSTER_1_HEALTH_TAGS, METRICS
 
 
 @pytest.mark.e2e
@@ -31,17 +31,8 @@ def test_e2e(dd_agent_check, config):
         for metric in metrics:
             aggregator.assert_metric_has_tag_prefix(f'cloudera.{category}.{metric}', f"cloudera_{category}")
 
-    aggregator.assert_service_check(
-        'cloudera.can_connect',
-        ClouderaCheck.OK,
-        tags=CAN_CONNECT_TAGS,
-    )
+    aggregator.assert_service_check('cloudera.can_connect', ClouderaCheck.OK, tags=CAN_CONNECT_TAGS)
     # caddy test env is supposed to be in BAD_HEALTH
-    aggregator.assert_service_check(
-        'cloudera.cluster.health',
-        ClouderaCheck.CRITICAL,
-        message="BAD_HEALTH",
-        tags=CLUSTER_HEALTH_TAGS,
-    )
+    aggregator.assert_service_check('cloudera.cluster.health', ClouderaCheck.OK, tags=CLUSTER_1_HEALTH_TAGS)
     aggregator.assert_service_check('cloudera.host.health', ClouderaCheck.OK)
     aggregator.assert_all_metrics_covered()

@@ -1,14 +1,14 @@
 {
   "items": [
     {
-      "name": "cod--qfdcinkqrzw",
-      "displayName": "cod--qfdcinkqrzw",
+      "name": "cluster_1",
+      "displayName": "cluster_1",
       "fullVersion": "7.2.15",
       "maintenanceMode": false,
       "maintenanceOwners": [],
       "clusterUrl": "https://cod--qfdcinkqrzw-gateway.agent-in.jfha-h5rc.a0.cloudera.site/cmf/clusterRedirect/cod--qfdcinkqrzw",
       "hostsUrl": "https://cod--qfdcinkqrzw-gateway.agent-in.jfha-h5rc.a0.cloudera.site/cmf/clusterRedirect/cod--qfdcinkqrzw/hosts",
-      "entityStatus": "BAD_HEALTH",
+      "entityStatus": "GOOD_HEALTH",
       "uuid": "4f201e38-4f96-4a60-8fe5-11231a128617",
       "dataContextRefs": [
         {

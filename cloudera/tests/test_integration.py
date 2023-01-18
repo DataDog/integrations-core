@@ -7,7 +7,7 @@ import pytest
 from datadog_checks.cloudera import ClouderaCheck
 from datadog_checks.cloudera.metrics import TIMESERIES_METRICS
 
-from .common import CAN_CONNECT_TAGS, CLUSTER_HEALTH_TAGS, METRICS
+from .common import CAN_CONNECT_TAGS, CLUSTER_1_HEALTH_TAGS, METRICS
 
 
 @pytest.mark.usefixtures('dd_environment')
@@ -16,15 +16,15 @@ def test_given_bad_url_when_check_runs_then_service_check_critical(
     aggregator,
     dd_run_check,
     cloudera_check,
-    instance,
+    instance_bad_url,
 ):
-    with pytest.raises(Exception):
+    with pytest.raises(Exception, match="HTTPConnectionPool"):
         # Given
-        check = cloudera_check(instance)
+        check = cloudera_check(instance_bad_url)
         # When
         dd_run_check(check)
-        # Then
-        aggregator.assert_service_check('cloudera.can_connect', ClouderaCheck.CRITICAL)
+    # Then
+    aggregator.assert_service_check('cloudera.can_connect', ClouderaCheck.CRITICAL)
 
 
 @pytest.mark.usefixtures('dd_environment')
@@ -65,12 +65,10 @@ def test_given_api_v48_endpoint_when_check_runs_then_service_check_ok_and_metric
         ClouderaCheck.OK,
         tags=CAN_CONNECT_TAGS,
     )
-    # caddy test env is supposed to be in BAD_HEALTH
     aggregator.assert_service_check(
         'cloudera.cluster.health',
-        ClouderaCheck.CRITICAL,
-        message="BAD_HEALTH",
-        tags=CLUSTER_HEALTH_TAGS,
+        ClouderaCheck.OK,
+        tags=CLUSTER_1_HEALTH_TAGS,
     )
     aggregator.assert_service_check('cloudera.host.health', ClouderaCheck.OK)
     aggregator.assert_event(

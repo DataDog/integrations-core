@@ -32,10 +32,10 @@
     }
     @get_hosts {
         method GET
-        path /api/v48/clusters/cod--qfdcinkqrzw/hosts
+        path /api/v48/clusters/cluster_1/hosts
     }
     route @get_hosts {
-        rewrite /api/v48/clusters/cod--qfdcinkqrzw/hosts /api/v48/clusters/cod--qfdcinkqrzw/hosts/get
+        rewrite /api/v48/clusters/cluster_1/hosts /api/v48/clusters/cluster_1/hosts/get
         file_server
     }
     @get_metrics_from_host {
