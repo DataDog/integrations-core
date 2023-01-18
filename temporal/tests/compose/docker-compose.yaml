@@ -103,6 +103,17 @@ services:
       - temporal-network
     ports:
       - 8080:8080
+  temporal-go-worker:
+    build:
+      context: workers/go
+    depends_on:
+      temporal:
+        condition: service_healthy
+    container_name: temporal-go-worker
+    ports:
+      - 8001:9090
+    networks:
+      - temporal-network
 networks:
   temporal-network:
     name: temporal-network
