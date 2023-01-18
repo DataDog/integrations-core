@@ -49,11 +49,13 @@ services:
       - ENABLE_ES=true
       - ES_SEEDS=elasticsearch
       - ES_VERSION=v7
+      - PROMETHEUS_ENDPOINT=0.0.0.0:8000
     image: temporalio/auto-setup:${TEMPORAL_VERSION}
     networks:
       - temporal-network
     ports:
       - 7233:7233
+      - 8000:8000
     labels:
       kompose.volume.type: configMap
     volumes:
@@ -119,6 +121,8 @@ services:
       temporal:
         condition: service_healthy
     container_name: temporal-go-worker
+    ports:
+      - 8001:9090
     networks:
       - temporal-network
 networks:
