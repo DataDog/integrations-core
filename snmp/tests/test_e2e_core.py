@@ -303,7 +303,7 @@ def test_e2e_meraki_cloud_controller(dd_agent_check):
     aggregator.assert_metric(
         'snmp.interface.status',
         metric_type=aggregator.GAUGE,
-        tags=if_tags + ['interface_alias:', 'interface_index:11', 'status:warning'],
+        tags=if_tags + ['interface_index:11', 'status:warning'],
         value=1,
     )
     aggregator.assert_all_metrics_covered()
