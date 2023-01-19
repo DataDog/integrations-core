@@ -5,6 +5,8 @@ from six import PY3, iteritems
 
 from datadog_checks.base import PDHBaseCheck, is_affirmative
 
+from .service_check import site_service_check, app_pool_service_check
+
 DEFAULT_COUNTERS = [
     ["Web Service", None, "Service Uptime", "iis.uptime", "gauge"],
     # Network
@@ -40,7 +42,6 @@ DEFAULT_COUNTERS = [
 ]
 
 TOTAL_INSTANCE = '_Total'
-
 
 class IIS(PDHBaseCheck):
     SITE = 'site'
@@ -125,7 +126,8 @@ class IIS(PDHBaseCheck):
                 self.log.error('Error in metric_func: %s %s %s', dd_name, value, e)
 
             if dd_name == 'iis.uptime':
-                self._report_uptime(namespace, value, tags)
+                status = site_service_check(value)
+                self._report_service_check(namespace, status, tags)
                 if site_name in remaining_sites:
                     self.log.debug('Removing %r from expected sites', site_name)
                     remaining_sites.remove(site_name)
@@ -160,22 +162,21 @@ class IIS(PDHBaseCheck):
             except Exception as e:
                 self.log.error('Error in metric_func: %s %s %s', dd_name, value, e)
 
-            if dd_name == 'iis.app_pool.uptime':
-                self._report_uptime(namespace, value, tags)
+            if dd_name == 'iis.app_pool.state':
+                status = app_pool_service_check(value)
+                self._report_service_check(namespace, status, tags)
                 if app_pool_name in remaining_app_pools:
                     self.log.debug('Removing %r from expected app pools', app_pool_name)
                     remaining_app_pools.remove(app_pool_name)
                 else:
                     self.log.warning('App pool %r not in expected app pools', app_pool_name)
 
-    def _report_uptime(self, namespace, uptime, tags):
-        uptime = int(uptime)
-        status = self.CRITICAL if uptime == 0 else self.OK
-        self.service_check(self.get_service_check_uptime(namespace), status, tags)
+    def _report_service_check(self, namespace, status, tags):
+        self.service_check(self.get_service_check_up(namespace), status, tags)
 
     def _report_unavailable_values(self):
         for namespace, remaining_values in self._remaining_data.items():
-            service_check_uptime = self.get_service_check_uptime(namespace)
+            service_check_uptime = self.get_service_check_up(namespace)
 
             for value in remaining_values:
                 tags = self._get_tags(namespace, value, False)
@@ -206,7 +207,7 @@ class IIS(PDHBaseCheck):
         return 'iis_host:{}'.format(self.normalize_tag(iis_host))
 
     @classmethod
-    def get_service_check_uptime(cls, namespace):
+    def get_service_check_up(cls, namespace):
         return 'iis.{}_up'.format(namespace)
 
     def reset_remaining_data(self):
