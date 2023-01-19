@@ -67,8 +67,8 @@ def instance_autodiscover_clusters_include_not_array():
 
 
 @pytest.fixture
-def instance_autodiscover_include_with_one_entry_dict():
-    return deepcopy(common.INSTANCE_AUTODISCOVER_INCLUDE_WITH_ONE_ENTRY_DICT)
+def instance_autodiscover_clusters_include_with_one_entry_dict():
+    return deepcopy(common.INSTANCE_AUTODISCOVER_CLUSTERS_INCLUDE_WITH_ONE_ENTRY_DICT)
 
 
 @pytest.fixture
@@ -89,6 +89,16 @@ def instance_autodiscover_exclude():
 @pytest.fixture
 def instance_autodiscover_hosts_include_not_array():
     return deepcopy(common.INSTANCE_AUTODISCOVER_HOSTS_INCLUDE_NOT_ARRAY)
+
+
+@pytest.fixture
+def instance_autodiscover_hosts_include_with_one_entry_dict():
+    return deepcopy(common.INSTANCE_AUTODISCOVER_HOSTS_INCLUDE_WITH_ONE_ENTRY_DICT)
+
+
+@pytest.fixture
+def instance_autodiscover_hosts_include_with_one_entry_dict_and_interval():
+    return deepcopy(common.INSTANCE_AUTODISCOVER_HOSTS_INCLUDE_WITH_ONE_ENTRY_DICT_AND_INTERVAL)
 
 
 @pytest.fixture
@@ -199,6 +209,25 @@ def list_two_clusters_with_one_tmp_resource():
                 ],
                 cluster_type="COMPUTE_CLUSTER",
             ),
+        ],
+    )
+
+
+@pytest.fixture
+def list_n_hosts_resource(request):
+    return ApiHostList(
+        items=[
+            ApiHost(
+                host_id=f'host_{n}',
+                cluster_ref=ApiClusterRef(
+                    cluster_name="cluster_1",
+                    display_name="cluster_1",
+                ),
+                num_cores=8,
+                num_physical_cores=4,
+                total_phys_mem_bytes=33079799808,
+            )
+            for n in range(request.param)
         ],
     )
 

@@ -32,7 +32,7 @@ INSTANCE_AUTODISCOVER_CLUSTERS_INCLUDE_NOT_ARRAY = {
 }
 
 
-INSTANCE_AUTODISCOVER_INCLUDE_WITH_ONE_ENTRY_DICT = {
+INSTANCE_AUTODISCOVER_CLUSTERS_INCLUDE_WITH_ONE_ENTRY_DICT = {
     'api_url': 'http://localhost:8080/api/v48/',
     'tags': ['test1'],
     'clusters': {
@@ -94,6 +94,47 @@ INSTANCE_AUTODISCOVER_HOSTS_INCLUDE_NOT_ARRAY = {
                     }
                 }
             }
+        ],
+    },
+}
+
+INSTANCE_AUTODISCOVER_HOSTS_INCLUDE_WITH_ONE_ENTRY_DICT = {
+    'api_url': 'http://localhost:8080/api/v48/',
+    'tags': ['test1'],
+    'clusters': {
+        'include': [
+            {
+                '^cluster.*': {
+                    'hosts': {
+                        'include': [
+                            {
+                                '^host.*': {},
+                            }
+                        ]
+                    }
+                },
+            },
+        ],
+    },
+}
+
+INSTANCE_AUTODISCOVER_HOSTS_INCLUDE_WITH_ONE_ENTRY_DICT_AND_INTERVAL = {
+    'api_url': 'http://localhost:8080/api/v48/',
+    'tags': ['test1'],
+    'clusters': {
+        'include': [
+            {
+                '^cluster.*': {
+                    'hosts': {
+                        'interval': 60,
+                        'include': [
+                            {
+                                '^host.*': {},
+                            }
+                        ],
+                    }
+                },
+            },
         ],
     },
 }

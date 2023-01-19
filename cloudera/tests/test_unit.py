@@ -251,11 +251,11 @@ def test_autodiscover_clusters_configured_include_not_array_then_exception_is_ra
         dd_run_check(check)
 
 
-def test_given_cloudera_check_when_autodiscover_configured_with_one_entry_dict_then_emits_configured_cluster_metrics(
+def test_autodiscover_clusters_configured_with_one_entry_dict_then_emits_configured_cluster_metrics(
     aggregator,
     dd_run_check,
     cloudera_check,
-    instance_autodiscover_include_with_one_entry_dict,
+    instance_autodiscover_clusters_include_with_one_entry_dict,
     cloudera_version_7_0_0,
     list_two_clusters_with_one_tmp_resource,
     list_hosts_resource,
@@ -278,7 +278,7 @@ def test_given_cloudera_check_when_autodiscover_configured_with_one_entry_dict_t
         return_value=read_events_resource,
     ):
         # Given
-        check = cloudera_check(instance_autodiscover_include_with_one_entry_dict)
+        check = cloudera_check(instance_autodiscover_clusters_include_with_one_entry_dict)
         # When
         dd_run_check(check)
         # Then
@@ -412,7 +412,7 @@ def test_given_cloudera_check_when_autodiscover_empty_clusters_then_emits_zero_c
     aggregator,
     dd_run_check,
     cloudera_check,
-    instance_autodiscover_include_with_one_entry_dict,
+    instance_autodiscover_clusters_include_with_one_entry_dict,
     cloudera_version_7_0_0,
     list_empty_clusters_resource,
     list_hosts_resource,
@@ -431,7 +431,7 @@ def test_given_cloudera_check_when_autodiscover_empty_clusters_then_emits_zero_c
         return_value=list_hosts_resource,
     ):
         # Given
-        check = cloudera_check(instance_autodiscover_include_with_one_entry_dict)
+        check = cloudera_check(instance_autodiscover_clusters_include_with_one_entry_dict)
         # When
         dd_run_check(check)
         # Then
@@ -470,3 +470,91 @@ def test_autodiscover_hosts_configured_include_not_array_then_emits_critical_ser
             message='Cloudera check raised an exception: Setting `include` must be an array',
             tags=CAN_CONNECT_TAGS,
         )
+
+
+@pytest.mark.parametrize(
+    'list_n_hosts_resource, expected_count',
+    [(1, 1), (2, 2)],
+    ids=["one host", "two hosts"],
+    indirect=['list_n_hosts_resource'],
+)
+def test_autodiscover_hosts_configured_with_one_entry_dict_then_emits_configured_host_metrics(
+    aggregator,
+    dd_run_check,
+    cloudera_check,
+    instance_autodiscover_hosts_include_with_one_entry_dict,
+    cloudera_version_7_0_0,
+    list_two_clusters_with_one_tmp_resource,
+    list_n_hosts_resource,
+    read_events_resource,
+    expected_count,
+):
+    with mock.patch(
+        'cm_client.ClouderaManagerResourceApi.get_version',
+        return_value=cloudera_version_7_0_0,
+    ), mock.patch(
+        'cm_client.ClustersResourceApi.read_clusters',
+        return_value=list_two_clusters_with_one_tmp_resource,
+    ), mock.patch(
+        'cm_client.TimeSeriesResourceApi.query_time_series',
+        side_effect=get_timeseries_resource,
+    ), mock.patch(
+        'cm_client.ClustersResourceApi.list_hosts',
+        return_value=list_n_hosts_resource,
+    ), mock.patch(
+        'cm_client.EventsResourceApi.read_events',
+        return_value=read_events_resource,
+    ):
+        # Given
+        check = cloudera_check(instance_autodiscover_hosts_include_with_one_entry_dict)
+        # When
+        dd_run_check(check)
+        # Then
+        for metric in METRICS['host']:
+            aggregator.assert_metric(f'cloudera.host.{metric}', count=expected_count)
+            aggregator.assert_metric_has_tag_prefix(f'cloudera.host.{metric}', "cloudera_cluster")
+
+
+@pytest.mark.parametrize(
+    'list_n_hosts_resource, expected_count',
+    [(1, 2)],
+    ids=["two runs"],
+    indirect=['list_n_hosts_resource'],
+)
+def test_autodiscover_hosts_configured_with_interval_and_two_runs_then_emits_configured_host_metrics(
+    aggregator,
+    dd_run_check,
+    cloudera_check,
+    instance_autodiscover_hosts_include_with_one_entry_dict_and_interval,
+    cloudera_version_7_0_0,
+    list_two_clusters_with_one_tmp_resource,
+    list_n_hosts_resource,
+    read_events_resource,
+    expected_count,
+):
+    with mock.patch(
+        'cm_client.ClouderaManagerResourceApi.get_version',
+        return_value=cloudera_version_7_0_0,
+    ), mock.patch(
+        'cm_client.ClustersResourceApi.read_clusters',
+        return_value=list_two_clusters_with_one_tmp_resource,
+    ), mock.patch(
+        'cm_client.TimeSeriesResourceApi.query_time_series',
+        side_effect=get_timeseries_resource,
+    ), mock.patch(
+        'cm_client.ClustersResourceApi.list_hosts',
+        return_value=list_n_hosts_resource,
+    ) as mocked_list_hosts, mock.patch(
+        'cm_client.EventsResourceApi.read_events',
+        return_value=read_events_resource,
+    ):
+        # Given
+        check = cloudera_check(instance_autodiscover_hosts_include_with_one_entry_dict_and_interval)
+        # When
+        dd_run_check(check)
+        dd_run_check(check)
+        # Then
+        for metric in METRICS['host']:
+            aggregator.assert_metric(f'cloudera.host.{metric}', count=expected_count)
+            aggregator.assert_metric_has_tag_prefix(f'cloudera.host.{metric}', "cloudera_cluster")
+        mocked_list_hosts.assert_called_once()

@@ -62,7 +62,7 @@ class ApiClientV7(ApiClient):
             with ThreadPoolExecutor(max_workers=len(discovered_clusters) * 2) as executor:
                 for pattern, key, item, config in discovered_clusters:
                     self._log.debug(
-                        "discovered item: [pattern:%s, key:%s, item:%s, config:%s]", pattern, key, item, config
+                        "discovered cluster: [pattern:%s, key:%s, item:%s, config:%s]", pattern, key, item, config
                     )
                     cluster_name = key
                     tags = self._collect_cluster_tags(item, self._check.config.tags)
@@ -115,36 +115,47 @@ class ApiClientV7(ApiClient):
         self._query_time_series(query, tags=tags)
 
     def _collect_hosts(self, cluster_name, config):
-        self._log.debug("Collecting hosts from '%s' cluster with config: %s", cluster_name, config)
-        config_hosts_include = normalize_discover_config_include(self._log, config.get('hosts') if config else None)
-        self._log.debug("config_hosts_include: %s", config_hosts_include)
-        # if config_clusters_include:
-        #     self._clusters_discovery = Discovery(
-        #         lambda: cm_client.ClustersResourceApi(self._api_client)
-        #             .read_clusters(cluster_type='any', view='full')
-        #             .items,
-        #         limit=self._check.config.clusters.limit,
-        #         include=config_clusters_include,
-        #         exclude=self._check.config.clusters.exclude,
-        #         interval=self._check.config.clusters.interval,
-        #         key=lambda cluster: cluster.name,
-        #     )
-        # else:
-        #     self._clusters_discovery = None
+        self._log.debug("self._hosts_discovery: %s", self._hosts_discovery)
+        if cluster_name not in self._hosts_discovery:
+            self._log.debug("Collecting hosts from '%s' cluster with config: %s", cluster_name, config)
+            config_hosts_include = normalize_discover_config_include(self._log, config.get('hosts') if config else None)
+            self._log.debug("config_hosts_include: %s", config_hosts_include)
+            if config_hosts_include:
+                self._hosts_discovery[cluster_name] = Discovery(
+                    lambda: cm_client.ClustersResourceApi(self._api_client).list_hosts(cluster_name, view='full').items,
+                    limit=config.get('hosts').get('limit') if config else None,
+                    include=config_hosts_include,
+                    exclude=config.get('hosts').get('exclude') if config else None,
+                    interval=config.get('hosts').get('interval') if config else None,
+                    key=lambda host: host.host_id,
+                )
+            else:
+                self._hosts_discovery[cluster_name] = None
 
-        clusters_resource_api = cm_client.ClustersResourceApi(self._api_client)
-        list_hosts_response = clusters_resource_api.list_hosts(cluster_name, view='full')
-        self._log.debug("Cloudera full hosts response:\n%s", list_hosts_response)
-
+        if self._hosts_discovery[cluster_name]:
+            discovered_hosts = list(self._hosts_discovery[cluster_name].get_items())
+        else:
+            discovered_hosts = [
+                (None, host.host_id, host, None)
+                for host in cm_client.ClustersResourceApi(self._api_client).list_hosts(cluster_name, view='full').items
+            ]
+        self._log.debug("discovered hosts:\n%s", discovered_hosts)
         # Use len(list_hosts_response.items) * 4 workers since
         # for each host, we are executing 4 tasks in parallel.
-        with ThreadPoolExecutor(max_workers=len(list_hosts_response.items) * 4) as executor:
-            for host in list_hosts_response.items:
-                tags = self._collect_host_tags(host, self._check.config.tags)
-                executor.submit(self._collect_host_metrics, host, tags)
-                executor.submit(self._collect_role_metrics, host, tags)
-                executor.submit(self._collect_disk_metrics, host, tags)
-                executor.submit(self._collect_host_service_check, host, tags)
+        if len(discovered_hosts) > 0:
+            futures = []
+            with ThreadPoolExecutor(max_workers=len(discovered_hosts) * 4) as executor:
+                for pattern, key, item, config in discovered_hosts:
+                    self._log.debug(
+                        "discovered host: [pattern:%s, key:%s, item:%s, config:%s]", pattern, key, item, config
+                    )
+                    tags = self._collect_host_tags(item, self._check.config.tags)
+                    futures.append(executor.submit(self._collect_host_metrics, item, tags))
+                    futures.append(executor.submit(self._collect_role_metrics, item, tags))
+                    futures.append(executor.submit(self._collect_disk_metrics, item, tags))
+                    futures.append(executor.submit(self._collect_host_service_check, item, tags))
+            for future in futures:
+                future.result()
 
     @staticmethod
     def _collect_host_tags(host, custom_tags):
