@@ -118,6 +118,8 @@ def test_session_idle_and_killed(aggregator, integration_check, pg_instance):
     with postgres_conn.cursor() as cur:
         cur.execute("select pg_stat_reset();")
         cur.fetchall()
+    # Make sure the stats collector is updated
+    time.sleep(0.5)
 
     check = integration_check(pg_instance)
     check.check(pg_instance)
