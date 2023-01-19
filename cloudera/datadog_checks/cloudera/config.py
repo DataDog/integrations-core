@@ -3,16 +3,23 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 # Discovery class requires 'include' to be a dict, so this function is needed to normalize the config
-def normalize_config_clusters_include(log, clusters_config):
+def normalize_discover_config_include(log, clusters_config):
     config = {}
-    if clusters_config and clusters_config.include:
-        if not isinstance(clusters_config.include, list):
-            raise TypeError('Setting `include` must be an array')
-        for entry in clusters_config.include:
-            log.debug("entry: %s", type(entry))
-            if isinstance(entry, str):
-                config[entry] = None
-            elif isinstance(entry, dict):
-                for key, value in entry.items():
-                    config[key] = value.copy()
+    log.debug("normalize_config_clusters_include: %s", type(clusters_config))
+    include_list = (
+        clusters_config.get('include')
+        if isinstance(clusters_config, dict)
+        else clusters_config.include
+        if clusters_config
+        else []
+    )
+    log.debug("normalize_config_clusters_include: %s", include_list)
+    if not isinstance(include_list, list):
+        raise TypeError('Setting `include` must be an array')
+    for entry in include_list:
+        if isinstance(entry, str):
+            config[entry] = None
+        elif isinstance(entry, dict):
+            for key, value in entry.items():
+                config[key] = value.copy()
     return config

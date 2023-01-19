@@ -441,3 +441,32 @@ def test_given_cloudera_check_when_autodiscover_empty_clusters_then_emits_zero_c
 
         aggregator.assert_service_check('cloudera.can_connect', AgentCheck.OK, tags=CAN_CONNECT_TAGS)
         aggregator.assert_service_check('cloudera.cluster.health', AgentCheck.OK, tags=CLUSTER_1_HEALTH_TAGS, count=0)
+
+
+def test_autodiscover_hosts_configured_include_not_array_then_emits_critical_service(
+    aggregator,
+    dd_run_check,
+    cloudera_check,
+    instance_autodiscover_hosts_include_not_array,
+    cloudera_version_7_0_0,
+    list_two_clusters_with_one_tmp_resource,
+):
+    with mock.patch(
+        'cm_client.ClouderaManagerResourceApi.get_version',
+        return_value=cloudera_version_7_0_0,
+    ), mock.patch(
+        'cm_client.ClustersResourceApi.read_clusters',
+        return_value=list_two_clusters_with_one_tmp_resource,
+    ), mock.patch(
+        'cm_client.TimeSeriesResourceApi.query_time_series',
+        side_effect=get_timeseries_resource,
+    ):
+        check = cloudera_check(instance_autodiscover_hosts_include_not_array)
+        dd_run_check(check)
+
+        aggregator.assert_service_check(
+            'cloudera.can_connect',
+            AgentCheck.CRITICAL,
+            message='Cloudera check raised an exception: Setting `include` must be an array',
+            tags=CAN_CONNECT_TAGS,
+        )

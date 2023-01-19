@@ -16,14 +16,14 @@ from datadog_checks.cloudera.event import ClouderaEvent
 from datadog_checks.cloudera.metrics import NATIVE_METRICS, TIMESERIES_METRICS
 
 from .common import CLUSTER_HEALTH, HOST_HEALTH
-from .config import normalize_config_clusters_include
+from .config import normalize_discover_config_include
 
 
 class ApiClientV7(ApiClient):
     def __init__(self, check, api_client):
         super(ApiClientV7, self).__init__(check, api_client)
         self._log.debug("clusters config: %s", self._check.config.clusters)
-        config_clusters_include = normalize_config_clusters_include(self._log, self._check.config.clusters)
+        config_clusters_include = normalize_discover_config_include(self._log, self._check.config.clusters)
         self._log.debug("config_clusters_include: %s", config_clusters_include)
         if config_clusters_include:
             self._clusters_discovery = Discovery(
@@ -38,6 +38,7 @@ class ApiClientV7(ApiClient):
             )
         else:
             self._clusters_discovery = None
+        self._hosts_discovery = {}
 
     def collect_data(self):
         self._collect_clusters()
@@ -57,6 +58,7 @@ class ApiClientV7(ApiClient):
         # Use len(read_clusters_response.items) * 2 workers since
         # for each cluster, we are executing 2 tasks in parallel.
         if len(discovered_clusters) > 0:
+            futures = []
             with ThreadPoolExecutor(max_workers=len(discovered_clusters) * 2) as executor:
                 for pattern, key, item, config in discovered_clusters:
                     self._log.debug(
@@ -64,9 +66,11 @@ class ApiClientV7(ApiClient):
                     )
                     cluster_name = key
                     tags = self._collect_cluster_tags(item, self._check.config.tags)
-                    executor.submit(self._collect_cluster_metrics, cluster_name, tags)
-                    executor.submit(self._collect_hosts, cluster_name)
+                    futures.append(executor.submit(self._collect_cluster_metrics, cluster_name, tags))
+                    futures.append(executor.submit(self._collect_hosts, cluster_name, config))
                     self._collect_cluster_service_check(item, tags)
+            for future in futures:
+                future.result()
 
     def _collect_events(self):
         events_resource_api = cm_client.EventsResourceApi(self._api_client)
@@ -110,7 +114,24 @@ class ApiClientV7(ApiClient):
         query = f'SELECT {metric_names} WHERE clusterName="{cluster_name}" AND category=CLUSTER'
         self._query_time_series(query, tags=tags)
 
-    def _collect_hosts(self, cluster_name):
+    def _collect_hosts(self, cluster_name, config):
+        self._log.debug("Collecting hosts from '%s' cluster with config: %s", cluster_name, config)
+        config_hosts_include = normalize_discover_config_include(self._log, config.get('hosts') if config else None)
+        self._log.debug("config_hosts_include: %s", config_hosts_include)
+        # if config_clusters_include:
+        #     self._clusters_discovery = Discovery(
+        #         lambda: cm_client.ClustersResourceApi(self._api_client)
+        #             .read_clusters(cluster_type='any', view='full')
+        #             .items,
+        #         limit=self._check.config.clusters.limit,
+        #         include=config_clusters_include,
+        #         exclude=self._check.config.clusters.exclude,
+        #         interval=self._check.config.clusters.interval,
+        #         key=lambda cluster: cluster.name,
+        #     )
+        # else:
+        #     self._clusters_discovery = None
+
         clusters_resource_api = cm_client.ClustersResourceApi(self._api_client)
         list_hosts_response = clusters_resource_api.list_hosts(cluster_name, view='full')
         self._log.debug("Cloudera full hosts response:\n%s", list_hosts_response)

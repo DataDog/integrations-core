@@ -87,6 +87,11 @@ def instance_autodiscover_exclude():
 
 
 @pytest.fixture
+def instance_autodiscover_hosts_include_not_array():
+    return deepcopy(common.INSTANCE_AUTODISCOVER_HOSTS_INCLUDE_NOT_ARRAY)
+
+
+@pytest.fixture
 def init_config():
     return deepcopy(common.INIT_CONFIG)
 

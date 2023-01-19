@@ -38,7 +38,7 @@ INSTANCE_AUTODISCOVER_INCLUDE_WITH_ONE_ENTRY_DICT = {
     'clusters': {
         'include': [
             {
-                '^cluster.*': {'hosts': {}},
+                '^cluster.*': {},
             },
         ],
     },
@@ -50,8 +50,8 @@ INSTANCE_AUTODISCOVER_INCLUDE_WITH_TWO_ENTRIES_DICT = {
     'clusters': {
         'include': [
             {
-                '^cluster.*': {'hosts': {}},
-                '^tmp.*': {'hosts': {}},
+                '^cluster.*': {},
+                '^tmp.*': {},
             },
         ],
     },
@@ -77,6 +77,24 @@ INSTANCE_AUTODISCOVER_EXCLUDE = {
             },
         ],
         'exclude': ['^tmp.*'],
+    },
+}
+
+INSTANCE_AUTODISCOVER_HOSTS_INCLUDE_NOT_ARRAY = {
+    'api_url': 'http://localhost:8080/api/v48/',
+    'tags': ['test1'],
+    'clusters': {
+        'include': [
+            {
+                '^cluster.*': {
+                    'hosts': {
+                        'include': {
+                            '^host.*',
+                        },
+                    }
+                }
+            }
+        ],
     },
 }
 
