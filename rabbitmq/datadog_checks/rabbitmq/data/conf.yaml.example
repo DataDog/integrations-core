@@ -164,7 +164,7 @@ instances:
         ##   - If the field is left unspecified, we don't use any endpoint.
         ##   - "per-object" means we use the /metrics/per-object endpoint
         ##   - "detailed" means we use the /metrics/detailed endpoint.
-        ##     Note that you can also provide a query for this option, exactly as if you were making an HTTP request
+        ##     You can also provide a query for this option, exactly as if you were making an HTTP request
         ##     to this endpoint.
         #
         # unaggregated_endpoint: detailed
