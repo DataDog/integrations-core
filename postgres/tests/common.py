@@ -110,8 +110,7 @@ def check_common_metrics(aggregator, expected_tags, count=1):
         for name in COMMON_METRICS:
             aggregator.assert_metric(name, count=count, tags=db_tags)
         if POSTGRES_VERSION is None or float(POSTGRES_VERSION) >= 14.0:
-            for metrics in NEWER_14_METRICS.values():
-                metric_name = metrics[0]
+            for (metric_name, _) in NEWER_14_METRICS.values():
                 aggregator.assert_metric(metric_name, count=count, tags=db_tags)
 
 
