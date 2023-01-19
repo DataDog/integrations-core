@@ -28,14 +28,13 @@ def test_rabbitmq_e2e(dd_agent_check):
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
-# TODO uncomment this to add openmetrics e2e test
-# @pytest.mark.skipif(
-#     common.RABBITMQ_VERSION < version.parse("3.8"), reason="Test openmetrics check on rabbitmq versions >= 3.8"
-# )
-# @pytest.mark.e2e
-# def test_rabbitmq_e2e_openmetrics(dd_agent_check):
-#     aggregator = dd_agent_check(common.OPENMETRICS_CONFIG)
-#     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+@pytest.mark.skipif(
+    common.RABBITMQ_VERSION < version.parse("3.8"), reason="Test openmetrics check only on rabbitmq versions >= 3.8"
+)
+@pytest.mark.e2e
+def test_rabbitmq_e2e_openmetrics(dd_agent_check):
+    aggregator = dd_agent_check(common.OPENMETRICS_CONFIG)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 @pytest.mark.integration
