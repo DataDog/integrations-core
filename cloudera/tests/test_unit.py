@@ -234,10 +234,10 @@ def test_given_cloudera_check_when_no_events_response_then_no_event_collection(
         aggregator.assert_event(msg_text=expected_content, count=0)
 
 
-def test_autodiscover_configured_include_not_array_then_exception_is_raised(
+def test_autodiscover_clusters_configured_include_not_array_then_exception_is_raised(
     dd_run_check,
     cloudera_check,
-    instance_autodiscover_include_not_array,
+    instance_autodiscover_clusters_include_not_array,
     cloudera_version_7_0_0,
 ):
     with mock.patch(
@@ -247,7 +247,7 @@ def test_autodiscover_configured_include_not_array_then_exception_is_raised(
         Exception,
         match='Setting `include` must be an array',
     ):
-        check = cloudera_check(instance_autodiscover_include_not_array)
+        check = cloudera_check(instance_autodiscover_clusters_include_not_array)
         dd_run_check(check)
 
 

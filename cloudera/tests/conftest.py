@@ -62,8 +62,8 @@ def instance_bad_url():
 
 
 @pytest.fixture
-def instance_autodiscover_include_not_array():
-    return deepcopy(common.INSTANCE_AUTODISCOVER_INCLUDE_NOT_ARRAY)
+def instance_autodiscover_clusters_include_not_array():
+    return deepcopy(common.INSTANCE_AUTODISCOVER_CLUSTERS_INCLUDE_NOT_ARRAY)
 
 
 @pytest.fixture

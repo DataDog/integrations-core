@@ -21,7 +21,7 @@ INSTANCE_BAD_URL = {
     'tags': ['test1'],
 }
 
-INSTANCE_AUTODISCOVER_INCLUDE_NOT_ARRAY = {
+INSTANCE_AUTODISCOVER_CLUSTERS_INCLUDE_NOT_ARRAY = {
     'api_url': 'http://localhost:8080/api/v48/',
     'tags': ['test1'],
     'clusters': {
