@@ -1,0 +1,37 @@
+# TYPE rabbitmq_detailed_queue_messages_ready gauge
+# HELP rabbitmq_detailed_queue_messages_ready Messages ready to be delivered to consumers
+rabbitmq_detailed_queue_messages_ready{vhost="/",queue="queue3"} 0
+rabbitmq_detailed_queue_messages_ready{vhost="/",queue="queue1"} 0
+rabbitmq_detailed_queue_messages_ready{vhost="/",queue="queue2"} 1
+# TYPE rabbitmq_detailed_queue_messages_unacked gauge
+# HELP rabbitmq_detailed_queue_messages_unacked Messages delivered to consumers but not yet acknowledged
+rabbitmq_detailed_queue_messages_unacked{vhost="/",queue="queue3"} 0
+rabbitmq_detailed_queue_messages_unacked{vhost="/",queue="queue1"} 0
+rabbitmq_detailed_queue_messages_unacked{vhost="/",queue="queue2"} 0
+# TYPE rabbitmq_detailed_queue_messages gauge
+# HELP rabbitmq_detailed_queue_messages Sum of ready and unacknowledged messages - total queue depth
+rabbitmq_detailed_queue_messages{vhost="/",queue="queue3"} 0
+rabbitmq_detailed_queue_messages{vhost="/",queue="queue1"} 0
+rabbitmq_detailed_queue_messages{vhost="/",queue="queue2"} 1
+# TYPE rabbitmq_detailed_queue_process_reductions_total counter
+# HELP rabbitmq_detailed_queue_process_reductions_total Total number of queue process reductions
+rabbitmq_detailed_queue_process_reductions_total{vhost="/",queue="queue3"} 35146
+rabbitmq_detailed_queue_process_reductions_total{vhost="/",queue="queue1"} 30773
+rabbitmq_detailed_queue_process_reductions_total{vhost="/",queue="queue2"} 30466
+# TYPE rabbitmq_build_info untyped
+# HELP rabbitmq_build_info RabbitMQ & Erlang/OTP version info
+rabbitmq_build_info{rabbitmq_version="3.11.3",prometheus_plugin_version="3.11.3",prometheus_client_version="4.9.1",erlang_version="25.1.2"} 1
+# TYPE rabbitmq_identity_info untyped
+# HELP rabbitmq_identity_info RabbitMQ node & cluster identity info
+rabbitmq_identity_info{rabbitmq_node="rabbit@54cfac2199f1",rabbitmq_cluster="rabbit@54cfac2199f1",rabbitmq_cluster_permanent_id="rabbitmq-cluster-id-cyw_z6c4UMIBoK51iVq9rw"} 1
+# TYPE telemetry_scrape_encoded_size_bytes summary
+# HELP telemetry_scrape_encoded_size_bytes Scrape size, encoded
+# TYPE telemetry_scrape_duration_seconds summary
+# HELP telemetry_scrape_duration_seconds Scrape duration
+telemetry_scrape_duration_seconds_count{registry="detailed",content_type="text/plain; version=0.0.4"} 5
+telemetry_scrape_duration_seconds_sum{registry="detailed",content_type="text/plain; version=0.0.4"} 0.008101946
+# TYPE telemetry_scrape_size_bytes summary
+# HELP telemetry_scrape_size_bytes Scrape size, not encoded
+telemetry_scrape_size_bytes_count{registry="detailed",content_type="text/plain; version=0.0.4"} 5
+telemetry_scrape_size_bytes_sum{registry="detailed",content_type="text/plain; version=0.0.4"} 13684
+
