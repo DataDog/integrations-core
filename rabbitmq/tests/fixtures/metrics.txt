@@ -488,8 +488,12 @@ rabbitmq_global_messages_unroutable_returned_total{protocol="amqp091"} 0
 rabbitmq_global_publishers{protocol="amqp091"} 1
 # TYPE telemetry_scrape_size_bytes summary
 # HELP telemetry_scrape_size_bytes Scrape size, not encoded
+telemetry_scrape_size_bytes_count{registry="default",content_type="text/plain; version=0.0.4"} 1
+telemetry_scrape_size_bytes_sum{registry="default",content_type="text/plain; version=0.0.4"} 114834
 # TYPE telemetry_scrape_duration_seconds summary
 # HELP telemetry_scrape_duration_seconds Scrape duration
+telemetry_scrape_duration_seconds_count{registry="default",content_type="text/plain; version=0.0.4"} 1
+telemetry_scrape_duration_seconds_sum{registry="default",content_type="text/plain; version=0.0.4"} 0.022238
 # TYPE telemetry_scrape_encoded_size_bytes summary
 # HELP telemetry_scrape_encoded_size_bytes Scrape size, encoded
 telemetry_scrape_encoded_size_bytes_count{registry="per-object",content_type="text/plain; version=0.0.4",encoding="identity"} 1

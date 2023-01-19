@@ -1,6 +1,6 @@
 from datadog_checks.base import OpenMetricsBaseCheckV2
 
-from .metrics import METRICS_RENAMES
+from . import metrics
 
 
 class RabbitMQOpenMetrics(OpenMetricsBaseCheckV2):
@@ -9,5 +9,5 @@ class RabbitMQOpenMetrics(OpenMetricsBaseCheckV2):
     def configure_scrapers(self):
         self.instance['openmetrics_endpoint'] = self.instance['prometheus_plugin']['url'] + "/metrics"
         self.scraper_configs.clear()
-        self.scraper_configs.append({**self.instance, 'metrics': [METRICS_RENAMES]})
+        self.scraper_configs.append({**self.instance, 'metrics': [metrics.RENAME_RABBITMQ_TO_DATADOG]})
         super().configure_scrapers()
