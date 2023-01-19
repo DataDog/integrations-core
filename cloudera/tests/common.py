@@ -89,7 +89,7 @@ HERE = get_here()
 COMPOSE_FILE = os.path.join(HERE, 'docker', 'docker-compose.yaml')
 
 CAN_CONNECT_TAGS = [
-    'api_url=http://localhost:8080/api/v48/',
+    'api_url:http://localhost:8080/api/v48/',
     'test1',
 ]
 CLUSTER_1_HEALTH_TAGS = [
