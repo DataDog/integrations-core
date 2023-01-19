@@ -93,6 +93,7 @@ def test_detailed_endpoint(endpoint, fixture_file, expected_metrics, aggregator,
         aggregator.assert_metric(m)
 
     for m in set(DEFAULT_OPENMETRICS).difference(expected_metrics):
+        # We check that all metrics that are not in the query don't show up at all.
         aggregator.assert_metric(m, at_least=0)
     aggregator.assert_metric('rabbitmq.build_info', tags=[OM_ENDPOINT_TAG + f"/{endpoint}"] + BUILD_INFO_TAGS)
     aggregator.assert_metric('rabbitmq.identity_info', tags=[OM_ENDPOINT_TAG + f"/{endpoint}"] + IDENTITY_INFO_TAGS)
