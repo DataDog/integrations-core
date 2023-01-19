@@ -2,6 +2,9 @@ from itertools import product
 from pathlib import Path
 
 from datadog_checks.dev.utils import get_metadata_metrics
+import pytest
+
+from datadog_checks.dev.http import MockResponse
 from datadog_checks.rabbitmq import RabbitMQ
 
 from .common import DEFAULT_OM_TAGS, HERE
@@ -255,3 +258,83 @@ def test_per_object(aggregator, dd_run_check, mock_http_response):
             "tags": ["endpoint:localhost:15692/metrics/per-object"] + m.get('tags', []),
         }
         aggregator.assert_metric(**kwargs)
+
+
+def mock_http_responses(url, **_params):
+    from urllib.parse import urlparse
+
+    parsed = urlparse(url)
+    fname = {
+        '/metrics': 'metrics.txt',
+        '/metrics/per-object': 'per-object.txt',
+        '/metrics/detailed?family=queue_consumer_count': 'detailed-queue_consumer_count.txt',
+        '/metrics/detailed?family=queue_consumer_count&vhost=test': 'detailed-queue_consumer_count.txt',
+        '/metrics/detailed?family=queue_consumer_count&family=queue_coarse_metrics': 'detailed-queue_coarse_metrics-queue_consumer_count.txt',  # noqa: E501
+    }[parsed.path + (f"?{parsed.query}" if parsed.query else "")]
+    with open(OPENMETRICS_RESPONSE_FIXTURES / fname) as fh:
+        return MockResponse(content=fh.read())
+
+
+@pytest.mark.parametrize(
+    'query, metrics',
+    [
+        pytest.param('family=queue_consumer_count', ['rabbitmq.queue.consumers'], id='one metric family'),
+        pytest.param(
+            'family=queue_consumer_count&vhost=test',
+            ['rabbitmq.queue.consumers'],
+            id='one metric family with vhost query',
+        ),
+        pytest.param(
+            'family=queue_consumer_count&family=queue_coarse_metrics',
+            [
+                'rabbitmq.queue.consumers',
+                'rabbitmq.queue.messages',
+                'rabbitmq.queue.messages.ready',
+                'rabbitmq.queue.messages.unacked',
+                'rabbitmq.queue.process_reductions.count',
+            ],
+            id="two metric families",
+        ),
+    ],
+)
+def test_aggregated_and_detailed_endpoints(query, metrics, aggregator, dd_run_check, mocker):
+    """Detailed and aggregated endpoints queried together.
+
+    We will drop duplicate metrics coming from both endpoints in favor of the
+    detailed ones as they can provide more information.
+    """
+    detailed_ep = f'detailed?{query}'
+    check = RabbitMQ(
+        "rabbitmq",
+        {},
+        [
+            {
+                'prometheus_plugin': {
+                    'url': "http://localhost:15692",
+                    'unaggregated_endpoint': detailed_ep,
+                    'include_aggregated_endpoint': True,
+                },
+            }
+        ],
+    )
+    mocker.patch('requests.get', wraps=mock_http_responses)
+    dd_run_check(check)
+
+    for m in metrics:
+        aggregator.assert_metric_has_tag(
+            m,
+            f'endpoint:http://localhost:15692/metrics/{detailed_ep}',
+        )
+        # Here we want to make sure that we don't collect the equivalent metrics from
+        # the aggregated endpoint.
+        aggregator.assert_metric_has_tag(
+            m,
+            'endpoint:http://localhost:15692/metrics',
+            count=0,
+            at_least=0,
+        )
+
+    # Identity and build info metrics should come from both endpoints.
+    for m in ['rabbitmq.build_info', 'rabbitmq.identity_info']:
+        aggregator.assert_metric_has_tag(m, f'endpoint:http://localhost:15692/metrics/{detailed_ep}', count=1)
+        aggregator.assert_metric_has_tag(m, 'endpoint:http://localhost:15692/metrics', count=1)
