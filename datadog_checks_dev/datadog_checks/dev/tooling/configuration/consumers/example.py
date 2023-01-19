@@ -192,7 +192,9 @@ def write_option(option, writer, indent='', start_list=False):
                 for idx, instance in enumerate(option['options']):
                     if idx == 0:
                         start_list = True
-                    write_sub_option(instance, writer, indent, multiple, include_top_description=True, start_list=start_list)
+                    write_sub_option(
+                        instance, writer, indent, multiple, include_top_description=True, start_list=start_list
+                    )
             else:
                 write_sub_option(option, writer, indent, multiple)
 
