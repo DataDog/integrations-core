@@ -40,7 +40,7 @@ text = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
-    "paramiko==2.11.0",
+    "paramiko==2.12.0",
 ]
 
 [project.urls]
