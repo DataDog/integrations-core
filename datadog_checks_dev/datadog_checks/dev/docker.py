@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-# Comment to trigger pipeline
 import os
 from contextlib import contextmanager
 from typing import Iterator
