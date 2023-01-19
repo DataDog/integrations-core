@@ -33,7 +33,7 @@ from .common import (
     check_wal_receiver_metrics,
     requires_static_version,
 )
-from .utils import requires_over_10
+from .utils import requires_over_10, requires_over_14
 
 CONNECTION_METRICS = ['postgresql.max_connections', 'postgresql.percent_usage_connections']
 
@@ -87,6 +87,7 @@ def _get_conn(user=USER, db=DB_NAME, application_name='test'):
     return conn
 
 
+@requires_over_14
 def test_session_number(aggregator, integration_check, pg_instance):
     check = integration_check(pg_instance)
     check.check(pg_instance)
@@ -110,6 +111,7 @@ def test_session_number(aggregator, integration_check, pg_instance):
     aggregator.assert_metric('postgresql.sessions.count', value=session_number + 1, count=1, tags=expected_tags)
 
 
+@requires_over_14
 def test_session_idle_and_killed(aggregator, integration_check, pg_instance):
     check = integration_check(pg_instance)
     check.check(pg_instance)
