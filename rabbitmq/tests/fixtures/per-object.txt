@@ -1343,16 +1343,22 @@ rabbitmq_io_sync_time_seconds_total 0.0
 rabbitmq_io_seek_time_seconds_total 0.0
 # TYPE rabbitmq_raft_term_total counter
 # HELP rabbitmq_raft_term_total Current Raft term number
+rabbitmq_raft_term_total 0
 # TYPE rabbitmq_raft_log_snapshot_index gauge
 # HELP rabbitmq_raft_log_snapshot_index Raft log snapshot index
+rabbitmq_raft_log_snapshot_index 0
 # TYPE rabbitmq_raft_log_last_applied_index gauge
 # HELP rabbitmq_raft_log_last_applied_index Raft log last applied index
+rabbitmq_raft_log_last_applied_index 0
 # TYPE rabbitmq_raft_log_commit_index gauge
 # HELP rabbitmq_raft_log_commit_index Raft log commit index
+rabbitmq_raft_log_commit_index 0
 # TYPE rabbitmq_raft_log_last_written_index gauge
 # HELP rabbitmq_raft_log_last_written_index Raft log last written index
+rabbitmq_raft_log_last_written_index 0
 # TYPE rabbitmq_raft_entry_commit_latency_seconds gauge
 # HELP rabbitmq_raft_entry_commit_latency_seconds Time taken for a log entry to be committed
+rabbitmq_raft_entry_commit_latency_seconds 0.0
 # TYPE rabbitmq_auth_attempts_total counter
 # HELP rabbitmq_auth_attempts_total Total number of authorization attempts
 rabbitmq_auth_attempts_total{protocol="amqp091"} 1
@@ -1687,8 +1693,13 @@ rabbitmq_global_messages_unroutable_returned_total{protocol="amqp091"} 0
 rabbitmq_global_publishers{protocol="amqp091"} 1
 # TYPE telemetry_scrape_size_bytes summary
 # HELP telemetry_scrape_size_bytes Scrape size, not encoded
+telemetry_scrape_size_bytes_count{registry="default",content_type="text/plain; version=0.0.4"} 1
+telemetry_scrape_size_bytes_sum{registry="default",content_type="text/plain; version=0.0.4"} 114834
 # TYPE telemetry_scrape_duration_seconds summary
 # HELP telemetry_scrape_duration_seconds Scrape duration
+telemetry_scrape_duration_seconds_count{registry="default",content_type="text/plain; version=0.0.4"} 1
+telemetry_scrape_duration_seconds_sum{registry="default",content_type="text/plain; version=0.0.4"} 0.022238
 # TYPE telemetry_scrape_encoded_size_bytes summary
 # HELP telemetry_scrape_encoded_size_bytes Scrape size, encoded
-
+telemetry_scrape_encoded_size_bytes_count{registry="per-object",content_type="text/plain; version=0.0.4",encoding="identity"} 1
+telemetry_scrape_encoded_size_bytes_sum{registry="per-object",content_type="text/plain; version=0.0.4",encoding="identity"} 131800
