@@ -59,6 +59,7 @@ class ApiClientV7(ApiClient):
         # Use len(read_clusters_response.items) * 2 workers since
         # for each cluster, we are executing 2 tasks in parallel.
         if len(discovered_clusters) > 0:
+            futures = []
             with ThreadPoolExecutor(max_workers=len(discovered_clusters) * 2) as executor:
                 for pattern, key, item, config in discovered_clusters:
                     self._log.debug(
@@ -66,9 +67,11 @@ class ApiClientV7(ApiClient):
                     )
                     cluster_name = key
                     tags = self._collect_cluster_tags(item, self._check.config.tags)
-                    executor.submit(self._collect_cluster_metrics, cluster_name, tags)
-                    executor.submit(self._collect_hosts, cluster_name)
+                    futures.append(executor.submit(self._collect_cluster_metrics, cluster_name, tags))
+                    futures.append(executor.submit(self._collect_hosts, cluster_name))
                     self._collect_cluster_service_check(item, tags)
+            for future in futures:
+                future.result()
 
     def _collect_events(self):
         events_resource_api = cm_client.EventsResourceApi(self._api_client)
@@ -119,13 +122,17 @@ class ApiClientV7(ApiClient):
 
         # Use len(list_hosts_response.items) * 4 workers since
         # for each host, we are executing 4 tasks in parallel.
-        with ThreadPoolExecutor(max_workers=len(list_hosts_response.items) * 4) as executor:
-            for host in list_hosts_response.items:
-                tags = self._collect_host_tags(host, self._check.config.tags)
-                executor.submit(self._collect_host_metrics, host, tags)
-                executor.submit(self._collect_role_metrics, host, tags)
-                executor.submit(self._collect_disk_metrics, host, tags)
-                executor.submit(self._collect_host_service_check, host, tags)
+        if len(list_hosts_response.items) > 0:
+            futures = []
+            with ThreadPoolExecutor(max_workers=len(list_hosts_response.items) * 4) as executor:
+                for host in list_hosts_response.items:
+                    tags = self._collect_host_tags(host, self._check.config.tags)
+                    futures.append(executor.submit(self._collect_host_metrics, host, tags))
+                    futures.append(executor.submit(self._collect_role_metrics, host, tags))
+                    futures.append(executor.submit(self._collect_disk_metrics, host, tags))
+                    futures.append(executor.submit(self._collect_host_service_check, host, tags))
+            for future in futures:
+                future.result()
 
     @staticmethod
     def _collect_host_tags(host, custom_tags):
@@ -151,9 +158,12 @@ class ApiClientV7(ApiClient):
 
     def _collect_host_metrics(self, host, tags):
         # Use 2 workers since we are executing 2 tasks in parallel.
+        futures = []
         with ThreadPoolExecutor(max_workers=2) as executor:
-            executor.submit(self._collect_host_native_metrics, host, tags)
-            executor.submit(self._collect_host_timeseries_metrics, host, tags)
+            futures.append(executor.submit(self._collect_host_native_metrics, host, tags))
+            futures.append(executor.submit(self._collect_host_timeseries_metrics, host, tags))
+        for future in futures:
+            future.result()
 
     def _collect_host_native_metrics(self, host, tags):
         for metric in NATIVE_METRICS['host']:
