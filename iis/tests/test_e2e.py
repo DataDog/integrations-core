@@ -2,10 +2,11 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-import pytest
-import subprocess
-import six
 import socket
+import subprocess
+
+import pytest
+import six
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.dev.utils import get_active_env
@@ -52,9 +53,13 @@ def run_command(command):
     Run a command in the docker container being used for E2E tests
     """
     container_name = 'dd_{}_{}'.format(CHECK_NAME, get_active_env())
-    result = subprocess.check_output(
-        ['docker', 'exec', container_name] + command,
-    ).decode().strip()
+    result = (
+        subprocess.check_output(
+            ['docker', 'exec', container_name] + command,
+        )
+        .decode()
+        .strip()
+    )
     return result
 
 
@@ -73,7 +78,17 @@ def stop_iis():
     sites = ['Default Web Site']
 
     for app_pool in app_pools:
-        run_command(['powershell.exe', '-Command', 'if((Get-WebAppPoolState -Name "{app_pool}").Value -ne "Stopped") {{ Stop-WebAppPool -Name "{app_pool}" }}'.format(app_pool=app_pool)])
+        run_command(
+            [
+                'powershell.exe',
+                '-Command',
+                (
+                    'if((Get-WebAppPoolState -Name "{app_pool}").Value -ne "Stopped") {{'
+                    + ' Stop-WebAppPool -Name "{app_pool}"'
+                    + '}}'
+                ).format(app_pool=app_pool),
+            ]
+        )
     for site in sites:
         run_command(['powershell.exe', '-Command', 'Stop-IISSite -Name "{}" -Confirm:$false'.format(site)])
 
@@ -96,7 +111,10 @@ def test_service_checks(dd_agent_check, aggregator, instance, iis_host):
     for namespace, status, values in namespace_data:
         for value in values:
             aggregator.assert_service_check(
-                'iis.{}_up'.format(namespace), status, tags=normalize_tags(['{}:{}'.format(namespace, value), iis_host]), count=1
+                'iis.{}_up'.format(namespace),
+                status,
+                tags=normalize_tags(['{}:{}'.format(namespace, value), iis_host]),
+                count=1,
             )
 
 
@@ -125,7 +143,9 @@ def test_app_pool_status_running(dd_agent_check, aggregator, instance, iis_host)
 
     value = IIS_APPLICATION_POOL_STATE['Running']
     assert value == 3
-    aggregator.assert_metric('iis.app_pool.state', value=value, tags=normalize_tags(['app_pool:DefaultAppPool', iis_host]))
+    aggregator.assert_metric(
+        'iis.app_pool.state', value=value, tags=normalize_tags(['app_pool:DefaultAppPool', iis_host])
+    )
 
 
 @pytest.mark.e2e
@@ -140,4 +160,6 @@ def test_app_pool_status_stopped(dd_agent_check, aggregator, instance, iis_host)
 
     value = IIS_APPLICATION_POOL_STATE['Disabled']
     assert value == 5
-    aggregator.assert_metric('iis.app_pool.state', value=value, tags=normalize_tags(['app_pool:DefaultAppPool', iis_host]))
+    aggregator.assert_metric(
+        'iis.app_pool.state', value=value, tags=normalize_tags(['app_pool:DefaultAppPool', iis_host])
+    )

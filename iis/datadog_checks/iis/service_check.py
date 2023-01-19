@@ -13,7 +13,7 @@ IIS_APPLICATION_POOL_STATE = {
     'Disabling': 4,
     'Disabled': 5,
     'Shutdown Pending': 6,
-    'Delete Pending': 7
+    'Delete Pending': 7,
 }
 # Add int -> string mapping to the dict
 IIS_APPLICATION_POOL_STATE.update({v: k for k, v in IIS_APPLICATION_POOL_STATE.items()})

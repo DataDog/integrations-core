@@ -6,7 +6,7 @@ from datadog_checks.base.checks.windows.perf_counters.counter import PerfObject
 from datadog_checks.base.constants import ServiceCheck
 
 from .metrics import METRICS_CONFIG
-from .service_check import site_service_check, app_pool_service_check
+from .service_check import app_pool_service_check, site_service_check
 
 
 class IISCheckV2(PerfCountersBaseCheckWithLegacySupport):
@@ -139,9 +139,7 @@ class CompatibilityPerfObject(PerfObject):
             # Submit the counter's value as a metric
             gauge_method(metric_name, value, tags=tags)
             # Submit a service check
-            service_check_method(
-                self.instance_service_check_name, status, tags=tags
-            )
+            service_check_method(self.instance_service_check_name, status, tags=tags)
 
         del check
         del modifiers

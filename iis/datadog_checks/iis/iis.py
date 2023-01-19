@@ -5,7 +5,7 @@ from six import PY3, iteritems
 
 from datadog_checks.base import PDHBaseCheck, is_affirmative
 
-from .service_check import site_service_check, app_pool_service_check
+from .service_check import app_pool_service_check, site_service_check
 
 DEFAULT_COUNTERS = [
     ["Web Service", None, "Service Uptime", "iis.uptime", "gauge"],
@@ -42,6 +42,7 @@ DEFAULT_COUNTERS = [
 ]
 
 TOTAL_INSTANCE = '_Total'
+
 
 class IIS(PDHBaseCheck):
     SITE = 'site'

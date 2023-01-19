@@ -17,7 +17,8 @@ def dd_environment():
         'start_commands': [
             # Install IIS
             'powershell.exe -Command Add-WindowsFeature Web-Server'
-        ]}
+        ],
+    }
 
 
 @pytest.fixture
