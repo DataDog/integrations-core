@@ -32,6 +32,10 @@ _COUNTS = {
     "rabbitmq_auth_attempts_failed_total": "auth_attempts.failed",
     "rabbitmq_auth_attempts_succeeded_total": "auth_attempts.succeeded",
     "rabbitmq_auth_attempts_total": "auth_attempts",
+    # The detailed endpoint exposes the same authorization metrics but split by tag and with slightly different names.
+    "rabbitmq_auth_attempts_detailed_failed_total": "auth_attempts.failed",
+    "rabbitmq_auth_attempts_detailed_succeeded_total": "auth_attempts.succeeded",
+    "rabbitmq_auth_attempts_detailed_total": "auth_attempts",
     "rabbitmq_channel_get_ack_total": "channel.get.ack",
     "rabbitmq_channel_get_empty_total": "channel.get.empty",
     "rabbitmq_channel_get_total": "channel.get",
@@ -221,6 +225,9 @@ _GAUGES = {
     "rabbitmq_raft_log_last_written_index": "raft.log.last_written_index",
     "rabbitmq_raft_log_snapshot_index": "raft.log.snapshot_index",
     "rabbitmq_resident_memory_limit_bytes": "resident_memory_limit_bytes",
+}
+# We submit these metrics as gauges so that we have access to their tags.
+_INFO = {
     "rabbitmq_build_info": {
         'name': 'build_info',
         "type": 'gauge',
@@ -236,4 +243,189 @@ _SUMMARIES = {
     "telemetry_scrape_size_bytes": "telemetry.scrape.size_bytes",
 }
 
-RENAME_RABBITMQ_TO_DATADOG = {**{re.sub("_total$", "", k): v for k, v in _COUNTS.items()}, **_GAUGES, **_SUMMARIES}
+_RENAME_RABBITMQ_TO_DATADOG = {
+    **{re.sub("_total$", "", k): v for k, v in _COUNTS.items()},
+    **_GAUGES,
+    **_SUMMARIES,
+    **_INFO,
+}
+
+_DETAILED_FAMILIES = {
+    # Generic metrics
+    "connection_churn_metrics": {
+        "rabbitmq_connections_opened_total",
+        "rabbitmq_connections_closed_total",
+        "rabbitmq_channels_opened_total",
+        "rabbitmq_channels_closed_total",
+        "rabbitmq_queues_declared_total",
+        "rabbitmq_queues_created_total",
+        "rabbitmq_queues_deleted_total",
+    },
+    "node_coarse_metrics": {
+        "rabbitmq_process_open_fds",
+        "rabbitmq_process_open_tcp_sockets",
+        "rabbitmq_process_resident_memory_bytes",
+        "rabbitmq_disk_space_available_bytes",
+        "rabbitmq_erlang_processes_used",
+        "rabbitmq_erlang_gc_runs_total",
+        "rabbitmq_erlang_gc_reclaimed_bytes_total",
+        "rabbitmq_erlang_scheduler_context_switches_total",
+    },
+    "node_metrics": {
+        "rabbitmq_process_max_fds",
+        "rabbitmq_process_max_tcp_sockets",
+        "rabbitmq_resident_memory_limit_bytes",
+        "rabbitmq_disk_space_available_limit_bytes",
+        "rabbitmq_erlang_processes_limit",
+        "rabbitmq_erlang_scheduler_run_queue",
+        "rabbitmq_erlang_net_ticktime_seconds",
+        "rabbitmq_erlang_uptime_seconds",
+    },
+    "node_persister_metrics": {
+        "rabbitmq_io_read_ops_total",
+        "rabbitmq_io_read_bytes_total",
+        "rabbitmq_io_write_ops_total",
+        "rabbitmq_io_write_bytes_total",
+        "rabbitmq_io_sync_ops_total",
+        "rabbitmq_io_seek_ops_total",
+        "rabbitmq_io_reopen_ops_total",
+        "rabbitmq_schema_db_ram_tx_total",
+        "rabbitmq_schema_db_disk_tx_total",
+        "rabbitmq_msg_store_read_total",
+        "rabbitmq_msg_store_write_total",
+        "rabbitmq_queue_index_read_ops_total",
+        "rabbitmq_queue_index_write_ops_total",
+        "rabbitmq_io_read_time_seconds_total",
+        "rabbitmq_io_write_time_seconds_total",
+        "rabbitmq_io_sync_time_seconds_total",
+        "rabbitmq_io_seek_time_seconds_total",
+    },
+    "ra_metrics": {
+        "rabbitmq_raft_term_total",
+        "rabbitmq_raft_log_snapshot_index",
+        "rabbitmq_raft_log_last_applied_index",
+        "rabbitmq_raft_log_commit_index",
+        "rabbitmq_raft_log_last_written_index",
+        "rabbitmq_raft_entry_commit_latency_seconds",
+    },
+    "auth_attempt_metrics": {
+        "rabbitmq_auth_attempts_total",
+        "rabbitmq_auth_attempts_succeeded_total",
+        "rabbitmq_auth_attempts_failed_total",
+    },
+    # NOTE: These names are not what's in the docs, instead they exclude the
+    # same aggergated metrics as the `auth_attempt_metrics` family.
+    "auth_attempt_detailed_metrics": {
+        "rabbitmq_auth_attempts_total",
+        "rabbitmq_auth_attempts_succeeded_total",
+        "rabbitmq_auth_attempts_failed_total",
+    },
+    # Queue Metrics
+    "queue_coarse_metrics": {
+        'rabbitmq_queue_messages',
+        'rabbitmq_queue_messages_ready',
+        'rabbitmq_queue_process_reductions_total',
+        'rabbitmq_queue_messages_unacked',
+    },
+    'queue_consumer_count': {"rabbitmq_queue_consumers"},
+    "queue_metrics": {
+        "rabbitmq_queue_consumers",
+        "rabbitmq_queue_consumer_capacity",
+        "rabbitmq_queue_consumer_utilisation",
+        "rabbitmq_queue_process_memory_bytes",
+        "rabbitmq_queue_messages_ram",
+        "rabbitmq_queue_messages_ram_bytes",
+        "rabbitmq_queue_messages_ready_ram",
+        "rabbitmq_queue_messages_unacked_ram",
+        "rabbitmq_queue_messages_persistent",
+        "rabbitmq_queue_messages_persistent_bytes",
+        "rabbitmq_queue_messages_bytes",
+        "rabbitmq_queue_messages_ready_bytes",
+        "rabbitmq_queue_messages_unacked_bytes",
+        "rabbitmq_queue_messages_paged_out",
+        "rabbitmq_queue_messages_paged_out_bytes",
+        "rabbitmq_queue_head_message_timestamp",
+        "rabbitmq_queue_disk_reads_total",
+        "rabbitmq_queue_disk_writes_total",
+    },
+    # Connection/channel metrics
+    "connection_coarse_metrics": {
+        "rabbitmq_connection_incoming_bytes_total",
+        "rabbitmq_connection_outgoing_bytes_total",
+        "rabbitmq_connection_process_reductions_total",
+    },
+    "connection_metrics": {
+        "rabbitmq_connection_incoming_packets_total",
+        "rabbitmq_connection_outgoing_packets_total",
+        "rabbitmq_connection_pending_packets",
+        "rabbitmq_connection_channels",
+    },
+    "channel_metrics": {
+        "rabbitmq_channel_consumers",
+        "rabbitmq_channel_messages_unacked",
+        "rabbitmq_channel_messages_unconfirmed",
+        "rabbitmq_channel_messages_uncommitted",
+        "rabbitmq_channel_acks_uncommitted",
+        "rabbitmq_consumer_prefetch",
+        "rabbitmq_channel_prefetch",
+    },
+    "channel_process_metrics": {"rabbitmq_channel_process_reductions_total"},
+    "channel_exchange_metrics": {
+        "rabbitmq_channel_messages_published_total",
+        "rabbitmq_channel_messages_confirmed_total",
+        "rabbitmq_channel_messages_unroutable_returned_total",
+        "rabbitmq_channel_messages_unroutable_dropped_total",
+    },
+    "channel_queue_metrics": {
+        "rabbitmq_channel_get_ack_total",
+        "rabbitmq_channel_get_total",
+        "rabbitmq_channel_messages_delivered_ack_total",
+        "rabbitmq_channel_messages_delivered_total",
+        "rabbitmq_channel_messages_redelivered_total",
+        "rabbitmq_channel_messages_acked_total",
+        "rabbitmq_channel_get_empty_total",
+    },
+    "channel_queue_exchange_metrics": {"rabbitmq_queue_messages_published_total"},
+    # Virtual hosts and exchange metrics
+    # TODO: Add these metrics to the mapping/metadata
+    "vhost_status": {"rabbitmq_cluster_vhost_status"},
+    "exchange_names": {"rabbitmq_cluster_exchange_name"},
+    "exchange_bindings": {"rabbitmq_cluster_exchange_bindings"},
+}
+
+
+def unaggregated_renames_and_exclusions(endpoint):
+    """Generate metrics renaming mapping and exclusions for an unaggregated endpoint.
+
+    The exclusions are a set of raw metric names which we want to collect only from the unaggregated endpoint
+    and exclude from the aggregated endpoint if we enable it.
+    """
+    exclude_from_agg = set()
+    metric_renames = {}
+    if 'detailed' in endpoint:
+        exclude_from_agg = set()
+        for metric_fam in re.findall(r"family=([^&\s]+)", endpoint):
+            exclude_from_agg |= _DETAILED_FAMILIES.get(metric_fam, set())
+        metric_renames = {
+            (re.sub("^rabbitmq_", "rabbitmq_detailed_", k) if k not in _INFO else k): v
+            for k, v in _RENAME_RABBITMQ_TO_DATADOG.items()
+        }
+
+    if 'per-object' in endpoint:
+        metric_renames = _RENAME_RABBITMQ_TO_DATADOG
+
+    return metric_renames, exclude_from_agg
+
+
+def aggregated_renames(exclude_unaggregated_metrics):
+    """Generate metric renaming mapping for the aggregated endpoint.
+
+    This takes into account any metrics that we should not collect because we already get them from
+    the unaggregated endpoint.
+    """
+    return {
+        **{re.sub("_total$", "", k): v for k, v in _COUNTS.items() if k not in exclude_unaggregated_metrics},
+        **{k: v for k, v in _GAUGES.items() if k not in exclude_unaggregated_metrics},
+        **_SUMMARIES,
+        **_INFO,
+    }
