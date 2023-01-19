@@ -73,6 +73,11 @@ instances:
     #
     # clusters: {}
 
+    ## @param custom_queries - list of mappings - optional
+    ## custom queries
+    #
+    # custom_queries: []
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##

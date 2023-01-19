@@ -102,4 +102,17 @@ files:
               Validity time of the last list of clusters obtained through the endpoint.
             type: integer
         example: {}
+    - name: custom_queries
+      description: custom queries
+      value:
+        type: array
+        items:
+          type: object
+          properties:
+            - name: query
+              type: string
+            - name: tags
+              type: array
+              items:
+                type: string
     - template: instances/default
