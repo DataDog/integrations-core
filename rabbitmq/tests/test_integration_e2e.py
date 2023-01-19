@@ -33,8 +33,12 @@ def test_rabbitmq_e2e(dd_agent_check):
 )
 @pytest.mark.e2e
 def test_rabbitmq_e2e_openmetrics(dd_agent_check):
-    aggregator = dd_agent_check(common.OPENMETRICS_CONFIG)
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator = dd_agent_check(common.OPENMETRICS_CONFIG, rate=True)
+    metadata_metrics = get_metadata_metrics()
+    for metric in metrics.DEFAULT_OPENMETRICS:
+        aggregator.assert_metric(metric)
+    aggregator.assert_metrics_using_metadata(metadata_metrics)
+    aggregator.assert_all_metrics_covered()
 
 
 @pytest.mark.integration
