@@ -158,6 +158,17 @@ instances:
         #
         # include_aggregated_endpoint: true
 
+        ## @param unaggregated_endpoint - string - optional - default: detailed
+        ## Which  unaggregated endpoint to use.
+        ## The choices are:
+        ##   - If the field is left unspecified, no endpoint is used.
+        ##   - "per-object" means the /metrics/per-object endpoint is used.
+        ##   - "detailed" means the /metrics/detailed endpoint is used.
+        ##     You can also provide a query for this option, exactly as if you were making an HTTP request
+        ##     to this endpoint.
+        #
+        # unaggregated_endpoint: detailed
+
     ## @param raw_metric_prefix - string - optional
     ## A prefix that will be removed from all exposed metric names, if present.
     ## All configuration options will use the prefix-less name.
