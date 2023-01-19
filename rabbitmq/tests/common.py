@@ -109,4 +109,4 @@ EXCHANGE_MESSAGE_STATS = {
 }
 
 OPENMETRICS_CONFIG = {"prometheus_plugin": {"url": OPENMETRICS_URL, "include_aggregated_endpoint": True}}
-DEFAULT_OM_TAGS = ["endpoint:localhost:15692/metrics"]
+DEFAULT_OM_TAGS = ["endpoint:http://localhost:15692/metrics"]

@@ -1,11 +1,11 @@
 from itertools import product
 from pathlib import Path
 
-from datadog_checks.dev.utils import get_metadata_metrics
 import pytest
 
 from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.dev.http import MockResponse
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.rabbitmq import RabbitMQ
 
 from .common import DEFAULT_OM_TAGS, HERE
@@ -15,17 +15,21 @@ OPENMETRICS_RESPONSE_FIXTURES = HERE / Path('fixtures')
 TEST_URL = "http://localhost:15692"
 
 
-def test_aggregated_endpoint(aggregator, dd_run_check, mock_http_response):
+@pytest.mark.parametrize(
+    'aggregated_setting',
+    [
+        pytest.param({"include_aggregated_endpoint": True}, id="explicitly enable"),
+        pytest.param({}, id="implicitly enable by default"),
+    ],
+)
+def test_aggregated_endpoint(aggregated_setting, aggregator, dd_run_check, mock_http_response):
     """User only enables aggregated endpoint.
 
     We expect in this case all the metrics from the '/metrics' endpoint.
     """
     mock_http_response(file_path=OPENMETRICS_RESPONSE_FIXTURES / "metrics.txt")
-    check = RabbitMQ(
-        "rabbitmq",
-        {},
-        [{'prometheus_plugin': {'url': TEST_URL, "include_aggregated_endpoint": True}, "metrics": [".+"]}],
-    )
+    prometheus_settings = {'url': TEST_URL, **aggregated_setting}
+    check = RabbitMQ("rabbitmq", {}, [{'prometheus_plugin': prometheus_settings, "metrics": [".+"]}])
     dd_run_check(check)
 
     build_info_tags = [
@@ -66,6 +70,7 @@ def test_bare_detailed_endpoint(aggregator, dd_run_check, mock_http_response):
                 'prometheus_plugin': {
                     'url': TEST_URL,
                     'unaggregated_endpoint': 'detailed',
+                    "include_aggregated_endpoint": False,
                 },
                 "metrics": [".+"],
             }
@@ -111,6 +116,7 @@ def test_detailed_endpoint_queue_coarse_metrics(aggregator, dd_run_check, mock_h
                 'prometheus_plugin': {
                     'url': TEST_URL,
                     'unaggregated_endpoint': 'detailed?family=queue_coarse_metrics',
+                    "include_aggregated_endpoint": False,
                 },
                 "metrics": [".+"],
             }
@@ -192,6 +198,7 @@ def test_per_object(aggregator, dd_run_check, mock_http_response):
                 'prometheus_plugin': {
                     'url': TEST_URL,
                     'unaggregated_endpoint': 'per-object',
+                    "include_aggregated_endpoint": False,
                 },
                 "metrics": [".+"],
             }
@@ -365,7 +372,7 @@ def test_aggregated_and_detailed_endpoints(query, metrics, aggregator, dd_run_ch
         ),
         pytest.param(
             {'url': "http://localhost", "unaggregated_endpoint": []},
-            r"prometheus_plugin\.unaggregated_endpoint must be a string\.",
+            "expected string or bytes-like object",
             id="Unaggregated_endpoint value must be a string.",
         ),
         pytest.param(
