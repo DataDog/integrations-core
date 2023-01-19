@@ -113,6 +113,11 @@ def test_session_number(aggregator, integration_check, pg_instance):
 
 @requires_over_14
 def test_session_idle_and_killed(aggregator, integration_check, pg_instance):
+    # Reset idle time to 0
+    postgres_conn = _get_conn('postgres')
+    with postgres_conn.cursor() as cur:
+        cur.execute("select pg_stat_reset();")
+
     check = integration_check(pg_instance)
     check.check(pg_instance)
     expected_tags = pg_instance['tags'] + ['db:{}'.format(DB_NAME), 'port:{}'.format(PORT)]
@@ -133,7 +138,6 @@ def test_session_idle_and_killed(aggregator, integration_check, pg_instance):
         pid = cur.fetchall()[0][0]
 
     # Kill session
-    postgres_conn = _get_conn('postgres')
     with postgres_conn.cursor() as cur:
         cur.execute("SELECT pg_terminate_backend({})".format(pid))
         cur.fetchall()
