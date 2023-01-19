@@ -161,10 +161,10 @@ instances:
         ## @param unaggregated_endpoint - string - optional - default: detailed
         ## Which  unaggregated endpoint to use.
         ## The choices are:
-        ##   - If the field is left unspecified, no endpoint is used.
-        ##   - "per-object" means the /metrics/per-object endpoint is used.
-        ##   - "detailed" means the /metrics/detailed endpoint is used.
-        ##     You can also provide a query for this option, exactly as if you were making an HTTP request
+        ##   - If the field is left unspecified, we don't use any endpoint.
+        ##   - "per-object" means we use the /metrics/per-object endpoint
+        ##   - "detailed" means we use the /metrics/detailed endpoint.
+        ##     Note that you can also provide a query for this option, exactly as if you were making an HTTP request
         ##     to this endpoint.
         #
         # unaggregated_endpoint: detailed
