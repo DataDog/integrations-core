@@ -218,7 +218,7 @@ def list_n_hosts_resource(request):
     return ApiHostList(
         items=[
             ApiHost(
-                host_id=f'host_{n}',
+                host_id=f'{prefix}{n}',
                 cluster_ref=ApiClusterRef(
                     cluster_name="cluster_1",
                     display_name="cluster_1",
@@ -227,7 +227,8 @@ def list_n_hosts_resource(request):
                 num_physical_cores=4,
                 total_phys_mem_bytes=33079799808,
             )
-            for n in range(request.param)
+            for n in range(request.param['number'])
+            for prefix in request.param['prefixes']
         ],
     )
 
