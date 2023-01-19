@@ -73,6 +73,27 @@ instances:
     #
     # clusters: {}
 
+    ## @param custom_queries - list of mappings - optional
+    ## Define custom queries to run using Cloudera Manager with tsquery. 
+    ## More information on querying Cloudera Manager can be found here:
+    ##
+    ## https://docs.cloudera.com/documentation/enterprise/6/6.3/topics/cm_dg_tsquery.html
+    ##
+    ## Note: If metric expression functions are used, make sure to set aliases or possibly
+    ## risk metrics being misnamed. For example, "SELECT last(foo)" will result
+    ## in a metric name of 'cloudera.last_foo'.
+    ##
+    ## Example usage:
+    ##
+    ## custom_queries:
+    ## - query: SELECT foo, bar
+    ##   tags: baz:1 
+    ##
+    ## This configuration will collect cloudera.<CATEGORY>.foo and cloudera.<CATEGORY>.bar,
+    ## both with custom tags of `baz:1`.
+    #
+    # custom_queries: []
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##

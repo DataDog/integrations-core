@@ -284,6 +284,13 @@ def assert_common_metrics(aggregator, tags=None, is_e2e=False, loader=None):
 
 
 def assert_common_check_run_metrics(aggregator, tags=None, is_e2e=False, loader=None):
+    if is_e2e and loader == 'core':
+        aggregator.assert_metric('snmp.device.reachable', metric_type=aggregator.GAUGE, tags=tags, at_least=1, value=1)
+        aggregator.assert_metric(
+            'snmp.device.unreachable', metric_type=aggregator.GAUGE, tags=tags, at_least=1, value=0
+        )
+        aggregator.assert_metric('snmp.interface.status', metric_type=aggregator.GAUGE, tags=tags, at_least=0, value=1)
+
     monotonic_type = aggregator.MONOTONIC_COUNT
     if is_e2e:
         monotonic_type = aggregator.COUNT

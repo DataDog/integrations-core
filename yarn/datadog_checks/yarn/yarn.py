@@ -234,19 +234,37 @@ class YarnCheck(AgentCheck):
         """
         Get metrics for running applications
         """
+        collect_apps_all_states = self.instance.get(
+            'collect_apps_all_states', self.init_config.get('collect_app_all_states', False)
+        )
+        collect_apps_states = self.instance.get(
+            'collect_apps_states_list', self.init_config.get('collect_apps_states_list', [])
+        )
+        if collect_apps_states:
+            collect_apps_all_states = False
+
+        collect_apps_states = [state.upper() for state in collect_apps_states]
+
         metrics_json = self._rest_request_to_json(rm_address, YARN_APPS_PATH, addl_tags)
 
         if metrics_json and metrics_json.get('apps') and metrics_json['apps'].get('app') is not None:
             for app_json in metrics_json['apps']['app']:
-                tags = self._get_app_tags(app_json, app_tags) + addl_tags
+                app_state = app_json['state']
+                tags = self._get_app_tags(app_json, app_tags)
+                tags.extend(addl_tags)
+                tags.append('state:{}'.format(app_state))
 
-                if app_json['state'] == YARN_APPLICATION_RUNNING:
+                if (
+                    collect_apps_all_states
+                    or app_state in collect_apps_states
+                    or (not collect_apps_states and app_state == YARN_APPLICATION_RUNNING)
+                ):
                     self._set_yarn_metrics_from_json(tags, app_json, DEPRECATED_YARN_APP_METRICS)
                     self._set_yarn_metrics_from_json(tags, app_json, YARN_APP_METRICS)
 
                 self.service_check(
                     APPLICATION_STATUS_SERVICE_CHECK,
-                    self.application_status_mapping.get(app_json['state'], AgentCheck.UNKNOWN),
+                    self.application_status_mapping.get(app_state, AgentCheck.UNKNOWN),
                     tags=tags,
                 )
 

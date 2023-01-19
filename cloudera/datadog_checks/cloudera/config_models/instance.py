@@ -35,6 +35,14 @@ class Clusters(BaseModel):
     limit: Optional[int] = Field(None, description='Maximum number of clusters to be processed.\n')
 
 
+class CustomQuery(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    query: Optional[str]
+    tags: Optional[Sequence[str]]
+
+
 class MetricPatterns(BaseModel):
     class Config:
         allow_mutation = False
@@ -49,6 +57,7 @@ class InstanceConfig(BaseModel):
 
     api_url: str
     clusters: Optional[Clusters]
+    custom_queries: Optional[Sequence[CustomQuery]]
     disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
     max_parallel_requests: Optional[int]
