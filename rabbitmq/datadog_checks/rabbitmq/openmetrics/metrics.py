@@ -133,6 +133,8 @@ _GAUGES = {
     "erlang_vm_dist_proc_min_heap_size_words": "erlang.vm.dist.proc.min_heap_size_words",
     "erlang_vm_dist_proc_reductions": "erlang.vm.dist.proc.reductions",
     "erlang_vm_dist_proc_stack_size_words": "erlang.vm.dist.proc.stack_size_words",
+    # We decided to submit erlang.vm.dist.proc.status as a gauge instead of a service check.
+    # We think this is more useful to set up alerting/monitoring for clients.
     "erlang_vm_dist_proc_status": "erlang.vm.dist.proc.status",
     "erlang_vm_dist_proc_total_heap_size_words": "erlang.vm.dist.proc.total_heap_size_words",
     "erlang_vm_dist_recv_avg_bytes": "erlang.vm.dist.recv.avg_bytes",
