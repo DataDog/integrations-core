@@ -174,3 +174,84 @@ def test_detailed_endpoint_queue_coarse_metrics(aggregator, dd_run_check, mock_h
             "tags": ["endpoint:localhost:15692/metrics/detailed?family=queue_coarse_metrics"] + m.get('tags', []),
         }
         aggregator.assert_metric(**kwargs)
+
+
+def test_per_object(aggregator, dd_run_check, mock_http_response):
+    """We scrape the /metrics/per-object endpoint."""
+    mock_http_response(file_path=OPENMETRICS_RESPONSE_FIXTURES / "per-object.txt")
+    check = RabbitMQ(
+        "rabbitmq",
+        {},
+        [
+            {
+                'prometheus_plugin': {
+                    'url': "localhost:15692",
+                    'unaggregated_endpoint': 'per-object',
+                },
+                "metrics": [".+"],
+            }
+        ],
+    )
+    dd_run_check(check)
+
+    expected_metrics = (
+        [
+            dict(
+                name='rabbitmq.build_info',
+                value=1,
+                metric_type=aggregator.GAUGE,
+                tags=[
+                    'erlang_version:25.1.2',
+                    'prometheus_client_version:4.9.1',
+                    'prometheus_plugin_version:3.11.3',
+                    'rabbitmq_version:3.11.3',
+                ],
+            ),
+            dict(
+                name='rabbitmq.identity_info',
+                value=1,
+                metric_type=aggregator.GAUGE,
+                tags=[
+                    'rabbitmq_node:rabbit@54cfac2199f1',
+                    "rabbitmq_cluster:rabbit@54cfac2199f1",
+                    "rabbitmq_cluster_permanent_id:rabbitmq-cluster-id-cyw_z6c4UMIBoK51iVq9rw",
+                ],
+            ),
+        ]
+        + [
+            dict(
+                name=name,
+                value=value,
+                metric_type=aggregator.GAUGE,
+                tags=['vhost:/', f'queue:{qname}'],
+            )
+            for name, (value, qname) in product(
+                ('rabbitmq.queue.messages', 'rabbitmq.queue.messages.ready'),
+                ((0, 'queue1'), (1, 'queue2'), (0, 'queue3')),
+            )
+        ]
+        + [
+            dict(
+                name='rabbitmq.queue.messages.unacked',
+                value=0,
+                metric_type=aggregator.GAUGE,
+                tags=['vhost:/', f'queue:{qname}'],
+            )
+            for qname in ('queue1', 'queue2', 'queue3')
+        ]
+        + [
+            dict(
+                name='rabbitmq.queue.process_reductions.count',
+                value=value,
+                metric_type=aggregator.MONOTONIC_COUNT,
+                tags=['vhost:/', f'queue:{qname}'],
+            )
+            for qname, value in (('queue1', 34258), ('queue2', 38325), ('queue3', 30020))
+        ]
+    )
+    for m in expected_metrics:
+        kwargs = {
+            **m,
+            "tags": ["endpoint:localhost:15692/metrics/per-object"] + m.get('tags', []),
+        }
+        aggregator.assert_metric(**kwargs)
