@@ -220,7 +220,7 @@ class ComposeFileUp(LazyFunction):
         self.compose_file = compose_file
         self.build = build
         self.service_name = service_name
-        self.command = ['docker', 'compose', '-f', self.compose_file, 'up', '-d']
+        self.command = ['docker', 'compose', '-f', self.compose_file, 'up', '-d', '--force-recreate']
 
         if self.build:
             self.command.append('--build')

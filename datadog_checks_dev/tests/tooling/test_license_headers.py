@@ -103,6 +103,25 @@ import os
     assert validate_license_headers(check_path, get_previous=_make_get_previous()) == []
 
 
+def test_validate_license_headers_handles_files_encoded_in_utf8_with_bom(tmp_path):
+    """This tests that a utf8 bom at the beginning of the file doesn't prevent the
+    validator from finding the header. We need that encoding in some files that contain
+    non-ascii characters to make py2 use the right encoding.
+    """
+    check_path = tmp_path / "check"
+    check_path.mkdir()
+
+    with open(check_path / "setup.py", "w", encoding="utf-8-sig") as f:
+        f.write(
+            f"""{get_license_header()}
+
+import os
+"""
+        )
+
+    assert validate_license_headers(check_path, get_previous=_make_get_previous()) == []
+
+
 def test_validate_license_headers_works_with_arbitrary_nesting(tmp_path):
     check_path = tmp_path / "check"
     check_path.mkdir()

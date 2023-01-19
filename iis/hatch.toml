@@ -9,7 +9,7 @@ dependencies = [
 ]
 e2e-env = false
 platforms = [
-  "win32",
+  "windows",
 ]
 
 [envs.default.overrides]

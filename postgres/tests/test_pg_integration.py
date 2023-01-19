@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import socket
+import time
 
 import mock
 import psycopg2
@@ -18,6 +19,7 @@ from .common import (
     HOST,
     PORT,
     POSTGRES_VERSION,
+    check_activity_metrics,
     check_bgw_metrics,
     check_common_metrics,
     check_connection_metrics,
@@ -28,14 +30,6 @@ from .common import (
 from .utils import requires_over_10
 
 CONNECTION_METRICS = ['postgresql.max_connections', 'postgresql.percent_usage_connections']
-
-ACTIVITY_METRICS = [
-    'postgresql.transactions.open',
-    'postgresql.transactions.idle_in_transaction',
-    'postgresql.active_queries',
-    'postgresql.waiting_queries',
-    'postgresql.active_waiting_queries',
-]
 
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
 
@@ -155,9 +149,114 @@ def test_activity_metrics(aggregator, integration_check, pg_instance):
     check = integration_check(pg_instance)
     check.check(pg_instance)
 
-    expected_tags = pg_instance['tags'] + ['port:{}'.format(PORT), 'db:datadog_test']
-    for name in ACTIVITY_METRICS:
-        aggregator.assert_metric(name, count=1, tags=expected_tags)
+    expected_tags = pg_instance['tags'] + [
+        'port:{}'.format(PORT),
+        'db:datadog_test',
+        'app:datadog-agent',
+        'user:datadog',
+    ]
+    check_activity_metrics(aggregator, expected_tags)
+
+
+def test_activity_metrics_no_application_aggregation(aggregator, integration_check, pg_instance):
+    pg_instance['collect_activity_metrics'] = True
+    pg_instance['activity_metrics_excluded_aggregations'] = ['application_name']
+    check = integration_check(pg_instance)
+    check.check(pg_instance)
+
+    expected_tags = pg_instance['tags'] + ['port:{}'.format(PORT), 'db:datadog_test', 'user:datadog']
+    check_activity_metrics(aggregator, expected_tags)
+
+
+def test_activity_metrics_no_aggregations(aggregator, integration_check, pg_instance):
+    pg_instance['collect_activity_metrics'] = True
+    pg_instance['activity_metrics_excluded_aggregations'] = ['datname', 'application_name', 'usename']
+    check = integration_check(pg_instance)
+    check.check(pg_instance)
+
+    expected_tags = pg_instance['tags'] + ['port:{}'.format(PORT)]
+    check_activity_metrics(aggregator, expected_tags)
+
+
+def assert_metric_at_least(aggregator, metric_name, expected_tag, count, lower_bound):
+    found_values = 0
+    for metric in aggregator.metrics(metric_name):
+        if expected_tag in metric.tags:
+            assert metric.value >= lower_bound
+            found_values += 1
+    assert found_values == count
+
+
+def test_backend_transaction_age(aggregator, integration_check, pg_instance):
+    pg_instance['collect_activity_metrics'] = True
+    check = integration_check(pg_instance)
+
+    check.check(pg_instance)
+
+    dd_agent_tags = pg_instance['tags'] + [
+        'port:{}'.format(PORT),
+        'db:datadog_test',
+        'app:datadog-agent',
+        'user:datadog',
+    ]
+    test_tags = pg_instance['tags'] + ['port:{}'.format(PORT), 'db:datadog_test', 'app:test', 'user:datadog']
+    # No transaction in progress, we have 0
+    if float(POSTGRES_VERSION) >= 9.6:
+        aggregator.assert_metric('postgresql.activity.backend_xmin_age', value=0, count=1, tags=dd_agent_tags)
+    else:
+        aggregator.assert_metric('postgresql.activity.backend_xmin_age', count=0, tags=dd_agent_tags)
+    aggregator.assert_metric('postgresql.activity.xact_start_age', count=1, tags=dd_agent_tags)
+
+    conn1 = psycopg2.connect(host=HOST, dbname=DB_NAME, user="datadog", password="datadog", application_name="test")
+    cur = conn1.cursor()
+
+    conn2 = psycopg2.connect(host=HOST, dbname=DB_NAME, user="datadog", password="datadog", application_name="test")
+    cur2 = conn2.cursor()
+
+    # Start a transaction in repeatable read to force pinning of backend_xmin
+    cur.execute('BEGIN TRANSACTION ISOLATION LEVEL REPEATABLE READ;')
+    # Force assignement of a txid and keep the transaction opened
+    cur.execute('select txid_current();')
+    # Make sure to fetch the result to make sure we start the timer after the transaction started
+    cur.fetchall()
+    start_transaction_time = time.time()
+
+    aggregator.reset()
+    check.check(pg_instance)
+
+    if float(POSTGRES_VERSION) >= 9.6:
+        aggregator.assert_metric('postgresql.activity.backend_xid_age', value=1, count=1, tags=test_tags)
+        aggregator.assert_metric('postgresql.activity.backend_xmin_age', value=1, count=1, tags=test_tags)
+
+        aggregator.assert_metric('postgresql.activity.backend_xid_age', count=0, tags=dd_agent_tags)
+        aggregator.assert_metric('postgresql.activity.backend_xmin_age', value=1, count=1, tags=dd_agent_tags)
+    else:
+        aggregator.assert_metric('postgresql.activity.backend_xid_age', count=0, tags=test_tags)
+        aggregator.assert_metric('postgresql.activity.backend_xmin_age', count=0, tags=test_tags)
+
+        aggregator.assert_metric('postgresql.activity.backend_xid_age', count=0, tags=dd_agent_tags)
+        aggregator.assert_metric('postgresql.activity.backend_xmin_age', count=0, tags=dd_agent_tags)
+
+    aggregator.assert_metric('postgresql.activity.xact_start_age', count=1, tags=test_tags)
+
+    # Open a new session and assign a new txid to it.
+    cur2.execute('select txid_current()')
+
+    aggregator.reset()
+    transaction_age_lower_bound = time.time() - start_transaction_time
+    check.check(pg_instance)
+
+    if float(POSTGRES_VERSION) >= 9.6:
+        # Check that the xmin and xid is 2 tx old
+        aggregator.assert_metric('postgresql.activity.backend_xid_age', value=2, count=1, tags=test_tags)
+        aggregator.assert_metric('postgresql.activity.backend_xmin_age', value=2, count=1, tags=test_tags)
+
+        aggregator.assert_metric('postgresql.activity.backend_xid_age', count=0, tags=dd_agent_tags)
+        aggregator.assert_metric('postgresql.activity.backend_xmin_age', value=2, count=1, tags=dd_agent_tags)
+
+    # Check that xact_start_age has a value greater than the trasaction_age lower bound
+    aggregator.assert_metric('postgresql.activity.xact_start_age', count=1, tags=test_tags)
+    assert_metric_at_least(aggregator, 'postgresql.activity.xact_start_age', 'app:test', 1, transaction_age_lower_bound)
 
 
 @requires_over_10
@@ -259,11 +358,13 @@ def test_correct_hostname(dbm_enabled, reported_hostname, expected_hostname, agg
 
     expected_tags_no_db = pg_instance['tags'] + ['server:{}'.format(HOST), 'port:{}'.format(PORT)]
     expected_tags_with_db = expected_tags_no_db + ['db:datadog_test']
+    expected_activity_tags = expected_tags_with_db + ['app:datadog-agent', 'user:datadog']
     c_metrics = COMMON_METRICS
     if not dbm_enabled:
         c_metrics = c_metrics + DBM_MIGRATED_METRICS
-    for name in c_metrics + ACTIVITY_METRICS:
+    for name in c_metrics:
         aggregator.assert_metric(name, count=1, tags=expected_tags_with_db, hostname=expected_hostname)
+    check_activity_metrics(aggregator, tags=expected_activity_tags, hostname=expected_hostname)
 
     for name in CONNECTION_METRICS:
         aggregator.assert_metric(name, count=1, tags=expected_tags_no_db, hostname=expected_hostname)

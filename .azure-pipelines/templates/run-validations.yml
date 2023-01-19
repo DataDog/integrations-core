@@ -109,6 +109,12 @@ steps:
       ddev validate licenses
     displayName: 'Validate third-party license list'
 
+- ${{ if eq(parameters.repo, 'core') }}:
+  - script: |
+      echo "ddev validate license-headers ${{ parameters.validate_changed }}"
+      ddev validate license-headers ${{ parameters.validate_changed }}
+    displayName: 'Validate license headers on source code files'
+
 - ${{ if eq(parameters.repo, 'marketplace') }}:
   - script: |
       echo "ddev validate eula"

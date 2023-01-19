@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.utils.time import get_timestamp
 
 from .api_client_factory import make_api_client
 from .common import CAN_CONNECT
@@ -15,6 +16,7 @@ class ClouderaCheck(AgentCheck, ConfigMixin):
     def __init__(self, name, init_config, instances):
         super(ClouderaCheck, self).__init__(name, init_config, instances)
         self.client = None
+        self.latest_event_query_utc = get_timestamp()
         self.check_initializations.append(self._create_client)
 
     @AgentCheck.metadata_entrypoint

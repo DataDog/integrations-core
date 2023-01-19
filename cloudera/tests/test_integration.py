@@ -1,3 +1,7 @@
+# (C) Datadog, Inc. 2022-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
 import pytest
 
 from datadog_checks.cloudera import ClouderaCheck
@@ -69,6 +73,9 @@ def test_given_api_v48_endpoint_when_check_runs_then_service_check_ok_and_metric
         tags=CLUSTER_HEALTH_TAGS,
     )
     aggregator.assert_service_check('cloudera.host.health', ClouderaCheck.OK)
+    aggregator.assert_event(
+        "ExecutionException running extraction tasks for service 'cod--qfdcinkqrzw::yarn'.", count=1
+    )
     aggregator.assert_all_metrics_covered()
 
 

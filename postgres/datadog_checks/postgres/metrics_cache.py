@@ -26,7 +26,7 @@ from .util import (
     REPLICATION_METRICS_10,
     REPLICATION_STATS_METRICS,
 )
-from .version_utils import V8_3, V9_1, V9_2, V9_4, V9_6, V10
+from .version_utils import V8_3, V9, V9_1, V9_2, V9_4, V9_6, V10
 
 logger = logging.getLogger(__name__)
 
@@ -187,7 +187,28 @@ class PostgresMetricsCache:
         metrics_data = self.activity_metrics
 
         if metrics_data is None:
-            query = ACTIVITY_QUERY_10 if version >= V10 else ACTIVITY_QUERY_LT_10
+            excluded_aggregations = self.config.activity_metrics_excluded_aggregations
+            if version < V9:
+                excluded_aggregations.append('application_name')
+
+            default_descriptors = [('application_name', 'app'), ('datname', 'db'), ('usename', 'user')]
+            default_aggregations = [d[0] for d in default_descriptors]
+
+            aggregation_columns = [a for a in default_aggregations if a not in excluded_aggregations]
+            descriptors = [d for d in default_descriptors if d[0] not in excluded_aggregations]
+
+            if version < V10:
+                query = ACTIVITY_QUERY_LT_10
+            else:
+                query = ACTIVITY_QUERY_10
+            if not aggregation_columns:
+                query = query.format(aggregation_columns_select='', aggregation_columns_group='')
+            else:
+                query = query.format(
+                    aggregation_columns_select=', '.join(aggregation_columns) + ',',
+                    aggregation_columns_group=',' + ', '.join(aggregation_columns),
+                )
+
             if version >= V9_6:
                 metrics_query = ACTIVITY_METRICS_9_6
             elif version >= V9_2:
@@ -202,8 +223,13 @@ class PostgresMetricsCache:
                     metrics_query[i] = q.format(dd__user=self.config.user)
 
             metrics = {k: v for k, v in zip(metrics_query, ACTIVITY_DD_METRICS)}
-            self.activity_metrics = (metrics, query)
+            self.activity_metrics = (metrics, query, descriptors)
         else:
-            metrics, query = metrics_data
+            metrics, query, descriptors = metrics_data
 
-        return {'descriptors': [('datname', 'db')], 'metrics': metrics, 'query': query, 'relation': False}
+        return {
+            'descriptors': descriptors,
+            'metrics': metrics,
+            'query': query,
+            'relation': False,
+        }

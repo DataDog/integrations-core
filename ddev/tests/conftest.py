@@ -5,10 +5,13 @@ from __future__ import annotations
 
 import os
 import random
+from contextlib import ExitStack
 from typing import Generator
 
 import pytest
+import vcr
 from click.testing import CliRunner as __CliRunner
+from datadog_checks.dev.tooling.utils import set_root
 
 from ddev.config.constants import AppEnvVars, ConfigEnvVars
 from ddev.config.file import ConfigFile
@@ -127,7 +130,21 @@ def repository(local_clone, config_file) -> Generator[ClonedRepo, None, None]:
     try:
         yield local_clone
     finally:
+        set_root('')
         local_clone.reset_branch()
+
+
+@pytest.fixture
+def network_replay(local_repo):
+    stack = ExitStack()
+
+    def add_cassette(relative_path, *args, **kwargs):
+        cassette = vcr.use_cassette(str(local_repo / relative_path), *args, **kwargs)
+        stack.enter_context(cassette)
+        return cassette
+
+    with stack:
+        yield add_cassette
 
 
 @pytest.fixture(scope='session')
