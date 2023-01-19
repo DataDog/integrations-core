@@ -47,7 +47,7 @@
                     {
                         "definition": {
                             "background_color": "transparent",
-                            "content": "This dashboard provides a high-level overview of your Argo CD clusters so that you can monitor its deployments, performance and the overall health of the cluster\n\nUsing the dashboard, you can monitor the health of\n* Application Controller\n* API Server\n* Repository Server",
+                            "content": "This dashboard provides a high-level overview of your Argo CD clusters so that you can monitor the deployments, performance, and overall health of a cluster\n\nUsing the dashboard, you can monitor the health of\n* Application Controller\n* API Server\n* Repository Server",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": false,
