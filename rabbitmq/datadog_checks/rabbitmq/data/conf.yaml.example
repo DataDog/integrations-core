@@ -45,108 +45,11 @@ init_config:
 #
 instances:
 
-  -
-    ## @param rabbitmq_api_url - string - optional - default: http://localhost:15672/api/
-    ## For every instance a 'rabbitmq_api_url' must be provided, pointing to the api
-    ## url of the RabbitMQ Management Plugin (http://www.rabbitmq.com/management.html).
-    #
-    # rabbitmq_api_url: http://localhost:15672/api/
-
-    ## @param tag_families - boolean - optional - default: false
-    ## To tag queue "families" based off of regex matching.
-    #
-    # tag_families: false
-
-    ## @param collect_node_metrics - boolean - optional - default: true
-    ## Node metrics are collected by default. Setting this parameter to false skips node metric collection.
-    #
-    # collect_node_metrics: true
-
-    ## @param nodes - list of strings - optional
-    ## Use the `nodes` parameters to specify the nodes you'd like to
-    ## collect metrics on (up to 100 nodes).
-    ## If you have less than 100 nodes, you don't have to set this parameter,
-    ## the metrics are collected on all the nodes by default.
-    #
-    # nodes:
-    #   - <NODE_NAME_1>
-    #   - <NODE_NAME_2>
-
-    ## @param nodes_regexes - list of strings - optional
-    ## Use the `nodes_regexes` parameters to specify one or multiple regex to
-    ## match the nodes you'd like to collect metrics on (up to 100 nodes).
-    ## If you have less than 100 nodes, you don't have to set this parameter,
-    ## the metrics are collected on all the nodes by default.
-    #
-    # nodes_regexes:
-    #   - <REGEX>
-
-    ## @param queues - list of strings - optional
-    ## Use the `queues` parameters to specify the queues you'd like to
-    ## collect metrics on (up to 200 queues).
-    ## If you have less than 200 queues, you don't have to set this parameter,
-    ## the metrics are collected on all the queues by default.
-    ## If you have set up vhosts, set the queue names as `vhost_name/queue_name`.
-    ## If you have `tag_families` enabled, the first captured group in the regex
-    ## is used as the queue_family tag if no named group is specified.
-    ## If you have named groups the tag names will be the named groups in regex.
-    ## If you use multiplies groups and not all are named, the tags are going to be
-    ## used only on the groups that contains names.
-    #
-    # queues:
-    #   - <QUEUE_NAME_1>
-    #   - <QUEUE_NAME_2>
-
-    ## @param queues_regexes - list of strings - optional
-    ## Use the `queues_regexes` parameters to specify one or multiple regex to to match
-    ## the queues you'd like to collect metrics on (up to 200 queues).
-    ## If you have vhosts set up, the regex pattern needs to be formatted with vhost
-    ## in the format of `<vhost>/<queue_name>`.
-    ## If you have less than 200 queues, you don't have to set this parameter,
-    ## the metrics are collected on all the queues by default.
-    ## If you have `tag_families` enabled, the first captured group in the regex
-    ## is used as the queue_family tag.
-    ## If you have named groups the tag names will be the named groups in regex.
-    ## If you use multiplies groups and not all have are named, the tags are going to be
-    ## used only on the groups that contains names.
-    #
-    # queues_regexes:
-    #   - <REGEX>
-
-    ## @param exchanges - list of strings - optional
-    ## Use the `exchanges` parameters to specify the exchanges you'd like to
-    ## collect metrics on (up to 50 exchanges).
-    ## If you have less than 50 exchanges, you don't have to set this parameter,
-    ## the metrics is collected on all the exchanges by default.
-    #
-    # exchanges:
-    #   - <EXCHANGE_1>
-    #   - <EXCHANGE_2>
-
-    ## @param exchanges_regexes - list of strings - optional
-    ## Use the `exchanges_regexes` parameters to specify one or multiple regex to to match
-    ## the exchanges you'd like to collect metrics on (up to 50 exchanges).
-    ## If you have less than 50 exchanges, you don't have to set this parameter,
-    ## the metrics is collected on all the exchanges by default.
-    #
-    # exchanges_regexes:
-    #   - <REGEX>
-
-    ## @param vhosts - list of strings - optional
-    ## Service checks and `rabbitmq.connections` metric:
-    ## By default a list of all vhosts is fetched and each one is checked using the aliveness
-    ## API and the metric `rabbitmq.connections` is collected.
-    ## If you prefer only certain vhosts to be monitored with service checks
-    ## and the number of `connections` then you can list the vhosts you care about in this parameter.
-    #
-    # vhosts:
-    #   - <VHOST_NAME_1>
-    #   - <VHOST_NAME_2>
-
+    ## RabbitMQ Prometheus Plugin Example
     ## Settings for talking to the Prometheus plugin of RabbitMQ.
     ## Specify this section to trigger metric collection from the Prometheus plugin endpoints.
     #
-    # prometheus_plugin:
+    prometheus_plugin:
 
         ## @param url - string - required
         ## Base URL for OpenMetrics endpoints.
@@ -737,6 +640,105 @@ instances:
     #   - <INCLUDE_REGEX>
     #   exclude:
     #   - <EXCLUDE_REGEX>
+
+    ## RabbitMQ Management Plugin Example
+  -
+    ## @param rabbitmq_api_url - string - optional - default: http://localhost:15672/api/
+    ## For every instance a 'rabbitmq_api_url' must be provided, pointing to the api
+    ## url of the RabbitMQ Management Plugin (http://www.rabbitmq.com/management.html).
+    #
+    # rabbitmq_api_url: http://localhost:15672/api/
+
+    ## @param tag_families - boolean - optional - default: false
+    ## To tag queue "families" based off of regex matching.
+    #
+    # tag_families: false
+
+    ## @param collect_node_metrics - boolean - optional - default: true
+    ## Node metrics are collected by default. Setting this parameter to false skips node metric collection.
+    #
+    # collect_node_metrics: true
+
+    ## @param nodes - list of strings - optional
+    ## Use the `nodes` parameters to specify the nodes you'd like to
+    ## collect metrics on (up to 100 nodes).
+    ## If you have less than 100 nodes, you don't have to set this parameter,
+    ## the metrics are collected on all the nodes by default.
+    #
+    # nodes:
+    #   - <NODE_NAME_1>
+    #   - <NODE_NAME_2>
+
+    ## @param nodes_regexes - list of strings - optional
+    ## Use the `nodes_regexes` parameters to specify one or multiple regex to
+    ## match the nodes you'd like to collect metrics on (up to 100 nodes).
+    ## If you have less than 100 nodes, you don't have to set this parameter,
+    ## the metrics are collected on all the nodes by default.
+    #
+    # nodes_regexes:
+    #   - <REGEX>
+
+    ## @param queues - list of strings - optional
+    ## Use the `queues` parameters to specify the queues you'd like to
+    ## collect metrics on (up to 200 queues).
+    ## If you have less than 200 queues, you don't have to set this parameter,
+    ## the metrics are collected on all the queues by default.
+    ## If you have set up vhosts, set the queue names as `vhost_name/queue_name`.
+    ## If you have `tag_families` enabled, the first captured group in the regex
+    ## is used as the queue_family tag if no named group is specified.
+    ## If you have named groups the tag names will be the named groups in regex.
+    ## If you use multiplies groups and not all are named, the tags are going to be
+    ## used only on the groups that contains names.
+    #
+    # queues:
+    #   - <QUEUE_NAME_1>
+    #   - <QUEUE_NAME_2>
+
+    ## @param queues_regexes - list of strings - optional
+    ## Use the `queues_regexes` parameters to specify one or multiple regex to to match
+    ## the queues you'd like to collect metrics on (up to 200 queues).
+    ## If you have vhosts set up, the regex pattern needs to be formatted with vhost
+    ## in the format of `<vhost>/<queue_name>`.
+    ## If you have less than 200 queues, you don't have to set this parameter,
+    ## the metrics are collected on all the queues by default.
+    ## If you have `tag_families` enabled, the first captured group in the regex
+    ## is used as the queue_family tag.
+    ## If you have named groups the tag names will be the named groups in regex.
+    ## If you use multiplies groups and not all have are named, the tags are going to be
+    ## used only on the groups that contains names.
+    #
+    # queues_regexes:
+    #   - <REGEX>
+
+    ## @param exchanges - list of strings - optional
+    ## Use the `exchanges` parameters to specify the exchanges you'd like to
+    ## collect metrics on (up to 50 exchanges).
+    ## If you have less than 50 exchanges, you don't have to set this parameter,
+    ## the metrics is collected on all the exchanges by default.
+    #
+    # exchanges:
+    #   - <EXCHANGE_1>
+    #   - <EXCHANGE_2>
+
+    ## @param exchanges_regexes - list of strings - optional
+    ## Use the `exchanges_regexes` parameters to specify one or multiple regex to to match
+    ## the exchanges you'd like to collect metrics on (up to 50 exchanges).
+    ## If you have less than 50 exchanges, you don't have to set this parameter,
+    ## the metrics is collected on all the exchanges by default.
+    #
+    # exchanges_regexes:
+    #   - <REGEX>
+
+    ## @param vhosts - list of strings - optional
+    ## Service checks and `rabbitmq.connections` metric:
+    ## By default a list of all vhosts is fetched and each one is checked using the aliveness
+    ## API and the metric `rabbitmq.connections` is collected.
+    ## If you prefer only certain vhosts to be monitored with service checks
+    ## and the number of `connections` then you can list the vhosts you care about in this parameter.
+    #
+    # vhosts:
+    #   - <VHOST_NAME_1>
+    #   - <VHOST_NAME_2>
 
 ## Log Section
 ##
