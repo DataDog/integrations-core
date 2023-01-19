@@ -228,7 +228,7 @@ def write_sub_option(option, writer, indent, multiple, include_top_description=F
                 if include_top_description and option.get('description'):
                     write_description(option, writer, next_indent, 'option')
                 if start_list and 'options' in opt:
-                    writer.write(indent, '-\n')
+                    writer.write(indent, '  -\n')
                 if option_enabled(opt):
                     write_option(opt, writer, next_indent, start_list=True)
                 else:

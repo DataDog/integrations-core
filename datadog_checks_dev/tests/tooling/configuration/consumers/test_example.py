@@ -1765,7 +1765,7 @@ def test_multi_instances_w_nested_options():
         instances:
 
             ## Instance A Example
-        -
+          -
             ## Option with options description
             #
             option_w_options:
