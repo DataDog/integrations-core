@@ -441,3 +441,34 @@ def test_given_cloudera_check_when_autodiscover_empty_clusters_then_emits_zero_c
 
         aggregator.assert_service_check('cloudera.can_connect', AgentCheck.OK, tags=CAN_CONNECT_TAGS)
         aggregator.assert_service_check('cloudera.cluster.health', AgentCheck.OK, tags=CLUSTER_1_HEALTH_TAGS, count=0)
+
+
+def test_given_custom_queries_then_retrieve_metrics_unit(
+    aggregator,
+    dd_run_check,
+    cloudera_check,
+    list_one_cluster_good_health_resource,
+    cloudera_version_7_0_0,
+    instance,
+    get_custom_timeseries_resource,
+):
+    with mock.patch(
+        'cm_client.ClouderaManagerResourceApi.get_version',
+        return_value=cloudera_version_7_0_0,
+    ), mock.patch(
+        'cm_client.ClustersResourceApi.read_clusters',
+        return_value=list_one_cluster_good_health_resource,
+    ), mock.patch(
+        'cm_client.TimeSeriesResourceApi.query_time_series',
+        return_value=get_custom_timeseries_resource,
+    ):
+        # Given
+        instance['custom_queries'] = [
+            {'query': "select foo"},  # foo is given category of cluster in common.py
+        ]
+
+        check = cloudera_check(instance)
+        # When
+        dd_run_check(check)
+        # Then
+        aggregator.assert_metric("cloudera.cluster.foo")
