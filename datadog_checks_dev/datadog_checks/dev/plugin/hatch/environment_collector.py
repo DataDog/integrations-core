@@ -120,7 +120,7 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
             'dependencies': [
                 'black==22.12.0',
                 'flake8==5.0.4',
-                'flake8-bugbear==22.12.6',
+                'flake8-bugbear==22.9.11',
                 'flake8-logging-format==0.9.0',
                 'isort==5.11.4',
                 # Keep in sync with: /datadog_checks_base/pyproject.toml

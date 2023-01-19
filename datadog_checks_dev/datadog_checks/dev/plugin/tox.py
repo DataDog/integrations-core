@@ -22,7 +22,7 @@ FIX_DEFAULT_ENVDIR_FLAG = 'ensure_default_envdir'
 ISORT_DEP = 'isort==5.11.4'
 BLACK_DEP = 'black==22.12.0'
 FLAKE8_DEP = 'flake8==5.0.4'
-FLAKE8_BUGBEAR_DEP = 'flake8-bugbear==22.12.6'
+FLAKE8_BUGBEAR_DEP = 'flake8-bugbear==22.9.11'
 FLAKE8_LOGGING_FORMAT_DEP = 'flake8-logging-format==0.9.0'
 # TODO: remove extra when we drop Python 2
 MYPY_DEP = 'mypy[python2]==0.910'
