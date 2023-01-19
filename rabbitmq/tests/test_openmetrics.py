@@ -1,5 +1,6 @@
 from itertools import product
 from pathlib import Path
+from urllib.parse import urlparse
 
 import pytest
 
@@ -8,11 +9,27 @@ from datadog_checks.dev.http import MockResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.rabbitmq import RabbitMQ
 
-from .common import DEFAULT_OM_TAGS, HERE
-from .metrics import DEFAULT_OPENMETRICS, MISSING_OPENMETRICS
+from .common import HERE
+from .metrics import AGGREGATED_ONLY_METRICS, DEFAULT_OPENMETRICS, MISSING_OPENMETRICS
 
-OPENMETRICS_RESPONSE_FIXTURES = HERE / Path('fixtures')
+OM_RESPONSE_FIXTURES = HERE / Path('fixtures')
 TEST_URL = "http://localhost:15692"
+OM_ENDPOINT_TAG = f"endpoint:{TEST_URL}/metrics"
+BUILD_INFO_TAGS = [
+    'erlang_version:25.1.2',
+    'prometheus_client_version:4.9.1',
+    'prometheus_plugin_version:3.11.3',
+    'rabbitmq_version:3.11.3',
+]
+IDENTITY_INFO_TAGS = [
+    'rabbitmq_node:rabbit@54cfac2199f1',
+    "rabbitmq_cluster:rabbit@54cfac2199f1",
+    "rabbitmq_cluster_permanent_id:rabbitmq-cluster-id-cyw_z6c4UMIBoK51iVq9rw",
+]
+
+
+def _rmq_om_check(prom_plugin_settings):
+    return RabbitMQ("rabbitmq", {}, [{'prometheus_plugin': prom_plugin_settings}])
 
 
 @pytest.mark.parametrize(
@@ -27,22 +44,10 @@ def test_aggregated_endpoint(aggregated_setting, aggregator, dd_run_check, mock_
 
     We expect in this case all the metrics from the '/metrics' endpoint.
     """
-    mock_http_response(file_path=OPENMETRICS_RESPONSE_FIXTURES / "metrics.txt")
+    mock_http_response(file_path=OM_RESPONSE_FIXTURES / "metrics.txt")
     prometheus_settings = {'url': TEST_URL, **aggregated_setting}
-    check = RabbitMQ("rabbitmq", {}, [{'prometheus_plugin': prometheus_settings, "metrics": [".+"]}])
+    check = _rmq_om_check(prometheus_settings)
     dd_run_check(check)
-
-    build_info_tags = [
-        'erlang_version:25.1.2',
-        'prometheus_client_version:4.9.1',
-        'prometheus_plugin_version:3.11.3',
-        'rabbitmq_version:3.11.3',
-    ]
-    identity_info_tags = [
-        'rabbitmq_node:rabbit@54cfac2199f1',
-        "rabbitmq_cluster:rabbit@54cfac2199f1",
-        "rabbitmq_cluster_permanent_id:rabbitmq-cluster-id-cyw_z6c4UMIBoK51iVq9rw",
-    ]
 
     for m in DEFAULT_OPENMETRICS:
         aggregator.assert_metric(m)
@@ -50,251 +55,108 @@ def test_aggregated_endpoint(aggregated_setting, aggregator, dd_run_check, mock_
     for m in MISSING_OPENMETRICS:
         aggregator.assert_metric(m, at_least=0)
 
-    aggregator.assert_metric('rabbitmq.build_info', tags=DEFAULT_OM_TAGS + build_info_tags)
-    aggregator.assert_metric('rabbitmq.identity_info', tags=DEFAULT_OM_TAGS + identity_info_tags)
+    aggregator.assert_metric('rabbitmq.build_info', tags=[OM_ENDPOINT_TAG] + BUILD_INFO_TAGS)
+    aggregator.assert_metric('rabbitmq.identity_info', tags=[OM_ENDPOINT_TAG] + IDENTITY_INFO_TAGS)
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
     aggregator.assert_all_metrics_covered()
 
 
-def test_bare_detailed_endpoint(aggregator, dd_run_check, mock_http_response):
-    """User enables only the /metrics/detailed endpoint and without any query to it.
-
-    We expect at least metrics like build_info and identity_info to still be present.
-    """
-    mock_http_response(file_path=OPENMETRICS_RESPONSE_FIXTURES / "detailed.txt")
-    check = RabbitMQ(
-        "rabbitmq",
-        {},
-        [
-            {
-                'prometheus_plugin': {
-                    'url': TEST_URL,
-                    'unaggregated_endpoint': 'detailed',
-                    "include_aggregated_endpoint": False,
-                },
-                "metrics": [".+"],
-            }
-        ],
-    )
-    dd_run_check(check)
-    expected_metrics = [
-        dict(
-            name='rabbitmq.build_info',
-            value=1,
-            metric_type=aggregator.GAUGE,
-            tags=[
-                'erlang_version:25.1.2',
-                'prometheus_client_version:4.9.1',
-                'prometheus_plugin_version:3.11.3',
-                'rabbitmq_version:3.11.3',
+@pytest.mark.parametrize(
+    'endpoint, fixture_file, expected_metrics',
+    [
+        pytest.param("detailed", 'detailed.txt', [], id="no query"),
+        pytest.param(
+            'detailed?family=queue_coarse_metrics',
+            "detailed-queue_coarse_metrics.txt",
+            [
+                'rabbitmq.queue.messages',
+                'rabbitmq.queue.messages.ready',
+                'rabbitmq.queue.messages.unacked',
+                'rabbitmq.queue.process_reductions.count',
             ],
+            id="query queue_coarse_metrics family",
         ),
-        dict(
-            name='rabbitmq.identity_info',
-            value=1,
-            metric_type=aggregator.GAUGE,
-            tags=[
-                'rabbitmq_node:rabbit@54cfac2199f1',
-                "rabbitmq_cluster:rabbit@54cfac2199f1",
-                "rabbitmq_cluster_permanent_id:rabbitmq-cluster-id-cyw_z6c4UMIBoK51iVq9rw",
-            ],
-        ),
-    ]
-    for m in expected_metrics:
-        kwargs = {**m, "tags": [f"endpoint:{TEST_URL}/metrics/detailed"] + m.get('tags', [])}
-        aggregator.assert_metric(**kwargs)
-
-
-def test_detailed_endpoint_queue_coarse_metrics(aggregator, dd_run_check, mock_http_response):
-    """We scrape the /metrics/detailed endpoint with the 'queue_coarse_metrics' family query."""
-    mock_http_response(file_path=OPENMETRICS_RESPONSE_FIXTURES / "detailed-queue_coarse_metrics.txt")
-    check = RabbitMQ(
-        "rabbitmq",
-        {},
-        [
-            {
-                'prometheus_plugin': {
-                    'url': TEST_URL,
-                    'unaggregated_endpoint': 'detailed?family=queue_coarse_metrics',
-                    "include_aggregated_endpoint": False,
-                },
-                "metrics": [".+"],
-            }
-        ],
-    )
-    dd_run_check(check)
-
-    expected_metrics = (
-        [
-            dict(
-                name='rabbitmq.build_info',
-                value=1,
-                metric_type=aggregator.GAUGE,
-                tags=[
-                    'erlang_version:25.1.2',
-                    'prometheus_client_version:4.9.1',
-                    'prometheus_plugin_version:3.11.3',
-                    'rabbitmq_version:3.11.3',
-                ],
-            ),
-            dict(
-                name='rabbitmq.identity_info',
-                value=1,
-                metric_type=aggregator.GAUGE,
-                tags=[
-                    'rabbitmq_node:rabbit@54cfac2199f1',
-                    "rabbitmq_cluster:rabbit@54cfac2199f1",
-                    "rabbitmq_cluster_permanent_id:rabbitmq-cluster-id-cyw_z6c4UMIBoK51iVq9rw",
-                ],
-            ),
-        ]
-        + [
-            dict(
-                name=name,
-                value=value,
-                metric_type=aggregator.GAUGE,
-                tags=['vhost:/', f'queue:{qname}'],
-            )
-            for name, (value, qname) in product(
-                ('rabbitmq.queue.messages', 'rabbitmq.queue.messages.ready'),
-                ((0, 'queue1'), (1, 'queue2'), (0, 'queue3')),
-            )
-        ]
-        + [
-            dict(
-                name='rabbitmq.queue.messages.unacked',
-                value=0,
-                metric_type=aggregator.GAUGE,
-                tags=['vhost:/', f'queue:{qname}'],
-            )
-            for qname in ('queue1', 'queue2', 'queue3')
-        ]
-        + [
-            dict(
-                name='rabbitmq.queue.process_reductions.count',
-                value=value,
-                metric_type=aggregator.MONOTONIC_COUNT,
-                tags=['vhost:/', f'queue:{qname}'],
-            )
-            for qname, value in (('queue1', 30773), ('queue2', 30466), ('queue3', 35146))
-        ]
-    )
-    for m in expected_metrics:
-        kwargs = {
-            **m,
-            "tags": [f"endpoint:{TEST_URL}/metrics/detailed?family=queue_coarse_metrics"] + m.get('tags', []),
+    ],
+)
+def test_detailed_endpoint(endpoint, fixture_file, expected_metrics, aggregator, dd_run_check, mock_http_response):
+    mock_http_response(file_path=OM_RESPONSE_FIXTURES / fixture_file)
+    check = _rmq_om_check(
+        {
+            'url': TEST_URL,
+            'unaggregated_endpoint': endpoint,
+            "include_aggregated_endpoint": False,
         }
-        aggregator.assert_metric(**kwargs)
+    )
+    dd_run_check(check)
+
+    for m in expected_metrics:
+        aggregator.assert_metric(m)
+
+    for m in set(DEFAULT_OPENMETRICS).difference(expected_metrics):
+        # We check that all metrics that are not in the query don't show up at all.
+        aggregator.assert_metric(m, at_least=0)
+    aggregator.assert_metric('rabbitmq.build_info', tags=[OM_ENDPOINT_TAG + f"/{endpoint}"] + BUILD_INFO_TAGS)
+    aggregator.assert_metric('rabbitmq.identity_info', tags=[OM_ENDPOINT_TAG + f"/{endpoint}"] + IDENTITY_INFO_TAGS)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_all_metrics_covered()
 
 
 def test_per_object(aggregator, dd_run_check, mock_http_response):
     """We scrape the /metrics/per-object endpoint."""
-    mock_http_response(file_path=OPENMETRICS_RESPONSE_FIXTURES / "per-object.txt")
-    check = RabbitMQ(
-        "rabbitmq",
-        {},
-        [
-            {
-                'prometheus_plugin': {
-                    'url': TEST_URL,
-                    'unaggregated_endpoint': 'per-object',
-                    "include_aggregated_endpoint": False,
-                },
-                "metrics": [".+"],
-            }
-        ],
+    endpoint = "per-object"
+    fixture_file = "per-object.txt"
+    mock_http_response(file_path=OM_RESPONSE_FIXTURES / fixture_file)
+    check = _rmq_om_check(
+        {
+            'url': TEST_URL,
+            'unaggregated_endpoint': endpoint,
+            "include_aggregated_endpoint": False,
+        }
     )
     dd_run_check(check)
 
-    expected_metrics = (
-        [
-            dict(
-                name='rabbitmq.build_info',
-                value=1,
-                metric_type=aggregator.GAUGE,
-                tags=[
-                    'erlang_version:25.1.2',
-                    'prometheus_client_version:4.9.1',
-                    'prometheus_plugin_version:3.11.3',
-                    'rabbitmq_version:3.11.3',
-                ],
-            ),
-            dict(
-                name='rabbitmq.identity_info',
-                value=1,
-                metric_type=aggregator.GAUGE,
-                tags=[
-                    'rabbitmq_node:rabbit@54cfac2199f1',
-                    "rabbitmq_cluster:rabbit@54cfac2199f1",
-                    "rabbitmq_cluster_permanent_id:rabbitmq-cluster-id-cyw_z6c4UMIBoK51iVq9rw",
-                ],
-            ),
-        ]
-        + [
-            dict(
-                name=name,
-                value=value,
-                metric_type=aggregator.GAUGE,
-                tags=['vhost:/', f'queue:{qname}'],
-            )
-            for name, (value, qname) in product(
-                ('rabbitmq.queue.messages', 'rabbitmq.queue.messages.ready'),
-                ((0, 'queue1'), (1, 'queue2'), (0, 'queue3')),
-            )
-        ]
-        + [
-            dict(
-                name='rabbitmq.queue.messages.unacked',
-                value=0,
-                metric_type=aggregator.GAUGE,
-                tags=['vhost:/', f'queue:{qname}'],
-            )
-            for qname in ('queue1', 'queue2', 'queue3')
-        ]
-        + [
-            dict(
-                name='rabbitmq.queue.process_reductions.count',
-                value=value,
-                metric_type=aggregator.MONOTONIC_COUNT,
-                tags=['vhost:/', f'queue:{qname}'],
-            )
-            for qname, value in (('queue1', 34258), ('queue2', 38325), ('queue3', 30020))
-        ]
-    )
-    for m in expected_metrics:
-        kwargs = {
-            **m,
-            "tags": [f"endpoint:{TEST_URL}/metrics/per-object"] + m.get('tags', []),
-        }
-        aggregator.assert_metric(**kwargs)
+    for m in set(DEFAULT_OPENMETRICS).difference(AGGREGATED_ONLY_METRICS):
+        aggregator.assert_metric(m)
+
+    for m in MISSING_OPENMETRICS:
+        aggregator.assert_metric(m, at_least=0)
+
+    aggregator.assert_metric('rabbitmq.build_info', tags=[OM_ENDPOINT_TAG + f"/{endpoint}"] + BUILD_INFO_TAGS)
+    aggregator.assert_metric('rabbitmq.identity_info', tags=[OM_ENDPOINT_TAG + f"/{endpoint}"] + IDENTITY_INFO_TAGS)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_all_metrics_covered()
 
 
 def mock_http_responses(url, **_params):
-    from urllib.parse import urlparse
-
     parsed = urlparse(url)
     fname = {
         '/metrics': 'metrics.txt',
         '/metrics/per-object': 'per-object.txt',
         '/metrics/detailed?family=queue_consumer_count': 'detailed-queue_consumer_count.txt',
         '/metrics/detailed?family=queue_consumer_count&vhost=test': 'detailed-queue_consumer_count.txt',
-        '/metrics/detailed?family=queue_consumer_count&family=queue_coarse_metrics': 'detailed-queue_coarse_metrics-queue_consumer_count.txt',  # noqa: E501
+        (
+            '/metrics/detailed?family=queue_consumer_count' '&family=queue_coarse_metrics'
+        ): 'detailed-queue_coarse_metrics-queue_consumer_count.txt',
     }[parsed.path + (f"?{parsed.query}" if parsed.query else "")]
-    with open(OPENMETRICS_RESPONSE_FIXTURES / fname) as fh:
+    with open(OM_RESPONSE_FIXTURES / fname) as fh:
         return MockResponse(content=fh.read())
 
 
 @pytest.mark.parametrize(
-    'query, metrics',
+    'endpoint, metrics',
     [
-        pytest.param('family=queue_consumer_count', ['rabbitmq.queue.consumers'], id='one metric family'),
         pytest.param(
-            'family=queue_consumer_count&vhost=test',
+            'detailed?family=queue_consumer_count',
             ['rabbitmq.queue.consumers'],
-            id='one metric family with vhost query',
+            id='detailed?family=queue_consumer_count',
         ),
         pytest.param(
-            'family=queue_consumer_count&family=queue_coarse_metrics',
+            'detailed?family=queue_consumer_count&vhost=test',
+            ['rabbitmq.queue.consumers'],
+            id='detailed?family=queue_consumer_count&vhost=test',
+        ),
+        pytest.param(
+            'detailed?family=queue_consumer_count&family=queue_coarse_metrics',
             [
                 'rabbitmq.queue.consumers',
                 'rabbitmq.queue.messages',
@@ -304,53 +166,48 @@ def mock_http_responses(url, **_params):
             ],
             id="two metric families",
         ),
+        pytest.param('per-object', set(DEFAULT_OPENMETRICS).difference(AGGREGATED_ONLY_METRICS), id='per-object'),
     ],
 )
-def test_aggregated_and_detailed_endpoints(query, metrics, aggregator, dd_run_check, mocker):
+def test_aggregated_and_unaggregated_endpoints(endpoint, metrics, aggregator, dd_run_check, mocker):
     """Detailed and aggregated endpoints queried together.
 
     We will drop duplicate metrics coming from both endpoints in favor of the
     detailed ones as they can provide more information.
     """
-    detailed_ep = f'detailed?{query}'
-    check = RabbitMQ(
-        "rabbitmq",
-        {},
-        [
-            {
-                'prometheus_plugin': {
-                    'url': "http://localhost:15692",
-                    'unaggregated_endpoint': detailed_ep,
-                    'include_aggregated_endpoint': True,
-                },
-            }
-        ],
+    check = _rmq_om_check(
+        {
+            'url': "http://localhost:15692",
+            'unaggregated_endpoint': endpoint,
+            'include_aggregated_endpoint': True,
+        }
     )
     mocker.patch('requests.get', wraps=mock_http_responses)
     dd_run_check(check)
 
     for m in metrics:
-        aggregator.assert_metric_has_tag(
-            m,
-            f'endpoint:http://localhost:15692/metrics/{detailed_ep}',
-        )
+        aggregator.assert_metric_has_tag(m, f'endpoint:http://localhost:15692/metrics/{endpoint}', at_least=1)
         # Here we want to make sure that we don't collect the equivalent metrics from
         # the aggregated endpoint.
-        aggregator.assert_metric_has_tag(
-            m,
-            'endpoint:http://localhost:15692/metrics',
-            count=0,
-            at_least=0,
-        )
+        aggregator.assert_metric_has_tag(m, 'endpoint:http://localhost:15692/metrics', at_least=0)
+    for m in set(DEFAULT_OPENMETRICS).difference(metrics):
+        # We check the equivalent for metrics that come from the aggregated endpoint.
+        aggregator.assert_metric_has_tag(m, f'endpoint:http://localhost:15692/metrics/{endpoint}', at_least=0)
+        aggregator.assert_metric_has_tag(m, 'endpoint:http://localhost:15692/metrics', at_least=1)
 
     # Identity and build info metrics should come from both endpoints.
-    for m in ['rabbitmq.build_info', 'rabbitmq.identity_info']:
-        aggregator.assert_metric_has_tag(m, f'endpoint:http://localhost:15692/metrics/{detailed_ep}', count=1)
-        aggregator.assert_metric_has_tag(m, 'endpoint:http://localhost:15692/metrics', count=1)
+    for m, tag in product(
+        ['rabbitmq.build_info', 'rabbitmq.identity_info'],
+        [
+            f'endpoint:http://localhost:15692/metrics/{endpoint}',
+            'endpoint:http://localhost:15692/metrics',
+        ],
+    ):
+        aggregator.assert_metric_has_tag(m, tag, count=1)
 
 
 @pytest.mark.parametrize(
-    'plugin_config, err',
+    'prom_plugin_settings, err',
     [
         pytest.param({}, r'prometheus_plugin\.url field is required\.', id="No URL supplied."),
         pytest.param(
@@ -382,7 +239,7 @@ def test_aggregated_and_detailed_endpoints(query, metrics, aggregator, dd_run_ch
         ),
     ],
 )
-def test_config(plugin_config, err):
-    check = RabbitMQ("rabbitmq", {}, [{'prometheus_plugin': plugin_config}])
+def test_config(prom_plugin_settings, err):
+    check = _rmq_om_check(prom_plugin_settings)
     with pytest.raises(ConfigurationError, match=err):
         check.load_configuration_models()

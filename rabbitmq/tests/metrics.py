@@ -333,3 +333,11 @@ MISSING_OPENMETRICS = [
     'rabbitmq.queue.consumer_capacity',
     'rabbitmq.queue.messages.persistent_bytes',
 ]
+
+# Metrics only present in the aggregated endpoint.
+AGGREGATED_ONLY_METRICS = [
+    "rabbitmq.process_start_time_seconds",
+    "rabbitmq.alarms.file_descriptor_limit",
+    "rabbitmq.alarms.free_disk_space.watermark",
+    "rabbitmq.alarms.memory_used_watermark",
+]
