@@ -12,7 +12,7 @@ from packaging import version
 from datadog_checks.dev import docker_run, temp_dir
 from datadog_checks.rabbitmq import RabbitMQ
 
-from .common import CHECK_NAME, CONFIG, HERE, HOST, PORT, RABBITMQ_VERSION
+from .common import CHECK_NAME, CONFIG, HERE, HOST, OPENMETRICS_CONFIG, PORT, RABBITMQ_VERSION
 
 
 @pytest.fixture(scope="session")
@@ -34,7 +34,10 @@ def dd_environment():
     with docker_run(
         compose_file, log_patterns='Server startup complete', env_vars=env, conditions=[setup_rabbitmq], sleep=5
     ):
-        yield CONFIG
+        if RABBITMQ_VERSION >= version.parse("3.8"):
+            yield OPENMETRICS_CONFIG
+        else:
+            yield CONFIG
 
 
 def setup_rabbitmq():
@@ -169,12 +172,7 @@ def instance():
     return CONFIG
 
 
-def pytest_collection_modifyitems(config, items):
-    for item in items:
-        if "openmetrics" in os.path.relpath(item.fspath, start=config.rootdir):
-            item.add_marker(
-                pytest.mark.skipif(
-                    RABBITMQ_VERSION < version.parse("3.8"),
-                    reason='No openmetrics support in rabbitmq <3.8',
-                )
-            )
+# https://docs.pytest.org/en/7.1.x/example/pythoncollection.html#customizing-test-collection
+collect_ignore_glob = []
+if RABBITMQ_VERSION < version.parse("3.8"):
+    collect_ignore_glob.append("*openmetrics*")
