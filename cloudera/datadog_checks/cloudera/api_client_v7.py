@@ -183,9 +183,12 @@ class ApiClientV7(ApiClient):
 
     def _collect_host_metrics(self, host, tags):
         # Use 2 workers since we are executing 2 tasks in parallel.
+        futures = []
         with ThreadPoolExecutor(max_workers=2) as executor:
-            executor.submit(self._collect_host_native_metrics, host, tags)
-            executor.submit(self._collect_host_timeseries_metrics, host, tags)
+            futures.append(executor.submit(self._collect_host_native_metrics, host, tags))
+            futures.append(executor.submit(self._collect_host_timeseries_metrics, host, tags))
+        for future in futures:
+            future.result()
 
     def _collect_host_native_metrics(self, host, tags):
         for metric in NATIVE_METRICS['host']:
