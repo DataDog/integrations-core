@@ -49,6 +49,10 @@ EXPECTED_CONTAINER_METRICS_WINDOWS = [
     'ecs.fargate.mem.max_usage',
 ]
 
+EXPECTED_TASK_METRICS = [
+    "ecs.fargate.cpu.task.limit",
+]
+
 EXTRA_EXPECTED_CONTAINER_METRICS_LINUX = [
     'ecs.fargate.cpu.limit',
     'ecs.fargate.mem.hierarchical_memory_limit',
@@ -132,6 +136,12 @@ def mocked_get_tags(entity, _):
             "ecs_container_name:~internal~ecs~pause",
             "container_id:39e13ccc425e7777187a603fe33f466a18515030707c4063de1dc1b63d14d411",
             "container_name:ecs-redis-datadog-1-internalecspause-a2df9cefc2938ec19e01",
+            "task_arn:arn:aws:ecs:eu-west-1:172597598159:task/648ca535-cbe0-4de7-b102-28e50b81e888",
+        ],
+        "internal://global-entity-id": [
+            "cluster_name:pierrem-test-fargate",
+            "task_family:redis-datadog",
+            "task_version:1",
             "task_arn:arn:aws:ecs:eu-west-1:172597598159:task/648ca535-cbe0-4de7-b102-28e50b81e888",
         ],
     }
