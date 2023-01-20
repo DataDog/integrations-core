@@ -20,11 +20,13 @@ The RabbitMQ check is included in the [Datadog Agent][3] package. No additional 
 
 ### Configuration
 
-Rabbitmq exposes metrics in two ways: the [RabbitMQ Management Plugin][4] and the [Rabbitmq Prometheus Plugin][19]. We support both of these plugins.
+Rabbitmq exposes metrics in two ways: the [RabbitMQ Management Plugin][4] and the [Rabbitmq Prometheus Plugin][19]. The RabbitMQ integration supports both of these plugins.
 
 #### Prepare RabbitMQ
 
-These steps are only needed for the [RabbitMQ Management Plugin][4]. Starting with Rabbitmq v3.8 the [Rabbitmq Prometheus Plugin][19] is enabled by default and our integration communicates with it over an HTTP API.
+##### [RabbitMQ Management Plugin][4]. 
+
+__Note: Starting with RabbitMQ v3.8, the [Rabbitmq Prometheus Plugin][19] is enabled by default and our integration communicates with it over an HTTP API.__
 
 Enable the plugin. The Agent user then needs at least the `monitoring` tag and these required permissions:
 
@@ -59,19 +61,7 @@ To configure this check for an Agent running on a host:
 
 2. [Restart the Agent][8].
 
-##### Migrating from Management Plugin to Prometheus Plugin.
-
-If you were using this integration with the Rabbitmq Management Plugin and would like to switch to the Prometheus Plugin, this section is for you.
-
-You can switch the configuration by introducing a `prometheus_plugin` section in your instance configuration. As soon as you do so, any settings related to the Management Plugin are ignored. Below is an example of a minimal config sufficient to make the switch.
-
-```yaml
-instances:
-  - prometheus_plugin:
-      url: http://<HOST>:15692
-```
-
-This enables scraping of the [`/metrics` endpoint][20] on one rabbitmq node.
+##### RabbitMQ Prometheus Plugin
 
 For your convenience we also include the following table that helps map metrics coming from the Management plugin to their Prometheus plugin equivalents.
 
