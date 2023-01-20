@@ -185,6 +185,9 @@ _GAUGES = {
     "rabbitmq_channel_messages_unconfirmed": "channel.messages.unconfirmed",
     "rabbitmq_channel_prefetch": "channel.prefetch",
     "rabbitmq_channels": "channels",
+    "rabbitmq_cluster_vhost_status": "cluster.vhost_status",
+    "rabbitmq_cluster_exchange_name": "cluster.exchange_name",
+    "rabbitmq_cluster_exchange_bindings": "cluster.exchange_bindings",
     "rabbitmq_connection_channels": "connection.channels",
     "rabbitmq_connection_pending_packets": "connection.pending_packets",
     "rabbitmq_connections": "connections",
@@ -392,7 +395,6 @@ _DETAILED_FAMILIES = {
     },
     "channel_queue_exchange_metrics": {"rabbitmq_queue_messages_published_total"},
     # Virtual hosts and exchange metrics
-    # TODO: Add these metrics to the mapping/metadata
     "vhost_status": {"rabbitmq_cluster_vhost_status"},
     "exchange_names": {"rabbitmq_cluster_exchange_name"},
     "exchange_bindings": {"rabbitmq_cluster_exchange_bindings"},
