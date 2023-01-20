@@ -24,44 +24,7 @@ Rabbitmq exposes metrics in two ways: the [RabbitMQ Management Plugin][4] and th
 
 #### Prepare RabbitMQ
 
-##### [RabbitMQ Management Plugin][4]. 
-
-__Note: Starting with RabbitMQ v3.8, the [Rabbitmq Prometheus Plugin][19] is enabled by default and our integration communicates with it over an HTTP API.__
-
-Enable the plugin. The Agent user then needs at least the `monitoring` tag and these required permissions:
-
-| Permission | Command            |
-| ---------- | ------------------ |
-| **conf**   | `^aliveness-test$` |
-| **write**  | `^amq\.default$`   |
-| **read**   | `.*`               |
-
-Create an Agent user for your default vhost with the following commands:
-
-```text
-rabbitmqctl add_user datadog <SECRET>
-rabbitmqctl set_permissions  -p / datadog "^aliveness-test$" "^amq\.default$" ".*"
-rabbitmqctl set_user_tags datadog monitoring
-```
-
-Here, `/` refers to the default host. Set this to your specified virtual host name. See the [RabbitMQ documentation][5] for more information.
-
-<!-- xxx tabs xxx -->
-<!-- xxx tab "Host" xxx -->
-
-#### Host
-
-To configure this check for an Agent running on a host:
-
-##### Metric collection
-
-1. Edit the `rabbitmq.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][6] to start collecting your RabbitMQ metrics. See the [sample rabbitmq.d/conf.yaml][7] for all available configuration options.
-
-    **Note**: The Agent checks all queues, vhosts, and nodes by default, but you can provide lists or regexes to limit this. See the [rabbitmq.d/conf.yaml][7] for examples.
-
-2. [Restart the Agent][8].
-
-##### RabbitMQ Prometheus Plugin
+##### [RabbitMQ Prometheus Plugin][19].
 
 For your convenience we also include the following table that helps map metrics coming from the Management plugin to their Prometheus plugin equivalents.
 
@@ -147,7 +110,42 @@ The following Management plugin metrics to our knowledge have no equivalent in t
 - rabbitmq.queue.messages\_ready.rate
 - rabbitmq.queue.messages\_unacknowledged.rate
 
+##### [RabbitMQ Management Plugin][4].
 
+__Note: Starting with RabbitMQ v3.8, the [Rabbitmq Prometheus Plugin][19] is enabled by default and our integration communicates with it over an HTTP API.__
+
+Enable the plugin. The Agent user then needs at least the `monitoring` tag and these required permissions:
+
+| Permission | Command            |
+| ---------- | ------------------ |
+| **conf**   | `^aliveness-test$` |
+| **write**  | `^amq\.default$`   |
+| **read**   | `.*`               |
+
+Create an Agent user for your default vhost with the following commands:
+
+```text
+rabbitmqctl add_user datadog <SECRET>
+rabbitmqctl set_permissions  -p / datadog "^aliveness-test$" "^amq\.default$" ".*"
+rabbitmqctl set_user_tags datadog monitoring
+```
+
+Here, `/` refers to the default host. Set this to your specified virtual host name. See the [RabbitMQ documentation][5] for more information.
+
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
+#### Host
+
+To configure this check for an Agent running on a host:
+
+##### Metric collection
+
+1. Edit the `rabbitmq.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][6] to start collecting your RabbitMQ metrics. See the [sample rabbitmq.d/conf.yaml][7] for all available configuration options.
+
+    **Note**: The Agent checks all queues, vhosts, and nodes by default, but you can provide lists or regexes to limit this. See the [rabbitmq.d/conf.yaml][7] for examples.
+
+2. [Restart the Agent][8].
 
 ##### Log collection
 
