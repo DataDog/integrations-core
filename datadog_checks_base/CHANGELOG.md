@@ -4,7 +4,7 @@
 
 * [Added] Bump snowflake to 2.8.3. See [#13756](https://github.com/DataDog/integrations-core/pull/13756).
 * [Fixed] Update dependencies. See [#13726](https://github.com/DataDog/integrations-core/pull/13726).
-* [Changed] Skip typo or not yet installed Windows performance counters to allow collection of subsequent counters. See [#13678](https://github.com/DataDog/integrations-core/pull/13678).
+* [Changed] Skip typo for not yet installed Windows performance counters to allow collection of subsequent counters. See [#13678](https://github.com/DataDog/integrations-core/pull/13678).
 
 ## 29.0.0 / 2023-01-10
 
