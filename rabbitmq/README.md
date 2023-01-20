@@ -26,7 +26,7 @@ Rabbitmq exposes metrics in two ways: the [RabbitMQ Management Plugin][4] and th
 
 ##### [RabbitMQ Prometheus Plugin][19].
 
-For your convenience we also include the following table that helps map metrics coming from the Management plugin to their Prometheus plugin equivalents.
+For your convenience the following table helps map metrics coming from the Management plugin to their Prometheus plugin equivalents.
 
 | Management Plugin metric                                                    | Prometheus Plugin Equivalent                                                                                                                | Endpoint            |
 |----------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------|---------------------|
