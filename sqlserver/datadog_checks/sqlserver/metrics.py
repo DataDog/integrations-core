@@ -583,11 +583,14 @@ class SqlDatabaseStats(BaseSqlServerMetric):
         value_column_index = columns.index(self.column)
 
         for row in rows:
+            if row[database_name].lower() != self.instance.lower():
+                continue
+
             column_val = row[value_column_index]
             db_state_desc = row[db_state_desc_index]
             db_recovery_model_desc = row[db_recovery_model_desc_index]
             metric_tags = [
-                'database:{}'.format(str(row[database_name])),
+                'database:{}'.format(str(self.instance)),
                 'database_state_desc:{}'.format(str(db_state_desc)),
                 'database_recovery_model_desc:{}'.format(str(db_recovery_model_desc)),
             ]

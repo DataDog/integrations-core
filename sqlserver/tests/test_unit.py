@@ -320,11 +320,12 @@ def test_resolved_hostname(dbm_enabled, instance_host, database, reported_hostna
 
 
 def test_database_state(aggregator, dd_run_check, init_config, instance_docker):
+    instance_docker['database'] = 'mAsTeR'
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker])
     dd_run_check(sqlserver_check)
     expected_tags = instance_docker.get('tags', []) + [
         'database_recovery_model_desc:SIMPLE',
         'database_state_desc:ONLINE',
-        'database:msdb',
+        'database:{}'.format(instance_docker['database']),
     ]
     aggregator.assert_metric('sqlserver.database.state', tags=expected_tags, hostname=sqlserver_check.resolved_hostname)
