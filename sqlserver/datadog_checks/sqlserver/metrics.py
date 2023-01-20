@@ -23,7 +23,7 @@ class BaseSqlServerMetric(object):
     """Base class for SQL Server metrics collection operations.
 
     Each subclass defines the TABLE it's associated with, and the default
-    query to collect all of the information in one request.  This query gets
+    query to collect all the information in one request.  This query gets
     executed as part of the classmethod `fetch_all_values` and the data gets passed
     to the instance method `fetch_metric` which extracts the appropriate metric from
     within the larger collection.
@@ -48,6 +48,7 @@ class BaseSqlServerMetric(object):
             partial_kwargs['hostname'] = cfg_instance['hostname']
         self.report_function = partial(report_function, raw=True, **partial_kwargs)
         self.instance = cfg_instance.get('instance_name', '')
+        self.physical_db_name = cfg_instance.get('physical_db_name', None)
         self.object_name = cfg_instance.get('object_name', '')
         self.tags = cfg_instance.get('tags', [])
         self.tag_by = cfg_instance.get('tag_by', None)
@@ -109,7 +110,8 @@ class SqlSimpleMetric(BaseSqlServerMetric):
                 metric_tags = list(self.tags)
 
                 if (self.instance == ALL_INSTANCES and instance_name != "_Total") or (
-                    instance_name == self.instance and (not self.object_name or object_name == self.object_name)
+                    (instance_name == self.instance or instance_name == self.physical_db_name)
+                    and (not self.object_name or object_name == self.object_name)
                 ):
                     matched = True
 
@@ -181,7 +183,7 @@ class SqlFractionMetric(BaseSqlServerMetric):
             if inst in done_instances:
                 continue
 
-            if (self.instance != ALL_INSTANCES and inst != self.instance) or (
+            if (self.instance != ALL_INSTANCES and (inst != self.instance or inst != self.physical_db_name)) or (
                 self.object_name and object_name != self.object_name
             ):
                 done_instances.append(inst)
