@@ -21,7 +21,7 @@ contextlib2==0.6.0.post1; python_version < '3.0'
 cryptography==3.3.2; python_version < '3.0'
 cryptography==38.0.3; python_version > '3.0'
 ddtrace==0.32.2; sys_platform == 'win32' and python_version < '3.0'
-ddtrace==0.53.2; (sys_platform != 'win32' and (sys_platform != 'darwin' or platform_machine != 'arm64')) or python_version > '3.0'
+ddtrace==0.53.2; (sys_platform != 'win32' and (sys_platform != 'darwin' or platform_machine != 'arm64' and python_version > '3.0')) or python_version > '3.0'
 dnspython==1.16.0
 enum34==1.1.10; python_version < '3.0'
 foundationdb==6.3.24; python_version > '3.0'
