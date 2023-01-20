@@ -692,7 +692,7 @@ Monitor Fargate logs by using the `awslogs` log driver and a Lambda function to 
 
 ### Trace collection
 
-1. Follow the [instructions above](#installation) to add the Datadog Agent container to your task definition with the additional environment variable `DD_APM_ENABLED` set to `true` and set up a container port that uses **8126** with **tcp** protocol under port mappings. Set the `DD_SITE` variable to {{< region-param key="dd_site" code="true" >}}. It defaults to `datadoghq.com` if you don't set it.
+1. Follow the [instructions above](#installation) to add the Datadog Agent container to your task definition with the additional environment variable `DD_APM_ENABLED` set to `true`. Set the `DD_SITE` variable to {{< region-param key="dd_site" code="true" >}}. It defaults to `datadoghq.com` if you don't set it.
 
 2. [Instrument your application][32] based on your setup. With Fargate APM applications do **not** set `DD_AGENT_HOST`, the default of `localhost` works.
 
