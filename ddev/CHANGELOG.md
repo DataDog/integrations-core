@@ -1,5 +1,11 @@
 # CHANGELOG - ddev
 
+## 1.4.0 / 2023-01-20
+
+* [Added] Update manifest validation. See [#13637](https://github.com/DataDog/integrations-core/pull/13637).
+* [Added] Standardize integration selection. See [#13570](https://github.com/DataDog/integrations-core/pull/13570).
+* [Fixed] And fallbacks to some org config options. See [#13629](https://github.com/DataDog/integrations-core/pull/13629).
+
 ## 1.3.0 / 2022-12-09
 
 * [Added] Add `validate license-header` subcommand. See [#13417](https://github.com/DataDog/integrations-core/pull/13417).

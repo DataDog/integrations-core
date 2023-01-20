@@ -37,7 +37,7 @@ datadog-couchbase==2.2.0
 datadog-crio==2.3.0
 datadog-datadog-cluster-agent==2.4.0
 datadog-directory==1.14.0
-datadog-disk==4.8.0
+datadog-disk==4.9.0
 datadog-dns-check==2.3.0
 datadog-dotnetclr==1.13.0; sys_platform == 'win32'
 datadog-druid==2.2.0
