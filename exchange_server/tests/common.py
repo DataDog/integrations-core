@@ -3,9 +3,10 @@
 # Licensed under Simplified BSD License (see LICENSE)
 from datadog_checks.exchange_server.metrics import METRICS_CONFIG
 
+CHECK_NAME = 'exchange_server'
 MINIMAL_INSTANCE = {'host': '.'}
 
-CHECK_NAME = 'exchange_server'
+INSTANCE = {'host': '.'}
 
 DATABASE_INSTANCES = [
     'Information Store/_Total',
@@ -219,8 +220,8 @@ for object_name, instances in (
     ('System', [None]),
     ('Memory', [None]),
     ('Network Interface', ['AWS PV Network Device', 'isatap.{C7BAFAFE-DBF4-4C76-B406-8A25283E4CF9}']),
-    ('TCPv6', []),
-    ('TCPv4', []),
+    ('TCPv6', [None]),
+    ('TCPv4', [None]),
     ('Netlogon', ['foo']),
     ('MSExchange Database ==> Instances', DATABASE_INSTANCES),
     ('MSExchange Active Manager', [None]),
@@ -229,9 +230,9 @@ for object_name, instances in (
     ('MSExchangeIS Store', ['mailbox database 1266275882']),
     ('MSExchangeIS Client Type', CLIENT_TYPE_INSTANCES),
     ('MSExchange ActiveSync', [None]),
-    ('MSExchange OWA', []),
-    ('MSExchangeAutodiscover', []),
-    ('MSExchangeWS', []),
+    ('MSExchange OWA', [None]),
+    ('MSExchangeAutodiscover', [None]),
+    ('MSExchangeWS', [None]),
     ('Web Service', WEB_SITE_INSTANCES),
     ('MSExchange WorkloadManagement Workloads', WORKLOAD_INSTANCES),
 ):

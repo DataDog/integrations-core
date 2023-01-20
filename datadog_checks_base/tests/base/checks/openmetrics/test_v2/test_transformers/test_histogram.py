@@ -1,17 +1,12 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import pytest
-
 from datadog_checks.dev.testing import requires_py3
 
 from ..utils import get_check
 
 pytestmark = [
     requires_py3,
-    pytest.mark.openmetrics,
-    pytest.mark.openmetrics_transformers,
-    pytest.mark.openmetrics_transformers_histogram,
 ]
 
 
@@ -358,7 +353,7 @@ def test_histogram_buckets_as_distributions(aggregator, dd_run_check, mock_http_
         0.002,
         0.004,
         True,
-        check.hostname,
+        '',
         ['endpoint:test', 'url:http://127.0.0.1:8080/api', 'verb:GET', 'upper_bound:0.004', 'lower_bound:0.002'],
     )
     aggregator.assert_histogram_bucket(
@@ -367,7 +362,7 @@ def test_histogram_buckets_as_distributions(aggregator, dd_run_check, mock_http_
         0,
         0.001,
         True,
-        check.hostname,
+        '',
         ['endpoint:test', 'url:http://127.0.0.1:8080/api', 'verb:GET', 'upper_bound:0.001', 'lower_bound:0'],
     )
     aggregator.assert_histogram_bucket(
@@ -376,7 +371,7 @@ def test_histogram_buckets_as_distributions(aggregator, dd_run_check, mock_http_
         0.001,
         0.002,
         True,
-        check.hostname,
+        '',
         ['endpoint:test', 'url:http://127.0.0.1:8080/api', 'verb:GET', 'upper_bound:0.002', 'lower_bound:0.001'],
     )
     aggregator.assert_histogram_bucket(
@@ -385,7 +380,7 @@ def test_histogram_buckets_as_distributions(aggregator, dd_run_check, mock_http_
         0.004,
         0.008,
         True,
-        check.hostname,
+        '',
         ['endpoint:test', 'url:http://127.0.0.1:8080/api', 'verb:GET', 'upper_bound:0.008', 'lower_bound:0.004'],
     )
     aggregator.assert_histogram_bucket(
@@ -394,7 +389,7 @@ def test_histogram_buckets_as_distributions(aggregator, dd_run_check, mock_http_
         0.008,
         0.016,
         True,
-        check.hostname,
+        '',
         ['endpoint:test', 'url:http://127.0.0.1:8080/api', 'verb:GET', 'upper_bound:0.016', 'lower_bound:0.008'],
     )
     aggregator.assert_histogram_bucket(
@@ -403,7 +398,7 @@ def test_histogram_buckets_as_distributions(aggregator, dd_run_check, mock_http_
         0.016,
         0.032,
         True,
-        check.hostname,
+        '',
         ['endpoint:test', 'url:http://127.0.0.1:8080/api', 'verb:GET', 'upper_bound:0.032', 'lower_bound:0.016'],
     )
     aggregator.assert_histogram_bucket(
@@ -412,7 +407,7 @@ def test_histogram_buckets_as_distributions(aggregator, dd_run_check, mock_http_
         0.032,
         0.064,
         True,
-        check.hostname,
+        '',
         ['endpoint:test', 'url:http://127.0.0.1:8080/api', 'verb:GET', 'upper_bound:0.064', 'lower_bound:0.032'],
     )
     aggregator.assert_histogram_bucket(
@@ -421,7 +416,7 @@ def test_histogram_buckets_as_distributions(aggregator, dd_run_check, mock_http_
         0.064,
         0.128,
         True,
-        check.hostname,
+        '',
         ['endpoint:test', 'url:http://127.0.0.1:8080/api', 'verb:GET', 'upper_bound:0.128', 'lower_bound:0.064'],
     )
     aggregator.assert_histogram_bucket(
@@ -430,7 +425,7 @@ def test_histogram_buckets_as_distributions(aggregator, dd_run_check, mock_http_
         0.128,
         0.256,
         True,
-        check.hostname,
+        '',
         ['endpoint:test', 'url:http://127.0.0.1:8080/api', 'verb:GET', 'upper_bound:0.256', 'lower_bound:0.128'],
     )
     aggregator.assert_histogram_bucket(
@@ -439,7 +434,7 @@ def test_histogram_buckets_as_distributions(aggregator, dd_run_check, mock_http_
         0.256,
         0.512,
         True,
-        check.hostname,
+        '',
         ['endpoint:test', 'url:http://127.0.0.1:8080/api', 'verb:GET', 'upper_bound:0.512', 'lower_bound:0.256'],
     )
     aggregator.assert_histogram_bucket(
@@ -448,7 +443,7 @@ def test_histogram_buckets_as_distributions(aggregator, dd_run_check, mock_http_
         0.512,
         float('Inf'),
         True,
-        check.hostname,
+        '',
         ['endpoint:test', 'url:http://127.0.0.1:8080/api', 'verb:GET', 'upper_bound:inf', 'lower_bound:0.512'],
     )
 
@@ -504,7 +499,7 @@ def test_histogram_buckets_as_distributions_with_counters(aggregator, dd_run_che
         0.002,
         0.004,
         True,
-        check.hostname,
+        '',
         ['endpoint:test', 'url:http://127.0.0.1:8080/api', 'verb:GET', 'upper_bound:0.004', 'lower_bound:0.002'],
     )
     aggregator.assert_histogram_bucket(
@@ -513,7 +508,7 @@ def test_histogram_buckets_as_distributions_with_counters(aggregator, dd_run_che
         0,
         0.001,
         True,
-        check.hostname,
+        '',
         ['endpoint:test', 'url:http://127.0.0.1:8080/api', 'verb:GET', 'upper_bound:0.001', 'lower_bound:0'],
     )
     aggregator.assert_histogram_bucket(
@@ -522,7 +517,7 @@ def test_histogram_buckets_as_distributions_with_counters(aggregator, dd_run_che
         0.001,
         0.002,
         True,
-        check.hostname,
+        '',
         ['endpoint:test', 'url:http://127.0.0.1:8080/api', 'verb:GET', 'upper_bound:0.002', 'lower_bound:0.001'],
     )
     aggregator.assert_histogram_bucket(
@@ -531,7 +526,7 @@ def test_histogram_buckets_as_distributions_with_counters(aggregator, dd_run_che
         0.004,
         0.008,
         True,
-        check.hostname,
+        '',
         ['endpoint:test', 'url:http://127.0.0.1:8080/api', 'verb:GET', 'upper_bound:0.008', 'lower_bound:0.004'],
     )
     aggregator.assert_histogram_bucket(
@@ -540,7 +535,7 @@ def test_histogram_buckets_as_distributions_with_counters(aggregator, dd_run_che
         0.008,
         0.016,
         True,
-        check.hostname,
+        '',
         ['endpoint:test', 'url:http://127.0.0.1:8080/api', 'verb:GET', 'upper_bound:0.016', 'lower_bound:0.008'],
     )
     aggregator.assert_histogram_bucket(
@@ -549,7 +544,7 @@ def test_histogram_buckets_as_distributions_with_counters(aggregator, dd_run_che
         0.016,
         0.032,
         True,
-        check.hostname,
+        '',
         ['endpoint:test', 'url:http://127.0.0.1:8080/api', 'verb:GET', 'upper_bound:0.032', 'lower_bound:0.016'],
     )
     aggregator.assert_histogram_bucket(
@@ -558,7 +553,7 @@ def test_histogram_buckets_as_distributions_with_counters(aggregator, dd_run_che
         0.032,
         0.064,
         True,
-        check.hostname,
+        '',
         ['endpoint:test', 'url:http://127.0.0.1:8080/api', 'verb:GET', 'upper_bound:0.064', 'lower_bound:0.032'],
     )
     aggregator.assert_histogram_bucket(
@@ -567,7 +562,7 @@ def test_histogram_buckets_as_distributions_with_counters(aggregator, dd_run_che
         0.064,
         0.128,
         True,
-        check.hostname,
+        '',
         ['endpoint:test', 'url:http://127.0.0.1:8080/api', 'verb:GET', 'upper_bound:0.128', 'lower_bound:0.064'],
     )
     aggregator.assert_histogram_bucket(
@@ -576,7 +571,7 @@ def test_histogram_buckets_as_distributions_with_counters(aggregator, dd_run_che
         0.128,
         0.256,
         True,
-        check.hostname,
+        '',
         ['endpoint:test', 'url:http://127.0.0.1:8080/api', 'verb:GET', 'upper_bound:0.256', 'lower_bound:0.128'],
     )
     aggregator.assert_histogram_bucket(
@@ -585,7 +580,7 @@ def test_histogram_buckets_as_distributions_with_counters(aggregator, dd_run_che
         0.256,
         0.512,
         True,
-        check.hostname,
+        '',
         ['endpoint:test', 'url:http://127.0.0.1:8080/api', 'verb:GET', 'upper_bound:0.512', 'lower_bound:0.256'],
     )
     aggregator.assert_histogram_bucket(
@@ -594,7 +589,7 @@ def test_histogram_buckets_as_distributions_with_counters(aggregator, dd_run_che
         0.512,
         float('Inf'),
         True,
-        check.hostname,
+        '',
         ['endpoint:test', 'url:http://127.0.0.1:8080/api', 'verb:GET', 'upper_bound:inf', 'lower_bound:0.512'],
     )
 

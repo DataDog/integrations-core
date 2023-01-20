@@ -14,6 +14,8 @@ from six import iteritems
 from datadog_checks.postgres import PostgreSql, util
 from datadog_checks.postgres.version_utils import VersionUtils
 
+from .common import PORT
+
 pytestmark = pytest.mark.unit
 
 
@@ -243,16 +245,49 @@ def test_replication_stats(aggregator, integration_check, pg_instance):
     check = integration_check(pg_instance)
     check.check(pg_instance)
     base_tags = ['foo:bar', 'port:5432']
-    app1_tags = base_tags + ['wal_sync_state:async', 'wal_state:streaming', 'wal_app_name:app1']
-    app2_tags = base_tags + ['wal_sync_state:sync', 'wal_state:backup', 'wal_app_name:app2']
+    app1_tags = base_tags + [
+        'wal_sync_state:async',
+        'wal_state:streaming',
+        'wal_app_name:app1',
+        'wal_client_addr:1.1.1.1',
+    ]
+    app2_tags = base_tags + ['wal_sync_state:sync', 'wal_state:backup', 'wal_app_name:app2', 'wal_client_addr:1.1.1.1']
 
     aggregator.assert_metric('postgresql.db.count', 0, base_tags)
-    for suffix in ('wal_write_lag', 'wal_flush_lag', 'wal_replay_lag'):
+    for suffix in ('wal_write_lag', 'wal_flush_lag', 'wal_replay_lag', 'backend_xmin_age'):
         metric_name = 'postgresql.replication.{}'.format(suffix)
         aggregator.assert_metric(metric_name, 12, app1_tags)
         aggregator.assert_metric(metric_name, 13, app2_tags)
 
     aggregator.assert_all_metrics_covered()
+
+
+def test_replication_tag(aggregator, integration_check, pg_instance):
+    REPLICATION_TAG_TEST_METRIC = 'postgresql.db.count'
+
+    expected_tags = pg_instance['tags'] + ['port:{}'.format(PORT)]
+    check = integration_check(pg_instance)
+
+    # default configuration (no replication)
+    check.check(pg_instance)
+    aggregator.assert_metric(REPLICATION_TAG_TEST_METRIC, tags=expected_tags)
+    aggregator.reset()
+
+    # role = master
+    pg_instance['tag_replication_role'] = True
+    check = integration_check(pg_instance)
+
+    check.check(pg_instance)
+    ROLE_TAG = "replication_role:master"
+    aggregator.assert_metric(REPLICATION_TAG_TEST_METRIC, tags=expected_tags + [ROLE_TAG])
+    aggregator.reset()
+
+    # switchover: master -> standby
+    STANDBY = "standby"
+    check._get_replication_role = MagicMock(return_value=STANDBY)
+    check.check(pg_instance)
+    ROLE_TAG = "replication_role:{}".format(STANDBY)
+    aggregator.assert_metric(REPLICATION_TAG_TEST_METRIC, tags=expected_tags + [ROLE_TAG])
 
 
 def test_query_timeout_connection_string(aggregator, integration_check, pg_instance):

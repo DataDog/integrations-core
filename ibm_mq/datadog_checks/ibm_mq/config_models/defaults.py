@@ -10,6 +10,14 @@
 from datadog_checks.base.utils.models.fields import get_default_field_value
 
 
+def shared_queue_manager_process(field, value):
+    return get_default_field_value(field, value)
+
+
+def shared_queue_manager_process_limit(field, value):
+    return 1
+
+
 def shared_service(field, value):
     return get_default_field_value(field, value)
 
@@ -82,6 +90,10 @@ def instance_port(field, value):
     return 1414
 
 
+def instance_queue_manager_process(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_queue_manager_timezone(field, value):
     return 'Etc/UTC'
 
@@ -115,7 +127,7 @@ def instance_ssl_certificate_label(field, value):
 
 
 def instance_ssl_cipher_spec(field, value):
-    return 'TLS_RSA_WITH_AES_256_CBC_SHA'
+    return get_default_field_value(field, value)
 
 
 def instance_ssl_key_repository_location(field, value):

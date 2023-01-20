@@ -120,5 +120,13 @@ METRIC_MAP = [
         'arangodb_dropped_followers': {'name': 'health.dropped_followers'},
         'arangodb_heartbeat_failures': {'name': 'health.heartbeat_failures'},
         'arangodb_heartbeat_send_time_msec': {'name': 'health.heartbeat.sent.time'},
+        # connectivity
+        'arangodb_connection_pool_connections_created': {'name': 'connection_pool.connections.created'},
+        'arangodb_connection_pool_connections_current': {'name': 'connection_pool.connections.current'},
+        'arangodb_connection_pool_lease_time_hist': {'name': 'connection_pool.lease_time'},
+        'arangodb_connection_pool_leases_failed': {'name': 'connection_pool.leases.failed'},
+        'arangodb_connection_pool_leases_successful': {'name': 'connection_pool.leases.successful'},
+        'arangodb_http2_connections': {'name': 'http2.connections'},
+        'arangodb_vst_connections': {'name': 'vst.connections'},
     }
 ]

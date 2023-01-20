@@ -1,0 +1,14 @@
+[env.collectors.datadog-checks]
+
+[[envs.default.matrix]]
+python = ["2.7", "3.8"]
+version = ["1.10", "2.0"]
+
+[envs.default.overrides]
+matrix.version.env-vars = [
+  { key = "HARBOR_VERSION", value = "1.10.0", if = ["1.10"] },
+  { key = "HARBOR_VERSION", value = "2.0.5", if = ["2.0"] },
+]
+
+[envs.default.env-vars]
+HARBOR_USE_SSL = "1"

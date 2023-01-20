@@ -9,7 +9,6 @@ build-backend = "hatchling.build"
 name = "datadog-ibm-i"
 description = "The IBM i check"
 readme = "README.md"
-license = {text = "BSD-3-Clause"}
 requires-python = ">=3.8"
 keywords = [
     "datadog",
@@ -27,6 +26,7 @@ classifiers = [
     "License :: OSI Approved :: BSD License",
     "Programming Language :: Python :: 3.8",
     "Topic :: System :: Monitoring",
+    "Private :: Do Not Upload",
 ]
 dependencies = [
     "datadog-checks-base>=25.1.0",
@@ -35,9 +35,12 @@ dynamic = [
     "version",
 ]
 
+[project.license]
+text = "BSD-3-Clause"
+
 [project.optional-dependencies]
 deps = [
-    "pyodbc==4.0.32",
+    "pyodbc==4.0.32; sys_platform != 'darwin' or platform_machine != 'arm64'",
 ]
 
 [project.urls]
@@ -51,8 +54,6 @@ include = [
     "/datadog_checks",
     "/tests",
     "/manifest.json",
-    "/requirements-dev.txt",
-    "/tox.ini",
 ]
 
 [tool.hatch.build.targets.wheel]

@@ -26,12 +26,8 @@ ON_LINUX = not (ON_MACOS or ON_WINDOWS)
 GH_ANNOTATION_LEVELS = ['warning', 'error']
 
 
-def get_tox_env():
-    return os.environ['TOX_ENV_NAME']
-
-
-def using_legacy_docker_compose():
-    return os.environ.get('LEGACY_DOCKER_COMPOSE', 'false') == 'true'
+def get_active_env():
+    return os.environ.get('TOX_ENV_NAME') or os.environ['HATCH_ENV_ACTIVE']
 
 
 def ensure_bytes(s):
@@ -141,3 +137,8 @@ def get_metadata_metrics():
         for row in csv.DictReader(f):
             metrics[row['metric_name']] = row
     return metrics
+
+
+def get_hostname():
+    """Return the socket hostname"""
+    return socket.gethostname()

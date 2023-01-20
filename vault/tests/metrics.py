@@ -81,6 +81,7 @@ METRICS_OPTIONAL = {
     'vault.core.handle.login_request',
     'vault.core.post_unseal',
     'vault.core.unseal',
+    'vault.expire.fetch.lease',
     'vault.expire.register.auth',
     'vault.expire.renew_token',
     'vault.identity.entity',
@@ -116,3 +117,16 @@ KNOWN_COUNTERS = {
     'vault.identity.entity.creation',
     'vault.token.creation',
 }
+
+MERKLE_WAL_METRICS = [
+    'vault.vault.merkle.flushdirty',
+    'vault.vault.merkle.savecheckpoint',
+    'vault.vault.wal.deletewals',
+    'vault.vault.wal.persistwals',
+    'vault.vault.wal.flushready',
+]
+
+MERKLE_WAL_QUANTILES = [
+    'vault.vault.merkle.flushdirty',
+    'vault.vault.merkle.savecheckpoint',
+]

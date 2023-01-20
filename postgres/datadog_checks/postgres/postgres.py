@@ -11,6 +11,7 @@ import psycopg2
 from six import iteritems
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.utils.db import QueryExecutor
 from datadog_checks.base.utils.db.utils import resolve_db_host as agent_host_resolver
 from datadog_checks.postgres.metrics_cache import PostgresMetricsCache
 from datadog_checks.postgres.relationsmanager import INDEX_BLOAT, RELATION_METRICS, TABLE_BLOAT, RelationsManager
@@ -21,12 +22,14 @@ from .config import PostgresConfig
 from .util import (
     CONNECTION_METRICS,
     FUNCTION_METRICS,
+    QUERY_PG_STAT_DATABASE,
     REPLICATION_METRICS,
+    SLRU_METRICS,
     DatabaseConfigurationError,
     fmt,
     get_schema_field,
 )
-from .version_utils import V9, V10, VersionUtils
+from .version_utils import V9, V9_2, V10, V13, VersionUtils
 
 try:
     import datadog_agent
@@ -35,7 +38,7 @@ except ImportError:
 
 MAX_CUSTOM_RESULTS = 100
 
-PG_SETTINGS_QUERY = "SELECT name, setting FROM pg_settings WHERE name IN (%s, %s)"
+PG_SETTINGS_QUERY = "SELECT name, setting FROM pg_settings WHERE name IN (%s, %s, %s)"
 
 
 class PostgreSql(AgentCheck):
@@ -72,6 +75,51 @@ class PostgreSql(AgentCheck):
         self._db_pool = {}
         self._db_pool_lock = threading.Lock()
 
+        self.tags_without_db = [t for t in copy.copy(self._config.tags) if not t.startswith("db:")]
+
+        self._dynamic_queries = None
+
+    def _new_query_executor(self, queries):
+        return QueryExecutor(
+            self.execute_query_raw,
+            self,
+            queries=queries,
+            tags=self.tags_without_db,
+            hostname=self.resolved_hostname,
+        )
+
+    def execute_query_raw(self, query):
+        with self.db.cursor() as cursor:
+            cursor.execute(query)
+            return cursor.fetchall()
+
+    @property
+    def dynamic_queries(self):
+        if self._dynamic_queries:
+            return self._dynamic_queries
+
+        queries = []
+        if self.version >= V9_2:
+            q_pg_stat_database = copy.deepcopy(QUERY_PG_STAT_DATABASE)
+            q_pg_stat_database["query"] += " WHERE " + " AND ".join(
+                "datname not ilike '{}'".format(db) for db in self._config.ignore_databases
+            )
+
+            if self._config.dbstrict:
+                q_pg_stat_database["query"] += " AND datname in('{}')".format(self._config.dbname)
+
+            queries.extend([q_pg_stat_database])
+
+        if not queries:
+            self.log.debug("no dynamic queries defined")
+            return None
+
+        self._dynamic_queries = self._new_query_executor(queries)
+        self._dynamic_queries.compile_queries()
+        self.log.debug("initialized {cnt} dynamic querie(s)", extra=dict(cnt=str(len(queries))))
+
+        return self._dynamic_queries
+
     def cancel(self):
         self.statement_samples.cancel()
         self.statement_metrics.cancel()
@@ -103,7 +151,7 @@ class PostgreSql(AgentCheck):
             self.gauge(
                 "postgresql.wal_age",
                 wal_file_age,
-                tags=[t for t in instance_tags if not t.startswith("db:")],
+                tags=copy.copy(self.tags_without_db),
                 hostname=self.resolved_hostname,
             )
 
@@ -289,7 +337,7 @@ class PostgreSql(AgentCheck):
             # The reason is that pg_stat_database returns all databases regardless of the
             # connection.
             if not scope['relation'] and not scope.get('use_global_db_tag', False):
-                tags = [t for t in instance_tags if not t.startswith("db:")]
+                tags = copy.copy(self.tags_without_db)
             else:
                 tags = copy.copy(instance_tags)
 
@@ -321,6 +369,8 @@ class PostgreSql(AgentCheck):
             metric_scope.append(FUNCTION_METRICS)
         if self._config.collect_count_metrics:
             metric_scope.append(self.metrics_cache.get_count_metrics())
+        if self.version >= V13:
+            metric_scope.append(SLRU_METRICS)
 
         # Do we need relation-specific metrics?
         if self._config.relations:
@@ -344,7 +394,7 @@ class PostgreSql(AgentCheck):
             self.gauge(
                 "postgresql.db.count",
                 results_len,
-                tags=[t for t in instance_tags if not t.startswith("db:")],
+                tags=copy.copy(self.tags_without_db),
                 hostname=self.resolved_hostname,
             )
 
@@ -357,6 +407,9 @@ class PostgreSql(AgentCheck):
 
         for scope in list(metric_scope) + self._config.custom_metrics:
             self._query_scope(cursor, scope, instance_tags, scope in self._config.custom_metrics)
+
+        if self.dynamic_queries:
+            self.dynamic_queries.execute()
 
         cursor.close()
 
@@ -394,7 +447,7 @@ class PostgreSql(AgentCheck):
                 args['sslpassword'] = self._config.ssl_password
             conn = psycopg2.connect(**args)
         # Autocommit is enabled by default for safety for all new connections (to prevent long-lived transactions).
-        conn.set_session(autocommit=True)
+        conn.set_session(autocommit=True, readonly=True)
         return conn
 
     def _connect(self):
@@ -417,7 +470,7 @@ class PostgreSql(AgentCheck):
                 self.log.debug("Running query [%s]", PG_SETTINGS_QUERY)
                 cursor.execute(
                     PG_SETTINGS_QUERY,
-                    ("pg_stat_statements.max", "track_activity_query_size"),
+                    ("pg_stat_statements.max", "track_activity_query_size", "track_io_timing"),
                 )
                 rows = cursor.fetchall()
                 self.pg_settings.clear()
@@ -446,7 +499,6 @@ class PostgreSql(AgentCheck):
             if not db or db.closed:
                 self.log.debug("initializing connection to dbname=%s", dbname)
                 db = self._new_connection(dbname)
-                db.set_session(autocommit=True)
                 self._db_pool[dbname] = db
                 if self._config.dbname == dbname:
                     # reload settings for the main DB only once every time the connection is reestablished
@@ -582,7 +634,13 @@ class PostgreSql(AgentCheck):
             # Check version
             self._connect()
             if self._config.tag_replication_role:
-                tags.extend(["replication_role:{}".format(self._get_replication_role())])
+                replication_role_tag = "replication_role:{}".format(self._get_replication_role())
+                tags.append(replication_role_tag)
+                self.tags_without_db = [
+                    t for t in copy.copy(self.tags_without_db) if not t.startswith("replication_role:")
+                ]
+                self.tags_without_db.append(replication_role_tag)
+
             self.log.debug("Running check against version %s: is_aurora: %s", str(self.version), str(self.is_aurora))
             self._collect_stats(tags)
             self._collect_custom_queries(tags)

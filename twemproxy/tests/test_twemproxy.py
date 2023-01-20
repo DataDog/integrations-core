@@ -24,6 +24,10 @@ def test_integration(check, dd_environment, setup_request, aggregator):
         aggregator.assert_metric("twemproxy.{}".format(stat), count=2)
     for stat in metrics.POOL_STATS_2:
         aggregator.assert_metric("twemproxy.{}".format(stat), count=1)
+
+    for stat in metrics.GLOBAL_STATS:
+        aggregator.assert_metric("twemproxy.{}".format(stat))
+
     aggregator.assert_all_metrics_covered()
 
     # Test service check
@@ -62,6 +66,9 @@ def test_e2e(dd_agent_check, setup_request, instance):
         aggregator.assert_metric("twemproxy.{}".format(stat), count=2)
     for stat in metrics.POOL_STATS_2:
         aggregator.assert_metric("twemproxy.{}".format(stat), count=1)
+
+    for stat in metrics.GLOBAL_STATS:
+        aggregator.assert_metric("twemproxy.{}".format(stat))
 
     aggregator.assert_all_metrics_covered()
 

@@ -1,0 +1,17 @@
+[env.collectors.datadog-checks]
+
+[[envs.default.matrix]]
+python = ["2.7", "3.8"]
+version = ["5.0", "6.0", "7.0", "cloud"]
+
+[envs.default.overrides]
+matrix.version.env-vars = [
+  { key = "REDIS_VERSION", if = ["5.0", "6.0", "7.0"] },
+  { key = "CLOUD_ENV", value = "false", if = ["5.0", "6.0", "7.0"] },
+  { key = "REDIS_VERSION", value="7.0", if = ["cloud"] },
+  { key = "CLOUD_ENV", value = "true", if = ["cloud"] },
+]
+
+[envs.latest.env-vars]
+CLOUD_ENV = "false"
+REDIS_VERSION = "latest"

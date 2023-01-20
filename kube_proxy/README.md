@@ -23,4 +23,24 @@ Contribute to the integration if you want to add a relevant metric.
 
 [Run the Agent's `status` subcommand][1] and look for `kube_proxy` under the Checks section.
 
+## Data Collected
+
+### Metrics
+
+See [metadata.csv][2] for a list of metrics provided by this integration.
+
+### Events
+
+Kube Proxy does not include any events.
+
+### Service Checks
+
+The Kube Proxy integration does not include any service checks.
+
+## Troubleshooting
+
+Need help? Contact [Datadog support][3].
+
 [1]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[2]: https://github.com/DataDog/integrations-core/blob/master/kube_proxy/metadata.csv
+[3]: https://docs.datadoghq.com/help/

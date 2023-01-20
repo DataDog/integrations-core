@@ -1,30 +1,43 @@
 {
-  "display_name": "OOM Kill",
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "name": "oom_kill",
-  "metric_prefix": "oom_kill.",
-  "metric_to_check": "oom_kill.oom_process.count",
-  "creates_events": true,
-  "short_description": "Track process OOM kills by the system or cgroup.",
-  "guid": "4b8e9c18-1a13-43b0-a03c-186eb3221147",
-  "support": "core",
-  "supported_os": [
-    "linux"
-  ],
-  "public_title": "Datadog-OOM Kill Integration",
-  "categories": [
-    "os & system"
-  ],
-  "type": "check",
-  "is_public": true,
-  "integration_id": "oom-kill",
+  "manifest_version": "2.0.0",
+  "app_uuid": "7546b270-2efe-4a59-8f94-3447df2db801",
+  "app_id": "oom-kill",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Track process OOM kills by the system or cgroup.",
+    "title": "OOM Kill",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Category::OS & System"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "dashboards": {},
-    "monitors": {},
-    "saved_views": {},
-    "service_checks": "assets/service_checks.json",
-    "logs": {},
-    "metrics_metadata": "metadata.csv"
+    "integration": {
+      "source_type_name": "OOM Kill",
+      "configuration": {},
+      "events": {
+        "creates_events": true
+      },
+      "metrics": {
+        "prefix": "oom_kill.",
+        "check": "oom_kill.oom_process.count",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    }
   }
 }

@@ -1,37 +1,52 @@
 {
-  "display_name": "OTel",
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "name": "OTel",
-  "metric_prefix": "otel.",
-  "metric_to_check": [
-    "otel.datadog_exporter.metrics.running",
-    "otel.datadog_exporter.traces.running"
-  ],
-  "creates_events": false,
-  "short_description": "Get telemetry data from the OpenTelemetry Collector",
-  "guid": "7e87e1cc-df3b-4aa1-a6c0-3489f8296f86",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "public_title": "OpenTelemetry",
-  "categories": [
-    "os & system"
-  ],
-  "type": "check",
-  "is_public": false,
-  "integration_id": "otel",
+  "manifest_version": "2.0.0",
+  "app_uuid": "ca08ac68-f4a4-4d84-9c21-8f645733d62c",
+  "app_id": "otel",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Get telemetry data from the OpenTelemetry Collector",
+    "title": "OpenTelemetry",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::OS & System"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "dashboards": {
-      "OpenTelemetry Dashboard": "assets/dashboards/dashboard.json"
+    "integration": {
+      "source_type_name": "OTel",
+      "configuration": {},
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "otel.",
+        "check": [
+          "otel.datadog_exporter.metrics.running",
+          "otel.datadog_exporter.traces.running"
+        ],
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
     },
-    "saved_views": {},
-    "monitors": {},
-    "service_checks": "assets/service_checks.json",
-    "logs": {},
-    "metrics_metadata": "metadata.csv"
+    "dashboards": {
+      "OpenTelemetry Dashboard": "assets/dashboards/otel_host_metrics_dashboard.json",
+      "OpenTelemetry Collector Metrics Dashboard": "assets/dashboards/otel_collector_metrics_dashboard.json"
+    }
   }
 }

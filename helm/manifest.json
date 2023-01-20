@@ -1,33 +1,52 @@
 {
-  "display_name": "Helm",
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "name": "helm",
-  "metric_prefix": "helm.",
-  "metric_to_check": "helm.release",
-  "creates_events": false,
-  "short_description": "Track your Helm deployments with Datadog",
-  "guid": "7f57a1f2-6dc6-4029-ae9c-426238ea2f86",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "public_title": "Helm Check",
-  "categories": [
-    "configuration & deployment",
-    "containers"
-  ],
-  "type": "check",
-  "is_public": true,
-  "integration_id": "helm",
+  "manifest_version": "2.0.0",
+  "app_uuid": "754a061c-d896-4f3c-b54e-87125bb66241",
+  "app_id": "helm",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Track your Helm deployments with Datadog",
+    "title": "Helm Check",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Configuration & Deployment",
+      "Category::Containers"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "dashboards": {},
-    "monitors": {},
-    "saved_views": {},
-    "service_checks": "assets/service_checks.json",
-    "logs": {},
-    "metrics_metadata": "metadata.csv"
+    "integration": {
+      "source_type_name": "Helm",
+      "configuration": {},
+      "events": {
+        "creates_events": true
+      },
+      "metrics": {
+        "prefix": "helm.",
+        "check": "helm.release",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {
+      "Helm - Overview": "assets/dashboards/overview.json"
+    },
+    "monitors": {
+      "[helm] Monitor Helm failed releases": "assets/monitors/monitor_failed_releases.json"
+    }
   }
 }

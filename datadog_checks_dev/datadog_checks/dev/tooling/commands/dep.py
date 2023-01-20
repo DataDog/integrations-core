@@ -32,9 +32,22 @@ IGNORED_DEPS = {
     'ddtrace',  # https://github.com/DataDog/integrations-core/pull/9132
     'flup',  # https://github.com/DataDog/integrations-core/pull/1997
     # https://github.com/DataDog/integrations-core/pull/10105;
-    # snowflake-connector-python 2.6.0 has requirement cryptography<4.0.0,>=2.5.0
+    # snowflake-connector-python caps cryptography which means we need to be careful with how we update it
+    # (and do so manually)
     'cryptography',
     'dnspython',
+    'pymysql',  # https://github.com/DataDog/integrations-core/pull/12612
+    'foundationdb',  # Breaking datadog_checks_base tests
+    'openstacksdk',  # Breaking openstack_controller tests
+    'pyasn1',  # Breaking snmp tests
+    'pycryptodomex',  # Breaking snmp tests
+    'pysnmp',  # Breaking snmp tests
+    'clickhouse-driver',  # Breaking clickhouse tests
+    'lz4',  # Breaking clickhouse tests
+    'pyodbc',  # Breaking sqlserver tests
+    'psutil',  # Breaking disk tests
+    'keystoneauth1',  # Running our update command actually downgrades this 5.0.0 -> 3.18.0.
+    'aerospike',  # v8+ breaks agent build.
 }
 
 # Dependencies for the downloader that are security-related and should be updated separately from the others
@@ -175,6 +188,9 @@ async def scrape_version_data(urls):
                 versions.append(version)
 
                 for artifact in artifacts:
+                    if artifact.get("yanked", False):
+                        continue
+
                     if latest_py2 is None and artifact_compatible_with_python(artifact, '2'):
                         latest_py2 = version
                     if latest_py3 is None and artifact_compatible_with_python(artifact, '3'):

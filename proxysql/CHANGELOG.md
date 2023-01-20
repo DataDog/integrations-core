@@ -1,15 +1,20 @@
 # CHANGELOG - ProxySQL
 
-## 3.6.0 / 2022-04-27
+## 4.0.0 / 2022-08-05 / Agent 7.39.0
+
+* [Fixed] Pin `pymysql` to `0.10.1`. See [#12612](https://github.com/DataDog/integrations-core/pull/12612).
+* [Changed] Use stats database for proxysql backends count. See [#12555](https://github.com/DataDog/integrations-core/pull/12555). Thanks [aymeric-ledizes](https://github.com/aymeric-ledizes).
+
+## 3.6.0 / 2022-04-27 / Agent 7.37.0
 
 * [Added] Add `backends.count` metric. See [#11812](https://github.com/DataDog/integrations-core/pull/11812). Thanks [aymeric-ledizes](https://github.com/aymeric-ledizes).
 
-## 3.5.0 / 2022-04-05
+## 3.5.0 / 2022-04-05 / Agent 7.36.0
 
 * [Added] Upgrade dependencies. See [#11726](https://github.com/DataDog/integrations-core/pull/11726).
 * [Added] Add metric_patterns options to filter all metric submission by a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
 
-## 3.4.0 / 2022-02-19
+## 3.4.0 / 2022-02-19 / Agent 7.35.0
 
 * [Added] Add `pyproject.toml` file. See [#11422](https://github.com/DataDog/integrations-core/pull/11422).
 * [Fixed] Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).

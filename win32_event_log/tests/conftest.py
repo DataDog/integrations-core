@@ -95,4 +95,4 @@ def instance():
 
 @pytest.fixture(scope='session')
 def dd_environment():  # no cov
-    yield common.INSTANCE
+    yield common.INSTANCE, {'docker_platform': 'windows'}

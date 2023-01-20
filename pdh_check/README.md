@@ -38,6 +38,10 @@ The PDH check does not include any events.
 
 The PDH check does not include any service checks.
 
+## Troubleshooting
+
+Need help? Contact [Datadog support][9].
+
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [3]: https://github.com/DataDog/integrations-core/blob/master/pdh_check/datadog_checks/pdh_check/data/conf.yaml.example
@@ -46,3 +50,4 @@ The PDH check does not include any service checks.
 [6]: https://docs.datadoghq.com/developers/metrics/custom_metrics/
 [7]: https://docs.datadoghq.com/account_management/billing/custom_metrics/
 [8]: https://docs.datadoghq.com/integrations/windows_performance_counters/
+[9]: https://docs.datadoghq.com/help/

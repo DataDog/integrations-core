@@ -5,6 +5,7 @@
 import json
 import os
 from collections import namedtuple
+from enum import Enum
 from functools import lru_cache
 
 import click
@@ -20,6 +21,11 @@ NOTIFICATION_TYPE = 'notificationtype'
 ALLOWED_EXTENSIONS_BY_FORMAT = {"json": [".json"], "yaml": [".yml", ".yaml"]}
 
 
+class MappingType(Enum):
+    INTEGER = 0
+    BITS = 1
+
+
 class MissingMIBException(Exception):
     pass
 
@@ -33,7 +39,7 @@ class MultipleTypeDefintionsException(Exception):
 
 
 # namedtuple definition for trap variable metadata
-VarMetadata = namedtuple('VarMetadata', ['oid', 'description', 'enum'])
+VarMetadata = namedtuple('VarMetadata', ['oid', 'description', 'enum', 'bits'])
 
 
 @click.command(
@@ -319,6 +325,8 @@ def generate_trap_db(compiled_mibs, compiled_mibs_sources, no_descr):
                     trap_db["vars"][var_metadata.oid]["descr"] = var_metadata.description
                 if var_metadata.enum:
                     trap_db["vars"][var_metadata.oid]["enum"] = var_metadata.enum
+                if var_metadata.bits:
+                    trap_db["vars"][var_metadata.oid]["bits"] = var_metadata.bits
 
         if trap_db['traps']:
             mib_name = file_content['meta']['module']
@@ -351,12 +359,32 @@ def get_var_metadata(var_name, mib_name, search_locations=None):
 
     # grab enum if it exists in-line
     enum = file_content[var_name].get('syntax', {}).get('constraints', {}).get('enumeration', {})
+
     # if there is no enum in-line, check for type definition and enum in the same MIB and its imports
     if not enum:
         var_type = file_content[var_name].get('syntax', {}).get('type', '')
         if var_type:
             try:
-                enum = get_enum(var_type, mib_name, search_locations)
+                enum = get_mapping(var_type, mib_name, MappingType.INTEGER, search_locations)
+            except MissingMIBException:
+                echo_warning(
+                    "Variable {} references a type called {}, but the defining MIB is missing. "
+                    "Enum definitions for this variable will be unavailable.".format(var_name, var_type)
+                )
+            except MultipleTypeDefintionsException:
+                echo_warning(
+                    "Variable {} references a type called {}, but this symbol is imported from multiple MIBs. "
+                    "Enum definitions for this variable will be unavailable.".format(var_name, var_type)
+                )
+
+    # grab bits if they exist in-line
+    bits = file_content[var_name].get('syntax', {}).get('bits', {})
+
+    if not bits:
+        var_type = file_content[var_name].get('syntax', {}).get('type', '')
+        if var_type:
+            try:
+                bits = get_mapping(var_type, mib_name, MappingType.BITS, search_locations)
             except MissingMIBException:
                 echo_warning(
                     "Variable {} references a type called {}, but the defining MIB is missing. "
@@ -374,19 +402,25 @@ def get_var_metadata(var_name, mib_name, search_locations=None):
     for k, v in enum.items():
         parsed_enum[v] = k
 
-    return VarMetadata(file_content[var_name]['oid'], file_content[var_name].get('description', ''), parsed_enum)
+    parsed_bits = {}
+    for k, v in bits.items():
+        parsed_bits[v] = k
+
+    return VarMetadata(
+        file_content[var_name]['oid'], file_content[var_name].get('description', ''), parsed_enum, parsed_bits
+    )
 
 
 @lru_cache(maxsize=None)
-def get_enum(var_name, mib_name, search_locations=None):
+def get_mapping(var_name, mib_name, mapping_type: MappingType, search_locations=None):
     """
     Returns the enum of a given variable, even if the enum is not defined in-line or the same MIB.
     :param var_name: Name of the variable to search for
     :param search_locations: Tuple of path to directories containing json-compiled MIB files
     :return: The oid and the description of the variable.
     """
-    enum = {}
-    while mib_name and var_name and not enum:
+    mapping = {}
+    while mib_name and var_name and not mapping:
         for location in search_locations:
             file_name = os.path.join(location, mib_name + '.json')
             if os.path.isfile(file_name):
@@ -408,11 +442,17 @@ def get_enum(var_name, mib_name, search_locations=None):
                 raise MissingMIBException()
             continue
 
-        enum = file_content[var_name].get('type', {}).get('constraints', {}).get('enumeration', {})
+        if mapping_type == MappingType.INTEGER:
+            mapping = file_content[var_name].get('type', {}).get('constraints', {}).get('enumeration', {})
+        elif mapping_type == MappingType.BITS:
+            mapping = file_content[var_name].get('type', {}).get('bits', {})
+        else:
+            raise ValueError("invalid mapping type, must be INTEGER or BITS")
+
         # update variable to the type name in case we have to go another layer down
         var_name = file_content[var_name].get('type', {}).get('type', '')
 
-    return enum
+    return mapping
 
 
 @lru_cache(maxsize=None)

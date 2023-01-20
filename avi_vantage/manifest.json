@@ -1,44 +1,58 @@
 {
-  "display_name": "Avi Vantage",
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "name": "avi_vantage",
-  "metric_prefix": "avi_vantage.",
-  "metric_to_check": [
-    "avi_vantage.controller_stats.avg_cpu_usage",
-    "avi_vantage.pool_healthscore",
-    "avi_vantage.service_engine_healthscore",
-    "avi_vantage.virtual_service_healthscore"
-  ],
-  "creates_events": false,
-  "short_description": "Monitor the health and performance of your Avi Vantage instances.",
-  "guid": "9c3b3e3f-5e3d-49a4-8d35-4192b135a654",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "public_title": "Avi Vantage",
-  "categories": [
-    "network"
-  ],
-  "type": "check",
-  "is_public": true,
-  "integration_id": "avi-vantage",
+  "manifest_version": "2.0.0",
+  "app_uuid": "a3f11e6a-fdb7-421d-ad5c-dbfa987b8df8",
+  "app_id": "avi-vantage",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor the health and performance of your Avi Vantage instances.",
+    "title": "Avi Vantage",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Network"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "Avi Vantage",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "avi_vantage.",
+        "check": [
+          "avi_vantage.controller_stats.avg_cpu_usage",
+          "avi_vantage.pool_healthscore",
+          "avi_vantage.service_engine_healthscore",
+          "avi_vantage.virtual_service_healthscore"
+        ],
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
     },
     "dashboards": {
       "Avi Vantage - Overview": "assets/dashboards/overview.json"
     },
     "monitors": {
       "Avi Vantage - Error Rate Monitor": "assets/monitors/error_rate_monitor.json"
-    },
-    "saved_views": {},
-    "service_checks": "assets/service_checks.json",
-    "logs": {},
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

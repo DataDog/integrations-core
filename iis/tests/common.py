@@ -15,6 +15,8 @@ INSTANCE = {
 
 INVALID_HOST_INSTANCE = {'host': 'nonexistinghost'}
 
+WIN_SERVICES_LEGACY_CONFIG = {'host': '.', 'use_legacy_check_version': True}
+
 WIN_SERVICES_MINIMAL_CONFIG = {'host': '.', 'tags': ['mytag1', 'mytag2']}
 
 WIN_SERVICES_CONFIG = {

@@ -9,7 +9,6 @@ build-backend = "hatchling.build"
 name = "datadog-mysql"
 description = "The MySQL check"
 readme = "README.md"
-license = {text = "BSD-3-Clause"}
 keywords = [
     "datadog",
     "datadog agent",
@@ -27,23 +26,26 @@ classifiers = [
     "Programming Language :: Python :: 2.7",
     "Programming Language :: Python :: 3.8",
     "Topic :: System :: Monitoring",
+    "Private :: Do Not Upload",
 ]
 dependencies = [
-    "datadog-checks-base>=25.2.2",
+    "datadog-checks-base>=25.4.0",
 ]
 dynamic = [
     "version",
 ]
 
+[project.license]
+text = "BSD-3-Clause"
+
 [project.optional-dependencies]
 deps = [
     "cachetools==3.1.1; python_version < '3.0'",
-    "cachetools==5.0.0; python_version > '3.0'",
+    "cachetools==5.2.0; python_version > '3.0'",
     "cryptography==3.3.2; python_version < '3.0'",
-    "cryptography==3.4.8; python_version > '3.0'",
-    "futures==3.3.0; python_version < '3.0'",
-    "pymysql==0.10.1; python_version < '3.0'",
-    "pymysql==1.0.2; python_version > '3.0'",
+    "cryptography==38.0.3; python_version > '3.0'",
+    "futures==3.4.0; python_version < '3.0'",
+    "pymysql==0.10.1",
 ]
 
 [project.urls]
@@ -57,8 +59,6 @@ include = [
     "/datadog_checks",
     "/tests",
     "/manifest.json",
-    "/requirements-dev.txt",
-    "/tox.ini",
 ]
 
 [tool.hatch.build.targets.wheel]

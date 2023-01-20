@@ -65,7 +65,11 @@ class QueueMetricCollector(object):
             except Exception as e:
                 self.warning('Cannot connect to queue %s: %s', queue_name, e)
                 self.service_check(
-                    self.QUEUE_SERVICE_CHECK, AgentCheck.CRITICAL, queue_tags, hostname=self.config.hostname
+                    self.QUEUE_SERVICE_CHECK,
+                    AgentCheck.CRITICAL,
+                    queue_tags,
+                    message=str(e),
+                    hostname=self.config.hostname,
                 )
 
     def discover_queues(self, queue_manager):
@@ -149,7 +153,11 @@ class QueueMetricCollector(object):
             except pymqi.Error as e:
                 self.warning("Error getting queue manager stats: %s", e)
                 self.service_check(
-                    self.QUEUE_MANAGER_SERVICE_CHECK, AgentCheck.CRITICAL, tags, hostname=self.config.hostname
+                    self.QUEUE_MANAGER_SERVICE_CHECK,
+                    AgentCheck.CRITICAL,
+                    tags,
+                    message=str(e),
+                    hostname=self.config.hostname,
                 )
 
     def queue_stats(self, queue_manager, queue_name, tags):

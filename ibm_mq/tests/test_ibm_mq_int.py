@@ -11,9 +11,8 @@ from six import iteritems
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.time import ensure_aware_datetime
+from datadog_checks.dev.testing import requires_py3
 from datadog_checks.dev.utils import get_metadata_metrics
-from datadog_checks.ibm_mq import IbmMqCheck
-from datadog_checks.ibm_mq.collectors import ChannelMetricCollector, QueueMetricCollector
 
 from . import common
 from .common import QUEUE_METRICS, assert_all_metrics, skip_windows_ci
@@ -71,25 +70,38 @@ def test_unknown_service_check(aggregator, get_check, instance, caplog, dd_run_c
 
 
 def test_check_cant_connect(aggregator, get_check, instance, dd_run_check):
+    # Late import to ignore missing library for e2e
+    from datadog_checks.ibm_mq import IbmMqCheck
+    from datadog_checks.ibm_mq.collectors import QueueMetricCollector
+
     instance['queue_manager'] = "not_real"
 
     with pytest.raises(Exception, match=r'MQI Error'):
-        check = get_check(instance)
-        dd_run_check(check)
+        dd_run_check(get_check(instance))
 
-        tags = [
-            'connection_name:{}({})'.format(common.HOST, common.PORT),
-            'foo:bar',
-            'port:{}'.format(common.PORT),
-            'queue_manager:not_real',
-            'channel:{}'.format(common.CHANNEL),
-        ]
-        hostname = common.HOST
+    tags = [
+        'channel:{}'.format(common.CHANNEL),
+        'connection_name:{}({})'.format(common.HOST, common.PORT),
+        'foo:bar',
+        'port:{}'.format(common.PORT),
+        'queue_manager:not_real',
+        'mq_host:{}'.format(common.HOST),
+    ]
 
-        aggregator.assert_service_check(IbmMqCheck.SERVICE_CHECK, check.CRITICAL, tags=tags, count=1, hostname=hostname)
-        aggregator.assert_service_check(
-            ChannelMetricCollector.CHANNEL_SERVICE_CHECK, check.CRITICAL, tags=tags, count=1, hostname=hostname
-        )
+    aggregator.assert_service_check(
+        IbmMqCheck.SERVICE_CHECK,
+        IbmMqCheck.CRITICAL,
+        tags=tags,
+        count=1,
+        message="cannot connect to queue manager: MQI Error. Comp: 2, Reason 2058: FAILED: MQRC_Q_MGR_NAME_ERROR",
+    )
+    aggregator.assert_service_check(
+        QueueMetricCollector.QUEUE_MANAGER_SERVICE_CHECK,
+        IbmMqCheck.CRITICAL,
+        tags=tags,
+        count=1,
+        message="cannot connect to queue manager: MQI Error. Comp: 2, Reason 2058: FAILED: MQRC_Q_MGR_NAME_ERROR",
+    )
 
 
 def test_errors_are_logged(get_check, instance, caplog, dd_run_check):
@@ -116,6 +128,9 @@ def test_errors_are_logged(get_check, instance, caplog, dd_run_check):
     [False, True],
 )
 def test_check_metrics_and_service_checks(aggregator, get_check, instance, seed_data, override_hostname, dd_run_check):
+    # Late import to ignore missing library for e2e
+    from datadog_checks.ibm_mq.collectors import ChannelMetricCollector, QueueMetricCollector
+
     instance['mqcd_version'] = os.getenv('IBM_MQ_VERSION')
     instance['override_hostname'] = override_hostname
     check = get_check(instance)
@@ -147,7 +162,14 @@ def test_check_metrics_and_service_checks(aggregator, get_check, instance, seed_
     aggregator.assert_service_check(QueueMetricCollector.QUEUE_SERVICE_CHECK, check.OK, queue_tags, hostname=hostname)
 
     bad_channel_tags = tags + ['channel:{}'.format(common.BAD_CHANNEL)]
-    aggregator.assert_service_check('ibm_mq.channel', check.CRITICAL, tags=bad_channel_tags, count=1, hostname=hostname)
+    aggregator.assert_service_check(
+        'ibm_mq.channel',
+        check.CRITICAL,
+        tags=bad_channel_tags,
+        count=1,
+        hostname=hostname,
+        message="MQI Error. Comp: 2, Reason 3065: FAILED: MQRCCF_CHL_STATUS_NOT_FOUND",
+    )
 
     discoverable_tags = tags + ['channel:*']
     aggregator.assert_service_check('ibm_mq.channel', check.OK, tags=discoverable_tags, count=1, hostname=hostname)
@@ -188,15 +210,22 @@ def test_check_all(aggregator, get_check, instance_collect_all, seed_data, dd_ru
     assert_all_metrics(aggregator)
 
 
-def test_check_skip_reset_queue_metrics(aggregator, get_check, instance_collect_all, seed_data, dd_run_check):
-    instance_collect_all['collect_reset_queue_metrics'] = False
+@pytest.mark.parametrize(
+    'collect_reset_queue_metrics',
+    [False, True],
+)
+def test_check_skip_reset_queue_metrics(
+    collect_reset_queue_metrics, aggregator, get_check, instance_collect_all, seed_data, dd_run_check
+):
+    instance_collect_all['collect_reset_queue_metrics'] = collect_reset_queue_metrics
     check = get_check(instance_collect_all)
     dd_run_check(check)
 
-    aggregator.assert_metric('ibm_mq.queue.high_q_depth', count=0)
-    aggregator.assert_metric('ibm_mq.queue.msg_deq_count', count=0)
-    aggregator.assert_metric('ibm_mq.queue.msg_enq_count', count=0)
-    aggregator.assert_metric('ibm_mq.queue.time_since_reset', count=0)
+    for metric, _ in common.RESET_QUEUE_METRICS:
+        if collect_reset_queue_metrics:
+            aggregator.assert_metric(metric, at_least=1)
+        else:
+            aggregator.assert_metric(metric, count=0)
 
 
 @pytest.mark.parametrize(
@@ -365,3 +394,93 @@ def test_stats_metrics(aggregator, get_check, instance, dd_run_check):
 
     assert_all_metrics(aggregator)
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+
+def test_channel_status_no_duplicates(aggregator, get_check, instance, dd_run_check):
+    check = get_check(instance)
+    dd_run_check(check)
+
+    tags = [
+        'queue_manager:{}'.format(common.QUEUE_MANAGER),
+        'mq_host:{}'.format(common.HOST),
+        'port:{}'.format(common.PORT),
+        'connection_name:{}({})'.format(common.HOST, common.PORT),
+        'foo:bar',
+        'channel:{}'.format(common.CHANNEL),
+    ]
+
+    aggregator.assert_service_check("ibm_mq.channel.status", check.OK, tags=tags, count=1)
+
+
+@requires_py3
+def test_queue_manager_process_not_found(aggregator, get_check, instance, dd_run_check):
+    class ProcessMock(object):
+        @property
+        def info(self):
+            return {'cmdline': ['amqpcsea', 'baz']}
+
+    instance['queue_manager'] = 'foo'
+    instance['queue_manager_process'] = 'amqpcsea {}'.format(instance['queue_manager'])
+    check = get_check(instance)
+
+    with mock.patch('psutil.process_iter', return_value=[ProcessMock()]):
+        dd_run_check(check)
+
+    tags = [
+        'connection_name:{}({})'.format(common.HOST, common.PORT),
+        'mq_host:{}'.format(common.HOST),
+        'port:{}'.format(common.PORT),
+        'queue_manager:foo',
+        'channel:{}'.format(common.CHANNEL),
+        'foo:bar',
+    ]
+
+    message = 'Process not found, skipping check run'
+    aggregator.assert_service_check(check.SERVICE_CHECK, check.UNKNOWN, message=message, tags=tags, count=1)
+    aggregator.assert_service_check('ibm_mq.queue_manager', check.UNKNOWN, message=message, tags=tags, count=1)
+    aggregator.assert_all_metrics_covered()
+
+
+@requires_py3
+def test_queue_manager_process_found(aggregator, get_check, instance, dd_run_check):
+    class ProcessMock(object):
+        @property
+        def info(self):
+            return {'cmdline': ['amqpcsea', instance['queue_manager']]}
+
+    instance['queue_manager_process'] = 'amqpcsea {}'.format(instance['queue_manager'])
+    check = get_check(instance)
+
+    with mock.patch('psutil.process_iter', return_value=[ProcessMock()]):
+        dd_run_check(check)
+
+    tags = [
+        'connection_name:{}({})'.format(common.HOST, common.PORT),
+        'mq_host:{}'.format(common.HOST),
+        'port:{}'.format(common.PORT),
+        'queue_manager:{}'.format(common.QUEUE_MANAGER),
+        'channel:{}'.format(common.CHANNEL),
+        'foo:bar',
+    ]
+
+    aggregator.assert_service_check(check.SERVICE_CHECK, check.OK, tags=tags, count=1)
+    aggregator.assert_service_check('ibm_mq.queue_manager', check.OK, tags=tags)
+    assert_all_metrics(aggregator)
+
+
+@requires_py3
+def test_queue_manager_process_found_cleanup(get_check, instance, dd_run_check):
+    class ProcessMock(object):
+        @property
+        def info(self):
+            return {'cmdline': ['amqpcsea', instance['queue_manager']]}
+
+    instance['queue_manager_process'] = 'amqpcsea {}'.format(instance['queue_manager'])
+    check = get_check(instance)
+
+    with mock.patch('psutil.process_iter', return_value=[ProcessMock()]):
+        dd_run_check(check)
+
+    assert check.process_matcher.limit_reached()
+    check.cancel()
+    assert not check.process_matcher.limit_reached()

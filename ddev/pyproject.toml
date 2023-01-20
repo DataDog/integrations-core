@@ -1,0 +1,66 @@
+[build-system]
+requires = [
+    "hatchling>=1.5.0",
+]
+build-backend = "hatchling.build"
+
+[project]
+name = "ddev"
+description = "The Datadog Agent integration developer tool"
+readme = "README.md"
+requires-python = ">=3.8"
+license = "BSD-3-Clause"
+keywords = [
+    "datadog",
+    "agent",
+    "integration",
+]
+authors = [
+    { name = "Datadog", email = "packages@datadoghq.com" },
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: BSD License",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3.8",
+]
+dependencies = [
+    "datadog-checks-dev[cli]>=17.5.0",
+    "hatch>=1.6.3",
+    "httpx",
+    "jsonpointer",
+    "pyperclip",
+    "rich>=12.5.1",
+    "tomli; python_version < '3.11'",
+    "tomli-w",
+    "tomlkit",
+]
+dynamic = ["version"]
+
+[project.scripts]
+ddev = "ddev.cli:main"
+ddev-starship = "ddev.plugin.external.starship.prompt:main"
+
+[project.urls]
+Source = "https://github.com/DataDog/integrations-core"
+
+[tool.hatch.version]
+path = "src/ddev/__about__.py"
+
+[tool.black]
+include = '\.pyi?$'
+line-length = 120
+skip-string-normalization = true
+target-version = ["py38"]
+
+[tool.isort]
+default_section = "THIRDPARTY"
+force_grid_wrap = 0
+include_trailing_comma = true
+known_first_party = ["ddev"]
+line_length = 120
+multi_line_output = 3
+use_parentheses = true

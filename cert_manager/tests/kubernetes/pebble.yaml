@@ -1,0 +1,174 @@
+---
+# Source: pebble/templates/pebble-configmap.yaml
+apiVersion: v1
+data:
+  pebble-config.json: |
+    {"pebble":{"certificate":"/etc/pebble/temp-tls-leaf/cert.pem","externalAccountBindingRequired":false,"externalAccountMACKeys":{},"httpPort":80,"listenAddress":":8443","managementListenAddress":":8444","ocspResponderURL":"","privateKey":"/etc/pebble/temp-tls-leaf/key.pem","tlsPort":443}}
+  root-cert.pem: |
+    -----BEGIN CERTIFICATE-----
+    MIIDSzCCAjOgAwIBAgIIOvR7X+wFgKkwDQYJKoZIhvcNAQELBQAwIDEeMBwGA1UE
+    AxMVbWluaWNhIHJvb3QgY2EgM2FmNDdiMCAXDTIwMDQyNjIzMDYxNloYDzIxMjAw
+    NDI3MDAwNjE2WjAgMR4wHAYDVQQDExVtaW5pY2Egcm9vdCBjYSAzYWY0N2IwggEi
+    MA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCaoISLUOImo7vm7sGUpeycouDP
+    TcJj6CxfCbvBsrlAg8ERGIph9H7TuDnTVk46pOaoxByGlwvvh4qR/Dled+G8NCt5
+    s0r0yemY/fx1grm1TmcJRO+A1P5kx/M9hy+kVcyLRvPOnvo8Thj/4zvaJDh+pSjt
+    5oAQvOHt9hYwGkkvSsZw12cTUuCsbypQ4lapDSeAjp3pNlqFcWmCvF9Ib3URDybN
+    JWhY6yQQe54D2LxYqxCfYZjKhNbaxlNTlHu0Ujy75I/AdSjK6DljAZh0OimuQNEm
+    FyXWvpnfyHbV5f0mMiXIOo2FY8izSD7cyFagmr0XvymCtxeDK1+MvT2pM+rXAgMB
+    AAGjgYYwgYMwDgYDVR0PAQH/BAQDAgKEMB0GA1UdJQQWMBQGCCsGAQUFBwMBBggr
+    BgEFBQcDAjASBgNVHRMBAf8ECDAGAQH/AgEAMB0GA1UdDgQWBBR0MgecNe4RY575
+    qAtIt6zAjbBqLTAfBgNVHSMEGDAWgBR0MgecNe4RY575qAtIt6zAjbBqLTANBgkq
+    hkiG9w0BAQsFAAOCAQEAjtGjoXGRG7586vyT3XcJBa8y9MOsDhQGOec23h40NJCn
+    SPF28bmTIaWhB+Hv8G+Mkyf9Ov3L5L/mH0VGvZUkMAnSdT4vaMYGrTvMtYGS/8ew
+    lPnlSJ3oO9Kz9zfOneoPDD1OGkV0Oq3wLn9cq6jQgItEeACsXNtaogXJxYhvxiV1
+    1k/gjXmG9pvFpb0A1bw6apxGftIViDKrPR2P/pG3QAuLKywQiNxZ5odf3kvKdZmJ
+    hLbu119My9XiiWhNegufcRNRNEnKJ5AQsBEwLEnD4oeIZmFvYVKOPjfWRV5qczVi
+    mUPjtQv88HhlgX/lBVWJ2VONlFWVoOreZz4GkAm5bA==
+    -----END CERTIFICATE-----
+  root-key.pem: |-
+    -----BEGIN RSA PRIVATE KEY-----
+    MIIEowIBAAKCAQEAmqCEi1DiJqO75u7BlKXsnKLgz03CY+gsXwm7wbK5QIPBERiK
+    YfR+07g501ZOOqTmqMQchpcL74eKkfw5XnfhvDQrebNK9MnpmP38dYK5tU5nCUTv
+    gNT+ZMfzPYcvpFXMi0bzzp76PE4Y/+M72iQ4fqUo7eaAELzh7fYWMBpJL0rGcNdn
+    E1LgrG8qUOJWqQ0ngI6d6TZahXFpgrxfSG91EQ8mzSVoWOskEHueA9i8WKsQn2GY
+    yoTW2sZTU5R7tFI8u+SPwHUoyug5YwGYdDoprkDRJhcl1r6Z38h21eX9JjIlyDqN
+    hWPIs0g+3MhWoJq9F78pgrcXgytfjL09qTPq1wIDAQABAoIBAB0x7ZS4YtrU02eY
+    8Of2JCS3BCdgETH35ljTZ6X87slllxB5R7eTCFdFU3W5t++OrxZyYMhwwIorV1iU
+    /Of/TpnQZ90Eo0Rw0zBV1FMDqbi34vB3GZmDnby9nAmj+rTWllY9wU7j6W91d3bp
+    GqXnbNtMp9uzR77hSu85JZtTezn4YzjIbHqd4+/+4xbOsla0wKXFjiCgYBy15a6a
+    D92ypK/wyN0ghzyfNwIfnpqfHSUIOCogO8BClS3IV/wLci0hMIQlUkxm1MC7zsdN
+    hLFy4I0bKzq5MA+F9Tv0S6MxUpB4vSGw0bQeZjfxuFCTcZ8XE0CMsByDW+nfGU5b
+    Kmj75NECgYEAxP05uMVitQJh2Wi8kj5ufUIPA1OeGLdpuxXVkTm36Xsn4Jmv6NuU
+    OaOqa7kNoYrpSlUjLBng6KetewxXWB3ykaftycutgXS/Cd8OoaHKmdBtado8m3tb
+    shyTSG++8YLXVll4+Cn2DC6YHXJpq+OeDvFD+GTfgpa7kaWkBwswqZ0CgYEAyPKc
+    CoMuzdLKl/+8pVAy2Yb8pcCd0+KC74BQDvusSGCJtDl4ophO2tbvt7pvQJ6PEBl+
+    UDZdOohilWemG6wmswlAKsGn5L/I8946TF6r7l9CVBl9OAsSs2weZBNg5Ukqx5p+
+    JryfDQfv+FJq3n1q3ECMzgj1KFMdG8khuJ71RgMCgYBLuXA7+BzGqmDE+38p1LgS
+    jJdK1xT6OV96nJ0Zk4+AQGiG7W1y3R3wvlqfyGZWCBlACtRXeqc7qGGG4Kqe4/xA
+    Q8akARj0n9VkTQvJ1HEWicnVnCAaQORx5owzl0lWe86dkg1vkGnWKv8sqrO2cOxs
+    oBBZ5yUIhTsbdQpF7uZI/QKBgQCXOs7osnWE/UDvR84Hc+XxA8AcVmvxTKVR7fVS
+    cWHlTpIUCrSZWZru45ehZDPaI/pzGVyQrXlYVdArtMe0R8kQMMQT6Y6bfyKTNgoV
+    86HdUd+vP0eX5+15DsOIeXUQ2hHSCpkqOgZRXknhTtWTADxt6j6NyPwIDxT3FlXE
+    hgz9VQKBgEVRIPV27tD97VfBy3PRLSSQqDcUS/LaUUXEv7H+l7VPWOffJKg+xcFJ
+    nZ6akov9Z5vSDM7jjUStvaKQHV1QlqKGiVfdiLTFkwyC3B2IvxyAXWB/l+wckNP3
+    SS3wHkUjXo/eWoK0wSC5yDooaklsXiXWNJtWwHiAsRqYFTUt4IQs
+    -----END RSA PRIVATE KEY-----
+kind: ConfigMap
+metadata:
+  labels:
+    app.kubernetes.io/instance: pebble
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: pebble
+    app.kubernetes.io/version: v2.3.0
+    helm.sh/chart: pebble-0.2.2
+  name: pebble
+---
+# Source: pebble/templates/pebble-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/instance: pebble
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: pebble
+    app.kubernetes.io/version: v2.3.0
+    helm.sh/chart: pebble-0.2.2
+  name: pebble
+spec:
+  ports:
+  - name: acme
+    nodePort: 32443
+    port: 443
+    targetPort: acme
+  - name: acme-mgmt
+    nodePort: 32444
+    port: 8444
+    targetPort: acme-mgmt
+  selector:
+    app.kubernetes.io/instance: pebble
+    app.kubernetes.io/name: pebble
+  type: NodePort
+---
+# Source: pebble/templates/pebble-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/instance: pebble
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: pebble
+    app.kubernetes.io/version: v2.3.0
+    helm.sh/chart: pebble-0.2.2
+  name: pebble
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: pebble
+      app.kubernetes.io/name: pebble
+  template:
+    metadata:
+      annotations:
+        checksum/configmap: 3a146efd1ddbfb6956b4f1e2f26f3b258e556141523f5927bff9392ebd271419
+      labels:
+        app.kubernetes.io/instance: pebble
+        app.kubernetes.io/name: pebble
+    spec:
+      containers:
+      - command:
+        - pebble
+        - -config
+        - /etc/pebble/pebble-config.json
+        env:
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: PEBBLE_VA_NOSLEEP
+          value: "1"
+        - name: PEBBLE_WFE_NONCEREJECT
+          value: "0"
+        - name: PEBBLE_AUTHZREUSE
+          value: "100"
+        - name: PEBBLE_VA_ALWAYS_VALID
+          value: "1"
+        image: letsencrypt/pebble:v2.3.0
+        name: pebble
+        ports:
+        - containerPort: 8443
+          name: acme
+        - containerPort: 8444
+          name: acme-mgmt
+        readinessProbe:
+          exec:
+            command:
+            - sh
+            - -c
+            - '[ "$(netstat -tl | grep 8443)" != "" ] || exit 1'
+          periodSeconds: 2
+        volumeMounts:
+        - mountPath: /etc/pebble/pebble-config.json
+          name: pebble-config-and-tls-root
+          subPath: pebble-config.json
+        - mountPath: /etc/pebble/temp-tls-leaf
+          name: pebble-temp-tls-leaf
+      initContainers:
+      - command:
+        - sh
+        - -c
+        - |
+          [ -e localhost/key.pem ] || exec minica -ca-cert /input/root-cert.pem -ca-key /input/root-key.pem -domains "localhost,pebble,pebble.default,pebble.default.svc,pebble.default.svc.cluster.local" -ip-addresses 127.0.0.1
+        image: twalter/minica:latest
+        name: pebble-tls-leaf-creation
+        volumeMounts:
+        - mountPath: /input
+          name: pebble-config-and-tls-root
+        - mountPath: /output/localhost
+          name: pebble-temp-tls-leaf
+      terminationGracePeriodSeconds: 1
+      volumes:
+      - configMap:
+          name: pebble
+        name: pebble-config-and-tls-root
+      - emptyDir: {}
+        name: pebble-temp-tls-leaf

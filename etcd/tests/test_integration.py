@@ -10,7 +10,7 @@ import requests
 from datadog_checks.dev import run_command
 from datadog_checks.etcd import Etcd
 
-from .common import COMPOSE_FILE, ETCD_VERSION, HOST, STORE_METRICS, URL
+from .common import COMPOSE_FILE, ETCD_VERSION, HOST, REMAPED_DEBUGGING_METRICS, STORE_METRICS, URL
 from .utils import is_leader, legacy, preview
 
 CHECK_NAME = 'etcd'
@@ -29,7 +29,10 @@ def test_check(aggregator, instance, openmetrics_metrics, dd_run_check):
     for metric in openmetrics_metrics:
         aggregator.assert_metric('etcd.{}'.format(metric), tags=tags, at_least=0)
 
-    assert aggregator.metrics_asserted_pct > 79, 'Missing metrics {}'.format(aggregator.not_asserted())
+    for metric in REMAPED_DEBUGGING_METRICS:
+        aggregator.assert_metric('etcd.{}'.format(metric), at_least=1)
+
+    aggregator.assert_all_metrics_covered()
 
 
 @preview
@@ -44,7 +47,10 @@ def test_check_no_leader_tag(aggregator, instance, openmetrics_metrics, dd_run_c
     for metric in openmetrics_metrics:
         aggregator.assert_metric('etcd.{}'.format(metric), tags=[], at_least=0)
 
-    assert aggregator.metrics_asserted_pct > 79, 'Missing metrics {}'.format(aggregator.not_asserted())
+    for metric in REMAPED_DEBUGGING_METRICS:
+        aggregator.assert_metric('etcd.{}'.format(metric), at_least=1)
+
+    aggregator.assert_all_metrics_covered()
 
 
 @preview

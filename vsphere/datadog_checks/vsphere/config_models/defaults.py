@@ -58,6 +58,10 @@ def instance_collection_type(field, value):
     return 'realtime'
 
 
+def instance_connection_reset_timeout(field, value):
+    return 900
+
+
 def instance_disable_generic_tags(field, value):
     return False
 

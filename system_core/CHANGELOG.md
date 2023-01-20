@@ -1,10 +1,20 @@
 # CHANGELOG - system_core
 
-## 1.13.0 / 2022-04-05
+## 2.0.0 / 2022-12-09
+
+* [Added] Adds `system.core.frequency` metric. See [#13349](https://github.com/DataDog/integrations-core/pull/13349).
+* [Changed] Collect the number of cpu cores using `psutil.cpu_count()`. See [#13483](https://github.com/DataDog/integrations-core/pull/13483).
+
+## 1.14.0 / 2022-08-05 / Agent 7.39.0
+
+* [Added] Add total cpu percentages as a metric. See [#12525](https://github.com/DataDog/integrations-core/pull/12525).
+* [Fixed] Dependency updates. See [#12653](https://github.com/DataDog/integrations-core/pull/12653).
+
+## 1.13.0 / 2022-04-05 / Agent 7.36.0
 
 * [Added] Add metric_patterns options to filter all metric submission by a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
 
-## 1.12.0 / 2022-02-19
+## 1.12.0 / 2022-02-19 / Agent 7.35.0
 
 * [Added] Add `pyproject.toml` file. See [#11442](https://github.com/DataDog/integrations-core/pull/11442).
 * [Added] Upgrade psutil to 5.9.0. See [#11139](https://github.com/DataDog/integrations-core/pull/11139).

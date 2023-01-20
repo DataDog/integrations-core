@@ -5,8 +5,6 @@ import pytest
 
 from datadog_checks.base.utils.aws import rds_parse_tags_from_endpoint
 
-pytestmark = pytest.mark.aws
-
 
 class TestRDS:
     @pytest.mark.parametrize(

@@ -64,6 +64,8 @@ To configure this check for an Agent running on Kubernetes:
 
 Set [Autodiscovery Integrations Templates][5] as pod annotations on your application container. Alternatively, you can configure templates with a [file, configmap, or key-value store][6].
 
+**Annotations v1** (for Datadog Agent < v7.36)
+
 ```yaml
 apiVersion: v1
 kind: Pod
@@ -86,7 +88,36 @@ spec:
     - name: coredns
 ```
 
+**Annotations v2** (for Datadog Agent v7.36+)
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: coredns
+  annotations:
+    ad.datadoghq.com/coredns.checks: |
+      {
+        "coredns": {
+          "init_config": {},
+          "instances": [
+            {
+              "openmetrics_endpoint": "http://%%host%%:9153/metrics", 
+              "tags": ["dns-pod:%%host%%"]
+            }
+          ]
+        }
+      }
+  labels:
+    name: coredns
+spec:
+  containers:
+    - name: coredns
+```
+
 To enable the legacy OpenMetricsBaseCheckV1 version of the check, replace `openmetrics_endpoint` with `prometheus_url`:
+
+**Annotations v1** (for Datadog Agent < v7.36)
 
 ```yaml
     ad.datadoghq.com/coredns.instances: |
@@ -96,6 +127,17 @@ To enable the legacy OpenMetricsBaseCheckV1 version of the check, replace `openm
           "tags": ["dns-pod:%%host%%"]
         }
       ]
+```
+
+**Annotations v2** (for Datadog Agent v7.36+)
+
+```yaml
+          "instances": [
+            {
+              "prometheus_url": "http://%%host%%:9153/metrics", 
+              "tags": ["dns-pod:%%host%%"]
+            }
+          ]
 ```
 
 **Notes**:
@@ -109,6 +151,8 @@ To enable the legacy OpenMetricsBaseCheckV1 version of the check, replace `openm
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][7].
 
 Then, set [Log Integrations][8] as pod annotations. Alternatively, you can configure this with a [file, configmap, or key-value store][9].
+
+**Annotations v1/v2**
 
 ```yaml
 apiVersion: v1

@@ -34,6 +34,10 @@ def instance_collect_count_metrics(field, value):
     return False
 
 
+def instance_collect_ethtool_metrics(field, value):
+    return False
+
+
 def instance_collect_rate_metrics(field, value):
     return True
 

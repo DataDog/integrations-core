@@ -1,49 +1,61 @@
 {
-  "aliases": [
-    "/integrations/gearman"
-  ],
-  "categories": [
-    "processing",
-    "autodiscovery",
-    "log collection"
-  ],
-  "creates_events": false,
-  "display_name": "Gearman",
-  "guid": "bdd65394-92ff-4d51-bbe3-ba732663fdb2",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "gearman.",
-  "metric_to_check": "gearman.unique_tasks",
-  "name": "gearmand",
-  "process_signatures": [
-    "gearmand",
-    "gearman"
-  ],
-  "public_title": "Datadog-Gearman Integration",
-  "short_description": "Track the number of jobs queued and running - in total or by task.",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os"
-  ],
-  "type": "check",
-  "integration_id": "gearman",
+  "manifest_version": "2.0.0",
+  "app_uuid": "7e1b6c42-8f40-4f4c-8d58-a3f7f39cb3e5",
+  "app_id": "gearman",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Track the number of jobs queued and running - in total or by task.",
+    "title": "Gearman",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Category::Processing",
+      "Category::Autodiscovery",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "Gearman",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "gearman.",
+        "check": "gearman.unique_tasks",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      },
+      "process_signatures": [
+        "gearmand",
+        "gearman"
+      ]
     },
-    "monitors": {},
     "dashboards": {
       "gearman": "assets/dashboards/gearman_dashboard.json"
     },
-    "service_checks": "assets/service_checks.json",
-    "logs": {
-      "source": "gearman"
-    },
-    "metrics_metadata": "metadata.csv",
     "saved_views": {
       "gearman_processes": "assets/saved_views/gearman_processes.json"
+    },
+    "logs": {
+      "source": "gearman"
     }
   }
 }

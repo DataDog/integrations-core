@@ -75,11 +75,39 @@ For containerized environments, see the [Autodiscovery Integration Templates][2]
 
 ##### Metric collection
 
-| Parameter            | Value                                                                                 |
-|----------------------|---------------------------------------------------------------------------------------|
-| `<INTEGRATION_NAME>` | `haproxy`                                                                             |
-| `<INIT_CONFIG>`      | blank or `{}`                                                                         |
-| `<INSTANCE_CONFIG>`  | `{"openmetrics_endpoint": "http://%%host%%:<PORT>/metrics", "use_openmetrics": True}` |
+| Parameter            | Value                                                                                   |
+|----------------------|-----------------------------------------------------------------------------------------|
+| `<INTEGRATION_NAME>` | `haproxy`                                                                               |
+| `<INIT_CONFIG>`      | blank or `{}`                                                                           |
+| `<INSTANCE_CONFIG>`  | `{"openmetrics_endpoint": "http://%%host%%:<PORT>/metrics", "use_openmetrics": "true"}` |
+
+##### Kubernetes Deployment example
+
+Add pod annotations under `.spec.template.metadata` for a Deployment:
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: haproxy
+spec:
+  template:
+    metadata:
+      labels:
+        name: haproxy
+      annotations:
+        ad.datadoghq.com/haproxy.check_names: '["haproxy"]'
+        ad.datadoghq.com/haproxy.init_configs: '[{}]'
+        ad.datadoghq.com/haproxy.instances: |
+          [
+            {
+              "openmetrics_endpoint": "http://%%host%%:<PORT>/metrics", "use_openmetrics": "true"
+            }
+          ]
+    spec:
+      containers:
+        - name: haproxy
+```
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
@@ -215,6 +243,8 @@ To configure this check for an Agent running on Kubernetes:
 
 Set [Autodiscovery Integrations Templates][12] as pod annotations on your application container. Aside from this, templates can also be configured with [a file, a configmap, or a key-value store][13].
 
+**Annotations v1** (for Datadog Agent < v7.36)
+
 ```yaml
 apiVersion: v1
 kind: Pod
@@ -234,6 +264,30 @@ spec:
     - name: haproxy
 ```
 
+**Annotations v2** (for Datadog Agent v7.36+)
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: haproxy
+  annotations:
+    ad.datadoghq.com/haproxy.checks: |
+      {
+        "haproxy": {
+          "init_config": {},
+          "instances": [
+            {
+              "url": "https://%%host%%/admin?stats"
+            }
+          ]
+        }
+      }
+spec:
+  containers:
+    - name: haproxy
+```
+
 ##### Log collection
 
 _Available for Agent versions >6.0_
@@ -241,6 +295,8 @@ _Available for Agent versions >6.0_
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][14].
 
 Then, set [Log Integrations][11] as pod annotations. This can also be configured with [a file, a configmap, or a key-value store][15].
+
+**Annotations v1/v2**
 
 ```yaml
 apiVersion: v1
@@ -321,6 +377,11 @@ The Haproxy check does not include any events.
 See [service_checks.json][19] for a list of service checks provided by this integration.
 
 ## Troubleshooting
+### Port 514 Already in Use Error
+On systems with syslog, if the Agent is listening for HAProxy logs on port 514, the following error can appear in the Agent logs: 
+`Can't start UDP forwarder on port 514: listen udp :514: bind: address already in use`. 
+
+This is happening because, by default, syslog is listening on port 514. To resolve this error, syslog can be disabled, or HAProxy can be configured to forward logs to port 514 and another port the Agent is listening for logs on. The port the Agent listens on can be defined in the haproxy.d/conf.yaml file [here][28].
 
 Need help? Contact [Datadog support][20].
 
@@ -358,3 +419,4 @@ Need help? Contact [Datadog support][20].
 [25]: https://github.com/DataDog/integrations-core/blob/7.34.x/haproxy/datadog_checks/haproxy/data/conf.yaml.example
 [26]: https://datadoghq.dev/integrations-core/base/openmetrics/
 [27]: https://docs.datadoghq.com/agent/guide/agent-v6-python-3/?tab=helm#use-python-3-with-datadog-agent-v6
+[28]: https://github.com/DataDog/integrations-core/blob/0e34b3309cc1371095762bfcaf121b0b45a4e263/haproxy/datadog_checks/haproxy/data/conf.yaml.example#L631

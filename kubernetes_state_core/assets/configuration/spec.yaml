@@ -1,0 +1,126 @@
+name: Kubernetes State
+files:
+  - name: conf.yaml.example
+    options:
+      - template: init_config
+        options:
+          template: init_config/openmetrics_legacy
+      - template: instances
+        options:
+          - name: collectors
+            required: false
+            description: |
+              A list of resource types to collect
+
+              Example to enable pods and nodes collectors:
+            value:
+              type: array
+              items:
+                type: string
+              example:
+                - nodes
+                - pods
+          - name: label_joins
+            required: false
+            description: |
+              label_joins allows adding the tags to join from other KSM metrics.
+
+              Example: Joining for deployment metrics. Based on:
+              kube_deployment_labels{deployment="kube-dns",label_addonmanager_kubernetes_io_mode="Reconcile"}
+              Use the following config to add the value of label_addonmanager_kubernetes_io_mode as a tag to your KSM
+              deployment metrics.
+            value:
+              type: object
+              example:
+                kube_deployment_labels:
+                  labels_to_match:
+                    - deployment
+                  labels_to_get:
+                    - label_addonmanager_kubernetes_io_mode
+          - name: labels_as_tags
+            required: false
+            description: |
+              labels_as_tags allows to specify custom labels of kubernetes resources to be turned into Datadog tags attached the corresponding metrics.
+            value:
+              type: object
+              example:
+                labels_as_tags:
+                  pod:
+                    app.kubernetes.io/name: kube_app_name
+                  node:
+                    topology.kubernetes.io/region: kube_region
+          - name: annotations_as_tags
+            required: false
+            description: |
+              annotations_as_tags allows to specify custom annotations of kubernetes resources to be turned into Datadog tags attached the corresponding metrics.
+            value:
+              type: object
+              example:
+                annotations_as_tags:
+                  pod:
+                    my_pod_annotation: my_pod_tag
+          - name: labels_mapper
+            required: false
+            description: |
+              LabelsMapper can be used to translate kube-state-metrics labels to other tags.
+              Example: Adding kube_namespace tag instead of namespace
+            value:
+              type: object
+              example:
+                namespace: kube_namespace
+          - name: tags
+            required: false
+            description: |
+              A list of tags to attach to every metric and service check emitted by this instance.
+
+              Learn more about tagging at https://docs.datadoghq.com/tagging
+            value:
+              type: array
+              items:
+                type: string
+              example:
+                - <KEY_1>:<VALUE_1>
+                - <KEY_2>:<VALUE_2>
+          - name: disable_global_tags
+            required: false
+            description: |
+              disable_global_tags disables adding the global host tags defined via tags/DD_TAG in the Agent config, default false.
+            value:
+              type: bool
+              example: false
+          - name: namespaces
+            required: false
+            description: |
+              namespaces contains the namespaces from which we collect metrics
+
+               Example: Enable metric collection for objects in prod and kube-system namespaces.
+            value:
+              type: list
+              items:
+                type: string
+              example:
+                - prod
+                - kube-system
+          - name: resync_period
+            required: false
+            description: |
+              resync_period is the frequency of resync'ing the metrics cache in seconds, default 5 minutes (kubernetes_informers_resync_period).
+            value:
+              type: integer
+              example: 300
+          - name: telemetry
+            required: false
+            description: |
+              enables telemetry check's metrics, default false.
+              Metrics can be found under kubernetes_state.telemetry
+            value:
+              type: bool
+              example: false
+          - name: skip_leader_election
+            required: false
+            description: |
+              skip_leader_election forces ignoring the leader election when running the check
+              Can be useful when running the check as cluster check
+            value:
+              type: bool
+              example: false

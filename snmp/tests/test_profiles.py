@@ -2383,6 +2383,11 @@ def test_fortinet_fortigate(aggregator):
     ]
     processor_tags = common_tags + ['processor_index:12']
 
+    phase1_name = [
+        'ESMAO-Lomtec',
+        'ESMAO',
+    ]
+
     vd_metrics = [
         'fgVdEntOpMode',
         'fgVdEntHaState',
@@ -2414,8 +2419,14 @@ def test_fortinet_fortigate(aggregator):
     # Interface
     aggregator.assert_metric('snmp.fgIntfEntVdom', metric_type=aggregator.GAUGE, count=1)
 
+    for name in phase1_name:
+        tags = common_tags + ['vpn_tunnel:' + name]
+        aggregator.assert_metric('snmp.fgVpnTunEntInOctets', metric_type=aggregator.RATE, tags=tags, count=1)
+        aggregator.assert_metric('snmp.fgVpnTunEntOutOctets', metric_type=aggregator.RATE, tags=tags, count=1)
+        aggregator.assert_metric('snmp.fgVpnTunEntStatus', metric_type=aggregator.GAUGE, tags=tags, count=1)
+
     # Firewall
-    firewall_tags = common_tags + ['policy_index:22']
+    firewall_tags = common_tags + ['policy_index:22', 'virtualdomain_index:2']
     for metric in ['fgFwPolPktCount', 'fgFwPolByteCount']:
         aggregator.assert_metric(
             'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=firewall_tags, count=1
@@ -2425,7 +2436,7 @@ def test_fortinet_fortigate(aggregator):
         )
 
     # Firewall 6
-    firewall6_tags = common_tags + ['policy6_index:29']
+    firewall6_tags = common_tags + ['policy6_index:29', 'virtualdomain_index:5']
     for metric in ['fgFwPol6PktCount', 'fgFwPol6ByteCount']:
         aggregator.assert_metric(
             'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=firewall6_tags, count=1

@@ -9,7 +9,7 @@ init_config:
     #
     # service: <SERVICE>
 
-## Every instance is scheduled independent of the others.
+## Every instance is scheduled independently of the others.
 #
 instances:
 
@@ -62,7 +62,6 @@ instances:
     #   - template%
     #   - rdsadmin
     #   - azure_maintenance
-    #   - postgres
 
     ## @param ssl - string - optional - default: false
     ## This option determines whether or not and with what priority a secure SSL TCP/IP connection
@@ -178,15 +177,24 @@ instances:
     #
     # collect_activity_metrics: false
 
+    ## @param activity_metrics_excluded_aggregations - list of strings - optional
+    ## A list of columns to remove from the pg_stat_activity aggregation.
+    ## By default, datname, usename and application_name will be used.
+    ## If applications with different application_name are creating a lot of short-lived queries,
+    ## removing application_name from the aggregation can help generate more stable metrics.
+    #
+    # activity_metrics_excluded_aggregations:
+    #   - application_name
+
     ## @param collect_database_size_metrics - boolean - optional - default: true
     ## Collect database size metrics.
     #
     # collect_database_size_metrics: true
 
-    ## @param collect_default_database - boolean - optional - default: false
+    ## @param collect_default_database - boolean - optional - default: true
     ## Include statistics from the default database 'postgres' in the check metrics.
     #
-    # collect_default_database: false
+    # collect_default_database: true
 
     ## @param collect_bloat_metrics - boolean - optional - default: false
     ## Collect metrics about table bloat. Only available when `relation` metrics are enabled.
@@ -309,6 +317,12 @@ instances:
         ## for databases with a very large number of unique normalized execution plans which exceed the cache's limit.
         #
         # seen_samples_cache_maxsize: 10000
+
+        ## @param explain_parameterized_queries - boolean - optional - default: false
+        ## Note, this is a BETA feature. This option will enable the ability to explain parameterized queries.
+        ## This is useful if your SQL clients are using the extended query protocol or prepared statements.
+        #
+        # explain_parameterized_queries: false
 
     ## Configure collection of query activity
     #
@@ -501,12 +515,12 @@ instances:
 
 ## Log Section
 ##
-## type - required - Type of log input source (tcp / udp / file / windows_event)
+## type - required - Type of log input source (tcp / udp / file / windows_event).
 ## port / path / channel_path - required - Set port if type is tcp or udp.
 ##                                         Set path if type is file.
 ##                                         Set channel_path if type is windows_event.
 ## source  - required - Attribute that defines which integration sent the logs.
-## encoding - optional - For file specifies the file encoding, default is utf-8, other
+## encoding - optional - For file specifies the file encoding. Default is utf-8. Other
 ##                       possible values are utf-16-le and utf-16-be.
 ## service - optional - The name of the service that generates the log.
 ##                      Overrides any `service` defined in the `init_config` section.

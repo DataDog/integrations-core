@@ -5,13 +5,24 @@ import ssl
 from time import time
 
 from kafka import KafkaAdminClient, KafkaClient
+from kafka.oauth.abstract import AbstractTokenProvider
 from six import string_types
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
+from datadog_checks.base.utils.http import AuthTokenOAuthReader
 
 from .constants import CONTEXT_UPPER_BOUND, DEFAULT_KAFKA_TIMEOUT
 from .legacy_0_10_2 import LegacyKafkaCheck_0_10_2
 from .new_kafka_consumer import NewKafkaConsumerCheck
+
+
+class OAuthTokenProvider(AbstractTokenProvider):
+    def __init__(self, **config):
+        self.reader = AuthTokenOAuthReader(config)
+
+    def token(self):
+        # Read only if necessary or use cached token
+        return self.reader.read() or self.reader._token
 
 
 class KafkaCheck(AgentCheck):
@@ -31,6 +42,7 @@ class KafkaCheck(AgentCheck):
         super(KafkaCheck, self).__init__(name, init_config, instances)
         self.sub_check = None
         self._context_limit = int(self.init_config.get('max_partition_contexts', CONTEXT_UPPER_BOUND))
+        self._data_streams_enabled = is_affirmative(self.instance.get('data_streams_enabled', False))
         self._custom_tags = self.instance.get('tags', [])
         self._monitor_unlisted_consumer_groups = is_affirmative(
             self.instance.get('monitor_unlisted_consumer_groups', False)
@@ -152,5 +164,10 @@ class KafkaCheck(AgentCheck):
             sasl_plain_password=self.instance.get('sasl_plain_password'),
             sasl_kerberos_service_name=self.instance.get('sasl_kerberos_service_name', 'kafka'),
             sasl_kerberos_domain_name=self.instance.get('sasl_kerberos_domain_name'),
+            sasl_oauth_token_provider=(
+                OAuthTokenProvider(**self.instance['sasl_oauth_token_provider'])
+                if 'sasl_oauth_token_provider' in self.instance
+                else None
+            ),
             ssl_context=tls_context,
         )

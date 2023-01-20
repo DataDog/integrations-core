@@ -2,11 +2,21 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 import yaml
 
+from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.base.utils.common import get_docker_hostname
+from datadog_checks.marklogic import MarklogicCheck
+
+from .metrics import (
+    FOREST_STATUS_TREE_CACHE_METRICS,
+    GLOBAL_METRICS,
+    OPTIONAL_METRICS,
+    STORAGE_FOREST_METRICS,
+    STORAGE_HOST_METRICS,
+)
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 HOST = get_docker_hostname()
@@ -90,3 +100,43 @@ def read_fixture_file(fname):
     # type: (str) -> Dict[str, Any]
     with open(os.path.join(HERE, 'fixtures', fname)) as f:
         return yaml.safe_load(f.read())
+
+
+def assert_metrics(aggregator, tags):
+    # type: (AggregatorStub, List[str]) -> None
+    for metric in GLOBAL_METRICS:
+        aggregator.assert_metric(metric, tags=tags)
+    for metric in OPTIONAL_METRICS:
+        aggregator.assert_metric(metric, at_least=0)
+
+    # May take some time to be available
+    for metric in FOREST_STATUS_TREE_CACHE_METRICS:
+        aggregator.assert_metric(metric, tags=tags, at_least=0)
+
+    storage_tag_prefixes = ['storage_path', 'marklogic_host_name', 'marklogic_host_id']
+    for metric in STORAGE_HOST_METRICS:
+        for tag in tags:
+            aggregator.assert_metric_has_tag(metric, tag)
+        for prefix in storage_tag_prefixes:
+            aggregator.assert_metric_has_tag_prefix(metric, prefix)
+    for metric in STORAGE_FOREST_METRICS:
+        for tag in tags:
+            aggregator.assert_metric_has_tag(metric, tag)
+        for prefix in storage_tag_prefixes + ['forest_id', 'forest_name']:
+            aggregator.assert_metric_has_tag_prefix(metric, prefix)
+
+
+def assert_service_checks(aggregator, tags, count=1, include_health_checks=True):
+    # type: (AggregatorStub, List[str], int, bool) -> None
+    aggregator.assert_service_check('marklogic.can_connect', MarklogicCheck.OK, count=count)
+
+    if include_health_checks:
+        for database_tag in SERVICE_CHECKS_HEALTH_TAG['database']:
+            aggregator.assert_service_check(
+                'marklogic.database.health', MarklogicCheck.OK, tags=tags + [database_tag], count=count
+            )
+
+        for forest_tag in SERVICE_CHECKS_HEALTH_TAG['forest']:
+            aggregator.assert_service_check(
+                'marklogic.forest.health', MarklogicCheck.OK, tags=tags + [forest_tag], count=count
+            )

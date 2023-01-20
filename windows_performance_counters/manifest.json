@@ -1,34 +1,41 @@
 {
-  "display_name": "Windows performance counters",
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "name": "windows_performance_counters",
-  "metric_prefix": "",
-  "metric_to_check": "",
-  "creates_events": false,
-  "short_description": "Monitor performance counters on Windows operating systems.",
-  "guid": "18cca521-450e-477c-8334-e0d29aebc150",
-  "support": "core",
-  "supported_os": [
-    "windows"
-  ],
-  "public_title": "Windows performance counters",
-  "categories": [
-    "iot",
-    "os & system"
-  ],
-  "type": "check",
-  "is_public": true,
-  "integration_id": "windows-performance-counters",
+  "manifest_version": "2.0.0",
+  "app_uuid": "ec86de4d-a080-4160-8b0a-b937bbea08e9",
+  "app_id": "windows-performance-counters",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor performance counters on Windows operating systems.",
+    "title": "Windows performance counters",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Windows",
+      "Category::IOT",
+      "Category::OS & System"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
-    },
-    "dashboards": {},
-    "monitors": {},
-    "saved_views": {},
-    "service_checks": "assets/service_checks.json",
-    "logs": {},
-    "metrics_metadata": "metadata.csv"
+    "integration": {
+      "source_type_name": "Windows performance counters",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    }
   }
 }

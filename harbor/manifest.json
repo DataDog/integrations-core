@@ -1,40 +1,55 @@
 {
-  "display_name": "Harbor",
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "name": "harbor",
-  "metric_prefix": "harbor.",
-  "metric_to_check": "harbor.projects.count",
-  "creates_events": false,
-  "short_description": "Monitor the health of Harbor Container Registry",
-  "guid": "8fcaa5d7-a121-45ea-bde2-f12d55bc6286",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "public_title": "Datadog-Harbor Integration",
-  "categories": [
-    "containers",
-    "log collection",
-    "autodiscovery"
-  ],
-  "type": "check",
-  "is_public": true,
-  "integration_id": "harbor",
+  "manifest_version": "2.0.0",
+  "app_uuid": "a4aae6fb-1865-42d0-be03-78e98b7e4b22",
+  "app_id": "harbor",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor the health of Harbor Container Registry",
+    "title": "Harbor",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Containers",
+      "Category::Log Collection",
+      "Category::Autodiscovery"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "Harbor",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "harbor.",
+        "check": "harbor.projects.count",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
     },
     "dashboards": {
       "Harbor Overview": "assets/dashboards/overview.json"
     },
-    "monitors": {},
-    "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "harbor"
-    },
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

@@ -2,14 +2,13 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import mock
-import pytest
 
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.dev.testing import requires_py3, requires_windows
 
 from .utils import GLOBAL_TAGS, SERVER, get_check
 
-pytestmark = [requires_py3, requires_windows, pytest.mark.perf_counters]
+pytestmark = [requires_py3, requires_windows]
 
 
 def test_default(aggregator, dd_run_check, mock_performance_objects):
@@ -27,7 +26,7 @@ def test_default(aggregator, dd_run_check, mock_performance_objects):
     aggregator.assert_service_check('test.windows.perf.health', ServiceCheck.OK, tags=['server:{}'.format(SERVER)])
 
     win32pdh.AddEnglishCounter.assert_called_once_with(
-        mock.ANY, win32pdh.MakeCounterPath((SERVER, 'Foo', 'baz', None, 0, 'Bar'))
+        mock.ANY, win32pdh.MakeCounterPath((SERVER, 'Foo', '*', None, 0, 'Bar'))
     )
 
 
@@ -48,7 +47,7 @@ def test_localized_object(aggregator, dd_run_check, mock_performance_objects):
     aggregator.assert_service_check('test.windows.perf.health', ServiceCheck.OK, tags=['server:{}'.format(SERVER)])
 
     win32pdh.AddCounter.assert_called_once_with(
-        mock.ANY, win32pdh.MakeCounterPath((SERVER, 'Foo', 'baz', None, 0, 'Bar'))
+        mock.ANY, win32pdh.MakeCounterPath((SERVER, 'Foo', '*', None, 0, 'Bar'))
     )
 
 
@@ -69,7 +68,7 @@ def test_localized_global(aggregator, dd_run_check, mock_performance_objects):
     aggregator.assert_service_check('test.windows.perf.health', ServiceCheck.OK, tags=['server:{}'.format(SERVER)])
 
     win32pdh.AddCounter.assert_called_once_with(
-        mock.ANY, win32pdh.MakeCounterPath((SERVER, 'Foo', 'baz', None, 0, 'Bar'))
+        mock.ANY, win32pdh.MakeCounterPath((SERVER, 'Foo', '*', None, 0, 'Bar'))
     )
 
 
@@ -91,5 +90,5 @@ def test_localized_object_overrides_global(aggregator, dd_run_check, mock_perfor
     aggregator.assert_service_check('test.windows.perf.health', ServiceCheck.OK, tags=['server:{}'.format(SERVER)])
 
     win32pdh.AddEnglishCounter.assert_called_once_with(
-        mock.ANY, win32pdh.MakeCounterPath((SERVER, 'Foo', 'baz', None, 0, 'Bar'))
+        mock.ANY, win32pdh.MakeCounterPath((SERVER, 'Foo', '*', None, 0, 'Bar'))
     )

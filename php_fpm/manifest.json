@@ -1,52 +1,63 @@
 {
-  "aliases": [
-    "/integrations/phpfpm"
-  ],
-  "categories": [
-    "web",
-    "autodiscovery"
-  ],
-  "creates_events": false,
-  "display_name": "PHP-FPM",
-  "guid": "47f2c337-83ac-4767-b460-1927d8343764",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "php_fpm.",
-  "metric_to_check": "php_fpm.processes.total",
-  "name": "php_fpm",
-  "process_signatures": [
-    "php-fpm",
-    "php-fpm:",
-    "php7.0-fpm",
-    "php7.0-fpm start",
-    "service php-fpm",
-    "php7.0-fpm restart",
-    "restart php-fpm",
-    "systemctl restart php-fpm.service",
-    "php7.0-fpm.service"
-  ],
-  "public_title": "Datadog-PHP FPM Integration",
-  "short_description": "Monitor process states, slow requests, and accepted requests.",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "type": "check",
-  "integration_id": "php-fpm",
+  "manifest_version": "2.0.0",
+  "app_uuid": "34faabdb-8545-4a45-a8bd-be0f979e99e7",
+  "app_id": "php-fpm",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor process states, slow requests, and accepted requests.",
+    "title": "PHP FPM",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Web",
+      "Category::Autodiscovery"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "PHP-FPM",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "php_fpm.",
+        "check": "php_fpm.processes.total",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      },
+      "process_signatures": [
+        "php-fpm",
+        "php-fpm:",
+        "php7.0-fpm",
+        "php7.0-fpm start",
+        "service php-fpm",
+        "php7.0-fpm restart",
+        "restart php-fpm",
+        "systemctl restart php-fpm.service",
+        "php7.0-fpm.service"
+      ]
     },
-    "monitors": {},
     "dashboards": {
       "php-fpm": "assets/dashboards/php-fpm_dashboard.json"
     },
-    "service_checks": "assets/service_checks.json",
-    "logs": {},
-    "metrics_metadata": "metadata.csv",
     "saved_views": {
       "php-fpm_processes": "assets/saved_views/php-fpm_processes.json"
     }

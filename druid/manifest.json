@@ -1,40 +1,55 @@
 {
-  "display_name": "Druid",
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "name": "druid",
-  "metric_prefix": "druid.",
-  "metric_to_check": "druid.service.health",
-  "creates_events": false,
-  "short_description": "Track metrics related to queries, ingestion, and coordination.",
-  "guid": "8abd92f8-7383-45f2-a412-d6ee960baa15",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "public_title": "Datadog-Druid Integration",
-  "categories": [
-    "processing",
-    "data store",
-    "log collection"
-  ],
-  "type": "check",
-  "is_public": true,
-  "integration_id": "druid",
+  "manifest_version": "2.0.0",
+  "app_uuid": "15b15f01-b342-4001-89ac-9e92fc4f3234",
+  "app_id": "druid",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Track metrics related to queries, ingestion, and coordination.",
+    "title": "Druid",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Processing",
+      "Category::Data Store",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "Druid",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "druid.",
+        "check": "druid.service.health",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
     },
     "dashboards": {
       "Druid Overview": "assets/dashboards/overview.json"
     },
-    "monitors": {},
-    "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "druid"
-    },
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

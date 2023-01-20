@@ -78,6 +78,7 @@ class QueryMetrics(BaseModel):
 
     collection_interval: Optional[float]
     enabled: Optional[bool]
+    pg_stat_statements_max_warning_threshold: Optional[float]
 
 
 class QuerySamples(BaseModel):
@@ -87,6 +88,7 @@ class QuerySamples(BaseModel):
     collection_interval: Optional[float]
     enabled: Optional[bool]
     explain_function: Optional[str]
+    explain_parameterized_queries: Optional[bool]
     explained_queries_cache_maxsize: Optional[int]
     explained_queries_per_hour_per_query: Optional[int]
     samples_per_hour_per_query: Optional[int]
@@ -108,6 +110,7 @@ class InstanceConfig(BaseModel):
     class Config:
         allow_mutation = False
 
+    activity_metrics_excluded_aggregations: Optional[Sequence[str]]
     application_name: Optional[str]
     aws: Optional[Aws]
     azure: Optional[Azure]
@@ -128,6 +131,8 @@ class InstanceConfig(BaseModel):
     gcp: Optional[Gcp]
     host: str
     ignore_databases: Optional[Sequence[str]]
+    log_unobfuscated_plans: Optional[bool]
+    log_unobfuscated_queries: Optional[bool]
     max_relations: Optional[int]
     metric_patterns: Optional[MetricPatterns]
     min_collection_interval: Optional[float]

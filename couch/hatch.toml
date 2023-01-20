@@ -1,0 +1,12 @@
+[env.collectors.datadog-checks]
+
+[[envs.default.matrix]]
+python = ["2.7", "3.8"]
+version = ["1.6", "2.3", "3.1"]
+
+[envs.default.overrides]
+matrix.version.env-vars = [
+  { key = "COUCH_VERSION", value = "1.6.1", if = ["1.6"] },
+  { key = "COUCH_VERSION", value = "2.3.1", if = ["2.3"] },
+  { key = "COUCH_VERSION", value = "3.1.0", if = ["3.1"] },
+]

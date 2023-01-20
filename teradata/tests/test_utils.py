@@ -6,7 +6,7 @@ import time
 import pytest
 
 from datadog_checks.teradata.check import TeradataCheck
-from datadog_checks.teradata.utils import timestamp_validator
+from datadog_checks.teradata.utils import submit_version, timestamp_validator
 
 from .common import CHECK_NAME
 
@@ -51,3 +51,23 @@ def test_timestamp_validator(caplog, instance, row, expected, msg):
         assert msg in caplog.text
     else:
         assert not caplog.text
+
+
+@pytest.mark.parametrize(
+    'row, expected_log',
+    [
+        pytest.param(['17.10.03'], None, id='short version'),
+        pytest.param(['17'], None, id='valid version'),
+        pytest.param(['a'], None, id='somewhat valid version'),
+        pytest.param([], 'Could not collect version info', id='no version returned'),
+    ],
+)
+def test_submit_version(instance, caplog, row, expected_log):
+    caplog.clear()
+    check = TeradataCheck(CHECK_NAME, {}, [instance])
+    submit_version(check, row)
+
+    if expected_log:
+        assert expected_log in caplog.text
+    else:
+        assert caplog.text == ''

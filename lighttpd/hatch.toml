@@ -1,0 +1,13 @@
+[env.collectors.datadog-checks]
+
+[[envs.default.matrix]]
+python = ["2.7", "3.8"]
+flavor = ["auth", "noauth"]
+
+[envs.default.overrides]
+matrix.flavor.env-vars = "FLAVOR"
+
+[envs.default.env-vars]
+DDEV_SKIP_GENERIC_TAGS_CHECK = "true"
+LIGHTTPD_VERSION = "1.4.54"
+LIGHTTPD_IMAGE = "sebp/lighttpd:1.4.54-r0"

@@ -61,9 +61,9 @@ files:
       - name: gitlab_url
         required: true
         description: |
-          Master URL to probe for service health status
-          If you are using gitlab CE and not EE, use this url with
-          the authorization token: http://localhost/?token=<TOKEN>
+          Master URL to probe for service health status.
+          If you are using GitLab CE and not EE, use this URL with
+          the authorization token: http://localhost/?token=<TOKEN>.
         value:
           type: string
       - name: prometheus_endpoint

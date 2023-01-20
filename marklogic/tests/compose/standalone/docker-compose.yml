@@ -2,7 +2,7 @@ version: '3.6'
 
 services:
   bootstrap:
-    image: store/marklogicdb/marklogic-server:${MARKLOGIC_IMAGE}
+    image: marklogicdb/marklogic-db:${MARKLOGIC_IMAGE}
     environment:
       - MARKLOGIC_INIT=true
       - MARKLOGIC_ADMIN_USERNAME=admin

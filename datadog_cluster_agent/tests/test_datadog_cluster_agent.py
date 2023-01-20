@@ -19,6 +19,8 @@ METRICS = [
     'admission_webhooks.reconcile_errors',
     'admission_webhooks.reconcile_success',
     'admission_webhooks.webhooks_received',
+    'admission_webhooks.library_injection_attempts',
+    'admission_webhooks.library_injection_errors',
     'aggregator.flush',
     'aggregator.processed',
     'api_requests',
@@ -50,6 +52,8 @@ METRICS = [
     'autodiscovery.poll_duration.sum',
     'autodiscovery.watched_resources',
     'autodiscovery.errors',
+    'kubernetes_apiserver.kube_events',
+    'kubernetes_apiserver.emitted_events',
 ]
 
 

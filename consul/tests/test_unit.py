@@ -188,6 +188,7 @@ def test_service_checks(aggregator):
         "check:server-loadbalancer",
         "consul_service_id:server-loadbalancer",
         "consul_service:server-loadbalancer",
+        "consul_node:node-1",
     ]
     aggregator.assert_service_check('consul.check', status=ConsulCheck.CRITICAL, tags=expected_tags, count=1)
 
@@ -196,6 +197,7 @@ def test_service_checks(aggregator):
         "check:server-api",
         "consul_service_id:server-loadbalancer",
         "consul_service:server-loadbalancer",
+        "consul_node:node-1",
     ]
     aggregator.assert_service_check('consul.check', status=ConsulCheck.OK, tags=expected_tags, count=1)
 
@@ -203,10 +205,16 @@ def test_service_checks(aggregator):
         "consul_datacenter:dc1",
         "check:server-api",
         "consul_service:server-loadbalancer",
+        "consul_node:node-1",
     ]
     aggregator.assert_service_check('consul.check', status=ConsulCheck.OK, tags=expected_tags, count=1)
 
-    expected_tags = ["consul_datacenter:dc1", "check:server-api", "consul_service_id:server-loadbalancer"]
+    expected_tags = [
+        "consul_datacenter:dc1",
+        "check:server-api",
+        "consul_service_id:server-loadbalancer",
+        "consul_node:node-1",
+    ]
     aggregator.assert_service_check('consul.check', status=ConsulCheck.OK, tags=expected_tags, count=1)
 
     expected_tags = [
@@ -214,6 +222,7 @@ def test_service_checks(aggregator):
         "check:server-status-empty",
         "consul_service_id:server-empty",
         "consul_service:server-empty",
+        "consul_node:node-1",
     ]
     aggregator.assert_service_check('consul.check', status=ConsulCheck.UNKNOWN, tags=expected_tags, count=1)
 
@@ -232,6 +241,7 @@ def test_service_checks_disable_service_tag(aggregator):
         'check:server-loadbalancer',
         'consul_service_id:server-loadbalancer',
         'consul_service:server-loadbalancer',
+        'consul_node:node-1',
     ]
     aggregator.assert_service_check('consul.check', status=ConsulCheck.CRITICAL, tags=expected_tags, count=1)
 
@@ -240,13 +250,24 @@ def test_service_checks_disable_service_tag(aggregator):
         'check:server-api',
         'consul_service_id:server-loadbalancer',
         'consul_service:server-loadbalancer',
+        'consul_node:node-1',
     ]
     aggregator.assert_service_check('consul.check', status=ConsulCheck.OK, tags=expected_tags, count=1)
 
-    expected_tags = ['consul_datacenter:dc1', 'check:server-api', 'consul_service:server-loadbalancer']
+    expected_tags = [
+        'consul_datacenter:dc1',
+        'check:server-api',
+        'consul_service:server-loadbalancer',
+        'consul_node:node-1',
+    ]
     aggregator.assert_service_check('consul.check', status=ConsulCheck.OK, tags=expected_tags, count=1)
 
-    expected_tags = ['consul_datacenter:dc1', 'check:server-api', 'consul_service_id:server-loadbalancer']
+    expected_tags = [
+        'consul_datacenter:dc1',
+        'check:server-api',
+        'consul_service_id:server-loadbalancer',
+        'consul_node:node-1',
+    ]
     aggregator.assert_service_check('consul.check', status=ConsulCheck.OK, tags=expected_tags, count=1)
 
     expected_tags = [
@@ -254,6 +275,7 @@ def test_service_checks_disable_service_tag(aggregator):
         'check:server-status-empty',
         'consul_service_id:server-empty',
         'consul_service:server-empty',
+        'consul_node:node-1',
     ]
     aggregator.assert_service_check('consul.check', status=ConsulCheck.UNKNOWN, tags=expected_tags, count=1)
 

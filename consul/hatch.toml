@@ -1,0 +1,14 @@
+[env.collectors.datadog-checks]
+
+[[envs.default.matrix]]
+python = ["2.7", "3.8"]
+version = ["1.6", "1.9"]
+
+[envs.default.overrides]
+matrix.version.env-vars = [
+  { key = "CONSUL_VERSION", value = "1.6.0", if = ["1.6"] },
+  { key = "CONSUL_VERSION", value = "1.9.0", if = ["1.9"] },
+]
+
+[envs.bench.env-vars]
+CONSUL_VERSION = "1.9.0"

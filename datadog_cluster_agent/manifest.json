@@ -1,37 +1,50 @@
 {
-  "display_name": "Datadog Cluster Agent",
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "name": "datadog_cluster_agent",
-  "metric_prefix": "datadog_cluster_agent.",
-  "metric_to_check": "datadog.cluster_agent.admission_webhooks.certificate_expiry",
-  "creates_events": false,
-  "short_description": "Tracks metrics of the Datadog Cluster Agent",
-  "guid": "275fd66d-2440-44e5-ac30-461062cd2825",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "public_title": "Datadog Cluster Agent Integration",
-  "categories": [
-    "containers"
-  ],
-  "type": "check",
-  "is_public": true,
-  "integration_id": "datadog-cluster-agent",
+  "manifest_version": "2.0.0",
+  "app_uuid": "b6c2b71b-38c9-4769-86ad-516953849236",
+  "app_id": "datadog-cluster-agent",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Tracks metrics of the Datadog Cluster Agent",
+    "title": "Datadog Cluster Agent",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Containers"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "Datadog Cluster Agent",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "datadog_cluster_agent.",
+        "check": "datadog.cluster_agent.api_requests",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
     },
     "dashboards": {
       "Datadog Cluster Agent - Overview": "assets/dashboards/datadog_cluster_agent_overview.json"
-    },
-    "monitors": {},
-    "saved_views": {},
-    "service_checks": "assets/service_checks.json",
-    "logs": {},
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

@@ -1,36 +1,45 @@
 {
-  "display_name": "Consul Connect",
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "name": "consul_connect",
-  "metric_prefix": "consul_connect.",
-  "metric_to_check": "",
-  "creates_events": false,
-  "short_description": "Monitor Consul Connect Envoy sidecar proxies.",
-  "guid": "9eb2d74b-32df-41f3-9248-bc87ccdda983",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "public_title": "Consul Connect",
-  "categories": [
-    "network",
-    "log collection",
-    "containers"
-  ],
-  "type": "check",
-  "is_public": true,
-  "integration_id": "consul-connect",
+  "manifest_version": "2.0.0",
+  "app_uuid": "580ac585-9e97-4b4f-ba56-34dba5050e06",
+  "app_id": "consul-connect",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor Consul Connect Envoy sidecar proxies.",
+    "title": "Consul Connect",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Network",
+      "Category::Log Collection",
+      "Category::Containers"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "dashboards": {},
-    "saved_views": {},
-    "monitors": {},
-    "service_checks": "assets/service_checks.json",
+    "integration": {
+      "source_type_name": "Consul Connect",
+      "configuration": {},
+      "events": {
+        "creates_events": false
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
     "logs": {
       "source": "envoy"
-    },
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

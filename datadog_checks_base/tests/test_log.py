@@ -7,10 +7,11 @@ import logging
 import warnings
 
 import mock
+import pytest
 
 from datadog_checks import log
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.log import DEFAULT_FALLBACK_LOGGER, get_check_logger, init_logging
+from datadog_checks.base.log import DEFAULT_FALLBACK_LOGGER, CheckLogFormatter, get_check_logger, init_logging
 
 
 def test_get_py_loglevel():
@@ -25,7 +26,6 @@ def test_get_py_loglevel():
 
 
 def test_logging_capture_warnings():
-
     with mock.patch('logging.Logger.warning') as log_warning:
         warnings.warn("hello-world")
 
@@ -79,3 +79,37 @@ def test_get_check_logger_argument_fallback(caplog):
 
     assert log is logger
     assert "This is a warning" in caplog.text
+
+
+class MockAgentLogHandler(logging.Handler):
+    def __init__(self):
+        super(MockAgentLogHandler, self).__init__()
+        self.formatter = CheckLogFormatter()
+        self.records = []
+
+    def emit(self, record):
+        self.records.append(self.format(record))
+
+
+@pytest.mark.parametrize('integration_tracing_enabled', [False, True])
+def test_log_trace_context_injection(integration_tracing_enabled):
+    def _tracing_enabled():
+        return integration_tracing_enabled, False
+
+    with mock.patch('datadog_checks.base.log.tracing_enabled', _tracing_enabled):
+        logger = logging.getLogger("test_log_trace_context_injection")
+        logger.handlers = []
+        handler = MockAgentLogHandler()
+        assert handler.formatter.integration_tracing_enabled == integration_tracing_enabled
+
+        logger.addHandler(handler)
+        logger.setLevel(logging.INFO)
+        logger.info("hello", extra={'dd.trace_id': 1, 'dd.span_id': 2})
+
+        assert len(handler.records) == 1
+        record = handler.records[0]
+
+        if integration_tracing_enabled:
+            assert "dd.trace_id=1 dd.span_id=2" in record
+        else:
+            assert "dd.trace_id=1 dd.span_id=2" not in record

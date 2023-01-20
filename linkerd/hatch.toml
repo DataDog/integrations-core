@@ -1,0 +1,12 @@
+[env.collectors.datadog-checks]
+
+[envs.default]
+dependencies = [
+  "requests-mock==1.4.0",
+]
+
+[[envs.default.matrix]]
+python = ["2.7", "3.8"]
+
+[envs.default.env-vars]
+DDEV_SKIP_GENERIC_TAGS_CHECK = "true"

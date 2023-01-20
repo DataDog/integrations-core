@@ -6,15 +6,15 @@ files:
     options:
     - name: gitlab_url
       description: |
-        The master URL to probe for service health status
-        If you are using gitlab CE and not EE, use this URL with
-        the authorization token: http://localhost/?token=<TOKEN>
+        The GitLab external URL to probe for service health status
+        If authentication is required, use this URL with
+        the authorization token: http://localhost/?access_token=<TOKEN>
       value:
         type: string
     - name: api_token
       description: |
-        The Gitlab API token for this instance
-        used to collect the Gitlab version.
+        The GitLab API token for this instance
+        used to collect the GitLab version.
       value:
         type: string
     - template: instances/openmetrics_legacy
@@ -24,6 +24,8 @@ files:
         send_distribution_counts_as_monotonic.value.example: true
         send_monotonic_counter.enabled: true
         send_monotonic_counter.value.example: true
+        send_monotonic_counter.value.default: false
+        send_monotonic_counter.value.display_default: false
   - template: init_config
     options:
       - template: init_config/openmetrics_legacy

@@ -9,7 +9,7 @@
 
 from __future__ import annotations
 
-from typing import Optional, Sequence
+from typing import Any, Mapping, Optional, Sequence, Union
 
 from pydantic import BaseModel, root_validator, validator
 
@@ -37,8 +37,9 @@ class InstanceConfig(BaseModel):
     metric_patterns: Optional[MetricPatterns]
     min_collection_interval: Optional[float]
     service: Optional[str]
-    services: Sequence[str]
+    services: Sequence[Union[str, Mapping[str, Any]]]
     tags: Optional[Sequence[str]]
+    windows_service_startup_type_tag: Optional[bool]
 
     @root_validator(pre=True)
     def _initial_validation(cls, values):

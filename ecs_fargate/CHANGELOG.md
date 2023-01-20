@@ -1,6 +1,10 @@
 # CHANGELOG - ECS Fargate
 
-## 3.1.1 / 2022-04-11
+## 3.2.0 / 2022-09-16 / Agent 7.40.0
+
+* [Added] Update HTTP config spec templates. See [#12890](https://github.com/DataDog/integrations-core/pull/12890).
+
+## 3.1.1 / 2022-04-11 / Agent 7.36.0
 
 * [Fixed] Remove outdated warning in the description for the `tls_ignore_warning` option. See [#11800](https://github.com/DataDog/integrations-core/pull/11800).
 
@@ -10,7 +14,7 @@
 * [Fixed] Support newer versions of `click`. See [#11746](https://github.com/DataDog/integrations-core/pull/11746).
 * [Fixed] Remove outdated warning in the description for the `tls_ignore_warning` option. See [#11591](https://github.com/DataDog/integrations-core/pull/11591).
 
-## 3.0.0 / 2022-02-19
+## 3.0.0 / 2022-02-19 / Agent 7.35.0
 
 * [Added] Add `pyproject.toml` file. See [#11342](https://github.com/DataDog/integrations-core/pull/11342).
 * [Fixed] Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).

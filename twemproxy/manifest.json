@@ -1,40 +1,55 @@
 {
-  "categories": [
-    "web",
-    "autodiscovery",
-    "log collection"
-  ],
-  "creates_events": false,
-  "display_name": "Twemproxy",
-  "guid": "a5cca58a-9984-4226-ad1c-8dff73c9d6ac",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "twemproxy.",
-  "metric_to_check": "twemproxy.total_connections",
-  "name": "twemproxy",
-  "public_title": "Datadog-Twemproxy Integration",
-  "short_description": "Visualize twemproxy performance and correlate with the rest of your applications",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "type": "check",
-  "integration_id": "twemproxy",
+  "manifest_version": "2.0.0",
+  "app_uuid": "34f4e81a-6fd2-48fd-a10c-5bffb75bbd0e",
+  "app_id": "twemproxy",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Visualize twemproxy performance and correlate with the rest of your applications",
+    "title": "Twemproxy",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Web",
+      "Category::Autodiscovery",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "Twemproxy",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "twemproxy.",
+        "check": "twemproxy.total_connections",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
     },
-    "monitors": {},
     "dashboards": {
       "Twemproxy - Overview": "assets/dashboards/twemproxy_overview.json"
     },
-    "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "twemproxy"
-    },
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

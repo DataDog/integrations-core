@@ -10,6 +10,8 @@ You can also create your own metrics by having the check run custom queries.
 
 ## Setup
 
+<div class="alert alert-info">This page describes the SQL Server Agent integration. If you are looking for the Database Monitoring product for SQL Server, see <a href="https://docs.datadoghq.com/database_monitoring" target="_blank">Datadog Database Monitoring</a>.</div>
+
 ### Installation
 
 The SQL Server check is included in the [Datadog Agent][2] package. No additional installation is necessary on your SQL Server instances.

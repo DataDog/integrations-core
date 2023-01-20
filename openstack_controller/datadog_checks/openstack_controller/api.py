@@ -444,10 +444,11 @@ class Authenticator(object):
         projects = cls._get_auth_projects(logger, keystone_endpoint, requests_wrapper)
 
         # For each project, we create an OpenStackProject object that we add to the `project_scopes` dict
-        last_auth_token = None
-        last_project_auth_scope = None
-        last_nova_endpoint = None
-        last_neutron_endpoint = None
+        credential_auth_token = None
+        credential_project_auth_scope = None
+        credential_nova_endpoint = None
+        credential_neutron_endpoint = None
+        found_admin_credential = False
         for project in projects:
             identity = {"methods": ['token'], "token": {"id": keystone_auth_token}}
             scope = {'project': {'id': project.get('id')}}
@@ -458,6 +459,9 @@ class Authenticator(object):
             auth_token = token_resp.headers.get('X-Subject-Token')
             nova_endpoint = cls._get_nova_endpoint(token_resp.json())
             neutron_endpoint = cls._get_neutron_endpoint(token_resp.json())
+            roles = cls._get_roles(token_resp.json())
+            has_admin_auth = "admin" in roles
+
             project_auth_scope = {
                 'project': {
                     'name': project.get('name'),
@@ -468,14 +472,27 @@ class Authenticator(object):
 
             project_name = project.get('name')
             project_id = project.get('id')
-            if project_name is not None and project_id is not None:
-                last_auth_token = auth_token
-                last_project_auth_scope = project_auth_scope
-                last_nova_endpoint = nova_endpoint
-                last_neutron_endpoint = neutron_endpoint
 
-        if last_auth_token and last_project_auth_scope and last_nova_endpoint and last_neutron_endpoint:
-            return Credential(last_auth_token, last_project_auth_scope, last_nova_endpoint, last_neutron_endpoint)
+            if not found_admin_credential and project_name is not None and project_id is not None:
+                found_admin_credential = has_admin_auth
+
+                credential_auth_token = auth_token
+                credential_project_auth_scope = project_auth_scope
+                credential_nova_endpoint = nova_endpoint
+                credential_neutron_endpoint = neutron_endpoint
+
+        if (
+            credential_auth_token
+            and credential_project_auth_scope
+            and credential_nova_endpoint
+            and credential_neutron_endpoint
+        ):
+            return Credential(
+                credential_auth_token,
+                credential_project_auth_scope,
+                credential_nova_endpoint,
+                credential_neutron_endpoint,
+            )
 
         return None
 
@@ -557,6 +574,15 @@ class Authenticator(object):
         if valid_endpoint:
             return valid_endpoint
         raise MissingNovaEndpoint()
+
+    @classmethod
+    def _get_roles(cls, json_resp):
+        """
+        Collec the role names returned by the Identity API
+        """
+        roles_json = json_resp.get('token', {}).get('roles', [])
+        role_names = [role.get('name') for role in roles_json]
+        return role_names
 
     @staticmethod
     def _get_valid_endpoint(resp, name, entry_type):

@@ -1,15 +1,28 @@
 # CHANGELOG - Vertica
 
-## 3.3.1 / 2022-05-15
+## 3.4.1 / 2022-08-05 / Agent 7.39.0
+
+* [Fixed] Dependency updates. See [#12653](https://github.com/DataDog/integrations-core/pull/12653).
+
+## 3.4.0 / 2022-08-03
+
+* [Added] Use QueryManager to get metrics from queries. See [#12542](https://github.com/DataDog/integrations-core/pull/12542).
+
+## 3.3.2 / 2022-07-19
+
+* [Fixed] Support projection storage and storage containers for Vertica 11+. See [#12465](https://github.com/DataDog/integrations-core/pull/12465).
+* [Fixed] Make integration compatible with Vertica 11. See [#12394](https://github.com/DataDog/integrations-core/pull/12394).
+
+## 3.3.1 / 2022-05-15 / Agent 7.37.0
 
 * [Fixed] Upgrade dependencies. See [#11958](https://github.com/DataDog/integrations-core/pull/11958).
 
-## 3.3.0 / 2022-04-05
+## 3.3.0 / 2022-04-05 / Agent 7.36.0
 
 * [Added] Upgrade dependencies. See [#11726](https://github.com/DataDog/integrations-core/pull/11726).
 * [Added] Add metric_patterns options to filter all metric submission by a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
 
-## 3.2.0 / 2022-02-19
+## 3.2.0 / 2022-02-19 / Agent 7.35.0
 
 * [Added] Add `pyproject.toml` file. See [#11454](https://github.com/DataDog/integrations-core/pull/11454).
 * [Fixed] Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).

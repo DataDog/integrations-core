@@ -90,6 +90,10 @@ def instance_service(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_start_tls(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_tags(field, value):
     return get_default_field_value(field, value)
 

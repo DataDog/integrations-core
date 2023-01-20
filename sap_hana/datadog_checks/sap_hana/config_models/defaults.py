@@ -62,6 +62,10 @@ def instance_port(field, value):
     return 30015
 
 
+def instance_schema_(field, value):
+    return 'SYS_DATABASES'
+
+
 def instance_service(field, value):
     return get_default_field_value(field, value)
 

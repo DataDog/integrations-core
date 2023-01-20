@@ -6,15 +6,18 @@ kafka.net.processor.avg.idle.pct.rate,gauge,10,fraction,,Average fraction of tim
 kafka.messages_in.rate,gauge,10,message,,Incoming message rate.,0,kafka,messages in,cpu
 kafka.request.channel.queue.size,gauge,10,request,,Number of queued requests.,-1,kafka,req channel queue size,
 kafka.request.fetch_consumer.time.avg,gauge,10,millisecond,,Total time in ms to serve the specified request.,0,kafka,req fetch time avg,memory
+kafka.request.fetch_consumer.rate,gauge,10,request,,Fetch consumer requests rate.,0,kafka,req fetch consumer,
 kafka.request.fetch_consumer.time.99percentile,gauge,10,millisecond,,Total time in ms to serve the specified request.,0,kafka,req fetch time 99,
-kafka.request.fetch.failed.rate,gauge,10,request,,Number of client fetch request failures.,-1,kafka,req fetch fail,
+kafka.request.fetch.failed.rate,gauge,10,request,,Client fetch request failures rate.,-1,kafka,req fetch fail,
 kafka.request.fetch_follower.time.avg,gauge,10,millisecond,,Total time in ms to serve the specified request.,-1,kafka,req fetch follower avg,
 kafka.request.fetch_follower.time.99percentile,gauge,10,millisecond,,Total time in ms to serve the specified request.,-1,kafka,req fetch follower 99,
+kafka.request.fetch_follower.rate,gauge,10,request,,Fetch follower requests rate.,0,kafka,req fetch follower,
 kafka.request.fetch_request_purgatory.size,gauge,10,request,,Number of requests waiting in the producer purgatory.,0,kafka,req fetch purgatory,
 kafka.request.handler.avg.idle.pct.rate,gauge,10,fraction,,Average fraction of time the request handler threads are idle.,1,kafka,req handle avg idle,
 kafka.request.produce.time.avg,gauge,10,millisecond,,Average time for a produce request.,0,kafka,req prod time avg,cpu
 kafka.request.produce.time.99percentile,gauge,10,millisecond,,Time for produce requests for 99th percentile.,0,kafka,req prod time 99,cpu
-kafka.request.produce.failed.rate,gauge,10,request,,Number of failed produce requests.,-1,kafka,req prod fail,
+kafka.request.produce.failed.rate,gauge,10,request,,Failed produce requests rate.,-1,kafka,req prod fail,
+kafka.request.produce.rate,gauge,10,request,,Produce requests rate.,0,kafka,req prod,
 kafka.request.producer_request_purgatory.size,gauge,10,request,,Number of requests waiting in the producer purgatory,0,kafka,req prod purgatory,
 kafka.request.update_metadata.time.avg,gauge,10,millisecond,,Average time for a request to update metadata.,0,kafka,req update meta time avg,
 kafka.request.update_metadata.time.99percentile,gauge,10,millisecond,,Time for update metadata requests for 99th percentile.,0,kafka,req update meta time 99,
@@ -31,6 +34,7 @@ kafka.replication.max_lag,gauge,10,offset,,Maximum lag in messages between the f
 kafka.replication.partition_count,gauge,10,,,Number of partitions across all topics in the cluster.,0,kafka,rep partition count,
 kafka.replication.unclean_leader_elections.rate,gauge,10,event,second,Unclean leader election rate.,-1,kafka,rep leader dirty elect,
 kafka.replication.under_replicated_partitions,gauge,10,,,Number of under replicated partitions.,-1,kafka,rep under replicated part,
+kafka.replication.under_min_isr_partition_count,gauge,10,,,Number of under min ISR partitions.,-1,kafka,rep under min ISR part,
 kafka.replication.offline_partitions_count,gauge,10,,,Number of partitions that don't have an active leader.,0,kafka,rep offline partitions count,
 kafka.session.zookeeper.disconnect.rate,gauge,10,event,second,Zookeeper client disconnect rate.,-1,kafka,zookeeper disconnect rate,
 kafka.session.zookeeper.expire.rate,gauge,10,event,second,Zookeeper client session expiration rate.,-1,kafka,zookeeper expiration rate,

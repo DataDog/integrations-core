@@ -8,6 +8,7 @@ import re
 import pytest
 from datadog_test_libs.win.pdh_mocks import initialize_pdh_tests, pdh_mocks_fixture  # noqa: F401
 
+from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.dev.testing import requires_py2
 from datadog_checks.iis import IIS
 
@@ -21,6 +22,7 @@ from .common import (
     MINIMAL_INSTANCE,
     SITE_METRICS,
     WIN_SERVICES_CONFIG,
+    WIN_SERVICES_LEGACY_CONFIG,
     WIN_SERVICES_MINIMAL_CONFIG,
 )
 
@@ -187,6 +189,31 @@ def test_check_without_sites_specified(aggregator, dd_run_check):
                 'iis.{}_up'.format(namespace),
                 IIS.OK,
                 tags=['mytag1', 'mytag2', '{}:{}'.format(namespace, value), iis_host],
+                count=1,
+            )
+
+    aggregator.assert_all_metrics_covered()
+
+
+def test_legacy_check_version(aggregator, dd_run_check):
+    instance = WIN_SERVICES_LEGACY_CONFIG
+    c = IIS(CHECK_NAME, {}, [instance])
+    dd_run_check(c)
+    iis_host = c.get_iishost()
+
+    aggregator.assert_service_check('iis.windows.perf.health', ServiceCheck.OK, count=0)
+    namespace_data = ((SITE_METRICS, IIS.SITE, DEFAULT_SITES), (APP_POOL_METRICS, IIS.APP_POOL, DEFAULT_APP_POOLS))
+    for metrics, namespace, values in namespace_data:
+        for metric in metrics:
+            for value in values:
+                aggregator.assert_metric(metric, tags=['{}:{}'.format(namespace, value), iis_host], count=1)
+
+    for _, namespace, values in namespace_data:
+        for value in values:
+            aggregator.assert_service_check(
+                'iis.{}_up'.format(namespace),
+                IIS.OK,
+                tags=['{}:{}'.format(namespace, value), iis_host],
                 count=1,
             )
 

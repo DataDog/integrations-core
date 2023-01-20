@@ -4,6 +4,29 @@ files:
   options:
   - template: init_config
     options:
+      - name: queue_manager_process
+        description: |
+          A regular expression that must match the command line of a running process in
+          order for the check to run, which is useful if running MQ in a failover mode.
+          A `<queue_manager>` placeholder is supported which represents the value of
+          the `queue_manager` option defined in each check instance.
+
+          This option is only available on Agent 7+.
+        value:
+          display_default: null
+          example: amqpcsea <queue_manager>
+          type: string
+      - name: queue_manager_process_limit
+        description: |
+          The maximum number of processes that can be matched at any given moment by
+          the `queue_manager_process` option.
+
+          Note that if this limit is lower than the actual limit the check will ignore
+          some active queue managers, while if this limit is higher than the actual
+          limit you may see increased CPU usage during check runs.
+        value:
+          example: 1
+          type: integer
       - template: init_config/default
   - template: instances
     options:
@@ -176,7 +199,8 @@ files:
       - name: convert_endianness
         description: |
           If you are monitoring IBM MQ remotely and if the Agent and the server are using different endianness,
-          set this field to true.
+          set this field to true. For example, you will need to enable this option if you are monitoring a server that
+          is running on AIX or IBM i.
         value:
           example: false
           type: boolean
@@ -213,10 +237,10 @@ files:
           type: boolean
           display_default: true
       - name: ssl_cipher_spec
-        type: string
-        description: The ssl cipher to use. It should match the value of the channels SSLCIPH attribute.
+        description: |
+          The TLS/SSL cipher to use. It should match the value of the channels SSLCIPH attribute. For an enumeration
+          see: https://www.ibm.com/docs/en/ibm-mq/9.3?topic=jms-tls-cipherspecs-ciphersuites-in-mq-classes
         value:
-          example: 'TLS_RSA_WITH_AES_256_CBC_SHA'
           type: string
       - name: ssl_key_repository_location
         description: |
@@ -247,6 +271,21 @@ files:
             'SYSTEM.*': queue_type:system
             'DEV.*': role:dev,queue_type:default
           type: object
+      - name: queue_manager_process
+        description: |
+          A regular expression that must match the command line of a running process in
+          order for the check to run, which is useful if running MQ in a failover mode.
+          A `<queue_manager>` placeholder is supported which represents the value of
+          the `queue_manager` option.
+
+          This option is only available on Agent 7+.
+
+          This overrides the `queue_manager_process` option in the `init_config` section
+          but the `queue_manager_process_limit` option still applies.
+        value:
+          display_default: null
+          example: amqpcsea <queue_manager>
+          type: string
       - template: instances/default
   - template: logs
     example:

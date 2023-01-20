@@ -1,10 +1,10 @@
-# -*- coding: utf-8 -*-
-# (C) Datadog, Inc. 2019-present
+﻿# (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import datetime as dt
 import json
 import os
+import time
 
 import mock
 import pytest
@@ -431,3 +431,32 @@ def test_specs_start_time(aggregator, dd_run_check, historical_instance):
     assert len(start_times) != 0
     for start_time in start_times:
         assert start_time == (mock_time - dt.timedelta(hours=2))
+
+
+@pytest.mark.parametrize(
+    'test_timeout, expected_result',
+    [
+        (1, False),
+        (2, False),
+        (20, True),
+    ],
+)
+@pytest.mark.usefixtures('mock_type', 'mock_api')
+def test_connection_refresh(aggregator, dd_run_check, realtime_instance, test_timeout, expected_result):
+    # This test is to ensure that the connection is refreshed after a specified period of time.
+    # We run the check initially to get a connection object, sleep for a period of time, and then
+    # rerun the check and compare and see if the connection objects are the same.
+    realtime_instance['connection_reset_timeout'] = test_timeout
+    check = VSphereCheck('vsphere', {}, [realtime_instance])
+    dd_run_check(check)
+    first_connection = check.api
+
+    time.sleep(2)
+
+    dd_run_check(check)
+
+    same_object = False
+    if first_connection == check.api:
+        same_object = True
+
+    assert same_object == expected_result

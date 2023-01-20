@@ -1,12 +1,21 @@
 # CHANGELOG - TLS
 
-## 2.8.0 / 2022-04-05
+## 2.9.1 / 2022-12-09
+
+* [Fixed] Update `cryptography` dependency. See [#13367](https://github.com/DataDog/integrations-core/pull/13367).
+* [Fixed] Remove `default_backend` parameter from cryptography calls. See [#13333](https://github.com/DataDog/integrations-core/pull/13333).
+
+## 2.9.0 / 2022-08-05 / Agent 7.39.0
+
+* [Added] Implement StartTLS protocol for postgres. See [#12596](https://github.com/DataDog/integrations-core/pull/12596). Thanks [krogon](https://github.com/krogon).
+
+## 2.8.0 / 2022-04-05 / Agent 7.36.0
 
 * [Added] Upgrade dependencies. See [#11726](https://github.com/DataDog/integrations-core/pull/11726).
 * [Added] Add metric_patterns options to filter all metric submission by a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
 * [Fixed] Support newer versions of `click`. See [#11746](https://github.com/DataDog/integrations-core/pull/11746).
 
-## 2.7.0 / 2022-02-19
+## 2.7.0 / 2022-02-19 / Agent 7.35.0
 
 * [Added] Add `pyproject.toml` file. See [#11447](https://github.com/DataDog/integrations-core/pull/11447).
 * [Fixed] Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).

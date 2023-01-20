@@ -1,35 +1,48 @@
 {
-  "categories": [
-    "orchestration",
-    "containers"
-  ],
-  "creates_events": false,
-  "display_name": "Kubernetes State",
-  "guid": "fa0e4395-3eae-4df8-88f2-9d7075c21a2d",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "kubernetes_state.",
-  "metric_to_check": "kubernetes_state.container.running",
-  "name": "kubernetes_state",
-  "public_title": "Datadog-Kubernetes State Integration",
-  "short_description": "Capture Pod scheduling events, track the status of your Kubelets, and more.",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "type": "check",
-  "integration_id": "kubernetes-state",
+  "manifest_version": "2.0.0",
+  "app_uuid": "da79704f-b8b0-4a41-9ebe-a3772e939ae8",
+  "app_id": "kubernetes-state",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Capture Pod scheduling events, track the status of your Kubelets, and more.",
+    "title": "Kubernetes State",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Orchestration",
+      "Category::Containers"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "monitors": {},
-    "dashboards": {},
-    "service_checks": "assets/service_checks.json",
-    "logs": {},
-    "metrics_metadata": "metadata.csv",
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "Kubernetes State",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "kubernetes_state.",
+        "check": "kubernetes_state.container.running",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
     }
   }
 }

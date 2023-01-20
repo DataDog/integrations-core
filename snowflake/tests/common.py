@@ -18,6 +18,7 @@ INSTANCE = {
     'disable_generic_tags': True,
     'login_timeout': 3,
 }
+
 OAUTH_INSTANCE = {
     'username': 'testuser',
     'account': 'test_acct.us-central1.gcp',

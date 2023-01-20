@@ -1,0 +1,15 @@
+[env.collectors.datadog-checks]
+
+[[envs.default.matrix]]
+python = ["3.8"]
+version = ["2.15.0"]
+compose-file = ["artemis.yaml"]
+
+[[envs.default.matrix]]
+python = ["3.8"]
+version = ["5.15.9"]
+compose-file = ["activemq.yaml"]
+
+[envs.default.overrides]
+matrix.version.env-vars = "VERSION"
+matrix.compose-file.env-vars = "COMPOSE_FILE"

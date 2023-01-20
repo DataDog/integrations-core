@@ -125,6 +125,8 @@ class InstanceConfig(BaseModel):
     include_instance_metrics: Optional[bool]
     include_master_files_metrics: Optional[bool]
     include_task_scheduler_metrics: Optional[bool]
+    log_unobfuscated_plans: Optional[bool]
+    log_unobfuscated_queries: Optional[bool]
     metric_patterns: Optional[MetricPatterns]
     min_collection_interval: Optional[float]
     obfuscator_options: Optional[ObfuscatorOptions]

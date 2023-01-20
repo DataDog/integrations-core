@@ -7,7 +7,7 @@
 Get metrics from PostgreSQL in real time to:
 
 - Visualize and monitor PostgreSQL states.
-- Received notifications about PostgreSQL failovers and events.
+- Receive notifications about PostgreSQL failovers and events.
 
 ## Setup
 
@@ -234,6 +234,8 @@ To configure this check for an Agent running on Kubernetes:
 
 Set [Autodiscovery Integrations Templates][13] as pod annotations on your application container. Aside from this, templates can also be configured with [a file, a configmap, or a key-value store][14].
 
+**Annotations v1** (for Datadog Agent < v7.36)
+
 ```yaml
 apiVersion: v1
 kind: Pod
@@ -256,12 +258,41 @@ spec:
     - name: postgres
 ```
 
+**Annotations v2** (for Datadog Agent v7.36+)
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: postgres
+  annotations:
+    ad.datadoghq.com/postgres.checks: |
+      {
+        "postgres": {
+          "init_config": {},
+          "instances": [
+            {
+              "host": "%%host%%",
+              "port":"5432",
+              "username":"datadog",
+              "password":"<PASSWORD>"
+            }
+          ]
+        }
+      }
+spec:
+  containers:
+    - name: postgres
+```
+
 ##### Log collection
 
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][15].
 
 Then, set [Log Integrations][11] as pod annotations. This can also be configured with [a file, a configmap, or a key-value store][16].
+
+**Annotations v1/v2**
 
 ```yaml
 apiVersion: v1

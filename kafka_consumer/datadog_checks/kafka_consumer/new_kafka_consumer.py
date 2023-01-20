@@ -5,16 +5,19 @@ import json
 from collections import defaultdict
 from time import time
 
+import six
 from kafka import errors as kafka_errors
+from kafka.protocol.admin import ListGroupsRequest
+from kafka.protocol.commit import GroupCoordinatorRequest, OffsetFetchRequest
 from kafka.protocol.offset import OffsetRequest, OffsetResetStrategy, OffsetResponse
 from kafka.structs import TopicPartition
 
 from datadog_checks.base import AgentCheck, ConfigurationError
-from datadog_checks.kafka_consumer.datadog_agent import read_persistent_cache, write_persistent_cache
 
 from .constants import BROKER_REQUESTS_BATCH_SIZE, KAFKA_INTERNAL_TOPICS
 
 MAX_TIMESTAMPS = 1000
+BROKER_TIMESTAMP_CACHE_KEY = 'broker_timestamps'
 
 
 class NewKafkaConsumerCheck(object):
@@ -28,7 +31,6 @@ class NewKafkaConsumerCheck(object):
         self._parent_check = parent_check
         self._broker_requests_batch_size = self.instance.get('broker_requests_batch_size', BROKER_REQUESTS_BATCH_SIZE)
         self._kafka_client = None
-        self._broker_timestamp_cache_key = 'broker_timestamps' + "".join(sorted(self._custom_tags))
 
     def __getattr__(self, item):
         try:
@@ -67,7 +69,8 @@ class NewKafkaConsumerCheck(object):
             self.log.exception("There was a problem collecting consumer offsets from Kafka.")
             # don't raise because we might get valid broker offsets
 
-        self._load_broker_timestamps()
+        if self._data_streams_enabled:
+            self._load_broker_timestamps()
         # Fetch the broker highwater offsets
         try:
             if len(self._consumer_offsets) < self._context_limit:
@@ -89,7 +92,8 @@ class NewKafkaConsumerCheck(object):
                 self._context_limit,
             )
 
-        self._save_broker_timestamps()
+        if self._data_streams_enabled:
+            self._save_broker_timestamps()
 
         # Report the metrics
         self._report_highwater_offsets(self._context_limit)
@@ -101,14 +105,18 @@ class NewKafkaConsumerCheck(object):
         """Loads broker timestamps from persistent cache."""
         self._broker_timestamps = defaultdict(dict)
         try:
-            for topic_partition, content in json.loads(read_persistent_cache(self._broker_timestamp_cache_key)).items():
+            json_cache = self._read_persistent_cache()
+            for topic_partition, content in json.loads(json_cache).items():
                 for offset, timestamp in content.items():
                     self._broker_timestamps[topic_partition][int(offset)] = timestamp
         except Exception as e:
             self.log.warning('Could not read broker timestamps from cache: %s', str(e))
 
+    def _read_persistent_cache(self):
+        return self._parent_check.read_persistent_cache(BROKER_TIMESTAMP_CACHE_KEY)
+
     def _save_broker_timestamps(self):
-        write_persistent_cache(self._broker_timestamp_cache_key, json.dumps(self._broker_timestamps))
+        self._parent_check.write_persistent_cache(BROKER_TIMESTAMP_CACHE_KEY, json.dumps(self._broker_timestamps))
 
     def _create_kafka_admin_client(self, api_version):
         """Return a KafkaAdminClient."""
@@ -176,7 +184,10 @@ class NewKafkaConsumerCheck(object):
                     ],
                 )
 
-                highwater_future = self.kafka_client._send_request_to_node(node_id=broker.nodeId, request=request)
+                # We can disable wakeup here because it is the same thread doing both polling and sending. Also, it
+                # is possible that the wakeup itself could block if a large number of sends were processed beforehand.
+                highwater_future = self._send_request_to_node(node_id=broker.nodeId, request=request, wakeup=False)
+
                 highwater_future.add_callback(self._highwater_offsets_callback)
                 highwater_futures.append(highwater_future)
 
@@ -192,11 +203,12 @@ class NewKafkaConsumerCheck(object):
                 error_type = kafka_errors.for_code(error_code)
                 if error_type is kafka_errors.NoError:
                     self._highwater_offsets[(topic, partition)] = offsets[0]
-                    timestamps = self._broker_timestamps["{}_{}".format(topic, partition)]
-                    timestamps[offsets[0]] = time()
-                    # If there's too many timestamps, we delete the oldest
-                    if len(timestamps) > MAX_TIMESTAMPS:
-                        del timestamps[min(timestamps)]
+                    if self._data_streams_enabled:
+                        timestamps = self._broker_timestamps["{}_{}".format(topic, partition)]
+                        timestamps[offsets[0]] = time()
+                        # If there's too many timestamps, we delete the oldest
+                        if len(timestamps) > MAX_TIMESTAMPS:
+                            del timestamps[min(timestamps)]
                 elif error_type is kafka_errors.NotLeaderForPartitionError:
                     self.log.warning(
                         "Kafka broker returned %s (error_code %s) for topic %s, partition: %s. This should only happen "
@@ -280,9 +292,11 @@ class NewKafkaConsumerCheck(object):
 
                 if reported_contexts >= contexts_limit:
                     continue
+                if not self._data_streams_enabled:
+                    continue
                 timestamps = self._broker_timestamps["{}_{}".format(topic, partition)]
-                # producer_timestamp is set in the same check, so it should never be None
-                producer_timestamp = timestamps[producer_offset]
+                # The producer timestamp can be not set if there was an error fetching broker offsets.
+                producer_timestamp = timestamps.get(producer_offset, None)
                 consumer_timestamp = self._get_interpolated_timestamp(timestamps, consumer_offset)
                 if consumer_timestamp is None or producer_timestamp is None:
                     continue
@@ -357,13 +371,17 @@ class NewKafkaConsumerCheck(object):
 
         if self._monitor_unlisted_consumer_groups:
             for broker in self.kafka_client._client.cluster.brokers():
-                list_groups_future = self.kafka_client._list_consumer_groups_send_request(broker.nodeId)
+                # FIXME: This is using a workaround to skip socket wakeup, which causes blocking
+                # (see https://github.com/dpkp/kafka-python/issues/2286).
+                # Once https://github.com/dpkp/kafka-python/pull/2335 is merged in, we can use the official
+                # implementation for this function instead.
+                list_groups_future = self._list_consumer_groups_send_request(broker.nodeId)
                 list_groups_future.add_callback(self._list_groups_callback, broker.nodeId)
                 self._consumer_futures.append(list_groups_future)
         elif self._consumer_groups:
             self.validate_consumer_groups()
             for consumer_group in self._consumer_groups:
-                find_coordinator_future = self.kafka_client._find_coordinator_id_send_request(consumer_group)
+                find_coordinator_future = self._find_coordinator_id_send_request(consumer_group)
                 find_coordinator_future.add_callback(self._find_coordinator_callback, consumer_group)
                 self._consumer_futures.append(find_coordinator_future)
         else:
@@ -387,7 +405,7 @@ class NewKafkaConsumerCheck(object):
             # consumer groups from Kafka < 0.9 that store their offset in Kafka don't use Kafka for group-coordination
             # so their group_type is empty
             if group_type in ('consumer', ''):
-                single_group_offsets_future = self.kafka_client._list_consumer_group_offsets_send_request(
+                single_group_offsets_future = self._list_consumer_group_offsets_send_request(
                     group_id=consumer_group, group_coordinator_id=broker_id
                 )
                 single_group_offsets_future.add_callback(self._single_group_offsets_callback, consumer_group)
@@ -414,7 +432,7 @@ class NewKafkaConsumerCheck(object):
                 if not partitions:  # If partitions aren't specified, fetch all partitions in the topic
                     partitions = self.kafka_client._client.cluster.partitions_for_topic(topic)
                 topic_partitions.extend([TopicPartition(topic, p) for p in partitions])
-        single_group_offsets_future = self.kafka_client._list_consumer_group_offsets_send_request(
+        single_group_offsets_future = self._list_consumer_group_offsets_send_request(
             group_id=consumer_group, group_coordinator_id=coordinator_id, partitions=topic_partitions
         )
         single_group_offsets_future.add_callback(self._single_group_offsets_callback, consumer_group)
@@ -450,3 +468,68 @@ class NewKafkaConsumerCheck(object):
     def batchify(iterable, batch_size):
         iterable = list(iterable)
         return (iterable[i : i + batch_size] for i in range(0, len(iterable), batch_size))
+
+    # FIXME: This is using a workaround to skip socket wakeup, which causes blocking
+    # (see https://github.com/dpkp/kafka-python/issues/2286).
+    # Once https://github.com/dpkp/kafka-python/pull/2335 is merged in, we can use the official
+    # implementation for this function instead.
+    def _send_request_to_node(self, node_id, request, wakeup=True):
+        while not self.kafka_client._client.ready(node_id):
+            # poll until the connection to broker is ready, otherwise send()
+            # will fail with NodeNotReadyError
+            self.kafka_client._client.poll()
+        return self.kafka_client._client.send(node_id, request, wakeup=wakeup)
+
+    def _list_consumer_groups_send_request(self, broker_id):
+        kafka_version = self.kafka_client._matching_api_version(ListGroupsRequest)
+        if kafka_version <= 2:
+            request = ListGroupsRequest[kafka_version]()
+        else:
+            raise NotImplementedError(
+                "Support for ListGroupsRequest_v{} has not yet been added to KafkaAdminClient.".format(kafka_version)
+            )
+        # Disable wakeup when sending request to prevent blocking send requests
+        return self._send_request_to_node(broker_id, request, wakeup=False)
+
+    def _find_coordinator_id_send_request(self, group_id):
+        """Send a FindCoordinatorRequest to a broker.
+        :param group_id: The consumer group ID. This is typically the group
+            name as a string.
+        :return: A message future
+        """
+        version = 0
+        request = GroupCoordinatorRequest[version](group_id)
+        return self._send_request_to_node(self.kafka_client._client.least_loaded_node(), request, wakeup=False)
+
+    def _list_consumer_group_offsets_send_request(self, group_id, group_coordinator_id, partitions=None):
+        """Send an OffsetFetchRequest to a broker.
+        :param group_id: The consumer group id name for which to fetch offsets.
+        :param group_coordinator_id: The node_id of the group's coordinator
+            broker.
+        :return: A message future
+        """
+        version = self.kafka_client._matching_api_version(OffsetFetchRequest)
+        if version <= 3:
+            if partitions is None:
+                if version <= 1:
+                    raise ValueError(
+                        """OffsetFetchRequest_v{} requires specifying the
+                        partitions for which to fetch offsets. Omitting the
+                        partitions is only supported on brokers >= 0.10.2.
+                        For details, see KIP-88.""".format(
+                            version
+                        )
+                    )
+                topics_partitions = None
+            else:
+                # transform from [TopicPartition("t1", 1), TopicPartition("t1", 2)] to [("t1", [1, 2])]
+                topics_partitions_dict = defaultdict(set)
+                for topic, partition in partitions:
+                    topics_partitions_dict[topic].add(partition)
+                topics_partitions = list(six.iteritems(topics_partitions_dict))
+            request = OffsetFetchRequest[version](group_id, topics_partitions)
+        else:
+            raise NotImplementedError(
+                "Support for OffsetFetchRequest_v{} has not yet been added to KafkaAdminClient.".format(version)
+            )
+        return self._send_request_to_node(group_coordinator_id, request, wakeup=False)

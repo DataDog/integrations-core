@@ -1,15 +1,23 @@
 # CHANGELOG - windows_service
 
-## 4.2.1 / 2022-05-15
+## 4.4.0 / 2022-10-28 / Agent 7.41.0
+
+* [Added] Add Windows service `startup_type` filter to config. See [#12940](https://github.com/DataDog/integrations-core/pull/12940).
+
+## 4.3.0 / 2022-09-16 / Agent 7.40.0
+
+* [Added] Add optional windows_service_startup_type tag. See [#12932](https://github.com/DataDog/integrations-core/pull/12932).
+
+## 4.2.1 / 2022-05-15 / Agent 7.37.0
 
 * [Fixed] Upgrade dependencies. See [#11958](https://github.com/DataDog/integrations-core/pull/11958).
 
-## 4.2.0 / 2022-04-05
+## 4.2.0 / 2022-04-05 / Agent 7.36.0
 
 * [Added] Upgrade dependencies. See [#11726](https://github.com/DataDog/integrations-core/pull/11726).
 * [Added] Add metric_patterns options to filter all metric submission by a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
 
-## 4.1.0 / 2022-02-19
+## 4.1.0 / 2022-02-19 / Agent 7.35.0
 
 * [Added] Add `pyproject.toml` file. See [#11460](https://github.com/DataDog/integrations-core/pull/11460).
 * [Fixed] Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).

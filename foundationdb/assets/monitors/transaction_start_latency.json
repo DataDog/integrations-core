@@ -1,6 +1,6 @@
 {
 	"name": "FoundationDB Transaction Start Latency Probe",
-	"type": "event alert",
+	"type": "query alert",
 	"query": "avg(last_5m):avg:foundationdb.latency_probe.transaction_start_seconds{*} > 5",
 	"message": "{{#is_alert}}\nA transaction performed on the FoundationDB cluster to measure current latency took a long time to start.\n{{/is_alert}} \n{{#is_warning}}\nA transaction performed on the FoundationDB cluster to measure current latency took a longer time to start than would normally be expected.\n{{/is_warning}}\n",
 	"tags": [

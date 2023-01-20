@@ -1,0 +1,2 @@
+# CHANGELOG - Azure Active Directory
+

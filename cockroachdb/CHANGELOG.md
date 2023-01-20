@@ -1,15 +1,36 @@
 # CHANGELOG - CockroachDB
 
+## 2.5.0 / 2022-12-09
+
+* [Added] Collect additional metrics. See [#13339](https://github.com/DataDog/integrations-core/pull/13339).
+
+## 2.4.1 / 2022-10-28 / Agent 7.41.0
+
+* [Fixed] Remove metrics limit from legacy version of the integration. See [#13038](https://github.com/DataDog/integrations-core/pull/13038).
+
+## 2.4.0 / 2022-09-16 / Agent 7.40.0
+
+* [Added] Update HTTP config spec templates. See [#12890](https://github.com/DataDog/integrations-core/pull/12890).
+* [Added] Document Openmetrics V2 version of backup metrics. See [#12730](https://github.com/DataDog/integrations-core/pull/12730).
+
+## 2.3.0 / 2022-08-05 / Agent 7.39.0
+
+* [Added] [CockroachDB] Add additional metrics for CockroachDB integration. See [#12382](https://github.com/DataDog/integrations-core/pull/12382). Thanks [tomellis91](https://github.com/tomellis91).
+
+## 2.2.1 / 2022-05-18 / Agent 7.37.0
+
+* [Fixed] Fix extra metrics description example. See [#12043](https://github.com/DataDog/integrations-core/pull/12043).
+
 ## 2.2.0 / 2022-05-15
 
 * [Added] Support dynamic bearer tokens (Bound Service Account Token Volume). See [#11915](https://github.com/DataDog/integrations-core/pull/11915).
 
-## 2.1.0 / 2022-04-05
+## 2.1.0 / 2022-04-05 / Agent 7.36.0
 
 * [Added] Add metric_patterns options to filter all metric submission by a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
 * [Fixed] Remove outdated warning in the description for the `tls_ignore_warning` option. See [#11591](https://github.com/DataDog/integrations-core/pull/11591).
 
-## 2.0.0 / 2022-02-19
+## 2.0.0 / 2022-02-19 / Agent 7.35.0
 
 * [Added] Add `pyproject.toml` file. See [#11329](https://github.com/DataDog/integrations-core/pull/11329).
 * [Fixed] Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).

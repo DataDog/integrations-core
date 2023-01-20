@@ -8,7 +8,6 @@ build-backend = "hatchling.build"
 name = "datadog-snowflake"
 description = "The Snowflake check"
 readme = "README.md"
-license = {text = "BSD-3-Clause"}
 requires-python = ">=3.8"
 keywords = [
     "datadog",
@@ -26,17 +25,21 @@ classifiers = [
     "License :: OSI Approved :: BSD License",
     "Programming Language :: Python :: 3.8",
     "Topic :: System :: Monitoring",
+    "Private :: Do Not Upload",
 ]
 dependencies = [
-    "datadog-checks-base>=25.1.0",
+    "datadog-checks-base>=27.5.0",
 ]
 dynamic = [
     "version",
 ]
 
+[project.license]
+text = "BSD-3-Clause"
+
 [project.optional-dependencies]
 deps = [
-    "snowflake-connector-python==2.7.6; python_version > '3.0'",
+    "snowflake-connector-python==2.8.2; python_version > '3.0'",
 ]
 
 [project.urls]
@@ -50,8 +53,6 @@ include = [
     "/datadog_checks",
     "/tests",
     "/manifest.json",
-    "/requirements-dev.txt",
-    "/tox.ini",
 ]
 
 [tool.hatch.build.targets.wheel]

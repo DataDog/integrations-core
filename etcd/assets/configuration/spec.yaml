@@ -8,7 +8,9 @@ files:
   - template: instances
     options:
       - name: use_preview
-        description: Whether or not to preview the new version of the check supporting only ETCD 3+
+        description: |
+          Enable this option to run the Prometheus-based check of etcd.
+          Note: This requires etcd v3 or greater.
         value:
           type: boolean
           example: true

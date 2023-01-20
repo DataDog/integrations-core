@@ -35,7 +35,7 @@ SELECT mode,
   LEFT JOIN pg_namespace pn ON (pn.oid = pc.relnamespace)
  WHERE {relations}
    AND l.mode IS NOT NULL
-   AND pc.relname NOT LIKE 'pg_%%'
+   AND pc.relname NOT LIKE 'pg^_%%' ESCAPE '^'
  GROUP BY pd.datname, pc.relname, pn.nspname, locktype, mode""",
     'relation': True,
 }
@@ -278,7 +278,7 @@ class RelationsManager(object):
             relation_filter.append(')')
             relations_filter.append(' '.join(relation_filter))
 
-        relations_filter = ' OR '.join(relations_filter)
+        relations_filter = '(' + ' OR '.join(relations_filter) + ')'
         self.log.debug("Running query: %s with relations matching: %s", str(query), relations_filter)
         return query.format(relations=relations_filter)
 

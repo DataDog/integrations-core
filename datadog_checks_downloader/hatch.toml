@@ -1,0 +1,24 @@
+[env.collectors.datadog-checks]
+
+[[envs.default.matrix]]
+python = ["3.8"]
+
+[envs.default.overrides]
+matrix.python.scripts = [
+  { key = "test", value = "_dd-test --capture=no --log-cli-level=debug" },
+]
+
+[envs.default]
+e2e-env = false
+dependencies = [
+  "freezegun==1.2.2",
+]
+
+[envs.test-data]
+description = """
+Make zipfile from online data for local testing
+"""
+detached = true
+
+[envs.test-data.scripts]
+create = "python tests/scripts/download_test_data.py"

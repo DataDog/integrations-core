@@ -27,6 +27,7 @@ classifiers = [
     "Programming Language :: Python :: 2.7",
     "Programming Language :: Python :: 3.8",
     "Topic :: System :: Monitoring",
+    "Private :: Do Not Upload",
 ]
 dependencies = [
     "datadog-checks-base>=25.1.0",
@@ -37,8 +38,7 @@ dynamic = [
 
 [project.optional-dependencies]
 deps = [
-    "pymysql==0.10.1; python_version < '3.0'",
-    "pymysql==1.0.2; python_version > '3.0'",
+    "pymysql==0.10.1",
 ]
 
 [project.urls]
@@ -52,8 +52,6 @@ include = [
     "/datadog_checks",
     "/tests",
     "/manifest.json",
-    "/requirements-dev.txt",
-    "/tox.ini",
 ]
 
 [tool.hatch.build.targets.wheel]

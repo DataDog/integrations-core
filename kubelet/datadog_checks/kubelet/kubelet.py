@@ -34,7 +34,6 @@ from .summary import SummaryScraperMixin
 KUBELET_HEALTH_PATH = '/healthz'
 NODE_SPEC_PATH = '/spec'
 POD_LIST_PATH = '/pods'
-CADVISOR_METRICS_PATH = '/metrics/cadvisor'
 KUBELET_METRICS_PATH = '/metrics'
 STATS_PATH = '/stats/summary/'
 PROBES_METRICS_PATH = '/metrics/probes'
@@ -61,7 +60,14 @@ FACTORS = {
 
 
 WHITELISTED_CONTAINER_STATE_REASONS = {
-    'waiting': ['errimagepull', 'imagepullbackoff', 'crashloopbackoff', 'containercreating'],
+    'waiting': [
+        'errimagepull',
+        'imagepullbackoff',
+        'crashloopbackoff',
+        'containercreating',
+        'createcontainererror',
+        'invalidimagename',
+    ],
     'terminated': ['oomkilled', 'containercannotrun', 'error'],
 }
 
@@ -231,14 +237,14 @@ class KubeletCheck(
         Create a copy of the instance and set default values.
         This is so the base class can create a scraper_config with the proper values.
         """
+        kubelet_conn_info = get_connection_info()
+        endpoint = kubelet_conn_info.get('url')
+
         kubelet_instance = deepcopy(instance)
         kubelet_instance.update(
             {
                 'namespace': self.NAMESPACE,
-                # We need to specify a prometheus_url so the base class can use it as the key for our config_map,
-                # we specify a dummy url that will be replaced in the `check()` function. We append it with "kubelet"
-                # so the key is different than the cadvisor scraper.
-                'prometheus_url': instance.get('kubelet_metrics_endpoint', 'dummy_url/kubelet'),
+                'prometheus_url': instance.get('kubelet_metrics_endpoint', urljoin(endpoint, KUBELET_METRICS_PATH)),
                 'metrics': [
                     DEFAULT_GAUGES,
                     DEPRECATED_GAUGES,
@@ -320,35 +326,19 @@ class KubeletCheck(
         # Test the kubelet health ASAP
         self._perform_kubelet_check(self.instance_tags)
 
-        if 'cadvisor_metrics_endpoint' in instance:
-            self.cadvisor_scraper_config['prometheus_url'] = instance.get(
-                'cadvisor_metrics_endpoint', urljoin(endpoint, CADVISOR_METRICS_PATH)
-            )
-        else:
-            self.cadvisor_scraper_config['prometheus_url'] = instance.get(
-                'metrics_endpoint', urljoin(endpoint, CADVISOR_METRICS_PATH)
-            )
-
-        if 'metrics_endpoint' in instance:
-            self.log.warning('metrics_endpoint is deprecated, please specify cadvisor_metrics_endpoint instead.')
-
-        self.kubelet_scraper_config['prometheus_url'] = instance.get(
-            'kubelet_metrics_endpoint', urljoin(endpoint, KUBELET_METRICS_PATH)
-        )
-
-        probes_metrics_endpoint = urljoin(endpoint, PROBES_METRICS_PATH)
-        if self.detect_probes(probes_metrics_endpoint):
-            self.probes_scraper_config['prometheus_url'] = instance.get(
-                'probes_metrics_endpoint', probes_metrics_endpoint
-            )
-        else:
-            # Disable probe metrics collection (k8s 1.15+ required)
-            self.probes_scraper_config['prometheus_url'] = ''
-
         # Kubelet credentials handling
         self.kubelet_credentials.configure_scraper(self.cadvisor_scraper_config)
         self.kubelet_credentials.configure_scraper(self.kubelet_scraper_config)
         self.kubelet_credentials.configure_scraper(self.probes_scraper_config)
+
+        if 'metrics_endpoint' in instance:
+            self.log.warning('metrics_endpoint is deprecated, please specify cadvisor_metrics_endpoint instead.')
+
+        http_handler = self.get_http_handler(self.probes_scraper_config)
+        probes_metrics_endpoint = urljoin(endpoint, PROBES_METRICS_PATH)
+        if not self.detect_probes(http_handler, probes_metrics_endpoint):
+            # Disable probe metrics collection (k8s 1.15+ required)
+            self.probes_scraper_config['prometheus_url'] = ''
 
         # Legacy cadvisor support
         try:

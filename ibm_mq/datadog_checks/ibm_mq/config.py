@@ -6,7 +6,7 @@ import datetime as dt
 import re
 
 from dateutil.tz import UTC
-from six import iteritems
+from six import PY2, iteritems
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.constants import ServiceCheck
@@ -40,7 +40,7 @@ class IBMMQConfig:
         'SYSTEM.CLUSTER.TRANSMIT.MODEL.QUEUE',
     ]
 
-    def __init__(self, instance):
+    def __init__(self, instance, init_config):
         self.log = get_check_logger()
         self.channel = instance.get('channel')  # type: str
         self.queue_manager_name = instance.get('queue_manager', 'default')  # type: str
@@ -121,19 +121,30 @@ class IBMMQConfig:
         # SSL options
         self.ssl = is_affirmative(instance.get('ssl_auth', False))  # type: bool
         self.try_basic_auth = is_affirmative(instance.get('try_basic_auth', True))  # type: bool
-        self.ssl_cipher_spec = instance.get('ssl_cipher_spec', 'TLS_RSA_WITH_AES_256_CBC_SHA')  # type: str
+        self.ssl_cipher_spec = instance.get('ssl_cipher_spec', '')  # type: str
         self.ssl_key_repository_location = instance.get(
             'ssl_key_repository_location', '/var/mqm/ssl-db/client/KeyringClient'
         )  # type: str
         self.ssl_certificate_label = instance.get('ssl_certificate_label')  # type: str
-        if instance.get('ssl_auth') is None and (
-            instance.get('ssl_cipher_spec') or instance.get('ssl_key_repository_location') or self.ssl_certificate_label
-        ):
-            self.log.info(
-                "ssl_auth has not been explicitly enabled but other SSL options have been provided. "
-                "SSL will be used for connecting"
-            )
-            self.ssl = True
+
+        ssl_options = ['ssl_cipher_spec', 'ssl_key_repository_location', 'ssl_certificate_label']
+
+        # Implicitly enable SSL auth connection if SSL options are used and `ssl_auth` isn't set
+        if instance.get('ssl_auth') is None:
+            if any([instance.get(o) for o in ssl_options]):
+                self.log.info(
+                    "`ssl_auth` has not been explicitly enabled but other SSL options have been provided. "
+                    "SSL will be used for connecting"
+                )
+                self.ssl = True
+
+        # Explicitly disable SSL auth connection if SSL options are used but `ssl_auth` is False
+        if instance.get('ssl_auth') is False:
+            if any([instance.get(o) for o in ssl_options]):
+                self.log.warning(
+                    "`ssl_auth` is explicitly disabled but SSL options are being used. "
+                    "SSL will not be used for connecting."
+                )
 
         self.mq_installation_dir = instance.get('mq_installation_dir', '/opt/mqm/')
 
@@ -147,6 +158,19 @@ class IBMMQConfig:
             raise ConfigurationError(
                 "mqcd_version must be a number between 1 and 9. {} found.".format(raw_mqcd_version)
             )
+
+        pattern = instance.get('queue_manager_process', init_config.get('queue_manager_process', ''))
+        if pattern:
+            if PY2:
+                raise ConfigurationError('The `queue_manager_process` option is only supported on Agent 7')
+
+            pattern = pattern.replace('<queue_manager>', re.escape(self.queue_manager_name))
+            self.queue_manager_process_pattern = re.compile(pattern)
+
+            # Implied immunity to IBM MQ's memory leak
+            self.try_basic_auth = False
+        else:
+            self.queue_manager_process_pattern = None
 
         self.instance_creation_datetime = dt.datetime.now(UTC)
 

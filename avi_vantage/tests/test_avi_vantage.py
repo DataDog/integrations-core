@@ -39,12 +39,12 @@ def test_integration(
 
 
 @pytest.mark.e2e
-def test_e2e(dd_agent_check, datadog_agent, integration_instance, get_expected_metrics):
+def test_e2e(dd_agent_check, integration_instance, get_expected_metrics):
     aggregator = dd_agent_check(integration_instance)
 
     aggregator.assert_service_check("avi_vantage.can_connect", AviVantageCheck.OK)
     for metric in get_expected_metrics(endpoint='http://localhost:5000/'):
         aggregator.assert_metric(metric['name'], metric['value'], metric['tags'], metric_type=metric['type'])
+
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
-    datadog_agent.assert_metadata_count(5)

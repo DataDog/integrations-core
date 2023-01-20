@@ -185,54 +185,76 @@ def test_index_metrics(aggregator, integration_check, pg_instance):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_locks_metrics(aggregator, integration_check, pg_instance):
-    pg_instance['relations'] = ['persons']
+@pytest.mark.parametrize(
+    'relations, lock_count, lock_table_name, tags',
+    [
+        pytest.param(
+            ['persons'],
+            1,
+            'persons',
+            [
+                'port:{}'.format(PORT),
+                'db:datadog_test',
+                'lock_mode:AccessExclusiveLock',
+                'lock_type:relation',
+                'table:persons',
+                'schema:public',
+            ],
+            id="test with single table lock should return 1",
+        ),
+        pytest.param(
+            [{'relation_regex': 'perso.*', 'relkind': ['r']}],
+            1,
+            'persons',
+            None,
+            id="test with matching relkind should return 1",
+        ),
+        pytest.param(
+            [{'relation_regex': 'perso.*', 'relkind': ['i']}],
+            0,
+            'persons',
+            None,
+            id="test without matching relkind should return 0",
+        ),
+        pytest.param(
+            ['pgtable'],
+            1,
+            'pgtable',
+            None,
+            id="pgtable should be included in lock metrics",
+        ),
+        pytest.param(
+            ['pg_newtable'],
+            0,
+            'pg_newtable',
+            None,
+            id="pg_newtable should be excluded from query since it starts with `pg_`",
+        ),
+    ],
+)
+def test_locks_metrics(aggregator, integration_check, pg_instance, relations, lock_count, lock_table_name, tags):
+    pg_instance['relations'] = relations
     pg_instance['query_timeout'] = 1000  # One of the relation queries waits for the table to not be locked
 
     check = integration_check(pg_instance)
-    check_with_lock(check, pg_instance)
+    check_with_lock(check, pg_instance, lock_table_name)
 
-    expected_tags = pg_instance['tags'] + [
-        'port:{}'.format(PORT),
-        'db:datadog_test',
-        'lock_mode:AccessExclusiveLock',
-        'lock_type:relation',
-        'table:persons',
-        'schema:public',
-    ]
-
-    aggregator.assert_metric('postgresql.locks', count=1, tags=expected_tags)
+    if tags is not None:
+        expected_tags = pg_instance['tags'] + tags
+        aggregator.assert_metric('postgresql.locks', count=lock_count, tags=expected_tags)
+    else:
+        aggregator.assert_metric('postgresql.locks', count=lock_count)
 
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_locks_relkind_match(aggregator, integration_check, pg_instance):
-    pg_instance['relations'] = [{'relation_regex': 'perso.*', 'relkind': ['r']}]
-    pg_instance['query_timeout'] = 1000  # One of the relation queries waits for the table to not be locked
-
-    check = integration_check(pg_instance)
-    check_with_lock(check, pg_instance)
-
-    aggregator.assert_metric('postgresql.locks', count=1)
-
-
-@pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
-def test_locks_metrics_no_relkind_match(aggregator, integration_check, pg_instance):
-    pg_instance['relations'] = [{'relation_regex': 'perso.*', 'relkind': ['i']}]
-    pg_instance['query_timeout'] = 1000  # One of the relation queries waits for the table to not be locked
-
-    check = integration_check(pg_instance)
-    check_with_lock(check, pg_instance)
-    aggregator.assert_metric('postgresql.locks', count=0)
-
-
-@pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
-def check_with_lock(check, instance):
+def check_with_lock(check, instance, lock_table=None):
+    lock_statement = 'LOCK persons'
+    if lock_table is not None:
+        lock_statement = 'LOCK {}'.format(lock_table)
     with psycopg2.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g") as conn:
         with conn.cursor() as cur:
-            cur.execute('LOCK persons')
+            cur.execute(lock_statement)
             check.check(instance)
 
 

@@ -28,10 +28,11 @@ def dd_environment():
     with docker_run(
         compose_file,
         conditions=[
-            CheckDockerLogs(compose_file, 'Server server1 open for e-business', attempts=120),
+            CheckDockerLogs(compose_file, 'Server server1 open for e-business', attempts=80, wait=2),
             StartPerfServlet(),
             CheckEndpoints(common.INSTANCE['servlet_url']),
         ],
+        attempts=2,
     ):
         yield common.INSTANCE
 

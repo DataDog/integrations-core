@@ -3,7 +3,7 @@
 ## Download the IBM MQ Client
 
 You can find it here: 
-https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/messaging/mqdev/mactoolkit/9.2.2.0-IBM-MQ-Toolkit-MacX64.pkg
+https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/messaging/mqdev/mactoolkit/9.2.5.0-IBM-MQ-DevToolkit-MacX64.pkg
 
 Follow the instructions in the installation guide to update your PATH.
 
@@ -43,7 +43,13 @@ $ DYLD_LIBRARY_PATH=/opt/mqm/lib64 python -c 'import pymqi'
 ModuleNotFoundError: No module named 'pymqe'
 ```
 
-The workaround is to use a virtualenv, then set `DYLD_LIBRARY_PATH`, then import `pymqi`.
+The workaround is to use a virtualenv:
+1. Create a virtualenv.
+2. Set `DYLD_LIBRARY_PATH`.
+3. Install `pymqi` using `pip install pymqi`.
+4. Re-install ddev in the virtual environment using `python -m pip install -e "path/to/datadog_checks_dev[cli]"`.
+
+You can start the ddev environment in your virtual environment.
 
 This does not affect tox tests since virtualenv is used.
 

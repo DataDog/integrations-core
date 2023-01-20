@@ -1,12 +1,36 @@
 # CHANGELOG - network
 
-## 2.7.0 / 2022-04-05
+## 2.9.3 / 2022-12-09
+
+* [Fixed] Fix network check for solaris. See [#13319](https://github.com/DataDog/integrations-core/pull/13319).
+
+## 2.9.2 / 2022-10-28 / Agent 7.41.0
+
+* [Fixed] Extract windows check to separate class. See [#13143](https://github.com/DataDog/integrations-core/pull/13143).
+* [Fixed] Test & better document collect_cx_queues. See [#13117](https://github.com/DataDog/integrations-core/pull/13117).
+* [Fixed] Exclude loopback interface from ethtool. See [#13042](https://github.com/DataDog/integrations-core/pull/13042).
+
+## 2.9.1 / 2022-10-04 / Agent 7.40.0
+
+* [Fixed] Exclude loopback interface from ethtool. See [#13042](https://github.com/DataDog/integrations-core/pull/13042).
+
+## 2.9.0 / 2022-09-16
+
+* [Added] Add collection of ethtool queue stats. See [#12023](https://github.com/DataDog/integrations-core/pull/12023).
+
+## 2.8.0 / 2022-08-05 / Agent 7.39.0
+
+* [Added] Add collection of ethtool queue stats. See [#11056](https://github.com/DataDog/integrations-core/pull/11056).
+* [Fixed] Dependency updates. See [#12653](https://github.com/DataDog/integrations-core/pull/12653).
+* [Fixed] Revert "Add collection of ethtool queue stats (#11056)". See [#12017](https://github.com/DataDog/integrations-core/pull/12017).
+
+## 2.7.0 / 2022-04-05 / Agent 7.36.0
 
 * [Added] Add IP and TCP metric collection. See [#11170](https://github.com/DataDog/integrations-core/pull/11170).
 * [Added] Add metric_patterns options to filter all metric submission by a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
 * [Fixed] Support newer versions of `click`. See [#11746](https://github.com/DataDog/integrations-core/pull/11746).
 
-## 2.6.0 / 2022-02-19
+## 2.6.0 / 2022-02-19 / Agent 7.35.0
 
 * [Added] Collect additional iface metrics: mtu, num tx/rx queue and tx queue length. See [#11156](https://github.com/DataDog/integrations-core/pull/11156).
 * [Added] Add `pyproject.toml` file. See [#11402](https://github.com/DataDog/integrations-core/pull/11402).
@@ -137,21 +161,21 @@
 
 ## 1.8.0 / 2018-11-30 / Agent 6.8.0
 
-* [Added] Update psutil. See [#2576][1].
-* [Fixed] Use raw string literals when \ is present. See [#2465][2].
+* [Added] Update psutil. See [#2576](https://github.com/DataDog/integrations-core/pull/2576).
+* [Fixed] Use raw string literals when \ is present. See [#2465](https://github.com/DataDog/integrations-core/pull/2465).
 
 ## 1.7.0 / 2018-10-12 / Agent 6.6.0
 
-* [Added] Upgrade psutil. See [#2190][3].
+* [Added] Upgrade psutil. See [#2190](https://github.com/DataDog/integrations-core/pull/2190).
 
 ## 1.6.1 / 2018-09-04 / Agent 6.5.0
 
-* [Fixed] Retrieve no_proxy directly from the Datadog Agent's configuration. See [#2004][4].
-* [Fixed] Add data files to the wheel package. See [#1727][5].
+* [Fixed] Retrieve no_proxy directly from the Datadog Agent's configuration. See [#2004](https://github.com/DataDog/integrations-core/pull/2004).
+* [Fixed] Add data files to the wheel package. See [#1727](https://github.com/DataDog/integrations-core/pull/1727).
 
 ## 1.6.0 / 2018-06-07
 
-* [Added] Add monotonic counts for some metrics. See [#1551][6]. Thanks [jalaziz][7].
+* [Added] Add monotonic counts for some metrics. See [#1551](https://github.com/DataDog/integrations-core/pull/1551). Thanks [jalaziz](https://github.com/jalaziz).
 
 ## 1.5.0 / 2018-03-23
 
@@ -159,45 +183,28 @@
 
 ## 1.4.0 / 2018-02-13
 
-* [FEATURE] Get some host network stats when the agent is running inside a container and not in the host network namespace. See [#994][8]
+* [FEATURE] Get some host network stats when the agent is running inside a container and not in the host network namespace. See [#994](https://github.com/DataDog/integrations-core/pull/994)
 
 ## 1.3.0 / 2017-09-01
 
-* [FEATURE] Collects TCPRetransFail metric from /proc/net/netstat, See [#697][9]
+* [FEATURE] Collects TCPRetransFail metric from /proc/net/netstat, See [#697](https://github.com/DataDog/integrations-core/pull/697)
 
 ## 1.2.2 / 2017-08-28
 
-* [BUGFIX] Fix incorrect `log.error` call in BSD check. See [#698][10]
+* [BUGFIX] Fix incorrect `log.error` call in BSD check. See [#698](https://github.com/DataDog/integrations-core/issues/698)
 
 ## 1.2.1 / 2017-07-18
 
-* [BUGFIX] Fix TCP6 metrics overriding TCP4 metrics when monitoring non combines socket states. See [#501][11]
+* [BUGFIX] Fix TCP6 metrics overriding TCP4 metrics when monitoring non combines socket states. See [#501](https://github.com/DataDog/integrations-core/issues/501)
 
 ## 1.2.0 / 2017-06-05
 
-* [FEATURE] Adds metrics from `/proc/net/netstat` in addition to the existing ones from `/proc/net/snmp`. See [#299][12] and [#452][13], thanks [@cory-stripe][14]
+* [FEATURE] Adds metrics from `/proc/net/netstat` in addition to the existing ones from `/proc/net/snmp`. See [#299](https://github.com/DataDog/integrations-core/issues/299) and [#452](https://github.com/DataDog/integrations-core/issues/452), thanks [@cory-stripe](https://github.com/cory-stripe)
 
 ## 1.1.0 / 2017-05-03
 
-* [BUGFIX] Work around `ss -atun` bug not differentiating tcp and udp. See [#296][15]
+* [BUGFIX] Work around `ss -atun` bug not differentiating tcp and udp. See [#296](https://github.com/DataDog/integrations-core/issues/296)
 
 ## 1.0.0 / 2017-03-22
 
 * [FEATURE] adds network integration.
-
-<!--- The following link definition list is generated by PimpMyChangelog --->
-[1]: https://github.com/DataDog/integrations-core/pull/2576
-[2]: https://github.com/DataDog/integrations-core/pull/2465
-[3]: https://github.com/DataDog/integrations-core/pull/2190
-[4]: https://github.com/DataDog/integrations-core/pull/2004
-[5]: https://github.com/DataDog/integrations-core/pull/1727
-[6]: https://github.com/DataDog/integrations-core/pull/1551
-[7]: https://github.com/jalaziz
-[8]: https://github.com/DataDog/integrations-core/pull/994
-[9]: https://github.com/DataDog/integrations-core/pull/697
-[10]: https://github.com/DataDog/integrations-core/issues/698
-[11]: https://github.com/DataDog/integrations-core/issues/501
-[12]: https://github.com/DataDog/integrations-core/issues/299
-[13]: https://github.com/DataDog/integrations-core/issues/452
-[14]: https://github.com/cory-stripe
-[15]: https://github.com/DataDog/integrations-core/issues/296

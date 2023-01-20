@@ -1,32 +1,42 @@
 {
-  "display_name": "Oracle Container Engine for Kubernetes - OKE",
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "name": "oke",
-  "metric_prefix": "oke.",
-  "metric_to_check": "",
-  "creates_events": false,
-  "short_description": "OKE is an Oracle-managed container orchestration service.",
-  "guid": "a9d60438-8782-44cb-bd27-1ffc6c5688c1",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "public_title": "Datadog-Oracle Container Engine for Kubernetes Integration",
-  "categories": [
-    "oracle",
-    "containers",
-    "orchestration"
-  ],
-  "type": "check",
-  "is_public": true,
-  "integration_id": "oke",
+  "manifest_version": "2.0.0",
+  "app_uuid": "c3361861-32be-4ed4-a138-d68b85b8d88b",
+  "app_id": "oke",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "OKE is an Oracle-managed container orchestration service.",
+    "title": "Oracle Container Engine for Kubernetes",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Oracle",
+      "Category::Containers",
+      "Category::Orchestration"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "dashboards": {},
-    "monitors": {},
-    "service_checks": "assets/service_checks.json",
-    "logs": {}
+    "integration": {
+      "source_type_name": "Oracle Container Engine for Kubernetes - OKE",
+      "configuration": {},
+      "events": {
+        "creates_events": false
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    }
   }
 }

@@ -11,14 +11,15 @@ ad_identifiers:
 #
 init_config:
 
-## Every instance is scheduled independent of the others.
+## Every instance is scheduled independently of the others.
 #
 instances:
 
   -
     ## @param use_openmetrics - boolean - optional - default: false
-    ## Use the latest OpenMetrics implementation for more features and better performance.
-    ## This implementation supports only Istio 1.5. Use `istiod_endpoint` or `istio_mesh_endpoint`.
+    ## Use the OpenMetrics V2 implementation for more features and better performance.
+    ## This implementation is only available for Istio >= 1.5, and should be used with 
+    ## `istiod_endpoint` and/or `istio_mesh_endpoint`.
     #
     # use_openmetrics: true
 
@@ -30,7 +31,7 @@ instances:
     ## @param istio_mesh_endpoint - string - optional
     ## To enable Istio metrics you must specify the url exposing the API.
     #
-    istio_mesh_endpoint: http://%%host%%:15090/stats/prometheus
+    istio_mesh_endpoint: http://%%host%%:15020/stats/prometheus
 
     ## @param tag_by_endpoint - boolean - optional - default: true
     ## Wether to include an endpoint tag or not. This only applies if `use openmentrics` is enabled.

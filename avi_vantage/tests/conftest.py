@@ -25,6 +25,7 @@ def dd_environment(integration_instance):
         conditions=[
             CheckDockerLogs(compose_file, 'Running on ', wait=5),
         ],
+        attempts=2,
     ):
         yield integration_instance
 

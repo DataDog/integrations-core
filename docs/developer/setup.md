@@ -11,29 +11,21 @@ you intend to work on.
 
 ## Python
 
-To work on any integration you must install Python 3.8+.
+To work on any integration you must install Python 3.8.
 
 After installation, restart your terminal and ensure that your newly installed Python comes first in your `PATH`.
 
 === "macOS"
-    We recommend using [Homebrew][homebrew-home].
-
-    First update the formulae and Homebrew itself:
+    First update the formulae and [Homebrew][homebrew-home] itself:
 
     ```
     brew update
     ```
 
-    then either install Python:
+    then install Python:
 
     ```
-    brew install python
-    ```
-
-    or upgrade it:
-
-    ```
-    brew upgrade python
+    brew install python@3.8
     ```
 
     After it completes, check the output to see if it asked you to run any extra commands and if so, execute them.
@@ -47,7 +39,7 @@ After installation, restart your terminal and ensure that your newly installed P
 === "Windows"
     Windows users have it the easiest.
 
-    Simply download the [latest x86-64 executable installer][python-downloads-windows] and run it.
+    Simply download the [Python 3.8 64-bit executable installer](https://www.python.org/downloads/release/python-3810/) and run it.
     When prompted, be sure to select the option to add to your `PATH`. Also, it is recommended that you choose the per-user installation method.
 
     Verify successful `PATH` modification:
@@ -59,7 +51,7 @@ After installation, restart your terminal and ensure that your newly installed P
 === "Linux"
     Ah, you enjoy difficult things. Are you using Gentoo?
 
-    We recommend using either [Miniconda][miniconda-docs] or [pyenv][pyenv-github]. Whatever you do, never modify the system Python.
+    We recommend using either [Miniconda][miniconda-docs] or [pyenv][pyenv-github] to install Python 3.8. Whatever you do, never modify the system Python.
 
     Verify successful `PATH` modification:
 
@@ -67,32 +59,124 @@ After installation, restart your terminal and ensure that your newly installed P
     which -a python
     ```
 
+## pipx
+
+To install certain command line tools, you'll need [pipx](https://github.com/pypa/pipx).
+
+=== "macOS"
+    Run:
+
+    ```
+    brew install pipx
+    ```
+
+    After it completes, check the output to see if it asked you to run any extra commands and if so, execute them.
+
+    Verify successful `PATH` modification:
+
+    ```
+    which -a pipx
+    ```
+
+=== "Windows"
+    Run:
+
+    ```
+    python -m pip install pipx
+    ```
+
+    Verify successful `PATH` modification:
+
+    ```
+    where pipx
+    ```
+
+=== "Linux"
+    Run:
+
+    ```
+    python -m pip install --user pipx
+    ```
+
+    Verify successful `PATH` modification:
+
+    ```
+    which -a pipx
+    ```
+
 ## ddev
 
 ### Installation
 
-You have 2 options to install the CLI provided by the package [datadog-checks-dev](ddev/about.md).
+You have 2 options to install the CLI.
 
 !!! warning
     For either option, if you are on macOS/Linux do not use `sudo`! Doing so will result in a broken installation.
 
+#### Stable
+
+The latest released version may be installed from [PyPI][].
+
+=== "macOS"
+    Remove any executables shown in the output of `which -a ddev` and make sure that there is no active virtual environment, then run:
+
+    === "ARM"
+        ```
+        pipx install ddev --python /opt/homebrew/bin/python3.8
+        ```
+    === "Intel"
+        ```
+        pipx install ddev --python /usr/local/bin/python3.8
+        ```
+
+=== "Windows"
+    Run:
+
+    ```
+    pipx install ddev
+    ```
+
+=== "Linux"
+    Run:
+
+    ```
+    pipx install ddev
+    ```
+
 #### Development
 
-If you cloned [integrations-core][] and want to always use the version based on the current branch, run:
+This is if you cloned [integrations-core][] and want to always use the version based on the current branch.
 
-```
-python -m pip install -e "path/to/datadog_checks_dev[cli]"
-```
+=== "macOS"
+    Remove any executables shown in the output of `which -a ddev` and make sure that there is no active virtual environment, then run:
+
+    ```
+    pipx install -e /path/to/integrations-core/ddev --python /usr/local/opt/python@3.8/bin/python3.8
+    ```
+
+=== "Windows"
+    Run:
+
+    ```
+    pipx install -e /path/to/integrations-core/ddev
+    ```
+
+=== "Linux"
+    Run:
+
+    ```
+    pipx install -e /path/to/integrations-core/ddev
+    ```
 
 !!! note
     Be aware that this method does not keep track of dependencies so you will need to re-run the command if/when the required dependencies are changed.
 
-#### Stable
+### Upgrade
 
-The latest released version may be installed from [PyPI][]:
+Upgrade (or re-sync dependencies for [development](#development) versions) at any time by running:
 
 ```
-python -m pip install --upgrade "datadog-checks-dev[cli]"
+pipx upgrade ddev
 ```
 
 ### Configuration

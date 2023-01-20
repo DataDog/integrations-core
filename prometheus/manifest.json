@@ -1,29 +1,42 @@
 {
-  "categories": [
-    "monitoring"
-  ],
-  "creates_events": false,
-  "display_name": "Prometheus",
-  "guid": "58e75868-0933-407b-aaa5-469c252bdb2b",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "name": "prometheus",
-  "public_title": "Datadog-Prometheus (legacy) Integration",
-  "short_description": "Prometheus is an open source monitoring system for timeseries metric data",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "type": "check",
-  "integration_id": "prometheus",
+  "manifest_version": "2.0.0",
+  "app_uuid": "b978d452-7008-49d0-bb87-62d8639b2205",
+  "app_id": "prometheus",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Prometheus is an open source monitoring system for timeseries metric data",
+    "title": "Prometheus (legacy)",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Monitoring"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "monitors": {},
-    "dashboards": {},
-    "service_checks": "assets/service_checks.json",
-    "logs": {},
-    "metrics_metadata": "metadata.csv"
+    "integration": {
+      "source_type_name": "Prometheus",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    }
   }
 }

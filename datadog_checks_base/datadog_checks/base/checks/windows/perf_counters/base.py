@@ -38,6 +38,7 @@ class PerfCountersBaseCheck(AgentCheck):
         self._static_tags = None
 
         self.check_initializations.append(self.create_connection)
+
         self.check_initializations.append(self.configure_perf_objects)
 
     def check(self, _):
@@ -48,31 +49,20 @@ class PerfCountersBaseCheck(AgentCheck):
             self._query_counters()
 
     def _query_counters(self):
-        # Refresh the list of performance objects, see:
-        # https://docs.microsoft.com/en-us/windows/win32/api/pdh/nf-pdh-pdhenumobjectitemsa#remarks
-        try:
-            # https://docs.microsoft.com/en-us/windows/win32/api/pdh/nf-pdh-pdhenumobjectsa
-            # https://mhammond.github.io/pywin32/win32pdh__EnumObjects_meth.html
-            win32pdh.EnumObjects(None, self._connection.server, win32pdh.PERF_DETAIL_WIZARD, True)
-        except pywintypes.error as error:
-            message = 'Error refreshing performance objects: {}'.format(error.strerror)
-            self.submit_health_check(self.CRITICAL, message=message)
-            self.log.error(message)
-
-            return
-
         # Avoid collection of performance objects that failed to refresh
         collection_queue = []
 
         for perf_object in self.perf_objects:
-            self.log.info('Refreshing counters for performance object: %s', perf_object.name)
+            self.log.debug('Refreshing counters for performance object: %s', perf_object.name)
             try:
                 perf_object.refresh()
             except ConfigurationError as e:
                 # Counters are lazily configured and any errors should prevent check execution
                 exception_class = type(e)
                 message = str(e)
-                self.check_initializations.append(lambda: raise_exception(exception_class, message))
+                self.check_initializations.append(
+                    lambda exception_class=exception_class, message=message: raise_exception(exception_class, message)
+                )
                 return
             except Exception as e:
                 self.log.error('Error refreshing counters for performance object `%s`: %s', perf_object.name, e)
@@ -90,7 +80,7 @@ class PerfCountersBaseCheck(AgentCheck):
             return
 
         for perf_object in collection_queue:
-            self.log.info('Collecting query data for performance object: %s', perf_object.name)
+            self.log.debug('Collecting query data for performance object: %s', perf_object.name)
             try:
                 perf_object.collect()
             except Exception as e:

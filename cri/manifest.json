@@ -1,31 +1,46 @@
 {
-  "categories": [
-    "containers"
-  ],
-  "creates_events": false,
-  "display_name": "CRI",
-  "guid": "6eb96c6a-3e2d-4236-9387-fa3b0c455336",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "cri.",
-  "metric_to_check": "cri.cpu.usage",
-  "name": "CRI",
-  "public_title": "Datadog-CRI Integration",
-  "short_description": "Track all your CRI metrics with Datadog",
-  "support": "core",
-  "supported_os": [
-    "linux"
-  ],
-  "type": "check",
-  "integration_id": "cri",
+  "manifest_version": "2.0.0",
+  "app_uuid": "81805522-0f55-45a4-95f6-23dd9ea46361",
+  "app_id": "cri",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Track all your CRI metrics with Datadog",
+    "title": "CRI",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Category::Containers"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "monitors": {},
+    "integration": {
+      "source_type_name": "CRI",
+      "configuration": {},
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "cri.",
+        "check": "cri.cpu.usage",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
     "dashboards": {
       "cri": "assets/dashboards/overview.json"
-    },
-    "service_checks": "assets/service_checks.json",
-    "logs": {},
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

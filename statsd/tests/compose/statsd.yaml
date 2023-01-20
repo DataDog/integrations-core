@@ -5,6 +5,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        - STATSD_VERSION=${STATSD_VERSION}
     ports:
       - "8125:8125"
       - "8126:8126"

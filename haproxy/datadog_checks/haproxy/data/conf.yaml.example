@@ -41,7 +41,7 @@ init_config:
     #
     # service: <SERVICE>
 
-## Every instance is scheduled independent of the others.
+## Every instance is scheduled independently of the others.
 #
 instances:
 
@@ -76,14 +76,14 @@ instances:
     ## 1. If the item is a string, then it represents the exposed metric name, and
     ##    the sent metric name will be identical. For example:
     ##
-    ##      metrics:
+    ##      extra_metrics:
     ##      - <METRIC_1>
     ##      - <METRIC_2>
     ## 2. If the item is a mapping, then the keys represent the exposed metric names.
     ##
     ##      a. If a value is a string, then it represents the sent metric name. For example:
     ##
-    ##           metrics:
+    ##           extra_metrics:
     ##           - <EXPOSED_METRIC_1>: <SENT_METRIC_1>
     ##           - <EXPOSED_METRIC_2>: <SENT_METRIC_2>
     ##      b. If a value is a mapping, then it must have a `name` and/or `type` key.
@@ -91,7 +91,7 @@ instances:
     ##         the metric should be handled, overriding any type information the endpoint
     ##         may provide. For example:
     ##
-    ##           metrics:
+    ##           extra_metrics:
     ##           - <EXPOSED_METRIC_1>:
     ##               name: <SENT_METRIC_1>
     ##               type: <METRIC_TYPE_1>
@@ -109,7 +109,7 @@ instances:
     ##
     ## Regular expressions may be used to match the exposed metric names, for example:
     ##
-    ##   metrics:
+    ##   extra_metrics:
     ##   - ^network_(ingress|egress)_.+
     ##   - .+:
     ##       type: gauge
@@ -129,7 +129,7 @@ instances:
     ## A mapping of labels where metrics with matching label name and values are ignored. To match
     ## all values of a label, set it to `true`.
     ##
-    ## Note: Labels filtering happens before `rename_labels`.
+    ## Note: Label filtering happens before `rename_labels`.
     ##
     ## For example, the following configuration instructs the check to exclude all metrics with
     ## a label `worker` or a label `pid` with the value of either `23` or `42`.
@@ -145,17 +145,17 @@ instances:
     ## @param exclude_labels - list of strings - optional
     ## A list of labels to exclude, useful for high cardinality values like timestamps or UUIDs.
     ## May be used in conjunction with `include_labels`.
-    ## Labels defined in `excluded labels` will take precedence in case of overlap.
+    ## Labels defined in `exclude_labels` will take precedence in case of overlap.
     ##
-    ## Note: Labels filtering happens before `rename_labels`.
+    ## Note: Label filtering happens before `rename_labels`.
     #
     # exclude_labels: []
 
     ## @param include_labels - list of strings - optional
     ## A list of labels to include. May be used in conjunction with `exclude_labels`.
-    ## Labels defined in `excluded labels` will take precedence in case of overlap.
+    ## Labels defined in `exclude_labels` will take precedence in case of overlap.
     ##
-    ## Note: Labels filtering happens before `rename_labels`.
+    ## Note: Label filtering happens before `rename_labels`.
     #
     # include_labels: []
 
@@ -249,7 +249,7 @@ instances:
 
     ## @param cache_shared_labels - boolean - optional - default: true
     ## When `share_labels` is set, it instructs the check to cache labels collected from the first payload
-    ## for increased performance.
+    ## for improved performance.
     ##
     ## Set this to `false` to compute label sharing for every payload at the risk of potentially increased memory usage.
     #
@@ -433,13 +433,19 @@ instances:
     ##     path (required): The absolute path for the file to read from.
     ##     pattern: A regular expression pattern with a single capture group used to find the
     ##              token rather than using the entire file, for example: Your secret is (.+)
+    ##   - type: oauth
+    ##     url (required): The token endpoint.
+    ##     client_id (required): The client identifier.
+    ##     client_secret (required): The client secret.
+    ##     basic_auth: Whether the provider expects credentials to be transmitted in
+    ##                 an HTTP Basic Auth header. The default is: false
     ##
     ## The available writers are:
     ##
     ##   - type: header
     ##     name (required): The name of the field, for example: Authorization
     ##     value: The template value, for example `Bearer <TOKEN>`. The default is: <TOKEN>
-    ##     placeholder: The substring in `value` to replace by the token, defaults to: <TOKEN>
+    ##     placeholder: The substring in `value` to replace with the token, defaults to: <TOKEN>
     #
     # auth_token:
     #   reader:
@@ -576,7 +582,7 @@ instances:
     # log_requests: false
 
     ## @param persist_connections - boolean - optional - default: false
-    ## Whether or not to persist cookies and use connection pooling for increased performance.
+    ## Whether or not to persist cookies and use connection pooling for improved performance.
     #
     # persist_connections: false
 
@@ -627,12 +633,12 @@ instances:
 
 ## Log Section
 ##
-## type - required - Type of log input source (tcp / udp / file / windows_event)
+## type - required - Type of log input source (tcp / udp / file / windows_event).
 ## port / path / channel_path - required - Set port if type is tcp or udp.
 ##                                         Set path if type is file.
 ##                                         Set channel_path if type is windows_event.
 ## source  - required - Attribute that defines which integration sent the logs.
-## encoding - optional - For file specifies the file encoding, default is utf-8, other
+## encoding - optional - For file specifies the file encoding. Default is utf-8. Other
 ##                       possible values are utf-16-le and utf-16-be.
 ## service - optional - The name of the service that generates the log.
 ##                      Overrides any `service` defined in the `init_config` section.

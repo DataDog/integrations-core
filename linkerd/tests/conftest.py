@@ -1,3 +1,7 @@
+# (C) Datadog, Inc. 2019-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
 import os
 
 import pytest
@@ -35,6 +39,7 @@ def dd_environment():
         with docker_run(
             compose_file=compose_file,
             conditions=[CheckDockerLogs(compose_file, 'LINKERD DEPLOY COMPLETE', wait=5, attempts=120)],
+            attempts=2,
         ):
             with ExitStack() as stack:
                 ip, port = stack.enter_context(

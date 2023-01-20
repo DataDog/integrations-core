@@ -1,0 +1,27 @@
+[env.collectors.datadog-checks]
+
+[[envs.default.matrix]]
+python = ["3.8"]
+version = ["12.2"]
+library = ["oracle", "jdbc"]
+
+[[envs.default.matrix]]
+python = ["3.8"]
+version = ["12.2"]
+library = ["oracle", "jdbc"]
+protocol = ["tcps"]
+
+[envs.default.overrides]
+matrix.version.env-vars = [
+  { key = "ORACLE_DATABASE_VERSION", value = "12.2.0.1", if = ["12.2"] },
+]
+matrix.protocol.env-vars = [
+  { key = "ENABLE_TCPS", value = "true", if = ["tcps"] },
+]
+matrix.library.set-features = [
+  { value = "deps", if = ["jdbc"] },
+  { value = "client-only", if = ["oracle"] },
+]
+
+[envs.default.env-vars]
+CLIENT_LIB = "{matrix:library}"

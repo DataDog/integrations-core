@@ -23,7 +23,7 @@ init_config:
     #
     # service: <SERVICE>
 
-## Every instance is scheduled independent of the others.
+## Every instance is scheduled independently of the others.
 #
 instances:
 
@@ -126,6 +126,16 @@ instances:
     ## Unique identifier for this instance that is added as a tag to all data emitted.
     #
     # name: <NAME>
+
+    ## @param start_tls - string - optional
+    ## Send protocol-specific message(s) to switch to TLS for communication.
+    ## StartTLS is implemented on these protocols: smtp, pop3, imap, ftp, xmpp, xmpp-server,
+    ## irc, postgres, mysql, lmtp, nntp, sieve, and ldap.
+    ##
+    ## Currently this checks supports only the below protocols:
+    ##   postgres
+    #
+    # start_tls: <START_TLS>
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.

@@ -46,6 +46,10 @@ METRICS_COLUMNS = {
 }
 
 
+def agent_check_getter(self):
+    return self.check
+
+
 def _row_key(row):
     """
     :param row: a normalized row from events_statements_summary_by_digest
@@ -139,10 +143,6 @@ class MySQLStatementMetrics(DBMAsyncJob):
         for event in self._rows_to_fqt_events(rows):
             self._check.database_monitoring_query_sample(json.dumps(event, default=default_json_event_encoding))
 
-        # truncate query text to the maximum length supported by metrics tags
-        for row in rows:
-            row['digest_text'] = row['digest_text'][0:200] if row['digest_text'] is not None else None
-
         payload = {
             'host': self._check.resolved_hostname,
             'timestamp': time.time() * 1000,
@@ -156,6 +156,12 @@ class MySQLStatementMetrics(DBMAsyncJob):
             'mysql_rows': rows,
         }
         self._check.database_monitoring_query_metrics(json.dumps(payload, default=default_json_event_encoding))
+        self._check.count(
+            "dd.mysql.collect_per_statement_metrics.rows",
+            len(rows),
+            tags=self._tags + self._check._get_debug_tags(),
+            hostname=self._check.resolved_hostname,
+        )
 
     def _collect_per_statement_metrics(self):
         # type: () -> List[PyMysqlRow]
@@ -209,7 +215,7 @@ class MySQLStatementMetrics(DBMAsyncJob):
                 statement = obfuscate_sql_with_metadata(row['digest_text'], self._obfuscate_options)
                 obfuscated_statement = statement['query'] if row['digest_text'] is not None else None
             except Exception as e:
-                self.log.warning("Failed to obfuscate query '%s': %s", row['digest_text'], e)
+                self.log.warning("Failed to obfuscate query=[%s] | err=[%s]", row['digest_text'], e)
                 continue
 
             normalized_row['digest_text'] = obfuscated_statement

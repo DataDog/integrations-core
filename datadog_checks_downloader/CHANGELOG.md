@@ -1,10 +1,32 @@
 # CHANGELOG - Datadog Checks Downloader
 
-## 3.7.0 / 2022-04-11
+## 3.10.1 / 2022-12-09
+
+* [Fixed] Update dependencies. See [#13478](https://github.com/DataDog/integrations-core/pull/13478).
+
+## 3.10.0 / 2022-10-28 / Agent 7.41.0
+
+* [Added] Update downloader to use v5 root layout. See [#13174](https://github.com/DataDog/integrations-core/pull/13174).
+* [Fixed] Fix setup.py keywords in datadog-checks-downloader. See [#12951](https://github.com/DataDog/integrations-core/pull/12951). Thanks [fridex](https://github.com/fridex).
+
+## 3.9.0 / 2022-09-16 / Agent 7.40.0
+
+* [Added] Add `packaging` to dependencies. See [#12753](https://github.com/DataDog/integrations-core/pull/12753).
+* [Fixed] Use packaging instead of pkg_resources for parsing version. See [#12560](https://github.com/DataDog/integrations-core/pull/12560). Thanks [fridex](https://github.com/fridex).
+
+## 3.8.0 / 2022-08-05 / Agent 7.39.0
+
+* [Added] Use context manager when creating temporary directory. See [#12559](https://github.com/DataDog/integrations-core/pull/12559). Thanks [fridex](https://github.com/fridex).
+* [Fixed] Prevent from publishing datadog-checks-downloader to PyPI. See [#12556](https://github.com/DataDog/integrations-core/pull/12556).
+* [Fixed] Revert #12559 to make it compatible with python2. See [#12647](https://github.com/DataDog/integrations-core/pull/12647).
+* [Fixed] Avoid using assert statement by creating UpdatedTargetsError exception. See [#12558](https://github.com/DataDog/integrations-core/pull/12558).
+* [Fixed] Adjust logging setup when multiple -v flags are supplied. See [#12562](https://github.com/DataDog/integrations-core/pull/12562). Thanks [fridex](https://github.com/fridex).
+
+## 3.7.0 / 2022-04-11 / Agent 7.36.0
 
 * [Added] Update downloader to use v4 root layout. See [#11779](https://github.com/DataDog/integrations-core/pull/11779).
 
-## 3.6.0 / 2022-02-24
+## 3.6.0 / 2022-02-24 / Agent 7.35.0
 
 * [Added] Add --ignore-python-version flag. See [#11568](https://github.com/DataDog/integrations-core/pull/11568).
 

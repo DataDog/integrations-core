@@ -53,4 +53,10 @@ files:
         default: false
         example: false
         type: boolean
+    - name: ipv4_only
+      description: Enable to run the check against only IPv4-formatted addresses on every check run.
+      value:
+        default: false
+        example: false
+        type: boolean
     - template: instances/default

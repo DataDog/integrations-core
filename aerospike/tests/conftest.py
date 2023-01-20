@@ -55,6 +55,7 @@ def dd_environment():
     with docker_run(
         COMPOSE_FILE,
         conditions=[CheckDockerLogs(COMPOSE_FILE, ['service ready: soon there will be cake!']), WaitFor(init_db)],
+        attempts=2,
     ):
         yield OPENMETRICS_V2_INSTANCE
 

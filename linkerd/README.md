@@ -2,7 +2,13 @@
 
 ## Overview
 
-This check collects distributed system observability metrics from [Linkerd][1].
+[Linkerd][1] is a light but powerful open-source service mesh with CNCF graduated status. It provides the tools you need to write secure, reliable, observable cloud-native applications. With minimal configuration and no application changes, Linkerd:
+- Uses mutual TLS to transparently secure all on-cluster TCP communication. 
+- Adds latency-aware load balancing, request retries, timeouts, and blue-green deploys to keep your applications resilient.
+- Provides platform health metrics by tracking success rates, latencies, and request volumes for every meshed workload.
+
+This integration sends your Linkerd metrics to Datadog, including application success rates, latency, and saturation.
+
 
 ## Setup
 
@@ -78,7 +84,7 @@ See [metadata.csv][11] for a list of metrics provided by this integration.
 
 For Linkerd v1, see the [finagle metrics guide][12] for metric descriptions and [this gist][13] for an example of metrics exposed by Linkerd.
 
-**Note**: Depending on your Linkerd configuration, some metrics might not be exposed by Linkerd.
+**Note**: Linkerd is a Prometheus-based integration. Depending on your Linkerd configuration, some metrics might not be exposed by Linkerd. If any metric is not present in the curl output, the Datadog Agent is unable to collect that particular metric.
 
 To list the metrics exposed by your current configuration, run:
 
@@ -91,6 +97,7 @@ Where `linkerd_prometheus_endpoint` is the Linkerd Prometheus endpoint (you shou
 If you need to use a metric that is not provided by default, you can add an entry to `linkerd.yaml`.
 
 Simply follow the examples present in the [default configuration][4].
+
 
 ### Service Checks
 

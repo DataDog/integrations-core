@@ -1,16 +1,37 @@
 # CHANGELOG - Amazon MSK
 
+## 3.2.2 / 2022-12-09
+
+* [Fixed] Update dependencies. See [#13478](https://github.com/DataDog/integrations-core/pull/13478).
+
+## 3.2.1 / 2022-10-28 / Agent 7.41.0
+
+* [Fixed] Update dependencies. See [#13205](https://github.com/DataDog/integrations-core/pull/13205).
+
+## 3.2.0 / 2022-09-16 / Agent 7.40.0
+
+* [Added] Update HTTP config spec templates. See [#12890](https://github.com/DataDog/integrations-core/pull/12890).
+* [Fixed] Bump dependencies for 7.40. See [#12896](https://github.com/DataDog/integrations-core/pull/12896).
+
+## 3.1.3 / 2022-08-05 / Agent 7.39.0
+
+* [Fixed] Dependency updates. See [#12653](https://github.com/DataDog/integrations-core/pull/12653).
+
+## 3.1.2 / 2022-05-18 / Agent 7.37.0
+
+* [Fixed] Fix extra metrics description example. See [#12043](https://github.com/DataDog/integrations-core/pull/12043).
+
 ## 3.1.1 / 2022-05-15
 
 * [Fixed] Upgrade dependencies. See [#11958](https://github.com/DataDog/integrations-core/pull/11958).
 
-## 3.1.0 / 2022-04-05
+## 3.1.0 / 2022-04-05 / Agent 7.36.0
 
 * [Added] Upgrade dependencies. See [#11726](https://github.com/DataDog/integrations-core/pull/11726).
 * [Added] Add metric_patterns options to filter all metric submission by a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
 * [Fixed] Remove outdated warning in the description for the `tls_ignore_warning` option. See [#11591](https://github.com/DataDog/integrations-core/pull/11591).
 
-## 3.0.0 / 2022-02-19
+## 3.0.0 / 2022-02-19 / Agent 7.35.0
 
 * [Added] Allow disabling querying an exporter. See [#11306](https://github.com/DataDog/integrations-core/pull/11306).
 * [Added] Add `pyproject.toml` file. See [#11313](https://github.com/DataDog/integrations-core/pull/11313).

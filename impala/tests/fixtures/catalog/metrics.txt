@@ -1,0 +1,416 @@
+# HELP impala_rpc_method_catalog_server_CatalogService_GetPartialCatalogObject_call_duration
+# TYPE impala_rpc_method_catalog_server_CatalogService_GetPartialCatalogObject_call_duration summary
+impala_rpc_method_catalog_server_CatalogService_GetPartialCatalogObject_call_duration{quantile="0.2"} 0.001
+impala_rpc_method_catalog_server_CatalogService_GetPartialCatalogObject_call_duration{quantile="0.5"} 0.002
+impala_rpc_method_catalog_server_CatalogService_GetPartialCatalogObject_call_duration{quantile="0.7"} 0.003
+impala_rpc_method_catalog_server_CatalogService_GetPartialCatalogObject_call_duration{quantile="0.9"} 0.004
+impala_rpc_method_catalog_server_CatalogService_GetPartialCatalogObject_call_duration{quantile="0.95"} 0.005
+impala_rpc_method_catalog_server_CatalogService_GetPartialCatalogObject_call_duration{quantile="0.999"} 0.006
+impala_rpc_method_catalog_server_CatalogService_GetPartialCatalogObject_call_duration_count 4
+impala_rpc_method_catalog_server_CatalogService_GetPartialCatalogObject_call_duration_sum 0.103
+# HELP impala_thrift_server_CatalogService_timedout_cnxn_requests The number of connection requests to the Catalog Service that have been timed out waiting to be setup.
+# TYPE impala_thrift_server_CatalogService_timedout_cnxn_requests gauge
+impala_thrift_server_CatalogService_timedout_cnxn_requests 500
+# HELP impala_statestore_subscriber_statestore_client_cache_clients_in_use The number of active StateStore subscriber clients in this Impala Daemon's client cache. These clients are for communication from this role to the StateStore.
+# TYPE impala_statestore_subscriber_statestore_client_cache_clients_in_use gauge
+impala_statestore_subscriber_statestore_client_cache_clients_in_use 70
+# HELP impala_thread_manager_total_threads_created Threads created over the lifetime of the process.
+# TYPE impala_thread_manager_total_threads_created gauge
+impala_thread_manager_total_threads_created 13
+# HELP impala_catalog_partial_fetch_rpc_queue_len RPC queue length for partial object fetches.
+# TYPE impala_catalog_partial_fetch_rpc_queue_len gauge
+impala_catalog_partial_fetch_rpc_queue_len 60
+# HELP impala_thread_manager_running_threads The number of running threads in this process.
+# TYPE impala_thread_manager_running_threads gauge
+impala_thread_manager_running_threads 12
+# HELP impala_thrift_server_CatalogService_connection_setup_queue_size The number of connections to the Catalog Service that have been accepted and are waiting to be setup.
+# TYPE impala_thrift_server_CatalogService_connection_setup_queue_size gauge
+impala_thrift_server_CatalogService_connection_setup_queue_size 15
+# HELP impala_catalog_server_topic_processing_time_s Catalog Server Topic Processing Time
+# TYPE impala_catalog_server_topic_processing_time_s counter
+impala_catalog_server_topic_processing_time_s_total 403
+impala_catalog_server_topic_processing_time_s_last 0
+impala_catalog_server_topic_processing_time_s_min 0
+impala_catalog_server_topic_processing_time_s_max 0.127
+impala_catalog_server_topic_processing_time_s_mean 0.000367246
+impala_catalog_server_topic_processing_time_s_stddev 0.00631978
+
+# HELP impala_statestore_subscriber_statestore_client_cache_total_clients The total number of StateStore subscriber clients in this Impala Daemon's client cache. These clients are for communication from this role to the StateStore.
+# TYPE impala_statestore_subscriber_statestore_client_cache_total_clients gauge
+impala_statestore_subscriber_statestore_client_cache_total_clients 1
+# HELP impala_thrift_server_CatalogService_connections_in_use The number of active catalog service connections to this Catalog Server.
+# TYPE impala_thrift_server_CatalogService_connections_in_use gauge
+impala_thrift_server_CatalogService_connections_in_use 1
+# HELP impala_thrift_server_CatalogService_total_connections The total number of connections made to this Catalog Server's catalog service  over its lifetime.
+# TYPE impala_thrift_server_CatalogService_total_connections counter
+impala_thrift_server_CatalogService_total_connections 1000
+# HELP impala_thrift_server_CatalogService_svc_thread_wait_time Amount of time clients of Catalog Service spent waiting for service threads
+# TYPE impala_thrift_server_CatalogService_svc_thread_wait_time summary
+impala_thrift_server_CatalogService_svc_thread_wait_time{quantile="0.2"} 10
+impala_thrift_server_CatalogService_svc_thread_wait_time{quantile="0.5"} 11
+impala_thrift_server_CatalogService_svc_thread_wait_time{quantile="0.7"} 12
+impala_thrift_server_CatalogService_svc_thread_wait_time{quantile="0.9"} 13
+impala_thrift_server_CatalogService_svc_thread_wait_time{quantile="0.95"} 14
+impala_thrift_server_CatalogService_svc_thread_wait_time{quantile="0.999"} 15
+impala_thrift_server_CatalogService_svc_thread_wait_time_count 1
+impala_thrift_server_CatalogService_svc_thread_wait_time_sum 0
+# HELP impala_thrift_server_CatalogService_connection_setup_time Amount of time clients of Catalog Service spent waiting for connection to be set up
+# TYPE impala_thrift_server_CatalogService_connection_setup_time summary
+impala_thrift_server_CatalogService_connection_setup_time{quantile="0.2"} 1
+impala_thrift_server_CatalogService_connection_setup_time{quantile="0.5"} 2
+impala_thrift_server_CatalogService_connection_setup_time{quantile="0.7"} 3
+impala_thrift_server_CatalogService_connection_setup_time{quantile="0.9"} 4
+impala_thrift_server_CatalogService_connection_setup_time{quantile="0.95"} 5
+impala_thrift_server_CatalogService_connection_setup_time{quantile="0.999"} 6
+impala_thrift_server_CatalogService_connection_setup_time_count 1
+impala_thrift_server_CatalogService_connection_setup_time_sum 0
+# HELP impala_rpc_method_statestore_subscriber_StatestoreSubscriber_UpdateState_call_duration
+# TYPE impala_rpc_method_statestore_subscriber_StatestoreSubscriber_UpdateState_call_duration summary
+impala_rpc_method_statestore_subscriber_StatestoreSubscriber_UpdateState_call_duration{quantile="0.2"} 0.020
+impala_rpc_method_statestore_subscriber_StatestoreSubscriber_UpdateState_call_duration{quantile="0.5"} 0.021
+impala_rpc_method_statestore_subscriber_StatestoreSubscriber_UpdateState_call_duration{quantile="0.7"} 0.022
+impala_rpc_method_statestore_subscriber_StatestoreSubscriber_UpdateState_call_duration{quantile="0.9"} 0.023
+impala_rpc_method_statestore_subscriber_StatestoreSubscriber_UpdateState_call_duration{quantile="0.95"} 0.024
+impala_rpc_method_statestore_subscriber_StatestoreSubscriber_UpdateState_call_duration{quantile="0.999"} 0.025
+impala_rpc_method_statestore_subscriber_StatestoreSubscriber_UpdateState_call_duration_count 403
+impala_rpc_method_statestore_subscriber_StatestoreSubscriber_UpdateState_call_duration_sum 0.153
+# HELP impala_statestore_subscriber_topic_catalog_update_update_interval Interval between topic updates for Topic catalog-update
+# TYPE impala_statestore_subscriber_topic_catalog_update_update_interval counter
+impala_statestore_subscriber_topic_catalog_update_update_interval_total 402
+impala_statestore_subscriber_topic_catalog_update_update_interval_last 2.001
+impala_statestore_subscriber_topic_catalog_update_update_interval_min 0.008
+impala_statestore_subscriber_topic_catalog_update_update_interval_max 2.06927
+impala_statestore_subscriber_topic_catalog_update_update_interval_mean 2.00014
+impala_statestore_subscriber_topic_catalog_update_update_interval_stddev 0.0997928
+
+# HELP impala_statestore_subscriber_heartbeat_interval_time The time (sec) between Statestore heartbeats.
+# TYPE impala_statestore_subscriber_heartbeat_interval_time counter
+impala_statestore_subscriber_heartbeat_interval_time_total 803
+impala_statestore_subscriber_heartbeat_interval_time_last 1.005
+impala_statestore_subscriber_heartbeat_interval_time_min 0
+impala_statestore_subscriber_heartbeat_interval_time_max 1.096
+impala_statestore_subscriber_heartbeat_interval_time_mean 1.00283
+impala_statestore_subscriber_heartbeat_interval_time_stddev 0.0362923
+
+# HELP impala_statestore_subscriber_topic_catalog_update_processing_time_s Statestore Subscriber Topic catalog-update Processing Time
+# TYPE impala_statestore_subscriber_topic_catalog_update_processing_time_s counter
+impala_statestore_subscriber_topic_catalog_update_processing_time_s_total 403
+impala_statestore_subscriber_topic_catalog_update_processing_time_s_last 0
+impala_statestore_subscriber_topic_catalog_update_processing_time_s_min 0
+impala_statestore_subscriber_topic_catalog_update_processing_time_s_max 0.002
+impala_statestore_subscriber_topic_catalog_update_processing_time_s_mean 4.96278e-05
+impala_statestore_subscriber_topic_catalog_update_processing_time_s_stddev 0.000228315
+
+# HELP impala_rpc_method_statestore_subscriber_StatestoreSubscriber_Heartbeat_call_duration
+# TYPE impala_rpc_method_statestore_subscriber_StatestoreSubscriber_Heartbeat_call_duration summary
+impala_rpc_method_statestore_subscriber_StatestoreSubscriber_Heartbeat_call_duration{quantile="0.2"} 0.010
+impala_rpc_method_statestore_subscriber_StatestoreSubscriber_Heartbeat_call_duration{quantile="0.5"} 0.011
+impala_rpc_method_statestore_subscriber_StatestoreSubscriber_Heartbeat_call_duration{quantile="0.7"} 0.012
+impala_rpc_method_statestore_subscriber_StatestoreSubscriber_Heartbeat_call_duration{quantile="0.9"} 0.013
+impala_rpc_method_statestore_subscriber_StatestoreSubscriber_Heartbeat_call_duration{quantile="0.95"} 0.014
+impala_rpc_method_statestore_subscriber_StatestoreSubscriber_Heartbeat_call_duration{quantile="0.999"} 0.015
+impala_rpc_method_statestore_subscriber_StatestoreSubscriber_Heartbeat_call_duration_count 803
+impala_rpc_method_statestore_subscriber_StatestoreSubscriber_Heartbeat_call_duration_sum 0.289
+# HELP impala_statestore_subscriber_topic_update_duration The time (sec) taken to process Statestore subscriber topic updates.
+# TYPE impala_statestore_subscriber_topic_update_duration counter
+impala_statestore_subscriber_topic_update_duration_total 490
+impala_statestore_subscriber_topic_update_duration_last 0
+impala_statestore_subscriber_topic_update_duration_min 0
+impala_statestore_subscriber_topic_update_duration_max 0.002
+impala_statestore_subscriber_topic_update_duration_mean 5.21092e-05
+impala_statestore_subscriber_topic_update_duration_stddev 0.000233145
+
+# HELP impala_statestore_subscriber_num_connection_failures Number of times that the Daemon detected a loss of connectivity to the StateStore.
+# TYPE impala_statestore_subscriber_num_connection_failures counter
+impala_statestore_subscriber_num_connection_failures 55
+# HELP impala_statestore_subscriber_topic_update_interval_time The time (sec) between Statestore subscriber topic updates.
+# TYPE impala_statestore_subscriber_topic_update_interval_time counter
+impala_statestore_subscriber_topic_update_interval_time_total 480
+impala_statestore_subscriber_topic_update_interval_time_last 2.001
+impala_statestore_subscriber_topic_update_interval_time_min 0.008
+impala_statestore_subscriber_topic_update_interval_time_max 2.06927
+impala_statestore_subscriber_topic_update_interval_time_mean 2.00014
+impala_statestore_subscriber_topic_update_interval_time_stddev 0.0997928
+
+# HELP impala_statestore_subscriber_last_recovery_duration The amount of time the StateStore subscriber took to recover the connection the last time it was lost.
+# TYPE impala_statestore_subscriber_last_recovery_duration gauge
+impala_statestore_subscriber_last_recovery_duration 42
+# HELP impala_memory_rss Resident set size (RSS) of this process, including TCMalloc, buffer pool and Jvm.
+# TYPE impala_memory_rss gauge
+impala_memory_rss 209494016
+# HELP impala_memory_total_used Total memory currently used by TCMalloc and buffer pool.
+# TYPE impala_memory_total_used gauge
+impala_memory_total_used 58187776
+# HELP impala_memory_mapped_bytes Total bytes of memory mappings in this process (the virtual memory size).
+# TYPE impala_memory_mapped_bytes gauge
+impala_memory_mapped_bytes 4081811456
+# HELP impala_events_processor_events_received_15min_rate Exponentially weighted moving average (EWMA) of number of events received in last 15 min
+# TYPE impala_events_processor_events_received_15min_rate gauge
+impala_events_processor_events_received_15min_rate 1
+# HELP impala_events_processor_events_received Total number of metastore events received
+# TYPE impala_events_processor_events_received counter
+impala_events_processor_events_received 2
+# HELP impala_events_processor_last_synced_event_id Last metastore event id that the catalog server processed and synced to
+# TYPE impala_events_processor_last_synced_event_id counter
+impala_events_processor_last_synced_event_id 3
+# HELP impala_events_processor_events_skipped Total number of metastore events skipped
+# TYPE impala_events_processor_events_skipped counter
+impala_events_processor_events_skipped 4
+# HELP impala_events_processor_avg_events_fetch_duration Average time taken to fetch a batch of metastore events
+# TYPE impala_events_processor_avg_events_fetch_duration gauge
+impala_events_processor_avg_events_fetch_duration 0.992732
+# HELP impala_events_processor_events_received_5min_rate Exponentially weighted moving average (EWMA) of number of events received in last 5 min
+# TYPE impala_events_processor_events_received_5min_rate gauge
+impala_events_processor_events_received_5min_rate 5
+# HELP impala_events_processor_events_received_1min_rate Exponentially weighted moving average (EWMA) of number of events received in last 1 min
+# TYPE impala_events_processor_events_received_1min_rate gauge
+impala_events_processor_events_received_1min_rate 6
+# HELP impala_events_processor_avg_events_process_duration Average time taken to process a batch of events received from metastore
+# TYPE impala_events_processor_avg_events_process_duration gauge
+impala_events_processor_avg_events_process_duration 7
+# HELP impala_jvm_gc_total_extra_sleep_time_millis Jvm Pause Detection Extra Sleep Time
+# TYPE impala_jvm_gc_total_extra_sleep_time_millis counter
+impala_jvm_gc_total_extra_sleep_time_millis 1.232
+# HELP impala_jvm_gc_count Jvm Garbage Collection Count
+# TYPE impala_jvm_gc_count counter
+impala_jvm_gc_count 9
+# HELP impala_jvm_gc_time_millis Jvm Garbage Collection Time
+# TYPE impala_jvm_gc_time_millis counter
+impala_jvm_gc_time_millis 0.126
+# HELP impala_jvm_non_heap_peak_max_usage_bytes Jvm non-heap Peak Max Usage Bytes
+# TYPE impala_jvm_non_heap_peak_max_usage_bytes gauge
+impala_jvm_non_heap_peak_max_usage_bytes 0
+# HELP impala_jvm_non_heap_init_usage_bytes Jvm non-heap Init Usage Bytes
+# TYPE impala_jvm_non_heap_init_usage_bytes gauge
+impala_jvm_non_heap_init_usage_bytes 2555904
+# HELP impala_jvm_non_heap_current_usage_bytes Jvm non-heap Current Usage Bytes
+# TYPE impala_jvm_non_heap_current_usage_bytes gauge
+impala_jvm_non_heap_current_usage_bytes 37971904
+# HELP impala_jvm_heap_peak_init_usage_bytes Jvm heap Peak Init Usage Bytes
+# TYPE impala_jvm_heap_peak_init_usage_bytes gauge
+impala_jvm_heap_peak_init_usage_bytes 0
+# HELP impala_jvm_heap_peak_current_usage_bytes Jvm heap Peak Current Usage Bytes
+# TYPE impala_jvm_heap_peak_current_usage_bytes gauge
+impala_jvm_heap_peak_current_usage_bytes 0
+# HELP impala_jvm_heap_init_usage_bytes Jvm heap Init Usage Bytes
+# TYPE impala_jvm_heap_init_usage_bytes gauge
+impala_jvm_heap_init_usage_bytes 132120576
+# HELP impala_jvm_heap_committed_usage_bytes Jvm heap Committed Usage Bytes
+# TYPE impala_jvm_heap_committed_usage_bytes gauge
+impala_jvm_heap_committed_usage_bytes 119013376
+# HELP impala_jvm_heap_current_usage_bytes Jvm heap Current Usage Bytes
+# TYPE impala_jvm_heap_current_usage_bytes gauge
+impala_jvm_heap_current_usage_bytes 29420832
+# HELP impala_jvm_non_heap_peak_init_usage_bytes Jvm non-heap Peak Init Usage Bytes
+# TYPE impala_jvm_non_heap_peak_init_usage_bytes gauge
+impala_jvm_non_heap_peak_init_usage_bytes 0
+# HELP impala_jvm_ps_old_gen_peak_committed_usage_bytes Jvm ps-old-gen Peak Committed Usage Bytes
+# TYPE impala_jvm_ps_old_gen_peak_committed_usage_bytes gauge
+impala_jvm_ps_old_gen_peak_committed_usage_bytes 88080384
+# HELP impala_jvm_ps_old_gen_peak_current_usage_bytes Jvm ps-old-gen Peak Current Usage Bytes
+# TYPE impala_jvm_ps_old_gen_peak_current_usage_bytes gauge
+impala_jvm_ps_old_gen_peak_current_usage_bytes 8830616
+# HELP impala_jvm_gc_num_warn_threshold_exceeded Jvm Pause Detection Warning Threshold Exceeded
+# TYPE impala_jvm_gc_num_warn_threshold_exceeded counter
+impala_jvm_gc_num_warn_threshold_exceeded 55
+# HELP impala_jvm_non_heap_max_usage_bytes Jvm non-heap Max Usage Bytes
+# TYPE impala_jvm_non_heap_max_usage_bytes gauge
+impala_jvm_non_heap_max_usage_bytes -1
+# HELP impala_jvm_ps_old_gen_peak_max_usage_bytes Jvm ps-old-gen Peak Max Usage Bytes
+# TYPE impala_jvm_ps_old_gen_peak_max_usage_bytes gauge
+impala_jvm_ps_old_gen_peak_max_usage_bytes 1431830528
+# HELP impala_jvm_ps_old_gen_current_usage_bytes Jvm ps-old-gen Current Usage Bytes
+# TYPE impala_jvm_ps_old_gen_current_usage_bytes gauge
+impala_jvm_ps_old_gen_current_usage_bytes 8830616
+# HELP impala_jvm_gc_num_info_threshold_exceeded Jvm Pause Detection Info Threshold Exceeded
+# TYPE impala_jvm_gc_num_info_threshold_exceeded counter
+impala_jvm_gc_num_info_threshold_exceeded 12
+# HELP impala_jvm_ps_survivor_space_peak_committed_usage_bytes Jvm ps-survivor-space Peak Committed Usage Bytes
+# TYPE impala_jvm_ps_survivor_space_peak_committed_usage_bytes gauge
+impala_jvm_ps_survivor_space_peak_committed_usage_bytes 10485760
+# HELP impala_jvm_ps_survivor_space_init_usage_bytes Jvm ps-survivor-space Init Usage Bytes
+# TYPE impala_jvm_ps_survivor_space_init_usage_bytes gauge
+impala_jvm_ps_survivor_space_init_usage_bytes 5242880
+# HELP impala_jvm_ps_survivor_space_current_usage_bytes Jvm ps-survivor-space Current Usage Bytes
+# TYPE impala_jvm_ps_survivor_space_current_usage_bytes gauge
+impala_jvm_ps_survivor_space_current_usage_bytes 5841520
+# HELP impala_jvm_ps_survivor_space_peak_init_usage_bytes Jvm ps-survivor-space Peak Init Usage Bytes
+# TYPE impala_jvm_ps_survivor_space_peak_init_usage_bytes gauge
+impala_jvm_ps_survivor_space_peak_init_usage_bytes 5242880
+# HELP impala_jvm_ps_survivor_space_max_usage_bytes Jvm ps-survivor-space Max Usage Bytes
+# TYPE impala_jvm_ps_survivor_space_max_usage_bytes gauge
+impala_jvm_ps_survivor_space_max_usage_bytes 8388608
+# HELP impala_jvm_ps_survivor_space_peak_max_usage_bytes Jvm ps-survivor-space Peak Max Usage Bytes
+# TYPE impala_jvm_ps_survivor_space_peak_max_usage_bytes gauge
+impala_jvm_ps_survivor_space_peak_max_usage_bytes 10485760
+# HELP impala_jvm_ps_eden_space_peak_committed_usage_bytes Jvm ps-eden-space Peak Committed Usage Bytes
+# TYPE impala_jvm_ps_eden_space_peak_committed_usage_bytes gauge
+impala_jvm_ps_eden_space_peak_committed_usage_bytes 48758784
+# HELP impala_jvm_ps_eden_space_peak_current_usage_bytes Jvm ps-eden-space Peak Current Usage Bytes
+# TYPE impala_jvm_ps_eden_space_peak_current_usage_bytes gauge
+impala_jvm_ps_eden_space_peak_current_usage_bytes 33554432
+# HELP impala_jvm_ps_survivor_space_committed_usage_bytes Jvm ps-survivor-space Committed Usage Bytes
+# TYPE impala_jvm_ps_survivor_space_committed_usage_bytes gauge
+impala_jvm_ps_survivor_space_committed_usage_bytes 8388608
+# HELP impala_jvm_code_cache_peak_committed_usage_bytes Jvm code-cache Peak Committed Usage Bytes
+# TYPE impala_jvm_code_cache_peak_committed_usage_bytes gauge
+impala_jvm_code_cache_peak_committed_usage_bytes 6553600
+# HELP impala_jvm_code_cache_peak_current_usage_bytes Jvm code-cache Peak Current Usage Bytes
+# TYPE impala_jvm_code_cache_peak_current_usage_bytes gauge
+impala_jvm_code_cache_peak_current_usage_bytes 6493568
+# HELP impala_jvm_code_cache_current_usage_bytes Jvm code-cache Current Usage Bytes
+# TYPE impala_jvm_code_cache_current_usage_bytes gauge
+impala_jvm_code_cache_current_usage_bytes 6104000
+# HELP impala_jvm_code_cache_max_usage_bytes Jvm code-cache Max Usage Bytes
+# TYPE impala_jvm_code_cache_max_usage_bytes gauge
+impala_jvm_code_cache_max_usage_bytes 251658240
+# HELP impala_jvm_total_peak_init_usage_bytes Jvm total Peak Init Usage Bytes
+# TYPE impala_jvm_total_peak_init_usage_bytes gauge
+impala_jvm_total_peak_init_usage_bytes 129433600
+# HELP impala_jvm_code_cache_committed_usage_bytes Jvm code-cache Committed Usage Bytes
+# TYPE impala_jvm_code_cache_committed_usage_bytes gauge
+impala_jvm_code_cache_committed_usage_bytes 6553600
+# HELP impala_jvm_total_peak_committed_usage_bytes Jvm total Peak Committed Usage Bytes
+# TYPE impala_jvm_total_peak_committed_usage_bytes gauge
+impala_jvm_total_peak_committed_usage_bytes 186384384
+# HELP impala_jvm_ps_eden_space_peak_init_usage_bytes Jvm ps-eden-space Peak Init Usage Bytes
+# TYPE impala_jvm_ps_eden_space_peak_init_usage_bytes gauge
+impala_jvm_ps_eden_space_peak_init_usage_bytes 33554432
+# HELP impala_jvm_total_current_usage_bytes Jvm total Current Usage Bytes
+# TYPE impala_jvm_total_current_usage_bytes gauge
+impala_jvm_total_current_usage_bytes 67392736
+# HELP impala_jvm_total_init_usage_bytes Jvm total Init Usage Bytes
+# TYPE impala_jvm_total_init_usage_bytes gauge
+impala_jvm_total_init_usage_bytes 129433600
+# HELP impala_jvm_non_heap_committed_usage_bytes Jvm non-heap Committed Usage Bytes
+# TYPE impala_jvm_non_heap_committed_usage_bytes gauge
+impala_jvm_non_heap_committed_usage_bytes 39059456
+# HELP impala_jvm_ps_old_gen_init_usage_bytes Jvm ps-old-gen Init Usage Bytes
+# TYPE impala_jvm_ps_old_gen_init_usage_bytes gauge
+impala_jvm_ps_old_gen_init_usage_bytes 88080384
+# HELP impala_jvm_total_max_usage_bytes Jvm total Max Usage Bytes
+# TYPE impala_jvm_total_max_usage_bytes gauge
+impala_jvm_total_max_usage_bytes 3463446527
+# HELP impala_jvm_compressed_class_space_peak_max_usage_bytes Jvm compressed-class-space Peak Max Usage Bytes
+# TYPE impala_jvm_compressed_class_space_peak_max_usage_bytes gauge
+impala_jvm_compressed_class_space_peak_max_usage_bytes 1073741824
+# HELP impala_jvm_total_peak_max_usage_bytes Jvm total Peak Max Usage Bytes
+# TYPE impala_jvm_total_peak_max_usage_bytes gauge
+impala_jvm_total_peak_max_usage_bytes 3472883711
+# HELP impala_jvm_metaspace_peak_max_usage_bytes Jvm metaspace Peak Max Usage Bytes
+# TYPE impala_jvm_metaspace_peak_max_usage_bytes gauge
+impala_jvm_metaspace_peak_max_usage_bytes -1
+# HELP impala_jvm_non_heap_peak_committed_usage_bytes Jvm non-heap Peak Committed Usage Bytes
+# TYPE impala_jvm_non_heap_peak_committed_usage_bytes gauge
+impala_jvm_non_heap_peak_committed_usage_bytes 0
+# HELP impala_jvm_ps_survivor_space_peak_current_usage_bytes Jvm ps-survivor-space Peak Current Usage Bytes
+# TYPE impala_jvm_ps_survivor_space_peak_current_usage_bytes gauge
+impala_jvm_ps_survivor_space_peak_current_usage_bytes 5841520
+# HELP impala_jvm_ps_eden_space_max_usage_bytes Jvm ps-eden-space Max Usage Bytes
+# TYPE impala_jvm_ps_eden_space_max_usage_bytes gauge
+impala_jvm_ps_eden_space_max_usage_bytes 697827328
+# HELP impala_jvm_code_cache_init_usage_bytes Jvm code-cache Init Usage Bytes
+# TYPE impala_jvm_code_cache_init_usage_bytes gauge
+impala_jvm_code_cache_init_usage_bytes 2555904
+# HELP impala_jvm_metaspace_max_usage_bytes Jvm metaspace Max Usage Bytes
+# TYPE impala_jvm_metaspace_max_usage_bytes gauge
+impala_jvm_metaspace_max_usage_bytes -1
+# HELP impala_jvm_non_heap_peak_current_usage_bytes Jvm non-heap Peak Current Usage Bytes
+# TYPE impala_jvm_non_heap_peak_current_usage_bytes gauge
+impala_jvm_non_heap_peak_current_usage_bytes 0
+# HELP impala_jvm_ps_old_gen_max_usage_bytes Jvm ps-old-gen Max Usage Bytes
+# TYPE impala_jvm_ps_old_gen_max_usage_bytes gauge
+impala_jvm_ps_old_gen_max_usage_bytes 1431830528
+# HELP impala_jvm_total_peak_current_usage_bytes Jvm total Peak Current Usage Bytes
+# TYPE impala_jvm_total_peak_current_usage_bytes gauge
+impala_jvm_total_peak_current_usage_bytes 86588040
+# HELP impala_jvm_compressed_class_space_peak_init_usage_bytes Jvm compressed-class-space Peak Init Usage Bytes
+# TYPE impala_jvm_compressed_class_space_peak_init_usage_bytes gauge
+impala_jvm_compressed_class_space_peak_init_usage_bytes 0
+# HELP impala_jvm_metaspace_current_usage_bytes Jvm metaspace Current Usage Bytes
+# TYPE impala_jvm_metaspace_current_usage_bytes gauge
+impala_jvm_metaspace_current_usage_bytes 28849616
+# HELP impala_jvm_heap_peak_committed_usage_bytes Jvm heap Peak Committed Usage Bytes
+# TYPE impala_jvm_heap_peak_committed_usage_bytes gauge
+impala_jvm_heap_peak_committed_usage_bytes 0
+# HELP impala_jvm_metaspace_peak_committed_usage_bytes Jvm metaspace Peak Committed Usage Bytes
+# TYPE impala_jvm_metaspace_peak_committed_usage_bytes gauge
+impala_jvm_metaspace_peak_committed_usage_bytes 29360128
+# HELP impala_jvm_metaspace_committed_usage_bytes Jvm metaspace Committed Usage Bytes
+# TYPE impala_jvm_metaspace_committed_usage_bytes gauge
+impala_jvm_metaspace_committed_usage_bytes 29360128
+# HELP impala_jvm_ps_eden_space_committed_usage_bytes Jvm ps-eden-space Committed Usage Bytes
+# TYPE impala_jvm_ps_eden_space_committed_usage_bytes gauge
+impala_jvm_ps_eden_space_committed_usage_bytes 48758784
+# HELP impala_jvm_code_cache_peak_max_usage_bytes Jvm code-cache Peak Max Usage Bytes
+# TYPE impala_jvm_code_cache_peak_max_usage_bytes gauge
+impala_jvm_code_cache_peak_max_usage_bytes 251658240
+# HELP impala_jvm_total_committed_usage_bytes Jvm total Committed Usage Bytes
+# TYPE impala_jvm_total_committed_usage_bytes gauge
+impala_jvm_total_committed_usage_bytes 158072832
+# HELP impala_jvm_metaspace_init_usage_bytes Jvm metaspace Init Usage Bytes
+# TYPE impala_jvm_metaspace_init_usage_bytes gauge
+impala_jvm_metaspace_init_usage_bytes 0
+# HELP impala_jvm_ps_old_gen_committed_usage_bytes Jvm ps-old-gen Committed Usage Bytes
+# TYPE impala_jvm_ps_old_gen_committed_usage_bytes gauge
+impala_jvm_ps_old_gen_committed_usage_bytes 61865984
+# HELP impala_jvm_ps_eden_space_peak_max_usage_bytes Jvm ps-eden-space Peak Max Usage Bytes
+# TYPE impala_jvm_ps_eden_space_peak_max_usage_bytes gauge
+impala_jvm_ps_eden_space_peak_max_usage_bytes 705167360
+# HELP impala_jvm_metaspace_peak_current_usage_bytes Jvm metaspace Peak Current Usage Bytes
+# TYPE impala_jvm_metaspace_peak_current_usage_bytes gauge
+impala_jvm_metaspace_peak_current_usage_bytes 28849616
+# HELP impala_jvm_compressed_class_space_current_usage_bytes Jvm compressed-class-space Current Usage Bytes
+# TYPE impala_jvm_compressed_class_space_current_usage_bytes gauge
+impala_jvm_compressed_class_space_current_usage_bytes 3018288
+# HELP impala_jvm_code_cache_peak_init_usage_bytes Jvm code-cache Peak Init Usage Bytes
+# TYPE impala_jvm_code_cache_peak_init_usage_bytes gauge
+impala_jvm_code_cache_peak_init_usage_bytes 2555904
+# HELP impala_jvm_metaspace_peak_init_usage_bytes Jvm metaspace Peak Init Usage Bytes
+# TYPE impala_jvm_metaspace_peak_init_usage_bytes gauge
+impala_jvm_metaspace_peak_init_usage_bytes 0
+# HELP impala_jvm_compressed_class_space_peak_current_usage_bytes Jvm compressed-class-space Peak Current Usage Bytes
+# TYPE impala_jvm_compressed_class_space_peak_current_usage_bytes gauge
+impala_jvm_compressed_class_space_peak_current_usage_bytes 3018288
+# HELP impala_jvm_heap_max_usage_bytes Jvm heap Max Usage Bytes
+# TYPE impala_jvm_heap_max_usage_bytes gauge
+impala_jvm_heap_max_usage_bytes 1908932608
+# HELP impala_jvm_compressed_class_space_max_usage_bytes Jvm compressed-class-space Max Usage Bytes
+# TYPE impala_jvm_compressed_class_space_max_usage_bytes gauge
+impala_jvm_compressed_class_space_max_usage_bytes 1073741824
+# HELP impala_jvm_compressed_class_space_committed_usage_bytes Jvm compressed-class-space Committed Usage Bytes
+# TYPE impala_jvm_compressed_class_space_committed_usage_bytes gauge
+impala_jvm_compressed_class_space_committed_usage_bytes 3145728
+# HELP impala_jvm_heap_peak_max_usage_bytes Jvm heap Peak Max Usage Bytes
+# TYPE impala_jvm_heap_peak_max_usage_bytes gauge
+impala_jvm_heap_peak_max_usage_bytes 0
+# HELP impala_jvm_compressed_class_space_init_usage_bytes Jvm compressed-class-space Init Usage Bytes
+# TYPE impala_jvm_compressed_class_space_init_usage_bytes gauge
+impala_jvm_compressed_class_space_init_usage_bytes 0
+# HELP impala_jvm_compressed_class_space_peak_committed_usage_bytes Jvm compressed-class-space Peak Committed Usage Bytes
+# TYPE impala_jvm_compressed_class_space_peak_committed_usage_bytes gauge
+impala_jvm_compressed_class_space_peak_committed_usage_bytes 3145728
+# HELP impala_jvm_ps_old_gen_peak_init_usage_bytes Jvm ps-old-gen Peak Init Usage Bytes
+# TYPE impala_jvm_ps_old_gen_peak_init_usage_bytes gauge
+impala_jvm_ps_old_gen_peak_init_usage_bytes 88080384
+# HELP impala_jvm_ps_eden_space_current_usage_bytes Jvm ps-eden-space Current Usage Bytes
+# TYPE impala_jvm_ps_eden_space_current_usage_bytes gauge
+impala_jvm_ps_eden_space_current_usage_bytes 14748696
+# HELP impala_jvm_ps_eden_space_init_usage_bytes Jvm ps-eden-space Init Usage Bytes
+# TYPE impala_jvm_ps_eden_space_init_usage_bytes gauge
+impala_jvm_ps_eden_space_init_usage_bytes 33554432
+# HELP impala_tcmalloc_physical_bytes_reserved Derived metric computing the amount of physical memory (in bytes) used by the process, including that actually in use and free bytes reserved by tcmalloc. Does not include the tcmalloc metadata.
+# TYPE impala_tcmalloc_physical_bytes_reserved gauge
+impala_tcmalloc_physical_bytes_reserved 58187776
+# HELP impala_tcmalloc_pageheap_free_bytes Number of bytes in free, mapped pages in page heap. These bytes can be used to fulfill allocation requests. They always count towards virtual memory usage, and unless the underlying memory is swapped out by the OS, they also count towards physical memory usage.
+# TYPE impala_tcmalloc_pageheap_free_bytes gauge
+impala_tcmalloc_pageheap_free_bytes 10
+# HELP impala_tcmalloc_pageheap_unmapped_bytes Number of bytes in free, unmapped pages in page heap. These are bytes that have been released back to the OS, possibly by one of the MallocExtension "Release" calls. They can be used to fulfill allocation requests, but typically incur a page fault. They always count towards virtual memory usage, and depending on the OS, typically do not count towards physical memory usage.
+# TYPE impala_tcmalloc_pageheap_unmapped_bytes gauge
+impala_tcmalloc_pageheap_unmapped_bytes 14565376
+# HELP impala_tcmalloc_bytes_in_use Number of bytes used by the application. This will not typically match the memory use reported by the OS, because it does not include TCMalloc overhead or memory fragmentation.
+# TYPE impala_tcmalloc_bytes_in_use gauge
+impala_tcmalloc_bytes_in_use 48179280
+# HELP impala_tcmalloc_total_bytes_reserved Bytes of system memory reserved by TCMalloc.
+# TYPE impala_tcmalloc_total_bytes_reserved gauge
+impala_tcmalloc_total_bytes_reserved 72753152

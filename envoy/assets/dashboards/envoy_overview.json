@@ -98,13 +98,13 @@
                   "response_format": "scalar",
                   "queries": [
                     {
-                      "query": "sum:envoy.cluster.upstream_rq_5xx{service:ingress-haproxy*,*,*,*,$release}.as_count()",
+                      "query": "sum:envoy.cluster.upstream_rq_5xx{$envoy_cluster,$listener,$release}.as_count()",
                       "data_source": "metrics",
                       "name": "query1",
                       "aggregator": "avg"
                     },
                     {
-                      "query": "sum:envoy.cluster.upstream_rq_completed{service:ingress-haproxy*,*,*,*,$release}.as_count()",
+                      "query": "sum:envoy.cluster.upstream_rq_completed{$envoy_cluster,$listener,$release}.as_count()",
                       "data_source": "metrics",
                       "name": "query2",
                       "aggregator": "avg"
@@ -140,25 +140,25 @@
                   "response_format": "scalar",
                   "queries": [
                     {
-                      "query": "sum:envoy.cluster.upstream_rq_2xx{service:ingress-haproxy*,*,*,*,$release}.as_count()",
+                      "query": "sum:envoy.cluster.upstream_rq_2xx{$envoy_cluster,$listener,$release}.as_count()",
                       "data_source": "metrics",
                       "name": "query1",
                       "aggregator": "avg"
                     },
                     {
-                      "query": "sum:envoy.cluster.upstream_rq_3xx{service:ingress-haproxy*,*,*,*,$release}.as_count()",
+                      "query": "sum:envoy.cluster.upstream_rq_3xx{$envoy_cluster,$listener,$release}.as_count()",
                       "data_source": "metrics",
                       "name": "query3",
                       "aggregator": "avg"
                     },
                     {
-                      "query": "sum:envoy.cluster.upstream_rq_4xx{service:ingress-haproxy*,*,*,*,$release}.as_count()",
+                      "query": "sum:envoy.cluster.upstream_rq_4xx{$envoy_cluster,$listener,$release}.as_count()",
                       "data_source": "metrics",
                       "name": "query2",
                       "aggregator": "avg"
                     },
                     {
-                      "query": "sum:envoy.cluster.upstream_rq_5xx{service:ingress-haproxy*,*,*,*,$release}.as_count()",
+                      "query": "sum:envoy.cluster.upstream_rq_5xx{$envoy_cluster,$listener,$release}.as_count()",
                       "data_source": "metrics",
                       "name": "query4",
                       "aggregator": "avg"
@@ -192,7 +192,7 @@
                   "response_format": "scalar",
                   "queries": [
                     {
-                      "query": "sum:envoy.cluster.upstream_rq_total{service:ingress-haproxy*,*,*,*,$release} by {release}.as_count()",
+                      "query": "sum:envoy.cluster.upstream_rq_total{$envoy_cluster,$listener,$release}.as_count()",
                       "data_source": "metrics",
                       "name": "query4",
                       "aggregator": "avg"
@@ -267,27 +267,27 @@
                   "on_right_yaxis": false,
                   "queries": [
                     {
-                      "query": "sum:envoy.cluster.upstream_rq_2xx{service:ingress-haproxy*,*,*,*,$release}.as_count()",
+                      "query": "sum:envoy.cluster.upstream_rq_2xx{$envoy_cluster,$listener,$release}.as_count()",
                       "data_source": "metrics",
                       "name": "query1"
                     },
                     {
-                      "query": "sum:envoy.cluster.upstream_rq_completed{service:ingress-haproxy*,*,*,*,$release}.as_count()",
+                      "query": "sum:envoy.cluster.upstream_rq_completed{$envoy_cluster,$listener,$release}.as_count()",
                       "data_source": "metrics",
                       "name": "query2"
                     },
                     {
-                      "query": "sum:envoy.cluster.upstream_rq_3xx{service:ingress-haproxy*,*,*,*,$release}.as_count()",
+                      "query": "sum:envoy.cluster.upstream_rq_3xx{$envoy_cluster,$listener,$release}.as_count()",
                       "data_source": "metrics",
                       "name": "query3"
                     },
                     {
-                      "query": "sum:envoy.cluster.upstream_rq_4xx{service:ingress-haproxy*,*,*,*,$release}.as_count()",
+                      "query": "sum:envoy.cluster.upstream_rq_4xx{$envoy_cluster,$listener,$release}.as_count()",
                       "data_source": "metrics",
                       "name": "query4"
                     },
                     {
-                      "query": "sum:envoy.cluster.upstream_rq_5xx{service:ingress-haproxy*,*,*,*,$release}.as_count()",
+                      "query": "sum:envoy.cluster.upstream_rq_5xx{$envoy_cluster,$listener,$release}.as_count()",
                       "data_source": "metrics",
                       "name": "query5"
                     }
@@ -356,22 +356,22 @@
                   "on_right_yaxis": false,
                   "queries": [
                     {
-                      "query": "sum:envoy.cluster.upstream_rq_2xx{service:ingress-haproxy*,*,*,*,$release}.as_count()",
+                      "query": "sum:envoy.cluster.upstream_rq_2xx{$envoy_cluster,$listener,$release}.as_count()",
                       "data_source": "metrics",
                       "name": "query1"
                     },
                     {
-                      "query": "sum:envoy.cluster.upstream_rq_3xx{service:ingress-haproxy*,*,*,*,$release}.as_count()",
+                      "query": "sum:envoy.cluster.upstream_rq_3xx{$envoy_cluster,$listener,$release}.as_count()",
                       "data_source": "metrics",
                       "name": "query3"
                     },
                     {
-                      "query": "sum:envoy.cluster.upstream_rq_5xx{service:ingress-haproxy*,*,*,*,$release}.as_count()",
+                      "query": "sum:envoy.cluster.upstream_rq_5xx{$envoy_cluster,$listener,$release}.as_count()",
                       "data_source": "metrics",
                       "name": "query2"
                     },
                     {
-                      "query": "sum:envoy.cluster.upstream_rq_4xx{service:ingress-haproxy*,*,*,*,$release}.as_count()",
+                      "query": "sum:envoy.cluster.upstream_rq_4xx{$envoy_cluster,$listener,$release}.as_count()",
                       "data_source": "metrics",
                       "name": "query4"
                     }
@@ -447,7 +447,7 @@
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "avg:envoy.cluster.upstream_rq_time.99percentile{*,*,*,$release} by {release}",
+                      "query": "avg:envoy.cluster.upstream_rq_time.99percentile{$envoy_cluster,$listener,$release}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
@@ -501,7 +501,7 @@
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "avg:envoy.cluster.upstream_rq_total{*,*,*,$release} by {release}.as_rate()",
+                      "query": "avg:envoy.cluster.upstream_rq_total{$envoy_cluster,$listener,$release}.as_rate()",
                       "data_source": "metrics",
                       "name": "query1"
                     }
@@ -556,7 +556,7 @@
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "avg:envoy.cluster.lb_healthy_panic{*,datacenter:us1.prod.dog,*,$release} by {release}.as_count()",
+                      "query": "avg:envoy.cluster.lb_healthy_panic{$envoy_cluster,$listener,$release}.as_count()",
                       "data_source": "metrics",
                       "name": "query1"
                     }
@@ -649,12 +649,12 @@
                   "on_right_yaxis": false,
                   "queries": [
                     {
-                      "query": "max:kubernetes.cpu.usage.total{team:logs,*,*,*,datacenter:us1.prod.dog,*,*,*,*,kube_container_name:*,$envoy_cluster,short_image:envoy,$release} by {release}",
+                      "query": "max:kubernetes.cpu.usage.total{$envoy_cluster,$listener,$release}",
                       "data_source": "metrics",
                       "name": "query1"
                     },
                     {
-                      "query": "max:kubernetes.cpu.limits{team:logs,*,*,*,datacenter:us1.prod.dog,*,*,*,*,kube_container_name:*,short_image:envoy,$envoy_cluster,$release} by {release}",
+                      "query": "max:kubernetes.cpu.limits{$envoy_cluster,$listener,$release}",
                       "data_source": "metrics",
                       "name": "query2"
                     }
@@ -724,12 +724,12 @@
                   "on_right_yaxis": false,
                   "queries": [
                     {
-                      "query": "max:kubernetes.memory.usage{team:logs,*,*,*,datacenter:us1.prod.dog,*,*,*,kube_container_name:*,short_image:envoy,$release} by {release}",
+                      "query": "max:kubernetes.memory.usage{$envoy_cluster,$listener,$release}",
                       "data_source": "metrics",
                       "name": "query1"
                     },
                     {
-                      "query": "avg:kubernetes.memory.limits{team:logs,*,*,*,datacenter:us1.prod.dog,*,*,*,kube_container_name:*,short_image:envoy,$release} by {release}",
+                      "query": "avg:kubernetes.memory.limits{$envoy_cluster,$listener,$release}",
                       "data_source": "metrics",
                       "name": "query2"
                     }
@@ -792,7 +792,7 @@
                   "on_right_yaxis": false,
                   "queries": [
                     {
-                      "query": "sum:kubernetes.containers.running{team:logs,*,*,*,datacenter:us1.prod.dog,*,*,*,*,short_image:envoy,$release} by {image_tag,kube_cluster_name}.as_count().fill(null)",
+                      "query": "sum:kubernetes.containers.running{$envoy_cluster,$listener,$release}.as_count().fill(null)",
                       "data_source": "metrics",
                       "name": "query1"
                     }
@@ -867,32 +867,32 @@
                   "on_right_yaxis": false,
                   "queries": [
                     {
-                      "query": "sum:envoy.listener.http.downstream_rq_3xx{service:ingress-haproxy*,*,*,!stat_prefix:admin-read,!stat_prefix:admin,*} by {stat_prefix}.as_count()",
+                      "query": "sum:envoy.listener.http.downstream_rq_3xx{$envoy_cluster,$listener,$release}.as_count()",
                       "data_source": "metrics",
                       "name": "query3"
                     },
                     {
-                      "query": "sum:envoy.listener.http.downstream_rq_2xx{service:ingress-haproxy*,*,*,!stat_prefix:admin-read,!stat_prefix:admin,*} by {stat_prefix}.as_count()",
+                      "query": "sum:envoy.listener.http.downstream_rq_2xx{$envoy_cluster,$listener,$release}.as_count()",
                       "data_source": "metrics",
                       "name": "query1"
                     },
                     {
-                      "query": "sum:envoy.listener.http.downstream_rq_1xx{service:ingress-haproxy*,*,*,!stat_prefix:admin-read,!stat_prefix:admin,*} by {stat_prefix}.as_count()",
+                      "query": "sum:envoy.listener.http.downstream_rq_1xx{$envoy_cluster,$listener,$release}.as_count()",
                       "data_source": "metrics",
                       "name": "query6"
                     },
                     {
-                      "query": "sum:envoy.listener.http.downstream_rq_completed{service:ingress-haproxy*,*,*,!stat_prefix:admin-read,!stat_prefix:admin,*} by {stat_prefix}.as_count()",
+                      "query": "sum:envoy.listener.http.downstream_rq_completed{$envoy_cluster,$listener,$release}.as_count()",
                       "data_source": "metrics",
                       "name": "query2"
                     },
                     {
-                      "query": "sum:envoy.listener.http.downstream_rq_4xx{service:ingress-haproxy*,*,*,!stat_prefix:admin-read,!stat_prefix:admin,*} by {stat_prefix}.as_count()",
+                      "query": "sum:envoy.listener.http.downstream_rq_4xx{$envoy_cluster,$listener,$release}.as_count()",
                       "data_source": "metrics",
                       "name": "query4"
                     },
                     {
-                      "query": "sum:envoy.listener.http.downstream_rq_5xx{service:ingress-haproxy*,*,*,!stat_prefix:admin-read,!stat_prefix:admin,*} by {stat_prefix}.as_count()",
+                      "query": "sum:envoy.listener.http.downstream_rq_5xx{$envoy_cluster,$listener,$release}.as_count()",
                       "data_source": "metrics",
                       "name": "query5"
                     }
@@ -953,17 +953,17 @@
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "avg:envoy.http.downstream_rq_time.50percentile{service:ingress-haproxy*,*,*,*} by {stat_prefix}",
+                      "query": "avg:envoy.http.downstream_rq_time.50percentile{$envoy_cluster,$listener,$release}",
                       "data_source": "metrics",
                       "name": "query"
                     },
                     {
-                      "query": "avg:envoy.http.downstream_rq_time.25percentile{service:ingress-haproxy*,*,*,*} by {stat_prefix}",
+                      "query": "avg:envoy.http.downstream_rq_time.25percentile{$envoy_cluster,$listener,$release}",
                       "data_source": "metrics",
                       "name": "query1"
                     },
                     {
-                      "query": "avg:envoy.http.downstream_rq_time.90percentile{service:ingress-haproxy*,*,*,*} by {stat_prefix}",
+                      "query": "avg:envoy.http.downstream_rq_time.90percentile{$envoy_cluster,$listener,$release}",
                       "data_source": "metrics",
                       "name": "query2"
                     }
@@ -1037,12 +1037,12 @@
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "sum:envoy.listener.http.downstream_rq_completed{service:ingress-haproxy*,*,*,*} by {stat_prefix}.as_rate()",
+                      "query": "sum:envoy.listener.http.downstream_rq_completed{$envoy_cluster,$listener,$release}.as_rate()",
                       "data_source": "metrics",
                       "name": "query1"
                     },
                     {
-                      "query": "sum:envoy.http.downstream_cx_tx_bytes_total{service:ingress-haproxy*,*,*,*} by {stat_prefix}.as_rate()",
+                      "query": "sum:envoy.http.downstream_cx_tx_bytes_total{$envoy_cluster,$listener,$release}.as_rate()",
                       "data_source": "metrics",
                       "name": "query2"
                     }
@@ -1105,17 +1105,17 @@
                   "on_right_yaxis": false,
                   "queries": [
                     {
-                      "query": "avg:envoy.http.no_route{team:logs,*,*,*,datacenter:us1.prod.dog,*,*,*,*,*,$release} by {stat_prefix}.as_count()",
+                      "query": "avg:envoy.http.no_route{$envoy_cluster,$listener,$release}.as_count()",
                       "data_source": "metrics",
                       "name": "query1"
                     },
                     {
-                      "query": "avg:envoy.http.no_cluster{team:logs,*,*,*,datacenter:us1.prod.dog,*,*,*,*,*,$release} by {stat_prefix}",
+                      "query": "avg:envoy.http.no_cluster{$envoy_cluster,$listener,$release}",
                       "data_source": "metrics",
                       "name": "query2"
                     },
                     {
-                      "query": "avg:envoy.http.downstream_cx_protocol_error{team:logs,*,*,*,datacenter:us1.prod.dog,*,*,*,*,*,$release} by {stat_prefix}",
+                      "query": "avg:envoy.http.downstream_cx_protocol_error{$envoy_cluster,$listener,$release}",
                       "data_source": "metrics",
                       "name": "query3"
                     }
@@ -1197,17 +1197,17 @@
                   "on_right_yaxis": false,
                   "queries": [
                     {
-                      "query": "avg:envoy.http.downstream_cx_active{team:logs,*,*,*,datacenter:us1.prod.dog,*,*,*,*,*,$release} by {stat_prefix}",
+                      "query": "avg:envoy.http.downstream_cx_active{$envoy_cluster,$listener,$release}",
                       "data_source": "metrics",
                       "name": "query"
                     },
                     {
-                      "query": "avg:envoy.http.downstream_cx_http2_active{team:logs,*,*,*,datacenter:us1.prod.dog,*,*,*,*,*,$release} by {stat_prefix}",
+                      "query": "avg:envoy.http.downstream_cx_http2_active{$envoy_cluster,$listener,$release}",
                       "data_source": "metrics",
                       "name": "query3"
                     },
                     {
-                      "query": "avg:envoy.http.downstream_cx_http1_active{team:logs,*,*,*,datacenter:us1.prod.dog,*,*,*,*,*,$release} by {stat_prefix}",
+                      "query": "avg:envoy.http.downstream_cx_http1_active{$envoy_cluster,$listener,$release}",
                       "data_source": "metrics",
                       "name": "query4"
                     }

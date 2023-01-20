@@ -23,9 +23,37 @@ OPTIONAL_HEADERS = {'options', 'timerange', 'visible_facets'}
 
 ALL_HEADERS = REQUIRED_HEADERS | OPTIONAL_HEADERS
 
-VALID_TYPES = {'logs', 'trace', 'process'}
+VALID_TYPES = {'logs', 'trace', 'process', 'container'}
 
-VALID_PAGES = {'analytics', 'insights', 'patterns', 'stream', 'traces', 'process_overview'}
+VALID_PAGES = {
+    'analytics',
+    'insights',
+    'patterns',
+    'stream',
+    'traces',
+    'process_overview',
+    'container_overview',
+    'container_orchestration_summary',
+    'container_orchestration_map',
+    'container_orchestration_resource_utilization',
+    'container_orchestration_pods',
+    'container_orchestration_deployments',
+    'container_orchestration_replica_sets',
+    'container_orchestration_services',
+    'container_orchestration_nodes',
+    'container_orchestration_clusters',
+    'container_orchestration_jobs',
+    'container_orchestration_cron_jobs',
+    'container_orchestration_daemon_sets',
+    'container_orchestration_stateful_sets',
+    'container_orchestration_persistent_volumes',
+    'container_orchestration_persistent_volume_claims',
+    'container_orchestration_roles',
+    'container_orchestration_role_bindings',
+    'container_orchestration_cluster_roles',
+    'container_orchestration_cluster_role_bindings',
+    'container_orchestration_service_accounts',
+}
 
 NO_OPTIONS_PAGES = {'insights', 'patterns', 'traces'}
 
@@ -58,7 +86,7 @@ def saved_views(check):
     echo_info(f"Validating saved views for {len(integrations)} checks ...")
 
     for integration in integrations:
-        saved_views, _ = get_assets_from_manifest(integration, 'saved_views')
+        saved_views, non_existing = get_assets_from_manifest(integration, 'saved_views')
 
         for saved_view in saved_views:
             display_queue = []
@@ -192,6 +220,10 @@ def saved_views(check):
                 annotate_display_queue(saved_view, display_queue)
                 for func, message in display_queue:
                     func(message)
+
+        for saved_view in non_existing:
+            errors = True
+            echo_failure(f"{integration} saved view does not exist: {saved_view}")
 
     if errors:
         abort()

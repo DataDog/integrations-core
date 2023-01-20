@@ -1,6 +1,6 @@
 {
 	"name": "FoundationDB Errors Logged",
-	"type": "event alert",
+	"type": "log alert",
 	"query": "logs(\"service:foundationdb @Severity:>=40\").index(\"*\").rollup(\"count\").by(\"host\").last(\"10m\") > 3",
 	"message": "FoundationDB has logged errors. This indicates that one of the assumptions of the database has been violated; such situations are generally caused by hardware failures.",
 	"tags": [

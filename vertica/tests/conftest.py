@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import os
 from copy import deepcopy
 
 import pytest
@@ -9,18 +10,12 @@ import vertica_python as vertica
 from datadog_checks.dev import LazyFunction, docker_run
 
 from . import common
+from .db import setup_db_tables  # noqa: F401
 
 
 class InitializeDB(LazyFunction):
     def __init__(self, config):
-        self.conn_info = {
-            'database': config['db'],
-            'host': config['server'],
-            'port': config['port'],
-            'user': config['username'],
-            'password': config['password'],
-            'connection_timeout': config['timeout'],
-        }
+        self.conn_info = common.connection_options_from_config(config)
 
     def __call__(self):
         with vertica.connect(**self.conn_info) as conn:
@@ -37,9 +32,9 @@ class InitializeDB(LazyFunction):
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    with docker_run(
-        common.COMPOSE_FILE, log_patterns=['Vertica is now running'], conditions=[InitializeDB(common.CONFIG)]
-    ):
+    compose_file = os.path.join(common.HERE, 'docker', 'docker-compose.yaml')
+
+    with docker_run(compose_file, log_patterns=['Vertica is now running'], conditions=[InitializeDB(common.CONFIG)]):
         yield common.CONFIG
 
 

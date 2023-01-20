@@ -569,7 +569,6 @@
                     {
                         "definition": {
                             "query": "spark has status $spark_node $databricks_cluster_name $app_name",
-                            "tags_execution": "and",
                             "time": {
                                 "live_span": "1d"
                             },

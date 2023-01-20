@@ -4,9 +4,9 @@
 
 import string
 import unicodedata
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 
-from .trello_users import TrelloUser, TrelloUsers
+from .trello_users import TrelloUser
 
 
 class GithubTrelloUserMatcher:
@@ -17,10 +17,9 @@ class GithubTrelloUserMatcher:
     `__normalize_trello_name` for Trello name normalization
     """
 
-    def __init__(self, trello_users: TrelloUsers):
-        users = trello_users.get_users()
+    def __init__(self, trello_users: List[TrelloUser]):
         self.__normalized_trello_users: Dict[str, TrelloUser] = {}
-        for user in users:
+        for user in trello_users:
             self.__add_trello_user(user.full_name, user)
             self.__add_trello_user(user.username, user)
 

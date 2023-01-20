@@ -1,35 +1,53 @@
 {
-  "display_name": "Teradata",
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "name": "teradata",
-  "metric_prefix": "teradata.",
-  "metric_to_check": "teradata.disk_space.curr_perm",
-  "creates_events": false,
-  "short_description": "Monitor the health and performance of your Teradata Vantage Database.",
-  "guid": "8205988e-888a-4d31-abf0-753720d772a7",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "public_title": "Teradata",
-  "categories": [
-    "data store"
-  ],
-  "type": "check",
-  "is_public": false,
-  "integration_id": "teradata",
+  "manifest_version": "2.0.0",
+  "app_uuid": "8cac0599-64ca-4a46-8c68-1c5db6cc65ca",
+  "app_id": "teradata",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor the health and performance of your Teradata Vantage Database.",
+    "title": "Teradata",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Category::Data Store"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "Teradata",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "teradata.",
+        "check": "teradata.disk_space.curr_perm.total",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
     },
-    "dashboards": {},
-    "monitors": {},
-    "saved_views": {},
-    "service_checks": "assets/service_checks.json",
-    "logs": {},
-    "metrics_metadata": "metadata.csv"
+    "dashboards": {
+      "Teradata Overview": "assets/dashboards/teradata_overview.json"
+    },
+    "monitors": {
+      "High disk space": "assets/recommended_monitors/high_disk_space.json",
+      "Low ready threads": "assets/recommended_monitors/low_ready_threads.json"
+    }
   }
 }

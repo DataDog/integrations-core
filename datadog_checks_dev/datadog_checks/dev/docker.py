@@ -7,7 +7,6 @@ from typing import Iterator
 
 from six import string_types
 from six.moves.urllib.parse import urlparse
-from tenacity import retry, stop_after_attempt, wait_fixed
 
 from .conditions import CheckDockerLogs
 from .env import environment_run, get_state, save_state
@@ -15,7 +14,7 @@ from .fs import create_file, file_exists
 from .spec import load_spec
 from .structures import EnvVars, LazyFunction, TempDir
 from .subprocess import run_command
-from .utils import find_check_root, using_legacy_docker_compose
+from .utils import find_check_root
 
 try:
     from contextlib import ExitStack
@@ -49,20 +48,10 @@ def compose_file_active(compose_file):
     """
     Returns a `bool` indicating whether or not a compose file has any active services.
     """
-    if using_legacy_docker_compose():
-        command = ['docker-compose', '-f', compose_file, 'ps']
-        lines = run_command(command, capture='out', check=True).stdout.splitlines()
+    command = ['docker', 'compose', '-f', compose_file, 'ps']
+    lines = run_command(command, capture='out', check=True).stdout.strip().splitlines()
 
-        for i, line in enumerate(lines, 1):
-            if set(line.strip()) == {'-'}:
-                return len(lines[i:]) >= 1
-
-        return False
-    else:
-        command = ['docker', 'compose', '--compatibility', '-f', compose_file, 'ps']
-        lines = run_command(command, capture='out', check=True).stdout.strip().splitlines()
-
-        return len(lines) > 1
+    return len(lines) > 1
 
 
 def using_windows_containers():
@@ -150,14 +139,14 @@ def docker_run(
       `CheckEndpoints(endpoints)` to the `conditions` argument.
     - **log_patterns** (_List[str|re.Pattern]_) - Regular expression patterns to find in Docker logs before yielding.
       This is only available when `compose_file` is provided. Shorthand for adding
-      `CheckDockerLogs(compose_file, log_patterns)` to the `conditions` argument.
+      `CheckDockerLogs(compose_file, log_patterns, 'all')` to the `conditions` argument.
     - **mount_logs** (_bool_) - Whether or not to mount log files in Agent containers based on example logs
       configuration
     - **conditions** (_callable_) - A list of callable objects that will be executed before yielding to
       check for errors
     - **env_vars** (_dict_) - A dictionary to update `os.environ` with during execution
     - **wrappers** (_List[callable]_) - A list of context managers to use during execution
-    - **attempts** (_int_) - Number of attempts to run `up` successfully
+    - **attempts** (_int_) - Number of attempts to run `up` and the `conditions` successfully. Defaults to 2 in CI
     - **attempts_wait** (_int_) - Time to wait between attempts
     """
     if compose_file and up:
@@ -178,15 +167,6 @@ def docker_run(
         set_up = up
         tear_down = down
 
-    if attempts is not None:
-        saved_set_up = set_up
-
-        @retry(wait=wait_fixed(attempts_wait), stop=stop_after_attempt(attempts))
-        def set_up_with_retry():
-            return saved_set_up()
-
-        set_up = set_up_with_retry
-
     docker_conditions = []
 
     if log_patterns is not None:
@@ -195,7 +175,7 @@ def docker_run(
                 'The `log_patterns` convenience is unavailable when using '
                 'a custom setup. Please use a custom condition instead.'
             )
-        docker_conditions.append(CheckDockerLogs(compose_file, log_patterns))
+        docker_conditions.append(CheckDockerLogs(compose_file, log_patterns, 'all'))
 
     if conditions is not None:
         docker_conditions.extend(conditions)
@@ -229,6 +209,8 @@ def docker_run(
         conditions=docker_conditions,
         env_vars=env_vars,
         wrappers=wrappers,
+        attempts=attempts,
+        attempts_wait=attempts_wait,
     ) as result:
         yield result
 
@@ -238,10 +220,7 @@ class ComposeFileUp(LazyFunction):
         self.compose_file = compose_file
         self.build = build
         self.service_name = service_name
-        if using_legacy_docker_compose():
-            self.command = ['docker-compose', '-f', self.compose_file, 'up', '-d']
-        else:
-            self.command = ['docker', 'compose', '--compatibility', '-f', self.compose_file, 'up', '-d']
+        self.command = ['docker', 'compose', '-f', self.compose_file, 'up', '-d', '--force-recreate']
 
         if self.build:
             self.command.append('--build')
@@ -257,10 +236,7 @@ class ComposeFileLogs(LazyFunction):
     def __init__(self, compose_file, check=True):
         self.compose_file = compose_file
         self.check = check
-        if using_legacy_docker_compose():
-            self.command = ['docker-compose', '-f', self.compose_file, 'logs']
-        else:
-            self.command = ['docker', 'compose', '--compatibility', '-f', self.compose_file, 'logs']
+        self.command = ['docker', 'compose', '-f', self.compose_file, 'logs']
 
     def __call__(self, exception):
         return run_command(self.command, capture=False, check=self.check)
@@ -270,30 +246,17 @@ class ComposeFileDown(LazyFunction):
     def __init__(self, compose_file, check=True):
         self.compose_file = compose_file
         self.check = check
-        if using_legacy_docker_compose():
-            self.command = [
-                'docker-compose',
-                '-f',
-                self.compose_file,
-                'down',
-                '--volumes',
-                '--remove-orphans',
-                '-t',
-                '0',
-            ]
-        else:
-            self.command = [
-                'docker',
-                'compose',
-                '--compatibility',
-                '-f',
-                self.compose_file,
-                'down',
-                '--volumes',
-                '--remove-orphans',
-                '-t',
-                '0',
-            ]
+        self.command = [
+            'docker',
+            'compose',
+            '-f',
+            self.compose_file,
+            'down',
+            '--volumes',
+            '--remove-orphans',
+            '-t',
+            '0',
+        ]
 
     def __call__(self):
         return run_command(self.command, check=self.check)
@@ -313,12 +276,8 @@ def _read_example_logs_config(check_root):
 @contextmanager
 def temporarily_stop_service(service, compose_file, check=True):
     # type: (str, str, bool) -> Iterator[None]
-    if using_legacy_docker_compose():
-        stop_command = ['docker-compose', '-f', compose_file, 'stop', service]
-        start_command = ['docker-compose', '-f', compose_file, 'start', service]
-    else:
-        stop_command = ['docker', 'compose', '--compatibility', '-f', compose_file, 'stop', service]
-        start_command = ['docker', 'compose', '--compatibility', '-f', compose_file, 'start', service]
+    stop_command = ['docker', 'compose', '-f', compose_file, 'stop', service]
+    start_command = ['docker', 'compose', '-f', compose_file, 'start', service]
 
     run_command(stop_command, capture=False, check=check)
     yield

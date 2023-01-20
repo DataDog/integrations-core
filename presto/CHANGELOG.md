@@ -1,10 +1,10 @@
 # CHANGELOG - Presto
 
-## 2.6.1 / 2022-04-05
+## 2.6.1 / 2022-04-05 / Agent 7.36.0
 
 * [Fixed] Remove check options from jmx template. See [#11686](https://github.com/DataDog/integrations-core/pull/11686).
 
-## 2.6.0 / 2022-02-19
+## 2.6.0 / 2022-02-19 / Agent 7.35.0
 
 * [Added] Add `pyproject.toml` file. See [#11419](https://github.com/DataDog/integrations-core/pull/11419).
 * [Fixed] Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).

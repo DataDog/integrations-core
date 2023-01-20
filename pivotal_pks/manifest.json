@@ -1,29 +1,41 @@
 {
-  "display_name": "Pivotal PKS",
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "name": "pivotal_pks",
-  "creates_events": false,
-  "short_description": "Enterprise-Grade Kubernetes offering from Pivotal.",
-  "guid": "b0090603-01c8-4ad9-8f9a-4f3700bf065b",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os"
-  ],
-  "public_title": "Datadog-Pivotal Container Service Integration",
-  "categories": [
-    "containers",
-    "orchestration",
-    "log collection"
-  ],
-  "type": "check",
-  "is_public": true,
-  "integration_id": "pivotal-pks",
+  "manifest_version": "2.0.0",
+  "app_uuid": "e8a08b96-bbca-4907-8cc8-b7c3abf2f443",
+  "app_id": "pivotal-pks",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Enterprise-Grade Kubernetes offering from Pivotal.",
+    "title": "Pivotal Container Service",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Category::Containers",
+      "Category::Orchestration",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "monitors": {},
-    "dashboards": {},
-    "service_checks": "assets/service_checks.json",
-    "logs": {}
+    "integration": {
+      "source_type_name": "Pivotal PKS",
+      "configuration": {},
+      "events": {
+        "creates_events": false
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    }
   }
 }

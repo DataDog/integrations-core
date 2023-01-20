@@ -63,7 +63,7 @@ files:
     - name: slm_stats
       description: | 
         Set "slm_stats" to true to collect statistics about Snapshot Lifcycle Management.
-        The user must have `manage_slm` cluster privilege to get these metrics.
+        The user must have the `read_slm` cluster privilege to get these metrics.
       value:
         type: boolean
         example: false

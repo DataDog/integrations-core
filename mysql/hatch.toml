@@ -1,0 +1,59 @@
+[env.collectors.datadog-checks]
+base-package-features = ["deps", "db", "json"]
+check-types = true
+mypy-args = [
+  "--py2",
+  "--check-untyped-defs",
+  "--follow-imports",
+  "silent",
+  "datadog_checks/mysql/statements.py",
+]
+mypy-deps = [
+  "types-cachetools==0.1.10",
+  "types-enum34==1.1.1",
+  "types-pymysql==1.0.4",
+]
+
+[[envs.default.matrix]]
+python = ["2.7", "3.8"]
+version = [
+  "5.7",  # EOL October 21, 2023
+  "8.0",  # EOL April, 2026
+]
+
+[[envs.default.matrix]]
+python = ["2.7", "3.8"]
+version = ["8.0"]
+replication = ["group"]
+
+[[envs.default.matrix]]
+python = ["2.7", "3.8"]
+flavor = ["mariadb"]
+version = [
+  "10.2",  # EOL 23 May 2022
+  "10.5",  # EOL 24 June 2025
+]
+
+[envs.default.overrides]
+matrix.version.env-vars = [
+  { key = "COMPOSE_FILE", value = "mysql8.yaml", if = ["8.0"] },
+]
+name."8.0-group".env-vars = [
+  { key = "COMPOSE_FILE", value = "mysql8-group.yaml" },
+]
+
+[envs.default.env-vars]
+COMPOSE_FILE = "{matrix:flavor:mysql}.yaml"
+MYSQL_FLAVOR = "{matrix:flavor:mysql}"
+MYSQL_REPLICATION = "{matrix:replication:classic}"
+MYSQL_VERSION = "{matrix:version}"
+
+[envs.default]
+dependencies = [
+  "psutil",
+]
+
+[envs.latest.env-vars]
+COMPOSE_FILE = "mysql8.yaml"
+MYSQL_FLAVOR = "mysql"
+MYSQL_VERSION = "latest"

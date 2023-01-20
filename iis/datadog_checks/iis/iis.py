@@ -3,7 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 from six import PY3, iteritems
 
-from datadog_checks.base import PDHBaseCheck
+from datadog_checks.base import PDHBaseCheck, is_affirmative
 
 DEFAULT_COUNTERS = [
     ["Web Service", None, "Service Uptime", "iis.uptime", "gauge"],
@@ -47,7 +47,7 @@ class IIS(PDHBaseCheck):
     APP_POOL = 'app_pool'
 
     def __new__(cls, name, init_config, instances):
-        if PY3:
+        if PY3 and not is_affirmative(instances[0].get('use_legacy_check_version', False)):
             from .check import IISCheckV2
 
             return IISCheckV2(name, init_config, instances)

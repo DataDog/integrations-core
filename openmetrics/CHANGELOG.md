@@ -1,17 +1,30 @@
 # CHANGELOG - OpenMetrics
 
+## 2.3.0 / 2022-09-16 / Agent 7.40.0
+
+* [Added] Update HTTP config spec templates. See [#12890](https://github.com/DataDog/integrations-core/pull/12890).
+* [Fixed] Bumps base check requirement to v25.4.0. See [#12734](https://github.com/DataDog/integrations-core/pull/12734).
+
+## 2.2.2 / 2022-08-05 / Agent 7.39.0
+
+* [Fixed] Hide `extra_metrics` in example config. See [#12470](https://github.com/DataDog/integrations-core/pull/12470).
+
+## 2.2.1 / 2022-05-18 / Agent 7.37.0
+
+* [Fixed] Fix extra metrics description example. See [#12043](https://github.com/DataDog/integrations-core/pull/12043).
+
 ## 2.2.0 / 2022-05-15
 
 * [Added] Support dynamic bearer tokens (Bound Service Account Token Volume). See [#11915](https://github.com/DataDog/integrations-core/pull/11915).
 * [Fixed] Don't tag by endpoint on default config. See [#11966](https://github.com/DataDog/integrations-core/pull/11966).
 * [Fixed] Fix incorrect OpenMetrics V2 check exposition format HTTP header. See [#11899](https://github.com/DataDog/integrations-core/pull/11899). Thanks [jalaziz](https://github.com/jalaziz).
 
-## 2.1.0 / 2022-04-05
+## 2.1.0 / 2022-04-05 / Agent 7.36.0
 
 * [Added] Add metric_patterns options to filter all metric submission by a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
 * [Fixed] Remove outdated warning in the description for the `tls_ignore_warning` option. See [#11591](https://github.com/DataDog/integrations-core/pull/11591).
 
-## 2.0.0 / 2022-02-19
+## 2.0.0 / 2022-02-19 / Agent 7.35.0
 
 * [Added] Add `pyproject.toml` file. See [#11407](https://github.com/DataDog/integrations-core/pull/11407).
 * [Fixed] Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).

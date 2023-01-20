@@ -1,5 +1,167 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 17.7.0 / 2022-12-27
+
+* [Added] Add hidden option to ignore manifest schema validation. See [#13569](https://github.com/DataDog/integrations-core/pull/13569).
+* [Added] Add `--fix` flag to `ddev validate license-headers` for automatically fixing errors. See [#13507](https://github.com/DataDog/integrations-core/pull/13507).
+* [Fixed] Properly account for other integration repos. See [#13581](https://github.com/DataDog/integrations-core/pull/13581).
+* [Fixed] Make `ddev validate license-header` honor gitignore files. See [#13439](https://github.com/DataDog/integrations-core/pull/13439).
+* [Fixed] Fix style. See [#13518](https://github.com/DataDog/integrations-core/pull/13518).
+
+## 17.6.0 / 2022-12-13
+
+* [Added] Update marketplace GitHub actions to validate new template fields. See [#13267](https://github.com/DataDog/integrations-core/pull/13267).
+* [Fixed] Fix style deps. See [#13495](https://github.com/DataDog/integrations-core/pull/13495).
+* [Fixed] Update integrations repo name. See [#13494](https://github.com/DataDog/integrations-core/pull/13494).
+
+## 17.5.1 / 2022-12-09
+
+* [Fixed] Update dependencies. See [#13478](https://github.com/DataDog/integrations-core/pull/13478).
+
+## 17.5.0 / 2022-12-09
+
+* [Added] Add `validate license-header` subcommand. See [#13417](https://github.com/DataDog/integrations-core/pull/13417).
+* [Added] Add new template for metrics crawler integrations. See [#13411](https://github.com/DataDog/integrations-core/pull/13411).
+* [Added] Add an option to ignore failed environments in env start. See [#13443](https://github.com/DataDog/integrations-core/pull/13443).
+* [Fixed] Fix parsing of E2E output for Hatch environments when warnings occur. See [#13479](https://github.com/DataDog/integrations-core/pull/13479).
+* [Fixed] Force the semver version to >=2.13.0. See [#13477](https://github.com/DataDog/integrations-core/pull/13477).
+* [Fixed] Re-raise the exception when the environment failed to start. See [#13472](https://github.com/DataDog/integrations-core/pull/13472).
+* [Fixed] Remove the `--memray-show-report` option. See [#13463](https://github.com/DataDog/integrations-core/pull/13463).
+* [Fixed] Bump pytest-memray version. See [#13462](https://github.com/DataDog/integrations-core/pull/13462).
+* [Fixed] Do not force pytest version. See [#13461](https://github.com/DataDog/integrations-core/pull/13461).
+* [Fixed] Fix typo in platfrom-integrations team name. See [#13368](https://github.com/DataDog/integrations-core/pull/13368).
+
+## 17.4.0 / 2022-11-23
+
+* [Added] Add a dummy `--memray` option to the pytest plugin. See [#13352](https://github.com/DataDog/integrations-core/pull/13352).
+* [Added] Add a dummy `--hide-memray-summary` option to the pytest plugin. See [#13358](https://github.com/DataDog/integrations-core/pull/13358).
+* [Added] Add an option to show the memray report. See [#13351](https://github.com/DataDog/integrations-core/pull/13351).
+* [Fixed] Support isolated installation. See [#13366](https://github.com/DataDog/integrations-core/pull/13366).
+* [Fixed] Allow `bench` as an env name for running benchmarks with hatch. See [#13316](https://github.com/DataDog/integrations-core/pull/13316).
+* [Fixed] Consider `hatch.toml` file in testable files for PR tests to run. See [#13303](https://github.com/DataDog/integrations-core/pull/13303).
+
+## 17.3.2 / 2022-11-08
+
+* [Fixed] Update marketplace README template. See [#13249](https://github.com/DataDog/integrations-core/pull/13249).
+* [Fixed] [cli] Expand help text for --dev and --base options. See [#13235](https://github.com/DataDog/integrations-core/pull/13235).
+* [Fixed] Add the CHANGELOG.md template file to the new integration scaffolds. See [#13257](https://github.com/DataDog/integrations-core/pull/13257).
+
+## 17.3.1 / 2022-10-28
+
+* [Fixed] Fix process signature report. See [#13226](https://github.com/DataDog/integrations-core/pull/13226).
+
+## 17.3.0 / 2022-10-26
+
+* [Added] Add the memray option to the `test` command. See [#13160](https://github.com/DataDog/integrations-core/pull/13160).
+* [Fixed] Rename Tools and Libs team to Platform Integrations. See [#13201](https://github.com/DataDog/integrations-core/pull/13201).
+* [Fixed] Force pytest<7.2.0 to avoid test breakage. See [#13198](https://github.com/DataDog/integrations-core/pull/13198).
+
+## 17.2.0 / 2022-10-20
+
+* [Added] Add the ability to retry kind environments. See [#13106](https://github.com/DataDog/integrations-core/pull/13106).
+* [Fixed] Add f5-distributed-cloud as tile without github team or username. See [#13149](https://github.com/DataDog/integrations-core/pull/13149).
+* [Fixed] Fix `release make` to include new integrations in the agent requirements file. See [#13125](https://github.com/DataDog/integrations-core/pull/13125).
+* [Fixed] Fix deprecation warnings with `semver`. See [#12967](https://github.com/DataDog/integrations-core/pull/12967).
+* [Fixed] Stop running `codecov` in the `test` command for integrations-core. See [#13085](https://github.com/DataDog/integrations-core/pull/13085).
+
+## 17.1.1 / 2022-10-14
+
+* [Fixed] Allow 1e to have email-based codeowners. See [#13121](https://github.com/DataDog/integrations-core/pull/13121).
+* [Fixed] Remove the legacy docker-compose. See [#13073](https://github.com/DataDog/integrations-core/pull/13073).
+* [Fixed] Use specific endpoint to get all members from trello board at once. See [#13074](https://github.com/DataDog/integrations-core/pull/13074).
+* [Fixed] Make the `validate metadata` command fail if the metric prefix is invalid. See [#12903](https://github.com/DataDog/integrations-core/pull/12903).
+* [Fixed] Pin security deps in ddev. See [#12956](https://github.com/DataDog/integrations-core/pull/12956).
+* [Fixed] Fixed `validate manifest` command by providing default config for `dd_url` setting. See [#13057](https://github.com/DataDog/integrations-core/pull/13057).
+
+## 17.1.0 / 2022-10-04
+
+* [Added] Support new `integrations` repo. See [#13007](https://github.com/DataDog/integrations-core/pull/13007).
+* [Fixed] Allow creating integrations with `--here` in an arbitrary folder. See [#13026](https://github.com/DataDog/integrations-core/pull/13026).
+* [Fixed] Do not include `ddev` in the `requirements-agent-release.txt` file. See [#12947](https://github.com/DataDog/integrations-core/pull/12947).
+* [Fixed] Avoid assigning QA cards to the main reviewers. See [#12990](https://github.com/DataDog/integrations-core/pull/12990).
+
+## 17.0.1 / 2022-09-19
+
+* [Fixed] Do not fail the validation if `pr_labels_config_relative_path` is not defined. See [#12965](https://github.com/DataDog/integrations-core/pull/12965).
+
+## 17.0.0 / 2022-09-16
+
+* [Added] Refactor tooling for getting the current env name. See [#12939](https://github.com/DataDog/integrations-core/pull/12939).
+* [Added] Attempts default to 2 on ci. See [#12867](https://github.com/DataDog/integrations-core/pull/12867).
+* [Added] Update HTTP config spec templates. See [#12890](https://github.com/DataDog/integrations-core/pull/12890).
+* [Added] Add OAuth functionality to the HTTP util. See [#12884](https://github.com/DataDog/integrations-core/pull/12884).
+* [Added] Upgrade Hatch. See [#12872](https://github.com/DataDog/integrations-core/pull/12872).
+* [Added] Validate the `changelog` field in the manifest file. See [#12829](https://github.com/DataDog/integrations-core/pull/12829).
+* [Added] Upgrade dependencies for environment management. See [#12785](https://github.com/DataDog/integrations-core/pull/12785).
+* [Added] Make sure process_signatures gets migrated during V2 migrations. See [#12589](https://github.com/DataDog/integrations-core/pull/12589).
+* [Added] Enforce version 2 of manifests. See [#12775](https://github.com/DataDog/integrations-core/pull/12775).
+* [Added] Update templates for new integrations. See [#12744](https://github.com/DataDog/integrations-core/pull/12744).
+* [Added] Update new integration templates to use v2 manifests. See [#12592](https://github.com/DataDog/integrations-core/pull/12592).
+* [Fixed] Templatize the repository in the README links. See [#12930](https://github.com/DataDog/integrations-core/pull/12930).
+* [Fixed] Fix tile-only README template generation. See [#12918](https://github.com/DataDog/integrations-core/pull/12918).
+* [Fixed] Add case sensitive changelog validation. See [#12920](https://github.com/DataDog/integrations-core/pull/12920).
+* [Fixed] Add a validator for the manifest version. See [#12788](https://github.com/DataDog/integrations-core/pull/12788).
+* [Fixed] Make the manifest validation fail if the file is not found. See [#12789](https://github.com/DataDog/integrations-core/pull/12789).
+* [Fixed] Fix Hatch environment plugin. See [#12769](https://github.com/DataDog/integrations-core/pull/12769).
+* [Fixed] Templatize the README links. See [#12742](https://github.com/DataDog/integrations-core/pull/12742).
+* [Fixed] Bump dependencies for 7.40. See [#12896](https://github.com/DataDog/integrations-core/pull/12896).
+* [Changed] Use official labeler GH action. See [#12546](https://github.com/DataDog/integrations-core/pull/12546).
+
+## 16.7.0 / 2022-08-05
+
+* [Added] Make ddev a standalone package. See [#12565](https://github.com/DataDog/integrations-core/pull/12565).
+* [Fixed] Dependency updates. See [#12653](https://github.com/DataDog/integrations-core/pull/12653).
+* [Fixed] Prevent metadata validation from crashing on missing columns. See [#12680](https://github.com/DataDog/integrations-core/pull/12680).
+* [Fixed] Update exclude list in metadata validation. See [#12658](https://github.com/DataDog/integrations-core/pull/12658).
+
+## 16.6.0 / 2022-08-02
+
+* [Added] [SNMP Traps] Include BITS enums in traps DB. See [#12581](https://github.com/DataDog/integrations-core/pull/12581).
+* [Added] Include the conditions in the retry for the `docker_run` function. See [#12527](https://github.com/DataDog/integrations-core/pull/12527).
+* [Added] Update Hatch plugin. See [#12518](https://github.com/DataDog/integrations-core/pull/12518).
+* [Added] Add functionality to load the legacy version of the integration. See [#12396](https://github.com/DataDog/integrations-core/pull/12396).
+* [Added] Add validations for duplicate JMX bean entries. See [#11505](https://github.com/DataDog/integrations-core/pull/11505).
+* [Fixed] Make log_patterns match all logs. See [#12623](https://github.com/DataDog/integrations-core/pull/12623).
+* [Fixed] Add pymysql to dependency update exclude list. See [#12631](https://github.com/DataDog/integrations-core/pull/12631).
+* [Fixed] Better failed assertion message, print return code. See [#12615](https://github.com/DataDog/integrations-core/pull/12615).
+* [Fixed] Do not update docker compose. See [#12576](https://github.com/DataDog/integrations-core/pull/12576).
+* [Fixed] Better print the error on extra startup commands for e2e tests on Agent image set up. See [#12578](https://github.com/DataDog/integrations-core/pull/12578).
+* [Fixed] Fix nightly base package builds that use Hatch. See [#12544](https://github.com/DataDog/integrations-core/pull/12544).
+
+## 16.5.2 / 2022-07-08
+
+* [Fixed] Update trello.py. See [#12475](https://github.com/DataDog/integrations-core/pull/12475).
+* [Fixed] Do not include Datadog licenses to community files. See [#12445](https://github.com/DataDog/integrations-core/pull/12445).
+
+## 16.5.1 / 2022-07-06
+
+* [Fixed] Fix validation error message and wrong parameters. See [#12428](https://github.com/DataDog/integrations-core/pull/12428).
+* [Fixed] Use the correct team when using `ddev -a release trello testable`. See [#12418](https://github.com/DataDog/integrations-core/pull/12418).
+
+## 16.5.0 / 2022-06-27
+
+* [Added] Add a `--debug` (`-d`) flag to `ddev env test`. See [#12379](https://github.com/DataDog/integrations-core/pull/12379).
+* [Fixed] Fix tooling to support v2 manifests. See [#12411](https://github.com/DataDog/integrations-core/pull/12411).
+* [Fixed] Fix agent changelog command for manifest v2. See [#12406](https://github.com/DataDog/integrations-core/pull/12406).
+* [Fixed] Change `get_commits_since` so that it won't take commits from other branches. See [#12376](https://github.com/DataDog/integrations-core/pull/12376).
+
+## 16.4.0 / 2022-06-16
+
+* [Added] Emulate an Agent shutdown after every test that uses the `dd_run_check` fixture by default. See [#12371](https://github.com/DataDog/integrations-core/pull/12371).
+* [Added] Adjust description character limits in manifest. See [#12339](https://github.com/DataDog/integrations-core/pull/12339).
+* [Added] Include information about the manifest migration in the docs build. See [#12136](https://github.com/DataDog/integrations-core/pull/12136).
+* [Fixed] Properly support E2E testing for Hatch envs. See [#12362](https://github.com/DataDog/integrations-core/pull/12362).
+* [Fixed] Fix validation for readme images. See [#12351](https://github.com/DataDog/integrations-core/pull/12351).
+* [Fixed] Fix `Configuration & Deployment` tag for v2 manifest migration. See [#12348](https://github.com/DataDog/integrations-core/pull/12348).
+* [Fixed] Fix manifest migration of macOS tag. See [#12138](https://github.com/DataDog/integrations-core/pull/12138).
+
+## 16.3.0 / 2022-06-02
+
+* [Added] Move v2 manifest field `classifier_tags` under `tile`. See [#12122](https://github.com/DataDog/integrations-core/pull/12122).
+* [Added] Upgrade Hatch to latest version. See [#12016](https://github.com/DataDog/integrations-core/pull/12016).
+* [Fixed] Fix extra metrics description example. See [#12043](https://github.com/DataDog/integrations-core/pull/12043).
+* [Fixed] Fix tooling for v2 manifests. See [#12040](https://github.com/DataDog/integrations-core/pull/12040).
+
 ## 16.2.1 / 2022-05-12
 
 * [Fixed] Fix `enabled` for parent options. See [#11707](https://github.com/DataDog/integrations-core/pull/11707).

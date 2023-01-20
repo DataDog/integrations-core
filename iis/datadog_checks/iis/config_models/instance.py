@@ -133,6 +133,7 @@ class InstanceConfig(BaseModel):
     service: Optional[str]
     sites: Optional[Union[Sequence[str], Site]]
     tags: Optional[Sequence[str]]
+    use_legacy_check_version: Optional[bool]
     username: Optional[str]
 
     @root_validator(pre=True)

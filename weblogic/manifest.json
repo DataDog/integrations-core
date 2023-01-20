@@ -1,35 +1,52 @@
 {
-  "display_name": "WebLogic",
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "name": "weblogic",
-  "metric_prefix": "weblogic.",
-  "metric_to_check": "weblogic.jvm_runtime.heap_size",
-  "creates_events": false,
-  "short_description": "Monitor the health and performance of WebLogic Servers.",
-  "guid": "7c48d184-c234-4366-b463-46a1faf27f84",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "process_signatures": [
-    "java weblogic.Server"
-  ],
-  "public_title": "WebLogic",
-  "categories": [
-    "log collection",
-    "web",
-    "oracle"
-
-  ],
-  "type": "check",
-  "is_public": true,
-  "integration_id": "weblogic",
+  "manifest_version": "2.0.0",
+  "app_uuid": "80a8d9e2-48dd-4242-be78-0d929ea1a492",
+  "app_id": "weblogic",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor the health and performance of WebLogic Servers.",
+    "title": "WebLogic",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Log Collection",
+      "Category::Web",
+      "Category::Oracle"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "WebLogic",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "weblogic.",
+        "check": "weblogic.jvm_runtime.heap_size",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      },
+      "process_signatures": [
+        "java weblogic.Server"
+      ]
     },
     "dashboards": {
       "overview": "assets/dashboards/overview.json",
@@ -39,11 +56,8 @@
       "active_threads": "assets/monitors/active_threads.json",
       "stuck_threads": "assets/monitors/stuck_threads.json"
     },
-    "saved_views": {},
-    "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "weblogic"
-    },
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

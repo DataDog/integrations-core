@@ -9,7 +9,7 @@
 
 from __future__ import annotations
 
-from typing import Optional, Sequence
+from typing import Literal, Optional, Sequence
 
 from pydantic import BaseModel, root_validator, validator
 
@@ -49,6 +49,7 @@ class InstanceConfig(BaseModel):
     server: str
     server_hostname: Optional[str]
     service: Optional[str]
+    start_tls: Optional[Literal['postgres']]
     tags: Optional[Sequence[str]]
     timeout: Optional[int]
     tls_ca_cert: Optional[str]

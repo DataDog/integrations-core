@@ -63,3 +63,23 @@ DATABASES_METRICS = {
     ],
     'query': """SHOW DATABASES""",
 }
+
+CLIENTS_METRICS = {
+    'descriptors': [('database', 'db'), ('user', 'user'), ('state', 'state')],
+    'metrics': [
+        ('connect_time', ('pgbouncer.clients.connect_time', GAUGE)),
+        ('request_time', ('pgbouncer.clients.request_time', GAUGE)),
+        ('wait', ('pgbouncer.clients.wait', GAUGE)),  # >= 1.8
+        ('wait_us', ('pgbouncer.clients.wait_us', GAUGE)),  # >= 1.8
+    ],
+    'query': """SHOW CLIENTS""",
+}
+
+SERVERS_METRICS = {
+    'descriptors': [('database', 'db'), ('user', 'user'), ('state', 'state')],
+    'metrics': [
+        ('connect_time', ('pgbouncer.servers.connect_time', GAUGE)),
+        ('request_time', ('pgbouncer.servers.request_time', GAUGE)),
+    ],
+    'query': """SHOW SERVERS""",
+}

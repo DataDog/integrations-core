@@ -9,7 +9,7 @@ from datadog_checks.dev.testing import requires_py3, requires_windows
 
 from .utils import get_check
 
-pytestmark = [requires_py3, requires_windows, pytest.mark.perf_counters]
+pytestmark = [requires_py3, requires_windows]
 
 
 @pytest.fixture(autouse=True)

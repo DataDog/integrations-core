@@ -89,10 +89,11 @@ After setting up the [Kubernetes][12] integration, Calico logs become available 
 Collecting logs is disabled by default in the Datadog Agent. Enable it in your `datadog.yaml` file:
 
    ```yaml
-   <!-- xxz tab xxx -->
    logs_enabled: true
-   <!-- xxx tab "Containerized" xxx -->
    ```
+   
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
 
 #### Containerized
 

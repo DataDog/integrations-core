@@ -1,3 +1,7 @@
+# (C) Datadog, Inc. 2022-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
 import datetime
 import decimal
 import time
@@ -13,27 +17,13 @@ from datadog_checks.base.utils.db.utils import DBMAsyncJob, obfuscate_sql_with_m
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 
-from .util import get_truncation_state
+from .util import DatabaseConfigurationError, get_truncation_state, warning_with_tags
 
 try:
     import datadog_agent
 except ImportError:
     from ..stubs import datadog_agent
 
-CONNECTIONS_QUERY = """\
-SELECT
-    processlist_user,
-    processlist_host,
-    processlist_db,
-    processlist_state,
-    COUNT(processlist_user) AS connections
-FROM
-    performance_schema.threads
-WHERE
-    processlist_user IS NOT NULL AND
-    processlist_state IS NOT NULL
-    GROUP BY processlist_user, processlist_host, processlist_db, processlist_state
-"""
 
 ACTIVITY_QUERY = """\
 SELECT
@@ -44,48 +34,51 @@ SELECT
     thread_a.processlist_db,
     thread_a.processlist_command,
     thread_a.processlist_state,
-    statement.sql_text,
+    COALESCE(statement.sql_text, thread_a.PROCESSLIST_info) AS sql_text,
     statement.timer_start AS event_timer_start,
     statement.timer_end AS event_timer_end,
     statement.lock_time,
     statement.current_schema,
-    COALESCE(
-        IF(thread_a.processlist_state = 'User sleep', 'User sleep',
-        IF(waits_a.event_id = waits_a.end_event_id, 'CPU', waits_a.event_name)), 'CPU') AS wait_event,
-    waits_a.event_id,
+    waits_a.event_id AS event_id,
     waits_a.end_event_id,
-    waits_a.event_name,
+    IF(waits_a.thread_id IS NULL,
+        'other',
+        COALESCE(
+            IF(thread_a.processlist_state = 'User sleep', 'User sleep',
+            IF(waits_a.event_id = waits_a.end_event_id, 'CPU', waits_a.event_name)), 'CPU'
+        )
+    ) AS wait_event,
+    waits_a.operation,
     waits_a.timer_start AS wait_timer_start,
     waits_a.timer_end AS wait_timer_end,
     waits_a.object_schema,
     waits_a.object_name,
     waits_a.index_name,
     waits_a.object_type,
-    waits_a.source,
-    socket.ip,
-    socket.port,
-    socket.event_name AS socket_event_name
+    waits_a.source
 FROM
     performance_schema.threads AS thread_a
+    LEFT JOIN performance_schema.events_waits_current AS waits_a ON waits_a.thread_id = thread_a.thread_id
+    LEFT JOIN performance_schema.events_statements_current AS statement ON statement.thread_id = thread_a.thread_id
+WHERE
+    thread_a.processlist_state IS NOT NULL
+    AND thread_a.processlist_command != 'Sleep'
+    AND thread_a.processlist_id != CONNECTION_ID()
+    AND thread_a.PROCESSLIST_COMMAND != 'Daemon'
+    AND (waits_a.EVENT_NAME != 'idle' OR waits_a.EVENT_NAME IS NULL)
+    AND (waits_a.operation != 'idle' OR waits_a.operation IS NULL)
     -- events_waits_current can have multiple rows per thread, thus we use EVENT_ID to identify the row we want to use.
     -- Additionally, we want the row with the highest EVENT_ID which reflects the most recent and current wait.
-    LEFT JOIN performance_schema.events_waits_current AS waits_a ON waits_a.thread_id = thread_a.thread_id AND
-    waits_a.event_id IN(
-        SELECT
-            MAX(waits_b.EVENT_ID)
-        FROM performance_schema.threads AS thread_b
-            LEFT JOIN performance_schema.events_waits_current AS waits_b ON waits_b.thread_id = thread_b.thread_id
-        WHERE
-            thread_b.processlist_state IS NOT NULL AND
-            thread_b.processlist_command != 'Sleep' AND
-            thread_b.processlist_id != connection_id()
-        GROUP BY thread_b.thread_id)
-    LEFT JOIN performance_schema.events_statements_current AS statement ON statement.thread_id = thread_a.thread_id
-    LEFT JOIN performance_schema.socket_instances AS socket ON socket.thread_id = thread_a.thread_id
-WHERE
-    thread_a.processlist_state IS NOT NULL AND
-    thread_a.processlist_command != 'Sleep' AND
-    thread_a.processlist_id != CONNECTION_ID()
+    AND (
+        waits_a.event_id = (
+           SELECT
+              MAX(waits_b.EVENT_ID)
+          FROM  performance_schema.events_waits_current AS waits_b
+          Where waits_b.thread_id = thread_a.thread_id
+    ) OR waits_a.event_id is NULL)
+    -- We ignore rows without SQL text because there will be rows for background operations that do not have
+    -- SQL text associated with it.
+    AND COALESCE(statement.sql_text, thread_a.PROCESSLIST_info) != "";
 """
 
 
@@ -135,6 +128,21 @@ class MySQLActivity(DBMAsyncJob):
 
     def run_job(self):
         # type: () -> None
+        # Detect a database misconfiguration by checking if `events-waits-current` is enabled.
+        if not self._check.events_wait_current_enabled:
+            self._check.record_warning(
+                DatabaseConfigurationError.events_waits_current_not_enabled,
+                warning_with_tags(
+                    'Query activity and wait event collection is disabled on this host. To enable it, the setup '
+                    'consumer `performance-schema-consumer-events-waits-current` must be enabled on the MySQL server. '
+                    'Please refer to the troubleshooting documentation: '
+                    'https://docs.datadoghq.com/database_monitoring/setup_mysql/troubleshooting#%s',
+                    DatabaseConfigurationError.events_waits_current_not_enabled.value,
+                    code=DatabaseConfigurationError.events_waits_current_not_enabled.value,
+                    host=self._check.resolved_hostname,
+                ),
+            )
+            return
         self._check_version()
         self._collect_activity()
 
@@ -151,10 +159,9 @@ class MySQLActivity(DBMAsyncJob):
     def _collect_activity(self):
         # type: () -> None
         with closing(self._get_db_connection().cursor(pymysql.cursors.DictCursor)) as cursor:
-            connections = self._get_active_connections(cursor)
             rows = self._get_activity(cursor)
             rows = self._normalize_rows(rows)
-            event = self._create_activity_event(rows, connections)
+            event = self._create_activity_event(rows)
             payload = json.dumps(event, default=self._json_event_encoding)
             self._check.database_monitoring_query_activity(payload)
             self._check.histogram(
@@ -162,15 +169,6 @@ class MySQLActivity(DBMAsyncJob):
                 len(payload),
                 tags=self._tags + self._check._get_debug_tags(),
             )
-
-    @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
-    def _get_active_connections(self, cursor):
-        # type: (pymysql.cursor) -> List[Dict[str]]
-        self._log.debug("Running connections query [%s]", CONNECTIONS_QUERY)
-        cursor.execute(CONNECTIONS_QUERY)
-        rows = cursor.fetchall()
-        self._log.debug("Loaded [%s] current connections", len(rows))
-        return rows
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _get_activity(self, cursor):
@@ -208,8 +206,11 @@ class MySQLActivity(DBMAsyncJob):
         try:
             self._finalize_row(row, obfuscate_sql_with_metadata(row["sql_text"], self._obfuscator_options))
         except Exception as e:
+            if self._config.log_unobfuscated_queries:
+                self._log.warning("Failed to obfuscate query=[%s] | err=[%s]", row["sql_text"], e)
+            else:
+                self._log.debug("Failed to obfuscate query | err=[%s]", e)
             row["sql_text"] = "ERROR: failed to obfuscate"
-            self._log.debug("Failed to obfuscate | err=[%s]", e)
         return row
 
     @staticmethod
@@ -234,7 +235,7 @@ class MySQLActivity(DBMAsyncJob):
         # type: (Dict[str]) -> int
         return len(str(row))
 
-    def _create_activity_event(self, active_sessions, active_connections):
+    def _create_activity_event(self, active_sessions):
         # type: (List[Dict[str]], List[Dict[str]]) -> Dict[str]
         return {
             "host": self._check.resolved_hostname,
@@ -245,7 +246,6 @@ class MySQLActivity(DBMAsyncJob):
             "ddtags": self._tags,
             "timestamp": time.time() * 1000,
             "mysql_activity": active_sessions,
-            "mysql_connections": active_connections,
         }
 
     @staticmethod

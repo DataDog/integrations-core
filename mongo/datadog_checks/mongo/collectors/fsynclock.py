@@ -1,3 +1,7 @@
+# (C) Datadog, Inc. 2020-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
 from datadog_checks.mongo.collectors.base import MongoCollector
 from datadog_checks.mongo.common import MongosDeployment, ReplicaSetDeployment
 
@@ -6,9 +10,8 @@ class FsyncLockCollector(MongoCollector):
     """Collects the mongodb.fsyncLock metric by checking the output of the 'currentOp' command.
     Useful to know if the selected database is currently write-locked."""
 
-    def __init__(self, check, db_name, tags):
+    def __init__(self, check, tags):
         super(FsyncLockCollector, self).__init__(check, tags)
-        self.db_name = db_name
 
     def compatible_with(self, deployment):
         # Can be run on any mongod instance excepts arbiters.
@@ -19,7 +22,8 @@ class FsyncLockCollector(MongoCollector):
         return True
 
     def collect(self, api):
-        db = api[self.db_name]
-        ops = db.current_op()
-        payload = {'fsyncLocked': 1 if ops.get('fsyncLock') else 0}
-        self._submit_payload(payload)
+        db = api['admin']
+        ops = db.aggregate([{"$currentOp": {}}])
+        for op in ops:
+            payload = {'fsyncLocked': 1 if op.get('fsyncLock') else 0}
+            self._submit_payload(payload)

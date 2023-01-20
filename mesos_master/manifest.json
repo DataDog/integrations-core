@@ -1,48 +1,59 @@
 {
-  "aliases": [
-    "/integrations/mesos/"
-  ],
-  "categories": [
-    "configuration & deployment",
-    "containers",
-    "orchestration",
-    "log collection"
-  ],
-  "creates_events": false,
-  "display_name": "Mesos Master",
-  "guid": "f807f479-33f6-4c45-9c11-04ee2473acdc",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "mesos.",
-  "metric_to_check": "mesos.role.mem",
-  "name": "mesos_master",
-  "process_signatures": [
-    "mesos-master.sh",
-    "mesos-agent.sh"
-  ],
-  "public_title": "Datadog-Mesos Master Integration",
-  "short_description": "Track cluster resource usage, master and slave counts, tasks statuses, and more.",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os"
-  ],
-  "type": "check",
-  "integration_id": "mesos-master",
+  "manifest_version": "2.0.0",
+  "app_uuid": "fe4b70df-c13c-4469-b698-a404955b33ad",
+  "app_id": "mesos-master",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Track cluster resource usage, master and slave counts, tasks statuses, and more.",
+    "title": "Mesos Master",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Category::Configuration & Deployment",
+      "Category::Containers",
+      "Category::Orchestration",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "Mesos Master",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "mesos.",
+        "check": "mesos.role.mem",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      },
+      "process_signatures": [
+        "mesos-master.sh",
+        "mesos-agent.sh"
+      ]
     },
-    "monitors": {},
-    "dashboards": {},
-    "service_checks": "assets/service_checks.json",
-    "logs": {
-      "source": "mesos"
-    },
-    "metrics_metadata": "metadata.csv",
     "saved_views": {
       "mesos-master_processes": "assets/saved_views/mesos-master_processes.json"
+    },
+    "logs": {
+      "source": "mesos"
     }
   }
 }

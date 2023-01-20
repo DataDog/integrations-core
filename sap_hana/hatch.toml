@@ -1,0 +1,15 @@
+[env.collectors.datadog-checks]
+
+[envs.default]
+dependencies = [
+  "hdbcli==2.10.15",
+]
+
+[[envs.default.matrix]]
+python = ["2.7", "3.8"]
+version = ["2.0"]
+
+[envs.default.overrides]
+matrix.version.env-vars = [
+  { key = "SAP_HANA_VERSION", value = "2.00.061.00.20220519.1", if = ["2.0"] },
+]

@@ -7,14 +7,13 @@ import mock
 import pytest
 import requests
 
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.envoy import Envoy
 from datadog_checks.envoy.metrics import METRIC_PREFIX, METRICS
 
-from .common import ENVOY_VERSION, FLAVOR, HOST, INSTANCES, requires_legacy_environment
+from .common import ENVOY_VERSION, FLAVOR, HOST, INSTANCES
 
 CHECK_NAME = 'envoy'
-
-pytestmark = [requires_legacy_environment]
 
 
 @pytest.mark.integration
@@ -35,6 +34,12 @@ def test_success(aggregator, check, dd_run_check):
                 ), ('tags ' + str(expected_tags) + ' not found in ' + metric)
         metrics_collected += len(collected_metrics)
     assert metrics_collected >= 445
+
+    metadata_metrics = get_metadata_metrics()
+    # Metric that has a different type in legacy
+    metadata_metrics['envoy.cluster.upstream_cx_tx_bytes_total']['metric_type'] = 'count'
+
+    aggregator.assert_metrics_using_metadata(metadata_metrics)
 
 
 @pytest.mark.unit

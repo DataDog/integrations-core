@@ -31,6 +31,7 @@ class Memcache(AgentCheck):
         "uptime",
         "bytes",
         "curr_connections",
+        "max_connections",
         "connection_structures",
         "threads",
         "pointer_size",

@@ -850,6 +850,43 @@ def test_no_tags_no_metrics(monkeypatch, aggregator, tagger):
     aggregator.assert_metric('kubernetes.runtime.memory.rss')
     aggregator.assert_metric('kubernetes.kubelet.cpu.usage')
     aggregator.assert_metric('kubernetes.kubelet.memory.rss')
+    aggregator.assert_metric('kubernetes.apiserver.certificate.expiration.count')
+    aggregator.assert_metric('kubernetes.apiserver.certificate.expiration.sum')
+    aggregator.assert_metric('kubernetes.go_goroutines')
+    aggregator.assert_metric('kubernetes.go_threads')
+    aggregator.assert_metric('kubernetes.kubelet.container.log_filesystem.used_bytes')
+    aggregator.assert_metric('kubernetes.kubelet.docker.errors')
+    aggregator.assert_metric('kubernetes.kubelet.docker.operations')
+    aggregator.assert_metric('kubernetes.kubelet.docker.operations.duration.count')
+    aggregator.assert_metric('kubernetes.kubelet.docker.operations.duration.quantile')
+    aggregator.assert_metric('kubernetes.kubelet.docker.operations.duration.sum')
+    aggregator.assert_metric('kubernetes.kubelet.evictions')
+    aggregator.assert_metric('kubernetes.kubelet.network_plugin.latency.count')
+    aggregator.assert_metric('kubernetes.kubelet.network_plugin.latency.sum')
+    aggregator.assert_metric('kubernetes.kubelet.pleg.relist_duration.count')
+    aggregator.assert_metric('kubernetes.kubelet.pleg.relist_duration.sum')
+    aggregator.assert_metric('kubernetes.kubelet.pleg.relist_interval.count')
+    aggregator.assert_metric('kubernetes.kubelet.pleg.relist_interval.sum')
+    aggregator.assert_metric('kubernetes.kubelet.pod.start.duration.count')
+    aggregator.assert_metric('kubernetes.kubelet.pod.start.duration.sum')
+    aggregator.assert_metric('kubernetes.kubelet.pod.worker.duration.count')
+    aggregator.assert_metric('kubernetes.kubelet.pod.worker.duration.sum')
+    aggregator.assert_metric('kubernetes.kubelet.pod.worker.start.duration.count')
+    aggregator.assert_metric('kubernetes.kubelet.pod.worker.start.duration.sum')
+    aggregator.assert_metric('kubernetes.kubelet.runtime.errors')
+    aggregator.assert_metric('kubernetes.kubelet.runtime.operations')
+    aggregator.assert_metric('kubernetes.kubelet.runtime.operations.duration.count')
+    aggregator.assert_metric('kubernetes.kubelet.runtime.operations.duration.quantile')
+    aggregator.assert_metric('kubernetes.kubelet.runtime.operations.duration.sum')
+    aggregator.assert_metric('kubernetes.kubelet.volume.stats.available_bytes')
+    aggregator.assert_metric('kubernetes.kubelet.volume.stats.capacity_bytes')
+    aggregator.assert_metric('kubernetes.kubelet.volume.stats.inodes')
+    aggregator.assert_metric('kubernetes.kubelet.volume.stats.inodes_free')
+    aggregator.assert_metric('kubernetes.kubelet.volume.stats.inodes_used')
+    aggregator.assert_metric('kubernetes.kubelet.volume.stats.used_bytes')
+    aggregator.assert_metric('kubernetes.rest.client.latency.count')
+    aggregator.assert_metric('kubernetes.rest.client.latency.sum')
+    aggregator.assert_metric('kubernetes.rest.client.requests')
     aggregator.assert_all_metrics_covered()
 
 
@@ -1403,8 +1440,11 @@ def mock_request():
 
 def test_detect_probes(monkeypatch, mock_request):
     mock_request.head('http://kubelet:10250/metrics/probes', status_code=200)
-    check = mock_kubelet_check(monkeypatch, [{}])
-    available = check.detect_probes('http://kubelet:10250/metrics/probes')
+    instance = dict({'prometheus_url': 'http://kubelet:10250', 'namespace': 'kubernetes'})
+    check = mock_kubelet_check(monkeypatch, [instance])
+    scraper_config = check.get_scraper_config(instance)
+    http_handler = check.get_http_handler(scraper_config)
+    available = check.detect_probes(http_handler, 'http://kubelet:10250/metrics/probes')
     assert available is True
     assert check._probes_available is True
     assert mock_request.call_count == 1
@@ -1412,12 +1452,15 @@ def test_detect_probes(monkeypatch, mock_request):
 
 def test_detect_probes_cached(monkeypatch, mock_request):
     mock_request.head('http://kubelet:10250/metrics/probes', status_code=200)
-    check = mock_kubelet_check(monkeypatch, [{}])
-    available = check.detect_probes('http://kubelet:10250/metrics/probes')
+    instance = dict({'prometheus_url': 'http://kubelet:10250', 'namespace': 'kubernetes'})
+    check = mock_kubelet_check(monkeypatch, [instance])
+    scraper_config = check.get_scraper_config(instance)
+    http_handler = check.get_http_handler(scraper_config)
+    available = check.detect_probes(http_handler, 'http://kubelet:10250/metrics/probes')
     assert available is True
     assert check._probes_available is True
     assert mock_request.call_count == 1
-    available = check.detect_probes('http://kubelet:10250/metrics/probes')
+    available = check.detect_probes(http_handler, 'http://kubelet:10250/metrics/probes')
     assert available is True
     assert check._probes_available is True
     assert mock_request.call_count == 1
@@ -1425,8 +1468,11 @@ def test_detect_probes_cached(monkeypatch, mock_request):
 
 def test_detect_probes_404(monkeypatch, mock_request):
     mock_request.head('http://kubelet:10250/metrics/probes', status_code=404)
-    check = mock_kubelet_check(monkeypatch, [{}])
-    available = check.detect_probes('http://kubelet:10250/metrics/probes')
+    instance = dict({'prometheus_url': 'http://kubelet:10250', 'namespace': 'kubernetes'})
+    check = mock_kubelet_check(monkeypatch, [instance])
+    scraper_config = check.get_scraper_config(instance)
+    http_handler = check.get_http_handler(scraper_config)
+    available = check.detect_probes(http_handler, 'http://kubelet:10250/metrics/probes')
     assert available is False
     assert check._probes_available is False
     assert mock_request.call_count == 1
@@ -1434,12 +1480,15 @@ def test_detect_probes_404(monkeypatch, mock_request):
 
 def test_detect_probes_404_cached(monkeypatch, mock_request):
     mock_request.head('http://kubelet:10250/metrics/probes', status_code=404)
-    check = mock_kubelet_check(monkeypatch, [{}])
-    available = check.detect_probes('http://kubelet:10250/metrics/probes')
+    instance = dict({'prometheus_url': 'http://kubelet:10250', 'namespace': 'kubernetes'})
+    check = mock_kubelet_check(monkeypatch, [instance])
+    scraper_config = check.get_scraper_config(instance)
+    http_handler = check.get_http_handler(scraper_config)
+    available = check.detect_probes(http_handler, 'http://kubelet:10250/metrics/probes')
     assert available is False
     assert check._probes_available is False
     assert mock_request.call_count == 1
-    available = check.detect_probes('http://kubelet:10250/metrics/probes')
+    available = check.detect_probes(http_handler, 'http://kubelet:10250/metrics/probes')
     assert available is False
     assert check._probes_available is False
     assert mock_request.call_count == 1
@@ -1447,8 +1496,11 @@ def test_detect_probes_404_cached(monkeypatch, mock_request):
 
 def test_detect_probes_req_exception(monkeypatch, mock_request):
     mock_request.head('http://kubelet:10250/metrics/probes', exc=requests.exceptions.ConnectTimeout)
-    check = mock_kubelet_check(monkeypatch, [{}])
-    available = check.detect_probes('http://kubelet:10250/metrics/probes')
+    instance = dict({'prometheus_url': 'http://kubelet:10250', 'namespace': 'kubernetes'})
+    check = mock_kubelet_check(monkeypatch, [instance])
+    scraper_config = check.get_scraper_config(instance)
+    http_handler = check.get_http_handler(scraper_config)
+    available = check.detect_probes(http_handler, 'http://kubelet:10250/metrics/probes')
     assert available is False
     assert check._probes_available is None
     assert mock_request.call_count == 1

@@ -45,6 +45,7 @@ Q_METRICS = [
     'rabbitmq.queue.messages.rate',
     'rabbitmq.queue.messages_ready',
     'rabbitmq.queue.messages_ready.rate',
+    'rabbitmq.queue.message_bytes',
     'rabbitmq.queue.messages_unacknowledged',
     'rabbitmq.queue.messages_unacknowledged.rate',
     'rabbitmq.queue.messages.publish.count',
@@ -54,6 +55,10 @@ Q_METRICS = [
 # Present from 3.6
 if RABBITMQ_VERSION >= version.parse('3.6'):
     Q_METRICS.extend(['rabbitmq.queue.head_message_timestamp'])
+
+# Present from 3.8
+if RABBITMQ_VERSION >= version.parse('3.8'):
+    Q_METRICS.extend(['rabbitmq.queue.consumer_utilisation'])
 
 OVERVIEW_METRICS_TOTALS = [
     'rabbitmq.overview.object_totals.connections',
@@ -86,3 +91,12 @@ OVERVIEW_METRICS_MESSAGES = [
     'rabbitmq.overview.messages.redeliver.count',
     'rabbitmq.overview.messages.redeliver.rate',
 ]
+
+# Present from 3.8
+if RABBITMQ_VERSION >= version.parse('3.8'):
+    OVERVIEW_METRICS_MESSAGES.extend(
+        [
+            'rabbitmq.overview.messages.drop_unroutable.count',
+            'rabbitmq.overview.messages.drop_unroutable.rate',
+        ]
+    )

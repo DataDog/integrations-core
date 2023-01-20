@@ -18,7 +18,9 @@ from datadog_checks.dev.tooling.utils import (
     has_process_signature,
     has_saved_views,
     has_recommended_monitor,
-    is_tile_only, is_logs_only, get_available_recommended_monitors_integrations,
+    is_tile_only,
+    is_logs_only,
+    get_available_recommended_monitors_integrations,
 )
 
 MARKER = '<docs-insert-status>'

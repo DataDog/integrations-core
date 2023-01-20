@@ -324,7 +324,7 @@ class OpenMetricsScraper:
 
             tags.extend(self.tags)
 
-            hostname = self.hostname
+            hostname = ""
             if self.hostname_label and self.hostname_label in labels:
                 hostname = labels[self.hostname_label]
                 if self.hostname_formatter is not None:

@@ -1,8 +1,6 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from copy import deepcopy
-
 import pytest
 
 from datadog_checks.dev import WaitFor, docker_run, run_command
@@ -24,28 +22,11 @@ from .common import (
     USER,
 )
 
-E2E_METADATA_ORACLE_CLIENT = {
-    'docker_volumes': [
-        '{}/scripts/install_instant_client.sh:/tmp/install_instant_client.sh'.format(HERE),
-        '{}/docker/client/client_wallet:/opt/oracle/instantclient_19_3/client_wallet'.format(HERE),
-        '{}/docker/client/sqlnet.ora:/opt/oracle/instantclient_19_3/sqlnet.ora'.format(HERE),
-        '{}/docker/client/tnsnames.ora:/opt/oracle/instantclient_19_3/tnsnames.ora'.format(HERE),
-        '{}/docker/client/listener.ora:/opt/oracle/instantclient_19_3/listener.ora'.format(HERE),
-    ],
-    'start_commands': [
-        'bash /tmp/install_instant_client.sh',
-        'apt-get install libaio1',  # `apt-get update` already ran in install_instant_client.sh
-        'apt-get install gcc g++ -y',
-    ],
-    'env_vars': {'LD_LIBRARY_PATH': '/opt/oracle/instantclient_19_3', 'TNS_ADMIN': '/opt/oracle/instantclient_19_3'},
-}
-
 E2E_METADATA_JDBC_CLIENT = {
-    # Since we don't include Oracle instantclient to `LD_LIBRARY_PATH` env var,
-    # the integration will fallback to JDBC client
+    # The integration will use to JDBC client
     'use_jmx': True,  # Using jmx to have a ready to use java runtime
     'docker_volumes': [
-        '{}/scripts/install_instant_client.sh:/tmp/install_instant_client.sh'.format(HERE),
+        '{}/scripts/install_jdbc_client.sh:/tmp/install_jdbc_client.sh'.format(HERE),
         '{}/docker/client/client_wallet:/opt/oracle/instantclient_19_3/client_wallet'.format(HERE),
         '{}/docker/client/sqlnet.ora:/opt/oracle/instantclient_19_3/sqlnet.ora'.format(HERE),
         '{}/docker/client/tnsnames.ora:/opt/oracle/instantclient_19_3/tnsnames.ora'.format(HERE),
@@ -55,10 +36,27 @@ E2E_METADATA_JDBC_CLIENT = {
         '{}/docker/client/osdt_core.jar:/opt/oracle/instantclient_19_3/osdt_core.jar'.format(HERE),
     ],
     'start_commands': [
-        'bash /tmp/install_instant_client.sh',
-        'apt-get install gcc g++ -y',  # `apt-get update` already ran in install_instant_client.sh
+        'bash /tmp/install_jdbc_client.sh',  # Still needed to set up the database
     ],
     'env_vars': {'TNS_ADMIN': '/opt/oracle/instantclient_19_3'},
+}
+
+E2E_METADATA_ORACLE_CLIENT = {
+    'use_jmx': True,  # update-ca-certificates fails without this
+    'docker_volumes': [
+        '{}/scripts/install_jdbc_client.sh:/tmp/install_jdbc_client.sh'.format(HERE),
+        '{}/docker/client/client_wallet:/opt/oracle/instantclient_19_3/client_wallet'.format(HERE),
+        '{}/docker/client/sqlnet.ora:/opt/oracle/instantclient_19_3/sqlnet.ora'.format(HERE),
+        '{}/docker/client/tnsnames.ora:/opt/oracle/instantclient_19_3/tnsnames.ora'.format(HERE),
+        '{}/docker/client/listener.ora:/opt/oracle/instantclient_19_3/listener.ora'.format(HERE),
+    ],
+    'start_commands': [
+        'bash /tmp/install_jdbc_client.sh',
+        'mkdir -p /usr/local/share/ca-certificates',
+        'touch /usr/local/share/ca-certificates/ca-cert.crt',
+        'cp /opt/oracle/instantclient_19_3/client_wallet/cert.pem /usr/local/share/ca-certificates/ca-certificate.crt',
+        'update-ca-certificates',
+    ],
 }
 
 
@@ -74,30 +72,26 @@ def tcps_check(tcps_instance):
 
 @pytest.fixture
 def instance():
-    return deepcopy(
-        {
-            'server': 'localhost:1521',
-            'username': 'system',
-            'password': 'oracle',
-            'service_name': 'xe',
-            'protocol': 'TCP',
-            'tags': ['optional:tag1'],
-        }
-    )
+    return {
+        'server': 'localhost:1521',
+        'username': 'system',
+        'password': 'oracle',
+        'service_name': 'xe',
+        'protocol': 'TCP',
+        'tags': ['optional:tag1'],
+    }
 
 
 @pytest.fixture
 def tcps_instance():
-    return deepcopy(
-        {
-            'server': 'localhost:2484',
-            'username': 'system',
-            'password': 'oracle',
-            'service_name': 'xe',
-            'protocol': 'TCPS',
-            'tags': ['optional:tag1'],
-        }
-    )
+    return {
+        'server': 'localhost:2484',
+        'username': 'system',
+        'password': 'oracle',
+        'service_name': 'xe',
+        'protocol': 'TCPS',
+        'tags': ['optional:tag1'],
+    }
 
 
 @pytest.fixture(scope='session')

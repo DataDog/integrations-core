@@ -338,8 +338,7 @@
             "id": 12,
             "definition": {
                 "type": "event_stream",
-                "query": "sources:kubernetes $node",
-                "tags_execution": "and",
+                "query": "source:kubernetes $node",
                 "event_size": "s",
                 "time": {
                     "live_span": "1w"
@@ -629,8 +628,7 @@
             "id": 22,
             "definition": {
                 "type": "event_timeline",
-                "query": "sources:kubernetes $node",
-                "tags_execution": "and",
+                "query": "source:kubernetes $node",
                 "title": "Number of Kubernetes events per node",
                 "title_size": "16",
                 "title_align": "left",

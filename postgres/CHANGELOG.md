@@ -1,13 +1,46 @@
 # CHANGELOG - postgres
 
-## 12.4.0 / 2022-05-15
+## 13.2.0 / 2022-12-09
+
+* [Added] Explain parameterized queries. See [#13434](https://github.com/DataDog/integrations-core/pull/13434).
+* [Added] Add deadlocks monotonic count metric. See [#13374](https://github.com/DataDog/integrations-core/pull/13374).
+* [Fixed] Update dependencies. See [#13478](https://github.com/DataDog/integrations-core/pull/13478).
+* [Fixed] Fix inflated query metrics when pg_stat_statements.max is set above 10k. See [#13426](https://github.com/DataDog/integrations-core/pull/13426).
+* [Fixed] Do not install psycopg2-binary on arm macs. See [#13343](https://github.com/DataDog/integrations-core/pull/13343).
+
+## 13.1.0 / 2022-10-31 / Agent 7.41.0
+
+* [Added] Improve DBM explain plan error collection errors. See [#13224](https://github.com/DataDog/integrations-core/pull/13224).
+
+## 13.0.0 / 2022-10-28
+
+* [Added] Add Agent settings to log original unobfuscated strings. See [#12926](https://github.com/DataDog/integrations-core/pull/12926).
+* [Fixed] Fix deprecation warnings with `semver`. See [#12967](https://github.com/DataDog/integrations-core/pull/12967).
+* [Fixed] Honor `ignore_databases` in query metrics collection. See [#12998](https://github.com/DataDog/integrations-core/pull/12998).
+* [Changed] Update default configuration to collect postgres database by default. See [#12999](https://github.com/DataDog/integrations-core/pull/12999).
+* [Removed] Remove postgres tag truncation for metrics. See [#13210](https://github.com/DataDog/integrations-core/pull/13210).
+
+## 12.5.1 / 2022-08-05 / Agent 7.39.0
+
+* [Fixed] Dependency updates. See [#12653](https://github.com/DataDog/integrations-core/pull/12653).
+* [Fixed] Escape underscore in LOCK_METRICS query. See [#12652](https://github.com/DataDog/integrations-core/pull/12652).
+* [Fixed] Fix operator precedence in relation filter. See [#12645](https://github.com/DataDog/integrations-core/pull/12645). Thanks [jonremy](https://github.com/jonremy).
+* [Fixed] Use readonly connections. See [#12608](https://github.com/DataDog/integrations-core/pull/12608).
+* [Fixed] Add missing arguments to log statement. See [#12499](https://github.com/DataDog/integrations-core/pull/12499). Thanks [carobme](https://github.com/carobme).
+
+## 12.5.0 / 2022-06-27 / Agent 7.38.0
+
+* [Added] Track blk_read_time and blk_write_time for Postgres databases if track_io_timing is enabled. See [#12380](https://github.com/DataDog/integrations-core/pull/12380).
+* [Fixed] Fix Postgres calculation of blk_read_time and blk_write_time metrics. See [#12399](https://github.com/DataDog/integrations-core/pull/12399).
+
+## 12.4.0 / 2022-05-15 / Agent 7.37.0
 
 * [Added] Add option to keep alias and dollar quote functions in postgres (`keep_sql_alias` and `keep_dollar_quoted_func`). See [#12019](https://github.com/DataDog/integrations-core/pull/12019).
 * [Added] Add support to ingest cloud_metadata for DBM host linking. See [#11987](https://github.com/DataDog/integrations-core/pull/11987).
 * [Added] Add query_truncated field on activity rows. See [#11885](https://github.com/DataDog/integrations-core/pull/11885).
 * [Fixed] Fix uncommented parent options. See [#12013](https://github.com/DataDog/integrations-core/pull/12013).
 
-## 12.3.2 / 2022-04-20
+## 12.3.2 / 2022-04-20 / Agent 7.36.0
 
 * [Fixed] Fix activity and sample host reporting. See [#11855](https://github.com/DataDog/integrations-core/pull/11855).
 
@@ -26,7 +59,7 @@
 * [Added] Enable SQL metadata collection by default. See [#11602](https://github.com/DataDog/integrations-core/pull/11602).
 * [Fixed] Include SQL metadata in FQT. See [#11640](https://github.com/DataDog/integrations-core/pull/11640).
 
-## 12.1.1 / 2022-03-14
+## 12.1.1 / 2022-03-14 / Agent 7.35.0
 
 * [Fixed] Cache pg_stat_activity columns for sampling query. See [#11588](https://github.com/DataDog/integrations-core/pull/11588).
 
@@ -359,71 +392,71 @@
 
 ## 2.4.0 / 2019-01-04 / Agent 6.9.0
 
-* [Added] Bump psycopg2-binary version to 2.7.5. See [#2799][1].
+* [Added] Bump psycopg2-binary version to 2.7.5. See [#2799](https://github.com/DataDog/integrations-core/pull/2799).
 
 ## 2.3.0 / 2018-11-30 / Agent 6.8.0
 
-* [Added] Include db tag with postgresql.locks metrics. See [#2567][2]. Thanks [sj26][3].
-* [Added] Support Python 3. See [#2616][4].
+* [Added] Include db tag with postgresql.locks metrics. See [#2567](https://github.com/DataDog/integrations-core/pull/2567). Thanks [sj26](https://github.com/sj26).
+* [Added] Support Python 3. See [#2616](https://github.com/DataDog/integrations-core/pull/2616).
 
 ## 2.2.3 / 2018-10-14 / Agent 6.6.0
 
-* [Fixed] Fix version detection for new development releases. See [#2401][5].
+* [Fixed] Fix version detection for new development releases. See [#2401](https://github.com/DataDog/integrations-core/pull/2401).
 
 ## 2.2.2 / 2018-09-11 / Agent 6.5.0
 
-* [Fixed] Fix version detection for Postgres v10+. See [#2208][6].
+* [Fixed] Fix version detection for Postgres v10+. See [#2208](https://github.com/DataDog/integrations-core/pull/2208).
 
 ## 2.2.1 / 2018-09-06
 
-* [Fixed]  Gracefully handle errors when performing custom_queries. See [#2184][7].
-* [Fixed] Gracefully handle failed version regex match. See [#2178][8].
+* [Fixed]  Gracefully handle errors when performing custom_queries. See [#2184](https://github.com/DataDog/integrations-core/pull/2184).
+* [Fixed] Gracefully handle failed version regex match. See [#2178](https://github.com/DataDog/integrations-core/pull/2178).
 
 ## 2.2.0 / 2018-09-04
 
-* [Added] Add number of "idle in transaction" transactions and open transactions. See [#2118][9].
-* [Added] Implement custom_queries and start deprecating custom_metrics. See [#2043][10].
-* [Fixed] Fix Postgres version parsing for beta versions. See [#2064][11].
-* [Added] Re-enable instance tags for server metrics on Agent version 6. See [#2049][12].
-* [Added] Rename dependency psycopg2 to pyscopg2-binary. See [#1842][13].
-* [Added] Correcting duplicate metric name, add index_rows_fetched. See [#1762][14].
-* [Fixed] Add data files to the wheel package. See [#1727][15].
+* [Added] Add number of "idle in transaction" transactions and open transactions. See [#2118](https://github.com/DataDog/integrations-core/pull/2118).
+* [Added] Implement custom_queries and start deprecating custom_metrics. See [#2043](https://github.com/DataDog/integrations-core/pull/2043).
+* [Fixed] Fix Postgres version parsing for beta versions. See [#2064](https://github.com/DataDog/integrations-core/pull/2064).
+* [Added] Re-enable instance tags for server metrics on Agent version 6. See [#2049](https://github.com/DataDog/integrations-core/pull/2049).
+* [Added] Rename dependency psycopg2 to pyscopg2-binary. See [#1842](https://github.com/DataDog/integrations-core/pull/1842).
+* [Added] Correcting duplicate metric name, add index_rows_fetched. See [#1762](https://github.com/DataDog/integrations-core/pull/1762).
+* [Fixed] Add data files to the wheel package. See [#1727](https://github.com/DataDog/integrations-core/pull/1727).
 
 ## 2.1.3 / 2018-06-20 / Agent 6.4.0
 
-* [Fixed] Fixed postgres verification script. See [#1764][16].
+* [Fixed] Fixed postgres verification script. See [#1764](https://github.com/DataDog/integrations-core/pull/1764).
 
 ## 2.1.2 / 2018-06-07
 
-* [Fixed] Fix function metrics tagging issue for no-args functions. See [#1452][17]. Thanks [zorgz][18].
-* [Security] Update psycopg2 for security fixes. See [#1538][19].
+* [Fixed] Fix function metrics tagging issue for no-args functions. See [#1452](https://github.com/DataDog/integrations-core/pull/1452). Thanks [zorgz](https://github.com/zorgz).
+* [Security] Update psycopg2 for security fixes. See [#1538](https://github.com/DataDog/integrations-core/pull/1538).
 
 ## 2.1.1 / 2018-05-11
 
-* [BUGFIX] Adding db rollback when transaction fails in postgres metrics collection. See[#1193][20].
+* [BUGFIX] Adding db rollback when transaction fails in postgres metrics collection. See[#1193](https://github.com/DataDog/integrations-core/pull/1193).
 
 ## 2.1.0 / 2018-03-07
 
-* [BUGFIX] Adding support for postgres 10. See [#1172][21].
+* [BUGFIX] Adding support for postgres 10. See [#1172](https://github.com/DataDog/integrations-core/issues/1172).
 
 ## 2.0.0 / 2018-02-13
 
 * [DOC] Adding configuration for log collection in `conf.yaml`
-* [DEPRECATING] Starting with agent6 the postgres check no longer tag server wide metrics with instance tags. See [#1073][22]
+* [DEPRECATING] Starting with agent6 the postgres check no longer tag server wide metrics with instance tags. See [#1073](https://github.com/DataDog/integrations-core/issues/1073)
 
 ## 1.2.1 / 2018-02-13
 
-* [BUGFIX] Adding instance tags to service check See [#1042][23]
+* [BUGFIX] Adding instance tags to service check See [#1042](https://github.com/DataDog/integrations-core/issues/1042)
 
 ## 1.2.0 / 2017-11-21
 
-* [IMPROVEMENT] Adding an option to include the default 'postgres' database when gathering stats [#740][24]
-* [BUGFIX] Allows `schema` as tag for custom metrics when no schema relations have been defined See[#776][25]
+* [IMPROVEMENT] Adding an option to include the default 'postgres' database when gathering stats [#740](https://github.com/DataDog/integrations-core/issues/740)
+* [BUGFIX] Allows `schema` as tag for custom metrics when no schema relations have been defined See[#776](https://github.com/DataDog/integrations-core/issues/776)
 
 ## 1.1.0 / 2017-08-28
 
-* [IMPROVEMENT] Deprecating "postgres.replication_delay_bytes" in favor of "postgresql.replication_delay_bytes". See[#639][26] and [#699][27], thanks to [@Erouan50][28]
-* [MINOR] Allow specifying postgres port as string. See [#607][29], thanks [@infothrill][30]
+* [IMPROVEMENT] Deprecating "postgres.replication_delay_bytes" in favor of "postgresql.replication_delay_bytes". See[#639](https://github.com/DataDog/integrations-core/issues/639) and [#699](https://github.com/DataDog/integrations-core/issues/699), thanks to [@Erouan50](https://github.com/Erouan50)
+* [MINOR] Allow specifying postgres port as string. See [#607](https://github.com/DataDog/integrations-core/issues/607), thanks [@infothrill](https://github.com/infothrill)
 
 ## 1.0.3 / 2017-07-18
 
@@ -431,46 +464,12 @@
 
 ## 1.0.2 / 2017-06-05
 
-* [IMPROVEMENT] Provide a meaningful error when custom metrics are misconfigured. See [#446][31]
+* [IMPROVEMENT] Provide a meaningful error when custom metrics are misconfigured. See [#446](https://github.com/DataDog/integrations-core/issues/446)
 
 ## 1.0.1 / 2017-03-22
 
-* [DEPENDENCY] bump psycopg2 to 2.7.1. See [#295][32].
+* [DEPENDENCY] bump psycopg2 to 2.7.1. See [#295](https://github.com/DataDog/integrations-core/issues/295).
 
 ## 1.0.0 / 2017-03-22
 
 * [FEATURE] adds postgres integration.
-
-<!--- The following link definition list is generated by PimpMyChangelog --->
-[1]: https://github.com/DataDog/integrations-core/pull/2799
-[2]: https://github.com/DataDog/integrations-core/pull/2567
-[3]: https://github.com/sj26
-[4]: https://github.com/DataDog/integrations-core/pull/2616
-[5]: https://github.com/DataDog/integrations-core/pull/2401
-[6]: https://github.com/DataDog/integrations-core/pull/2208
-[7]: https://github.com/DataDog/integrations-core/pull/2184
-[8]: https://github.com/DataDog/integrations-core/pull/2178
-[9]: https://github.com/DataDog/integrations-core/pull/2118
-[10]: https://github.com/DataDog/integrations-core/pull/2043
-[11]: https://github.com/DataDog/integrations-core/pull/2064
-[12]: https://github.com/DataDog/integrations-core/pull/2049
-[13]: https://github.com/DataDog/integrations-core/pull/1842
-[14]: https://github.com/DataDog/integrations-core/pull/1762
-[15]: https://github.com/DataDog/integrations-core/pull/1727
-[16]: https://github.com/DataDog/integrations-core/pull/1764
-[17]: https://github.com/DataDog/integrations-core/pull/1452
-[18]: https://github.com/zorgz
-[19]: https://github.com/DataDog/integrations-core/pull/1538
-[20]: https://github.com/DataDog/integrations-core/pull/1193
-[21]: https://github.com/DataDog/integrations-core/issues/1172
-[22]: https://github.com/DataDog/integrations-core/issues/1073
-[23]: https://github.com/DataDog/integrations-core/issues/1042
-[24]: https://github.com/DataDog/integrations-core/issues/740
-[25]: https://github.com/DataDog/integrations-core/issues/776
-[26]: https://github.com/DataDog/integrations-core/issues/639
-[27]: https://github.com/DataDog/integrations-core/issues/699
-[28]: https://github.com/Erouan50
-[29]: https://github.com/DataDog/integrations-core/issues/607
-[30]: https://github.com/infothrill
-[31]: https://github.com/DataDog/integrations-core/issues/446
-[32]: https://github.com/DataDog/integrations-core/issues/295

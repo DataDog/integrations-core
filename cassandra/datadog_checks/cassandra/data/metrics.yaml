@@ -197,6 +197,23 @@ jmx_metrics:
       attribute:
         - Value
   - include:
+      domain: org.apache.cassandra.metrics
+      type: ThreadPools
+      path: request
+      name:
+        - ActiveTasks
+  - include:
+      domain: org.apache.cassandra.metrics
+      type: ClientRequest
+      scope:
+        - Read
+        - Write
+      name:
+        - Timeouts
+      attribute:
+        - Count
+        - OneMinuteRate
+  - include:
       domain: org.apache.cassandra.db
       type: Tables
       attribute:

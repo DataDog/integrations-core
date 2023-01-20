@@ -1,37 +1,51 @@
 {
-  "display_name": "Kube metrics server",
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "name": "kube_metrics_server",
-  "metric_prefix": "kube_metrics_server.",
-  "metric_to_check": "kube_metrics_server.process.open_fds",
-  "creates_events": false,
-  "short_description": "Monitors the Kubernetes Metrics Server",
-  "guid": "7a477937-4db8-4277-bd58-9e56ac064185",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "public_title": "Datadog-Kubernetes Metrics Server Integration",
-  "categories": [
-    "orchestration",
-    "containers"
-  ],
-  "type": "check",
-  "is_public": true,
-  "integration_id": "kube-metrics-server",
+  "manifest_version": "2.0.0",
+  "app_uuid": "df9c9e3c-368a-4472-b0cb-b32f1066a2f5",
+  "app_id": "kube-metrics-server",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitors the Kubernetes Metrics Server",
+    "title": "Kubernetes Metrics Server",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Orchestration",
+      "Category::Containers"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "monitors": {},
+    "integration": {
+      "source_type_name": "Kube metrics server",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "kube_metrics_server.",
+        "check": "kube_metrics_server.process.open_fds",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
     "dashboards": {
       "Kubernetes Metrics Server - Overview": "assets/dashboards/overview.json"
-    },
-    "service_checks": "assets/service_checks.json",
-    "logs": {},
-    "metrics_metadata": "metadata.csv",
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
     }
   }
 }

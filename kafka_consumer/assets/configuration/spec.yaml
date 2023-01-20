@@ -149,6 +149,32 @@ files:
           type: string
           example: localhost
           display_default: null
+      - name: sasl_oauth_token_provider
+        description: |
+          Settings for when `sasl_mechanism` is set to `OAUTHBEARER`.
+        options:
+        - name: url
+          required: true
+          enabled: false
+          description: |
+            The token endpoint.
+          value:
+            type: string
+        - name: client_id
+          required: true
+          enabled: false
+          description: |
+            The client identifier.
+          value:
+            type: string
+        - name: client_secret
+          secret: true
+          required: true
+          enabled: false
+          description: |
+            The client secret.
+          value:
+            type: string
       - template: instances/tls
       - name: tls_crlfile
         description: |
@@ -212,6 +238,13 @@ files:
           `monitor_unlisted_consumer_groups` since the generated list comes from Zookeeper.
           Set to true to fetch consumer offsets from both Zookeeper and Kafka
           Set to false to fetch consumer offsets only from Zookeeper.
+        value:
+          type: boolean
+          example: false
+        display_default: false
+      - name: data_streams_enabled
+        description: |
+          Beta feature to get a lag metric in Seconds. It's part of the Data Streams Monitoring Product
         value:
           type: boolean
           example: false

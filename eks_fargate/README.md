@@ -382,6 +382,8 @@ spec:
      name: "<POD_NAME>"
    spec:
      serviceAccountName: datadog-agent
+     ## Putting the agent in the same namespace as the application for origin detection with cgroup v2
+     shareProcessNamespace: true
      containers:
      - name: "<APPLICATION_NAME>"
        image: "<APPLICATION_IMAGE>"
@@ -464,9 +466,11 @@ Need help? Contact [Datadog support][20].
 
 ## Further Reading
 
-- Blog post: [Key metrics for monitoring AWS Fargate][26]
-- Blog post: [How to collect metrics and logs from AWS Fargate workloads][27]
-- Blog post: [AWS Fargate monitoring with Datadog][28]
+Additional helpful documentation, links, and articles:
+
+- [Key metrics for monitoring AWS Fargate][32]
+- [How to collect metrics and logs from AWS Fargate workloads][27]
+- [AWS Fargate monitoring with Datadog][28]
 
 [1]: http://docs.datadoghq.com/integrations/ecs_fargate/
 [2]: http://docs.datadoghq.com/integrations/amazon_eks/
@@ -499,3 +503,4 @@ Need help? Contact [Datadog support][20].
 [29]: https://docs.datadoghq.com/agent/kubernetes/?tab=helm#event-collection
 [30]: https://docs.datadoghq.com/infrastructure/livecontainers/#kubernetes-resources-view
 [31]: https://docs.datadoghq.com/agent/cluster_agent/clusterchecks/#overview
+[32]: https://www.datadoghq.com/blog/aws-fargate-metrics/

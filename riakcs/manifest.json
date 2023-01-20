@@ -1,40 +1,54 @@
 {
-  "categories": [
-    "data store"
-  ],
-  "creates_events": false,
-  "display_name": "RiakCS",
-  "guid": "55ba6b94-8eeb-486b-aa94-6366a044fdf0",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "riakcs.",
-  "metric_to_check": "riakcs.bucket_list_pool.workers",
-  "name": "riakcs",
-  "process_signatures": [
-    "riak-cs start"
-  ],
-  "public_title": "Datadog-Riak CS Integration",
-  "short_description": "Track the rate and mean latency of GETs, PUTs, DELETEs, and other operations.",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "type": "check",
-  "integration_id": "riak-cs",
+  "manifest_version": "2.0.0",
+  "app_uuid": "29e6a2b4-7f3a-4243-8e10-d065147c3da0",
+  "app_id": "riak-cs",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Track the rate and mean latency of GETs, PUTs, DELETEs, and other operations.",
+    "title": "Riak CS",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Data Store"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "RiakCS",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "riakcs.",
+        "check": "riakcs.bucket_list_pool.workers",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      },
+      "process_signatures": [
+        "riak-cs start"
+      ]
     },
-    "monitors": {},
     "dashboards": {
       "riakcs": "assets/dashboards/riakcs_dashboard.json"
     },
-    "service_checks": "assets/service_checks.json",
-    "logs": {},
-    "metrics_metadata": "metadata.csv",
     "saved_views": {
       "riak-cs_processes": "assets/saved_views/riak-cs_processes.json"
     }

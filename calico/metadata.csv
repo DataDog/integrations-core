@@ -2,7 +2,7 @@ metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation
 calico.felix.active.local_endpoints,gauge,,,,Number of active endpoints on this host,0,calico,calico.felix.active.local_endpoints,
 calico.felix.active.local_policies,gauge,,,,Number of policies on this host,0,calico,calico.felix.active.local_policies,
 calico.felix.active.local_selectors,gauge,,,,Number of active selectors on this host,0,calico,calico.felix.active.local_selectors,
-calico.felix.active.local_tags,gauge,,,,Number of active tags on this host (deprecated in Calico v3.23+),0,calico,calico.felix.active.local_tags,
+calico.felix.active.local_tags,gauge,,,,Number of active tags on this host [versions < Calico v3.23],0,calico,calico.felix.active.local_tags,
 calico.felix.cluster.num_host_endpoints,gauge,,,,Total number of host endpoints cluster-wide,0,calico,calico.felix.cluster.num_host_endpoints,
 calico.felix.cluster.num_hosts,gauge,,,,Total number of Calico hosts in the cluster,0,calico,calico.felix.cluster.num_hosts,
 calico.felix.cluster.num_workload_endpoints,gauge,,,,Total number of workload endpoints cluster-wide,0,calico,calico.felix.cluster.num_workload_endpoints,

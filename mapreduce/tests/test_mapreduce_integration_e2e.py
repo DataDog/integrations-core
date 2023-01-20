@@ -44,7 +44,7 @@ def test_metadata(aggregator, check, dd_run_check, instance, datadog_agent):
 @pytest.mark.e2e
 def test_e2e(dd_agent_check, instance):
     # trigger a job but wait for it to be in a running state before running check
-    common.setup_mapreduce()
+    assert common.setup_mapreduce()
 
     aggregator = dd_agent_check(instance, rate=True)
     for metric in common.ELAPSED_TIME_BUCKET_METRICS:

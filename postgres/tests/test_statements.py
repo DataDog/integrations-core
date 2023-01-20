@@ -19,7 +19,7 @@ from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.postgres.statement_samples import DBExplainError, StatementTruncationState
-from datadog_checks.postgres.statements import PG_STAT_STATEMENTS_METRICS_COLUMNS
+from datadog_checks.postgres.statements import PG_STAT_STATEMENTS_METRICS_COLUMNS, PG_STAT_STATEMENTS_TIMING_COLUMNS
 
 from .common import DB_NAME, HOST, PORT, POSTGRES_VERSION
 
@@ -101,12 +101,21 @@ def test_statement_metrics_version(integration_check, dbm_instance, version, exp
             assert check.statement_metrics._payload_pg_version() == expected_payload_version
 
 
-@pytest.mark.parametrize("dbstrict", [True, False])
+@pytest.mark.parametrize("dbstrict,ignore_databases", [(True, []), (False, ['dogs']), (False, [])])
 @pytest.mark.parametrize("pg_stat_statements_view", ["pg_stat_statements", "datadog.pg_stat_statements()"])
+@pytest.mark.parametrize("track_io_timing_enabled", [True, False])
 def test_statement_metrics(
-    aggregator, integration_check, dbm_instance, dbstrict, pg_stat_statements_view, datadog_agent
+    aggregator,
+    integration_check,
+    dbm_instance,
+    dbstrict,
+    ignore_databases,
+    pg_stat_statements_view,
+    datadog_agent,
+    track_io_timing_enabled,
 ):
     dbm_instance['dbstrict'] = dbstrict
+    dbm_instance['ignore_databases'] = ignore_databases
     dbm_instance['pg_stat_statements_view'] = pg_stat_statements_view
     # don't need samples for this test
     dbm_instance['query_samples'] = {'enabled': False}
@@ -122,6 +131,11 @@ def test_statement_metrics(
 
     check = integration_check(dbm_instance)
     check._connect()
+    check.check(dbm_instance)
+
+    # We can't change track_io_timing at runtime, but we can change what the integration thinks the runtime value is
+    # This must be done after the first check since postgres settings are loaded from the database then
+    check.pg_settings["track_io_timing"] = "on" if track_io_timing_enabled else "off"
 
     _run_queries()
     check.check(dbm_instance)
@@ -136,13 +150,13 @@ def test_statement_metrics(
             # cannot catch any queries from other users
             # only can see own queries
             return False
-        if dbstrict and dbname != dbm_instance['dbname']:
+        if dbstrict and dbname != dbm_instance['dbname'] or dbname in ignore_databases:
             return False
         return True
 
     events = aggregator.get_event_platform_events("dbm-metrics")
-    assert len(events) == 1
-    event = events[0]
+    assert len(events) == 2
+    event = events[1]  # first item is from the initial dummy check to load pg_settings
 
     assert event['host'] == 'stubbed.hostname'
     assert event['timestamp'] > 0
@@ -172,9 +186,13 @@ def test_statement_metrics(
         assert row['calls'] == 1
         assert row['datname'] == dbname
         assert row['rolname'] == username
-        assert row['query'] == expected_query[0:200], "query should be truncated when sending to metrics"
+        assert row['query'] == expected_query
         available_columns = set(row.keys())
         metric_columns = available_columns & PG_STAT_STATEMENTS_METRICS_COLUMNS
+        if track_io_timing_enabled:
+            assert (available_columns & PG_STAT_STATEMENTS_TIMING_COLUMNS) == PG_STAT_STATEMENTS_TIMING_COLUMNS
+        else:
+            assert (available_columns & PG_STAT_STATEMENTS_TIMING_COLUMNS) == set()
         for col in metric_columns:
             assert type(row[col]) in (float, int)
 
@@ -356,32 +374,49 @@ failed_explain_test_repeat_count = 5
 
 
 @pytest.mark.parametrize(
-    "query,expected_error_tag,explain_function_override,expected_fail_count",
+    "query,expected_error_tag,explain_function_override,expected_fail_count,skip_on_versions",
     [
-        ("select * from fake_table", "error:explain-database_error-<class 'psycopg2.errors.UndefinedTable'>", None, 1),
         (
-            "select * from fake_schema.fake_table",
-            "error:explain-database_error-<class 'psycopg2.errors.UndefinedTable'>",
+            "select * from fake_table",
+            "error:explain-undefined_table-<class 'psycopg2.errors.UndefinedTable'>",
             None,
             1,
+            None,
+        ),
+        (
+            "select * from fake_schema.fake_table",
+            "error:explain-undefined_table-<class 'psycopg2.errors.UndefinedTable'>",
+            None,
+            1,
+            None,
         ),
         (
             "select * from pg_settings where name = $1",
-            "error:explain-database_error-<class 'psycopg2.errors.UndefinedParameter'>",
+            "error:explain-parameterized_query-<class 'psycopg2.errors.UndefinedParameter'>",
             None,
             1,
+            None,
         ),
         (
             "select * from pg_settings where name = 'this query is truncated' limi",
             "error:explain-database_error-<class 'psycopg2.errors.SyntaxError'>",
             None,
             1,
+            None,
         ),
         (
             "select * from persons",
             "error:explain-database_error-<class 'psycopg2.errors.InsufficientPrivilege'>",
             "datadog.explain_statement_noaccess",
             failed_explain_test_repeat_count,
+            None,
+        ),
+        (
+            "update persons set firstname='firstname' where personid in (2, 1); select pg_sleep(1);",
+            "error:explain-database_error-<class 'psycopg2.errors.InvalidCursorDefinition'>",
+            None,
+            1,
+            None,
         ),
     ],
 )
@@ -393,12 +428,16 @@ def test_failed_explain_handling(
     expected_error_tag,
     explain_function_override,
     expected_fail_count,
+    skip_on_versions,
 ):
     dbname = "datadog_test"
     if explain_function_override:
         dbm_instance['query_samples']['explain_function'] = explain_function_override
     check = integration_check(dbm_instance)
     check._connect()
+
+    if skip_on_versions is not None and float(POSTGRES_VERSION) in skip_on_versions:
+        pytest.skip("not relevant for postgres {version}".format(version=POSTGRES_VERSION))
 
     # run check so all internal state is correctly initialized
     check.check(dbm_instance)
@@ -1072,14 +1111,14 @@ def test_truncate_activity_rows(integration_check, dbm_instance, active_rows, ex
     [
         (
             "select * from fake_table",
-            "error:explain-database_error-<class 'psycopg2.errors.UndefinedTable'>",
-            DBExplainError.database_error,
+            "error:explain-undefined_table-<class 'psycopg2.errors.UndefinedTable'>",
+            DBExplainError.undefined_table,
             "<class 'psycopg2.errors.UndefinedTable'>",
         ),
         (
             "select * from pg_settings where name = $1",
-            "error:explain-database_error-<class 'psycopg2.errors.UndefinedParameter'>",
-            DBExplainError.database_error,
+            "error:explain-parameterized_query-<class 'psycopg2.errors.UndefinedParameter'>",
+            DBExplainError.parameterized_query,
             "<class 'psycopg2.errors.UndefinedParameter'>",
         ),
         (
@@ -1512,5 +1551,36 @@ def test_statement_metrics_database_errors(
     aggregator.assert_metric(
         'dd.postgres.statement_metrics.error', value=1.0, count=1, tags=expected_tags, hostname='stubbed.hostname'
     )
+
+    assert check.warnings == expected_warnings
+
+
+@pytest.mark.parametrize(
+    "pg_stat_statements_max_threshold,expected_warnings",
+    [
+        (
+            9999,
+            [
+                'pg_stat_statements.max is set to 10000 which is higher than the supported value of 9999. '
+                'This can have a negative impact on database and collection of query metrics performance. '
+                'Consider lowering the pg_stat_statements.max value to 9999. Alternatively, you may acknowledge '
+                'the potential performance impact by increasing the '
+                'query_metrics.pg_stat_statements_max_warning_threshold to equal or greater than 9999 to silence '
+                'this warning. See https://docs.datadoghq.com/database_monitoring/setup_postgres/troubleshooting#'
+                'high-pg-stat-statements-max-configuration for more details\n'
+                'code=high-pg-stat-statements-max-configuration dbname=datadog_test host=stubbed.hostname '
+                'threshold=9999 value=10000',
+            ],
+        ),
+        (10000, []),
+    ],
+)
+def test_pg_stat_statements_max_warning(
+    integration_check, dbm_instance, pg_stat_statements_max_threshold, expected_warnings
+):
+    dbm_instance['query_metrics']['pg_stat_statements_max_warning_threshold'] = pg_stat_statements_max_threshold
+    check = integration_check(dbm_instance)
+    check._connect()
+    check.check(dbm_instance)
 
     assert check.warnings == expected_warnings

@@ -7,7 +7,7 @@ from datadog_checks.dev.testing import requires_py3
 
 from .utils import get_legacy_check
 
-pytestmark = [requires_py3, pytest.mark.openmetrics, pytest.mark.openmetrics_compat_scraper]
+pytestmark = [requires_py3]
 
 
 class TestRawMetricPrefix:

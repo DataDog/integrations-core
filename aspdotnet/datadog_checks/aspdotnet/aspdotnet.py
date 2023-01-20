@@ -3,7 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 from six import PY3
 
-from datadog_checks.base import PDHBaseCheck
+from datadog_checks.base import PDHBaseCheck, is_affirmative
 
 from .metrics import DEFAULT_COUNTERS
 
@@ -12,7 +12,8 @@ EVENT_TYPE = SOURCE_TYPE_NAME = 'aspdotnet'
 
 class AspdotnetCheck(PDHBaseCheck):
     def __new__(cls, name, init_config, instances):
-        if PY3:
+
+        if PY3 and not is_affirmative(instances[0].get('use_legacy_check_version', False)):
             from .check import AspdotnetCheckV2
 
             return AspdotnetCheckV2(name, init_config, instances)

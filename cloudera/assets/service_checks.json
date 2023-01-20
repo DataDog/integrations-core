@@ -1,0 +1,50 @@
+[
+  {
+    "agent_version": "7.43.0",
+    "integration": "Cloudera",
+    "check": "cloudera.can_connect",
+    "statuses": [
+      "ok",
+      "critical"
+    ],
+    "groups": [
+      "api_url"
+    ],
+    "name": "Cloudera Manager Can Connect",
+    "description": "Returns `OK` if the check is able to connect to the Cloudera Manager API and collect metrics, `CRITICAL` otherwise."
+  },
+  {
+    "agent_version": "7.43.0",
+    "integration": "Cloudera",
+    "check": "cloudera.cluster.health",
+    "statuses": [
+      "ok",
+      "critical",
+      "warning",
+      "unknown"
+    ],
+    "groups": [
+      "cloudera_cluster"
+    ],
+    "name": "Cloudera Cluster Health",
+    "description": "Returns `OK` if the cluster is in good health or is starting, `WARNING` if the cluster is stopping or the health is concerning, `CRITICAL` if the cluster is down or in bad health, and `UNKNOWN` otherwise."
+  },
+  {
+    "agent_version": "7.43.0",
+    "integration": "Cloudera",
+    "check": "cloudera.host.health",
+    "statuses": [
+      "ok",
+      "critical",
+      "warning",
+      "unknown"
+    ],
+    "groups": [
+      "cloudera_cluster",
+      "cloudera_rack_id",
+      "cloudera_hostname"
+    ],
+    "name": "Cloudera Host Health",
+    "description": "Returns `OK` if the host is in good health or is starting, `WARNING` if the host is stopping or the health is concerning, `CRITICAL` if the host is down or in bad health, and `UNKNOWN` otherwise."
+  }
+]
