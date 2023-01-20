@@ -38,6 +38,7 @@ class ApiClientV7(ApiClient):
             )
         else:
             self._clusters_discovery = None
+        self._log.debug("_clusters_discovery: %s", self._clusters_discovery)
         self._hosts_discovery = {}
 
     def collect_data(self):
@@ -61,16 +62,16 @@ class ApiClientV7(ApiClient):
         # for each cluster, we are executing 2 tasks in parallel.
         if len(discovered_clusters) > 0:
             futures = []
-            with ThreadPoolExecutor(max_workers=len(discovered_clusters) * 2) as executor:
+            with ThreadPoolExecutor(max_workers=len(discovered_clusters) * 3) as executor:
                 for pattern, key, item, config in discovered_clusters:
                     self._log.debug(
                         "discovered cluster: [pattern:%s, key:%s, item:%s, config:%s]", pattern, key, item, config
                     )
                     cluster_name = key
-                    tags = self._collect_cluster_tags(item, self._check.config.tags)
-                    futures.append(executor.submit(self._collect_cluster_metrics, cluster_name, tags))
-                    futures.append(executor.submit(self._collect_hosts, cluster_name, config))
-                    self._collect_cluster_service_check(item, tags)
+                    cloudera_cluster_tag, cluster_tags = self._collect_cluster_tags(item, config)
+                    futures.append(executor.submit(self._collect_cluster_metrics, cluster_name, cluster_tags))
+                    futures.append(executor.submit(self._collect_hosts, cloudera_cluster_tag, cluster_name, config))
+                    futures.append(executor.submit(self._collect_cluster_service_check, item, cluster_tags))
             for future in futures:
                 future.result()
 
@@ -96,27 +97,25 @@ class ApiClientV7(ApiClient):
         except Exception as e:
             self._log.error("Cloudera unable to process event collection: %s", e)
 
-    @staticmethod
-    def _collect_cluster_tags(cluster, custom_tags):
+    def _collect_cluster_tags(self, cluster, config):
+        cloudera_cluster_tag = f"cloudera_cluster:{cluster.name}" if cluster.name else None
         cluster_tags = [f"{cluster_tag.name}:{cluster_tag.value}" for cluster_tag in cluster.tags]
-
-        cluster_tags.extend(custom_tags)
-
-        return cluster_tags
+        cluster_tags.extend([tag for tag in self._check.config.tags])
+        cluster_tags.extend([tag for tag in config.get('tags', [])] if config else [])
+        cluster_tags.append(cloudera_cluster_tag)
+        return cloudera_cluster_tag, cluster_tags
 
     def _collect_cluster_service_check(self, cluster, tags):
         cluster_entity_status = ENTITY_STATUS[cluster.entity_status]
         message = cluster.entity_status if cluster_entity_status != AgentCheck.OK else None
-        self._check.service_check(
-            CLUSTER_HEALTH, cluster_entity_status, tags=[f'cloudera_cluster:{cluster.name}', *tags], message=message
-        )
+        self._check.service_check(CLUSTER_HEALTH, cluster_entity_status, tags=tags, message=message)
 
     def _collect_cluster_metrics(self, cluster_name, tags):
         metric_names = ','.join(f'last({metric}) AS {metric}' for metric in TIMESERIES_METRICS['cluster'])
         query = f'SELECT {metric_names} WHERE clusterName="{cluster_name}" AND category=CLUSTER'
         self._query_time_series(query, tags=tags)
 
-    def _collect_hosts(self, cluster_name, config):
+    def _collect_hosts(self, cloudera_cluster_tag, cluster_name, config):
         self._log.debug("self._hosts_discovery: %s", self._hosts_discovery)
         if cluster_name not in self._hosts_discovery:
             self._log.debug("Collecting hosts from '%s' cluster with config: %s", cluster_name, config)
@@ -151,30 +150,30 @@ class ApiClientV7(ApiClient):
                     self._log.debug(
                         "discovered host: [pattern:%s, key:%s, item:%s, config:%s]", pattern, key, item, config
                     )
-                    tags = self._collect_host_tags(item, self._check.config.tags)
-                    futures.append(executor.submit(self._collect_host_metrics, item, tags))
-                    futures.append(executor.submit(self._collect_role_metrics, item, tags))
-                    futures.append(executor.submit(self._collect_disk_metrics, item, tags))
-                    futures.append(executor.submit(self._collect_host_service_check, item, tags))
+                    cloudera_hostname_tag, host_tags = self._collect_host_tags(item, config)
+                    futures.append(
+                        executor.submit(self._collect_host_metrics, item, [cloudera_cluster_tag] + host_tags)
+                    )
+                    futures.append(
+                        executor.submit(self._collect_role_metrics, item, [cloudera_cluster_tag] + host_tags)
+                    )
+                    futures.append(
+                        executor.submit(self._collect_disk_metrics, item, [cloudera_cluster_tag] + host_tags)
+                    )
+                    futures.append(
+                        executor.submit(self._collect_host_service_check, item, [cloudera_cluster_tag] + host_tags)
+                    )
             for future in futures:
                 future.result()
 
-    @staticmethod
-    def _collect_host_tags(host, custom_tags):
-        tags = [
-            f'cloudera_hostname:{host.hostname}',
-            f'cloudera_rack_id:{host.rack_id}',
-            f'cloudera_cluster:{host.cluster_ref.cluster_name}',
-        ]
-
-        host_tags = host.tags
-        if host_tags:
-            for host_tag in host_tags:
-                tags.append(f"{host_tag.name}:{host_tag.value}")
-
-        tags.extend(custom_tags)
-
-        return tags
+    def _collect_host_tags(self, host, config):
+        cloudera_hostname_tag = f'cloudera_hostname:{host.hostname}' if host.hostname else None
+        host_tags = [f"{host_tag.name}:{host_tag.value}" for host_tag in host.tags] if host.tags else []
+        host_tags.extend([tag for tag in self._check.config.tags])
+        host_tags.extend([tag for tag in config.get('tags', [])] if config else [])
+        host_tags.append(cloudera_hostname_tag)
+        host_tags.append(f'cloudera_rack_id:{host.rack_id}' if host.rack_id else None)
+        return cloudera_hostname_tag, host_tags
 
     def _collect_host_service_check(self, host, tags):
         host_entity_status = ENTITY_STATUS[host.entity_status] if host.entity_status else None
@@ -220,16 +219,12 @@ class ApiClientV7(ApiClient):
                 metric_name = ts.metadata.alias
                 category_name = ts.metadata.attributes['category'].lower()
                 full_metric_name = f'{category_name}.{metric_name}'
-                entity_tag = None
-
-                # host timeseries metrics shouldn't include `cloudera_host` tag
-                # since `cloudera_hostname` is already included.
-                if category_name != "host":
-                    entity_tag = f'cloudera_{category_name}:{ts.metadata.entity_name}'
-
+                entity_tag = f'cloudera_{category_name}:{ts.metadata.entity_name}' if ts.metadata.entity_name else None
                 for d in ts.data:
                     value = d.value
-                    self._check.gauge(full_metric_name, value, tags=[entity_tag, *tags])
+                    self._check.gauge(
+                        full_metric_name, value, tags=[entity_tag if entity_tag not in tags else None, *tags]
+                    )
 
     def _collect_custom_queries(self):
         for custom_query in self._check.config.custom_queries:

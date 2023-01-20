@@ -6,16 +6,15 @@ import mock
 import pytest
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.dev.utils import get_metadata_metrics
 
-from .common import CAN_CONNECT_TAGS, CLUSTER_1_HEALTH_TAGS, METRICS
+from .common import CAN_CONNECT_TAGS, METRICS
 from .conftest import get_timeseries_resource
 
 pytestmark = [pytest.mark.unit]
 
 
 @pytest.mark.parametrize('cloudera_api_exception', ['Service not available'], indirect=True)
-def test_given_cloudera_check_when_get_version_exception_from_cloudera_client_then_emits_critical_service(
+def test_version_exception(
     aggregator,
     dd_run_check,
     cloudera_check,
@@ -41,8 +40,18 @@ def test_given_cloudera_check_when_get_version_exception_from_cloudera_client_th
     )
 
 
-@pytest.mark.parametrize('cloudera_version', [None, '5.0.0'], indirect=True)
-def test_given_cloudera_check_when_version_unsupported_or_unknown_then_emits_critical_service(
+@pytest.mark.parametrize(
+    'cloudera_version',
+    [None, '5.0.0'],
+    ids=[
+        "unsupported",
+        "5.0.0",
+    ],
+    indirect=[
+        'cloudera_version',
+    ],
+)
+def test_version_unsupported_or_unknown(
     aggregator,
     dd_run_check,
     cloudera_check,
@@ -68,7 +77,7 @@ def test_given_cloudera_check_when_version_unsupported_or_unknown_then_emits_cri
 
 
 @pytest.mark.parametrize('cloudera_api_exception', ['Service not available'], indirect=True)
-def test_given_cloudera_check_when_v7_read_clusters_exception_from_cloudera_client_then_emits_critical_service(
+def test_v7_read_clusters_exception(
     aggregator,
     dd_run_check,
     cloudera_check,
@@ -96,99 +105,84 @@ def test_given_cloudera_check_when_v7_read_clusters_exception_from_cloudera_clie
     )
 
 
-def test_given_cloudera_check_when_bad_health_cluster_then_emits_cluster_health_critical(
-    aggregator,
-    dd_run_check,
-    cloudera_check,
-    instance,
+@pytest.mark.parametrize(
+    'instance_autodiscover, read_clusters, query_time_series, list_hosts, dd_run_check_count, expected_list',
+    [
+        (
+            {'clusters': {}},
+            {'number': 1, 'prefix': ['cluster_'], 'status': ['BAD_HEALTH'], 'tags_number': 0},
+            {'category': 'cluster'},
+            {'number': 0, 'prefix': []},
+            1,
+            [
+                {
+                    'status': AgentCheck.CRITICAL,
+                    'message': 'BAD_HEALTH',
+                    'tags': [f'cloudera_cluster:cluster_{i}' for i in range(1)],
+                }
+            ],
+        ),
+        (
+            {'clusters': {}},
+            {'number': 1, 'prefix': ['cluster_'], 'status': ['GOOD_HEALTH'], 'tags_number': 0},
+            {'category': 'cluster'},
+            {'number': 0, 'prefix': []},
+            1,
+            [
+                {
+                    'status': AgentCheck.OK,
+                    'message': None,
+                    'tags': [f'cloudera_cluster:cluster_{i}' for i in range(1)],
+                }
+            ],
+        ),
+    ],
+    ids=[
+        "bad health",
+        "good health",
+    ],
+    indirect=[
+        'instance_autodiscover',
+        'read_clusters',
+        'query_time_series',
+        'list_hosts',
+    ],
+)
+def test_health_cluster(
+    instance_autodiscover,
+    read_clusters,
+    query_time_series,
+    list_hosts,
+    dd_run_check_count,
+    expected_list,
     cloudera_version_7_0_0,
-    list_one_cluster_bad_health_resource,
-    list_hosts_resource,
+    cloudera_check,
+    dd_run_check,
+    aggregator,
 ):
     with mock.patch(
         'cm_client.ClouderaManagerResourceApi.get_version',
         return_value=cloudera_version_7_0_0,
-    ), mock.patch(
-        'cm_client.ClustersResourceApi.read_clusters',
-        return_value=list_one_cluster_bad_health_resource,
-    ), mock.patch(
-        'cm_client.TimeSeriesResourceApi.query_time_series',
-        side_effect=get_timeseries_resource,
-    ), mock.patch(
-        'cm_client.ClustersResourceApi.list_hosts',
-        return_value=list_hosts_resource,
-    ):
-        # Given
-        check = cloudera_check(instance)
-        # When
-        dd_run_check(check)
-        # Then
-        aggregator.assert_service_check(
-            'cloudera.cluster.health',
-            AgentCheck.CRITICAL,
-            message='BAD_HEALTH',
-            tags=CLUSTER_1_HEALTH_TAGS,
-        )
-        aggregator.assert_service_check(
-            'cloudera.can_connect',
-            AgentCheck.OK,
-            tags=CAN_CONNECT_TAGS,
-        )
-
-
-def test_given_cloudera_check_when_good_health_cluster_then_emits_cluster_metrics(
-    aggregator,
-    dd_run_check,
-    cloudera_check,
-    instance,
-    cloudera_version_7_0_0,
-    list_one_cluster_good_health_resource,
-    list_hosts_resource,
-    read_events_resource,
-):
-    with mock.patch(
-        'cm_client.ClouderaManagerResourceApi.get_version',
-        return_value=cloudera_version_7_0_0,
-    ), mock.patch(
-        'cm_client.ClustersResourceApi.read_clusters',
-        return_value=list_one_cluster_good_health_resource,
-    ), mock.patch(
-        'cm_client.TimeSeriesResourceApi.query_time_series',
-        side_effect=get_timeseries_resource,
-    ), mock.patch(
-        'cm_client.ClustersResourceApi.list_hosts',
-        return_value=list_hosts_resource,
-    ), mock.patch(
+    ), mock.patch('cm_client.ClustersResourceApi.read_clusters', return_value=read_clusters,), mock.patch(
         'cm_client.EventsResourceApi.read_events',
-        return_value=read_events_resource,
+        side_effect=Exception,
+    ), mock.patch(
+        'cm_client.TimeSeriesResourceApi.query_time_series',
+        return_value=query_time_series,
+    ), mock.patch(
+        'cm_client.ClustersResourceApi.list_hosts',
+        return_value=list_hosts,
     ):
-        # Given
-        check = cloudera_check(instance)
-        # When
-        dd_run_check(check)
-        # Then
-        for category, metrics in METRICS.items():
-            for metric in metrics:
-                aggregator.assert_metric(f'cloudera.{category}.{metric}')
-
-        aggregator.assert_service_check(
-            'cloudera.can_connect',
-            AgentCheck.OK,
-            tags=CAN_CONNECT_TAGS,
-        )
-        aggregator.assert_service_check(
-            'cloudera.cluster.health',
-            AgentCheck.OK,
-            tags=CLUSTER_1_HEALTH_TAGS,
-        )
-        expected_msg_text = (
-            'Interceptor for {http://yarn.extractor.cdx.cloudera.com/}YarnHistoryClient '
-            'has thrown exception, unwinding now'
-        )
-
-        aggregator.assert_event(msg_text=expected_msg_text, count=1)
-        aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
-        aggregator.assert_all_metrics_covered()
+        check = cloudera_check(instance_autodiscover)
+        for _ in range(dd_run_check_count):
+            dd_run_check(check)
+        for expected in expected_list:
+            aggregator.assert_service_check(
+                'cloudera.cluster.health',
+                status=expected['status'],
+                message=expected['message'],
+                tags=expected['tags'],
+            )
 
 
 def test_given_cloudera_check_when_no_events_response_then_no_event_collection(
@@ -291,70 +285,94 @@ def test_autodiscover_clusters_configured_include_not_array_then_exception_is_ra
 
 
 @pytest.mark.parametrize(
-    'instance_autodiscover, read_clusters, list_hosts, dd_run_check_count, expected_list',
+    'instance_autodiscover, read_clusters, query_time_series, list_hosts, dd_run_check_count, expected_list',
     [
         (
             {'clusters': {}},
-            {'number': 0, 'prefix': [], 'status': ['GOOD_HEALTH']},
+            {'number': 0, 'prefix': [], 'status': ['GOOD_HEALTH'], 'tags_number': 0},
+            {'category': 'cluster'},
             {'number': 0, 'prefix': []},
             1,
-            [{'metric_count': 0, 'call_count': 1}],
+            [{'metric_count': 0, 'call_count': 1, 'metric_tags': []}],
         ),
         (
             {'clusters': {'include': ['.*']}},
-            {'number': 0, 'prefix': [], 'status': ['GOOD_HEALTH']},
+            {'number': 0, 'prefix': [], 'status': ['GOOD_HEALTH'], 'tags_number': 0},
+            {'category': 'cluster'},
             {'number': 0, 'prefix': []},
             1,
-            [{'metric_count': 0, 'call_count': 1}],
+            [{'metric_count': 0, 'call_count': 1, 'metric_tags': []}],
         ),
         (
             {'clusters': {'include': ['.*']}},
-            {'number': 1, 'prefix': ['cluster_'], 'status': ['GOOD_HEALTH']},
+            {'number': 1, 'prefix': ['cluster_'], 'status': ['GOOD_HEALTH'], 'tags_number': 0},
+            {'category': 'cluster'},
             {'number': 0, 'prefix': []},
             1,
-            [{'metric_count': 1, 'call_count': 1}],
+            [{'metric_count': 1, 'call_count': 1, 'metric_tags': [f'cloudera_cluster:cluster_{i}']} for i in range(1)],
         ),
         (
             {'clusters': {'include': ['.*']}},
-            {'number': 10, 'prefix': ['cluster_'], 'status': ['GOOD_HEALTH']},
-            {'number': 0, 'prefixes': []},
+            {'number': 10, 'prefix': ['cluster_'], 'status': ['GOOD_HEALTH'], 'tags_number': 0},
+            {'category': 'cluster'},
+            {'number': 0, 'prefix': []},
             1,
-            [{'metric_count': 10, 'call_count': 1}],
+            [{'metric_count': 1, 'call_count': 1, 'metric_tags': [f'cloudera_cluster:cluster_{i}']} for i in range(10)],
         ),
         (
             {'clusters': {'include': ['^cluster_.*']}},
-            {'number': 1, 'prefix': ['cluster_', 'tmp_'], 'status': ['GOOD_HEALTH']},
-            {'number': 0, 'prefixes': []},
+            {'number': 1, 'prefix': ['cluster_', 'tmp_'], 'status': ['GOOD_HEALTH'], 'tags_number': 0},
+            {'category': 'cluster', 'name': 'cluster_1'},
+            {'number': 0, 'prefix': []},
             1,
-            [{'metric_count': 1, 'call_count': 1}],
+            [{'metric_count': 1, 'call_count': 1, 'metric_tags': [f'cloudera_cluster:cluster_{i}']} for i in range(1)],
         ),
         (
             {'clusters': {'include': ['.*'], 'exclude': ['^tmp_*']}},
-            {'number': 1, 'prefix': ['cluster_', 'tmp_'], 'status': ['GOOD_HEALTH']},
-            {'number': 0, 'prefixes': []},
+            {'number': 1, 'prefix': ['cluster_', 'tmp_'], 'status': ['GOOD_HEALTH'], 'tags_number': 0},
+            {'category': 'cluster', 'name': 'cluster_1'},
+            {'number': 0, 'prefix': []},
             1,
-            [{'metric_count': 1, 'call_count': 1}],
+            [{'metric_count': 1, 'call_count': 1, 'metric_tags': [f'cloudera_cluster:cluster_{i}']} for i in range(1)],
         ),
         (
             {'clusters': {'include': ['.*'], 'limit': 5}},
-            {'number': 10, 'prefix': ['cluster_'], 'status': ['GOOD_HEALTH']},
-            {'number': 0, 'prefixes': []},
+            {'number': 10, 'prefix': ['cluster_'], 'status': ['GOOD_HEALTH'], 'tags_number': 0},
+            {'category': 'cluster', 'name': 'cluster_1'},
+            {'number': 0, 'prefix': []},
             1,
-            [{'metric_count': 5, 'call_count': 1}],
+            [{'metric_count': 1, 'call_count': 1, 'metric_tags': [f'cloudera_cluster:cluster_{i}']} for i in range(5)],
         ),
         (
             {'clusters': {'include': ['.*']}},
-            {'number': 10, 'prefix': ['cluster_'], 'status': ['GOOD_HEALTH']},
-            {'number': 0, 'prefixes': []},
+            {'number': 10, 'prefix': ['cluster_'], 'status': ['GOOD_HEALTH'], 'tags_number': 0},
+            {'category': 'cluster', 'name': 'cluster_1'},
+            {'number': 0, 'prefix': []},
             2,
-            [{'metric_count': 20, 'call_count': 2}],
+            [{'metric_count': 2, 'call_count': 2, 'metric_tags': [f'cloudera_cluster:cluster_{i}']} for i in range(10)],
         ),
         (
             {'clusters': {'include': ['.*'], 'interval': 60}},
-            {'number': 10, 'prefix': ['cluster_'], 'status': ['GOOD_HEALTH']},
-            {'number': 0, 'prefixes': []},
+            {'number': 10, 'prefix': ['cluster_'], 'status': ['GOOD_HEALTH'], 'tags_number': 0},
+            {'category': 'cluster', 'name': 'cluster_1'},
+            {'number': 0, 'prefix': []},
             2,
-            [{'metric_count': 20, 'call_count': 1}],
+            [{'metric_count': 2, 'call_count': 1, 'metric_tags': [f'cloudera_cluster:cluster_{i}']} for i in range(10)],
+        ),
+        (
+            {'clusters': {'include': ['.*']}},
+            {'number': 1, 'prefix': ['cluster_'], 'status': ['GOOD_HEALTH'], 'tags_number': 1},
+            {'category': 'cluster'},
+            {'number': 0, 'prefix': []},
+            1,
+            [
+                {
+                    'metric_count': 1,
+                    'call_count': 1,
+                    'metric_tags': [f'cloudera_cluster:cluster_{i}' for i in range(1)]
+                    + [f'tag_{i}:tag_value_{i}' for i in range(1)],
+                }
+            ],
         ),
     ],
     ids=[
@@ -367,16 +385,19 @@ def test_autodiscover_clusters_configured_include_not_array_then_exception_is_ra
         "include all and limit to 5 / read 10 clusters",
         "include all in two runs / read 10 clusters",
         "include all and interval to 60 in two runs / read 10 clusters",
+        "include all hosts/ read 1 cluster with 1 tag",
     ],
     indirect=[
         'instance_autodiscover',
         'read_clusters',
+        'query_time_series',
         'list_hosts',
     ],
 )
 def test_autodiscover_clusters(
     instance_autodiscover,
     read_clusters,
+    query_time_series,
     list_hosts,
     dd_run_check_count,
     expected_list,
@@ -396,7 +417,7 @@ def test_autodiscover_clusters(
         side_effect=Exception,
     ), mock.patch(
         'cm_client.TimeSeriesResourceApi.query_time_series',
-        side_effect=get_timeseries_resource,
+        return_value=query_time_series,
     ), mock.patch(
         'cm_client.ClustersResourceApi.list_hosts',
         return_value=list_hosts,
@@ -406,7 +427,9 @@ def test_autodiscover_clusters(
             dd_run_check(check)
         for expected in expected_list:
             for metric in METRICS['cluster']:
-                aggregator.assert_metric(f'cloudera.cluster.{metric}', count=expected['metric_count'])
+                aggregator.assert_metric(
+                    f'cloudera.cluster.{metric}', count=expected['metric_count'], tags=expected['metric_tags']
+                )
             assert mocked_read_clusters.call_count == expected['call_count']
 
 
@@ -415,7 +438,7 @@ def test_autodiscover_clusters(
     [
         (
             {'tags': ['test1'], 'clusters': {'include': [{'.*': {'hosts': {'include': {'^host.*'}}}}]}},
-            {'number': 1, 'prefix': ['cluster_'], 'status': ['GOOD_HEALTH']},
+            {'number': 1, 'prefix': ['cluster_'], 'status': ['GOOD_HEALTH'], 'tags_number': 0},
         ),
     ],
     ids=["hosts configured not a list"],
@@ -454,73 +477,95 @@ def test_autodiscover_hosts_configured_include_not_array_then_emits_critical_ser
     [
         (
             {'clusters': {}},
-            {'number': 1, 'prefix': ['cluster_'], 'status': ['GOOD_HEALTH']},
-            {'number': 0, 'prefix': []},
+            {'number': 1, 'prefix': ['cluster_'], 'status': ['GOOD_HEALTH'], 'tags_number': 0},
+            {'number': 0, 'prefix': [], 'tags_number': 0},
             1,
-            [{'metric_count': 0, 'call_count': 1}],
+            [{'metric_count': 0, 'call_count': 1, 'metric_tags': []}],
         ),
         (
             {'clusters': {'include': [{'.*': {'hosts': {'include': ['.*']}}}]}},
-            {'number': 1, 'prefix': ['cluster_'], 'status': ['GOOD_HEALTH']},
-            {'number': 0, 'prefix': []},
+            {'number': 1, 'prefix': ['cluster_'], 'status': ['GOOD_HEALTH'], 'tags_number': 0},
+            {'number': 0, 'prefix': [], 'tags_number': 0},
             1,
-            [{'metric_count': 0, 'call_count': 1}],
+            [{'metric_count': 0, 'call_count': 1, 'metric_tags': []}],
         ),
         (
             {'clusters': {'include': [{'.*': {'hosts': {'include': ['.*']}}}]}},
-            {'number': 1, 'prefix': ['cluster_'], 'status': ['GOOD_HEALTH']},
-            {'number': 1, 'prefix': ['host_']},
+            {'number': 1, 'prefix': ['cluster_'], 'status': ['GOOD_HEALTH'], 'tags_number': 0},
+            {'number': 1, 'prefix': ['host_'], 'tags_number': 0},
             1,
-            [{'metric_count': 1, 'call_count': 1}],
+            [
+                {
+                    'metric_count': 1,
+                    'call_count': 1,
+                    'metric_tags': [f'cloudera_cluster:cluster_{i}' for i in range(1)]
+                    + [f'cloudera_hostname:host_{i}' for i in range(1)],
+                }
+            ],
         ),
         (
             {'clusters': {'include': [{'.*': {'hosts': {'include': ['.*']}}}]}},
-            {'number': 1, 'prefix': ['cluster_'], 'status': ['GOOD_HEALTH']},
-            {'number': 5, 'prefix': ['host_']},
+            {'number': 1, 'prefix': ['cluster_'], 'status': ['GOOD_HEALTH'], 'tags_number': 0},
+            {'number': 5, 'prefix': ['host_'], 'tags_number': 0},
             1,
-            [{'metric_count': 5, 'call_count': 1}],
+            [{'metric_count': 5, 'call_count': 1, 'metric_tags': []}],
         ),
         (
             {'clusters': {'include': [{'.*': {'hosts': {'include': ['.*']}}}]}},
-            {'number': 2, 'prefix': ['cluster_'], 'status': ['GOOD_HEALTH']},
-            {'number': 1, 'prefix': ['host_']},
+            {'number': 2, 'prefix': ['cluster_'], 'status': ['GOOD_HEALTH'], 'tags_number': 0},
+            {'number': 1, 'prefix': ['host_'], 'tags_number': 0},
             1,
-            [{'metric_count': 2, 'call_count': 2}],
+            [{'metric_count': 2, 'call_count': 2, 'metric_tags': []}],
         ),
         (
             {'clusters': {'include': [{'.*': {'hosts': {'include': ['^host_.*']}}}]}},
-            {'number': 1, 'prefix': ['cluster_'], 'status': ['GOOD_HEALTH']},
-            {'number': 1, 'prefix': ['host_', 'tmp_']},
+            {'number': 1, 'prefix': ['cluster_'], 'status': ['GOOD_HEALTH'], 'tags_number': 0},
+            {'number': 1, 'prefix': ['host_', 'tmp_'], 'tags_number': 0},
             1,
-            [{'metric_count': 1, 'call_count': 1}],
+            [{'metric_count': 1, 'call_count': 1, 'metric_tags': []}],
         ),
         (
             {'clusters': {'include': [{'.*': {'hosts': {'include': ['.*'], 'exclude': ['^tmp_.*']}}}]}},
-            {'number': 1, 'prefix': ['cluster_'], 'status': ['GOOD_HEALTH']},
-            {'number': 1, 'prefix': ['host_', 'tmp_']},
+            {'number': 1, 'prefix': ['cluster_'], 'status': ['GOOD_HEALTH'], 'tags_number': 0},
+            {'number': 1, 'prefix': ['host_', 'tmp_'], 'tags_number': 0},
             1,
-            [{'metric_count': 1, 'call_count': 1}],
+            [{'metric_count': 1, 'call_count': 1, 'metric_tags': []}],
         ),
         (
             {'clusters': {'include': [{'.*': {'hosts': {'include': ['.*'], 'limit': 5}}}]}},
-            {'number': 1, 'prefix': ['cluster_'], 'status': ['GOOD_HEALTH']},
-            {'number': 10, 'prefix': ['host_']},
+            {'number': 1, 'prefix': ['cluster_'], 'status': ['GOOD_HEALTH'], 'tags_number': 0},
+            {'number': 10, 'prefix': ['host_'], 'tags_number': 0},
             1,
-            [{'metric_count': 5, 'call_count': 1}],
+            [{'metric_count': 5, 'call_count': 1, 'metric_tags': []}],
         ),
         (
             {'clusters': {'include': [{'.*': {'hosts': {'include': ['.*']}}}]}},
-            {'number': 1, 'prefix': ['cluster_'], 'status': ['GOOD_HEALTH']},
-            {'number': 10, 'prefix': ['host_']},
+            {'number': 1, 'prefix': ['cluster_'], 'status': ['GOOD_HEALTH'], 'tags_number': 0},
+            {'number': 10, 'prefix': ['host_'], 'tags_number': 0},
             2,
-            [{'metric_count': 20, 'call_count': 2}],
+            [{'metric_count': 20, 'call_count': 2, 'metric_tags': []}],
         ),
         (
             {'clusters': {'include': [{'.*': {'hosts': {'include': ['.*'], 'interval': 60}}}]}},
-            {'number': 1, 'prefix': ['cluster_'], 'status': ['GOOD_HEALTH']},
-            {'number': 10, 'prefix': ['host_']},
+            {'number': 1, 'prefix': ['cluster_'], 'status': ['GOOD_HEALTH'], 'tags_number': 0},
+            {'number': 10, 'prefix': ['host_'], 'tags_number': 0},
             2,
-            [{'metric_count': 20, 'call_count': 1}],
+            [{'metric_count': 20, 'call_count': 1, 'metric_tags': []}],
+        ),
+        (
+            {'clusters': {'include': [{'.*': {'hosts': {'include': ['.*']}}}]}},
+            {'number': 1, 'prefix': ['cluster_'], 'status': ['GOOD_HEALTH'], 'tags_number': 0},
+            {'number': 1, 'prefix': ['host_'], 'tags_number': 1},
+            1,
+            [
+                {
+                    'metric_count': 1,
+                    'call_count': 1,
+                    'metric_tags': [f'cloudera_cluster:cluster_{i}' for i in range(1)]
+                    + [f'cloudera_hostname:host_{i}' for i in range(1)]
+                    + [f'tag_{i}:tag_value_{i}' for i in range(1)],
+                }
+            ],
         ),
     ],
     ids=[
@@ -534,6 +579,7 @@ def test_autodiscover_hosts_configured_include_not_array_then_emits_critical_ser
         "include all and limit to 5 / read 1 cluster with 10 hosts",
         "include all in two runs / read 1 cluster with 10 hosts",
         "include all and interval to 60 in two runs / read 1 cluster with 10 hosts",
+        "include all hosts/ read 1 cluster with 1 host with 1 tag",
     ],
     indirect=[
         'instance_autodiscover',
@@ -570,5 +616,7 @@ def test_autodiscover_hosts(
             dd_run_check(check)
         for expected in expected_list:
             for metric in METRICS['host']:
-                aggregator.assert_metric(f'cloudera.host.{metric}', count=expected['metric_count'])
+                aggregator.assert_metric(
+                    f'cloudera.host.{metric}', count=expected['metric_count'], tags=expected['metric_tags']
+                )
             assert mocked_list_hosts.call_count == expected['call_count']

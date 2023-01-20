@@ -44,6 +44,14 @@ def dd_environment():
 
 
 @pytest.fixture
+def config():
+    return {
+        'instances': [common.INSTANCE],
+        'init_config': common.INIT_CONFIG,
+    }
+
+
+@pytest.fixture
 def instance():
     return deepcopy(common.INSTANCE)
 
@@ -205,14 +213,13 @@ def read_clusters(request):
                 name=f'{prefix}{n}',
                 entity_status=status,
                 tags=[
-                    ApiEntityTag(name="_cldr_cb_clustertype", value="Data Hub"),
-                    ApiEntityTag(name="_cldr_cb_origin", value="cloudbreak"),
+                    ApiEntityTag(name=f'tag_{n}', value=f'tag_value_{n}') for n in range(request.param['tags_number'])
                 ],
                 cluster_type="COMPUTE_CLUSTER",
             )
             for status in request.param['status']
-            for n in range(request.param['number'])
             for prefix in request.param['prefix']
+            for n in range(request.param['number'])
         ],
     )
 
@@ -223,15 +230,41 @@ def list_hosts(request):
         items=[
             ApiHost(
                 host_id=f'{prefix}{n}',
+                hostname=f'{prefix}{n}',
                 cluster_ref=ApiClusterRef(
                     cluster_name="cluster_1",
                     display_name="cluster_1",
                 ),
+                tags=[
+                    ApiEntityTag(name=f'tag_{n}', value=f'tag_value_{n}') for n in range(request.param['tags_number'])
+                ],
                 num_cores=8,
                 num_physical_cores=4,
                 total_phys_mem_bytes=33079799808,
             )
-            for n in range(request.param['number'])
             for prefix in request.param['prefix']
+            for n in range(request.param['number'])
         ],
+    )
+
+
+@pytest.fixture
+def query_time_series(request):
+    return ApiTimeSeriesResponseList(
+        items=[
+            ApiTimeSeriesResponse(
+                time_series=[
+                    ApiTimeSeries(
+                        data=[
+                            ApiTimeSeriesData(value=49.7),
+                        ],
+                        metadata=ApiTimeSeriesMetadata(
+                            attributes={'category': request.param['category']},
+                            alias=metric,
+                        ),
+                    )
+                    for metric in TIMESERIES_METRICS[request.param['category']]
+                ]
+            )
+        ]
     )
