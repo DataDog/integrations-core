@@ -17,7 +17,7 @@ class RabbitMQ(AgentCheck):
                 raise ConfigurationError(
                     "This version of the integration is only available when using py3. "
                     "Check https://docs.datadoghq.com/agent/guide/agent-v6-python-3 "
-                    "for more information or use the older style config."
+                    "for more information or use the `rabbitmq_api_url` config."
                 )
             from .openmetrics import RabbitMQOpenMetrics
 
