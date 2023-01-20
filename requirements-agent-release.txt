@@ -25,7 +25,7 @@ datadog-checks-downloader==3.10.1
 datadog-cilium==2.3.0
 datadog-cisco-aci==2.2.1
 datadog-citrix-hypervisor==2.2.0
-datadog-clickhouse==2.8.1
+datadog-clickhouse==2.8.2
 datadog-cloud-foundry-api==2.2.1
 datadog-cloudera==1.0.0
 datadog-cockroachdb==2.5.0
