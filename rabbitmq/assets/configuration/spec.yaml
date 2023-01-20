@@ -40,7 +40,7 @@ files:
                 - "per-object" means the /metrics/per-object endpoint is used.
                 - "detailed" means the /metrics/detailed endpoint is used.
                   You can also provide a query for this option, exactly as if you were making an HTTP request
-                  to this endpoint.
+                  to this endpoint. For example, `detailed?family=queue_consumer_count`.
             value:
               type: string
               example: "detailed"
