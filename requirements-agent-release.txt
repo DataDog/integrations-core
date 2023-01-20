@@ -41,10 +41,10 @@ datadog-disk==4.9.0
 datadog-dns-check==2.3.0
 datadog-dotnetclr==1.13.0; sys_platform == 'win32'
 datadog-druid==2.2.0
-datadog-ecs-fargate==3.2.0
+datadog-ecs-fargate==3.3.0
 datadog-eks-fargate==3.2.0
 datadog-elastic==5.3.0
-datadog-envoy==2.4.0
+datadog-envoy==2.4.1
 datadog-etcd==3.3.0
 datadog-exchange-server==1.15.0; sys_platform == 'win32'
 datadog-external-dns==2.3.0
