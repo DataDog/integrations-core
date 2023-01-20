@@ -118,11 +118,11 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
             },
             # We pin deps in order to make CI more stable/reliable.
             'dependencies': [
-                'black==22.8.0',
+                'black==22.12.0',
                 'flake8==5.0.4',
                 'flake8-bugbear==22.9.11',
-                'flake8-logging-format==0.7.5',
-                'isort==5.10.1',
+                'flake8-logging-format==0.9.0',
+                'isort==5.11.4',
                 # Keep in sync with: /datadog_checks_base/pyproject.toml
                 'pydantic==1.10.2',
             ],
