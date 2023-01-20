@@ -25,6 +25,10 @@ Rabbitmq exposes metrics in two ways: the [RabbitMQ Management Plugin][4] and th
 #### Prepare RabbitMQ
 
 ##### [RabbitMQ Prometheus Plugin][19].
+
+_Note: The Prometheus Plugin collection method requires Python 3._
+
+_Starting with RabbitMQ v3.8, the [Rabbitmq Prometheus Plugin][19] is enabled by default and the integration communicates with it over HTTP API using OpenMetricsV2._
 	
 Configure the `prometheus_plugin` section in your instance configuration. When using the `prometheus_plugin` option, settings related to the Management Plugin are ignored.
 
@@ -37,8 +41,6 @@ Configure the `prometheus_plugin` section in your instance configuration. When u
  This enables scraping of the [`/metrics` endpoint][20] on one rabbitmq node.
 
 ##### [RabbitMQ Management Plugin][4].
-
-__Note: Starting with RabbitMQ v3.8, the [Rabbitmq Prometheus Plugin][19] is enabled by default and our integration communicates with it over an HTTP API.__
 
 Enable the plugin. The Agent user then needs at least the `monitoring` tag and these required permissions:
 
