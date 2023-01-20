@@ -1,5 +1,9 @@
 # CHANGELOG - IBM MQ
 
+## 4.0.2 / 2023-01-20
+
+* [Fixed] Prevent unnecessary non-SSL connection attempts. See [#13559](https://github.com/DataDog/integrations-core/pull/13559).
+
 ## 4.0.1 / 2022-12-09
 
 * [Fixed] Add messaging to service checks. See [#13355](https://github.com/DataDog/integrations-core/pull/13355).
