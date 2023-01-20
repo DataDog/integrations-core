@@ -367,13 +367,13 @@ class SQLServer(AgentCheck):
         now = time.time()
         if now - self.ad_last_check > self.autodiscovery_interval:
             self.log.info('Performing database autodiscovery')
-            query, with_physical_db_col = self._get_autodiscovery_query_cached(cursor)
+            query = self._get_autodiscovery_query_cached(cursor)
             cursor.execute(query)
-            all_dbs = []
-            if with_physical_db_col:
-                all_dbs = set(Database(row.name, row.physical_database_name) for row in cursor.fetchall())
+            rows = list(cursor.fetchall())
+            if len(rows[0]) == 2:
+                all_dbs = set(Database(row.name, row.physical_database_name) for row in rows)
             else:
-                all_dbs = set(Database(row.name) for row in cursor.fetchall())
+                all_dbs = set(Database(row.name) for row in rows)
             excluded_dbs = set([d for d in all_dbs if self._exclude_patterns.match(d.name)])
             included_dbs = set([d for d in all_dbs if self._include_patterns.match(d.name)])
 
@@ -397,7 +397,7 @@ class SQLServer(AgentCheck):
             return self.autodiscovery_query
         available_columns = self._get_available_sys_database_columns(cursor, expected_sys_databases_columns)
         self.autodiscovery_query = AUTODISCOVERY_QUERY.format(columns=', '.join(available_columns))
-        return self.autodiscovery_query, 'physical_database_name' in available_columns
+        return self.autodiscovery_query
 
     def _get_available_sys_database_columns(self, cursor, all_expected_columns):
         # confirm that sys.databases has the expected columns as not all versions of sql server

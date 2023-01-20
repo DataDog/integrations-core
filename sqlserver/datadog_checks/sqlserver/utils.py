@@ -23,6 +23,9 @@ class Database:
         if not isinstance(other, type(self)): return NotImplemented
         return self.name == other.name and self.physical_db_name == other.physical_db_name
 
+    def __str__(self):
+        return "name:{}, physical_db_name:{}".format(self.name, self.physical_db_name)
+
 
 def set_default_driver_conf():
     if Platform.is_containerized():
