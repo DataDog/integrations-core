@@ -44,14 +44,6 @@ def dd_environment():
 
 
 @pytest.fixture
-def config():
-    return {
-        'instances': [common.INSTANCE],
-        'init_config': common.INIT_CONFIG,
-    }
-
-
-@pytest.fixture
 def instance():
     return deepcopy(common.INSTANCE)
 
@@ -59,51 +51,6 @@ def instance():
 @pytest.fixture
 def instance_bad_url():
     return deepcopy(common.INSTANCE_BAD_URL)
-
-
-@pytest.fixture
-def instance_autodiscover_clusters_include_not_array():
-    return deepcopy(common.INSTANCE_AUTODISCOVER_CLUSTERS_INCLUDE_NOT_ARRAY)
-
-
-@pytest.fixture
-def instance_autodiscover_clusters_include_with_one_entry_dict():
-    return deepcopy(common.INSTANCE_AUTODISCOVER_CLUSTERS_INCLUDE_WITH_ONE_ENTRY_DICT)
-
-
-@pytest.fixture
-def instance_autodiscover_include_with_two_entries_dict():
-    return deepcopy(common.INSTANCE_AUTODISCOVER_INCLUDE_WITH_TWO_ENTRIES_DICT)
-
-
-@pytest.fixture
-def instance_autodiscover_include_with_str():
-    return deepcopy(common.INSTANCE_AUTODISCOVER_INCLUDE_WITH_STR)
-
-
-@pytest.fixture
-def instance_autodiscover_exclude():
-    return deepcopy(common.INSTANCE_AUTODISCOVER_EXCLUDE)
-
-
-@pytest.fixture
-def instance_autodiscover_hosts_include_not_array():
-    return deepcopy(common.INSTANCE_AUTODISCOVER_HOSTS_INCLUDE_NOT_ARRAY)
-
-
-@pytest.fixture
-def instance_autodiscover_hosts_include_with_one_entry_dict():
-    return deepcopy(common.INSTANCE_AUTODISCOVER_HOSTS_INCLUDE_WITH_ONE_ENTRY_DICT)
-
-
-@pytest.fixture
-def instance_autodiscover_hosts_include_with_one_entry_dict_and_interval():
-    return deepcopy(common.INSTANCE_AUTODISCOVER_HOSTS_INCLUDE_WITH_ONE_ENTRY_DICT_AND_INTERVAL)
-
-
-@pytest.fixture
-def init_config():
-    return deepcopy(common.INIT_CONFIG)
 
 
 @pytest.fixture(scope='session')
@@ -147,13 +94,6 @@ def cloudera_version_7_0_0():
 
 
 @pytest.fixture
-def list_empty_clusters_resource():
-    return ApiClusterList(
-        items=[],
-    )
-
-
-@pytest.fixture
 def list_one_cluster_bad_health_resource():
     return ApiClusterList(
         items=[
@@ -183,52 +123,6 @@ def list_one_cluster_good_health_resource():
                 ],
                 cluster_type="COMPUTE_CLUSTER",
             ),
-        ],
-    )
-
-
-@pytest.fixture
-def list_two_clusters_with_one_tmp_resource():
-    return ApiClusterList(
-        items=[
-            ApiCluster(
-                name="cluster_1",
-                entity_status="GOOD_HEALTH",
-                tags=[
-                    ApiEntityTag(name="_cldr_cb_clustertype", value="Data Hub"),
-                    ApiEntityTag(name="_cldr_cb_origin", value="cloudbreak"),
-                ],
-                cluster_type="COMPUTE_CLUSTER",
-            ),
-            ApiCluster(
-                name="tmp_cluster",
-                entity_status="GOOD_HEALTH",
-                tags=[
-                    ApiEntityTag(name="_cldr_cb_clustertype", value="Data Hub"),
-                    ApiEntityTag(name="_cldr_cb_origin", value="cloudbreak"),
-                ],
-                cluster_type="COMPUTE_CLUSTER",
-            ),
-        ],
-    )
-
-
-@pytest.fixture
-def list_n_hosts_resource(request):
-    return ApiHostList(
-        items=[
-            ApiHost(
-                host_id=f'{prefix}{n}',
-                cluster_ref=ApiClusterRef(
-                    cluster_name="cluster_1",
-                    display_name="cluster_1",
-                ),
-                num_cores=8,
-                num_physical_cores=4,
-                total_phys_mem_bytes=33079799808,
-            )
-            for n in range(request.param['number'])
-            for prefix in request.param['prefixes']
         ],
     )
 
@@ -288,5 +182,56 @@ def get_custom_timeseries_resource():
                     )
                 ]
             )
+        ],
+    )
+
+
+@pytest.fixture
+def instance_autodiscover(request):
+    clusters = request.param.get('clusters')
+    tags = request.param.get('tags')
+    return {
+        'api_url': 'http://localhost:8080/api/v48/',
+        'tags': tags if tags else None,
+        'clusters': clusters if clusters else None,
+    }
+
+
+@pytest.fixture
+def read_clusters(request):
+    return ApiClusterList(
+        items=[
+            ApiCluster(
+                name=f'{prefix}{n}',
+                entity_status=status,
+                tags=[
+                    ApiEntityTag(name="_cldr_cb_clustertype", value="Data Hub"),
+                    ApiEntityTag(name="_cldr_cb_origin", value="cloudbreak"),
+                ],
+                cluster_type="COMPUTE_CLUSTER",
+            )
+            for status in request.param['status']
+            for n in range(request.param['number'])
+            for prefix in request.param['prefix']
+        ],
+    )
+
+
+@pytest.fixture
+def list_hosts(request):
+    return ApiHostList(
+        items=[
+            ApiHost(
+                host_id=f'{prefix}{n}',
+                cluster_ref=ApiClusterRef(
+                    cluster_name="cluster_1",
+                    display_name="cluster_1",
+                ),
+                num_cores=8,
+                num_physical_cores=4,
+                total_phys_mem_bytes=33079799808,
+            )
+            for n in range(request.param['number'])
+            for prefix in request.param['prefix']
         ],
     )

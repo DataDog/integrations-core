@@ -8,7 +8,7 @@ import pytest
 from datadog_checks.base import AgentCheck
 from datadog_checks.dev.utils import get_metadata_metrics
 
-from .common import CAN_CONNECT_TAGS, CLUSTER_1_HEALTH_TAGS, CLUSTER_TMP_HEALTH_TAGS, METRICS
+from .common import CAN_CONNECT_TAGS, CLUSTER_1_HEALTH_TAGS, METRICS
 from .conftest import get_timeseries_resource
 
 pytestmark = [pytest.mark.unit]
@@ -234,215 +234,6 @@ def test_given_cloudera_check_when_no_events_response_then_no_event_collection(
         aggregator.assert_event(msg_text=expected_content, count=0)
 
 
-def test_autodiscover_clusters_configured_include_not_array_then_exception_is_raised(
-    dd_run_check,
-    cloudera_check,
-    instance_autodiscover_clusters_include_not_array,
-    cloudera_version_7_0_0,
-):
-    with mock.patch(
-        'cm_client.ClouderaManagerResourceApi.get_version',
-        return_value=cloudera_version_7_0_0,
-    ), pytest.raises(
-        Exception,
-        match='Setting `include` must be an array',
-    ):
-        check = cloudera_check(instance_autodiscover_clusters_include_not_array)
-        dd_run_check(check)
-
-
-def test_autodiscover_clusters_configured_with_one_entry_dict_then_emits_configured_cluster_metrics(
-    aggregator,
-    dd_run_check,
-    cloudera_check,
-    instance_autodiscover_clusters_include_with_one_entry_dict,
-    cloudera_version_7_0_0,
-    list_two_clusters_with_one_tmp_resource,
-    list_hosts_resource,
-    read_events_resource,
-):
-    with mock.patch(
-        'cm_client.ClouderaManagerResourceApi.get_version',
-        return_value=cloudera_version_7_0_0,
-    ), mock.patch(
-        'cm_client.ClustersResourceApi.read_clusters',
-        return_value=list_two_clusters_with_one_tmp_resource,
-    ), mock.patch(
-        'cm_client.TimeSeriesResourceApi.query_time_series',
-        side_effect=get_timeseries_resource,
-    ), mock.patch(
-        'cm_client.ClustersResourceApi.list_hosts',
-        return_value=list_hosts_resource,
-    ), mock.patch(
-        'cm_client.EventsResourceApi.read_events',
-        return_value=read_events_resource,
-    ):
-        # Given
-        check = cloudera_check(instance_autodiscover_clusters_include_with_one_entry_dict)
-        # When
-        dd_run_check(check)
-        # Then
-        for category, metrics in METRICS.items():
-            for metric in metrics:
-                aggregator.assert_metric(f'cloudera.{category}.{metric}', count=1)
-                aggregator.assert_metric_has_tag_prefix(f'cloudera.{category}.{metric}', "cloudera_cluster")
-        aggregator.assert_service_check('cloudera.can_connect', AgentCheck.OK, tags=CAN_CONNECT_TAGS)
-        aggregator.assert_service_check('cloudera.cluster.health', AgentCheck.OK, tags=CLUSTER_1_HEALTH_TAGS, count=1)
-
-
-def test_given_cloudera_check_when_autodiscover_configured_with_two_entries_dict_then_emits_configured_cluster_metrics(
-    aggregator,
-    dd_run_check,
-    cloudera_check,
-    instance_autodiscover_include_with_two_entries_dict,
-    cloudera_version_7_0_0,
-    list_two_clusters_with_one_tmp_resource,
-    list_hosts_resource,
-    read_events_resource,
-):
-    with mock.patch(
-        'cm_client.ClouderaManagerResourceApi.get_version',
-        return_value=cloudera_version_7_0_0,
-    ), mock.patch(
-        'cm_client.ClustersResourceApi.read_clusters',
-        return_value=list_two_clusters_with_one_tmp_resource,
-    ), mock.patch(
-        'cm_client.TimeSeriesResourceApi.query_time_series',
-        side_effect=get_timeseries_resource,
-    ), mock.patch(
-        'cm_client.ClustersResourceApi.list_hosts',
-        return_value=list_hosts_resource,
-    ), mock.patch(
-        'cm_client.EventsResourceApi.read_events',
-        return_value=read_events_resource,
-    ):
-        # Given
-        check = cloudera_check(instance_autodiscover_include_with_two_entries_dict)
-        # When
-        dd_run_check(check)
-        # Then
-        for category, metrics in METRICS.items():
-            for metric in metrics:
-                aggregator.assert_metric(f'cloudera.{category}.{metric}', count=2)
-                aggregator.assert_metric_has_tag_prefix(f'cloudera.{category}.{metric}', "cloudera_cluster")
-        aggregator.assert_service_check('cloudera.can_connect', AgentCheck.OK, tags=CAN_CONNECT_TAGS)
-        aggregator.assert_service_check('cloudera.cluster.health', AgentCheck.OK, tags=CLUSTER_1_HEALTH_TAGS, count=1)
-        aggregator.assert_service_check('cloudera.cluster.health', AgentCheck.OK, tags=CLUSTER_TMP_HEALTH_TAGS, count=1)
-
-
-def test_given_cloudera_check_when_autodiscover_configured_with_str_then_emits_configured_cluster_metrics(
-    aggregator,
-    dd_run_check,
-    cloudera_check,
-    instance_autodiscover_include_with_str,
-    cloudera_version_7_0_0,
-    list_two_clusters_with_one_tmp_resource,
-    list_hosts_resource,
-    read_events_resource,
-):
-    with mock.patch(
-        'cm_client.ClouderaManagerResourceApi.get_version',
-        return_value=cloudera_version_7_0_0,
-    ), mock.patch(
-        'cm_client.ClustersResourceApi.read_clusters',
-        return_value=list_two_clusters_with_one_tmp_resource,
-    ), mock.patch(
-        'cm_client.TimeSeriesResourceApi.query_time_series',
-        side_effect=get_timeseries_resource,
-    ), mock.patch(
-        'cm_client.ClustersResourceApi.list_hosts',
-        return_value=list_hosts_resource,
-    ), mock.patch(
-        'cm_client.EventsResourceApi.read_events',
-        return_value=read_events_resource,
-    ):
-        # Given
-        check = cloudera_check(instance_autodiscover_include_with_str)
-        # When
-        dd_run_check(check)
-        # Then
-        for category, metrics in METRICS.items():
-            for metric in metrics:
-                aggregator.assert_metric(f'cloudera.{category}.{metric}', count=1)
-                aggregator.assert_metric_has_tag_prefix(f'cloudera.{category}.{metric}', "cloudera_cluster")
-        aggregator.assert_service_check('cloudera.can_connect', AgentCheck.OK, tags=CAN_CONNECT_TAGS)
-        aggregator.assert_service_check('cloudera.cluster.health', AgentCheck.OK, tags=CLUSTER_1_HEALTH_TAGS, count=1)
-
-
-def test_given_cloudera_check_when_autodiscover_exclude_configured_then_emits_configured_cluster_metrics(
-    aggregator,
-    dd_run_check,
-    cloudera_check,
-    instance_autodiscover_exclude,
-    cloudera_version_7_0_0,
-    list_two_clusters_with_one_tmp_resource,
-    list_hosts_resource,
-    read_events_resource,
-):
-    with mock.patch(
-        'cm_client.ClouderaManagerResourceApi.get_version',
-        return_value=cloudera_version_7_0_0,
-    ), mock.patch(
-        'cm_client.ClustersResourceApi.read_clusters',
-        return_value=list_two_clusters_with_one_tmp_resource,
-    ), mock.patch(
-        'cm_client.TimeSeriesResourceApi.query_time_series',
-        side_effect=get_timeseries_resource,
-    ), mock.patch(
-        'cm_client.ClustersResourceApi.list_hosts',
-        return_value=list_hosts_resource,
-    ), mock.patch(
-        'cm_client.EventsResourceApi.read_events',
-        return_value=read_events_resource,
-    ):
-        # Given
-        check = cloudera_check(instance_autodiscover_exclude)
-        # When
-        dd_run_check(check)
-        # Then
-        for category, metrics in METRICS.items():
-            for metric in metrics:
-                aggregator.assert_metric(f'cloudera.{category}.{metric}', count=1)
-                aggregator.assert_metric_has_tag_prefix(f'cloudera.{category}.{metric}', "cloudera_cluster")
-        aggregator.assert_service_check('cloudera.can_connect', AgentCheck.OK, tags=CAN_CONNECT_TAGS)
-        aggregator.assert_service_check('cloudera.cluster.health', AgentCheck.OK, tags=CLUSTER_1_HEALTH_TAGS, count=1)
-
-
-def test_given_cloudera_check_when_autodiscover_empty_clusters_then_emits_zero_cluster_metrics(
-    aggregator,
-    dd_run_check,
-    cloudera_check,
-    instance_autodiscover_clusters_include_with_one_entry_dict,
-    cloudera_version_7_0_0,
-    list_empty_clusters_resource,
-    list_hosts_resource,
-):
-    with mock.patch(
-        'cm_client.ClouderaManagerResourceApi.get_version',
-        return_value=cloudera_version_7_0_0,
-    ), mock.patch(
-        'cm_client.ClustersResourceApi.read_clusters',
-        return_value=list_empty_clusters_resource,
-    ), mock.patch(
-        'cm_client.TimeSeriesResourceApi.query_time_series',
-        side_effect=get_timeseries_resource,
-    ), mock.patch(
-        'cm_client.ClustersResourceApi.list_hosts',
-        return_value=list_hosts_resource,
-    ):
-        # Given
-        check = cloudera_check(instance_autodiscover_clusters_include_with_one_entry_dict)
-        # When
-        dd_run_check(check)
-        # Then
-        for category, metrics in METRICS.items():
-            for metric in metrics:
-                aggregator.assert_metric(f'cloudera.{category}.{metric}', count=0)
-
-        aggregator.assert_service_check('cloudera.can_connect', AgentCheck.OK, tags=CAN_CONNECT_TAGS)
-        aggregator.assert_service_check('cloudera.cluster.health', AgentCheck.OK, tags=CLUSTER_1_HEALTH_TAGS, count=0)
-
-
 def test_given_custom_queries_then_retrieve_metrics_unit(
     aggregator,
     dd_run_check,
@@ -474,27 +265,182 @@ def test_given_custom_queries_then_retrieve_metrics_unit(
         aggregator.assert_metric("cloudera.cluster.foo")
 
 
-def test_autodiscover_hosts_configured_include_not_array_then_emits_critical_service(
-    aggregator,
+@pytest.mark.parametrize(
+    'instance_autodiscover',
+    [
+        {'clusters': {'include': {'^cluster.*'}}},
+    ],
+    ids=["clusters configured not a list"],
+    indirect=['instance_autodiscover'],
+)
+def test_autodiscover_clusters_configured_include_not_array_then_exception_is_raised(
     dd_run_check,
     cloudera_check,
-    instance_autodiscover_hosts_include_not_array,
+    instance_autodiscover,
     cloudera_version_7_0_0,
-    list_two_clusters_with_one_tmp_resource,
+):
+    with mock.patch(
+        'cm_client.ClouderaManagerResourceApi.get_version',
+        return_value=cloudera_version_7_0_0,
+    ), pytest.raises(
+        Exception,
+        match='Setting `include` must be an array',
+    ):
+        check = cloudera_check(instance_autodiscover)
+        dd_run_check(check)
+
+
+@pytest.mark.parametrize(
+    'instance_autodiscover, read_clusters, list_hosts, dd_run_check_count, expected_list',
+    [
+        (
+            {'clusters': {}},
+            {'number': 0, 'prefix': [], 'status': ['GOOD_HEALTH']},
+            {'number': 0, 'prefix': []},
+            1,
+            [{'metric_count': 0, 'call_count': 1}],
+        ),
+        (
+            {'clusters': {'include': ['.*']}},
+            {'number': 0, 'prefix': [], 'status': ['GOOD_HEALTH']},
+            {'number': 0, 'prefix': []},
+            1,
+            [{'metric_count': 0, 'call_count': 1}],
+        ),
+        (
+            {'clusters': {'include': ['.*']}},
+            {'number': 1, 'prefix': ['cluster_'], 'status': ['GOOD_HEALTH']},
+            {'number': 0, 'prefix': []},
+            1,
+            [{'metric_count': 1, 'call_count': 1}],
+        ),
+        (
+            {'clusters': {'include': ['.*']}},
+            {'number': 10, 'prefix': ['cluster_'], 'status': ['GOOD_HEALTH']},
+            {'number': 0, 'prefixes': []},
+            1,
+            [{'metric_count': 10, 'call_count': 1}],
+        ),
+        (
+            {'clusters': {'include': ['^cluster_.*']}},
+            {'number': 1, 'prefix': ['cluster_', 'tmp_'], 'status': ['GOOD_HEALTH']},
+            {'number': 0, 'prefixes': []},
+            1,
+            [{'metric_count': 1, 'call_count': 1}],
+        ),
+        (
+            {'clusters': {'include': ['.*'], 'exclude': ['^tmp_*']}},
+            {'number': 1, 'prefix': ['cluster_', 'tmp_'], 'status': ['GOOD_HEALTH']},
+            {'number': 0, 'prefixes': []},
+            1,
+            [{'metric_count': 1, 'call_count': 1}],
+        ),
+        (
+            {'clusters': {'include': ['.*'], 'limit': 5}},
+            {'number': 10, 'prefix': ['cluster_'], 'status': ['GOOD_HEALTH']},
+            {'number': 0, 'prefixes': []},
+            1,
+            [{'metric_count': 5, 'call_count': 1}],
+        ),
+        (
+            {'clusters': {'include': ['.*']}},
+            {'number': 10, 'prefix': ['cluster_'], 'status': ['GOOD_HEALTH']},
+            {'number': 0, 'prefixes': []},
+            2,
+            [{'metric_count': 20, 'call_count': 2}],
+        ),
+        (
+            {'clusters': {'include': ['.*'], 'interval': 60}},
+            {'number': 10, 'prefix': ['cluster_'], 'status': ['GOOD_HEALTH']},
+            {'number': 0, 'prefixes': []},
+            2,
+            [{'metric_count': 20, 'call_count': 1}],
+        ),
+    ],
+    ids=[
+        "empty clusters",
+        "include all clusters / read 0 clusters",
+        "include all clusters / read 1 cluster",
+        "include all clusters / read 10 clusters",
+        "include 'cluster_*' clusters / read 2 clusters ('cluster_0' and 'tmp_0')",
+        "include all and exclude 'tmp_*' clusters / read 2 clusters ('cluster_0' and 'tmp_0')",
+        "include all and limit to 5 / read 10 clusters",
+        "include all in two runs / read 10 clusters",
+        "include all and interval to 60 in two runs / read 10 clusters",
+    ],
+    indirect=[
+        'instance_autodiscover',
+        'read_clusters',
+        'list_hosts',
+    ],
+)
+def test_autodiscover_clusters(
+    instance_autodiscover,
+    read_clusters,
+    list_hosts,
+    dd_run_check_count,
+    expected_list,
+    cloudera_version_7_0_0,
+    cloudera_check,
+    dd_run_check,
+    aggregator,
 ):
     with mock.patch(
         'cm_client.ClouderaManagerResourceApi.get_version',
         return_value=cloudera_version_7_0_0,
     ), mock.patch(
         'cm_client.ClustersResourceApi.read_clusters',
-        return_value=list_two_clusters_with_one_tmp_resource,
+        return_value=read_clusters,
+    ) as mocked_read_clusters, mock.patch(
+        'cm_client.EventsResourceApi.read_events',
+        side_effect=Exception,
     ), mock.patch(
         'cm_client.TimeSeriesResourceApi.query_time_series',
         side_effect=get_timeseries_resource,
+    ), mock.patch(
+        'cm_client.ClustersResourceApi.list_hosts',
+        return_value=list_hosts,
     ):
-        check = cloudera_check(instance_autodiscover_hosts_include_not_array)
-        dd_run_check(check)
+        check = cloudera_check(instance_autodiscover)
+        for _ in range(dd_run_check_count):
+            dd_run_check(check)
+        for expected in expected_list:
+            for metric in METRICS['cluster']:
+                aggregator.assert_metric(f'cloudera.cluster.{metric}', count=expected['metric_count'])
+            assert mocked_read_clusters.call_count == expected['call_count']
 
+
+@pytest.mark.parametrize(
+    'instance_autodiscover, read_clusters',
+    [
+        (
+            {'tags': ['test1'], 'clusters': {'include': [{'.*': {'hosts': {'include': {'^host.*'}}}}]}},
+            {'number': 1, 'prefix': ['cluster_'], 'status': ['GOOD_HEALTH']},
+        ),
+    ],
+    ids=["hosts configured not a list"],
+    indirect=[
+        'instance_autodiscover',
+        'read_clusters',
+    ],
+)
+def test_autodiscover_hosts_configured_include_not_array_then_emits_critical_service(
+    aggregator,
+    dd_run_check,
+    cloudera_check,
+    instance_autodiscover,
+    read_clusters,
+    cloudera_version_7_0_0,
+):
+    with mock.patch(
+        'cm_client.ClouderaManagerResourceApi.get_version',
+        return_value=cloudera_version_7_0_0,
+    ), mock.patch('cm_client.ClustersResourceApi.read_clusters', return_value=read_clusters,), mock.patch(
+        'cm_client.TimeSeriesResourceApi.query_time_series',
+        side_effect=get_timeseries_resource,
+    ):
+        check = cloudera_check(instance_autodiscover)
+        dd_run_check(check)
         aggregator.assert_service_check(
             'cloudera.can_connect',
             AgentCheck.CRITICAL,
@@ -504,210 +450,125 @@ def test_autodiscover_hosts_configured_include_not_array_then_emits_critical_ser
 
 
 @pytest.mark.parametrize(
-    'list_n_hosts_resource, expected_count',
+    'instance_autodiscover, read_clusters, list_hosts, dd_run_check_count, expected_list',
     [
         (
-            {
-                'number': 1,
-                'prefixes': ['host_', 'tmp_'],
-            },
+            {'clusters': {}},
+            {'number': 1, 'prefix': ['cluster_'], 'status': ['GOOD_HEALTH']},
+            {'number': 0, 'prefix': []},
             1,
+            [{'metric_count': 0, 'call_count': 1}],
         ),
         (
-            {
-                'number': 2,
-                'prefixes': ['host_'],
-            },
+            {'clusters': {'include': [{'.*': {'hosts': {'include': ['.*']}}}]}},
+            {'number': 1, 'prefix': ['cluster_'], 'status': ['GOOD_HEALTH']},
+            {'number': 0, 'prefix': []},
+            1,
+            [{'metric_count': 0, 'call_count': 1}],
+        ),
+        (
+            {'clusters': {'include': [{'.*': {'hosts': {'include': ['.*']}}}]}},
+            {'number': 1, 'prefix': ['cluster_'], 'status': ['GOOD_HEALTH']},
+            {'number': 1, 'prefix': ['host_']},
+            1,
+            [{'metric_count': 1, 'call_count': 1}],
+        ),
+        (
+            {'clusters': {'include': [{'.*': {'hosts': {'include': ['.*']}}}]}},
+            {'number': 1, 'prefix': ['cluster_'], 'status': ['GOOD_HEALTH']},
+            {'number': 5, 'prefix': ['host_']},
+            1,
+            [{'metric_count': 5, 'call_count': 1}],
+        ),
+        (
+            {'clusters': {'include': [{'.*': {'hosts': {'include': ['.*']}}}]}},
+            {'number': 2, 'prefix': ['cluster_'], 'status': ['GOOD_HEALTH']},
+            {'number': 1, 'prefix': ['host_']},
+            1,
+            [{'metric_count': 2, 'call_count': 2}],
+        ),
+        (
+            {'clusters': {'include': [{'.*': {'hosts': {'include': ['^host_.*']}}}]}},
+            {'number': 1, 'prefix': ['cluster_'], 'status': ['GOOD_HEALTH']},
+            {'number': 1, 'prefix': ['host_', 'tmp_']},
+            1,
+            [{'metric_count': 1, 'call_count': 1}],
+        ),
+        (
+            {'clusters': {'include': [{'.*': {'hosts': {'include': ['.*'], 'exclude': ['^tmp_.*']}}}]}},
+            {'number': 1, 'prefix': ['cluster_'], 'status': ['GOOD_HEALTH']},
+            {'number': 1, 'prefix': ['host_', 'tmp_']},
+            1,
+            [{'metric_count': 1, 'call_count': 1}],
+        ),
+        (
+            {'clusters': {'include': [{'.*': {'hosts': {'include': ['.*'], 'limit': 5}}}]}},
+            {'number': 1, 'prefix': ['cluster_'], 'status': ['GOOD_HEALTH']},
+            {'number': 10, 'prefix': ['host_']},
+            1,
+            [{'metric_count': 5, 'call_count': 1}],
+        ),
+        (
+            {'clusters': {'include': [{'.*': {'hosts': {'include': ['.*']}}}]}},
+            {'number': 1, 'prefix': ['cluster_'], 'status': ['GOOD_HEALTH']},
+            {'number': 10, 'prefix': ['host_']},
             2,
+            [{'metric_count': 20, 'call_count': 2}],
+        ),
+        (
+            {'clusters': {'include': [{'.*': {'hosts': {'include': ['.*'], 'interval': 60}}}]}},
+            {'number': 1, 'prefix': ['cluster_'], 'status': ['GOOD_HEALTH']},
+            {'number': 10, 'prefix': ['host_']},
+            2,
+            [{'metric_count': 20, 'call_count': 1}],
         ),
     ],
-    ids=["one host", "two hosts"],
-    indirect=['list_n_hosts_resource'],
-)
-def test_autodiscover_hosts_configured_with_one_entry_dict_then_emits_configured_host_metrics(
-    aggregator,
-    dd_run_check,
-    cloudera_check,
-    instance_autodiscover_hosts_include_with_one_entry_dict,
-    cloudera_version_7_0_0,
-    list_two_clusters_with_one_tmp_resource,
-    list_n_hosts_resource,
-    read_events_resource,
-    expected_count,
-):
-    with mock.patch(
-        'cm_client.ClouderaManagerResourceApi.get_version',
-        return_value=cloudera_version_7_0_0,
-    ), mock.patch(
-        'cm_client.ClustersResourceApi.read_clusters',
-        return_value=list_two_clusters_with_one_tmp_resource,
-    ), mock.patch(
-        'cm_client.TimeSeriesResourceApi.query_time_series',
-        side_effect=get_timeseries_resource,
-    ), mock.patch(
-        'cm_client.ClustersResourceApi.list_hosts',
-        return_value=list_n_hosts_resource,
-    ), mock.patch(
-        'cm_client.EventsResourceApi.read_events',
-        return_value=read_events_resource,
-    ):
-        # Given
-        check = cloudera_check(instance_autodiscover_hosts_include_with_one_entry_dict)
-        # When
-        dd_run_check(check)
-        # Then
-        for metric in METRICS['host']:
-            aggregator.assert_metric(f'cloudera.host.{metric}', count=expected_count)
-            aggregator.assert_metric_has_tag_prefix(f'cloudera.host.{metric}', "cloudera_cluster")
-
-
-@pytest.mark.parametrize(
-    'list_n_hosts_resource, expected_count',
-    [
-        (
-            {
-                'number': 1,
-                'prefixes': ['host_'],
-            },
-            2,
-        )
+    ids=[
+        "empty hosts",
+        "include all hosts / read 1 cluster with 0 hosts",
+        "include all hosts/ read 1 cluster with 1 host",
+        "include all hosts/ read 1 cluster with 5 hosts",
+        "include all hosts/ read 2 clusters with 1 host each",
+        "include 'host_*' hosts / read 1 cluster with 2 hosts ('host_0' and 'tmp_0')",
+        "include all and exclude 'tmp_*' hosts / read 1 cluster with 2 hosts ('host_0' and 'tmp_0')",
+        "include all and limit to 5 / read 1 cluster with 10 hosts",
+        "include all in two runs / read 1 cluster with 10 hosts",
+        "include all and interval to 60 in two runs / read 1 cluster with 10 hosts",
     ],
-    ids=["two runs without setting interval"],
-    indirect=['list_n_hosts_resource'],
-)
-def test_autodiscover_hosts_configured_without_interval_and_two_runs_then_emits_configured_host_metrics(
-    aggregator,
-    dd_run_check,
-    cloudera_check,
-    instance_autodiscover_hosts_include_with_one_entry_dict,
-    cloudera_version_7_0_0,
-    list_two_clusters_with_one_tmp_resource,
-    list_n_hosts_resource,
-    read_events_resource,
-    expected_count,
-):
-    with mock.patch(
-        'cm_client.ClouderaManagerResourceApi.get_version',
-        return_value=cloudera_version_7_0_0,
-    ), mock.patch(
-        'cm_client.ClustersResourceApi.read_clusters',
-        return_value=list_two_clusters_with_one_tmp_resource,
-    ), mock.patch(
-        'cm_client.TimeSeriesResourceApi.query_time_series',
-        side_effect=get_timeseries_resource,
-    ), mock.patch(
-        'cm_client.ClustersResourceApi.list_hosts',
-        return_value=list_n_hosts_resource,
-    ) as mocked_list_hosts, mock.patch(
-        'cm_client.EventsResourceApi.read_events',
-        return_value=read_events_resource,
-    ):
-        # Given
-        check = cloudera_check(instance_autodiscover_hosts_include_with_one_entry_dict)
-        # When
-        dd_run_check(check)
-        dd_run_check(check)
-        # Then
-        for metric in METRICS['host']:
-            aggregator.assert_metric(f'cloudera.host.{metric}', count=expected_count)
-            aggregator.assert_metric_has_tag_prefix(f'cloudera.host.{metric}', "cloudera_cluster")
-        assert mocked_list_hosts.call_count == 2
-
-
-@pytest.mark.parametrize(
-    'list_n_hosts_resource, expected_count',
-    [
-        (
-            {
-                'number': 1,
-                'prefixes': ['host_'],
-            },
-            2,
-        )
+    indirect=[
+        'instance_autodiscover',
+        'read_clusters',
+        'list_hosts',
     ],
-    ids=["two runs setting interval"],
-    indirect=['list_n_hosts_resource'],
 )
-def test_autodiscover_hosts_configured_with_interval_and_two_runs_then_emits_configured_host_metrics(
-    aggregator,
-    dd_run_check,
-    cloudera_check,
-    instance_autodiscover_hosts_include_with_one_entry_dict_and_interval,
+def test_autodiscover_hosts(
+    instance_autodiscover,
+    read_clusters,
+    list_hosts,
+    dd_run_check_count,
+    expected_list,
     cloudera_version_7_0_0,
-    list_two_clusters_with_one_tmp_resource,
-    list_n_hosts_resource,
-    read_events_resource,
-    expected_count,
+    cloudera_check,
+    dd_run_check,
+    aggregator,
 ):
     with mock.patch(
         'cm_client.ClouderaManagerResourceApi.get_version',
         return_value=cloudera_version_7_0_0,
-    ), mock.patch(
-        'cm_client.ClustersResourceApi.read_clusters',
-        return_value=list_two_clusters_with_one_tmp_resource,
-    ), mock.patch(
-        'cm_client.TimeSeriesResourceApi.query_time_series',
-        side_effect=get_timeseries_resource,
-    ), mock.patch(
-        'cm_client.ClustersResourceApi.list_hosts',
-        return_value=list_n_hosts_resource,
-    ) as mocked_list_hosts, mock.patch(
+    ), mock.patch('cm_client.ClustersResourceApi.read_clusters', return_value=read_clusters,), mock.patch(
         'cm_client.EventsResourceApi.read_events',
-        return_value=read_events_resource,
-    ):
-        # Given
-        check = cloudera_check(instance_autodiscover_hosts_include_with_one_entry_dict_and_interval)
-        # When
-        dd_run_check(check)
-        dd_run_check(check)
-        # Then
-        for metric in METRICS['host']:
-            aggregator.assert_metric(f'cloudera.host.{metric}', count=expected_count)
-            aggregator.assert_metric_has_tag_prefix(f'cloudera.host.{metric}', "cloudera_cluster")
-        mocked_list_hosts.assert_called_once()
-
-
-@pytest.mark.parametrize(
-    'list_n_hosts_resource, expected_count',
-    [
-        (
-            {
-                'number': 0,
-                'prefixes': [],
-            },
-            0,
-        )
-    ],
-    ids=["empty hosts"],
-    indirect=['list_n_hosts_resource'],
-)
-def test_when_autodiscover_empty_hosts_then_emits_zero_hosts_metrics(
-    aggregator,
-    dd_run_check,
-    cloudera_check,
-    instance_autodiscover_clusters_include_with_one_entry_dict,
-    cloudera_version_7_0_0,
-    list_two_clusters_with_one_tmp_resource,
-    list_n_hosts_resource,
-    expected_count,
-):
-    with mock.patch(
-        'cm_client.ClouderaManagerResourceApi.get_version',
-        return_value=cloudera_version_7_0_0,
-    ), mock.patch(
-        'cm_client.ClustersResourceApi.read_clusters',
-        return_value=list_two_clusters_with_one_tmp_resource,
+        side_effect=Exception,
     ), mock.patch(
         'cm_client.TimeSeriesResourceApi.query_time_series',
         side_effect=get_timeseries_resource,
     ), mock.patch(
         'cm_client.ClustersResourceApi.list_hosts',
-        return_value=list_n_hosts_resource,
-    ):
-        # Given
-        check = cloudera_check(instance_autodiscover_clusters_include_with_one_entry_dict)
-        # When
-        dd_run_check(check)
-        # Then
-        for metric in METRICS['host']:
-            aggregator.assert_metric(f'cloudera.host.{metric}', count=expected_count)
+        return_value=list_hosts,
+    ) as mocked_list_hosts:
+        check = cloudera_check(instance_autodiscover)
+        for _ in range(dd_run_check_count):
+            dd_run_check(check)
+        for expected in expected_list:
+            for metric in METRICS['host']:
+                aggregator.assert_metric(f'cloudera.host.{metric}', count=expected['metric_count'])
+            assert mocked_list_hosts.call_count == expected['call_count']

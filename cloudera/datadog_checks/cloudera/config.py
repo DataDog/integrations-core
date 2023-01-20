@@ -2,6 +2,22 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+
+TYPE_STORAGE = {
+    str: (lambda config, entry: normalize_str(config, entry)),
+    dict: (lambda config, entry: normalize_dict(config, entry)),
+}
+
+
+def normalize_str(config, entry):
+    config[entry] = None
+
+
+def normalize_dict(config, entry):
+    for key, value in entry.items():
+        config[key] = value.copy()
+
+
 # Discovery class requires 'include' to be a dict, so this function is needed to normalize the config
 def normalize_discover_config_include(log, clusters_config):
     config = {}
@@ -17,9 +33,5 @@ def normalize_discover_config_include(log, clusters_config):
     if not isinstance(include_list, list):
         raise TypeError('Setting `include` must be an array')
     for entry in include_list:
-        if isinstance(entry, str):
-            config[entry] = None
-        elif isinstance(entry, dict):
-            for key, value in entry.items():
-                config[key] = value.copy()
+        TYPE_STORAGE[type(entry)](config, entry)
     return config
