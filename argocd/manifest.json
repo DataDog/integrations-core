@@ -40,7 +40,10 @@
         "metadata_path": "assets/service_checks.json"
       }
     },
-    "logs": {}
+    "logs": {},
+    "dashboards": {
+      "Argo CD Overview": "assets/dashboards/argo_cd_overview.json"
+    }
   },
   "author": {
     "support_email": "help@datadoghq.com",
