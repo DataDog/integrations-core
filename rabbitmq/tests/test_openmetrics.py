@@ -1,3 +1,6 @@
+# (C) Datadog, Inc. 2023-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
 from itertools import product
 from pathlib import Path
 from urllib.parse import urlparse
