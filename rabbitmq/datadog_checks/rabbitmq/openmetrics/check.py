@@ -21,5 +21,12 @@ class RabbitMQOpenMetrics(OpenMetricsBaseCheckV2):
         if self.instance['prometheus_plugin'].get('include_aggregated_endpoint', True):
             endpoints.append(("/metrics", {'metrics': [metrics.aggregated_renames(exclude_from_agg)]}))
         for ep, ep_config in endpoints:
-            self.scraper_configs.append({**self.instance, 'openmetrics_endpoint': base_url + ep, **ep_config})
+            self.scraper_configs.append(
+                {
+                    **self.instance,
+                    'openmetrics_endpoint': base_url + ep,
+                    **ep_config,
+                    'share_labels': {'rabbitmq_identity_info': True},
+                }
+            )
         super().configure_scrapers()
