@@ -123,7 +123,7 @@ _GAUGES = {
     "erlang_vm_dirty_cpu_schedulers": "erlang.vm.dirty_cpu_schedulers",
     "erlang_vm_dirty_cpu_schedulers_online": "erlang.vm.dirty_cpu_schedulers_online",
     "erlang_vm_dirty_io_schedulers": "erlang.vm.dirty_io_schedulers",
-    "erlang_vm_dist_node_queue_size_bytes": "erlang.vm.dist.node_queue.size_bytes",
+    "erlang_vm_dist_node_queue_size_bytes": "erlang.vm.dist.node_queue_size_bytes",
     "erlang_vm_dist_node_state": "erlang.vm.dist.node_state",
     "erlang_vm_dist_port_input_bytes": "erlang.vm.dist.port_input_bytes",
     "erlang_vm_dist_port_memory_bytes": "erlang.vm.dist.port_memory_bytes",

@@ -305,7 +305,7 @@ DEFAULT_OPENMETRICS = [
 ]
 
 MISSING_OPENMETRICS = [
-    'rabbitmq.erlang.vm.dist.node_queue.size_bytes',
+    'rabbitmq.erlang.vm.dist.node_queue_size_bytes',
     'rabbitmq.erlang.vm.dist.node_state',
     'rabbitmq.erlang.vm.dist.port_input_bytes',
     'rabbitmq.erlang.vm.dist.port_memory_bytes',
