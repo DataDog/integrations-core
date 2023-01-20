@@ -6,7 +6,7 @@
 * [Added] Add SLRU cache metrics for Postgres. See [#13476](https://github.com/DataDog/integrations-core/pull/13476).
 * [Added] Add `postgresql.replication.backend_xmin_age` metric and use `client_addr` as additional label. See [#13413](https://github.com/DataDog/integrations-core/pull/13413).
 * [Fixed] Update dependencies. See [#13726](https://github.com/DataDog/integrations-core/pull/13726).
-* [Fixed] replication role tag bug fix. See [#13694](https://github.com/DataDog/integrations-core/pull/13694).
+* [Fixed] Fix bug in replication role tag. See [#13694](https://github.com/DataDog/integrations-core/pull/13694).
 * [Fixed] Bump the base check dependency. See [#13643](https://github.com/DataDog/integrations-core/pull/13643).
 
 ## 13.2.0 / 2022-12-09
