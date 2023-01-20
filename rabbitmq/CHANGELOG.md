@@ -3,7 +3,7 @@
 ## 3.3.0 / 2023-01-20
 
 * [Added] Support RabbitMQ Prometheus Metrics. See [#13662](https://github.com/DataDog/integrations-core/pull/13662).
-* [Added] [rabbitmq] Add drop unroutable metric. See [#13553](https://github.com/DataDog/integrations-core/pull/13553). Thanks [laststem](https://github.com/laststem).
+* [Added] Add drop unroutable metric. See [#13553](https://github.com/DataDog/integrations-core/pull/13553). Thanks [laststem](https://github.com/laststem).
 
 ## 3.2.0 / 2022-09-16 / Agent 7.40.0
 
