@@ -4,6 +4,8 @@
 
 from packaging import version
 
+from datadog_checks.rabbitmq import RabbitMQ
+
 from .common import RABBITMQ_VERSION
 
 COMMON_METRICS = [
@@ -367,3 +369,41 @@ FLAKY_E2E_METRICS = [
     'rabbitmq.global.publishers',
     'rabbitmq.process_start_time_seconds',
 ]
+
+
+def assert_metric_covered(aggregator):
+    # Node attributes
+    for mname in COMMON_METRICS:
+        aggregator.assert_metric_has_tag_prefix(mname, 'rabbitmq_node', count=1)
+
+    aggregator.assert_metric('rabbitmq.node.partitions', value=0, count=1)
+    aggregator.assert_metric('rabbitmq.connections', tags=['rabbitmq_vhost:/', "tag1:1", "tag2"], value=0, count=1)
+    aggregator.assert_metric(
+        'rabbitmq.connections', tags=['rabbitmq_vhost:myvhost', "tag1:1", "tag2"], value=0, count=1
+    )
+    aggregator.assert_metric(
+        'rabbitmq.connections', tags=['rabbitmq_vhost:myothervhost', "tag1:1", "tag2"], value=0, count=1
+    )
+
+    # Queue attributes, should be only one queue fetched
+    for mname in Q_METRICS:
+        aggregator.assert_metric_has_tag(mname, 'rabbitmq_queue:test1', count=1)
+    # Exchange attributes, should be only one exchange fetched
+    for mname in E_METRICS:
+        aggregator.assert_metric_has_tag(mname, 'rabbitmq_exchange:test1', count=1)
+    # Overview attributes
+    for mname in OVERVIEW_METRICS_TOTALS:
+        aggregator.assert_metric_has_tag(mname, 'rabbitmq_cluster:rabbitmqtest', count=1)
+    for mname in OVERVIEW_METRICS_MESSAGES:
+        # All messages metrics are not always present, so we assert with at_least=0
+        aggregator.assert_metric_has_tag(mname, 'rabbitmq_cluster:rabbitmqtest', at_least=0)
+
+    aggregator.assert_service_check('rabbitmq.aliveness', tags=['vhost:/', "tag1:1", "tag2"], status=RabbitMQ.OK)
+    aggregator.assert_service_check('rabbitmq.aliveness', tags=['vhost:myvhost', "tag1:1", "tag2"], status=RabbitMQ.OK)
+    aggregator.assert_service_check(
+        'rabbitmq.aliveness', tags=['vhost:myothervhost', "tag1:1", "tag2"], status=RabbitMQ.OK
+    )
+
+    aggregator.assert_service_check('rabbitmq.status', tags=["tag1:1", "tag2"], status=RabbitMQ.OK)
+
+    aggregator.assert_all_metrics_covered()
