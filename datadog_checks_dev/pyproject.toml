@@ -1,7 +1,7 @@
 [build-system]
 requires = [
     "hatchling>=0.11.2",
-    "setuptools<61",
+    "setuptools>=66",
 ]
 build-backend = "hatchling.build"
 
@@ -87,7 +87,7 @@ cli = [
     "twine>=1.11.0",
     "virtualenv",
     # TODO: Remove once every check has a pyproject.toml
-    "setuptools<61",
+    "setuptools>=66",
     "wheel>=0.31.0",
 ]
 
