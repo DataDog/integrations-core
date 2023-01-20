@@ -434,13 +434,19 @@ class SQLServer(AgentCheck):
         if self.databases:
             for db in self.databases:
                 self._add_performance_counters(
-                    INSTANCE_METRICS_TOTAL, metrics_to_collect, tags, db=db.name, physical_database_name=db.physical_db_name
+                    INSTANCE_METRICS_TOTAL,
+                    metrics_to_collect,
+                    tags,
+                    db=db.name,
+                    physical_database_name=db.physical_db_name,
                 )
 
         # Load database statistics
         for name, table, column in DATABASE_METRICS:
             # include database as a filter option
-            db_names = [d.name for d in self.databases] or [self.instance.get('database', self.connection.DEFAULT_DATABASE)]
+            db_names = [d.name for d in self.databases] or [
+                self.instance.get('database', self.connection.DEFAULT_DATABASE)
+            ]
             for db_name in db_names:
                 cfg = {'name': name, 'table': table, 'column': column, 'instance_name': db_name, 'tags': tags}
                 metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
@@ -476,7 +482,9 @@ class SQLServer(AgentCheck):
         # Load DB Fragmentation metrics
         if is_affirmative(self.instance.get('include_db_fragmentation_metrics', False)):
             db_fragmentation_object_names = self.instance.get('db_fragmentation_object_names', [])
-            db_names = [d.name for d in self.databases] or [self.instance.get('database', self.connection.DEFAULT_DATABASE)]
+            db_names = [d.name for d in self.databases] or [
+                self.instance.get('database', self.connection.DEFAULT_DATABASE)
+            ]
 
             if not db_fragmentation_object_names:
                 self.log.debug(

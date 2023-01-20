@@ -9,6 +9,7 @@ from datadog_checks.base.utils.platform import Platform
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 DRIVER_CONFIG_DIR = os.path.join(CURRENT_DIR, 'data', 'driver_config')
 
+
 # Database is used to store both the name and physical_database_name
 # for a database, which is discovered via autodiscovery
 class Database:
