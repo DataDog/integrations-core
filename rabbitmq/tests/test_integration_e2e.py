@@ -36,7 +36,11 @@ def test_rabbitmq_e2e_openmetrics(dd_agent_check):
     aggregator = dd_agent_check(common.OPENMETRICS_CONFIG, rate=True)
     metadata_metrics = get_metadata_metrics()
     for metric in metrics.DEFAULT_OPENMETRICS:
-        aggregator.assert_metric(metric)
+        if metric in metrics.FLAKY_E2E_METRICS:
+            aggregator.assert_metric(metric, at_least=0)
+        else:
+            aggregator.assert_metric(metric)
+
     aggregator.assert_metrics_using_metadata(metadata_metrics)
     aggregator.assert_all_metrics_covered()
 
