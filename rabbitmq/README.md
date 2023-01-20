@@ -20,9 +20,13 @@ The RabbitMQ check is included in the [Datadog Agent][3] package. No additional 
 
 ### Configuration
 
+Rabbitmq exposes metrics in two ways: the [RabbitMQ Management Plugin][4] and the [Rabbitmq Prometheus Plugin][19]. We support both of these plugins.
+
 #### Prepare RabbitMQ
 
-Enable the [RabbitMQ Management Plugin][4]. The Agent user then needs at least the `monitoring` tag and these required permissions:
+These steps are only needed for the [RabbitMQ Management Plugin][4]. Starting with Rabbitmq v3.8 the [Rabbitmq Prometheus Plugin][19] is enabled by default and our integration communicates with it over an HTTP API.
+
+Enable the plugin. The Agent user then needs at least the `monitoring` tag and these required permissions:
 
 | Permission | Command            |
 | ---------- | ------------------ |
@@ -101,7 +105,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][9]
 | -------------------- | -------------------------------------------- |
 | `<INTEGRATION_NAME>` | `rabbitmq`                                   |
 | `<INIT_CONFIG>`      | blank or `{}`                                |
-| `<INSTANCE_CONFIG>`  | `{"rabbitmq_api_url":"%%host%%:15672/api/","username": <USERNAME>, "password": <PASSWORD>}` |
+| `<INSTANCE_CONFIG>`  | `{"prometheus_plugin": {"url": "%%host%%:15692"}}` |
 
 ##### Log collection
 
@@ -126,13 +130,7 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 See [metadata.csv][12] for a list of metrics provided by this integration.
 
-The Agent tags `rabbitmq.queue.*` metrics by queue name and `rabbitmq.node.*` metrics by node name.
-
 ### Events
-
-For performance reasons, the RabbitMQ check limits the number of exchanges, queues, and nodes it collects metrics for. If the check nears this limit, it emits a warning-level event to your event stream.
-
-If you require an increase in the number of exchanges, queues, or nodes, contact [Datadog support][13].
 
 ### Service Checks
 
@@ -172,3 +170,4 @@ Additional helpful documentation, links, and articles:
 [16]: https://www.datadoghq.com/blog/rabbitmq-monitoring-tools
 [17]: https://www.datadoghq.com/blog/monitoring-rabbitmq-performance-with-datadog
 [18]: https://docs.datadoghq.com/integrations/faq/tagging-rabbitmq-queues-by-tag-family/
+[19]: https://www.rabbitmq.com/prometheus.html
