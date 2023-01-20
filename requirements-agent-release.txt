@@ -156,7 +156,7 @@ datadog-tomcat==1.11.1
 datadog-traffic-server==1.1.0
 datadog-twemproxy==1.13.0
 datadog-twistlock==3.2.0
-datadog-varnish==1.14.2
+datadog-varnish==1.14.3
 datadog-vault==3.3.3
 datadog-vertica==3.4.1
 datadog-voltdb==2.1.2
