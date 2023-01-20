@@ -524,7 +524,7 @@
                                     ],
                                     "queries": [
                                         {
-                                            "query": "p99:cockroachdb.sql.txn.latency.bucket{$host,$store,$cluster,$node,$region}",
+                                            "query": "p99:cockroachdb.sql.txn.latency{$host,$store,$cluster,$node,$region}",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
