@@ -43,6 +43,9 @@
     "logs": {},
     "dashboards": {
       "Argo CD Overview": "assets/dashboards/argo_cd_overview.json"
+    },
+    "monitors": {
+      "Sync Status": "assets/recommended_monitors/application_sync_status.json"
     }
   },
   "author": {
