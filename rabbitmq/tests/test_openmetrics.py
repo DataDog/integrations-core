@@ -209,22 +209,22 @@ def test_aggregated_and_unaggregated_endpoints(endpoint, metrics, aggregator, dd
 @pytest.mark.parametrize(
     'prom_plugin_settings, err',
     [
-        pytest.param({}, r'prometheus_plugin\.url field is required\.', id="No URL supplied."),
+        pytest.param({}, r"'prometheus_plugin\.url' field is required\.", id="No URL supplied."),
         pytest.param(
             {'url': 'localhost'},
-            r'prometheus_plugin\.url field must be an HTTP or HTTPS URL\.',
+            r"'prometheus_plugin\.url' field must be an HTTP or HTTPS URL\.",
             id="URL supplied without HTTP(S) protocol.",
         ),
         pytest.param(
             {'url': "http://localhost", "unaggregated_endpoint": "detailed?"},
-            r"prometheus_plugin\.unaggregated_endpoint must be either 'per-object' "
-            + r"or 'detailed' or 'detailed\?<QUERY>'\.",
+            r"'prometheus_plugin\.unaggregated_endpoint' must be 'per-object', "
+            + r"'detailed', or 'detailed\?<QUERY>'\.",
             id="Invalid nonempty unaggregated_endpoint value.",
         ),
         pytest.param(
             {'url': "http://localhost", "unaggregated_endpoint": ""},
-            r"prometheus_plugin\.unaggregated_endpoint must be either 'per-object' "
-            + r"or 'detailed' or 'detailed\?<QUERY>'\.",
+            r"'prometheus_plugin\.unaggregated_endpoint' must be 'per-object', "
+            + r"'detailed', or 'detailed\?<QUERY>'\.",
             id="Empty unaggregated_endpoint value is invalid.",
         ),
         pytest.param(
@@ -234,7 +234,7 @@ def test_aggregated_and_unaggregated_endpoints(endpoint, metrics, aggregator, dd
         ),
         pytest.param(
             {'url': "http://localhost", "include_aggregated_endpoint": 1},
-            r"prometheus_plugin\.include_aggregated_endpoint must be a boolean\.",
+            r"'prometheus_plugin\.include_aggregated_endpoint' must be a boolean\.",
             id="Aggregated_endpoint must be a boolean.",
         ),
     ],
