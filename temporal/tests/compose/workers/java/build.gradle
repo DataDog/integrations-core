@@ -24,25 +24,20 @@ repositories {
 
 // @@@SNIPSTART hello-world-project-template-java-gradle-dependencies
 dependencies {
-    implementation group: 'io.temporal', name: 'temporal-sdk', version: '1.11.0'
+    implementation group: 'io.temporal', name: 'temporal-sdk', version: '1.17.0'
     implementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.11'
     implementation group: 'commons-configuration', name: 'commons-configuration', version: '1.10'
 
     testImplementation group: 'io.temporal', name: 'temporal-testing', version: '1.11.0'
     testImplementation group: 'junit', name: 'junit', version: '4.13.2'
     testImplementation group: 'org.mockito', name: 'mockito-core', version: '4.5.1'
+    implementation "io.micrometer:micrometer-registry-prometheus"
 }
 // @@@SNIPEND
 
 application {
     // Define the main class for the application.
     mainClassName = 'helloworldapp.InitiateHelloWorld'
-}
-
-// @@@SNIPSTART hello-world-project-template-java-gradle-tasks
-task sayHello(type: JavaExec) {
-    main = 'helloworldapp.InitiateHelloWorld'
-    classpath = sourceSets.main.runtimeClasspath
 }
 
 task startWorker(type: JavaExec) {

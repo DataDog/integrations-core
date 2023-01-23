@@ -114,6 +114,8 @@ services:
       temporal:
         condition: service_healthy
     container_name: temporal-java-worker
+    ports:
+      - 8003:8080
     networks:
       - temporal-network
   temporal-go-worker:
