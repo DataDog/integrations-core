@@ -35,7 +35,7 @@ TYPES_DEPS = [
     'types-simplejson==3.17.5',
 ]
 # Keep in sync with: /datadog_checks_base/datadog_checks/data/agent_requirements.in and ./hatch/environment_collector.py
-PYDANTIC_DEP = 'pydantic==1.10.2'
+PYDANTIC_DEP = 'pydantic==1.10.4'
 
 
 @tox.hookimpl
