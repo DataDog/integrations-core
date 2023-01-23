@@ -29,6 +29,7 @@ from .common import (
     YARN_CLUSTER_METRICS_VALUES,
     YARN_CLUSTER_TAG,
     YARN_COLLECT_APPS_ALL_STATES_CONFIG,
+    YARN_COLLECT_APPS_FAILED_INSTANCE_CONFIG,
     YARN_CONFIG,
     YARN_CONFIG_EXCLUDING_APP,
     YARN_CONFIG_SPLIT_APPLICATION_TAGS,
@@ -330,6 +331,20 @@ def test_collect_apps_all_states(dd_run_check, aggregator, mocked_request):
     for app in YARN_APPS_ALL_STATES:
         for metric, value in iteritems(app['metric_values']):
             aggregator.assert_metric(metric, value=value, tags=app['tags'] + EXPECTED_TAGS, count=1)
+
+
+def test_collect_apps_failed_instance_state(dd_run_check, aggregator, mocked_request):
+    instance = YARN_COLLECT_APPS_FAILED_INSTANCE_CONFIG['instances'][0]
+    yarn = YarnCheck('yarn', YARN_COLLECT_APPS_FAILED_INSTANCE_CONFIG['init_config'], [instance])
+
+    dd_run_check(yarn)
+
+    # Even though both init_config and instance have `collect_apps_all_states: True`,
+    # `collect_apps_states_list: ['FAILED']` should override both.
+    # Therefore, metrics with `state` tag values of ` `RUNNING`, `KILLED`, or `NEW` should not be collected.
+    for app in YARN_APPS_ALL_STATES:
+        for metric, value in iteritems(app['metric_values']):
+            aggregator.assert_metric(metric, value=value, tags=app['tags'] + EXPECTED_TAGS, count=0)
 
 
 @pytest.mark.parametrize(
