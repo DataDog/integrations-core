@@ -99,12 +99,20 @@ files:
             description: |
               Enable this parameter to collect metrics from applications of all states when collecting yarn.app metrics.
               For example, collect metrics from applications with 'NEW', 'SUBMITTED', 'FINISHED', and other states.
+
+              This instance-level option of `collect_apps_all_states` overrides the init_config-level
+              `collect_apps_all_states` option and also the init_config-level `collect_apps_states_list` option.
             value:
               example: false
               type: boolean
           - name: collect_apps_states_list
             description: |
-              Configure the application states of which to collect application metrics.
+              Configure the application states of which to collect application metrics. 
+              Valid options are 'ALL', 'NEW', 'NEW_SAVING', 'SUBMITTED', 'ACCEPTED',
+              'RUNNING', 'FINISHED', 'FAILED', and 'KILLED'.
+
+              This instance-level option of `collect_apps_states_list` overrides the init_config-level
+              `collect_apps_states_list` option.
             value:
               type: array
               example: &yarn_app_states
