@@ -66,7 +66,7 @@ def dd_environment():
     if COUCHBASE_MAJOR_VERSION >= 7:
         conditions.append(WaitFor(load_sample_bucket))
     with docker_run(
-        compose_file=os.path.join(HERE, 'compose', 'standalone.compose'),
+        compose_file=os.path.join(HERE, 'compose', 'docker-compose.yaml'),
         env_vars={'CB_CONTAINER_NAME': CB_CONTAINER_NAME},
         conditions=conditions,
     ):
