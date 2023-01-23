@@ -1,5 +1,19 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 17.8.0 / 2023-01-20
+
+* [Added] Update style deps. See [#13740](https://github.com/DataDog/integrations-core/pull/13740).
+* [Fixed] Fix `ddev make release` when the `version` parameter is not provided. See [#13717](https://github.com/DataDog/integrations-core/pull/13717).
+* [Fixed] Improve startup time and fix some tests. See [#13703](https://github.com/DataDog/integrations-core/pull/13703).
+* [Fixed] Validate the new release version when provided. See [#13687](https://github.com/DataDog/integrations-core/pull/13687).
+* [Fixed] Always recreate the containers when using docker-compose in tests. See [#13685](https://github.com/DataDog/integrations-core/pull/13685).
+* [Fixed] Automatically delete the agent container when the container is stopped. See [#13675](https://github.com/DataDog/integrations-core/pull/13675).
+* [Fixed] Support license header validation for files encoded with utf8 with bom. See [#13676](https://github.com/DataDog/integrations-core/pull/13676).
+* [Fixed] Stop ignoring the `protobuf` dependency when updating them. See [#13642](https://github.com/DataDog/integrations-core/pull/13642).
+* [Fixed] Skip yanked artifacts from PyPi. See [#13632](https://github.com/DataDog/integrations-core/pull/13632).
+* [Fixed] Update the hatch env selection to act as the tox one. See [#13644](https://github.com/DataDog/integrations-core/pull/13644).
+* [Fixed] Rename TOX_SKIP_ENV to SKIP_ENV_NAME. See [#13633](https://github.com/DataDog/integrations-core/pull/13633).
+
 ## 17.7.0 / 2022-12-27
 
 * [Added] Add hidden option to ignore manifest schema validation. See [#13569](https://github.com/DataDog/integrations-core/pull/13569).

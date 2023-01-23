@@ -1,5 +1,11 @@
 # CHANGELOG - Datadog Checks Downloader
 
+## 4.0.0 / 2023-01-20
+
+* [Fixed] Update dependencies. See [#13726](https://github.com/DataDog/integrations-core/pull/13726).
+* [Fixed] Fix path separator-related bug affecting Windows. See [#13631](https://github.com/DataDog/integrations-core/pull/13631).
+* [Removed] Update TUF to 2.0.0. See [#13331](https://github.com/DataDog/integrations-core/pull/13331).
+
 ## 3.10.1 / 2022-12-09
 
 * [Fixed] Update dependencies. See [#13478](https://github.com/DataDog/integrations-core/pull/13478).

@@ -1,5 +1,9 @@
 # CHANGELOG - varnish
 
+## 1.14.3 / 2023-01-20
+
+* [Fixed] Fix UNKNOWN service check with backend:name. See [#13706](https://github.com/DataDog/integrations-core/pull/13706).
+
 ## 1.14.2 / 2022-12-09
 
 * [Fixed] Stop using deprecated `distutils.version` classes. See [#13408](https://github.com/DataDog/integrations-core/pull/13408).
