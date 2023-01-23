@@ -143,8 +143,6 @@ def test_metrics(aggregator, dd_run_check, instance, couchbase_container_ip):
     """
     Test couchbase metrics not including 'couchbase.query.'
     """
-    # Few metrics are only available after some time post launch. Sleep to ensure they're present before we validate
-    time.sleep(15)
     couchbase = Couchbase('couchbase', {}, instances=[instance])
     dd_run_check(couchbase)
 

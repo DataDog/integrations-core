@@ -69,6 +69,8 @@ def dd_environment():
         compose_file=os.path.join(HERE, 'compose', 'docker-compose.yaml'),
         env_vars={'CB_CONTAINER_NAME': CB_CONTAINER_NAME},
         conditions=conditions,
+        sleep=15,
+
     ):
         yield deepcopy(DEFAULT_INSTANCE)
 
