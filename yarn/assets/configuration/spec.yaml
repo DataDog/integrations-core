@@ -6,7 +6,7 @@ files:
         options:
           - name: collect_apps_all_states
             description: |
-              Enable this parameter when using `collect_app_metrics` to collect metrics from applications of all states.
+              Enable this parameter to collect metrics from applications of all states when collecting yarn.app metrics.
               For example, collect metrics from applications with 'NEW', 'SUBMITTED', 'FINISHED', and other states.
             value:
               example: false
@@ -97,7 +97,7 @@ files:
               type: boolean
           - name: collect_apps_all_states
             description: |
-              Enable this parameter when using `collect_app_metrics` to collect metrics from applications of all states.
+              Enable this parameter to collect metrics from applications of all states when collecting yarn.app metrics.
               For example, collect metrics from applications with 'NEW', 'SUBMITTED', 'FINISHED', and other states.
             value:
               example: false
