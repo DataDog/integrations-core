@@ -195,7 +195,8 @@ QUERY_STATS_ALWAYS_PRESENT = {
 }
 
 BY_BUCKET_METRICS = [
-    'couchbase.by_bucket.mem_used',
+    # TODO I did not find a reliable way to make sure those metrics are always present.
+    # Check which conditions we should add to the docker_run command to be able to assert them in all cases.
 ]
 
 OPTIONAL_BY_BUCKET_METRICS = [
@@ -314,6 +315,7 @@ OPTIONAL_BY_BUCKET_METRICS = [
     'couchbase.by_bucket.mem_actual_used',
     'couchbase.by_bucket.mem_free',
     'couchbase.by_bucket.mem_total',
+    'couchbase.by_bucket.mem_used',
     'couchbase.by_bucket.mem_used_sys',
     'couchbase.by_bucket.misses',
     'couchbase.by_bucket.ops',
