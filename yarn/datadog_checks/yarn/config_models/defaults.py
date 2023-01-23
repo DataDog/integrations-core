@@ -14,10 +14,6 @@ def shared_collect_apps_all_states(field, value):
     return False
 
 
-def shared_collect_apps_states_list(field, value):
-    return get_default_field_value(field, value)
-
-
 def shared_proxy(field, value):
     return get_default_field_value(field, value)
 

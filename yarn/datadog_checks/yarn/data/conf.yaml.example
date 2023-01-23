@@ -8,22 +8,6 @@ init_config:
     #
     # collect_apps_all_states: false
 
-    ## @param collect_apps_states_list - list of strings - optional
-    ## Configure the application states of which to collect application metrics. 
-    ## Valid options are 'ALL', 'NEW', 'NEW_SAVING', 'SUBMITTED', 'ACCEPTED',
-    ## 'RUNNING', 'FINISHED', 'FAILED', and 'KILLED'.
-    #
-    # collect_apps_states_list:
-    #   - ALL
-    #   - NEW
-    #   - NEW_SAVING
-    #   - SUBMITTED
-    #   - ACCEPTED
-    #   - RUNNING
-    #   - FINISHED
-    #   - FAILED
-    #   - KILLED
-
     ## @param proxy - mapping - optional
     ## Set HTTP or HTTPS proxies for all instances. Use the `no_proxy` list
     ## to specify hosts that must bypass proxies.
@@ -138,9 +122,6 @@ instances:
     ## Configure the application states of which to collect application metrics. 
     ## Valid options are 'ALL', 'NEW', 'NEW_SAVING', 'SUBMITTED', 'ACCEPTED',
     ## 'RUNNING', 'FINISHED', 'FAILED', and 'KILLED'.
-    ##
-    ## This instance-level option of `collect_apps_states_list` overrides the init_config-level
-    ## `collect_apps_states_list` option.
     #
     # collect_apps_states_list:
     #   - ALL

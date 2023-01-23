@@ -240,11 +240,9 @@ class YarnCheck(AgentCheck):
             )
         )
 
-        collect_apps_states = self.instance.get(
-            'collect_apps_states_list', self.init_config.get('collect_apps_states_list', [])
-        )
+        collect_apps_states = self.instance.get('collect_apps_states_list', [])
 
-        if collect_apps_states:
+        if collect_apps_states and collect_apps_all_states:
             self.log.warning(
                 "Detected configured collect_apps_states_list, overriding any collect_apps_all_states value"
             )

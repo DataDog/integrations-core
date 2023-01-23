@@ -9,7 +9,7 @@
 
 from __future__ import annotations
 
-from typing import Literal, Optional, Sequence
+from typing import Optional, Sequence
 
 from pydantic import BaseModel, root_validator, validator
 
@@ -33,11 +33,6 @@ class SharedConfig(BaseModel):
         allow_mutation = False
 
     collect_apps_all_states: Optional[bool]
-    collect_apps_states_list: Optional[
-        Sequence[
-            Literal['ALL', 'NEW', 'NEW_SAVING', 'SUBMITTED', 'ACCEPTED', 'RUNNING', 'FINISHED', 'FAILED', 'KILLED']
-        ]
-    ]
     proxy: Optional[Proxy]
     service: Optional[str]
     skip_proxy: Optional[bool]
