@@ -12,6 +12,9 @@ from ..constants import get_root
 from ..utils import get_hatch_file
 from .format import parse_config_from_result
 
+_hatch = [sys.executable, "-m", "hatch", "env", "run", "--env"]
+_tox = [sys.executable, "-m", "tox", "--develop", "-e"]
+
 
 def _execute(check, command, env_vars):
     if E2E_TEAR_DOWN in env_vars:
@@ -32,9 +35,9 @@ def _execute(check, command, env_vars):
 def start_environment(check, env):
     env_vars = {E2E_TEAR_DOWN: 'false', 'PYTEST_ADDOPTS': '--exitfirst'}
     if file_exists(get_hatch_file(check)):
-        command = [sys.executable, "-m", 'hatch', 'env', 'run', '--env', env, 'test']
+        command = _hatch + [env, 'test']
     else:
-        command = [sys.executable, "-m", "tox", '--develop', '-e', env]
+        command = _tox + [env]
         env_vars['PYTEST_ADDOPTS'] += ' --benchmark-skip'
         env_vars[
             'TOX_TESTENV_PASSENV'
@@ -47,10 +50,10 @@ def start_environment(check, env):
 def stop_environment(check, env, metadata=None):
     env_vars = {E2E_SET_UP: 'false', 'PYTEST_ADDOPTS': '--exitfirst'}
     if file_exists(get_hatch_file(check)):
-        command = f'hatch env run --env {env} test'
+        command = _hatch + [env, 'test']
         env_vars['PYTEST_ADDOPTS'] = '--exitfirst'
     else:
-        command = f'tox --develop -e {env}'
+        command = _tox + [env]
         env_vars['PYTEST_ADDOPTS'] += ' --benchmark-skip'
         env_vars[
             'TOX_TESTENV_PASSENV'
