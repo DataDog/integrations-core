@@ -934,6 +934,8 @@ def test_e2e_core_metadata_aos_lldp(dd_agent_check):
     device_id = u'default:' + device_ip
 
     topology_link1 = {
+        'id': device_id + ':1.216',
+        'source_type': 'lldp',
         "local": {
             "device": {"id": device_id, "id_type": "ndm"},
             'interface': {'id': device_id + ':1', 'id_type': 'ndm'},
@@ -944,6 +946,8 @@ def test_e2e_core_metadata_aos_lldp(dd_agent_check):
         },
     }
     topology_link2 = {
+        'id': device_id + ':11.217',
+        'source_type': 'lldp',
         "local": {
             "device": {"id": device_id, "id_type": "ndm"},
             'interface': {'id': device_id + ':11', 'id_type': 'ndm'},

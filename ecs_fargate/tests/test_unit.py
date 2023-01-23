@@ -14,6 +14,7 @@ from datadog_checks.ecs_fargate import FargateCheck
 from .conftest import (
     EXPECTED_CONTAINER_METRICS_LINUX,
     EXPECTED_CONTAINER_METRICS_WINDOWS,
+    EXPECTED_TASK_METRICS,
     EXTRA_EXPECTED_CONTAINER_METRICS_LINUX,
     EXTRA_NETWORK_METRICS,
     INSTANCE_TAGS,
@@ -113,6 +114,11 @@ def test_successful_check_linux(check, aggregator, dd_run_check):
         ],
     ]
 
+    task_tags = [
+        # Tagger
+        "task_arn:arn:aws:ecs:eu-west-1:172597598159:task/648ca535-cbe0-4de7-b102-28e50b81e888",
+    ]
+
     extra_expected_metrics_for_container = [
         EXTRA_EXPECTED_CONTAINER_METRICS_LINUX,
         EXTRA_EXPECTED_CONTAINER_METRICS_LINUX,
@@ -128,6 +134,9 @@ def test_successful_check_linux(check, aggregator, dd_run_check):
 
     for metric in EXTRA_NETWORK_METRICS:
         aggregator.assert_metric(metric, count=1)  # 1 network interfaces
+
+    for metric in EXPECTED_TASK_METRICS:
+        aggregator.assert_metric(metric, count=1, tags=common_tags + task_tags, value=2 * 10**9)
 
     aggregator.assert_all_metrics_covered()
 
@@ -172,12 +181,20 @@ def test_successful_check_windows(check, aggregator, dd_run_check):
         'docker_name:ecs-redis-datadog-1-dd-agent-8085fa82d1d3ada5a601',
     ]
 
+    task_tags = [
+        # Tagger
+        "task_arn:arn:aws:ecs:eu-west-1:172597598159:task/648ca535-cbe0-4de7-b102-28e50b81e888",
+    ]
+
     tags = common_tags + container_tags
     for metric in EXPECTED_CONTAINER_METRICS_WINDOWS:
         aggregator.assert_metric(metric, count=1, tags=tags)
 
     for metric in EXTRA_NETWORK_METRICS:
         aggregator.assert_metric(metric, count=1)  # 1 network interfaces
+
+    for metric in EXPECTED_TASK_METRICS:
+        aggregator.assert_metric(metric, count=1, tags=common_tags + task_tags, value=2 * 10**9)
 
     aggregator.assert_all_metrics_covered()
 
@@ -234,6 +251,11 @@ def test_successful_check_wrong_sys_delta(check, aggregator, dd_run_check):
         ],
     ]
 
+    task_tags = [
+        # Tagger
+        "task_arn:arn:aws:ecs:eu-west-1:172597598159:task/648ca535-cbe0-4de7-b102-28e50b81e888",
+    ]
+
     extra_expected_metrics_for_container = [
         EXTRA_EXPECTED_CONTAINER_METRICS_LINUX,
         EXTRA_EXPECTED_CONTAINER_METRICS_LINUX,
@@ -249,6 +271,9 @@ def test_successful_check_wrong_sys_delta(check, aggregator, dd_run_check):
 
     for metric in EXTRA_NETWORK_METRICS:
         aggregator.assert_metric(metric, count=1)  # 1 network interfaces
+
+    for metric in EXPECTED_TASK_METRICS:
+        aggregator.assert_metric(metric, count=1, tags=common_tags + task_tags, value=2 * 10**9)
 
     aggregator.assert_all_metrics_covered()
 

@@ -1,5 +1,9 @@
 # CHANGELOG - IBM WAS
 
+## 2.3.2 / 2023-01-20
+
+* [Fixed] Update dependencies. See [#13726](https://github.com/DataDog/integrations-core/pull/13726).
+
 ## 2.3.1 / 2022-12-09
 
 * [Fixed] Log that we collect stats only when we in fact do collect them. See [#13324](https://github.com/DataDog/integrations-core/pull/13324).

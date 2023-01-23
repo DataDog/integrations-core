@@ -1,5 +1,9 @@
 # CHANGELOG - ssh_check
 
+## 2.3.3 / 2023-01-20
+
+* [Fixed] Update dependencies. See [#13726](https://github.com/DataDog/integrations-core/pull/13726).
+
 ## 2.3.2 / 2022-08-05 / Agent 7.39.0
 
 * [Fixed] Dependency updates. See [#12653](https://github.com/DataDog/integrations-core/pull/12653).
