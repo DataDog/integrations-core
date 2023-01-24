@@ -317,6 +317,12 @@ class Varnish(AgentCheck):
               --------------------------------------------------------------RR Good Recv
               ------------------------------------------------------------HHHH Happy
 
+        Example output (v6):
+
+            Backend name   Admin      Probe    Health     Last change
+            boot.default   healthy    0/0      healthy    Mon, 16 Jan 2023 09:13:41 GMT
+            boot.image     healthy    0/0      healthy    Mon, 16 Jan 2023 09:13:41 GMT
+
         """
         # Process status by backend.
         backends_by_status = defaultdict(list)
@@ -326,7 +332,7 @@ class Varnish(AgentCheck):
             tokens = filter(None, line.strip().split(' '))
             tokens = [t for t in tokens]
             if len(tokens):
-                if tokens == ['Backend', 'name', 'Admin', 'Probe']:
+                if all(t in tokens for t in ['Backend', 'name', 'Admin', 'Probe']):
                     # skip the column headers that exist in new output format
                     continue
                 # parse new output format

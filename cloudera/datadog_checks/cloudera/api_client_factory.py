@@ -10,12 +10,12 @@ from datadog_checks.base import ConfigurationError
 from datadog_checks.cloudera.api_client_v7 import ApiClientV7
 
 
-def make_api_client(check, config, shared_config):
-    cm_client.configuration.username = shared_config.workload_username
-    cm_client.configuration.password = shared_config.workload_password
-    api_client = cm_client.ApiClient(config.api_url)
-    api_client.rest_client = RESTClientObject(maxsize=(config.max_parallel_requests))
-    check.log.debug('Getting version from cloudera API URL: %s', config.api_url)
+def make_api_client(check):
+    cm_client.configuration.username = check.shared_config.workload_username
+    cm_client.configuration.password = check.shared_config.workload_password
+    api_client = cm_client.ApiClient(check.config.api_url)
+    api_client.rest_client = RESTClientObject(maxsize=check.config.max_parallel_requests)
+    check.log.debug('Getting version from cloudera API URL: %s', check.config.api_url)
     cloudera_manager_resource_api = cm_client.ClouderaManagerResourceApi(api_client)
     try:
         get_version_response = cloudera_manager_resource_api.get_version()

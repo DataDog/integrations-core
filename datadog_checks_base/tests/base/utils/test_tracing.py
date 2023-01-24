@@ -95,6 +95,7 @@ def test_traced_class(integration_tracing, integration_tracing_exhaustive, datad
                 assert m in called_methods
 
             warning_span_tag_calls = tracer.trace().__enter__().set_tag.call_args_list
+            assert mock.call('_dd.origin', INTEGRATION_TRACING_SERVICE_NAME) in warning_span_tag_calls
             assert mock.call('error.msg', 'whoops oh no') in warning_span_tag_calls
             assert mock.call('error.type', 'AgentCheck.warning') in warning_span_tag_calls
 

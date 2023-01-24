@@ -8,6 +8,7 @@ from datetime import datetime
 import cm_client
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.utils.discovery import Discovery
 from datadog_checks.base.utils.time import get_timestamp
 from datadog_checks.cloudera.api_client import ApiClient
 from datadog_checks.cloudera.entity_status import ENTITY_STATUS
@@ -15,32 +16,62 @@ from datadog_checks.cloudera.event import ClouderaEvent
 from datadog_checks.cloudera.metrics import NATIVE_METRICS, TIMESERIES_METRICS
 
 from .common import CLUSTER_HEALTH, HOST_HEALTH
+from .config import normalize_config_clusters_include
 
 
 class ApiClientV7(ApiClient):
     def __init__(self, check, api_client):
         super(ApiClientV7, self).__init__(check, api_client)
+        self._log.debug("clusters config: %s", self._check.config.clusters)
+        config_clusters_include = normalize_config_clusters_include(self._log, self._check.config.clusters)
+        self._log.debug("config_clusters_include: %s", config_clusters_include)
+        if config_clusters_include:
+            self._clusters_discovery = Discovery(
+                lambda: cm_client.ClustersResourceApi(self._api_client)
+                .read_clusters(cluster_type='any', view='full')
+                .items,
+                limit=self._check.config.clusters.limit,
+                include=config_clusters_include,
+                exclude=self._check.config.clusters.exclude,
+                interval=self._check.config.clusters.interval,
+                key=lambda cluster: cluster.name,
+            )
+        else:
+            self._clusters_discovery = None
 
     def collect_data(self):
         self._collect_clusters()
         self._collect_events()
+        if self._check.config.custom_queries:
+            self._collect_custom_queries()
 
     def _collect_clusters(self):
-        clusters_resource_api = cm_client.ClustersResourceApi(self._api_client)
-        read_clusters_response = clusters_resource_api.read_clusters(cluster_type='any', view='full')
-        self._log.debug("Cloudera full clusters response:\n%s", read_clusters_response)
-
+        if self._clusters_discovery:
+            discovered_clusters = list(self._clusters_discovery.get_items())
+        else:
+            discovered_clusters = [
+                (None, cluster.name, cluster, None)
+                for cluster in cm_client.ClustersResourceApi(self._api_client)
+                .read_clusters(cluster_type='any', view='full')
+                .items
+            ]
+        self._log.debug("discovered clusters:\n%s", discovered_clusters)
         # Use len(read_clusters_response.items) * 2 workers since
         # for each cluster, we are executing 2 tasks in parallel.
-        with ThreadPoolExecutor(max_workers=len(read_clusters_response.items) * 2) as executor:
-            for cluster in read_clusters_response.items:
-                cluster_name = cluster.name
-
-                tags = self._collect_cluster_tags(cluster, self._check.config.tags)
-
-                executor.submit(self._collect_cluster_metrics, cluster_name, tags)
-                executor.submit(self._collect_hosts, cluster_name)
-                self._collect_cluster_service_check(cluster, tags)
+        if len(discovered_clusters) > 0:
+            futures = []
+            with ThreadPoolExecutor(max_workers=len(discovered_clusters) * 2) as executor:
+                for pattern, key, item, config in discovered_clusters:
+                    self._log.debug(
+                        "discovered item: [pattern:%s, key:%s, item:%s, config:%s]", pattern, key, item, config
+                    )
+                    cluster_name = key
+                    tags = self._collect_cluster_tags(item, self._check.config.tags)
+                    futures.append(executor.submit(self._collect_cluster_metrics, cluster_name, tags))
+                    futures.append(executor.submit(self._collect_hosts, cluster_name))
+                    self._collect_cluster_service_check(item, tags)
+            for future in futures:
+                future.result()
 
     def _collect_events(self):
         events_resource_api = cm_client.EventsResourceApi(self._api_client)
@@ -91,13 +122,17 @@ class ApiClientV7(ApiClient):
 
         # Use len(list_hosts_response.items) * 4 workers since
         # for each host, we are executing 4 tasks in parallel.
-        with ThreadPoolExecutor(max_workers=len(list_hosts_response.items) * 4) as executor:
-            for host in list_hosts_response.items:
-                tags = self._collect_host_tags(host, self._check.config.tags)
-                executor.submit(self._collect_host_metrics, host, tags)
-                executor.submit(self._collect_role_metrics, host, tags)
-                executor.submit(self._collect_disk_metrics, host, tags)
-                executor.submit(self._collect_host_service_check, host, tags)
+        if len(list_hosts_response.items) > 0:
+            futures = []
+            with ThreadPoolExecutor(max_workers=len(list_hosts_response.items) * 4) as executor:
+                for host in list_hosts_response.items:
+                    tags = self._collect_host_tags(host, self._check.config.tags)
+                    futures.append(executor.submit(self._collect_host_metrics, host, tags))
+                    futures.append(executor.submit(self._collect_role_metrics, host, tags))
+                    futures.append(executor.submit(self._collect_disk_metrics, host, tags))
+                    futures.append(executor.submit(self._collect_host_service_check, host, tags))
+            for future in futures:
+                future.result()
 
     @staticmethod
     def _collect_host_tags(host, custom_tags):
@@ -123,9 +158,12 @@ class ApiClientV7(ApiClient):
 
     def _collect_host_metrics(self, host, tags):
         # Use 2 workers since we are executing 2 tasks in parallel.
+        futures = []
         with ThreadPoolExecutor(max_workers=2) as executor:
-            executor.submit(self._collect_host_native_metrics, host, tags)
-            executor.submit(self._collect_host_timeseries_metrics, host, tags)
+            futures.append(executor.submit(self._collect_host_native_metrics, host, tags))
+            futures.append(executor.submit(self._collect_host_timeseries_metrics, host, tags))
+        for future in futures:
+            future.result()
 
     def _collect_host_native_metrics(self, host, tags):
         for metric in NATIVE_METRICS['host']:
@@ -167,3 +205,36 @@ class ApiClientV7(ApiClient):
                 for d in ts.data:
                     value = d.value
                     self._check.gauge(full_metric_name, value, tags=[entity_tag, *tags])
+
+    def _collect_custom_queries(self):
+        for custom_query in self._check.config.custom_queries:
+            try:
+                tags = custom_query.tags if custom_query.tags else []
+                self._run_custom_query(custom_query.query, tags)
+            except Exception as e:
+                self._log.error("Skipping custom query %s due to the following exception: %s", custom_query, e)
+
+    def _run_custom_query(self, custom_query, tags):
+        self._log.debug('Running Cloudera custom query: %s', custom_query)
+        time_series_resource_api = cm_client.TimeSeriesResourceApi(self._api_client)
+        query_time_series_response = time_series_resource_api.query_time_series(query=custom_query)
+        self._log.debug('Cloudera custom query result: %s', query_time_series_response)
+        for item in query_time_series_response.items:
+            for ts in item.time_series:
+                if ts.metadata.alias:
+                    metric_name = ts.metadata.alias
+                else:
+                    metric_name = ts.metadata.metric_name
+
+                category_name = ts.metadata.attributes['category'].lower()
+                full_metric_name = f'{category_name}.{metric_name}'
+                entity_tag = f'cloudera_{category_name}:{ts.metadata.entity_name}'
+
+                value = ts.data[0].value
+                timestamp = ts.data[0].timestamp
+                for d in ts.data:
+                    current_timestamp = d.timestamp
+                    if current_timestamp > timestamp:
+                        value = d.value
+
+                self._check.gauge(full_metric_name, value, tags=[entity_tag, *tags])

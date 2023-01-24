@@ -10,6 +10,7 @@ init_config:
     #
     # file_system_global_exclude:
     #   - iso9660$
+    #   - tracefs$
 
     ## @param device_global_exclude - list of strings - optional
     ## Instruct the check to always add these patterns to `device_exclude`.

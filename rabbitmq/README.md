@@ -20,9 +20,29 @@ The RabbitMQ check is included in the [Datadog Agent][3] package. No additional 
 
 ### Configuration
 
+Rabbitmq exposes metrics in two ways: the [RabbitMQ Management Plugin][4] and the [Rabbitmq Prometheus Plugin][19]. The RabbitMQ integration supports both of these plugins.
+
 #### Prepare RabbitMQ
 
-Enable the [RabbitMQ Management Plugin][4]. The Agent user then needs at least the `monitoring` tag and these required permissions:
+##### [RabbitMQ Prometheus Plugin][19].
+
+_Note: The Prometheus Plugin collection method requires Python 3._
+
+_Starting with RabbitMQ v3.8, the [Rabbitmq Prometheus Plugin][19] is enabled by default and the integration communicates with it over HTTP API using OpenMetricsV2._
+	
+Configure the `prometheus_plugin` section in your instance configuration. When using the `prometheus_plugin` option, settings related to the Management Plugin are ignored.
+
+ ```yaml
+ instances:
+   - prometheus_plugin:
+       url: http://<HOST>:15692
+ ```
+ 
+ This enables scraping of the [`/metrics` endpoint][20] on one rabbitmq node.
+
+##### [RabbitMQ Management Plugin][4].
+
+Enable the plugin. The Agent user then needs at least the `monitoring` tag and these required permissions:
 
 | Permission | Command            |
 | ---------- | ------------------ |
@@ -101,7 +121,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][9]
 | -------------------- | -------------------------------------------- |
 | `<INTEGRATION_NAME>` | `rabbitmq`                                   |
 | `<INIT_CONFIG>`      | blank or `{}`                                |
-| `<INSTANCE_CONFIG>`  | `{"rabbitmq_api_url":"%%host%%:15672/api/","username": <USERNAME>, "password": <PASSWORD>}` |
+| `<INSTANCE_CONFIG>`  | `{"prometheus_plugin": {"url": "%%host%%:15692"}}` |
 
 ##### Log collection
 
@@ -126,13 +146,7 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 See [metadata.csv][12] for a list of metrics provided by this integration.
 
-The Agent tags `rabbitmq.queue.*` metrics by queue name and `rabbitmq.node.*` metrics by node name.
-
 ### Events
-
-For performance reasons, the RabbitMQ check limits the number of exchanges, queues, and nodes it collects metrics for. If the check nears this limit, it emits a warning-level event to your event stream.
-
-If you require an increase in the number of exchanges, queues, or nodes, contact [Datadog support][13].
 
 ### Service Checks
 
@@ -149,6 +163,92 @@ Additional helpful documentation, links, and articles:
 - [Key metrics for RabbitMQ monitoring][15]
 - [Collecting metrics with RabbitMQ monitoring tools][16]
 - [Monitoring RabbitMQ performance with Datadog][17]
+
+### Prometheus Plugin Migration Guide
+
+The following table maps metrics coming from the Management plugin to their Prometheus plugin equivalents.
+
+| Management Plugin metric                                                    | Prometheus Plugin Equivalent                                                                                                                | Endpoint            |
+|----------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------|---------------------|
+| rabbitmq.connections                                           | rabbitmq\_connections                                                                                                         |                     |
+| rabbitmq.node.disk\_alarm                                      | rabbitmq\_alarms\_free\_disk\_space\_watermark                                                                                | /metrics            |
+| rabbitmq.node.disk\_free                                       | rabbitmq\_disk\_space\_available\_bytes                                                                                       |                     |
+| rabbitmq.node.fd\_used                                         | rabbitmq\_process\_open\_fds                                                                                                  |                     |
+| rabbitmq.node.mem\_alarm                                       | rabbitmq\_alarms\_memory\_used\_watermark                                                                                     | /metrics            |
+| rabbitmq.node.mem\_limit                                       | rabbitmq\_resident\_memory\_limit\_bytes                                                                                      |                     |
+| rabbitmq.node.mem\_used                                        | rabbitmq\_process\_resident\_memory\_bytes                                                                                    |                     |
+| rabbitmq.node.sockets\_used                                    | erlang\_vm\_port\_count                                                                                                       |                     |
+| rabbitmq.overview.messages.confirm.count                       | rabbitmq\_global\_messages\_confirmed\_total                                                                                  |                     |
+| rabbitmq.overview.messages.deliver\_get.count                  | rabbitmq\_global\_messages\_delivered\_get\_auto\_ack\_total + rabbitmq\_global\_messages\_delivered\_get\_manual\_ack\_total |                     |
+| rabbitmq.overview.messages.publish.count                       | rabbitmq\_queue\_messages\_published\_total                                                                                   | /metrics            |
+| rabbitmq.overview.messages.redeliver.count                     | rabbitmq\_global\_messages\_redelivered\_total                                                                                |                     |
+| rabbitmq.overview.messages.return\_unroutable.count            | rabbitmq\_global\_messages\_unroutable\_returned\_total                                                                       |                     |
+| rabbitmq.overview.object\_totals.channels                      | rabbitmq\_channels                                                                                                            |                     |
+| rabbitmq.overview.object\_totals.connections                   | rabbitmq\_connections                                                                                                         |                     |
+| rabbitmq.overview.object\_totals.consumers                     | rabbitmq\_global\_consumers                                                                                                   |                     |
+| rabbitmq.overview.object\_totals.queues                        | rabbitmq\_queues                                                                                                              |                     |
+| rabbitmq.overview.queue\_totals.messages.count                 | rabbitmq\_queue\_messages                                                                                                     | /metrics            |
+| rabbitmq.overview.queue\_totals.messages\_ready.count          | rabbitmq\_queue\_messages\_ready                                                                                              | /metrics            |
+| rabbitmq.overview.queue\_totals.messages\_unacknowledged.count | rabbitmq\_queue\_messages\_unacked                                                                                            | /metrics            |
+| rabbitmq.queue.consumers                                       | rabbitmq\_queue\_consumers                                                                                                    | /metrics            |
+| rabbitmq.queue.head\_message\_timestamp                        | rabbitmq\_queue\_head\_message\_timestamp                                                                                     | /metrics/per-object |
+| rabbitmq.queue.memory                                          | rabbitmq\_queue\_process\_memory\_bytes                                                                                       | /metrics/per-object |
+| rabbitmq.queue.message\_bytes                                  | rabbitmq\_queue\_messages\_ready\_bytes                                                                                       | /metrics/per-object |
+| rabbitmq.queue.messages                                        | rabbitmq\_queue\_messages                                                                                                     | /metrics/per-object |
+| rabbitmq.queue.messages.publish.count                          | rabbitmq\_queue\_messages\_published\_total                                                                                   | /metrics            |
+| rabbitmq.queue.messages.redeliver.count                        | rabbitmq\_global\_messages\_redelivered\_total                                                                                |                     |
+| rabbitmq.queue.messages\_ready                                 | rabbitmq\_queue\_messages\_ready                                                                                              |                     |
+| rabbitmq.queue.messages\_unacknowledged                        | rabbitmq\_queue\_messages\_unacked                                                                                            |                     |
+
+The following Management plugin metrics to our knowledge have no equivalent in the Prometheus plugin.
+
+- rabbitmq.connections.state
+- rabbitmq.exchange.messages.ack.count
+- rabbitmq.exchange.messages.ack.rate
+- rabbitmq.exchange.messages.confirm.count
+- rabbitmq.exchange.messages.confirm.rate
+- rabbitmq.exchange.messages.deliver\_get.count
+- rabbitmq.exchange.messages.deliver\_get.rate
+- rabbitmq.exchange.messages.publish.count
+- rabbitmq.exchange.messages.publish.rate
+- rabbitmq.exchange.messages.publish\_in.count
+- rabbitmq.exchange.messages.publish\_in.rate
+- rabbitmq.exchange.messages.publish\_out.count
+- rabbitmq.exchange.messages.publish\_out.rate
+- rabbitmq.exchange.messages.redeliver.count
+- rabbitmq.exchange.messages.redeliver.rate
+- rabbitmq.exchange.messages.return\_unroutable.count
+- rabbitmq.exchange.messages.return\_unroutable.rate
+- rabbitmq.node.partitions
+- rabbitmq.node.run\_queue
+- rabbitmq.node.running
+- rabbitmq.overview.messages.ack.count
+- rabbitmq.overview.messages.ack.rate
+- rabbitmq.overview.messages.confirm.rate
+- rabbitmq.overview.messages.deliver\_get.rate
+- rabbitmq.overview.messages.publish.rate
+- rabbitmq.overview.messages.publish\_in.count
+- rabbitmq.overview.messages.publish\_in.rate
+- rabbitmq.overview.messages.publish\_out.count
+- rabbitmq.overview.messages.publish\_out.rate
+- rabbitmq.overview.messages.redeliver.rate
+- rabbitmq.overview.messages.return\_unroutable.rate
+- rabbitmq.overview.queue\_totals.messages.rate
+- rabbitmq.overview.queue\_totals.messages\_ready.rate
+- rabbitmq.overview.queue\_totals.messages\_unacknowledged.rate
+- rabbitmq.queue.active\_consumers
+- rabbitmq.queue.bindings.count
+- rabbitmq.queue.messages.ack.count
+- rabbitmq.queue.messages.ack.rate
+- rabbitmq.queue.messages.deliver.count
+- rabbitmq.queue.messages.deliver.rate
+- rabbitmq.queue.messages.deliver\_get.count
+- rabbitmq.queue.messages.deliver\_get.rate
+- rabbitmq.queue.messages.publish.rate
+- rabbitmq.queue.messages.rate
+- rabbitmq.queue.messages.redeliver.rate
+- rabbitmq.queue.messages\_ready.rate
+- rabbitmq.queue.messages\_unacknowledged.rate
 
 ### FAQ
 
@@ -172,3 +272,5 @@ Additional helpful documentation, links, and articles:
 [16]: https://www.datadoghq.com/blog/rabbitmq-monitoring-tools
 [17]: https://www.datadoghq.com/blog/monitoring-rabbitmq-performance-with-datadog
 [18]: https://docs.datadoghq.com/integrations/faq/tagging-rabbitmq-queues-by-tag-family/
+[19]: https://www.rabbitmq.com/prometheus.html
+[20]: https://www.rabbitmq.com/prometheus.html#default-endpoint

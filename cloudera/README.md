@@ -81,6 +81,64 @@ For containerized environments, see the [Autodiscovery Integration Templates][3]
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
+#### Clusters Discovery
+
+You can configure how your clusters are discovered with the `clusters` configuration option with the following parameters:
+
+- `limit`
+: Maximum number of items to be autodiscovered.  
+**Default value**: `None` (all clusters will be processed)
+
+- `include`
+: Mapping of regular expression keys and component config values to autodiscover.  
+**Default value**: empty map
+
+- `exclude`
+: List of regular expressions with the patterns of components to exclude from autodiscovery.  
+**Default value**: empty list
+
+- `interval`
+: Validity time in seconds of the last list of clusters obtained through the endpoint.  
+**Default value**: `None` (no cache used)
+
+**Examples**:
+
+Process a maximum of `5` clusters with names that start with `my_cluster`:
+
+```yaml
+clusters:
+  limit: 5
+  include:
+    - 'my_cluster.*'
+```
+
+Process a maximum of `20` clusters and exclude those with names that start with `tmp_`:
+
+```yaml
+clusters:
+  limit: 20
+  include:
+    - '.*'
+  exclude:
+    - 'tmp_.*'
+```
+
+#### Custom Queries
+
+You can configure the Cloudera integration to collect custom metrics that are not be collected by default by running custom timeseries queries. These queries use [the tsquery language][14] to retrieve data from Cloudera Manager. 
+
+**Example**:
+
+Collect JVM garbage collection rate and JVM free memory with `cloudera_jvm` as a custom tag:
+
+```yaml
+custom_queries:
+- query: select last(jvm_gc_rate) as jvm_gc_rate, last(jvm_free_memory) as jvm_free_memory
+  tags: cloudera_jvm
+```
+
+Note: These queries can take advantage of metric expressions, resulting in queries such as `total_cpu_user + total_cpu_system`, `1000 * jvm_gc_time_ms / jvm_gc_count`, and `max(total_cpu_user)`. When using metric expressions, make sure to also include aliases for the metrics, otherwise the metric names may be incorrectly formatted. For example, `SELECT last(jvm_gc_count)` results in the metric `cloudera.<CATEGORY>.last_jvm_gc_count`. You can append an alias like in the following example: `SELECT last(jvm_gc_count) as jvm_gc_count` to generate the metric `cloudera.<CATEGORY>.jvm_gc_count`.
+
 ### Validation
 
 [Run the Agent's status subcommand][6] and look for `cloudera` under the Checks section.
@@ -149,3 +207,4 @@ Need help? Contact [Datadog support][9].
 [11]: https://raw.githubusercontent.com/DataDog/integrations-core/master/cloudera/images/create_machine_user.png
 [12]: https://raw.githubusercontent.com/DataDog/integrations-core/master/cloudera/images/set_workload_password.png
 [13]: https://docs.cloudera.com/data-hub/cloud/access-clusters/topics/mc-accessing-cluster-via-ssh.html
+[14]: https://docs.cloudera.com/documentation/enterprise/6/6.3/topics/cm_dg_tsquery.html

@@ -1,5 +1,9 @@
 # CHANGELOG - ClickHouse
 
+## 2.8.2 / 2023-01-20
+
+* [Fixed] Make service check tests unitary. Add metadata entrypoint. See [#13753](https://github.com/DataDog/integrations-core/pull/13753).
+
 ## 2.8.1 / 2022-12-09 / Agent 7.42.0
 
 * [Fixed] Update dependencies. See [#13478](https://github.com/DataDog/integrations-core/pull/13478).

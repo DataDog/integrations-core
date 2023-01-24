@@ -23,7 +23,7 @@ def test_default_options():
     assert check._use_mount is False
     assert check._all_partitions is False
     assert check._file_system_include is None
-    assert check._file_system_exclude == re.compile('iso9660$', re.I)
+    assert check._file_system_exclude == re.compile('iso9660$|tracefs$', re.I)
     assert check._device_include is None
     assert check._device_exclude is None
     assert check._mount_point_include is None
