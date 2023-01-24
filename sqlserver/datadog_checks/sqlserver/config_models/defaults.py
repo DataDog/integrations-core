@@ -170,14 +170,6 @@ def instance_password(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_proc_only_if(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_proc_only_if_database(field, value):
-    return 'master'
-
-
 def instance_query_activity(field, value):
     return get_default_field_value(field, value)
 
@@ -195,10 +187,6 @@ def instance_server_version(field, value):
 
 
 def instance_service(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_stored_procedure(field, value):
     return get_default_field_value(field, value)
 
 

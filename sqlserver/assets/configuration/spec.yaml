@@ -462,25 +462,6 @@ files:
         type: integer
         example: 5
     - template: instances/db
-    - name: stored_procedure
-      description: |
-        DEPRECATED - use `custom_queries` instead. For guidance, see:
-        https://docs.datadoghq.com/integrations/guide/collect-sql-server-custom-metrics/
-        Get metrics from custom proc in MyDB but only if the database is writable
-        (i.e. it's the master in an availability group) Note: Custom proc must be defined in its own instance
-      value:
-        type: string
-        example: <PROCEDURE_NAME>
-    - name: proc_only_if
-      description: Run this SQL before each call to `stored_procedure`. Only if it returns 1 then call the proc.
-      value:
-        type: string
-        example: <SQL_QUERY>
-    - name: proc_only_if_database
-      description: The database to run the `proc_only_if` SQL in.
-      value:
-        type: string
-        example: master
     - name: ignore_missing_database
       description: If the DB specified doesn't exist on the server then don't do the check
       value:
