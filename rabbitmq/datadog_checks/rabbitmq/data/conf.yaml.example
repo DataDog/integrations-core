@@ -60,7 +60,7 @@ instances:
         ## @param include_aggregated_endpoint - boolean - optional - default: true
         ## Whether or not to include metrics from the aggregated endpoint (/metrics).
         ##
-        ## Note: This option should be set to true when 'unaggregated_endpoint' is unspecified.
+        ## Note: This option must be set to true when 'unaggregated_endpoint' is unspecified.
         #
         # include_aggregated_endpoint: true
 
