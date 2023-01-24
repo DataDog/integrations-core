@@ -124,7 +124,7 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
                 'flake8-logging-format==0.9.0',
                 'isort==5.11.4',
                 # Keep in sync with: /datadog_checks_base/pyproject.toml
-                'pydantic==1.10.2',
+                'pydantic==1.10.4',
             ],
         }
         config = {'lint': lint_env}
