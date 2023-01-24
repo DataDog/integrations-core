@@ -362,7 +362,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
                 tags=self._tags,
                 hostname=self._check.resolved_hostname,
             )
-            self._check.count(
+            self._check.gauge(
                 "postgresql.pg_stat_statements.count",
                 count,
                 tags=self._tags,
