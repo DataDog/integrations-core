@@ -70,7 +70,6 @@ def dd_environment():
         env_vars={'CB_CONTAINER_NAME': CB_CONTAINER_NAME},
         conditions=conditions,
         sleep=15,
-
     ):
         yield deepcopy(DEFAULT_INSTANCE)
 
