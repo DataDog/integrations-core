@@ -195,7 +195,6 @@ QUERY_STATS_ALWAYS_PRESENT = {
 }
 
 BY_BUCKET_METRICS = [
-    'couchbase.by_bucket.ep_oom_errors',
     'couchbase.by_bucket.ep_overhead',
     'couchbase.by_bucket.ep_queue_size',
     'couchbase.by_bucket.ep_vb_total',
@@ -293,6 +292,7 @@ OPTIONAL_BY_BUCKET_METRICS = [
     'couchbase.by_bucket.ep_diskqueue_fill',
     'couchbase.by_bucket.ep_max_size',
     'couchbase.by_bucket.ep_mem_high_wat',
+    'couchbase.by_bucket.ep_oom_errors',
     'couchbase.by_bucket.ep_tap_replica_queue_drain',
     'couchbase.by_bucket.ep_tap_total_queue_drain',
     'couchbase.by_bucket.ep_tap_total_queue_fill',
