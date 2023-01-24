@@ -19,7 +19,7 @@ This is a cluster check. You can enable this check by addiing `datadog.helmCheck
 
 **Note**: If no configuration is required, an empty `conf.d` can be passed.
 
-For more information, see the [Cluster checks documentation][2].
+For more information, see the [Cluster Check documentation][2].
 
 ### Validation
 
