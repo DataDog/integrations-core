@@ -15,9 +15,11 @@ No additional installation is needed on your server.
 
 ### Configuration
 
-This is a cluster check. For more information, see the [Cluster checks documentation][2].
+This is a cluster check. You can enable this check by addiing `datadog.helmCheck.enabled` to your Helm chart.
 
 **Note**: If no configuration is required, an empty `conf.d` can be passed.
+
+For more information, see the [Cluster checks documentation][2].
 
 ### Validation
 
