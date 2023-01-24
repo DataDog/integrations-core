@@ -240,6 +240,12 @@ def test_aggregated_and_unaggregated_endpoints(endpoint, metrics, aggregator, dd
             r"'prometheus_plugin\.include_aggregated_endpoint' must be a boolean\.",
             id="Aggregated_endpoint must be a boolean.",
         ),
+        pytest.param(
+            {'url': "http://localhost", "include_aggregated_endpoint": False},
+            r"'prometheus_plugin\.include_aggregated_endpoint' field should be set to 'true' "
+            + r"when 'prometheus_plugin\.unaggregated_endpoint' is not collected\.",
+            id="include_aggregated_endpoint must be true when unaggregated_endpoint is missing.",
+        ),
     ],
 )
 def test_config(prom_plugin_settings, err):
