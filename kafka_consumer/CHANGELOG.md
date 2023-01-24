@@ -1,5 +1,10 @@
 # CHANGELOG - kafka_consumer
 
+## 2.16.3 / 2023-01-20
+
+* [Fixed] Add kafka consumer logs for more visibility. See [#13679](https://github.com/DataDog/integrations-core/pull/13679).
+* [Fixed] Disable socket wakeups for coordinate ID and consumer group offsets. See [#13505](https://github.com/DataDog/integrations-core/pull/13505).
+
 ## 2.16.2 / 2022-11-22
 
 * [Fixed] Disable socket wakeup when sending requests. See [#13221](https://github.com/DataDog/integrations-core/pull/13221).

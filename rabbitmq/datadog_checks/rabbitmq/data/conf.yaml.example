@@ -45,102 +45,256 @@ init_config:
 #
 instances:
 
-    ## @param rabbitmq_api_url - string - required
-    ## For every instance a 'rabbitmq_api_url' must be provided, pointing to the api
-    ## url of the RabbitMQ Management Plugin (http://www.rabbitmq.com/management.html).
+    ## RabbitMQ Prometheus Plugin Example
+  -
+    ## Settings for talking to the Prometheus plugin of RabbitMQ.
+    ## Specify this section to trigger metric collection from the Prometheus plugin endpoints.
     #
-  - rabbitmq_api_url: http://localhost:15672/api/
+    prometheus_plugin:
 
-    ## @param tag_families - boolean - optional - default: false
-    ## To tag queue "families" based off of regex matching.
-    #
-    # tag_families: false
+        ## @param url - string - required
+        ## Base URL for OpenMetrics endpoints.
+        #
+        url: http://localhost:15692
 
-    ## @param collect_node_metrics - boolean - optional - default: true
-    ## Node metrics are collected by default. Setting this parameter to false skips node metric collection.
-    #
-    # collect_node_metrics: true
+        ## @param include_aggregated_endpoint - boolean - optional - default: true
+        ## Whether or not to include metrics from the aggregated endpoint (/metrics).
+        #
+        # include_aggregated_endpoint: true
 
-    ## @param nodes - list of strings - optional
-    ## Use the `nodes` parameters to specify the nodes you'd like to
-    ## collect metrics on (up to 100 nodes).
-    ## If you have less than 100 nodes, you don't have to set this parameter,
-    ## the metrics are collected on all the nodes by default.
-    #
-    # nodes:
-    #   - <NODE_NAME_1>
-    #   - <NODE_NAME_2>
+        ## @param unaggregated_endpoint - string - optional - default: detailed
+        ## Which  unaggregated endpoint to use.
+        ## The choices are:
+        ##   - If the field is left unspecified, no endpoint is used.
+        ##   - "per-object" means the /metrics/per-object endpoint is used.
+        ##   - "detailed" means the /metrics/detailed endpoint is used.
+        ##     You can also provide a query for this option, exactly as if you were making an HTTP request
+        ##     to this endpoint. For example, `detailed?family=queue_consumer_count`.
+        #
+        # unaggregated_endpoint: detailed
 
-    ## @param nodes_regexes - list of strings - optional
-    ## Use the `nodes_regexes` parameters to specify one or multiple regex to
-    ## match the nodes you'd like to collect metrics on (up to 100 nodes).
-    ## If you have less than 100 nodes, you don't have to set this parameter,
-    ## the metrics are collected on all the nodes by default.
+    ## @param raw_metric_prefix - string - optional
+    ## A prefix that is removed from all exposed metric names, if present.
+    ## All configuration options will use the prefix-less name.
     #
-    # nodes_regexes:
-    #   - <REGEX>
+    # raw_metric_prefix: <PREFIX>_
 
-    ## @param queues - list of strings - optional
-    ## Use the `queues` parameters to specify the queues you'd like to
-    ## collect metrics on (up to 200 queues).
-    ## If you have less than 200 queues, you don't have to set this parameter,
-    ## the metrics are collected on all the queues by default.
-    ## If you have set up vhosts, set the queue names as `vhost_name/queue_name`.
-    ## If you have `tag_families` enabled, the first captured group in the regex
-    ## is used as the queue_family tag if no named group is specified.
-    ## If you have named groups the tag names will be the named groups in regex.
-    ## If you use multiplies groups and not all are named, the tags are going to be
-    ## used only on the groups that contains names.
+    ## @param extra_metrics - (list of string or mapping) - optional
+    ## This list defines metrics to collect from the `openmetrics_endpoint`, in addition to
+    ## what the check collects by default. If the check already collects a metric, then
+    ## metric definitions here take precedence. Metrics may be defined in 3 ways:
+    ##
+    ## 1. If the item is a string, then it represents the exposed metric name, and
+    ##    the sent metric name will be identical. For example:
+    ##
+    ##      extra_metrics:
+    ##      - <METRIC_1>
+    ##      - <METRIC_2>
+    ## 2. If the item is a mapping, then the keys represent the exposed metric names.
+    ##
+    ##      a. If a value is a string, then it represents the sent metric name. For example:
+    ##
+    ##           extra_metrics:
+    ##           - <EXPOSED_METRIC_1>: <SENT_METRIC_1>
+    ##           - <EXPOSED_METRIC_2>: <SENT_METRIC_2>
+    ##      b. If a value is a mapping, then it must have a `name` and/or `type` key.
+    ##         The `name` represents the sent metric name, and the `type` represents how
+    ##         the metric should be handled, overriding any type information the endpoint
+    ##         may provide. For example:
+    ##
+    ##           extra_metrics:
+    ##           - <EXPOSED_METRIC_1>:
+    ##               name: <SENT_METRIC_1>
+    ##               type: <METRIC_TYPE_1>
+    ##           - <EXPOSED_METRIC_2>:
+    ##               name: <SENT_METRIC_2>
+    ##               type: <METRIC_TYPE_2>
+    ##
+    ##         The supported native types are `gauge`, `counter`, `histogram`, and `summary`.
+    ##
+    ## Note: To collect counter metrics with names ending in `_total`, specify the metric name without the `_total`
+    ## suffix. For example, to collect the counter metric `promhttp_metric_handler_requests_total`, specify
+    ## `promhttp_metric_handler_requests`. This submits to Datadog the metric name appended with `.count`.
+    ## For more information, see:
+    ## https://github.com/OpenObservability/OpenMetrics/blob/main/specification/OpenMetrics.md#suffixes
+    ##
+    ## Regular expressions may be used to match the exposed metric names, for example:
+    ##
+    ##   extra_metrics:
+    ##   - ^network_(ingress|egress)_.+
+    ##   - .+:
+    ##       type: gauge
     #
-    # queues:
-    #   - <QUEUE_NAME_1>
-    #   - <QUEUE_NAME_2>
+    # extra_metrics: []
 
-    ## @param queues_regexes - list of strings - optional
-    ## Use the `queues_regexes` parameters to specify one or multiple regex to to match
-    ## the queues you'd like to collect metrics on (up to 200 queues).
-    ## If you have vhosts set up, the regex pattern needs to be formatted with vhost
-    ## in the format of `<vhost>/<queue_name>`.
-    ## If you have less than 200 queues, you don't have to set this parameter,
-    ## the metrics are collected on all the queues by default.
-    ## If you have `tag_families` enabled, the first captured group in the regex
-    ## is used as the queue_family tag.
-    ## If you have named groups the tag names will be the named groups in regex.
-    ## If you use multiplies groups and not all have are named, the tags are going to be
-    ## used only on the groups that contains names.
+    ## @param exclude_metrics - list of strings - optional
+    ## A list of metrics to exclude, with each entry being either
+    ## the exact metric name or a regular expression.
+    ## In order to exclude all metrics but the ones matching a specific filter,
+    ## you can use a negative lookahead regex like:
+    ##   - ^(?!foo).*$
     #
-    # queues_regexes:
-    #   - <REGEX>
+    # exclude_metrics: []
 
-    ## @param exchanges - list of strings - optional
-    ## Use the `exchanges` parameters to specify the exchanges you'd like to
-    ## collect metrics on (up to 50 exchanges).
-    ## If you have less than 50 exchanges, you don't have to set this parameter,
-    ## the metrics is collected on all the exchanges by default.
+    ## @param exclude_metrics_by_labels - mapping - optional
+    ## A mapping of labels to exclude metrics with matching label name and their corresponding metric values. To match
+    ## all values of a label, set it to `true`.
+    ##
+    ## Note: Label filtering happens before `rename_labels`.
+    ##
+    ## For example, the following configuration instructs the check to exclude all metrics with
+    ## a label `worker` or a label `pid` with the value of either `23` or `42`.
+    ##
+    ##   exclude_metrics_by_labels:
+    ##     worker: true
+    ##     pid:
+    ##     - '23'
+    ##     - '42'
     #
-    # exchanges:
-    #   - <EXCHANGE_1>
-    #   - <EXCHANGE_2>
+    # exclude_metrics_by_labels: {}
 
-    ## @param exchanges_regexes - list of strings - optional
-    ## Use the `exchanges_regexes` parameters to specify one or multiple regex to to match
-    ## the exchanges you'd like to collect metrics on (up to 50 exchanges).
-    ## If you have less than 50 exchanges, you don't have to set this parameter,
-    ## the metrics is collected on all the exchanges by default.
+    ## @param exclude_labels - list of strings - optional
+    ## A list of labels to exclude, useful for high cardinality values like timestamps or UUIDs.
+    ## May be used in conjunction with `include_labels`.
+    ## Labels defined in `exclude_labels` will take precedence in case of overlap.
+    ##
+    ## Note: Label filtering happens before `rename_labels`.
     #
-    # exchanges_regexes:
-    #   - <REGEX>
+    # exclude_labels: []
 
-    ## @param vhosts - list of strings - optional
-    ## Service checks and `rabbitmq.connections` metric:
-    ## By default a list of all vhosts is fetched and each one is checked using the aliveness
-    ## API and the metric `rabbitmq.connections` is collected.
-    ## If you prefer only certain vhosts to be monitored with service checks
-    ## and the number of `connections` then you can list the vhosts you care about in this parameter.
+    ## @param include_labels - list of strings - optional
+    ## A list of labels to include. May be used in conjunction with `exclude_labels`.
+    ## Labels defined in `exclude_labels` will take precedence in case of overlap.
+    ##
+    ## Note: Label filtering happens before `rename_labels`.
     #
-    # vhosts:
-    #   - <VHOST_NAME_1>
-    #   - <VHOST_NAME_2>
+    # include_labels: []
+
+    ## @param rename_labels - mapping - optional
+    ## A mapping of label names to their new names.
+    #
+    # rename_labels:
+    #   <LABEL_NAME_1>: <NEW_LABEL_NAME_1>
+    #   <LABEL_NAME_2>: <NEW_LABEL_NAME_2>
+
+    ## @param enable_health_service_check - boolean - optional - default: true
+    ## Whether or not to send a service check named `<NAMESPACE>.openmetrics.health` which reports
+    ## the health of the `openmetrics_endpoint`.
+    #
+    # enable_health_service_check: true
+
+    ## @param hostname_label - string - optional
+    ## Override the hostname for every metric submission with the value of one of its labels.
+    #
+    # hostname_label: <HOSTNAME_LABEL>
+
+    ## @param hostname_format - string - optional
+    ## When `hostname_label` is set, this instructs the check how to format the values. The string
+    ## `<HOSTNAME>` is replaced by the value of the label defined by `hostname_label`.
+    #
+    # hostname_format: <HOSTNAME>
+
+    ## @param collect_histogram_buckets - boolean - optional - default: true
+    ## Whether or not to send histogram buckets.
+    #
+    # collect_histogram_buckets: true
+
+    ## @param non_cumulative_histogram_buckets - boolean - optional - default: false
+    ## Whether or not histogram buckets are non-cumulative and to come with a `lower_bound` tag.
+    #
+    # non_cumulative_histogram_buckets: false
+
+    ## @param histogram_buckets_as_distributions - boolean - optional - default: false
+    ## Whether or not to send histogram buckets as Datadog distribution metrics. This implicitly
+    ## enables the `collect_histogram_buckets` and `non_cumulative_histogram_buckets` options.
+    ##
+    ## Learn more about distribution metrics:
+    ## https://docs.datadoghq.com/developers/metrics/types/?tab=distribution#metric-types
+    #
+    # histogram_buckets_as_distributions: false
+
+    ## @param collect_counters_with_distributions - boolean - optional - default: false
+    ## Whether or not to also collect the observation counter metrics ending in `.sum` and `.count`
+    ## when sending histogram buckets as Datadog distribution metrics. This implicitly enables the
+    ## `histogram_buckets_as_distributions` option.
+    #
+    # collect_counters_with_distributions: false
+
+    ## @param use_process_start_time - boolean - optional - default: false
+    ## Whether to enable a heuristic for reporting counter values on the first scrape. When true,
+    ## the first time an endpoint is scraped, check `process_start_time_seconds` to decide whether zero
+    ## initial value can be assumed for counters. This requires keeping metrics in memory until the entire
+    ## response is received.
+    #
+    # use_process_start_time: false
+
+    ## @param share_labels - mapping - optional
+    ## This mapping allows for the sharing of labels across multiple metrics. The keys represent the
+    ## exposed metrics from which to share labels, and the values are mappings that configure the
+    ## sharing behavior. Each mapping must have at least one of the following keys:
+    ##
+    ##   labels - This is a list of labels to share. All labels are shared if this is not set.
+    ##   match - This is a list of labels to match on other metrics as a condition for sharing.
+    ##   values - This is a list of allowed values as a condition for sharing.
+    ##
+    ## To unconditionally share all labels of a metric, set it to `true`.
+    ##
+    ## For example, the following configuration instructs the check to apply all labels from `metric_a`
+    ## to all other metrics, the `node` label from `metric_b` to only those metrics that have a `pod`
+    ## label value that matches the `pod` label value of `metric_b`, and all labels from `metric_c`
+    ## to all other metrics if their value is equal to `23` or `42`.
+    ##
+    ##   share_labels:
+    ##     metric_a: true
+    ##     metric_b:
+    ##       labels:
+    ##       - node
+    ##       match:
+    ##       - pod
+    ##     metric_c:
+    ##       values:
+    ##       - 23
+    ##       - 42
+    #
+    # share_labels: {}
+
+    ## @param cache_shared_labels - boolean - optional - default: true
+    ## When `share_labels` is set, it instructs the check to cache labels collected from the first payload
+    ## for improved performance.
+    ##
+    ## Set this to `false` to compute label sharing for every payload at the risk of potentially increased memory usage.
+    #
+    # cache_shared_labels: true
+
+    ## @param raw_line_filters - list of strings - optional
+    ## A list of regular expressions used to exclude lines read from the `openmetrics_endpoint`
+    ## from being parsed.
+    #
+    # raw_line_filters: []
+
+    ## @param cache_metric_wildcards - boolean - optional - default: true
+    ## Whether or not to cache data from metrics that are defined by regular expressions rather
+    ## than the full metric name.
+    #
+    # cache_metric_wildcards: true
+
+    ## @param use_latest_spec - boolean - optional - default: false
+    ## Whether or not the parser will strictly adhere to the latest version of the OpenMetrics specification.
+    #
+    # use_latest_spec: false
+
+    ## @param telemetry - boolean - optional - default: false
+    ## Whether or not to submit metrics prefixed by `<NAMESPACE>.telemetry.` for debugging purposes.
+    #
+    # telemetry: false
+
+    ## @param ignore_tags - list of strings - optional
+    ## A list of regular expressions used to ignore tags added by Autodiscovery and entries in the `tags` option.
+    #
+    # ignore_tags:
+    #   - <FULL:TAG>
+    #   - <TAG_PREFIX:.*>
+    #   - <TAG_SUFFIX$>
 
     ## @param proxy - mapping - optional
     ## This overrides the `proxy` setting in `init_config`.
@@ -204,10 +358,10 @@ instances:
     #
     # auth_type: basic
 
-    ## @param use_legacy_auth_encoding - boolean - optional - default: false
+    ## @param use_legacy_auth_encoding - boolean - optional - default: true
     ## When `auth_type` is set to `basic`, this determines whether to encode as `latin1` rather than `utf-8`.
     #
-    # use_legacy_auth_encoding: false
+    # use_legacy_auth_encoding: true
 
     ## @param username - string - optional
     ## The username to use if services are behind basic or digest auth.
@@ -487,6 +641,105 @@ instances:
     #   - <INCLUDE_REGEX>
     #   exclude:
     #   - <EXCLUDE_REGEX>
+
+    ## RabbitMQ Management Plugin Example
+  -
+    ## @param rabbitmq_api_url - string - optional - default: http://localhost:15672/api/
+    ## For every instance a 'rabbitmq_api_url' must be provided, pointing to the api
+    ## url of the RabbitMQ Management Plugin (http://www.rabbitmq.com/management.html).
+    #
+    # rabbitmq_api_url: http://localhost:15672/api/
+
+    ## @param tag_families - boolean - optional - default: false
+    ## To tag queue "families" based off of regex matching.
+    #
+    # tag_families: false
+
+    ## @param collect_node_metrics - boolean - optional - default: true
+    ## Node metrics are collected by default. Setting this parameter to false skips node metric collection.
+    #
+    # collect_node_metrics: true
+
+    ## @param nodes - list of strings - optional
+    ## Use the `nodes` parameters to specify the nodes you'd like to
+    ## collect metrics on (up to 100 nodes).
+    ## If you have less than 100 nodes, you don't have to set this parameter,
+    ## the metrics are collected on all the nodes by default.
+    #
+    # nodes:
+    #   - <NODE_NAME_1>
+    #   - <NODE_NAME_2>
+
+    ## @param nodes_regexes - list of strings - optional
+    ## Use the `nodes_regexes` parameters to specify one or multiple regex to
+    ## match the nodes you'd like to collect metrics on (up to 100 nodes).
+    ## If you have less than 100 nodes, you don't have to set this parameter,
+    ## the metrics are collected on all the nodes by default.
+    #
+    # nodes_regexes:
+    #   - <REGEX>
+
+    ## @param queues - list of strings - optional
+    ## Use the `queues` parameters to specify the queues you'd like to
+    ## collect metrics on (up to 200 queues).
+    ## If you have less than 200 queues, you don't have to set this parameter,
+    ## the metrics are collected on all the queues by default.
+    ## If you have set up vhosts, set the queue names as `vhost_name/queue_name`.
+    ## If you have `tag_families` enabled, the first captured group in the regex
+    ## is used as the queue_family tag if no named group is specified.
+    ## If you have named groups the tag names will be the named groups in regex.
+    ## If you use multiplies groups and not all are named, the tags are going to be
+    ## used only on the groups that contains names.
+    #
+    # queues:
+    #   - <QUEUE_NAME_1>
+    #   - <QUEUE_NAME_2>
+
+    ## @param queues_regexes - list of strings - optional
+    ## Use the `queues_regexes` parameters to specify one or multiple regex to to match
+    ## the queues you'd like to collect metrics on (up to 200 queues).
+    ## If you have vhosts set up, the regex pattern needs to be formatted with vhost
+    ## in the format of `<vhost>/<queue_name>`.
+    ## If you have less than 200 queues, you don't have to set this parameter,
+    ## the metrics are collected on all the queues by default.
+    ## If you have `tag_families` enabled, the first captured group in the regex
+    ## is used as the queue_family tag.
+    ## If you have named groups the tag names will be the named groups in regex.
+    ## If you use multiplies groups and not all have are named, the tags are going to be
+    ## used only on the groups that contains names.
+    #
+    # queues_regexes:
+    #   - <REGEX>
+
+    ## @param exchanges - list of strings - optional
+    ## Use the `exchanges` parameters to specify the exchanges you'd like to
+    ## collect metrics on (up to 50 exchanges).
+    ## If you have less than 50 exchanges, you don't have to set this parameter,
+    ## the metrics is collected on all the exchanges by default.
+    #
+    # exchanges:
+    #   - <EXCHANGE_1>
+    #   - <EXCHANGE_2>
+
+    ## @param exchanges_regexes - list of strings - optional
+    ## Use the `exchanges_regexes` parameters to specify one or multiple regex to to match
+    ## the exchanges you'd like to collect metrics on (up to 50 exchanges).
+    ## If you have less than 50 exchanges, you don't have to set this parameter,
+    ## the metrics is collected on all the exchanges by default.
+    #
+    # exchanges_regexes:
+    #   - <REGEX>
+
+    ## @param vhosts - list of strings - optional
+    ## Service checks and `rabbitmq.connections` metric:
+    ## By default a list of all vhosts is fetched and each one is checked using the aliveness
+    ## API and the metric `rabbitmq.connections` is collected.
+    ## If you prefer only certain vhosts to be monitored with service checks
+    ## and the number of `connections` then you can list the vhosts you care about in this parameter.
+    #
+    # vhosts:
+    #   - <VHOST_NAME_1>
+    #   - <VHOST_NAME_2>
 
 ## Log Section
 ##
