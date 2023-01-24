@@ -34,7 +34,7 @@
         "creates_events": false
       },
       "metrics": {
-        "prefix": "btrfs.",
+        "prefix": "system.disk.btrfs.",
         "check": "system.disk.btrfs.total",
         "metadata_path": "metadata.csv"
       },
