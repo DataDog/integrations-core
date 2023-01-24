@@ -29,6 +29,8 @@ files:
           - name: include_aggregated_endpoint
             description: |
               Whether or not to include metrics from the aggregated endpoint (/metrics).
+
+              Note: This option must be set to true when 'unaggregated_endpoint' is unspecified.
             value:
               type: boolean
               example: true
