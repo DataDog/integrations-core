@@ -9,7 +9,7 @@
 * [Fixed] Fix bug in replication role tag. See [#13694](https://github.com/DataDog/integrations-core/pull/13694).
 * [Fixed] Bump the base check dependency. See [#13643](https://github.com/DataDog/integrations-core/pull/13643).
 
-## 13.2.0 / 2022-12-09
+## 13.2.0 / 2022-12-09 / Agent 7.42.0
 
 * [Added] Explain parameterized queries. See [#13434](https://github.com/DataDog/integrations-core/pull/13434).
 * [Added] Add deadlocks monotonic count metric. See [#13374](https://github.com/DataDog/integrations-core/pull/13374).
