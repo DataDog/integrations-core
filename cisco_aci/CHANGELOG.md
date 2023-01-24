@@ -1,6 +1,6 @@
 # CHANGELOG - cisco_aci
 
-## 2.2.1 / 2022-12-09
+## 2.2.1 / 2022-12-09 / Agent 7.42.0
 
 * [Fixed] Update cryptography dependency. See [#13367](https://github.com/DataDog/integrations-core/pull/13367).
 * [Fixed] Remove `default_backend` parameter from cryptography calls. See [#13333](https://github.com/DataDog/integrations-core/pull/13333).

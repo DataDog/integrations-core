@@ -1,6 +1,6 @@
 # CHANGELOG - spark
 
-## 3.1.3 / 2022-12-09
+## 3.1.3 / 2022-12-09 / Agent 7.42.0
 
 * [Fixed] Allow punctuation marks in query name when publishing spark structured streaming metrics. See [#13246](https://github.com/DataDog/integrations-core/pull/13246). Thanks [cpolito88](https://github.com/cpolito88).
 

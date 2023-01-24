@@ -1,6 +1,6 @@
 # CHANGELOG - CockroachDB
 
-## 2.5.0 / 2022-12-09
+## 2.5.0 / 2022-12-09 / Agent 7.42.0
 
 * [Added] Collect additional metrics. See [#13339](https://github.com/DataDog/integrations-core/pull/13339).
 
