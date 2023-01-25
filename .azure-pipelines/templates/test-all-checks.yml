@@ -211,7 +211,7 @@ jobs:
       displayName: GlusterFS
       os: linux
     - checkName: go_expvar
-      displayName: Go-Expvar
+      displayName: Go Expvar
       os: linux
     - checkName: gunicorn
       displayName: Gunicorn

@@ -37,7 +37,7 @@
         "creates_events": false
       },
       "metrics": {
-        "prefix": "couch.",
+        "prefix": "couchdb.",
         "check": [
           "couchdb.couchdb.request_time.n",
           "couchdb.couchdb.request_time"

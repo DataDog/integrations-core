@@ -1,5 +1,10 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 17.8.1 / 2023-01-25
+
+* [Fixed] Call hatch from `sys.executable`. See [#13769](https://github.com/DataDog/integrations-core/pull/13769).
+* [Fixed] Bump pydantic version to 1.10.4. See [#13764](https://github.com/DataDog/integrations-core/pull/13764).
+
 ## 17.8.0 / 2023-01-20
 
 * [Added] Update style deps. See [#13740](https://github.com/DataDog/integrations-core/pull/13740).

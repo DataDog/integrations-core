@@ -4,7 +4,7 @@
 
 * [Added] Exclude tracefs by default from disk checks. See [#13530](https://github.com/DataDog/integrations-core/pull/13530). Thanks [DaveWK](https://github.com/DaveWK).
 
-## 4.8.0 / 2022-12-09
+## 4.8.0 / 2022-12-09 / Agent 7.42.0
 
 * [Added] Allow device-specific tags for all device-specific metrics. See [#13233](https://github.com/DataDog/integrations-core/pull/13233).
 

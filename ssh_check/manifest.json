@@ -36,7 +36,7 @@
         "creates_events": false
       },
       "metrics": {
-        "prefix": "ssh.",
+        "prefix": "sftp.",
         "check": "sftp.response_time",
         "metadata_path": "metadata.csv"
       },

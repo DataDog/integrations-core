@@ -210,7 +210,7 @@ coverage:
         target: 75
         flags:
         - glusterfs
-      Go-Expvar:
+      Go_Expvar:
         target: 75
         flags:
         - go_expvar

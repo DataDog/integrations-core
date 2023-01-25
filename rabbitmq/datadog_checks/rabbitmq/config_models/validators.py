@@ -23,5 +23,10 @@ def initialize_instance(values, **kwargs):
             agg_ep = plugin_settings['include_aggregated_endpoint']
             if not isinstance(agg_ep, bool):
                 raise TypeError("'prometheus_plugin.include_aggregated_endpoint' must be a boolean.")
+            if not agg_ep and 'unaggregated_endpoint' not in plugin_settings:
+                raise ValueError(
+                    "'prometheus_plugin.include_aggregated_endpoint' field must "
+                    + "be set to 'true' when 'prometheus_plugin.unaggregated_endpoint' is not collected."
+                )
 
     return values
