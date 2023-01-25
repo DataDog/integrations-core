@@ -185,6 +185,8 @@ class Oracle(AgentCheck):
             self.log.error("Failed to connect to Oracle DB, error: %s", str(e))
             raise
 
+            
+            
     def _get_dsn(self):
         host = self._server
         port = 1521
