@@ -233,8 +233,8 @@ files:
           WARNING: There is a known issue with the client library in which disabling
           this option has the potential to cause a memory leak.
           
-          Note: When used in combination with `queue_manager_process` the default is `false` instead. As this option
-          will also prevent connection memory leaks.
+          Note: When used in combination with `queue_manager_process`, the default is `false` instead. This option
+          also prevents connection memory leaks.
         value:
           example: false
           type: boolean
