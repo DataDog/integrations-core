@@ -415,6 +415,13 @@ class PostgresStatementSamples(DBMAsyncJob):
             self._check.database_monitoring_query_sample(json.dumps(e, default=default_json_event_encoding))
             submitted_count += 1
 
+        elapsed_ms = (time.time() - start_time) * 1000
+        self._check.histogram(
+            "dd.postgres.collect_statement_samples_explain_plans.time",
+            elapsed_ms,
+            tags=self._tags + self._check._get_debug_tags(),
+            hostname=self._check.resolved_hostname,
+        )
         if self._report_activity_event():
             active_connections = self._get_active_connections()
             activity_event = self._create_activity_event(rows, active_connections)
@@ -737,6 +744,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             return event
         return None
 
+    @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_plans(self, rows):
         events = []
         for row in rows:
