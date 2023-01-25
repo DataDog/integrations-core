@@ -1,5 +1,9 @@
 # CHANGELOG - ddev
 
+## 1.4.1 / 2023-01-25
+
+* [Fixed] Pin and bump the datadog_checks_dev version. See [#13557](https://github.com/DataDog/integrations-core/pull/13557).
+
 ## 1.4.0 / 2023-01-20
 
 * [Added] Update manifest validation. See [#13637](https://github.com/DataDog/integrations-core/pull/13637).
