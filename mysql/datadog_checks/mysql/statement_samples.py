@@ -362,6 +362,7 @@ class MySQLStatementSamples(DBMAsyncJob):
             num_sent += 1
 
     def _collect_plan_for_statement(self, row):
+        start_time = time.time()
         # Plans have several important signatures to tag events with:
         # - `plan_signature` - hash computed from the normalized JSON plan to group identical plan trees
         # - `resource_hash` - hash computed off the raw sql text to match apm resources
@@ -424,11 +425,23 @@ class MySQLStatementSamples(DBMAsyncJob):
             except Exception as e:
                 if self._config.log_unobfuscated_plans:
                     self._log.warning("Failed to obfuscate plan=[%s] | err=[%s]", plan, e)
+                self._check.histogram(
+                    "dd.mysql.collect_plan_for_statement.time",
+                    (time.time() - start_time) * 1000,
+                    tags=self._tags + self._check._get_debug_tags(),
+                    hostname=self._check.resolved_hostname,
+                )
                 raise e
             plan_signature = compute_exec_plan_signature(normalized_plan)
 
         query_plan_cache_key = (query_cache_key, plan_signature)
         if self._seen_samples_ratelimiter.acquire(query_plan_cache_key):
+            self._check.histogram(
+                "dd.mysql.collect_plan_for_statement.time",
+                (time.time() - start_time) * 1000,
+                tags=self._tags + self._check._get_debug_tags(),
+                hostname=self._check.resolved_hostname,
+            )
             return {
                 "timestamp": row["timer_end_time_s"] * 1000,
                 "host": self._check.resolved_hostname,
@@ -461,7 +474,6 @@ class MySQLStatementSamples(DBMAsyncJob):
                 'mysql': {k: v for k, v in row.items() if k not in EVENTS_STATEMENTS_SAMPLE_EXCLUDE_KEYS},
             }
 
-    @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_plans_for_statements(self, rows):
         for row in rows:
             try:
