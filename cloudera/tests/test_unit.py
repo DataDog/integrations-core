@@ -96,6 +96,39 @@ def test_given_cloudera_check_when_v7_read_clusters_exception_from_cloudera_clie
     )
 
 
+@pytest.mark.parametrize('cloudera_api_exception', ['Service not available'], indirect=True)
+def test_given_cloudera_check_when_v7_read_query_time_series_exception_from_cloudera_client_then_emits_critical_service(
+    aggregator,
+    dd_run_check,
+    cloudera_check,
+    instance,
+    cloudera_version_7_0_0,
+    cloudera_api_exception,
+    list_one_cluster_good_health_resource,
+):
+    with mock.patch(
+        'cm_client.ClouderaManagerResourceApi.get_version',
+        return_value=cloudera_version_7_0_0,
+    ), mock.patch(
+        'cm_client.ClustersResourceApi.read_clusters',
+        return_value=list_one_cluster_good_health_resource,
+    ), mock.patch(
+        'cm_client.TimeSeriesResourceApi.query_time_series',
+        side_effect=cloudera_api_exception,
+    ):
+        # Given
+        check = cloudera_check(instance)
+        # When
+        dd_run_check(check)
+        # Then
+    aggregator.assert_service_check(
+        'cloudera.can_connect',
+        AgentCheck.CRITICAL,
+        tags=CAN_CONNECT_TAGS,
+        message="Cloudera check raised an exception: (Service not available)\nReason: None\n",
+    )
+
+
 def test_given_cloudera_check_when_bad_health_cluster_then_emits_cluster_health_critical(
     aggregator,
     dd_run_check,
