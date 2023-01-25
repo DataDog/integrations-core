@@ -16,7 +16,7 @@
                    "id":3745019902866334,
                    "definition":{
                       "type":"note",
-                      "content":"This dashboard is a high-level overview of your SQL Server AlwaysOn servers. View Availability Group and Failover Cluster metrics such as redo queue size, log send queue size, and log send rate by using the dropdowns to filter by `host`, `replica_server`, or `availability_group`.",
+                      "content":"This dashboard is a high-level overview of your SQL Server AlwaysOn servers. View availability group and failover cluster metrics such as redo queue size, log send queue size, and log send rate by using the dropdowns to filter by `host`, `replica_server`, or `availability_group`.",
                       "background_color":"transparent",
                       "font_size":"16",
                       "text_align":"left",
