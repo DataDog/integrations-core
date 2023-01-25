@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import contextlib
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 
@@ -59,19 +60,18 @@ class ApiClientV7(ApiClient):
         # Use len(read_clusters_response.items) * 2 workers since
         # for each cluster, we are executing 2 tasks in parallel.
         if len(discovered_clusters) > 0:
-            futures = []
-            with ThreadPoolExecutor(max_workers=len(discovered_clusters) * 2) as executor:
+            with ThreadPoolExecutor(max_workers=len(discovered_clusters) * 2) as executor, raising_submitter(
+                executor
+            ) as submit:
                 for pattern, key, item, config in discovered_clusters:
                     self._log.debug(
                         "discovered item: [pattern:%s, key:%s, item:%s, config:%s]", pattern, key, item, config
                     )
                     cluster_name = key
                     tags = self._collect_cluster_tags(item, self._check.config.tags)
-                    futures.append(executor.submit(self._collect_cluster_metrics, cluster_name, tags))
-                    futures.append(executor.submit(self._collect_hosts, cluster_name))
+                    submit(self._collect_cluster_metrics, cluster_name, tags)
+                    submit(self._collect_hosts, cluster_name)
                     self._collect_cluster_service_check(item, tags)
-            for future in futures:
-                future.result()
 
     def _collect_events(self):
         events_resource_api = cm_client.EventsResourceApi(self._api_client)
@@ -123,16 +123,15 @@ class ApiClientV7(ApiClient):
         # Use len(list_hosts_response.items) * 4 workers since
         # for each host, we are executing 4 tasks in parallel.
         if len(list_hosts_response.items) > 0:
-            futures = []
-            with ThreadPoolExecutor(max_workers=len(list_hosts_response.items) * 4) as executor:
+            with ThreadPoolExecutor(max_workers=len(list_hosts_response.items) * 4) as executor, raising_submitter(
+                executor
+            ) as submit:
                 for host in list_hosts_response.items:
                     tags = self._collect_host_tags(host, self._check.config.tags)
-                    futures.append(executor.submit(self._collect_host_metrics, host, tags))
-                    futures.append(executor.submit(self._collect_role_metrics, host, tags))
-                    futures.append(executor.submit(self._collect_disk_metrics, host, tags))
-                    futures.append(executor.submit(self._collect_host_service_check, host, tags))
-            for future in futures:
-                future.result()
+                    submit(self._collect_host_metrics, host, tags)
+                    submit(self._collect_role_metrics, host, tags)
+                    submit(self._collect_disk_metrics, host, tags)
+                    submit(self._collect_host_service_check, host, tags)
 
     @staticmethod
     def _collect_host_tags(host, custom_tags):
@@ -158,12 +157,9 @@ class ApiClientV7(ApiClient):
 
     def _collect_host_metrics(self, host, tags):
         # Use 2 workers since we are executing 2 tasks in parallel.
-        futures = []
-        with ThreadPoolExecutor(max_workers=2) as executor:
-            futures.append(executor.submit(self._collect_host_native_metrics, host, tags))
-            futures.append(executor.submit(self._collect_host_timeseries_metrics, host, tags))
-        for future in futures:
-            future.result()
+        with ThreadPoolExecutor(max_workers=2) as executor, raising_submitter(executor) as submit:
+            submit(self._collect_host_native_metrics, host, tags)
+            submit(self._collect_host_timeseries_metrics, host, tags)
 
     def _collect_host_native_metrics(self, host, tags):
         for metric in NATIVE_METRICS['host']:
@@ -238,3 +234,23 @@ class ApiClientV7(ApiClient):
                         value = d.value
 
                 self._check.gauge(full_metric_name, value, tags=[entity_tag, *tags])
+
+
+@contextlib.contextmanager
+def raising_submitter(executor):
+    """Provides a `submit` function that wraps `executor.submit` in such a way that it
+    will cause the first exception found in the resulting _futures_ to be raised in the
+    parent thread at the point where the context is exited.
+    """
+    futures = []
+
+    def submit_and_maybe_raise(*args, **kwargs):
+        future = executor.submit(*args, **kwargs)
+        futures.append(future)
+
+    yield submit_and_maybe_raise
+
+    # Calling the `result` method on futures causes exceptions that happened during the
+    # execution to be raised in the current thread.
+    for future in futures:
+        future.result()
