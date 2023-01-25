@@ -341,7 +341,7 @@ def test_collect_apps_failed_instance_state(dd_run_check, aggregator, mocked_req
 
     # Even though both init_config and instance have `collect_apps_all_states: True`,
     # `collect_apps_states_list: ['FAILED']` should override both.
-    # Therefore, metrics with `state` tag values of ` `RUNNING`, `KILLED`, or `NEW` should not be collected.
+    # Therefore, metrics with `state` tag values of `RUNNING`, `KILLED`, or `NEW` should not be collected.
     for app in YARN_APPS_ALL_STATES:
         for metric, value in iteritems(app['metric_values']):
             aggregator.assert_metric(metric, value=value, tags=app['tags'] + EXPECTED_TAGS, count=0)

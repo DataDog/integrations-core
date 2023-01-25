@@ -128,7 +128,7 @@ instances:
     ## For example, collect metrics from applications with 'NEW', 'SUBMITTED', 'FINISHED', and other states.
     ##
     ## This instance-level option of `collect_apps_all_states` overrides the init_config-level
-    ## `collect_apps_all_states` option and also the init_config-level `collect_apps_states_list` option.
+    ## `collect_apps_all_states` option.
     #
     # collect_apps_all_states: false
 
@@ -136,6 +136,9 @@ instances:
     ## Configure the application states of which to collect application metrics. 
     ## Valid options are 'ALL', 'NEW', 'NEW_SAVING', 'SUBMITTED', 'ACCEPTED',
     ## 'RUNNING', 'FINISHED', 'FAILED', and 'KILLED'.
+    ##
+    ## This instance-level option of `collect_apps_states_list` overrides the init_config-level
+    ## `collect_apps_states_list` option and also the instance-level `collect_apps_all_states`.
     #
     # collect_apps_states_list:
     #   - ALL

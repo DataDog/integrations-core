@@ -234,13 +234,17 @@ class YarnCheck(AgentCheck):
         """
         Get metrics for running applications
         """
+
+        # init_config.collect_apps_states_list < init_config.collect_apps_all_states
+        # < instance.collect_apps_states_list < instance.collect_apps_all_states
+
         collect_apps_all_states = is_affirmative(
             self.instance.get(
                 'collect_apps_all_states', is_affirmative(self.init_config.get('collect_app_all_states', False))
             )
         )
 
-        collect_apps_states = self.instance.get('collect_apps_states_list', [])
+        collect_apps_states = self.instance.get('collect_apps_states', self.init_config.get('collect_apps_states', []))
 
         if collect_apps_states and collect_apps_all_states:
             self.log.warning(
