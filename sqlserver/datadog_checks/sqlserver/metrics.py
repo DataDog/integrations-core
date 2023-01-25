@@ -48,7 +48,7 @@ class BaseSqlServerMetric(object):
             partial_kwargs['hostname'] = cfg_instance['hostname']
         self.report_function = partial(report_function, raw=True, **partial_kwargs)
         self.instance = cfg_instance.get('instance_name', '')
-        self.physical_db_name = cfg_instance.get('physical_db_name', None)
+        self.physical_db_name = cfg_instance.get('physical_db_name', '')
         self.object_name = cfg_instance.get('object_name', '')
         self.tags = cfg_instance.get('tags', [])
         self.tag_by = cfg_instance.get('tag_by', None)
@@ -183,7 +183,7 @@ class SqlFractionMetric(BaseSqlServerMetric):
             if inst in done_instances:
                 continue
 
-            if (self.instance != ALL_INSTANCES and (inst != self.instance or inst != self.physical_db_name)) or (
+            if (self.instance != ALL_INSTANCES and inst != self.instance and inst != self.physical_db_name) or (
                 self.object_name and object_name != self.object_name
             ):
                 done_instances.append(inst)
