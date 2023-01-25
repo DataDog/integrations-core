@@ -14,6 +14,8 @@ files:
           - name: collect_apps_states_list
             description: |
               Configure the application states of which to collect application metrics.
+              Valid options are 'ALL', 'NEW', 'NEW_SAVING', 'SUBMITTED', 'ACCEPTED',
+              'RUNNING', 'FINISHED', 'FAILED', and 'KILLED'.
             value:
               type: array
               example: &yarn_app_states_init

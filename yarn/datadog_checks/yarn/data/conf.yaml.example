@@ -10,6 +10,8 @@ init_config:
 
     ## @param collect_apps_states_list - list of strings - optional
     ## Configure the application states of which to collect application metrics.
+    ## Valid options are 'ALL', 'NEW', 'NEW_SAVING', 'SUBMITTED', 'ACCEPTED',
+    ## 'RUNNING', 'FINISHED', 'FAILED', and 'KILLED'.
     #
     # collect_apps_states_list:
     #   - ALL
