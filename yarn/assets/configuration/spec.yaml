@@ -11,6 +11,24 @@ files:
             value:
               example: false
               type: boolean
+          - name: collect_apps_states_list
+            description: |
+              Configure the application states of which to collect application metrics.
+            value:
+              type: array
+              example: &yarn_app_states_init
+              - 'ALL'
+              - 'NEW'
+              - 'NEW_SAVING'
+              - 'SUBMITTED'
+              - 'ACCEPTED'
+              - 'RUNNING'
+              - 'FINISHED'
+              - 'FAILED'
+              - 'KILLED'
+              items:
+                type: string
+                enum: *yarn_app_states_init
           - template: init_config/http
           - template: init_config/default
       - template: instances
