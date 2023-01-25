@@ -21,7 +21,8 @@ class Database:
         return hash((self.name, self.physical_db_name))
 
     def __eq__(self, other):
-        if not isinstance(other, type(self)): return NotImplemented
+        if not isinstance(other, type(self)):
+            return NotImplemented
         return self.name == other.name and self.physical_db_name == other.physical_db_name
 
     def __str__(self):

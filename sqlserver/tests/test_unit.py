@@ -186,7 +186,7 @@ def test_azure_autodiscovery_exclude_some(instance_autodiscovery):
     instance_autodiscovery['autodiscovery_exclude'] = ['.*2020db$', 'm.*']
     check = SQLServer(CHECK_NAME, {}, [instance_autodiscovery])
     check.autodiscover_databases(mock_cursor)
-    db_dict = {'tempdb': 'tempdb', 'AdventureWorks2017':'fce04774', 'CaseSensitive2018':'jub3j8kh'}
+    db_dict = {'tempdb': 'tempdb', 'AdventureWorks2017': 'fce04774', 'CaseSensitive2018': 'jub3j8kh'}
     dbs = [Database(name, pys_db) for name, pys_db in db_dict.items()]
     assert check.databases == set(dbs)
 
