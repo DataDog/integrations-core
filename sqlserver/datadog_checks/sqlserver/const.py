@@ -40,7 +40,11 @@ BASE_NAME_QUERY = (
 )
 
 DEFAULT_AUTODISCOVERY_INTERVAL = 3600
-AUTODISCOVERY_QUERY = "select name from sys.databases"
+AUTODISCOVERY_QUERY = """select {columns} from sys.databases"""
+expected_sys_databases_columns = [
+    'name',
+    'physical_database_name',
+]
 
 VALID_METRIC_TYPES = ('gauge', 'rate', 'histogram')
 
