@@ -1,0 +1,48 @@
+{
+    debug
+    admin :2019
+}
+:80 {
+    root * /usr/share/caddy/
+    @get_stats_system_bs {
+        method GET
+        path /api/v2/stats/system
+        expression {uri}.contains('?')
+        expression {uri}.contains('bs')
+    }
+    route @get_stats_system_bs {
+        rewrite /api/v2/stats/system api/v2/stats/system_bs
+        file_server
+    }
+    @get_stats_system_rw {
+        method GET
+        path /api/v2/stats/system
+        expression {uri}.contains('?')
+        expression {uri}.contains('rw')
+    }
+    route @get_stats_system_rw {
+        rewrite /api/v2/stats/system api/v2/stats/system_rw
+        file_server
+    }
+    @get_stats_volumes_bs {
+        method GET
+        path /api/v2/stats/volumes
+        expression {uri}.contains('?')
+        expression {uri}.contains('bs')
+    }
+    route @get_stats_volumes_bs {
+        rewrite /api/v2/stats/volumes api/v2/stats/volumes_bs
+        file_server
+    }
+    @get_stats_volumes_rw {
+        method GET
+        path /api/v2/stats/volumes
+        expression {uri}.contains('?')
+        expression {uri}.contains('rw')
+    }
+    route @get_stats_volumes_rw {
+        rewrite /api/v2/stats/volumes api/v2/stats/volumes_rw
+        file_server
+    }
+    file_server browse
+}

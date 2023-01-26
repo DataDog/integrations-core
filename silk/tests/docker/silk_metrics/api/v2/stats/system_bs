@@ -1,0 +1,38 @@
+[
+    {
+        "bs": "lt8k",
+        "iops_avg": 0,
+        "latency_inner": 0.0,
+        "latency_outer": 0.0,
+        "resolution": 5,
+        "throughput_avg": 0,
+        "timestamp": 1644350350
+    },
+    {
+        "bs": "8k_64k",
+        "iops_avg": 84375,
+        "latency_inner": 0.40999999999999998,
+        "latency_outer": 0.029999999999999999,
+        "resolution": 5,
+        "throughput_avg": 1382403277,
+        "timestamp": 1644350350
+    },
+    {
+        "bs": "64k_256k",
+        "iops_avg": 0,
+        "latency_inner": 0.0,
+        "latency_outer": 0.0,
+        "resolution": 5,
+        "throughput_avg": 0,
+        "timestamp": 1644350350
+    },
+    {
+        "bs": "gt256k",
+        "iops_avg": 0,
+        "latency_inner": 0.0,
+        "latency_outer": 0.0,
+        "resolution": 5,
+        "throughput_avg": 0,
+        "timestamp": 1644350350
+    }
+]
