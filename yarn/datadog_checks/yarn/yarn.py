@@ -153,6 +153,18 @@ YARN_QUEUE_METRICS = {
     'maxApplicationsPerUser': ('yarn.queue.max_applications_per_user', GAUGE),
 }
 
+APPLICATION_STATES = {
+    'ALL',
+    'NEW',
+    'NEW_SAVING',
+    'SUBMITTED',
+    'ACCEPTED',
+    'RUNNING',
+    'FINISHED',
+    'FAILED',
+    'KILLED',
+}
+
 
 class YarnCheck(AgentCheck):
     """
@@ -244,15 +256,18 @@ class YarnCheck(AgentCheck):
             )
         )
 
-        collect_apps_states = self.instance.get('collect_apps_states', self.init_config.get('collect_apps_states', []))
+        collect_apps_states_list = self.instance.get(
+            'collect_apps_states_list', self.init_config.get('collect_apps_states_list', ['RUNNING'])
+        )
+        collect_apps_states_list = [state.upper() for state in collect_apps_states_list]
 
-        if collect_apps_states and collect_apps_all_states:
-            self.log.warning(
-                "Detected configured collect_apps_states_list, overriding any collect_apps_all_states value"
-            )
-            collect_apps_all_states = False
-
-        collect_apps_states = [state.upper() for state in collect_apps_states]
+        if collect_apps_all_states:
+            if collect_apps_states_list:
+                self.log.warning(
+                    "Detected configured collect_apps_states and collect_apps_all_states values, "
+                    "overriding collect_apps_states to collect all application states"
+                )
+            collect_apps_states_list = APPLICATION_STATES
 
         metrics_json = self._rest_request_to_json(rm_address, YARN_APPS_PATH, addl_tags)
 
@@ -263,11 +278,7 @@ class YarnCheck(AgentCheck):
                 tags.extend(addl_tags)
                 tags.append('state:{}'.format(app_state))
 
-                if (
-                    collect_apps_all_states
-                    or app_state in collect_apps_states
-                    or (not collect_apps_states and app_state == YARN_APPLICATION_RUNNING)
-                ):
+                if app_state in collect_apps_states_list:
                     self._set_yarn_metrics_from_json(tags, app_json, DEPRECATED_YARN_APP_METRICS)
                     self._set_yarn_metrics_from_json(tags, app_json, YARN_APP_METRICS)
 
