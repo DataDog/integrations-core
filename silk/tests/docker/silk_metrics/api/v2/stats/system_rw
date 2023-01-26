@@ -1,20 +1,23 @@
-[
-    {
-        "iops_avg": 76628,
-        "latency_inner": 0.44,
-        "latency_outer": 0.02,
-        "resolution": 5,
-        "rw": "r",
-        "throughput_avg": 1255473152,
-        "timestamp": 1644878550
-    },
-    {
-        "iops_avg": 8557,
-        "latency_inner": 0.17999999999999999,
-        "latency_outer": 0.11,
-        "resolution": 5,
-        "rw": "w",
-        "throughput_avg": 140197888,
-        "timestamp": 1644878550
-    }
-]
+{
+    "hits": [
+        {
+            "iops_avg": 76628,
+            "latency_inner": 0.44,
+            "latency_outer": 0.02,
+            "resolution": 5,
+            "rw": "r",
+            "throughput_avg": 1255473152,
+            "timestamp": 1644878550
+        },
+        {
+            "iops_avg": 8557,
+            "latency_inner": 0.17999999999999999,
+            "latency_outer": 0.11,
+            "resolution": 5,
+            "rw": "w",
+            "throughput_avg": 140197888,
+            "timestamp": 1644878550
+        }
+    ],
+    "total": 2
+}
