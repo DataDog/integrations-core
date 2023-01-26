@@ -28,6 +28,7 @@ classifiers = [
     "Private :: Do Not Upload",
     "Programming Language :: Python :: 3.8",
     "Topic :: System :: Monitoring",
+    "Category::Log Collection"
 ]
 dependencies = [
     "datadog-checks-base>=25.1.0",
