@@ -16,6 +16,7 @@ def dd_environment():
     with docker_run(
         compose_file=compose_file,
         conditions=conditions,
+        mount_logs=True,
     ):
         yield {}
 
