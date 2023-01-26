@@ -41,7 +41,7 @@ SAMPLE_QUERIES = [
 
 dbm_enabled_keys = ["dbm", "deep_database_monitoring"]
 
-DEFAULT_TZ_INFO = psycopg2.tz.FixedOffsetTimezone(offset=0, name=None)
+DEFAULT_TZ_INFO = datetime.timezone(offset=datetime.timedelta(0))
 
 
 @pytest.fixture(autouse=True)
