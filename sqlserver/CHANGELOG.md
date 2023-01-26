@@ -1,5 +1,9 @@
 # CHANGELOG - sqlserver
 
+## 10.1.2 / 2023-01-26
+
+* [Fixed] Bug Fix: Azure SQL DB database name tags properly applied on perf metrics. See [#13757](https://github.com/DataDog/integrations-core/pull/13757).
+
 ## 10.1.1 / 2023-01-20
 
 * [Fixed] Update dependencies. See [#13726](https://github.com/DataDog/integrations-core/pull/13726).
