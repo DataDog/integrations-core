@@ -10,6 +10,25 @@ CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 DRIVER_CONFIG_DIR = os.path.join(CURRENT_DIR, 'data', 'driver_config')
 
 
+# Database is used to store both the name and physical_database_name
+# for a database, which is discovered via autodiscovery
+class Database:
+    def __init__(self, name, physical_db_name=None):
+        self.name = name
+        self.physical_db_name = physical_db_name
+
+    def __hash__(self):
+        return hash((self.name, self.physical_db_name))
+
+    def __eq__(self, other):
+        if not isinstance(other, type(self)):
+            return NotImplemented
+        return self.name == other.name and self.physical_db_name == other.physical_db_name
+
+    def __str__(self):
+        return "name:{}, physical_db_name:{}".format(self.name, self.physical_db_name)
+
+
 def set_default_driver_conf():
     if Platform.is_containerized():
         # Use default `./driver_config/odbcinst.ini` when Agent is running in docker.
