@@ -114,6 +114,17 @@ services:
       - 8001:9090
     networks:
       - temporal-network
+  temporal-python-worker:
+    build:
+      context: workers/python
+    depends_on:
+      temporal:
+        condition: service_healthy
+    container_name: temporal-python-worker
+    ports:
+      - 8002:8002
+    networks:
+      - temporal-network
 networks:
   temporal-network:
     name: temporal-network
