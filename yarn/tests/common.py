@@ -215,7 +215,7 @@ YARN_COLLECT_APPS_ALL_STATES_CONFIG = {
     ]
 }
 
-YARN_COLLECT_APPS_FAILED_INSTANCE_CONFIG = {
+YARN_COLLECT_APPS_KILLED_INSTANCE_CONFIG = {
     'init_config': {
         'collect_apps_all_states': True,
     },
@@ -223,8 +223,7 @@ YARN_COLLECT_APPS_FAILED_INSTANCE_CONFIG = {
         {
             'resourcemanager_uri': RM_ADDRESS,
             'cluster_name': CLUSTER_NAME,
-            'collect_apps_all_states': True,
-            'collect_apps_states_list': ["FAILED"],
+            'collect_apps_states_list': ["KILLED"],
         }
     ],
 }

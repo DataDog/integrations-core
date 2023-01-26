@@ -252,7 +252,7 @@ class YarnCheck(AgentCheck):
 
         collect_apps_all_states = is_affirmative(
             self.instance.get(
-                'collect_apps_all_states', is_affirmative(self.init_config.get('collect_app_all_states', False))
+                'collect_apps_all_states', is_affirmative(self.init_config.get('collect_apps_all_states', False))
             )
         )
 
