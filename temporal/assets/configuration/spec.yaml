@@ -8,3 +8,9 @@ files:
   - template: instances
     options:
     - template: instances/default
+  - template: logs
+    example:
+    - type: file
+      path: /var/log/temporal/temporal-server.log
+      source: temporal
+      service: <SERVICE_NAME>

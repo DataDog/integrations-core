@@ -65,6 +65,8 @@ services:
       kompose.volume.type: configMap
     volumes:
       - ./config:/etc/temporal/config/dynamicconfig
+      - ./template/config_template.yaml:/etc/temporal/config/config_template.yaml
+      - ${TEMPORAL_LOG_FOLDER}:/var/log/temporal
     healthcheck:
       test:
         [
