@@ -20,6 +20,7 @@ files:
               By default, only applications in the 'RUNNING' state will have their metrics collected.
             value:
               type: array
+              default: ['RUNNING']
               example: &yarn_app_states_init
               - 'ALL'
               - 'NEW'
@@ -129,6 +130,7 @@ files:
               - 'FINISHED'
               - 'FAILED'
               - 'KILLED'
+              default: ['RUNNING']
               items:
                 type: string
                 enum: *yarn_app_states
