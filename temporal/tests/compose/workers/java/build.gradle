@@ -1,0 +1,47 @@
+
+plugins {
+    // Apply the java plugin to add support for Java
+    id 'java'
+
+    // Apply the application plugin to add support for building a CLI application.
+    id 'application'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+repositories {
+    maven {
+        url "https://plugins.gradle.org/m2/"
+    }
+    maven {
+        url "https://oss.sonatype.org/content/repositories/snapshots/"
+    }
+    mavenCentral()
+}
+
+// @@@SNIPSTART hello-world-project-template-java-gradle-dependencies
+dependencies {
+    implementation group: 'io.temporal', name: 'temporal-sdk', version: '1.17.0'
+    implementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.11'
+    implementation group: 'commons-configuration', name: 'commons-configuration', version: '1.10'
+
+    testImplementation group: 'io.temporal', name: 'temporal-testing', version: '1.11.0'
+    testImplementation group: 'junit', name: 'junit', version: '4.13.2'
+    testImplementation group: 'org.mockito', name: 'mockito-core', version: '4.5.1'
+    implementation "io.micrometer:micrometer-registry-prometheus"
+}
+// @@@SNIPEND
+
+application {
+    // Define the main class for the application.
+    mainClassName = 'helloworldapp.InitiateHelloWorld'
+}
+
+task startWorker(type: JavaExec) {
+    main = 'helloworldapp.HelloWorldWorker'
+    classpath = sourceSets.main.runtimeClasspath
+}
+// @@@SNIPEND
