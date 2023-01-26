@@ -3,9 +3,11 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import mock
 import pytest
-from .common import BASE_TAGS, HOST, METRICS, SYSTEM_TAGS, BLOCKSIZE_METRICS, READ_WRITE_METRICS
 
 from datadog_checks.silk import SilkCheck
+
+from .common import BASE_TAGS, BLOCKSIZE_METRICS, HOST, METRICS, READ_WRITE_METRICS, SYSTEM_TAGS
+
 
 @pytest.mark.parametrize(
     'enable_rw, enable_bs, expected_metrics',
@@ -29,6 +31,7 @@ def test_check(dd_run_check, aggregator, instance, enable_rw, enable_bs, expecte
         for tag in [*BASE_TAGS, *SYSTEM_TAGS]:
             aggregator.assert_metric_has_tag(metric, tag)
 
+
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_error_msg_response(dd_run_check, aggregator, instance):
@@ -37,7 +40,10 @@ def test_error_msg_response(dd_run_check, aggregator, instance):
         g.return_value = error_response
         check = SilkCheck('silk', {}, [instance])
         dd_run_check(check)
-        aggregator.assert_service_check('silk.can_connect', SilkCheck.WARNING, message="Received error message: " + error_response["error_msg"])
+        aggregator.assert_service_check(
+            'silk.can_connect', SilkCheck.WARNING, message="Received error message: " + error_response["error_msg"]
+        )
+
 
 @pytest.mark.integration
 def test_incorrect_config(dd_run_check):
@@ -45,6 +51,7 @@ def test_incorrect_config(dd_run_check):
     with pytest.raises(Exception):
         check = SilkCheck('silk', {}, [invalid_instance])
         dd_run_check(check)
+
 
 @pytest.mark.integration
 def test_unreachable_endpoint(dd_run_check, aggregator):

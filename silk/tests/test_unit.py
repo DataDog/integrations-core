@@ -8,12 +8,10 @@ from itertools import chain
 import mock
 import pytest
 
-from datadog_checks.silk.metrics import BLOCKSIZE_METRICS, METRICS, READ_WRITE_METRICS
-from .common import mock_get_data
-
 from datadog_checks.silk import SilkCheck
-from datadog_checks.silk.metrics import Metric
+from datadog_checks.silk.metrics import BLOCKSIZE_METRICS, METRICS, READ_WRITE_METRICS, Metric
 
+from .common import mock_get_data
 
 
 @pytest.mark.unit
@@ -28,6 +26,7 @@ def test_submit_system_state_error(instance, caplog):
         "Could not access system state and version info, got response code `404` from endpoint `system/state`"
         in caplog.text
     )
+
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
@@ -176,7 +175,6 @@ def test_bs_rw_metrics(aggregator, instance, get_data_url, expected_metrics, met
         aggregator.assert_metric(metric)
         for tag in base_tags:
             aggregator.assert_metric_has_tag(metric, tag)
-
 
 
 @pytest.mark.parametrize(

@@ -53,7 +53,7 @@ class SilkCheck(AgentCheck):
         self.submit_server_state()
 
         # Get events
-        # self.collect_events(system_tags)
+        self.collect_events(system_tags)
 
         # Get metrics
         self.collect_metrics(system_tags)
@@ -82,24 +82,26 @@ class SilkCheck(AgentCheck):
             self.warning("Encountered error getting Silk system state: %s", str(e))
             self.service_check(self.CONNECT_SERVICE_CHECK, AgentCheck.CRITICAL, message=str(e), tags=self._tags)
             raise
-
-        if response_hits:
-            data = response_hits[0]
-            state = data.get('state').lower()
-
-            # Assign system-wide tags and metadata
-            system_tags = [
-                'system_name:{}'.format(data.get('system_name')),
-                'system_id:{}'.format(data.get('system_id')),
-            ]
-
-            self._submit_version_metadata(data.get('system_version'))
-            self.service_check(self.STATE_SERVICE_CHECK, STATE_MAP[state], tags=[*system_tags, *self._tags])
         else:
-            msg = "Could not access system state and version info, got response code `{}` from endpoint `{}`".format(
-                code, STATE_ENDPOINT
-            )
-            self.log.debug(msg)
+            if response_hits:
+                data = response_hits[0]
+                state = data.get('state').lower()
+
+                # Assign system-wide tags and metadata
+                system_tags = [
+                    'system_name:{}'.format(data.get('system_name')),
+                    'system_id:{}'.format(data.get('system_id')),
+                ]
+
+                self._submit_version_metadata(data.get('system_version'))
+                self.service_check(self.STATE_SERVICE_CHECK, STATE_MAP[state], tags=[*system_tags, *self._tags])
+            else:
+                msg = (
+                    "Could not access system state and version info, got response code `{}` from endpoint `{}`".format(
+                        code, STATE_ENDPOINT
+                    )
+                )
+                self.log.debug(msg)
         return system_tags
 
     def submit_server_state(self):
