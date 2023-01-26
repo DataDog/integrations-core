@@ -25,7 +25,7 @@ def make_api_client(check):
                 is appended at the end"
         )
         raise
-    check.log.debug('get_version_response: %s', get_version_response)
+    check.log.trace('get_version_response: %s', get_version_response)
     response_version = get_version_response.version
     if response_version:
         cloudera_version = parse(response_version)

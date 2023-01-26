@@ -1,5 +1,9 @@
 # CHANGELOG - IBM MQ
 
+## 4.0.3 / 2023-01-25
+
+* [Fixed] Allow setting the try basic auth value from config in all cases. See [#13781](https://github.com/DataDog/integrations-core/pull/13781).
+
 ## 4.0.2 / 2023-01-20
 
 * [Fixed] Prevent unnecessary non-SSL connection attempts. See [#13559](https://github.com/DataDog/integrations-core/pull/13559).
