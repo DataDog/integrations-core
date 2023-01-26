@@ -55,7 +55,7 @@ paramiko,PyPI,LGPL-2.1-only,Copyright (C) 2009 Jeff Forcier
 ply,PyPI,BSD-3-Clause,Copyright David Beazley
 prometheus-client,PyPI,Apache-2.0,Copyright 2015 The Prometheus Authors
 protobuf,PyPI,BSD-3-Clause,Copyright 2008 Google Inc.  All rights reserved.
-psutil,PyPI,BSD-3-Clause,"Copyright (c) 2009, Jay Loden, Dave Daeschler, Giampaolo Rodola'"
+psutil,PyPI,BSD-3-Clause,"Copyright (c) 2009, Jay Loden, Dave Daeschler, Giampaolo Rodola"
 psycopg2-binary,PyPI,BSD-3-Clause,Copyright 2013 Federico Di Gregorio
 psycopg2-binary,PyPI,LGPL-3.0-only,Copyright (C) 2013 Federico Di Gregorio
 pyasn1,PyPI,BSD-3-Clause,"Copyright (c) 2005-2020, Ilya Etingof <etingof@gmail.com>"
