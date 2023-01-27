@@ -31,7 +31,7 @@ Configure the Spark integration to monitor your Apache Spark Cluster on Databric
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Driver only" xxx -->
 ##### Install the Datadog Agent on Driver
-Install the Datadog Agent on the driver node of the cluster. This is a updated version of the [Datadog Init Script][5] Databricks notebook example.
+Install the Datadog Agent on the driver node of the cluster. 
 
 After creating the `datadog-install-driver-only.sh` script, add the init script path in the [cluster configuration page][6].
 
@@ -317,7 +317,6 @@ fi
 
 See the [Spark integration documentation][8] for a list of metrics collected.
 
-
 ### Service Checks
 
 See the [Spark integration documentation][9] for the list of service checks collected.
@@ -338,7 +337,6 @@ Need help? Contact [Datadog support][10].
 [2]: https://docs.datadoghq.com/integrations/spark/?tab=host
 [3]: https://databricks.com/blog/2017/06/01/apache-spark-cluster-monitoring-with-databricks-and-datadog.html
 [4]: https://app.datadoghq.com/account/settings#agent
-[5]: https://docs.databricks.com/_static/notebooks/datadog-init-script.html
 [6]: https://docs.databricks.com/clusters/init-scripts.html#configure-a-cluster-scoped-init-script-using-the-ui
 [7]: https://docs.datadoghq.com/agent/guide/agent-commands/?#agent-status-and-information
 [8]: https://docs.datadoghq.com/integrations/spark/#metrics
