@@ -5,12 +5,12 @@
 echo Wait for servers to be up
 sleep 10
 
-HOSTPARAMS="--host cockroachdb --insecure --watch 1m"
+HOSTPARAMS="--host cockroachdb --insecure"
 SQL="/cockroach/cockroach.sh sql $HOSTPARAMS"
 
 while :
   do
-    $SQL -e """
+    $SQL --watch 1m -e """
     CREATE DATABASE IF NOT EXISTS places;
     CREATE TABLE IF NOT EXISTS cities (
       id UUID NOT NULL DEFAULT gen_random_uuid(),
@@ -27,14 +27,15 @@ while :
     SELECT city FROM cities WHERE population > 0;
     DELETE FROM cities WHERE city = 'Nowhere';
     DROP TABLE cities;
+    SELECT * from fake_table;
     """
-    echo Sleeping 60s...
-    sleep $(( $RANDOM % 300 + 60 ))
-  done
 
+    random_num=$(( $RANDOM % 300 + 60 ))
 
-while :
-  do
-    $SQL -e "SELECT * from fake_table;"
-    sleep $(( $RANDOM % 600 + 300 ))
+    if [ $(random_num % 2) -gt 275 ]; then
+      $SQL -e "SELECT * from fake_table;"
+    fi
+
+    echo Sleeping...
+    sleep random_num
   done
