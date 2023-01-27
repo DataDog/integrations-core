@@ -1,5 +1,10 @@
 # CHANGELOG - Snowflake
 
+## 4.4.6 / 2023-01-27
+
+* [Fixed] Bump base check dependency. See [#13824](https://github.com/DataDog/integrations-core/pull/13824).
+* [Fixed] Backport snowflake-connector-python bump 2.8.3 to 7.42.x. See [#13794](https://github.com/DataDog/integrations-core/pull/13794).
+
 ## 4.4.5 / 2022-11-28
 
 * [Fixed] Update Snowflake connector and cryptography dependencies. See [#13367](https://github.com/DataDog/integrations-core/pull/13367).
