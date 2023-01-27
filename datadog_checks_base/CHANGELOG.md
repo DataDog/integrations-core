@@ -1,5 +1,10 @@
 # CHANGELOG - datadog_checks_base
 
+## 28.0.2 / 2023-01-27
+
+* [Fixed] Backport snowflake-connector-python bump 2.8.3 to 7.42.x. See [#13794](https://github.com/DataDog/integrations-core/pull/13794).
+* [Fixed] Fixed incorrect counter type determination and error reporting on the first collection. See [#13489](https://github.com/DataDog/integrations-core/pull/13489).
+
 ## 28.0.1 / 2022-12-16
 
 * [Fixed] Fixed incorrect counter type determination and error reporting on the first collection. See [#13489](https://github.com/DataDog/integrations-core/pull/13489).
