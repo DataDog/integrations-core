@@ -6,7 +6,7 @@ import os
 import pytest
 from packaging.version import parse as parse_version
 
-from datadog_checks.dev import docker_run
+from datadog_checks.dev import docker_run, run_command
 
 from .common import COCKROACHDB_VERSION, HOST, PORT
 
@@ -21,6 +21,7 @@ def dd_environment(instance):
         os.path.join(DOCKER_DIR, 'docker-compose.yaml'),
         env_vars=env_vars,
         endpoints=instance['openmetrics_endpoint'],
+        # conditions=[run_sql], # Uncomment to run the sql script in the cockroachdb container. See /tests/README.md.
     ):
         yield instance
 
@@ -43,3 +44,7 @@ def _get_start_command():
     if COCKROACHDB_VERSION != 'latest' and parse_version(COCKROACHDB_VERSION) < parse_version('20.2'):
         return 'start'
     return 'start-single-node'
+
+
+def run_sql():
+    return run_command(['docker', 'exec', '-d', 'cockroachdb', '/bin/bash', '/sql.sh'], capture=True, check=True)
