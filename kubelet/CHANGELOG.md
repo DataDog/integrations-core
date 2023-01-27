@@ -1,6 +1,6 @@
 # CHANGELOG - kubelet
 
-## 7.5.2 / 2022-12-09
+## 7.5.2 / 2022-12-09 / Agent 7.42.0
 
 * [Fixed] Set the `prometheus_url` for the kubelet endpoints in the `__init__` function. See [#13360](https://github.com/DataDog/integrations-core/pull/13360).
 

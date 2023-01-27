@@ -65,6 +65,7 @@ NETWORK_GAUGE_METRICS = {
     'tx_dropped': 'ecs.fargate.net.packet.out_dropped',
 }
 NETWORK_RATE_METRICS = {'rx_bytes': 'ecs.fargate.net.bytes_rcvd', 'tx_bytes': 'ecs.fargate.net.bytes_sent'}
+TASK_TAGGER_ENTITY_ID = "internal://global-entity-id"
 
 
 class FargateCheck(AgentCheck):
@@ -136,6 +137,20 @@ class FargateCheck(AgentCheck):
 
             if container.get('Limits', {}).get('CPU', 0) > 0:
                 self.gauge('ecs.fargate.cpu.limit', container['Limits']['CPU'], container_tags[c_id])
+
+        # Generating task tags only if we need to push the only task metric
+        if metadata.get('Limits', {}).get('CPU', 0) > 0:
+            task_tags = get_tags(TASK_TAGGER_ENTITY_ID, True) or []
+            # Compatibility with previous versions of the check
+            compat_tags = []
+            for tag in task_tags:
+                if tag.startswith(("task_family:", "task_version:")):
+                    compat_tags.append("ecs_" + tag)
+                elif tag.startswith("cluster_name:"):
+                    compat_tags.append(tag.replace("cluster_name:", "ecs_cluster:"))
+            task_tags = task_tags + compat_tags + custom_tags
+
+            self.gauge('ecs.fargate.cpu.task.limit', metadata['Limits']['CPU'] * 10**9, task_tags)
 
         try:
             request = self.http.get(stats_endpoint)

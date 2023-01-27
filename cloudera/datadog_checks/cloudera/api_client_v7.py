@@ -38,7 +38,7 @@ class ApiClientV7(ApiClient):
             )
         else:
             self._clusters_discovery = None
-        self._log.debug("_clusters_discovery: %s", self._clusters_discovery)
+        self._log.trace("_clusters_discovery: %s", self._clusters_discovery)
         self._hosts_discovery = {}
 
     def collect_data(self):
@@ -57,15 +57,19 @@ class ApiClientV7(ApiClient):
                 .read_clusters(cluster_type='any', view='full')
                 .items
             ]
-        self._log.debug("discovered clusters:\n%s", discovered_clusters)
+        self._log.trace("Discovered clusters raw response:\n%s", discovered_clusters)
         # Use len(read_clusters_response.items) * 2 workers since
         # for each cluster, we are executing 2 tasks in parallel.
         if len(discovered_clusters) > 0:
             futures = []
             with ThreadPoolExecutor(max_workers=len(discovered_clusters) * 3) as executor:
                 for pattern, key, item, config in discovered_clusters:
-                    self._log.debug(
-                        "discovered cluster: [pattern:%s, key:%s, item:%s, config:%s]", pattern, key, item, config
+                    self._log.trace(
+                        "Discovered cluster raw response: [pattern:%s, key:%s, item:%s, config:%s]",
+                        pattern,
+                        key,
+                        item,
+                        config,
                     )
                     cluster_name = key
                     cloudera_cluster_tag, cluster_tags = self._collect_cluster_tags(item, config)
@@ -91,6 +95,7 @@ class ApiClientV7(ApiClient):
                 self._log.debug('timestamp: %s', item.time_occurred)
                 self._log.debug('id: %s', item.id)
                 self._log.debug('category: %s', item.category)
+                self._log.debug('tag_attributes: %s', item.attributes)
                 event_payload = ClouderaEvent(item).get_event()
                 self._check.event(event_payload)
             self._check.latest_event_query_utc = now_utc
@@ -212,10 +217,10 @@ class ApiClientV7(ApiClient):
         self._log.debug('Cloudera timeseries query: %s', query)
         time_series_resource_api = cm_client.TimeSeriesResourceApi(self._api_client)
         query_time_series_response = time_series_resource_api.query_time_series(query=query)
-        self._log.debug('Cloudera query_time_series_response: %s', query_time_series_response)
+        self._log.trace('Cloudera query_time_series_response raw: %s', query_time_series_response)
         for item in query_time_series_response.items:
             for ts in item.time_series:
-                self._log.debug('ts: %s', ts)
+                self._log.trace('Timeseries raw response: %s', ts)
                 metric_name = ts.metadata.alias
                 category_name = ts.metadata.attributes['category'].lower()
                 full_metric_name = f'{category_name}.{metric_name}'
