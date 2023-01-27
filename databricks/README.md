@@ -335,7 +335,6 @@ Need help? Contact [Datadog support][10].
 
 [1]: https://databricks.com/
 [2]: https://docs.datadoghq.com/integrations/spark/?tab=host
-[3]: https://databricks.com/blog/2017/06/01/apache-spark-cluster-monitoring-with-databricks-and-datadog.html
 [4]: https://app.datadoghq.com/account/settings#agent
 [6]: https://docs.databricks.com/clusters/init-scripts.html#configure-a-cluster-scoped-init-script-using-the-ui
 [7]: https://docs.datadoghq.com/agent/guide/agent-commands/?#agent-status-and-information
