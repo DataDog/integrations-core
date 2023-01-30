@@ -112,7 +112,13 @@ class SQLServer(AgentCheck):
         self.ad_last_check = 0
 
         self.proc = self.instance.get('stored_procedure')
-        self.proc_type_mapping = {'gauge': self.gauge, 'rate': self.rate, 'histogram': self.histogram}
+        self.proc_type_mapping = {
+            "gauge": self.gauge,
+            "rate": self.rate,
+            "histogram": self.histogram,
+            "count": self.count,
+            "monotonic_count": self.monotonic_count,
+        }
         self.custom_metrics = init_config.get('custom_metrics', [])
 
         # DBM
