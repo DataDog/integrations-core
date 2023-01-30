@@ -89,7 +89,7 @@ PG_STAT_ACTIVITY_QUERY = re.sub(
     """
     SELECT {current_time_func} {pg_stat_activity_cols} {pg_blocking_func} FROM {pg_stat_activity_view}
     WHERE
-        {backend_type_predicate} OR
+        {backend_type_predicate}
         (coalesce(TRIM(query), '') != '' AND query_start IS NOT NULL {extra_filters})
 """,
 ).strip()
@@ -269,9 +269,9 @@ class PostgresStatementSamples(DBMAsyncJob):
         report_activity = self._report_activity_event()
         cur_time_func = ""
         blocking_func = ""
-        backend_type_predicate = "false"
+        backend_type_predicate = ""
         if self._check.version.compare(V10) >= 0:
-            backend_type_predicate = "backend_type != 'client backend'"
+            backend_type_predicate = "backend_type != 'client backend' OR"
         # minimum version for pg_blocking_pids function is v9.6
         # only call pg_blocking_pids as often as we collect activity snapshots
         if self._check.version >= V9_6 and report_activity:

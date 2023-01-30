@@ -917,6 +917,15 @@ def test_activity_snapshot_collection(
         assert bobs_query is not None
         assert blocking_bobs_query is not None
 
+        non_client_backend = [q for q in event['postgres_activity'] if q.get('backend_type', 'client backend') != 'client backend']
+
+        if POSTGRES_VERSION.split('.')[0] == "9":
+            assert len(non_client_backend) == 0
+        else:
+            assert len(non_client_backend) > 0
+            assert all(i['backend_type'] == i['statement'] and i['query_signature'] for i in non_client_backend)
+
+
         for key in expected_out:
             assert expected_out[key] == bobs_query[key]
         if POSTGRES_VERSION.split('.')[0] == "9":
