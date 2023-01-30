@@ -16,6 +16,11 @@ services:
       - temporal-network
     expose:
       - 9200
+    healthcheck:
+      test: [ "CMD-SHELL", "curl --silent --fail localhost:9200/_cluster/health || exit 1" ]
+      interval: 30s
+      timeout: 30s
+      retries: 3
   postgresql:
     container_name: temporal-postgresql
     environment:
@@ -38,7 +43,7 @@ services:
       postgresql:
         condition: service_healthy
       elasticsearch:
-        condition: service_started
+        condition: service_healthy
     environment:
       - DB=postgresql
       - DB_PORT=5432
