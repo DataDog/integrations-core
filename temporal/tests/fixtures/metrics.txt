@@ -1,0 +1,3 @@
+# HELP acquire_shards_count acquire_shards_count counter
+# TYPE acquire_shards_count counter
+acquire_shards_count{operation="ShardController",service_name="history"} 11
