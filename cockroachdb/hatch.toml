@@ -18,3 +18,4 @@ COCKROACHDB_VERSION = "latest"
 
 [envs.bench.env-vars]
 COCKROACHDB_VERSION = "v22.1.11"
+DDEV_SKIP_GENERIC_TAGS_CHECK = "true"
