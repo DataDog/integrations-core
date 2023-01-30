@@ -1,9 +1,10 @@
-# (C) Datadog, Inc. 2021-present
+# (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import mock
 import pytest
 
+from datadog_checks.base import ConfigurationError
 from datadog_checks.silk import SilkCheck
 
 from .common import BASE_TAGS, BLOCKSIZE_METRICS, HOST, METRICS, READ_WRITE_METRICS, SYSTEM_TAGS
@@ -29,6 +30,7 @@ def test_check(dd_run_check, aggregator, instance, enable_rw, enable_bs, expecte
     for metric in expected_metrics:
         aggregator.assert_metric(metric)
         for tag in [*BASE_TAGS, *SYSTEM_TAGS]:
+            # There are metric-specific tags so we just assert the common tags here
             aggregator.assert_metric_has_tag(metric, tag)
 
 
@@ -48,9 +50,8 @@ def test_error_msg_response(dd_run_check, aggregator, instance):
 @pytest.mark.integration
 def test_incorrect_config(dd_run_check):
     invalid_instance = {'host_addres': 'localhost'}  # misspelled required parameter
-    with pytest.raises(Exception):
-        check = SilkCheck('silk', {}, [invalid_instance])
-        dd_run_check(check)
+    with pytest.raises(ConfigurationError):
+        SilkCheck('silk', {}, [invalid_instance])
 
 
 @pytest.mark.integration
@@ -79,5 +80,4 @@ def test_submit_system_state(instance, datadog_agent):
     }
 
     datadog_agent.assert_metadata('test:123', version_metadata)
-    for expected_system_tag in SYSTEM_TAGS:
-        assert expected_system_tag in system_tags
+    assert all(expected_system_tag in system_tags for expected_system_tag in SYSTEM_TAGS)
