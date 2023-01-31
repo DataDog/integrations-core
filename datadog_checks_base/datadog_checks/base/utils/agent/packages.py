@@ -12,11 +12,11 @@ DATADOG_CHECK_PREFIX = 'datadog-'
 
 
 def get_datadog_wheels():
-    packages = []
+    packages = set()
     for package in distributions():
         project_name = package.metadata['Name']
         if project_name.startswith(DATADOG_CHECK_PREFIX):
             name = project_name[len(DATADOG_CHECK_PREFIX) :].replace('-', '_')
-            packages.append(name)
+            packages.add(name)
 
     return sorted(packages)[::-1]
