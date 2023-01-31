@@ -5,7 +5,7 @@ import os
 import re
 
 import mock
-import pywin32.adodbapi as adodbapi
+import pyodbc
 import pytest
 
 from datadog_checks.base import ConfigurationError

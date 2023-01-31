@@ -7,7 +7,7 @@ import threading
 from copy import copy
 from random import choice, randint, shuffle
 
-import pywin32.adodbapi as adodbapi
+import pyodbc
 import pytest
 
 from datadog_checks.dev.utils import running_on_windows_ci
