@@ -48,6 +48,7 @@ deps = [
     "ddtrace==0.32.2; sys_platform == 'win32' and python_version < '3.0'",
     "ddtrace==0.53.2; sys_platform != 'win32' or python_version > '3.0'",
     "enum34==1.1.10; python_version < '3.0'",
+    "importlib-metadata; python_version < '3.8'",
     "immutables==0.19; python_version > '3.0'",
     "ipaddress==1.0.23; python_version < '3.0'",
     "jellyfish==0.9.0; python_version > '3.0'",

@@ -317,7 +317,7 @@ class TUFDownloader:
             raise MissingVersions(standard_distribution_name)
 
         if not version:
-            # https://setuptools.readthedocs.io/en/latest/pkg_resources.html#parsing-utilities
+            # https://packaging.pypa.io/en/latest/version.html
             version = str(max(parse_version(v) for v in wheels.keys()))
 
         python_tags = wheels[version]
