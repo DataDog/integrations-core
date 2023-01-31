@@ -14,7 +14,7 @@ from os import environ
 import mock
 import pymysql
 import pytest
-from pkg_resources import parse_version
+from packaging.version import parse as parse_version
 
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
 from datadog_checks.mysql import MySql
