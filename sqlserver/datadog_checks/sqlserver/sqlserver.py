@@ -69,7 +69,7 @@ from datadog_checks.sqlserver.queries import (
 from datadog_checks.sqlserver.utils import set_default_driver_conf
 
 try:
-    import adodbapi
+    import pywin32.adodbapi as adodbapi
 except ImportError:
     adodbapi = None
 
