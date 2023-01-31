@@ -11,7 +11,7 @@ except ImportError:
     pyodbc = None
 
 try:
-    import adodbapi
+    import pywin32.adodbapi as adodbapi
     from adodbapi.apibase import OperationalError
     from pywintypes import com_error
 except ImportError:

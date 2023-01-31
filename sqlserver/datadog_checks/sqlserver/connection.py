@@ -11,7 +11,7 @@ from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.log import get_check_logger
 
 try:
-    import adodbapi
+    import pywin32.adodbapi as adodbapi
 except ImportError:
     adodbapi = None
 

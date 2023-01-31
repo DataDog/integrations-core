@@ -5,7 +5,7 @@ import os
 import re
 
 import mock
-import pyodbc
+import pywin32.adodbapi as adodbapi
 import pytest
 
 from datadog_checks.base import ConfigurationError
@@ -245,7 +245,7 @@ def test_query_timeout(instance_docker):
                 if isinstance(e, pyodbc.OperationalError):
                     assert 'timeout' in "".join(e.args).lower(), "must be a timeout"
                 else:
-                    import adodbapi
+                    import pywin32.adodbapi as adodbapi
 
                     assert type(e) == adodbapi.apibase.DatabaseError
                     assert 'timeout' in "".join(e.args).lower(), "must be a timeout"
