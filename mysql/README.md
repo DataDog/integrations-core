@@ -120,8 +120,8 @@ Edit the `mysql.d/conf.yaml` file, in the `conf.d/` folder at the root of your [
   init_config:
 
   instances:
-    - server: 127.0.0.1
-      user: datadog
+    - host: 127.0.0.1
+      username: datadog
       password: "<YOUR_CHOSEN_PASSWORD>" # from the CREATE USER step earlier
       port: "<YOUR_MYSQL_PORT>" # e.g. 3306
       options:
