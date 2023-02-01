@@ -1,5 +1,9 @@
 # CHANGELOG - rabbitmq
 
+## 3.3.1 / 2023-01-27
+
+* [Fixed] Add validation for `include_aggregated_endpoint`. See [#13793](https://github.com/DataDog/integrations-core/pull/13793).
+
 ## 3.3.0 / 2023-01-20
 
 * [Added] Support RabbitMQ Prometheus Metrics. See [#13662](https://github.com/DataDog/integrations-core/pull/13662).

@@ -1,6 +1,6 @@
 # CHANGELOG - network
 
-## 2.9.3 / 2022-12-09
+## 2.9.3 / 2022-12-09 / Agent 7.42.0
 
 * [Fixed] Fix network check for solaris. See [#13319](https://github.com/DataDog/integrations-core/pull/13319).
 

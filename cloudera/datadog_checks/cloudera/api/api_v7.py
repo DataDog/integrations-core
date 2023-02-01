@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import contextlib
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 
@@ -38,9 +39,9 @@ class ApiV7(Api):
 
     def collect_data(self):
         self._collect_clusters()
-        # self._collect_events()
-        # if self._check.config.custom_queries:
-        #     self._collect_custom_queries()
+        self._collect_events()
+        if self._check.config.custom_queries:
+            self._collect_custom_queries()
 
     def _collect_clusters(self):
         if self._clusters_discovery:
@@ -49,23 +50,29 @@ class ApiV7(Api):
             discovered_clusters = [
                 (None, cluster.get('name'), cluster, None) for cluster in self._api_client.read_clusters()
             ]
-        self._log.debug("discovered clusters:\n%s", discovered_clusters)
+        self._log.trace("Discovered clusters raw response:\n%s", discovered_clusters)
         # Use len(read_clusters_response.items) * 2 workers since
         # for each cluster, we are executing 2 tasks in parallel.
         if len(discovered_clusters) > 0:
-            futures = []
-            with ThreadPoolExecutor(max_workers=len(discovered_clusters) * 3) as executor:
+            with ThreadPoolExecutor(max_workers=len(discovered_clusters) * 3) as executor, raising_submitter(
+                executor
+            ) as submit:
                 for pattern, key, item, config in discovered_clusters:
                     self._log.debug(
-                        "discovered cluster: [pattern:%s, key:%s, item:%s, config:%s]", pattern, key, item, config
+                        "Discovered cluster: [pattern:%s, cluster_name:%s, config:%s]", pattern, key, config
+                    )
+                    self._log.trace(
+                        "Discovered cluster raw response: [pattern:%s, key:%s, item:%s, config:%s]",
+                        pattern,
+                        key,
+                        item,
+                        config,
                     )
                     cluster_name = key
                     tags = self._collect_cluster_tags(item)
-                    futures.append(executor.submit(self._collect_cluster_metrics, cluster_name, tags))
-                    futures.append(executor.submit(self._collect_hosts, cluster_name))
-                    futures.append(executor.submit(self._collect_cluster_service_check, item, tags))
-            for future in futures:
-                future.result()
+                    submit(self._collect_cluster_metrics, cluster_name, tags)
+                    submit(self._collect_hosts, cluster_name)
+                    submit(self._collect_cluster_service_check, item, tags)
 
     def _collect_events(self):
         events_resource_api = cm_client.EventsResourceApi(self._api_client)
@@ -83,6 +90,7 @@ class ApiV7(Api):
                 self._log.debug('timestamp: %s', item.time_occurred)
                 self._log.debug('id: %s', item.id)
                 self._log.debug('category: %s', item.category)
+                self._log.debug('tag_attributes: %s', item.attributes)
                 event_payload = ClouderaEvent(item).get_event()
                 self._check.event(event_payload)
             self._check.latest_event_query_utc = now_utc
@@ -108,24 +116,23 @@ class ApiV7(Api):
 
     def _collect_hosts(self, cluster_name):
         discovered_hosts = [(None, host.get('name'), host, None) for host in self._api_client.list_hosts(cluster_name)]
-        self._log.debug("discovered hosts from cluster '%s': %s", cluster_name, discovered_hosts)
+        self._log.trace("Cloudera full hosts raw response:\n%s", discovered_hosts)
         # # Use len(discovered_hosts) * 4 workers since
         # # for each host, we are executing 4 tasks in parallel.
         if len(discovered_hosts) > 0:
             futures = []
-            with ThreadPoolExecutor(max_workers=len(discovered_hosts) * 4) as executor:
+            with ThreadPoolExecutor(max_workers=len(discovered_hosts) * 4) as executor, raising_submitter(
+                executor
+            ) as submit:
                 for pattern, key, item, config in discovered_hosts:
                     self._log.debug(
                         "discovered host: [pattern:%s, key:%s, item:%s, config:%s]", pattern, key, item, config
                     )
                     tags = self._collect_host_tags(item) + [f'cloudera_cluster:{cluster_name}']
-                    futures.append(executor.submit(self._collect_host_service_check, item, tags))
-                    futures.append(executor.submit(self._collect_host_metrics, item, tags))
-                    futures.append(executor.submit(self._collect_role_metrics, item, tags))
-                    futures.append(executor.submit(self._collect_disk_metrics, item, tags))
-
-            for future in futures:
-                future.result()
+                    submit(self._collect_host_service_check, item, tags)
+                    submit(self._collect_host_metrics, item, tags)
+                    submit(self._collect_role_metrics, item, tags)
+                    submit(self._collect_disk_metrics, item, tags)
 
     def _collect_host_tags(self, host):
         host_tags = [f"cloudera_hostname:{host['name']}", f"cloudera_rack_id:{host['rack_id']}"]
@@ -141,12 +148,9 @@ class ApiV7(Api):
 
     def _collect_host_metrics(self, host, tags):
         # Use 2 workers since we are executing 2 tasks in parallel.
-        futures = []
-        with ThreadPoolExecutor(max_workers=2) as executor:
-            futures.append(executor.submit(self._collect_host_native_metrics, host, tags))
-            futures.append(executor.submit(self._collect_host_timeseries_metrics, host, tags))
-        for future in futures:
-            future.result()
+        with ThreadPoolExecutor(max_workers=2) as executor, raising_submitter(executor) as submit:
+            submit(self._collect_host_native_metrics, host, tags)
+            submit(self._collect_host_timeseries_metrics, host, tags)
 
     def _collect_host_native_metrics(self, host, tags):
         for metric in NATIVE_METRICS['host']:
@@ -217,3 +221,23 @@ class ApiV7(Api):
                         value = d.value
 
                 self._check.gauge(full_metric_name, value, tags=[entity_tag, *tags])
+
+
+@contextlib.contextmanager
+def raising_submitter(executor):
+    """Provides a `submit` function that wraps `executor.submit` in such a way that it
+    will cause the first exception found in the resulting _futures_ to be raised in the
+    parent thread at the point where the context is exited.
+    """
+    futures = []
+
+    def submit_and_maybe_raise(*args, **kwargs):
+        future = executor.submit(*args, **kwargs)
+        futures.append(future)
+
+    yield submit_and_maybe_raise
+
+    # Calling the `result` method on futures causes exceptions that happened during the
+    # execution to be raised in the current thread.
+    for future in futures:
+        future.result()

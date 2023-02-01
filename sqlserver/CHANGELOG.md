@@ -1,10 +1,14 @@
 # CHANGELOG - sqlserver
 
+## 10.1.2 / 2023-01-26
+
+* [Fixed] Bug Fix: Azure SQL DB database name tags properly applied on perf metrics. See [#13757](https://github.com/DataDog/integrations-core/pull/13757).
+
 ## 10.1.1 / 2023-01-20
 
 * [Fixed] Update dependencies. See [#13726](https://github.com/DataDog/integrations-core/pull/13726).
 
-## 10.1.0 / 2022-12-09
+## 10.1.0 / 2022-12-09 / Agent 7.42.0
 
 * [Added] Add well formatted agent errors on common connection issues for SQL Server. See [#13436](https://github.com/DataDog/integrations-core/pull/13436).
 * [Added] Add procedure name on query metrics/events. See [#13484](https://github.com/DataDog/integrations-core/pull/13484).

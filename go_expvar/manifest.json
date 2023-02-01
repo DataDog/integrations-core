@@ -28,7 +28,7 @@
   "oauth": {},
   "assets": {
     "integration": {
-      "source_type_name": "Go-Expvar",
+      "source_type_name": "Go Expvar",
       "configuration": {
         "spec": "assets/configuration/spec.yaml"
       },

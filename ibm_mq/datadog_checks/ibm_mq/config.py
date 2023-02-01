@@ -168,7 +168,7 @@ class IBMMQConfig:
             self.queue_manager_process_pattern = re.compile(pattern)
 
             # Implied immunity to IBM MQ's memory leak
-            self.try_basic_auth = False
+            self.try_basic_auth = is_affirmative(instance.get('try_basic_auth', False))  # type: bool
         else:
             self.queue_manager_process_pattern = None
 

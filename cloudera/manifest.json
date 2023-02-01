@@ -8,7 +8,7 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "",
+    "description": "Cloudera",
     "title": "Cloudera",
     "media": [],
     "classifier_tags": [
@@ -37,6 +37,9 @@
     },
     "dashboards": {
       "Cloudera Data Platform Overview": "assets/dashboards/cloudera_overview.json"
+    },
+    "monitors": {
+      "Cloudera High CPU Usage": "assets/recommended_monitors/cloudera_high_cpu.json"
     }
   },
   "author": {
