@@ -933,6 +933,7 @@ def test_e2e_core_metadata_aos_lldp(dd_agent_check):
     device_ip = instance['ip_address']
     device_id = u'default:' + device_ip
 
+    # CHANGE
     topology_link1 = {
         'id': device_id + ':1.216',
         'source_type': 'lldp',
