@@ -938,8 +938,8 @@ def test_e2e_core_metadata_aos_lldp(dd_agent_check):
         'id': device_id + ':1.216',
         'source_type': 'lldp',
         "local": {
-            "device": {"id": device_id, "id_type": "ndm"},
-            'interface': {'id': device_id + ':1', 'id_type': 'ndm'},
+            "device": {'dd_id': device_id},
+            'interface': {'dd_id': device_id + ':1', 'id': 'e1'},
         },
         "remote": {
             "device": {"id": "00:80:9f:85:78:8e", "id_type": "mac_address"},
@@ -950,8 +950,8 @@ def test_e2e_core_metadata_aos_lldp(dd_agent_check):
         'id': device_id + ':11.217',
         'source_type': 'lldp',
         "local": {
-            "device": {"id": device_id, "id_type": "ndm"},
-            'interface': {'id': device_id + ':11', 'id_type': 'ndm'},
+            "device": {'dd_id': device_id},
+            'interface': {'dd_id': device_id + ':11', 'id': 'e11'},
         },
         "remote": {
             "device": {"id": "00:80:9f:86:0d:d8", "id_type": "mac_address"},
