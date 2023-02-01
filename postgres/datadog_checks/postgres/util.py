@@ -223,15 +223,15 @@ WAL_RECEIVER_METRICS = {
     'metrics': {
         'received_tli': ('postgresql.wal_receiver.received_timeline', AgentCheck.gauge),
         'EXTRACT(EPOCH FROM (clock_timestamp() - last_msg_send_time))': (
-            'postgresql.wal_receiver.send_time_age',
+            'postgresql.wal_receiver.last_msg_send_age',
             AgentCheck.gauge,
         ),
         'EXTRACT(EPOCH FROM (clock_timestamp() - last_msg_receipt_time))': (
-            'postgresql.wal_receiver.receipt_time_age',
+            'postgresql.wal_receiver.last_msg_receipt_age',
             AgentCheck.gauge,
         ),
         'EXTRACT(EPOCH FROM (clock_timestamp() - latest_end_time))': (
-            'postgresql.wal_receiver.receipt_time_age',
+            'postgresql.wal_receiver.latest_end_age',
             AgentCheck.gauge,
         ),
     },

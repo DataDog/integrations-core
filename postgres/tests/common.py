@@ -8,7 +8,7 @@ import pytest
 
 from datadog_checks.dev import get_docker_hostname
 from datadog_checks.dev.docker import get_container_ip
-from datadog_checks.postgres.util import REPLICATION_STATS_METRICS, SLRU_METRICS
+from datadog_checks.postgres.util import REPLICATION_STATS_METRICS, REPLICATION_METRICS_9_2, REPLICATION_METRICS_10, WAL_RECEIVER_METRICS, SLRU_METRICS
 
 HOST = get_docker_hostname()
 PORT = '5432'
@@ -115,7 +115,7 @@ def check_activity_metrics(aggregator, tags, hostname=None, count=1):
         aggregator.assert_metric(name, count=1, tags=tags, hostname=hostname)
 
 
-def check_replication_metrics(aggregator, expected_tags, count=1):
+def check_stat_replication(aggregator, expected_tags, count=1):
     replication_tags = expected_tags + [
         'wal_app_name:walreceiver',
         'wal_client_addr:{}'.format(get_container_ip(REPLICA_CONTAINER_NAME)),
@@ -124,6 +124,19 @@ def check_replication_metrics(aggregator, expected_tags, count=1):
     ]
     for (metric_name, _) in REPLICATION_STATS_METRICS['metrics'].values():
         aggregator.assert_metric(metric_name, count=count, tags=replication_tags)
+
+
+def check_wal_receiver_metrics(aggregator, expected_tags, count=1):
+    for (metric_name, _) in WAL_RECEIVER_METRICS['metrics'].values():
+        aggregator.assert_metric(metric_name, count=count, tags=expected_tags + ['status:streaming'])
+
+
+def check_replication_delay(aggregator, expected_tags, count=1):
+    metric_tuples = REPLICATION_METRICS_10
+    if float(POSTGRES_VERSION) < 10.0:
+        metric_tuples = REPLICATION_METRICS_9_2
+    for (metric_name, _) in metric_tuples.values():
+        aggregator.assert_metric(metric_name, count=count, tags=expected_tags)
 
 
 def check_bgw_metrics(aggregator, expected_tags, count=1):

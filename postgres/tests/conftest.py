@@ -66,6 +66,13 @@ def pg_instance():
     return copy.deepcopy(INSTANCE)
 
 
+@pytest.fixture
+def pg_replica_instance():
+    instance = copy.deepcopy(INSTANCE)
+    instance['port'] = PORT_REPLICA
+    return instance
+
+
 @pytest.fixture(scope='session')
 def e2e_instance():
     instance = copy.deepcopy(INSTANCE)
