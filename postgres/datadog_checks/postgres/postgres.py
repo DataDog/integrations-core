@@ -25,6 +25,7 @@ from .util import (
     QUERY_PG_STAT_DATABASE,
     REPLICATION_METRICS,
     SLRU_METRICS,
+    WAL_RECEIVER_METRICS,
     DatabaseConfigurationError,
     fmt,
     get_schema_field,
@@ -363,7 +364,7 @@ class PostgreSql(AgentCheck):
         bgw_instance_metrics = self.metrics_cache.get_bgw_metrics(self.version)
         archiver_instance_metrics = self.metrics_cache.get_archiver_metrics(self.version)
 
-        metric_scope = [CONNECTION_METRICS]
+        metric_scope = [CONNECTION_METRICS, WAL_RECEIVER_METRICS]
 
         if self._config.collect_function_metrics:
             metric_scope.append(FUNCTION_METRICS)

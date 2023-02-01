@@ -24,6 +24,7 @@ from .common import (
     check_common_metrics,
     check_connection_metrics,
     check_db_count,
+    check_replication_metrics,
     check_slru_metrics,
     requires_static_version,
 )
@@ -44,6 +45,7 @@ def test_common_metrics(aggregator, integration_check, pg_instance):
     check_connection_metrics(aggregator, expected_tags=expected_tags)
     check_db_count(aggregator, expected_tags=expected_tags)
     check_slru_metrics(aggregator, expected_tags=expected_tags)
+    check_replication_metrics(aggregator, expected_tags=expected_tags)
 
     aggregator.assert_all_metrics_covered()
 

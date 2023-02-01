@@ -13,7 +13,7 @@ from semver import VersionInfo
 from datadog_checks.dev import WaitFor, docker_run
 from datadog_checks.postgres import PostgreSql
 
-from .common import DB_NAME, HOST, PASSWORD, PORT, POSTGRES_IMAGE, USER
+from .common import DB_NAME, HOST, PASSWORD, PORT, PORT_REPLICA, POSTGRES_IMAGE, USER
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 INSTANCE = {
@@ -29,6 +29,7 @@ INSTANCE = {
 
 def connect_to_pg():
     psycopg2.connect(host=HOST, dbname=DB_NAME, user=USER, password=PASSWORD)
+    psycopg2.connect(host=HOST, dbname=DB_NAME, user=USER, port=PORT_REPLICA, password=PASSWORD)
 
 
 @pytest.fixture(scope='session')

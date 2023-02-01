@@ -216,6 +216,29 @@ FROM pg_stat_replication
 """,
 }
 
+WAL_RECEIVER_METRICS = {
+    'descriptors': [
+        ('status', 'status'),
+    ],
+    'metrics': {
+        'received_tli': ('postgresql.wal_receiver.received_timeline', AgentCheck.gauge),
+        'EXTRACT(EPOCH FROM (clock_timestamp() - last_msg_send_time))': (
+            'postgresql.wal_receiver.send_time_age',
+            AgentCheck.gauge,
+        ),
+        'EXTRACT(EPOCH FROM (clock_timestamp() - last_msg_receipt_time))': (
+            'postgresql.wal_receiver.receipt_time_age',
+            AgentCheck.gauge,
+        ),
+        'EXTRACT(EPOCH FROM (clock_timestamp() - latest_end_time))': (
+            'postgresql.wal_receiver.receipt_time_age',
+            AgentCheck.gauge,
+        ),
+    },
+    'relation': False,
+    'query': "SELECT status, {metrics_columns} FROM pg_stat_wal_receiver",
+}
+
 CONNECTION_METRICS = {
     'descriptors': [],
     'metrics': {

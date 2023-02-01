@@ -7,16 +7,20 @@ from sys import maxsize
 import pytest
 
 from datadog_checks.dev import get_docker_hostname
-from datadog_checks.postgres.util import SLRU_METRICS
+from datadog_checks.dev.docker import get_container_ip
+from datadog_checks.postgres.util import REPLICATION_STATS_METRICS, SLRU_METRICS
 
 HOST = get_docker_hostname()
 PORT = '5432'
+PORT_REPLICA = '5433'
 USER = 'datadog'
 PASSWORD = 'datadog'
 DB_NAME = 'datadog_test'
 POSTGRES_VERSION = os.environ.get('POSTGRES_VERSION', None)
 POSTGRES_IMAGE = "alpine"
 
+PRIMARY_CONTAINER_NAME = 'compose-postgres-1'
+REPLICA_CONTAINER_NAME = 'compose-postgres_replica-1'
 USING_LATEST = False
 
 if POSTGRES_VERSION is not None:
@@ -109,6 +113,17 @@ def check_activity_metrics(aggregator, tags, hostname=None, count=1):
         activity_metrics.append('postgresql.activity.backend_xmin_age')
     for name in activity_metrics:
         aggregator.assert_metric(name, count=1, tags=tags, hostname=hostname)
+
+
+def check_replication_metrics(aggregator, expected_tags, count=1):
+    replication_tags = expected_tags + [
+        'wal_app_name:walreceiver',
+        'wal_client_addr:{}'.format(get_container_ip(REPLICA_CONTAINER_NAME)),
+        'wal_state:streaming',
+        'wal_sync_state:async',
+    ]
+    for (metric_name, _) in REPLICATION_STATS_METRICS['metrics'].values():
+        aggregator.assert_metric(metric_name, count=count, tags=replication_tags)
 
 
 def check_bgw_metrics(aggregator, expected_tags, count=1):
