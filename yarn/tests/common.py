@@ -215,6 +215,19 @@ YARN_COLLECT_APPS_ALL_STATES_CONFIG = {
     ]
 }
 
+YARN_COLLECT_APPS_KILLED_INSTANCE_CONFIG = {
+    'init_config': {
+        'collect_apps_all_states': True,
+    },
+    'instances': [
+        {
+            'resourcemanager_uri': RM_ADDRESS,
+            'cluster_name': CLUSTER_NAME,
+            'collect_apps_states_list': ["KILLED"],
+        }
+    ],
+}
+
 YARN_CLUSTER_METRICS_VALUES = {
     'yarn.metrics.apps_submitted': 0,
     'yarn.metrics.apps_completed': 0,

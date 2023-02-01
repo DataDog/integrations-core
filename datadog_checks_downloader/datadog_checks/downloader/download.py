@@ -323,7 +323,6 @@ class TUFDownloader:
                 if any(suffix in key for suffix in non_official_suffixes):
                     del wheels[key]
             # https://setuptools.readthedocs.io/en/latest/pkg_resources.html#parsing-utilities
-            version = str(max(parse_version(v) for v in wheels.keys()))
 
         python_tags = wheels[version]
         if not python_tags:
