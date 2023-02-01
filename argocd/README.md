@@ -37,10 +37,10 @@ metadata:
     ad.datadoghq.com/argocd-application-controller.checks: |
       {
         "argocd": {
-          "init_config": {}},
+          "init_config": {},
           "instances": [
             {
-              "app_controller_endpoint": "%%host%%:8082/metrics"
+              "app_controller_endpoint": "http://%%host%%:8082/metrics"
             }
           ]
         }
@@ -63,10 +63,10 @@ metadata:
     ad.datadoghq.com/argocd-server.checks: |
       {
         "argocd": {
-          "init_config": {}},
+          "init_config": {},
           "instances": [
             {
-              "api_server_endpoint": "%%host%%:8083/metrics"
+              "api_server_endpoint": "http://%%host%%:8083/metrics"
             }
           ]
         }
@@ -89,10 +89,10 @@ metadata:
     ad.datadoghq.com/argocd-repo-server.checks: |
       {
         "argocd": {
-          "init_config": {}},
+          "init_config": {},
           "instances": [
             {
-              "repo_server_endpoint": "%%host%%:8084/metrics"
+              "repo_server_endpoint": "http://%%host%%:8084/metrics"
             }
           ]
         }
