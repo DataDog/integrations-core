@@ -585,7 +585,7 @@ class SqlDatabaseStats(BaseSqlServerMetric):
         value_column_index = columns.index(self.column)
 
         for row in rows:
-            if row[database_name] != self.instance:
+            if row[database_name].lower() != self.instance.lower():
                 continue
 
             column_val = row[value_column_index]

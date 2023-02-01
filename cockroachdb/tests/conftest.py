@@ -4,7 +4,7 @@
 import os
 
 import pytest
-from pkg_resources import parse_version
+from packaging.version import parse as parse_version
 
 from datadog_checks.dev import docker_run
 

@@ -322,7 +322,7 @@ class TUFDownloader:
             for key in list(wheels.keys()):
                 if any(suffix in key for suffix in non_official_suffixes):
                     del wheels[key]
-            # https://setuptools.readthedocs.io/en/latest/pkg_resources.html#parsing-utilities
+            # https://packaging.pypa.io/en/latest/version.html
             version = str(max(parse_version(v) for v in wheels.keys()))
 
         python_tags = wheels[version]
