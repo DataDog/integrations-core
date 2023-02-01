@@ -6,9 +6,17 @@ from sys import maxsize
 
 import pytest
 
+from datadog_checks.base.stubs.aggregator import normalize_tags
 from datadog_checks.dev import get_docker_hostname
 from datadog_checks.dev.docker import get_container_ip
-from datadog_checks.postgres.util import REPLICATION_STATS_METRICS, REPLICATION_METRICS_9_2, REPLICATION_METRICS_10, WAL_RECEIVER_METRICS, SLRU_METRICS
+from datadog_checks.postgres.util import (
+    REPLICATION_METRICS_9_2,
+    REPLICATION_METRICS_10,
+    REPLICATION_STATS_METRICS,
+    SLRU_METRICS,
+    WAL_RECEIVER_COUNT_METRICS,
+    WAL_RECEIVER_METRICS,
+)
 
 HOST = get_docker_hostname()
 PORT = '5432'
@@ -76,6 +84,26 @@ COMMON_DBS = ['dogs', 'postgres', 'dogs_nofunc', 'dogs_noschema', DB_NAME]
 requires_static_version = pytest.mark.skipif(USING_LATEST, reason='Version `latest` is ever-changing, skipping')
 
 
+def assert_metric_at_least(aggregator, metric_name, lower_bound=None, higher_bound=None, count=None, tags=None):
+    found_values = 0
+    expected_tags = normalize_tags(tags, sort=True)
+    for metric in aggregator.metrics(metric_name):
+        if expected_tags and expected_tags == sorted(metric.tags):
+            if lower_bound is not None:
+                assert metric.value >= lower_bound, 'Expected {} with tags {} to have a value >= {}, got {}'.format(
+                    metric_name, expected_tags, lower_bound, metric.value
+                )
+            if higher_bound is not None:
+                assert metric.value <= higher_bound, 'Expected {} with tags {} to have a value <= {}, got {}'.format(
+                    metric_name, expected_tags, higher_bound, metric.value
+                )
+            found_values += 1
+    if count:
+        assert found_values == count, 'Expected to have {} with tags {} values for metric {}, got {}'.format(
+            count, expected_tags, metric_name, found_values
+        )
+
+
 def check_common_metrics(aggregator, expected_tags, count=1):
     for db in COMMON_DBS:
         db_tags = expected_tags + ['db:{}'.format(db)]
@@ -129,6 +157,11 @@ def check_stat_replication(aggregator, expected_tags, count=1):
 def check_wal_receiver_metrics(aggregator, expected_tags, count=1):
     for (metric_name, _) in WAL_RECEIVER_METRICS['metrics'].values():
         aggregator.assert_metric(metric_name, count=count, tags=expected_tags + ['status:streaming'])
+
+
+def check_wal_receiver_count_metrics(aggregator, expected_tags, count=1, value=None):
+    for (metric_name, _) in WAL_RECEIVER_COUNT_METRICS['metrics'].values():
+        aggregator.assert_metric(metric_name, count=count, value=value, tags=expected_tags)
 
 
 def check_replication_delay(aggregator, expected_tags, count=1):

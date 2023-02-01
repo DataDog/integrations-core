@@ -19,6 +19,7 @@ from .common import (
     HOST,
     PORT,
     POSTGRES_VERSION,
+    assert_metric_at_least,
     check_activity_metrics,
     check_bgw_metrics,
     check_common_metrics,
@@ -26,6 +27,7 @@ from .common import (
     check_db_count,
     check_slru_metrics,
     check_stat_replication,
+    check_wal_receiver_count_metrics,
     requires_static_version,
 )
 from .utils import requires_over_10
@@ -46,6 +48,7 @@ def test_common_metrics(aggregator, integration_check, pg_instance):
     check_db_count(aggregator, expected_tags=expected_tags)
     check_slru_metrics(aggregator, expected_tags=expected_tags)
     check_stat_replication(aggregator, expected_tags=expected_tags)
+    check_wal_receiver_count_metrics(aggregator, expected_tags=expected_tags, value=0)
 
     aggregator.assert_all_metrics_covered()
 
@@ -180,15 +183,6 @@ def test_activity_metrics_no_aggregations(aggregator, integration_check, pg_inst
     check_activity_metrics(aggregator, expected_tags)
 
 
-def assert_metric_at_least(aggregator, metric_name, expected_tag, count, lower_bound):
-    found_values = 0
-    for metric in aggregator.metrics(metric_name):
-        if expected_tag in metric.tags:
-            assert metric.value >= lower_bound
-            found_values += 1
-    assert found_values == count
-
-
 def test_backend_transaction_age(aggregator, integration_check, pg_instance):
     pg_instance['collect_activity_metrics'] = True
     check = integration_check(pg_instance)
@@ -258,7 +252,13 @@ def test_backend_transaction_age(aggregator, integration_check, pg_instance):
 
     # Check that xact_start_age has a value greater than the trasaction_age lower bound
     aggregator.assert_metric('postgresql.activity.xact_start_age', count=1, tags=test_tags)
-    assert_metric_at_least(aggregator, 'postgresql.activity.xact_start_age', 'app:test', 1, transaction_age_lower_bound)
+    assert_metric_at_least(
+        aggregator,
+        'postgresql.activity.xact_start_age',
+        tags=test_tags,
+        count=1,
+        lower_bound=transaction_age_lower_bound,
+    )
 
 
 @requires_over_10
