@@ -2,7 +2,7 @@
 
 ## 10.1.3 / 2023-02-01
 
-* [Fixed] sqlserver.database.state not sent for all databases. See [#13735](https://github.com/DataDog/integrations-core/pull/13735).
+* [Fixed] Fix sqlserver.database.state not being sent for all databases. See [#13735](https://github.com/DataDog/integrations-core/pull/13735).
 
 ## 10.1.2 / 2023-01-26
 
