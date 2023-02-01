@@ -216,6 +216,15 @@ FROM pg_stat_replication
 """,
 }
 
+WAL_RECEIVER_COUNT_METRICS = {
+    'descriptors': [],
+    'metrics': {
+        'count(*)': ('postgresql.wal_receiver.count', AgentCheck.gauge),
+    },
+    'relation': False,
+    'query': "SELECT {metrics_columns} FROM pg_stat_wal_receiver",
+}
+
 WAL_RECEIVER_METRICS = {
     'descriptors': [
         ('status', 'status'),
