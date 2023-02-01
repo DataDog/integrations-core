@@ -149,3 +149,17 @@ def list_hosts(request):
         for prefix in request.param['prefix']
         for status in request.param['status']
     ]
+
+
+@pytest.fixture
+def read_events(request):
+    exception = request.param.get('exception')
+    if exception:
+        return Exception(exception)
+    return [
+        {
+            'msg_text': f'{content}{n}',
+        }
+        for n in range(request.param['number'])
+        for content in request.param['content']
+    ]

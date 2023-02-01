@@ -72,3 +72,11 @@ class CmClient(Client):
             }
             for host in cm_client.ClustersResourceApi(self._client).list_hosts(cluster_name, view='full').items
         ]
+
+    def read_events(self, query) -> list:
+        return [
+            {
+                'msg_text': event.content,
+            }
+            for event in cm_client.EventsResourceApi(self._client).read_events(query=query).items
+        ]

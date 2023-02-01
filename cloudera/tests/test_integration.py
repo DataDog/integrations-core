@@ -17,7 +17,7 @@ from datadog_checks.cloudera import ClouderaCheck
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
 @pytest.mark.parametrize(
-    'instance, dd_run_check_count, expected_list',
+    'instance, dd_run_check_count, expected_service_checks, expected_events',
     [
         (
             {'api_url': 'http://bad_host:8080/api/v48/'},
@@ -25,11 +25,18 @@ from datadog_checks.cloudera import ClouderaCheck
             [
                 {'status': ClouderaCheck.CRITICAL, 'message': None, 'tags': ['api_url:http://bad_host:8080/api/v48/']},
             ],
+            [],
         ),
         (
             {'api_url': 'http://localhost:8080/api/v48/'},
             1,
             [{'status': ClouderaCheck.OK, 'message': None, 'tags': ['api_url:http://localhost:8080/api/v48/']}],
+            [
+                {
+                    'count': 1,
+                    'msg_text': "ExecutionException running extraction tasks for service 'cod--qfdcinkqrzw::yarn'.",
+                }
+            ],
         ),
     ],
     ids=['bad url', 'good url'],
@@ -41,18 +48,21 @@ def test_api_urls(
     cloudera_check,
     instance,
     dd_run_check_count,
-    expected_list,
+    expected_service_checks,
+    expected_events,
 ):
     check = cloudera_check(instance)
     for _ in range(dd_run_check_count):
         dd_run_check(check)
-    for expected in expected_list:
+    for expected_service_check in expected_service_checks:
         aggregator.assert_service_check(
             'cloudera.can_connect',
-            status=expected['status'],
-            message=expected['message'],
-            tags=expected['tags'],
+            status=expected_service_check['status'],
+            message=expected_service_check['message'],
+            tags=expected_service_check['tags'],
         )
+    for expected_event in expected_events:
+        aggregator.assert_event(expected_event.get('msg_text'), count=expected_event.get('count'))
 
 
 #

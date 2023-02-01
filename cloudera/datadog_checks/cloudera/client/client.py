@@ -23,3 +23,11 @@ class Client(ABC):
     @abstractmethod
     def query_time_series(self, category, query) -> list:
         pass
+
+    @abstractmethod
+    def list_hosts(self, cluster_name) -> list:
+        pass
+
+    @abstractmethod
+    def read_events(self, query) -> list:
+        pass
