@@ -11,6 +11,7 @@ def test_non_official_wheel_filter(mocker):
         '5.4.0rc2': {'py2.py3': 'datadog_vsphere-5.4.0rc2-py2.py3-none-any.whl'},
         '6.2.2a1': {'py2.py3': 'datadog_vsphere-6.2.2b1-py2.py3-none-any.whl'},
         '6.3.0b1': {'py2.py3': 'datadog_vsphere-6.3.0b1-py2.py3-none-any.whl'},
+        '6.3.0pre3': {'py2.py3': 'datadog_vsphere-6.3.0pre1-py2.py3-none-any.whl'},
     }
 
     downloader = TUFDownloader()
