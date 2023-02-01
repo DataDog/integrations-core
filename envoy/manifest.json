@@ -44,7 +44,10 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "process_signatures": [
+        "envoy"
+      ]
     },
     "dashboards": {
       "Envoy - Overview": "assets/dashboards/envoy_overview.json"
