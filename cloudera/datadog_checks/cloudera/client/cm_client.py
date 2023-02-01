@@ -1,11 +1,21 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from datetime import timezone
+
 import cm_client
 from cm_client.rest import RESTClientObject
+from dateutil import parser
 from packaging.version import Version, parse
 
 from datadog_checks.cloudera.client.client import Client
+
+EVENT_TYPES = {
+    'UNKNOWN': 'error',
+    'INFORMATIONAL': 'info',
+    'IMPORTANT': 'info',
+    'CRITICAL': 'error',
+}
 
 
 class CmClient(Client):
@@ -76,7 +86,12 @@ class CmClient(Client):
     def read_events(self, query) -> list:
         return [
             {
-                'msg_text': event.content,
+                "timestamp": parser.isoparse(event.time_occurred).replace(tzinfo=timezone.utc).timestamp(),
+                "event_type": event.category,
+                "alert_type": EVENT_TYPES[event.severity],
+                "tags": [f'{attribute.name}:{value}' for attribute in event.attributes for value in attribute.values],
+                "msg_title": event.content,
+                "msg_text": event.content,
             }
             for event in cm_client.EventsResourceApi(self._client).read_events(query=query).items
         ]

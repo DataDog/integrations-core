@@ -7,14 +7,6 @@ import string
 from copy import deepcopy
 
 import pytest
-from cm_client.models.api_event import ApiEvent
-from cm_client.models.api_event_attribute import ApiEventAttribute
-from cm_client.models.api_event_query_result import ApiEventQueryResult
-from cm_client.models.api_time_series import ApiTimeSeries
-from cm_client.models.api_time_series_data import ApiTimeSeriesData
-from cm_client.models.api_time_series_metadata import ApiTimeSeriesMetadata
-from cm_client.models.api_time_series_response import ApiTimeSeriesResponse
-from cm_client.models.api_time_series_response_list import ApiTimeSeriesResponseList
 from packaging.version import Version
 
 from datadog_checks.cloudera import ClouderaCheck
@@ -40,7 +32,7 @@ def dd_environment():
 @pytest.fixture
 def config():
     return {
-        'instances': [common.INSTANCE_WITH_TAGS],
+        'instances': [common.INSTANCE],
         'init_config': common.INIT_CONFIG,
     }
 
@@ -53,6 +45,7 @@ def instance(request):
         'cloudera_client': request.param.get('cloudera_client'),
         'api_url': request.param.get('api_url'),
         'tags': tags if tags else None,
+        # 'custom_queries': request.param.get('custom_queries'),
         'clusters': clusters if clusters else None,
     }
 
@@ -69,47 +62,6 @@ def cloudera_version(request):
         return Exception(exception)
     version = request.param.get('version')
     return Version(version) if version else None
-
-
-@pytest.fixture
-def read_events_resource():
-    content = (
-        'Interceptor for {http://yarn.extractor.cdx.cloudera.com/}YarnHistoryClient has thrown exception, unwinding now'
-    )
-    dummy_event = ApiEvent(
-        time_occurred='2022-11-30T21:06:39.870Z',
-        severity='IMPORTANT',
-        content=content,
-        category='LOG_EVENT',
-        attributes=[
-            ApiEventAttribute(name='ROLE', values=['TELEMETRYPUBLISHER']),
-            ApiEventAttribute(name='CLUSTER', values=['cod--qfdcinkqrzw']),
-            ApiEventAttribute(name='ROLE_DISPLAY_NAME', values=['Telemetry Publisher (cod--qfdcinkqrzw-gateway0)']),
-        ],
-    )
-    return ApiEventQueryResult(items=[dummy_event])
-
-
-@pytest.fixture
-def get_custom_timeseries_resource():
-    return ApiTimeSeriesResponseList(
-        items=[
-            ApiTimeSeriesResponse(
-                time_series=[
-                    ApiTimeSeries(
-                        data=[
-                            ApiTimeSeriesData(value=49.7, timestamp="2023-01-18T18:41:09.449Z"),
-                        ],
-                        metadata=ApiTimeSeriesMetadata(
-                            attributes={'category': "cluster"},
-                            alias="foo",
-                            entity_name="foo",
-                        ),
-                    )
-                ]
-            )
-        ],
-    )
 
 
 @pytest.fixture
@@ -162,4 +114,19 @@ def read_events(request):
         }
         for n in range(request.param['number'])
         for content in request.param['content']
+    ]
+
+
+@pytest.fixture
+def fixture_query_time_series(request):
+    exception = request.param.get('exception')
+    if exception:
+        return Exception(exception)
+    return [
+        {
+            'metric': f'{request.param["category"]}.{metric}',
+            'value': random.uniform(0, 1000),
+            'tags': [f'cloudera_{request.param["category"]}:{request.param["name"]}'],
+        }
+        for metric in request.param["metrics"][request.param["category"]]
     ]

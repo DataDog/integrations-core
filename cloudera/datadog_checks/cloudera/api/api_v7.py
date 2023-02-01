@@ -6,8 +6,6 @@ import contextlib
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 
-import cm_client
-
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.discovery import Discovery
 from datadog_checks.base.utils.time import get_timestamp
@@ -79,35 +77,14 @@ class ApiV7(Api):
         end_time_iso = datetime.utcfromtimestamp(now_utc).isoformat()
         query = f"timeOccurred=ge={start_time_iso};timeOccurred=le={end_time_iso}"
         self._log.debug("Cloudera event query: %s", query)
-
-        events = self._api_client.read_events(query)
-        self._log.debug("Events: %s", events)
-        for event in events:
-            self._check.event(event)
+        try:
+            events = self._api_client.read_events(query)
+            self._log.debug("Events: %s", events)
+            for event in events:
+                self._check.event(event)
+        except Exception as e:
+            self._log.error("Cloudera unable to process event collection: %s", e)
         self._check.latest_event_query_utc = now_utc
-
-        # events_resource_api = cm_client.EventsResourceApi(self._api_client)
-        # now_utc = get_timestamp()
-        #
-        # start_time_iso = datetime.utcfromtimestamp(self._check.latest_event_query_utc).isoformat()
-        # end_time_iso = datetime.utcfromtimestamp(now_utc).isoformat()
-        #
-        # query = f"timeOccurred=ge={start_time_iso};timeOccurred=le={end_time_iso}"
-        # self._log.info("Cloudera event query: %s", query)
-        # try:
-        #     event_resource_response = events_resource_api.read_events(query=query)
-        #     for item in event_resource_response.items:
-        #         self._log.debug('content: %s', item.content)
-        #         self._log.debug('timestamp: %s', item.time_occurred)
-        #         self._log.debug('id: %s', item.id)
-        #         self._log.debug('category: %s', item.category)
-        #         self._log.debug('tag_attributes: %s', item.attributes)
-        #         event_payload = ClouderaEvent(item).get_event()
-        #         self._check.event(event_payload)
-        #     self._check.latest_event_query_utc = now_utc
-        # except Exception as e:
-        #     self._log.error("Cloudera unable to process event collection: %s", e)
-        #     raise
 
     def _collect_cluster_tags(self, cluster):
         cluster_tags = [f"cloudera_cluster:{cluster['name']}"]
@@ -210,28 +187,40 @@ class ApiV7(Api):
 
     def _run_custom_query(self, custom_query, tags):
         self._log.debug('Running Cloudera custom query: %s', custom_query)
-        time_series_resource_api = cm_client.TimeSeriesResourceApi(self._api_client)
-        query_time_series_response = time_series_resource_api.query_time_series(query=custom_query)
-        self._log.debug('Cloudera custom query result: %s', query_time_series_response)
-        for item in query_time_series_response.items:
-            for ts in item.time_series:
-                if ts.metadata.alias:
-                    metric_name = ts.metadata.alias
-                else:
-                    metric_name = ts.metadata.metric_name
+        items = self._api_client.query_time_series('cluster', 'cluster_0', custom_query)
+        self._log.debug('query_time_series response: %s', items)
 
-                category_name = ts.metadata.attributes['category'].lower()
-                full_metric_name = f'{category_name}.{metric_name}'
-                entity_tag = f'cloudera_{category_name}:{ts.metadata.entity_name}'
+        for item in items:
+            self._log.debug('item: %s', item)
+            metric = item.get('metric')
+            item_tags = [*tags]
+            item_tags.extend([tag for tag in item.get('tags') if tag not in item_tags])
+            value = item.get('value')
+            self._log.debug('metric: %s', metric)
+            self._check.gauge(metric, value, tags=[*item_tags])
 
-                value = ts.data[0].value
-                timestamp = ts.data[0].timestamp
-                for d in ts.data:
-                    current_timestamp = d.timestamp
-                    if current_timestamp > timestamp:
-                        value = d.value
-
-                self._check.gauge(full_metric_name, value, tags=[entity_tag, *tags])
+        # time_series_resource_api = cm_client.TimeSeriesResourceApi(self._api_client)
+        # query_time_series_response = time_series_resource_api.query_time_series(query=custom_query)
+        # self._log.debug('Cloudera custom query result: %s', query_time_series_response)
+        # for item in query_time_series_response.items:
+        #     for ts in item.time_series:
+        #         if ts.metadata.alias:
+        #             metric_name = ts.metadata.alias
+        #         else:
+        #             metric_name = ts.metadata.metric_name
+        #
+        #         category_name = ts.metadata.attributes['category'].lower()
+        #         full_metric_name = f'{category_name}.{metric_name}'
+        #         entity_tag = f'cloudera_{category_name}:{ts.metadata.entity_name}'
+        #
+        #         value = ts.data[0].value
+        #         timestamp = ts.data[0].timestamp
+        #         for d in ts.data:
+        #             current_timestamp = d.timestamp
+        #             if current_timestamp > timestamp:
+        #                 value = d.value
+        #
+        #         self._check.gauge(full_metric_name, value, tags=[entity_tag, *tags])
 
 
 @contextlib.contextmanager

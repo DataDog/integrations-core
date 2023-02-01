@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+
 import mock
 import pytest
 from tests.common import query_time_series
@@ -24,8 +25,7 @@ pytestmark = [pytest.mark.unit]
             1,
             [
                 {
-                    'status': ServiceCheck.CRITICAL,
-                    'message': 'Cloudera check raised an exception: Exception reading events',
+                    'status': ServiceCheck.OK,
                     'tags': ['api_url:http://localhost:8080/api/v48/'],
                 }
             ],
@@ -40,8 +40,7 @@ pytestmark = [pytest.mark.unit]
             1,
             [
                 {
-                    'status': ServiceCheck.CRITICAL,
-                    'message': 'Cloudera check raised an exception: Exception reading events',
+                    'status': ServiceCheck.OK,
                     'tags': ['api_url:http://localhost:8080/api/v48/', 'new_tag'],
                 }
             ],
@@ -82,7 +81,10 @@ pytestmark = [pytest.mark.unit]
             {'version': '7.0.0'},
             {'number': 0},
             {'number': 0},
-            {'number': 1, 'content': ['content_']},
+            {
+                'number': 1,
+                'content': ['content_'],
+            },
             1,
             [
                 {
@@ -97,7 +99,10 @@ pytestmark = [pytest.mark.unit]
             {'version': '7.0.0'},
             {'number': 0},
             {'number': 0},
-            {'number': 1, 'content': ['content_']},
+            {
+                'number': 1,
+                'content': ['content_'],
+            },
             1,
             [
                 {
