@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import os
+import random
 from collections import defaultdict
 
 from datadog_checks.cloudera.metrics import NATIVE_METRICS, TIMESERIES_METRICS
@@ -12,6 +13,10 @@ HOST = get_docker_hostname()
 PORT = 7180
 
 INSTANCE = {
+    'api_url': 'http://localhost:8080/api/v48/',
+}
+
+INSTANCE_WITH_TAGS = {
     'api_url': 'http://localhost:8080/api/v48/',
     'tags': ['test1'],
 }
@@ -115,3 +120,18 @@ def merge_dicts(d1, d2):
 
 
 METRICS = merge_dicts(NATIVE_METRICS, TIMESERIES_METRICS)
+
+
+def query_time_series(category, name, _):
+    return (
+        [
+            {
+                'metric': f'{category}.{metric}',
+                'value': random.uniform(0, 1000),
+                'tags': [f'cloudera_{category}:{name}'],
+            }
+            for metric in TIMESERIES_METRICS[category]
+        ]
+        if category is not None and name is not None
+        else []
+    )

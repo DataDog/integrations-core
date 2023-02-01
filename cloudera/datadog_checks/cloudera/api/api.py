@@ -5,7 +5,7 @@
 from abc import ABC, abstractmethod
 
 
-class ApiClient(ABC):
+class Api(ABC):
     def __init__(self, check, api_client):
         self._check = check
         self._log = check.log

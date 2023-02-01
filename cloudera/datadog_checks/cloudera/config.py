@@ -15,4 +15,6 @@ def normalize_config_clusters_include(log, clusters_config):
             elif isinstance(entry, dict):
                 for key, value in entry.items():
                     config[key] = value.copy()
+            else:
+                raise TypeError('`include` entries must be a map or a string')
     return config
