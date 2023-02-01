@@ -7,6 +7,7 @@ from datadog_checks.downloader.download import TUFDownloader
 def test_non_official_wheel_filter(mocker):
     mocked_wheels = {
         '3.6.1': {'py2.py3': 'datadog_vsphere-3.6.1-py2.py3-none-any.whl'},
+        '3.6.2': {'py2.py3': 'datadog_vsphere-3.6.2-py2.py3-none-any.whl'},
         '5.4.0rc2': {'py2.py3': 'datadog_vsphere-5.4.0rc2-py2.py3-none-any.whl'},
         '6.2.2a1': {'py2.py3': 'datadog_vsphere-6.2.2b1-py2.py3-none-any.whl'},
         '6.3.0b1': {'py2.py3': 'datadog_vsphere-6.3.0b1-py2.py3-none-any.whl'},
@@ -19,4 +20,4 @@ def test_non_official_wheel_filter(mocker):
     result = downloader.get_wheel_relpath(integration)
 
     mock_wheels_call.assert_called_once()
-    assert result == 'simple/datadog-vsphere/datadog_vsphere-3.6.1-py2.py3-none-any.whl'
+    assert result == 'simple/datadog-vsphere/datadog_vsphere-3.6.2-py2.py3-none-any.whl'
