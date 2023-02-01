@@ -120,7 +120,6 @@ class ApiV7(Api):
         # # Use len(discovered_hosts) * 4 workers since
         # # for each host, we are executing 4 tasks in parallel.
         if len(discovered_hosts) > 0:
-            futures = []
             with ThreadPoolExecutor(max_workers=len(discovered_hosts) * 4) as executor, raising_submitter(
                 executor
             ) as submit:
