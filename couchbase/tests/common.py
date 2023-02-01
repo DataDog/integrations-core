@@ -194,11 +194,6 @@ QUERY_STATS_ALWAYS_PRESENT = {
     'request_prepared_percent',
 }
 
-BY_BUCKET_METRICS = [
-    # TODO I did not find a reliable way to make sure those metrics are always present.
-    # Check which conditions we should add to the docker_run command to be able to assert them in all cases.
-]
-
 OPTIONAL_BY_BUCKET_METRICS = [
     'couchbase.by_bucket.avg_bg_wait_time',
     'couchbase.by_bucket.avg_disk_commit_time',
@@ -411,8 +406,8 @@ BUCKET_TAGS = CHECK_TAGS + ['bucket:{}'.format(BUCKET_NAME)]
 
 
 def _assert_bucket_metrics(aggregator, tags, device=None):
-    for metric in BY_BUCKET_METRICS:
-        aggregator.assert_metric(metric, tags=tags, device=device, count=1)
+    # TODO I did not find a reliable way to make sure those metrics are always present.
+    # Check which conditions we should add to the docker_run command to be able to assert them in all cases.
 
     for metric in OPTIONAL_BY_BUCKET_METRICS:
         aggregator.assert_metric(metric, tags=tags, device=device, at_least=0)
