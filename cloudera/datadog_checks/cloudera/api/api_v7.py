@@ -199,29 +199,6 @@ class ApiV7(Api):
             self._log.debug('metric: %s', metric)
             self._check.gauge(metric, value, tags=[*item_tags])
 
-        # time_series_resource_api = cm_client.TimeSeriesResourceApi(self._api_client)
-        # query_time_series_response = time_series_resource_api.query_time_series(query=custom_query)
-        # self._log.debug('Cloudera custom query result: %s', query_time_series_response)
-        # for item in query_time_series_response.items:
-        #     for ts in item.time_series:
-        #         if ts.metadata.alias:
-        #             metric_name = ts.metadata.alias
-        #         else:
-        #             metric_name = ts.metadata.metric_name
-        #
-        #         category_name = ts.metadata.attributes['category'].lower()
-        #         full_metric_name = f'{category_name}.{metric_name}'
-        #         entity_tag = f'cloudera_{category_name}:{ts.metadata.entity_name}'
-        #
-        #         value = ts.data[0].value
-        #         timestamp = ts.data[0].timestamp
-        #         for d in ts.data:
-        #             current_timestamp = d.timestamp
-        #             if current_timestamp > timestamp:
-        #                 value = d.value
-        #
-        #         self._check.gauge(full_metric_name, value, tags=[entity_tag, *tags])
-
 
 @contextlib.contextmanager
 def raising_submitter(executor):
