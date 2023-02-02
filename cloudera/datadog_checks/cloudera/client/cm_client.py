@@ -22,9 +22,9 @@ class CmClient(Client):
     def __init__(self, log, **kwargs):
         self._log = log
         self._log.debug("creating CmClient object with parameters: %s", kwargs)
-        cm_client.configuration.username = kwargs.get('username')
-        cm_client.configuration.password = kwargs.get('password')
-        self._client = cm_client.ApiClient(kwargs.get('url'))
+        cm_client.configuration.username = kwargs.get('workload_username')
+        cm_client.configuration.password = kwargs.get('workload_password')
+        self._client = cm_client.ApiClient(kwargs.get('api_url'))
         self._client.rest_client = RESTClientObject(maxsize=kwargs.get('max_parallel_requests'))
 
     def get_version(self) -> Version:

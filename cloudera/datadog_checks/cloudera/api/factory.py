@@ -15,9 +15,9 @@ def make_api(check) -> Api:
         check.log,
         check.config.cloudera_client,
         **{
-            'url': check.config.api_url,
-            'username': check.shared_config.workload_username,
-            'password': check.shared_config.workload_password,
+            'api_url': check.config.api_url,
+            'workload_username': check.shared_config.workload_username,
+            'workload_password': check.shared_config.workload_password,
             'max_parallel_requests': check.config.max_parallel_requests,
         },
     )
