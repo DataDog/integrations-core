@@ -98,8 +98,19 @@ def stop_iis():
         run_container_command(['powershell.exe', '-Command', 'Stop-IISSite -Name "{}" -Confirm:$false'.format(site)])
 
 
+def _assert_service_checks(service_checks, aggregator, iis_host):
+    for namespace, status, values in service_checks:
+        for value in values:
+            aggregator.assert_service_check(
+                'iis.{}_up'.format(namespace),
+                status,
+                tags=normalize_tags(['{}:{}'.format(namespace, value), iis_host]),
+                count=1,
+            )
+
+
 @pytest.mark.e2e
-def test_service_checks(dd_agent_check, aggregator, instance, iis_host):
+def test_service_checks_ok(dd_agent_check, aggregator, instance, iis_host):
     """
     Test that the site and app_pool service checks are correct for running and non-existent instances
     """
@@ -113,14 +124,25 @@ def test_service_checks(dd_agent_check, aggregator, instance, iis_host):
         (IIS.SITE, IIS.CRITICAL, ['Non Existing Website']),
         (IIS.APP_POOL, IIS.CRITICAL, ['Non Existing App Pool']),
     )
-    for namespace, status, values in namespace_data:
-        for value in values:
-            aggregator.assert_service_check(
-                'iis.{}_up'.format(namespace),
-                status,
-                tags=normalize_tags(['{}:{}'.format(namespace, value), iis_host]),
-                count=1,
-            )
+    _assert_service_checks(namespace_data, aggregator, iis_host)
+
+
+@pytest.mark.e2e
+def test_service_checks_critical(dd_agent_check, aggregator, instance, iis_host):
+    """
+    Test that the site and app_pool service checks are correct for running and non-existent instances
+    """
+    stop_iis()
+
+    aggregator = dd_agent_check(instance)
+
+    namespace_data = (
+        (IIS.SITE, IIS.CRITICAL, ['Default Web Site']),
+        (IIS.APP_POOL, IIS.CRITICAL, ['DefaultAppPool']),
+        (IIS.SITE, IIS.CRITICAL, ['Non Existing Website']),
+        (IIS.APP_POOL, IIS.CRITICAL, ['Non Existing App Pool']),
+    )
+    _assert_service_checks(namespace_data, aggregator, iis_host)
 
 
 @pytest.mark.e2e
