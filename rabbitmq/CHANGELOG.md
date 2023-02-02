@@ -2,8 +2,7 @@
 
 ## 3.4.0 / 2023-02-02
 
-* [Fixed] Add validation for `include_aggregated_endpoint`. See [#13793](https://github.com/DataDog/integrations-core/pull/13793).
-* [Changed] Remove support for /metrics/per-object endpoint. See [#13869](https://github.com/DataDog/integrations-core/pull/13869).
+* [Changed] Remove support for `/metrics/per-object` endpoint. See [#13869](https://github.com/DataDog/integrations-core/pull/13869).
 
 ## 3.3.1 / 2023-01-27
 
