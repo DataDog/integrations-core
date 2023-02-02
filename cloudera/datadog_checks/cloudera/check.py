@@ -15,7 +15,6 @@ class ClouderaCheck(AgentCheck, ConfigMixin):
 
     def __init__(self, name, init_config, instances):
         super(ClouderaCheck, self).__init__(name, init_config, instances)
-        self.log.debug('name:%s init_config:%s, instances:%s', name, init_config, instances)
         self.client = None
         self.latest_event_query_utc = get_timestamp()
         self.check_initializations.append(self._create_client)
