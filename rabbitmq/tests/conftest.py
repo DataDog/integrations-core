@@ -172,7 +172,9 @@ def instance():
     return CONFIG
 
 
-# https://docs.pytest.org/en/7.1.x/example/pythoncollection.html#customizing-test-collection
+# We don't want to maintain compatibility with Python2 in our OpenMetrics tests.
+# If the rabbitmq version is too old for OpenMetrics support we don't load the test files at all.
+# Docs for how we do it: https://docs.pytest.org/en/7.1.x/example/pythoncollection.html#customizing-test-collection
 collect_ignore_glob = []
 if RABBITMQ_VERSION < version.parse("3.8"):
     collect_ignore_glob.append("*openmetrics*")
