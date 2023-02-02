@@ -54,13 +54,7 @@ def run_container_command(command):
     Run a command in the docker container being used for E2E tests
     """
     container_name = 'dd_{}_{}'.format(CHECK_NAME, get_active_env())
-    result = (
-        run_command(
-            ['docker', 'exec', container_name] + command,
-            capture=True,
-            check=True
-        )
-    )
+    result = run_command(['docker', 'exec', container_name] + command, capture=True, check=True)
     return result
 
 
