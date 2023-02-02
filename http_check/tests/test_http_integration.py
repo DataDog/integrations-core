@@ -551,6 +551,11 @@ def test_tls_config_ok(dd_run_check, instance, check_hostname):
     ],
 )
 def test_case_insensitive_header_content_type(dd_run_check, headers):
+    """
+    Test that `Content-Type` is accessible from the headers dict regardless of letter case.
+    We're only testing `Content-Type` for a non-GET method because that's the only header field
+    that applies a default header value if omitted.
+    """
     instance = {
         'name': 'foobar',
         'url': 'http://something.com',
