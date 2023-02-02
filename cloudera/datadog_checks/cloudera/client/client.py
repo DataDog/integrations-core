@@ -9,25 +9,25 @@ from packaging.version import Version
 
 class Client(ABC):
     def __init__(self):
-        pass
+        pass  # pragma: no cover
 
     @abstractmethod
     def get_version(self) -> Version:
         """Collect metrics and service checks via the Cloudera API Client"""
-        pass
+        pass  # pragma: no cover
 
     @abstractmethod
     def read_clusters(self) -> list:
-        pass
+        pass  # pragma: no cover
 
     @abstractmethod
     def query_time_series(self, category, query) -> list:
-        pass
+        pass  # pragma: no cover
 
     @abstractmethod
     def list_hosts(self, cluster_name) -> list:
-        pass
+        pass  # pragma: no cover
 
     @abstractmethod
     def read_events(self, query) -> list:
-        pass
+        pass  # pragma: no cover

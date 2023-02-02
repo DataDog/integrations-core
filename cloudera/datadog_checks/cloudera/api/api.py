@@ -14,4 +14,4 @@ class Api(ABC):
     @abstractmethod
     def collect_data(self):
         """Collect metrics and service checks via the Cloudera API Client"""
-        pass
+        pass  # pragma: no cover
