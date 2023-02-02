@@ -48,7 +48,7 @@ def merge_dicts(d1, d2):
 METRICS = merge_dicts(NATIVE_METRICS, TIMESERIES_METRICS)
 
 
-def query_time_series(category, name, _):
+def query_time_series(category, name, query):
     return (
         [
             {
