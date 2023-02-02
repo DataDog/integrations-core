@@ -12,6 +12,8 @@ from semver import VersionInfo
 
 from datadog_checks.dev import WaitFor, docker_run
 from datadog_checks.postgres import PostgreSql
+from datadog_checks.postgres.config import PostgresConfig
+from datadog_checks.postgres.metrics_cache import PostgresMetricsCache
 
 from .common import DB_NAME, HOST, PASSWORD, PORT, PORT_REPLICA, POSTGRES_IMAGE, USER
 
@@ -71,6 +73,18 @@ def pg_replica_instance():
     instance = copy.deepcopy(INSTANCE)
     instance['port'] = PORT_REPLICA
     return instance
+
+
+@pytest.fixture
+def metrics_cache(pg_instance):
+    config = PostgresConfig(pg_instance)
+    return PostgresMetricsCache(config)
+
+
+@pytest.fixture
+def metrics_cache_replica(pg_replica_instance):
+    config = PostgresConfig(pg_replica_instance)
+    return PostgresMetricsCache(config)
 
 
 @pytest.fixture(scope='session')

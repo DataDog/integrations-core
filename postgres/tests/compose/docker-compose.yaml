@@ -1,14 +1,19 @@
 version: '3'
+networks:
+  pg-net:
+
 services:
   postgres:
     image: "postgres:${POSTGRES_IMAGE}"
     ports:
-      - 5432:5432
+      - "5432:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U datadog -d datadog_test && if [[ ! -e /tmp/container_ready.txt ]]; then exit 1; fi"]
       interval: 1s
       timeout: 5s
       retries: 5
+    networks:
+      - pg-net
     volumes:
       - ./resources:/docker-entrypoint-initdb.d/
       - ./etc/postgresql:/etc/postgresql/
@@ -19,12 +24,16 @@ services:
   postgres_replica:
     image: "postgres:${POSTGRES_IMAGE}"
     ports:
-      - 5433:5432
+      - "5433:5433"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U datadog -d datadog_test && if [[ ! -e /tmp/container_ready.txt ]]; then exit 1; fi"]
       interval: 1s
       timeout: 5s
       retries: 5
+    links:
+      - postgres:postgres
+    networks:
+      - pg-net
     volumes:
       - ./resources_replica:/docker-entrypoint-initdb.d/
       - ./etc/postgresql_replica:/etc/postgresql/
