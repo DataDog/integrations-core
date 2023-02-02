@@ -38,7 +38,8 @@ RELATION_INDEX_METRICS = [
     'postgresql.index_rel_rows_fetched',
     'postgresql.index_blocks_read',
     'postgresql.index_blocks_hit',
-]
+    'postgresql.individual_index_size',
+    ]
 
 IDX_METRICS = ['postgresql.index_scans', 'postgresql.index_rows_read', 'postgresql.index_rows_fetched']
 

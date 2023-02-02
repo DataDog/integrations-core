@@ -78,6 +78,7 @@ IDX_METRICS = {
         'idx_scan': ('postgresql.index_scans', AgentCheck.rate),
         'idx_tup_read': ('postgresql.index_rows_read', AgentCheck.rate),
         'idx_tup_fetch': ('postgresql.index_rows_fetched', AgentCheck.rate),
+        'pg_relation_size(indexrelid) as index_size': ('postgresql.individual_index_size', AgentCheck.gauge),
     },
     'query': """
 SELECT relname,

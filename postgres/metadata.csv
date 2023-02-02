@@ -43,6 +43,7 @@ postgresql.index_rows_read,gauge,,row,second,The number of index entries returne
 postgresql.table_size,gauge,,byte,,"The total disk space used by the specified table. Includes TOAST, free space map, and visibility map. Excludes indexes.",0,postgres,tbl size,
 postgresql.index_size,gauge,,byte,,The total disk space used by indexes attached to the specified table.,0,postgres,idx size,
 postgresql.total_size,gauge,,byte,,"The total disk space used by the table, including indexes and TOAST data.",0,postgres,tot size,
+postgresql.individual_index_size,gauge,,byte,,The disk space used by a the specified index.,0,postgres,idx size,
 postgresql.table.count,gauge,,table,,The number of user tables in this database.,0,postgres,tbl count,
 postgresql.max_connections,gauge,,connection,, The maximum number of client connections allowed to this database.,0,postgres,max conns,
 postgresql.percent_usage_connections,gauge,,fraction,,The number of connections to this database as a fraction of the maximum number of allowed connections.,0,postgres,pct usg conns,
