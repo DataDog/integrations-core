@@ -66,6 +66,30 @@ def test_aggregated_endpoint(aggregated_setting, aggregator, dd_run_check, mock_
     aggregator.assert_all_metrics_covered()
 
 
+def test_aggregated_endpoint_as_per_object(aggregator, dd_run_check, mock_http_response):
+    """Rabbitmq is configured to emit per-object metrics from the `/metrics` endpoint.
+
+    We expect all metrics except the ones unique to the `/metrics` endpoint to be collected.
+    """
+    mock_http_response(file_path=OM_RESPONSE_FIXTURES / "per-object.txt")
+    prometheus_settings = {'url': TEST_URL}
+    check = _rmq_om_check(prometheus_settings)
+    dd_run_check(check)
+
+    for m in DEFAULT_OPENMETRICS - AGGREGATED_ONLY_METRICS:
+        aggregator.assert_metric(m)
+        for tag in IDENTITY_INFO_TAGS:
+            aggregator.assert_metric_has_tag(m, tag)
+
+    for m in MISSING_OPENMETRICS:
+        aggregator.assert_metric(m, at_least=0)
+
+    aggregator.assert_metric('rabbitmq.build_info', tags=[OM_ENDPOINT_TAG] + BUILD_INFO_TAGS + IDENTITY_INFO_TAGS)
+    aggregator.assert_metric('rabbitmq.identity_info', tags=[OM_ENDPOINT_TAG] + IDENTITY_INFO_TAGS)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_all_metrics_covered()
+
+
 @pytest.mark.parametrize(
     'endpoint, fixture_file, expected_metrics',
     [
@@ -81,7 +105,6 @@ def test_aggregated_endpoint(aggregated_setting, aggregator, dd_run_check, mock_
             },
             id="detailed, query queue_coarse_metrics family",
         ),
-        pytest.param("per-object", "per-object.txt", DEFAULT_OPENMETRICS - AGGREGATED_ONLY_METRICS, id="per-object"),
     ],
 )
 def test_unaggregated_endpoint(endpoint, fixture_file, expected_metrics, aggregator, dd_run_check, mock_http_response):
@@ -154,7 +177,6 @@ def mock_http_responses(url, **_params):
             ],
             id="two metric families",
         ),
-        pytest.param('per-object', DEFAULT_OPENMETRICS.difference(AGGREGATED_ONLY_METRICS), id='per-object'),
     ],
 )
 def test_aggregated_and_unaggregated_endpoints(endpoint, metrics, aggregator, dd_run_check, mocker):
@@ -205,15 +227,18 @@ def test_aggregated_and_unaggregated_endpoints(endpoint, metrics, aggregator, dd
         ),
         pytest.param(
             {'url': "http://localhost", "unaggregated_endpoint": "detailed?"},
-            r"'prometheus_plugin\.unaggregated_endpoint' must be 'per-object', "
-            + r"'detailed', or 'detailed\?<QUERY>'\.",
+            r"'prometheus_plugin\.unaggregated_endpoint' must be 'detailed', or 'detailed\?<QUERY>'\.",
             id="Invalid nonempty unaggregated_endpoint value.",
         ),
         pytest.param(
             {'url': "http://localhost", "unaggregated_endpoint": ""},
-            r"'prometheus_plugin\.unaggregated_endpoint' must be 'per-object', "
-            + r"'detailed', or 'detailed\?<QUERY>'\.",
+            r"'prometheus_plugin\.unaggregated_endpoint' must be 'detailed', or 'detailed\?<QUERY>'\.",
             id="Empty unaggregated_endpoint value is invalid.",
+        ),
+        pytest.param(
+            {'url': "http://localhost", "unaggregated_endpoint": "per-object"},
+            r"'prometheus_plugin\.unaggregated_endpoint' must be 'detailed', or 'detailed\?<QUERY>'\.",
+            id="We do not support per-object endpoint in the config.",
         ),
         pytest.param(
             {'url': "http://localhost", "unaggregated_endpoint": []},
