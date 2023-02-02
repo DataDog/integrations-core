@@ -105,7 +105,6 @@ def test_aggregated_endpoint_as_per_object(aggregator, dd_run_check, mock_http_r
             },
             id="detailed, query queue_coarse_metrics family",
         ),
-        # pytest.param("per-object", "per-object.txt", DEFAULT_OPENMETRICS - AGGREGATED_ONLY_METRICS, id="per-object"),
     ],
 )
 def test_unaggregated_endpoint(endpoint, fixture_file, expected_metrics, aggregator, dd_run_check, mock_http_response):
@@ -178,7 +177,6 @@ def mock_http_responses(url, **_params):
             ],
             id="two metric families",
         ),
-        # pytest.param('per-object', DEFAULT_OPENMETRICS.difference(AGGREGATED_ONLY_METRICS), id='per-object'),
     ],
 )
 def test_aggregated_and_unaggregated_endpoints(endpoint, metrics, aggregator, dd_run_check, mocker):
