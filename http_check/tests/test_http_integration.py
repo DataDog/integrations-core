@@ -539,3 +539,36 @@ def test_tls_config_ok(dd_run_check, instance, check_hostname):
     )
     tls_context = check.get_tls_context()
     assert tls_context.check_hostname is check_hostname
+
+
+@pytest.mark.parametrize(
+    'headers',
+    [
+        pytest.param({'content-type': 'application/json'}),
+        pytest.param({'Content-Type': 'application/json'}),
+        pytest.param({'CONTENT-TYPE': 'text/html'}),
+        pytest.param({}),
+    ],
+)
+def test_case_insensitive_header_content_type(dd_run_check, headers):
+    instance = {
+        'name': 'foobar',
+        'url': 'http://something.com',
+        'method': 'POST',
+        'headers': headers,
+        'data': {'foo': 'bar'},
+    }
+    default_headers = {
+        'User-Agent': 'Datadog Agent/0.0.0',
+        'Accept': '*/*',
+        'Accept-Encoding': 'gzip, deflate',
+        'Content-Type': 'application/x-www-form-urlencoded',
+    }
+    check = HTTPCheck('http_check', {'ca_certs': 'foo'}, [instance])
+
+    dd_run_check(check)
+
+    if headers == {}:
+        assert check.http.options["headers"] == default_headers
+    else:
+        assert check.http.options["headers"] == headers

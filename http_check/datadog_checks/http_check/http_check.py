@@ -12,6 +12,7 @@ from datetime import datetime
 import requests
 from cryptography import x509
 from requests import Response
+from requests.structures import CaseInsensitiveDict
 from six import PY2, string_types
 from six.moves.urllib.parse import urlparse
 
@@ -115,7 +116,7 @@ class HTTPCheck(AgentCheck):
             self.http.session.trust_env = False
 
             # Add 'Content-Type' for non GET requests when they have not been specified in custom headers
-            if method.upper() in DATA_METHODS and not headers.get("Content-Type"):
+            if method.upper() in DATA_METHODS and not CaseInsensitiveDict(headers).get("Content-Type"):
                 self.http.options["headers"]["Content-Type"] = "application/x-www-form-urlencoded"
 
             http_method = method.lower()
