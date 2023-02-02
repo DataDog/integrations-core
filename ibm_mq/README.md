@@ -14,8 +14,8 @@ To use the IBM MQ check, you need to make sure the [IBM MQ Client][3] 9.1+ is in
 
 #### On Linux
 
-Update your `LD_LIBRARY_PATH` to include the location of the libraries (or create this environment variable if it doesn't exist yet).
-For example, if you installed the cliend under `/opt`:
+Update your `LD_LIBRARY_PATH` to include the location of the libraries. Create this environment variable if it doesn't exist yet.
+For example, if you installed the client under `/opt`:
 
 ```text
 export LD_LIBRARY_PATH=/opt/mqm/lib64:/opt/mqm/lib:$LD_LIBRARY_PATH
