@@ -21,14 +21,6 @@ files:
     - template: init_config/default
   - template: instances
     options:
-    - name: cloudera_client
-      description: |
-        Type of client.
-      required: false
-      hidden: true
-      value:
-        type: string
-        example: 'cm_client'
     - name: api_url
       required: true
       description: |
@@ -140,4 +132,12 @@ files:
               type: array
               items:
                 type: string
+    - name: cloudera_client
+      description: |
+        Type of client.
+      required: false
+      hidden: true
+      value:
+        type: string
+        example: 'cm_client'
     - template: instances/default

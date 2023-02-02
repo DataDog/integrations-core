@@ -34,7 +34,7 @@ instances:
     ## to the following:
     ## `https://cluster1.cloudera.site/cluster_1/cdp-proxy-api/cm-api/v48`
     #
-    api_url: <API_URL>
+  - api_url: <API_URL>
 
     ## @param clusters - mapping - optional
     ## Optional configuration to indicate the clusters that we want to be processed. If not configured, 
