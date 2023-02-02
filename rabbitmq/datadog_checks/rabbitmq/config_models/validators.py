@@ -15,9 +15,7 @@ def initialize_instance(values, **kwargs):
         if 'unaggregated_endpoint' in plugin_settings:
             unagg_ep = plugin_settings['unaggregated_endpoint']
             if not re.match(r"detailed(\?.+)?$", unagg_ep):
-                raise ValueError(
-                    "'prometheus_plugin.unaggregated_endpoint' must be 'detailed', or 'detailed?<QUERY>'."
-                )
+                raise ValueError("'prometheus_plugin.unaggregated_endpoint' must be 'detailed', or 'detailed?<QUERY>'.")
         if 'include_aggregated_endpoint' in plugin_settings:
             agg_ep = plugin_settings['include_aggregated_endpoint']
             if not isinstance(agg_ep, bool):
