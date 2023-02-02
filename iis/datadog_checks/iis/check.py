@@ -132,13 +132,14 @@ class CompatibilityPerfObject(PerfObject):
         service_check_method = check.service_check
 
         def submit_uptime(value, tags=None):
+            # Submit the counter's value as a metric
+            gauge_method(metric_name, value, tags=tags)
+
+            # Submit a service check
             if self.instance_type == 'site':
                 status = site_service_check(value)
             elif self.instance_type == 'app_pool':
                 status = app_pool_service_check(value)
-            # Submit the counter's value as a metric
-            gauge_method(metric_name, value, tags=tags)
-            # Submit a service check
             service_check_method(self.instance_service_check_name, status, tags=tags)
 
         del check

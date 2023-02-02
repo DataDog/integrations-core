@@ -3,12 +3,12 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 import socket
-import subprocess
 
 import pytest
 import six
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.dev.subprocess import run_command
 from datadog_checks.dev.utils import get_active_env
 from datadog_checks.iis import IIS
 from datadog_checks.iis.service_check import IIS_APPLICATION_POOL_STATE
@@ -27,7 +27,7 @@ def test_e2e(dd_agent_check, aggregator, instance):
 
 
 @pytest.fixture
-def iis_host(aggregator, dd_default_hostname):
+def iis_host(aggregator):
     if six.PY2:
         # the python2 version of the check uses the configured hostname,
         # which is the hostnane of the docker host.
@@ -35,7 +35,8 @@ def iis_host(aggregator, dd_default_hostname):
     else:
         # the python3 version of the check uses the perf counter server field,
         # which is the hostname of the container.
-        hostname = run_command(['hostname'])
+        result = run_container_command(['hostname'])
+        hostname = result.stdout.strip()
         return 'iis_host:{}'.format(hostname)
 
 
@@ -48,37 +49,41 @@ def normalize_tags(tags):
         return tags
 
 
-def run_command(command):
+def run_container_command(command):
     """
     Run a command in the docker container being used for E2E tests
     """
     container_name = 'dd_{}_{}'.format(CHECK_NAME, get_active_env())
     result = (
-        subprocess.check_output(
+        run_command(
             ['docker', 'exec', container_name] + command,
+            capture=True,
+            check=True
         )
-        .decode()
-        .strip()
     )
     return result
 
 
 def start_iis():
+    # Stopping W3SVC does not stop the app pool, so have to use IIS cmdlets
+
     app_pools = ['DefaultAppPool']
     sites = ['Default Web Site']
 
     for app_pool in app_pools:
-        run_command(['powershell.exe', '-Command', 'Start-WebAppPool -Name "{}"'.format(app_pool)])
+        run_container_command(['powershell.exe', '-Command', 'Start-WebAppPool -Name "{}"'.format(app_pool)])
     for site in sites:
-        run_command(['powershell.exe', '-Command', 'Start-IISSite -Name "{}"'.format(site)])
+        run_container_command(['powershell.exe', '-Command', 'Start-IISSite -Name "{}"'.format(site)])
 
 
 def stop_iis():
+    # Stopping W3SVC does not stop the app pool, so have to use IIS cmdlets
+
     app_pools = ['DefaultAppPool']
     sites = ['Default Web Site']
 
     for app_pool in app_pools:
-        run_command(
+        run_container_command(
             [
                 'powershell.exe',
                 '-Command',
@@ -90,7 +95,7 @@ def stop_iis():
             ]
         )
     for site in sites:
-        run_command(['powershell.exe', '-Command', 'Stop-IISSite -Name "{}" -Confirm:$false'.format(site)])
+        run_container_command(['powershell.exe', '-Command', 'Stop-IISSite -Name "{}" -Confirm:$false'.format(site)])
 
 
 @pytest.mark.e2e
