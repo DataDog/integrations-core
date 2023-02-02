@@ -14,10 +14,9 @@ def initialize_instance(values, **kwargs):
             raise ValueError("'prometheus_plugin.url' field must be an HTTP or HTTPS URL.")
         if 'unaggregated_endpoint' in plugin_settings:
             unagg_ep = plugin_settings['unaggregated_endpoint']
-            if not re.match(r'(per-object|detailed(\?.+)?)$', unagg_ep):
+            if not re.match(r"detailed(\?.+)?$", unagg_ep):
                 raise ValueError(
-                    "'prometheus_plugin.unaggregated_endpoint' must be 'per-object', 'detailed', "
-                    "or 'detailed?<QUERY>'."
+                    "'prometheus_plugin.unaggregated_endpoint' must be 'detailed', or 'detailed?<QUERY>'."
                 )
         if 'include_aggregated_endpoint' in plugin_settings:
             agg_ep = plugin_settings['include_aggregated_endpoint']
