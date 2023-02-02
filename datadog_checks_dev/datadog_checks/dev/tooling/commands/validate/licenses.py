@@ -285,15 +285,19 @@ def probe_github(url, ctx):
     owner_repo = re.sub(r'.*github.com/', '', url)
     repo_api_url = f'https://api.github.com/repos/{owner_repo}'
     try:
-        repo_res = requests.get(repo_api_url, auth=get_auth_info(ctx.obj)).json()
-        def_branch = repo_res.get('default_branch')
-        created_date = repo_res.get('created_at', '')
+        repo_res = requests.get(repo_api_url, auth=get_auth_info(ctx.obj))
+        def_branch = repo_res.json().get('default_branch')
+        created_date = repo_res.json().get('created_at', '')
         if created_date:
             created_date = created_date[:4] + ' '
         tar_path = f'https://github.com/{owner_repo}/archive/refs/heads/{def_branch}.tar.gz'
-        return tar_path, created_date
+
     except Exception:
         return None, ''
+
+    if not def_branch:
+        print(repo_res)
+    return tar_path, created_date
 
 
 def parse_license_path(tar_file_name):
