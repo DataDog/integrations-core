@@ -1,27 +1,26 @@
 # (C) Datadog, Inc. 2022-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-# import logging
-#
+
+from contextlib import nullcontext as does_not_raise
+
 import pytest
 
-#
 from datadog_checks.cloudera import ClouderaCheck
-
-# from datadog_checks.cloudera.metrics import TIMESERIES_METRICS
-#
-# from .common import CAN_CONNECT_TAGS, CLUSTER_1_HEALTH_TAGS, METRICS
-# from .common import METRICS
 
 
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
 @pytest.mark.parametrize(
-    'instance, dd_run_check_count, expected_service_checks, expected_events',
+    'instance, dd_run_check_count, expected_exception, expected_service_checks, expected_events',
     [
         (
             {'api_url': 'http://bad_host:8080/api/v48/'},
             1,
+            pytest.raises(
+                Exception,
+                match='HTTPConnectionPool',
+            ),
             [
                 {'status': ClouderaCheck.CRITICAL, 'message': None, 'tags': ['api_url:http://bad_host:8080/api/v48/']},
             ],
@@ -30,6 +29,7 @@ from datadog_checks.cloudera import ClouderaCheck
         (
             {'api_url': 'http://localhost:8080/api/v48/'},
             1,
+            does_not_raise(),
             [{'status': ClouderaCheck.OK, 'message': None, 'tags': ['api_url:http://localhost:8080/api/v48/']}],
             [
                 {
@@ -40,7 +40,7 @@ from datadog_checks.cloudera import ClouderaCheck
         ),
     ],
     ids=['bad url', 'good url'],
-    indirect=['instance'],
+    indirect=[],
 )
 def test_api_urls(
     aggregator,
@@ -48,21 +48,23 @@ def test_api_urls(
     cloudera_check,
     instance,
     dd_run_check_count,
+    expected_exception,
     expected_service_checks,
     expected_events,
 ):
-    check = cloudera_check(instance)
-    for _ in range(dd_run_check_count):
-        dd_run_check(check)
-    for expected_service_check in expected_service_checks:
-        aggregator.assert_service_check(
-            'cloudera.can_connect',
-            status=expected_service_check['status'],
-            message=expected_service_check['message'],
-            tags=expected_service_check['tags'],
-        )
-    for expected_event in expected_events:
-        aggregator.assert_event(expected_event.get('msg_text'), count=expected_event.get('count'))
+    with expected_exception:
+        check = cloudera_check(instance)
+        for _ in range(dd_run_check_count):
+            dd_run_check(check)
+        for expected_service_check in expected_service_checks:
+            aggregator.assert_service_check(
+                'cloudera.can_connect',
+                status=expected_service_check['status'],
+                message=expected_service_check['message'],
+                tags=expected_service_check['tags'],
+            )
+        for expected_event in expected_events:
+            aggregator.assert_event(expected_event.get('msg_text'), count=expected_event.get('count'))
 
 
 #

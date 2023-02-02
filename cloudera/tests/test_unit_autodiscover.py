@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from contextlib import nullcontext as does_not_raise
+
 import mock
 import pytest
 from tests.common import query_time_series
@@ -13,8 +15,8 @@ pytestmark = [pytest.mark.unit]
 
 
 @pytest.mark.parametrize(
-    'instance, cloudera_version, read_clusters, list_hosts, read_events, dd_run_check_count, expected_service_checks, '
-    'expected_metrics',
+    'instance, cloudera_version, read_clusters, list_hosts, read_events, dd_run_check_count, expected_exception, '
+    'expected_service_checks, expected_metrics',
     [
         (
             {'api_url': 'http://localhost:8080/api/v48/', 'clusters': {'include': {'^cluster.*'}}},
@@ -23,6 +25,10 @@ pytestmark = [pytest.mark.unit]
             {'number': 0},
             {'number': 0},
             1,
+            pytest.raises(
+                Exception,
+                match='Setting `include` must be an array',
+            ),
             [
                 {
                     'status': ServiceCheck.CRITICAL,
@@ -39,6 +45,10 @@ pytestmark = [pytest.mark.unit]
             {'number': 0},
             {'number': 0},
             1,
+            pytest.raises(
+                Exception,
+                match='Setting `include` must be an array',
+            ),
             [
                 {
                     'status': ServiceCheck.CRITICAL,
@@ -55,6 +65,10 @@ pytestmark = [pytest.mark.unit]
             {'number': 0},
             {'number': 0},
             1,
+            pytest.raises(
+                Exception,
+                match='`include` entries must be a map or a string',
+            ),
             [
                 {
                     'status': ServiceCheck.CRITICAL,
@@ -71,6 +85,10 @@ pytestmark = [pytest.mark.unit]
             {'number': 0},
             {'number': 0},
             1,
+            pytest.raises(
+                Exception,
+                match='`include` entries must be a map or a string',
+            ),
             [
                 {
                     'status': ServiceCheck.CRITICAL,
@@ -87,6 +105,7 @@ pytestmark = [pytest.mark.unit]
             {'number': 0},
             {'number': 0},
             1,
+            does_not_raise(),
             [{'status': ServiceCheck.OK, 'tags': ['api_url:http://localhost:8080/api/v48/']}],
             [{'count': 0}],
         ),
@@ -97,6 +116,7 @@ pytestmark = [pytest.mark.unit]
             {'number': 0},
             {'number': 0},
             1,
+            does_not_raise(),
             [{'status': ServiceCheck.OK, 'tags': ['api_url:http://localhost:8080/api/v48/']}],
             [{'count': 1, 'ts_tags': [f'cloudera_cluster:cluster_{i}']} for i in range(1)]
             + [{'count': 1, 'ts_tags': [f'cloudera_cluster:cluster_new_{i}']} for i in range(1)],
@@ -108,6 +128,7 @@ pytestmark = [pytest.mark.unit]
             {'number': 0},
             {'number': 0},
             1,
+            does_not_raise(),
             [{'status': ServiceCheck.OK, 'tags': ['api_url:http://localhost:8080/api/v48/']}],
             [{'count': 1, 'ts_tags': [f'cloudera_cluster:cluster_{i}']} for i in range(5)]
             + [{'count': 0, 'ts_tags': [f'cloudera_cluster:cluster_{i}']} for i in range(5, 10)],
@@ -119,6 +140,7 @@ pytestmark = [pytest.mark.unit]
             {'number': 0},
             {'number': 0},
             1,
+            does_not_raise(),
             [{'status': ServiceCheck.OK, 'tags': ['api_url:http://localhost:8080/api/v48/']}],
             [{'count': 1, 'ts_tags': [f'cloudera_cluster:cluster_{i}']} for i in range(1)]
             + [{'count': 0, 'ts_tags': [f'cloudera_cluster:tmp_{i}']} for i in range(1)],
@@ -133,6 +155,7 @@ pytestmark = [pytest.mark.unit]
             {'number': 0},
             {'number': 0},
             1,
+            does_not_raise(),
             [{'status': ServiceCheck.OK, 'tags': ['api_url:http://localhost:8080/api/v48/']}],
             [{'count': 1, 'ts_tags': [f'cloudera_cluster:cluster_{i}']} for i in range(1)]
             + [{'count': 0, 'ts_tags': [f'cloudera_cluster:tmp_{i}']} for i in range(1)],
@@ -161,10 +184,11 @@ def test_autodiscover_clusters(
     list_hosts,
     read_events,
     dd_run_check_count,
+    expected_exception,
     expected_service_checks,
     expected_metrics,
 ):
-    with mock.patch(
+    with expected_exception, mock.patch(
         'datadog_checks.cloudera.client.cm_client.CmClient.get_version',
         side_effect=[cloudera_version],
     ), mock.patch(

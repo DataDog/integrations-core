@@ -31,14 +31,13 @@ class ClouderaCheck(AgentCheck, ConfigMixin):
             message = f"Cloudera API Client is none: {e}"
             self.service_check(CAN_CONNECT, AgentCheck.CRITICAL, message=message, tags=self.can_connect_tags)
             self.log.error(message)
-            self.client = None
+            raise
 
     def check(self, _):
-        if self.client:
-            try:
-                self.client.collect_data()
-                self.service_check(CAN_CONNECT, AgentCheck.OK, tags=self.can_connect_tags)
-            except Exception as e:
-                message = f'Cloudera check raised an exception: {e}'
-                self.service_check(CAN_CONNECT, AgentCheck.CRITICAL, message=message, tags=self.can_connect_tags)
-                self.log.error(message)
+        try:
+            self.client.collect_data()
+            self.service_check(CAN_CONNECT, AgentCheck.OK, tags=self.can_connect_tags)
+        except Exception as e:
+            message = f'Cloudera check raised an exception: {e}'
+            self.service_check(CAN_CONNECT, AgentCheck.CRITICAL, message=message, tags=self.can_connect_tags)
+            self.log.error(message)

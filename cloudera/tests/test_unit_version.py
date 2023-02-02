@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from contextlib import nullcontext as does_not_raise
+
 import mock
 import pytest
 
@@ -11,7 +13,8 @@ pytestmark = [pytest.mark.unit]
 
 
 @pytest.mark.parametrize(
-    'instance, cloudera_version, read_clusters, read_events, dd_run_check_count, expected_service_checks',
+    'instance, cloudera_version, read_clusters, read_events, dd_run_check_count, expected_exception, '
+    'expected_service_checks',
     [
         (
             {'api_url': 'http://localhost:8080/api/v48/'},
@@ -19,6 +22,10 @@ pytestmark = [pytest.mark.unit]
             {'number': 0},
             {'number': 0},
             1,
+            pytest.raises(
+                Exception,
+                match='Service not available',
+            ),
             [
                 {
                     'status': ServiceCheck.CRITICAL,
@@ -33,6 +40,10 @@ pytestmark = [pytest.mark.unit]
             {'number': 0},
             {'number': 0},
             1,
+            pytest.raises(
+                Exception,
+                match='Service not available',
+            ),
             [
                 {
                     'status': ServiceCheck.CRITICAL,
@@ -47,6 +58,10 @@ pytestmark = [pytest.mark.unit]
             {'number': 0},
             {'number': 0},
             1,
+            pytest.raises(
+                Exception,
+                match='Cloudera Manager Version is unsupported or unknown: None',
+            ),
             [
                 {
                     'status': ServiceCheck.CRITICAL,
@@ -61,6 +76,10 @@ pytestmark = [pytest.mark.unit]
             {'number': 0},
             {'number': 0},
             1,
+            pytest.raises(
+                Exception,
+                match='Cloudera Manager Version is unsupported or unknown: None',
+            ),
             [
                 {
                     'status': ServiceCheck.CRITICAL,
@@ -75,6 +94,10 @@ pytestmark = [pytest.mark.unit]
             {'number': 0},
             {'number': 0},
             1,
+            pytest.raises(
+                Exception,
+                match='Cloudera Manager Version is unsupported or unknown: 5.0.0',
+            ),
             [
                 {
                     'status': ServiceCheck.CRITICAL,
@@ -89,6 +112,10 @@ pytestmark = [pytest.mark.unit]
             {'number': 0},
             {'number': 0},
             1,
+            pytest.raises(
+                Exception,
+                match='Cloudera Manager Version is unsupported or unknown: 5.0.0',
+            ),
             [
                 {
                     'status': ServiceCheck.CRITICAL,
@@ -103,6 +130,7 @@ pytestmark = [pytest.mark.unit]
             {'number': 0},
             {'number': 0},
             1,
+            does_not_raise(),
             [{'status': ServiceCheck.OK, 'message': None, 'tags': ['api_url:http://localhost:8080/api/v48/']}],
         ),
         (
@@ -111,6 +139,7 @@ pytestmark = [pytest.mark.unit]
             {'number': 0},
             {'number': 0},
             1,
+            does_not_raise(),
             [
                 {
                     'status': ServiceCheck.OK,
@@ -141,9 +170,10 @@ def test_version(
     read_clusters,
     read_events,
     dd_run_check_count,
+    expected_exception,
     expected_service_checks,
 ):
-    with mock.patch(
+    with expected_exception, mock.patch(
         'datadog_checks.cloudera.client.cm_client.CmClient.get_version',
         side_effect=[cloudera_version],
     ), mock.patch(
