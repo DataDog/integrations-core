@@ -3,6 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from collections import namedtuple
 
+from requests.structures import CaseInsensitiveDict
+
 from datadog_checks.base import ConfigurationError, ensure_unicode, is_affirmative
 from datadog_checks.base.utils.headers import headers as agent_headers
 
@@ -45,9 +47,9 @@ def from_instance(instance, default_ca_certs=None):
     config_headers = instance.get('headers', {})
     default_headers = is_affirmative(instance.get("include_default_headers", True))
     if default_headers:
-        headers = agent_headers({})
+        headers = CaseInsensitiveDict(agent_headers({}))
     else:
-        headers = {}
+        headers = CaseInsensitiveDict({})
     headers.update(config_headers)
     url = instance.get('url')
     if url is not None:
