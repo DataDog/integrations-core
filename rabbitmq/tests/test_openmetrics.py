@@ -54,11 +54,13 @@ def test_aggregated_endpoint(aggregated_setting, aggregator, dd_run_check, mock_
 
     for m in DEFAULT_OPENMETRICS:
         aggregator.assert_metric(m)
+        for tag in IDENTITY_INFO_TAGS:
+            aggregator.assert_metric_has_tag(m, tag)
 
     for m in MISSING_OPENMETRICS:
         aggregator.assert_metric(m, at_least=0)
 
-    aggregator.assert_metric('rabbitmq.build_info', tags=[OM_ENDPOINT_TAG] + BUILD_INFO_TAGS)
+    aggregator.assert_metric('rabbitmq.build_info', tags=[OM_ENDPOINT_TAG] + BUILD_INFO_TAGS + IDENTITY_INFO_TAGS)
     aggregator.assert_metric('rabbitmq.identity_info', tags=[OM_ENDPOINT_TAG] + IDENTITY_INFO_TAGS)
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
     aggregator.assert_all_metrics_covered()
@@ -99,11 +101,15 @@ def test_unaggregated_endpoint(endpoint, fixture_file, expected_metrics, aggrega
 
     for m in expected_metrics:
         aggregator.assert_metric(m)
+        for tag in IDENTITY_INFO_TAGS:
+            aggregator.assert_metric_has_tag(m, tag)
 
     for m in (DEFAULT_OPENMETRICS - expected_metrics) | MISSING_OPENMETRICS:
         # We check that all metrics that are not in the query don't show up at all.
         aggregator.assert_metric(m, at_least=0)
-    aggregator.assert_metric('rabbitmq.build_info', tags=[OM_ENDPOINT_TAG + f"/{endpoint}"] + BUILD_INFO_TAGS)
+    aggregator.assert_metric(
+        'rabbitmq.build_info', tags=[OM_ENDPOINT_TAG + f"/{endpoint}"] + BUILD_INFO_TAGS + IDENTITY_INFO_TAGS
+    )
     aggregator.assert_metric('rabbitmq.identity_info', tags=[OM_ENDPOINT_TAG + f"/{endpoint}"] + IDENTITY_INFO_TAGS)
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
     aggregator.assert_all_metrics_covered()
