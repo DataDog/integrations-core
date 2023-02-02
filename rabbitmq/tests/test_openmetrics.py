@@ -13,7 +13,7 @@ from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.rabbitmq import RabbitMQ
 
 from .common import HERE
-from .metrics import AGGREGATED_ONLY_METRICS, DEFAULT_OPENMETRICS, MISSING_OPENMETRICS
+from .metrics import AGGREGATED_ONLY_METRICS, DEFAULT_OPENMETRICS, MISSING_OPENMETRICS, SUMMARY_METRICS
 
 OM_RESPONSE_FIXTURES = HERE / Path('fixtures')
 TEST_URL = "http://localhost:15692"
@@ -195,25 +195,31 @@ def test_aggregated_and_unaggregated_endpoints(endpoint, metrics, aggregator, dd
     mocker.patch('requests.get', wraps=mock_http_responses)
     dd_run_check(check)
 
+    meta_metrics = {'rabbitmq.build_info', 'rabbitmq.identity_info'}
+
     for m in metrics:
         aggregator.assert_metric_has_tag(m, f'endpoint:http://localhost:15692/metrics/{endpoint}', at_least=1)
         # Here we want to make sure that we don't collect the equivalent metrics from
         # the aggregated endpoint.
-        aggregator.assert_metric_has_tag(m, 'endpoint:http://localhost:15692/metrics', at_least=0)
-    for m in DEFAULT_OPENMETRICS.difference(metrics):
+        aggregator.assert_metric_has_tag(m, 'endpoint:http://localhost:15692/metrics', count=0)
+    for m in (DEFAULT_OPENMETRICS.difference(metrics) - SUMMARY_METRICS) - meta_metrics:
         # We check the equivalent for metrics that come from the aggregated endpoint.
-        aggregator.assert_metric_has_tag(m, f'endpoint:http://localhost:15692/metrics/{endpoint}', at_least=0)
+        aggregator.assert_metric_has_tag(m, f'endpoint:http://localhost:15692/metrics/{endpoint}', count=0)
         aggregator.assert_metric_has_tag(m, 'endpoint:http://localhost:15692/metrics', at_least=1)
-
+    # Summary metrics MAY come from both endpoints or from only one, so we just make sure at least one is submitted.
+    for m in SUMMARY_METRICS:
+        aggregator.assert_metric(m, at_least=1)
     # Identity and build info metrics should come from both endpoints.
     for m, tag in product(
-        ['rabbitmq.build_info', 'rabbitmq.identity_info'],
+        meta_metrics,
         [
             f'endpoint:http://localhost:15692/metrics/{endpoint}',
             'endpoint:http://localhost:15692/metrics',
         ],
     ):
         aggregator.assert_metric_has_tag(m, tag, count=1)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_all_metrics_covered()
 
 
 @pytest.mark.parametrize(

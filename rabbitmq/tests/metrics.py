@@ -306,6 +306,15 @@ DEFAULT_OPENMETRICS = {
     'rabbitmq.telemetry.scrape.size_bytes.sum',
 }
 
+SUMMARY_METRICS = {
+    'rabbitmq.telemetry.scrape.duration_seconds.count',
+    'rabbitmq.telemetry.scrape.duration_seconds.sum',
+    'rabbitmq.telemetry.scrape.encoded_size_bytes.count',
+    'rabbitmq.telemetry.scrape.encoded_size_bytes.sum',
+    'rabbitmq.telemetry.scrape.size_bytes.count',
+    'rabbitmq.telemetry.scrape.size_bytes.sum',
+}
+
 MISSING_OPENMETRICS = {
     'rabbitmq.erlang.vm.dist.node_queue_size_bytes',
     'rabbitmq.erlang.vm.dist.node_state',
