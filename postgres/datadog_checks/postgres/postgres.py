@@ -31,7 +31,7 @@ from .util import (
     fmt,
     get_schema_field,
 )
-from .version_utils import V9, V9_2, V9_6, V10, V13, VersionUtils
+from .version_utils import V9, V9_2, V10, V13, VersionUtils
 
 try:
     import datadog_agent
@@ -371,8 +371,8 @@ class PostgreSql(AgentCheck):
             metric_scope.append(FUNCTION_METRICS)
         if self._config.collect_count_metrics:
             metric_scope.append(self.metrics_cache.get_count_metrics())
-        if self.version >= V9_6:
-            metric_scope.append([WAL_RECEIVER_METRICS, WAL_RECEIVER_COUNT_METRICS])
+        if self.version >= V10:
+            metric_scope += [WAL_RECEIVER_METRICS, WAL_RECEIVER_COUNT_METRICS]
         if self.version >= V13:
             metric_scope.append(SLRU_METRICS)
 
