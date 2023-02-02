@@ -105,6 +105,9 @@ assets/               @DataDog/agent-integrations
 /docs/developer/tutorials/snmp/                                    @DataDog/network-device-monitoring @DataDog/agent-integrations @DataDog/documentation
 
 # Platform Integrations
+/cloud_foundry_api/                     @DataDog/platform-integrations @DataDog/agent-integrations
+/cloud_foundry_api/manifest.json        @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
+/cloud_foundry_api/*.md                 @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
 /openstack/                             @DataDog/platform-integrations @DataDog/agent-integrations
 /openstack/*.md                         @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
 /openstack/manifest.json                @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
