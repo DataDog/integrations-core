@@ -190,10 +190,10 @@ def test_autodiscover_clusters(
 ):
     with expected_exception, mock.patch(
         'datadog_checks.cloudera.client.cm_client.CmClient.get_version',
-        side_effect=[cloudera_version],
+        return_value=cloudera_version,
     ), mock.patch(
         'datadog_checks.cloudera.client.cm_client.CmClient.read_clusters',
-        side_effect=[read_clusters],
+        return_value=read_clusters,
     ), mock.patch(
         'datadog_checks.cloudera.client.cm_client.CmClient.query_time_series',
         side_effect=query_time_series,
@@ -202,7 +202,7 @@ def test_autodiscover_clusters(
         return_value=list_hosts,
     ), mock.patch(
         'datadog_checks.cloudera.client.cm_client.CmClient.read_events',
-        side_effect=[read_events],
+        return_value=read_events,
     ):
         check = cloudera_check(instance)
         for _ in range(dd_run_check_count):
