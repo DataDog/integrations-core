@@ -52,7 +52,14 @@ pytestmark = [pytest.mark.unit]
             {'number': 0},
             {'number': 0},
             1,
-            [{'status': ServiceCheck.OK, 'message': None, 'tags': ['api_url:http://localhost:8080/api/v48/']}],
+            [
+                {
+                    'count': 1,
+                    'status': ServiceCheck.OK,
+                    'message': None,
+                    'tags': ['api_url:http://localhost:8080/api/v48/'],
+                }
+            ],
         ),
         (
             {'api_url': 'http://localhost:8080/api/v48/', 'tags': ['new_tag']},
@@ -63,6 +70,7 @@ pytestmark = [pytest.mark.unit]
             1,
             [
                 {
+                    'count': 1,
                     'status': ServiceCheck.OK,
                     'message': None,
                     'tags': ['api_url:http://localhost:8080/api/v48/', 'new_tag'],
@@ -76,7 +84,14 @@ pytestmark = [pytest.mark.unit]
             {'number': 0},
             {'number': 0},
             1,
-            [{'status': ServiceCheck.OK, 'message': None, 'tags': ['api_url:http://localhost:8080/api/v48/']}],
+            [
+                {
+                    'count': 1,
+                    'status': ServiceCheck.OK,
+                    'message': None,
+                    'tags': ['api_url:http://localhost:8080/api/v48/'],
+                }
+            ],
         ),
         (
             {'api_url': 'http://localhost:8080/api/v48/', 'tags': ['new_tag']},
@@ -87,6 +102,7 @@ pytestmark = [pytest.mark.unit]
             1,
             [
                 {
+                    'count': 1,
                     'status': ServiceCheck.OK,
                     'message': None,
                     'tags': ['api_url:http://localhost:8080/api/v48/', 'new_tag'],
@@ -100,7 +116,14 @@ pytestmark = [pytest.mark.unit]
             {'number': 0},
             {'number': 0},
             1,
-            [{'status': ServiceCheck.OK, 'message': None, 'tags': ['api_url:http://localhost:8080/api/v48/']}],
+            [
+                {
+                    'count': 1,
+                    'status': ServiceCheck.OK,
+                    'message': None,
+                    'tags': ['api_url:http://localhost:8080/api/v48/'],
+                }
+            ],
         ),
         (
             {'api_url': 'http://localhost:8080/api/v48/', 'tags': ['new_tag']},
@@ -111,6 +134,71 @@ pytestmark = [pytest.mark.unit]
             1,
             [
                 {
+                    'count': 1,
+                    'status': ServiceCheck.OK,
+                    'message': None,
+                    'tags': ['api_url:http://localhost:8080/api/v48/', 'new_tag'],
+                }
+            ],
+        ),
+        (
+            {'api_url': 'http://localhost:8080/api/v48/'},
+            {'version': '7.0.0'},
+            {'number': 2, 'prefix': ['cluster_'], 'status': ['BAD_HEALTH']},
+            {'number': 0},
+            {'number': 0},
+            1,
+            [
+                {
+                    'count': 1,
+                    'status': ServiceCheck.OK,
+                    'message': None,
+                    'tags': ['api_url:http://localhost:8080/api/v48/'],
+                }
+            ],
+        ),
+        (
+            {'api_url': 'http://localhost:8080/api/v48/', 'tags': ['new_tag']},
+            {'version': '7.0.0'},
+            {'number': 2, 'prefix': ['cluster_'], 'status': ['BAD_HEALTH']},
+            {'number': 0},
+            {'number': 0},
+            1,
+            [
+                {
+                    'count': 1,
+                    'status': ServiceCheck.OK,
+                    'message': None,
+                    'tags': ['api_url:http://localhost:8080/api/v48/', 'new_tag'],
+                }
+            ],
+        ),
+        (
+            {'api_url': 'http://localhost:8080/api/v48/'},
+            {'version': '7.0.0'},
+            {'number': 2, 'prefix': ['cluster_'], 'status': ['GOOD_HEALTH']},
+            {'number': 0},
+            {'number': 0},
+            1,
+            [
+                {
+                    'count': 1,
+                    'status': ServiceCheck.OK,
+                    'message': None,
+                    'tags': ['api_url:http://localhost:8080/api/v48/'],
+                }
+            ],
+        ),
+        (
+            {'api_url': 'http://localhost:8080/api/v48/', 'tags': ['new_tag']},
+            {'version': '7.0.0'},
+            {'number': 2, 'prefix': ['cluster_'], 'status': ['GOOD_HEALTH']},
+            {'number': 0},
+            {'number': 0},
+            1,
+            [
+                {
+                    'count': 1,
                     'status': ServiceCheck.OK,
                     'message': None,
                     'tags': ['api_url:http://localhost:8080/api/v48/', 'new_tag'],
@@ -127,6 +215,10 @@ pytestmark = [pytest.mark.unit]
         'one cluster with bad health and custom tags',
         'one cluster with good health',
         'one cluster with good health and custom tags',
+        'two clusters with bad health',
+        'two clusters with bad health and custom tags',
+        'two clusters with good health',
+        'two clusters with good health and custom tags',
     ],
     indirect=['instance', 'cloudera_version', 'read_clusters', 'list_hosts', 'read_events'],
 )
@@ -144,7 +236,7 @@ def test_read_clusters_and_service_check_can_connect(
 ):
     with mock.patch(
         'datadog_checks.cloudera.client.cm_client.CmClient.get_version',
-        side_effect=[cloudera_version],
+        return_value=cloudera_version,
     ), mock.patch(
         'datadog_checks.cloudera.client.cm_client.CmClient.read_clusters',
         side_effect=[read_clusters],
@@ -153,10 +245,10 @@ def test_read_clusters_and_service_check_can_connect(
         side_effect=query_time_series,
     ), mock.patch(
         'datadog_checks.cloudera.client.cm_client.CmClient.list_hosts',
-        side_effect=[list_hosts],
+        return_value=list_hosts,
     ), mock.patch(
         'datadog_checks.cloudera.client.cm_client.CmClient.read_events',
-        side_effect=[read_events],
+        return_value=read_events,
     ):
         check = cloudera_check(instance)
         for _ in range(dd_run_check_count):
@@ -305,7 +397,7 @@ def test_read_clusters_and_service_check_cluster_health(
 ):
     with mock.patch(
         'datadog_checks.cloudera.client.cm_client.CmClient.get_version',
-        side_effect=[cloudera_version],
+        return_value=cloudera_version,
     ), mock.patch(
         'datadog_checks.cloudera.client.cm_client.CmClient.read_clusters',
         side_effect=[read_clusters],
@@ -314,10 +406,10 @@ def test_read_clusters_and_service_check_cluster_health(
         side_effect=query_time_series,
     ), mock.patch(
         'datadog_checks.cloudera.client.cm_client.CmClient.list_hosts',
-        side_effect=[list_hosts],
+        return_value=list_hosts,
     ), mock.patch(
         'datadog_checks.cloudera.client.cm_client.CmClient.read_events',
-        side_effect=[read_events],
+        return_value=read_events,
     ):
         check = cloudera_check(instance)
         for _ in range(dd_run_check_count):
@@ -378,7 +470,7 @@ def test_read_clusters_and_service_check_cluster_health(
             {'number': 0},
             {'number': 0},
             1,
-            [{'count': 1, 'ts_tags': [f'cloudera_cluster:cluster_{i}' for i in range(1)]}],
+            [{'count': 1, 'ts_tags': ['cloudera_cluster:cluster_0']}],
         ),
         (
             {'api_url': 'http://localhost:8080/api/v48/'},
@@ -387,7 +479,7 @@ def test_read_clusters_and_service_check_cluster_health(
             {'number': 0},
             {'number': 0},
             1,
-            [{'count': 1, 'ts_tags': [f'cloudera_cluster:cluster_{i}' for i in range(1)] + ['tag_0:value_0']}],
+            [{'count': 1, 'ts_tags': ['cloudera_cluster:cluster_0', 'tag_0:value_0']}],
         ),
         (
             {'api_url': 'http://localhost:8080/api/v48/', 'tags': ['new_tag']},
@@ -396,7 +488,7 @@ def test_read_clusters_and_service_check_cluster_health(
             {'number': 0},
             {'number': 0},
             1,
-            [{'count': 1, 'ts_tags': [f'cloudera_cluster:cluster_{i}' for i in range(1)] + ['new_tag']}],
+            [{'count': 1, 'ts_tags': ['cloudera_cluster:cluster_0', 'new_tag']}],
         ),
         (
             {'api_url': 'http://localhost:8080/api/v48/'},
@@ -405,7 +497,7 @@ def test_read_clusters_and_service_check_cluster_health(
             {'number': 0},
             {'number': 0},
             1,
-            [{'count': 1, 'ts_tags': [f'cloudera_cluster:cluster_{i}' for i in range(1)]}],
+            [{'count': 1, 'ts_tags': ['cloudera_cluster:cluster_0']}],
         ),
         (
             {'api_url': 'http://localhost:8080/api/v48/'},
@@ -414,7 +506,7 @@ def test_read_clusters_and_service_check_cluster_health(
             {'number': 0},
             {'number': 0},
             1,
-            [{'count': 1, 'ts_tags': [f'cloudera_cluster:cluster_{i}' for i in range(1)] + ['tag_0:value_0']}],
+            [{'count': 1, 'ts_tags': ['cloudera_cluster:cluster_0', 'tag_0:value_0']}],
         ),
         (
             {'api_url': 'http://localhost:8080/api/v48/', 'tags': ['new_tag']},
@@ -423,7 +515,7 @@ def test_read_clusters_and_service_check_cluster_health(
             {'number': 0},
             {'number': 0},
             1,
-            [{'count': 1, 'ts_tags': [f'cloudera_cluster:cluster_{i}' for i in range(1)] + ['new_tag']}],
+            [{'count': 1, 'ts_tags': ['cloudera_cluster:cluster_0', 'new_tag']}],
         ),
     ],
     ids=[
@@ -454,7 +546,7 @@ def test_read_clusters_and_cluster_metrics(
 ):
     with mock.patch(
         'datadog_checks.cloudera.client.cm_client.CmClient.get_version',
-        side_effect=[cloudera_version],
+        return_value=cloudera_version,
     ), mock.patch(
         'datadog_checks.cloudera.client.cm_client.CmClient.read_clusters',
         side_effect=[read_clusters],
@@ -463,10 +555,10 @@ def test_read_clusters_and_cluster_metrics(
         side_effect=query_time_series,
     ), mock.patch(
         'datadog_checks.cloudera.client.cm_client.CmClient.list_hosts',
-        side_effect=[list_hosts],
+        return_value=list_hosts,
     ), mock.patch(
         'datadog_checks.cloudera.client.cm_client.CmClient.read_events',
-        side_effect=[read_events],
+        return_value=read_events,
     ):
         check = cloudera_check(instance)
         for _ in range(dd_run_check_count):
