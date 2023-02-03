@@ -166,7 +166,7 @@ class ApiV7(Api):
         self._log.debug(
             'Cloudera timeseries query: category[%s], name[%s], query[%s], tags[%s]', category, name, query, tags
         )
-        items = self._api_client.query_time_series(category, name, query)
+        items = self._api_client.query_time_series(query, category, name)
         self._log.trace('query_time_series response: %s', items)
         for item in items:
             self._log.debug('item: %s', item)
@@ -187,7 +187,7 @@ class ApiV7(Api):
 
     def _run_custom_query(self, custom_query, tags):
         self._log.debug('Running Cloudera custom query: %s', custom_query)
-        items = self._api_client.query_time_series('cluster', 'cluster_0', custom_query)
+        items = self._api_client.query_time_series(custom_query)
         self._log.trace('query_time_series response: %s', items)
 
         for item in items:

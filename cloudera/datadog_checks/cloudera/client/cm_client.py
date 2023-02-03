@@ -46,7 +46,7 @@ class CmClient(Client):
             .items
         ]
 
-    def query_time_series(self, category, name, query) -> list:
+    def query_time_series(self, query, category=None, name=None) -> list:
         items = []
         for item in cm_client.TimeSeriesResourceApi(self._client).query_time_series(query=query).items:
             for ts in item.time_series:
