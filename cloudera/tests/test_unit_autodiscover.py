@@ -199,7 +199,7 @@ def test_autodiscover_clusters(
         side_effect=query_time_series,
     ), mock.patch(
         'datadog_checks.cloudera.client.cm_client.CmClient.list_hosts',
-        side_effect=[list_hosts, list_hosts, list_hosts, list_hosts, list_hosts],
+        return_value=list_hosts,
     ), mock.patch(
         'datadog_checks.cloudera.client.cm_client.CmClient.read_events',
         side_effect=[read_events],
