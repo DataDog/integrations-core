@@ -10,7 +10,7 @@ from kafka import KafkaConsumer
 
 from datadog_checks.dev import WaitFor, docker_run
 
-from .common import DOCKER_IMAGE_PATH, HOST_IP, KAFKA_CONNECT_STR, PARTITIONS, TOPICS, ZK_CONNECT_STR
+from .common import DOCKER_IMAGE_PATH, HERE, HOST_IP, KAFKA_CONNECT_STR, PARTITIONS, TOPICS, ZK_CONNECT_STR
 from .runners import KConsumer, Producer, ZKConsumer
 
 
@@ -61,10 +61,8 @@ def dd_environment(mock_local_kafka_hosts_dns, e2e_instance):
 
 E2E_METADATA = {
     'custom_hosts': [('kafka1', '127.0.0.1'), ('kafka2', '127.0.0.1')],
-    'start_commands': [
-        'apt-get update',
-        'apt-get install -y build-essential',
-    ],
+    'docker_volumes': ['{}/start_commands.sh:/tmp/start_commands.sh'.format(HERE)],
+    'start_commands': ['bash /tmp/start_commands.sh'],
 }
 
 
