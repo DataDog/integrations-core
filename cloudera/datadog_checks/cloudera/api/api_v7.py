@@ -106,8 +106,8 @@ class ApiV7(Api):
     def _collect_hosts(self, cluster_name):
         discovered_hosts = [(None, host.get('name'), host, None) for host in self._api_client.list_hosts(cluster_name)]
         self._log.trace("Cloudera full hosts raw response:\n%s", discovered_hosts)
-        # # Use len(discovered_hosts) * 4 workers since
-        # # for each host, we are executing 4 tasks in parallel.
+        # Use len(discovered_hosts) * 4 workers since
+        # for each host, we are executing 4 tasks in parallel.
         if len(discovered_hosts) > 0:
             with ThreadPoolExecutor(max_workers=len(discovered_hosts) * 4) as executor, raising_submitter(
                 executor
