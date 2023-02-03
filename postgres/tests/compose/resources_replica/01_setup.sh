@@ -1,18 +1,18 @@
 #!/bin/bash
 set -e
 
+pg_ctl -D /var/lib/postgresql/data -l /tmp/logfile -w stop
+rm -rf /var/lib/postgresql/data/*
+
 echo "Testing primary"
-while ! nc -z postgres 5432 ; do
+while ! pg_isready -U datadog -d datadog_test -h postgres -p 5432 ; do
     echo "Primary not running, waiting"
     sleep 1
 done
 
-pg_ctl -D /var/lib/postgresql/data -l /tmp/logfile stop
-rm -rf /var/lib/postgresql/data/*
-
 echo "Running pg basebackup"
 export PGPASSWORD='replicator'
 pg_basebackup -h postgres -U replicator -X stream -v -R -D /var/lib/postgresql/data/
-echo "pg basebackup ran"
+echo "pg basebackup executed"
 
-pg_ctl -D /var/lib/postgresql/data -l /tmp/logfile start
+pg_ctl -D /var/lib/postgresql/data -w start
