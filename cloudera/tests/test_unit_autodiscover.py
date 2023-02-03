@@ -118,8 +118,10 @@ pytestmark = [pytest.mark.unit]
             1,
             does_not_raise(),
             [{'status': ServiceCheck.OK, 'tags': ['api_url:http://localhost:8080/api/v48/']}],
-            [{'count': 1, 'ts_tags': [f'cloudera_cluster:cluster_{i}']} for i in range(1)]
-            + [{'count': 1, 'ts_tags': [f'cloudera_cluster:cluster_new_{i}']} for i in range(1)],
+            [
+                {'count': 1, 'ts_tags': ['cloudera_cluster:cluster_0']},
+                {'count': 1, 'ts_tags': ['cloudera_cluster:cluster_new_0']},
+            ],
         ),
         (
             {'api_url': 'http://localhost:8080/api/v48/', 'clusters': {'limit': 5, 'include': ['^cluster.*']}},
@@ -130,8 +132,18 @@ pytestmark = [pytest.mark.unit]
             1,
             does_not_raise(),
             [{'status': ServiceCheck.OK, 'tags': ['api_url:http://localhost:8080/api/v48/']}],
-            [{'count': 1, 'ts_tags': [f'cloudera_cluster:cluster_{i}']} for i in range(5)]
-            + [{'count': 0, 'ts_tags': [f'cloudera_cluster:cluster_{i}']} for i in range(5, 10)],
+            [
+                {'count': 1, 'ts_tags': ['cloudera_cluster:cluster_0']},
+                {'count': 1, 'ts_tags': ['cloudera_cluster:cluster_1']},
+                {'count': 1, 'ts_tags': ['cloudera_cluster:cluster_2']},
+                {'count': 1, 'ts_tags': ['cloudera_cluster:cluster_3']},
+                {'count': 1, 'ts_tags': ['cloudera_cluster:cluster_4']},
+                {'count': 0, 'ts_tags': ['cloudera_cluster:cluster_5']},
+                {'count': 0, 'ts_tags': ['cloudera_cluster:cluster_6']},
+                {'count': 0, 'ts_tags': ['cloudera_cluster:cluster_7']},
+                {'count': 0, 'ts_tags': ['cloudera_cluster:cluster_8']},
+                {'count': 0, 'ts_tags': ['cloudera_cluster:cluster_9']},
+            ],
         ),
         (
             {'api_url': 'http://localhost:8080/api/v48/', 'clusters': {'include': ['.*'], 'exclude': ['^tmp_.*']}},
@@ -142,8 +154,10 @@ pytestmark = [pytest.mark.unit]
             1,
             does_not_raise(),
             [{'status': ServiceCheck.OK, 'tags': ['api_url:http://localhost:8080/api/v48/']}],
-            [{'count': 1, 'ts_tags': [f'cloudera_cluster:cluster_{i}']} for i in range(1)]
-            + [{'count': 0, 'ts_tags': [f'cloudera_cluster:tmp_{i}']} for i in range(1)],
+            [
+                {'count': 1, 'ts_tags': ['cloudera_cluster:cluster_0']},
+                {'count': 0, 'ts_tags': ['cloudera_cluster:tmp_0']},
+            ],
         ),
         (
             {
@@ -157,8 +171,10 @@ pytestmark = [pytest.mark.unit]
             1,
             does_not_raise(),
             [{'status': ServiceCheck.OK, 'tags': ['api_url:http://localhost:8080/api/v48/']}],
-            [{'count': 1, 'ts_tags': [f'cloudera_cluster:cluster_{i}']} for i in range(1)]
-            + [{'count': 0, 'ts_tags': [f'cloudera_cluster:tmp_{i}']} for i in range(1)],
+            [
+                {'count': 1, 'ts_tags': ['cloudera_cluster:cluster_0']},
+                {'count': 0, 'ts_tags': ['cloudera_cluster:tmp_0']},
+            ],
         ),
     ],
     ids=[
