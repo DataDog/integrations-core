@@ -102,5 +102,5 @@ postgresql.wal_receiver.count,gauge,,,,"Count of WAL receiver, it can be 0 or 1.
 postgresql.wal_receiver.received_timeline,gauge,,,,"Timeline number of last write-ahead log location received and flushed to disk, the initial value of this field being the timeline number of the first log location used when WAL receiver is started.",0,postgres,wal receiver tli,
 postgresql.wal_receiver.last_msg_send_age,gauge,,second,,"The age of the latest message's send time received from the WAL sender.",0,postgres,wal receiver send age,
 postgresql.wal_receiver.last_msg_receipt_age,gauge,,second,,"Time since the reception of the last message from the WAL sender.",0,postgres,wal receiver receipt age,
-postgresql.wal_receiver.latest_end_age,gauge,,second,,"Time since the reception of the last message from the WAL sender with an update WAL location update.",0,postgres,wal receiver latest end,
+postgresql.wal_receiver.latest_end_age,gauge,,second,,"Time since the reception of the last message from the WAL sender with an WAL location update.",0,postgres,wal receiver latest end,
 postgresql.function.calls,rate,,,,The number of calls made to a function.,0,postgres,postgres_function_calls,
