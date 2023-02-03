@@ -15,7 +15,7 @@ from datadog_checks.postgres import PostgreSql
 from datadog_checks.postgres.config import PostgresConfig
 from datadog_checks.postgres.metrics_cache import PostgresMetricsCache
 
-from .common import DB_NAME, HOST, PASSWORD, PORT, PORT_REPLICA, POSTGRES_IMAGE, USER
+from .common import DB_NAME, HOST, PASSWORD, PORT, PORT_REPLICA, POSTGRES_IMAGE, POSTGRES_VERSION, USER
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 INSTANCE = {
@@ -31,7 +31,8 @@ INSTANCE = {
 
 def connect_to_pg():
     psycopg2.connect(host=HOST, dbname=DB_NAME, user=USER, password=PASSWORD)
-    psycopg2.connect(host=HOST, dbname=DB_NAME, user=USER, port=PORT_REPLICA, password=PASSWORD)
+    if float(POSTGRES_VERSION) >= 10.0:
+        psycopg2.connect(host=HOST, dbname=DB_NAME, user=USER, port=PORT_REPLICA, password=PASSWORD)
 
 
 @pytest.fixture(scope='session')
@@ -39,8 +40,11 @@ def dd_environment(e2e_instance):
     """
     Start a standalone postgres server requiring authentication.
     """
+    compose_file = 'docker-compose.yaml'
+    if float(POSTGRES_VERSION) >= 10.0:
+        compose_file = 'docker-compose-replication.yaml'
     with docker_run(
-        os.path.join(HERE, 'compose', 'docker-compose.yaml'),
+        os.path.join(HERE, 'compose', compose_file),
         conditions=[WaitFor(connect_to_pg)],
         env_vars={"POSTGRES_IMAGE": POSTGRES_IMAGE},
     ):
