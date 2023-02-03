@@ -53,6 +53,34 @@ pytestmark = [pytest.mark.unit]
             ],
         ),
         (
+            {'api_url': 'http://localhost:8080/api/v48/'},
+            {'version': '7.0.0'},
+            {'number': 0},
+            {'number': 0},
+            1,
+            does_not_raise(),
+            [
+                {
+                    'status': ServiceCheck.OK,
+                    'tags': ['api_url:http://localhost:8080/api/v48/'],
+                }
+            ],
+        ),
+        (
+            {'api_url': 'http://localhost:8080/api/v48/', 'tags': ['new_tag']},
+            {'version': '7.0.0'},
+            {'number': 0},
+            {'number': 0},
+            1,
+            does_not_raise(),
+            [
+                {
+                    'status': ServiceCheck.OK,
+                    'tags': ['api_url:http://localhost:8080/api/v48/', 'new_tag'],
+                }
+            ],
+        ),
+        (
             {'api_url': 'http://localhost:8080/api/v48/', 'cloudera_client': 'cm_client'},
             {'version': '7.0.0'},
             {'number': 0},
@@ -66,8 +94,29 @@ pytestmark = [pytest.mark.unit]
                 }
             ],
         ),
+        (
+            {'api_url': 'http://localhost:8080/api/v48/', 'tags': ['new_tag'], 'cloudera_client': 'cm_client'},
+            {'version': '7.0.0'},
+            {'number': 0},
+            {'number': 0},
+            1,
+            does_not_raise(),
+            [
+                {
+                    'status': ServiceCheck.OK,
+                    'tags': ['api_url:http://localhost:8080/api/v48/', 'new_tag'],
+                }
+            ],
+        ),
     ],
-    ids=['exception', 'exception with custom tags', 'cm_client'],
+    ids=[
+        'exception',
+        'exception with custom tags',
+        'cloudera_client by default',
+        'cloudera_client by default with custom tags',
+        'cloudera_client cm_client',
+        'cloudera_client cm_client with custom tags',
+    ],
     indirect=['instance', 'cloudera_version', 'read_clusters', 'read_events'],
 )
 def test_client(
