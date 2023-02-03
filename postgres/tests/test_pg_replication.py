@@ -24,6 +24,7 @@ from .utils import requires_over_10
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
 
 
+@requires_over_10
 def test_common_replica_metrics(aggregator, integration_check, metrics_cache_replica, pg_replica_instance):
     check = integration_check(pg_replica_instance)
     check.check(pg_replica_instance)
@@ -50,8 +51,8 @@ def test_wal_receiver_metrics(aggregator, integration_check, pg_replica_instance
             # Ask for a new txid to force a WAL change
             cur.execute('select txid_current();')
             cur.fetchall()
-    # Wait for 100ms for WAL sender to send message
-    time.sleep(0.1)
+    # Wait for 200ms for WAL sender to send message
+    time.sleep(0.2)
 
     check.check(pg_replica_instance)
     aggregator.assert_metric('postgresql.wal_receiver.last_msg_send_age', count=1, tags=expected_tags)
