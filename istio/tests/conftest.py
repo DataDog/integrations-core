@@ -59,7 +59,7 @@ def setup_istio():
 
     run_command(["kubectl", "apply", "-f", opj(istio, "samples", "bookinfo", "networking", "bookinfo-gateway.yaml")])
     run_command(["kubectl", "wait", "pods", "--all", "--for=condition=Ready", "--timeout=300s"])
-
+    run_command(["rm", "istio.tar.gz"])
 
 @pytest.fixture(scope='session')
 def dd_environment(dd_save_state):
