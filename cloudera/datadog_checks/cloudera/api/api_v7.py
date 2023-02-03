@@ -167,7 +167,7 @@ class ApiV7(Api):
             'Cloudera timeseries query: category[%s], name[%s], query[%s], tags[%s]', category, name, query, tags
         )
         items = self._api_client.query_time_series(category, name, query)
-        self._log.debug('query_time_series response: %s', items)
+        self._log.trace('query_time_series response: %s', items)
         for item in items:
             self._log.debug('item: %s', item)
             metric = item.get('metric')
