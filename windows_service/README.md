@@ -24,7 +24,7 @@ instances:
     - wmiapsrv
 ```
 
-This examples uses the `ALL` keyword to monitor all services. If any of the service names are set to `ALL` then the other patterns in the instance will be ignored.
+This example uses the `ALL` keyword to monitor all the services on the host. If any of the service names are set to `ALL` then the other patterns in the instance will be ignored.
 ```yaml
 instances:
   - services:
@@ -83,6 +83,13 @@ See [service_checks.json][6] for a list of service checks provided by this integ
 
 Need help? Contact [Datadog support][7].
 
+### Service permissions
+If a service is present and matches the configuration but the Datadog Agent does not not report a service check for the service the reason could be because the Datadog Agent has insufficient permissions. For example, by default the Datadog Agent does not have access to the NTDS Active Directory Domain Services service. To verify this, run the check from an **elevated(run as Admin)** powershell
+```powershell
+& "$env:ProgramFiles\Datadog\Datadog Agent\bin\agent.exe" check windows_service
+```
+If the service is present in the output then permissions are the issue. To give the Datadog Agent permission [grant `Read` access on the service][14] to the [Datadog Agent User][15]. We recommend [granting `Read` access with Group Policy][16] to ensure the permissions persist through Windows Updates.
+
 ## Further Reading
 
 - [Monitoring Windows Server 2012][8]
@@ -102,3 +109,6 @@ Need help? Contact [Datadog support][7].
 [11]: https://docs.python.org/3/howto/regex.html#regex-howto
 [12]: https://docs.datadoghq.com/getting_started/tagging/
 [13]: https://docs.datadoghq.com/getting_started/tagging/assigning_tags/
+[14]: https://learn.microsoft.com/en-us/troubleshoot/windows-server/windows-security/grant-users-rights-manage-services
+[15]: https://docs.datadoghq.com/agent/guide/windows-agent-ddagent-user/
+[16]: https://learn.microsoft.com/en-US/troubleshoot/windows-server/group-policy/configure-group-policies-set-security
