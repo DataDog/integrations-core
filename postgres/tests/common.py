@@ -143,7 +143,7 @@ def check_activity_metrics(aggregator, tags, hostname=None, count=1):
 
 
 def check_stat_replication(aggregator, expected_tags, count=1):
-    if float(POSTGRES_VERSION) <= 10:
+    if float(POSTGRES_VERSION) < 10:
         return
     replication_tags = expected_tags + [
         'wal_app_name:walreceiver',
