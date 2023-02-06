@@ -25,8 +25,8 @@ from .utils import (
     get_valid_integrations,
 )
 
-STYLE_CHECK_ENVS = {'flake8', 'style'}
-STYLE_ENVS = {'flake8', 'style', 'format_style'}
+STYLE_CHECK_ENVS = {'flake8', 'ruff', 'style'}
+STYLE_ENVS = {'flake8','ruff','style', 'format_style'}
 PYTHON_MAJOR_PATTERN = r'py(\d)'
 
 
