@@ -13,10 +13,10 @@ from .common import BASE_TAGS, BLOCKSIZE_METRICS, HOST, METRICS, READ_WRITE_METR
 @pytest.mark.parametrize(
     'enable_rw, enable_bs, expected_metrics',
     [
-        pytest.param(False, False, [*METRICS], id="rw bs disabled"),
-        pytest.param(True, True, [*METRICS, *BLOCKSIZE_METRICS, *READ_WRITE_METRICS], id="rw bs enabled"),
-        pytest.param(False, True, [*METRICS, *BLOCKSIZE_METRICS], id="bs enabled"),
-        pytest.param(True, False, [*METRICS, *READ_WRITE_METRICS], id="rw enabled"),
+        pytest.param(False, False, METRICS[0:], id="rw bs disabled"),
+        pytest.param(True, True, METRICS[0:] + BLOCKSIZE_METRICS[0:] + READ_WRITE_METRICS[0:], id="rw bs enabled"),
+        pytest.param(False, True, METRICS[0:] + BLOCKSIZE_METRICS[0:], id="bs enabled"),
+        pytest.param(True, False, METRICS[0:] + READ_WRITE_METRICS[0:], id="rw enabled"),
     ],
 )
 @pytest.mark.integration
