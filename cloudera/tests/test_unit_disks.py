@@ -11,7 +11,7 @@ from packaging.version import Version
 from tests.common import query_time_series
 
 from datadog_checks.base.types import ServiceCheck
-from datadog_checks.cloudera.metrics import NATIVE_METRICS, TIMESERIES_METRICS
+from datadog_checks.cloudera.metrics import TIMESERIES_METRICS
 
 pytestmark = [pytest.mark.unit]
 
@@ -91,7 +91,7 @@ pytestmark = [pytest.mark.unit]
                         'cloudera_cluster:cluster_0',
                         'cloudera_hostname:host_0',
                         'cloudera_rack_id:rack_id_0',
-                        'cloudera_host:host_0',
+                        'cloudera_disk:disk_host_0',
                     ],
                 }
             ],
@@ -136,7 +136,7 @@ pytestmark = [pytest.mark.unit]
                         'cloudera_cluster:cluster_0',
                         'cloudera_hostname:host_0',
                         'cloudera_rack_id:rack_id_0',
-                        'cloudera_host:host_0',
+                        'cloudera_disk:disk_host_0',
                         'tag_0:value_0',
                     ],
                 }
@@ -182,7 +182,7 @@ pytestmark = [pytest.mark.unit]
                         'cloudera_cluster:cluster_0',
                         'cloudera_hostname:host_0',
                         'cloudera_rack_id:rack_id_0',
-                        'cloudera_host:host_0',
+                        'cloudera_disk:disk_host_0',
                         'new_tag',
                     ],
                 }
@@ -218,7 +218,7 @@ pytestmark = [pytest.mark.unit]
                         'cloudera_cluster:cluster_0',
                         'cloudera_hostname:host_0',
                         'cloudera_rack_id:rack_id_0',
-                        'cloudera_host:host_0',
+                        'cloudera_disk:disk_host_0',
                     ],
                 }
             ],
@@ -263,7 +263,7 @@ pytestmark = [pytest.mark.unit]
                         'cloudera_cluster:cluster_0',
                         'cloudera_hostname:host_0',
                         'cloudera_rack_id:rack_id_0',
-                        'cloudera_host:host_0',
+                        'cloudera_disk:disk_host_0',
                         'tag_0:value_0',
                     ],
                 }
@@ -309,7 +309,7 @@ pytestmark = [pytest.mark.unit]
                         'cloudera_cluster:cluster_0',
                         'cloudera_hostname:host_0',
                         'cloudera_rack_id:rack_id_0',
-                        'cloudera_host:host_0',
+                        'cloudera_disk:disk_host_0',
                         'new_tag',
                     ],
                 }
@@ -375,11 +375,7 @@ def test_list_hosts(
                 tags=expected_host_health.get('tags'),
             )
         for expected_metric in expected_metrics:
-            for metric in NATIVE_METRICS['host']:
+            for metric in TIMESERIES_METRICS['disk']:
                 aggregator.assert_metric(
-                    f'cloudera.host.{metric}', count=expected_metric.get('count'), tags=expected_metric.get('tags')
-                )
-            for metric in TIMESERIES_METRICS['host']:
-                aggregator.assert_metric(
-                    f'cloudera.host.{metric}', count=expected_metric.get('count'), tags=expected_metric.get('ts_tags')
+                    f'cloudera.disk.{metric}', count=expected_metric.get('count'), tags=expected_metric.get('ts_tags')
                 )

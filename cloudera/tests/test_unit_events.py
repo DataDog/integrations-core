@@ -5,7 +5,7 @@
 
 import mock
 import pytest
-from tests.common import query_time_series
+from packaging.version import Version
 
 from datadog_checks.base.types import ServiceCheck
 
@@ -13,16 +13,11 @@ pytestmark = [pytest.mark.unit]
 
 
 @pytest.mark.parametrize(
-    'instance, cloudera_version, read_clusters, list_hosts, read_events, dd_run_check_count, expected_service_checks, '
-    'expected_events',
+    'instance, read_events, expected_service_checks, expected_events',
     [
         (
             {'api_url': 'http://localhost:8080/api/v48/'},
-            {'version': '7.0.0'},
-            {'number': 0},
-            {'number': 0},
-            {'exception': 'Exception reading events'},
-            1,
+            Exception('Exception reading events'),
             [
                 {
                     'status': ServiceCheck.OK,
@@ -33,11 +28,7 @@ pytestmark = [pytest.mark.unit]
         ),
         (
             {'api_url': 'http://localhost:8080/api/v48/', 'tags': ['new_tag']},
-            {'version': '7.0.0'},
-            {'number': 0},
-            {'number': 0},
-            {'exception': 'Exception reading events'},
-            1,
+            Exception('Exception reading events'),
             [
                 {
                     'status': ServiceCheck.OK,
@@ -48,11 +39,7 @@ pytestmark = [pytest.mark.unit]
         ),
         (
             {'api_url': 'http://localhost:8080/api/v48/'},
-            {'version': '7.0.0'},
-            {'number': 0},
-            {'number': 0},
-            {'number': 0},
-            1,
+            [],
             [
                 {
                     'status': ServiceCheck.OK,
@@ -63,11 +50,7 @@ pytestmark = [pytest.mark.unit]
         ),
         (
             {'api_url': 'http://localhost:8080/api/v48/', 'tags': ['new_tag']},
-            {'version': '7.0.0'},
             {'number': 0},
-            {'number': 0},
-            {'number': 0},
-            1,
             [
                 {
                     'status': ServiceCheck.OK,
@@ -78,14 +61,7 @@ pytestmark = [pytest.mark.unit]
         ),
         (
             {'api_url': 'http://localhost:8080/api/v48/'},
-            {'version': '7.0.0'},
-            {'number': 0},
-            {'number': 0},
-            {
-                'number': 1,
-                'content': ['content_'],
-            },
-            1,
+            [{'msg_text': 'content_0'}],
             [
                 {
                     'status': ServiceCheck.OK,
@@ -96,14 +72,7 @@ pytestmark = [pytest.mark.unit]
         ),
         (
             {'api_url': 'http://localhost:8080/api/v48/', 'tags': ['new_tag']},
-            {'version': '7.0.0'},
-            {'number': 0},
-            {'number': 0},
-            {
-                'number': 1,
-                'content': ['content_'],
-            },
-            1,
+            [{'msg_text': 'content_0'}],
             [
                 {
                     'status': ServiceCheck.OK,
@@ -121,40 +90,32 @@ pytestmark = [pytest.mark.unit]
         'one event',
         'one event with custom tags',
     ],
-    indirect=['instance', 'cloudera_version', 'read_clusters', 'list_hosts', 'read_events'],
+    indirect=[],
 )
 def test_events(
     aggregator,
     dd_run_check,
     cloudera_check,
     instance,
-    cloudera_version,
-    read_clusters,
-    list_hosts,
     read_events,
-    dd_run_check_count,
     expected_service_checks,
     expected_events,
 ):
     with mock.patch(
         'datadog_checks.cloudera.client.cm_client.CmClient.get_version',
-        side_effect=[cloudera_version],
-    ), mock.patch(
-        'datadog_checks.cloudera.client.cm_client.CmClient.read_clusters',
-        side_effect=[read_clusters],
-    ), mock.patch(
+        return_value=Version('7.0.0'),
+    ), mock.patch('datadog_checks.cloudera.client.cm_client.CmClient.read_clusters', return_value=[],), mock.patch(
         'datadog_checks.cloudera.client.cm_client.CmClient.query_time_series',
-        side_effect=query_time_series,
+        return_value=[],
     ), mock.patch(
         'datadog_checks.cloudera.client.cm_client.CmClient.list_hosts',
-        side_effect=[list_hosts],
+        return_value=[],
     ), mock.patch(
         'datadog_checks.cloudera.client.cm_client.CmClient.read_events',
         side_effect=[read_events],
     ):
         check = cloudera_check(instance)
-        for _ in range(dd_run_check_count):
-            dd_run_check(check)
+        dd_run_check(check)
         for expected_service_check in expected_service_checks:
             aggregator.assert_service_check(
                 'cloudera.can_connect',

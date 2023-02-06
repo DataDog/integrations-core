@@ -14,11 +14,10 @@ from datadog_checks.cloudera.metrics import TIMESERIES_METRICS
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
 @pytest.mark.parametrize(
-    'instance, dd_run_check_count, expected_exception, expected_service_checks, expected_events',
+    'instance, expected_exception, expected_service_checks, expected_events',
     [
         (
             {'api_url': 'http://bad_host:8080/api/v48/', 'tags': ['test1']},
-            1,
             pytest.raises(
                 Exception,
                 match='HTTPConnectionPool',
@@ -34,7 +33,6 @@ from datadog_checks.cloudera.metrics import TIMESERIES_METRICS
         ),
         (
             {'api_url': 'http://localhost:8080/api/v48/', 'tags': ['test1']},
-            1,
             does_not_raise(),
             [
                 {
@@ -59,15 +57,13 @@ def test_api_urls(
     dd_run_check,
     cloudera_check,
     instance,
-    dd_run_check_count,
     expected_exception,
     expected_service_checks,
     expected_events,
 ):
     with expected_exception:
         check = cloudera_check(instance)
-        for _ in range(dd_run_check_count):
-            dd_run_check(check)
+        dd_run_check(check)
         aggregator.assert_service_check(
             'cloudera.cluster.health',
             ServiceCheck.OK,
@@ -108,21 +104,17 @@ def test_api_urls(
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
 @pytest.mark.parametrize(
-    'instance, dd_run_check_count',
+    'instance',
     [
-        (
-            {'api_url': 'http://localhost:8080/api/v48/'},
-            1,
-        ),
+        {'api_url': 'http://localhost:8080/api/v48/'},
     ],
     ids=['metadata from good url'],
     indirect=[],
 )
-def test_metadata(instance, dd_run_check_count, cloudera_check, datadog_agent, dd_run_check):
+def test_metadata(instance, cloudera_check, dd_run_check, datadog_agent):
     check = cloudera_check(instance)
     check.check_id = 'test:123'
-    for _ in range(dd_run_check_count):
-        dd_run_check(check)
+    dd_run_check(check)
     raw_version = '7.2.15'
     major, minor, patch = raw_version.split('.')
     version_metadata = {
@@ -137,7 +129,7 @@ def test_metadata(instance, dd_run_check_count, cloudera_check, datadog_agent, d
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
 @pytest.mark.parametrize(
-    'instance, dd_run_check_count, expected_service_checks, expected_metrics, expected_caplog_text',
+    'instance, expected_service_checks, expected_metrics, expected_caplog_text',
     [
         (
             {
@@ -149,7 +141,6 @@ def test_metadata(instance, dd_run_check_count, cloudera_check, datadog_agent, d
                     },
                 ],
             },
-            1,
             [
                 {
                     'status': ServiceCheck.OK,
@@ -180,7 +171,6 @@ def test_metadata(instance, dd_run_check_count, cloudera_check, datadog_agent, d
                     },
                 ],
             },
-            1,
             [
                 {
                     'status': ServiceCheck.OK,
@@ -211,7 +201,6 @@ def test_metadata(instance, dd_run_check_count, cloudera_check, datadog_agent, d
                     },
                 ],
             },
-            1,
             [
                 {
                     'status': ServiceCheck.OK,
@@ -242,7 +231,6 @@ def test_metadata(instance, dd_run_check_count, cloudera_check, datadog_agent, d
                     }
                 ],
             },
-            1,
             [
                 {
                     'status': ServiceCheck.OK,
@@ -268,7 +256,6 @@ def test_metadata(instance, dd_run_check_count, cloudera_check, datadog_agent, d
                     }
                 ],
             },
-            1,
             [
                 {
                     'status': ServiceCheck.OK,
@@ -290,7 +277,6 @@ def test_metadata(instance, dd_run_check_count, cloudera_check, datadog_agent, d
 )
 def test_custom_queries(
     instance,
-    dd_run_check_count,
     expected_service_checks,
     expected_metrics,
     expected_caplog_text,
@@ -302,8 +288,7 @@ def test_custom_queries(
     caplog.clear()
     caplog.set_level(logging.WARNING)
     check = cloudera_check(instance)
-    for _ in range(dd_run_check_count):
-        dd_run_check(check)
+    dd_run_check(check)
     for expected_service_check in expected_service_checks:
         aggregator.assert_service_check(
             'cloudera.can_connect',

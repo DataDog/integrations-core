@@ -6,6 +6,7 @@ from contextlib import nullcontext as does_not_raise
 
 import mock
 import pytest
+from packaging.version import Version
 
 from datadog_checks.base.types import ServiceCheck
 
@@ -13,15 +14,11 @@ pytestmark = [pytest.mark.unit]
 
 
 @pytest.mark.parametrize(
-    'instance, cloudera_version, read_clusters, read_events, dd_run_check_count, expected_exception, '
-    'expected_service_checks',
+    'instance, cloudera_version, expected_exception, expected_service_checks',
     [
         (
             {'api_url': 'http://localhost:8080/api/v48/'},
-            {'exception': 'Service not available'},
-            {'number': 0},
-            {'number': 0},
-            1,
+            Exception('Service not available'),
             pytest.raises(
                 Exception,
                 match='Service not available',
@@ -36,10 +33,7 @@ pytestmark = [pytest.mark.unit]
         ),
         (
             {'api_url': 'http://localhost:8080/api/v48/', 'tags': ['new_tag']},
-            {'exception': 'Service not available'},
-            {'number': 0},
-            {'number': 0},
-            1,
+            Exception('Service not available'),
             pytest.raises(
                 Exception,
                 match='Service not available',
@@ -54,10 +48,7 @@ pytestmark = [pytest.mark.unit]
         ),
         (
             {'api_url': 'http://localhost:8080/api/v48/'},
-            {},
-            {'number': 0},
-            {'number': 0},
-            1,
+            None,
             pytest.raises(
                 Exception,
                 match='Cloudera Manager Version is unsupported or unknown: None',
@@ -72,10 +63,7 @@ pytestmark = [pytest.mark.unit]
         ),
         (
             {'api_url': 'http://localhost:8080/api/v48/', 'tags': ['new_tag']},
-            {},
-            {'number': 0},
-            {'number': 0},
-            1,
+            None,
             pytest.raises(
                 Exception,
                 match='Cloudera Manager Version is unsupported or unknown: None',
@@ -90,10 +78,7 @@ pytestmark = [pytest.mark.unit]
         ),
         (
             {'api_url': 'http://localhost:8080/api/v48/'},
-            {'version': '5.0.0'},
-            {'number': 0},
-            {'number': 0},
-            1,
+            Version('5.0.0'),
             pytest.raises(
                 Exception,
                 match='Cloudera Manager Version is unsupported or unknown: 5.0.0',
@@ -108,10 +93,7 @@ pytestmark = [pytest.mark.unit]
         ),
         (
             {'api_url': 'http://localhost:8080/api/v48/', 'tags': ['new_tag']},
-            {'version': '5.0.0'},
-            {'number': 0},
-            {'number': 0},
-            1,
+            Version('5.0.0'),
             pytest.raises(
                 Exception,
                 match='Cloudera Manager Version is unsupported or unknown: 5.0.0',
@@ -126,19 +108,13 @@ pytestmark = [pytest.mark.unit]
         ),
         (
             {'api_url': 'http://localhost:8080/api/v48/'},
-            {'version': '7.0.0'},
-            {'number': 0},
-            {'number': 0},
-            1,
+            Version('7.0.0'),
             does_not_raise(),
             [{'status': ServiceCheck.OK, 'message': None, 'tags': ['api_url:http://localhost:8080/api/v48/']}],
         ),
         (
             {'api_url': 'http://localhost:8080/api/v48/', 'tags': ['new_tag']},
-            {'version': '7.0.0'},
-            {'number': 0},
-            {'number': 0},
-            1,
+            Version('7.0.0'),
             does_not_raise(),
             [
                 {
@@ -159,7 +135,7 @@ pytestmark = [pytest.mark.unit]
         'supported',
         'supported with custom tags',
     ],
-    indirect=['instance', 'cloudera_version', 'read_clusters', 'read_events'],
+    indirect=[],
 )
 def test_version(
     aggregator,
@@ -167,25 +143,18 @@ def test_version(
     cloudera_check,
     instance,
     cloudera_version,
-    read_clusters,
-    read_events,
-    dd_run_check_count,
     expected_exception,
     expected_service_checks,
 ):
     with expected_exception, mock.patch(
         'datadog_checks.cloudera.client.cm_client.CmClient.get_version',
         side_effect=[cloudera_version],
-    ), mock.patch(
-        'datadog_checks.cloudera.client.cm_client.CmClient.read_clusters',
-        side_effect=[read_clusters],
-    ), mock.patch(
+    ), mock.patch('datadog_checks.cloudera.client.cm_client.CmClient.read_clusters', return_value=[],), mock.patch(
         'datadog_checks.cloudera.client.cm_client.CmClient.read_events',
-        side_effect=[read_events],
+        return_value=[],
     ):
         check = cloudera_check(instance)
-        for _ in range(dd_run_check_count):
-            dd_run_check(check)
+        dd_run_check(check)
         for expected_service_check in expected_service_checks:
             aggregator.assert_service_check(
                 'cloudera.can_connect',

@@ -87,8 +87,10 @@ class ApiV7(Api):
         self._check.latest_event_query_utc = now_utc
 
     def _collect_cluster_tags(self, cluster):
-        cluster_tags = [f"cloudera_cluster:{cluster['name']}"]
-        cluster_tags.extend([f"{cluster_tag['name']}:{cluster_tag['value']}" for cluster_tag in cluster['tags'] or []])
+        cluster_tags = [f"cloudera_cluster:{cluster.get('name')}"]
+        cluster_tags.extend(
+            [f"{cluster_tag['name']}:{cluster_tag['value']}" for cluster_tag in cluster.get('tags', [])]
+        )
         cluster_tags.extend(self._check.config.tags)
         return cluster_tags
 

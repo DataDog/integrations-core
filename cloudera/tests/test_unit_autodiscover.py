@@ -6,6 +6,7 @@ from contextlib import nullcontext as does_not_raise
 
 import mock
 import pytest
+from packaging.version import Version
 from tests.common import query_time_series
 
 from datadog_checks.base.types import ServiceCheck
@@ -15,148 +16,161 @@ pytestmark = [pytest.mark.unit]
 
 
 @pytest.mark.parametrize(
-    'instance, cloudera_version, read_clusters, list_hosts, read_events, dd_run_check_count, expected_exception, '
-    'expected_service_checks, expected_metrics',
+    'instance, read_clusters, expected_exception, expected_can_connects, expected_cluster_healths, expected_metrics',
     [
         (
             {'api_url': 'http://localhost:8080/api/v48/', 'clusters': {'include': {'^cluster.*'}}},
-            {'version': '7.0.0'},
-            {'number': 0},
-            {'number': 0},
-            {'number': 0},
-            1,
+            [],
             pytest.raises(
                 Exception,
                 match='Setting `include` must be an array',
             ),
             [
                 {
+                    'count': 1,
                     'status': ServiceCheck.CRITICAL,
                     'message': 'Cloudera API Client is none: Setting `include` must be an array',
                     'tags': ['api_url:http://localhost:8080/api/v48/'],
                 }
             ],
+            [{'count': 0}],
             [{'count': 0}],
         ),
         (
             {'api_url': 'http://localhost:8080/api/v48/', 'tags': ['new_tag'], 'clusters': {'include': {'^cluster.*'}}},
-            {'version': '7.0.0'},
-            {'number': 0},
-            {'number': 0},
-            {'number': 0},
-            1,
+            [],
             pytest.raises(
                 Exception,
                 match='Setting `include` must be an array',
             ),
             [
                 {
+                    'count': 1,
                     'status': ServiceCheck.CRITICAL,
                     'message': 'Cloudera API Client is none: Setting `include` must be an array',
                     'tags': ['api_url:http://localhost:8080/api/v48/', 'new_tag'],
                 }
             ],
             [{'count': 0}],
+            [{'count': 0}],
         ),
         (
             {'api_url': 'http://localhost:8080/api/v48/', 'clusters': {'include': [[]]}},
-            {'version': '7.0.0'},
-            {'number': 0},
-            {'number': 0},
-            {'number': 0},
-            1,
+            [],
             pytest.raises(
                 Exception,
                 match='`include` entries must be a map or a string',
             ),
             [
                 {
+                    'count': 1,
                     'status': ServiceCheck.CRITICAL,
                     'message': 'Cloudera API Client is none: `include` entries must be a map or a string',
                     'tags': ['api_url:http://localhost:8080/api/v48/'],
                 }
             ],
             [{'count': 0}],
+            [{'count': 0}],
         ),
         (
             {'api_url': 'http://localhost:8080/api/v48/', 'tags': ['new_tag'], 'clusters': {'include': [[]]}},
-            {'version': '7.0.0'},
-            {'number': 0},
-            {'number': 0},
-            {'number': 0},
-            1,
+            [],
             pytest.raises(
                 Exception,
                 match='`include` entries must be a map or a string',
             ),
             [
                 {
+                    'count': 1,
                     'status': ServiceCheck.CRITICAL,
                     'message': 'Cloudera API Client is none: `include` entries must be a map or a string',
                     'tags': ['api_url:http://localhost:8080/api/v48/', 'new_tag'],
                 }
             ],
             [{'count': 0}],
-        ),
-        (
-            {'api_url': 'http://localhost:8080/api/v48/', 'clusters': {'include': ['^cluster.*']}},
-            {'version': '7.0.0'},
-            {'number': 0},
-            {'number': 0},
-            {'number': 0},
-            1,
-            does_not_raise(),
-            [{'status': ServiceCheck.OK, 'tags': ['api_url:http://localhost:8080/api/v48/']}],
             [{'count': 0}],
         ),
         (
             {'api_url': 'http://localhost:8080/api/v48/', 'clusters': {'include': ['^cluster.*']}},
-            {'version': '7.0.0'},
-            {'number': 1, 'prefix': ['cluster_', 'cluster_new_'], 'status': ['GOOD_HEALTH', 'GOOD_HEALTH']},
-            {'number': 0},
-            {'number': 0},
-            1,
+            [],
             does_not_raise(),
-            [{'status': ServiceCheck.OK, 'tags': ['api_url:http://localhost:8080/api/v48/']}],
+            [{'count': 1, 'status': ServiceCheck.OK, 'tags': ['api_url:http://localhost:8080/api/v48/']}],
+            [{'count': 0}],
+            [{'count': 0}],
+        ),
+        (
+            {'api_url': 'http://localhost:8080/api/v48/', 'clusters': {'include': ['^cluster.*']}},
             [
-                {'count': 1, 'ts_tags': ['cloudera_cluster:cluster_0']},
-                {'count': 1, 'ts_tags': ['cloudera_cluster:cluster_new_0']},
+                {'name': 'cluster_0', 'entity_status': 'GOOD_HEALTH'},
+                {'name': 'cluster_new_0', 'entity_status': 'GOOD_HEALTH'},
+            ],
+            does_not_raise(),
+            [{'count': 1, 'status': ServiceCheck.OK, 'tags': ['api_url:http://localhost:8080/api/v48/']}],
+            [
+                {'count': 1, 'status': ServiceCheck.OK, 'tags': ['cloudera_cluster:cluster_0']},
+                {'count': 1, 'status': ServiceCheck.OK, 'tags': ['cloudera_cluster:cluster_new_0']},
+            ],
+            [
+                {'count': 1, 'tags': ['cloudera_cluster:cluster_0']},
+                {'count': 1, 'tags': ['cloudera_cluster:cluster_new_0']},
             ],
         ),
         (
             {'api_url': 'http://localhost:8080/api/v48/', 'clusters': {'limit': 5, 'include': ['^cluster.*']}},
-            {'version': '7.0.0'},
-            {'number': 10, 'prefix': ['cluster_'], 'status': ['GOOD_HEALTH']},
-            {'number': 0},
-            {'number': 0},
-            1,
-            does_not_raise(),
-            [{'status': ServiceCheck.OK, 'tags': ['api_url:http://localhost:8080/api/v48/']}],
             [
-                {'count': 1, 'ts_tags': ['cloudera_cluster:cluster_0']},
-                {'count': 1, 'ts_tags': ['cloudera_cluster:cluster_1']},
-                {'count': 1, 'ts_tags': ['cloudera_cluster:cluster_2']},
-                {'count': 1, 'ts_tags': ['cloudera_cluster:cluster_3']},
-                {'count': 1, 'ts_tags': ['cloudera_cluster:cluster_4']},
-                {'count': 0, 'ts_tags': ['cloudera_cluster:cluster_5']},
-                {'count': 0, 'ts_tags': ['cloudera_cluster:cluster_6']},
-                {'count': 0, 'ts_tags': ['cloudera_cluster:cluster_7']},
-                {'count': 0, 'ts_tags': ['cloudera_cluster:cluster_8']},
-                {'count': 0, 'ts_tags': ['cloudera_cluster:cluster_9']},
+                {'name': 'cluster_0', 'entity_status': 'GOOD_HEALTH'},
+                {'name': 'cluster_1', 'entity_status': 'GOOD_HEALTH'},
+                {'name': 'cluster_2', 'entity_status': 'GOOD_HEALTH'},
+                {'name': 'cluster_3', 'entity_status': 'GOOD_HEALTH'},
+                {'name': 'cluster_4', 'entity_status': 'GOOD_HEALTH'},
+                {'name': 'cluster_5', 'entity_status': 'GOOD_HEALTH'},
+                {'name': 'cluster_6', 'entity_status': 'GOOD_HEALTH'},
+                {'name': 'cluster_7', 'entity_status': 'GOOD_HEALTH'},
+                {'name': 'cluster_8', 'entity_status': 'GOOD_HEALTH'},
+                {'name': 'cluster_9', 'entity_status': 'GOOD_HEALTH'},
+            ],
+            does_not_raise(),
+            [{'count': 1, 'status': ServiceCheck.OK, 'tags': ['api_url:http://localhost:8080/api/v48/']}],
+            [
+                {'count': 1, 'status': ServiceCheck.OK, 'tags': ['cloudera_cluster:cluster_0']},
+                {'count': 1, 'status': ServiceCheck.OK, 'tags': ['cloudera_cluster:cluster_1']},
+                {'count': 1, 'status': ServiceCheck.OK, 'tags': ['cloudera_cluster:cluster_2']},
+                {'count': 1, 'status': ServiceCheck.OK, 'tags': ['cloudera_cluster:cluster_3']},
+                {'count': 1, 'status': ServiceCheck.OK, 'tags': ['cloudera_cluster:cluster_4']},
+                {'count': 0, 'tags': ['cloudera_cluster:cluster_5']},
+                {'count': 0, 'tags': ['cloudera_cluster:cluster_6']},
+                {'count': 0, 'tags': ['cloudera_cluster:cluster_7']},
+                {'count': 0, 'tags': ['cloudera_cluster:cluster_8']},
+                {'count': 0, 'tags': ['cloudera_cluster:cluster_9']},
+            ],
+            [
+                {'count': 1, 'tags': ['cloudera_cluster:cluster_0']},
+                {'count': 1, 'tags': ['cloudera_cluster:cluster_1']},
+                {'count': 1, 'tags': ['cloudera_cluster:cluster_2']},
+                {'count': 1, 'tags': ['cloudera_cluster:cluster_3']},
+                {'count': 1, 'tags': ['cloudera_cluster:cluster_4']},
+                {'count': 0, 'tags': ['cloudera_cluster:cluster_5']},
+                {'count': 0, 'tags': ['cloudera_cluster:cluster_6']},
+                {'count': 0, 'tags': ['cloudera_cluster:cluster_7']},
+                {'count': 0, 'tags': ['cloudera_cluster:cluster_8']},
+                {'count': 0, 'tags': ['cloudera_cluster:cluster_9']},
             ],
         ),
         (
             {'api_url': 'http://localhost:8080/api/v48/', 'clusters': {'include': ['.*'], 'exclude': ['^tmp_.*']}},
-            {'version': '7.0.0'},
-            {'number': 1, 'prefix': ['cluster_', 'tmp_'], 'status': ['GOOD_HEALTH', 'GOOD_HEALTH']},
-            {'number': 0},
-            {'number': 0},
-            1,
-            does_not_raise(),
-            [{'status': ServiceCheck.OK, 'tags': ['api_url:http://localhost:8080/api/v48/']}],
             [
-                {'count': 1, 'ts_tags': ['cloudera_cluster:cluster_0']},
-                {'count': 0, 'ts_tags': ['cloudera_cluster:tmp_0']},
+                {'name': 'cluster_0', 'entity_status': 'GOOD_HEALTH'},
+                {'name': 'tmp_0', 'entity_status': 'GOOD_HEALTH'},
+            ],
+            does_not_raise(),
+            [{'count': 1, 'status': ServiceCheck.OK, 'tags': ['api_url:http://localhost:8080/api/v48/']}],
+            [
+                {'count': 1, 'status': ServiceCheck.OK, 'tags': ['cloudera_cluster:cluster_0']},
+                {'count': 0, 'tags': ['cloudera_cluster:tmp_0']},
+            ],
+            [
+                {'count': 1, 'tags': ['cloudera_cluster:cluster_0']},
+                {'count': 0, 'tags': ['cloudera_cluster:tmp_0']},
             ],
         ),
         (
@@ -164,16 +178,19 @@ pytestmark = [pytest.mark.unit]
                 'api_url': 'http://localhost:8080/api/v48/',
                 'clusters': {'include': [{'.*': {}}], 'exclude': ['^tmp_.*']},
             },
-            {'version': '7.0.0'},
-            {'number': 1, 'prefix': ['cluster_', 'tmp_'], 'status': ['GOOD_HEALTH', 'GOOD_HEALTH']},
-            {'number': 0},
-            {'number': 0},
-            1,
-            does_not_raise(),
-            [{'status': ServiceCheck.OK, 'tags': ['api_url:http://localhost:8080/api/v48/']}],
             [
-                {'count': 1, 'ts_tags': ['cloudera_cluster:cluster_0']},
-                {'count': 0, 'ts_tags': ['cloudera_cluster:tmp_0']},
+                {'name': 'cluster_0', 'entity_status': 'GOOD_HEALTH'},
+                {'name': 'tmp_0', 'entity_status': 'GOOD_HEALTH'},
+            ],
+            does_not_raise(),
+            [{'count': 1, 'status': ServiceCheck.OK, 'tags': ['api_url:http://localhost:8080/api/v48/']}],
+            [
+                {'count': 1, 'status': ServiceCheck.OK, 'tags': ['cloudera_cluster:cluster_0']},
+                {'count': 0, 'tags': ['cloudera_cluster:tmp_0']},
+            ],
+            [
+                {'count': 1, 'tags': ['cloudera_cluster:cluster_0']},
+                {'count': 0, 'tags': ['cloudera_cluster:tmp_0']},
             ],
         ),
     ],
@@ -188,25 +205,22 @@ pytestmark = [pytest.mark.unit]
         'configured cluster autodiscover with two different prefix clusters and one of them excluded',
         'configured cluster autodiscover (with dict) with two different prefix clusters and one of them excluded',
     ],
-    indirect=['instance', 'cloudera_version', 'read_clusters', 'list_hosts', 'read_events'],
+    indirect=[],
 )
 def test_autodiscover_clusters(
     aggregator,
     dd_run_check,
     cloudera_check,
     instance,
-    cloudera_version,
     read_clusters,
-    list_hosts,
-    read_events,
-    dd_run_check_count,
     expected_exception,
-    expected_service_checks,
+    expected_can_connects,
+    expected_cluster_healths,
     expected_metrics,
 ):
     with expected_exception, mock.patch(
         'datadog_checks.cloudera.client.cm_client.CmClient.get_version',
-        return_value=cloudera_version,
+        return_value=Version('7.0.0'),
     ), mock.patch(
         'datadog_checks.cloudera.client.cm_client.CmClient.read_clusters',
         return_value=read_clusters,
@@ -215,26 +229,31 @@ def test_autodiscover_clusters(
         side_effect=query_time_series,
     ), mock.patch(
         'datadog_checks.cloudera.client.cm_client.CmClient.list_hosts',
-        return_value=list_hosts,
+        return_value=[],
     ), mock.patch(
         'datadog_checks.cloudera.client.cm_client.CmClient.read_events',
-        return_value=read_events,
+        return_value=[],
     ):
         check = cloudera_check(instance)
-        for _ in range(dd_run_check_count):
-            dd_run_check(check)
-        for expected_service_check in expected_service_checks:
+        dd_run_check(check)
+        for expected_can_connect in expected_can_connects:
             aggregator.assert_service_check(
                 'cloudera.can_connect',
-                count=expected_service_check.get('count'),
-                status=expected_service_check.get('status'),
-                message=expected_service_check.get('message'),
-                tags=expected_service_check.get('tags'),
+                count=expected_can_connect.get('count'),
+                status=expected_can_connect.get('status'),
+                message=expected_can_connect.get('message'),
+                tags=expected_can_connect.get('tags'),
+            )
+        for expected_cluster_health in expected_cluster_healths:
+            aggregator.assert_service_check(
+                'cloudera.cluster.health',
+                count=expected_cluster_health.get('count'),
+                status=expected_cluster_health.get('status'),
+                message=expected_cluster_health.get('message'),
+                tags=expected_cluster_health.get('tags'),
             )
         for expected_metric in expected_metrics:
             for metric in TIMESERIES_METRICS['cluster']:
                 aggregator.assert_metric(
-                    f'cloudera.cluster.{metric}',
-                    count=expected_metric.get('count'),
-                    tags=expected_metric.get('ts_tags'),
+                    f'cloudera.cluster.{metric}', count=expected_metric.get('count'), tags=expected_metric.get('tags')
                 )
