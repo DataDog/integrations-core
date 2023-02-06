@@ -973,7 +973,7 @@ class AgentCheck(object):
 
     def warning(self, warning_message, *args, **kwargs):
         # type: (str, *Any, **Any) -> None
-        """Log a warning message and display it in the Agent's status page.
+        """Log a warning message, display it in the Agent's status page and in-app.
 
         Using *args is intended to make warning work like log.warn/debug/info/etc
         and make it compliant with flake8 logging format linter.
