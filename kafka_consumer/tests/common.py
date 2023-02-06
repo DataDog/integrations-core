@@ -21,6 +21,7 @@ else:
     DOCKER_IMAGE_PATH = os.path.join(HERE, 'docker', 'single-broker.yaml')
 
 # test
+# testset
 def is_supported(flavor):
     """
     Returns whether the current CI configuration is supported
