@@ -68,10 +68,11 @@ instances:
         ## Which  unaggregated endpoint to use.
         ## The choices are:
         ##   - If the field is left unspecified, no endpoint is used.
-        ##   - "per-object" means the /metrics/per-object endpoint is used.
         ##   - "detailed" means the /metrics/detailed endpoint is used.
         ##     You can also provide a query for this option, exactly as if you were making an HTTP request
         ##     to this endpoint. For example, `detailed?family=queue_consumer_count`.
+        ##     You can specify this and the aggregated endpoint. In that case any duplicate metrics will
+        ##     be taken from this endpoint and the corresponding aggregated ones dropped.
         #
         # unaggregated_endpoint: detailed
 
