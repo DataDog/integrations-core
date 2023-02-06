@@ -29,7 +29,7 @@ def test_check(dd_run_check, aggregator, instance, enable_rw, enable_bs, expecte
     dd_run_check(check)
     for metric in expected_metrics:
         aggregator.assert_metric(metric)
-        for tag in [*BASE_TAGS, *SYSTEM_TAGS]:
+        for tag in BASE_TAGS[0:] + SYSTEM_TAGS[0:]:
             # There are metric-specific tags so we just assert the common tags here
             aggregator.assert_metric_has_tag(metric, tag)
 
