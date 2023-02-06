@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 
+from datadog_checks.amazon_msk.metrics import JMX_METRICS_MAP, JMX_METRICS_OVERRIDES, METRICS_WITH_NAME_AS_LABEL
 from datadog_checks.dev import get_docker_hostname, get_here
 from datadog_checks.dev.utils import read_file
 
@@ -65,3 +66,56 @@ def read_api_fixture():
 
 def read_e2e_api_fixture():
     return read_file(os.path.join(HERE, 'mock_boto3', 'boto3', 'list_nodes.json'))
+
+
+def assert_jmx_metrics(aggregator, tags, is_enabled=True):
+    expected_metrics = set()
+
+    for raw_metric_name, metric_name in JMX_METRICS_MAP.items():
+        if raw_metric_name.endswith('_total') and raw_metric_name not in JMX_METRICS_OVERRIDES:
+            expected_metrics.add('{}.count'.format(metric_name[:-6]))
+        else:
+            expected_metrics.add(metric_name)
+
+    expected_metrics.update(METRICS_FROM_LABELS)
+    expected_metrics.update(data['legacy_name'] for data in METRICS_WITH_NAME_AS_LABEL.values())
+    expected_metrics.update(data['legacy_name'] + ".count" for data in METRICS_WITH_NAME_AS_LABEL.values())
+    metrics_from_label_ids = [
+        "kafka.network.request.ErrorsPerSec.count",
+        "kafka.network.request.LocalTimeMs.count",
+        "kafka.network.request.MessageConversionsTimeMs.count",
+        "kafka.network.request.RemoteTimeMs.count",
+        "kafka.network.request.RequestBytes.count",
+        "kafka.network.request.RequestQueueTimeMs.count",
+        "kafka.network.request.RequestsPerSec.count",
+        "kafka.network.request.ResponseQueueTimeMs.count",
+        "kafka.network.request.ResponseSendTimeMs.count",
+        "kafka.network.request.TemporaryMemoryBytes.count",
+        "kafka.network.request.ThrottleTimeMs.count",
+        "kafka.network.request.TotalTimeMs.count",
+        "kafka.server.broker_topics.BytesInPerSec.count",
+        "kafka.server.broker_topics.BytesOutPerSec.count",
+        "kafka.server.broker_topics.BytesRejectedPerSec.count",
+        "kafka.server.broker_topics.FailedFetchRequestsPerSec.count",
+        "kafka.server.broker_topics.FailedProduceRequestsPerSec.count",
+        "kafka.server.broker_topics.FetchMessageConversionsPerSec.count",
+        "kafka.server.broker_topics.MessagesInPerSec.count",
+        "kafka.server.broker_topics.ProduceMessageConversionsPerSec.count",
+        "kafka.server.broker_topics.ReplicationBytesInPerSec.count",
+        "kafka.server.broker_topics.ReplicationBytesOutPerSec.count",
+        "kafka.server.broker_topics.TotalFetchRequestsPerSec.count",
+        "kafka.server.broker_topics.TotalProduceRequestsPerSec.count",
+        "kafka.server.replica_manager.LeaderCount.count",
+        "kafka.server.replica_manager.OfflineReplicaCount.count",
+        "kafka.server.replica_manager.PartitionCount.count",
+        "kafka.server.replica_manager.UnderMinIsrPartitionCount.count",
+        "kafka.server.replica_manager.UnderReplicatedPartitions.count",
+    ]
+
+    for metric in sorted(expected_metrics) + metrics_from_label_ids:
+        metric = 'aws.msk.{}'.format(metric)
+        if is_enabled:
+            for tag in tags:
+                aggregator.assert_metric_has_tag(metric, tag)
+        else:
+            aggregator.assert_metric(metric, count=0)

@@ -5,15 +5,9 @@ import pytest
 from six import PY2
 
 from datadog_checks.amazon_msk import AmazonMskCheck
-from datadog_checks.amazon_msk.metrics import (
-    JMX_METRICS_MAP,
-    JMX_METRICS_OVERRIDES,
-    METRICS_WITH_NAME_AS_LABEL,
-    NODE_METRICS_MAP,
-    NODE_METRICS_OVERRIDES,
-)
+from datadog_checks.amazon_msk.metrics import JMX_METRICS_MAP, NODE_METRICS_MAP, NODE_METRICS_OVERRIDES
 
-from .common import METRICS_FROM_LABELS
+from .common import assert_jmx_metrics
 
 pytestmark = pytest.mark.e2e
 
@@ -115,24 +109,6 @@ def assert_node_metrics(aggregator, tags):
     for metric in ('go.gc.duration.seconds',):
         expected_metrics.remove(metric)
         expected_metrics.update({'{}.count'.format(metric), '{}.quantile'.format(metric), '{}.sum'.format(metric)})
-
-    for metric in sorted(expected_metrics):
-        metric = 'aws.msk.{}'.format(metric)
-        for tag in tags:
-            aggregator.assert_metric_has_tag(metric, tag)
-
-
-def assert_jmx_metrics(aggregator, tags):
-    expected_metrics = set()
-
-    for raw_metric_name, metric_name in JMX_METRICS_MAP.items():
-        if raw_metric_name.endswith('_total') and raw_metric_name not in JMX_METRICS_OVERRIDES:
-            expected_metrics.add('{}.count'.format(metric_name[:-6]))
-        else:
-            expected_metrics.add(metric_name)
-
-    expected_metrics.update(METRICS_FROM_LABELS)
-    expected_metrics.update(data['legacy_name'] for data in METRICS_WITH_NAME_AS_LABEL.values())
 
     for metric in sorted(expected_metrics):
         metric = 'aws.msk.{}'.format(metric)

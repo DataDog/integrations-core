@@ -112,11 +112,14 @@ class AmazonMskCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
         def transform(metric, sample_data, runtime_data):
             for sample, tags, hostname in sample_data:
                 method(legacy_name, sample.value, tags=tags, hostname=hostname)
+                self.count(legacy_name + ".count", sample.value, tags=tags, hostname=hostname)
 
                 tag = sample.labels.pop(label_name)
                 tags.remove('{}:{}'.format(label_name, tag))
 
-                method('{}.{}'.format(new_name, tag), sample.value, tags=tags, hostname=hostname)
+                new_name_to_submit = '{}.{}'.format(new_name, tag)
+                method(new_name_to_submit, sample.value, tags=tags, hostname=hostname)
+                self.count(new_name_to_submit + ".count", sample.value, tags=tags, hostname=hostname)
 
         return transform
 
