@@ -65,59 +65,53 @@ mypy_path = "../.stubs"
 exclude = '.*/config_models/.*\.py$'
 
 [tool.ruff]
+target-version = "py37"
 line-length = 120
 select = [
+  "A",
+  "ARG",
   "B",
   "C",
+  "DTZ",
   "E",
+  "EM",
   "F",
-  "G",
+  "FBT",
+  "I",
+  "ICN",
+  "ISC",
+  "N",
+  "PLC",
+  "PLE",
+  "PLR",
+  "PLW",
+  "Q",
+  "RUF",
+  "S",
+  "T",
+  "TID",
+  "UP",
   "W",
-  "B001",
-  "B003",
-  "B006",
-  "B007",
-  "B301",
-  "B305",
-  "B306",
-  "B902",
+  "YTT",
 ]
-
-# Ignore reasons:
-# - G200: logging exception is ok, we don't always want to log the stack trace too
-# - B015: Catches comparisons within a pytest.raises block.
-#         Revert once this is resolved: https://github.com/PyCQA/flake8-bugbear/issues/152
-
 ignore = [
-  "E203",
-  "E722",
-  "E741",
-  "W503",
-  "G200",
-  "B015",
+  # Allow non-abstract empty methods in abstract base classes
+  "B027",
+  # Ignore McCabe complexity
+  "C901",
+  # Allow boolean positional values in function calls, like `dict.get(... True)`
+  "FBT003",
+  # Ignore checks for possible passwords
+  "S105", "S106", "S107"
 ]
-
-exclude = [
-  ".eggs",
-  ".tox",
-  "build",
-  "compat.py",
-  "__init__.py",
-  "datadog_checks_dev/datadog_checks/dev/tooling/templates/*",
-  "*/datadog_checks/*/vendor/*",
+unfixable = [
+  # Don't touch unused imports
+  "F401",
 ]
-
-line-length = 120
-
+[tool.ruff.isort]
+known-first-party = ["{template_config['package_name']}"]
+[tool.ruff.flake8-tidy-imports]
+ban-relative-imports = "all"
 [tool.ruff.per-file-ignores]
-# potentially long literal strings
-"datadog_checks/*/config_models/deprecations.py" = ["E501"]
-"tests/models/config_models/deprecations.py" = ["E501"]
-# https://pydantic-docs.helpmanual.io/usage/validators/
-# > validators are "class methods", so the first argument value they
-#   receive is the UserModel class, not an instance of UserModel
-"datadog_checks/*/config_models/instance.py" = ["B902"]
-"datadog_checks/*/config_models/shared.py" = ["B902"]
-"tests/models/config_models/instance.py" = ["B902"]
-"tests/models/config_models/shared.py" = ["B902"]
-
+# Tests can use assertions and relative imports
+"tests/**/*" = ["S101", "TID252"]
