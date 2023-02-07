@@ -42,19 +42,13 @@ def replace_value(obj, log):
 
 def replace_datetime(obj, log):
     log.debug("replace_datetime in %s", obj)
-    if isinstance(obj, dict) or isinstance(obj, list):
-        for k, v in obj.items():
-            if isinstance(v, dict):
-                obj[k] = replace_datetime(v, log)
-            elif isinstance(v, list):
-                new_v = []
-                for item in v:
-                    new_v.append(replace_datetime(item, log))
-                obj[k] = new_v
-            else:
-                obj[k] = replace_value(v, log)
+    # Recur as necessary into dicts and lists
+    if isinstance(obj, dict):
+        return {k: replace_datetime(v, log) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [replace_datetime(item, log) for item in obj]
     else:
-        obj = replace_value(obj, log)
+        return replace_value(obj, log)
     return obj
 
 
