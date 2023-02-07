@@ -161,7 +161,6 @@ INSTANCE_CUSTOM_QUERIES_WITH_DATE = {
     ],
 }
 
-
 INSTANCE_CUSTOM_QUERIES_WITH_DATE_AND_OPERATION = {
     'hosts': ['{}:{}'.format(HOST, PORT1)],
     'database': 'test',
@@ -197,7 +196,6 @@ INSTANCE_CUSTOM_QUERIES_WITH_DATE_AND_OPERATION = {
     ],
 }
 
-
 INSTANCE_CUSTOM_QUERIES_WITH_ISODATE = {
     'hosts': ['{}:{}'.format(HOST, PORT1)],
     'database': 'test',
@@ -230,6 +228,27 @@ INSTANCE_CUSTOM_QUERIES_WITH_ISODATE = {
             'metric_prefix': 'dd.custom.mongo.aggregate',
             'tags': ['tag1:val1', 'tag2:val2'],
         }
+    ],
+}
+
+INSTANCE_CUSTOM_QUERIES_WITH_STRING_LIST = {
+    'hosts': ['{}:{}'.format(HOST, PORT1)],
+    'database': 'test',
+    'username': 'testUser2',
+    'password': 'testPass2',
+    'custom_queries': [
+        {
+            'metric_prefix': 'dd.custom.mongo.string',
+            'query': {
+                'find': 'orders',
+                'filter': {'amount': {'$gt': 25}},
+                'sort': {'amount': -1},
+                'projection': {'result': {'$subtract': ['$amount', 1]}},
+            },
+            'fields': [
+                {'field_name': 'result', 'name': 'result', 'type': 'gauge'},
+            ],
+        },
     ],
 }
 
