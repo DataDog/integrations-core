@@ -34,13 +34,8 @@ def get_counter_values(counter_handle, duplicate_instances_exist):
     # Currently when duplicates are no concern, calla  win32pdh.GetFormattedCounterArray()
     # function is 5-10x slower faster than pure python wrapper over Windows PdhGetFormattedCounterArray()
     # API call. See detailed comment for 'only_unique_instances' configuration
-    #
-    # ATTENTION:
-    #    win32pdh.GetFormattedCounterArray() also has a big memory leak. However, eventually, when the memory
-    #    leak is fixed and the function enhanced to handle duplicates we should use only this function and
-    #    remove duplicate_instances_exist configuration.
     if not duplicate_instances_exist:
-        # This function cannot currently handle duplicate/non-unique instances (e.g. for "Process" counters)
+        # This function cannot handle duplicate/non-unique instances (e.g. for "Process" counters)
         # See its implementation at
         #     https://github.com/mhammond/pywin32/blob/main/win32/src/win32pdhmodule.cpp#L677
         return win32pdh.GetFormattedCounterArray(counter_handle, COUNTER_VALUE_FORMAT)
