@@ -26,26 +26,28 @@ MONGO_DATE_EXPRESSIONS = {
 }
 
 
-def replace_datetime(obj, log):
-    for k, v in obj.items():
-        if isinstance(v, dict):
-            obj[k] = replace_datetime(v, log)
-        elif isinstance(v, list):
-            new_v = []
-            for item in v:
-                new_v.append(replace_datetime(item, log))
-            obj[k] = new_v
-        elif isinstance(v, str):
-            new_v = v
-            for expression, f in MONGO_DATE_EXPRESSIONS.items():
-                m = re.match(expression, v)
-                if m:
-                    log.debug("match: %s", v)
-                    log.debug("groups: %s", m.groups())
-                    new_v = f(m)
-                    break
-            obj[k] = new_v
+def replace_value(obj, log):
+    if isinstance(obj, str):
+        new_v = obj
+        for expression, f in MONGO_DATE_EXPRESSIONS.items():
+            m = re.match(expression, obj)
+            if m:
+                log.debug("match: %s", obj)
+                log.debug("groups: %s", m.groups())
+                new_v = f(m)
+                break
+        return new_v
     return obj
+
+
+def replace_datetime(obj, log):
+    log.debug("replace_datetime in %s", obj)
+    # Recur as necessary into dicts and lists
+    if isinstance(obj, dict):
+        return {k: replace_datetime(v, log) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [replace_datetime(item, log) for item in obj]
+    return replace_value(obj, log)
 
 
 class CustomQueriesCollector(MongoCollector):
