@@ -26,25 +26,35 @@ MONGO_DATE_EXPRESSIONS = {
 }
 
 
+def replace_value(obj, log):
+    if isinstance(obj, str):
+        new_v = obj
+        for expression, f in MONGO_DATE_EXPRESSIONS.items():
+            m = re.match(expression, obj)
+            if m:
+                log.debug("match: %s", obj)
+                log.debug("groups: %s", m.groups())
+                new_v = f(m)
+                break
+        return new_v
+    return obj
+
+
 def replace_datetime(obj, log):
-    for k, v in obj.items():
-        if isinstance(v, dict):
-            obj[k] = replace_datetime(v, log)
-        elif isinstance(v, list):
-            new_v = []
-            for item in v:
-                new_v.append(replace_datetime(item, log))
-            obj[k] = new_v
-        elif isinstance(v, str):
-            new_v = v
-            for expression, f in MONGO_DATE_EXPRESSIONS.items():
-                m = re.match(expression, v)
-                if m:
-                    log.debug("match: %s", v)
-                    log.debug("groups: %s", m.groups())
-                    new_v = f(m)
-                    break
-            obj[k] = new_v
+    log.debug("replace_datetime in %s", obj)
+    if isinstance(obj, dict) or isinstance(obj, list):
+        for k, v in obj.items():
+            if isinstance(v, dict):
+                obj[k] = replace_datetime(v, log)
+            elif isinstance(v, list):
+                new_v = []
+                for item in v:
+                    new_v.append(replace_datetime(item, log))
+                obj[k] = new_v
+            else:
+                obj[k] = replace_value(v, log)
+    else:
+        obj = replace_value(obj, log)
     return obj
 
 
