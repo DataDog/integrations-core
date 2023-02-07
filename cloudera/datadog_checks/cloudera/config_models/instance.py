@@ -56,6 +56,7 @@ class InstanceConfig(BaseModel):
         allow_mutation = False
 
     api_url: str
+    cloudera_client: Optional[str]
     clusters: Optional[Clusters]
     custom_queries: Optional[Sequence[CustomQuery]]
     disable_generic_tags: Optional[bool]
