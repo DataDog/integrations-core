@@ -111,7 +111,9 @@ ignore = [
   # Allow boolean positional values in function calls, like `dict.get(... True)`
   "FBT003",
   # Ignore checks for possible passwords
-  "S105", "S106", "S107"
+  "S105", "S106", "S107",
+  # Ignore single versus double quotes
+  "Q000"
 ]
 unfixable = [
   # Don't touch unused imports
@@ -123,4 +125,4 @@ known-first-party = ["{template_config['package_name']}"]
 ban-relative-imports = "all"
 [tool.ruff.per-file-ignores]
 # Tests can use assertions and relative imports
-"tests/**/*" = ["S101", "TID252"]
+"**/tests/**/*" = ["S101", "TID252"]
