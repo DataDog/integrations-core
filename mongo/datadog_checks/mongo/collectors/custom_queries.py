@@ -47,8 +47,7 @@ def replace_datetime(obj, log):
         return {k: replace_datetime(v, log) for k, v in obj.items()}
     elif isinstance(obj, list):
         return [replace_datetime(item, log) for item in obj]
-    else:
-        return replace_value(obj, log)
+    return replace_value(obj, log)
 
 
 class CustomQueriesCollector(MongoCollector):
