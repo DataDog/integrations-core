@@ -46,14 +46,14 @@ class IISCheckV2(PerfCountersBaseCheckWithLegacySupport):
                 new_config['include_fast'] = include_fast
 
             # As we have discovered in 7.43 win32pdh function (win32pdh.GetFormattedCounterArray)
-            # has a memory leak. Until it is fixed we are suppressing this single use of the 
-            # optimization controlled by "duplicate_instances_exist" flag because 
+            # has a memory leak. Until it is fixed we are suppressing this single use of the
+            # optimization controlled by "duplicate_instances_exist" flag because
             # win32pdh.GetFormattedCounterArray is 5-10 times faster than its python re-implementation
             # (GetFormattedCounterArray). For more details see get_counter_values() comments
             #
             # UNCOMMENT BELOW WHEN win32pdh.GetFormattedCounterArray IS FIXED
-            ### # No duplicate Sites or Pools can be created
-            ### new_config['duplicate_instances_exist'] = False
+            # # No duplicate Sites or Pools can be created
+            # new_config['duplicate_instances_exist'] = False
 
             metrics_config[object_name] = new_config
 
