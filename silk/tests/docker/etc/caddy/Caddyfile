@@ -1,0 +1,121 @@
+{
+    debug
+    admin :2019
+}
+:80 {
+    root * /usr/share/caddy/
+    @get_stats_system_bs {
+        method GET
+        path /api/v2/stats/system
+        expression {uri}.contains('?')
+        expression {uri}.contains('bs')
+    }
+    route @get_stats_system_bs {
+        rewrite /api/v2/stats/system api/v2/stats/system_bs
+        file_server
+    }
+    @get_stats_system_rw {
+        method GET
+        path /api/v2/stats/system
+        expression {uri}.contains('?')
+        expression {uri}.contains('rw')
+    }
+    route @get_stats_system_rw {
+        rewrite /api/v2/stats/system api/v2/stats/system_rw
+        file_server
+    }
+    @get_stats_volumes_bs {
+        method GET
+        path /api/v2/stats/volumes
+        expression {uri}.contains('?')
+        expression {uri}.contains('bs')
+    }
+    route @get_stats_volumes_bs {
+        rewrite /api/v2/stats/volumes api/v2/stats/volumes_bs
+        file_server
+    }
+    @get_stats_volumes_rw {
+        method GET
+        path /api/v2/stats/volumes
+        expression {uri}.contains('?')
+        expression {uri}.contains('rw')
+    }
+    route @get_stats_volumes_rw {
+        rewrite /api/v2/stats/volumes api/v2/stats/volumes_rw
+        file_server
+    }
+    @get_replication_stats_volumes {
+        method GET
+        path /api/v2/replication/stats/volumes
+    }
+    route @get_replication_stats_volumes {
+        rewrite /api/v2/replication/stats/volumes api/v2/replication/stats/volumes
+        file_server
+    }
+    @get_replication_stats_system {
+        method GET
+        path /api/v2/replication/stats/system
+    }
+    route @get_replication_stats_system {
+        rewrite /api/v2/replication/stats/system api/v2/replication/stats/system
+        file_server
+    }
+    @get_system_capacity {
+        method GET
+        path /api/v2/system/capacity
+    }
+    route @get_system_capacity {
+        rewrite /api/v2/system/capacity api/v2/system/capacity
+        file_server
+    }
+    @get_system_servers {
+        method GET
+        path /api/v2/system/servers
+    }
+    route @get_system_servers {
+        rewrite /api/v2/system/servers api/v2/system/servers
+        file_server
+    }
+    @get_system_state {
+        method GET
+        path /api/v2/system/state
+    }
+    route @get_system_state {
+        rewrite /api/v2/system/state api/v2/system/state
+        file_server
+    }
+    @get_events {
+        method GET
+        path /api/v2/events
+    }
+    route @get_events {
+        rewrite /api/v2/events api/v2/events
+        file_server
+    }
+    @get_hosts {
+        method GET
+        path /api/v2/hosts
+    }
+    route @get_hosts {
+        rewrite /api/v2/hosts api/v2/hosts
+        file_server
+    }
+    @get_snapshots {
+        method GET
+        path /api/v2/snapshots
+    }
+    route @get_snapshots {
+        rewrite /api/v2/snapshots api/v2/snapshots
+        file_server
+    }
+    @get_volumes {
+        method GET
+        path /api/v2/volumes
+    }
+    route @get_volumes {
+        rewrite /api/v2/volumes api/v2/volumes
+        file_server
+    }
+
+    file_server browse
+}
