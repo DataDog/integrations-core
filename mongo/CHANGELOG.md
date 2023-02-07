@@ -2,7 +2,6 @@
 
 ## 4.3.0 / 2023-02-07
 
-* [Added] Mongo Date types support in custom queries. See [#13516](https://github.com/DataDog/integrations-core/pull/13516).
 * [Fixed] Exception is thrown when items of a list in a custom query are not iterable. See [#13895](https://github.com/DataDog/integrations-core/pull/13895).
 
 ## 4.2.0 / 2023-02-01
