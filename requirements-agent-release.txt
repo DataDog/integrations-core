@@ -27,7 +27,7 @@ datadog-cisco-aci==2.2.1
 datadog-citrix-hypervisor==2.2.0
 datadog-clickhouse==2.8.2
 datadog-cloud-foundry-api==2.2.1
-datadog-cloudera==1.0.0
+datadog-cloudera==1.0.1
 datadog-cockroachdb==2.5.0
 datadog-confluent-platform==1.8.1
 datadog-consul==2.2.0
@@ -100,7 +100,7 @@ datadog-marklogic==3.2.0
 datadog-mcache==3.3.0; sys_platform != 'win32'
 datadog-mesos-master==3.1.0; sys_platform != 'win32'
 datadog-mesos-slave==3.1.0; sys_platform != 'win32'
-datadog-mongo==4.1.2
+datadog-mongo==4.2.0
 datadog-mysql==10.0.0
 datadog-nagios==1.11.0
 datadog-network==2.9.3
@@ -124,7 +124,7 @@ datadog-process==2.3.2
 datadog-prometheus==3.4.0
 datadog-proxysql==4.0.0
 datadog-pulsar==1.2.0
-datadog-rabbitmq==3.3.0
+datadog-rabbitmq==3.3.1
 datadog-redisdb==4.5.3
 datadog-rethinkdb==2.3.1
 datadog-riak==3.2.0

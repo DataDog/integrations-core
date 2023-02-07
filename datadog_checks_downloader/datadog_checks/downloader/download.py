@@ -317,8 +317,9 @@ class TUFDownloader:
             raise MissingVersions(standard_distribution_name)
 
         if not version:
-            # https://setuptools.readthedocs.io/en/latest/pkg_resources.html#parsing-utilities
-            version = str(max(parse_version(v) for v in wheels.keys()))
+            # Go through all wheels and remove alphas, betas and rcs and pick the latest version
+            # https://packaging.pypa.io/en/latest/version.html
+            version = str(max(parse_version(v) for v in wheels.keys() if not parse_version(v).is_prerelease))
 
         python_tags = wheels[version]
         if not python_tags:

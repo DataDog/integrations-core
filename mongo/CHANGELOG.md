@@ -1,5 +1,9 @@
 # CHANGELOG - mongo
 
+## 4.2.0 / 2023-02-01
+
+* [Added] Mongo Date types support in custom queries. See [#13516](https://github.com/DataDog/integrations-core/pull/13516).
+
 ## 4.1.2 / 2023-01-20
 
 * [Fixed] Update dependencies. See [#13726](https://github.com/DataDog/integrations-core/pull/13726).

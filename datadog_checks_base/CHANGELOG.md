@@ -16,6 +16,10 @@
 * [Changed] Improve integration tracing of warnings & errors. See [#13620](https://github.com/DataDog/integrations-core/pull/13620).
 * [Removed] Update TUF to 2.0.0. See [#13331](https://github.com/DataDog/integrations-core/pull/13331).
 
+## 28.0.2 / 2023-01-27 / Agent 7.42.1
+
+* [Fixed] Backport snowflake-connector-python bump 2.8.3 to 7.42.x. See [#13794](https://github.com/DataDog/integrations-core/pull/13794).
+
 ## 28.0.1 / 2022-12-16 / Agent 7.42.0
 
 * [Fixed] Fixed incorrect counter type determination and error reporting on the first collection. See [#13489](https://github.com/DataDog/integrations-core/pull/13489).

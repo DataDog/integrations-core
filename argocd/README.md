@@ -17,6 +17,7 @@ Argo CD exposes Prometheus-formatted metrics on three of their components:
    - Application Controller
    - API Server
    - Repo Server
+   
 The Datadog Agent can collect the exposed metrics using this integration. Follow the instructions below to configure data collection from any or all of the components.
 
 **Note**: This check uses [OpenMetrics][11] for metric collection, which requires Python 3.
@@ -24,7 +25,9 @@ The Datadog Agent can collect the exposed metrics using this integration. Follow
 #### Containerized
 ##### Metric collection
 
-Ensure that the Prometheus-formatted metrics are exposed in your Argo CD cluster. This is enabled by default if using Argo CD's [default manifests][10]. For the Agent to gather all metrics, each of the three aforementioned components needs to be annotated. For more information about annotations, see the [Autodiscovery Integration Templates][4] for guidance. Example configurations:
+Ensure that the Prometheus-formatted metrics are exposed in your Argo CD cluster. This is enabled by default if using Argo CD's [default manifests][10]. For the Agent to gather all metrics, each of the three aforementioned components needs to be annotated. For more information about annotations, see the [Autodiscovery Integration Templates][4] for guidance. Additional configuration options are available by reviewing the [sample argocd.d/conf.yaml][12].
+
+Example configurations:
 
 **Application Controller**:
 ```yaml
@@ -37,10 +40,10 @@ metadata:
     ad.datadoghq.com/argocd-application-controller.checks: |
       {
         "argocd": {
-          "init_config": {}},
+          "init_config": {},
           "instances": [
             {
-              "app_controller_endpoint": "%%host%%:8082/metrics"
+              "app_controller_endpoint": "http://%%host%%:8082/metrics"
             }
           ]
         }
@@ -63,10 +66,10 @@ metadata:
     ad.datadoghq.com/argocd-server.checks: |
       {
         "argocd": {
-          "init_config": {}},
+          "init_config": {},
           "instances": [
             {
-              "api_server_endpoint": "%%host%%:8083/metrics"
+              "api_server_endpoint": "http://%%host%%:8083/metrics"
             }
           ]
         }
@@ -89,10 +92,10 @@ metadata:
     ad.datadoghq.com/argocd-repo-server.checks: |
       {
         "argocd": {
-          "init_config": {}},
+          "init_config": {},
           "instances": [
             {
-              "repo_server_endpoint": "%%host%%:8084/metrics"
+              "repo_server_endpoint": "http://%%host%%:8084/metrics"
             }
           ]
         }
@@ -151,4 +154,5 @@ Need help? Contact [Datadog support][9].
 [9]: https://docs.datadoghq.com/help/
 [10]: https://argo-cd.readthedocs.io/en/stable/operator-manual/installation/
 [11]: https://docs.datadoghq.com/integrations/openmetrics/
+[12]: https://github.com/DataDog/integrations-core/blob/master/argocd/datadog_checks/argocd/data/conf.yaml.example
 
