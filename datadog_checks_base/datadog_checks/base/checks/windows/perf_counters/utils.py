@@ -38,7 +38,7 @@ def get_counter_values(counter_handle, duplicate_instances_exist):
     # ATTENTION:
     #    win32pdh.GetFormattedCounterArray() also has a big memory leak. However, eventually, when the memory
     #    leak is fixed and the function enhanced to handle duplicates we should use only this function and
-    #    remove duplicate_instances_exist configuration. 
+    #    remove duplicate_instances_exist configuration.
     if not duplicate_instances_exist:
         # This function cannot currently handle duplicate/non-unique instances (e.g. for "Process" counters)
         # See its implementation at
