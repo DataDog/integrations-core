@@ -52,7 +52,7 @@ You can explore examples of existing API integrations in the `integrations-extra
 
 The Agent Integration Developer Tool allows you to create scaffolding when you are developing an integration by generating a skeleton of your integration tile's assets and metadata. For instructions on installing the tool, see [Install the Datadog Agent Integration Developer Tool][23].
 
-Once you've installed the Developer tool, configure the tool for the `integrations-extras` repo:
+After you install the Developer tool, configure it for the `integrations-extras` repo:
 
 Set `integrations-extras` as the default working repository:
 
