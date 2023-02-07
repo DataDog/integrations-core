@@ -49,7 +49,6 @@ def replace_datetime(obj, log):
         return [replace_datetime(item, log) for item in obj]
     else:
         return replace_value(obj, log)
-    return obj
 
 
 class CustomQueriesCollector(MongoCollector):
