@@ -12,9 +12,9 @@ The Windows Service check is included in the [Datadog Agent][1] package, so you 
 
 ### Configuration
 
-The configuration is located in the `windows_service.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][2]. See the [sample windows_service.d/conf.yaml][3] for all available configuration options. When you are done editing the configuration file [Restart the Agent][4] to load the new configuration.
+The configuration is located in the `windows_service.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][2]. See the [sample windows_service.d/conf.yaml][3] for all available configuration options. When you are done editing the configuration file, [restart the Agent][4] to load the new configuration.
 
-The check can monitor all services on the system or selectively monitor a few services by name. Beginning with Agent version 7.41 the check can select which services to monitor based on their startup type.
+The check can monitor all services on the system or selectively monitor a few services by name. Beginning with Agent version 7.41, the check can select which services to monitor based on their startup type.
 
 This example configuration monitors only the `Dnscache` and `wmiApSrv` services:
 ```yaml
@@ -24,14 +24,14 @@ instances:
     - wmiapsrv
 ```
 
-This example uses the `ALL` keyword to monitor all the services on the host. If any of the service names are set to `ALL` then the other patterns in the instance will be ignored.
+This example uses the `ALL` keyword to monitor all services on the host. If the `ALL` keyword is used, the other patterns in the instance are ignored.
 ```yaml
 instances:
   - services:
     - ALL
 ```
 
-The check uses case-insensitive [Python regular expressions][11] when matching the service names. If a service name includes special characters you must escape the special characters with a `\`. For example, `MSSQL$CRMAWS` becomes  `MSSQL\$CRMAWS` and `Web Server (prod)` becomes `Web Server \(prod\)`. The service name pattern will match all service names that start with the pattern, for an exact match use the regular expression `^service$`.
+The check uses case-insensitive [Python regular expressions][11] when matching service names. If a service name includes special characters, you must escape the special characters with a `\`. For example, `MSSQL$CRMAWS` becomes  `MSSQL\$CRMAWS` and `Web Server (prod)` becomes `Web Server \(prod\)`. The service name pattern matches all service names that start with the pattern. For an exact match, use the regular expression `^service$`.
 
 Provide service names as they appear in the service name field, **NOT** the display name field. For example, configure the service name `datadogagent` **NOT** the display name `Datadog Agent`.
 
@@ -39,7 +39,7 @@ Provide service names as they appear in the service name field, **NOT** the disp
 <img alt="Datadog Agent service properties" src="https://raw.githubusercontent.com/DataDog/integrations-core/master/windows_service/images/service-properties.png"/>
 </p>
 
-Beginning with Agent version 7.41 the check can select which services to monitor based on their startup type.
+Beginning with Agent version 7.41, the check can select which services to monitor based on their startup type.
 For example, to monitor only the services that have an `automatic` or `automatic_delayed_start` startup type.
 ```yaml
 instances:
@@ -47,23 +47,24 @@ instances:
     - startup_type: automatic
     - startup_type: automatic_delayed_start
 ```
+
 The possible values for `startup_type` are:
-- disabled
-- manual
-- automatic
-- automatic_delayed_start
+- `disabled`
+- `manual`
+- `automatic`
+- `automatic_delayed_start`
 
 #### Tags
 
-The check automatically tags the Windows service name to each service check in the `windows_service:<SERVICE>` tag. The `<SERVICE>` name in the tag will be lowercased and have special characters replaced, see [Getting Started with Tags][12] for more information.
+The check automatically tags the Windows service name to each service check in the `windows_service:<SERVICE>` tag. The `<SERVICE>` name in the tag uses lowercase and special characters are replaced with underscores. See [Getting Started with Tags][12] for more information.
 
-**NOTE:** The check also automaticlly tags the Windows service name to each service check in the `service:<SERVICE>` tag. **This behavior is deprecated** and the check will stop automatically assigning this tag in a future version of the agent. To stop the check from automatically assigning this tag and to disable the associated deprecation warning set the `disable_legacy_service_tag` option. See [Assigning Tags][13] for information on how to assign the `service` tag to a service.
+**NOTE:** The check also automatically tags the Windows service name to each service check in the `service:<SERVICE>` tag. **This behavior is deprecated**. In a future version of the Agent, the check will stop automatically assigning this tag. To stop the check from automatically assigning this tag and to disable the associated deprecation warning, set the `disable_legacy_service_tag` option. See [Assigning Tags][13] for information on how to assign the `service` tag to a service.
 
-Beginning with Agent version 7.40 the check can add a `windows_service_startup_type:<STARTUP_TYPE>` tag to each service check to indicate the startup type of the service. Set the `windows_service_startup_type_tag` option to include this tag with each service check.
+Beginning with Agent version 7.40, the check can add a `windows_service_startup_type:<STARTUP_TYPE>` tag to each service check to indicate the startup type of the service. Set the `windows_service_startup_type_tag` option to include this tag with each service check.
 
 ### Validation
 
-[Run the Agent's status subcommand][5] and look for `windows_service` under the Checks section.
+[Run the Agent's status subcommand][5] and look for `windows_service` under the **Checks** section.
 
 ## Data Collected
 
@@ -84,11 +85,12 @@ See [service_checks.json][6] for a list of service checks provided by this integ
 Need help? Contact [Datadog support][7].
 
 ### Service permissions
-If a service is present and matches the configuration but the Datadog Agent does not not report a service check for the service the reason could be because the Datadog Agent has insufficient permissions. For example, by default the Datadog Agent does not have access to the NTDS Active Directory Domain Services service. To verify this, run the check from an **elevated(run as Admin)** powershell
+If a service is present and matches the configuration, but the Datadog Agent does not report a service check for the service, the Datadog Agent might have insufficient permissions. For example, by default the Datadog Agent does not have access to the NTDS Active Directory Domain Services service. To verify this, run the check from an **elevated (run as Admin)** PowerShell shell.
+
 ```powershell
 & "$env:ProgramFiles\Datadog\Datadog Agent\bin\agent.exe" check windows_service
 ```
-If the service is present in the output then permissions are the issue. To give the Datadog Agent permission [grant `Read` access on the service][14] to the [Datadog Agent User][15]. We recommend [granting `Read` access with Group Policy][16] to ensure the permissions persist through Windows Updates.
+If the service is present in the output, permissions are the issue. To give the Datadog Agent permission [grant `Read` access on the service][14] to the [Datadog Agent User][15]. We recommend [granting `Read` access with Group Policy][16] to ensure the permissions persist through Windows Updates.
 
 ## Further Reading
 
