@@ -23,10 +23,9 @@ from .util import (
     CONNECTION_METRICS,
     FUNCTION_METRICS,
     QUERY_PG_STAT_DATABASE,
+    QUERY_PG_STAT_WAL_RECEIVER,
     REPLICATION_METRICS,
     SLRU_METRICS,
-    WAL_RECEIVER_COUNT_METRICS,
-    WAL_RECEIVER_METRICS,
     DatabaseConfigurationError,
     fmt,
     get_schema_field,
@@ -111,6 +110,9 @@ class PostgreSql(AgentCheck):
                 q_pg_stat_database["query"] += " AND datname in('{}')".format(self._config.dbname)
 
             queries.extend([q_pg_stat_database])
+
+        if self.version >= V10:
+            queries.extend([QUERY_PG_STAT_WAL_RECEIVER])
 
         if not queries:
             self.log.debug("no dynamic queries defined")
@@ -371,8 +373,6 @@ class PostgreSql(AgentCheck):
             metric_scope.append(FUNCTION_METRICS)
         if self._config.collect_count_metrics:
             metric_scope.append(self.metrics_cache.get_count_metrics())
-        if self.version >= V10:
-            metric_scope += [WAL_RECEIVER_METRICS, WAL_RECEIVER_COUNT_METRICS]
         if self.version >= V13:
             metric_scope.append(SLRU_METRICS)
 
