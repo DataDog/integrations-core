@@ -328,7 +328,6 @@ pytestmark = [pytest.mark.unit]
         'one host with good health and one tag',
         'one host with good health and custom tags',
     ],
-    indirect=[],
 )
 def test_list_hosts(
     aggregator,

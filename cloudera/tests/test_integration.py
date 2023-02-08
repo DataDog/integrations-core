@@ -50,7 +50,6 @@ from datadog_checks.cloudera.metrics import TIMESERIES_METRICS
         ),
     ],
     ids=['bad url', 'good url'],
-    indirect=[],
 )
 def test_api_urls(
     aggregator,
@@ -109,7 +108,6 @@ def test_api_urls(
         {'api_url': 'http://localhost:8080/api/v48/'},
     ],
     ids=['metadata from good url'],
-    indirect=[],
 )
 def test_metadata(instance, cloudera_check, dd_run_check, datadog_agent):
     check = cloudera_check(instance)
@@ -273,7 +271,6 @@ def test_metadata(instance, cloudera_check, dd_run_check, datadog_agent):
         'non existent metric custom query',
         'incorrect formatting custom query',
     ],
-    indirect=[],
 )
 def test_custom_queries(
     instance,
