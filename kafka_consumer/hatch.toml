@@ -15,7 +15,7 @@ offset-storage = ["kafka", "zk"]
 matrix.version.e2e-env = { value = true, if = ["0.9", "latest"] }
 matrix.version.env-vars = [
   { key = "KAFKA_VERSION", value = "0.9.0.1-1", if = ["0.9"] },
-  { key = "KAFKA_VERSION", value = "0.11.0-1-r1", if = ["0.11"] },
+  { key = "KAFKA_VERSION", value = "0.11.0.1", if = ["0.11"] },
   { key = "KAFKA_VERSION", value = "1.1.1", if = ["1.1"] },
   { key = "KAFKA_VERSION", value = "2.3.1", if = ["2.3"] },
   { key = "KAFKA_VERSION", value = "latest", if = ["latest"] },
