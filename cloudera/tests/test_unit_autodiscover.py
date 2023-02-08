@@ -262,7 +262,7 @@ def test_autodiscover_clusters(
 
 @pytest.mark.parametrize(
     'instance, dd_run_check_count, read_clusters, list_hosts, expected_can_connects, expected_host_healths, '
-    'expected_metrics',
+    'expected_metrics, list_hosts_call_count',
     [
         (
             {
@@ -296,6 +296,7 @@ def test_autodiscover_clusters(
             ],
             [{'count': 0}],
             [{'count': 0}],
+            0,
         ),
         (
             {
@@ -330,6 +331,7 @@ def test_autodiscover_clusters(
             ],
             [{'count': 0}],
             [{'count': 0}],
+            0,
         ),
         (
             {
@@ -361,6 +363,7 @@ def test_autodiscover_clusters(
             ],
             [{'count': 0}],
             [{'count': 0}],
+            0,
         ),
         (
             {
@@ -393,6 +396,7 @@ def test_autodiscover_clusters(
             ],
             [{'count': 0}],
             [{'count': 0}],
+            0,
         ),
         (
             {
@@ -423,6 +427,7 @@ def test_autodiscover_clusters(
             ],
             [{'count': 0}],
             [{'count': 0}],
+            1,
         ),
         (
             {
@@ -514,6 +519,7 @@ def test_autodiscover_clusters(
                     ],
                 },
             ],
+            1,
         ),
         (
             {
@@ -793,6 +799,7 @@ def test_autodiscover_clusters(
                     ],
                 },
             ],
+            1,
         ),
         (
             {
@@ -876,6 +883,7 @@ def test_autodiscover_clusters(
                     ],
                 },
             ],
+            1,
         ),
         (
             {
@@ -959,6 +967,7 @@ def test_autodiscover_clusters(
                     ],
                 },
             ],
+            1,
         ),
         (
             {
@@ -1017,6 +1026,67 @@ def test_autodiscover_clusters(
                     ],
                 },
             ],
+            2,
+        ),
+        (
+            {
+                'api_url': 'http://localhost:8080/api/v48/',
+                'clusters': {
+                    'include': [
+                        {
+                            '^cluster.*': {
+                                'hosts': {
+                                    'interval': 60,
+                                    'include': ['^host.*'],
+                                }
+                            }
+                        }
+                    ]
+                },
+            },
+            2,
+            [
+                {'name': 'cluster_0', 'entity_status': 'GOOD_HEALTH'},
+            ],
+            [
+                {
+                    'host_id': ''.join(random.choices(string.ascii_uppercase + string.digits, k=8)),
+                    'name': 'host_0',
+                    'entity_status': 'BAD_HEALTH',
+                    'num_cores': 8,
+                    'num_physical_cores': 8,
+                    'total_phys_mem_bytes': 33079799808,
+                    'rack_id': 'rack_id_0',
+                    'tags': [],
+                },
+            ],
+            [
+                {
+                    'count': 2,
+                    'status': ServiceCheck.OK,
+                    'tags': ['api_url:http://localhost:8080/api/v48/'],
+                }
+            ],
+            [
+                {
+                    'count': 2,
+                    'status': ServiceCheck.CRITICAL,
+                    'tags': ['cloudera_cluster:cluster_0', 'cloudera_hostname:host_0', 'cloudera_rack_id:rack_id_0'],
+                },
+            ],
+            [
+                {
+                    'count': 2,
+                    'tags': ['cloudera_cluster:cluster_0', 'cloudera_hostname:host_0', 'cloudera_rack_id:rack_id_0'],
+                    'ts_tags': [
+                        'cloudera_cluster:cluster_0',
+                        'cloudera_hostname:host_0',
+                        'cloudera_rack_id:rack_id_0',
+                        'cloudera_host:host_0',
+                    ],
+                },
+            ],
+            1,
         ),
     ],
     ids=[
@@ -1029,7 +1099,8 @@ def test_autodiscover_clusters(
         'configured host autodiscover with ten clusters and limit',
         'configured host autodiscover with two different prefix hosts and one of them excluded',
         'configured host autodiscover (with dict) with two different prefix hosts and one of them excluded',
-        'configured host autodiscover with one host when run check two times only one remote call',
+        'configured host autodiscover without interval with one host when run check two times then two remote calls',
+        'configured host autodiscover with interval with one host when run check two times then only one remote call',
     ],
 )
 def test_autodiscover_hosts(
@@ -1043,6 +1114,7 @@ def test_autodiscover_hosts(
     expected_can_connects,
     expected_host_healths,
     expected_metrics,
+    list_hosts_call_count,
 ):
     with mock.patch(
         'datadog_checks.cloudera.client.cm_client.CmClient.get_version',
@@ -1088,4 +1160,4 @@ def test_autodiscover_hosts(
                 aggregator.assert_metric(
                     f'cloudera.host.{metric}', count=expected_metric.get('count'), tags=expected_metric.get('ts_tags')
                 )
-        mocked_list_hosts.call_count = 1
+        assert mocked_list_hosts.call_count == list_hosts_call_count
