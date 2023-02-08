@@ -85,6 +85,7 @@ def kafka_instance():
         'tags': ['optional:tag1'],
         'consumer_groups': {'my_consumer': {'marvel': [0]}},
         'broker_requests_batch_size': 1,
+        'api_version': os.environ.get('KAFKA_VERSION'),
     }
 
 
