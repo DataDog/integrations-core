@@ -48,7 +48,6 @@ pytestmark = [pytest.mark.unit]
         ),
     ],
     ids=['exception running custom query', 'one custom query configured'],
-    indirect=[],
 )
 def test_custom_queries(
     aggregator,

@@ -90,7 +90,6 @@ pytestmark = [pytest.mark.unit]
         'one event',
         'one event with custom tags',
     ],
-    indirect=[],
 )
 def test_events(
     aggregator,

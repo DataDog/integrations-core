@@ -207,7 +207,6 @@ pytestmark = [pytest.mark.unit]
         'configured cluster autodiscover with two different prefix clusters and one of them excluded',
         'configured cluster autodiscover (with dict) with two different prefix clusters and one of them excluded',
     ],
-    indirect=[],
 )
 def test_autodiscover_clusters(
     aggregator,
@@ -1032,7 +1031,6 @@ def test_autodiscover_clusters(
         'configured host autodiscover (with dict) with two different prefix hosts and one of them excluded',
         'configured host autodiscover with one host when run check two times only one remote call',
     ],
-    indirect=[],
 )
 def test_autodiscover_hosts(
     aggregator,

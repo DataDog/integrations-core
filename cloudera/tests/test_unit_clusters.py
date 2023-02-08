@@ -193,7 +193,6 @@ pytestmark = [pytest.mark.unit]
         'two clusters with good health',
         'two clusters with good health and custom tags',
     ],
-    indirect=[],
 )
 def test_read_clusters(
     aggregator,

@@ -135,7 +135,6 @@ pytestmark = [pytest.mark.unit]
         'supported',
         'supported with custom tags',
     ],
-    indirect=[],
 )
 def test_version(
     aggregator,
