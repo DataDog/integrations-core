@@ -123,6 +123,6 @@ def e2e_instance(kafka_instance, zk_instance):
 
 
 def _get_bootstrap_server_flag():
-    if KAFKA_VERSION != 'latest' and parse_version(KAFKA_VERSION) < parse_version('2.0'):
+    if KAFKA_VERSION != 'latest' and parse_version(KAFKA_VERSION) < parse_version('3.0'):
         return '--zookeeper zookeeper:2181'
     return '--bootstrap-server kafka1:19092'
