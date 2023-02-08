@@ -55,21 +55,23 @@ class ApiV7(Api):
             with ThreadPoolExecutor(max_workers=len(discovered_clusters) * 3) as executor, raising_submitter(
                 executor
             ) as submit:
-                for pattern, key, item, config in discovered_clusters:
+                for pattern, cluster_name, item, cluster_config in discovered_clusters:
                     self._log.debug(
-                        "Discovered cluster: [pattern:%s, cluster_name:%s, config:%s]", pattern, key, config
+                        "Discovered cluster: [pattern:%s, cluster_name:%s, config:%s]",
+                        pattern,
+                        cluster_name,
+                        cluster_config,
                     )
                     self._log.trace(
                         "Discovered cluster raw response: [pattern:%s, key:%s, item:%s, config:%s]",
                         pattern,
-                        key,
+                        cluster_name,
                         item,
-                        config,
+                        cluster_config,
                     )
-                    cluster_name = key
                     tags = self._collect_cluster_tags(item)
                     submit(self._collect_cluster_metrics, cluster_name, tags)
-                    submit(self._collect_hosts, cluster_name, config)
+                    submit(self._collect_hosts, cluster_name, cluster_config)
                     submit(self._collect_cluster_service_check, item, tags)
 
     def _collect_events(self):
