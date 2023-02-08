@@ -12,7 +12,7 @@ from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.utils.http import AuthTokenOAuthReader
 
 from .constants import CONTEXT_UPPER_BOUND, DEFAULT_KAFKA_TIMEOUT
-from .legacy_0_10_2 import LegacyKafkaCheck_0_10_2
+# from .legacy_0_10_2 import LegacyKafkaCheck_0_10_2
 from .new_kafka_consumer import NewKafkaConsumerCheck
 
 
@@ -117,8 +117,8 @@ class KafkaCheck(AgentCheck):
 
         To clarify: This check still allows fetching offsets from zookeeper/older kafka brokers, it just uses the
         legacy code path."""
-        if self.instance.get('zk_connect_str'):
-            return LegacyKafkaCheck_0_10_2(self)
+        # if self.instance.get('zk_connect_str'):
+        #     return LegacyKafkaCheck_0_10_2(self)
 
         kafka_version = self.instance.get('kafka_client_api_version')
         if isinstance(kafka_version, str):
@@ -129,8 +129,8 @@ class KafkaCheck(AgentCheck):
             kafka_version = kafka_client.config['api_version']
             kafka_client.close()
 
-        if kafka_version < (0, 10, 2):
-            return LegacyKafkaCheck_0_10_2(self)
+        # if kafka_version < (0, 10, 2):
+        #     return LegacyKafkaCheck_0_10_2(self)
 
         return NewKafkaConsumerCheck(self)
 

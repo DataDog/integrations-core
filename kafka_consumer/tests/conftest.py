@@ -10,7 +10,7 @@ from kafka import KafkaConsumer
 
 from datadog_checks.dev import WaitFor, docker_run
 
-from .common import DOCKER_IMAGE_PATH, HOST_IP, KAFKA_CONNECT_STR, PARTITIONS, TOPICS, ZK_CONNECT_STR
+from .common import DOCKER_IMAGE_PATH, HOST_IP, KAFKA_CONNECT_STR, PARTITIONS, TOPICS
 from .runners import KConsumer, Producer, ZKConsumer
 
 
@@ -24,10 +24,9 @@ def find_topics():
 
 def initialize_topics():
     flavor = os.environ.get('KAFKA_OFFSETS_STORAGE')
-    if flavor == 'zookeeper':
-        consumer = ZKConsumer(TOPICS, PARTITIONS)
-    else:
-        consumer = KConsumer(TOPICS)
+    # if flavor == 'zookeeper':
+    #     consumer = ZKConsumer(TOPICS, PARTITIONS)
+    consumer = KConsumer(TOPICS)
 
     with Producer():
         with consumer:
@@ -68,13 +67,13 @@ E2E_METADATA = {
 }
 
 
-@pytest.fixture(scope='session')
-def zk_instance():
-    return {
-        'kafka_connect_str': KAFKA_CONNECT_STR,
-        'zk_connect_str': ZK_CONNECT_STR,
-        'consumer_groups': {'my_consumer': {'marvel': [0]}},
-    }
+# @pytest.fixture(scope='session')
+# def zk_instance():
+#     return {
+#         'kafka_connect_str': KAFKA_CONNECT_STR,
+#         'zk_connect_str': ZK_CONNECT_STR,
+#         'consumer_groups': {'my_consumer': {'marvel': [0]}},
+#     }
 
 
 @pytest.fixture(scope='session')
@@ -111,9 +110,9 @@ def kafka_instance_tls():
 
 
 @pytest.fixture(scope='session')
-def e2e_instance(kafka_instance, zk_instance):
+def e2e_instance(kafka_instance):
     flavor = os.environ.get('KAFKA_OFFSETS_STORAGE')
     if flavor == 'kafka':
         return kafka_instance
-    elif flavor == 'zookeeper':
-        return zk_instance
+    # elif flavor == 'zookeeper':
+    #     return zk_instance
