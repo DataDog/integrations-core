@@ -27,7 +27,7 @@ from .common import (
     check_db_count,
     check_slru_metrics,
     check_stat_replication,
-    check_wal_receiver_count_metrics,
+    check_wal_receiver_metrics,
     requires_static_version,
 )
 from .utils import requires_over_10
@@ -48,7 +48,7 @@ def test_common_metrics(aggregator, integration_check, pg_instance):
     check_db_count(aggregator, expected_tags=expected_tags)
     check_slru_metrics(aggregator, expected_tags=expected_tags)
     check_stat_replication(aggregator, expected_tags=expected_tags)
-    check_wal_receiver_count_metrics(aggregator, expected_tags=expected_tags, value=0)
+    check_wal_receiver_metrics(aggregator, expected_tags=expected_tags, connected=0)
 
     aggregator.assert_all_metrics_covered()
 

@@ -10,10 +10,9 @@ from datadog_checks.base.stubs.aggregator import normalize_tags
 from datadog_checks.dev import get_docker_hostname
 from datadog_checks.dev.docker import get_container_ip
 from datadog_checks.postgres.util import (
+    QUERY_PG_STAT_WAL_RECEIVER,
     REPLICATION_STATS_METRICS,
     SLRU_METRICS,
-    WAL_RECEIVER_COUNT_METRICS,
-    WAL_RECEIVER_METRICS,
 )
 from datadog_checks.postgres.version_utils import VersionUtils
 
@@ -26,7 +25,6 @@ DB_NAME = 'datadog_test'
 POSTGRES_VERSION = os.environ.get('POSTGRES_VERSION', None)
 POSTGRES_IMAGE = "alpine"
 
-PRIMARY_CONTAINER_NAME = 'compose-postgres-1'
 REPLICA_CONTAINER_NAME = 'compose-postgres_replica-1'
 USING_LATEST = False
 
@@ -155,18 +153,17 @@ def check_stat_replication(aggregator, expected_tags, count=1):
         aggregator.assert_metric(metric_name, count=count, tags=replication_tags)
 
 
-def check_wal_receiver_metrics(aggregator, expected_tags, count=1):
+def check_wal_receiver_metrics(aggregator, expected_tags, count=1, connected=1):
     if float(POSTGRES_VERSION) < 10.0:
         return
-    for (metric_name, _) in WAL_RECEIVER_METRICS['metrics'].values():
-        aggregator.assert_metric(metric_name, count=count, tags=expected_tags + ['status:streaming'])
-
-
-def check_wal_receiver_count_metrics(aggregator, expected_tags, count=1, value=None):
-    if float(POSTGRES_VERSION) < 10.0:
+    if not connected:
+        aggregator.assert_metric('postgresql.wal_receiver.connected', count=count, value=1,
+                                 tags=expected_tags + ['status:disconnected'])
         return
-    for (metric_name, _) in WAL_RECEIVER_COUNT_METRICS['metrics'].values():
-        aggregator.assert_metric(metric_name, count=count, value=value, tags=expected_tags)
+    for column in QUERY_PG_STAT_WAL_RECEIVER['columns']:
+        if column['type'] == 'tag':
+            continue
+        aggregator.assert_metric(column['name'], count=count, tags=expected_tags)
 
 
 def check_replication_delay(aggregator, metrics_cache, expected_tags, count=1):
