@@ -23,32 +23,32 @@ class MetricPatterns(BaseModel):
     class Config:
         allow_mutation = False
 
-    exclude: Optional[Sequence[str]]
-    include: Optional[Sequence[str]]
+    exclude: Sequence[str] | None
+    include: Sequence[str] | None
 
 
 class InstanceConfig(BaseModel):
     class Config:
         allow_mutation = False
 
-    disable_generic_tags: Optional[bool]
-    empty_default_hostname: Optional[bool]
-    expected_mode: Optional[str]
+    disable_generic_tags: bool | None
+    empty_default_hostname: bool | None
+    expected_mode: str | None
     host: str
-    metric_patterns: Optional[MetricPatterns]
-    min_collection_interval: Optional[float]
-    port: Optional[int]
-    report_instance_mode: Optional[bool]
-    service: Optional[str]
-    tags: Optional[Sequence[str]]
-    timeout: Optional[int]
-    tls_ca_cert: Optional[str]
-    tls_cert: Optional[str]
-    tls_private_key: Optional[str]
-    tls_private_key_password: Optional[str]
-    tls_validate_hostname: Optional[bool]
-    tls_verify: Optional[bool]
-    use_tls: Optional[bool]
+    metric_patterns: MetricPatterns | None
+    min_collection_interval: float | None
+    port: int | None
+    report_instance_mode: bool | None
+    service: str | None
+    tags: Sequence[str] | None
+    timeout: int | None
+    tls_ca_cert: str | None
+    tls_cert: str | None
+    tls_private_key: str | None
+    tls_private_key_password: str | None
+    tls_validate_hostname: bool | None
+    tls_verify: bool | None
+    use_tls: bool | None
 
     @root_validator(pre=True)
     def _initial_validation(cls, values):

@@ -23,7 +23,7 @@ class SharedConfig(BaseModel):
     class Config:
         allow_mutation = False
 
-    service: Optional[str]
+    service: str | None
 
     @root_validator(pre=True)
     def _initial_validation(cls, values):
