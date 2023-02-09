@@ -12,7 +12,6 @@ from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.utils.http import AuthTokenOAuthReader
 
 from .constants import CONTEXT_UPPER_BOUND, DEFAULT_KAFKA_TIMEOUT
-# from .legacy_0_10_2 import LegacyKafkaCheck_0_10_2
 from .new_kafka_consumer import NewKafkaConsumerCheck
 
 
@@ -40,7 +39,6 @@ class KafkaCheck(AgentCheck):
 
     def __init__(self, name, init_config, instances):
         super(KafkaCheck, self).__init__(name, init_config, instances)
-        self.sub_check = None
         self._context_limit = int(self.init_config.get('max_partition_contexts', CONTEXT_UPPER_BOUND))
         self._data_streams_enabled = is_affirmative(self.instance.get('data_streams_enabled', False))
         self._custom_tags = self.instance.get('tags', [])
@@ -51,8 +49,7 @@ class KafkaCheck(AgentCheck):
             self.instance.get('monitor_all_broker_highwatermarks', False)
         )
         self._consumer_groups = self.instance.get('consumer_groups', {})
-
-        self.check_initializations.append(self._init_check_based_on_kafka_version)
+        self.sub_check = NewKafkaConsumerCheck(self)
 
     def check(self, _):
         return self.sub_check.check()
@@ -92,47 +89,6 @@ class KafkaCheck(AgentCheck):
                     if partitions is not None:
                         for partition in partitions:
                             assert isinstance(partition, int)
-
-    def _init_check_based_on_kafka_version(self):
-        """Set the sub_check attribute before allowing the `check` method to run. If something fails, this method will
-        be retried regularly."""
-        self.sub_check = self._make_sub_check()
-
-    def _make_sub_check(self):
-        """Determine whether to use old legacy KafkaClient implementation or the new KafkaAdminClient implementation.
-
-        The legacy version of this check uses the KafkaClient and handrolls things like looking up the GroupCoordinator,
-        crafting the offset requests, handling errors, etc.
-
-        The new implementation uses the KafkaAdminClient which lets us offload most of the Kafka-specific bits onto the
-        kafka-python library, which is used by many other tools and reduces our maintenance burden.
-
-        Unfortunately, the KafkaAdminClient requires brokers >= 0.10.0, so we split the check into legacy and new code.
-
-        Furthermore, we took the opportunity to simplify the new code by dropping support for:
-        1) Zookeeper-based offsets. These have been deprecated since Kafka 0.9.
-        2) Kafka brokers < 0.10.2. It is impossible to support monitor_unlisted_consumer_groups on these older brokers
-        because they do not provide a way to determine the mapping of consumer groups to topics. For details, see
-        KIP-88.
-
-        To clarify: This check still allows fetching offsets from zookeeper/older kafka brokers, it just uses the
-        legacy code path."""
-        # if self.instance.get('zk_connect_str'):
-        #     return LegacyKafkaCheck_0_10_2(self)
-
-        kafka_version = self.instance.get('kafka_client_api_version')
-        if isinstance(kafka_version, str):
-            kafka_version = tuple(map(int, kafka_version.split(".")))
-        if kafka_version is None:  # if unspecified by the user, we have to probe the cluster
-            kafka_client = self.create_kafka_client()
-            # version probing happens automatically as part of KafkaClient's __init__()
-            kafka_version = kafka_client.config['api_version']
-            kafka_client.close()
-
-        # if kafka_version < (0, 10, 2):
-        #     return LegacyKafkaCheck_0_10_2(self)
-
-        return NewKafkaConsumerCheck(self)
 
     def _create_kafka_client(self, clazz):
         kafka_connect_str = self.instance.get('kafka_connect_str')
