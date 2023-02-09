@@ -254,7 +254,7 @@ class ZookeeperCheck(AgentCheck):
                         return self._get_data(ssock, command)
                 else:
                     return self._get_data(sock, command)
-        except (socket.timeout, socket.error) as exc:
+        except OSError as exc:
             raise ZKConnectionFailure(exc)  # Include `exc` message for PY2.
 
     def parse_stat(self, buf):
