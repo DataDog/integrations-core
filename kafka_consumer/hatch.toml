@@ -6,7 +6,7 @@ python = ["3.8"]
 version = ["1.1", "2.3", "latest"]
 
 [envs.default.overrides]
-matrix.version.e2e-env = { value = true, if = ["0.9", "latest"] }
+matrix.version.e2e-env = { value = true, if = ["latest"] }
 matrix.version.env-vars = [
   { key = "KAFKA_VERSION", value = "1.1.0", if = ["1.1"] },
   { key = "KAFKA_VERSION", value = "2.12-2.3.0", if = ["2.3"] },

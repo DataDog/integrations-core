@@ -80,6 +80,7 @@ def test_tls_config_ok(kafka_instance_tls):
 @pytest.mark.unit
 def test_oauth_token_client_config(kafka_instance):
     instance = copy.deepcopy(kafka_instance)
+    instance['kafka_client_api_version'] = "0.10.2"
     instance['security_protocol'] = "SASL_PLAINTEXT"
     instance['sasl_mechanism'] = "OAUTHBEARER"
     instance['sasl_oauth_token_provider'] = {
