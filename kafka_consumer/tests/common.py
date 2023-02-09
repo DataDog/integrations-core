@@ -32,9 +32,3 @@ def is_supported(flavor):
         return False
 
     return True
-
-
-def is_legacy_check():
-    return os.environ.get('KAFKA_OFFSETS_STORAGE') == 'zookeeper' or os.environ.get('KAFKA_VERSION', '').startswith(
-        '0.9'
-    )

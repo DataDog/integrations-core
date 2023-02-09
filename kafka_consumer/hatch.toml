@@ -3,27 +3,23 @@
 
 [[envs.default.matrix]]
 python = ["3.8"]
-version = ["0.11", "1.1", "2.3", "latest"]
-offset-storage = ["kafka", "zk"]
+version = ["1.1", "2.3", "latest"]
+offset-storage = ["kafka"]
 
 [envs.default.overrides]
 matrix.version.e2e-env = { value = true, if = ["0.9", "latest"] }
 matrix.version.env-vars = [
-  { key = "KAFKA_VERSION", value = "0.9.0.1-1", if = ["0.9"] },
-  { key = "KAFKA_VERSION", value = "0.11.0.1", if = ["0.11"] },
   { key = "KAFKA_VERSION", value = "1.1.0", if = ["1.1"] },
   { key = "KAFKA_VERSION", value = "2.12-2.3.0", if = ["2.3"] },
   { key = "KAFKA_VERSION", value = "latest", if = ["latest"] },
   # Using Kafka 0.9 + with ZK 3.4 due to flakiness of Kafka 0.9 + ZK 3.6
-  { key = "ZK_VERSION", value = "3.4.11", if = ["0.9"] },
-  { key = "ZK_VERSION", value = "3.6.0", if = ["0.11", "1.1", "2.3", "latest"] },
+  { key = "ZK_VERSION", value = "3.6.0", if = ["1.1", "2.3", "latest"] },
   { key = "USE_MULTIPLE_BROKERS", value = "true", if = ["1.1", "2.3", "latest"] },
   # Can't have a working `docker compose` for these versions
   { key = "USE_MULTIPLE_BROKERS", value = "false", if = ["0.9", "0.11"] },
 ]
 matrix.offset-storage.env-vars = [
   { key = "KAFKA_OFFSETS_STORAGE", value = "kafka", if = ["kafka"] },
-  { key = "KAFKA_OFFSETS_STORAGE", value = "zookeeper", if = ["zk"] },
 ]
 
 [envs.default]
