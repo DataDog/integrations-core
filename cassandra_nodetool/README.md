@@ -14,6 +14,13 @@ The Cassandra Nodetool check is included in the [Datadog Agent][3] package, so y
 
 ### Configuration
 
+Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
+#### Host
+
 1. Edit the file `cassandra_nodetool.d/conf.yaml` in the `conf.d/` folder at the root of your [Agent's configuration directory][4]. See the [sample cassandra_nodetool.d/conf.yaml][5] for all available configuration options:
 
    ```yaml
@@ -34,6 +41,16 @@ The Cassandra Nodetool check is included in the [Datadog Agent][3] package, so y
 #### Log collection
 
 Cassandra Nodetool logs are collected by the Cassandra integration. See the [log collection instructions for Cassandra][7].
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
+
+#### Containerized
+
+For containerized environments, use the official [Prometheus exporter][15] in the pod, and then use Autodiscovery in the Agent to find the pod and query the endpoint.
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 
@@ -77,3 +94,4 @@ Need help? Contact [Datadog support][11].
 [12]: https://www.datadoghq.com/blog/how-to-monitor-cassandra-performance-metrics
 [13]: https://www.datadoghq.com/blog/how-to-collect-cassandra-metrics
 [14]: https://www.datadoghq.com/blog/monitoring-cassandra-with-datadog
+[15]: https://github.com/prometheus/jmx_exporter
