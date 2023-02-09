@@ -9,11 +9,7 @@ import pytest
 from datadog_checks.base.stubs.aggregator import normalize_tags
 from datadog_checks.dev import get_docker_hostname
 from datadog_checks.dev.docker import get_container_ip
-from datadog_checks.postgres.util import (
-    QUERY_PG_STAT_WAL_RECEIVER,
-    REPLICATION_STATS_METRICS,
-    SLRU_METRICS,
-)
+from datadog_checks.postgres.util import QUERY_PG_STAT_WAL_RECEIVER, REPLICATION_STATS_METRICS, SLRU_METRICS
 from datadog_checks.postgres.version_utils import VersionUtils
 
 HOST = get_docker_hostname()
