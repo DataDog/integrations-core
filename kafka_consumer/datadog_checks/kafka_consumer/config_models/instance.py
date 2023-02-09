@@ -47,7 +47,6 @@ class InstanceConfig(BaseModel):
     empty_default_hostname: Optional[bool]
     kafka_client_api_version: Optional[str]
     kafka_connect_str: Union[str, Sequence[str]]
-    kafka_consumer_offsets: Optional[bool]
     metric_patterns: Optional[MetricPatterns]
     min_collection_interval: Optional[float]
     monitor_all_broker_highwatermarks: Optional[bool]
@@ -68,8 +67,6 @@ class InstanceConfig(BaseModel):
     tls_private_key_password: Optional[str]
     tls_validate_hostname: Optional[bool]
     tls_verify: Optional[bool]
-    zk_connect_str: Optional[Union[str, Sequence[str]]]
-    zk_prefix: Optional[str]
 
     @root_validator(pre=True)
     def _initial_validation(cls, values):
