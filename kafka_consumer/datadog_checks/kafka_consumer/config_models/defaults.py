@@ -18,10 +18,6 @@ def shared_service(field, value):
     return get_default_field_value(field, value)
 
 
-def shared_zk_timeout(field, value):
-    return 5
-
-
 def instance_broker_requests_batch_size(field, value):
     return 30
 
@@ -44,10 +40,6 @@ def instance_empty_default_hostname(field, value):
 
 def instance_kafka_client_api_version(field, value):
     return get_default_field_value(field, value)
-
-
-def instance_kafka_consumer_offsets(field, value):
-    return False
 
 
 def instance_metric_patterns(field, value):
@@ -128,11 +120,3 @@ def instance_tls_validate_hostname(field, value):
 
 def instance_tls_verify(field, value):
     return True
-
-
-def instance_zk_connect_str(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_zk_prefix(field, value):
-    return get_default_field_value(field, value)
