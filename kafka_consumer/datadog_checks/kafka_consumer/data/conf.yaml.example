@@ -240,8 +240,3 @@ instances:
     #   - <INCLUDE_REGEX>
     #   exclude:
     #   - <EXCLUDE_REGEX>
-
-    ## @param data_streams_enabled - boolean - optional - default: false
-    ## Beta feature to get a lag metric in Seconds. It's part of the Data Streams Monitoring Product
-    #
-    # data_streams_enabled: false
