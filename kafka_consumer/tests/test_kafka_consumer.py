@@ -2,9 +2,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import copy
-import json
 import os
-from collections import defaultdict
 
 import mock
 import pytest
@@ -17,30 +15,6 @@ from .common import KAFKA_CONNECT_STR
 BROKER_METRICS = ['kafka.broker_offset']
 
 CONSUMER_METRICS = ['kafka.consumer_offset', 'kafka.consumer_lag']
-
-
-def mocked_read_persistent_cache(cache_key):
-    cached_offsets = defaultdict(dict)
-    cached_offsets["marvel_0"][25] = 150
-    cached_offsets["marvel_0"][40] = 200
-    return json.dumps(cached_offsets)
-
-
-def mocked_time():
-    return 400
-
-
-@pytest.mark.unit
-def test_get_interpolated_timestamp(kafka_instance):
-    instance = copy.deepcopy(kafka_instance)
-    instance['sasl_kerberos_service_name'] = 'kafka'
-    check = KafkaCheck('kafka_consumer', {}, [instance])
-    # at offset 0, time is 100s, at offset 10, time is 200sec.
-    # by interpolation, at offset 5, time should be 150sec.
-    assert check.sub_check._get_interpolated_timestamp({0: 100, 10: 200}, 5) == 150
-    assert check.sub_check._get_interpolated_timestamp({10: 100, 20: 200}, 5) == 50
-    assert check.sub_check._get_interpolated_timestamp({0: 100, 10: 200}, 15) == 250
-    assert check.sub_check._get_interpolated_timestamp({10: 200}, 15) is None
 
 
 @pytest.mark.unit
@@ -123,24 +97,6 @@ def test_tls_config_legacy(extra_config, expected_http_kwargs, kafka_instance):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-@mock.patch(
-    'datadog_checks.kafka_consumer.new_kafka_consumer.NewKafkaConsumerCheck._read_persistent_cache',
-    mocked_read_persistent_cache,
-)
-@mock.patch('datadog_checks.kafka_consumer.new_kafka_consumer.time', mocked_time)
-def test_data_streams_enabled(aggregator, kafka_instance, dd_run_check):
-    """
-    Testing Kafka_consumer check.
-    """
-    instance = copy.deepcopy(kafka_instance)
-    instance['data_streams_enabled'] = True
-    kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [instance])
-    dd_run_check(kafka_consumer_check)
-    assert_check_kafka(aggregator, instance['consumer_groups'], data_streams_enabled=True)
-
-
-@pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
 def test_check_kafka(aggregator, kafka_instance, dd_run_check):
     """
     Testing Kafka_consumer check.
@@ -179,7 +135,7 @@ def test_e2e(dd_agent_check, kafka_instance):
     assert_check_kafka(aggregator, kafka_instance['consumer_groups'])
 
 
-def assert_check_kafka(aggregator, consumer_groups, data_streams_enabled=False):
+def assert_check_kafka(aggregator, consumer_groups):
     for name, consumer_group in consumer_groups.items():
         for topic, partitions in consumer_group.items():
             for partition in partitions:
@@ -188,13 +144,6 @@ def assert_check_kafka(aggregator, consumer_groups, data_streams_enabled=False):
                     aggregator.assert_metric(mname, tags=tags, at_least=1)
                 for mname in CONSUMER_METRICS:
                     aggregator.assert_metric(mname, tags=tags + ["consumer_group:{}".format(name)], at_least=1)
-    if data_streams_enabled:
-        # in the e2e test, Kafka is not actively receiving data. So we never populate the broker
-        # timestamps with more than one timestamp. So we can't interpolate to get the consumer
-        # timestamp.
-        aggregator.assert_metric(
-            "kafka.consumer_lag_seconds", tags=tags + ["consumer_group:{}".format(name)], at_least=1
-        )
 
     aggregator.assert_all_metrics_covered()
 
