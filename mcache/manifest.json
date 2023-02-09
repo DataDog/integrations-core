@@ -16,7 +16,6 @@
       "Supported OS::macOS",
       "Category::Web",
       "Category::Caching",
-      "Category::Autodiscovery",
       "Category::Log Collection"
     ]
   },

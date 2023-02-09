@@ -17,8 +17,7 @@
       "Supported OS::Windows",
       "Category::Log Collection",
       "Category::Processing",
-      "Category::Messaging",
-      "Category::Autodiscovery"
+      "Category::Messaging"
     ]
   },
   "author": {
