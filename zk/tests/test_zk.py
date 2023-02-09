@@ -5,8 +5,8 @@
 import io
 import logging
 import re
+from unittest import mock
 
-import mock
 import pytest
 from six import PY2, PY3
 
@@ -47,7 +47,7 @@ def test_check(aggregator, dd_environment, get_test_instance, caplog):
     common.assert_service_checks_ok(aggregator)
 
     expected_mode = get_test_instance['expected_mode']
-    mname = "zookeeper.instances.{}".format(expected_mode)
+    mname = f"zookeeper.instances.{expected_mode}"
     aggregator.assert_metric(mname, value=1, tags=["mytag"])
     aggregator.assert_all_metrics_covered()
 
@@ -77,7 +77,7 @@ def test_error_state(aggregator, dd_environment, get_conn_failure_config):
     aggregator.assert_metric("zookeeper.instances", tags=["mode:down", "mytag"], count=1)
 
     expected_mode = get_conn_failure_config['expected_mode']
-    mname = "zookeeper.instances.{}".format(expected_mode)
+    mname = f"zookeeper.instances.{expected_mode}"
     aggregator.assert_metric(mname, value=1, count=1, tags=["mytag"])
 
 

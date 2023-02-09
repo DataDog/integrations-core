@@ -1,0 +1,881 @@
+A001 Variable `ConnectionError` is shadowing a python builtin
+A001 Variable `all` is shadowing a python builtin
+A001 Variable `bytes` is shadowing a python builtin
+A001 Variable `dir` is shadowing a python builtin
+A001 Variable `input` is shadowing a python builtin
+A001 Variable `int` is shadowing a python builtin
+A001 Variable `license` is shadowing a python builtin
+A001 Variable `type` is shadowing a python builtin
+A002 Argument `dict` is shadowing a python builtin
+A002 Argument `dir` is shadowing a python builtin
+A002 Argument `format` is shadowing a python builtin
+A002 Argument `hash` is shadowing a python builtin
+A002 Argument `object` is shadowing a python builtin
+A002 Argument `type` is shadowing a python builtin
+A003 Class attribute `compile` is shadowing a python builtin
+A003 Class attribute `format` is shadowing a python builtin
+A003 Class attribute `id` is shadowing a python builtin
+A003 Class attribute `iter` is shadowing a python builtin
+A003 Class attribute `open` is shadowing a python builtin
+A003 Class attribute `property` is shadowing a python builtin
+A003 Class attribute `set` is shadowing a python builtin
+A003 Class attribute `type` is shadowing a python builtin
+ARG001 Unused function argument: `acs_url`
+ARG001 Unused function argument: `admin_instance`
+ARG001 Unused function argument: `aggregator`
+ARG001 Unused function argument: `args`
+ARG001 Unused function argument: `autodiscovery_ready`
+ARG001 Unused function argument: `benchmark`
+ARG001 Unused function argument: `bob_conn`
+ARG001 Unused function argument: `cache_key`
+ARG001 Unused function argument: `caplog`
+ARG001 Unused function argument: `card`
+ARG001 Unused function argument: `case_name`
+ARG001 Unused function argument: `case`
+ARG001 Unused function argument: `cert`
+ARG001 Unused function argument: `cfg`
+ARG001 Unused function argument: `check`
+ARG001 Unused function argument: `cluster_tags`
+ARG001 Unused function argument: `column_name`
+ARG001 Unused function argument: `couchbase_container_ip`
+ARG001 Unused function argument: `count`
+ARG001 Unused function argument: `ctx`
+ARG001 Unused function argument: `d_name`
+ARG001 Unused function argument: `data_source`
+ARG001 Unused function argument: `datadog_agent`
+ARG001 Unused function argument: `day`
+ARG001 Unused function argument: `dd_environment`
+ARG001 Unused function argument: `dd_run_check`
+ARG001 Unused function argument: `detail_level`
+ARG001 Unused function argument: `detail`
+ARG001 Unused function argument: `environ`
+ARG001 Unused function argument: `errorIndex`
+ARG001 Unused function argument: `errorStatus`
+ARG001 Unused function argument: `error_metrics`
+ARG001 Unused function argument: `exact_match`
+ARG001 Unused function argument: `expected_aws_host`
+ARG001 Unused function argument: `expected_aws_service`
+ARG001 Unused function argument: `field`
+ARG001 Unused function argument: `format_style`
+ARG001 Unused function argument: `gauge_metrics`
+ARG001 Unused function argument: `gauges`
+ARG001 Unused function argument: `go_expvar_mock`
+ARG001 Unused function argument: `h`
+ARG001 Unused function argument: `haproxy_mock_enterprise_version_info`
+ARG001 Unused function argument: `haproxy_mock_evil`
+ARG001 Unused function argument: `haproxy_mock`
+ARG001 Unused function argument: `hours`
+ARG001 Unused function argument: `idx`
+ARG001 Unused function argument: `ignore_ad`
+ARG001 Unused function argument: `image`
+ARG001 Unused function argument: `instance_basic`
+ARG001 Unused function argument: `instance_docker`
+ARG001 Unused function argument: `instance`
+ARG001 Unused function argument: `is_bsd`
+ARG001 Unused function argument: `is_e2e`
+ARG001 Unused function argument: `is_linu`
+ARG001 Unused function argument: `is_linux`
+ARG001 Unused function argument: `is_metadata_collection_enabled`
+ARG001 Unused function argument: `is_solaris`
+ARG001 Unused function argument: `is_windows`
+ARG001 Unused function argument: `kerberos_agent`
+ARG001 Unused function argument: `key`
+ARG001 Unused function argument: `kwargs`
+ARG001 Unused function argument: `license_line`
+ARG001 Unused function argument: `line_data`
+ARG001 Unused function argument: `lines`
+ARG001 Unused function argument: `listdir`
+ARG001 Unused function argument: `machine_name`
+ARG001 Unused function argument: `make_request`
+ARG001 Unused function argument: `metric`
+ARG001 Unused function argument: `metrics`
+ARG001 Unused function argument: `microseconds`
+ARG001 Unused function argument: `min_collection_interval_10`
+ARG001 Unused function argument: `minutes`
+ARG001 Unused function argument: `mock_agent_data`
+ARG001 Unused function argument: `mock_client`
+ARG001 Unused function argument: `mock_command`
+ARG001 Unused function argument: `mock_connect`
+ARG001 Unused function argument: `mock_cursor`
+ARG001 Unused function argument: `mock_data`
+ARG001 Unused function argument: `mock_db_data`
+ARG001 Unused function argument: `mock_device_list`
+ARG001 Unused function argument: `mock_disk_sampler`
+ARG001 Unused function argument: `mock_filter_get`
+ARG001 Unused function argument: `mock_from_time`
+ARG001 Unused function argument: `mock_get_usage`
+ARG001 Unused function argument: `mock_get_wmi_sampler`
+ARG001 Unused function argument: `mock_get`
+ARG001 Unused function argument: `mock_git_tag_list`
+ARG001 Unused function argument: `mock_gstatus_data`
+ARG001 Unused function argument: `mock_hide_server_version`
+ARG001 Unused function argument: `mock_ioctl`
+ARG001 Unused function argument: `mock_iptables`
+ARG001 Unused function argument: `mock_leader`
+ARG001 Unused function argument: `mock_list_database_names`
+ARG001 Unused function argument: `mock_local_http_dns`
+ARG001 Unused function argument: `mock_local_kafka_hosts_dns`
+ARG001 Unused function argument: `mock_local_tls_dns`
+ARG001 Unused function argument: `mock_metrics_endpoint`
+ARG001 Unused function argument: `mock_metrics`
+ARG001 Unused function argument: `mock_operator_data`
+ARG001 Unused function argument: `mock_proc_sampler`
+ARG001 Unused function argument: `mock_process`
+ARG001 Unused function argument: `mock_psutil`
+ARG001 Unused function argument: `mock_requests`
+ARG001 Unused function argument: `mock_results`
+ARG001 Unused function argument: `mock_server_info`
+ARG001 Unused function argument: `mock_status`
+ARG001 Unused function argument: `mock_to_time`
+ARG001 Unused function argument: `mock_userspace`
+ARG001 Unused function argument: `mocked_auth_request`
+ARG001 Unused function argument: `mocked_bad_cert_request`
+ARG001 Unused function argument: `mocked_metadata_request`
+ARG001 Unused function argument: `mocked_prometheus_scraper_config`
+ARG001 Unused function argument: `mocked_query`
+ARG001 Unused function argument: `mocked_request`
+ARG001 Unused function argument: `mocked_time`
+ARG001 Unused function argument: `modifiers`
+ARG001 Unused function argument: `module`
+ARG001 Unused function argument: `monkeypatch`
+ARG001 Unused function argument: `month`
+ARG001 Unused function argument: `name`
+ARG001 Unused function argument: `namespace`
+ARG001 Unused function argument: `num`
+ARG001 Unused function argument: `obj`
+ARG001 Unused function argument: `options`
+ARG001 Unused function argument: `os_aggregates`
+ARG001 Unused function argument: `p`
+ARG001 Unused function argument: `param`
+ARG001 Unused function argument: `params`
+ARG001 Unused function argument: `password`
+ARG001 Unused function argument: `patch_requests`
+ARG001 Unused function argument: `pid`
+ARG001 Unused function argument: `poll_mock`
+ARG001 Unused function argument: `query`
+ARG001 Unused function argument: `rate_metrics`
+ARG001 Unused function argument: `read_int_file`
+ARG001 Unused function argument: `redis_auth`
+ARG001 Unused function argument: `refresh_ad_cache`
+ARG001 Unused function argument: `repository`
+ARG001 Unused function argument: `reserved`
+ARG001 Unused function argument: `reset_process_list_cache`
+ARG001 Unused function argument: `retry_state`
+ARG001 Unused function argument: `run_check`
+ARG001 Unused function argument: `runtime_data`
+ARG001 Unused function argument: `s`
+ARG001 Unused function argument: `sckt`
+ARG001 Unused function argument: `seconds`
+ARG001 Unused function argument: `seed_data`
+ARG001 Unused function argument: `self`
+ARG001 Unused function argument: `sendRequestHandle`
+ARG001 Unused function argument: `server_diagnostics`
+ARG001 Unused function argument: `server_id`
+ARG001 Unused function argument: `server`
+ARG001 Unused function argument: `servers_detail`
+ARG001 Unused function argument: `service_name`
+ARG001 Unused function argument: `service_number`
+ARG001 Unused function argument: `setup_gunicorn`
+ARG001 Unused function argument: `setup_request`
+ARG001 Unused function argument: `setup_route`
+ARG001 Unused function argument: `socks5_proxy`
+ARG001 Unused function argument: `sort`
+ARG001 Unused function argument: `stream`
+ARG001 Unused function argument: `style`
+ARG001 Unused function argument: `tagger`
+ARG001 Unused function argument: `tags`
+ARG001 Unused function argument: `test_case_name`
+ARG001 Unused function argument: `test_case`
+ARG001 Unused function argument: `text_data`
+ARG001 Unused function argument: `thread_mock`
+ARG001 Unused function argument: `timeout`
+ARG001 Unused function argument: `timezone`
+ARG001 Unused function argument: `transformers`
+ARG001 Unused function argument: `url`
+ARG001 Unused function argument: `value`
+ARG001 Unused function argument: `verbose`
+ARG001 Unused function argument: `version`
+ARG001 Unused function argument: `wmi_ts`
+ARG001 Unused function argument: `year`
+ARG002 Unused method argument: `aggregator`
+ARG002 Unused method argument: `api_version`
+ARG002 Unused method argument: `app`
+ARG002 Unused method argument: `args`
+ARG002 Unused method argument: `as_sec`
+ARG002 Unused method argument: `attrs`
+ARG002 Unused method argument: `capacity_metric`
+ARG002 Unused method argument: `caplog`
+ARG002 Unused method argument: `catalog_schema`
+ARG002 Unused method argument: `check_id`
+ARG002 Unused method argument: `check_name`
+ARG002 Unused method argument: `check`
+ARG002 Unused method argument: `command`
+ARG002 Unused method argument: `compose_file`
+ARG002 Unused method argument: `context`
+ARG002 Unused method argument: `custom_tags`
+ARG002 Unused method argument: `data`
+ARG002 Unused method argument: `db`
+ARG002 Unused method argument: `dd_environment`
+ARG002 Unused method argument: `dd_run_check`
+ARG002 Unused method argument: `default_agent`
+ARG002 Unused method argument: `deployment`
+ARG002 Unused method argument: `dir`
+ARG002 Unused method argument: `dt`
+ARG002 Unused method argument: `epg`
+ARG002 Unused method argument: `eqpt`
+ARG002 Unused method argument: `event_object`
+ARG002 Unused method argument: `exception`
+ARG002 Unused method argument: `filters`
+ARG002 Unused method argument: `fix`
+ARG002 Unused method argument: `hostname`
+ARG002 Unused method argument: `infrastructure_data`
+ARG002 Unused method argument: `instance_tags`
+ARG002 Unused method argument: `instance`
+ARG002 Unused method argument: `key`
+ARG002 Unused method argument: `kwargs`
+ARG002 Unused method argument: `limit_vhosts`
+ARG002 Unused method argument: `metric_name`
+ARG002 Unused method argument: `metric`
+ARG002 Unused method argument: `mock_get`
+ARG002 Unused method argument: `mock_incluster`
+ARG002 Unused method argument: `mock_read_bearer_token`
+ARG002 Unused method argument: `monitor_schema`
+ARG002 Unused method argument: `mor`
+ARG002 Unused method argument: `name`
+ARG002 Unused method argument: `namespaces`
+ARG002 Unused method argument: `normalize`
+ARG002 Unused method argument: `page_size`
+ARG002 Unused method argument: `page`
+ARG002 Unused method argument: `password`
+ARG002 Unused method argument: `pods`
+ARG002 Unused method argument: `project`
+ARG002 Unused method argument: `query`
+ARG002 Unused method argument: `recursive`
+ARG002 Unused method argument: `replicas`
+ARG002 Unused method argument: `resource_tags`
+ARG002 Unused method argument: `schema`
+ARG002 Unused method argument: `scraper_config`
+ARG002 Unused method argument: `server`
+ARG002 Unused method argument: `services_excl_filter`
+ARG002 Unused method argument: `services_incl_filter`
+ARG002 Unused method argument: `start_time`
+ARG002 Unused method argument: `strict`
+ARG002 Unused method argument: `tenant`
+ARG002 Unused method argument: `val`
+ARG002 Unused method argument: `warning_message`
+ARG003 Unused class method argument: `counters_list`
+ARG003 Unused class method argument: `databases`
+ARG004 Unused static method argument: `kwargs`
+ARG004 Unused static method argument: `method_name`
+ARG004 Unused static method argument: `options`
+ARG005 Unused lambda argument: `addr`
+ARG005 Unused lambda argument: `args`
+ARG005 Unused lambda argument: `err`
+ARG005 Unused lambda argument: `kwargs`
+ARG005 Unused lambda argument: `m`
+ARG005 Unused lambda argument: `name`
+ARG005 Unused lambda argument: `options`
+ARG005 Unused lambda argument: `plugin`
+ARG005 Unused lambda argument: `self`
+ARG005 Unused lambda argument: `socket_type`
+ARG005 Unused lambda argument: `symbol`
+ARG005 Unused lambda argument: `test`
+ARG005 Unused lambda argument: `v`
+ARG005 Unused lambda argument: `x`
+ARG005 Unused lambda argument: `y`
+B008 Do not perform function call in argument defaults
+B015 Pointless comparison. This comparison does nothing but waste CPU instructions. Either prepend `assert` or remove it.
+B025 try-except block with duplicate exception `OSError`
+B026 Star-arg unpacking after a keyword argument is strongly discouraged
+B904 Within an except clause, raise exceptions with `raise ... from err` or `raise ... from None` to distinguish them from errors in exception handling
+C414 Unnecessary `list` call within `sorted()`
+C417 Unnecessary `map` usage (rewrite using a `list` comprehension)
+C417 Unnecessary `map` usage (rewrite using a generator expression)
+DTZ001 The use of `datetime.datetime()` without `tzinfo` argument is not allowed
+DTZ003 The use of `datetime.datetime.utcnow()` is not allowed, use `datetime.datetime.now(tz=)` instead
+DTZ004 The use of `datetime.datetime.utcfromtimestamp()` is not allowed, use `datetime.datetime.fromtimestamp(ts, tz=)` instead
+DTZ005 The use of `datetime.datetime.now()` without `tz` argument is not allowed
+DTZ006 The use of `datetime.datetime.fromtimestamp()` without `tz` argument is not allowed
+DTZ007 The use of `datetime.datetime.strptime()` without %z must be followed by `.replace(tzinfo=)` or `.astimezone()`
+E501 Line too long (121 > 120 characters)
+E501 Line too long (123 > 120 characters)
+E501 Line too long (124 > 120 characters)
+E501 Line too long (126 > 120 characters)
+E501 Line too long (127 > 120 characters)
+E501 Line too long (128 > 120 characters)
+E501 Line too long (129 > 120 characters)
+E501 Line too long (130 > 120 characters)
+E501 Line too long (131 > 120 characters)
+E501 Line too long (132 > 120 characters)
+E501 Line too long (133 > 120 characters)
+E501 Line too long (134 > 120 characters)
+E501 Line too long (135 > 120 characters)
+E501 Line too long (136 > 120 characters)
+E501 Line too long (137 > 120 characters)
+E501 Line too long (138 > 120 characters)
+E501 Line too long (139 > 120 characters)
+E501 Line too long (140 > 120 characters)
+E501 Line too long (141 > 120 characters)
+E501 Line too long (142 > 120 characters)
+E501 Line too long (145 > 120 characters)
+E501 Line too long (146 > 120 characters)
+E501 Line too long (148 > 120 characters)
+E501 Line too long (149 > 120 characters)
+E501 Line too long (150 > 120 characters)
+E501 Line too long (153 > 120 characters)
+E501 Line too long (159 > 120 characters)
+E501 Line too long (161 > 120 characters)
+E501 Line too long (166 > 120 characters)
+E501 Line too long (167 > 120 characters)
+E501 Line too long (170 > 120 characters)
+E501 Line too long (171 > 120 characters)
+E501 Line too long (172 > 120 characters)
+E501 Line too long (174 > 120 characters)
+E501 Line too long (178 > 120 characters)
+E501 Line too long (179 > 120 characters)
+E501 Line too long (185 > 120 characters)
+E501 Line too long (188 > 120 characters)
+E501 Line too long (190 > 120 characters)
+E501 Line too long (194 > 120 characters)
+E501 Line too long (1949 > 120 characters)
+E501 Line too long (197 > 120 characters)
+E501 Line too long (224 > 120 characters)
+E501 Line too long (230 > 120 characters)
+E501 Line too long (234 > 120 characters)
+E501 Line too long (245 > 120 characters)
+E501 Line too long (2937 > 120 characters)
+E501 Line too long (326 > 120 characters)
+E501 Line too long (3517 > 120 characters)
+E501 Line too long (384 > 120 characters)
+E501 Line too long (386 > 120 characters)
+E501 Line too long (390 > 120 characters)
+E501 Line too long (409 > 120 characters)
+E501 Line too long (420 > 120 characters)
+E501 Line too long (450 > 120 characters)
+E501 Line too long (5191 > 120 characters)
+E501 Line too long (8916 > 120 characters)
+E501 Line too long (924 > 120 characters)
+E501 Line too long (9863 > 120 characters)
+E741 Ambiguous variable name: `l`
+EM101 Exception must not use a string literal, assign to variable first
+EM102 Exception must not use an f-string literal, assign to variable first
+EM103 Exception must not use a `.format()` string directly, assign to variable first
+F401 `...utils.common.to_native_string` imported but unused
+F401 `..config.IBMMQConfig` imported but unused
+F401 `..resolver.OIDResolver` imported but unused
+F401 `..types.AgentConfigType` imported but unused
+F401 `..types.Event` imported but unused
+F401 `..types.ExternalTagType` imported but unused
+F401 `..types.InitConfigType` imported but unused
+F401 `..types.InstanceType` imported but unused
+F401 `..types.ProxySettings` imported but unused
+F401 `..types.ServiceCheckStatus` imported but unused
+F401 `.config.Config` imported but unused
+F401 `.config.InstanceConfig` imported but unused
+F401 `.event` imported but unused
+F401 `.fault` imported but unused
+F401 `.metrics.ColumnTag` imported but unused
+F401 `.metrics.IndexTag` imported but unused
+F401 `.metrics_types.Metric` imported but unused
+F401 `.metrics_types.Symbol` imported but unused
+F401 `.metrics_types.TableMetricTag` imported but unused
+F401 `.models.OID` imported but unused
+F401 `.parsing.ColumnTag` imported but unused
+F401 `.parsing.IndexTag` imported but unused
+F401 `.parsing.ParsedMetric` imported but unused
+F401 `.parsing.SymbolTag` imported but unused
+F401 `.pysnmp_types.ContextData` imported but unused
+F401 `.pysnmp_types.MibViewController` imported but unused
+F401 `.pysnmp_types.ObjectIdentity` imported but unused
+F401 `.pysnmp_types.ObjectName` imported but unused
+F401 `.pysnmp_types.ObjectType` imported but unused
+F401 `.pysnmp_types.SnmpEngine` imported but unused
+F401 `.query` imported but unused
+F401 `.snmp.SnmpCheck` imported but unused
+F401 `.types.Instance` imported but unused
+F401 `.types.MetricDefinition` imported but unused
+F401 `.types.OIDMatch` imported but unused
+F401 `.types.ServerName` imported but unused
+F401 `.types.T` imported but unused
+F401 `.util.DatabaseConfigurationError` imported but unused
+F401 `.view` imported but unused
+F401 `datadog_checks.azure_iot_edge.types.Instance` imported but unused
+F401 `datadog_checks.base.AgentCheck` imported but unused
+F401 `datadog_checks.base.checks.win.wmi.WMISampler` imported but unused
+F401 `datadog_checks.base.checks.win.wmi.types.TagQuery` imported but unused
+F401 `datadog_checks.base.checks.win.wmi.types.WMIFilter` imported but unused
+F401 `datadog_checks.base.checks.win.wmi.types.WMIMetric` imported but unused
+F401 `datadog_checks.base.checks.win.wmi.types.WMIProperties` imported but unused
+F401 `datadog_checks.base.log.CheckLoggingAdapter` imported but unused
+F401 `datadog_checks.base.stubs.aggregator.AggregatorStub` imported but unused
+F401 `datadog_checks.base.stubs.datadog_agent.DatadogAgentStub` imported but unused
+F401 `datadog_checks.base.types.Event` imported but unused
+F401 `datadog_checks.base.types.InitConfigType` imported but unused
+F401 `datadog_checks.base.types.InstanceType` imported but unused
+F401 `datadog_checks.base.types.ServiceCheckStatus` imported but unused
+F401 `datadog_checks.base.types.ServiceCheck` imported but unused
+F401 `datadog_checks.base.utils.db.types.QueriesExecutor` imported but unused
+F401 `datadog_checks.base.utils.db.types.QueriesSubmitter` imported but unused
+F401 `datadog_checks.base.utils.db.types.TransformerFactory` imported but unused
+F401 `datadog_checks.base.utils.db.types.Transformer` imported but unused
+F401 `datadog_checks.base.utils.http.RequestsWrapper` imported but unused
+F401 `datadog_checks.base.utils.serialization.json` imported but unused
+F401 `datadog_checks.dev.run_command` imported but unused
+F401 `datadog_checks.ibm_mq.config.IBMMQConfig` imported but unused
+F401 `datadog_checks.rethinkdb.types.Instance` imported but unused
+F401 `datadog_checks.voltdb.types.Instance` imported but unused
+F401 `datadog_checks.vsphere.config.VSphereConfig` imported but unused
+F401 `datadog_checks.vsphere.resource_filters.ResourceFilter` imported but unused
+F401 `datadog_checks.vsphere.types.CounterId` imported but unused
+F401 `datadog_checks.vsphere.types.InfrastructureDataItem` imported but unused
+F401 `datadog_checks.vsphere.types.InfrastructureData` imported but unused
+F401 `datadog_checks.vsphere.types.InstanceConfig` imported but unused
+F401 `datadog_checks.vsphere.types.MetricFilterConfig` imported but unused
+F401 `datadog_checks.vsphere.types.MetricFilters` imported but unused
+F401 `datadog_checks.vsphere.types.MetricName` imported but unused
+F401 `datadog_checks.vsphere.types.MorBatch` imported but unused
+F401 `datadog_checks.vsphere.types.ResourceFilterConfig` imported but unused
+F401 `datadog_checks.vsphere.types.ResourceTags` imported but unused
+F401 `datadog_checks.vsphere.types.TagAssociation` imported but unused
+F401 `datetime` imported but unused
+F401 `io` imported but unused
+F401 `json` imported but unused
+F401 `logging.Logger` imported but unused
+F401 `logging` imported but unused
+F401 `os` imported but unused
+F401 `pprint` imported but unused
+F401 `pyVmomi.vim.ManagedEntity` imported but unused
+F401 `pyVmomi.vim` imported but unused
+F401 `pysnmp.hlapi` imported but unused
+F401 `re` imported but unused
+F401 `requests.Response` imported but unused
+F401 `requests` imported but unused
+F401 `rethinkdb` imported but unused
+F401 `socket` imported but unused
+F401 `ssl` imported but unused
+F401 `typing.AnyStr` imported but unused
+F401 `typing.Any` imported but unused
+F401 `typing.Callable` imported but unused
+F401 `typing.DefaultDict` imported but unused
+F401 `typing.Deque` imported but unused
+F401 `typing.Dict` imported but unused
+F401 `typing.Generator` imported but unused
+F401 `typing.Iterable` imported but unused
+F401 `typing.Iterator` imported but unused
+F401 `typing.List` imported but unused
+F401 `typing.Mapping` imported but unused
+F401 `typing.Optional` imported but unused
+F401 `typing.Pattern` imported but unused
+F401 `typing.Sequence` imported but unused
+F401 `typing.Set` imported but unused
+F401 `typing.Text` imported but unused
+F401 `typing.Tuple` imported but unused
+F401 `typing.Type` imported but unused
+F401 `typing.Union` imported but unused
+F401 `unittest.mock.MagicMock` imported but unused
+F401 `weakref` imported but unused
+FBT001 Boolean positional arg in function definition
+FBT002 Boolean default value in function definition
+Found 34167 errors (19312 fixed, 14855 remaining).
+ISC001 Implicitly concatenated string literals on one line
+ISC003 Explicitly concatenated string should be implicitly concatenated
+N801 Class name `LegacyIstioCheck_1_4` should use CapWords convention 
+N801 Class name `LegacyKafkaCheck_0_10_2` should use CapWords convention 
+N801 Class name `PDH_COUNTERVALUE` should use CapWords convention 
+N801 Class name `PDH_FMT_COUNTERVALUE_ITEM_W` should use CapWords convention 
+N801 Class name `PDH_FMT_COUNTERVALUE` should use CapWords convention 
+N801 Class name `__TransformerDocumentionHelper` should use CapWords convention 
+N802 Function name `ContinueRetrievePropertiesEx` should be lowercase
+N802 Function name `CreateCollectorForEvents` should be lowercase
+N802 Function name `CreateContainerView` should be lowercase
+N802 Function name `CurrentTime` should be lowercase
+N802 Function name `Destroy` should be lowercase
+N802 Function name `GetFormattedCounterArray` should be lowercase
+N802 Function name `QueryEvents` should be lowercase
+N802 Function name `QueryOptions` should be lowercase
+N802 Function name `QueryPerfCounterByLevel` should be lowercase
+N802 Function name `QueryPerf` should be lowercase
+N802 Function name `ReadNextEvents` should be lowercase
+N802 Function name `RetrievePropertiesEx` should be lowercase
+N802 Function name `assertMOR` should be lowercase
+N802 Function name `do_GET` should be lowercase
+N802 Function name `getAllProcessInfo` should be lowercase
+N802 Function name `getEffectiveLevel` should be lowercase
+N802 Function name `getProcessInfo` should be lowercase
+N802 Function name `hSvc` should be lowercase
+N802 Function name `isNumeric` should be lowercase
+N802 Function name `mock_AddCounter` should be lowercase
+N802 Function name `mock_CollectQueryData` should be lowercase
+N802 Function name `mock_EnumObjectItems` should be lowercase
+N802 Function name `mock_GetFormattedCounterValue` should be lowercase
+N802 Function name `mock_LookupPerfNameByIndex` should be lowercase
+N802 Function name `mock_MakeCounterPath` should be lowercase
+N802 Function name `mock_QueryValueExWithRaise` should be lowercase
+N802 Function name `mock_QueryValueEx` should be lowercase
+N802 Function name `mock_ValidatePath` should be lowercase
+N802 Function name `mock_get_cluster_leader_A` should be lowercase
+N802 Function name `mock_get_cluster_leader_B` should be lowercase
+N802 Function name `tearDown_module` should be lowercase
+N802 Function name `test_SqlMasterDatabaseFileStats_fetch_metric` should be lowercase
+N802 Function name `test_VerticaCheck_parse_db_version` should be lowercase
+N802 Function name `test_table_v3_MD5_AES` should be lowercase
+N802 Function name `test_table_v3_MD5_DES` should be lowercase
+N802 Function name `test_table_v3_SHA_AES` should be lowercase
+N802 Function name `test_table_v3_SHA_DES` should be lowercase
+N803 Argument name `Dumper` should be lowercase
+N803 Argument name `Loader` should be lowercase
+N803 Argument name `agentConfig` should be lowercase
+N803 Argument name `beginTime` should be lowercase
+N803 Argument name `cbCtx` should be lowercase
+N803 Argument name `counterId` should be lowercase
+N803 Argument name `errorIndex` should be lowercase
+N803 Argument name `errorIndication` should be lowercase
+N803 Argument name `errorStatus` should be lowercase
+N803 Argument name `maxCount` should be lowercase
+N803 Argument name `pFormat` should be lowercase
+N803 Argument name `querySpec` should be lowercase
+N803 Argument name `sendRequestHandle` should be lowercase
+N803 Argument name `snmpEngine` should be lowercase
+N803 Argument name `specSet` should be lowercase
+N803 Argument name `testerSelector` should be lowercase
+N803 Argument name `varBindTable` should be lowercase
+N803 Argument name `varBinds` should be lowercase
+N805 First argument of a method should be named `self`
+N806 Variable `ALL_HEADERS` in function should be lowercase
+N806 Variable `CAMEL_CASE_TEST_PAIRS` in function should be lowercase
+N806 Variable `CONFIG` in function should be lowercase
+N806 Variable `DB_EXCLUDE` in function should be lowercase
+N806 Variable `DB_INCLUDE` in function should be lowercase
+N806 Variable `EMBEDDED` in function should be lowercase
+N806 Variable `EXPECTED_RESULT` in function should be lowercase
+N806 Variable `FNULL` in function should be lowercase
+N806 Variable `FilterClass` in function should be lowercase
+N806 Variable `GENERIC_TAGS` in function should be lowercase
+N806 Variable `HTTP_PROXY` in function should be lowercase
+N806 Variable `ITERATIONS` in function should be lowercase
+N806 Variable `LOG_LINES_TO_ASSERT` in function should be lowercase
+N806 Variable `METRICS` in function should be lowercase
+N806 Variable `MOCK_VERSION` in function should be lowercase
+N806 Variable `NAGIOS_CFG` in function should be lowercase
+N806 Variable `NODE_HOST` in function should be lowercase
+N806 Variable `NODE_TAGS` in function should be lowercase
+N806 Variable `OID` in function should be lowercase
+N806 Variable `PATTERN` in function should be lowercase
+N806 Variable `PCMCIA` in function should be lowercase
+N806 Variable `P` in function should be lowercase
+N806 Variable `PdhGetFormattedCounterArrayW_fn` in function should be lowercase
+N806 Variable `QUERY_MAP` in function should be lowercase
+N806 Variable `REPLICATION_TAG_TEST_METRIC` in function should be lowercase
+N806 Variable `ROLE_TAG` in function should be lowercase
+N806 Variable `STABLE_REPLICA_STATES` in function should be lowercase
+N806 Variable `STANDBY` in function should be lowercase
+N806 Variable `STREAM_LOG_LINE` in function should be lowercase
+N806 Variable `SmartConnect` in function should be lowercase
+N806 Variable `TEST_TAG` in function should be lowercase
+N806 Variable `TIMEOUT_VALUE` in function should be lowercase
+N806 Variable `TO_ALERT_TYPE` in function should be lowercase
+N806 Variable `VM2_1` in function should be lowercase
+N806 Variable `WMI_Mock` in function should be lowercase
+N806 Variable `agentConfig` in function should be lowercase
+N806 Variable `clientId` in function should be lowercase
+N806 Variable `dbName` in function should be lowercase
+N806 Variable `errorIndication` in function should be lowercase
+N806 Variable `finishedTime` in function should be lowercase
+N806 Variable `guardSql` in function should be lowercase
+N806 Variable `mibCompiler` in function should be lowercase
+N806 Variable `minAssignedCards` in function should be lowercase
+N806 Variable `openstackCheck` in function should be lowercase
+N806 Variable `perfManager` in function should be lowercase
+N806 Variable `replSet` in function should be lowercase
+N806 Variable `rootFolder` in function should be lowercase
+N806 Variable `rootLogger` in function should be lowercase
+N806 Variable `testerSelector` in function should be lowercase
+N806 Variable `url_locationTemplate` in function should be lowercase
+N806 Variable `userMatcher` in function should be lowercase
+N812 Lowercase `error` imported as non-lowercase `SocketError`
+N812 Lowercase `etree` imported as non-lowercase `ET`
+N815 Variable `_moId` in class scope should not be mixedCase
+N815 Variable `apiType` in class scope should not be mixedCase
+N815 Variable `apiVersion` in class scope should not be mixedCase
+N815 Variable `createdTime` in class scope should not be mixedCase
+N815 Variable `customFieldsManager` in class scope should not be mixedCase
+N815 Variable `eventManager` in class scope should not be mixedCase
+N815 Variable `fullFormattedMessage` in class scope should not be mixedCase
+N815 Variable `fullName` in class scope should not be mixedCase
+N815 Variable `groupInfo` in class scope should not be mixedCase
+N815 Variable `intervalId` in class scope should not be mixedCase
+N815 Variable `latestEvent` in class scope should not be mixedCase
+N815 Variable `maxObjects` in class scope should not be mixedCase
+N815 Variable `maxSample` in class scope should not be mixedCase
+N815 Variable `metricId` in class scope should not be mixedCase
+N815 Variable `nameInfo` in class scope should not be mixedCase
+N815 Variable `objectSet` in class scope should not be mixedCase
+N815 Variable `pathSet` in class scope should not be mixedCase
+N815 Variable `perfManager` in class scope should not be mixedCase
+N815 Variable `poweredOff` in class scope should not be mixedCase
+N815 Variable `poweredOn` in class scope should not be mixedCase
+N815 Variable `propSet` in class scope should not be mixedCase
+N815 Variable `propertyCollector` in class scope should not be mixedCase
+N815 Variable `rollupType` in class scope should not be mixedCase
+N815 Variable `rootFolder` in class scope should not be mixedCase
+N815 Variable `selectSet` in class scope should not be mixedCase
+N815 Variable `startTime` in class scope should not be mixedCase
+N815 Variable `viewManager` in class scope should not be mixedCase
+N816 Variable `instanceSecure` in global scope should not be mixedCase
+N816 Variable `pymqiException` in global scope should not be mixedCase
+N817 Camelcase `ElementTree` imported as acronym `ET`
+N818 Exception name `APIAuthException` should be named with an Error suffix
+N818 Exception name `APIException` should be named with an Error suffix
+N818 Exception name `ApiUnreachable` should be named with an Error suffix
+N818 Exception name `AuthenticationNeeded` should be named with an Error suffix
+N818 Exception name `CheckException` should be named with an Error suffix
+N818 Exception name `ChecksDownloaderException` should be named with an Error suffix
+N818 Exception name `DuplicatePackage` should be named with an Error suffix
+N818 Exception name `FooException` should be named with an Error suffix
+N818 Exception name `IncompleteConfig` should be named with an Error suffix
+N818 Exception name `InconsistentSimpleIndex` should be named with an Error suffix
+N818 Exception name `InstancePowerOffFailure` should be named with an Error suffix
+N818 Exception name `InvalidArgument` should be named with an Error suffix
+N818 Exception name `InvalidDataTemplate` should be named with an Error suffix
+N818 Exception name `InvalidName` should be named with an Error suffix
+N818 Exception name `KeystoneUnreachable` should be named with an Error suffix
+N818 Exception name `MarkLogicParserException` should be named with an Error suffix
+N818 Exception name `MissingEndpoint` should be named with an Error suffix
+N818 Exception name `MissingMIBException` should be named with an Error suffix
+N818 Exception name `MissingVersions` should be named with an Error suffix
+N818 Exception name `MultipleTypeDefintionsException` should be named with an Error suffix
+N818 Exception name `MyException` should be named with an Error suffix
+N818 Exception name `NoInTotoLinkMetadataFound` should be named with an Error suffix
+N818 Exception name `NoInTotoRootLayoutPublicKeysFound` should be named with an Error suffix
+N818 Exception name `NoSuchDatadogPackageVersion` should be named with an Error suffix
+N818 Exception name `NoSuchDatadogPackage` should be named with an Error suffix
+N818 Exception name `NonCanonicalVersion` should be named with an Error suffix
+N818 Exception name `NonDatadogPackage` should be named with an Error suffix
+N818 Exception name `OidNodeInvalid` should be named with an Error suffix
+N818 Exception name `OpenStackAuthFailure` should be named with an Error suffix
+N818 Exception name `PymqiException` should be named with an Error suffix
+N818 Exception name `PythonVersionMismatch` should be named with an Error suffix
+N818 Exception name `RabbitMQException` should be named with an Error suffix
+N818 Exception name `RestrictedByAdministrator` should be named with an Error suffix
+N818 Exception name `RetryLimitExceeded` should be named with an Error suffix
+N818 Exception name `RevokedDeveloperOrMachine` should be named with an Error suffix
+N818 Exception name `SNMPException` should be named with an Error suffix
+N818 Exception name `ShouldRestartException` should be named with an Error suffix
+N818 Exception name `SingleStoreCleaningException` should be named with an Error suffix
+N818 Exception name `TimeoutException` should be named with an Error suffix
+N818 Exception name `UnknownMetric` should be named with an Error suffix
+N818 Exception name `UnknownTags` should be named with an Error suffix
+N818 Exception name `VariableNotDefinedException` should be named with an Error suffix
+N818 Exception name `ZKConnectionFailure` should be named with an Error suffix
+PLR0133 Two constants compared in a comparison, consider replacing `1 == 2`
+PLR0402 Use `from tests.tooling.manifest_validator import input_constants` in lieu of alias
+PLR0913 Too many arguments to function call (10/5)
+PLR0913 Too many arguments to function call (11/5)
+PLR0913 Too many arguments to function call (12/5)
+PLR0913 Too many arguments to function call (13/5)
+PLR0913 Too many arguments to function call (14/5)
+PLR0913 Too many arguments to function call (15/5)
+PLR0913 Too many arguments to function call (26/5)
+PLR0913 Too many arguments to function call (6/5)
+PLR0913 Too many arguments to function call (7/5)
+PLR0913 Too many arguments to function call (8/5)
+PLR0913 Too many arguments to function call (9/5)
+PLR0915 Too many statements (100/50)
+PLR0915 Too many statements (102/50)
+PLR0915 Too many statements (103/50)
+PLR0915 Too many statements (108/50)
+PLR0915 Too many statements (112/50)
+PLR0915 Too many statements (114/50)
+PLR0915 Too many statements (116/50)
+PLR0915 Too many statements (121/50)
+PLR0915 Too many statements (122/50)
+PLR0915 Too many statements (127/50)
+PLR0915 Too many statements (141/50)
+PLR0915 Too many statements (156/50)
+PLR0915 Too many statements (190/50)
+PLR0915 Too many statements (220/50)
+PLR0915 Too many statements (3226/50)
+PLR0915 Too many statements (51/50)
+PLR0915 Too many statements (52/50)
+PLR0915 Too many statements (53/50)
+PLR0915 Too many statements (54/50)
+PLR0915 Too many statements (55/50)
+PLR0915 Too many statements (56/50)
+PLR0915 Too many statements (57/50)
+PLR0915 Too many statements (58/50)
+PLR0915 Too many statements (59/50)
+PLR0915 Too many statements (61/50)
+PLR0915 Too many statements (62/50)
+PLR0915 Too many statements (63/50)
+PLR0915 Too many statements (64/50)
+PLR0915 Too many statements (648/50)
+PLR0915 Too many statements (65/50)
+PLR0915 Too many statements (66/50)
+PLR0915 Too many statements (67/50)
+PLR0915 Too many statements (68/50)
+PLR0915 Too many statements (69/50)
+PLR0915 Too many statements (70/50)
+PLR0915 Too many statements (71/50)
+PLR0915 Too many statements (73/50)
+PLR0915 Too many statements (74/50)
+PLR0915 Too many statements (75/50)
+PLR0915 Too many statements (76/50)
+PLR0915 Too many statements (79/50)
+PLR0915 Too many statements (80/50)
+PLR0915 Too many statements (82/50)
+PLR0915 Too many statements (84/50)
+PLR0915 Too many statements (87/50)
+PLR0915 Too many statements (89/50)
+PLR0915 Too many statements (90/50)
+PLR0915 Too many statements (91/50)
+PLR0915 Too many statements (92/50)
+PLR0915 Too many statements (93/50)
+PLR0915 Too many statements (95/50)
+PLR0915 Too many statements (98/50)
+PLR0915 Too many statements (99/50)
+PLR1701 Merge these isinstance calls: `isinstance(cls.__dict__[attr], (classmethod, staticmethod))`
+PLR1701 Merge these isinstance calls: `isinstance(value, (dict, list))`
+PLR2004 Magic value used in comparison, consider replacing 0.0 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 0.1 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 0.25 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 0.26577747932995816 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 0.5 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 1.0 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 1.2 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 1.6746410750238774 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 10 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 100 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 100.0 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 1000 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 1000000 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 1024 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 11 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 12 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 120 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 1216 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 1218 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 1234 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 128 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 13 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 13.0 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 14 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 14494 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 15 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 150 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 15007 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 1509998340 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 16 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 1617 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 1627907477 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 16384 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 17 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 18 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 19 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 2 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 2.56 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 20 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 200 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 2000 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 2012 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 2014 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 2016 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 2019 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 21 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 22 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 25 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 250 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 256 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 27 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 28015 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 28016 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 29 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 3 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 3.0 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 3.14 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 30 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 300 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 301 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 307 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 3128 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 3280598526 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 3306 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 3308 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 3599 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 3600 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 3601 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 4 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 4.0 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 4.23 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 4.235 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 40 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 400 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 401 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 403 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 404 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 409 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 4096 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 41 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 42 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 429 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 445 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 4481 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 45 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 499 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 5 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 50 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 500 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 503 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 512 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 51855 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 52 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 536870912.0 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 6 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 60 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 600 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 61 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 7 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 8 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 80 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 9 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 9.2 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 9.4 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 9.6 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 9000 with a constant variable
+PLR2004 Magic value used in comparison, consider replacing 9223372036854771712 with a constant variable
+PLW0120 Else clause on loop without a break statement, remove the else and de-indent all the code inside it
+RUF004 Keyword argument `schema` must come after starred arguments
+RUF005 Consider `["datadog_checks_downloader", *argv]` instead of concatenation
+RUF005 Consider `["hudi.action.insert_records_written", "hudi.action.duration", "hudi.action.bytes_written", "hudi.action.compacted_records_updated", "hudi.action.create_time", "hudi.action.files_inserted", "hudi.action.files_updated", "hudi.action.log_files_compacted", "hudi.action.log_files_size", "hudi.action.partitions_written", "hudi.action.records_written", "hudi.action.scan_time", "hudi.action.update_records_written", "hudi.action.upsert_time", "hudi.finalize.duration", "hudi.finalize.files_finalized", "hudi.index.command.duration", "hudi.action.commit_time", "hudi.action.time.min", "hudi.action.time.max", "hudi.action.time.count", "hudi.action.time.50th_percentile", "hudi.action.time.75th_percentile", "hudi.action.time.95th_percentile", "hudi.action.time.98th_percentile", "hudi.action.time.999th_percentile", "hudi.action.time.99th_percentile", "hudi.action.time.mean", "hudi.action.time.std_dev", *JVM_E2E_METRICS_NEW]` instead of concatenation
+RUF005 Consider `["tomcat.max_time", "tomcat.threads.busy", "tomcat.threads.count", "tomcat.threads.max", "tomcat.bytes_sent", "tomcat.bytes_rcvd", "tomcat.error_count", "tomcat.request_count", "tomcat.processing_time", "tomcat.servlet.processing_time", "tomcat.servlet.error_count", "tomcat.servlet.request_count", "tomcat.jsp.count", "tomcat.jsp.reload_count", "tomcat.string_cache.access_count", "tomcat.string_cache.hit_count", "tomcat.web.cache.hit_count", "tomcat.web.cache.lookup_count", *JVM_E2E_METRICS_NEW]` instead of concatenation
+RUF005 Consider `[*COMMON_METRICS, NAMESPACE + '.request_type_count', NAMESPACE + '.proxy_request_count', NAMESPACE + '.proxy_request_duration.seconds.sum', NAMESPACE + '.proxy_request_duration.seconds.count', NAMESPACE + '.forward_sockets_open']` instead of concatenation
+RUF005 Consider `[*COMMON_METRICS_OMV2, NAMESPACE + '.request_type_count.count', NAMESPACE + '.proxy_request_count.count', NAMESPACE + '.proxy_request_duration.seconds.bucket', NAMESPACE + '.proxy_request_duration.seconds.sum', NAMESPACE + '.proxy_request_duration.seconds.count', NAMESPACE + '.forward_sockets_open', NAMESPACE + '.go.memstats.heap_released_bytes.count']` instead of concatenation
+RUF005 Consider `[*INSTANCE_TAGS, 'cluster_name:pierrem-test-fargate', 'task_family:redis-datadog', 'task_version:1', 'ecs_cluster:pierrem-test-fargate', 'ecs_task_family:redis-datadog', 'ecs_task_version:1']` instead of concatenation
+RUF005 Consider `[*tags, f"channel:{self.channel}"]` instead of concatenation
+S101 Use of `assert` detected
+S102 Use of `exec` detected
+S103 `os.chmod` setting a permissive mask `0o770` on file or directory
+S103 `os.chmod` setting a permissive mask `0o777` on file or directory
+S104 Possible binding to all interfaces
+S108 Probable insecure usage of temporary file or directory: "/dev/shm=0MB;3080;3465;0;3851"
+S108 Probable insecure usage of temporary file or directory: "/tmp"
+S108 Probable insecure usage of temporary file or directory: "/tmp/ca.crt"
+S108 Probable insecure usage of temporary file or directory: "/tmp/kubeconfig.yaml"
+S108 Probable insecure usage of temporary file or directory: "/tmp/memcached.sock"
+S108 Probable insecure usage of temporary file or directory: "/tmp/test.sink.txt"
+S108 Probable insecure usage of temporary file or directory: "/tmp/unexisting.crt"
+S108 Probable insecure usage of temporary file or directory: "/tmp/voltdb-certs/ca.pem"
+S108 Probable insecure usage of temporary file or directory: "/tmp/voltdb-certs/client.pem"
+S108 Probable insecure usage of temporary file or directory: "/tmp/voltdb/backup/"
+S110 `try`-`except`-`pass` detected, consider logging the exception
+S113 Probable use of requests call without timeout
+S324 Probable use of insecure hash functions in `hashlib`: "md5"
+S501 Probable use of `requests` call with `verify=False` disabling SSL certificate checks
+S506 Probable use of unsafe `yaml.load`. Allows instantiation of arbitrary objects. Consider `yaml.safe_load`.
+S506 Probable use of unsafe loader `FullLoader` with `yaml.load`. Allows instantiation of arbitrary objects. Consider `yaml.safe_load`.
+S506 Probable use of unsafe loader `Loader` with `yaml.load`. Allows instantiation of arbitrary objects. Consider `yaml.safe_load`.
+S506 Probable use of unsafe loader `SafeLineLoader` with `yaml.load`. Allows instantiation of arbitrary objects. Consider `yaml.safe_load`.
+T100 Import for `pdb` found
+TID252 Relative imports are banned
+UP013 Convert `InfrastructureDataItem` from `TypedDict` functional to class syntax
+UP030 Use implicit references for positional format fields
+YTT202 `six.PY3` referenced (python4), use `not six.PY2`

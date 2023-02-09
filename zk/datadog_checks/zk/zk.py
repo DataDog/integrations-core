@@ -88,7 +88,7 @@ class ZKMetric(tuple):
     def __new__(cls, name, value, m_type="gauge", m_tags=None):
         if m_tags is None:
             m_tags = []
-        return super(ZKMetric, cls).__new__(cls, [name, value, m_type, m_tags])
+        return super().__new__(cls, [name, value, m_type, m_tags])
 
 
 class ZookeeperCheck(AgentCheck):
@@ -112,13 +112,13 @@ class ZookeeperCheck(AgentCheck):
     _MNTR_RATES = {'zk_packets_received', 'zk_packets_sent'}
 
     def __init__(self, name, init_config, instances):
-        super(ZookeeperCheck, self).__init__(name, init_config, instances)
+        super().__init__(name, init_config, instances)
         self.host = self.instance.get('host', 'localhost')
         self.port = int(self.instance.get('port', 2181))
         self.timeout = float(self.instance.get('timeout', 3.0))
         self.expected_mode = (self.instance.get('expected_mode') or '').strip()
         self.base_tags = list(set(self.instance.get('tags', [])))
-        self.sc_tags = ["host:{0}".format(self.host), "port:{0}".format(self.port)] + self.base_tags
+        self.sc_tags = [f"host:{self.host}", f"port:{self.port}", *self.base_tags]
         self.should_report_instance_mode = is_affirmative(self.instance.get("report_instance_mode", True))
         self.use_tls = is_affirmative(self.instance.get('use_tls', False))
 
@@ -146,7 +146,7 @@ class ZookeeperCheck(AgentCheck):
                 message = None
             else:
                 status = AgentCheck.WARNING
-                message = u'Response from the server: %s' % ruok
+                message = 'Response from the server: %s' % ruok
         finally:
             self.service_check('zookeeper.ruok', status, message=message, tags=self.sc_tags)
 
@@ -183,7 +183,7 @@ class ZookeeperCheck(AgentCheck):
                     message = None
                 else:
                     status = AgentCheck.CRITICAL
-                    message = u"Server is in %s mode but check expects %s mode" % (mode, self.expected_mode)
+                    message = f"Server is in {mode} mode but check expects {self.expected_mode} mode"
                 self.service_check('zookeeper.mode', status, message=message, tags=self.sc_tags)
 
         # Read metrics from the `mntr` output
@@ -217,7 +217,7 @@ class ZookeeperCheck(AgentCheck):
         if mode not in self.STATUS_TYPES:
             mode = "unknown"
 
-        tags = self.base_tags + ['mode:%s' % mode]
+        tags = [*self.base_tags, "mode:%s" % mode]
         self.gauge('zookeeper.instances', 1, tags=tags)
         gauges[mode] = 1
         for k, v in iteritems(gauges):
@@ -238,7 +238,7 @@ class ZookeeperCheck(AgentCheck):
         while chunk:
             if num_reads > max_reads:
                 # Safeguard against an infinite loop
-                raise Exception("Read %s bytes before exceeding max reads of %s. " % (buf.tell(), max_reads))
+                raise Exception(f"Read {buf.tell()} bytes before exceeding max reads of {max_reads}. ")
             chunk = ensure_unicode(sock.recv(chunk_size))
             buf.write(chunk)
             num_reads += 1
@@ -254,7 +254,7 @@ class ZookeeperCheck(AgentCheck):
                         return self._get_data(ssock, command)
                 else:
                     return self._get_data(sock, command)
-        except (socket.timeout, socket.error) as exc:
+        except OSError as exc:
             raise ZKConnectionFailure(exc)  # Include `exc` message for PY2.
 
     def parse_stat(self, buf):
@@ -293,7 +293,7 @@ class ZookeeperCheck(AgentCheck):
 
         # Latency min/avg/max: -10/0.0/20007
         _, value = buf.readline().split(':')
-        l_min, l_avg, l_max = [float(v) for v in value.strip().split('/')]
+        l_min, l_avg, l_max = (float(v) for v in value.strip().split('/'))
         metrics.append(ZKMetric('zookeeper.latency.min', l_min))
         metrics.append(ZKMetric('zookeeper.latency.avg', l_avg))
         metrics.append(ZKMetric('zookeeper.latency.max', l_max))
@@ -342,7 +342,7 @@ class ZookeeperCheck(AgentCheck):
         # Mode: leader
         _, value = buf.readline().split(':')
         mode = value.strip().lower()
-        tags = [u'mode:' + mode]
+        tags = ['mode:' + mode]
 
         # Node count: 487
         _, value = buf.readline().split(':')
@@ -371,7 +371,7 @@ class ZookeeperCheck(AgentCheck):
                 m = re.match(self.METRIC_TAGGED_PATTERN, line)
                 if m:
                     key, tag_name, tag_val, value = m.groups()
-                    tags.append('{}:{}'.format(tag_name, tag_val))
+                    tags.append(f'{tag_name}:{tag_val}')
                 else:
                     try:
                         key, value = line.split()

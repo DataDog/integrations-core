@@ -110,6 +110,7 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
                 ],
                 'fmt': [
                     f'isort . --settings-path {settings_dir}/pyproject.toml',
+                    f'ruff --config {settings_dir}/pyproject.toml . --fix',
                     f'black . --config {settings_dir}/pyproject.toml',
                     'python -c "print(\'\\n[NOTE] hello flake8 may still report style errors for things '
                     'black cannot fix, these will need to be fixed manually.\')"',

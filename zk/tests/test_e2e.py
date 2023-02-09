@@ -18,6 +18,6 @@ def test_e2e(dd_agent_check, get_instance):
     common.assert_service_checks_ok(aggregator)
 
     expected_mode = get_instance['expected_mode']
-    mname = "zookeeper.instances.{}".format(expected_mode)
+    mname = f"zookeeper.instances.{expected_mode}"
     aggregator.assert_metric(mname, value=1)
     aggregator.assert_all_metrics_covered()

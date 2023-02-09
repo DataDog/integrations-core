@@ -19,7 +19,7 @@ CHECK_NAME = 'zk'
 HOST = get_docker_hostname()
 PORT = 12181
 HERE = os.path.dirname(os.path.abspath(__file__))
-URL = "http://{}:{}".format(HOST, PORT)
+URL = f"http://{HOST}:{PORT}"
 
 VALID_CONFIG = {
     'host': HOST,
@@ -152,9 +152,9 @@ def dd_environment(get_instance):
     with docker_run(compose_file, conditions=condition, sleep=5):
         yield get_instance, {
             'docker_volumes': [
-                '{}:/conf/private_key.pem'.format(private_key),
-                '{}:/conf/cert.pem'.format(cert),
-                '{}:/conf/ca_cert.pem'.format(ca_cert),
+                f'{private_key}:/conf/private_key.pem',
+                f'{cert}:/conf/cert.pem',
+                f'{ca_cert}:/conf/ca_cert.pem',
             ]
         }
 
