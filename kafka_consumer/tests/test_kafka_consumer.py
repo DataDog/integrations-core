@@ -37,22 +37,11 @@ def mocked_time():
 
 
 @pytest.mark.unit
-def test_uses_new_implementation_when_new_version_specified(kafka_instance):
-    instance = copy.deepcopy(kafka_instance)
-    instance['kafka_client_api_version'] = '0.10.2'
-    kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [instance])
-    kafka_consumer_check._init_check_based_on_kafka_version()
-
-    assert isinstance(kafka_consumer_check.sub_check, NewKafkaConsumerCheck)
-
-
-@pytest.mark.unit
 def test_get_interpolated_timestamp(kafka_instance):
     instance = copy.deepcopy(kafka_instance)
     instance['kafka_client_api_version'] = '0.10.2'
     instance['sasl_kerberos_service_name'] = 'kafka'
     check = KafkaCheck('kafka_consumer', {}, [instance])
-    check._init_check_based_on_kafka_version()
     # at offset 0, time is 100s, at offset 10, time is 200sec.
     # by interpolation, at offset 5, time should be 150sec.
     assert check.sub_check._get_interpolated_timestamp({0: 100, 10: 200}, 5) == 150

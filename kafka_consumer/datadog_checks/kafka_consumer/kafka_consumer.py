@@ -39,7 +39,6 @@ class KafkaCheck(AgentCheck):
 
     def __init__(self, name, init_config, instances):
         super(KafkaCheck, self).__init__(name, init_config, instances)
-        self.sub_check = None
         self._context_limit = int(self.init_config.get('max_partition_contexts', CONTEXT_UPPER_BOUND))
         self._data_streams_enabled = is_affirmative(self.instance.get('data_streams_enabled', False))
         self._custom_tags = self.instance.get('tags', [])
@@ -50,8 +49,7 @@ class KafkaCheck(AgentCheck):
             self.instance.get('monitor_all_broker_highwatermarks', False)
         )
         self._consumer_groups = self.instance.get('consumer_groups', {})
-
-        self.check_initializations.append(self._init_check_based_on_kafka_version)
+        self.sub_check = NewKafkaConsumerCheck(self)
 
     def check(self, _):
         return self.sub_check.check()
@@ -91,11 +89,6 @@ class KafkaCheck(AgentCheck):
                     if partitions is not None:
                         for partition in partitions:
                             assert isinstance(partition, int)
-
-    def _init_check_based_on_kafka_version(self):
-        """Set the sub_check attribute before allowing the `check` method to run. If something fails, this method will
-        be retried regularly."""
-        self.sub_check = NewKafkaConsumerCheck(self)
 
     def _create_kafka_client(self, clazz):
         kafka_connect_str = self.instance.get('kafka_connect_str')

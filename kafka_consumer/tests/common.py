@@ -14,11 +14,7 @@ KAFKA_CONNECT_STR = '{}:9092'.format(HOST_IP)
 ZK_CONNECT_STR = '{}:2181'.format(HOST)
 TOPICS = ['marvel', 'dc']
 PARTITIONS = [0, 1]
-USE_MULTIPLE_BROKERS = is_affirmative(os.environ['USE_MULTIPLE_BROKERS'])
-if USE_MULTIPLE_BROKERS:
-    DOCKER_IMAGE_PATH = os.path.join(HERE, 'docker', 'multiple-brokers.yaml')
-else:
-    DOCKER_IMAGE_PATH = os.path.join(HERE, 'docker', 'single-broker.yaml')
+DOCKER_IMAGE_PATH = os.path.join(HERE, 'docker', 'multiple-brokers.yaml')
 
 
 def is_supported(flavor):
