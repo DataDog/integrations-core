@@ -19,15 +19,6 @@ The Cassandra check is included in the [Datadog Agent][2] package, so you don't 
 
 ### Configuration
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
-
-<!-- xxx tabs xxx -->
-<!-- xxx tab "Host" xxx -->
-
-#### Host
-
-To configure this check for an Agent running on a host:
-
 ##### Metric collection
 
 1. The default configuration of your `cassandra.d/conf.yaml` file activate the collection of your [Cassandra metrics](#metrics). See the [sample cassandra.d/conf.yaml][5] for all available configuration options.
@@ -64,30 +55,6 @@ _Available for Agent versions >6.0_
     To make sure that stacktraces are properly aggregated as one single log, a [multiline processing rule][7] can be added.
 
 3. [Restart the Agent][6].
-
-<!-- xxz tab xxx -->
-<!-- xxx tab "Containerized" xxx -->
-
-#### Containerized
-
-For containerized environments, see the [Autodiscovery Integration Templates][8] for guidance on applying the parameters below. 
-
-##### Metric collection
-
-For containerized environments, see the [Autodiscovery with JMX][9] guide, which includes [updating your Agent Image][17] on your clusters through Autodiscovery.
-
-##### Log collection
-
-_Available for Agent versions >6.0_
-
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][10].
-
-| Parameter      | Value                                                  |
-| -------------- | ------------------------------------------------------ |
-| `<LOG_CONFIG>` | `{"source": "cassandra", "service": "<SERVICE_NAME>"}` |
-
-<!-- xxz tab xxx -->
-<!-- xxz tabs xxx -->
 
 ### Validation
 
