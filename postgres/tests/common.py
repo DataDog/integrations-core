@@ -157,8 +157,9 @@ def check_wal_receiver_metrics(aggregator, expected_tags, count=1, connected=1):
     if float(POSTGRES_VERSION) < 10.0:
         return
     if not connected:
-        aggregator.assert_metric('postgresql.wal_receiver.connected', count=count, value=1,
-                                 tags=expected_tags + ['status:disconnected'])
+        aggregator.assert_metric(
+            'postgresql.wal_receiver.connected', count=count, value=1, tags=expected_tags + ['status:disconnected']
+        )
         return
     for column in QUERY_PG_STAT_WAL_RECEIVER['columns']:
         if column['type'] == 'tag':
