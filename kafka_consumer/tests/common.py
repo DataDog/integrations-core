@@ -27,8 +27,4 @@ def is_supported(flavor):
     """
     if not os.environ.get('KAFKA_VERSION'):
         return False
-
-    if flavor != os.environ.get('KAFKA_OFFSETS_STORAGE'):
-        return False
-
     return True

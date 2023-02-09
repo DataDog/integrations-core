@@ -4,7 +4,6 @@
 [[envs.default.matrix]]
 python = ["3.8"]
 version = ["1.1", "2.3", "latest"]
-offset-storage = ["kafka"]
 
 [envs.default.overrides]
 matrix.version.e2e-env = { value = true, if = ["0.9", "latest"] }
@@ -18,9 +17,6 @@ matrix.version.env-vars = [
   # Can't have a working `docker compose` for these versions
   { key = "USE_MULTIPLE_BROKERS", value = "false", if = ["0.9", "0.11"] },
 ]
-matrix.offset-storage.env-vars = [
-  { key = "KAFKA_OFFSETS_STORAGE", value = "kafka", if = ["kafka"] },
-]
 
 [envs.default]
 dependencies = [
@@ -29,7 +25,6 @@ dependencies = [
 e2e-env = false
 
 [envs.latest.env-vars]
-KAFKA_OFFSETS_STORAGE = "kafka"
 KAFKA_VERSION = "latest"
 USE_MULTIPLE_BROKERS = "true"
 ZK_VERSION = "3.6.0"
