@@ -4,7 +4,6 @@
 import os
 import socket
 
-from datadog_checks.base import is_affirmative
 from datadog_checks.dev import get_docker_hostname
 
 HERE = os.path.dirname(os.path.abspath(__file__))

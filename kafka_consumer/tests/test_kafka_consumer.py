@@ -11,7 +11,6 @@ import pytest
 
 from datadog_checks.kafka_consumer import KafkaCheck
 from datadog_checks.kafka_consumer.kafka_consumer import OAuthTokenProvider
-from datadog_checks.kafka_consumer.new_kafka_consumer import NewKafkaConsumerCheck
 
 from .common import KAFKA_CONNECT_STR, is_supported
 
@@ -39,7 +38,6 @@ def mocked_time():
 @pytest.mark.unit
 def test_get_interpolated_timestamp(kafka_instance):
     instance = copy.deepcopy(kafka_instance)
-    instance['kafka_client_api_version'] = '0.10.2'
     instance['sasl_kerberos_service_name'] = 'kafka'
     check = KafkaCheck('kafka_consumer', {}, [instance])
     # at offset 0, time is 100s, at offset 10, time is 200sec.
@@ -53,7 +51,6 @@ def test_get_interpolated_timestamp(kafka_instance):
 @pytest.mark.unit
 def test_gssapi(kafka_instance, dd_run_check):
     instance = copy.deepcopy(kafka_instance)
-    instance['kafka_client_api_version'] = '0.10.2'
     instance['sasl_mechanism'] = 'GSSAPI'
     instance['security_protocol'] = 'SASL_PLAINTEXT'
     instance['sasl_kerberos_service_name'] = 'kafka'
@@ -88,7 +85,6 @@ def test_tls_config_ok(kafka_instance_tls):
 @pytest.mark.unit
 def test_oauth_token_client_config(kafka_instance):
     instance = copy.deepcopy(kafka_instance)
-    instance['kafka_client_api_version'] = "0.10.2"
     instance['security_protocol'] = "SASL_PLAINTEXT"
     instance['sasl_mechanism'] = "OAUTHBEARER"
     instance['sasl_oauth_token_provider'] = {
@@ -129,22 +125,22 @@ def test_tls_config_legacy(extra_config, expected_http_kwargs, kafka_instance):
     assert expected_http_kwargs == actual_options
 
 
-# @pytest.mark.integration
-# @pytest.mark.usefixtures('dd_environment')
-# @mock.patch(
-#     'datadog_checks.kafka_consumer.new_kafka_consumer.NewKafkaConsumerCheck._read_persistent_cache',
-#     mocked_read_persistent_cache,
-# )
-# @mock.patch('datadog_checks.kafka_consumer.new_kafka_consumer.time', mocked_time)
-# def test_data_streams_enabled(aggregator, kafka_instance, dd_run_check):
-#     """
-#     Testing Kafka_consumer check.
-#     """
-#     instance = copy.deepcopy(kafka_instance)
-#     instance['data_streams_enabled'] = True
-#     kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [instance])
-#     dd_run_check(kafka_consumer_check)
-#     assert_check_kafka(aggregator, instance['consumer_groups'], data_streams_enabled=True)
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@mock.patch(
+    'datadog_checks.kafka_consumer.new_kafka_consumer.NewKafkaConsumerCheck._read_persistent_cache',
+    mocked_read_persistent_cache,
+)
+@mock.patch('datadog_checks.kafka_consumer.new_kafka_consumer.time', mocked_time)
+def test_data_streams_enabled(aggregator, kafka_instance, dd_run_check):
+    """
+    Testing Kafka_consumer check.
+    """
+    instance = copy.deepcopy(kafka_instance)
+    instance['data_streams_enabled'] = True
+    kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [instance])
+    dd_run_check(kafka_consumer_check)
+    assert_check_kafka(aggregator, instance['consumer_groups'], data_streams_enabled=True)
 
 
 @pytest.mark.integration
