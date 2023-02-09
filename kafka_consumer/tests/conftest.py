@@ -58,7 +58,10 @@ def dd_environment(mock_local_kafka_hosts_dns, e2e_instance):
             'BOOTSTRAP_SERVER_FLAG': _get_bootstrap_server_flag(),
         },
     ):
-        yield e2e_instance, E2E_METADATA
+        yield {
+            'instances': [e2e_instance],
+            'init_config': {'zk_timeout': 30, 'kafka_timeout': 30},
+        }, E2E_METADATA
 
 
 E2E_METADATA = {
@@ -87,7 +90,6 @@ def kafka_instance():
         'tags': ['optional:tag1'],
         'consumer_groups': {'my_consumer': {'marvel': [0]}},
         'broker_requests_batch_size': 1,
-        'api_version': os.environ.get('KAFKA_VERSION'),
     }
 
 
