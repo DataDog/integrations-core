@@ -12,12 +12,7 @@ import pytest
 from datadog_checks.kafka_consumer import KafkaCheck
 from datadog_checks.kafka_consumer.kafka_consumer import OAuthTokenProvider
 
-from .common import KAFKA_CONNECT_STR, is_supported
-
-pytestmark = pytest.mark.skipif(
-    not is_supported('kafka'), reason='kafka consumer offsets not supported in current environment'
-)
-
+from .common import KAFKA_CONNECT_STR
 
 BROKER_METRICS = ['kafka.broker_offset']
 

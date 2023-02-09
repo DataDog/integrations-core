@@ -14,12 +14,3 @@ ZK_CONNECT_STR = '{}:2181'.format(HOST)
 TOPICS = ['marvel', 'dc']
 PARTITIONS = [0, 1]
 DOCKER_IMAGE_PATH = os.path.join(HERE, 'docker', 'multiple-brokers.yaml')
-
-
-def is_supported(flavor):
-    """
-    Returns whether the current CI configuration is supported
-    """
-    if not os.environ.get('KAFKA_VERSION'):
-        return False
-    return True
