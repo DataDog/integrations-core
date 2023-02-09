@@ -11,8 +11,8 @@ matrix.version.env-vars = [
   { key = "KAFKA_VERSION", value = "1.1.0", if = ["1.1"] },
   { key = "KAFKA_VERSION", value = "2.12-2.3.0", if = ["2.3"] },
   { key = "KAFKA_VERSION", value = "latest", if = ["latest"] },
+  "ZK_VERSION=3.6.0",
 ]
-ZK_VERSION = "3.6.0"
 
 [envs.default]
 dependencies = [
