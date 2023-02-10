@@ -49,7 +49,7 @@ def test_tls_config_ok(kafka_instance_tls):
             assert tls_context.check_hostname is True
             assert tls_context.tls_cert is not None
             assert tls_context.check_hostname is True
-            assert kafka_consumer_check.create_kafka_client is not None
+            assert kafka_consumer_check.create_kafka_admin_client is not None
 
 
 @pytest.mark.parametrize(

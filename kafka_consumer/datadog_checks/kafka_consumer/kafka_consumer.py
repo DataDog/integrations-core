@@ -88,9 +88,6 @@ class KafkaCheck(AgentCheck):
         }
         self.event(event_dict)
 
-    def create_kafka_client(self):
-        return self._create_kafka_client(clazz=KafkaClient)
-
     def create_kafka_admin_client(self):
         return self._create_kafka_client(clazz=KafkaAdminClient)
 
