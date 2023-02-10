@@ -54,11 +54,8 @@ class KafkaCheck(AgentCheck):
             self.instance.get('monitor_all_broker_highwatermarks', False)
         )
         self._consumer_groups = self.instance.get('consumer_groups', {})
-
-        self.sub_check = NewKafkaConsumerCheck(self)
-
-    def check(self, _):
-        return self.sub_check.check()
+        self._broker_requests_batch_size = self.instance.get('broker_requests_batch_size', BROKER_REQUESTS_BATCH_SIZE)
+        self._kafka_client = None
 
     # KafkaCheck
     # - check()
@@ -153,24 +150,6 @@ class KafkaCheck(AgentCheck):
         )
 
 
-class NewKafkaConsumerCheck(object):
-    """
-    Check the offsets and lag of Kafka consumers. This check also returns broker highwater offsets.
-
-    For details about the supported options, see the associated `conf.yaml.example`.
-    """
-
-    def __init__(self, parent_check):
-        self._parent_check = parent_check
-        self._broker_requests_batch_size = self.instance.get('broker_requests_batch_size', BROKER_REQUESTS_BATCH_SIZE)
-        self._kafka_client = None
-
-    def __getattr__(self, item):
-        try:
-            return getattr(self._parent_check, item)
-        except AttributeError:
-            raise AttributeError("NewKafkaConsumerCheck has no attribute called {}".format(item))
-
     @property
     def kafka_client(self):
         if self._kafka_client is None:
@@ -184,7 +163,7 @@ class NewKafkaConsumerCheck(object):
             self._kafka_client = self._create_kafka_admin_client(api_version=kafka_version)
         return self._kafka_client
 
-    def check(self):
+    def check(self, _):
         """The main entrypoint of the check."""
         self._consumer_offsets = {}  # Expected format: {(consumer_group, topic, partition): offset}
         self._highwater_offsets = {}  # Expected format: {(topic, partition): offset}
