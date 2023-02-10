@@ -147,7 +147,7 @@ def test_tls_config_legacy(extra_config, expected_http_kwargs, kafka_instance):
             id="Invalid Non-string kafka_connect_str",
         ),
         # TODO fix this:
-        pytest.param({'kafka_connect_str': ''}, does_not_raise(), 0, id="Invalid empty string kafka_connect_str"),
+        pytest.param({'kafka_connect_str': ''}, pytest.raises(ConfigurationError), 0, id="Invalid empty string kafka_connect_str"),
         # TODO fix this:
         pytest.param(
             {'kafka_connect_str': [KAFKA_CONNECT_STR, '127.0.0.1:9093']},
