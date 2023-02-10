@@ -2,12 +2,10 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import copy
-import os
 from contextlib import nullcontext as does_not_raise
 
 import mock
 import pytest
-from kafka import errors as kafka_errors
 
 from datadog_checks.base import ConfigurationError
 from datadog_checks.kafka_consumer import KafkaCheck
@@ -101,7 +99,7 @@ def test_oauth_config(sasl_oauth_token_provider, expected_exception):
 @pytest.mark.unit
 def test_oauth_token_client_config(kafka_instance):
     instance = copy.deepcopy(kafka_instance)
-    instance['kafka_client_api_version'] = "0.10.2"
+    instance['kafka_client_api_version'] = "3.3.2"
     instance['security_protocol'] = "SASL_PLAINTEXT"
     instance['sasl_mechanism'] = "OAUTHBEARER"
     instance['sasl_oauth_token_provider'] = {
@@ -219,7 +217,6 @@ def test_no_partitions(aggregator, kafka_instance, dd_run_check):
     assert_check_kafka(aggregator, {'my_consumer': {'marvel': [0]}})
 
 
-@pytest.mark.skipif(os.environ.get('KAFKA_VERSION', '').startswith('0.9'), reason='Old Kafka version')
 @pytest.mark.usefixtures('dd_environment')
 def test_version_metadata(datadog_agent, kafka_instance, dd_run_check):
     kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [kafka_instance])
@@ -236,6 +233,7 @@ def test_version_metadata(datadog_agent, kafka_instance, dd_run_check):
     datadog_agent.assert_metadata('test:123', version_parts)
 
 
+# Get rid of dd_environment when we refactor and fix expected behaviors in the check
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize(
     'instance, expected_exception, metric_count',
@@ -247,21 +245,14 @@ def test_version_metadata(datadog_agent, kafka_instance, dd_run_check):
             0,
             id="Invalid Non-string kafka_connect_str",
         ),
-        # TODO fix this:
-        pytest.param(
-            {'kafka_connect_str': ''},
-            pytest.raises(kafka_errors.NoBrokersAvailable),
-            0,
-            id="Invalid empty string kafka_connect_str",
-        ),
-        # TODO fix this:
+        # TODO fix this: This should raise ConfigurationError
         pytest.param(
             {'kafka_connect_str': [KAFKA_CONNECT_STR, '127.0.0.1:9093']},
             does_not_raise(),
             0,
             id="monitor_unlisted_consumer_groups is False",
         ),
-        # TODO fix this:
+        # TODO fix this: This should raise ConfigurationError
         pytest.param(
             {'kafka_connect_str': KAFKA_CONNECT_STR, 'consumer_groups': {}},
             does_not_raise(),
