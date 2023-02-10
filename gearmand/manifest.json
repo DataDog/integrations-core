@@ -15,7 +15,6 @@
       "Supported OS::Linux",
       "Supported OS::macOS",
       "Category::Processing",
-      "Category::Autodiscovery",
       "Category::Log Collection"
     ]
   },

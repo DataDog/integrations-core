@@ -14,8 +14,7 @@
     "classifier_tags": [
       "Supported OS::Windows",
       "Category::Web",
-      "Category::Log Collection",
-      "Category::Autodiscovery"
+      "Category::Log Collection"
     ]
   },
   "author": {

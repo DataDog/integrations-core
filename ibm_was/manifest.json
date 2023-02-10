@@ -17,8 +17,7 @@
       "Supported OS::Windows",
       "Category::Web",
       "Category::OS & System",
-      "Category::Log Collection",
-      "Category::Autodiscovery"
+      "Category::Log Collection"
     ]
   },
   "author": {
