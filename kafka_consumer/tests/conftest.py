@@ -56,7 +56,7 @@ def dd_environment(mock_local_kafka_hosts_dns, e2e_instance):
     ):
         yield {
             'instances': [e2e_instance],
-            'init_config': {'zk_timeout': 30, 'kafka_timeout': 30},
+            'init_config': {'kafka_timeout': 30},
         }, E2E_METADATA
 
 
@@ -73,7 +73,6 @@ E2E_METADATA = {
 def kafka_instance():
     return {
         'kafka_connect_str': KAFKA_CONNECT_STR,
-        'kafka_consumer_offsets': True,
         'tags': ['optional:tag1'],
         'consumer_groups': {'my_consumer': {'marvel': [0]}},
         'broker_requests_batch_size': 1,
@@ -90,7 +89,6 @@ private_key = os.path.join(CERTIFICATE_DIR, 'server.pem')
 def kafka_instance_tls():
     return {
         'kafka_connect_str': KAFKA_CONNECT_STR,
-        'kafka_consumer_offsets': True,
         'tags': ['optional:tag1'],
         'consumer_groups': {'my_consumer': {'marvel': [0]}},
         'broker_requests_batch_size': 1,

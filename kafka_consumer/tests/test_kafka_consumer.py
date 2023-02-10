@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import copy
-import os
 
 import mock
 import pytest
@@ -54,7 +53,7 @@ def test_tls_config_ok(kafka_instance_tls):
 @pytest.mark.unit
 def test_oauth_token_client_config(kafka_instance):
     instance = copy.deepcopy(kafka_instance)
-    instance['kafka_client_api_version'] = "0.10.2"
+    instance['kafka_client_api_version'] = "3.3.2"
     instance['security_protocol'] = "SASL_PLAINTEXT"
     instance['sasl_mechanism'] = "OAUTHBEARER"
     instance['sasl_oauth_token_provider'] = {
@@ -151,7 +150,7 @@ def assert_check_kafka(aggregator, consumer_groups):
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_consumer_config_error(caplog, dd_run_check):
-    instance = {'kafka_connect_str': KAFKA_CONNECT_STR, 'kafka_consumer_offsets': True, 'tags': ['optional:tag1']}
+    instance = {'kafka_connect_str': KAFKA_CONNECT_STR, 'tags': ['optional:tag1']}
     kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [instance])
 
     dd_run_check(kafka_consumer_check, extract_message=True)
@@ -178,7 +177,6 @@ def test_no_partitions(aggregator, kafka_instance, dd_run_check):
     assert_check_kafka(aggregator, {'my_consumer': {'marvel': [0]}})
 
 
-@pytest.mark.skipif(os.environ.get('KAFKA_VERSION', '').startswith('0.9'), reason='Old Kafka version')
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_version_metadata(datadog_agent, kafka_instance, dd_run_check):
