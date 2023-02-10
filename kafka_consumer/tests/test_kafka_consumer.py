@@ -2,18 +2,20 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import copy
+from contextlib import nullcontext as does_not_raise
 
 import mock
 import pytest
 
+from datadog_checks.base import ConfigurationError
 from datadog_checks.kafka_consumer import KafkaCheck
 from datadog_checks.kafka_consumer.kafka_consumer import OAuthTokenProvider
 
-from .common import KAFKA_CONNECT_STR
+from .common import BROKER_METRICS, CONSUMER_METRICS, KAFKA_CONNECT_STR
 
-BROKER_METRICS = ['kafka.broker_offset']
+metrics = BROKER_METRICS + CONSUMER_METRICS
 
-CONSUMER_METRICS = ['kafka.consumer_offset', 'kafka.consumer_lag']
+pytestmark = [pytest.mark.integration]
 
 
 @pytest.mark.unit
@@ -48,6 +50,50 @@ def test_tls_config_ok(kafka_instance_tls):
             assert tls_context.tls_cert is not None
             assert tls_context.check_hostname is True
             assert kafka_consumer_check.create_kafka_client is not None
+
+
+@pytest.mark.parametrize(
+    'sasl_oauth_token_provider, expected_exception',
+    [
+        pytest.param(
+            {},
+            pytest.raises(AssertionError, match="sasl_oauth_token_provider required for OAUTHBEARER sasl"),
+            id="No sasl_oauth_token_provider",
+        ),
+        pytest.param(
+            {'sasl_oauth_token_provider': {}},
+            pytest.raises(ConfigurationError, match="The `url` setting of `auth_token` reader is required"),
+            id="Empty sasl_oauth_token_provider, url missing",
+        ),
+        pytest.param(
+            {'sasl_oauth_token_provider': {'url': 'http://fake.url'}},
+            pytest.raises(ConfigurationError, match="The `client_id` setting of `auth_token` reader is required"),
+            id="client_id missing",
+        ),
+        pytest.param(
+            {'sasl_oauth_token_provider': {'url': 'http://fake.url', 'client_id': 'id'}},
+            pytest.raises(ConfigurationError, match="The `client_secret` setting of `auth_token` reader is required"),
+            id="client_secret missing",
+        ),
+        pytest.param(
+            {'sasl_oauth_token_provider': {'url': 'http://fake.url', 'client_id': 'id', 'client_secret': 'secret'}},
+            pytest.raises(Exception, match="NoBrokersAvailable"),  # Mock the expected response after library migration
+            id="valid config",
+        ),
+    ],
+)
+def test_oauth_config(sasl_oauth_token_provider, expected_exception):
+    instance = {
+        'kafka_connect_str': KAFKA_CONNECT_STR,
+        'monitor_unlisted_consumer_groups': True,
+        'security_protocol': 'SASL_PLAINTEXT',
+        'sasl_mechanism': 'OAUTHBEARER',
+    }
+    instance.update(sasl_oauth_token_provider)
+    check = KafkaCheck('kafka_consumer', {}, [instance])
+
+    with expected_exception:
+        check.check(instance)
 
 
 @pytest.mark.unit
@@ -94,7 +140,6 @@ def test_tls_config_legacy(extra_config, expected_http_kwargs, kafka_instance):
     assert expected_http_kwargs == actual_options
 
 
-@pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_check_kafka(aggregator, kafka_instance, dd_run_check):
     """
@@ -105,7 +150,6 @@ def test_check_kafka(aggregator, kafka_instance, dd_run_check):
     assert_check_kafka(aggregator, kafka_instance['consumer_groups'])
 
 
-@pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_can_send_event(aggregator, kafka_instance, dd_run_check):
     """
@@ -116,7 +160,6 @@ def test_can_send_event(aggregator, kafka_instance, dd_run_check):
     aggregator.assert_event("test", exact_match=False, count=1)
 
 
-@pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_check_kafka_metrics_limit(aggregator, kafka_instance, dd_run_check):
     """
@@ -147,7 +190,6 @@ def assert_check_kafka(aggregator, consumer_groups):
     aggregator.assert_all_metrics_covered()
 
 
-@pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_consumer_config_error(caplog, dd_run_check):
     instance = {'kafka_connect_str': KAFKA_CONNECT_STR, 'tags': ['optional:tag1']}
@@ -157,7 +199,6 @@ def test_consumer_config_error(caplog, dd_run_check):
     assert 'monitor_unlisted_consumer_groups is False' in caplog.text
 
 
-@pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_no_topics(aggregator, kafka_instance, dd_run_check):
     kafka_instance['consumer_groups'] = {'my_consumer': {}}
@@ -167,7 +208,6 @@ def test_no_topics(aggregator, kafka_instance, dd_run_check):
     assert_check_kafka(aggregator, {'my_consumer': {'marvel': [0]}})
 
 
-@pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_no_partitions(aggregator, kafka_instance, dd_run_check):
     kafka_instance['consumer_groups'] = {'my_consumer': {'marvel': []}}
@@ -177,7 +217,6 @@ def test_no_partitions(aggregator, kafka_instance, dd_run_check):
     assert_check_kafka(aggregator, {'my_consumer': {'marvel': [0]}})
 
 
-@pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_version_metadata(datadog_agent, kafka_instance, dd_run_check):
     kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [kafka_instance])
@@ -192,3 +231,107 @@ def test_version_metadata(datadog_agent, kafka_instance, dd_run_check):
 
     dd_run_check(kafka_consumer_check)
     datadog_agent.assert_metadata('test:123', version_parts)
+
+
+# Get rid of dd_environment when we refactor and fix expected behaviors in the check
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize(
+    'instance, expected_exception, metric_count',
+    [
+        pytest.param({}, pytest.raises(Exception), 0, id="Empty instance"),
+        pytest.param(
+            {'kafka_connect_str': 12},
+            pytest.raises(ConfigurationError, match='kafka_connect_str should be string or list of strings'),
+            0,
+            id="Invalid Non-string kafka_connect_str",
+        ),
+        # TODO fix this: This should raise ConfigurationError
+        pytest.param(
+            {'kafka_connect_str': [KAFKA_CONNECT_STR, '127.0.0.1:9093']},
+            does_not_raise(),
+            0,
+            id="monitor_unlisted_consumer_groups is False",
+        ),
+        # TODO fix this: This should raise ConfigurationError
+        pytest.param(
+            {'kafka_connect_str': KAFKA_CONNECT_STR, 'consumer_groups': {}},
+            does_not_raise(),
+            0,
+            id="Empty consumer_groups",
+        ),
+        pytest.param(
+            {'kafka_connect_str': None},
+            pytest.raises(ConfigurationError, match='kafka_connect_str should be string or list of strings'),
+            0,
+            id="Invalid Nonetype kafka_connect_str",
+        ),
+        pytest.param(
+            {'kafka_connect_str': [KAFKA_CONNECT_STR, '127.0.0.1:9093'], 'monitor_unlisted_consumer_groups': True},
+            does_not_raise(),
+            4,
+            id="Valid list kafka_connect_str",
+        ),
+        pytest.param(
+            {'kafka_connect_str': KAFKA_CONNECT_STR, 'monitor_unlisted_consumer_groups': True},
+            does_not_raise(),
+            4,
+            id="Valid str kafka_connect_str",
+        ),
+        pytest.param({'kafka_connect_str': 'invalid'}, pytest.raises(Exception), 0, id="Invalid str kafka_connect_str"),
+        pytest.param(
+            {'kafka_connect_str': KAFKA_CONNECT_STR, 'consumer_groups': {}, 'monitor_unlisted_consumer_groups': True},
+            does_not_raise(),
+            4,
+            id="Empty consumer_groups and monitor_unlisted_consumer_groups true",
+        ),
+        pytest.param(
+            {'kafka_connect_str': KAFKA_CONNECT_STR, 'consumer_groups': {'my_consumer': None}},
+            does_not_raise(),
+            4,
+            id="One consumer group, all topics and partitions",
+        ),
+        pytest.param(
+            {'kafka_connect_str': KAFKA_CONNECT_STR, 'consumer_groups': {'my_consumer': {'marvel': None}}},
+            does_not_raise(),
+            2,
+            id="One consumer group, one topic, all partitions",
+        ),
+        pytest.param(
+            {'kafka_connect_str': KAFKA_CONNECT_STR, 'consumer_groups': {'my_consumer': {'marvel': [1]}}},
+            does_not_raise(),
+            1,
+            id="One consumer group, one topic, one partition",
+        ),
+    ],
+)
+def test_config(dd_run_check, instance, aggregator, expected_exception, metric_count):
+    check = KafkaCheck('kafka_consumer', {}, [instance])
+    with expected_exception:
+        check.check(instance)
+
+    for m in metrics:
+        aggregator.assert_metric(m, count=metric_count)
+
+
+@pytest.mark.parametrize(
+    'is_enabled, metric_count, topic_tags',
+    [
+        pytest.param(True, 4, ['topic:marvel', 'topic:dc'], id="Enabled"),
+        pytest.param(False, 2, ['topic:marvel'], id="Disabled"),
+    ],
+)
+@pytest.mark.usefixtures('dd_environment')
+def test_monitor_broker_highwatermarks(dd_run_check, aggregator, is_enabled, metric_count, topic_tags):
+    instance = {
+        'kafka_connect_str': KAFKA_CONNECT_STR,
+        'consumer_groups': {'my_consumer': {'marvel': None}},
+        'monitor_all_broker_highwatermarks': is_enabled,
+    }
+    check = KafkaCheck('kafka_consumer', {}, [instance])
+    dd_run_check(check)
+
+    # After refactor and library migration, write unit tests to assert expected metric values
+    aggregator.assert_metric('kafka.broker_offset', count=metric_count)
+    for tag in topic_tags:
+        aggregator.assert_metric_has_tag('kafka.broker_offset', tag, count=2)
+    aggregator.assert_metric_has_tag_prefix('kafka.broker_offset', 'partition', count=metric_count)
