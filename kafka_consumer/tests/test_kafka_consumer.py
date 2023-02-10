@@ -34,7 +34,7 @@ def test_gssapi(kafka_instance, dd_run_check):
 @pytest.mark.unit
 def test_tls_config_ok(kafka_instance_tls):
     with mock.patch('datadog_checks.base.utils.tls.ssl') as ssl:
-        with mock.patch('kafka.KafkaAdminClient') as kafka_client:
+        with mock.patch('kafka.KafkaClient') as kafka_client:
 
             # mock Kafka Client
             kafka_client.return_value = mock.MagicMock()
@@ -44,12 +44,12 @@ def test_tls_config_ok(kafka_instance_tls):
             ssl.SSLContext.return_value = tls_context
 
             kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [kafka_instance_tls])
-            kafka_consumer_check._create_kafka_client()
+            kafka_consumer_check._create_kafka_client(clazz=kafka_client)
 
             assert tls_context.check_hostname is True
             assert tls_context.tls_cert is not None
             assert tls_context.check_hostname is True
-            assert kafka_consumer_check.create_kafka_admin_client is not None
+            assert kafka_consumer_check.create_kafka_client is not None
 
 
 @pytest.mark.parametrize(
