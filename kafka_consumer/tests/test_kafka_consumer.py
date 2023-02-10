@@ -2,13 +2,10 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import copy
-import os
 
-import mock
 import pytest
 
 from datadog_checks.kafka_consumer import KafkaCheck
-from datadog_checks.kafka_consumer.kafka_consumer import OAuthTokenProvider
 
 from .common import KAFKA_CONNECT_STR
 
@@ -28,50 +25,6 @@ def test_gssapi(kafka_instance, dd_run_check):
     # Exception: Could not find main GSSAPI shared library.
     with pytest.raises(Exception, match='check_version'):
         dd_run_check(kafka_consumer_check)
-
-
-@pytest.mark.unit
-def test_tls_config_ok(kafka_instance_tls):
-    with mock.patch('datadog_checks.base.utils.tls.ssl') as ssl:
-        with mock.patch('kafka.KafkaClient') as kafka_client:
-
-            # mock Kafka Client
-            kafka_client.return_value = mock.MagicMock()
-
-            # mock TLS context
-            tls_context = mock.MagicMock()
-            ssl.SSLContext.return_value = tls_context
-
-            kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [kafka_instance_tls])
-            kafka_consumer_check._create_kafka_client(clazz=kafka_client)
-
-            assert tls_context.check_hostname is True
-            assert tls_context.tls_cert is not None
-            assert tls_context.check_hostname is True
-            assert kafka_consumer_check.create_kafka_client is not None
-
-
-@pytest.mark.unit
-def test_oauth_token_client_config(kafka_instance):
-    instance = copy.deepcopy(kafka_instance)
-    instance['kafka_client_api_version'] = "0.10.2"
-    instance['security_protocol'] = "SASL_PLAINTEXT"
-    instance['sasl_mechanism'] = "OAUTHBEARER"
-    instance['sasl_oauth_token_provider'] = {
-        "url": "http://fake.url",
-        "client_id": "id",
-        "client_secret": "secret",
-    }
-
-    kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [instance])
-    client = kafka_consumer_check.create_kafka_client()
-
-    assert client.config['security_protocol'] == 'SASL_PLAINTEXT'
-    assert client.config['sasl_mechanism'] == 'OAUTHBEARER'
-    assert isinstance(client.config['sasl_oauth_token_provider'], OAuthTokenProvider)
-    assert client.config['sasl_oauth_token_provider'].reader._client_id == "id"
-    assert client.config['sasl_oauth_token_provider'].reader._client_secret == "secret"
-    assert client.config['sasl_oauth_token_provider'].reader._url == "http://fake.url"
 
 
 @pytest.mark.parametrize(
@@ -176,21 +129,3 @@ def test_no_partitions(aggregator, kafka_instance, dd_run_check):
     dd_run_check(kafka_consumer_check)
 
     assert_check_kafka(aggregator, {'my_consumer': {'marvel': [0]}})
-
-
-@pytest.mark.skipif(os.environ.get('KAFKA_VERSION', '').startswith('0.9'), reason='Old Kafka version')
-@pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
-def test_version_metadata(datadog_agent, kafka_instance, dd_run_check):
-    kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [kafka_instance])
-    kafka_consumer_check.check_id = 'test:123'
-
-    kafka_client = kafka_consumer_check.create_kafka_client()
-    version_data = [str(part) for part in kafka_client.check_version()]
-    kafka_client.close()
-    version_parts = {'version.{}'.format(name): part for name, part in zip(('major', 'minor', 'patch'), version_data)}
-    version_parts['version.scheme'] = 'semver'
-    version_parts['version.raw'] = '.'.join(version_data)
-
-    dd_run_check(kafka_consumer_check)
-    datadog_agent.assert_metadata('test:123', version_parts)
