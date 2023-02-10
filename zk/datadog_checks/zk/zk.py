@@ -229,7 +229,8 @@ class ZookeeperCheck(AgentCheck):
         chunk_size = 1024
         max_reads = 10000
         buf = StringIO()
-        sock.sendall(ensure_bytes(command + "\n")) # Zookeeper expects a newline character at the end of commands; this ensures proxies don't remove it
+        # Zookeeper expects a newline character at the end of commands, add it to prevent removal by proxies
+        sock.sendall(ensure_bytes(command + "\n"))
         # Read the response into a StringIO buffer
         chunk = ensure_unicode(sock.recv(chunk_size))
         buf.write(chunk)
