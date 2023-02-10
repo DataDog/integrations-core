@@ -310,7 +310,6 @@ metadata:
     ad.datadoghq.com/mysql.checks: |
       {
         "mysql": {
-          "init_config": {},
           "instances": [
             {
               "server": "%%host%%", 
