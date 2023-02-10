@@ -12,10 +12,6 @@ matrix.version.env-vars = [
   { key = "KAFKA_VERSION", value = "3.3.2", if = ["3.3"] },
   "ZK_VERSION=3.6.4"
 ]
-matrix.offset-storage.env-vars = [
-  { key = "KAFKA_OFFSETS_STORAGE", value = "kafka", if = ["kafka"] },
-  { key = "KAFKA_OFFSETS_STORAGE", value = "zookeeper", if = ["zk"] },
-]
 
 [envs.default]
 dependencies = [
@@ -25,3 +21,4 @@ e2e-env = false
 
 [envs.latest.env-vars]
 KAFKA_VERSION = "latest"
+ZK_VERSION = "3.6.4"
