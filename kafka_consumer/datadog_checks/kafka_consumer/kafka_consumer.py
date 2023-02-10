@@ -6,7 +6,7 @@ from collections import defaultdict
 from time import time
 
 import six
-from kafka import KafkaAdminClient, KafkaClient
+from kafka import KafkaAdminClient
 from kafka import errors as kafka_errors
 from kafka.oauth.abstract import AbstractTokenProvider
 from kafka.protocol.admin import ListGroupsRequest
@@ -74,7 +74,6 @@ class KafkaCheck(AgentCheck):
     # ConfluentKafkaClient
     # actual implementation
 
-
     def send_event(self, title, text, tags, event_type, aggregation_key, severity='info'):
         """Emit an event to the Datadog Event Stream."""
         event_dict = {
@@ -89,7 +88,7 @@ class KafkaCheck(AgentCheck):
         self.event(event_dict)
 
     def create_kafka_admin_client(self):
-        return self._create_kafka_client(clazz=KafkaAdminClient)
+        return self._create_kafka_client()
 
     def validate_consumer_groups(self):
         """Validate any explicitly specified consumer groups.
@@ -108,7 +107,7 @@ class KafkaCheck(AgentCheck):
                         for partition in partitions:
                             assert isinstance(partition, int)
 
-    def _create_kafka_client(self, clazz):
+    def _create_kafka_client(self):
         kafka_connect_str = self.instance.get('kafka_connect_str')
         if not isinstance(kafka_connect_str, (string_types, list)):
             raise ConfigurationError('kafka_connect_str should be string or list of strings')
@@ -122,7 +121,7 @@ class KafkaCheck(AgentCheck):
             tls_context.load_verify_locations(crlfile)
             tls_context.verify_flags |= ssl.VERIFY_CRL_CHECK_LEAF
 
-        return clazz(
+        return KafkaAdminClient(
             bootstrap_servers=kafka_connect_str,
             client_id='dd-agent',
             request_timeout_ms=self.init_config.get('kafka_timeout', DEFAULT_KAFKA_TIMEOUT) * 1000,
@@ -145,7 +144,6 @@ class KafkaCheck(AgentCheck):
             ),
             ssl_context=tls_context,
         )
-
 
     @property
     def kafka_client(self):
