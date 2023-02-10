@@ -5,7 +5,7 @@ import ssl
 from collections import defaultdict
 from time import time
 
-from kafka import KafkaAdminClient
+from kafka import KafkaAdminClient, KafkaClient
 from kafka import errors as kafka_errors
 from kafka.oauth.abstract import AbstractTokenProvider
 from kafka.protocol.admin import ListGroupsRequest
@@ -144,10 +144,16 @@ class KafkaCheck(AgentCheck):
                         for partition in partitions:
                             assert isinstance(partition, int)
 
+    def create_kafka_client(self):
+        return self._create_kafka_client(clazz=KafkaClient)
+
+    def create_kafka_admin_client(self):
+        return self._create_kafka_client(clazz=KafkaAdminClient)
+
     def _create_kafka_admin_client(self, api_version):
         """Return a KafkaAdminClient."""
         # TODO accept None (which inherits kafka-python default of localhost:9092)
-        kafka_admin_client = self._create_kafka_client()
+        kafka_admin_client = self.create_kafka_admin_client()
         self.log.debug("KafkaAdminClient api_version: %s", kafka_admin_client.config['api_version'])
         # Force initial population of the local cluster metadata cache
         kafka_admin_client._client.poll(future=kafka_admin_client._client.cluster.request_update())
@@ -155,21 +161,20 @@ class KafkaCheck(AgentCheck):
             raise RuntimeError("Local cluster metadata cache did not populate.")
         return kafka_admin_client
 
-    def _create_kafka_client(self):
+    def _create_kafka_client(self, clazz):
         kafka_connect_str = self.instance.get('kafka_connect_str')
         if not isinstance(kafka_connect_str, (string_types, list)):
             raise ConfigurationError('kafka_connect_str should be string or list of strings')
         kafka_version = self.instance.get('kafka_client_api_version')
         if isinstance(kafka_version, str):
             kafka_version = tuple(map(int, kafka_version.split(".")))
-
         tls_context = self.get_tls_context()
         crlfile = self.instance.get('ssl_crlfile', self.instance.get('tls_crlfile'))
         if crlfile:
             tls_context.load_verify_locations(crlfile)
             tls_context.verify_flags |= ssl.VERIFY_CRL_CHECK_LEAF
 
-        return KafkaAdminClient(
+        return clazz(
             bootstrap_servers=kafka_connect_str,
             client_id='dd-agent',
             request_timeout_ms=self.init_config.get('kafka_timeout', DEFAULT_KAFKA_TIMEOUT) * 1000,
