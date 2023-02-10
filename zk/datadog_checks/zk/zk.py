@@ -293,7 +293,7 @@ class ZookeeperCheck(AgentCheck):
 
         # Latency min/avg/max: -10/0.0/20007
         _, value = buf.readline().split(':')
-        l_min, l_avg, l_max = (float(v) for v in value.strip().split('/'))
+        l_min, l_avg, l_max = [float(v) for v in value.strip().split('/')]
         metrics.append(ZKMetric('zookeeper.latency.min', l_min))
         metrics.append(ZKMetric('zookeeper.latency.avg', l_avg))
         metrics.append(ZKMetric('zookeeper.latency.max', l_max))
