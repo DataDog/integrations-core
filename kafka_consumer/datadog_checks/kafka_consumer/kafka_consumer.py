@@ -56,6 +56,7 @@ class KafkaCheck(AgentCheck):
         self._consumer_groups = self.instance.get('consumer_groups', {})
         self._broker_requests_batch_size = self.instance.get('broker_requests_batch_size', BROKER_REQUESTS_BATCH_SIZE)
         self._kafka_client = None
+        self.client = None
 
     # KafkaCheck
     # - check()
