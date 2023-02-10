@@ -19,6 +19,9 @@ from datadog_checks.base.utils.http import AuthTokenOAuthReader
 
 from .constants import BROKER_REQUESTS_BATCH_SIZE, CONTEXT_UPPER_BOUND, DEFAULT_KAFKA_TIMEOUT, KAFKA_INTERNAL_TOPICS
 
+MAX_TIMESTAMPS = 1000
+BROKER_TIMESTAMP_CACHE_KEY = 'broker_timestamps'
+
 
 class OAuthTokenProvider(AbstractTokenProvider):
     def __init__(self, **config):
@@ -55,51 +58,6 @@ class KafkaCheck(AgentCheck):
         self._consumer_groups = self.instance.get('consumer_groups', {})
         self._kafka_client = None
         self._broker_requests_batch_size = self.instance.get('broker_requests_batch_size', BROKER_REQUESTS_BATCH_SIZE)
-
-    def check(self, _):
-        """The main entrypoint of the check."""
-        self._consumer_offsets = {}  # Expected format: {(consumer_group, topic, partition): offset}
-        self._highwater_offsets = {}  # Expected format: {(topic, partition): offset}
-
-        # For calculating consumer lag, we have to fetch both the consumer offset and the broker highwater offset.
-        # There's a potential race condition because whichever one we check first may be outdated by the time we check
-        # the other. Better to check consumer offsets before checking broker offsets because worst case is that
-        # overstates consumer lag a little. Doing it the other way can understate consumer lag to the point of having
-        # negative consumer lag, which just creates confusion because it's theoretically impossible.
-
-        # Fetch Kafka consumer offsets
-        try:
-            self._get_consumer_offsets()
-        except Exception:
-            self.log.exception("There was a problem collecting consumer offsets from Kafka.")
-            # don't raise because we might get valid broker offsets
-
-        # Fetch the broker highwater offsets
-        try:
-            if len(self._consumer_offsets) < self._context_limit:
-                self._get_highwater_offsets()
-            else:
-                self.warning("Context limit reached. Skipping highwater offset collection.")
-        except Exception:
-            self.log.exception("There was a problem collecting the highwater mark offsets.")
-            # Unlike consumer offsets, fail immediately because we can't calculate consumer lag w/o highwater_offsets
-            raise
-
-        total_contexts = len(self._consumer_offsets) + len(self._highwater_offsets)
-        if total_contexts >= self._context_limit:
-            self.warning(
-                """Discovered %s metric contexts - this exceeds the maximum number of %s contexts permitted by the
-                check. Please narrow your target by specifying in your kafka_consumer.yaml the consumer groups, topics
-                and partitions you wish to monitor.""",
-                total_contexts,
-                self._context_limit,
-            )
-
-        # Report the metrics
-        self._report_highwater_offsets(self._context_limit)
-        self._report_consumer_offsets_and_lag(self._context_limit - len(self._highwater_offsets))
-
-        self._collect_broker_metadata()
 
     def send_event(self, title, text, tags, event_type, aggregation_key, severity='info'):
         """Emit an event to the Datadog Event Stream."""
@@ -197,6 +155,62 @@ class KafkaCheck(AgentCheck):
             ),
             ssl_context=tls_context,
         )
+
+    def check(self, _):
+        """The main entrypoint of the check."""
+        self._consumer_offsets = {}  # Expected format: {(consumer_group, topic, partition): offset}
+        self._highwater_offsets = {}  # Expected format: {(topic, partition): offset}
+
+        # For calculating consumer lag, we have to fetch both the consumer offset and the broker highwater offset.
+        # There's a potential race condition because whichever one we check first may be outdated by the time we check
+        # the other. Better to check consumer offsets before checking broker offsets because worst case is that
+        # overstates consumer lag a little. Doing it the other way can understate consumer lag to the point of having
+        # negative consumer lag, which just creates confusion because it's theoretically impossible.
+
+        # Fetch Kafka consumer offsets
+        try:
+            self._get_consumer_offsets()
+        except Exception:
+            self.log.exception("There was a problem collecting consumer offsets from Kafka.")
+            # don't raise because we might get valid broker offsets
+
+        # Fetch the broker highwater offsets
+        try:
+            if len(self._consumer_offsets) < self._context_limit:
+                self._get_highwater_offsets()
+            else:
+                self.warning("Context limit reached. Skipping highwater offset collection.")
+        except Exception:
+            self.log.exception("There was a problem collecting the highwater mark offsets.")
+            # Unlike consumer offsets, fail immediately because we can't calculate consumer lag w/o highwater_offsets
+            raise
+
+        total_contexts = len(self._consumer_offsets) + len(self._highwater_offsets)
+        if total_contexts >= self._context_limit:
+            self.warning(
+                """Discovered %s metric contexts - this exceeds the maximum number of %s contexts permitted by the
+                check. Please narrow your target by specifying in your kafka_consumer.yaml the consumer groups, topics
+                and partitions you wish to monitor.""",
+                total_contexts,
+                self._context_limit,
+            )
+
+        # Report the metrics
+        self._report_highwater_offsets(self._context_limit)
+        self._report_consumer_offsets_and_lag(self._context_limit - len(self._highwater_offsets))
+
+        self._collect_broker_metadata()
+
+    def _create_kafka_admin_client(self, api_version):
+        """Return a KafkaAdminClient."""
+        # TODO accept None (which inherits kafka-python default of localhost:9092)
+        kafka_admin_client = self._create_kafka_client()
+        self.log.debug("KafkaAdminClient api_version: %s", kafka_admin_client.config['api_version'])
+        # Force initial population of the local cluster metadata cache
+        kafka_admin_client._client.poll(future=kafka_admin_client._client.cluster.request_update())
+        if kafka_admin_client._client.cluster.topics(exclude_internal_topics=False) is None:
+            raise RuntimeError("Local cluster metadata cache did not populate.")
+        return kafka_admin_client
 
     def _get_highwater_offsets(self):
         """Fetch highwater offsets for topic_partitions in the Kafka cluster.
