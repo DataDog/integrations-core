@@ -14,9 +14,6 @@ from datadog_checks.base import AgentCheck, ConfigurationError
 
 from .constants import BROKER_REQUESTS_BATCH_SIZE, KAFKA_INTERNAL_TOPICS
 
-MAX_TIMESTAMPS = 1000
-BROKER_TIMESTAMP_CACHE_KEY = 'broker_timestamps'
-
 
 class NewKafkaConsumerCheck(object):
     """
