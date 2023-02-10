@@ -60,6 +60,24 @@ class KafkaCheck(AgentCheck):
     def check(self, _):
         return self.sub_check.check()
 
+    # KafkaCheck
+    # - check()
+    # - create_kafka_client() - return KafkaClient
+
+    # KafkaClient
+    # - get_consumer_offset_and_lag()
+    # - get_broker_offset()
+    # - report_consumer_offset_and_lag()
+    # - report_broker_offset()
+
+    # KafkaPythonClient
+    # actual implementation
+    # "_report_highwater_offsets()"
+
+    # ConfluentKafkaClient
+    # actual implementation
+
+
     def send_event(self, title, text, tags, event_type, aggregation_key, severity='info'):
         """Emit an event to the Datadog Event Stream."""
         event_dict = {
