@@ -106,19 +106,18 @@ class AmazonMskCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
 
         self.scrapers = scrapers
 
-    def configure_transformer_with_metric_label(self, legacy_name, new_name, label_name, metric_type):
-        method = getattr(self, metric_type)
+    def configure_transformer_with_metric_label(self, legacy_name, new_name, label_name):
 
         def transform(metric, sample_data, runtime_data):
             for sample, tags, hostname in sample_data:
-                method(legacy_name, sample.value, tags=tags, hostname=hostname)
+                self.gauge(legacy_name, sample.value, tags=tags, hostname=hostname)
                 self.count(legacy_name + ".count", sample.value, tags=tags, hostname=hostname)
 
                 tag = sample.labels.pop(label_name)
                 tags.remove('{}:{}'.format(label_name, tag))
 
                 new_name_to_submit = '{}.{}'.format(new_name, tag)
-                method(new_name_to_submit, sample.value, tags=tags, hostname=hostname)
+                self.gauge(new_name_to_submit, sample.value, tags=tags, hostname=hostname)
                 self.count(new_name_to_submit + ".count", sample.value, tags=tags, hostname=hostname)
 
         return transform

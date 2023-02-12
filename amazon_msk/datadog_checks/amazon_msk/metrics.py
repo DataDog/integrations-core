@@ -816,19 +816,16 @@ METRICS_WITH_NAME_AS_LABEL = {
         'legacy_name': 'kafka.network.RequestMetrics.Count',
         'new_name': 'kafka.network.request',
         'label_name': 'name',
-        'metric_type': 'gauge',
     },
     'kafka_server_BrokerTopicMetrics_Count': {
         'legacy_name': 'kafka.server.BrokerTopicMetrics.Count',
         'new_name': 'kafka.server.broker_topics',
         'label_name': 'name',
-        'metric_type': 'gauge',
     },
     'kafka_server_ReplicaManager_Value': {
         'legacy_name': 'kafka.server.ReplicaManager.Value',
         'new_name': 'kafka.server.replica_manager',
         'label_name': 'name',
-        'metric_type': 'gauge',
     },
 }
 
