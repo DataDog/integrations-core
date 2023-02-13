@@ -5,6 +5,7 @@ import os
 
 import mock
 
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.network.check_bsd import BSDNetwork
 
 from . import common
@@ -40,3 +41,5 @@ def test_check_bsd(instance, aggregator):
         check.check({})
     for metric in common.EXPECTED_METRICS:
         aggregator.assert_metric(metric)
+
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())

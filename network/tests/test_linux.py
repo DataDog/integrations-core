@@ -11,6 +11,7 @@ from six import PY3, iteritems
 
 from datadog_checks.base.utils.platform import Platform
 from datadog_checks.base.utils.subprocess_output import get_subprocess_output
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.network.check_linux import LinuxNetwork
 
 from . import common
@@ -190,6 +191,8 @@ def test_collect_cx_queues(check, aggregator):
     for metric in CONNECTION_QUEUES_METRICS + common.EXPECTED_METRICS + common.EXPECTED_WINDOWS_LINUX_METRICS:
         aggregator.assert_metric(metric)
 
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
 
 @pytest.mark.skipif(not Platform.is_linux(), reason="Only works on Linux systems")
 def test_collect_cx_queues_when_ss_fails(check, aggregator):
@@ -203,6 +206,8 @@ def test_collect_cx_queues_when_ss_fails(check, aggregator):
 
     for metric in CONNECTION_QUEUES_METRICS + common.EXPECTED_METRICS + common.EXPECTED_WINDOWS_LINUX_METRICS:
         aggregator.assert_metric(metric)
+
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 @pytest.mark.skipif(Platform.is_windows(), reason="Only runs on Unix systems")
@@ -223,6 +228,8 @@ def test_cx_state(aggregator):
         for metric, value in iteritems(CX_STATE_GAUGES_VALUES):
             aggregator.assert_metric(metric, value=value)
 
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
 
 @pytest.mark.skipif(Platform.is_windows(), reason="Only runs on Unix systems")
 @mock.patch('os.listdir', side_effect=os_list_dir_mock)
@@ -236,7 +243,8 @@ def test_linux_sys_net(listdir, read_int_file, aggregator):
     for metric, value in iteritems(LINUX_SYS_NET_STATS):
         aggregator.assert_metric(metric, value=value[0], tags=['iface:lo'])
         aggregator.assert_metric(metric, value=value[1], tags=['iface:ens5'])
-    aggregator.reset()
+
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 def test_cx_state_mocked(aggregator):
@@ -258,6 +266,8 @@ def test_cx_state_mocked(aggregator):
         for metric, value in iteritems(CX_STATE_GAUGES_VALUES):
             aggregator.assert_metric(metric, value=value)
 
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
 
 def test_add_conntrack_stats_metrics(aggregator):
     mocked_conntrack_stats = (
@@ -274,6 +284,8 @@ def test_add_conntrack_stats_metrics(aggregator):
         for metric, value in iteritems(CONNTRACK_STATS):
             aggregator.assert_metric(metric, value=value[0], tags=['foo:bar', 'cpu:0'])
             aggregator.assert_metric(metric, value=value[1], tags=['foo:bar', 'cpu:1'])
+
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 @pytest.mark.skipif(not PY3, reason="mock builtins only works on Python 3")
@@ -318,3 +330,5 @@ def test_proc_net_metrics(aggregator):
     check_instance.check({})
     for metric, value in iteritems(PROC_NET_STATS):
         aggregator.assert_metric(metric, value=value)
+
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
