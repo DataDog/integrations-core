@@ -5,22 +5,14 @@ from collections import defaultdict
 from time import time
 
 from kafka import errors as kafka_errors
-from kafka.protocol.offset import OffsetRequest, OffsetResetStrategy, OffsetResponse
-
-from datadog_checks.kafka_consumer.constants import KAFKA_INTERNAL_TOPICS
-
-
-class KafkaPythonClient:
-    def __init__(self, check) -> None:
-        self.check = check
-
-import six
 from kafka.protocol.admin import ListGroupsRequest
 from kafka.protocol.commit import GroupCoordinatorRequest, OffsetFetchRequest
+from kafka.protocol.offset import OffsetRequest, OffsetResetStrategy, OffsetResponse
 from kafka.structs import TopicPartition
-from six import string_types
+from six import string_types, iteritems
 
 from datadog_checks.base import ConfigurationError
+from datadog_checks.kafka_consumer.constants import KAFKA_INTERNAL_TOPICS
 
 
 class KafkaPythonClient:
@@ -393,7 +385,7 @@ class KafkaPythonClient:
                 topics_partitions_dict = defaultdict(set)
                 for topic, partition in partitions:
                     topics_partitions_dict[topic].add(partition)
-                topics_partitions = list(six.iteritems(topics_partitions_dict))
+                topics_partitions = list(iteritems(topics_partitions_dict))
             request = OffsetFetchRequest[version](group_id, topics_partitions)
         else:
             raise NotImplementedError(
