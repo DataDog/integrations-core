@@ -48,25 +48,7 @@ class KafkaCheck(AgentCheck):
         )
         self._consumer_groups = self.instance.get('consumer_groups', {})
         self._broker_requests_batch_size = self.instance.get('broker_requests_batch_size', BROKER_REQUESTS_BATCH_SIZE)
-        # self._kafka_client = None
         self.client = None
-
-    # KafkaCheck
-    # - check()
-    # - create_kafka_client() - return KafkaClient
-
-    # KafkaClient
-    # - get_consumer_offset_and_lag()
-    # - get_broker_offset()
-    # - report_consumer_offset_and_lag()
-    # - report_broker_offset()
-
-    # KafkaPythonClient
-    # actual implementation
-    # "_report_highwater_offsets()"
-
-    # ConfluentKafkaClient
-    # actual implementation
 
     def create_kafka_client(self):
         return self._create_kafka_client(clazz=KafkaClient)
