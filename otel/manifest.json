@@ -33,6 +33,7 @@
         "creates_events": false
       },
       "metrics": {
+        "prefix": "otel.",
         "check": [
           "otel.datadog_exporter.metrics.running",
           "otel.datadog_exporter.traces.running"
