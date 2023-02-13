@@ -69,10 +69,10 @@ class KafkaPythonClient:
             tps_with_consumer_offset = {(topic, partition) for (_, topic, partition) in self.check._consumer_offsets}
 
         for batch in self.batchify(
-            self.check.kafka_client._client.cluster.brokers(), self.check._broker_requests_batch_size
+            self.kafka_client._client.cluster.brokers(), self.check._broker_requests_batch_size
         ):
             for broker in batch:
-                broker_led_partitions = self.check.kafka_client._client.cluster.partitions_for_broker(broker.nodeId)
+                broker_led_partitions = self.kafka_client._client.cluster.partitions_for_broker(broker.nodeId)
                 if broker_led_partitions is None:
                     continue
 
@@ -104,7 +104,7 @@ class KafkaPythonClient:
                 highwater_futures.append(highwater_future)
 
             # Loop until all futures resolved.
-            self.check.kafka_client._wait_for_futures(highwater_futures)
+            self.kafka_client._wait_for_futures(highwater_futures)
 
     def _highwater_offsets_callback(self, response):
         """Callback that parses an OffsetFetchResponse and saves it to the highwater_offsets dict."""
@@ -116,7 +116,7 @@ class KafkaPythonClient:
                 if error_type is kafka_errors.NoError:
                     self.check._highwater_offsets[(topic, partition)] = offsets[0]
                 elif error_type is kafka_errors.NotLeaderForPartitionError:
-                    self.check.log.warning(
+                    self.log.warning(
                         "Kafka broker returned %s (error_code %s) for topic %s, partition: %s. This should only happen "
                         "if the broker that was the partition leader when kafka_admin_client last fetched metadata is "
                         "no longer the leader.",
@@ -125,9 +125,9 @@ class KafkaPythonClient:
                         topic,
                         partition,
                     )
-                    self.check.kafka_client._client.cluster.request_update()  # force metadata update on next poll()
+                    self.kafka_client._client.cluster.request_update()  # force metadata update on next poll()
                 elif error_type is kafka_errors.UnknownTopicOrPartitionError:
-                    self.check.log.warning(
+                    self.log.warning(
                         "Kafka broker returned %s (error_code %s) for topic: %s, partition: %s. This should only "
                         "happen if the topic is currently being deleted or the check configuration lists non-existent "
                         "topic partitions.",
@@ -152,11 +152,11 @@ class KafkaPythonClient:
     # Once https://github.com/dpkp/kafka-python/pull/2335 is merged in, we can use the official
     # implementation for this function instead.
     def _send_request_to_node(self, node_id, request, wakeup=True):
-        while not self.check.kafka_client._client.ready(node_id):
+        while not self.kafka_client._client.ready(node_id):
             # poll until the connection to broker is ready, otherwise send()
             # will fail with NodeNotReadyError
-            self.check.kafka_client._client.poll()
-        return self.check.kafka_client._client.send(node_id, request, wakeup=wakeup)
+            self.kafka_client._client.poll()
+        return self.kafka_client._client.send(node_id, request, wakeup=wakeup)
 
     def report_consumer_offsets_and_lag(self):
         return self._report_consumer_offsets_and_lag
