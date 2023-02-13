@@ -9,9 +9,9 @@ from kafka.protocol.admin import ListGroupsRequest
 from kafka.protocol.commit import GroupCoordinatorRequest, OffsetFetchRequest
 from kafka.protocol.offset import OffsetRequest, OffsetResetStrategy, OffsetResponse
 from kafka.structs import TopicPartition
-from six import string_types, iteritems
+from six import iteritems, string_types
 
-from datadog_checks.base import ConfigurationError, AgentCheck
+from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.kafka_consumer.constants import KAFKA_INTERNAL_TOPICS
 
 
@@ -32,7 +32,7 @@ class KafkaPythonClient:
         self.set_metadata(
             'version', '.'.join(version_data), scheme='parts', final_scheme='semver', part_map=version_parts
         )
-        
+
     def get_consumer_offsets(self):
         return self._get_consumer_offsets
 
@@ -163,7 +163,7 @@ class KafkaPythonClient:
 
     def report_broker_offset(self, contexts_limit):
         return self._report_broker_offset
-        
+
     def _report_broker_offset(self, contexts_limit):
         """Report the broker highwater offsets."""
         reported_contexts = 0
