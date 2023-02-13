@@ -3820,7 +3820,7 @@ METRICS = {
         ),
         'method': 'monotonic_count',
     },
-    'access_logs.grpc_access_log.logs_dropped': { 
+    'access_logs.grpc_access_log.logs_dropped': {
         'tags': (
             (),
             (),
@@ -3828,7 +3828,7 @@ METRICS = {
         ),
         'method': 'monotonic_count',
     },
-    'access_logs.grpc_access_log.logs_written': { 
+    'access_logs.grpc_access_log.logs_written': {
         'tags': (
             (),
             (),
