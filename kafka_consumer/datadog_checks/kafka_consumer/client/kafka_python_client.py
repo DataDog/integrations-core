@@ -11,7 +11,7 @@ from kafka.protocol.offset import OffsetRequest, OffsetResetStrategy, OffsetResp
 from kafka.structs import TopicPartition
 from six import string_types, iteritems
 
-from datadog_checks.base import ConfigurationError
+from datadog_checks.base import ConfigurationError, AgentCheck
 from datadog_checks.kafka_consumer.constants import KAFKA_INTERNAL_TOPICS
 
 
@@ -21,10 +21,25 @@ class KafkaPythonClient:
         self.log = check.log
         self.kafka_client = check.kafka_client
 
+    @AgentCheck.metadata_entrypoint
+    def collect_broker_metadata(self):
+        return self._collect_broker_metadata
+
+    def _collect_broker_metadata(self):
+        version_data = [str(part) for part in self.kafka_client._client.check_version()]
+        version_parts = {name: part for name, part in zip(('major', 'minor', 'patch'), version_data)}
+
+        self.set_metadata(
+            'version', '.'.join(version_data), scheme='parts', final_scheme='semver', part_map=version_parts
+        )
+        
     def get_consumer_offsets(self):
         return self._get_consumer_offsets
 
     def get_broker_offset(self):
+        return self._get_broker_offset
+
+    def _get_broker_offset(self):
         """Fetch highwater offsets for topic_partitions in the Kafka cluster.
 
         Do this for all partitions in the cluster because even if it has no consumers, we may want to measure whether
@@ -146,8 +161,20 @@ class KafkaPythonClient:
     def report_consumer_offsets_and_lag(self):
         return self._report_consumer_offsets_and_lag
 
-    def report_broker_offset(self):
-        pass
+    def report_broker_offset(self, contexts_limit):
+        return self._report_broker_offset
+        
+    def _report_broker_offset(self, contexts_limit):
+        """Report the broker highwater offsets."""
+        reported_contexts = 0
+        self.log.debug("Reporting broker offset metric")
+        for (topic, partition), highwater_offset in self._highwater_offsets.items():
+            broker_tags = ['topic:%s' % topic, 'partition:%s' % partition]
+            broker_tags.extend(self._custom_tags)
+            self.gauge('broker_offset', highwater_offset, tags=broker_tags)
+            reported_contexts += 1
+            if reported_contexts == contexts_limit:
+                return
 
     def _validate_consumer_groups(self):
         """Validate any explicitly specified consumer groups.
