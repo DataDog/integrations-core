@@ -68,9 +68,7 @@ class KafkaPythonClient:
         if not self.check._monitor_all_broker_highwatermarks:
             tps_with_consumer_offset = {(topic, partition) for (_, topic, partition) in self.check._consumer_offsets}
 
-        for batch in self.batchify(
-            self.kafka_client._client.cluster.brokers(), self.check._broker_requests_batch_size
-        ):
+        for batch in self.batchify(self.kafka_client._client.cluster.brokers(), self.check._broker_requests_batch_size):
             for broker in batch:
                 broker_led_partitions = self.kafka_client._client.cluster.partitions_for_broker(broker.nodeId)
                 if broker_led_partitions is None:
@@ -170,8 +168,8 @@ class KafkaPythonClient:
         self.log.debug("Reporting broker offset metric")
         for (topic, partition), highwater_offset in self._highwater_offsets.items():
             broker_tags = ['topic:%s' % topic, 'partition:%s' % partition]
-            broker_tags.extend(self._custom_tags)
-            self.gauge('broker_offset', highwater_offset, tags=broker_tags)
+            broker_tags.extend(self.check._custom_tags)
+            self.check.gauge('broker_offset', highwater_offset, tags=broker_tags)
             reported_contexts += 1
             if reported_contexts == contexts_limit:
                 return
@@ -375,7 +373,7 @@ class KafkaPythonClient:
                 "Support for ListGroupsRequest_v{} has not yet been added to KafkaAdminClient.".format(kafka_version)
             )
         # Disable wakeup when sending request to prevent blocking send requests
-        return self.check._send_request_to_node(broker_id, request, wakeup=False)
+        return self._send_request_to_node(broker_id, request, wakeup=False)
 
     def _find_coordinator_id_send_request(self, group_id):
         """Send a FindCoordinatorRequest to a broker.
@@ -385,7 +383,7 @@ class KafkaPythonClient:
         """
         version = 0
         request = GroupCoordinatorRequest[version](group_id)
-        return self.check._send_request_to_node(self.kafka_client._client.least_loaded_node(), request, wakeup=False)
+        return self._send_request_to_node(self.kafka_client._client.least_loaded_node(), request, wakeup=False)
 
     def _list_consumer_group_offsets_send_request(self, group_id, group_coordinator_id, partitions=None):
         """Send an OffsetFetchRequest to a broker.
@@ -418,7 +416,7 @@ class KafkaPythonClient:
             raise NotImplementedError(
                 "Support for OffsetFetchRequest_v{} has not yet been added to KafkaAdminClient.".format(version)
             )
-        return self.check._send_request_to_node(group_coordinator_id, request, wakeup=False)
+        return self._send_request_to_node(group_coordinator_id, request, wakeup=False)
 
     def _send_event(self, title, text, tags, event_type, aggregation_key, severity='info'):
         """Emit an event to the Datadog Event Stream."""
