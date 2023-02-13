@@ -1,0 +1,8 @@
+# Profile for Cisco ASA devices
+
+extends:
+  - _base.yaml
+  - _cisco-generic.yaml
+
+device:
+  vendor: "cisco"
