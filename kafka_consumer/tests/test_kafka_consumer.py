@@ -120,7 +120,6 @@ def test_oauth_token_client_config(kafka_instance):
         assert isinstance(params['sasl_oauth_token_provider'], OAuthTokenProvider)
 
 
-
 @pytest.mark.parametrize(
     'extra_config, expected_http_kwargs',
     [

@@ -5,8 +5,8 @@ import ssl
 from collections import defaultdict
 from time import time
 
-import six
 import kafka
+import six
 from kafka import errors as kafka_errors
 from kafka.oauth.abstract import AbstractTokenProvider
 from kafka.protocol.admin import ListGroupsRequest
