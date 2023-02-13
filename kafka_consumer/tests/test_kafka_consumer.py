@@ -34,22 +34,21 @@ def test_gssapi(kafka_instance, dd_run_check):
 @pytest.mark.unit
 def test_tls_config_ok(kafka_instance_tls):
     with mock.patch('datadog_checks.base.utils.tls.ssl') as ssl:
-        with mock.patch('kafka.KafkaClient') as kafka_client:
-
+        with mock.patch('kafka.KafkaAdminClient') as kafka_admin_client:
             # mock Kafka Client
-            kafka_client.return_value = mock.MagicMock()
-
+            kafka_admin_client.return_value = mock.MagicMock()
             # mock TLS context
             tls_context = mock.MagicMock()
             ssl.SSLContext.return_value = tls_context
 
             kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [kafka_instance_tls])
-            kafka_consumer_check._create_kafka_client(clazz=kafka_client)
+            client = kafka_consumer_check.kafka_client
 
             assert tls_context.check_hostname is True
             assert tls_context.tls_cert is not None
             assert tls_context.check_hostname is True
-            assert kafka_consumer_check.create_kafka_client is not None
+            assert client is not None
+            assert kafka_admin_client.call_args_list[0].kwargs['ssl_context'] == tls_context
 
 
 @pytest.mark.parametrize(
@@ -108,15 +107,18 @@ def test_oauth_token_client_config(kafka_instance):
         "client_secret": "secret",
     }
 
-    kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [instance])
-    client = kafka_consumer_check.create_kafka_client()
+    with mock.patch('kafka.KafkaAdminClient') as kafka_admin_client:
+        kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [instance])
+        _ = kafka_consumer_check.kafka_client
+        params = kafka_admin_client.call_args_list[0].kwargs
 
-    assert client.config['security_protocol'] == 'SASL_PLAINTEXT'
-    assert client.config['sasl_mechanism'] == 'OAUTHBEARER'
-    assert isinstance(client.config['sasl_oauth_token_provider'], OAuthTokenProvider)
-    assert client.config['sasl_oauth_token_provider'].reader._client_id == "id"
-    assert client.config['sasl_oauth_token_provider'].reader._client_secret == "secret"
-    assert client.config['sasl_oauth_token_provider'].reader._url == "http://fake.url"
+        assert params['security_protocol'] == 'SASL_PLAINTEXT'
+        assert params['sasl_mechanism'] == 'OAUTHBEARER'
+        assert params['sasl_oauth_token_provider'].reader._client_id == "id"
+        assert params['sasl_oauth_token_provider'].reader._client_secret == "secret"
+        assert params['sasl_oauth_token_provider'].reader._url == "http://fake.url"
+        assert isinstance(params['sasl_oauth_token_provider'], OAuthTokenProvider)
+
 
 
 @pytest.mark.parametrize(
