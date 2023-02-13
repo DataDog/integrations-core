@@ -153,7 +153,13 @@ class KafkaCheck(AgentCheck):
             if isinstance(kafka_version, str):
                 kafka_version = tuple(map(int, kafka_version.split(".")))
 
-            self._kafka_client = self._create_kafka_admin_client(api_version=kafka_version)
+            kafka_admin_client = self.create_kafka_admin_client()
+            self.log.debug("KafkaAdminClient api_version: %s", kafka_admin_client.config['api_version'])
+            # Force initial population of the local cluster metadata cache
+            kafka_admin_client._client.poll(future=kafka_admin_client._client.cluster.request_update())
+            if kafka_admin_client._client.cluster.topics(exclude_internal_topics=False) is None:
+                raise RuntimeError("Local cluster metadata cache did not populate.")
+            self._kafka_client = kafka_admin_client
         return self._kafka_client
 
     def check(self, _):
@@ -200,17 +206,6 @@ class KafkaCheck(AgentCheck):
         self._report_consumer_offsets_and_lag(self._context_limit - len(self._highwater_offsets))
 
         self._collect_broker_metadata()
-
-    def _create_kafka_admin_client(self, api_version):
-        """Return a KafkaAdminClient."""
-        # TODO accept None (which inherits kafka-python default of localhost:9092)
-        kafka_admin_client = self.create_kafka_admin_client()
-        self.log.debug("KafkaAdminClient api_version: %s", kafka_admin_client.config['api_version'])
-        # Force initial population of the local cluster metadata cache
-        kafka_admin_client._client.poll(future=kafka_admin_client._client.cluster.request_update())
-        if kafka_admin_client._client.cluster.topics(exclude_internal_topics=False) is None:
-            raise RuntimeError("Local cluster metadata cache did not populate.")
-        return kafka_admin_client
 
     def _get_highwater_offsets(self):
         """Fetch highwater offsets for topic_partitions in the Kafka cluster.
