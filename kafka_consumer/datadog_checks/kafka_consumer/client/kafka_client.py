@@ -6,15 +6,8 @@ from abc import ABC, abstractmethod
 
 class KafkaClient(ABC):
     def __init__(self, check) -> None:
-        self.check = check
         self.log = check.log
         self._kafka_client = None
-        self._highwater_offsets = {}
-        self._consumer_offsets = {}
-        self._context_limit = check._context_limit
-
-    def should_get_highwater_offsets(self):
-        return len(self._consumer_offsets) < self._context_limit
 
     @abstractmethod
     def get_consumer_offsets(self):
@@ -25,13 +18,5 @@ class KafkaClient(ABC):
         pass
 
     @abstractmethod
-    def report_consumer_offsets_and_lag(self):
-        pass
-
-    @abstractmethod
-    def report_highwater_offsets(self):
-        pass
-
-    @abstractmethod
-    def collect_broker_metadata(self):
+    def get_version(self):
         pass
