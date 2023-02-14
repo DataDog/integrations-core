@@ -1,15 +1,15 @@
 {
   "manifest_version": "2.0.0",
-  "app_uuid": "ea753ad3-1b17-4b05-bca5-d6933308e55a",
-  "app_id": "snmp-check-point",
+  "app_uuid": "344b37df-ba82-4352-b277-ba1f1ccf716f",
+  "app_id": "snmp-chatsworth-products",
   "display_on_public_website": false,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Collect SNMP metrics from your Check Point network devices.",
-    "title": "Check Point",
+    "description": "Collect SNMP metrics from your Chatsworth Products network devices.",
+    "title": "Chatsworth Products",
     "media": [],
     "classifier_tags": [
       "Supported OS::Linux",
@@ -24,7 +24,7 @@
   },
   "assets": {
     "integration": {
-      "source_type_name": "Check Point",
+      "source_type_name": "Chatsworth Products",
       "configuration": {
         "spec": "assets/configuration/spec.yaml"
       },
@@ -32,7 +32,7 @@
         "creates_events": false
       },
       "metrics": {
-        "prefix": "snmp_check_point.",
+        "prefix": "snmp_chatsworth_products.",
         "check": "",
         "metadata_path": "metadata.csv"
       },

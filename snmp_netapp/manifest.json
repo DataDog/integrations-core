@@ -1,15 +1,15 @@
 {
   "manifest_version": "2.0.0",
-  "app_uuid": "ea753ad3-1b17-4b05-bca5-d6933308e55a",
-  "app_id": "snmp-check-point",
+  "app_uuid": "d50aeab6-c26b-49df-aeb1-910d5d1a3e48",
+  "app_id": "snmp-netapp",
   "display_on_public_website": false,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Collect SNMP metrics from your Check Point network devices.",
-    "title": "Check Point",
+    "description": "Collect SNMP metrics from your NetApp network devices.",
+    "title": "NetApp",
     "media": [],
     "classifier_tags": [
       "Supported OS::Linux",
@@ -24,7 +24,7 @@
   },
   "assets": {
     "integration": {
-      "source_type_name": "Check Point",
+      "source_type_name": "NetApp",
       "configuration": {
         "spec": "assets/configuration/spec.yaml"
       },
@@ -32,7 +32,7 @@
         "creates_events": false
       },
       "metrics": {
-        "prefix": "snmp_check_point.",
+        "prefix": "snmp_netapp.",
         "check": "",
         "metadata_path": "metadata.csv"
       },

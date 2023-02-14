@@ -1,15 +1,15 @@
 {
   "manifest_version": "2.0.0",
-  "app_uuid": "ea753ad3-1b17-4b05-bca5-d6933308e55a",
-  "app_id": "snmp-check-point",
+  "app_uuid": "e501cab9-ba54-495c-80c2-ca3d373561a8",
+  "app_id": "snmp-fortinet",
   "display_on_public_website": false,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Collect SNMP metrics from your Check Point network devices.",
-    "title": "Check Point",
+    "description": "Collect SNMP metrics from your Fortinet network devices.",
+    "title": "Fortinet",
     "media": [],
     "classifier_tags": [
       "Supported OS::Linux",
@@ -18,13 +18,12 @@
       "Category::Monitoring",
       "Category::Notification",
       "Category::Network",
-      "Category::Autodiscovery",
-      "Category::SNMP"
+      "Category::Autodiscovery"
     ]
   },
   "assets": {
     "integration": {
-      "source_type_name": "Check Point",
+      "source_type_name": "Fortinet",
       "configuration": {
         "spec": "assets/configuration/spec.yaml"
       },
@@ -32,7 +31,7 @@
         "creates_events": false
       },
       "metrics": {
-        "prefix": "snmp_check_point.",
+        "prefix": "snmp_fortinet.",
         "check": "",
         "metadata_path": "metadata.csv"
       },

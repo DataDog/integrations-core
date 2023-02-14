@@ -1,15 +1,15 @@
 {
   "manifest_version": "2.0.0",
-  "app_uuid": "ea753ad3-1b17-4b05-bca5-d6933308e55a",
-  "app_id": "snmp-check-point",
+  "app_uuid": "6b5325b8-443d-42e0-8545-f7dc42acacb4",
+  "app_id": "snmp-american-power-conversion",
   "display_on_public_website": false,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Collect SNMP metrics from your Check Point network devices.",
-    "title": "Check Point",
+    "description": "Collect SNMP metrics from your American Power Conversion network devices.",
+    "title": "American Power Conversion",
     "media": [],
     "classifier_tags": [
       "Supported OS::Linux",
@@ -24,7 +24,7 @@
   },
   "assets": {
     "integration": {
-      "source_type_name": "Check Point",
+      "source_type_name": "American Power Conversion",
       "configuration": {
         "spec": "assets/configuration/spec.yaml"
       },
@@ -32,7 +32,7 @@
         "creates_events": false
       },
       "metrics": {
-        "prefix": "snmp_check_point.",
+        "prefix": "snmp_american_power_conversion.",
         "check": "",
         "metadata_path": "metadata.csv"
       },
