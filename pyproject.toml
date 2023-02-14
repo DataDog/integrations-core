@@ -129,3 +129,4 @@ ban-relative-imports = "all"
 [tool.ruff.per-file-ignores]
 # Tests can use assertions and relative imports
 "**/tests/**/*" = ["S101", "TID252"]
+"**/config_models/defaults.py" = ["ARG001"]
