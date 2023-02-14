@@ -274,6 +274,12 @@ def test_non_cumulative_histogram_buckets(aggregator, dd_run_check, mock_http_re
         tags=['endpoint:test', 'url:http://127.0.0.1:8080/api', 'verb:GET', 'upper_bound:0.512', 'lower_bound:0.256'],
     )
     aggregator.assert_metric(
+        'test.rest_client_request_latency_seconds.bucket',
+        0,
+        metric_type=aggregator.MONOTONIC_COUNT,
+        tags=['endpoint:test', 'url:http://127.0.0.1:8080/api', 'verb:GET', 'upper_bound:inf', 'lower_bound:0.512'],
+    )
+    aggregator.assert_metric(
         'test.rest_client_request_latency_seconds.sum',
         2.185820220000001,
         metric_type=aggregator.MONOTONIC_COUNT,
