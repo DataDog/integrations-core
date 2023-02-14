@@ -1,0 +1,54 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "ea753ad3-1b17-4b05-bca5-d6933308e55a",
+  "app_id": "snmp-check-point",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Collect SNMP metrics from your Check Point network devices.",
+    "title": "Check Point",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Category::Monitoring",
+      "Category::Notification",
+      "Category::Network",
+      "Category::Autodiscovery"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "source_type_name": "Check Point",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "snmp_check_point.",
+        "check": "",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {},
+    "monitors": {},
+    "logs": {},
+    "saved_views": {}
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {}
+}
