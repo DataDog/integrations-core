@@ -122,9 +122,7 @@ def get_histogram(check, metric_name, modifiers, global_options):
                                 hostname=hostname,
                                 flush_first_value=flush_first_value,
                             )
-                        # Skip infinity upper bound as that is otherwise the
-                        # same context as the sample suffixed by `_count`
-                        elif sample_name.endswith('_bucket') and not sample.labels['upper_bound'].endswith('inf'):
+                        elif sample_name.endswith('_bucket'):
                             monotonic_count_method(
                                 bucket_metric,
                                 sample.value,
