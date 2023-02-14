@@ -79,29 +79,30 @@ line-length = 120
 select = [
   "A",
   "ARG",
-  "B",
-  "C",
-  "DTZ",
-  "E",
-  "EM",
-  "F",
-  "FBT",
-  "I",
-  "ICN",
-  "ISC",
-  "N",
-  "PLC",
-  "PLE",
-  "PLR",
-  "PLW",
-  "Q",
-  "RUF",
-  "S",
-  "T",
-  "TID",
-  "UP",
-  "W",
-  "YTT",
+  #"B",
+  #"C",
+  #"DTZ",
+  #"E",
+  #"EM",
+  #"F",
+  #"FBT",
+  #"I",
+  #"ICN",
+  #"ISC",
+  #"N",
+  #"PLC",
+  #"PLE",
+  #"PLR",
+  #"PLW",
+  #"Q",
+  #"RUF",
+  #"S",
+  #"T",
+  #"TID",
+  # pyupgrade (UP) is disabled due to PY2
+  # "UP",
+  #"W",
+  #"YTT",
 ]
 ignore = [
   # Allow non-abstract empty methods in abstract base classes
@@ -113,7 +114,9 @@ ignore = [
   # Ignore checks for possible passwords
   "S105", "S106", "S107",
   # Ignore single versus double quotes
-  "Q000"
+  "Q000",
+  # Ignore because these because of PY2 limitations
+  "RUF005",
 ]
 unfixable = [
   # Don't touch unused imports
