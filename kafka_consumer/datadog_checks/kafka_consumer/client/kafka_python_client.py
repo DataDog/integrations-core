@@ -30,7 +30,7 @@ class OAuthTokenProvider(AbstractTokenProvider):
 
 class KafkaPythonClient(KafkaClient):
     def __init__(self, check) -> None:
-        self.check = check
+        self.check = check  # TODO: Want to get rid of this
         self.config = check.config
         self.log = check.log
         self._kafka_client = None
@@ -158,6 +158,12 @@ class KafkaPythonClient(KafkaClient):
     def create_kafka_admin_client(self):
         return self._create_kafka_client(clazz=KafkaAdminClient)
 
+    def get_partitions_for_topic(self, topic):
+        return self.kafka_client._client.cluster.partitions_for_topic(topic)
+
+    def request_update(self):
+        self.kafka_client._client.cluster.request_update()
+
     def _create_kafka_admin_client(self, api_version):
         """Return a KafkaAdminClient."""
         # TODO accept None (which inherits kafka-python default of localhost:9092)
@@ -182,7 +188,6 @@ class KafkaPythonClient(KafkaClient):
         return clazz(
             bootstrap_servers=self.config._kafka_connect_str,
             client_id='dd-agent',
-            # request_timeout_ms=self.check.init_config.get('kafka_timeout', DEFAULT_KAFKA_TIMEOUT) * 1000,
             request_timeout_ms=self.config._request_timeout_ms,
             # if `kafka_client_api_version` is not set, then kafka-python automatically probes the cluster for
             # broker version during the bootstrapping process. Note that this returns the first version found, so in
@@ -198,7 +203,7 @@ class KafkaPythonClient(KafkaClient):
             sasl_kerberos_domain_name=self.config._sasl_kerberos_domain_name,
             sasl_oauth_token_provider=(
                 OAuthTokenProvider(**self.config._sasl_oauth_token_provider)
-                if 'sasl_oauth_token_provider' in self.check.instance
+                if 'sasl_oauth_token_provider' in self.config.instance
                 else None
             ),
             ssl_context=tls_context,

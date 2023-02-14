@@ -19,3 +19,11 @@ class KafkaClient(ABC):
     @abstractmethod
     def get_version(self):
         pass
+
+    @abstractmethod
+    def get_partitions_for_topic(self, topic):
+        pass
+
+    @abstractmethod
+    def request_update(self):
+        pass

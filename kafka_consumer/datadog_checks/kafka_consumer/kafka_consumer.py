@@ -93,8 +93,7 @@ class KafkaCheck(AgentCheck):
             consumer_group_tags = ['topic:%s' % topic, 'partition:%s' % partition, 'consumer_group:%s' % consumer_group]
             consumer_group_tags.extend(self.config._custom_tags)
 
-            # TODO: get_partitions_for_topic()
-            partitions = self.client.kafka_client._client.cluster.partitions_for_topic(topic)
+            partitions = self.client.get_partitions_for_topic(topic)
             self.log.debug("Received partitions %s for topic %s", partitions, topic)
             if partitions is not None and partition in partitions:
                 # report consumer offset if the partition is valid because even if leaderless the consumer offset will
@@ -141,8 +140,7 @@ class KafkaCheck(AgentCheck):
                     )
                 self.log.warning(msg, consumer_group, topic, partition)
 
-                # TODO: Include request_update() temporarily since kafka-python may require it
-                self.client.kafka_client._client.cluster.request_update()  # force metadata update on next poll()
+                self.client.request_update()  # force metadata update on next poll()
 
     @AgentCheck.metadata_entrypoint
     def collect_broker_metadata(self):
