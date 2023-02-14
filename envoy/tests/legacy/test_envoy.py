@@ -271,3 +271,21 @@ def test_metadata_integration(datadog_agent, check):
 
     datadog_agent.assert_metadata('test:123', version_metadata)
     datadog_agent.assert_metadata_count(len(version_metadata))
+
+
+@pytest.mark.unit
+def test_stats_prefix_ext_auth(aggregator, fixture_path, mock_http_response, check, dd_run_check):
+    metrics = [
+        "envoy.cluster.ext_authz.denied",
+        "envoy.cluster.ext_authz.error",
+        "envoy.cluster.ext_authz.ok",
+    ]
+    instance = INSTANCES['main']
+    c = check(instance)
+
+    mock_http_response(file_path=fixture_path('stat_prefix')).return_value
+    dd_run_check(c)
+
+    for metric in metrics:
+        aggregator.assert_metric_has_tag_prefix(metric, "stat_prefix", at_least=1)
+        aggregator.assert_metric(metric, count=2)

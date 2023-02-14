@@ -1,0 +1,6 @@
+cluster.foo.ext_authz.denied: 1
+cluster.foo.ext_authz.error: 1
+cluster.foo.ext_authz.ok: 1
+cluster.foo.ext_authz.bar.ok: 2
+cluster.foo.ext_authz.bar.denied: 2
+cluster.foo.ext_authz.bar.error: 2
