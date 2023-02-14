@@ -5,9 +5,8 @@ from abc import ABC, abstractmethod
 
 
 class KafkaClient(ABC):
-    def __init__(self, check) -> None:
-        self.log = check.log
-        self._kafka_client = None
+    def __init__(self) -> None:
+        pass
 
     @abstractmethod
     def get_consumer_offsets(self):
