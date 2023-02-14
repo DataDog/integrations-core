@@ -81,7 +81,7 @@ rabbitmq.overview.messages.publish_out.rate,gauge,,message,second,Rate of messag
 rabbitmq.alarms.file_descriptor_limit,gauge,,,,[OpenMetricsV2] is 1 if file descriptor limit alarm is in effect,0,rabbitmq,file descriptor limit,
 rabbitmq.alarms.free_disk_space.watermark,gauge,,,,[OpenMetricsV2] is 1 if free disk space watermark alarm is in effect,0,rabbitmq,free disk space watermark,
 rabbitmq.alarms.memory_used_watermark,gauge,,,,[OpenMetricsV2] is 1 if VM memory watermark alarm is in effect,0,rabbitmq,memory used watermark,
-rabbitmq.auth_attempts.count,count,,,,[OpenMetricsV2] Total number of authorization attempts,0,rabbitmq,auth attempts,
+rabbitmq.auth_attempts.count,count,,,,[OpenMetricsV2] Total number of authentication attempts,0,rabbitmq,auth attempts,
 rabbitmq.auth_attempts.failed.count,count,,,,[OpenMetricsV2] Total number of failed authentication attempts,0,rabbitmq,auth attempts failed,
 rabbitmq.auth_attempts.succeeded.count,count,,,,[OpenMetricsV2] Total number of successful authentication attempts,0,rabbitmq,auth attempts succeeded,
 rabbitmq.build_info,gauge,,,,[OpenMetricsV2] RabbitMQ & Erlang/OTP version info,0,rabbitmq,build info,
