@@ -192,7 +192,7 @@ def test_collect_cx_queues(check, aggregator):
         aggregator.assert_metric(metric)
 
     # TODO Add this assert back when `assert_metrics_using_metadata` properly handles histograms
-    # aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=False)
+    # aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 @pytest.mark.skipif(not Platform.is_linux(), reason="Only works on Linux systems")
@@ -209,7 +209,7 @@ def test_collect_cx_queues_when_ss_fails(check, aggregator):
         aggregator.assert_metric(metric)
 
     # TODO Add this assert back when `assert_metrics_using_metadata` properly handles histograms
-    # aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=False)
+    # aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 @pytest.mark.skipif(Platform.is_windows(), reason="Only runs on Unix systems")
