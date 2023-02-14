@@ -2,12 +2,11 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-import time
+from time import time
 
-from datadog_checks.base import AgentCheck, is_affirmative
+from datadog_checks.base import AgentCheck
 from datadog_checks.kafka_consumer.client.kafka_client_factory import make_client
-
-from .constants import BROKER_REQUESTS_BATCH_SIZE, CONTEXT_UPPER_BOUND
+from datadog_checks.kafka_consumer.config import KafkaConfig
 
 
 class KafkaCheck(AgentCheck):
@@ -25,16 +24,7 @@ class KafkaCheck(AgentCheck):
 
     def __init__(self, name, init_config, instances):
         super(KafkaCheck, self).__init__(name, init_config, instances)
-        self._context_limit = int(self.init_config.get('max_partition_contexts', CONTEXT_UPPER_BOUND))
-        self._custom_tags = self.instance.get('tags', [])
-        self._monitor_unlisted_consumer_groups = is_affirmative(
-            self.instance.get('monitor_unlisted_consumer_groups', False)
-        )
-        self._monitor_all_broker_highwatermarks = is_affirmative(
-            self.instance.get('monitor_all_broker_highwatermarks', False)
-        )
-        self._consumer_groups = self.instance.get('consumer_groups', {})
-        self._broker_requests_batch_size = self.instance.get('broker_requests_batch_size', BROKER_REQUESTS_BATCH_SIZE)
+        self.config = KafkaConfig(self.init_config, self.instance)
         self.client = make_client(self)
 
     def check(self, _):
@@ -61,18 +51,18 @@ class KafkaCheck(AgentCheck):
             raise
 
         total_contexts = len(self.client._consumer_offsets) + len(self.client._highwater_offsets)
-        if total_contexts >= self._context_limit:
+        if total_contexts >= self.config._context_limit:
             self.warning(
                 """Discovered %s metric contexts - this exceeds the maximum number of %s contexts permitted by the
                 check. Please narrow your target by specifying in your kafka_consumer.yaml the consumer groups, topics
                 and partitions you wish to monitor.""",
                 total_contexts,
-                self._context_limit,
+                self.config._context_limit,
             )
 
         # Report the metrics
-        self.report_highwater_offsets(self._context_limit)
-        self.report_consumer_offsets_and_lag(self._context_limit - len(self._highwater_offsets))
+        self.report_highwater_offsets(self.config._context_limit)
+        self.report_consumer_offsets_and_lag(self.config._context_limit - len(self._highwater_offsets))
 
         self.collect_broker_metadata()
 
@@ -82,7 +72,7 @@ class KafkaCheck(AgentCheck):
         self.log.debug("Reporting broker offset metric")
         for (topic, partition), highwater_offset in self._highwater_offsets.items():
             broker_tags = ['topic:%s' % topic, 'partition:%s' % partition]
-            broker_tags.extend(self._custom_tags)
+            broker_tags.extend(self.config._custom_tags)
             self.gauge('broker_offset', highwater_offset, tags=broker_tags)
             reported_contexts += 1
             if reported_contexts == contexts_limit:
@@ -101,7 +91,7 @@ class KafkaCheck(AgentCheck):
                 )
                 return
             consumer_group_tags = ['topic:%s' % topic, 'partition:%s' % partition, 'consumer_group:%s' % consumer_group]
-            consumer_group_tags.extend(self._custom_tags)
+            consumer_group_tags.extend(self.config._custom_tags)
 
             # TODO: get_partitions_for_topic()
             partitions = self.client.kafka_client._client.cluster.partitions_for_topic(topic)
@@ -165,7 +155,7 @@ class KafkaCheck(AgentCheck):
         )
 
     def should_get_highwater_offsets(self):
-        return len(self._consumer_offsets) < self._context_limit
+        return len(self._consumer_offsets) < self.config._context_limit
 
     def send_event(self, title, text, tags, event_type, aggregation_key, severity='info'):
         """Emit an event to the Datadog Event Stream."""
