@@ -42,4 +42,4 @@ def test_check_bsd(instance, aggregator):
     for metric in common.EXPECTED_METRICS:
         aggregator.assert_metric(metric)
 
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)

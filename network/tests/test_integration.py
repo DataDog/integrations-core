@@ -25,7 +25,7 @@ def test_check(aggregator, check, instance):
     for metric in expected_metrics:
         aggregator.assert_metric(metric)
 
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 @pytest.mark.skipif(platform.system() != 'Linux', reason="Only runs on Linux systems")
