@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
+import ssl
 from time import time
 
 from datadog_checks.base import AgentCheck
@@ -25,7 +26,14 @@ class KafkaCheck(AgentCheck):
     def __init__(self, name, init_config, instances):
         super(KafkaCheck, self).__init__(name, init_config, instances)
         self.config = KafkaConfig(self.init_config, self.instance)
-        self.client = make_client(self)
+
+        tls_context = self.get_tls_context()
+        crlfile = self.config._crlfile
+        if crlfile:
+            tls_context.load_verify_locations(crlfile)
+            tls_context.verify_flags |= ssl.VERIFY_CRL_CHECK_LEAF
+
+        self.client = make_client(self.config, self.log, tls_context)
 
     def check(self, _):
         """The main entrypoint of the check."""

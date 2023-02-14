@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-import ssl
 from collections import defaultdict
 
 from kafka import KafkaAdminClient
@@ -29,13 +28,13 @@ class OAuthTokenProvider(AbstractTokenProvider):
 
 
 class KafkaPythonClient(KafkaClient):
-    def __init__(self, check) -> None:
-        self.check = check  # TODO: Want to get rid of this
-        self.config = check.config
-        self.log = check.log
+    def __init__(self, config, log, tls_context) -> None:
+        self.config = config
+        self.log = log
         self._kafka_client = None
         self._highwater_offsets = {}
         self._consumer_offsets = {}
+        self.tls_context = tls_context
 
     def get_consumer_offsets(self):
         """Fetch Consumer Group offsets from Kafka.
@@ -176,12 +175,6 @@ class KafkaPythonClient(KafkaClient):
         return kafka_admin_client
 
     def _create_kafka_client(self, clazz):
-        tls_context = self.check.get_tls_context()
-        crlfile = self.config._crlfile
-        if crlfile:
-            tls_context.load_verify_locations(crlfile)
-            tls_context.verify_flags |= ssl.VERIFY_CRL_CHECK_LEAF
-
         if not isinstance(self.config._kafka_connect_str, (string_types, list)):
             raise ConfigurationError('kafka_connect_str should be string or list of strings')
 
@@ -206,7 +199,7 @@ class KafkaPythonClient(KafkaClient):
                 if 'sasl_oauth_token_provider' in self.config.instance
                 else None
             ),
-            ssl_context=tls_context,
+            ssl_context=self.tls_context,
         )
 
     @property
