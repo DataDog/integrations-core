@@ -1,6 +1,4 @@
-#!/usr/bin/python
-# -*- coding: utf8 -*-
-# (C) Datadog, Inc. 2020-present
+﻿# (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
@@ -361,8 +359,8 @@ def test_connection_failure(aggregator, dd_run_check, instance_docker):
                 "TCP Provider: No such host is known",
                 "SQLOLEDB|SQLNCLI11": "TCP-connection\\(ERROR: getaddrinfo failed\\).*"
                 "could not open database requested by login",
-                "odbc-linux": "(TCP-connection\\(ERROR: Temporary failure in name resolution\\).*"
-                "Unable to connect to data source|"
+                "odbc-linux": "((TCP-connection\\(ERROR: Temporary failure in name resolution\\).*)*"
+                "Unable to connect to |"
                 "TCP-connection\\(ERROR: Name or service not known\\).*Login timeout expired)",
             },
             ConnectionErrorCode.tcp_connection_failed,

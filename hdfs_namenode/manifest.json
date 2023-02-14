@@ -16,8 +16,7 @@
       "Supported OS::macOS",
       "Category::Processing",
       "Category::OS & System",
-      "Category::Log Collection",
-      "Category::Autodiscovery"
+      "Category::Log Collection"
     ]
   },
   "author": {

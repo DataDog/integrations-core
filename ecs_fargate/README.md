@@ -219,8 +219,6 @@ For details on collecting integration metrics, see [Integration Setup for ECS Fa
 
 Metrics are collected with [DogStatsD][13] through UDP port 8125.
 
-To send custom metrics by listening to DogStatsD packets from other containers, set the environment variable `DD_DOGSTATSD_NON_LOCAL_TRAFFIC` to `true` within the Datadog Agent container.
-
 #### Other environment variables
 
 For environment variables available with the Docker Agent container, see the [Docker Agent][14] page. **Note**: Some variables are not be available for Fargate.

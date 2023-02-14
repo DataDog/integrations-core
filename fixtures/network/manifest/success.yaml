@@ -1,0 +1,81 @@
+interactions:
+- request:
+    body: '{"data": {"type": "app_manifest", "attributes": {"manifest_version": "2.0.0",
+      "app_uuid": "e6b3c5ec-b293-4a22-9145-277a12a9abd4", "app_id": "postgres", "display_on_public_website":
+      true, "tile": {"overview": "README.md#Overview", "configuration": "README.md#Setup",
+      "support": "README.md#Support", "changelog": "CHANGELOG.md", "description":
+      "Collect a wealth of database performance and health metrics.", "title": "Postgres",
+      "media": [], "classifier_tags": ["Supported OS::Linux", "Supported OS::macOS",
+      "Supported OS::Windows", "Category::Data Store", "Category::Log Collection",
+      "Category::Autodiscovery"]}, "author": {"support_email": "help@datadoghq.com",
+      "name": "Datadog", "homepage": "https://www.datadoghq.com", "sales_email": "info@datadoghq.com"},
+      "oauth": {}, "assets": {"integration": {"source_type_name": "Postgres", "configuration":
+      {"spec": "assets/configuration/spec.yaml"}, "events": {"creates_events": false},
+      "metrics": {"prefix": "postgresql.", "check": ["postgresql.connections", "postgresql.max_connections"],
+      "metadata_path": "metadata.csv"}, "service_checks": {"metadata_path": "assets/service_checks.json"},
+      "process_signatures": ["postgres -D", "pg_ctl start -l logfile", "postgres -c
+      ''pg_ctl start -D -l"]}, "dashboards": {"postgresql": "assets/dashboards/postgresql_dashboard.json",
+      "postgresql_screenboard": "assets/dashboards/postgresql_screenboard_dashboard.json"},
+      "monitors": {"percent_usage_connections": "assets/monitors/percent_usage_connections.json",
+      "replication_delay": "assets/monitors/replication_delay.json"}, "saved_views":
+      {"operations": "assets/saved_views/operations.json", "slow_operations": "assets/saved_views/slow_operations.json",
+      "postgres_pattern": "assets/saved_views/postgres_pattern.json", "sessions_by_host":
+      "assets/saved_views/sessions_by_host.json", "postgres_processes": "assets/saved_views/postgres_processes.json"},
+      "logs": {"source": "postgresql"}}}}}'
+    headers:
+      accept:
+      - '*/*'
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '1918'
+      content-type:
+      - application/json
+      host:
+      - app.datadoghq.com
+      user-agent:
+      - python-httpx/0.23.1
+    method: POST
+    uri: https://app.datadoghq.com/api/beta/apps/manifest/validate
+  response:
+    content: '{"data":{"type":"app_manifest","attributes":{"app_id":"postgres","app_uuid":"e6b3c5ec-b293-4a22-9145-277a12a9abd4","manifest_version":"2.0.0","display_on_public_website":true,"tile":{"title":"Postgres","description":"Collect
+      a wealth of database performance and health metrics.","overview":"README.md#Overview","configuration":"README.md#Setup","support":"README.md#Support","changelog":"CHANGELOG.md","media":[],"classifier_tags":["Category::Autodiscovery","Category::Data
+      Store","Category::Log Collection","Supported OS::Linux","Supported OS::Windows","Supported
+      OS::macOS"]},"author":{"homepage":"https://www.datadoghq.com","name":"Datadog","sales_email":"info@datadoghq.com","support_email":"help@datadoghq.com"},"oauth":{},"assets":{"integration":{"source_type_name":"Postgres","configuration":{"spec":"assets/configuration/spec.yaml"},"process_signatures":["postgres
+      -D","pg_ctl start -l logfile","postgres -c ''pg_ctl start -D -l"],"events":{"creates_events":false},"metrics":{"prefix":"postgresql.","check":["postgresql.connections","postgresql.max_connections"],"auto_install":false,"metadata_path":"metadata.csv"},"service_checks":{"metadata_path":"assets/service_checks.json"}},"dashboards":{"postgresql":"assets/dashboards/postgresql_dashboard.json","postgresql_screenboard":"assets/dashboards/postgresql_screenboard_dashboard.json"},"monitors":{"percent_usage_connections":"assets/monitors/percent_usage_connections.json","replication_delay":"assets/monitors/replication_delay.json"},"saved_views":{"operations":"assets/saved_views/operations.json","postgres_processes":"assets/saved_views/postgres_processes.json","sessions_by_host":"assets/saved_views/sessions_by_host.json","postgres_pattern":"assets/saved_views/postgres_pattern.json","slow_operations":"assets/saved_views/slow_operations.json"},"logs":{"source":"postgresql"}},"pricing":[],"legal_terms":{}}}}
+
+      '
+    headers:
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      Date:
+      - Fri, 06 Jan 2023 23:37:09 GMT
+      Transfer-Encoding:
+      - chunked
+      content-encoding:
+      - gzip
+      content-security-policy:
+      - frame-ancestors 'self'; report-uri https://logs.browser-intake-datadoghq.com/api/v2/logs?dd-api-key=pube4f163c23bbf91c16b8f57f56af9fc58&dd-evp-origin=content-security-policy&ddsource=csp-report&ddtags=site%3Adatadoghq.com
+      strict-transport-security:
+      - max-age=15724800;
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - SAMEORIGIN
+      x-ratelimit-limit:
+      - '500'
+      x-ratelimit-period:
+      - '60'
+      x-ratelimit-remaining:
+      - '499'
+      x-ratelimit-reset:
+      - '51'
+    http_version: HTTP/1.1
+    status_code: 200
+version: 1

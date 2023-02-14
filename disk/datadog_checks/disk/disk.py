@@ -547,6 +547,8 @@ class Disk(AgentCheck):
         return [
             # CDROM
             'iso9660$',
+            # tracefs
+            'tracefs$',
         ]
 
     @staticmethod

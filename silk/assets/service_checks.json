@@ -3,7 +3,9 @@
         "agent_version": "7.35.0",
         "integration": "Silk",
         "groups": [
-            "host"
+            "silk_host",
+            "system_id",
+            "system_name"
         ],
         "check": "silk.system.state",
         "statuses": [
@@ -19,7 +21,8 @@
         "agent_version": "7.35.0",
         "integration": "Silk",
         "groups": [
-            "host"
+            "silk_host",
+            "server_name"
         ],
         "check": "silk.server.state",
         "statuses": [
@@ -33,7 +36,7 @@
       "agent_version": "7.35.0",
       "integration": "Silk",
       "groups": [
-          "host"
+          "silk_host"
       ],
       "check": "silk.can_connect",
       "statuses": [

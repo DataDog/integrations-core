@@ -1,7 +1,8 @@
 [build-system]
 requires = [
     "hatchling>=0.11.2",
-    "setuptools<61",
+    "setuptools>=66; python_version > '3.0'",
+    "setuptools; python_version < '3.0'",
 ]
 build-backend = "hatchling.build"
 
@@ -41,7 +42,7 @@ text = "BSD-3-Clause"
 [project.optional-dependencies]
 deps = [
     "boto3==1.17.112; python_version < '3.0'",
-    "boto3==1.26.25; python_version > '3.0'",
+    "boto3==1.26.51; python_version > '3.0'",
 ]
 
 [project.urls]

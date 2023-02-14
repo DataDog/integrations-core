@@ -17,7 +17,7 @@ Configure the Spark integration to monitor your Apache Spark Cluster on Databric
 1. Determine the best init script below for your Databricks cluster environment. 
 
 2. Copy and run the contents into a notebook. The notebook creates an init script that installs a Datadog Agent on your clusters.
-    The notebook only needs to be run once to save the script as a global configuration. For more information about the Databricks Datadog Init scripts, see [Apache Spark Cluster Monitoring with Databricks and Datadog][3].
+    The notebook only needs to be run once to save the script as a global configuration. 
     - Set `<init-script-folder>` path to where you want your init scripts to be saved in.
         
 3. Configure a new Databricks cluster with the cluster-scoped init script path using the UI, Databricks CLI, or invoking the Clusters API.
@@ -31,7 +31,7 @@ Configure the Spark integration to monitor your Apache Spark Cluster on Databric
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Driver only" xxx -->
 ##### Install the Datadog Agent on Driver
-Install the Datadog Agent on the driver node of the cluster. This is a updated version of the [Datadog Init Script][5] Databricks notebook example.
+Install the Datadog Agent on the driver node of the cluster. 
 
 After creating the `datadog-install-driver-only.sh` script, add the init script path in the [cluster configuration page][6].
 
@@ -70,6 +70,11 @@ if [[ \${DB_IS_DRIVER} = "TRUE" ]]; then
 
   # ENABLE LOGS IN datadog.yaml TO COLLECT DRIVER LOGS
   sed -i '/.*logs_enabled:.*/a logs_enabled: true' /etc/datadog-agent/datadog.yaml
+
+  # CONFIGURE HOSTNAME EXPLICITLY IN datadog.yaml TO PREVENT AGENT FROM FAILING ON VERSION 7.40+
+  # SEE https://github.com/DataDog/datadog-agent/issues/14152 FOR CHANGE
+  hostname=\$(hostname | xargs)
+  echo "hostname: \$hostname" >> /etc/datadog-agent/datadog.yaml
 
   # WAITING UNTIL MASTER PARAMS ARE LOADED, THEN GRABBING IP AND PORT
   while [ -z \$gotparams ]; do
@@ -156,6 +161,11 @@ if [[ \${DB_IS_DRIVER} = "TRUE" ]]; then
 
   # ENABLE LOGS IN datadog.yaml TO COLLECT DRIVER LOGS
   sed -i '/.*logs_enabled:.*/a logs_enabled: true' /etc/datadog-agent/datadog.yaml
+
+  # CONFIGURE HOSTNAME EXPLICITLY IN datadog.yaml TO PREVENT AGENT FROM FAILING ON VERSION 7.40+
+  # SEE https://github.com/DataDog/datadog-agent/issues/14152 FOR CHANGE
+  hostname=\$(hostname | xargs)
+  echo "hostname: \$hostname" >> /etc/datadog-agent/datadog.yaml
 
   while [ -z \$gotparams ]; do
     if [ -e "/tmp/driver-env.sh" ]; then
@@ -249,6 +259,11 @@ if [ \$DB_IS_DRIVER ]; then
   # ENABLE LOGS IN datadog.yaml TO COLLECT DRIVER LOGS
   sed -i '/.*logs_enabled:.*/a logs_enabled: true' /etc/datadog-agent/datadog.yaml
 
+  # CONFIGURE HOSTNAME EXPLICITLY IN datadog.yaml TO PREVENT AGENT FROM FAILING ON VERSION 7.40+
+  # SEE https://github.com/DataDog/datadog-agent/issues/14152 FOR CHANGE
+  hostname=\$(hostname | xargs)
+  echo "hostname: \$hostname" >> /etc/datadog-agent/datadog.yaml
+
   while [ -z \$gotparams ]; do
     if [ -e "/tmp/driver-env.sh" ]; then
       DB_DRIVER_PORT=\$(grep -i "CONF_UI_PORT" /tmp/driver-env.sh | cut -d'=' -f2)
@@ -302,7 +317,6 @@ fi
 
 See the [Spark integration documentation][8] for a list of metrics collected.
 
-
 ### Service Checks
 
 See the [Spark integration documentation][9] for the list of service checks collected.
@@ -321,9 +335,8 @@ Need help? Contact [Datadog support][10].
 
 [1]: https://databricks.com/
 [2]: https://docs.datadoghq.com/integrations/spark/?tab=host
-[3]: https://databricks.com/blog/2017/06/01/apache-spark-cluster-monitoring-with-databricks-and-datadog.html
+[3]: https://app.datadoghq.com/integrations/spark
 [4]: https://app.datadoghq.com/account/settings#agent
-[5]: https://docs.databricks.com/_static/notebooks/datadog-init-script.html
 [6]: https://docs.databricks.com/clusters/init-scripts.html#configure-a-cluster-scoped-init-script-using-the-ui
 [7]: https://docs.datadoghq.com/agent/guide/agent-commands/?#agent-status-and-information
 [8]: https://docs.datadoghq.com/integrations/spark/#metrics

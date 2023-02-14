@@ -1,7 +1,8 @@
 [build-system]
 requires = [
     "hatchling>=0.11.2",
-    "setuptools<61",
+    "setuptools>=66; python_version > '3.0'",
+    "setuptools; python_version < '3.0'",
 ]
 build-backend = "hatchling.build"
 
@@ -38,6 +39,7 @@ dependencies = [
     "psutil",
     "py>=1.8.2; python_version < '3.0'",  # https://github.com/ionelmc/pytest-benchmark/issues/226
     "pytest",
+    "pytest-asyncio>=0.20.3; python_version > '3.0'",
     "pytest-benchmark[histogram]<4.0.0; python_version < '3.0'",
     "pytest-benchmark[histogram]>=4.0.0; python_version > '3.0'",
     "pytest-cov>=2.6.1",
@@ -86,7 +88,8 @@ cli = [
     "twine>=1.11.0",
     "virtualenv",
     # TODO: Remove once every check has a pyproject.toml
-    "setuptools<61",
+    "setuptools>=66; python_version > '3.0'",
+    "setuptools; python_version < '3.0'",
     "wheel>=0.31.0",
 ]
 

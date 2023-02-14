@@ -1,7 +1,8 @@
 [build-system]
 requires = [
     "hatchling>=0.13.0",
-    "setuptools<61",
+    "setuptools>=66; python_version > '3.0'",
+    "setuptools; python_version < '3.0'",
 ]
 build-backend = "hatchling.build"
 
@@ -30,7 +31,7 @@ classifiers = [
     "Topic :: System :: Monitoring",
 ]
 dependencies = [
-    "datadog-checks-base>=25.1.0",
+    "datadog-checks-base>=29.0.0",
 ]
 dynamic = [
     "version",

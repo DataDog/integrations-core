@@ -19,8 +19,7 @@
       "Category::Orchestration",
       "Category::Configuration & Deployment",
       "Category::Notification",
-      "Category::Log Collection",
-      "Category::Autodiscovery"
+      "Category::Log Collection"
     ]
   },
   "author": {

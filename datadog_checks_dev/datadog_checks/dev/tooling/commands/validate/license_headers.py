@@ -12,7 +12,13 @@ from ...testing import process_checks_option
 from ...utils import complete_valid_checks
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_warning
 
-IGNORES = {"datadog_checks_dev": ["datadog_checks/dev/tooling/templates"], "all": ["tests/compose", "tests/docker"]}
+IGNORES = {
+    "all": ["tests/compose", "tests/docker"],
+    "datadog_checks_dev": ["datadog_checks/dev/tooling/templates"],
+    "php_fpm": ["datadog_checks/php_fpm/vendor"],
+    "snmp": ["tests/mibs"],
+    "tokumx": ["datadog_checks/tokumx/vendor"],
+}
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate license headers in python files')

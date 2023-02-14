@@ -1,3 +1,7 @@
+# (C) Datadog, Inc. 2021-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
 from pymongo import MongoClient, ReadPreference
 from pymongo.errors import ConnectionFailure
 
@@ -32,7 +36,7 @@ class MongoApi(object):
         if replicaset:
             options['replicaSet'] = replicaset
         options.update(self._config.additional_options)
-        options.update(self._config.ssl_params)
+        options.update(self._config.tls_params)
         if self._config.do_auth and not self._is_arbiter(options):
             self._log.info("Using '%s' as the authentication database", self._config.auth_source)
             if self._config.username:

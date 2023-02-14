@@ -2,13 +2,13 @@
   "manifest_version": "2.0.0",
   "app_uuid": "49ad19d0-1452-4275-b0fe-cbda3821807d",
   "app_id": "argocd",
-  "display_on_public_website": false,
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "",
+    "description": "Argo CD",
     "title": "Argo CD",
     "media": [],
     "classifier_tags": [
@@ -38,9 +38,20 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "process_signatures": [
+        "argocd-application-controller",
+        "argocd-repo-server",
+        "argocd-server"
+      ]
     },
-    "logs": {}
+    "logs": {},
+    "dashboards": {
+      "Argo CD Overview": "assets/dashboards/argo_cd_overview.json"
+    },
+    "monitors": {
+      "Sync Status": "assets/recommended_monitors/application_sync_status.json"
+    }
   },
   "author": {
     "support_email": "help@datadoghq.com",

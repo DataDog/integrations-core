@@ -15,7 +15,6 @@
       "Supported OS::Linux",
       "Category::Containers",
       "Category::Network",
-      "Category::Autodiscovery",
       "Category::Log Collection"
     ]
   },

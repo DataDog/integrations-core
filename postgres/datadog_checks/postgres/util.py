@@ -216,6 +216,30 @@ FROM pg_stat_replication
 """,
 }
 
+
+QUERY_PG_STAT_WAL_RECEIVER = {
+    'name': 'pg_stat_wal_receiver',
+    'query': """
+        WITH connected(c) AS (VALUES (1))
+        SELECT CASE WHEN status IS NULL THEN 'disconnected' ELSE status END AS connected,
+               c,
+               received_tli,
+               EXTRACT(EPOCH FROM (clock_timestamp() - last_msg_send_time)),
+               EXTRACT(EPOCH FROM (clock_timestamp() - last_msg_receipt_time)),
+               EXTRACT(EPOCH FROM (clock_timestamp() - latest_end_time))
+        FROM pg_stat_wal_receiver
+        RIGHT JOIN connected ON (true);
+    """.strip(),
+    'columns': [
+        {'name': 'status', 'type': 'tag'},
+        {'name': 'postgresql.wal_receiver.connected', 'type': 'gauge'},
+        {'name': 'postgresql.wal_receiver.received_timeline', 'type': 'gauge'},
+        {'name': 'postgresql.wal_receiver.last_msg_send_age', 'type': 'gauge'},
+        {'name': 'postgresql.wal_receiver.last_msg_receipt_age', 'type': 'gauge'},
+        {'name': 'postgresql.wal_receiver.latest_end_age', 'type': 'gauge'},
+    ],
+}
+
 CONNECTION_METRICS = {
     'descriptors': [],
     'metrics': {
@@ -284,6 +308,9 @@ ACTIVITY_METRICS_9_6 = [
     "THEN 1 ELSE null END )",
     "COUNT(CASE WHEN wait_event is NOT NULL AND query !~ '^autovacuum:' THEN 1 ELSE null END )",
     "COUNT(CASE WHEN wait_event is NOT NULL AND query !~ '^autovacuum:' AND state = 'active' THEN 1 ELSE null END )",
+    "max(EXTRACT(EPOCH FROM (clock_timestamp() - xact_start)))",
+    "max(age(backend_xid))",
+    "max(age(backend_xmin))",
 ]
 
 # The metrics we retrieve from pg_stat_activity when the postgres version >= 9.2
@@ -294,6 +321,9 @@ ACTIVITY_METRICS_9_2 = [
     "THEN 1 ELSE null END )",
     "COUNT(CASE WHEN waiting = 't' AND query !~ '^autovacuum:' THEN 1 ELSE null END )",
     "COUNT(CASE WHEN waiting = 't' AND query !~ '^autovacuum:' AND state = 'active' THEN 1 ELSE null END )",
+    "max(EXTRACT(EPOCH FROM (clock_timestamp() - xact_start)))",
+    "null",  # backend_xid is not available
+    "null",  # backend_xmin is not available
 ]
 
 # The metrics we retrieve from pg_stat_activity when the postgres version >= 8.3
@@ -304,6 +334,9 @@ ACTIVITY_METRICS_8_3 = [
     "THEN 1 ELSE null END )",
     "COUNT(CASE WHEN waiting = 't' AND query !~ '^autovacuum:' THEN 1 ELSE null END )",
     "COUNT(CASE WHEN waiting = 't' AND query !~ '^autovacuum:' AND state = 'active' THEN 1 ELSE null END )",
+    "max(EXTRACT(EPOCH FROM (clock_timestamp() - xact_start)))",
+    "null",  # backend_xid is not available
+    "null",  # backend_xmin is not available
 ]
 
 # The metrics we retrieve from pg_stat_activity when the postgres version < 8.3
@@ -314,6 +347,9 @@ ACTIVITY_METRICS_LT_8_3 = [
     "THEN 1 ELSE null END )",
     "COUNT(CASE WHEN waiting = 't' AND query !~ '^autovacuum:' THEN 1 ELSE null END )",
     "COUNT(CASE WHEN waiting = 't' AND query !~ '^autovacuum:' AND state = 'active' THEN 1 ELSE null END )",
+    "max(EXTRACT(EPOCH FROM (clock_timestamp() - query_start)))",
+    "null",  # backend_xid is not available
+    "null",  # backend_xmin is not available
 ]
 
 # The metrics we collect from pg_stat_activity that we zip with one of the lists above
@@ -323,21 +359,24 @@ ACTIVITY_DD_METRICS = [
     ('postgresql.active_queries', AgentCheck.gauge),
     ('postgresql.waiting_queries', AgentCheck.gauge),
     ('postgresql.active_waiting_queries', AgentCheck.gauge),
+    ('postgresql.activity.xact_start_age', AgentCheck.gauge),
+    ('postgresql.activity.backend_xid_age', AgentCheck.gauge),
+    ('postgresql.activity.backend_xmin_age', AgentCheck.gauge),
 ]
 
 # The base query for postgres version >= 10
 ACTIVITY_QUERY_10 = """
-SELECT datname,
-    {metrics_columns}
+SELECT {aggregation_columns_select}
+    {{metrics_columns}}
 FROM pg_stat_activity
 WHERE backend_type = 'client backend'
-GROUP BY datid, datname
+GROUP BY datid {aggregation_columns_group}
 """
 
 # The base query for postgres version < 10
 ACTIVITY_QUERY_LT_10 = """
-SELECT datname,
-    {metrics_columns}
+SELECT {aggregation_columns_select}
+    {{metrics_columns}}
 FROM pg_stat_activity
-GROUP BY datid, datname
+GROUP BY datid {aggregation_columns_group}
 """

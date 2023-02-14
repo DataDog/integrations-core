@@ -40,4 +40,9 @@ datadog.cluster_agent.admission_webhooks.library_injection_attempts,count,,,,"Nu
 datadog.cluster_agent.admission_webhooks.library_injection_errors,count,,,,"Number of library injection failures by language",0,datadog_cluster_agent,library injection errors,
 datadog.cluster_agent.kubernetes_apiserver.kube_events,count,,,,"Kubernetes events processed by the kubernetes_apiserver check",0,datadog_cluster_agent,apiserver events,
 datadog.cluster_agent.kubernetes_apiserver.emitted_events,count,,,,"Datadog events emitted by the kubernetes_apiserver check",0,datadog_cluster_agent,datadog events events,
+datadog.cluster_agent.admission_webhooks.patcher.attempts,count,,,,"Number of patch attempts",0,datadog_cluster_agent,patch attempts,
+datadog.cluster_agent.admission_webhooks.patcher.completed,count,,,,"Number of completed patch attempts",0,datadog_cluster_agent,completed patch attempts,
+datadog.cluster_agent.admission_webhooks.patcher.errors,count,,,,"Number of patch errors",0,datadog_cluster_agent,patch errors,
+datadog.cluster_agent.admission_webhooks.rc_provider.configs,gauge,,,,"Number of valid remote configuration",0,datadog_cluster_agent,valid remote configurations,
+datadog.cluster_agent.admission_webhooks.rc_provider.invalid_configs,gauge,,,,"Number of invalid remote configurations",0,datadog_cluster_agent,invalid remote configurations,
 

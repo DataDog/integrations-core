@@ -1,6 +1,6 @@
 # CHANGELOG - pgbouncer
 
-## 4.3.1 / 2022-12-09
+## 4.3.1 / 2022-12-09 / Agent 7.42.0
 
 * [Fixed] Do not install psycopg2-binary on arm macs. See [#13343](https://github.com/DataDog/integrations-core/pull/13343).
 

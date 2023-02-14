@@ -9,14 +9,38 @@
 
 from __future__ import annotations
 
-from typing import Optional, Sequence
+from typing import Any, Mapping, Optional, Sequence, Union
 
-from pydantic import BaseModel, root_validator, validator
+from pydantic import BaseModel, Field, root_validator, validator
 
 from datadog_checks.base.utils.functions import identity
 from datadog_checks.base.utils.models import validation
 
 from . import defaults, validators
+
+
+class Clusters(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    exclude: Optional[Sequence[str]] = Field(
+        None, description='List of regular expressions with the patterns of clusters that will not be processed.\n'
+    )
+    include: Optional[Sequence[Union[str, Mapping[str, Any]]]] = Field(
+        None, description='Mapping of regular expressions keys and cluster config values that will be processed.\n'
+    )
+    interval: Optional[int] = Field(
+        None, description='Validity time of the last list of clusters obtained through the endpoint.\n'
+    )
+    limit: Optional[int] = Field(None, description='Maximum number of clusters to be processed.\n')
+
+
+class CustomQuery(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    query: Optional[str]
+    tags: Optional[Sequence[str]]
 
 
 class MetricPatterns(BaseModel):
@@ -32,6 +56,9 @@ class InstanceConfig(BaseModel):
         allow_mutation = False
 
     api_url: str
+    cloudera_client: Optional[str]
+    clusters: Optional[Clusters]
+    custom_queries: Optional[Sequence[CustomQuery]]
     disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
     max_parallel_requests: Optional[int]

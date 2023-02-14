@@ -1,6 +1,26 @@
 # CHANGELOG - datadog_checks_base
 
-## 28.0.1 / 2022-12-16
+## 30.0.0 / 2023-01-20
+
+* [Added] Bump snowflake to 2.8.3. See [#13756](https://github.com/DataDog/integrations-core/pull/13756).
+* [Fixed] Update dependencies. See [#13726](https://github.com/DataDog/integrations-core/pull/13726).
+* [Changed] Skip typo for not yet installed Windows performance counters to allow collection of subsequent counters. See [#13678](https://github.com/DataDog/integrations-core/pull/13678).
+
+## 29.0.0 / 2023-01-10
+
+* [Added] Autodiscovery in Agent Integrations. See [#13656](https://github.com/DataDog/integrations-core/pull/13656).
+* [Added] Inject trace context into logs when integration_tracing is enabled. See [#13636](https://github.com/DataDog/integrations-core/pull/13636).
+* [Added] Update integration tracing naming scheme. See [#13579](https://github.com/DataDog/integrations-core/pull/13579).
+* [Added] Add option to enable profiling of Python integrations. See [#13576](https://github.com/DataDog/integrations-core/pull/13576).
+* [Added] Add Cloudera integration. See [#13244](https://github.com/DataDog/integrations-core/pull/13244).
+* [Changed] Improve integration tracing of warnings & errors. See [#13620](https://github.com/DataDog/integrations-core/pull/13620).
+* [Removed] Update TUF to 2.0.0. See [#13331](https://github.com/DataDog/integrations-core/pull/13331).
+
+## 28.0.2 / 2023-01-27 / Agent 7.42.1
+
+* [Fixed] Backport snowflake-connector-python bump 2.8.3 to 7.42.x. See [#13794](https://github.com/DataDog/integrations-core/pull/13794).
+
+## 28.0.1 / 2022-12-16 / Agent 7.42.0
 
 * [Fixed] Fixed incorrect counter type determination and error reporting on the first collection. See [#13489](https://github.com/DataDog/integrations-core/pull/13489).
 

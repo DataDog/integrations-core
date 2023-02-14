@@ -32,10 +32,10 @@
     }
     @get_hosts {
         method GET
-        path /api/v48/clusters/cod--qfdcinkqrzw/hosts
+        path /api/v48/clusters/cluster_1/hosts
     }
     route @get_hosts {
-        rewrite /api/v48/clusters/cod--qfdcinkqrzw/hosts /api/v48/clusters/cod--qfdcinkqrzw/hosts/get
+        rewrite /api/v48/clusters/cluster_1/hosts /api/v48/clusters/cluster_1/hosts/get
         file_server
     }
     @get_metrics_from_host {
@@ -67,6 +67,58 @@
     route @get_metrics_from_disk {
         rewrite /api/v48/timeseries /api/v48/timeseries/get_metrics_from_disk
         file_server
+    }
+    @get_events {
+        method GET
+        path /api/v48/events
+        expression {query}.contains('query=timeOccurred')
+    }
+    route @get_events {
+        rewrite /api/v48/events /api/v48/events/get_events
+        file_server
+    }
+    @get_custom_metrics_no_alias {
+        method GET
+        path /api/v48/timeseries
+        expression {query}.contains('SELECT+jvm_gc_rate%2C+jvm_free_memory')
+    }
+    route @get_custom_metrics_no_alias {
+        rewrite /api/v48/timeseries /api/v48/timeseries/get_custom_metrics_no_alias
+        file_server
+    }
+    @get_custom_metrics_last_alias {
+        method GET
+        path /api/v48/timeseries
+        expression {query}.contains('SELECT+last%28jvm_gc_rate%29+as+jvm_gc_rate%2C+last%28jvm_free_memory%29+as+jvm_free_memory')
+    }
+    route @get_custom_metrics_last_alias {
+        rewrite /api/v48/timeseries /api/v48/timeseries/get_custom_metrics_last_alias
+        file_server
+    }
+    @get_custom_metrics_alias {
+        method GET
+        path /api/v48/timeseries
+        expression {query}.contains('SELECT+jvm_gc_rate+as+foo')
+    }
+    route @get_custom_metrics_alias {
+        rewrite /api/v48/timeseries /api/v48/timeseries/get_custom_metrics_alias
+        file_server
+    }
+    @get_custom_metrics_invalid_metric {
+        method GET
+        path /api/v48/timeseries
+        expression {query}.contains('select+fake_foo')
+    }
+    respond @get_custom_metrics_invalid_metric "Invalid metric 'fake_foo' in 'select fake_foo'\nIllegal query: must specify metrics or filters. 'select fake_foo'\nInvalid metric 'fake_foo' in 'select fake_foo'\nIllegal query: must specify metrics or filters. 'select fake_foo'\n" 500 {
+        close
+    }
+    @get_custom_metrics_incorrect_formatting {
+        method GET
+        path /api/v48/timeseries
+        expression {query}.contains('selectt')
+    }
+    respond @get_custom_metrics_incorrect_formatting "Invalid syntax: no viable alternative at input 'selectt'. selectt\nInvalid syntax: no viable alternative at input 'selectt'. selectt\n" 500 {
+        close
     }
     file_server browse
 }

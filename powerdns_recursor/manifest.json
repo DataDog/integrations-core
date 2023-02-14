@@ -17,7 +17,6 @@
       "Supported OS::Windows",
       "Category::Web",
       "Category::Network",
-      "Category::Autodiscovery",
       "Category::Log Collection"
     ]
   },

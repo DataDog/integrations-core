@@ -2,7 +2,10 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import asyncio
+import difflib
 import os
+import re
+import tarfile
 from collections import defaultdict
 
 import click
@@ -13,11 +16,20 @@ from aiomultiprocess import Pool
 from packaging.requirements import Requirement
 
 from ....fs import file_exists, read_file_lines, write_file_lines
-from ...constants import get_agent_requirements, get_license_attribution_file
+from ...constants import (
+    get_agent_requirements,
+    get_copyright_ignore_re,
+    get_copyright_locations_re,
+    get_copyright_re,
+    get_license_attribution_file,
+)
+from ...github import get_auth_info
 from ...utils import get_extra_license_files, read_license_file_rows
-from ..console import CONTEXT_SETTINGS, abort, annotate_error, echo_failure, echo_info, echo_success
+from ..console import CONTEXT_SETTINGS, abort, annotate_error, echo_failure, echo_info, echo_success, echo_warning
 
 EXPLICIT_LICENSES = {
+    # https://github.com/aerospike/aerospike-client-python/blob/master/LICENSE
+    'aerospike': ['Apache-2.0'],
     # https://github.com/baztian/jaydebeapi/blob/master/COPYING
     'JayDeBeApi': ['LGPL-3.0-only'],
     # https://github.com/mhammond/pywin32/blob/master/adodbapi/license.txt
@@ -32,8 +44,12 @@ EXPLICIT_LICENSES = {
     'cm-client': ['Apache-2.0'],
     # https://github.com/oauthlib/oauthlib/blob/master/LICENSE
     'oauthlib': ['BSD-3-Clause'],
+    # https://github.com/hajimes/mmh3/blob/master/LICENSE
+    'mmh3': ['CC0-1.0'],
     # https://github.com/paramiko/paramiko/blob/master/LICENSE
     'paramiko': ['LGPL-2.1-only'],
+    # https://github.com/oracle/python-oracledb/blob/main/LICENSE.txt
+    'oracledb': ['Apache-2.0'],
     # https://github.com/psycopg/psycopg2/blob/master/LICENSE
     # https://github.com/psycopg/psycopg2/blob/master/doc/COPYING.LESSER
     'psycopg2-binary': ['LGPL-3.0-only', 'BSD-3-Clause'],
@@ -45,6 +61,8 @@ EXPLICIT_LICENSES = {
     'requests_ntlm': ['ISC'],
     # https://github.com/rethinkdb/rethinkdb-python/blob/master/LICENSE
     'rethinkdb': ['Apache-2.0'],
+    # https://github.com/simplejson/simplejson/blob/master/LICENSE.txt
+    'simplejson': ['MIT'],
     # https://github.com/Supervisor/supervisor/blob/master/LICENSES.txt
     'supervisor': ['BSD-3-Clause-Modification'],
     # https://github.com/Cairnarvon/uptime/blob/master/COPYING.txt
@@ -124,13 +142,51 @@ VALID_LICENSES = (
 HEADERS = ['Component', 'Origin', 'License', 'Copyright']
 
 ADDITIONAL_LICENSES = [
-    'flup,Vendor,BSD-3-Clause,Allan Saddi\n',
-    'flup-py3,Vendor,BSD-3-Clause,Allan Saddi\n',
+    'flup,Vendor,BSD-3-Clause,Copyright (c) 2005 Allan Saddi. All Rights Reserved.\n',
+    'flup-py3,Vendor,BSD-3-Clause,"Copyright (c) 2005, 2006 Allan Saddi <allan@saddi.com> All rights reserved."\n',
 ]
+
+PACKAGE_REPO_OVERRIDES = {
+    'PyYAML': 'https://github.com/yaml/pyyaml',
+    'Pyro4': 'https://github.com/irmen/Pyro4',
+    'contextlib2': 'https://github.com/jazzband/contextlib2',
+    'dnspython': 'https://github.com/rthalley/dnspython',
+    'foundationdb': 'https://github.com/apple/foundationdb',
+    'in-toto': 'https://github.com/in-toto/in-toto',
+    'kazoo': 'https://github.com/python-zk/kazoo',
+    'keystoneauth1': 'https://github.com/openstack/keystoneauth',
+    'lxml': 'https://github.com/lxml/lxml',
+    'oracledb': 'https://github.com/oracle/python-oracledb',
+    'packaging': 'https://github.com/pypa/packaging',
+    'paramiko': 'https://github.com/paramiko/paramiko',
+    'protobuf': 'https://github.com/protocolbuffers/protobuf',
+    'psycopg2-binary': 'https://github.com/psycopg/psycopg2',
+    'pycryptodomex': 'https://github.com/Legrandin/pycryptodome',
+    'redis': 'https://github.com/redis/redis-py',
+    'requests': 'https://github.com/psf/requests',
+    'requests-toolbelt': 'https://github.com/requests/toolbelt',
+    'service-identity': 'https://github.com/pyca/service-identity',
+    'snowflake-connector-python': 'https://github.com/snowflakedb/snowflake-connector-python',
+    'supervisor': 'https://github.com/Supervisor/supervisor',
+    'tuf': 'https://github.com/theupdateframework/python-tuf',
+    'typing': 'https://github.com/python/typing',
+}
+
+COPYRIGHT_ATTR_TEMPLATES = {
+    'Apache-2.0': 'Copyright {year}{author}',
+    'BSD-2-Clause': 'Copyright {year}{author}',
+    'BSD-3-Clause': 'Copyright {year}{author}',
+    'BSD-3-Clause-Modification': 'Copyright {year}{author}',
+    'LGPL-2.1-only': 'Copyright (C) {year}{author}',
+    'LGPL-3.0-only': 'Copyright (C) {year}{author}',
+    'MIT': 'Copyright (c) {year}{author}',
+    'PSF': 'Copyright (c) {year}{author}',
+    'CC0-1.0': '{author}. {package_name} is dedicated to the public domain under {license}.',
+    'Unlicense': '{author}. {package_name} is dedicated to the public domain under {license}.',
+}
 
 
 def format_attribution_line(package_name, license_id, package_copyright):
-    package_copyright = ' | '.join(sorted(package_copyright))
     if ',' in package_copyright:
         package_copyright = f'"{package_copyright}"'
 
@@ -160,27 +216,150 @@ async def get_data(url):
                 info['name'],
                 info['author'] or info['maintainer'] or info['author_email'] or info['maintainer_email'] or '',
                 info['license'],
+                info['home_page'],
                 {extract_classifier_value(c) for c in info['classifiers'] if c.startswith('License ::')},
             )
 
 
 async def scrape_license_data(urls):
-    package_data = defaultdict(lambda: {'copyright': set(), 'licenses': [], 'classifiers': set()})
+    package_data = defaultdict(
+        lambda: {'copyright': dict(), 'licenses': set(), 'classifiers': set(), 'home_page': None, 'author': None}
+    )
 
     async with Pool() as pool:
-        async for package_name, package_copyright, package_license, license_classifiers in pool.map(get_data, urls):
+        async for package_name, package_author, package_license, home_page, license_classifiers in pool.map(
+            get_data, urls
+        ):
             data = package_data[package_name]
-            if package_copyright:
-                data['copyright'].add(package_copyright)
+            if package_author:
+                data['author'] = package_author
 
             data['classifiers'].update(license_classifiers)
             if package_license:
                 if ' :: ' in package_license:
                     data['classifiers'].add(extract_classifier_value(package_license))
                 else:
-                    data['licenses'].append(package_license)
+                    data['licenses'].add(package_license)
+
+            if home_page:
+                data['home_page'] = home_page
 
     return package_data
+
+
+def update_copyrights(package_name, license_id, data, ctx):
+    """
+    Update package data with scraped copyright attributions.
+    """
+    home_page = data['home_page']
+    repo_url = PACKAGE_REPO_OVERRIDES.get(package_name)
+    created_date = ''
+
+    if not repo_url:
+        repo_url = home_page
+
+    if repo_url:
+        cp, created_date = scrape_copyright_data(repo_url, ctx)
+        if cp:
+            data['copyright'][license_id] = cp
+
+    if data['author'] and not data['copyright'].get(license_id):
+        cp = 'Copyright {}{}'.format(created_date, data['author'])
+        if license_id in COPYRIGHT_ATTR_TEMPLATES:
+            cp = COPYRIGHT_ATTR_TEMPLATES[license_id].format(
+                year=created_date, author=data['author'], package_name=package_name, license=license_id
+            )
+        data['copyright'][license_id] = cp
+
+
+def probe_github(url, ctx):
+    """
+    Probe GitHub API for package's repo creation date and default branch.
+    Generates URL path for downloading the repo's tarball archive file.
+    Returns tarball path and repo creation date.
+    """
+    if url.endswith('/'):
+        url = url[:-1]
+    if 'github.com' not in url:
+        return None, ''
+    owner_repo = re.sub(r'.*github.com/', '', url)
+    repo_api_url = f'https://api.github.com/repos/{owner_repo}'
+    try:
+        repo_res = requests.get(repo_api_url, auth=get_auth_info(ctx.obj)).json()
+        def_branch = repo_res.get('default_branch')
+        created_date = repo_res.get('created_at', '')
+        if created_date:
+            created_date = created_date[:4] + ' '
+        tar_path = f'https://github.com/{owner_repo}/archive/refs/heads/{def_branch}.tar.gz'
+        return tar_path, created_date
+    except Exception:
+        return None, ''
+
+
+def parse_license_path(tar_file_name):
+    """
+    Parses filepath name and returns the filepath if it is a potential copyright attribution location.
+    """
+    file_name_parts = tar_file_name.split("/")
+    # Look at only the root-level files
+    if len(file_name_parts) == 2:
+        m = get_copyright_locations_re().search(file_name_parts[1])
+        if m:
+            return file_name_parts[1]
+    return None
+
+
+def generate_tarfiles(tar_path):
+    """
+    Streams tarball archive and generates tarfile for each file.
+    """
+    stream = requests.get(tar_path, stream=True)
+    with tarfile.open(fileobj=stream.raw, mode="r|gz") as tar_file:
+        for tar_info in tar_file:
+            if not tar_info.islnk() and not tar_info.issym():
+                yield tar_info, tar_file
+    stream.close()
+
+
+def scrape_copyright_data(url_path, ctx):
+    """
+    Scrapes each tarfile for copyright attributions.
+    """
+    tar_path, created_date = probe_github(url_path, ctx)
+    if tar_path:
+        for tar_info, tar_file in generate_tarfiles(tar_path):
+            local_path = parse_license_path(tar_info.name)
+            if local_path:
+                file = tar_file.extractfile(tar_info)
+                cp = find_cpy(file.read())
+                if cp:
+                    file.close()
+                    return cp, created_date
+                if file:
+                    file.close()
+    return None, created_date
+
+
+def find_cpy(data):
+    """
+    Performs pattern matching on input data to find copyright attributions.
+    Returns the copyright attribution if found.
+    """
+    text = str(data, 'UTF-8')
+    for line in text.splitlines():
+        line = re.sub(r'.*#', '', line)
+        line = line.strip()
+        m = get_copyright_re().search(line)
+        if not m:
+            continue
+        cpy = m.group(0)
+        # ignore a few spurious matches from license boilerplate
+        if any(ign.match(cpy) for ign in get_copyright_ignore_re()):
+            continue
+
+        cpy = cpy.strip().rstrip(',')
+        if cpy:
+            return cpy
 
 
 def validate_extra_licenses():
@@ -276,8 +455,9 @@ def licenses(ctx, sync):
     for package_name, data in sorted(package_data.items()):
         if package_name in EXPLICIT_LICENSES:
             for license_id in sorted(EXPLICIT_LICENSES[package_name]):
-                lines.append(format_attribution_line(package_name, license_id, data['copyright']))
-
+                data['licenses'].add(license_id)
+                update_copyrights(package_name, license_id, data, ctx)
+                lines.append(format_attribution_line(package_name, license_id, data['copyright'].get(license_id, '')))
             continue
 
         license_ids = set()
@@ -314,7 +494,8 @@ def licenses(ctx, sync):
 
         if license_ids:
             for license_id in sorted(license_ids):
-                lines.append(format_attribution_line(package_name, license_id, data['copyright']))
+                update_copyrights(package_name, license_id, data, ctx)
+                lines.append(format_attribution_line(package_name, license_id, data['copyright'].get(license_id, '')))
         else:
             package_license_errors[package_name].append('no license information')
 
@@ -338,6 +519,12 @@ def licenses(ctx, sync):
         else:
             echo_success('Success!')
     elif read_file_lines(license_attribution_file) != lines:
+        echo_warning('Found diff between current file vs expected file:')
+        difference = difflib.unified_diff(read_file_lines(license_attribution_file), lines)
+        for item in difference:
+            echo_warning(item)
         abort('Out of sync, run again with the --sync flag')
     elif any_errors:
         abort()
+    else:
+        echo_success('Licenses file is valid!')
