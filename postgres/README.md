@@ -6,7 +6,7 @@
 
 The Postgres integration provides health and performance metrics for your Postgres database in near real-time. Visualize these metrics with the provided dashboard and create monitors to alert your team on PostgreSQL states.
 
-Enable [Database Monitoring](https://docs.datadoghq.com/database_monitoring/) (DBM) for enhanced insight into query performance and database health. In addition to the standard integration, Datadog DBM provides query-level metrics, live and historical query snapshots, wait event analysis, database load, query explain plans, and blocking query insights.
+Enable [Database Monitoring][28] (DBM) for enhanced insights into query performance and database health. In addition to the standard integration, Datadog DBM provides query-level metrics, live and historical query snapshots, wait event analysis, database load, query explain plans, and blocking query insights.
 
 ## Setup
 
@@ -18,7 +18,7 @@ The PostgreSQL check is packaged with the Agent. To start gathering your Postgre
 
 ### Configuration
 
-**Note**: To install Database Monitoring for PostgreSQL, select your hosting solution on the [documentation site](https://docs.datadoghq.com/database_monitoring/#postgres) for instructions.
+**Note**: To install Database Monitoring for PostgreSQL, select your hosting solution in the [Database Monitoring documentation][29] for instructions.
 
 Proceed with the following steps in this guide only if you are installing the standard integration alone.
 
@@ -456,3 +456,5 @@ Additional helpful documentation, links, and articles:
 [25]: https://www.datadoghq.com/blog/postgresql-monitoring-tools
 [26]: https://www.datadoghq.com/blog/collect-postgresql-data-with-datadog
 [27]: https://docs.datadoghq.com/agent/docker/apm/
+[28]: https://docs.datadoghq.com/database_monitoring/
+[29]: https://docs.datadoghq.com/database_monitoring/#postgres
