@@ -155,7 +155,12 @@ class KafkaCheck(AgentCheck, ConfigMixin):
 
     @AgentCheck.metadata_entrypoint
     def collect_broker_metadata(self):
-        self.client.collect_broker_metadata()
+        version_data = [str(part) for part in self.client.collect_broker_version()]
+        version_parts = {name: part for name, part in zip(('major', 'minor', 'patch'), version_data)}
+
+        self.check.set_metadata(
+            'version', '.'.join(version_data), scheme='parts', final_scheme='semver', part_map=version_parts
+        )
 
     def send_event(self, title, text, tags, event_type, aggregation_key, severity='info'):
         """Emit an event to the Datadog Event Stream."""
