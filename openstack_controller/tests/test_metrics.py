@@ -204,7 +204,6 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute7.openstack.local',
                     'server_name:finalDestination-4',
                     'availability_zone:nova',
-                    'instance_hostname:servertest4',
                     'interface:tapb488fc1e-3e',
                 ],
                 hostname=u'7e622c28-4b12-4a58-8ac2-4a2e854f84eb',
@@ -1312,7 +1311,6 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute7.openstack.local',
                     'server_name:finalDestination-4',
                     'availability_zone:nova',
-                    'instance_hostname:servertest4',
                     'interface:tapb488fc1e-3e',
                 ],
                 hostname=u'7e622c28-4b12-4a58-8ac2-4a2e854f84eb',
@@ -1340,7 +1338,6 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute7.openstack.local',
                     'server_name:finalDestination-4',
                     'availability_zone:nova',
-                    'instance_hostname:servertest4',
                     'interface:tapb488fc1e-3e',
                 ],
                 hostname=u'7e622c28-4b12-4a58-8ac2-4a2e854f84eb',
@@ -1497,7 +1494,6 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute7.openstack.local',
                     'server_name:finalDestination-4',
                     'availability_zone:nova',
-                    'instance_hostname:servertest4',
                 ],
                 hostname=u'7e622c28-4b12-4a58-8ac2-4a2e854f84eb',
             )
@@ -2776,7 +2772,6 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute7.openstack.local',
                     'server_name:finalDestination-4',
                     'availability_zone:nova',
-                    'instance_hostname:servertest4',
                 ],
                 hostname=u'7e622c28-4b12-4a58-8ac2-4a2e854f84eb',
             )
@@ -2965,7 +2960,6 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute7.openstack.local',
                     'server_name:finalDestination-4',
                     'availability_zone:nova',
-                    'instance_hostname:servertest4',
                     'interface:tapb488fc1e-3e',
                 ],
                 hostname=u'7e622c28-4b12-4a58-8ac2-4a2e854f84eb',
@@ -2993,7 +2987,6 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute7.openstack.local',
                     'server_name:finalDestination-4',
                     'availability_zone:nova',
-                    'instance_hostname:servertest4',
                     'interface:tapb488fc1e-3e',
                 ],
                 hostname=u'7e622c28-4b12-4a58-8ac2-4a2e854f84eb',
@@ -3340,7 +3333,6 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute7.openstack.local',
                     'server_name:finalDestination-4',
                     'availability_zone:nova',
-                    'instance_hostname:servertest4',
                 ],
                 hostname=u'7e622c28-4b12-4a58-8ac2-4a2e854f84eb',
             )
@@ -3644,7 +3636,6 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute7.openstack.local',
                     'server_name:finalDestination-4',
                     'availability_zone:nova',
-                    'instance_hostname:servertest4',
                 ],
                 hostname=u'7e622c28-4b12-4a58-8ac2-4a2e854f84eb',
             )
@@ -3878,7 +3869,6 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute7.openstack.local',
                     'server_name:finalDestination-4',
                     'availability_zone:nova',
-                    'instance_hostname:servertest4',
                 ],
                 hostname=u'7e622c28-4b12-4a58-8ac2-4a2e854f84eb',
             )
@@ -4126,7 +4116,6 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute7.openstack.local',
                     'server_name:finalDestination-4',
                     'availability_zone:nova',
-                    'instance_hostname:servertest4',
                 ],
                 hostname=u'7e622c28-4b12-4a58-8ac2-4a2e854f84eb',
             )
@@ -4430,7 +4419,6 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute7.openstack.local',
                     'server_name:finalDestination-4',
                     'availability_zone:nova',
-                    'instance_hostname:servertest4',
                 ],
                 hostname=u'7e622c28-4b12-4a58-8ac2-4a2e854f84eb',
             )
@@ -4667,7 +4655,6 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute7.openstack.local',
                     'server_name:finalDestination-4',
                     'availability_zone:nova',
-                    'instance_hostname:servertest4',
                     'interface:tapb488fc1e-3e',
                 ],
                 hostname=u'7e622c28-4b12-4a58-8ac2-4a2e854f84eb',
@@ -4681,7 +4668,6 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute7.openstack.local',
                     'server_name:finalDestination-4',
                     'availability_zone:nova',
-                    'instance_hostname:servertest4',
                     'interface:tapb488fc1e-3e',
                 ],
                 hostname=u'7e622c28-4b12-4a58-8ac2-4a2e854f84eb',
@@ -5125,7 +5111,6 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute7.openstack.local',
                     'server_name:finalDestination-4',
                     'availability_zone:nova',
-                    'instance_hostname:servertest4',
                 ],
                 hostname=u'7e622c28-4b12-4a58-8ac2-4a2e854f84eb',
             )
@@ -5373,7 +5358,6 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute7.openstack.local',
                     'server_name:finalDestination-4',
                     'availability_zone:nova',
-                    'instance_hostname:servertest4',
                 ],
                 hostname=u'7e622c28-4b12-4a58-8ac2-4a2e854f84eb',
             )
@@ -6023,7 +6007,6 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute7.openstack.local',
                     'server_name:finalDestination-4',
                     'availability_zone:nova',
-                    'instance_hostname:servertest4',
                     'interface:tapb488fc1e-3e',
                 ],
                 hostname=u'7e622c28-4b12-4a58-8ac2-4a2e854f84eb',
@@ -6089,7 +6072,6 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute7.openstack.local',
                     'server_name:finalDestination-4',
                     'availability_zone:nova',
-                    'instance_hostname:servertest4',
                 ],
                 hostname=u'7e622c28-4b12-4a58-8ac2-4a2e854f84eb',
             )
@@ -6324,7 +6306,6 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute7.openstack.local',
                     'server_name:finalDestination-4',
                     'availability_zone:nova',
-                    'instance_hostname:servertest4',
                 ],
                 hostname=u'7e622c28-4b12-4a58-8ac2-4a2e854f84eb',
             )
@@ -6559,7 +6540,6 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute7.openstack.local',
                     'server_name:finalDestination-4',
                     'availability_zone:nova',
-                    'instance_hostname:servertest4',
                 ],
                 hostname=u'7e622c28-4b12-4a58-8ac2-4a2e854f84eb',
             )
@@ -6794,7 +6774,6 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute7.openstack.local',
                     'server_name:finalDestination-4',
                     'availability_zone:nova',
-                    'instance_hostname:servertest4',
                 ],
                 hostname=u'7e622c28-4b12-4a58-8ac2-4a2e854f84eb',
             )
@@ -7029,7 +7008,6 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute7.openstack.local',
                     'server_name:finalDestination-4',
                     'availability_zone:nova',
-                    'instance_hostname:servertest4',
                 ],
                 hostname=u'7e622c28-4b12-4a58-8ac2-4a2e854f84eb',
             )
@@ -7561,7 +7539,6 @@ def test_auth_tokens(make_request, aggregator, auth_tokens_path):
                     'hypervisor:compute7.openstack.local',
                     'server_name:finalDestination-4',
                     'availability_zone:nova',
-                    'instance_hostname:servertest4',
                     'interface:tapb488fc1e-3e',
                 ],
                 hostname=u'7e622c28-4b12-4a58-8ac2-4a2e854f84eb',
