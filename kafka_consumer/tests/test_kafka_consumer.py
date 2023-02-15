@@ -9,7 +9,7 @@ import pytest
 
 from datadog_checks.base import ConfigurationError
 from datadog_checks.kafka_consumer import KafkaCheck
-from datadog_checks.kafka_consumer.client.kafka_python_client import OAuthTokenProvider
+from datadog_checks.kafka_consumer.kafka_consumer import OAuthTokenProvider
 
 from .common import BROKER_METRICS, CONSUMER_METRICS, KAFKA_CONNECT_STR
 
@@ -34,22 +34,22 @@ def test_gssapi(kafka_instance, dd_run_check):
 @pytest.mark.unit
 def test_tls_config_ok(kafka_instance_tls):
     with mock.patch('datadog_checks.base.utils.tls.ssl') as ssl:
-        with mock.patch('kafka.KafkaAdminClient') as kafka_admin_client:
+        with mock.patch('kafka.KafkaClient') as kafka_client:
 
             # mock Kafka Client
-            kafka_admin_client.return_value = mock.MagicMock()
+            kafka_client.return_value = mock.MagicMock()
 
             # mock TLS context
             tls_context = mock.MagicMock()
             ssl.SSLContext.return_value = tls_context
 
             kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [kafka_instance_tls])
-            kafka_consumer_check.client._create_kafka_client(clazz=kafka_admin_client)
+            kafka_consumer_check._create_kafka_client(clazz=kafka_client)
 
             assert tls_context.check_hostname is True
             assert tls_context.tls_cert is not None
             assert tls_context.check_hostname is True
-            assert kafka_consumer_check.client.create_kafka_admin_client is not None
+            assert kafka_consumer_check.create_kafka_client is not None
 
 
 @pytest.mark.parametrize(
@@ -108,17 +108,15 @@ def test_oauth_token_client_config(kafka_instance):
         "client_secret": "secret",
     }
 
-    with mock.patch('kafka.KafkaAdminClient') as kafka_admin_client:
-        kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [instance])
-        _ = kafka_consumer_check.client._create_kafka_client(clazz=kafka_admin_client)
-        params = kafka_admin_client.call_args_list[0].kwargs
+    kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [instance])
+    client = kafka_consumer_check.create_kafka_client()
 
-        assert params['security_protocol'] == 'SASL_PLAINTEXT'
-        assert params['sasl_mechanism'] == 'OAUTHBEARER'
-        assert params['sasl_oauth_token_provider'].reader._client_id == "id"
-        assert params['sasl_oauth_token_provider'].reader._client_secret == "secret"
-        assert params['sasl_oauth_token_provider'].reader._url == "http://fake.url"
-        assert isinstance(params['sasl_oauth_token_provider'], OAuthTokenProvider)
+    assert client.config['security_protocol'] == 'SASL_PLAINTEXT'
+    assert client.config['sasl_mechanism'] == 'OAUTHBEARER'
+    assert isinstance(client.config['sasl_oauth_token_provider'], OAuthTokenProvider)
+    assert client.config['sasl_oauth_token_provider'].reader._client_id == "id"
+    assert client.config['sasl_oauth_token_provider'].reader._client_secret == "secret"
+    assert client.config['sasl_oauth_token_provider'].reader._url == "http://fake.url"
 
 
 @pytest.mark.parametrize(
@@ -224,8 +222,8 @@ def test_version_metadata(datadog_agent, kafka_instance, dd_run_check):
     kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [kafka_instance])
     kafka_consumer_check.check_id = 'test:123'
 
-    kafka_client = kafka_consumer_check.client.create_kafka_admin_client()
-    version_data = [str(part) for part in kafka_client._client.check_version()]
+    kafka_client = kafka_consumer_check.create_kafka_client()
+    version_data = [str(part) for part in kafka_client.check_version()]
     kafka_client.close()
     version_parts = {'version.{}'.format(name): part for name, part in zip(('major', 'minor', 'patch'), version_data)}
     version_parts['version.scheme'] = 'semver'
