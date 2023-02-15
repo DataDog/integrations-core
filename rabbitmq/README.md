@@ -29,7 +29,7 @@ Rabbitmq exposes metrics in two ways: the [RabbitMQ Management Plugin][4] and th
 _Note: The Prometheus Plugin collection method requires Python 3._
 
 _Starting with RabbitMQ v3.8, the [Rabbitmq Prometheus Plugin][19] is enabled by default and the integration communicates with it over HTTP API using OpenMetricsV2._
-	
+
 Configure the `prometheus_plugin` section in your instance configuration. When using the `prometheus_plugin` option, settings related to the Management Plugin are ignored.
 
  ```yaml
@@ -37,7 +37,7 @@ Configure the `prometheus_plugin` section in your instance configuration. When u
    - prometheus_plugin:
        url: http://<HOST>:15692
  ```
- 
+
  This enables scraping of the [`/metrics` endpoint][20] on one rabbitmq node.
 
 ##### [RabbitMQ Management Plugin][4].
@@ -113,7 +113,9 @@ _Available for Agent versions >6.0_
 
 #### Containerized
 
-For containerized environments, see the [Autodiscovery Integration Templates][9] for guidance on applying the parameters below.
+You can take advantage of Datadog's [Docker container Autodiscovery][21], see the `auto_conf.yaml` example configuration for Rabbitmq-specific settings.
+
+For container environments such as Kubernetes, see the [Autodiscovery Integration Templates][9] for guidance on applying the parameters below.
 
 ##### Metric collection
 
@@ -274,3 +276,4 @@ The following Management plugin metrics to our knowledge have no equivalent in t
 [18]: https://docs.datadoghq.com/integrations/faq/tagging-rabbitmq-queues-by-tag-family/
 [19]: https://www.rabbitmq.com/prometheus.html
 [20]: https://www.rabbitmq.com/prometheus.html#default-endpoint
+[21]: https://docs.datadoghq.com/containers/docker/integrations/?tab=dockeradv2
