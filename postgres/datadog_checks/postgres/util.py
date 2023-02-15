@@ -100,6 +100,30 @@ QUERY_PG_STAT_DATABASE = {
     ],
 }
 
+LOCK_METRICS = {
+    'name': 'lock_count',
+    'query': """
+SELECT mode,
+       locktype,
+       pn.nspname,
+       pd.datname,
+       pc.relname,
+       count(*) AS {metrics_columns}
+  FROM pg_locks l
+  JOIN pg_database pd ON (l.database = pd.oid)
+  JOIN pg_class pc ON (l.relation = pc.oid)
+  LEFT JOIN pg_namespace pn ON (pn.oid = pc.relnamespace)
+ WHERE {relations}
+   AND l.mode IS NOT NULL
+   AND pc.relname NOT LIKE 'pg^_%%' ESCAPE '^'
+ GROUP BY pd.datname, pc.relname, pn.nspname, locktype, mode""",
+    'relation': True,
+    'columns': [
+        {'name': 'db', 'type': 'tag'},
+        {'name': 'postgresql.locks', 'type': 'gauge'},
+    ],
+}
+
 COMMON_BGW_METRICS = {
     'checkpoints_timed': ('postgresql.bgwriter.checkpoints_timed', AgentCheck.monotonic_count),
     'checkpoints_req': ('postgresql.bgwriter.checkpoints_requested', AgentCheck.monotonic_count),
