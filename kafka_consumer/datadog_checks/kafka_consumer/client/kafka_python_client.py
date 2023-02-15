@@ -415,3 +415,7 @@ class KafkaPythonClient(KafkaClient):
 
     def request_metadata_update(self):
         self.kafka_client._client.cluster.request_update()
+
+    def reset_offsets(self):
+        self._consumer_offsets = {}
+        self._highwater_offsets = {}

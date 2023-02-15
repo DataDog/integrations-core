@@ -40,6 +40,8 @@ class KafkaCheck(AgentCheck, ConfigMixin):
     def check(self, _):
         """The main entrypoint of the check."""
         # Fetch Kafka consumer offsets
+        self.client.reset_offsets()
+
         try:
             self.client.get_consumer_offsets()
         except Exception:
@@ -158,7 +160,7 @@ class KafkaCheck(AgentCheck, ConfigMixin):
         version_data = [str(part) for part in self.client.collect_broker_version()]
         version_parts = {name: part for name, part in zip(('major', 'minor', 'patch'), version_data)}
 
-        self.check.set_metadata(
+        self.set_metadata(
             'version', '.'.join(version_data), scheme='parts', final_scheme='semver', part_map=version_parts
         )
 
