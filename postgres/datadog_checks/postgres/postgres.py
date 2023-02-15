@@ -110,7 +110,7 @@ class PostgreSql(AgentCheck):
             lock_metrics = copy.deepcopy(LOCK_METRICS)
             lock_metrics["query"] += " WHERE " + " AND ".join(
                 "datname not ilike '{}'".format(db) for db in self._config.ignore_databases
-            )
+            ) + " LIMIT " + str(self._config.max_relations)
 
             if self._config.dbstrict:
                 q_pg_stat_database["query"] += " AND datname in('{}')".format(self._config.dbname)
