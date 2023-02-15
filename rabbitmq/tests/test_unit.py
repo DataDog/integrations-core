@@ -13,7 +13,10 @@ from datadog_checks.rabbitmq.rabbitmq import EXCHANGE_TYPE, NODE_TYPE, OVERVIEW_
 
 from . import common, metrics
 
-pytestmark = pytest.mark.unit
+pytestmark = [
+    pytest.mark.unit,
+    pytest.mark.skipif(common.METRICS_PLUGIN == "prometheus", reason="Not testing management plugin metrics."),
+]
 
 
 @pytest.mark.unit

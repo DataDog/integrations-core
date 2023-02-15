@@ -5,11 +5,10 @@
 import logging
 
 import pytest
-from packaging import version
 
 from datadog_checks.dev.utils import get_metadata_metrics
 
-from .common import CONFIG, OPENMETRICS_CONFIG, RABBITMQ_VERSION
+from .common import CONFIG, METRICS_PLUGIN, OPENMETRICS_CONFIG
 from .metrics import DEFAULT_OPENMETRICS, FLAKY_E2E_METRICS, assert_metric_covered
 
 log = logging.getLogger(__file__)
@@ -17,16 +16,14 @@ log = logging.getLogger(__file__)
 pytestmark = [pytest.mark.e2e]
 
 
-@pytest.mark.skipif(RABBITMQ_VERSION >= version.parse("3.8"), reason="Test legacy check on rabbitmq versions < 3.8")
-def test_rabbitmq_e2e(dd_agent_check):
+@pytest.mark.skipif(METRICS_PLUGIN == "prometheus", reason="Not testing management plugin metrics.")
+def test_rabbitmq_e2e_management(dd_agent_check):
     aggregator = dd_agent_check(CONFIG)
     assert_metric_covered(aggregator)
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
-@pytest.mark.skipif(
-    RABBITMQ_VERSION < version.parse("3.8"), reason="Test openmetrics check only on rabbitmq versions >= 3.8"
-)
+@pytest.mark.skipif(METRICS_PLUGIN == "management", reason="Not testing prometheus plugin (OpenMetrics) metrics.")
 def test_rabbitmq_e2e_openmetrics(dd_agent_check):
     aggregator = dd_agent_check(OPENMETRICS_CONFIG, rate=True)
     metadata_metrics = get_metadata_metrics()

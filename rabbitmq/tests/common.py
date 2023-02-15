@@ -13,6 +13,10 @@ ROOT = os.path.dirname(os.path.dirname(HERE))
 
 RABBITMQ_VERSION_RAW = os.environ['RABBITMQ_VERSION']
 RABBITMQ_VERSION = version.parse(RABBITMQ_VERSION_RAW)
+METRICS_FROM_MANAGEMENT_PLUGIN = os.environ.get("METRICS_FROM_MANAGEMENT_PLUGIN", False)
+METRICS_PLUGIN = (
+    "management" if RABBITMQ_VERSION < version.parse("3.8") or METRICS_FROM_MANAGEMENT_PLUGIN else "prometheus"
+)
 
 CHECK_NAME = 'rabbitmq'
 
