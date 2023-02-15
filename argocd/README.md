@@ -11,7 +11,7 @@ This check monitors [Argo CD][1] through the Datadog Agent.
 The Argo CD check is included in the [Datadog Agent][2] package.
 No additional installation is needed on your server.
 
-**Note**: This check requires requires Agent version 7.42.0 or above.
+**Note**: This check requires Agent v7.42.0+.
 
 ### Configuration
 
