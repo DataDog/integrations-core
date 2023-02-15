@@ -161,6 +161,11 @@ instances:
     #
     # max_relations: 300
 
+    ## @param collect_relations_metrics - boolean - optional - default: false
+    ## If set to true, collects lock metrics.
+    #
+    # collect_relations_metrics: false
+
     ## @param collect_function_metrics - boolean - optional - default: false
     ## If set to true, collects metrics regarding PL/pgSQL functions from pg_stat_user_functions.
     #
