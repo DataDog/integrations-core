@@ -4,9 +4,9 @@
 
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.kafka_consumer.client.kafka_client_factory import make_client
+from datadog_checks.kafka_consumer.config import KafkaConfig
 
 from .config_models import ConfigMixin
-from .constants import BROKER_REQUESTS_BATCH_SIZE, CONTEXT_UPPER_BOUND
 
 
 class KafkaCheck(AgentCheck, ConfigMixin):
@@ -24,17 +24,10 @@ class KafkaCheck(AgentCheck, ConfigMixin):
 
     def __init__(self, name, init_config, instances):
         super(KafkaCheck, self).__init__(name, init_config, instances)
-        self._context_limit = int(self.init_config.get('max_partition_contexts', CONTEXT_UPPER_BOUND))
-        self._custom_tags = self.instance.get('tags', [])
-        self._monitor_unlisted_consumer_groups = is_affirmative(
-            self.instance.get('monitor_unlisted_consumer_groups', False)
-        )
-        self._monitor_all_broker_highwatermarks = is_affirmative(
-            self.instance.get('monitor_all_broker_highwatermarks', False)
-        )
-        self._consumer_groups = self.instance.get('consumer_groups', {})
-        self._broker_requests_batch_size = self.instance.get('broker_requests_batch_size', BROKER_REQUESTS_BATCH_SIZE)
-        self.client = make_client(self, self.config)
+        self.kafka_config = KafkaConfig(self.init_config, self.instance)
+        self._context_limit = self.kafka_config._context_limit
+        self.client = make_client(self, self.kafka_config)
+
 
     def check(self, _):
         """The main entrypoint of the check."""
