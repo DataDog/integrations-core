@@ -26,7 +26,7 @@ class Resource:
     def submit(self, check, metric, value, tags):
         # Most metrics seem to be counters:
         # https://www.ibm.com/docs/en/app-connect/12.0?topic=performance-resource-statistics-data
-        check.monotonic_count(self.full_metric_name(metric), value, tags=tags)
+        check.count(self.full_metric_name(metric), value, tags=tags)
 
 
 class ConnectDirectResource(Resource):
