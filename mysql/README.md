@@ -4,26 +4,26 @@
 
 ## Overview
 
-The Datadog Agent can collect many metrics from MySQL databases, including (but not limited to):
+The MySQL integration tracks the performance of your MySQL instances. It collects metrics related to throughput, connections, errors, and InnoDB metrics.
 
-- Query throughput
-- Query performance, such as average query runtime, or slow queries
-- Connections, such as currently open connections, aborted connections, or errors
-- InnoDB, such as buffer pool metrics
+Enable [Database Monitoring](https://docs.datadoghq.com/database_monitoring/) (DBM) for enhanced insight into query performance and database health. In addition to the standard integration, Datadog DBM provides query-level metrics, live and historical query snapshots, wait event analysis, database load, and query explain plans.
 
-You can also create your own metrics using custom SQL queries.
 
 **Note:** This integration is also compatible with [MariaDB][2], as it serves as a ["drop-in replacement"][3] for MySQL.
 
 ## Setup
 
-<div class="alert alert-info">This page describes the MySQL Agent integration. If you are looking for the Database Monitoring product for MySQL, see <a href="https://docs.datadoghq.com/database_monitoring" target="_blank">Datadog Database Monitoring</a>.</div>
+<div class="alert alert-info">This page describes the MySQL Agent standard integration. If you are looking for the Database Monitoring product for MySQL, see <a href="https://docs.datadoghq.com/database_monitoring" target="_blank">Datadog Database Monitoring</a>.</div>
 
 ### Installation
 
 The MySQL check is included in the [Datadog Agent][4] package. No additional installation is needed on your MySQL server.
 
 #### Prepare MySQL
+
+**Note**: To install Database Monitoring for MySQL, select your hosting solution on the [documentation site](https://docs.datadoghq.com/database_monitoring/#mysql) for instructions.
+
+Proceed with the following steps in this guide only if you are installing the standard integration alone.
 
 On each MySQL server, create a database user for the Datadog Agent.
 
