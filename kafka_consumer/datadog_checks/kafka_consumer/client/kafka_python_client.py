@@ -152,6 +152,7 @@ class KafkaPythonClient(KafkaClient):
             # Loop until all futures resolved.
             self.kafka_client._wait_for_futures(highwater_futures)
 
+            self.log.error(self._highwater_offsets) # TODO: Remove, just for CI testing
             return self._highwater_offsets
 
     def create_kafka_admin_client(self):
