@@ -6,8 +6,7 @@
 
 The MySQL integration tracks the performance of your MySQL instances. It collects metrics related to throughput, connections, errors, and InnoDB metrics.
 
-Enable [Database Monitoring](https://docs.datadoghq.com/database_monitoring/) (DBM) for enhanced insight into query performance and database health. In addition to the standard integration, Datadog DBM provides query-level metrics, live and historical query snapshots, wait event analysis, database load, and query explain plans.
-
+Enable [Database Monitoring][32] (DBM) for enhanced insights into query performance and database health. In addition to the standard integration, Datadog DBM provides query-level metrics, live and historical query snapshots, wait event analysis, database load, and query explain plans.
 
 **Note:** This integration is also compatible with [MariaDB][2], as it serves as a ["drop-in replacement"][3] for MySQL.
 
@@ -21,7 +20,7 @@ The MySQL check is included in the [Datadog Agent][4] package. No additional ins
 
 #### Prepare MySQL
 
-**Note**: To install Database Monitoring for MySQL, select your hosting solution on the [documentation site](https://docs.datadoghq.com/database_monitoring/#mysql) for instructions.
+**Note**: To install Database Monitoring for MySQL, select your hosting solution in the [Database Monitoring documentation][33] for instructions.
 
 Proceed with the following steps in this guide only if you are installing the standard integration alone.
 
@@ -607,3 +606,5 @@ Additional helpful documentation, links, and articles:
 [29]: https://docs.datadoghq.com/integrations/faq/database-user-lacks-privileges/
 [30]: https://docs.datadoghq.com/integrations/guide/collect-sql-server-custom-metrics/#collecting-metrics-from-a-custom-procedure
 [31]: https://www.datadoghq.com/blog/monitoring-mysql-performance-metrics
+[32]: https://docs.datadoghq.com/database_monitoring/
+[33]: https://docs.datadoghq.com/database_monitoring/#mysql
