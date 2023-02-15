@@ -4,9 +4,9 @@
 
 ## Overview
 
-The Postgres integration provides health and performance metrics for your Postgres database in real time. Visualize these metrics with the included dashboard and create monitors to alert on PostgreSQL states. 
+The Postgres integration provides health and performance metrics for your Postgres database in real time. Visualize these metrics with the included dashboard and create monitors to alert your team on PostgreSQL states.
 
-For enhanced database visibility, enable [Database Monitoring](https://docs.datadoghq.com/database_monitoring/) for deep insight into query performance and database health. In addition to the standard integration, Datadog DBM provides database load, active connections, and wait event analysis, query level metrics and explain plans, and more.
+For enhanced database visibility, enable [Database Monitoring](https://docs.datadoghq.com/database_monitoring/) for deep insight into query performance and database health. In addition to the standard integration, Datadog DBM provides query level metrics, live and historical query snapshots, wait event analysis, database load, query explain plans, and [more](https://www.datadoghq.com/product/database-monitoring/).
 
 ## Setup
 
