@@ -10,6 +10,3 @@ class ConfluentKafkaClient:
 
     def get_broker_offset(self):
         pass
-
-    def collect_broker_metadata(self):
-        pass

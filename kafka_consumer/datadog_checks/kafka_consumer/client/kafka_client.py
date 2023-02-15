@@ -23,7 +23,3 @@ class KafkaClient(ABC):
     @abstractmethod
     def get_highwater_offsets(self):
         pass
-
-    @abstractmethod
-    def collect_broker_metadata(self):
-        pass
