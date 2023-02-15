@@ -23,6 +23,7 @@ from .util import (
     CONNECTION_METRICS,
     FUNCTION_METRICS,
     QUERY_PG_STAT_DATABASE,
+    LOCK_METRICS,
     QUERY_PG_STAT_WAL_RECEIVER,
     REPLICATION_METRICS,
     SLRU_METRICS,
@@ -106,10 +107,16 @@ class PostgreSql(AgentCheck):
                 "datname not ilike '{}'".format(db) for db in self._config.ignore_databases
             )
 
+            lock_metrics = copy.deepcopy(LOCK_METRICS)
+            lock_metrics["query"] += " WHERE " + " AND ".join(
+                "datname not ilike '{}'".format(db) for db in self._config.ignore_databases
+            )
+
             if self._config.dbstrict:
                 q_pg_stat_database["query"] += " AND datname in('{}')".format(self._config.dbname)
+                lock_metrics["query"] += " AND datname in('{}')".format(self._config.dbname)
 
-            queries.extend([q_pg_stat_database])
+            queries.extend([q_pg_stat_database, lock_metrics])
 
         if self.version >= V10:
             queries.append(QUERY_PG_STAT_WAL_RECEIVER)
