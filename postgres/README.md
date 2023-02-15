@@ -4,13 +4,13 @@
 
 ## Overview
 
-The Postgres integration provides health and performance metrics for your Postgres database in real time. Visualize these metrics with the included dashboard and create monitors to alert your team on PostgreSQL states.
+The Postgres integration provides health and performance metrics for your Postgres database in near real-time. Visualize these metrics with the provided dashboard and create monitors to alert your team on PostgreSQL states.
 
-For enhanced database visibility, enable [Database Monitoring](https://docs.datadoghq.com/database_monitoring/) for deep insight into query performance and database health. In addition to the standard integration, Datadog DBM provides query level metrics, live and historical query snapshots, wait event analysis, database load, query explain plans, and [more](https://www.datadoghq.com/product/database-monitoring/).
+Enable [Database Monitoring](https://docs.datadoghq.com/database_monitoring/) (DBM) for enhanced insight into query performance and database health. In addition to the standard integration, Datadog DBM provides query-level metrics, live and historical query snapshots, wait event analysis, database load, query explain plans, and blocking query insights.
 
 ## Setup
 
-<div class="alert alert-info">This page describes the Postgres Agent integration. If you are looking for the Database Monitoring product for Postgres, see <a href="https://docs.datadoghq.com/database_monitoring" target="_blank">Datadog Database Monitoring</a>.</div>
+<div class="alert alert-info">This page describes the standard Postgres Agent integration. If you are looking for the Database Monitoring product for Postgres, see <a href="https://docs.datadoghq.com/database_monitoring" target="_blank">Datadog Database Monitoring</a>.</div>
 
 ### Installation
 
@@ -20,7 +20,14 @@ The PostgreSQL check is packaged with the Agent. To start gathering your Postgre
 
 #### Prepare Postgres
 
-To get started with the PostgreSQL integration, create a read-only `datadog` user with proper access to your PostgreSQL server. Start `psql` on your PostgreSQL database.
+##### Database Monitoring
+
+To install Database Monitoring for PostgreSQL, select your hosting solution on the [documentation site](https://docs.datadoghq.com/database_monitoring/#postgres) for instructions.
+
+If you are only installing the standard Postgres integration, proceed with the following steps in this guide.
+##### Standard Integration
+
+To get started with the standard PostgreSQL integration, create a read-only `datadog` user with proper access to your PostgreSQL server. Start `psql` on your PostgreSQL database.
 
 For PostgreSQL version 10 and above, run:
 
