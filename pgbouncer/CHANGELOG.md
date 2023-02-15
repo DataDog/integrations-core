@@ -1,5 +1,9 @@
 # CHANGELOG - pgbouncer
 
+## 4.4.0 / 2023-02-15
+
+* [Added] Add `name` tag to pool metrics. See [#13952](https://github.com/DataDog/integrations-core/pull/13952).
+
 ## 4.3.1 / 2022-12-09 / Agent 7.42.0
 
 * [Fixed] Do not install psycopg2-binary on arm macs. See [#13343](https://github.com/DataDog/integrations-core/pull/13343).
