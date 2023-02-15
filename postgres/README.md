@@ -4,10 +4,9 @@
 
 ## Overview
 
-Get metrics from PostgreSQL in real time to:
+The Postgres integration provides health and performance metrics for your Postgres database in real time. Visualize these metrics with the included dashboard and create monitors to alert on PostgreSQL states. 
 
-- Visualize and monitor PostgreSQL states.
-- Receive notifications about PostgreSQL failovers and events.
+For enhanced database visibility, enable [Database Monitoring](https://docs.datadoghq.com/database_monitoring/) for deep insight into query performance and database health. In addition to the standard integration, Datadog DBM provides database load, active connections, and wait event analysis, query level metrics and explain plans, and more.
 
 ## Setup
 
