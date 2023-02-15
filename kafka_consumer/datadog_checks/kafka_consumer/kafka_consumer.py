@@ -5,10 +5,11 @@
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.kafka_consumer.client.kafka_client_factory import make_client
 
+from .config_models import ConfigMixin
 from .constants import BROKER_REQUESTS_BATCH_SIZE, CONTEXT_UPPER_BOUND
 
 
-class KafkaCheck(AgentCheck):
+class KafkaCheck(AgentCheck, ConfigMixin):
 
     __NAMESPACE__ = 'kafka'
 
@@ -33,7 +34,7 @@ class KafkaCheck(AgentCheck):
         )
         self._consumer_groups = self.instance.get('consumer_groups', {})
         self._broker_requests_batch_size = self.instance.get('broker_requests_batch_size', BROKER_REQUESTS_BATCH_SIZE)
-        self.client = make_client(self)
+        self.client = make_client(self, self.config)
 
     def check(self, _):
         """The main entrypoint of the check."""
