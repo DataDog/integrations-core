@@ -157,8 +157,8 @@ class KafkaCheck(AgentCheck, ConfigMixin):
     def collect_broker_metadata(self):
         self.client.collect_broker_metadata()
 
-    # TODO: Remove me once the tests are refactored
 
+    # TODO: Remove me once the tests are refactored
     def send_event(self, title, text, tags, event_type, aggregation_key, severity='info'):
         """Emit an event to the Datadog Event Stream."""
         event_dict = {
