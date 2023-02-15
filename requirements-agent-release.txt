@@ -67,7 +67,7 @@ datadog-hivemq==1.6.1
 datadog-http-check==8.2.0
 datadog-hudi==2.1.1
 datadog-hyperv==1.8.0; sys_platform == 'win32'
-datadog-ibm-ace==1.0.3
+datadog-ibm-ace==1.0.4
 datadog-ibm-db2==1.11.2
 datadog-ibm-i==1.5.0; sys_platform != 'win32'
 datadog-ibm-mq==4.0.3
