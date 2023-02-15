@@ -100,7 +100,7 @@ class KafkaPythonClient(KafkaClient):
                 )
                 return
             consumer_group_tags = ['topic:%s' % topic, 'partition:%s' % partition, 'consumer_group:%s' % consumer_group]
-            consumer_group_tags.extend(self.kafka_config._custom_tags)
+            consumer_group_tags.extend(self.check._custom_tags)
 
             partitions = self.kafka_client._client.cluster.partitions_for_topic(topic)
             self.log.debug("Received partitions %s for topic %s", partitions, topic)
@@ -221,7 +221,7 @@ class KafkaPythonClient(KafkaClient):
         self.log.debug("Reporting broker offset metric")
         for (topic, partition), highwater_offset in self._highwater_offsets.items():
             broker_tags = ['topic:%s' % topic, 'partition:%s' % partition]
-            broker_tags.extend(self.kafka_config._custom_tags)
+            broker_tags.extend(self.check._custom_tags)
             self.check.gauge('broker_offset', highwater_offset, tags=broker_tags)
             reported_contexts += 1
             if reported_contexts == contexts_limit:
