@@ -39,7 +39,7 @@ STATS_METRICS = {
 }
 
 POOLS_METRICS = {
-    'descriptors': [('database', 'db'), ('user', 'user')],
+    'descriptors': [('database', 'db'), ('database', 'name'), ('user', 'user')],
     'metrics': [
         ('cl_active', ('pgbouncer.pools.cl_active', GAUGE)),
         ('cl_waiting', ('pgbouncer.pools.cl_waiting', GAUGE)),
@@ -55,7 +55,7 @@ POOLS_METRICS = {
 }
 
 DATABASES_METRICS = {
-    'descriptors': [('name', 'name'), ('name', 'db')],
+    'descriptors': [('name', 'name')],
     'metrics': [
         ('pool_size', ('pgbouncer.databases.pool_size', GAUGE)),
         ('max_connections', ('pgbouncer.databases.max_connections', GAUGE)),
