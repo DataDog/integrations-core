@@ -168,7 +168,7 @@ class KafkaCheck(AgentCheck):
                 for topic, partition in broker_led_partitions:
                     # No sense fetching highwater offsets for internal topics
                     if topic not in KAFKA_INTERNAL_TOPICS and (
-                            self._monitor_all_broker_highwatermarks or (topic, partition) in tps_with_consumer_offset
+                        self._monitor_all_broker_highwatermarks or (topic, partition) in tps_with_consumer_offset
                     ):
                         partitions_grouped_by_topic[topic].append(partition)
 
@@ -425,7 +425,7 @@ class KafkaCheck(AgentCheck):
     @staticmethod
     def batchify(iterable, batch_size):
         iterable = list(iterable)
-        return (iterable[i: i + batch_size] for i in range(0, len(iterable), batch_size))
+        return (iterable[i : i + batch_size] for i in range(0, len(iterable), batch_size))
 
     # FIXME: This is using a workaround to skip socket wakeup, which causes blocking
     # (see https://github.com/dpkp/kafka-python/issues/2286).
