@@ -18,14 +18,11 @@ The PostgreSQL check is packaged with the Agent. To start gathering your Postgre
 
 ### Configuration
 
+**Note**: To install Database Monitoring for PostgreSQL, select your hosting solution on the [documentation site](https://docs.datadoghq.com/database_monitoring/#postgres) for instructions.
+
+Proceed with the following steps in this guide only if you are installing the standard integration alone.
+
 #### Prepare Postgres
-
-##### Database Monitoring
-
-To install Database Monitoring for PostgreSQL, select your hosting solution on the [documentation site](https://docs.datadoghq.com/database_monitoring/#postgres) for instructions.
-
-If you are only installing the standard Postgres integration, proceed with the following steps in this guide.
-##### Standard Integration
 
 To get started with the standard PostgreSQL integration, create a read-only `datadog` user with proper access to your PostgreSQL server. Start `psql` on your PostgreSQL database.
 
