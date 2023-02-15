@@ -25,6 +25,7 @@ from .common import (
     check_common_metrics,
     check_connection_metrics,
     check_db_count,
+    check_replication_slots,
     check_slru_metrics,
     check_stat_replication,
     check_wal_receiver_metrics,
@@ -49,6 +50,22 @@ def test_common_metrics(aggregator, integration_check, pg_instance):
     check_slru_metrics(aggregator, expected_tags=expected_tags)
     check_stat_replication(aggregator, expected_tags=expected_tags)
     check_wal_receiver_metrics(aggregator, expected_tags=expected_tags, connected=0)
+
+    replication_slot_tags = expected_tags + [
+        'slot_name:replication_slot',
+        'slot_persistence:permanent',
+        'slot_state:active',
+        'slot_type:physical',
+    ]
+    check_replication_slots(aggregator, expected_tags=replication_slot_tags)
+
+    logical_replication_slot_tags = expected_tags + [
+        'slot_name:logical_slot',
+        'slot_persistence:permanent',
+        'slot_state:inactive',
+        'slot_type:logical',
+    ]
+    check_replication_slots(aggregator, expected_tags=logical_replication_slot_tags)
 
     aggregator.assert_all_metrics_covered()
 

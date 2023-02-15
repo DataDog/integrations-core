@@ -240,6 +240,30 @@ QUERY_PG_STAT_WAL_RECEIVER = {
     ],
 }
 
+QUERY_PG_REPLICATION_SLOTS = {
+    'name': 'pg_replication_slots',
+    'query': """
+    SELECT
+        slot_name,
+        slot_type,
+        CASE WHEN temporary THEN 'temporary' ELSE 'permanent' END,
+        CASE WHEN active THEN 'active' ELSE 'inactive' END,
+        CASE WHEN xmin IS NULL THEN NULL ELSE age(xmin) END,
+        pg_wal_lsn_diff(pg_current_wal_lsn(), restart_lsn),
+        pg_wal_lsn_diff(pg_current_wal_lsn(), confirmed_flush_lsn)
+    FROM pg_replication_slots;
+    """.strip(),
+    'columns': [
+        {'name': 'slot_name', 'type': 'tag'},
+        {'name': 'slot_type', 'type': 'tag'},
+        {'name': 'slot_persistence', 'type': 'tag'},
+        {'name': 'slot_state', 'type': 'tag'},
+        {'name': 'postgresql.replication_slot.xmin_age', 'type': 'gauge'},
+        {'name': 'postgresql.replication_slot.restart_delay_bytes', 'type': 'gauge'},
+        {'name': 'postgresql.replication_slot.confirmed_flush_delay_bytes', 'type': 'gauge'},
+    ],
+}
+
 CONNECTION_METRICS = {
     'descriptors': [],
     'metrics': {

@@ -9,7 +9,12 @@ import pytest
 from datadog_checks.base.stubs.aggregator import normalize_tags
 from datadog_checks.dev import get_docker_hostname
 from datadog_checks.dev.docker import get_container_ip
-from datadog_checks.postgres.util import QUERY_PG_STAT_WAL_RECEIVER, REPLICATION_STATS_METRICS, SLRU_METRICS
+from datadog_checks.postgres.util import (
+    QUERY_PG_REPLICATION_SLOTS,
+    QUERY_PG_STAT_WAL_RECEIVER,
+    REPLICATION_STATS_METRICS,
+    SLRU_METRICS,
+)
 from datadog_checks.postgres.version_utils import VersionUtils
 
 HOST = get_docker_hostname()
@@ -80,6 +85,7 @@ requires_static_version = pytest.mark.skipif(USING_LATEST, reason='Version `late
 def assert_metric_at_least(aggregator, metric_name, lower_bound=None, higher_bound=None, count=None, tags=None):
     found_values = 0
     expected_tags = normalize_tags(tags, sort=True)
+    aggregator.assert_metric(metric_name, count=count, tags=expected_tags)
     for metric in aggregator.metrics(metric_name):
         if expected_tags and expected_tags == sorted(metric.tags):
             if lower_bound is not None:
@@ -159,6 +165,21 @@ def check_wal_receiver_metrics(aggregator, expected_tags, count=1, connected=1):
         return
     for column in QUERY_PG_STAT_WAL_RECEIVER['columns']:
         if column['type'] == 'tag':
+            continue
+        aggregator.assert_metric(column['name'], count=count, tags=expected_tags)
+
+
+def check_replication_slots(aggregator, expected_tags, count=1):
+    if float(POSTGRES_VERSION) < 10.0:
+        return
+    for column in QUERY_PG_REPLICATION_SLOTS['columns']:
+        if column['type'] == 'tag':
+            continue
+        if 'slot_type:physical' in expected_tags and column['name'] in [
+            'postgresql.replication_slot.confirmed_flush_delay_bytes',
+        ]:
+            continue
+        if 'slot_type:logical' in expected_tags and column['name'] in ['postgresql.replication_slot.restart_delay_bytes', 'postgresql.replication_slot.xmin_age']:
             continue
         aggregator.assert_metric(column['name'], count=count, tags=expected_tags)
 
