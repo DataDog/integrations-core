@@ -129,8 +129,7 @@ class KafkaPythonClient(KafkaClient):
                 for topic, partition in broker_led_partitions:
                     # No sense fetching highwater offsets for internal topics
                     if topic not in KAFKA_INTERNAL_TOPICS and (
-                        self.config._monitor_all_broker_highwatermarks
-                        or (topic, partition) in tps_with_consumer_offset
+                        self.config._monitor_all_broker_highwatermarks or (topic, partition) in tps_with_consumer_offset
                     ):
                         partitions_grouped_by_topic[topic].append(partition)
 
