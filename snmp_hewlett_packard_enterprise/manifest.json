@@ -2,7 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "48134faf-2af6-4512-9853-ebe2a8620515",
   "app_id": "snmp-hewlett-packard-enterprise",
-  "display_on_public_website": false,
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
