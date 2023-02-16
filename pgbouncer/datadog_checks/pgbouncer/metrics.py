@@ -15,7 +15,7 @@ CONFIG_METRICS = {
 }
 
 STATS_METRICS = {
-    'descriptors': [('database', 'db'), ('database', 'pgbouncer_db')],
+    'descriptors': [('database', 'db')],
     'metrics': [
         ('total_requests', ('pgbouncer.stats.requests_per_second', RATE)),  # < 1.8
         ('total_xact_count', ('pgbouncer.stats.transactions_per_second', RATE)),  # >= 1.8
@@ -39,7 +39,7 @@ STATS_METRICS = {
 }
 
 POOLS_METRICS = {
-    'descriptors': [('database', 'db'), ('database', 'pgbouncer_db'), ('user', 'user')],
+    'descriptors': [('database', 'db'), ('user', 'user')],
     'metrics': [
         ('cl_active', ('pgbouncer.pools.cl_active', GAUGE)),
         ('cl_waiting', ('pgbouncer.pools.cl_waiting', GAUGE)),
@@ -55,7 +55,7 @@ POOLS_METRICS = {
 }
 
 DATABASES_METRICS = {
-    'descriptors': [('name', 'name'), ('name', 'pgbouncer_db')],
+    'descriptors': [('name', 'name'), ('name', 'db'), ('database', 'postgres_db')],
     'metrics': [
         ('pool_size', ('pgbouncer.databases.pool_size', GAUGE)),
         ('max_connections', ('pgbouncer.databases.max_connections', GAUGE)),
@@ -65,7 +65,7 @@ DATABASES_METRICS = {
 }
 
 CLIENTS_METRICS = {
-    'descriptors': [('database', 'db'), ('database', 'pgbouncer_db'), ('user', 'user'), ('state', 'state')],
+    'descriptors': [('database', 'db'), ('user', 'user'), ('state', 'state')],
     'metrics': [
         ('connect_time', ('pgbouncer.clients.connect_time', GAUGE)),
         ('request_time', ('pgbouncer.clients.request_time', GAUGE)),
@@ -76,7 +76,7 @@ CLIENTS_METRICS = {
 }
 
 SERVERS_METRICS = {
-    'descriptors': [('database', 'db'), ('database', 'pgbouncer_db'), ('user', 'user'), ('state', 'state')],
+    'descriptors': [('database', 'db'), ('user', 'user'), ('state', 'state')],
     'metrics': [
         ('connect_time', ('pgbouncer.servers.connect_time', GAUGE)),
         ('request_time', ('pgbouncer.servers.request_time', GAUGE)),
