@@ -2,7 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "e501cab9-ba54-495c-80c2-ca3d373561a8",
   "app_id": "snmp-fortinet",
-  "display_on_public_website": false,
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
