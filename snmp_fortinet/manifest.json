@@ -30,11 +30,6 @@
       "events": {
         "creates_events": false
       },
-      "metrics": {
-        "prefix": "snmp_fortinet.",
-        "check": "",
-        "metadata_path": "metadata.csv"
-      },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       }
