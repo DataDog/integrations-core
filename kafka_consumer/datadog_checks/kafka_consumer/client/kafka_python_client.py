@@ -176,7 +176,7 @@ class KafkaPythonClient(KafkaClient):
             kafka_version = tuple(map(int, kafka_version.split(".")))
 
         tls_context = self.check.get_tls_context()
-        crlfile = self.check.instance.get('ssl_crlfile', self.check.instance.get('tls_crlfile'))
+        crlfile = self.config._crlfile
         if crlfile:
             tls_context.load_verify_locations(crlfile)
             tls_context.verify_flags |= ssl.VERIFY_CRL_CHECK_LEAF
