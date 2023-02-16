@@ -1,3 +1,7 @@
+## Datadog Agent version [7.42.2](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7422)
+
+* IIS [2.18.1](https://github.com/DataDog/integrations-core/blob/master/iis/CHANGELOG.md)
+
 ## Datadog Agent version [7.42.1](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7421)
 
 * datadog_checks_base [28.0.2](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/CHANGELOG.md)
