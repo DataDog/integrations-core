@@ -2,7 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "d50aeab6-c26b-49df-aeb1-910d5d1a3e48",
   "app_id": "snmp-netapp",
-  "display_on_public_website": false,
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
