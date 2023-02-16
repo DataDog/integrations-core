@@ -26,12 +26,15 @@ class KafkaCheck(AgentCheck):
         self.config = KafkaConfig(self.init_config, self.instance)
         self._context_limit = self.config._context_limit
         tls_context = self.get_tls_context()
-        self.client = make_client(self, self.config, tls_context)
+        self.client = make_client(self.config, tls_context, self.log)
 
     def check(self, _):
         """The main entrypoint of the check."""
         # Fetch Kafka consumer offsets
         self.client.reset_offsets()
+
+        consumer_offsets = {}
+        highwater_offsets = {}
 
         try:
             self.client.get_consumer_offsets()
@@ -41,7 +44,7 @@ class KafkaCheck(AgentCheck):
 
         # Fetch the broker highwater offsets
         try:
-            if self.client.should_get_highwater_offsets():
+            if len(consumer_offsets) < self._context_limit:
                 self.client.get_highwater_offsets()
             else:
                 self.warning("Context limit reached. Skipping highwater offset collection.")
@@ -62,20 +65,20 @@ class KafkaCheck(AgentCheck):
 
         # Report the metrics
         # Expected format: {(consumer_group, topic, partition): offset}
-        self._consumer_offsets = self.client.get_consumer_offsets_dict()
+        consumer_offsets = self.client.get_consumer_offsets_dict()
         # Expected format: {(topic, partition): offset}
-        self._highwater_offsets = self.client.get_highwater_offsets_dict()
+        highwater_offsets = self.client.get_highwater_offsets_dict()
 
-        self.report_highwater_offsets(self._context_limit)
-        self.report_consumer_offsets_and_lag(self._context_limit - len(self._highwater_offsets))
+        self.report_highwater_offsets(highwater_offsets, self._context_limit)
+        self.report_consumer_offsets_and_lag(consumer_offsets, self._context_limit - len(self._highwater_offsets))
 
         self.collect_broker_metadata()
 
-    def report_highwater_offsets(self, contexts_limit):
+    def report_highwater_offsets(self, highwater_offsets, contexts_limit):
         """Report the broker highwater offsets."""
         reported_contexts = 0
         self.log.debug("Reporting broker offset metric")
-        for (topic, partition), highwater_offset in self._highwater_offsets.items():
+        for (topic, partition), highwater_offset in highwater_offsets.items():
             broker_tags = ['topic:%s' % topic, 'partition:%s' % partition]
             broker_tags.extend(self.config._custom_tags)
             self.gauge('broker_offset', highwater_offset, tags=broker_tags)
@@ -83,11 +86,11 @@ class KafkaCheck(AgentCheck):
             if reported_contexts == contexts_limit:
                 return
 
-    def report_consumer_offsets_and_lag(self, contexts_limit):
+    def report_consumer_offsets_and_lag(self, consumer_offsets, contexts_limit):
         """Report the consumer offsets and consumer lag."""
         reported_contexts = 0
         self.log.debug("Reporting consumer offsets and lag metrics")
-        for (consumer_group, topic, partition), consumer_offset in self._consumer_offsets.items():
+        for (consumer_group, topic, partition), consumer_offset in consumer_offsets.items():
             if reported_contexts >= contexts_limit:
                 self.log.debug(
                     "Reported contexts number %s greater than or equal to contexts limit of %s, returning",
