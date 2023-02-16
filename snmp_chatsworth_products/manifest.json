@@ -2,7 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "344b37df-ba82-4352-b277-ba1f1ccf716f",
   "app_id": "snmp-chatsworth-products",
-  "display_on_public_website": false,
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
