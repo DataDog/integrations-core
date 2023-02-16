@@ -2,7 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "6b5325b8-443d-42e0-8545-f7dc42acacb4",
   "app_id": "snmp-american-power-conversion",
-  "display_on_public_website": false,
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
