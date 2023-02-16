@@ -7,10 +7,8 @@ from datadog_checks.base import AgentCheck
 from datadog_checks.kafka_consumer.client.kafka_client_factory import make_client
 from datadog_checks.kafka_consumer.config import KafkaConfig
 
-from .config_models import ConfigMixin
 
-
-class KafkaCheck(AgentCheck, ConfigMixin):
+class KafkaCheck(AgentCheck):
 
     __NAMESPACE__ = 'kafka'
 
@@ -25,9 +23,9 @@ class KafkaCheck(AgentCheck, ConfigMixin):
 
     def __init__(self, name, init_config, instances):
         super(KafkaCheck, self).__init__(name, init_config, instances)
-        self.kafka_config = KafkaConfig(self.init_config, self.instance)
-        self._context_limit = self.kafka_config._context_limit
-        self.client = make_client(self, self.kafka_config)
+        self.config = KafkaConfig(self.init_config, self.instance)
+        self._context_limit = self.config._context_limit
+        self.client = make_client(self, self.config)
 
     def check(self, _):
         """The main entrypoint of the check."""
@@ -78,7 +76,7 @@ class KafkaCheck(AgentCheck, ConfigMixin):
         self.log.debug("Reporting broker offset metric")
         for (topic, partition), highwater_offset in self._highwater_offsets.items():
             broker_tags = ['topic:%s' % topic, 'partition:%s' % partition]
-            broker_tags.extend(self.kafka_config._custom_tags)
+            broker_tags.extend(self.config._custom_tags)
             self.gauge('broker_offset', highwater_offset, tags=broker_tags)
             reported_contexts += 1
             if reported_contexts == contexts_limit:
@@ -97,7 +95,7 @@ class KafkaCheck(AgentCheck, ConfigMixin):
                 )
                 return
             consumer_group_tags = ['topic:%s' % topic, 'partition:%s' % partition, 'consumer_group:%s' % consumer_group]
-            consumer_group_tags.extend(self.kafka_config._custom_tags)
+            consumer_group_tags.extend(self.config._custom_tags)
 
             partitions = self.client.get_partitions_for_topic(topic)
             self.log.debug("Received partitions %s for topic %s", partitions, topic)

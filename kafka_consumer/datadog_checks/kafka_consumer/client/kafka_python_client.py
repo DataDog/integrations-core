@@ -29,9 +29,9 @@ class OAuthTokenProvider(AbstractTokenProvider):
 
 
 class KafkaPythonClient(KafkaClient):
-    def __init__(self, check, kafka_config) -> None:
+    def __init__(self, check, config) -> None:
         self.check = check
-        self.kafka_config = kafka_config
+        self.config = config
         self.log = check.log
         self._kafka_client = None
         self._highwater_offsets = {}
@@ -61,7 +61,7 @@ class KafkaPythonClient(KafkaClient):
         # don't have access to variables scoped to this method, only to the object scope
         self._consumer_futures = []
 
-        if self.kafka_config._monitor_unlisted_consumer_groups:
+        if self.config._monitor_unlisted_consumer_groups:
             for broker in self.kafka_client._client.cluster.brokers():
                 # FIXME: This is using a workaround to skip socket wakeup, which causes blocking
                 # (see https://github.com/dpkp/kafka-python/issues/2286).
@@ -70,16 +70,16 @@ class KafkaPythonClient(KafkaClient):
                 list_groups_future = self._list_consumer_groups_send_request(broker.nodeId)
                 list_groups_future.add_callback(self._list_groups_callback, broker.nodeId)
                 self._consumer_futures.append(list_groups_future)
-        elif self.kafka_config._consumer_groups:
+        elif self.config._consumer_groups:
             self._validate_consumer_groups()
-            for consumer_group in self.kafka_config._consumer_groups:
+            for consumer_group in self.config._consumer_groups:
                 find_coordinator_future = self._find_coordinator_id_send_request(consumer_group)
                 find_coordinator_future.add_callback(self._find_coordinator_callback, consumer_group)
                 self._consumer_futures.append(find_coordinator_future)
         else:
             raise ConfigurationError(
                 "Cannot fetch consumer offsets because no consumer_groups are specified and "
-                "monitor_unlisted_consumer_groups is %s." % self.kafka_config._monitor_unlisted_consumer_groups
+                "monitor_unlisted_consumer_groups is %s." % self.config._monitor_unlisted_consumer_groups
             )
 
         # Loop until all futures resolved.
@@ -112,11 +112,11 @@ class KafkaPythonClient(KafkaClient):
         # If we aren't fetching all broker highwater offsets, then construct the unique set of topic partitions for
         # which this run of the check has at least once saved consumer offset. This is later used as a filter for
         # excluding partitions.
-        if not self.kafka_config._monitor_all_broker_highwatermarks:
+        if not self.config._monitor_all_broker_highwatermarks:
             tps_with_consumer_offset = {(topic, partition) for (_, topic, partition) in self._consumer_offsets}
 
         for batch in self.batchify(
-            self.kafka_client._client.cluster.brokers(), self.kafka_config._broker_requests_batch_size
+            self.kafka_client._client.cluster.brokers(), self.config._broker_requests_batch_size
         ):
             for broker in batch:
                 broker_led_partitions = self.kafka_client._client.cluster.partitions_for_broker(broker.nodeId)
@@ -129,7 +129,7 @@ class KafkaPythonClient(KafkaClient):
                 for topic, partition in broker_led_partitions:
                     # No sense fetching highwater offsets for internal topics
                     if topic not in KAFKA_INTERNAL_TOPICS and (
-                        self.kafka_config._monitor_all_broker_highwatermarks
+                        self.config._monitor_all_broker_highwatermarks
                         or (topic, partition) in tps_with_consumer_offset
                     ):
                         partitions_grouped_by_topic[topic].append(partition)
@@ -169,10 +169,10 @@ class KafkaPythonClient(KafkaClient):
         return kafka_admin_client
 
     def _create_kafka_client(self, clazz):
-        kafka_connect_str = self.kafka_config._kafka_connect_str
+        kafka_connect_str = self.config._kafka_connect_str
         if not isinstance(kafka_connect_str, (string_types, list)):
             raise ConfigurationError('kafka_connect_str should be string or list of strings')
-        kafka_version = self.kafka_config._kafka_version
+        kafka_version = self.config._kafka_version
         if isinstance(kafka_version, str):
             kafka_version = tuple(map(int, kafka_version.split(".")))
 
@@ -185,22 +185,22 @@ class KafkaPythonClient(KafkaClient):
         return clazz(
             bootstrap_servers=kafka_connect_str,
             client_id='dd-agent',
-            request_timeout_ms=self.kafka_config._request_timeout_ms,
+            request_timeout_ms=self.config._request_timeout_ms,
             # if `kafka_client_api_version` is not set, then kafka-python automatically probes the cluster for
             # broker version during the bootstrapping process. Note that this returns the first version found, so in
             # a mixed-version cluster this will be a non-deterministic result.
             api_version=kafka_version,
             # While we check for SASL/SSL params, if not present they will default to the kafka-python values for
             # plaintext connections
-            security_protocol=self.kafka_config._security_protocol,
-            sasl_mechanism=self.kafka_config._sasl_mechanism,
-            sasl_plain_username=self.kafka_config._sasl_plain_username,
-            sasl_plain_password=self.kafka_config._sasl_plain_password,
-            sasl_kerberos_service_name=self.kafka_config._sasl_kerberos_service_name,
-            sasl_kerberos_domain_name=self.kafka_config._sasl_kerberos_domain_name,
+            security_protocol=self.config._security_protocol,
+            sasl_mechanism=self.config._sasl_mechanism,
+            sasl_plain_username=self.config._sasl_plain_username,
+            sasl_plain_password=self.config._sasl_plain_password,
+            sasl_kerberos_service_name=self.config._sasl_kerberos_service_name,
+            sasl_kerberos_domain_name=self.config._sasl_kerberos_domain_name,
             sasl_oauth_token_provider=(
-                OAuthTokenProvider(**self.kafka_config._sasl_oauth_token_provider)
-                if 'sasl_oauth_token_provider' in self.kafka_config.instance
+                OAuthTokenProvider(**self.config._sasl_oauth_token_provider)
+                if 'sasl_oauth_token_provider' in self.config.instance
                 else None
             ),
             ssl_context=tls_context,
@@ -212,7 +212,7 @@ class KafkaPythonClient(KafkaClient):
             # if `kafka_client_api_version` is not set, then kafka-python automatically probes the cluster for
             # broker version during the bootstrapping process. Note that this returns the first version found, so in
             # a mixed-version cluster this will be a non-deterministic result.
-            kafka_version = self.kafka_config._kafka_version
+            kafka_version = self.config._kafka_version
             if isinstance(kafka_version, str):
                 kafka_version = tuple(map(int, kafka_version.split(".")))
 
@@ -279,8 +279,8 @@ class KafkaPythonClient(KafkaClient):
 
         consumer_groups = {'consumer_group': {'topic': [0, 1]}}
         """
-        assert isinstance(self.kafka_config._consumer_groups, dict)
-        for consumer_group, topics in self.kafka_config._consumer_groups.items():
+        assert isinstance(self.config._consumer_groups, dict)
+        for consumer_group, topics in self.config._consumer_groups.items():
             assert isinstance(consumer_group, string_types)
             assert isinstance(topics, dict) or topics is None  # topics are optional
             if topics is not None:
@@ -319,7 +319,7 @@ class KafkaPythonClient(KafkaClient):
         are unspecified for a topic listed in the config, offsets are fetched for all the partitions within that topic.
         """
         coordinator_id = self.kafka_client._find_coordinator_id_process_response(response)
-        topics = self.kafka_config._consumer_groups[consumer_group]
+        topics = self.config._consumer_groups[consumer_group]
         if not topics:
             topic_partitions = None  # None signals to fetch all known offsets for the consumer group
         else:
