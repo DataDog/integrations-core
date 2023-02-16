@@ -3,14 +3,12 @@
 # Licensed under Simplified BSD License (see LICENSE)
 from time import time
 
-from datadog_checks.base import AgentCheck, is_affirmative
+from datadog_checks.base import AgentCheck
 from datadog_checks.kafka_consumer.client.kafka_client_factory import make_client
-
-from .config_models import ConfigMixin
-from .constants import BROKER_REQUESTS_BATCH_SIZE, CONTEXT_UPPER_BOUND
+from datadog_checks.kafka_consumer.config import KafkaConfig
 
 
-class KafkaCheck(AgentCheck, ConfigMixin):
+class KafkaCheck(AgentCheck):
 
     __NAMESPACE__ = 'kafka'
 
@@ -25,16 +23,8 @@ class KafkaCheck(AgentCheck, ConfigMixin):
 
     def __init__(self, name, init_config, instances):
         super(KafkaCheck, self).__init__(name, init_config, instances)
-        self._context_limit = int(self.init_config.get('max_partition_contexts', CONTEXT_UPPER_BOUND))
-        self._custom_tags = self.instance.get('tags', [])
-        self._monitor_unlisted_consumer_groups = is_affirmative(
-            self.instance.get('monitor_unlisted_consumer_groups', False)
-        )
-        self._monitor_all_broker_highwatermarks = is_affirmative(
-            self.instance.get('monitor_all_broker_highwatermarks', False)
-        )
-        self._consumer_groups = self.instance.get('consumer_groups', {})
-        self._broker_requests_batch_size = self.instance.get('broker_requests_batch_size', BROKER_REQUESTS_BATCH_SIZE)
+        self.config = KafkaConfig(self.init_config, self.instance)
+        self._context_limit = self.config._context_limit
         self.client = make_client(self, self.config)
 
     def check(self, _):
@@ -86,7 +76,7 @@ class KafkaCheck(AgentCheck, ConfigMixin):
         self.log.debug("Reporting broker offset metric")
         for (topic, partition), highwater_offset in self._highwater_offsets.items():
             broker_tags = ['topic:%s' % topic, 'partition:%s' % partition]
-            broker_tags.extend(self._custom_tags)
+            broker_tags.extend(self.config._custom_tags)
             self.gauge('broker_offset', highwater_offset, tags=broker_tags)
             reported_contexts += 1
             if reported_contexts == contexts_limit:
@@ -105,7 +95,7 @@ class KafkaCheck(AgentCheck, ConfigMixin):
                 )
                 return
             consumer_group_tags = ['topic:%s' % topic, 'partition:%s' % partition, 'consumer_group:%s' % consumer_group]
-            consumer_group_tags.extend(self._custom_tags)
+            consumer_group_tags.extend(self.config._custom_tags)
 
             partitions = self.client.get_partitions_for_topic(topic)
             self.log.debug("Received partitions %s for topic %s", partitions, topic)
