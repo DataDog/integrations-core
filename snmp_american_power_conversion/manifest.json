@@ -31,11 +31,6 @@
       "events": {
         "creates_events": false
       },
-      "metrics": {
-        "prefix": "snmp_american_power_conversion.",
-        "check": "",
-        "metadata_path": "metadata.csv"
-      },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       }
