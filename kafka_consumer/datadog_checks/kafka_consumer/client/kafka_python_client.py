@@ -86,69 +86,6 @@ class KafkaPythonClient(KafkaClient):
         self.kafka_client._wait_for_futures(self._consumer_futures)
         del self._consumer_futures  # since it's reset on every check run, no sense holding the reference between runs
 
-    def report_consumer_offsets_and_lag(self, contexts_limit):
-        """Report the consumer offsets and consumer lag."""
-        reported_contexts = 0
-        self.log.debug("Reporting consumer offsets and lag metrics")
-        for (consumer_group, topic, partition), consumer_offset in self._consumer_offsets.items():
-            if reported_contexts >= contexts_limit:
-                self.log.debug(
-                    "Reported contexts number %s greater than or equal to contexts limit of %s, returning",
-                    str(reported_contexts),
-                    str(contexts_limit),
-                )
-                return
-            consumer_group_tags = ['topic:%s' % topic, 'partition:%s' % partition, 'consumer_group:%s' % consumer_group]
-            consumer_group_tags.extend(self.kafka_config._custom_tags)
-
-            partitions = self.kafka_client._client.cluster.partitions_for_topic(topic)
-            self.log.debug("Received partitions %s for topic %s", partitions, topic)
-            if partitions is not None and partition in partitions:
-                # report consumer offset if the partition is valid because even if leaderless the consumer offset will
-                # be valid once the leader failover completes
-                self.check.gauge('consumer_offset', consumer_offset, tags=consumer_group_tags)
-                reported_contexts += 1
-
-                if (topic, partition) not in self._highwater_offsets:
-                    self.log.warning(
-                        "Consumer group: %s has offsets for topic: %s partition: %s, but no stored highwater offset "
-                        "(likely the partition is in the middle of leader failover) so cannot calculate consumer lag.",
-                        consumer_group,
-                        topic,
-                        partition,
-                    )
-                    continue
-                producer_offset = self._highwater_offsets[(topic, partition)]
-                consumer_lag = producer_offset - consumer_offset
-                if reported_contexts < contexts_limit:
-                    self.check.gauge('consumer_lag', consumer_lag, tags=consumer_group_tags)
-                    reported_contexts += 1
-
-                if consumer_lag < 0:
-                    # this will effectively result in data loss, so emit an event for max visibility
-                    title = "Negative consumer lag for group: {}.".format(consumer_group)
-                    message = (
-                        "Consumer group: {}, topic: {}, partition: {} has negative consumer lag. This should never "
-                        "happen and will result in the consumer skipping new messages until the lag turns "
-                        "positive.".format(consumer_group, topic, partition)
-                    )
-                    key = "{}:{}:{}".format(consumer_group, topic, partition)
-                    self._send_event(title, message, consumer_group_tags, 'consumer_lag', key, severity="error")
-                    self.log.debug(message)
-            else:
-                if partitions is None:
-                    msg = (
-                        "Consumer group: %s has offsets for topic: %s, partition: %s, but that topic has no partitions "
-                        "in the cluster, so skipping reporting these offsets."
-                    )
-                else:
-                    msg = (
-                        "Consumer group: %s has offsets for topic: %s, partition: %s, but that topic partition isn't "
-                        "included in the cluster partitions, so skipping reporting these offsets."
-                    )
-                self.log.warning(msg, consumer_group, topic, partition)
-                self.kafka_client._client.cluster.request_update()  # force metadata update on next poll()
-
     def get_highwater_offsets(self):
         """Fetch highwater offsets for topic_partitions in the Kafka cluster.
 
@@ -213,18 +150,6 @@ class KafkaPythonClient(KafkaClient):
 
             # Loop until all futures resolved.
             self.kafka_client._wait_for_futures(highwater_futures)
-
-    def report_highwater_offsets(self, contexts_limit):
-        """Report the broker highwater offsets."""
-        reported_contexts = 0
-        self.log.debug("Reporting broker offset metric")
-        for (topic, partition), highwater_offset in self._highwater_offsets.items():
-            broker_tags = ['topic:%s' % topic, 'partition:%s' % partition]
-            broker_tags.extend(self.kafka_config._custom_tags)
-            self.check.gauge('broker_offset', highwater_offset, tags=broker_tags)
-            reported_contexts += 1
-            if reported_contexts == contexts_limit:
-                return
 
     def create_kafka_admin_client(self):
         return self._create_kafka_client(clazz=KafkaAdminClient)
