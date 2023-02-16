@@ -120,6 +120,7 @@ CLASSIFIER_TO_HIGHEST_SPDX = {
     'GNU Lesser General Public License v2 or later (LGPLv2+)': 'LGPL-2.0-or-later',
     'GNU Lesser General Public License v3 (LGPLv3)': 'LGPL-3.0-only',
     'GNU Lesser General Public License v3 or later (LGPLv3+)': 'LGPL-3.0-or-later',
+    'ISC License (ISCL)': 'ISC',
     'MIT License': 'MIT',
     'Mozilla Public License 1.0 (MPL)': 'MPL-1.0',
     'Mozilla Public License 1.1 (MPL 1.1)': 'MPL-1.1',
@@ -443,7 +444,7 @@ def licenses(ctx, sync):
     for package, versions in packages.items():
         for version in versions:
             api_urls.append(f'https://pypi.org/pypi/{package}/{version}/json')
-
+    # import pdb; pdb.set_trace()
     package_data = asyncio.run(scrape_license_data(api_urls))
     known_spdx_licenses = {license_id.lower(): license_id for license_id in get_known_spdx_licenses()}
 
@@ -490,6 +491,7 @@ def licenses(ctx, sync):
             elif classifier in CLASSIFIER_TO_HIGHEST_SPDX:
                 license_ids.add(CLASSIFIER_TO_HIGHEST_SPDX[classifier])
             else:
+                # breakpoint()
                 package_license_errors[package_name].append(f'unknown classifier: {classifier}')
 
         if license_ids:
