@@ -2,7 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "ea753ad3-1b17-4b05-bca5-d6933308e55a",
   "app_id": "snmp-check-point",
-  "display_on_public_website": false,
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
