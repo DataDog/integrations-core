@@ -29,7 +29,7 @@ class OAuthTokenProvider(AbstractTokenProvider):
 
 
 class KafkaPythonClient(KafkaClient):
-    def __init__(self, check, config) -> None:
+    def __init__(self, check, config, tls_context) -> None:
         self.check = check
         self.config = config
         self.log = check.log
@@ -37,6 +37,7 @@ class KafkaPythonClient(KafkaClient):
         self._highwater_offsets = {}
         self._consumer_offsets = {}
         self._context_limit = check._context_limit
+        self._tls_context = tls_context
 
     def get_consumer_offsets(self):
         """Fetch Consumer Group offsets from Kafka.
@@ -175,11 +176,10 @@ class KafkaPythonClient(KafkaClient):
         if isinstance(kafka_version, str):
             kafka_version = tuple(map(int, kafka_version.split(".")))
 
-        tls_context = self.check.get_tls_context()
         crlfile = self.config._crlfile
         if crlfile:
-            tls_context.load_verify_locations(crlfile)
-            tls_context.verify_flags |= ssl.VERIFY_CRL_CHECK_LEAF
+            self._tls_context.load_verify_locations(crlfile)
+            self._tls_context.verify_flags |= ssl.VERIFY_CRL_CHECK_LEAF
 
         return clazz(
             bootstrap_servers=kafka_connect_str,
@@ -202,7 +202,7 @@ class KafkaPythonClient(KafkaClient):
                 if 'sasl_oauth_token_provider' in self.config.instance
                 else None
             ),
-            ssl_context=tls_context,
+            ssl_context=self._tls_context,
         )
 
     @property
