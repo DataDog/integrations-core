@@ -2,7 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "b5d6950a-7880-4b47-b9e9-49fe38e00490",
   "app_id": "snmp-arista",
-  "display_on_public_website": false,
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
