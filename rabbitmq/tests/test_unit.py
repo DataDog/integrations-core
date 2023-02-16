@@ -13,13 +13,9 @@ from datadog_checks.rabbitmq.rabbitmq import EXCHANGE_TYPE, NODE_TYPE, OVERVIEW_
 
 from . import common, metrics
 
-pytestmark = [
-    pytest.mark.unit,
-    pytest.mark.skipif(common.METRICS_PLUGIN == "prometheus", reason="Not testing management plugin metrics."),
-]
+pytestmark = [pytest.mark.unit, common.requires_management]
 
 
-@pytest.mark.unit
 def test__get_data(check):
     with mock.patch('datadog_checks.base.utils.http.requests') as r:
         r.get.side_effect = [requests.exceptions.HTTPError, ValueError]
@@ -31,7 +27,6 @@ def test__get_data(check):
             assert isinstance(e, RabbitMQException)
 
 
-@pytest.mark.unit
 def test_status_check(check, aggregator):
     check.check({"rabbitmq_api_url": "http://example.com"})
     assert len(aggregator._service_checks) == 1
@@ -69,7 +64,6 @@ def test_status_check(check, aggregator):
     assert sc.status == RabbitMQ.OK
 
 
-@pytest.mark.unit
 def test__check_aliveness(check, aggregator):
     instance = {"rabbitmq_api_url": "http://example.com"}
     check._get_data = mock.MagicMock()
@@ -89,7 +83,6 @@ def test__check_aliveness(check, aggregator):
         assert isinstance(e, RabbitMQException)
 
 
-@pytest.mark.unit
 def test__get_metrics(check, aggregator):
     data = {'fd_used': 3.14, 'disk_free': 4242, 'mem_used': 9000}
 
@@ -97,7 +90,6 @@ def test__get_metrics(check, aggregator):
     assert check._get_metrics({}, NODE_TYPE, []) == 0
 
 
-@pytest.mark.unit
 def test__get_metrics_3_1(check, aggregator):
     data = {'queue_totals': []}
 
@@ -105,7 +97,6 @@ def test__get_metrics_3_1(check, aggregator):
     assert metrics == 0
 
 
-@pytest.mark.unit
 @mock.patch.object(datadog_checks.rabbitmq.rabbitmq.RabbitMQManagement, '_get_object_data')
 def test_get_stats_empty_exchanges(mock__get_object_data, instance, check, aggregator):
     data = [
@@ -158,7 +149,6 @@ def test_config(check, test_case, extra_config, expected_http_kwargs):
         r.get.assert_called_with('http://localhost:15672/api/connections', **http_wargs)
 
 
-@pytest.mark.unit
 def test_nodes(aggregator, check):
 
     # default, node metrics are collected
@@ -171,7 +161,6 @@ def test_nodes(aggregator, check):
     aggregator.reset()
 
 
-@pytest.mark.unit
 def test_disable_nodes(aggregator, check):
 
     # node metrics collection disabled in config, node metrics should not appear

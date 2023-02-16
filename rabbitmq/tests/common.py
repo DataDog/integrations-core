@@ -4,6 +4,7 @@
 
 import os
 
+import pytest
 from packaging import version
 
 from datadog_checks.base.utils.common import get_docker_hostname
@@ -13,9 +14,17 @@ ROOT = os.path.dirname(os.path.dirname(HERE))
 
 RABBITMQ_VERSION_RAW = os.environ['RABBITMQ_VERSION']
 RABBITMQ_VERSION = version.parse(RABBITMQ_VERSION_RAW)
-METRICS_FROM_MANAGEMENT_PLUGIN = os.environ.get("METRICS_FROM_MANAGEMENT_PLUGIN", False)
-METRICS_PLUGIN = (
-    "management" if RABBITMQ_VERSION < version.parse("3.8") or METRICS_FROM_MANAGEMENT_PLUGIN else "prometheus"
+RABBITMQ_METRICS_PLUGIN = (
+    "management"
+    if RABBITMQ_VERSION < version.parse("3.8") or os.environ.get("METRICS_FROM_MANAGEMENT_PLUGIN", False)
+    else "prometheus"
+)
+
+requires_management = pytest.mark.skipif(
+    RABBITMQ_METRICS_PLUGIN == "prometheus", reason="Not testing management plugin metrics."
+)
+requires_prometheus = pytest.mark.skipif(
+    RABBITMQ_METRICS_PLUGIN == "management", reason="Not testing prometheus plugin (OpenMetrics) metrics."
 )
 
 CHECK_NAME = 'rabbitmq'

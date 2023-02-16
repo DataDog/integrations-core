@@ -11,7 +11,7 @@ import requests
 from datadog_checks.dev import docker_run, temp_dir
 from datadog_checks.rabbitmq import RabbitMQ
 
-from .common import CHECK_NAME, CONFIG, HERE, HOST, METRICS_PLUGIN, OPENMETRICS_CONFIG, PORT
+from .common import CHECK_NAME, CONFIG, HERE, HOST, OPENMETRICS_CONFIG, PORT, RABBITMQ_METRICS_PLUGIN
 
 
 @pytest.fixture(scope="session")
@@ -33,7 +33,7 @@ def dd_environment():
     with docker_run(
         compose_file, log_patterns='Server startup complete', env_vars=env, conditions=[setup_rabbitmq], sleep=5
     ):
-        if METRICS_PLUGIN == "prometheus":
+        if RABBITMQ_METRICS_PLUGIN == "prometheus":
             yield OPENMETRICS_CONFIG
         else:
             yield CONFIG
@@ -175,5 +175,5 @@ def instance():
 # which still supports Py2, we don't load the test files at all. Docs for how we do it:
 # https://docs.pytest.org/en/7.1.x/example/pythoncollection.html#customizing-test-collection
 collect_ignore_glob = []
-if METRICS_PLUGIN == "management":
+if RABBITMQ_METRICS_PLUGIN == "management":
     collect_ignore_glob.append("*openmetrics*")

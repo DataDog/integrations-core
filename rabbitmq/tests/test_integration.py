@@ -19,7 +19,7 @@ from .common import (
     CONFIG_WITH_FAMILY,
     CONFIG_WITH_FAMILY_NAMED_GROUP,
     HOST,
-    METRICS_PLUGIN,
+    requires_management,
 )
 from .metrics import (
     COMMON_METRICS,
@@ -32,11 +32,7 @@ from .metrics import (
 
 log = logging.getLogger(__file__)
 
-pytestmark = [
-    pytest.mark.integration,
-    pytest.mark.usefixtures('dd_environment'),
-    pytest.mark.skipif(METRICS_PLUGIN == "prometheus", reason="Not testing management plugin metrics."),
-]
+pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment'), requires_management]
 
 
 def test_rabbitmq(aggregator, check):
