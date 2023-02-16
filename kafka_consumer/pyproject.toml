@@ -38,7 +38,7 @@ text = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
-    "gssapi==1.8.2",
+    "gssapi==1.8.2; python_version > '3.0'",
     "kafka-python==2.0.2",
     "kazoo==2.9.0",
 ]
