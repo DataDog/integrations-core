@@ -18,7 +18,6 @@
       "Category::Monitoring",
       "Category::Notification",
       "Category::Network",
-      "Category::Autodiscovery",
       "Category::SNMP"
     ]
   },
