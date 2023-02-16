@@ -714,7 +714,7 @@ The Agent can autodiscover and attach tags to all data emitted by the entire tas
   | `task_family`                 | Low          | ECS API              |
   | `task_name`                   | Low          | ECS API              |
   | `task_version`                | Low          | ECS API              |
-  | `availability_zone`           | Low          | ECS API              |
+  | `availability-zone`           | Low          | ECS API              |
   | `region`                      | Low          | ECS API              |
 
 ## Data Collected
