@@ -183,11 +183,15 @@ def assert_check_kafka(aggregator, consumer_groups):
     for name, consumer_group in consumer_groups.items():
         for topic, partitions in consumer_group.items():
             for partition in partitions:
-                tags = ["topic:{}".format(topic), "partition:{}".format(partition)] + ['optional:tag1']
+                tags = [f"topic:{topic}", f"partition:{partition}"] + ['optional:tag1']
                 for mname in BROKER_METRICS:
                     aggregator.assert_metric(mname, tags=tags, at_least=1)
                 for mname in CONSUMER_METRICS:
-                    aggregator.assert_metric(mname, tags=tags + ["consumer_group:{}".format(name)], at_least=1)
+                    aggregator.assert_metric(
+                        mname,
+                        tags=tags + [f"consumer_group:{name}"],
+                        at_least=1,
+                    )
 
     aggregator.assert_all_metrics_covered()
 
@@ -227,7 +231,7 @@ def test_version_metadata(datadog_agent, kafka_instance, dd_run_check):
     kafka_client = kafka_consumer_check.client.create_kafka_admin_client()
     version_data = [str(part) for part in kafka_client._client.check_version()]
     kafka_client.close()
-    version_parts = {'version.{}'.format(name): part for name, part in zip(('major', 'minor', 'patch'), version_data)}
+    version_parts = {f'version.{name}': part for name, part in zip(('major', 'minor', 'patch'), version_data)}
     version_parts['version.scheme'] = 'semver'
     version_parts['version.raw'] = '.'.join(version_data)
 
