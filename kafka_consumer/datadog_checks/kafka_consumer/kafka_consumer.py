@@ -52,13 +52,12 @@ class KafkaCheck(AgentCheck):
             self.log.exception("There was a problem collecting the highwater mark offsets.")
             # Unlike consumer offsets, fail immediately because we can't calculate consumer lag w/o highwater_offsets
             raise
-        
+
         # Report the metrics
         # Expected format: {(consumer_group, topic, partition): offset}
         consumer_offsets = self.client.get_consumer_offsets_dict()
         # Expected format: {(topic, partition): offset}
         highwater_offsets = self.client.get_highwater_offsets_dict()
-
 
         total_contexts = len(consumer_offsets) + len(highwater_offsets)
         if total_contexts >= self._context_limit:
@@ -70,9 +69,10 @@ class KafkaCheck(AgentCheck):
                 self._context_limit,
             )
 
-
         self.report_highwater_offsets(highwater_offsets, self._context_limit)
-        self.report_consumer_offsets_and_lag(consumer_offsets, highwater_offsets, self._context_limit - len(highwater_offsets))
+        self.report_consumer_offsets_and_lag(
+            consumer_offsets, highwater_offsets, self._context_limit - len(highwater_offsets)
+        )
 
         self.collect_broker_metadata()
 
