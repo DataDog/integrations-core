@@ -16,7 +16,7 @@ from six import iteritems, string_types
 from datadog_checks.base import ConfigurationError
 from datadog_checks.base.utils.http import AuthTokenOAuthReader
 from datadog_checks.kafka_consumer.client.kafka_client import KafkaClient
-from datadog_checks.kafka_consumer.constants import DEFAULT_KAFKA_TIMEOUT, KAFKA_INTERNAL_TOPICS
+from datadog_checks.kafka_consumer.constants import KAFKA_INTERNAL_TOPICS
 
 
 class OAuthTokenProvider(AbstractTokenProvider):
@@ -115,7 +115,9 @@ class KafkaPythonClient(KafkaClient):
         if not self.kafka_config._monitor_all_broker_highwatermarks:
             tps_with_consumer_offset = {(topic, partition) for (_, topic, partition) in self._consumer_offsets}
 
-        for batch in self.batchify(self.kafka_client._client.cluster.brokers(), self.kafka_config._broker_requests_batch_size):
+        for batch in self.batchify(
+            self.kafka_client._client.cluster.brokers(), self.kafka_config._broker_requests_batch_size
+        ):
             for broker in batch:
                 broker_led_partitions = self.kafka_client._client.cluster.partitions_for_broker(broker.nodeId)
                 if broker_led_partitions is None:
@@ -127,7 +129,8 @@ class KafkaPythonClient(KafkaClient):
                 for topic, partition in broker_led_partitions:
                     # No sense fetching highwater offsets for internal topics
                     if topic not in KAFKA_INTERNAL_TOPICS and (
-                        self.kafka_config._monitor_all_broker_highwatermarks or (topic, partition) in tps_with_consumer_offset
+                        self.kafka_config._monitor_all_broker_highwatermarks
+                        or (topic, partition) in tps_with_consumer_offset
                     ):
                         partitions_grouped_by_topic[topic].append(partition)
 

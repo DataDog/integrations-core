@@ -3,7 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 from time import time
 
-from datadog_checks.base import AgentCheck, is_affirmative
+from datadog_checks.base import AgentCheck
 from datadog_checks.kafka_consumer.client.kafka_client_factory import make_client
 from datadog_checks.kafka_consumer.config import KafkaConfig
 
@@ -28,7 +28,6 @@ class KafkaCheck(AgentCheck, ConfigMixin):
         self.kafka_config = KafkaConfig(self.init_config, self.instance)
         self._context_limit = self.kafka_config._context_limit
         self.client = make_client(self, self.kafka_config)
-
 
     def check(self, _):
         """The main entrypoint of the check."""
