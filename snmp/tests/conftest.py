@@ -83,7 +83,7 @@ def _autodiscovery_ready():
             autodiscovery_checks.append(result_line)
 
     # assert subnets discovered by `snmp_listener` config from datadog.yaml
-    expected_autodiscovery_checks = 5
+    expected_autodiscovery_checks = 6
     assert len(autodiscovery_checks) == expected_autodiscovery_checks
 
 
@@ -132,6 +132,22 @@ def create_datadog_conf_file(tmp_dir):
                     'authentication_protocol': 'sha',
                     'privacy_key': 'doggiePRIVkey',
                     'privacy_protocol': 'des',
+                    'context_name': 'public',
+                    'ignored_ip_addresses': {'{}.2'.format(prefix): True},
+                    'loader': 'core',
+                },
+                {
+                    'network': '{}.0/27'.format(prefix),
+                    'namespace': 'test-auth-proto',
+                    'port': PORT,
+                    'version': 3,
+                    'timeout': 1,
+                    'retries': 2,
+                    'user': 'datadogSHA256AES',
+                    'authentication_key': 'doggiepass',
+                    'authentication_protocol': 'SHA256',
+                    'privacy_key': 'doggiePRIVkey',
+                    'privacy_protocol': 'AES',
                     'context_name': 'public',
                     'ignored_ip_addresses': {'{}.2'.format(prefix): True},
                     'loader': 'core',
