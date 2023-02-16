@@ -52,8 +52,15 @@ class KafkaCheck(AgentCheck):
             self.log.exception("There was a problem collecting the highwater mark offsets.")
             # Unlike consumer offsets, fail immediately because we can't calculate consumer lag w/o highwater_offsets
             raise
+        
+        # Report the metrics
+        # Expected format: {(consumer_group, topic, partition): offset}
+        consumer_offsets = self.client.get_consumer_offsets_dict()
+        # Expected format: {(topic, partition): offset}
+        highwater_offsets = self.client.get_highwater_offsets_dict()
 
-        total_contexts = len(self.client._consumer_offsets) + len(self.client._highwater_offsets)
+
+        total_contexts = len(consumer_offsets) + len(highwater_offsets)
         if total_contexts >= self._context_limit:
             self.warning(
                 """Discovered %s metric contexts - this exceeds the maximum number of %s contexts permitted by the
@@ -63,14 +70,9 @@ class KafkaCheck(AgentCheck):
                 self._context_limit,
             )
 
-        # Report the metrics
-        # Expected format: {(consumer_group, topic, partition): offset}
-        consumer_offsets = self.client.get_consumer_offsets_dict()
-        # Expected format: {(topic, partition): offset}
-        highwater_offsets = self.client.get_highwater_offsets_dict()
 
         self.report_highwater_offsets(highwater_offsets, self._context_limit)
-        self.report_consumer_offsets_and_lag(consumer_offsets, self._context_limit - len(self._highwater_offsets))
+        self.report_consumer_offsets_and_lag(consumer_offsets, highwater_offsets, self._context_limit - len(highwater_offsets))
 
         self.collect_broker_metadata()
 
@@ -86,7 +88,7 @@ class KafkaCheck(AgentCheck):
             if reported_contexts == contexts_limit:
                 return
 
-    def report_consumer_offsets_and_lag(self, consumer_offsets, contexts_limit):
+    def report_consumer_offsets_and_lag(self, consumer_offsets, highwater_offsets, contexts_limit):
         """Report the consumer offsets and consumer lag."""
         reported_contexts = 0
         self.log.debug("Reporting consumer offsets and lag metrics")
@@ -109,7 +111,7 @@ class KafkaCheck(AgentCheck):
                 self.gauge('consumer_offset', consumer_offset, tags=consumer_group_tags)
                 reported_contexts += 1
 
-                if (topic, partition) not in self._highwater_offsets:
+                if (topic, partition) not in highwater_offsets:
                     self.log.warning(
                         "Consumer group: %s has offsets for topic: %s partition: %s, but no stored highwater offset "
                         "(likely the partition is in the middle of leader failover) so cannot calculate consumer lag.",
@@ -118,7 +120,7 @@ class KafkaCheck(AgentCheck):
                         partition,
                     )
                     continue
-                producer_offset = self._highwater_offsets[(topic, partition)]
+                producer_offset = highwater_offsets[(topic, partition)]
                 consumer_lag = producer_offset - consumer_offset
                 if reported_contexts < contexts_limit:
                     self.gauge('consumer_lag', consumer_lag, tags=consumer_group_tags)
