@@ -58,7 +58,7 @@ EXPLICIT_LICENSES = {
     # https://github.com/requests/requests-kerberos/pull/123
     'requests-kerberos': ['ISC'],
     # https://github.com/requests/requests-ntlm/blob/master/LICENSE
-    'requests-ntlm': ['ISC'],
+    'requests_ntlm': ['ISC'],
     # https://github.com/rethinkdb/rethinkdb-python/blob/master/LICENSE
     'rethinkdb': ['Apache-2.0'],
     # https://github.com/simplejson/simplejson/blob/master/LICENSE.txt

@@ -34,12 +34,7 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      },
-      "process_signatures": [
-        "impalad",
-        "catalogd",
-        "statestored"
-      ]
+      }
     },
     "logs": {
       "source": "impala"
