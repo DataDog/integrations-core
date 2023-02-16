@@ -32,11 +32,7 @@
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       }
-    },
-    "dashboards": {},
-    "monitors": {},
-    "logs": {},
-    "saved_views": {}
+    }
   },
   "author": {
     "support_email": "help@datadoghq.com",
