@@ -54,6 +54,7 @@ from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_suc
     type=click.INT,
     help='Number of checks to wait, retry until the specified number of checks is reached',
 )
+@click.option('--instance-filter', help="filter instances using jq style syntax, example: --instance-filter '.ip_address == \"127.0.0.51\"'")
 def check_run(
     check,
     env,
@@ -70,6 +71,7 @@ def check_run(
     discovery_timeout,
     discovery_retry_interval,
     discovery_min_instances,
+    instance_filter,
 ):
     """Run an Agent check."""
     envs = get_configured_envs(check)
@@ -105,6 +107,7 @@ def check_run(
         discovery_timeout=discovery_timeout,
         discovery_retry_interval=discovery_retry_interval,
         discovery_min_instances=discovery_min_instances,
+        instance_filter=instance_filter,
     )
 
     if config_file:

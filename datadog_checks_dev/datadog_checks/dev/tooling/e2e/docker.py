@@ -139,6 +139,7 @@ class DockerInterface(object):
         discovery_timeout=None,
         discovery_retry_interval=None,
         discovery_min_instances=None,
+        instance_filter=None,
     ):
         # JMX check
         if jmx_list:
@@ -177,6 +178,9 @@ class DockerInterface(object):
 
             if discovery_min_instances is not None:
                 command.extend(['--discovery-min-instances', str(discovery_min_instances)])
+
+            if instance_filter is not None:
+                command.extend(['--instance-filter', str(instance_filter)])
 
         if log_level is not None:
             command.extend(['--log-level', log_level])
