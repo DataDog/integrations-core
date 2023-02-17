@@ -4,7 +4,7 @@
 
 This check monitors Fortinet devices.
 
-For details of monitored metrics see the [SNMP Data Collected][1] section.
+For details of monitored metrics, see the [SNMP Data Collected][1] section.
 
 ## Setup
 
