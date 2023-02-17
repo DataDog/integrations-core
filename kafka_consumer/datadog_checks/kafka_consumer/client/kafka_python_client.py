@@ -29,14 +29,12 @@ class OAuthTokenProvider(AbstractTokenProvider):
 
 
 class KafkaPythonClient(KafkaClient):
-    def __init__(self, check, config, tls_context) -> None:
-        self.check = check
+    def __init__(self, config, tls_context, log) -> None:
         self.config = config
-        self.log = check.log
+        self.log = log
         self._kafka_client = None
         self._highwater_offsets = {}
         self._consumer_offsets = {}
-        self._context_limit = check._context_limit
         self._tls_context = tls_context
 
     def get_consumer_offsets(self):
