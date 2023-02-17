@@ -123,6 +123,7 @@ def create_datadog_conf_file(tmp_dir):
                 },
                 {
                     'network': '{}.0/27'.format(prefix),
+                    'namespace': 'test-auth-proto-sha',
                     'port': PORT,
                     'version': 3,
                     'timeout': 1,
@@ -138,7 +139,7 @@ def create_datadog_conf_file(tmp_dir):
                 },
                 {
                     'network': '{}.0/27'.format(prefix),
-                    'namespace': 'test-auth-proto',
+                    'namespace': 'test-auth-proto-sha256',
                     'port': PORT,
                     'version': 3,
                     'timeout': 1,
