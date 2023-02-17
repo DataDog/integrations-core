@@ -47,6 +47,7 @@ def test_e2e_snmp_listener(dd_agent_check, container_ip, autodiscovery_ready):
         rate=True,
         discovery_min_instances=5,
         discovery_timeout=10,
+        instance_filter='.ip_address  == "172.19.0.1" and .namespace == "default"'
     )
 
     # === network profile ===
