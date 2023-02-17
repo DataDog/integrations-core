@@ -20,6 +20,7 @@ from datadog_checks.kafka_consumer.constants import KAFKA_INTERNAL_TOPICS
 
 from .common import validate_consumer_groups
 
+
 class OAuthTokenProvider(AbstractTokenProvider):
     def __init__(self, **config):
         self.reader = AuthTokenOAuthReader(config)

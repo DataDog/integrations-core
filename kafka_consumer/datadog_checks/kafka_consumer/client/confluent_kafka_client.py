@@ -1,12 +1,13 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from confluent_kafka import Consumer, ConsumerGroupTopicPartitions, KafkaException, TopicPartition
 from confluent_kafka.admin import AdminClient
-from confluent_kafka import Consumer, TopicPartition, ConsumerGroupTopicPartitions
 
-from .common import validate_consumer_groups
+from datadog_checks.base import ConfigurationError
 
 EXCLUDED_TOPICS = ['__consumer_offsets', '__transaction_state']
+
 
 class ConfluentKafkaClient:
     def __init__(self, config, tls_context, log) -> None:
@@ -16,14 +17,12 @@ class ConfluentKafkaClient:
         self._highwater_offsets = {}
         self._consumer_offsets = {}
         self._tls_context = tls_context
-    
+
     @property
     def kafka_client(self):
         if self._kafka_client is None:
             # self.conf is just the config options from librdkafka
-            self._kafka_client = AdminClient({
-                "bootstrap.servers": self.config._kafka_connect_str
-            })
+            self._kafka_client = AdminClient({"bootstrap.servers": self.config._kafka_connect_str})
 
         return self._kafka_client
 
@@ -31,7 +30,7 @@ class ConfluentKafkaClient:
         # {(topic, partition): offset}
         for consumer_group in self.config._consumer_groups:
             config = {
-                "bootstrap.servers" : self.config._kafka_connect_str,
+                "bootstrap.servers": self.config._kafka_connect_str,
                 "group.id": consumer_group,
             }
             consumer = Consumer(config)
@@ -50,7 +49,6 @@ class ConfluentKafkaClient:
                         _, high_offset = consumer.get_watermark_offsets(topic_partition)
 
                         self._highwater_offsets[(topic, topic_partition.partition)] = high_offset
-    
 
     def get_consumer_offsets(self):
         if self.config._monitor_unlisted_consumer_groups:
@@ -58,7 +56,9 @@ class ConfluentKafkaClient:
             try:
                 list_consumer_groups_result = consumer_groups_future.result()
                 for valid_consumer_group in list_consumer_groups_result.valid:
-                    futureMap = self.kafka_client.list_consumer_group_offsets([ConsumerGroupTopicPartitions(valid_consumer_group.group_id)])
+                    futureMap = self.kafka_client.list_consumer_group_offsets(
+                        [ConsumerGroupTopicPartitions(valid_consumer_group.group_id)]
+                    )
 
                 for group_id, future in futureMap.items():
                     try:
@@ -66,12 +66,18 @@ class ConfluentKafkaClient:
                         consumer_group = response_offset_info.group_id
                         for topic_partition in response_offset_info.topic_partitions:
                             if topic_partition.error:
-                                self.log.debug("Encountered error: " + topic_partition.error.str() + " Occurred with " +
-                                      topic_partition.topic + " [" + str(topic_partition.partition) + "]")
+                                self.log.debug(
+                                    "Encountered error: %s. Occurred with topic: %s; partition: [%s]",
+                                    topic_partition.error.str(),
+                                    topic_partition.topic,
+                                    str(topic_partition.partition),
+                                )
                     except KafkaException as e:
-                        self.log.debug("Failed to fetch consumer offsets for {}: {}".format(group_id, e))
+                        self.log.debug("Failed to fetch consumer offsets for %s: %s", group_id, e)
 
-                self._consumer_offsets[(consumer_group, topic_partition.topic, topic_partition.partition)] = topic_partition.offset
+                self._consumer_offsets[
+                    (consumer_group, topic_partition.topic, topic_partition.partition)
+                ] = topic_partition.offset
             except Exception as e:
                 self.log.error("Failed to collect consumer offsets %s", e)
         elif self.config._consumer_groups:
@@ -93,7 +99,6 @@ class ConfluentKafkaClient:
         topics = cluster_metadata.topics
         partitions = list(topics[topic].partitions.keys())
         return partitions or []
-
 
     def request_metadata_update(self):
         # May not need this

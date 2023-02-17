@@ -1,5 +1,6 @@
 from six import string_types
 
+
 def validate_consumer_groups(consumer_groups):
     """Validate any explicitly specified consumer groups.
 
