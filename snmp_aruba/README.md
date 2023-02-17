@@ -4,7 +4,7 @@
 
 Aruba Networks is a wireless networking subsidiary of Hewlett Packard Enterprise and provides wired, wireless, and SD-WAN solutions. Configure the Aruba integration and collect SNMP metrics from devices such as Aruba switches and access points.
 
-For details of monitored metrics see the [SNMP Data Collected][1] section.
+For details of monitored metrics, see the [SNMP Data Collected][1] section.
 
 ## Setup
 
