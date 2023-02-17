@@ -122,7 +122,7 @@ def test_e2e_snmp_listener(dd_agent_check, container_ip, autodiscovery_ready):
             'autodiscovery_subnet:{}.0/27'.format(subnet_prefix),
             'snmp_host:41ba948911b9',
             'snmp_profile:generic-router',
-            'device_namespace:test-auth-proto-%s'.format(auth_proto),
+            'device_namespace:test-auth-proto-{}'.format(auth_proto),
         ]
 
         common.assert_common_metrics(aggregator, common_tags, is_e2e=True, loader='core')
