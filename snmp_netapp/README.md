@@ -4,7 +4,7 @@
 
 NetApp is a cloud data management and data services company that offers online and physical cloud data services to manage data and applications.
 
-For details of monitored metrics see the [SNMP Data Collected][1] section.
+For details of monitored metrics, see the [SNMP Data Collected][1] section.
 
 ## Setup
 
