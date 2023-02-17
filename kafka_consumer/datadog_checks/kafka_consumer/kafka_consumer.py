@@ -33,14 +33,15 @@ class KafkaCheck(AgentCheck):
         # Fetch Kafka consumer offsets
         self.client.reset_offsets()
 
-        consumer_offsets = {}
-        highwater_offsets = {}
-
         try:
             self.client.get_consumer_offsets()
         except Exception:
             self.log.exception("There was a problem collecting consumer offsets from Kafka.")
             # don't raise because we might get valid broker offsets
+
+        # Fetch consumer offsets
+        # Expected format: {(consumer_group, topic, partition): offset}
+        consumer_offsets = self.client.get_consumer_offsets_dict()
 
         # Fetch the broker highwater offsets
         try:
@@ -53,9 +54,7 @@ class KafkaCheck(AgentCheck):
             # Unlike consumer offsets, fail immediately because we can't calculate consumer lag w/o highwater_offsets
             raise
 
-        # Report the metrics
-        # Expected format: {(consumer_group, topic, partition): offset}
-        consumer_offsets = self.client.get_consumer_offsets_dict()
+        # Fetch highwater offsets
         # Expected format: {(topic, partition): offset}
         highwater_offsets = self.client.get_highwater_offsets_dict()
 
