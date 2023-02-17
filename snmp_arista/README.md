@@ -4,7 +4,7 @@
 
 Arista Networks is a computer networking company that designs and sells multilayer network switches.
 
-For details of monitored metrics see the [SNMP Data Collected][1] section.
+For details of monitored metrics, see the [SNMP Data Collected][1] section.
 
 ## Setup
 
