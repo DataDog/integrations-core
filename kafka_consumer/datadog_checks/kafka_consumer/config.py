@@ -1,3 +1,7 @@
+# (C) Datadog, Inc. 2023-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
 from datadog_checks.base import is_affirmative
 from datadog_checks.kafka_consumer.constants import (
     BROKER_REQUESTS_BATCH_SIZE,
