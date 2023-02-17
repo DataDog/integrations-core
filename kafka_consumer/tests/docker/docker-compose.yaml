@@ -1,4 +1,4 @@
-version: '3.5'
+version: '3.9'
 
 services:
   zookeeper:
@@ -7,6 +7,12 @@ services:
       - 2181:2181
     environment:
       - ALLOW_ANONYMOUS_LOGIN=yes
+    healthcheck:
+      test: nc -vz localhost 2181 || exit -1
+      start_period: 5s
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   kafka1:
     image: docker.io/bitnami/kafka:${KAFKA_VERSION}
@@ -21,7 +27,8 @@ services:
       KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
       ALLOW_PLAINTEXT_LISTENER: "true"
     depends_on:
-      - zookeeper
+      zookeeper:
+        condition: service_healthy
 
   kafka2:
     image: docker.io/bitnami/kafka:${KAFKA_VERSION}
@@ -35,9 +42,9 @@ services:
       KAFKA_CFG_ADVERTISED_LISTENERS: INTERNAL://:19093,EXTERNAL://127.0.0.1:9093
       KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
       ALLOW_PLAINTEXT_LISTENER: "true"
-
     depends_on:
-      - zookeeper
+      zookeeper:
+        condition: service_healthy
 
   kafka-init:
     image: docker.io/bitnami/kafka:${KAFKA_VERSION}
@@ -45,4 +52,7 @@ services:
       sh -c "sleep 10 &&./opt/bitnami/kafka/bin/kafka-topics.sh ${BOOTSTRAP_SERVER_FLAG} --create --topic marvel --if-not-exists --partitions 2 --replication-factor 1 &&
             ./opt/bitnami/kafka/bin/kafka-topics.sh ${BOOTSTRAP_SERVER_FLAG} --create --topic dc --if-not-exists --partitions 2 --replication-factor 1"
     depends_on:
-      - kafka1
+      kafka1:
+        condition: service_started
+      kafka2:
+        condition: service_started
