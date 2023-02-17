@@ -3,74 +3,63 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
-from datadog_checks.kafka_consumer import KafkaCheck
+from datadog_checks.dev.utils import get_metadata_metrics
 
 from ..common import KAFKA_CONNECT_STR, assert_check_kafka
 
-pytestmark = [pytest.mark.integration]
+pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
 
 
-@pytest.mark.usefixtures('dd_environment')
-def test_check_kafka(aggregator, kafka_instance, dd_run_check):
+def test_check_kafka(aggregator, check, kafka_instance, dd_run_check):
     """
     Testing Kafka_consumer check.
     """
-    kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [kafka_instance])
-    dd_run_check(kafka_consumer_check)
+    dd_run_check(check(kafka_instance))
     assert_check_kafka(aggregator, kafka_instance['consumer_groups'])
 
 
-@pytest.mark.usefixtures('dd_environment')
-def test_can_send_event(aggregator, kafka_instance, dd_run_check):
+def test_can_send_event(aggregator, check, kafka_instance, dd_run_check):
     """
     Testing Kafka_consumer check.
     """
-    kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [kafka_instance])
+    kafka_consumer_check = check(kafka_instance)
     kafka_consumer_check.send_event("test", "test", [], "test", "test")
     aggregator.assert_event("test", exact_match=False, count=1)
 
 
-@pytest.mark.usefixtures('dd_environment')
-def test_check_kafka_metrics_limit(aggregator, kafka_instance, dd_run_check):
+def test_check_kafka_metrics_limit(aggregator, check, kafka_instance, dd_run_check):
     """
     Testing Kafka_consumer check.
     """
-    kafka_consumer_check = KafkaCheck('kafka_consumer', {'max_partition_contexts': 1}, [kafka_instance])
-    dd_run_check(kafka_consumer_check)
+    dd_run_check(check(kafka_instance, {'max_partition_contexts': 1}))
 
     assert len(aggregator._metrics) == 1
 
 
-@pytest.mark.usefixtures('dd_environment')
-def test_consumer_config_error(caplog, dd_run_check):
+def test_consumer_config_error(caplog, check, dd_run_check):
     instance = {'kafka_connect_str': KAFKA_CONNECT_STR, 'tags': ['optional:tag1']}
-    kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [instance])
+    kafka_consumer_check = check(instance)
 
     dd_run_check(kafka_consumer_check, extract_message=True)
     assert 'monitor_unlisted_consumer_groups is False' in caplog.text
 
 
-@pytest.mark.usefixtures('dd_environment')
-def test_no_topics(aggregator, kafka_instance, dd_run_check):
+def test_no_topics(aggregator, check, kafka_instance, dd_run_check):
     kafka_instance['consumer_groups'] = {'my_consumer': {}}
-    kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [kafka_instance])
-    dd_run_check(kafka_consumer_check)
+    dd_run_check(check(kafka_instance))
 
     assert_check_kafka(aggregator, {'my_consumer': {'marvel': [0]}})
 
 
-@pytest.mark.usefixtures('dd_environment')
-def test_no_partitions(aggregator, kafka_instance, dd_run_check):
+def test_no_partitions(aggregator, check, kafka_instance, dd_run_check):
     kafka_instance['consumer_groups'] = {'my_consumer': {'marvel': []}}
-    kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [kafka_instance])
-    dd_run_check(kafka_consumer_check)
+    dd_run_check(check(kafka_instance))
 
     assert_check_kafka(aggregator, {'my_consumer': {'marvel': [0]}})
 
 
-@pytest.mark.usefixtures('dd_environment')
-def test_version_metadata(datadog_agent, kafka_instance, dd_run_check):
-    kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [kafka_instance])
+def test_version_metadata(datadog_agent, check, kafka_instance, dd_run_check):
+    kafka_consumer_check = check(kafka_instance)
     kafka_consumer_check.check_id = 'test:123'
 
     kafka_client = kafka_consumer_check.client.create_kafka_admin_client()
@@ -91,19 +80,19 @@ def test_version_metadata(datadog_agent, kafka_instance, dd_run_check):
         pytest.param(False, 2, ['topic:marvel'], id="Disabled"),
     ],
 )
-@pytest.mark.usefixtures('dd_environment')
-def test_monitor_broker_highwatermarks(dd_run_check, aggregator, is_enabled, metric_count, topic_tags):
+def test_monitor_broker_highwatermarks(dd_run_check, check, aggregator, is_enabled, metric_count, topic_tags):
     instance = {
         'kafka_connect_str': KAFKA_CONNECT_STR,
         'consumer_groups': {'my_consumer': {'marvel': None}},
         'monitor_all_broker_highwatermarks': is_enabled,
     }
-    check = KafkaCheck('kafka_consumer', {}, [instance])
-    dd_run_check(check)
+    dd_run_check(check(instance))
 
     # After refactor and library migration, write unit tests to assert expected metric values
     aggregator.assert_metric('kafka.broker_offset', count=metric_count)
+
     for tag in topic_tags:
         aggregator.assert_metric_has_tag('kafka.broker_offset', tag, count=2)
 
     aggregator.assert_metric_has_tag_prefix('kafka.broker_offset', 'partition', count=metric_count)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
