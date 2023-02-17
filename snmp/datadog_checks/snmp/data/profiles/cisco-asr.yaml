@@ -1,4 +1,4 @@
-# Profile for Cisco ASA devices
+# Profile for Cisco ASR devices
 
 extends:
   - _base.yaml
