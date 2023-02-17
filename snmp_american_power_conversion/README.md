@@ -6,7 +6,7 @@ APC provides IT physical infrastructure products including surge protection, and
 
 Configure the APC integration and collect SNMP metrics from devices such as APC Uninterruptible Power Supply (UPS) products.
 
-For details of monitored metrics see the [SNMP Data Collected][1] section.
+For details of monitored metrics, see the [SNMP Data Collected][1] section.
 
 ## Setup
 
