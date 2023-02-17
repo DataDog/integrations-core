@@ -13,7 +13,7 @@ from packaging.version import parse as parse_version
 from datadog_checks.dev import WaitFor, docker_run
 from datadog_checks.kafka_consumer import KafkaCheck
 
-from .common import DOCKER_IMAGE_PATH, HOST_IP, KAFKA_CONNECT_STR, KAFKA_VERSION, TOPICS
+from .common import DOCKER_IMAGE_PATH, HERE, HOST_IP, KAFKA_CONNECT_STR, KAFKA_VERSION, TOPICS
 from .runners import KConsumer, Producer
 
 # Dummy TLS certs
@@ -23,11 +23,8 @@ private_key = os.path.join(CERTIFICATE_DIR, 'server.pem')
 
 E2E_METADATA = {
     'custom_hosts': [('kafka1', '127.0.0.1'), ('kafka2', '127.0.0.1')],
-    'start_commands': [
-        'apt-get update',
-        'apt-get install -y build-essential',
-    ],
-}
+    'docker_volumes': ['{}/start_commands.sh:/tmp/start_commands.sh'.format(HERE)],
+    'start_commands': ['bash /tmp/start_commands.sh'],}
 
 INSTANCE = {
     'kafka_connect_str': KAFKA_CONNECT_STR,
