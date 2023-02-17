@@ -182,3 +182,49 @@ files:
         - type: multi_line
           name: logs_starts_with_equal_sign
           pattern: "="
+
+- name: auto_conf.yaml
+  options:
+  - template: ad_identifiers
+    overrides:
+      value.example:
+        - rabbitmq
+  - template: init_config
+    options: []
+  - template: instances
+    options:
+    - name: prometheus_plugin
+      description: |
+        Settings for talking to the Prometheus plugin of RabbitMQ.
+        Specify this section to trigger metric collection from the Prometheus plugin endpoints.
+      enabled: true
+      options:
+        - name: url
+          enabled: true
+          required: true
+          description: |
+            Base URL for OpenMetrics endpoints.
+          value:
+            type: string
+            example: 'http://%%host%%:15692'
+        - name: include_aggregated_endpoint
+          description: |
+            Whether or not to include metrics from the aggregated endpoint (/metrics).
+
+            Note: This option must be set to true when 'unaggregated_endpoint' is unspecified.
+          value:
+            type: boolean
+            example: true
+        - name: unaggregated_endpoint
+          description: |
+            Which  unaggregated endpoint to use.
+            The choices are:
+              - If the field is left unspecified, no endpoint is used.
+              - "detailed" means the /metrics/detailed endpoint is used.
+                You can also provide a query for this option, exactly as if you were making an HTTP request
+                to this endpoint. For example, `detailed?family=queue_consumer_count`.
+                You can specify this and the aggregated endpoint. In that case any duplicate metrics will
+                be taken from this endpoint and the corresponding aggregated ones dropped.
+          value:
+            type: string
+            example: "detailed"
