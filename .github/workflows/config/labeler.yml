@@ -360,6 +360,8 @@ integration/snmp_american_power_conversion:
 - snmp_american_power_conversion/**/*
 integration/snmp_arista:
 - snmp_arista/**/*
+integration/snmp_aruba:
+- snmp_aruba/**/*
 integration/snmp_chatsworth_products:
 - snmp_chatsworth_products/**/*
 integration/snmp_check_point:
