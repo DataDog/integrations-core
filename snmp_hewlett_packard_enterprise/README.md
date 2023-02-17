@@ -6,7 +6,7 @@ HPE is a multinational IT company that develops and works in servers, networking
 
 Configure the HPE integration and collect SNMP metrics from devices such as HP iLO and HP Proliant. 
 
-For details of monitored metrics see the [SNMP Data Collected][1] section.
+For details of monitored metrics, see the [SNMP Data Collected][1] section.
 
 ## Setup
 
