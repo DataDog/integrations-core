@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import copy
 import os
 import time
 
@@ -10,36 +11,34 @@ from kafka import KafkaConsumer
 from packaging.version import parse as parse_version
 
 from datadog_checks.dev import WaitFor, docker_run
+from datadog_checks.kafka_consumer import KafkaCheck
 
 from .common import DOCKER_IMAGE_PATH, HOST_IP, KAFKA_CONNECT_STR, KAFKA_VERSION, TOPICS
 from .runners import KConsumer, Producer
 
+# Dummy TLS certs
+CERTIFICATE_DIR = os.path.join(os.path.dirname(__file__), 'certificate')
+cert = os.path.join(CERTIFICATE_DIR, 'cert.cert')
+private_key = os.path.join(CERTIFICATE_DIR, 'server.pem')
 
-def find_topics():
-    consumer = KafkaConsumer(bootstrap_servers=KAFKA_CONNECT_STR, request_timeout_ms=1000)
-    topics = consumer.topics()
+E2E_METADATA = {
+    'custom_hosts': [('kafka1', '127.0.0.1'), ('kafka2', '127.0.0.1')],
+    'start_commands': [
+        'apt-get update',
+        'apt-get install -y build-essential',
+    ],
+}
 
-    # We expect to find 2 topics: `marvel` and `dc`
-    return len(topics) == 2
-
-
-def initialize_topics():
-    consumer = KConsumer(TOPICS)
-
-    with Producer():
-        with consumer:
-            time.sleep(5)
-
-
-@pytest.fixture(scope='session')
-def mock_local_kafka_hosts_dns():
-    mapping = {'kafka1': ('127.0.0.1', 9092), 'kafka2': ('127.0.0.1', 9093)}
-    with mock_local(mapping):
-        yield
+INSTANCE = {
+    'kafka_connect_str': KAFKA_CONNECT_STR,
+    'tags': ['optional:tag1'],
+    'consumer_groups': {'my_consumer': {'marvel': [0]}},
+    'broker_requests_batch_size': 1,
+}
 
 
 @pytest.fixture(scope='session')
-def dd_environment(mock_local_kafka_hosts_dns, e2e_instance):
+def dd_environment(mock_local_kafka_hosts_dns):
     """
     Start a kafka cluster and wait for it to be up and running.
     """
@@ -55,37 +54,22 @@ def dd_environment(mock_local_kafka_hosts_dns, e2e_instance):
         },
     ):
         yield {
-            'instances': [e2e_instance],
+            'instances': [INSTANCE],
             'init_config': {'kafka_timeout': 30},
         }, E2E_METADATA
 
 
-E2E_METADATA = {
-    'custom_hosts': [('kafka1', '127.0.0.1'), ('kafka2', '127.0.0.1')],
-    'start_commands': [
-        'apt-get update',
-        'apt-get install -y build-essential',
-    ],
-}
+@pytest.fixture
+def check():
+    return lambda instance, init_config=None: KafkaCheck('kafka_consumer', init_config or {}, [instance])
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture
 def kafka_instance():
-    return {
-        'kafka_connect_str': KAFKA_CONNECT_STR,
-        'tags': ['optional:tag1'],
-        'consumer_groups': {'my_consumer': {'marvel': [0]}},
-        'broker_requests_batch_size': 1,
-    }
+    return copy.deepcopy(INSTANCE)
 
 
-# Dummy TLS certs
-CERTIFICATE_DIR = os.path.join(os.path.dirname(__file__), 'certificate')
-cert = os.path.join(CERTIFICATE_DIR, 'cert.cert')
-private_key = os.path.join(CERTIFICATE_DIR, 'server.pem')
-
-
-@pytest.fixture(scope='session')
+@pytest.fixture
 def kafka_instance_tls():
     return {
         'kafka_connect_str': KAFKA_CONNECT_STR,
@@ -100,12 +84,27 @@ def kafka_instance_tls():
     }
 
 
-@pytest.fixture(scope='session')
-def e2e_instance(kafka_instance):
-    return kafka_instance
-
-
 def _get_bootstrap_server_flag():
     if KAFKA_VERSION != 'latest' and parse_version(KAFKA_VERSION) < parse_version('3.0'):
         return '--zookeeper zookeeper:2181'
     return '--bootstrap-server kafka1:19092'
+
+
+def find_topics():
+    consumer = KafkaConsumer(bootstrap_servers=KAFKA_CONNECT_STR, request_timeout_ms=1000)
+    return consumer.topics() == set(TOPICS)
+
+
+def initialize_topics():
+    consumer = KConsumer(TOPICS)
+
+    with Producer():
+        with consumer:
+            time.sleep(5)
+
+
+@pytest.fixture(scope='session')
+def mock_local_kafka_hosts_dns():
+    mapping = {'kafka1': ('127.0.0.1', 9092), 'kafka2': ('127.0.0.1', 9093)}
+    with mock_local(mapping):
+        yield

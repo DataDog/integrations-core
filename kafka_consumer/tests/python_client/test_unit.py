@@ -8,7 +8,7 @@ import mock
 import pytest
 
 from datadog_checks.base import ConfigurationError
-from datadog_checks.kafka_consumer import KafkaCheck
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.kafka_consumer.client.kafka_python_client import OAuthTokenProvider
 
 from ..common import KAFKA_CONNECT_STR, metrics
@@ -16,19 +16,18 @@ from ..common import KAFKA_CONNECT_STR, metrics
 pytestmark = [pytest.mark.unit]
 
 
-def test_gssapi(kafka_instance, dd_run_check):
+def test_gssapi(kafka_instance, dd_run_check, check):
     instance = copy.deepcopy(kafka_instance)
     instance['sasl_mechanism'] = 'GSSAPI'
     instance['security_protocol'] = 'SASL_PLAINTEXT'
     instance['sasl_kerberos_service_name'] = 'kafka'
-    kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [instance])
     # assert the check doesn't fail with:
     # Exception: Could not find main GSSAPI shared library.
     with pytest.raises(Exception, match='check_version'):
-        dd_run_check(kafka_consumer_check)
+        dd_run_check(check(instance))
 
 
-def test_tls_config_ok(kafka_instance_tls):
+def test_tls_config_ok(check, kafka_instance_tls):
     with mock.patch('datadog_checks.base.utils.tls.ssl') as ssl:
         with mock.patch('kafka.KafkaAdminClient') as kafka_admin_client:
 
@@ -39,7 +38,7 @@ def test_tls_config_ok(kafka_instance_tls):
             tls_context = mock.MagicMock()
             ssl.SSLContext.return_value = tls_context
 
-            kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [kafka_instance_tls])
+            kafka_consumer_check = check(kafka_instance_tls)
             kafka_consumer_check.client._create_kafka_client(clazz=kafka_admin_client)
 
             assert tls_context.check_hostname is True
@@ -78,7 +77,7 @@ def test_tls_config_ok(kafka_instance_tls):
         ),
     ],
 )
-def test_oauth_config(sasl_oauth_token_provider, expected_exception):
+def test_oauth_config(sasl_oauth_token_provider, check, expected_exception):
     instance = {
         'kafka_connect_str': KAFKA_CONNECT_STR,
         'monitor_unlisted_consumer_groups': True,
@@ -86,26 +85,24 @@ def test_oauth_config(sasl_oauth_token_provider, expected_exception):
         'sasl_mechanism': 'OAUTHBEARER',
     }
     instance.update(sasl_oauth_token_provider)
-    check = KafkaCheck('kafka_consumer', {}, [instance])
 
     with expected_exception:
-        check.check(instance)
+        check(instance).check(instance)
 
 
-def test_oauth_token_client_config(kafka_instance):
-    instance = copy.deepcopy(kafka_instance)
-    instance['kafka_client_api_version'] = "3.3.2"
-    instance['security_protocol'] = "SASL_PLAINTEXT"
-    instance['sasl_mechanism'] = "OAUTHBEARER"
-    instance['sasl_oauth_token_provider'] = {
+def test_oauth_token_client_config(check, kafka_instance):
+    kafka_instance['kafka_client_api_version'] = "3.3.2"
+    kafka_instance['security_protocol'] = "SASL_PLAINTEXT"
+    kafka_instance['sasl_mechanism'] = "OAUTHBEARER"
+    kafka_instance['sasl_oauth_token_provider'] = {
         "url": "http://fake.url",
         "client_id": "id",
         "client_secret": "secret",
     }
 
     with mock.patch('kafka.KafkaAdminClient') as kafka_admin_client:
-        kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [instance])
-        _ = kafka_consumer_check.client._create_kafka_client(clazz=kafka_admin_client)
+        kafka_consumer_check = check(kafka_instance)
+        kafka_consumer_check.client._create_kafka_client(clazz=kafka_admin_client)
         params = kafka_admin_client.call_args_list[0].kwargs
 
         assert params['security_protocol'] == 'SASL_PLAINTEXT'
@@ -124,12 +121,11 @@ def test_oauth_token_client_config(kafka_instance):
         ),
     ],
 )
-def test_tls_config_legacy(extra_config, expected_http_kwargs, kafka_instance):
+def test_tls_config_legacy(extra_config, expected_http_kwargs, check, kafka_instance):
     instance = kafka_instance
     instance.update(extra_config)
 
-    kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [instance])
-
+    kafka_consumer_check = check(instance)
     kafka_consumer_check.get_tls_context()
     actual_options = {
         k: v for k, v in kafka_consumer_check._tls_context_wrapper.config.items() if k in expected_http_kwargs
@@ -137,8 +133,6 @@ def test_tls_config_legacy(extra_config, expected_http_kwargs, kafka_instance):
     assert expected_http_kwargs == actual_options
 
 
-# Get rid of dd_environment when we refactor and fix expected behaviors in the check
-@pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize(
     'instance, expected_exception, metric_count',
     [
@@ -208,10 +202,11 @@ def test_tls_config_legacy(extra_config, expected_http_kwargs, kafka_instance):
         ),
     ],
 )
-def test_config(dd_run_check, instance, aggregator, expected_exception, metric_count):
-    check = KafkaCheck('kafka_consumer', {}, [instance])
+def test_config(check, instance, aggregator, expected_exception, metric_count):
     with expected_exception:
-        check.check(instance)
+        check(instance).check(instance)
 
     for m in metrics:
         aggregator.assert_metric(m, count=metric_count)
+
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())

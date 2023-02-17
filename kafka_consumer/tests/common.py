@@ -5,6 +5,7 @@ import os
 import socket
 
 from datadog_checks.dev import get_docker_hostname
+from datadog_checks.dev.utils import get_metadata_metrics
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 HOST = get_docker_hostname()
@@ -26,12 +27,14 @@ def assert_check_kafka(aggregator, consumer_groups):
             for partition in partitions:
                 tags = [f"topic:{topic}", f"partition:{partition}"] + ['optional:tag1']
                 for mname in BROKER_METRICS:
-                    aggregator.assert_metric(mname, tags=tags, at_least=1)
+                    aggregator.assert_metric(mname, tags=tags, count=1)
+
                 for mname in CONSUMER_METRICS:
                     aggregator.assert_metric(
                         mname,
                         tags=tags + [f"consumer_group:{name}"],
-                        at_least=1,
+                        count=1,
                     )
 
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
