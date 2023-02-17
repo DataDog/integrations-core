@@ -1,0 +1,41 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "39ecfe88-b733-43f6-b8c5-99450430b776",
+  "app_id": "snmp-aruba",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Collect SNMP metrics from your Aruba network devices.",
+    "title": "Aruba",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Category::Monitoring",
+      "Category::Notification",
+      "Category::Network"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "source_type_name": "Aruba",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      }
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {}
+}
