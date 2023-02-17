@@ -3,9 +3,6 @@ name: validations
 on:
   push:
     branches:
-    - master
-  pull_request:
-    branches:
     - *
 
 env:
