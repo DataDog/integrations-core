@@ -18,6 +18,7 @@ from datadog_checks.base.utils.http import AuthTokenOAuthReader
 from datadog_checks.kafka_consumer.client.kafka_client import KafkaClient
 from datadog_checks.kafka_consumer.constants import KAFKA_INTERNAL_TOPICS
 
+from .common import validate_consumer_groups
 
 class OAuthTokenProvider(AbstractTokenProvider):
     def __init__(self, **config):
@@ -70,7 +71,7 @@ class KafkaPythonClient(KafkaClient):
                 list_groups_future.add_callback(self._list_groups_callback, broker.nodeId)
                 self._consumer_futures.append(list_groups_future)
         elif self.config._consumer_groups:
-            self._validate_consumer_groups()
+            validate_consumer_groups(self.config._consumer_groups)
             for consumer_group in self.config._consumer_groups:
                 find_coordinator_future = self._find_coordinator_id_send_request(consumer_group)
                 find_coordinator_future.add_callback(self._find_coordinator_callback, consumer_group)

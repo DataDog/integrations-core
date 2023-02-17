@@ -2,7 +2,9 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from confluent_kafka.admin import AdminClient
-from confluent_kafka import Consumer, TopicPartition
+from confluent_kafka import Consumer, TopicPartition, ConsumerGroupTopicPartitions
+
+from .common import validate_consumer_groups
 
 EXCLUDED_TOPICS = ['__consumer_offsets', '__transaction_state']
 
@@ -19,7 +21,9 @@ class ConfluentKafkaClient:
     def kafka_client(self):
         if self._kafka_client is None:
             # self.conf is just the config options from librdkafka
-            self._kafka_client = AdminClient(self.conf)
+            self._kafka_client = AdminClient({
+                "bootstrap.servers": self.config._kafka_connect_str
+            })
 
         return self._kafka_client
 
@@ -49,20 +53,47 @@ class ConfluentKafkaClient:
     
 
     def get_consumer_offsets(self):
-        # {(consumer_group, topic, partition): offset}
-        # client.list_consumer_group_offsets(list_consumer_group_offsets_request)
-        # ConsumerGroupTopicPartitions object
-        pass
+        if self.config._monitor_unlisted_consumer_groups:
+            consumer_groups_future = self.kafka_client.list_consumer_groups()
+            try:
+                list_consumer_groups_result = consumer_groups_future.result()
+                for valid_consumer_group in list_consumer_groups_result.valid:
+                    futureMap = self.kafka_client.list_consumer_group_offsets([ConsumerGroupTopicPartitions(valid_consumer_group.group_id)])
+
+                for group_id, future in futureMap.items():
+                    try:
+                        response_offset_info = future.result()
+                        consumer_group = response_offset_info.group_id
+                        for topic_partition in response_offset_info.topic_partitions:
+                            if topic_partition.error:
+                                self.log.debug("Encountered error: " + topic_partition.error.str() + " Occurred with " +
+                                      topic_partition.topic + " [" + str(topic_partition.partition) + "]")
+                    except KafkaException as e:
+                        self.log.debug("Failed to fetch consumer offsets for {}: {}".format(group_id, e))
+
+                self._consumer_offsets[(consumer_group, topic_partition.topic, topic_partition.partition)] = topic_partition.offset
+            except Exception as e:
+                self.log.error("Failed to collect consumer offsets %s", e)
+        elif self.config._consumer_groups:
+            pass
+        else:
+            raise ConfigurationError(
+                "Cannot fetch consumer offsets because no consumer_groups are specified and "
+                "monitor_unlisted_consumer_groups is %s." % self.config._monitor_unlisted_consumer_groups
+            )
 
     def get_consumer_offsets_dict(self):
-        return {}
+        return self._consumer_offsets
 
     def get_highwater_offsets_dict(self):
-        self.log.error(self._highwater_offsets)
         return self._highwater_offsets
 
-    def get_partitions_for_topic(self):
-        pass
+    def get_partitions_for_topic(self, topic):
+        cluster_metadata = self.kafka_client.list_topics(topic)
+        topics = cluster_metadata.topics
+        partitions = list(topics[topic].partitions.keys())
+        return partitions or []
+
 
     def request_metadata_update(self):
         # May not need this

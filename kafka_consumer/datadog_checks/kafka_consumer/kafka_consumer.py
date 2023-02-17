@@ -73,7 +73,7 @@ class KafkaCheck(AgentCheck):
             consumer_offsets, highwater_offsets, self._context_limit - len(highwater_offsets)
         )
 
-        self.collect_broker_metadata()
+        # self.collect_broker_metadata()
 
     def report_highwater_offsets(self, highwater_offsets, contexts_limit):
         """Report the broker highwater offsets."""
