@@ -64,7 +64,6 @@ class ConfluentKafkaClient:
                     offset_futures = self.kafka_client.list_consumer_group_offsets(
                         [ConsumerGroupTopicPartitions(valid_consumer_group.group_id)]
                     )
-
             except Exception as e:
                 self.log.error("Failed to collect consumer offsets %s", e)
         elif self.config._consumer_groups:
@@ -92,12 +91,11 @@ class ConfluentKafkaClient:
                             topic_partition.topic,
                             str(topic_partition.partition),
                         )
+                    self._consumer_offsets[
+                        (consumer_group, topic_partition.topic, topic_partition.partition)
+                    ] = topic_partition.offset
             except KafkaException as e:
-                self.log.debug("Failed to fetch consumer offsets for %s: %s", group_id, e)
-
-        self._consumer_offsets[
-            (consumer_group, topic_partition.topic, topic_partition.partition)
-        ] = topic_partition.offset
+                self.log.debug("Failed to read consumer offsets for %s: %s", group_id, e)
 
     def get_consumer_offsets_dict(self):
         return self._consumer_offsets
