@@ -53,6 +53,7 @@ class ConfluentKafkaClient:
                         self._highwater_offsets[(topic, topic_partition.partition)] = high_offset
 
     def get_consumer_offsets(self):
+        # {(consumer_group, topic, partition): offset}
         offset_futures = {}
 
         if self.config._monitor_unlisted_consumer_groups:
