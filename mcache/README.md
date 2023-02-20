@@ -14,7 +14,7 @@ The Memcache check is included in the [Datadog Agent][1] package, so you don't n
 
 Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section
 
-When launching the Memcache server, set the binding protocal `-B` to `binary` or `auto`. Automatic (auto) is the default.
+When launching the Memcache server, set the binding protocol `-B` to `binary` or `auto`. Automatic (auto) is the default.
 
 #### Metric collection
 
