@@ -448,7 +448,7 @@ class ProcessCheck(AgentCheck):
         self.gauge('system.processes.number', len(pids), tags=tags)
 
         if len(pids) == 0:
-            self.warning("No matching process '%s' was found", self.name)
+            self.log.debug("No matching process '%s' was found", self.name)
             # reset the process caches now, something changed
             self.last_pid_cache_ts[self.name] = 0
             self.process_list_cache.reset()

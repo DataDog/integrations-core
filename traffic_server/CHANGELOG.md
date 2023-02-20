@@ -1,6 +1,10 @@
 # CHANGELOG - Traffic Server
 
-## 1.0.2 / 2022-05-25
+## 1.1.0 / 2022-09-16 / Agent 7.40.0
+
+* [Added] Update HTTP config spec templates. See [#12890](https://github.com/DataDog/integrations-core/pull/12890).
+
+## 1.0.2 / 2022-05-25 / Agent 7.37.0
 
 ## 1.0.1 / 2022-04-20 / Agent 7.36.0
 

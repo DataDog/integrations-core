@@ -15,12 +15,12 @@ e2e-env = false
 DDEV_TESTING_PLUGIN = "true"
 
 [[envs.default.matrix]]
-python = ["27", "38"]
+python = ["2.7", "3.8"]
 
 [envs.default.overrides]
 matrix.python.features = [
-  { value = "cli", if = ["38"] },
+  { value = "cli", if = ["3.8"] },
 ]
 matrix.python.scripts = [
-  { key = "test", value = "dd-test --ignore tests/tooling", if = ["27"] },
+  { key = "test", value = "_dd-test --ignore tests/tooling", if = ["2.7"] },
 ]

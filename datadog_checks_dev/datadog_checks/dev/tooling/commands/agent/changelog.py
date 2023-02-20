@@ -1,14 +1,14 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import json
 import os
 from io import StringIO
 
 import click
 
-from ....fs import read_file, write_file
-from ...constants import get_agent_changelog, get_root
+from ....fs import write_file
+from ...constants import get_agent_changelog
+from ...manifest_utils import Manifest
 from ..console import CONTEXT_SETTINGS, abort, echo_info
 from .common import get_changes_per_agent
 
@@ -66,14 +66,11 @@ def changelog(since, to, write, force):
             for entry in CHANGELOG_MANUAL_ENTRIES.get(agent, []):
                 changelog_contents.write(f'{entry}\n')
             for name, ver in version_changes.items():
-                # get the "display name" for the check
-                manifest_file = os.path.join(get_root(), name, 'manifest.json')
-                if os.path.exists(manifest_file):
-                    decoded = json.loads(read_file(manifest_file).strip())
-                    display_name = decoded.get('display_name')
-                else:
+                manifest = Manifest.load_manifest(name)
+                if manifest is None:
                     display_name = name
-
+                else:
+                    display_name = manifest.get_display_name()
                 display_name = DISPLAY_NAME_MAPPING.get(display_name, display_name)
 
                 breaking_notice = " **BREAKING CHANGE**" if ver[1] else ""

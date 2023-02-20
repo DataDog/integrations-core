@@ -1,38 +1,48 @@
 {
-  "aliases": [
-    "/integrations/httpcheck"
-  ],
-  "categories": [
-    "web",
-    "network"
-  ],
-  "creates_events": false,
-  "display_name": "HTTP",
-  "guid": "eb133a1f-697c-4143-bad3-10e72541fa9c",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "network.",
-  "metric_to_check": "network.http.response_time",
-  "name": "http_check",
-  "public_title": "Datadog-HTTP Check Integration",
-  "short_description": "Monitor any HTTP service for bad responses, soon-to-expire SSL certs, and more.",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "type": "check",
-  "integration_id": "network",
+  "manifest_version": "2.0.0",
+  "app_uuid": "3773283a-494f-497a-98cc-804520634a7a",
+  "app_id": "network",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor any HTTP service for bad responses, soon-to-expire SSL certs, and more.",
+    "title": "HTTP Check",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Web",
+      "Category::Network"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
-    },
-    "monitors": {},
-    "dashboards": {},
-    "service_checks": "assets/service_checks.json",
-    "logs": {},
-    "metrics_metadata": "metadata.csv"
+    "integration": {
+      "source_type_name": "HTTP",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "network.",
+        "check": "network.http.response_time",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    }
   }
 }

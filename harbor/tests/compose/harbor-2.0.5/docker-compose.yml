@@ -1,4 +1,4 @@
-version: '2.3'
+version: '3.8'
 services:
   registry:
     image: goharbor/registry-photon:v2.0.5
@@ -13,7 +13,7 @@ services:
     volumes:
       - ./config/registry/:/etc/registry/:z
     networks:
-      - harbor
+      - harbor-205
     dns_search: .
   registryctl:
     image: goharbor/harbor-registryctl:v2.0.5
@@ -33,7 +33,7 @@ services:
         source: ./config/registryctl/config.yml
         target: /etc/registryctl/config.yml
     networks:
-      - harbor
+      - harbor-205
     dns_search: .
   postgresql:
     image: goharbor/harbor-db:v2.0.5
@@ -47,7 +47,7 @@ services:
       - SETGID
       - SETUID
     networks:
-      harbor:
+      - harbor-205
     dns_search: .
     env_file:
       - ./config/db/env
@@ -71,8 +71,8 @@ services:
         source: ../common/secretkey
         target: /etc/core/key
     networks:
-      harbor:
-      harbor-chartmuseum:
+      harbor-205:
+      harbor-chartmuseum-205:
         aliases:
         - harbor-core
     dns_search: .
@@ -92,7 +92,7 @@ services:
       - SETUID
       - NET_BIND_SERVICE
     networks:
-      - harbor
+      - harbor-205
     dns_search: .
 
   jobservice:
@@ -112,7 +112,7 @@ services:
         source: ./config/jobservice/config.yml
         target: /etc/jobservice/config.yml
     networks:
-      - harbor
+      - harbor-205
     dns_search: .
     depends_on:
       - core
@@ -127,8 +127,8 @@ services:
       - SETGID
       - SETUID
     networks:
-      harbor:
-      harbor-chartmuseum:
+      harbor-205:
+      harbor-chartmuseum-205:
         aliases:
           - redis
     dns_search: .
@@ -147,7 +147,7 @@ services:
       - ./config/nginx:/etc/nginx:z
       - ../common/cert/:/etc/cert:z
     networks:
-      - harbor
+      - harbor-205
     dns_search: .
     ports:
       - 80:8080
@@ -168,12 +168,12 @@ services:
       - SETGID
       - SETUID
     networks:
-      - harbor-chartmuseum
+      - harbor-chartmuseum-205
     dns_search: .
     env_file:
       ./config/chartserver/env
 networks:
-  harbor:
+  harbor-205:
     external: false
-  harbor-chartmuseum:
+  harbor-chartmuseum-205:
     external: false

@@ -1,35 +1,48 @@
 {
-  "categories": [
-    "web",
-    "network"
-  ],
-  "creates_events": false,
-  "display_name": "External DNS",
-  "guid": "31eb63d5-15eb-42b3-912d-f8de47ea252a",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "external_dns.",
-  "metric_to_check": "external_dns.source.endpoints.total",
-  "name": "external_dns",
-  "public_title": "Datadog-External DNS Integration",
-  "short_description": "Track all your External DNS metrics with Datadog",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "type": "check",
-  "integration_id": "external-dns",
+  "manifest_version": "2.0.0",
+  "app_uuid": "b41539a6-8222-4d6e-92f9-0a9f8496acdd",
+  "app_id": "external-dns",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Track all your External DNS metrics with Datadog",
+    "title": "External DNS",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Web",
+      "Category::Network"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
-    },
-    "monitors": {},
-    "dashboards": {},
-    "service_checks": "assets/service_checks.json",
-    "logs": {},
-    "metrics_metadata": "metadata.csv"
+    "integration": {
+      "source_type_name": "External DNS",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "external_dns.",
+        "check": "external_dns.source.endpoints.total",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    }
   }
 }

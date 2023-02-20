@@ -1,36 +1,45 @@
 {
-  "display_name": "Azure Active Directory",
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "name": "azure_active_directory",
-  "metric_prefix": "azure_active_directory.",
-  "metric_to_check": "",
-  "creates_events": false,
-  "short_description": "Analyze your Azure Active Directory activity logs",
-  "guid": "1f6dbea8-db4a-4b0e-bfe8-f69efb3e877b",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "public_title": "Datadog-Azure Active Directory Integration",
-  "categories": [
-    "azure",
-    "log collection",
-    "security"
-  ],
-  "type": "check",
-  "is_public": true,
-  "integration_id": "azure-active-directory",
+  "manifest_version": "2.0.0",
+  "app_uuid": "8c4717a8-93f0-4de6-b79b-1e7f52c94895",
+  "app_id": "azure-active-directory",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Analyze your Azure Active Directory activity logs",
+    "title": "Azure Active Directory",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Azure",
+      "Category::Log Collection",
+      "Category::Security"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "dashboards": {},
-    "saved_views": {},
-    "monitors": {},
-    "service_checks": "assets/service_checks.json",
+    "integration": {
+      "source_type_name": "Azure Active Directory",
+      "configuration": {},
+      "events": {
+        "creates_events": false
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
     "logs": {
       "source": "azure.active_directory"
-    },
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

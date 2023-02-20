@@ -1,0 +1,10 @@
+[env.collectors.datadog-checks]
+
+[[envs.default.matrix]]
+python = ["3.8"]
+version = ["4.3"]
+
+[envs.default.overrides]
+matrix.version.env-vars = [
+  { key = "HIVEMQ_VERSION", value = "4.3.2", if = ["4.3"] },
+]

@@ -1,0 +1,12 @@
+[env.collectors.datadog-checks]
+
+[[envs.default.matrix]]
+python = ["2.7", "3.8"]
+version = ["1.0", "1.1", "1.7"]
+
+[envs.default.overrides]
+matrix.version.env-vars = [
+  { key = "MESOS_SLAVE_VERSION", value = "1.0.1-2.0.93.ubuntu1404", if = ["1.0"] },
+  { key = "MESOS_SLAVE_VERSION", value = "1.1.0-2.0.107.ubuntu1404", if = ["1.1"] },
+  { key = "MESOS_SLAVE_VERSION", value = "1.7.1", if = ["1.7"] },
+]

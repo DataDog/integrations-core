@@ -1,50 +1,64 @@
 {
-  "aliases": [
-    "/integrations/postgresql"
-  ],
-  "categories": [
-    "data store",
-    "log collection",
-    "autodiscovery"
-  ],
-  "creates_events": false,
-  "display_name": "Postgres",
-  "guid": "e9ca29d5-5b4f-4478-8989-20d89afda0c9",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "postgresql.",
-  "metric_to_check": [
-    "postgresql.connections",
-    "postgresql.max_connections"
-  ],
-  "name": "postgres",
-  "process_signatures": [
-    "postgres -D",
-    "pg_ctl start -l logfile",
-    "postgres -c 'pg_ctl start -D -l"
-  ],
-  "public_title": "Datadog-Postgres Integration",
-  "short_description": "Collect a wealth of database performance and health metrics.",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "type": "check",
-  "integration_id": "postgres",
+  "manifest_version": "2.0.0",
+  "app_uuid": "e6b3c5ec-b293-4a22-9145-277a12a9abd4",
+  "app_id": "postgres",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Collect a wealth of database performance and health metrics.",
+    "title": "Postgres",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Data Store",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
-    },
-    "monitors": {
-      "percent_usage_connections": "assets/monitors/percent_usage_connections.json",
-      "replication_delay": "assets/monitors/replication_delay.json"
+    "integration": {
+      "source_type_name": "Postgres",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "postgresql.",
+        "check": [
+          "postgresql.connections",
+          "postgresql.max_connections"
+        ],
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      },
+      "process_signatures": [
+        "postgres -D",
+        "pg_ctl start -l logfile",
+        "postgres -c 'pg_ctl start -D -l"
+      ]
     },
     "dashboards": {
       "postgresql": "assets/dashboards/postgresql_dashboard.json",
       "postgresql_screenboard": "assets/dashboards/postgresql_screenboard_dashboard.json"
+    },
+    "monitors": {
+      "percent_usage_connections": "assets/monitors/percent_usage_connections.json",
+      "replication_delay": "assets/monitors/replication_delay.json"
     },
     "saved_views": {
       "operations": "assets/saved_views/operations.json",
@@ -53,10 +67,8 @@
       "sessions_by_host": "assets/saved_views/sessions_by_host.json",
       "postgres_processes": "assets/saved_views/postgres_processes.json"
     },
-    "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "postgresql"
-    },
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

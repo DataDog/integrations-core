@@ -27,13 +27,13 @@ class AuthToken(BaseModel):
     writer: Optional[Mapping[str, Any]]
 
 
-class Components(BaseModel):
+class ComponentsDiscovery(BaseModel):
     class Config:
         allow_mutation = False
 
     exclude: Optional[Sequence[str]]
-    include: Optional[Sequence[str]]
-    tag: Optional[str]
+    include: Optional[Mapping[str, Any]]
+    limit: Optional[int]
 
 
 class Proxy(BaseModel):
@@ -56,7 +56,8 @@ class InstanceConfig(BaseModel):
     aws_region: Optional[str]
     aws_service: Optional[str]
     collect_default_jvm_metrics: Optional[bool]
-    components: Optional[Components]
+    components: Optional[Mapping[str, Any]]
+    components_discovery: Optional[ComponentsDiscovery]
     connect_timeout: Optional[float]
     default_exclude: Optional[Sequence[str]]
     default_include: Optional[Sequence[str]]

@@ -1,0 +1,27 @@
+[env.collectors.datadog-checks]
+check-types = true
+mypy-args = [
+  "--py2",
+  "--check-untyped-defs",
+  "--follow-imports",
+  "silent",
+  "datadog_checks/base/checks/base.py",
+  "datadog_checks/base/checks/win/winpdh_base.py",
+  "datadog_checks/base/checks/win/wmi/__init__.py",
+]
+
+[[envs.default.matrix]]
+python = ["2.7", "3.8"]
+
+[envs.default]
+features = ["db", "deps", "http", "json", "kube"]
+dependencies = [
+  "datadog_checks_tests_helper @ {root:uri}/../datadog_checks_tests_helper",
+]
+e2e-env = false
+
+[envs.default.env-vars]
+PIP_EXTRA_INDEX_URL = "https://datadoghq.dev/ci-wheels/bin"
+DDEV_SKIP_GENERIC_TAGS_CHECK = "true"
+
+[envs.bench]

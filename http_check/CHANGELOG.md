@@ -1,6 +1,18 @@
 # CHANGELOG - http_check
 
-## 8.0.1 / 2022-05-23
+## 8.2.0 / 2023-01-20
+
+* [Added] Allow certificate expiration checks no matter what ssl/tls verification settings are. See [#13527](https://github.com/DataDog/integrations-core/pull/13527). Thanks [scott-shields-github](https://github.com/scott-shields-github).
+
+## 8.1.1 / 2022-12-09 / Agent 7.42.0
+
+* [Fixed] Update cryptography dependency. See [#13367](https://github.com/DataDog/integrations-core/pull/13367).
+
+## 8.1.0 / 2022-09-16 / Agent 7.40.0
+
+* [Added] Update HTTP config spec templates. See [#12890](https://github.com/DataDog/integrations-core/pull/12890).
+
+## 8.0.1 / 2022-05-23 / Agent 7.37.0
 
 * [Fixed] Clarify no cert service check message. See [#12064](https://github.com/DataDog/integrations-core/pull/12064).
 
@@ -190,60 +202,60 @@
 
 ## 3.1.1 / 2018-12-07 / Agent 6.8.0
 
-* [Fixed] Fix unicode handling of log messages. See [#2700][1].
+* [Fixed] Fix unicode handling of log messages. See [#2700](https://github.com/DataDog/integrations-core/pull/2700).
 
 ## 3.1.0 / 2018-11-30
 
-* [Added] Add option to set `stream` parameter on requests. See [#2658][2]. Thanks [syskill][3].
-* [Added] Upgrade cryptography. See [#2659][4].
-* [Added] Upgrade requests. See [#2481][5].
-* [Fixed] Use raw string literals when \ is present. See [#2465][6].
-* [Added] Fix unicode handling on A6. See [#2435][7].
-* [Added] Validate that the url starts with the scheme. See [#2393][8].
+* [Added] Add option to set `stream` parameter on requests. See [#2658](https://github.com/DataDog/integrations-core/pull/2658). Thanks [syskill](https://github.com/syskill).
+* [Added] Upgrade cryptography. See [#2659](https://github.com/DataDog/integrations-core/pull/2659).
+* [Added] Upgrade requests. See [#2481](https://github.com/DataDog/integrations-core/pull/2481).
+* [Fixed] Use raw string literals when \ is present. See [#2465](https://github.com/DataDog/integrations-core/pull/2465).
+* [Added] Fix unicode handling on A6. See [#2435](https://github.com/DataDog/integrations-core/pull/2435).
+* [Added] Validate that the url starts with the scheme. See [#2393](https://github.com/DataDog/integrations-core/pull/2393).
 
 ## 3.0.0 / 2018-10-12 / Agent 6.6.0
 
-* [Added] Handle SSL exception and send a DOWN service check status. See [#2332][9].
-* [Changed] Refactoring: isolate config parsing. See [#2321][10].
+* [Added] Handle SSL exception and send a DOWN service check status. See [#2332](https://github.com/DataDog/integrations-core/pull/2332).
+* [Changed] Refactoring: isolate config parsing. See [#2321](https://github.com/DataDog/integrations-core/pull/2321).
 
 ## 2.4.0 / 2018-10-01
 
-* [Fixed] Fix fetching ca_certs from init_config. See [#2318][11].
-* [Added] Allow configuring cert expiration time in seconds. See [#2290][12].
+* [Fixed] Fix fetching ca_certs from init_config. See [#2318](https://github.com/DataDog/integrations-core/pull/2318).
+* [Added] Allow configuring cert expiration time in seconds. See [#2290](https://github.com/DataDog/integrations-core/pull/2290).
 
 ## 2.3.0 / 2018-09-04 / Agent 6.5.0
 
-* [Fixed] Update cryptography to 2.3. See [#1927][13].
-* [Fixed] fix link in config option description. See [#1865][14].
-* [Added] support NTLM auth. See [#1812][15].
-* [Fixed] Add data files to the wheel package. See [#1727][16].
+* [Fixed] Update cryptography to 2.3. See [#1927](https://github.com/DataDog/integrations-core/pull/1927).
+* [Fixed] fix link in config option description. See [#1865](https://github.com/DataDog/integrations-core/pull/1865).
+* [Added] support NTLM auth. See [#1812](https://github.com/DataDog/integrations-core/pull/1812).
+* [Fixed] Add data files to the wheel package. See [#1727](https://github.com/DataDog/integrations-core/pull/1727).
 
 ## 2.2.0 / 2018-06-20 / Agent 6.3.1
 
-* [Fixed] Add support client auth for http check cert expiration.. See [#1754][17].
-* [Fixed] Check will now send data with PUT, DELETE, and PATCH methods--not just POST. See [#1718][18].
+* [Fixed] Add support client auth for http check cert expiration.. See [#1754](https://github.com/DataDog/integrations-core/pull/1754).
+* [Fixed] Check will now send data with PUT, DELETE, and PATCH methods--not just POST. See [#1718](https://github.com/DataDog/integrations-core/pull/1718).
 
 ## 2.1.0 / 2018-06-06
 
-* [Fixed] fixes AttributeError when running on 6.2.1. See [#1617][19].
-* [Fixed] Suppress InsecureRequestWarning for urllib3 for http_check. See [#1574][20].
-* [Added] Allow users to disable matching hostnames verification in ssl cert verification. See [#1519][21].
-* [Changed] Emit a warning if disable_ssl_validation is unset. See [#1517][22].
+* [Fixed] fixes AttributeError when running on 6.2.1. See [#1617](https://github.com/DataDog/integrations-core/pull/1617).
+* [Fixed] Suppress InsecureRequestWarning for urllib3 for http_check. See [#1574](https://github.com/DataDog/integrations-core/pull/1574).
+* [Added] Allow users to disable matching hostnames verification in ssl cert verification. See [#1519](https://github.com/DataDog/integrations-core/pull/1519).
+* [Changed] Emit a warning if disable_ssl_validation is unset. See [#1517](https://github.com/DataDog/integrations-core/pull/1517).
 
 ## 2.0.1 / 2018-05-11
 
-* [BUGFIX] Properly detect default certificate file for all supported Platforms. See [#1340][23]
+* [BUGFIX] Properly detect default certificate file for all supported Platforms. See [#1340](https://github.com/DataDog/integrations-core/pull/1340)
 
 ## 2.0.0 / 2018-03-23
 
 * [BUGFIX] Make import of default certificate file relative rather than absolute
   Fixes loading problem on Windows, and/or allows check to be installed in other
   location
-* [DEPRECATION] Remove the `skip_event` option from the check. See [#1054][24]
+* [DEPRECATION] Remove the `skip_event` option from the check. See [#1054](https://github.com/DataDog/integrations-core/pull/1054)
 
 ## 1.4.0 / 2018-02-13
 
-* [IMPROVEMENT] begin deprecation of `no_proxy` config flag in favor of `skip_proxy`. See [#1057][25].
+* [IMPROVEMENT] begin deprecation of `no_proxy` config flag in favor of `skip_proxy`. See [#1057](https://github.com/DataDog/integrations-core/pull/1057).
 
 ## 1.3.1 / 2018-01-17
 
@@ -252,64 +264,27 @@
 ## 1.3.0 / 2018-01-10
 
 * [FEATURE] Report http connect status as metrics. See #659.
-* [BUGFIX] User-defined "url" tag replaces default "url" tag. See[#301][26]. (Thanks [@colinmollenhour][27])
-* [FEATURE] Add configurable ssl server name for cert expiration check. See[#905][28].
+* [BUGFIX] User-defined "url" tag replaces default "url" tag. See[#301](https://github.com/DataDog/integrations-core/pull/301). (Thanks [@colinmollenhour](https://github.com/colinmollenhour))
+* [FEATURE] Add configurable ssl server name for cert expiration check. See[#905](https://github.com/DataDog/integrations-core/pull/905).
 
 ## 1.2.0 / 2017-10-10
 
-* [FEATURE] Add support for client side certificate. See[#688][29]. (Thanks [@xkrt][30])
-* [IMPROVEMENT] Make tornado optional. See [#758][31].
+* [FEATURE] Add support for client side certificate. See[#688](https://github.com/DataDog/integrations-core/issues/688). (Thanks [@xkrt](https://github.com/xkrt))
+* [IMPROVEMENT] Make tornado optional. See [#758](https://github.com/DataDog/integrations-core/issues/758).
 
 ## 1.1.2 / 2017-08-28
 
-* [IMPROVEMENT] Improved logging. See [#652][32].
+* [IMPROVEMENT] Improved logging. See [#652](https://github.com/DataDog/integrations-core/issues/652).
 
 ## 1.1.1 / 2017-07-18
 
-* [BUGFIX] Fix response tuple arity in SSL certificate check. See[#461][33].
+* [BUGFIX] Fix response tuple arity in SSL certificate check. See[#461](https://github.com/DataDog/integrations-core/issues/461).
 
 ## 1.1.0 / 2017-06-05
 
-* [FEATURE] Add support for SOAP requests. See [#328][34].
-* [FEATURE] Add gauge metric for ssl days left. See [#249][35].
+* [FEATURE] Add support for SOAP requests. See [#328](https://github.com/DataDog/integrations-core/issues/328).
+* [FEATURE] Add gauge metric for ssl days left. See [#249](https://github.com/DataDog/integrations-core/issues/249).
 
 ## 1.0.0 / 2017-03-22
 
 * [FEATURE] adds http_check integration.
-
-<!--- The following link definition list is generated by PimpMyChangelog --->
-[1]: https://github.com/DataDog/integrations-core/pull/2700
-[2]: https://github.com/DataDog/integrations-core/pull/2658
-[3]: https://github.com/syskill
-[4]: https://github.com/DataDog/integrations-core/pull/2659
-[5]: https://github.com/DataDog/integrations-core/pull/2481
-[6]: https://github.com/DataDog/integrations-core/pull/2465
-[7]: https://github.com/DataDog/integrations-core/pull/2435
-[8]: https://github.com/DataDog/integrations-core/pull/2393
-[9]: https://github.com/DataDog/integrations-core/pull/2332
-[10]: https://github.com/DataDog/integrations-core/pull/2321
-[11]: https://github.com/DataDog/integrations-core/pull/2318
-[12]: https://github.com/DataDog/integrations-core/pull/2290
-[13]: https://github.com/DataDog/integrations-core/pull/1927
-[14]: https://github.com/DataDog/integrations-core/pull/1865
-[15]: https://github.com/DataDog/integrations-core/pull/1812
-[16]: https://github.com/DataDog/integrations-core/pull/1727
-[17]: https://github.com/DataDog/integrations-core/pull/1754
-[18]: https://github.com/DataDog/integrations-core/pull/1718
-[19]: https://github.com/DataDog/integrations-core/pull/1617
-[20]: https://github.com/DataDog/integrations-core/pull/1574
-[21]: https://github.com/DataDog/integrations-core/pull/1519
-[22]: https://github.com/DataDog/integrations-core/pull/1517
-[23]: https://github.com/DataDog/integrations-core/pull/1340
-[24]: https://github.com/DataDog/integrations-core/pull/1054
-[25]: https://github.com/DataDog/integrations-core/pull/1057
-[26]: https://github.com/DataDog/integrations-core/pull/301
-[27]: https://github.com/colinmollenhour
-[28]: https://github.com/DataDog/integrations-core/pull/905
-[29]: https://github.com/DataDog/integrations-core/issues/688
-[30]: https://github.com/xkrt
-[31]: https://github.com/DataDog/integrations-core/issues/758
-[32]: https://github.com/DataDog/integrations-core/issues/652
-[33]: https://github.com/DataDog/integrations-core/issues/461
-[34]: https://github.com/DataDog/integrations-core/issues/328
-[35]: https://github.com/DataDog/integrations-core/issues/249

@@ -1,40 +1,54 @@
 {
-  "display_name": "Twistlock",
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "name": "twistlock",
-  "metric_prefix": "twistlock.",
-  "metric_to_check": "twistlock.images.cve.details",
-  "creates_events": true,
-  "short_description": "Twistlock is a container security scanner",
-  "guid": "59082b73-62f4-48d4-83f8-af3d5576eae1",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "public_title": "Datadog-Prisma Cloud Compute Edition Integration",
-  "categories": [
-    "security",
-    "log collection",
-    "autodiscovery"
-  ],
-  "type": "check",
-  "is_public": true,
-  "integration_id": "twistlock",
+  "manifest_version": "2.0.0",
+  "app_uuid": "b10f1447-4e25-4c76-ab05-911cde5df5c6",
+  "app_id": "twistlock",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Twistlock is a container security scanner",
+    "title": "Prisma Cloud Compute Edition",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Security",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "Twistlock",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": true
+      },
+      "metrics": {
+        "prefix": "twistlock.",
+        "check": "twistlock.images.cve.details",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
     },
-    "monitors": {},
     "dashboards": {
       "Twistlock": "assets/dashboards/overview.json"
     },
-    "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "twistlock"
-    },
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

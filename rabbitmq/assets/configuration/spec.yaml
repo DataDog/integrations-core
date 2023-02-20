@@ -7,131 +7,172 @@ files:
     - template: init_config/http
     - template: init_config/default
   - template: instances
+    multiple_instances_defined: true
     options:
-    - name: rabbitmq_api_url
-      required: true
-      description: |
-        For every instance a 'rabbitmq_api_url' must be provided, pointing to the api
-        url of the RabbitMQ Management Plugin (http://www.rabbitmq.com/management.html).
-      value:
-        type: string
-        example: http://localhost:15672/api/
-    - name: tag_families
-      description: To tag queue "families" based off of regex matching.
-      value:
-        type: boolean
-        example: false
-    - name: collect_node_metrics
-      description: Node metrics are collected by default. Setting this parameter to false skips node metric collection.
-      value:
-        type: boolean
-        example: true
-    - name: nodes
-      description: |
-        Use the `nodes` parameters to specify the nodes you'd like to
-        collect metrics on (up to 100 nodes).
-        If you have less than 100 nodes, you don't have to set this parameter,
-        the metrics are collected on all the nodes by default.
-      value:
-        type: array
-        items:
+    - name: OpenMetrics
+      description: RabbitMQ Prometheus Plugin Example
+      options:
+      - name: prometheus_plugin
+        description: |
+          Settings for talking to the Prometheus plugin of RabbitMQ.
+          Specify this section to trigger metric collection from the Prometheus plugin endpoints.
+        enabled: true
+        options:
+          - name: url
+            enabled: true
+            required: true
+            description: |
+              Base URL for OpenMetrics endpoints.
+            value:
+              type: string
+              example: 'http://localhost:15692'
+          - name: include_aggregated_endpoint
+            description: |
+              Whether or not to include metrics from the aggregated endpoint (/metrics).
+
+              Note: This option must be set to true when 'unaggregated_endpoint' is unspecified.
+            value:
+              type: boolean
+              example: true
+          - name: unaggregated_endpoint
+            description: |
+              Which  unaggregated endpoint to use.
+              The choices are:
+                - If the field is left unspecified, no endpoint is used.
+                - "detailed" means the /metrics/detailed endpoint is used.
+                  You can also provide a query for this option, exactly as if you were making an HTTP request
+                  to this endpoint. For example, `detailed?family=queue_consumer_count`.
+                  You can specify this and the aggregated endpoint. In that case any duplicate metrics will
+                  be taken from this endpoint and the corresponding aggregated ones dropped.
+            value:
+              type: string
+              example: "detailed"
+      - template: instances/openmetrics
+        overrides:
+          openmetrics_endpoint.required: false
+          openmetrics_endpoint.hidden: true
+    - name: RabbitMQ Management Plugin
+      description: RabbitMQ Management Plugin Example
+      options:
+      - name: rabbitmq_api_url
+        description: |
+          For every instance a 'rabbitmq_api_url' must be provided, pointing to the api
+          url of the RabbitMQ Management Plugin (http://www.rabbitmq.com/management.html).
+        value:
           type: string
-        example:
-          - <NODE_NAME_1>
-          - <NODE_NAME_2>
-    - name: nodes_regexes
-      description: |
-        Use the `nodes_regexes` parameters to specify one or multiple regex to
-        match the nodes you'd like to collect metrics on (up to 100 nodes).
-        If you have less than 100 nodes, you don't have to set this parameter,
-        the metrics are collected on all the nodes by default.
-      value:
-        type: array
-        items:
-          type: string
-        example:
-          - <REGEX>
-    - name: queues
-      description: |
-        Use the `queues` parameters to specify the queues you'd like to
-        collect metrics on (up to 200 queues).
-        If you have less than 200 queues, you don't have to set this parameter,
-        the metrics are collected on all the queues by default.
-        If you have set up vhosts, set the queue names as `vhost_name/queue_name`.
-        If you have `tag_families` enabled, the first captured group in the regex
-        is used as the queue_family tag if no named group is specified.
-        If you have named groups the tag names will be the named groups in regex.
-        If you use multiplies groups and not all are named, the tags are going to be
-        used only on the groups that contains names.
-      value:
-        type: array
-        items:
-          type: string
-        example:
-          - <QUEUE_NAME_1>
-          - <QUEUE_NAME_2>
-    - name: queues_regexes
-      description: |
-        Use the `queues_regexes` parameters to specify one or multiple regex to to match
-        the queues you'd like to collect metrics on (up to 200 queues).
-        If you have vhosts set up, the regex pattern needs to be formatted with vhost
-        in the format of `<vhost>/<queue_name>`.
-        If you have less than 200 queues, you don't have to set this parameter,
-        the metrics are collected on all the queues by default.
-        If you have `tag_families` enabled, the first captured group in the regex
-        is used as the queue_family tag.
-        If you have named groups the tag names will be the named groups in regex.
-        If you use multiplies groups and not all have are named, the tags are going to be
-        used only on the groups that contains names.
-      value:
-        type: array
-        items:
-          type: string
-        example:
-          - <REGEX>
-    - name: exchanges
-      description: |
-        Use the `exchanges` parameters to specify the exchanges you'd like to
-        collect metrics on (up to 50 exchanges).
-        If you have less than 50 exchanges, you don't have to set this parameter,
-        the metrics is collected on all the exchanges by default.
-      value:
-        type: array
-        items:
-          type: string
-        example:
-          - <EXCHANGE_1>
-          - <EXCHANGE_2>
-    - name: exchanges_regexes
-      description: |
-        Use the `exchanges_regexes` parameters to specify one or multiple regex to to match
-        the exchanges you'd like to collect metrics on (up to 50 exchanges).
-        If you have less than 50 exchanges, you don't have to set this parameter,
-        the metrics is collected on all the exchanges by default.
-      value:
-        type: array
-        items:
-          type: string
-        example:
-          - <REGEX>
-    - name: vhosts
-      description: |
-        Service checks and `rabbitmq.connections` metric:
-        By default a list of all vhosts is fetched and each one is checked using the aliveness
-        API and the metric `rabbitmq.connections` is collected.
-        If you prefer only certain vhosts to be monitored with service checks
-        and the number of `connections` then you can list the vhosts you care about in this parameter.
-      value:
-        type: array
-        items:
-          type: string
-        example:
-          - <VHOST_NAME_1>
-          - <VHOST_NAME_2>
-    - template: instances/http
-      overrides:
-        use_legacy_auth_encoding.value.example: false
-    - template: instances/default
+          example: http://localhost:15672/api/
+      - name: tag_families
+        description: To tag queue "families" based off of regex matching.
+        value:
+          type: boolean
+          example: false
+      - name: collect_node_metrics
+        description: Node metrics are collected by default. Setting this parameter to false skips node metric collection.
+        value:
+          type: boolean
+          example: true
+      - name: nodes
+        description: |
+          Use the `nodes` parameters to specify the nodes you'd like to
+          collect metrics on (up to 100 nodes).
+          If you have less than 100 nodes, you don't have to set this parameter,
+          the metrics are collected on all the nodes by default.
+        value:
+          type: array
+          items:
+            type: string
+          example:
+            - <NODE_NAME_1>
+            - <NODE_NAME_2>
+      - name: nodes_regexes
+        description: |
+          Use the `nodes_regexes` parameters to specify one or multiple regex to
+          match the nodes you'd like to collect metrics on (up to 100 nodes).
+          If you have less than 100 nodes, you don't have to set this parameter,
+          the metrics are collected on all the nodes by default.
+        value:
+          type: array
+          items:
+            type: string
+          example:
+            - <REGEX>
+      - name: queues
+        description: |
+          Use the `queues` parameters to specify the queues you'd like to
+          collect metrics on (up to 200 queues).
+          If you have less than 200 queues, you don't have to set this parameter,
+          the metrics are collected on all the queues by default.
+          If you have set up vhosts, set the queue names as `vhost_name/queue_name`.
+          If you have `tag_families` enabled, the first captured group in the regex
+          is used as the queue_family tag if no named group is specified.
+          If you have named groups the tag names will be the named groups in regex.
+          If you use multiplies groups and not all are named, the tags are going to be
+          used only on the groups that contains names.
+        value:
+          type: array
+          items:
+            type: string
+          example:
+            - <QUEUE_NAME_1>
+            - <QUEUE_NAME_2>
+      - name: queues_regexes
+        description: |
+          Use the `queues_regexes` parameters to specify one or multiple regex to to match
+          the queues you'd like to collect metrics on (up to 200 queues).
+          If you have vhosts set up, the regex pattern needs to be formatted with vhost
+          in the format of `<vhost>/<queue_name>`.
+          If you have less than 200 queues, you don't have to set this parameter,
+          the metrics are collected on all the queues by default.
+          If you have `tag_families` enabled, the first captured group in the regex
+          is used as the queue_family tag.
+          If you have named groups the tag names will be the named groups in regex.
+          If you use multiplies groups and not all have are named, the tags are going to be
+          used only on the groups that contains names.
+        value:
+          type: array
+          items:
+            type: string
+          example:
+            - <REGEX>
+      - name: exchanges
+        description: |
+          Use the `exchanges` parameters to specify the exchanges you'd like to
+          collect metrics on (up to 50 exchanges).
+          If you have less than 50 exchanges, you don't have to set this parameter,
+          the metrics is collected on all the exchanges by default.
+        value:
+          type: array
+          items:
+            type: string
+          example:
+            - <EXCHANGE_1>
+            - <EXCHANGE_2>
+      - name: exchanges_regexes
+        description: |
+          Use the `exchanges_regexes` parameters to specify one or multiple regex to to match
+          the exchanges you'd like to collect metrics on (up to 50 exchanges).
+          If you have less than 50 exchanges, you don't have to set this parameter,
+          the metrics is collected on all the exchanges by default.
+        value:
+          type: array
+          items:
+            type: string
+          example:
+            - <REGEX>
+      - name: vhosts
+        description: |
+          Service checks and `rabbitmq.connections` metric:
+          By default a list of all vhosts is fetched and each one is checked using the aliveness
+          API and the metric `rabbitmq.connections` is collected.
+          If you prefer only certain vhosts to be monitored with service checks
+          and the number of `connections` then you can list the vhosts you care about in this parameter.
+        value:
+          type: array
+          items:
+            type: string
+          example:
+            - <VHOST_NAME_1>
+            - <VHOST_NAME_2>
   - template: logs
     example:
     - type: file
@@ -141,3 +182,49 @@ files:
         - type: multi_line
           name: logs_starts_with_equal_sign
           pattern: "="
+
+- name: auto_conf.yaml
+  options:
+  - template: ad_identifiers
+    overrides:
+      value.example:
+        - rabbitmq
+  - template: init_config
+    options: []
+  - template: instances
+    options:
+    - name: prometheus_plugin
+      description: |
+        Settings for talking to the Prometheus plugin of RabbitMQ.
+        Specify this section to trigger metric collection from the Prometheus plugin endpoints.
+      enabled: true
+      options:
+        - name: url
+          enabled: true
+          required: true
+          description: |
+            Base URL for OpenMetrics endpoints.
+          value:
+            type: string
+            example: 'http://%%host%%:15692'
+        - name: include_aggregated_endpoint
+          description: |
+            Whether or not to include metrics from the aggregated endpoint (/metrics).
+
+            Note: This option must be set to true when 'unaggregated_endpoint' is unspecified.
+          value:
+            type: boolean
+            example: true
+        - name: unaggregated_endpoint
+          description: |
+            Which  unaggregated endpoint to use.
+            The choices are:
+              - If the field is left unspecified, no endpoint is used.
+              - "detailed" means the /metrics/detailed endpoint is used.
+                You can also provide a query for this option, exactly as if you were making an HTTP request
+                to this endpoint. For example, `detailed?family=queue_consumer_count`.
+                You can specify this and the aggregated endpoint. In that case any duplicate metrics will
+                be taken from this endpoint and the corresponding aggregated ones dropped.
+          value:
+            type: string
+            example: "detailed"

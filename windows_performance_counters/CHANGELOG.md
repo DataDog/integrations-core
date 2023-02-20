@@ -1,5 +1,17 @@
 # CHANGELOG - Windows performance counters
 
+## 1.5.0 / 2022-12-09 / Agent 7.42.0
+
+* [Added] Implement multi-instance counters without Windows PdhEnumObjects API. See [#13243](https://github.com/DataDog/integrations-core/pull/13243).
+
+## 1.4.0 / 2022-09-16 / Agent 7.40.0
+
+* [Added] Refactor tooling for getting the current env name. See [#12939](https://github.com/DataDog/integrations-core/pull/12939).
+
+## 1.3.0 / 2022-08-05 / Agent 7.39.0
+
+* [Added] Add functionality to load the legacy version of the integration. See [#12396](https://github.com/DataDog/integrations-core/pull/12396).
+
 ## 1.2.0 / 2022-04-05 / Agent 7.36.0
 
 * [Added] Add metric_patterns options to filter all metric submission by a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).

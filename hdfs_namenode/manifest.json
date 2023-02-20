@@ -1,40 +1,54 @@
 {
-  "categories": [
-    "processing",
-    "os & system",
-    "log collection",
-    "autodiscovery"
-  ],
-  "creates_events": false,
-  "display_name": "HDFS Namenode",
-  "guid": "41454590-0a25-4146-9c74-9d377db42764",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "hdfs.",
-  "metric_to_check": "hdfs.namenode.capacity_used",
-  "name": "hdfs_namenode",
-  "public_title": "HDFS Namenode",
-  "short_description": "Track cluster disk usage, volume failures, dead DataNodes, and more.",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os"
-  ],
-  "type": "check",
-  "integration_id": "hdfs-namenode",
+  "manifest_version": "2.0.0",
+  "app_uuid": "58a6fbbc-fc0a-47c5-8688-e3713003c6d6",
+  "app_id": "hdfs-namenode",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Track cluster disk usage, volume failures, dead DataNodes, and more.",
+    "title": "HDFS Namenode",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Category::Processing",
+      "Category::OS & System",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "HDFS Namenode",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "hdfs.",
+        "check": "hdfs.namenode.capacity_used",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
     },
-    "monitors": {},
     "dashboards": {
       "hdfs_namenode": "assets/dashboards/hdfs_namenode_dashboard.json"
     },
-    "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "hdfs_namenode"
-    },
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

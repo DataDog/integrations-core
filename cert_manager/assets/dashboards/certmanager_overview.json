@@ -1,0 +1,540 @@
+{
+  "title": "Cert Manager Overview",
+  "description": "",
+  "widgets": [
+    {
+      "id": 0,
+      "definition": {
+        "title": "About Cert-Manager",
+        "title_align": "center",
+        "type": "group",
+        "show_title": true,
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 2108072626095020,
+            "definition": {
+              "type": "image",
+              "url": "https://raw.githubusercontent.com/cncf/artwork/master/projects/cert-manager/stacked/color/cert-manager-stacked-color.png",
+              "sizing": "contain",
+              "margin": "sm"
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 3,
+              "height": 4
+            }
+          },
+          {
+            "id": 7423501451853801,
+            "definition": {
+              "type": "note",
+              "content": "cert-manager is a Kubernetes add-on to automate the management and issuance of TLS certificates from various issuing sources.\n\nIt will ensure certificates are valid and up to date periodically, and attempt to renew certificates at an appropriate time before expiry.\n\n##### [**Datadog Cert-Manager integration docs&nbsp;↗**](https://docs.datadoghq.com/integrations/cert_manager/)",
+              "background_color": "transparent",
+              "font_size": "16",
+              "text_align": "left",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 3,
+              "y": 0,
+              "width": 3,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 6,
+        "height": 5
+      }
+    },
+    {
+      "id": 1,
+      "definition": {
+        "title": "Overview",
+        "type": "group",
+        "show_title": true,
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 5241763733587486,
+            "definition": {
+              "title": "Cert-Manager Pods",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "hostmap",
+              "requests": {
+                "fill": {
+                  "q": "avg:process.stat.container.cpu.total_pct{kube_container_name:cert-manager,$cluster_name} by {host}"
+                }
+              },
+              "node_type": "container",
+              "no_metric_hosts": true,
+              "no_group_hosts": true,
+              "group": [
+                "kube_deployment"
+              ],
+              "scope": [
+                "kube_container_name:cert-manager"
+              ],
+              "style": {
+                "palette": "green_to_orange",
+                "palette_flip": false
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 5530919959649137,
+            "definition": {
+              "title": "OpenMetrics Endpoint Status",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "check_status",
+              "check": "cert_manager.openmetrics.health",
+              "grouping": "cluster",
+              "group_by": [],
+              "tags": []
+            },
+            "layout": {
+              "x": 4,
+              "y": 0,
+              "width": 2,
+              "height": 2
+            }
+          },
+          {
+            "id": 7753669607476341,
+            "definition": {
+              "title": "Days to expiration",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {
+                "live_span": "5m"
+              },
+              "type": "query_table",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Days",
+                      "conditional_formats": [
+                        {
+                          "palette": "white_on_red",
+                          "comparator": "<",
+                          "value": 0
+                        },
+                        {
+                          "palette": "white_on_yellow",
+                          "comparator": "<",
+                          "value": 30
+                        }
+                      ],
+                      "limit": {
+                        "count": 500,
+                        "order": "asc"
+                      },
+                      "formula": "(query1 - query2) / 3600 / 24"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "max:cert_manager.certificate.expiration_timestamp{$cluster_name} by {name}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "query": "avg:cert_manager.clock_time{$cluster_name}",
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "aggregator": "avg"
+                    }
+                  ]
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 2,
+              "height": 2
+            }
+          },
+          {
+            "id": 6696297692368588,
+            "definition": {
+              "title": "Ready Certs",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {
+                "live_span": "1m"
+              },
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "sum:cert_manager.certificate.ready_status{condition:true,$cluster_name}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "last"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 0
+            },
+            "layout": {
+              "x": 2,
+              "y": 2,
+              "width": 2,
+              "height": 2
+            }
+          },
+          {
+            "id": 1459805529723438,
+            "definition": {
+              "title": "Unready Certs",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {
+                "live_span": "1m"
+              },
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "sum:cert_manager.certificate.ready_status{condition:false,$cluster_name}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "max"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 0
+            },
+            "layout": {
+              "x": 4,
+              "y": 2,
+              "width": 2,
+              "height": 2
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 6,
+        "y": 0,
+        "width": 6,
+        "height": 5
+      }
+    },
+    {
+      "id": 2,
+      "definition": {
+        "title": "ACME Client",
+        "type": "group",
+        "background_color": "vivid_green",
+        "show_title": true,
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 4570545421301402,
+            "definition": {
+              "title": "Requests by ACME client",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "on_right_yaxis": false,
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "sum:cert_manager.http_acme_client.request.count{$cluster_name} by {host,method}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "label": "",
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 2164987611530685,
+            "definition": {
+              "title": "ACME Request Latency",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "q": "avg:cert_manager.http_acme_client.request.duration.quantile{$cluster_name} by {quantile}",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "label": "",
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 4,
+              "y": 0,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 2631212097882199,
+            "definition": {
+              "title": "ACME Request Errors",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "q": "sum:cert_manager.http_acme_client.request.count{(status:400 OR s) AND $cluster_name} by {status}.as_count()",
+                  "on_right_yaxis": false,
+                  "style": {
+                    "palette": "warm",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "label": "",
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 8,
+              "y": 0,
+              "width": 4,
+              "height": 2
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 5,
+        "width": 12,
+        "height": 3
+      }
+    },
+    {
+      "id": 3,
+      "definition": {
+        "title": "Sync Calls",
+        "type": "group",
+        "background_color": "vivid_purple",
+        "show_title": true,
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 1397436366643337,
+            "definition": {
+              "title": "Number of sync() calls made by a controller",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "q": "sum:cert_manager.controller.sync_call.count{$cluster_name} by {controller}.as_count()",
+                  "on_right_yaxis": false,
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "label": "",
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 6,
+        "height": 4,
+        "is_column_break": true
+      }
+    },
+    {
+      "id": 4,
+      "definition": {
+        "title": "Cert-Manager Logs",
+        "type": "group",
+        "background_color": "vivid_pink",
+        "show_title": true,
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 6511754985358555,
+            "definition": {
+              "title": "All logs",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "log_stream",
+              "indexes": [],
+              "query": "service:cert-manager* $cluster_name",
+              "sort": {
+                "column": "time",
+                "order": "desc"
+              },
+              "columns": [
+                "host",
+                "service"
+              ],
+              "show_date_column": true,
+              "show_message_column": true,
+              "message_display": "expanded-md"
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 6,
+        "y": 0,
+        "width": 6,
+        "height": 4
+      }
+    }
+  ],
+  "template_variables": [
+    {
+      "name": "cluster_name",
+      "default": "*",
+      "prefix": "cluster_name"
+    }
+  ],
+  "layout_type": "ordered",
+  "is_read_only": false,
+  "notify_list": [],
+  "reflow_type": "fixed",
+  "id": "fxk-bga-7jy"
+}

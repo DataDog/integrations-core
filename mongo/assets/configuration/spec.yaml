@@ -47,6 +47,15 @@ files:
         The password to use for authentication.
       value:
         type: string
+    - name: connection_scheme
+      description: |
+        Use `mongodb` to identify that this is a string in the standard connection format. This is the default value.
+        In order to leverage the DNS seed list, use a connection_scheme of `mongodb+srv` rather than the standard
+        `mongodb`.
+        For more information, see: https://www.mongodb.com/docs/manual/reference/connection-string/
+      value:
+        type: string
+        example: mongodb
     - name: database
       description: |
         The database to collect metrics from.
@@ -65,6 +74,16 @@ files:
       value:
         type: object
         properties: []
+    - name: dbnames
+      description: |
+        Set a list of the names of all databases to collect metrics from.
+        If this key does not exist, all metrics from all databases on the server will be collected.
+      value:
+        type: array
+        items:
+          type: string
+        example:
+          [ one_database, other_database ]
     - name: replica_check
       description: |
         Whether or not to read from available replicas.
@@ -79,34 +98,38 @@ files:
       value:
         type: integer
         example: 30
-    - name: ssl
-      description: If `True`, create the connection to the server using SSL.
+    - name: tls
+      description: If `True`, create the connection to the server using transport layer security.
       value:
         type: boolean
         example: false
-    - name: ssl_keyfile
-      description: Path to the private key file used to identify the local connection against Mongodb.
+    - name: tls_certificate_key_file
+      description: A file containing the client certificate and private key. Implies tls=True.
       value:
         type: string
-    - name: ssl_certfile
-      required: false
-      description: Path to the certificate file used to identify the local connection against Mongodb.
-      value:
-        type: string
-    - name: ssl_cert_reqs
+    - name: tls_ca_file
       description: |
-        Specifies whether a certificate is required from the other side of the connection, and whether it will be
-        validated if provided.
-        Possible values:
-          * 0 for ssl.CERT_NONE (certificates ignored)
-          * 1 for ssl.CERT_OPTIONAL (not required, but validated if provided)
-          * 2 for ssl.CERT_REQUIRED (required and validated)
-      value:
-        type: integer
-    - name: ssl_ca_certs
-      description: Path to the ca_certs file.
+        A file containing one or a bundle of “certification authority” certificates, 
+        which are used to validate certificates passed from the other end of the connection. 
+        Implies tls=True.
       value:
         type: string
+    - name: tls_allow_invalid_hostnames
+      description: |
+        If `True`, disables TLS hostname verification. tls_allow_invalid_hostnames=False implies tls=True. 
+        Think very carefully before setting this to True as that could make your application 
+        vulnerable to on-path attackers.
+      value:
+        type: boolean
+        example: false
+    - name: tls_allow_invalid_certificates
+      description: |
+        If `True`, continues the TLS handshake regardless of the outcome of the certificate verification process. 
+        Think very carefully before setting this to True as that could make your application 
+        vulnerable to on-path attackers.
+      value:
+        type: boolean
+        example: false
     - name: additional_metrics
       description: |
         By default, the check collects a sample of metrics from MongoDB.
@@ -150,6 +173,11 @@ files:
         Note: Custom queries are ignored by default when the mongo node is a secondary of a replica set.
         You can add `run_on_secondary: true` for each query that you want to run on both primaries and secondaries.
         See https://docs.datadoghq.com/integrations/guide/mongo-custom-query-collection to learn more.
+        Note: For MongoDB date types you can use functions matching any of these regular expressions:
+        "ISODate\(\s*\'(.*?)\'\s*\)" (e.g. "ISODate('2022-12-15T08:26:00.969Z')")
+        "ISODate\(\s*\)|Date\(\s*\)" (e.g. "Date()")
+        "new\s*Date\(ISODate\(\s*\)\.getTime\(\s*\)((\s*[+\-*\/]\s*(\d+))*)\s*\)" 
+          (e.g. "new Date(ISODate().getTime() - 60 * 1000)")
       value:
         type: array
         items:

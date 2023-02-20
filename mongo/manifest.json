@@ -1,43 +1,57 @@
 {
-  "aliases": [
-    "/integrations/mongodb"
-  ],
-  "categories": [
-    "data store",
-    "log collection",
-    "autodiscovery"
-  ],
-  "creates_events": true,
-  "display_name": "MongoDB",
-  "guid": "d51c342e-7a02-4611-a47f-1e8eade5735c",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "mongodb.",
-  "metric_to_check": "mongodb.connections.available",
-  "name": "mongo",
-  "process_signatures": [
-    "mongod"
-  ],
-  "public_title": "Datadog-MongoDB Integration",
-  "short_description": "Track read/write performance, most-used replicas, collection metrics, and more.",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "type": "check",
-  "integration_id": "mongodb",
+  "manifest_version": "2.0.0",
+  "app_uuid": "54cca53a-3c87-4b53-beb4-fce95d1fcfb5",
+  "app_id": "mongodb",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Track read/write performance, most-used replicas, collection metrics, and more.",
+    "title": "MongoDB",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Data Store",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
-    },
-    "monitors": {
-      "[MongoDB] High incoming connections": "assets/monitors/high_connections.json"
+    "integration": {
+      "source_type_name": "MongoDB",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": true
+      },
+      "metrics": {
+        "prefix": "mongodb.",
+        "check": "mongodb.connections.available",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      },
+      "process_signatures": [
+        "mongod"
+      ]
     },
     "dashboards": {
       "mongodb": "assets/dashboards/overview.json"
+    },
+    "monitors": {
+      "[MongoDB] High incoming connections": "assets/monitors/high_connections.json"
     },
     "saved_views": {
       "operations_by_type_overview": "assets/saved_views/operations_by_type_overview.json",
@@ -46,10 +60,8 @@
       "slow_queries": "assets/saved_views/slow_queries.json",
       "mongodb_processes": "assets/saved_views/mongodb_processes.json"
     },
-    "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "mongodb"
-    },
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

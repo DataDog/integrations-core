@@ -11,6 +11,13 @@ DEFAULT_METRICS = {
     'admission_webhooks_reconcile_errors': 'admission_webhooks.reconcile_errors',
     'admission_webhooks_reconcile_success': 'admission_webhooks.reconcile_success',
     'admission_webhooks_webhooks_received': 'admission_webhooks.webhooks_received',
+    'admission_webhooks_library_injection_attempts': 'admission_webhooks.library_injection_attempts',
+    'admission_webhooks_library_injection_errors': 'admission_webhooks.library_injection_errors',
+    'admission_webhooks_patcher_attempts': 'admission_webhooks.patcher.attempts',
+    'admission_webhooks_patcher_completed': 'admission_webhooks.patcher.completed',
+    'admission_webhooks_patcher_errors': 'admission_webhooks.patcher.errors',
+    'admission_webhooks_rc_provider_configs': 'admission_webhooks.rc_provider.configs',
+    'admission_webhooks_rc_provider_configs_invalid': 'admission_webhooks.rc_provider.invalid_configs',
     'aggregator__flush': 'aggregator.flush',
     'aggregator__processed': 'aggregator.processed',
     'api_requests': 'api_requests',
@@ -41,6 +48,8 @@ DEFAULT_METRICS = {
     'autodiscovery_poll_duration': 'autodiscovery.poll_duration',
     'autodiscovery_watched_resources': 'autodiscovery.watched_resources',
     'autodiscovery_errors': 'autodiscovery.errors',
+    'kubernetes_apiserver_kube_events': 'kubernetes_apiserver.kube_events',
+    'kubernetes_apiserver_emitted_events': 'kubernetes_apiserver.emitted_events',
 }
 
 

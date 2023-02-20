@@ -1,35 +1,52 @@
 {
-  "display_name": "nginx-ingress-controller",
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "name": "nginx_ingress_controller",
-  "metric_prefix": "nginx_ingress.",
-  "metric_to_check": "nginx_ingress.nginx.process.count",
-  "creates_events": false,
-  "short_description": "Monitor metrics about the NGINX ingress controller and the embedded NGINX.",
-  "guid": "27f6a498-6b3e-41b0-bec4-68db4d3322c3",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "public_title": "Datadog-nginx-ingress-controller Integration",
-  "categories": [
-    "orchestration",
-    "containers",
-    "log collection",
-    "web",
-    "network"
-  ],
-  "type": "check",
-  "is_public": true,
-  "integration_id": "nginx-ingress-controller",
+  "manifest_version": "2.0.0",
+  "app_uuid": "f84e3ebf-848b-4894-a5b0-9abbd21d4189",
+  "app_id": "nginx-ingress-controller",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor metrics about the NGINX ingress controller and the embedded NGINX.",
+    "title": "nginx-ingress-controller",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Orchestration",
+      "Category::Containers",
+      "Category::Log Collection",
+      "Category::Web",
+      "Category::Network"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "nginx-ingress-controller",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "nginx_ingress.",
+        "check": "nginx_ingress.nginx.process.count",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
     },
-    "monitors": {},
     "dashboards": {
       "nginx_ingress_controller": "assets/dashboards/overview.json"
     },
@@ -39,10 +56,8 @@
       "status_code_overview": "assets/saved_views/status_code_overview.json",
       "bot_errors": "assets/saved_views/bot_errors.json"
     },
-    "service_checks": "assets/service_checks.json",
     "logs": {
-      "source": "nginx-ingress-controller"
-    },
-    "metrics_metadata": "metadata.csv"
+      "source": "nginx_ingress_controller"
+    }
   }
 }

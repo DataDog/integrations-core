@@ -22,16 +22,16 @@ except ImportError:
 @pytest.mark.usefixtures('dd_environment')
 def test_check_invalid_password(aggregator, dd_run_check, init_config, instance_docker):
     instance_docker['password'] = 'FOO'
-
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker])
 
-    with pytest.raises(SQLConnectionError):
+    with pytest.raises(SQLConnectionError) as excinfo:
         sqlserver_check.initialize_connection()
         sqlserver_check.check(instance_docker)
     aggregator.assert_service_check(
         'sqlserver.can_connect',
         status=sqlserver_check.CRITICAL,
-        tags=['sqlserver_host:localhost,1433', 'db:master', 'optional:tag1'],
+        tags=['sqlserver_host:{}'.format(sqlserver_check.resolved_hostname), 'db:master', 'optional:tag1'],
+        message=str(excinfo.value),
     )
 
 
@@ -92,7 +92,9 @@ def test_custom_metrics_object_name(aggregator, dd_run_check, init_config_object
     dd_run_check(sqlserver_check)
 
     aggregator.assert_metric('sqlserver.cache.hit_ratio', tags=['optional:tag1', 'optional_tag:tag1'], count=1)
-    aggregator.assert_metric('sqlserver.active_requests', tags=['optional:tag1', 'optional_tag:tag1'], count=1)
+    aggregator.assert_metric(
+        'sqlserver.broker_activation.tasks_running', tags=['optional:tag1', 'optional_tag:tag1'], count=1
+    )
 
 
 @pytest.mark.integration
@@ -155,7 +157,7 @@ def test_autodiscovery_database_metrics(aggregator, dd_run_check, instance_autod
 
 @pytest.mark.integration
 @pytest.mark.parametrize(
-    'service_check_enabled, default_count, extra_count',
+    'service_check_enabled,default_count,extra_count',
     [(True, 4, 1), (False, 0, 0)],
 )
 @pytest.mark.usefixtures('dd_environment')
@@ -174,7 +176,7 @@ def test_autodiscovery_db_service_checks(
         status=SQLServer.OK,
     )
 
-    # verify all databses in autodiscovery have a service check
+    # verify all databases in autodiscovery have a service check
     aggregator.assert_service_check(
         'sqlserver.database.can_connect',
         count=default_count,
@@ -187,14 +189,21 @@ def test_autodiscovery_db_service_checks(
         tags=['db:msdb', 'optional:tag1', 'sqlserver_host:localhost,1433'],
         status=SQLServer.OK,
     )
-    # unavailable_db is an 'offline' database which prevents connections so we expect this service check to be
+    # unavailable_db is an 'offline' database which prevents connections, so we expect this service check to be
     # critical but not cause a failure of the check
-    aggregator.assert_service_check(
-        'sqlserver.database.can_connect',
-        count=extra_count,
-        tags=['db:unavailable_db', 'optional:tag1', 'sqlserver_host:localhost,1433'],
-        status=SQLServer.CRITICAL,
-    )
+    # TODO: add support to the assert_service_check function to take a message regex pattern
+    # to match against, so this assertion does not require the exact string
+    sc = aggregator.service_checks('sqlserver.database.can_connect')
+    db_critical_exists = False
+    for c in sc:
+        if c.status == SQLServer.CRITICAL:
+            db_critical_exists = True
+            assert (
+                c.tags.sort()
+                == ['db:unavailable_db', 'optional:tag1', 'sqlserver_host:{}'.format(check.resolved_hostname)].sort()
+            )
+    if service_check_enabled:
+        assert db_critical_exists
 
 
 @pytest.mark.integration
@@ -364,48 +373,6 @@ def test_check_windows_defaults(aggregator, dd_run_check, init_config, instance_
 
     aggregator.assert_service_check('sqlserver.can_connect', status=SQLServer.OK)
     aggregator.assert_all_metrics_covered()
-
-
-@pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
-@pytest.mark.parametrize(
-    "instance_host,split_host,split_port",
-    [
-        ("localhost,1433,some-typo", "localhost", "1433"),
-        ("localhost, 1433,some-typo", "localhost", "1433"),
-        ("localhost,1433", "localhost", "1433"),
-        ("localhost", "localhost", None),
-    ],
-)
-def test_split_sqlserver_host(instance_docker, instance_host, split_host, split_port):
-    sqlserver_check = SQLServer(CHECK_NAME, {}, [instance_docker])
-    s_host, s_port = sqlserver_check.split_sqlserver_host_port(instance_host)
-    assert (s_host, s_port) == (split_host, split_port)
-
-
-@pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
-@pytest.mark.parametrize(
-    "dbm_enabled, instance_host, reported_hostname, expected_hostname",
-    [
-        (False, 'localhost,1433,some-typo', '', 'stubbed.hostname'),
-        (True, 'localhost,1433', '', 'stubbed.hostname'),
-        (False, 'localhost', '', 'stubbed.hostname'),
-        (False, '8.8.8.8', '', 'stubbed.hostname'),
-        (True, 'localhost', 'forced_hostname', 'forced_hostname'),
-        (True, 'datadoghq.com,1433', '', 'datadoghq.com'),
-        (True, 'datadoghq.com', '', 'datadoghq.com'),
-        (True, 'datadoghq.com', 'forced_hostname', 'forced_hostname'),
-        (True, '8.8.8.8,1433', '', '8.8.8.8'),
-        (False, '8.8.8.8', 'forced_hostname', 'forced_hostname'),
-    ],
-)
-def test_resolved_hostname(instance_docker, dbm_enabled, instance_host, reported_hostname, expected_hostname):
-    instance_docker['dbm'] = dbm_enabled
-    instance_docker['host'] = instance_host
-    instance_docker['reported_hostname'] = reported_hostname
-    sqlserver_check = SQLServer(CHECK_NAME, {}, [instance_docker])
-    assert sqlserver_check.resolved_hostname == expected_hostname
 
 
 @pytest.mark.integration

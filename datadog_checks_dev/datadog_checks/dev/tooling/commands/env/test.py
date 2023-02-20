@@ -9,7 +9,7 @@ from ...e2e.agent import DEFAULT_PYTHON_VERSION
 from ...testing import complete_active_checks, get_test_envs
 from ..console import CONTEXT_SETTINGS, DEBUG_OUTPUT, echo_info, echo_warning
 from ..test import test as test_command
-from .start import start
+from .start import base_option, dev_option, start
 from .stop import stop
 
 
@@ -29,8 +29,8 @@ from .stop import stop
     type=click.INT,
     help=f'The version of Python to use. Defaults to {DEFAULT_PYTHON_VERSION} if no tox Python is specified.',
 )
-@click.option('--dev/--prod', default=None, help='Whether to use the latest version of a check or what is shipped')
-@click.option('--base', is_flag=True, help='Whether to use the latest version of the base check or what is shipped')
+@dev_option
+@base_option
 @click.option(
     '--env-vars',
     '-e',
@@ -46,9 +46,27 @@ from .stop import stop
 @click.option('--ddtrace', is_flag=True, help='Run tests using dd-trace-py')
 @click.option('--filter', '-k', 'test_filter', help='Only run tests matching given substring expression')
 @click.option('--changed', is_flag=True, help='Only test changed checks')
+@click.option('--debug', '-d', is_flag=True, help='Set the log level to debug')
+@click.option(
+    '--skip-failed-environments', '-sfe', is_flag=True, help='Skip environments that failed to start and continue'
+)
 @click.pass_context
 def test(
-    ctx, checks, agent, python, dev, base, env_vars, new_env, profile_memory, junit, ddtrace, test_filter, changed
+    ctx,
+    checks,
+    agent,
+    python,
+    dev,
+    base,
+    env_vars,
+    new_env,
+    profile_memory,
+    junit,
+    ddtrace,
+    test_filter,
+    changed,
+    debug,
+    skip_failed_environments,
 ):
     """Test an environment."""
     check_envs = get_test_envs(checks, e2e_tests_only=True, changed_only=changed)
@@ -82,17 +100,23 @@ def test(
 
         for env in envs:
             if new_env:
-                ctx.invoke(
-                    start,
-                    check=check,
-                    env=env,
-                    agent=agent,
-                    python=python,
-                    dev=dev,
-                    base=base,
-                    env_vars=env_vars,
-                    profile_memory=profile_memory,
-                )
+                try:
+                    ctx.invoke(
+                        start,
+                        check=check,
+                        env=env,
+                        agent=agent,
+                        python=python,
+                        dev=dev,
+                        base=base,
+                        env_vars=env_vars,
+                        profile_memory=profile_memory,
+                    )
+                except SystemExit:
+                    if skip_failed_environments:
+                        echo_warning(f"Skipping {env} environment because it failed to start.")
+                        continue
+                    raise
             elif env not in config_envs:
                 continue
 
@@ -104,7 +128,7 @@ def test(
                     ctx.invoke(
                         test_command,
                         checks=[f'{check}:{env}'],
-                        debug=DEBUG_OUTPUT,
+                        debug=debug or DEBUG_OUTPUT,
                         e2e=True,
                         passenv=' '.join(persisted_env_vars) if persisted_env_vars else None,
                         junit=junit,

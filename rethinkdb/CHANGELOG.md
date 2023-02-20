@@ -1,5 +1,9 @@
 # CHANGELOG - RethinkDB
 
+## 2.3.1 / 2022-08-05 / Agent 7.39.0
+
+* [Fixed] Dependency updates. See [#12653](https://github.com/DataDog/integrations-core/pull/12653).
+
 ## 2.3.0 / 2022-04-05 / Agent 7.36.0
 
 * [Added] Upgrade dependencies. See [#11726](https://github.com/DataDog/integrations-core/pull/11726).

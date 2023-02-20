@@ -1,41 +1,55 @@
 {
-  "display_name": "Ignite",
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "name": "ignite",
-  "metric_prefix": "ignite.",
-  "metric_to_check": "ignite.received_messages",
-  "creates_events": false,
-  "short_description": "Collect metrics from your Ignite server.",
-  "guid": "fd5a21d5-ddfe-4d04-855f-28492b4d270e",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "public_title": "Datadog-ignite Integration",
-  "categories": [
-    "caching",
-    "data store",
-    "log collection"
-  ],
-  "type": "check",
-  "is_public": true,
-  "integration_id": "ignite",
+  "manifest_version": "2.0.0",
+  "app_uuid": "0e1f1ef2-ea62-4ae4-a99f-8c40171b729c",
+  "app_id": "ignite",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Collect metrics from your Ignite server.",
+    "title": "ignite",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Caching",
+      "Category::Data Store",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "Ignite",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "ignite.",
+        "check": "ignite.received_messages",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
     },
     "dashboards": {
       "Ignite Overview": "assets/dashboards/ignite_overview.json"
     },
-    "saved_views": {},
-    "monitors": {},
-    "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "ignite"
-    },
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

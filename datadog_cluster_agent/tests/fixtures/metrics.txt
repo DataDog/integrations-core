@@ -359,3 +359,31 @@ autodiscovery_poll_duration_count{provider="kubernetes-services"} 3
 # TYPE endpoint_checks_configs_dispatched gauge
 endpoint_checks_configs_dispatched{join_leader="true",node="gke-ahmed-default-pool-4658d5d4-80fn"} 2
 endpoint_checks_configs_dispatched{join_leader="true",node="gke-ahmed-default-pool-4658d5d4-sv26"} 1
+# HELP admission_webhooks_library_injection_attempts Number of pod library injection attempts by language.
+# TYPE admission_webhooks_library_injection_attempts counter
+admission_webhooks_library_injection_attempts{injected="false",language="java"} 1
+admission_webhooks_library_injection_attempts{injected="true",language="java"} 4
+# HELP admission_webhooks_library_injection_errors Number of library injection failures by language
+# TYPE admission_webhooks_library_injection_errors counter
+admission_webhooks_library_injection_errors{language="java"} 1
+# HELP kubernetes_apiserver_emitted_events Number of events emitted by the check.
+# TYPE kubernetes_apiserver_emitted_events counter
+kubernetes_apiserver_emitted_events{kind="ConfigMap",type="Normal"} 7
+# HELP kubernetes_apiserver_kube_events Number of Kubernetes events received by the check.
+# TYPE kubernetes_apiserver_kube_events counter
+kubernetes_apiserver_kube_events{component="",kind="Pod",reason="FailedScheduling",type="Warning"} 10424
+# HELP admission_webhooks_patcher_attempts Number of patch attempts.
+# TYPE admission_webhooks_patcher_attempts counter
+admission_webhooks_patcher_attempts 6
+# HELP admission_webhooks_patcher_completed Number of completed patch attempts.
+# TYPE admission_webhooks_patcher_completed counter
+admission_webhooks_patcher_completed 1
+# HELP admission_webhooks_patcher_errors Number of patch errors.
+# TYPE admission_webhooks_patcher_errors counter
+admission_webhooks_patcher_errors 2
+# HELP admission_webhooks_rc_provider_configs Number of valid remote configurations.
+# TYPE admission_webhooks_rc_provider_configs gauge
+admission_webhooks_rc_provider_configs 2
+# HELP admission_webhooks_rc_provider_configs_invalid Number of invalid remote configurations.
+# TYPE admission_webhooks_rc_provider_configs_invalid gauge
+admission_webhooks_rc_provider_configs_invalid 1

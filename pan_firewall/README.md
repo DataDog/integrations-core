@@ -6,7 +6,7 @@ Datadog's Palo Alto Networks Firewall Log integration allows customers to ingest
 
 ### Key use cases
 #### Respond to high severity threat events
-Firewall threat logs provide context on threats detected by a firewall, which can be filtered and analyzed by severity, type, origin IPs/countries, and more. 
+Firewall threat logs provide context on threats detected by a firewall, which can be filtered and analyzed by severity, type, origin IPs/countries, and more.
 
 #### Make informed decisions on Firewall deployment
 Firewall traffic logs can be used to measure the traffic and sessions passing through a firewall and also gives you the ability to monitor for anomalous throughput across firewall deployment.
@@ -16,13 +16,13 @@ Firewall authentication logs provide detailed information on users as they authe
 
 ## Setup
 
-### Log collection 
+### Log collection
 
  1. [Install the Datadog Agent][1] on a machine that is reachable by the firewall and can connect to the internet.
  2. In PanOS, Select Device >> Server Profiles >> Syslog , add a name for the server profile. Follow the Syslog log forwarding [configuration steps][2]. Same steps listed below.
  3. Click Add and provide the following details of the server:
  	* Name of the server
- 	* IP address of the machine with datadog agent 
+ 	* IP address of the machine with datadog agent
  	* Transport as TCP
  	* Port as 10518 and format as BSD
  4. Copy and configure custom log format for the required log type.
@@ -43,9 +43,9 @@ Firewall authentication logs provide detailed information on users as they authe
 
  5. Click OK, this creates a syslog server profile.
  6. Click on the Objects tab, this opens the log forwarding profile screen.
- 7. Create log forwarding profile by providing the name, log type and syslog profile 
+ 7. Create log forwarding profile by providing the name, log type and syslog profile
  8. Create a pan.firewall.d/conf.yaml file at the root of the [Agent's configuration directory][3] with the below content.
- 
+
      ```yaml
      logs:
      - type: tcp
@@ -54,7 +54,7 @@ Firewall authentication logs provide detailed information on users as they authe
        source: "pan.firewall"
      ```
  9. [Restart Agent][4].
- 
+
 ## Data Collected
 
 ### Logs
@@ -80,9 +80,14 @@ Additional helpful documentation, links, and articles:
 - [Log types and fields][5]
 - [Logs Collection documentation][6]
 
+## Troubleshooting
+
+Need help? Contact [Datadog support][7].
+
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://www.youtube.com/watch?v=LOPXg0oCMPs
 [3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6v7
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [5]: https://docs.paloaltonetworks.com/pan-os/9-1/pan-os-admin/monitoring/use-syslog-for-monitoring/syslog-field-descriptions
 [6]: https://docs.datadoghq.com/logs/log_collection/?tab=tailexistingfiles#getting-started-with-the-agent
+[7]: https://docs.datadoghq.com/help/

@@ -1,39 +1,53 @@
 {
-  "categories": [
-    "collaboration",
-    "source control",
-    "issue tracking",
-    "log collection"
-  ],
-  "creates_events": false,
-  "display_name": "Gitlab Runner",
-  "guid": "08318775-7b40-4bc5-bb3d-36ad9111db37",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "gitlab_runner.",
-  "metric_to_check": "gitlab_runner.process_max_fds",
-  "name": "gitlab_runner",
-  "public_title": "Datadog-Gitlab Runners Integration",
-  "short_description": "Track all the metrics from your Gitlab runners with Datadog",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "type": "check",
-  "integration_id": "gitlab-runner",
+  "manifest_version": "2.0.0",
+  "app_uuid": "ee31aff6-4821-4dbf-af9c-bd09e59a4e80",
+  "app_id": "gitlab-runner",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Track all the metrics from your GitLab runners with Datadog.",
+    "title": "GitLab Runners",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Collaboration",
+      "Category::Source Control",
+      "Category::Issue Tracking",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "Gitlab Runner",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "gitlab_runner.",
+        "check": "gitlab_runner.process_max_fds",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
     },
-    "monitors": {},
-    "dashboards": {},
-    "service_checks": "assets/service_checks.json",
     "logs": {
-      "source": "gitlab-runner"
-    },
-    "metrics_metadata": "metadata.csv"
+      "source": "gitlab_runner"
+    }
   }
 }

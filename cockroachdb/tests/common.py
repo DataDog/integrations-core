@@ -5,13 +5,25 @@ import os
 
 from datadog_checks.cockroachdb.metrics import METRIC_MAP
 from datadog_checks.dev import get_docker_hostname
+from datadog_checks.dev.utils import get_metadata_metrics
 
 HOST = get_docker_hostname()
 PORT = '8080'
 
 COCKROACHDB_VERSION = os.getenv('COCKROACHDB_VERSION')
 
-KNOWN_HISTOGRAMS = {'liveness_heartbeatlatency'}
+KNOWN_HISTOGRAMS = {
+    'admission_wait_durations_kv',
+    'admission_wait_durations_kv_stores',
+    'admission_wait_durations_sql_leaf_start',
+    'admission_wait_durations_sql_sql_response',
+    'admission_wait_durations_sql_kv_response',
+    'admission_wait_durations_sql_root_start',
+    'liveness_heartbeatlatency',
+    'sql.conn.latency',
+    'sql.txn.latency',
+}
+
 KNOWN_COUNTERS = {
     'addsstable_applications',
     'addsstable_copies',
@@ -109,6 +121,9 @@ KNOWN_COUNTERS = {
     'range_snapshots_normal_applied',
     'range_snapshots_preemptive_applied',
     'range_splits',
+    'schedules_BACKUP_failed',
+    'schedules_BACKUP_started',
+    'schedules_BACKUP_succeeded',
     'sql_bytesin',
     'sql_bytesout',
     'sql_ddl_count',
@@ -139,6 +154,48 @@ KNOWN_COUNTERS = {
     'txn_restarts_possiblereplay',
     'txn_restarts_serializable',
     'txn_restarts_writetooold',
+    'admission_wait_sum_kv',
+    'admission_wait_sum_kv_stores',
+    'admission_wait_sum_sql_kv_response',
+    'admission_wait_sum_sql_sql_response',
+    'changefeed_emitted_messages',
+    'changefeed_error_retries',
+    'changefeed_failures',
+    'jobs_changefeed_resume_retry_error',
+    'sql_distsql_contended_queries_count',
+    'sql_failure_count',
+    'sql_full_scan_count',
+    'admission_admitted_sql_sql_response',
+    'admission_wait_sum_kv_stores',
+    'admission_admitted_sql_leaf_start',
+    'admission_wait_sum_sql_leaf_start',
+    'admission_requested_kv',
+    'admission_requested_kv_stores',
+    'admission_errored_sql_root_start',
+    'admission_wait_sum_sql_sql_response',
+    'admission_errored_kv',
+    'admission_requested_sql_leaf_start',
+    'admission_errored_sql_leaf_start',
+    'admission_wait_sum_sql_root_start',
+    'admission_admitted_kv',
+    'admission_admitted_sql_kv_response',
+    'admission_admitted_sql_root_start',
+    'admission_wait_sum_kv',
+    'admission_granter_io_tokens_exhausted_duration_kv',
+    'admission_requested_sql_sql_response',
+    'admission_errored_sql_kv_response',
+    'admission_requested_sql_kv_response',
+    'admission_errored_kv_stores',
+    'admission_requested_sql_root_start',
+    'admission_wait_sum_sql_kv_response',
+    'admission_errored_sql_sql_response',
+    'admission_admitted_kv_stores',
+    'jobs_backup_fail_or_cancel_completed',
+    'jobs_backup_fail_or_cancel_retry_error',
+    'jobs_backup_fail_or_cancel_failed',
+    'jobs_backup_resume_failed',
+    'jobs_backup_resume_retry_error',
+    'jobs_backup_resume_completed',
 }
 
 EXPECTED_METRICS = []
@@ -152,10 +209,13 @@ for raw_metric_name, metric_name in METRIC_MAP.items():
 
 
 def assert_metrics(aggregator):
+    metadata_metrics = get_metadata_metrics()
     for metric in EXPECTED_METRICS:
         aggregator.assert_metric('cockroachdb.{}'.format(metric), at_least=0)
 
     # Custom transformer
     aggregator.assert_metric('cockroachdb.build.timestamp')
+
+    aggregator.assert_metrics_using_metadata(metadata_metrics, check_submission_type=True)
 
     assert aggregator.metrics_asserted_pct > 80, 'Missing metrics {}'.format(aggregator.not_asserted())

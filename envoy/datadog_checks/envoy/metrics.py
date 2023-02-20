@@ -10,6 +10,11 @@ PROMETHEUS_METRICS_MAP = {
     'envoy_cluster_assignment_timeout_received': 'cluster.assignment_timeout_received',
     'envoy_cluster_bind_errors': 'cluster.bind_errors',
     'envoy_cluster_default_total_match_count': 'cluster.default_total_match',
+    'envoy_cluster_ext_authz_ok': 'cluster.ext_authz.ok',
+    'envoy_cluster_ext_authz_error': 'cluster.ext_authz.error',
+    'envoy_cluster_ext_authz_denied': 'cluster.ext_authz.denied',
+    'envoy_cluster_ext_authz_disabled': 'cluster.ext_authz.disabled',
+    'envoy_cluster_ext_authz_failure_mode_allowed': 'cluster.ext_authz.failure_mode_allowed',
     'envoy_cluster_http2_dropped_headers_with_underscores': 'cluster.http2.dropped_headers_with_underscores',
     'envoy_cluster_http2_header_overflow': 'cluster.http2.header_overflow',
     'envoy_cluster_http2_headers_cb_no_stream': 'cluster.http2.headers_cb_no_stream',
@@ -47,6 +52,10 @@ PROMETHEUS_METRICS_MAP = {
     'envoy_cluster_lb_zone_routing_sampled': 'cluster.lb_zone_routing_sampled',
     'envoy_cluster_membership_change': 'cluster.membership_change',
     'envoy_cluster_original_dst_host_invalid': 'cluster.original_dst_host_invalid',
+    'envoy_cluster_ratelimit_ok': 'cluster.ratelimit.ok',
+    'envoy_cluster_ratelimit_error': 'cluster.ratelimit.error',
+    'envoy_cluster_ratelimit_over_limit': 'cluster.ratelimit.over_limit',
+    'envoy_cluster_ratelimit_failure_mode_allowed': 'cluster.ratelimit.failure_mode_allowed',
     'envoy_cluster_retry_or_shadow_abandoned': 'cluster.retry_or_shadow_abandoned',
     'envoy_cluster_update_attempt': 'cluster.update_attempt',
     'envoy_cluster_update_empty': 'cluster.update_empty',
@@ -63,24 +72,24 @@ PROMETHEUS_METRICS_MAP = {
     'envoy_cluster_upstream_cx_destroy_remote': 'cluster.upstream_cx_destroy_remote',
     'envoy_cluster_upstream_cx_destroy_remote_with_active_rq': 'cluster.upstream_cx_destroy_with_active_rq',
     'envoy_cluster_upstream_cx_destroy_with_active_rq': 'cluster.upstream_cx_destroy_with_active_rq',
-    'envoy_cluster_upstream_cx_http1_total': 'cluster.upstream_cx_http1_total',
-    'envoy_cluster_upstream_cx_http2_total': 'cluster.upstream_cx_http2_total',
-    'envoy_cluster_upstream_cx_http3_total': 'cluster.upstream_cx_http3_total',
+    'envoy_cluster_upstream_cx_http1': 'cluster.upstream_cx_http1',
+    'envoy_cluster_upstream_cx_http2': 'cluster.upstream_cx_http2',
+    'envoy_cluster_upstream_cx_http3': 'cluster.upstream_cx_http3',
     'envoy_cluster_upstream_cx_idle_timeout': 'cluster.upstream_cx_idle_timeout',
     'envoy_cluster_upstream_cx_max_requests': 'cluster.upstream_cx_max_requests',
     'envoy_cluster_upstream_cx_none_healthy': 'cluster.upstream_cx_none_healthy',
     'envoy_cluster_upstream_cx_overflow': 'cluster.upstream_cx_overflow',
     'envoy_cluster_upstream_cx_pool_overflow': 'cluster.upstream_cx_pool_overflow',
     'envoy_cluster_upstream_cx_protocol_error': 'cluster.upstream_cx_protocol_error',
-    'envoy_cluster_upstream_cx_rx_bytes_total': 'cluster.upstream_cx_rx_bytes_total',
-    'envoy_cluster_upstream_cx_total': 'cluster.upstream_cx',
-    'envoy_cluster_upstream_cx_tx_bytes_total': 'cluster.upstream_cx_tx_bytes_total',
-    'envoy_cluster_upstream_flow_control_backed_up_total': 'cluster.upstream_flow_control_backed_up_total',
-    'envoy_cluster_upstream_flow_control_drained_total': 'cluster.upstream_flow_control_drained_total',
-    'envoy_cluster_upstream_flow_control_paused_reading_total': 'cluster.upstream_flow_control_paused_reading_total',
-    'envoy_cluster_upstream_flow_control_resumed_reading_total': 'cluster.upstream_flow_control_resumed_reading_total',
-    'envoy_cluster_upstream_internal_redirect_failed_total': 'cluster.upstream_internal_redirect_failed_total',
-    'envoy_cluster_upstream_internal_redirect_succeeded_total': 'cluster.upstream_internal_redirect_succeeded_total',
+    'envoy_cluster_upstream_cx_rx_bytes': 'cluster.upstream_cx_rx_bytes',
+    'envoy_cluster_upstream_cx_tx_bytes': 'cluster.upstream_cx_tx_bytes',
+    'envoy_cluster_upstream_cx': 'cluster.upstream_cx',
+    'envoy_cluster_upstream_flow_control_backed_up': 'cluster.upstream_flow_control_backed_up',
+    'envoy_cluster_upstream_flow_control_drained': 'cluster.upstream_flow_control_drained',
+    'envoy_cluster_upstream_flow_control_paused_reading': 'cluster.upstream_flow_control_paused_reading',
+    'envoy_cluster_upstream_flow_control_resumed_reading': 'cluster.upstream_flow_control_resumed_reading',
+    'envoy_cluster_upstream_internal_redirect_failed': 'cluster.upstream_internal_redirect_failed',
+    'envoy_cluster_upstream_internal_redirect_succeeded': 'cluster.upstream_internal_redirect_succeeded',
     'envoy_cluster_upstream_rq': 'cluster.upstream_rq',
     'envoy_cluster_upstream_rq_cancelled': 'cluster.upstream_rq_cancelled',
     'envoy_cluster_upstream_rq_completed': 'cluster.upstream_rq_completed',
@@ -88,7 +97,7 @@ PROMETHEUS_METRICS_MAP = {
     'envoy_cluster_upstream_rq_max_duration_reached': 'cluster.upstream_rq_max_duration_reached',
     'envoy_cluster_upstream_rq_pending_failure_eject': 'cluster.upstream_rq_pending_failure_eject',
     'envoy_cluster_upstream_rq_pending_overflow': 'cluster.upstream_rq_pending_overflow',
-    'envoy_cluster_upstream_rq_pending_total': 'cluster.upstream_rq_pending_total',
+    'envoy_cluster_upstream_rq_pending': 'cluster.upstream_rq_pending',
     'envoy_cluster_upstream_rq_per_try_timeout': 'cluster.upstream_rq_per_try_timeout',
     'envoy_cluster_upstream_rq_retry': 'cluster.upstream_rq_retry',
     'envoy_cluster_upstream_rq_retry_backoff_exponential': 'cluster.upstream_rq_retry_backoff_exponential',
@@ -97,8 +106,9 @@ PROMETHEUS_METRICS_MAP = {
     'envoy_cluster_upstream_rq_retry_overflow': 'cluster.upstream_rq_retry_overflow',
     'envoy_cluster_upstream_rq_retry_success': 'cluster.upstream_rq_retry_success',
     'envoy_cluster_upstream_rq_rx_reset': 'cluster.upstream_rq_rx_reset',
+    'envoy_cluster_upstream_rq_time': 'cluster.upstream_rq_time',
     'envoy_cluster_upstream_rq_timeout': 'cluster.upstream_rq_timeout',
-    'envoy_cluster_upstream_rq_total': 'cluster.upstream_rq_total',
+    'envoy_cluster_upstream_rq': 'cluster.upstream_rq',
     'envoy_cluster_upstream_rq_tx_reset': 'cluster.upstream_rq_tx_reset',
     'envoy_cluster_upstream_rq_xx': 'cluster.upstream_rq_xx',
     'envoy_cluster_manager_cds_control_plane_rate_limit_enforced': (
@@ -129,26 +139,26 @@ PROMETHEUS_METRICS_MAP = {
     'envoy_http_downstream_cx_destroy_remote': 'http.downstream_cx_destroy_remote',
     'envoy_http_downstream_cx_destroy_remote_active_rq': 'http.downstream_cx_destroy_remote_active_rq',
     'envoy_http_downstream_cx_drain_close': 'http.downstream_cx_drain_close',
-    'envoy_http_downstream_cx_http1_total': 'http.downstream_cx_http1_total',
-    'envoy_http_downstream_cx_http2_total': 'http.downstream_cx_http2_total',
-    'envoy_http_downstream_cx_http3_total': 'http.downstream_cx_http3_total',
+    'envoy_http_downstream_cx_http1': 'http.downstream_cx_http1',
+    'envoy_http_downstream_cx_http2': 'http.downstream_cx_http2',
+    'envoy_http_downstream_cx_http3': 'http.downstream_cx_http3',
     'envoy_http_downstream_cx_idle_timeout': 'http.downstream_cx_idle_timeout',
     'envoy_http_downstream_cx_max_duration_reached': 'http.downstream_cx_max_duration_reached',
     'envoy_http_downstream_cx_overload_disable_keepalive': 'http.downstream_cx_overload_disable_keepalive',
     'envoy_http_downstream_cx_protocol_error': 'http.downstream_cx_protocol_error',
-    'envoy_http_downstream_cx_rx_bytes_total': 'http.downstream_cx_rx_bytes_total',
-    'envoy_http_downstream_cx_ssl_total': 'http.downstream_cx_ssl_total',
-    'envoy_http_downstream_cx_total': 'http.downstream_cx_total',
-    'envoy_http_downstream_cx_tx_bytes_total': 'http.downstream_cx_tx_bytes_total',
-    'envoy_http_downstream_cx_upgrades_total': 'http.downstream_cx_upgrades_total',
-    'envoy_http_downstream_flow_control_paused_reading_total': 'http.downstream_flow_control_paused_reading_total',
-    'envoy_http_downstream_flow_control_resumed_reading_total': 'http.downstream_flow_control_resumed_reading_total',
+    'envoy_http_downstream_cx_rx_bytes': 'http.downstream_cx_rx_bytes',
+    'envoy_http_downstream_cx_ssl': 'http.downstream_cx_ssl',
+    'envoy_http_downstream_cx': 'http.downstream_cx',
+    'envoy_http_downstream_cx_tx_bytes': 'http.downstream_cx_tx_bytes',
+    'envoy_http_downstream_cx_upgrades': 'http.downstream_cx_upgrades',
+    'envoy_http_downstream_flow_control_paused_reading': 'http.downstream_flow_control_paused_reading',
+    'envoy_http_downstream_flow_control_resumed_reading': 'http.downstream_flow_control_resumed_reading',
     'envoy_http_downstream_rq_completed': 'http.downstream_rq_completed',
     'envoy_http_downstream_rq_failed_path_normalization': 'http.downstream_rq_failed_path_normalization',
     'envoy_http_downstream_rq_header_timeout': 'http.downstream_rq_header_timeout',
-    'envoy_http_downstream_rq_http1_total': 'http.downstream_rq_http1_total',
-    'envoy_http_downstream_rq_http2_total': 'http.downstream_rq_http2_total',
-    'envoy_http_downstream_rq_http3_total': 'http.downstream_rq_http3_total',
+    'envoy_http_downstream_rq_http1': 'http.downstream_rq_http1',
+    'envoy_http_downstream_rq_http2': 'http.downstream_rq_http2',
+    'envoy_http_downstream_rq_http3': 'http.downstream_rq_http3',
     'envoy_http_downstream_rq_idle_timeout': 'http.downstream_rq_idle_timeout',
     'envoy_http_downstream_rq_max_duration_reached': 'http.downstream_rq_max_duration_reached',
     'envoy_http_downstream_rq_non_relative_path': 'http.downstream_rq_non_relative_path',
@@ -158,7 +168,7 @@ PROMETHEUS_METRICS_MAP = {
     'envoy_http_downstream_rq_rx_reset': 'http.downstream_rq_rx_reset',
     'envoy_http_downstream_rq_timeout': 'http.downstream_rq_timeout',
     'envoy_http_downstream_rq_too_large': 'http.downstream_rq_too_large',
-    'envoy_http_downstream_rq_total': 'http.downstream_rq_total',
+    'envoy_http_downstream_rq': 'http.downstream_rq',
     'envoy_http_downstream_rq_tx_reset': 'http.downstream_rq_tx_reset',
     'envoy_http_downstream_rq_ws_on_non_ws_route': 'http.downstream_rq_ws_on_non_ws_route',
     'envoy_http_downstream_rq_xx': 'http.downstream_rq_xx',
@@ -174,7 +184,7 @@ PROMETHEUS_METRICS_MAP = {
     'envoy_http_rq_direct_response': 'http.rq_direct_response',
     'envoy_http_rq_redirect': 'http.rq_redirect',
     'envoy_http_rq_reset_after_downstream_response_started': 'http.rq_reset_after_downstream_response_started',
-    'envoy_http_rq_total': 'http.rq_total',
+    'envoy_http_rq': 'http.rq',
     'envoy_http_rs_too_large': 'http.rs_too_large',
     'envoy_http_tracing_client_enabled': 'http.tracing.client_enabled',
     'envoy_http_tracing_health_check': 'http.tracing.health_check',
@@ -190,7 +200,7 @@ PROMETHEUS_METRICS_MAP = {
     'envoy_listener_admin_downstream_cx_destroy': 'listener.admin.downstream_cx_destroy',
     'envoy_listener_admin_downstream_cx_overflow': 'listener.admin.downstream_cx_overflow',
     'envoy_listener_admin_downstream_cx_overload_reject': 'listener.admin.downstream_cx_overload_reject',
-    'envoy_listener_admin_downstream_cx_total': 'listener.admin.downstream_cx_total',
+    'envoy_listener_admin_downstream_cx': 'listener.admin.downstream_cx',
     'envoy_listener_admin_downstream_global_cx_overflow': 'listener.admin.downstream_global_cx_overflow',
     'envoy_listener_admin_downstream_pre_cx_timeout': 'listener.admin.downstream_pre_cx_timeout',
     'envoy_listener_admin_http_downstream_rq_completed': 'listener.admin.http.downstream_rq_completed',
@@ -199,7 +209,7 @@ PROMETHEUS_METRICS_MAP = {
     'envoy_listener_downstream_cx_destroy': 'listener.downstream_cx_destroy',
     'envoy_listener_downstream_cx_overflow': 'listener.downstream_cx_overflow',
     'envoy_listener_downstream_cx_overload_reject': 'listener.downstream_cx_overload_reject',
-    'envoy_listener_downstream_cx_total': 'listener.downstream_cx_total',
+    'envoy_listener_downstream_cx': 'listener.downstream_cx',
     'envoy_listener_downstream_global_cx_overflow': 'listener.downstream_global_cx_overflow',
     'envoy_listener_downstream_pre_cx_timeout': 'listener.downstream_pre_cx_timeout',
     'envoy_listener_http_downstream_rq_completed': 'listener.http.downstream_rq_completed',
@@ -234,7 +244,7 @@ PROMETHEUS_METRICS_MAP = {
     'envoy_vhost_vcluster_upstream_rq_retry_overflow': 'vhost.vcluster.upstream_rq_retry_overflow',
     'envoy_vhost_vcluster_upstream_rq_retry_success': 'vhost.vcluster.upstream_rq_retry_success',
     'envoy_vhost_vcluster_upstream_rq_timeout': 'vhost.vcluster.upstream_rq_timeout',
-    'envoy_vhost_vcluster_upstream_rq_total': 'vhost.vcluster.upstream_rq_total',
+    'envoy_vhost_vcluster_upstream_rq': 'vhost.vcluster.upstream_rq',
     'envoy_cluster_http2_pending_send_bytes': 'cluster.http2.pending_send_bytes',
     'envoy_cluster_http2_streams_active': 'cluster.http2.streams_active',
     'envoy_cluster_lb_subsets_active': 'cluster.lb_subsets_active',
@@ -246,7 +256,7 @@ PROMETHEUS_METRICS_MAP = {
     'envoy_cluster_version': 'cluster.version',
     'envoy_cluster_upstream_cx_active': 'cluster.upstream_cx_active',
     'envoy_cluster_upstream_cx_rx_bytes_buffered': 'cluster.upstream_cx_rx_bytes_buffered',
-    'envoy_cluster_upstream_cx_tx_bytes_buffered': 'cluster.upstream_cx_tx_bytes_total',
+    'envoy_cluster_upstream_cx_tx_bytes_buffered': 'cluster.upstream_cx_tx_bytes_buffered',
     'envoy_cluster_upstream_rq_active': 'cluster.upstream_rq_active',
     'envoy_cluster_upstream_rq_pending_active': 'cluster.upstream_rq_pending_active',
     'envoy_cluster_manager_active_clusters': 'cluster_manager.active_clusters',
@@ -322,6 +332,22 @@ PROMETHEUS_METRICS_MAP = {
     'envoy_server_initialization_time_ms': 'server.initialization_time_ms',
     'envoy_workers_watchdog_miss': 'workers.watchdog_miss',
     'envoy_workers_watchdog_mega_miss': 'workers.watchdog_mega_miss',
+    'envoy_cluster_outlier_detection_ejections_active': 'cluster.outlier_detection.ejections_active',  # noqa: E501
+    'envoy_cluster_outlier_detection_ejections_overflow': 'cluster.outlier_detection.ejections_overflow',  # noqa: E501
+    'envoy_cluster_outlier_detection_ejections_enforced_consecutive_5xx': 'cluster.outlier_detection.ejections_enforced_consecutive_5xx',  # noqa: E501
+    'envoy_cluster_outlier_detection_ejections_detected_consecutive_5xx': 'cluster.outlier_detection.ejections_detected_consecutive_5xx',  # noqa: E501
+    'envoy_cluster_outlier_detection_ejections_enforced_success_rate': 'cluster.outlier_detection.ejections_enforced_success_rate',  # noqa: E501
+    'envoy_cluster_outlier_detection_ejections_detected_success_rate': 'cluster.outlier_detection.ejections_detected_success_rate',  # noqa: E501
+    'envoy_cluster_outlier_detection_ejections_enforced_consecutive_gateway_failure': 'cluster.outlier_detection.ejections_enforced_consecutive_gateway_failure',  # noqa: E501
+    'envoy_cluster_outlier_detection_ejections_detected_consecutive_gateway_failure': 'cluster.outlier_detection.ejections_detected_consecutive_gateway_failure',  # noqa: E501
+    'envoy_cluster_outlier_detection_ejections_enforced_consecutive_local_origin_failure': 'cluster.outlier_detection.ejections_enforced_consecutive_local_origin_failure',  # noqa: E501
+    'envoy_cluster_outlier_detection_ejections_detected_consecutive_local_origin_failure': 'cluster.outlier_detection.ejections_detected_consecutive_local_origin_failure',  # noqa: E501
+    'envoy_cluster_outlier_detection_ejections_enforced_local_origin_success_rate': 'cluster.outlier_detection.ejections_enforced_local_origin_success_rate',  # noqa: E501
+    'envoy_cluster_outlier_detection_ejections_detected_local_origin_success_rate': 'cluster.outlier_detection.ejections_detected_local_origin_success_rate',  # noqa: E501
+    'envoy_cluster_outlier_detection_ejections_enforced_failure_percentage': 'cluster.outlier_detection.ejections_enforced_failure_percentage',  # noqa: E501
+    'envoy_cluster_outlier_detection_ejections_detected_failure_percentage': 'cluster.outlier_detection.ejections_detected_failure_percentage',  # noqa: E501
+    'envoy_cluster_outlier_detection_ejections_enforced_failure_percentage_local_origin': 'cluster.outlier_detection.ejections_enforced_failure_percentage_local_origin',  # noqa: E501
+    'envoy_cluster_outlier_detection_ejections_detected_failure_percentage_local_origin': 'cluster.outlier_detection.ejections_detected_failure_percentage_local_origin',  # noqa: E501
 }
 
 # fmt: off
@@ -757,6 +783,46 @@ METRICS = {
         ),
         'method': 'monotonic_count',
     },
+    'cluster.ext_authz.ok': {
+        'tags': (
+            ('envoy_cluster', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'cluster.ext_authz.error': {
+        'tags': (
+            ('envoy_cluster', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'cluster.ext_authz.denied': {
+        'tags': (
+            ('envoy_cluster', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'cluster.ext_authz.disabled': {
+        'tags': (
+            ('envoy_cluster', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'cluster.ext_authz.failure_mode_allowed': {
+        'tags': (
+            ('envoy_cluster', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
     'cluster.ratelimit.ok': {
         'tags': (
             ('envoy_cluster', ),
@@ -774,6 +840,14 @@ METRICS = {
         'method': 'monotonic_count',
     },
     'cluster.ratelimit.over_limit': {
+        'tags': (
+            ('envoy_cluster', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'cluster.ratelimit.failure_mode_allowed': {
         'tags': (
             ('envoy_cluster', ),
             (),

@@ -23,6 +23,7 @@ ENGINE_EDITION_AZURE_SYNAPSE_SERVERLESS_POOL = 11
 
 # Keys of the static info cache, used to cache server info which does not change
 STATIC_INFO_VERSION = 'version'
+STATIC_INFO_MAJOR_VERSION = 'major_version'
 STATIC_INFO_ENGINE_EDITION = 'engine_edition'
 
 # Metric discovery queries
@@ -39,7 +40,11 @@ BASE_NAME_QUERY = (
 )
 
 DEFAULT_AUTODISCOVERY_INTERVAL = 3600
-AUTODISCOVERY_QUERY = "select name from sys.databases"
+AUTODISCOVERY_QUERY = """select {columns} from sys.databases"""
+expected_sys_databases_columns = [
+    'name',
+    'physical_database_name',
+]
 
 VALID_METRIC_TYPES = ('gauge', 'rate', 'histogram')
 
@@ -160,17 +165,4 @@ DATABASE_FRAGMENTATION_METRICS = [
 DATABASE_MASTER_FILES = [
     ('sqlserver.database.master_files.size', 'sys.master_files', 'size'),
     ('sqlserver.database.master_files.state', 'sys.master_files', 'state'),
-]
-
-DATABASE_FILES_IO = [
-    ('sqlserver.files.size_on_disk', 'size_on_disk_bytes', 'gauge'),
-    ('sqlserver.files.reads', 'num_of_reads', 'monotonic_count'),
-    ('sqlserver.files.read_bytes', 'num_of_bytes_read', 'monotonic_count'),
-    ('sqlserver.files.read_io_stall', 'io_stall_read_ms', 'monotonic_count'),
-    ('sqlserver.files.read_io_stall_queued', 'io_stall_queued_read_ms', 'monotonic_count'),
-    ('sqlserver.files.writes', 'num_of_writes', 'monotonic_count'),
-    ('sqlserver.files.written_bytes', 'num_of_bytes_written', 'monotonic_count'),
-    ('sqlserver.files.write_io_stall', 'io_stall_write_ms', 'monotonic_count'),
-    ('sqlserver.files.write_io_stall_queued', 'io_stall_queued_write_ms', 'monotonic_count'),
-    ('sqlserver.files.io_stall', 'io_stall', 'monotonic_count'),
 ]

@@ -1,11 +1,11 @@
 ## Log Section
 ##
-## type - required - Type of log input source (tcp / udp / file / windows_event)
+## type - required - Type of log input source (tcp / udp / file / windows_event).
 ## port / path / channel_path - required - Set port if type is tcp or udp.
 ##                                         Set path if type is file.
 ##                                         Set channel_path if type is windows_event.
 ## source  - required - Attribute that defines which integration sent the logs.
-## encoding - optional - For file specifies the file encoding, default is utf-8, other
+## encoding - optional - For file specifies the file encoding. Default is utf-8. Other
 ##                       possible values are utf-16-le and utf-16-be.
 ## service - optional - The name of the service that generates the log.
 ##                      Overrides any `service` defined in the `init_config` section.
@@ -13,6 +13,49 @@
 ##
 ## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
 #
-# logs:
-#   - type: journald
-#     container_mode: true
+logs:
+
+    ## @param type - string - required
+    #
+  - type: journald
+
+    ## @param container_mode - boolean - optional - default: false
+    ## Automatically sets the source attribute to the corresponding short image
+    ##   name of the container for logs coming from Docker containers.
+    ##
+    ## Available from Datadog Agent 7.17.0 and above.
+    #
+    # container_mode: true
+
+    ## @param include_units - list of strings - optional
+    ## List of system-level service units to include from log collection.
+    #
+    # include_units:
+    #   - docker.service
+    #   - sshd.service
+
+    ## @param exclude_units - list of strings - optional
+    ## List of system-level service units to exclude from log collection.
+    ## Note: The excluded units will take precedence over include_units.
+    ##
+    ## From Datadog Agent 7.37.0+, a wildcard can be used to exclude all
+    ##   system-level unit logs, thereby collecting only user-level unit logs.
+    #
+    # exclude_units:
+    #   - '*'
+
+    ## @param include_user_units - list of strings - optional
+    ## List of user-level service units to include from log collection.
+    #
+    # include_user_units:
+    #   - linger-example.service
+
+    ## @param exclude_user_units - list of strings - optional
+    ## List of user-level service units to exclude from log collection.
+    ## Note: The excluded units will take precedence over include_user_units.
+    ##
+    ## From Datadog Agent 7.37.0+, a wildcard can be used to exclude all
+    ##   user-level unit logs, thereby collecting only system-level unit logs.
+    #
+    # exclude_user_units:
+    #   - '*'

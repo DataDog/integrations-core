@@ -1,44 +1,64 @@
 {
-  "categories": [
-    "configuration & deployment",
-    "autodiscovery",
-    "log collection"
-  ],
-  "creates_events": true,
-  "display_name": "Teamcity",
-  "guid": "b390dd3f-47d5-4555-976a-36722833f000",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "teamcity.",
-  "name": "teamcity",
-  "process_signatures": [
-    "teamcity-server.sh",
-    "teamcity-server"
-  ],
-  "public_title": "Datadog-Teamcity Integration",
-  "short_description": "Track builds and understand the performance impact of every deploy.",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "type": "check",
-  "integration_id": "teamcity",
+  "manifest_version": "2.0.0",
+  "app_uuid": "8dd65d36-9cb4-4295-bb0c-68d67c0cdd4b",
+  "app_id": "teamcity",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Track builds and understand the performance impact of every deploy.",
+    "title": "TeamCity",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Configuration & Deployment",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "Teamcity",
+      "process_signatures": [
+        "teamcity-server.sh",
+        "teamcity-server"
+      ],
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "metrics": {
+        "prefix": "teamcity.",
+        "check": ["teamcity.builds", "teamcity.build_duration"],
+        "metadata_path": "metadata.csv"
+      },
+      "events": {
+        "creates_events": true
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
     },
-    "monitors": {},
-    "dashboards": {},
-    "service_checks": "assets/service_checks.json",
-    "logs": {
-      "source": "teamcity"
+    "dashboards": {
+      "TeamCity Overview": "assets/dashboards/overview.json"
     },
-    "metrics_metadata": "metadata.csv",
+    "monitors": {
+      "Build Status": "assets/recommended_monitors/build_status.json"
+    },
     "saved_views": {
       "teamcity_processes": "assets/saved_views/teamcity_processes.json"
+    },
+    "logs": {
+      "source": "teamcity"
     }
   }
 }

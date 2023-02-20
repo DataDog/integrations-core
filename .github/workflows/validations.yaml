@@ -5,8 +5,6 @@ on:
     branches:
     - master
   pull_request:
-    branches:
-    - master
 
 env:
   CHANGED: ${{ github.event_name == 'pull_request' && 'changed' || '' }}
@@ -29,7 +27,9 @@ jobs:
       run: pip install --disable-pip-version-check --upgrade pip setuptools wheel
 
     - name: Install ddev
-      run: pip install -e ./datadog_checks_dev[cli]
+      run: |
+        pip install -e ./datadog_checks_dev[cli]
+        pip install -e ./ddev
 
     - name: Configure ddev
       run: |
@@ -49,6 +49,10 @@ jobs:
     - name: Run configuration validation
       run: |
         ddev validate config $CHANGED
+
+    - name: Run manifest validation
+      run: |
+        ddev validate manifest $CHANGED
 
     - name: Run dashboard validation
       run: |
@@ -79,12 +83,16 @@ jobs:
         ddev validate legacy-signature $CHANGED
 
     - name: Run licenses validation
+      if: ${{ github.event.pull_request.head.repo.full_name == github.repository }} # only PRs from this repo
+      env:
+        DD_GITHUB_USER: ${{ github.actor }}
+        DD_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         ddev validate licenses
 
-    - name: Run manifest validation
+    - name: Run license header validation
       run: |
-        ddev validate manifest $CHANGED
+        ddev validate license-headers $CHANGED
 
     - name: Run metadata validation
       run: |
@@ -93,11 +101,11 @@ jobs:
     - name: Run models validation
       run: |
         ddev validate models $CHANGED
-        
+
     - name: Run package validation
       run: |
         ddev validate package $CHANGED
-        
+
     - name: Run readmes validation
       run: |
         ddev validate readmes $CHANGED
@@ -117,9 +125,9 @@ jobs:
     - name: Comment PR on failure
       if: ${{ failure() && github.event.pull_request.merged != true }}
       uses: actions/github-script@0.3.0
+      continue-on-error: true
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         script: |
           const { issue: { number: issue_number }, repo: { owner, repo }  } = context;
           github.issues.createComment({ issue_number, owner, repo, body: "The `validations` job has failed; please review the `Files changed` tab for possible suggestions to resolve." });
-

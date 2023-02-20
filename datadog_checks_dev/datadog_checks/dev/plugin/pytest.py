@@ -6,10 +6,12 @@ from __future__ import absolute_import
 import json
 import os
 import re
+import warnings
 from base64 import urlsafe_b64encode
 from typing import Dict, List, Optional, Tuple
 
 import pytest
+from six import PY2
 
 from .._env import (
     E2E_FIXTURE_NAME,
@@ -158,8 +160,9 @@ def dd_agent_check(request, aggregator, datadog_agent):
             root = new_root
 
         python_path = os.environ[E2E_PARENT_PYTHON]
-        env = os.environ['TOX_ENV_NAME']
+        env = os.environ.get('TOX_ENV_NAME') or os.environ['HATCH_ENV_ACTIVE']
 
+        # TODO: switch to `ddev` when the old CLI is gone
         check_command = [python_path, '-m', 'datadog_checks.dev', 'env', 'check', check, env, '--json']
 
         if config:
@@ -206,7 +209,12 @@ def dd_agent_check(request, aggregator, datadog_agent):
 
 @pytest.fixture
 def dd_run_check():
-    def run_check(check, extract_message=False):
+    checks = {}
+
+    def run_check(check, extract_message=False, cancel=True):
+        if cancel:
+            checks[id(check)] = check
+
         error = check.run()
 
         if error:
@@ -220,7 +228,13 @@ def dd_run_check():
 
         return ''
 
-    return run_check
+    yield run_check
+
+    for c in checks.values():
+        try:
+            c.cancel()
+        except Exception:
+            pass
 
 
 @pytest.fixture(scope='session')
@@ -283,13 +297,45 @@ def mock_performance_objects(mocker, dd_default_hostname):
                 instance_counts[instance_name] += 1
 
             for counter_name, values in counter_values.items():
-                for instance_name, index, value in zip(instances, instance_indices, values):
-                    counters[
-                        win32pdh.MakeCounterPath((server, object_name, instance_name, None, index, counter_name))
-                    ] = value
+                if len(values) == 0:
+                    continue
 
-        mocker.patch('win32pdh.ValidatePath', side_effect=lambda path: 0 if path in counters else 1)
+                if instance_name is None:
+                    # Single counter
+                    counters[win32pdh.MakeCounterPath((server, object_name, None, None, 0, counter_name))] = values[0]
+                else:
+                    # Multiple instance counter
+                    counter_path_wildcard = win32pdh.MakeCounterPath((server, object_name, '*', None, 0, counter_name))
+                    instance_values_wildcard = {}
+                    for instance_name, index, value in zip(instances, instance_indices, values):
+                        # Add single instance counter (in case like IIS is using exact per-instnace wildcard)
+                        counter_path_exact = win32pdh.MakeCounterPath(
+                            (server, object_name, instance_name, None, 0, counter_name)
+                        )
+                        instance_values_exact = {}
+                        instance_values_exact[instance_name] = value
+                        counters[counter_path_exact] = instance_values_exact
+
+                        # Add wildcard path/value
+                        if index == 0:
+                            instance_values_wildcard[instance_name] = value
+                        elif index == 1:
+                            # Replace single value as a two instance list
+                            non_unique_instance_value = [instance_values_wildcard[instance_name], value]
+                            instance_values_wildcard[instance_name] = non_unique_instance_value
+                        else:
+                            # Append to the list
+                            non_unique_instance_value = instance_values_wildcard[instance_name]
+                            non_unique_instance_value.append(value)
+                            instance_values_wildcard[instance_name] = non_unique_instance_value
+
+                    counters[counter_path_wildcard] = instance_values_wildcard
+
+        validate_path_fn_name = 'datadog_checks.base.checks.windows.perf_counters.counter.validate_path'
+        mocker.patch(validate_path_fn_name, side_effect=lambda x, y, path: True if path in counters else False)
         mocker.patch('win32pdh.GetFormattedCounterValue', side_effect=lambda path, _: (None, counters[path]))
+        get_counter_values_fn_name = 'datadog_checks.base.checks.windows.perf_counters.counter.get_counter_values'
+        mocker.patch(get_counter_values_fn_name, side_effect=lambda path, _: counters[path])
 
     return mock_perf_objects
 
@@ -305,6 +351,17 @@ def pytest_configure(config):
 def pytest_addoption(parser):
     parser.addoption("--run-latest-metrics", action="store_true", default=False, help="run check_metrics tests")
 
+    if PY2:
+        # Add a dummy memray options to make it possible to run memray with `ddev test --memray <integration>`
+        # only on py3 environments
+        parser.addoption("--memray", action="store_true", default=False, help="Dummy parameter for memray")
+        parser.addoption(
+            "--hide-memray-summary",
+            action="store_true",
+            default=False,
+            help="Dummy parameter for memray to hide the summary",
+        )
+
 
 def pytest_collection_modifyitems(config, items):
     # at test collection time, this function gets called by pytest, see:
@@ -313,6 +370,12 @@ def pytest_collection_modifyitems(config, items):
     if config.getoption("--run-latest-metrics"):
         # --run-check-metrics given in cli: do not skip slow tests
         return
+
+    if PY2:
+        for option in ("--memray",):
+            if config.getoption(option):
+                warnings.warn("`{}` option ignored as it's not supported for py2 environments.".format(option))
+
     skip_latest_metrics = pytest.mark.skip(reason="need --run-latest-metrics option to run")
     for item in items:
         if "latest_metrics" in item.keywords:

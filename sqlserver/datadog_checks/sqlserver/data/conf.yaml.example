@@ -37,7 +37,10 @@ init_config:
 instances:
 
     ## @param host - string - required
-    ## Host and port of your SQL server.
+    ## Host and port of your SQL server. If a port is ommitted, a default port of 1433 will be used. 
+    ## If you use Sql Server Browser Service or a similar port autodiscovery service, pass in a port
+    ## of 0 to omit port from your connection string. This should allow SSBS to autodiscover the 
+    ## correct database port. 
     #
   - host: <HOST>,<PORT>
 
@@ -178,8 +181,8 @@ instances:
     ## @param adoprovider - string - optional - default: SQLOLEDB
     ## Choose the ADO provider.  Note that the (default) provider
     ## SQLOLEDB is being deprecated.  To use the newer MSOLEDBSQL
-    ## provider, set the adoprovider to "MSOLEDBSQL" below. You will also need
-    ## to download the new provider from
+    ## provider, set the adoprovider to "MSOLEDBSQL" below or "MSOLEDBSQL19" for version 19 of the driver.
+    ## You will also need to download the new provider from
     ## https://docs.microsoft.com/en-us/sql/connect/oledb/oledb-driver-for-sql-server?view=sql-server-2017
     #
     # adoprovider: SQLOLEDB
@@ -216,7 +219,6 @@ instances:
 
     ## @param dbm - boolean - optional - default: false
     ## Set to `true` to enable Database Monitoring.
-    ## Reach out to your Customer Success Manager to request access to the beta.
     #
     # dbm: false
 
@@ -434,9 +436,10 @@ instances:
     #     - test:<INTEGRATION>
 
     ## @param stored_procedure - string - optional
+    ## DEPRECATED - use `custom_queries` instead. For guidance, see:
+    ## https://docs.datadoghq.com/integrations/guide/collect-sql-server-custom-metrics/
     ## Get metrics from custom proc in MyDB but only if the database is writable
     ## (i.e. it's the master in an availability group) Note: Custom proc must be defined in its own instance
-    ## See https://docs.datadoghq.com/integrations/guide/collect-sql-server-custom-metrics/
     #
     # stored_procedure: <PROCEDURE_NAME>
 
@@ -503,12 +506,12 @@ instances:
 
 ## Log Section
 ##
-## type - required - Type of log input source (tcp / udp / file / windows_event)
+## type - required - Type of log input source (tcp / udp / file / windows_event).
 ## port / path / channel_path - required - Set port if type is tcp or udp.
 ##                                         Set path if type is file.
 ##                                         Set channel_path if type is windows_event.
 ## source  - required - Attribute that defines which integration sent the logs.
-## encoding - optional - For file specifies the file encoding, default is utf-8, other
+## encoding - optional - For file specifies the file encoding. Default is utf-8. Other
 ##                       possible values are utf-16-le and utf-16-be.
 ## service - optional - The name of the service that generates the log.
 ##                      Overrides any `service` defined in the `init_config` section.

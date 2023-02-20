@@ -5,7 +5,6 @@
 import base64
 import random
 
-from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import padding
 
@@ -40,9 +39,7 @@ class SessionWrapper:
 
         self.cert_key = cert_key
         if cert_key:
-            self.cert_key = serialization.load_pem_private_key(
-                cert_key, password=cert_key_password, backend=default_backend()
-            )
+            self.cert_key = serialization.load_pem_private_key(cert_key, password=cert_key_password)
 
     def login(self, password):
         data = '<aaaUser name="{}" pwd="{}"/>\n'.format(self.username, password)

@@ -1,46 +1,60 @@
 {
-  "categories": [
-    "web",
-    "autodiscovery",
-    "log collection"
-  ],
-  "creates_events": false,
-  "display_name": "Lighttpd",
-  "guid": "01dcfe7a-7a56-4388-a388-799ee6daaaab",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "lighttpd.",
-  "metric_to_check": "lighttpd.performance.uptime",
-  "name": "lighttpd",
-  "process_signatures": [
-    "lighttpd"
-  ],
-  "public_title": "Datadog-Lighttpd Integration",
-  "short_description": "Track uptime, bytes served, requests per second, response codes, and more.",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "type": "check",
-  "integration_id": "lighttpd",
+  "manifest_version": "2.0.0",
+  "app_uuid": "3d7ace6a-9efd-4d21-b4e6-a9956512a875",
+  "app_id": "lighttpd",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Track uptime, bytes served, requests per second, response codes, and more.",
+    "title": "Lighttpd",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Web",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "Lighttpd",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "lighttpd.",
+        "check": "lighttpd.performance.uptime",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      },
+      "process_signatures": [
+        "lighttpd"
+      ]
     },
-    "monitors": {},
     "dashboards": {
       "lighttpd": "assets/dashboards/lighttpd_dashboard.json"
     },
-    "service_checks": "assets/service_checks.json",
-    "logs": {
-      "source": "lighttpd"
-    },
-    "metrics_metadata": "metadata.csv",
     "saved_views": {
       "lighttpd_processes": "assets/saved_views/lighttpd_processes.json"
+    },
+    "logs": {
+      "source": "lighttpd"
     }
   }
 }

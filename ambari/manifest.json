@@ -1,39 +1,53 @@
 {
-  "display_name": "Ambari",
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "name": "ambari",
-  "metric_prefix": "ambari.",
-  "metric_to_check": "ambari.cpu.cpu_user",
-  "creates_events": false,
-  "short_description": "Get metrics by host or service for all your ambari managed clusters",
-  "guid": "4f518f2c-cfa7-4763-ac33-b1c8846eb738",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os"
-  ],
-  "public_title": "Datadog-Ambari Integration",
-  "categories": [
-    "processing",
-    "log collection",
-    "autodiscovery"
-  ],
-  "type": "check",
-  "is_public": true,
-  "integration_id": "ambari",
+  "manifest_version": "2.0.0",
+  "app_uuid": "081f9cd9-a86a-4cea-ae5b-b4f7e163f413",
+  "app_id": "ambari",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Get metrics by host or service for all your ambari managed clusters",
+    "title": "Ambari",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Category::Processing",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "Ambari",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "ambari.",
+        "check": "ambari.cpu.cpu_user",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
     },
-    "monitors": {},
     "dashboards": {
       "Ambari base dashboard": "assets/dashboards/base_dashboard.json"
     },
-    "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "ambari"
-    },
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

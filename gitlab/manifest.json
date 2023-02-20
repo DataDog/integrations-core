@@ -1,45 +1,59 @@
 {
-  "categories": [
-    "collaboration",
-    "source control",
-    "issue tracking",
-    "log collection",
-    "autodiscovery"
-  ],
-  "creates_events": false,
-  "display_name": "Gitlab",
-  "guid": "1cab328c-5560-4737-ad06-92ebc54af901",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "gitlab.",
-  "metric_to_check": [
-    "gitlab.process_max_fds",
-    "gitlab.ruby.process_start_time_seconds"
-  ],
-  "name": "gitlab",
-  "public_title": "Datadog-Gitlab Integration",
-  "short_description": "Track all your Gitlab metrics with Datadog",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "type": "check",
-  "integration_id": "gitlab",
+  "manifest_version": "2.0.0",
+  "app_uuid": "3d165411-7734-4f72-b39a-f222add296b2",
+  "app_id": "gitlab",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Track all your GitLab metrics with Datadog.",
+    "title": "GitLab",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Collaboration",
+      "Category::Source Control",
+      "Category::Issue Tracking",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "monitors": {},
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "Gitlab",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "gitlab.",
+        "check": [
+          "gitlab.process_max_fds",
+          "gitlab.ruby.process_start_time_seconds"
+        ],
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
     },
     "dashboards": {
       "Gitlab Overview": "assets/dashboards/overview.json"
     },
-    "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "gitlab"
-    },
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

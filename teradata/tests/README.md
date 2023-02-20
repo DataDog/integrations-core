@@ -8,7 +8,7 @@ Available out-of-the-box:
 ` ddev env start teradata py38` 
 
 ## py38-sandbox
-Requires a running Teradata instance configured with a Datadog user (see the [Teradata Datadog documentation](https://github.com/DataDog/integrations-core/blob/master/check/datadog_checks/teradata/README.md) installation instructions). The instance may be running locally or cloud-hosted. 
+Requires a running Teradata instance configured with a Datadog user (see the [Teradata Datadog documentation](https://github.com/DataDog/integrations-core/blob/master/teradata/README.md) installation instructions). The instance may be running locally or cloud-hosted. 
 
 To use the `py38-sandbox` environment, the following environment variables must be configured:
 

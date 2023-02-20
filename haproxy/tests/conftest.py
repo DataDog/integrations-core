@@ -102,6 +102,9 @@ def prometheus_metrics():
                 metrics.pop(metric)
     if HAPROXY_VERSION < version.parse('2.4.9'):
         metrics.pop('haproxy_backend_agg_server_check_status')
+    if HAPROXY_VERSION < version.parse('2.4.21'):
+        metrics.pop('haproxy_backend_agg_check_status')
+        metrics.pop('haproxy_backend_agg_server_status')
 
     metrics = list(metrics.values())
     return metrics

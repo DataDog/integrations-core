@@ -185,11 +185,6 @@ def instance_remote_no_connect_port_in_host():
 
 
 @pytest.fixture
-def instance_remote_version_default_1_1():
-    return {'server': 'https://tls-v1-1.valid.mock', 'tls_ca_cert': CA_CERT}
-
-
-@pytest.fixture
 def instance_remote_version_default_1_2():
     return {'server': 'https://tls-v1-2.valid.mock', 'tls_ca_cert': CA_CERT}
 
@@ -250,5 +245,16 @@ def instance_remote_cert_warning_seconds():
         'server': 'https://valid.mock',
         'days_warning': -1,
         'seconds_warning': days_to_seconds(200),
+        'tls_ca_cert': CA_CERT,
+    }
+
+
+@pytest.fixture
+def instance_remote_postgresql_valid():
+    return {
+        'server': 'localhost',
+        'port': 55432,
+        'server_hostname': 'valid.mock',
+        'start_tls': 'postgres',
         'tls_ca_cert': CA_CERT,
     }

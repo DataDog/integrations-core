@@ -4,7 +4,7 @@
 import os
 import re
 
-from semver import parse_version_info
+from semver import VersionInfo
 
 from ..fs import chdir
 from ..subprocess import run_command
@@ -86,7 +86,7 @@ def get_commits_since(check_name, target_tag=None, end=None, exclude_branch=None
     elif exclude_branch is not None:
         command = f"git cherry -v {exclude_branch} HEAD {'' if target_tag is None else f'{target_tag} '}"
     else:
-        command = f"git log --pretty=%s {'' if target_tag is None else f'{target_tag}...{end} '}{target_path}"
+        command = f"git log --pretty=%s {'' if target_tag is None else f'{target_tag}..{end} '}{target_path}"
 
     with chdir(root):
         return run_command(command, capture=True, check=True).stdout.splitlines()
@@ -100,7 +100,7 @@ def git_show_file(path, ref):
     command = f'git show {ref}:{path}'
 
     with chdir(root):
-        return run_command(command, capture=True).stdout
+        return run_command(command, capture=True, check=True).stdout
 
 
 def git_commit(targets, message, force=False, sign=False, update=False):
@@ -171,7 +171,7 @@ def get_latest_tag(pattern=None, tag_prefix='v'):
     """
     if not pattern:
         pattern = rf'^({tag_prefix})?\d+\.\d+\.\d+.*'
-    all_tags = sorted((parse_version_info(t.replace(tag_prefix, '', 1)), t) for t in git_tag_list(pattern))
+    all_tags = sorted((VersionInfo.parse(t.replace(tag_prefix, '', 1)), t) for t in git_tag_list(pattern))
     if not all_tags:
         return
     else:

@@ -1,0 +1,18 @@
+[env.collectors.datadog-checks]
+
+[envs.default.env-vars]
+CLICKHOUSE_REPOSITORY = "clickhouse/clickhouse-server"
+
+[[envs.default.matrix]]
+python = ["2.7", "3.8"]
+version = ["18", "19", "20", "21.8", "22.7"]
+
+[envs.default.overrides]
+matrix.version.env-vars = [
+    { key = "CLICKHOUSE_VERSION" },
+    { key = "CLICKHOUSE_REPOSITORY", value = "yandex/clickhouse-server", if = ["18", "19", "20", "21.8"] },
+]
+
+[envs.latest.env-vars]
+CLICKHOUSE_VERSION = "latest"
+CLICKHOUSE_REPOSITORY = "clickhouse/clickhouse-server"

@@ -202,6 +202,10 @@ In both cases, you need to change the Datadog Agent sidecar manifest in order to
           value: <CLUSTER_NAME>
 ```
 
+## Cluster performance
+
+For insights into your EKS cluster performance, enable a [Cluster Check Runner][34] to collect metrics from the [`kube-state-metrics`][33] service.
+
 ## Metrics collection
 
 ### Integration metrics
@@ -382,6 +386,8 @@ spec:
      name: "<POD_NAME>"
    spec:
      serviceAccountName: datadog-agent
+     ## Putting the agent in the same namespace as the application for origin detection with cgroup v2
+     shareProcessNamespace: true
      containers:
      - name: "<APPLICATION_NAME>"
        image: "<APPLICATION_IMAGE>"
@@ -502,3 +508,5 @@ Additional helpful documentation, links, and articles:
 [30]: https://docs.datadoghq.com/infrastructure/livecontainers/#kubernetes-resources-view
 [31]: https://docs.datadoghq.com/agent/cluster_agent/clusterchecks/#overview
 [32]: https://www.datadoghq.com/blog/aws-fargate-metrics/
+[33]: https://github.com/kubernetes/kube-state-metrics
+[34]: https://docs.datadoghq.com/containers/guide/clustercheckrunners

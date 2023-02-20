@@ -79,15 +79,9 @@ class Kong(AgentCheck):
         parsed = json.loads(raw)
         output = []
 
-        # First get the server stats
+        # Get the server stats
         for name, value in parsed.get('server').items():
             metric_name = self.METRIC_PREFIX + name
             output.append((metric_name, value, tags))
-
-        # Then the database metrics
-        databases_metrics = parsed.get('database').items()
-        output.append((self.METRIC_PREFIX + 'table.count', len(databases_metrics), tags))
-        for name, items in databases_metrics:
-            output.append((self.METRIC_PREFIX + 'table.items', items, tags + ['table:{}'.format(name)]))
 
         return output

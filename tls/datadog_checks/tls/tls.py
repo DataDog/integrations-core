@@ -62,6 +62,8 @@ class TLSCheck(AgentCheck):
             self._sock_type = socket.SOCK_STREAM
             self._port = int(self.instance.get('port', parsed_uri.port or 443))
 
+        self._start_tls = self.instance.get('start_tls')
+
         # https://en.wikipedia.org/wiki/Server_Name_Indication
         self._server_hostname = self.instance.get('server_hostname', self._server)
 

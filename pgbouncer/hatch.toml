@@ -1,0 +1,18 @@
+[env.collectors.datadog-checks]
+
+[[envs.default.matrix]]
+python = ["2.7", "3.8"]
+version = ["1.7", "1.8", "1.12"]
+
+[envs.default.env-vars]
+DDEV_SKIP_GENERIC_TAGS_CHECK = "true"
+
+[envs.default.overrides]
+matrix.version.env-vars = [
+    { key = "PGBOUNCER_VERSION", value = "1.7.2", if = ["1.7"] },
+    { key = "PGBOUNCER_IMAGE_TAG", value = "pgbouncer_1_7", if = ["1.7"] },
+    { key = "PGBOUNCER_VERSION", value = "1.8.1", if = ["1.8"] },
+    { key = "PGBOUNCER_IMAGE_TAG", value = "pgbouncer_1_8", if = ["1.8"] },
+    { key = "PGBOUNCER_VERSION", value = "1.12.0", if = ["1.12"] },
+    { key = "PGBOUNCER_IMAGE_TAG", value = "1.12.0", if = ["1.12"] },
+]

@@ -1,7 +1,7 @@
-version: '2.3'
+version: '3.8'
 services:
   registry:
-    image: goharbor/registry-photon:v2.7.1-patch-2819-2553-v1.10.0
+    image: goharbor/registry-photon:v1.10.11
     container_name: registry
     restart: always
     cap_drop:
@@ -14,10 +14,10 @@ services:
       - ./config/registry/config.yml:/etc/registry/config.yml
       - ../common/root.crt:/etc/registry/root.crt
     networks:
-      - harbor
+      - harbor-110
     dns_search: .
   registryctl:
-    image: goharbor/harbor-registryctl:v1.10.0
+    image: goharbor/harbor-registryctl:v1.10.11
     container_name: registryctl
     env_file:
       - ./config/registryctl/env
@@ -31,10 +31,10 @@ services:
     volumes:
       - ./config/registryctl/config.yml:/etc/registryctl/config.yml
     networks:
-      - harbor
+      - harbor-110
     dns_search: .
   postgresql:
-    image: goharbor/harbor-db:v1.10.0
+    image: goharbor/harbor-db:v1.10.11
     container_name: harbor-db
     restart: always
     cap_drop:
@@ -45,12 +45,12 @@ services:
       - SETGID
       - SETUID
     networks:
-      harbor:
+       - harbor-110
     dns_search: .
     env_file:
       - ./config/db/env
   core:
-    image: goharbor/harbor-core:v1.10.0
+    image: goharbor/harbor-core:v1.10.11
     container_name: harbor-core
     env_file:
       - ./config/core/env
@@ -72,8 +72,8 @@ services:
         source: ../common/secretkey
         target: /etc/core/key
     networks:
-      harbor:
-      harbor-chartmuseum:
+      harbor-110:
+      harbor-chartmuseum-110:
         aliases:
           - harbor-core
     dns_search: .
@@ -82,7 +82,7 @@ services:
       - redis
       - postgresql
   portal:
-    image: goharbor/harbor-portal:v1.10.0
+    image: goharbor/harbor-portal:v1.10.11
     container_name: harbor-portal
     restart: always
     cap_drop:
@@ -93,11 +93,11 @@ services:
       - SETUID
       - NET_BIND_SERVICE
     networks:
-      - harbor
+      - harbor-110
     dns_search: .
 
   jobservice:
-    image: goharbor/harbor-jobservice:v1.10.0
+    image: goharbor/harbor-jobservice:v1.10.11
     container_name: harbor-jobservice
     env_file:
       - ./config/jobservice/env
@@ -113,12 +113,12 @@ services:
         source: ./config/jobservice/config.yml
         target: /etc/jobservice/config.yml
     networks:
-      - harbor
+      - harbor-110
     dns_search: .
     depends_on:
       - core
   redis:
-    image: goharbor/redis-photon:v1.10.0
+    image: goharbor/redis-photon:v1.10.11
     container_name: redis
     restart: always
     cap_drop:
@@ -128,13 +128,13 @@ services:
       - SETGID
       - SETUID
     networks:
-      harbor:
-      harbor-chartmuseum:
+      harbor-110:
+      harbor-chartmuseum-110:
         aliases:
           - redis
     dns_search: .
   proxy:
-    image: goharbor/nginx-photon:v1.10.0
+    image: goharbor/nginx-photon:v1.10.11
     container_name: nginx
     restart: always
     cap_drop:
@@ -148,7 +148,7 @@ services:
       - ./config/nginx:/etc/nginx:z
       - ../common/cert/:/etc/cert:z
     networks:
-      - harbor
+      - harbor-110
     dns_search: .
     ports:
       - 80:8080
@@ -159,7 +159,7 @@ services:
       - portal
   chartmuseum:
     container_name: chartmuseum
-    image: goharbor/chartmuseum-photon:v0.9.0-v1.10.0
+    image: goharbor/chartmuseum-photon:v1.10.11
     restart: always
     cap_drop:
       - ALL
@@ -169,14 +169,14 @@ services:
       - SETGID
       - SETUID
     networks:
-      - harbor-chartmuseum
+      - harbor-chartmuseum-110
     dns_search: .
     volumes:
       - ./config/chartserver:/etc/chartserver:z
     env_file:
       ./config/chartserver/env
 networks:
-  harbor:
+  harbor-110:
     external: false
-  harbor-chartmuseum:
+  harbor-chartmuseum-110:
     external: false

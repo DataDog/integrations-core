@@ -1,41 +1,55 @@
 {
-  "display_name": "ProxySQL",
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "name": "proxysql",
-  "metric_prefix": "proxysql.",
-  "metric_to_check": "proxysql.active_transactions",
-  "creates_events": false,
-  "short_description": "Collect your ProxySQL metrics and logs.",
-  "guid": "8d759c9d-eb9e-4c78-9f26-1c2c844233a5",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "public_title": "Datadog-ProxySQL Integration",
-  "categories": [
-    "data store",
-    "log collection",
-    "caching"
-  ],
-  "type": "check",
-  "is_public": true,
-  "integration_id": "proxysql",
+  "manifest_version": "2.0.0",
+  "app_uuid": "aadfa11b-3de5-4827-9cdd-888c4e9587d0",
+  "app_id": "proxysql",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Collect your ProxySQL metrics and logs.",
+    "title": "ProxySQL",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Data Store",
+      "Category::Log Collection",
+      "Category::Caching"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "ProxySQL",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "proxysql.",
+        "check": "proxysql.active_transactions",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
     },
     "dashboards": {
       "ProxySQL Overview": "assets/dashboards/overview.json"
     },
-    "saved_views": {},
-    "monitors": {},
-    "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "proxysql"
-    },
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

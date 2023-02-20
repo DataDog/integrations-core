@@ -1,0 +1,55 @@
+version: '3.8'
+
+# https://github.com/hashicorp/boundary-reference-architecture/tree/main/deployment/docker/compose
+services:
+  boundary:
+    image: hashicorp/boundary:${BOUNDARY_VERSION}
+    command: ["server", "-config", "/boundary/boundary.hcl"]
+    volumes:
+      - ./boundary.hcl:/boundary/boundary.hcl
+      - ${DD_LOG_1}:/var/log/boundary/events.ndjson
+    ports:
+      - "9200:9200"
+      - "9201:9201"
+      - "9202:9202"
+      - "9203:9203"
+    environment:
+      - BOUNDARY_PG_URL=postgresql://postgres:postgres@db/boundary?sslmode=disable
+      - HOSTNAME=boundary
+    cap_add:
+      - IPC_LOCK
+    depends_on:
+      db-init:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "wget", "-O-", "http://boundary:9200"]
+      interval: 3s
+      timeout: 5s
+      retries: 5
+
+  db-init:
+    image: hashicorp/boundary:${BOUNDARY_VERSION}
+    command: ["database", "init", "-config", "/boundary/boundary.hcl"]
+    volumes:
+      - ./boundary.hcl:/boundary/boundary.hcl
+    environment:
+      - BOUNDARY_PG_URL=postgresql://postgres:postgres@db/boundary?sslmode=disable
+    cap_add:
+      - IPC_LOCK
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:11
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_DB=boundary
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 3s
+      timeout: 5s
+      retries: 5

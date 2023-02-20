@@ -1,5 +1,9 @@
 # CHANGELOG - cacti
 
+## 1.11.1 / 2022-08-05 / Agent 7.39.0
+
+* [Fixed] Pin `pymysql` to `0.10.1`. See [#12612](https://github.com/DataDog/integrations-core/pull/12612).
+
 ## 1.11.0 / 2022-04-05 / Agent 7.36.0
 
 * [Added] Upgrade dependencies. See [#11726](https://github.com/DataDog/integrations-core/pull/11726).

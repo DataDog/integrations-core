@@ -93,5 +93,6 @@ def test_tracked_method(aggregator, debug_stats_kwargs, disable_tracking):
         aggregator.assert_metric(
             "dd.hello.operation.error",
             hostname=hostname,
-            tags=tags + ["operation:test_tracked_exception", "error:<class 'test_tracking.MyException'>"],
+            tags=tags
+            + ["operation:test_tracked_exception", "error:<class 'tests.base.utils.test_tracking.MyException'>"],
         )

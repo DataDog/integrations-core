@@ -2,10 +2,11 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+import re
 from contextlib import suppress
 
 import click
-from semver import finalize_version, parse_version_info
+from semver import VersionInfo, finalize_version
 
 from ...constants import BETA_PACKAGES, NOT_CHECKS, VERSION_BUMP, get_agent_release_requirements
 from ...git import get_current_branch, git_commit
@@ -16,9 +17,19 @@ from . import changelog
 from .show import changes
 
 
+def validate_version(ctx, param, value):
+    if value is not None:
+        if re.match("^\\d+\\.\\d+\\.\\d+(-(rc|pre|alpha|beta)\\.\\d+)?$", value):
+            return value
+
+        raise click.BadParameter('must match `^\\d+\\.\\d+\\.\\d+(-(rc|pre|alpha|beta)\\.\\d+)?$`')
+
+    return None
+
+
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Release one or more checks')
 @click.argument('checks', shell_complete=complete_valid_checks, nargs=-1, required=True)
-@click.option('--version')
+@click.option('--version', callback=validate_version)
 @click.option('--end')
 @click.option('--new', 'initial_release', is_flag=True, help='Ensure versions are at 1.0.0')
 @click.option('--skip-sign', is_flag=True, help='Skip the signing of release metadata')
@@ -110,8 +121,8 @@ def make(ctx, checks, version, end, initial_release, skip_sign, sign_only, exclu
                         version = VERSION_BUMP[method](prev_version)
                         prev_version = version
 
-            p_version = parse_version_info(version)
-            p_current = parse_version_info(cur_version)
+            p_version = VersionInfo.parse(version)
+            p_current = VersionInfo.parse(cur_version)
             if p_version <= p_current:
                 if initial_release:
                     continue

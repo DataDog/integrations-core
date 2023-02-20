@@ -430,6 +430,12 @@ files:
           when `collect_tags` instance config is enabled.
         options:
           - template: instances/http
+      - name: connection_reset_timeout
+        description: |
+          The time interval in seconds at which the agent should re-authenticate using the provided credentials
+        value:
+          type: integer
+          example: 900
       - template: instances/default
         overrides:
           empty_default_hostname.display_priority: 1

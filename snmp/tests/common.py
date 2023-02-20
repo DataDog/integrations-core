@@ -16,6 +16,7 @@ from six import iteritems
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.base.utils.common import get_docker_hostname, to_native_string
 from datadog_checks.dev.docker import get_container_ip
+from datadog_checks.dev.utils import get_active_env
 from datadog_checks.snmp import SnmpCheck
 
 log = logging.getLogger(__name__)
@@ -25,7 +26,7 @@ PORT = 1161
 HERE = os.path.dirname(os.path.abspath(__file__))
 COMPOSE_DIR = os.path.join(HERE, 'compose')
 SNMP_LISTENER_ENV = os.environ['SNMP_LISTENER_ENV']
-TOX_ENV_NAME = os.environ['TOX_ENV_NAME']
+ACTIVE_ENV_NAME = get_active_env()
 
 AUTH_PROTOCOLS = {'MD5': 'usmHMACMD5AuthProtocol', 'SHA': 'usmHMACSHAAuthProtocol'}
 PRIV_PROTOCOLS = {'DES': 'usmDESPrivProtocol', 'AES': 'usmAesCfb128Protocol'}
@@ -283,6 +284,13 @@ def assert_common_metrics(aggregator, tags=None, is_e2e=False, loader=None):
 
 
 def assert_common_check_run_metrics(aggregator, tags=None, is_e2e=False, loader=None):
+    if is_e2e and loader == 'core':
+        aggregator.assert_metric('snmp.device.reachable', metric_type=aggregator.GAUGE, tags=tags, at_least=1, value=1)
+        aggregator.assert_metric(
+            'snmp.device.unreachable', metric_type=aggregator.GAUGE, tags=tags, at_least=1, value=0
+        )
+        aggregator.assert_metric('snmp.interface.status', metric_type=aggregator.GAUGE, tags=tags, at_least=0, value=1)
+
     monotonic_type = aggregator.MONOTONIC_COUNT
     if is_e2e:
         monotonic_type = aggregator.COUNT

@@ -7,9 +7,6 @@ parameters:
   ddtrace_flag: ''
   benchmark: true
   latest: false
-  validate: false
-  validate_changed: ''
-  validate_codeowners: false
   repo: 'core'
   ispr: false
   run_py2_tests: true  # Whether or not to run python2 tests.
@@ -29,13 +26,13 @@ jobs:
       dd_agent: dd_agent
 
   pool:
-    vmImage: 'ubuntu-18.04'
+    vmImage: 'ubuntu-20.04'
 
   variables:
     ${{ if not(eq(parameters.run_py2_tests, 'true')) }}:
-      TOX_SKIP_ENV: py27.*  # Don't run py2 tests
+      SKIP_ENV_NAME: py2.*  # Don't run py2 tests
     ${{ if not(eq(parameters.run_py3_tests, 'true')) }}:
-      TOX_SKIP_ENV: py3.*  # Don't run py2 tests
+      SKIP_ENV_NAME: py3.*  # Don't run py3 tests
     ${{ if eq(parameters.ddtrace_flag, '--ddtrace') }}:
       DD_ENV: ci
       DD_SERVICE: ddev-integrations-${{ parameters.repo }}
@@ -56,15 +53,6 @@ jobs:
     parameters:
       check: ${{ parameters.check }}
 
-  - ${{ if eq(parameters.validate, 'true') }}:
-    - template: './run-validations.yml'
-      parameters:
-        validate_changed: ${{ parameters.validate_changed }}
-        check: ${{ parameters.check }}
-        repo: ${{ parameters.repo }}
-        ispr: ${{ parameters.ispr }}
-        validate_codeowners: ${{ parameters.validate_codeowners }}
-
   - template: './run-tests.yml'
     parameters:
       test_run: '${{ coalesce(parameters.job_name, parameters.check) }}.linux'
@@ -77,3 +65,21 @@ jobs:
       repo: ${{ parameters.repo }}
       coverage: ${{ parameters.coverage }}
       force_base_package: ${{ parameters.force_base_package }}
+
+  - ${{ if and(eq(parameters.repo, 'core'), eq(parameters.test, 'true'), eq(parameters.coverage, 'true'), eq(parameters.force_base_package, 'false')) }}:
+    # https://docs.codecov.com/docs/codecov-uploader
+    - script: |
+        curl -O https://uploader.codecov.io/v0.3.2/linux/codecov
+        # Verify checksum
+        printf '20f9c9d78483fce977b6cc39e231a734a23bcd36f4d536bb7355222fb88d02bc  codecov' > codecov.SHA256SUM
+        shasum -a 256 -c codecov.SHA256SUM
+        chmod +x codecov
+      displayName: 'Install Codecov'
+    - script: |
+        for cov_file in */coverage.xml; do
+          echo "Uploading $cov_file with flag $(dirname $cov_file)"
+          ./codecov --F $(dirname $cov_file) -f $cov_file
+        done
+      displayName: 'Upload coverage data'
+      env:
+        CODECOV_TOKEN: $(CODECOV_TOKEN)

@@ -1,11 +1,16 @@
+# (C) Datadog, Inc. 2018-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
 import os
 
 import pytest
+import requests
 
 from datadog_checks.dev import docker_run
 from datadog_checks.envoy import Envoy
 
-from .common import DEFAULT_INSTANCE, DOCKER_DIR, ENVOY_LEGACY, FIXTURE_DIR, URL
+from .common import DEFAULT_INSTANCE, DOCKER_DIR, FIXTURE_DIR, HOST, URL
 from .legacy.common import FLAVOR, INSTANCES
 
 
@@ -16,7 +21,7 @@ def fixture_path():
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    if ENVOY_LEGACY == 'true':
+    if FLAVOR == 'api_v2':
         instance = INSTANCES['main']
     else:
         instance = DEFAULT_INSTANCE
@@ -25,8 +30,12 @@ def dd_environment():
         os.path.join(DOCKER_DIR, FLAVOR, 'docker-compose.yaml'),
         build=True,
         endpoints="{}/stats".format(URL),
-        log_patterns=['all dependencies initialized. starting workers'],
+        log_patterns=['front-envoy(.*?)all dependencies initialized. starting workers'],
+        attempts=2,
     ):
+        # Exercising envoy a bit will trigger extra metrics
+        requests.get('http://{}:8000/service/1'.format(HOST))
+        requests.get('http://{}:8000/service/2'.format(HOST))
         yield instance
 
 

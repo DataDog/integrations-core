@@ -148,27 +148,7 @@ class Disk(AgentCheck):
 
             self.log.debug('Passed: %s', part.device)
 
-            device_name = part.mountpoint if self._use_mount else part.device
-
-            tags = [part.fstype, 'filesystem:{}'.format(part.fstype)] if self._tag_by_filesystem else []
-            tags.extend(self._custom_tags)
-
-            # apply device/mountpoint specific tags
-            for regex, device_tags in self._device_tag_re:
-                if regex.match(device_name):
-                    tags.extend(device_tags)
-
-            # apply device labels as tags (from blkid or lsblk).
-            # we want to use the real device name and not the device_name (which can be the mountpoint)
-            if self.devices_label.get(part.device):
-                tags.extend(self.devices_label.get(part.device))
-
-            # legacy check names c: vs psutil name C:\\
-            if Platform.is_win32():
-                device_name = device_name.strip('\\').lower()
-
-            tags.append('device:{}'.format(device_name))
-            tags.append('device_name:{}'.format(_base_device_name(part.device)))
+            tags = self._get_tags(part)
             for metric_name, metric_value in iteritems(self._collect_part_metrics(part, disk_usage)):
                 self.gauge(metric_name, metric_value, tags=tags)
 
@@ -183,6 +163,28 @@ class Disk(AgentCheck):
                     self.service_check('disk.read_write', AgentCheck.UNKNOWN, tags=tags)
 
         self.collect_latency_metrics()
+
+    def _get_tags(self, part):
+        device_name = part.mountpoint if self._use_mount else part.device
+        tags = [part.fstype, 'filesystem:{}'.format(part.fstype)] if self._tag_by_filesystem else []
+        tags.extend(self._custom_tags)
+
+        # apply device-specific tags
+        device_specific_tags = self._get_device_specific_tags(device_name)
+        tags.extend(device_specific_tags)
+
+        # apply device labels as tags (from blkid or lsblk).
+        # we want to use the real device name and not the device_name (which can be the mountpoint)
+        if self.devices_label.get(part.device):
+            tags.extend(self.devices_label.get(part.device))
+
+        # legacy check names c: vs psutil name C:\\
+        if Platform.is_win32():
+            device_name = device_name.strip('\\').lower()
+
+        tags.append('device:{}'.format(device_name))
+        tags.append('device_name:{}'.format(_base_device_name(part.device)))
+        return tags
 
     def exclude_disk(self, part):
         # skip cd-rom drives with no disk in it; they may raise
@@ -318,6 +320,10 @@ class Disk(AgentCheck):
             self.log.debug('IO Counters: %s -> %s', disk_name, disk)
             try:
                 metric_tags = [] if self._custom_tags is None else self._custom_tags[:]
+
+                device_specific_tags = self._get_device_specific_tags(disk_name)
+                metric_tags.extend(device_specific_tags)
+
                 metric_tags.append('device:{}'.format(disk_name))
                 metric_tags.append('device_name:{}'.format(_base_device_name(disk_name)))
                 if self.devices_label.get(disk_name):
@@ -488,6 +494,15 @@ class Disk(AgentCheck):
 
         return devices_label
 
+    def _get_device_specific_tags(self, device_name):
+        device_specific_tags = []
+
+        # apply device/mountpoint specific tags
+        for regex, device_tags in self._device_tag_re:
+            if regex.match(device_name):
+                device_specific_tags.extend(device_tags)
+        return device_specific_tags
+
     def _create_manual_mounts(self):
         """
         on Windows, in order to collect statistics on remote (SMB/NFS) drives, the drive must be mounted
@@ -532,6 +547,8 @@ class Disk(AgentCheck):
         return [
             # CDROM
             'iso9660$',
+            # tracefs
+            'tracefs$',
         ]
 
     @staticmethod

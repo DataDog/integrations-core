@@ -49,6 +49,7 @@ from .console import CONTEXT_SETTINGS, abort, echo_debug, echo_info, echo_succes
 @click.option('--force-base-unpinned', is_flag=True, help='Force using datadog-checks-base as specified by check dep')
 @click.option('--force-base-min', is_flag=True, help='Force using lowest viable release version of datadog-checks-base')
 @click.option('--force-env-rebuild', is_flag=True, help='Force creating a new env')
+@click.option('--memray', is_flag=True, help='Run memray to measure memory usage on all tests')
 @click.pass_context
 def test(
     ctx,
@@ -76,6 +77,7 @@ def test(
     force_base_unpinned,
     force_base_min,
     force_env_rebuild,
+    memray,
 ):
     """Run tests for Agent-based checks.
 
@@ -94,7 +96,6 @@ def test(
     root = get_root()
     testing_on_ci = running_on_ci()
     color = ctx.obj['color']
-    repo = ctx.obj['repo_name']
 
     # Implicitly track coverage
     if cov_missing:
@@ -167,7 +168,7 @@ def test(
             echo_debug(f"No envs found for: `{check}`")
             continue
 
-        ddtrace_check = ddtrace
+        ddtrace_check = ddtrace and check not in ('datadog_checks_dev', 'ddev')
         if ddtrace and ON_WINDOWS and any('py2' in env for env in env_names):
             # The pytest flag --ddtrace is not available for windows-py2 env.
             # Removing it so it does not fail.
@@ -200,6 +201,7 @@ def test(
             pytest_args=pytest_args,
             e2e=e2e,
             ddtrace=ddtrace_check,
+            memray=memray,
         )
         if coverage:
             pytest_options = pytest_options.format(pytest_coverage_sources(check))
@@ -263,8 +265,6 @@ def test(
 
                     fix_coverage_report(check, 'coverage.xml')
 
-                    if repo == 'integrations-core':
-                        run_command(['codecov', '-X', 'gcov', '--root', root, '-F', check, '-f', 'coverage.xml'])
                 else:
                     if not cov_keep:
                         remove_path('.coverage')
@@ -277,6 +277,7 @@ def test(
             break
 
     if not tests_ran:
+        # TODO: remove branch when tox is replaced by Hatch
         if format_style:
             echo_warning('Code formatting is not enabled!')
             echo_info('To enable it, set `dd_check_style = true` under the `[testenv]` section of `tox.ini`.')

@@ -1,34 +1,55 @@
 {
-  "categories": [
-    "web",
-    "log collection",
-    "autodiscovery"
-  ],
-  "creates_events": false,
-  "display_name": "Tomcat",
-  "guid": "60f37d34-3bb7-43c9-9b52-2659b8898997",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "tomcat.",
-  "metric_to_check": "tomcat.threads.count",
-  "name": "tomcat",
-  "process_signatures": [
-    "java tomcat"
-  ],
-  "public_title": "Datadog-Tomcat Integration",
-  "short_description": "Track requests per second, bytes served, cache hits, servlet metrics, and more.",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "type": "check",
-  "integration_id": "tomcat",
+  "manifest_version": "2.0.0",
+  "app_uuid": "9497c2d8-63cb-4d90-b73c-f32065349fe1",
+  "app_id": "tomcat",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Track requests per second, bytes served, cache hits, servlet metrics, and more.",
+    "title": "Tomcat",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Web",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "Tomcat",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "tomcat.",
+        "check": "tomcat.threads.count",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      },
+      "process_signatures": [
+        "java tomcat"
+      ]
+    },
+    "dashboards": {
+      "tomcat--overview": "assets/dashboards/overview.json",
+      "tomcat": "assets/dashboards/metrics.json"
     },
     "monitors": {
       "[Tomcat] Anomalous request rate for host {{host.name}}": "assets/monitors/req_count.json",
@@ -38,17 +59,11 @@
       "[Tomcat] % of busy threads is high for host: {{host.name}}": "assets/monitors/thread_busy.json",
       "[Tomcat] Increase of the errors/second rate for host: {{host.name}}": "assets/monitors/error_count.json"
     },
-    "dashboards": {
-      "tomcat--overview": "assets/dashboards/overview.json",
-      "tomcat": "assets/dashboards/metrics.json"
-    },
-    "service_checks": "assets/service_checks.json",
-    "logs": {
-      "source": "tomcat"
-    },
-    "metrics_metadata": "metadata.csv",
     "saved_views": {
       "tomcat_processes": "assets/saved_views/tomcat_processes.json"
+    },
+    "logs": {
+      "source": "tomcat"
     }
   }
 }

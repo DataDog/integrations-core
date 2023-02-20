@@ -1,37 +1,51 @@
 {
-  "display_name": "HyperV",
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "name": "hyperv",
-  "metric_prefix": "hyperv.",
-  "metric_to_check": "hyperv.hypervisor_logical_processor.total_run_time",
-  "creates_events": false,
-  "short_description": "Monitor Microsoft's Hyper-V virtualization technology.",
-  "guid": "412a75c1-b752-4b20-b046-4195dfaaf6ec",
-  "support": "core",
-  "supported_os": [
-    "windows"
-  ],
-  "public_title": "Datadog-HyperV Integration",
-  "categories": [
-    "azure",
-    "cloud",
-    "monitoring",
-    "os & system"
-  ],
-  "type": "check",
-  "is_public": true,
-  "integration_id": "hyper-v",
+  "manifest_version": "2.0.0",
+  "app_uuid": "6024e97b-c3c6-45e3-ba71-a48adeebc191",
+  "app_id": "hyper-v",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor Microsoft's Hyper-V virtualization technology.",
+    "title": "HyperV",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Windows",
+      "Category::Azure",
+      "Category::Cloud",
+      "Category::Monitoring",
+      "Category::OS & System"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "HyperV",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "hyperv.",
+        "check": "hyperv.hypervisor_logical_processor.total_run_time",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
     },
-    "monitors": {},
     "dashboards": {
       "hyper-v": "assets/dashboards/overview.json"
-    },
-    "service_checks": "assets/service_checks.json",
-    "logs": {},
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

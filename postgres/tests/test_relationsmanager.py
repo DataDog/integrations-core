@@ -19,15 +19,15 @@ pytestmark = pytest.mark.unit
                 {'relation_regex': 'ibx.*', 'schemas': ['public']},
                 {'relation_regex': 'icx.*', 'schemas': ['public']},
             ],
-            "( relname ~ 'ix.*' AND schemaname = ANY(array['public','s1','s2']::text[]) ) "
+            "(( relname ~ 'ix.*' AND schemaname = ANY(array['public','s1','s2']::text[]) ) "
             "OR ( relname ~ 'ibx.*' AND schemaname = ANY(array['public']::text[]) ) "
-            "OR ( relname ~ 'icx.*' AND schemaname = ANY(array['public']::text[]) )",
+            "OR ( relname ~ 'icx.*' AND schemaname = ANY(array['public']::text[]) ))",
         ),
         (
             [
                 {'relation_regex': '.+_archive'},
             ],
-            "( relname ~ '.+_archive' )",
+            "(( relname ~ '.+_archive' ))",
         ),
         (
             [
@@ -35,13 +35,13 @@ pytestmark = pytest.mark.unit
                 {'relation_name': 'my_table2', 'relkind': ['p', 'r']},  # relkind ignored
                 {'relation_regex': 'table.*'},
             ],
-            "( relname = 'my_table' AND schemaname = ANY(array['public','app']::text[]) ) "
+            "(( relname = 'my_table' AND schemaname = ANY(array['public','app']::text[]) ) "
             "OR ( relname = 'my_table2' ) "
-            "OR ( relname ~ 'table.*' )",
+            "OR ( relname ~ 'table.*' ))",
         ),
         (
             ['table1', 'table2'],
-            "( relname = 'table1' ) OR ( relname = 'table2' )",
+            "(( relname = 'table1' ) OR ( relname = 'table2' ))",
         ),
     ],
 )
@@ -59,7 +59,8 @@ def test_relation_filter():
 
     query_filter = relations.filter_relation_query(query, SCHEMA_NAME)
     assert (
-        query_filter == "Select foo from bar where ( relname = 'breed' AND schemaname = ANY(array['public']::text[]) )"
+        query_filter
+        == "Select foo from bar where (( relname = 'breed' AND schemaname = ANY(array['public']::text[]) ))"
     )
 
 
@@ -69,7 +70,7 @@ def test_relation_filter_no_schemas():
     relations = RelationsManager(relations_config)
 
     query_filter = relations.filter_relation_query(query, SCHEMA_NAME)
-    assert query_filter == "Select foo from bar where ( relname = 'persons' )"
+    assert query_filter == "Select foo from bar where (( relname = 'persons' ))"
 
 
 def test_relation_filter_regex():
@@ -78,7 +79,7 @@ def test_relation_filter_regex():
     relations = RelationsManager(relations_config)
 
     query_filter = relations.filter_relation_query(query, SCHEMA_NAME)
-    assert query_filter == "Select foo from bar where ( relname ~ 'b.*' )"
+    assert query_filter == "Select foo from bar where (( relname ~ 'b.*' ))"
 
 
 def test_relation_filter_relkind():

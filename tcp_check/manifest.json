@@ -1,39 +1,48 @@
 {
-  "aliases": [
-    "/guides/network_checks",
-    "/integrations/tcpcheck"
-  ],
-  "categories": [
-    "network",
-    "web"
-  ],
-  "creates_events": false,
-  "display_name": "TCP",
-  "guid": "c514029e-0ed8-4c9f-abe5-2fd4096726ba",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "network.",
-  "metric_to_check": "network.tcp.can_connect",
-  "name": "tcp_check",
-  "public_title": "Datadog-TCP Check Integration",
-  "short_description": "Monitor TCP connectivity to remote hosts.",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "type": "check",
-  "integration_id": "system",
+  "manifest_version": "2.0.0",
+  "app_uuid": "a675760c-00f7-4bf3-bd0e-c7edfb0e7e82",
+  "app_id": "system",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor TCP connectivity to remote hosts.",
+    "title": "TCP Check",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Network",
+      "Category::Web"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
-    },
-    "monitors": {},
-    "dashboards": {},
-    "service_checks": "assets/service_checks.json",
-    "logs": {},
-    "metrics_metadata": "metadata.csv"
+    "integration": {
+      "source_type_name": "TCP",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "network.",
+        "check": "network.tcp.can_connect",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    }
   }
 }

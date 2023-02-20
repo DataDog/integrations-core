@@ -20,7 +20,7 @@ If you are only collecting standard metrics from Microsoft Windows and other pac
 1. Submit performance counters using System.Diagnostics in .NET, then access them with WMI.
 2. Implement a COM-based WMI provider for your application. You would typically only do this if you are using a non-.NET language.
 
-To learn more about using System.Diagnostics, see the [PerformanceCounter Class][3]). After adding your metric you should be able to find it in WMI. To browse the WMI namespaces, you may find [WMI Explorer][4] useful. You can find the same information with Powershell using [Get-WmiObject][5]. Also, review the information in [How to retrieve WMI metrics][6].
+To learn more about using System.Diagnostics, see the [PerformanceCounter Class][3]). After adding your metric you should be able to find it in WMI. To browse the WMI namespaces, you may find [WMI Explorer][4] useful. You can find the same information with Powershell using [Get-WmiObject][5]. Also, review the information in [Retrieving WMI metrics][6].
 
 If you assign the new metric a category of My_New_Metric, the WMI path is
 `\\<ComputerName>\ROOT\CIMV2:Win32_PerfFormattedData_My_New_Metric`
@@ -196,9 +196,9 @@ Need help? Contact [Datadog support][13].
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/wmi_check/images/wmimetric.png
 [2]: https://docs.datadoghq.com/integrations/windows_performance_counters/
 [3]: https://docs.microsoft.com/en-us/dotnet/api/system.diagnostics.performancecounter
-[4]: https://wmie.codeplex.com
+[4]: https://github.com/vinaypamnani/wmie2/releases
 [5]: https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.management/get-wmiobject
-[6]: https://docs.datadoghq.com/integrations/faq/how-to-retrieve-wmi-metrics/
+[6]: https://docs.datadoghq.com/integrations/guide/retrieving-wmi-metrics/
 [7]: https://msdn.microsoft.com/en-us/library/windows/desktop/aa394084.aspx
 [8]: https://technet.microsoft.com/en-us/library/Hh921475.aspx
 [9]: https://msdn.microsoft.com/en-us/library/aa393067.aspx

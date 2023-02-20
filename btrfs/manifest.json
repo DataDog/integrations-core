@@ -1,35 +1,49 @@
 {
-  "categories": [
-    "os & system"
-  ],
-  "creates_events": false,
-  "display_name": "Btrfs",
-  "guid": "54f9329a-8270-4f5a-bd4b-cd169abfc791",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "btrfs.",
-  "metric_to_check": "system.disk.btrfs.total",
-  "name": "btrfs",
-  "public_title": "Datadog-Btrfs Integration",
-  "short_description": "Monitor usage on Btrfs volumes so you can respond before they fill up.",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os"
-  ],
-  "type": "check",
-  "integration_id": "btrfs",
+  "manifest_version": "2.0.0",
+  "app_uuid": "471f9447-678b-4199-9503-7170b65d07c5",
+  "app_id": "btrfs",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor usage on Btrfs volumes so you can respond before they fill up.",
+    "title": "Btrfs",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Category::OS & System"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "Btrfs",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "system.disk.btrfs.",
+        "check": "system.disk.btrfs.total",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
     },
-    "monitors": {},
     "dashboards": {
       "btrfs": "assets/dashboards/btrfs_dashboard.json"
-    },
-    "service_checks": "assets/service_checks.json",
-    "logs": {},
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

@@ -1,7 +1,8 @@
 [build-system]
 requires = [
     "hatchling>=0.11.2",
-    "setuptools<61",
+    "setuptools>=66; python_version > '3.0'",
+    "setuptools; python_version < '3.0'",
 ]
 build-backend = "hatchling.build"
 
@@ -9,7 +10,6 @@ build-backend = "hatchling.build"
 name = "datadog-checks-base"
 description = "The Datadog Check Toolkit"
 readme = "README.md"
-license = {text = "BSD-3-Clause"}
 keywords = [
     "datadog",
     "agent",
@@ -31,6 +31,9 @@ dynamic = [
     "version",
 ]
 
+[project.license]
+text = "BSD-3-Clause"
+
 [project.optional-dependencies]
 db = [
     "mmh3==2.5.1; python_version < '3.0'",
@@ -39,53 +42,58 @@ db = [
 deps = [
     "binary==1.0.0",
     "cachetools==3.1.1; python_version < '3.0'",
-    "cachetools==5.0.0; python_version > '3.0'",
+    "cachetools==5.2.1; python_version > '3.0'",
     "contextlib2==0.6.0.post1; python_version < '3.0'",
     "cryptography==3.3.2; python_version < '3.0'",
-    "cryptography==3.4.8; python_version > '3.0'",
+    "cryptography==39.0.1; python_version > '3.0'",
     "ddtrace==0.32.2; sys_platform == 'win32' and python_version < '3.0'",
-    "ddtrace==0.53.2; sys_platform != 'win32' or python_version > '3.0'",
+    "ddtrace==0.53.2; (sys_platform != 'win32' and (sys_platform != 'darwin' or platform_machine != 'arm64' and python_version > '3.0')) or python_version > '3.0'",
     "enum34==1.1.10; python_version < '3.0'",
-    "immutables==0.17; python_version > '3.0'",
+    "immutables==0.19; python_version > '3.0'",
+    "importlib-metadata==2.1.3; python_version < '3.8'",
     "ipaddress==1.0.23; python_version < '3.0'",
     "jellyfish==0.9.0; python_version > '3.0'",
     "prometheus-client==0.12.0; python_version < '3.0'",
-    "prometheus-client==0.14.1; python_version > '3.0'",
+    "prometheus-client==0.15.0; python_version > '3.0'",
     "protobuf==3.17.3; python_version < '3.0'",
-    "protobuf==3.20.1; python_version > '3.0'",
-    "pydantic==1.9.0; python_version > '3.0'",
+    "protobuf==3.20.2; python_version > '3.0'",
+    "pydantic==1.10.4; python_version > '3.0'",
     "python-dateutil==2.8.2",
     "pywin32==228; sys_platform == 'win32' and python_version < '3.0'",
     "pywin32==304; sys_platform == 'win32' and python_version > '3.0'",
-    "pyyaml==5.4.1",
-    "requests-toolbelt==0.9.1",
+    "pyyaml==5.4.1; python_version < '3.0'",
+    "pyyaml==6.0; python_version > '3.0'",
+    "requests-toolbelt==0.10.1",
     "requests-unixsocket==0.3.0",
     "requests==2.27.1; python_version < '3.0'",
-    "requests==2.27.1; python_version > '3.0'",
+    "requests==2.28.1; python_version > '3.0'",
     "simplejson==3.17.6",
     "six==1.16.0",
     "typing==3.10.0.0; python_version < '3.0'",
     "uptime==3.0.1",
-    "wrapt==1.14.0",
+    "wrapt==1.14.1",
 ]
 http = [
     "aws-requests-auth==0.4.3",
     "botocore==1.20.112; python_version < '3.0'",
-    "botocore==1.25.8; python_version > '3.0'",
+    "botocore==1.29.51; python_version > '3.0'",
+    "oauthlib==3.1.0; python_version < '3.0'",
+    "oauthlib==3.2.2; python_version > '3.0'",
     "pyjwt==1.7.1; python_version < '3.0'",
-    "pyjwt==2.3.0; python_version > '3.0'",
+    "pyjwt==2.6.0; python_version > '3.0'",
     "pysocks==1.7.1",
     "requests-kerberos==0.12.0; python_version < '3.0'",
     "requests-kerberos==0.14.0; python_version > '3.0'",
     "requests-ntlm==1.1.0",
+    "requests-oauthlib==1.3.1",
     "win-inet-pton==1.1.0; sys_platform == 'win32' and python_version < '3.0'",
 ]
 json = [
-    "orjson==3.6.8; python_version > '3.0'",
+    "orjson==3.8.5; python_version > '3.0'",
 ]
 kube = [
     "kubernetes==18.20.0; python_version < '3.0'",
-    "kubernetes==22.6.0; python_version > '3.0'",
+    "kubernetes==25.3.0; python_version > '3.0'",
 ]
 
 [project.urls]
@@ -98,8 +106,6 @@ path = "datadog_checks/base/__about__.py"
 include = [
     "/datadog_checks",
     "/tests",
-    "/requirements-dev.txt",
-    "/tox.ini",
 ]
 
 [tool.hatch.build.targets.wheel]

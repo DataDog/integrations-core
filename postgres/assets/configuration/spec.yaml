@@ -65,12 +65,10 @@ files:
           - 'template%'
           - rdsadmin
           - azure_maintenance
-          - postgres
         default:
           - 'template%'
           - rdsadmin
           - azure_maintenance
-          - postgres
     - name: ssl
       description: |
         This option determines whether or not and with what priority a secure SSL TCP/IP connection
@@ -218,6 +216,19 @@ files:
       value:
         type: boolean
         example: false
+    - name: activity_metrics_excluded_aggregations
+      description: |
+        A list of columns to remove from the pg_stat_activity aggregation.
+        By default, datname, usename and application_name will be used.
+        If applications with different application_name are creating a lot of short-lived queries,
+        removing application_name from the aggregation can help generate more stable metrics.
+      value:
+        type: array
+        items:
+          type: string
+        example:
+          - application_name
+        default: []
     - name: collect_database_size_metrics
       description: Collect database size metrics.
       value:
@@ -227,7 +238,7 @@ files:
       description: Include statistics from the default database 'postgres' in the check metrics.
       value:
         type: boolean
-        example: false
+        example: true
     - name: collect_bloat_metrics
       description: Collect metrics about table bloat. Only available when `relation` metrics are enabled.
       enabled: true
@@ -319,6 +330,14 @@ files:
           value:
             type: number
             example: 10
+        - name: pg_stat_statements_max_warning_threshold
+          hidden: true
+          description: |
+            Set the threshold for a safe value of `pg_stat_statements.max`. If the database is configured with a value
+            higher than this threshold, a warning is emitted to recommend lowering the setting value.
+          value:
+            type: number
+            example: 10000
     - name: query_samples
       description: Configure collection of query samples
       options:
@@ -369,6 +388,13 @@ files:
           value:
             type: integer
             example: 10000
+        - name: explain_parameterized_queries
+          description: |
+            Note, this is a BETA feature. This option will enable the ability to explain parameterized queries.
+            This is useful if your SQL clients are using the extended query protocol or prepared statements.
+          value:
+            type: boolean
+            example: false
     - name: query_activity
       description: Configure collection of query activity
       options:
@@ -392,7 +418,7 @@ files:
           value:
             type: number
             example: 3500
-            
+
     - name: aws
       description: |
         This block defines the configuration for AWS RDS and Aurora instances. 
@@ -533,6 +559,26 @@ files:
             type: boolean
             example: true
             display_default: true
+    - name: log_unobfuscated_queries
+      hidden: true
+      description: |
+        Set to `true` to enable logging of original unobfuscated SQL queries when obfuscation errors occur.
+        For security purposes, it is recommended to use this option for debugging only when requested by Datadog Support.
+        Note: This option only applies when `dbm` is enabled.
+      value:
+        type: boolean
+        example: false
+        display_default: false
+    - name: log_unobfuscated_plans
+      hidden: true
+      description: |
+        Set to `true` to enable logging of original unobfuscated SQL plans when obfuscation errors occur.
+        For security purposes, it is recommended to use this option for debugging only when requested by Datadog Support.
+        Note: This option only applies when `dbm` is enabled.
+      value:
+        type: boolean
+        example: false
+        display_default: false
     - template: instances/default
       overrides:
         disable_generic_tags.hidden: False

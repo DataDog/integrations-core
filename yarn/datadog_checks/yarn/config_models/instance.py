@@ -9,7 +9,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Mapping, Optional, Sequence
+from typing import Any, Literal, Mapping, Optional, Sequence
 
 from pydantic import BaseModel, root_validator, validator
 
@@ -58,6 +58,12 @@ class InstanceConfig(BaseModel):
     aws_service: Optional[str]
     cluster_name: Optional[str]
     collect_app_metrics: Optional[bool]
+    collect_apps_all_states: Optional[bool]
+    collect_apps_states_list: Optional[
+        Sequence[
+            Literal['ALL', 'NEW', 'NEW_SAVING', 'SUBMITTED', 'ACCEPTED', 'RUNNING', 'FINISHED', 'FAILED', 'KILLED']
+        ]
+    ]
     collect_node_metrics: Optional[bool]
     connect_timeout: Optional[float]
     disable_generic_tags: Optional[bool]

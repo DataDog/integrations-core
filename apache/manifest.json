@@ -1,47 +1,60 @@
 {
-  "aliases": [
-    "/integrations/faq/issues-with-apache-integration/"
-  ],
-  "categories": [
-    "web",
-    "log collection",
-    "autodiscovery"
-  ],
-  "creates_events": false,
-  "description": "Track requests per second, bytes served, worker threads, uptime, and more.",
-  "display_name": "Apache",
-  "guid": "cb2b4a06-4ede-465e-9478-a45f8b32058a",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "apache.",
-  "metric_to_check": "apache.performance.busy_workers",
-  "name": "Apache",
-  "process_signatures": [
-    "httpd",
-    "apache",
-    "apache2"
-  ],
-  "public_title": "Datadog-Apache Integration",
-  "short_description": "Track requests per second, bytes served, worker threads, uptime, and more.",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "type": "check",
-  "integration_id": "apache",
+  "manifest_version": "2.0.0",
+  "app_uuid": "8dfc1942-7820-49c7-93c8-5a31579ee52a",
+  "app_id": "apache",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Track requests per second, bytes served, worker threads, uptime, and more.",
+    "title": "Apache",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Web",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "Apache",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "apache.",
+        "check": "apache.performance.busy_workers",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      },
+      "process_signatures": [
+        "httpd",
+        "apache",
+        "apache2"
+      ]
+    },
+    "dashboards": {
+      "apache": "assets/dashboards/apache_dashboard.json"
     },
     "monitors": {
       "[Apache] Low number of idle workers": "assets/recommended_monitors/apache_low_idle_workers.json",
       "[Apache] resource utilization": "assets/recommended_monitors/high_keep_alive_and_cpu.json"
-    },
-    "dashboards": {
-      "apache": "assets/dashboards/apache_dashboard.json"
     },
     "saved_views": {
       "4xx_errors": "assets/saved_views/4xx_errors.json",
@@ -50,10 +63,8 @@
       "bot_errors": "assets/saved_views/bot_errors.json",
       "apache_processes": "assets/saved_views/apache_processes.json"
     },
-    "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "apache"
-    },
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

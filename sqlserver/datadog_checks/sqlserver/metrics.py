@@ -23,7 +23,7 @@ class BaseSqlServerMetric(object):
     """Base class for SQL Server metrics collection operations.
 
     Each subclass defines the TABLE it's associated with, and the default
-    query to collect all of the information in one request.  This query gets
+    query to collect all the information in one request.  This query gets
     executed as part of the classmethod `fetch_all_values` and the data gets passed
     to the instance method `fetch_metric` which extracts the appropriate metric from
     within the larger collection.
@@ -48,6 +48,7 @@ class BaseSqlServerMetric(object):
             partial_kwargs['hostname'] = cfg_instance['hostname']
         self.report_function = partial(report_function, raw=True, **partial_kwargs)
         self.instance = cfg_instance.get('instance_name', '')
+        self.physical_db_name = cfg_instance.get('physical_db_name', '')
         self.object_name = cfg_instance.get('object_name', '')
         self.tags = cfg_instance.get('tags', [])
         self.tag_by = cfg_instance.get('tag_by', None)
@@ -109,7 +110,8 @@ class SqlSimpleMetric(BaseSqlServerMetric):
                 metric_tags = list(self.tags)
 
                 if (self.instance == ALL_INSTANCES and instance_name != "_Total") or (
-                    instance_name == self.instance and (not self.object_name or object_name == self.object_name)
+                    (instance_name == self.instance or instance_name == self.physical_db_name)
+                    and (not self.object_name or object_name == self.object_name)
                 ):
                     matched = True
 
@@ -181,7 +183,7 @@ class SqlFractionMetric(BaseSqlServerMetric):
             if inst in done_instances:
                 continue
 
-            if (self.instance != ALL_INSTANCES and inst != self.instance) or (
+            if (self.instance != ALL_INSTANCES and inst != self.instance and inst != self.physical_db_name) or (
                 self.object_name and object_name != self.object_name
             ):
                 done_instances.append(inst)
@@ -486,7 +488,7 @@ class SqlDatabaseFileStats(BaseSqlServerMetric):
         if databases is None:
             databases = []
 
-        cursor.execute('select DB_NAME()')  # This can return None in some implementations so it cannot be chained
+        cursor.execute('select DB_NAME()')  # This can return None in some implementations, so it cannot be chained
         data = cursor.fetchall()
         current_db = data[0][0]
         logger.debug("%s: current db is %s", cls.__name__, current_db)
@@ -565,131 +567,6 @@ class SqlDatabaseFileStats(BaseSqlServerMetric):
             self.report_function(metric_name, column_val, tags=metric_tags)
 
 
-class SqlFileStats(BaseSqlServerMetric):
-    CUSTOM_QUERIES_AVAILABLE = False
-
-    # Default base query works for server-wide view of all master files
-    QUERY_MASTER_FILES = """
-        SELECT
-            DB_NAME(fs.database_id) AS database_name,
-            mf.state_desc AS state_desc,
-            mf.name AS logical_name,
-            mf.physical_name AS physical_name,
-            fs.num_of_reads AS num_of_reads,
-            fs.num_of_bytes_read AS num_of_bytes_read,
-            fs.io_stall_read_ms AS io_stall_read_ms,
-            fs.io_stall_queued_read_ms AS io_stall_queued_read_ms,
-            fs.num_of_writes AS num_of_writes,
-            fs.num_of_bytes_written AS num_of_bytes_written,
-            fs.io_stall_write_ms AS io_stall_write_ms,
-            fs.io_stall_queued_write_ms AS io_stall_queued_write_ms,
-            fs.io_stall AS io_stall,
-            fs.size_on_disk_bytes AS size_on_disk_bytes
-        FROM sys.dm_io_virtual_file_stats(NULL, NULL) fs
-            LEFT JOIN sys.master_files mf
-                ON mf.database_id = fs.database_id
-                AND mf.file_id = fs.file_id;
-    """
-
-    # Per-database query
-    QUERY_DATABASE_FILES = """
-        SELECT
-            DB_NAME() AS database_name,
-            df.state_desc AS state_desc,
-            df.name AS logical_name,
-            df.physical_name AS physical_name,
-            fs.num_of_reads AS num_of_reads,
-            fs.num_of_bytes_read AS num_of_bytes_read,
-            fs.io_stall_read_ms AS io_stall_read_ms,
-            fs.io_stall_queued_read_ms AS io_stall_queued_read_ms,
-            fs.num_of_writes AS num_of_writes,
-            fs.num_of_bytes_written AS num_of_bytes_written,
-            fs.io_stall_write_ms AS io_stall_write_ms,
-            fs.io_stall_queued_write_ms AS io_stall_queued_write_ms,
-            fs.io_stall AS io_stall,
-            fs.size_on_disk_bytes AS size_on_disk_bytes
-        FROM sys.dm_io_virtual_file_stats(DB_ID(), NULL) fs
-            LEFT JOIN sys.database_files df
-                ON df.file_id = fs.file_id;
-    """
-
-    def __init__(self, cfg_instance, base_name, report_function, column, logger):
-        super(SqlFileStats, self).__init__(cfg_instance, base_name, report_function, column, logger)
-
-    @classmethod
-    def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
-        rows = []
-        columns = []
-
-        # Exclude the master database because sys.database_files is not available there
-        databases = [d for d in databases if d != 'master']
-
-        if not databases:
-            # No database list; use the server-wide master files DMV
-            query = cls.QUERY_MASTER_FILES
-
-            cursor.execute(query)
-            rows = cursor.fetchall()
-            columns = [i[0] for i in cursor.description]
-            logger.debug("%s: received %d rows and %d columns", cls.__name__, len(rows), len(columns))
-
-        else:
-            # Query each database in the list for the files in the current database
-            query = cls.QUERY_DATABASE_FILES
-
-            cursor.execute('select DB_NAME()')  # This can return None in some implementations so it cannot be chained
-            data = cursor.fetchall()
-            current_db = data[0][0]
-            logger.debug("%s: current db is %s", cls.__name__, current_db)
-
-            for db in databases:
-                # use statements need to be executed separate from select queries
-                try:
-                    ctx = construct_use_statement(db)
-                    logger.debug("%s: changing cursor context via use statement: %s", cls.__name__, ctx)
-                    cursor.execute(ctx)
-                    logger.debug("%s: fetch_all executing query: %s", cls.__name__, query)
-                    cursor.execute(query)
-                    data = cursor.fetchall()
-                    columns = [i[0] for i in cursor.description]
-                    for r in data:
-                        rows.append(r)
-                    logger.debug(
-                        "%s: received %d rows and %d columns for db %s", cls.__name__, len(data), len(columns), db
-                    )
-                except Exception as e:
-                    logger.warning("failed to fetch SQLFileStats from db %s due to Error: %s", db, e)
-
-            # reset back to previous db
-            logger.debug("%s: reverting cursor context via use statement to %s", cls.__name__, current_db)
-            cursor.execute(construct_use_statement(current_db))
-
-        return rows, columns
-
-    def fetch_metric(self, rows, columns):
-        db_name = columns.index('database_name')
-        state_desc = columns.index('state_desc')
-        logical_name = columns.index('logical_name')
-        physical_name = columns.index('physical_name')
-        column_val = columns.index(self.column)
-
-        for row in rows:
-            val = row[column_val]
-            if column_val is None:
-                continue
-
-            metric_tags = [
-                'db:{}'.format(row[db_name]),
-                'state:{}'.format(row[state_desc]),
-                'logical_name:{}'.format(row[logical_name]),
-                'file_location:{}'.format(row[physical_name]),
-            ]
-
-            metric_tags.extend(self.tags)
-            metric_name = '{}'.format(self.datadog_name)
-            self.report_function(metric_name, val, tags=metric_tags)
-
-
 # https://docs.microsoft.com/en-us/sql/relational-databases/system-catalog-views/sys-databases-transact-sql?view=sql-server-ver15
 class SqlDatabaseStats(BaseSqlServerMetric):
     CUSTOM_QUERIES_AVAILABLE = False
@@ -708,7 +585,7 @@ class SqlDatabaseStats(BaseSqlServerMetric):
         value_column_index = columns.index(self.column)
 
         for row in rows:
-            if row[database_name] != self.instance:
+            if row[database_name].lower() != self.instance.lower():
                 continue
 
             column_val = row[value_column_index]

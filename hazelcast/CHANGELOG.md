@@ -1,5 +1,9 @@
 # CHANGELOG - Hazelcast
 
+## 2.1.0 / 2022-09-16 / Agent 7.40.0
+
+* [Added] Update HTTP config spec templates. See [#12890](https://github.com/DataDog/integrations-core/pull/12890).
+
 ## 2.0.1 / 2022-04-05 / Agent 7.36.0
 
 * [Fixed] Remove check options from jmx template. See [#11686](https://github.com/DataDog/integrations-core/pull/11686).

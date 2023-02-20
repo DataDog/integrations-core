@@ -3,6 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 
+import pytest
+
 from datadog_checks.dev import get_docker_hostname, get_here
 
 HERE = get_here()
@@ -12,15 +14,26 @@ PORT2 = 27018
 PORT_ARBITER = 27020
 MAX_WAIT = 150
 
-MONGODB_SERVER = "mongodb://%s:%s/test" % (HOST, PORT1)
-SHARD_SERVER = "mongodb://%s:%s/test" % (HOST, PORT2)
+COMPOSE_FILE = os.getenv('COMPOSE_FILE')
+IS_STANDALONE = COMPOSE_FILE == 'mongo-standalone.yaml'
+IS_SHARD = COMPOSE_FILE == 'mongo-shard.yaml'
+IS_TLS = COMPOSE_FILE == 'mongo-tls.yaml'
+IS_AUTH = COMPOSE_FILE == 'mongo-auth.yaml'
+
+TLS_CERTS_FOLDER = os.path.join(os.path.dirname(__file__), 'compose', 'certs')
+
+standalone = pytest.mark.skipif(not IS_STANDALONE, reason='Test only valid for standalone mongo')
+shard = pytest.mark.skipif(not IS_SHARD, reason='Test only valid for sharded mongo')
+tls = pytest.mark.skipif(not IS_TLS, reason='Test only valid for TLS')
+auth = pytest.mark.skipif(not IS_AUTH, reason='Test only valid for mongo with --auth')
+
 MONGODB_VERSION = os.environ['MONGO_VERSION']
 
 ROOT = os.path.dirname(os.path.dirname(HERE))
 
 INSTANCE_BASIC = {'hosts': ['{}:{}'.format(HOST, PORT1)]}
 INSTANCE_BASIC_SHARD = {'hosts': ['{}:{}'.format(HOST, PORT2)]}
-INSTANCE_BASIC_LEGACY_CONFIG = {'server': MONGODB_SERVER}
+INSTANCE_BASIC_LEGACY_CONFIG = {'server': "mongodb://%s:%s/test" % (HOST, PORT1)}
 
 INSTANCE_AUTHDB = {
     'hosts': ['{}:{}'.format(HOST, PORT1)],
@@ -49,7 +62,7 @@ INSTANCE_USER = {
 }
 INSTANCE_USER_LEGACY_CONFIG = {'server': 'mongodb://testUser2:testPass2@{}:{}/test'.format(HOST, PORT1)}
 
-INSTANCE_ARBITER = {'hosts': ['{}:{}'.format(HOST, PORT_ARBITER)], 'username': 'testUser', 'password': 'testPass'}
+INSTANCE_ARBITER = {'hosts': ['{}:{}'.format(HOST, PORT_ARBITER)]}
 
 INSTANCE_CUSTOM_QUERIES = {
     'hosts': ['{}:{}'.format(HOST, PORT1)],
@@ -99,7 +112,7 @@ INSTANCE_CUSTOM_QUERIES = {
                 'pipeline': [
                     {'$currentOp': {'allUsers': True}},
                 ],
-                'cursor': {'batchSize': 1},
+                'cursor': {},
             },
             'database': 'admin',
             'fields': [
@@ -110,5 +123,137 @@ INSTANCE_CUSTOM_QUERIES = {
             'metric_prefix': 'dd.mongodb.custom.queries_slower_than_60sec',
             'tags': ['tag1:val1', 'tag2:val2'],
         },
+    ],
+}
+
+INSTANCE_CUSTOM_QUERIES_WITH_DATE = {
+    'hosts': ['{}:{}'.format(HOST, PORT1)],
+    'database': 'test',
+    'username': 'testUser2',
+    'password': 'testPass2',
+    'custom_queries': [
+        {
+            'query': {
+                'aggregate': 'orders',
+                'pipeline': [
+                    {
+                        '$match': {
+                            'status': 'A',
+                            "created_time": {
+                                "$gte": "new Date(ISODate().getTime() - 60000)",
+                                "$lt": "Date()",
+                            },
+                        }
+                    },
+                    {'$group': {'_id': '$cust_id', 'total': {'$sum': '$amount'}}},
+                    {'$sort': {'total': -1}},
+                ],
+                'cursor': {},
+            },
+            'database': 'test2',
+            'fields': [
+                {'field_name': 'total', 'name': 'total', 'type': 'count'},
+                {'field_name': '_id', 'name': 'cluster_id', 'type': 'tag'},
+            ],
+            'metric_prefix': 'dd.custom.mongo.aggregate',
+            'tags': ['tag1:val1', 'tag2:val2'],
+        }
+    ],
+}
+
+INSTANCE_CUSTOM_QUERIES_WITH_DATE_AND_OPERATION = {
+    'hosts': ['{}:{}'.format(HOST, PORT1)],
+    'database': 'test',
+    'username': 'testUser2',
+    'password': 'testPass2',
+    'custom_queries': [
+        {
+            'query': {
+                'aggregate': 'orders',
+                'pipeline': [
+                    {
+                        '$match': {
+                            'status': 'A',
+                            "created_time": {
+                                "$gte": "new Date(ISODate().getTime() - 60 * 1000)",
+                                "$lt": "Date()",
+                            },
+                        }
+                    },
+                    {'$group': {'_id': '$cust_id', 'total': {'$sum': '$amount'}}},
+                    {'$sort': {'total': -1}},
+                ],
+                'cursor': {},
+            },
+            'database': 'test2',
+            'fields': [
+                {'field_name': 'total', 'name': 'total', 'type': 'count'},
+                {'field_name': '_id', 'name': 'cluster_id', 'type': 'tag'},
+            ],
+            'metric_prefix': 'dd.custom.mongo.aggregate',
+            'tags': ['tag1:val1', 'tag2:val2'],
+        }
+    ],
+}
+
+INSTANCE_CUSTOM_QUERIES_WITH_ISODATE = {
+    'hosts': ['{}:{}'.format(HOST, PORT1)],
+    'database': 'test',
+    'username': 'testUser2',
+    'password': 'testPass2',
+    'custom_queries': [
+        {
+            'query': {
+                'aggregate': 'orders',
+                'pipeline': [
+                    {
+                        '$match': {
+                            'status': 'A',
+                            "created_time": {
+                                "$gte": "ISODate('2000-01-01T00:00:00.000+0000')",
+                                "$lt": "ISODate()",
+                            },
+                        }
+                    },
+                    {'$group': {'_id': '$cust_id', 'total': {'$sum': '$amount'}}},
+                    {'$sort': {'total': -1}},
+                ],
+                'cursor': {},
+            },
+            'database': 'test2',
+            'fields': [
+                {'field_name': 'total', 'name': 'total', 'type': 'count'},
+                {'field_name': '_id', 'name': 'cluster_id', 'type': 'tag'},
+            ],
+            'metric_prefix': 'dd.custom.mongo.aggregate',
+            'tags': ['tag1:val1', 'tag2:val2'],
+        }
+    ],
+}
+
+INSTANCE_CUSTOM_QUERIES_WITH_STRING_LIST = {
+    'hosts': ['{}:{}'.format(HOST, PORT1)],
+    'database': 'test',
+    'username': 'testUser2',
+    'password': 'testPass2',
+    'custom_queries': [
+        {
+            'metric_prefix': 'dd.custom.mongo.string',
+            'query': {
+                'find': 'orders',
+                'filter': {'amount': {'$gt': 25}},
+                'sort': {'amount': -1},
+                'projection': {'result': {'$subtract': ['$amount', 1]}},
+            },
+            'fields': [
+                {'field_name': 'result', 'name': 'result', 'type': 'gauge'},
+            ],
+        },
+    ],
+}
+
+TLS_METADATA = {
+    'docker_volumes': [
+        '{}:/certs'.format(TLS_CERTS_FOLDER),
     ],
 }

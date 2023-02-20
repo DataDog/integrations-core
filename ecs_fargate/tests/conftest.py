@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+from copy import deepcopy
 
 import pytest
 
@@ -46,6 +47,10 @@ EXPECTED_CONTAINER_METRICS_WINDOWS = [
     'ecs.fargate.cpu.limit',
     'ecs.fargate.mem.usage',
     'ecs.fargate.mem.max_usage',
+]
+
+EXPECTED_TASK_METRICS = [
+    "ecs.fargate.cpu.task.limit",
 ]
 
 EXTRA_EXPECTED_CONTAINER_METRICS_LINUX = [
@@ -133,6 +138,12 @@ def mocked_get_tags(entity, _):
             "container_name:ecs-redis-datadog-1-internalecspause-a2df9cefc2938ec19e01",
             "task_arn:arn:aws:ecs:eu-west-1:172597598159:task/648ca535-cbe0-4de7-b102-28e50b81e888",
         ],
+        "internal://global-entity-id": [
+            "cluster_name:pierrem-test-fargate",
+            "task_family:redis-datadog",
+            "task_version:1",
+            "task_arn:arn:aws:ecs:eu-west-1:172597598159:task/648ca535-cbe0-4de7-b102-28e50b81e888",
+        ],
     }
     # Match agent 6.5 behaviour of not accepting None
     if entity is None:
@@ -152,3 +163,13 @@ INSTANCE = {'timeout': '2', 'tags': INSTANCE_TAGS}
 @pytest.fixture
 def check():
     return FargateCheck('ecs_fargate', {}, [INSTANCE])
+
+
+@pytest.fixture(scope="session")
+def dd_environment():
+    yield INSTANCE
+
+
+@pytest.fixture
+def instance():
+    return deepcopy(INSTANCE)

@@ -1,39 +1,52 @@
 {
-  "display_name": "Amazon Kafka",
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "name": "amazon_msk",
-  "metric_prefix": "aws.msk.",
-  "metric_to_check": "aws.msk.go.threads",
-  "creates_events": false,
-  "short_description": "Monitor the health and performance of your Amazon MSK clusters.",
-  "guid": "a572ad85-f431-4ed1-a1f3-cba9e1d4712f",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "public_title": "Amazon MSK (Agent)",
-  "categories": [
-    "aws",
-    "messaging",
-    "processing"
-  ],
-  "type": "check",
-  "is_public": true,
-  "integration_id": "amazon-kafka",
+  "manifest_version": "2.0.0",
+  "app_uuid": "e6dc171a-911d-4440-a409-7951eaadf69f",
+  "app_id": "amazon-kafka",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor the health and performance of your Amazon MSK clusters.",
+    "title": "Amazon MSK (Agent)",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::AWS",
+      "Category::Messaging",
+      "Category::Processing"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "Amazon Kafka",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "aws.msk.",
+        "check": "aws.msk.go.threads",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
     },
     "dashboards": {
       "Amazon MSK Overview": "assets/dashboards/overview.json"
-    },
-    "saved_views": {},
-    "monitors": {},
-    "service_checks": "assets/service_checks.json",
-    "logs": {},
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

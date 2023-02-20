@@ -90,7 +90,7 @@ def test_get_commits_since():
             chdir.assert_called_once_with('/foo/')
             get_commits_since('my-check', target_tag='the-tag')
             run.assert_any_call('git log --pretty=%s /foo/my-check', capture=True, check=True)
-            run.assert_any_call('git log --pretty=%s the-tag... /foo/my-check', capture=True, check=True)
+            run.assert_any_call('git log --pretty=%s the-tag.. /foo/my-check', capture=True, check=True)
 
 
 def test_git_show_file():
@@ -99,7 +99,7 @@ def test_git_show_file():
             set_root('/foo/')
             git_show_file('path-string', 'git-ref-string')
             chdir.assert_called_once_with('/foo/')
-            run.assert_called_once_with('git show git-ref-string:path-string', capture=True)
+            run.assert_called_once_with('git show git-ref-string:path-string', capture=True, check=True)
 
 
 def test_git_commit():

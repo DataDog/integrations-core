@@ -43,8 +43,40 @@ static_resources:
                   prefix: "/service/2"
                 route:
                   cluster: service2
+                  rate_limits:
+                  - stage: 0
+                    actions:
+                    - {source_cluster: {}}
+                typed_per_filter_config:
+                  envoy.filters.http.ext_authz:
+                    "@type": type.googleapis.com/envoy.extensions.filters.http.ext_authz.v3.ExtAuthzPerRoute
+                    disabled: true
           http_filters:
-          - name: envoy.router
+          - name: envoy.filters.http.ext_authz
+            typed_config:
+              "@type": type.googleapis.com/envoy.extensions.filters.http.ext_authz.v3.ExtAuthz
+              http_service:
+                server_uri:
+                  uri: 127.0.0.1:10003
+                  cluster: ext-authz
+                  timeout: 0.25s
+              include_peer_certificate: true
+              failure_mode_allow: true
+          - name: envoy.filters.http.ratelimit
+            typed_config:
+              "@type": type.googleapis.com/envoy.extensions.filters.http.ratelimit.v3.RateLimit
+              domain: apis
+              stage: 0
+              request_type: external
+              failure_mode_deny: false
+              rate_limit_service:
+                transport_api_version: V3
+                grpc_service:
+                  envoy_grpc:
+                    cluster_name: ratelimiter
+          - name: envoy.filters.http.router
+            typed_config:
+              "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
   clusters:
   - name: service1
     connect_timeout: 0.25s
@@ -88,6 +120,40 @@ static_resources:
               socket_address:
                 address: xds
                 port_value: 8080
+  - name: ratelimiter
+    type: static
+    connect_timeout: 0.25s
+    lb_policy: ROUND_ROBIN
+    load_assignment:
+      cluster_name: ratelimiter
+      endpoints:
+      - lb_endpoints:
+        - endpoint:
+            address:
+              socket_address:
+                address: 127.0.0.1
+                port_value: 8081
+    http2_protocol_options: {}
+  - name: ext-authz
+    type: static
+    typed_extension_protocol_options:
+      envoy.extensions.upstreams.http.v3.HttpProtocolOptions:
+        "@type": type.googleapis.com/envoy.extensions.upstreams.http.v3.HttpProtocolOptions
+        explicit_http_config:
+          http2_protocol_options: {}
+    load_assignment:
+      cluster_name: ext-authz
+      endpoints:
+      - lb_endpoints:
+        - endpoint:
+            address:
+              socket_address:
+                address: 127.0.0.1
+                port_value: 10003
+
+    # This timeout controls the initial TCP handshake timeout - not the timeout for the
+    # entire request.
+    connect_timeout: 0.25s
 dynamic_resources:
   cds_config:
     resource_api_version: V3

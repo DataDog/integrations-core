@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from typing import Any, Mapping, Optional, Sequence
 
-from pydantic import BaseModel, root_validator, validator
+from pydantic import BaseModel, Field, root_validator, validator
 
 from datadog_checks.base.utils.functions import identity
 from datadog_checks.base.utils.models import validation
@@ -51,6 +51,7 @@ class InstanceConfig(BaseModel):
     password: str
     persist_db_connections: Optional[bool]
     port: Optional[int]
+    schema_: Optional[str] = Field(None, alias='schema')
     server: str
     service: Optional[str]
     tags: Optional[Sequence[str]]

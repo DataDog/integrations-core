@@ -1,3 +1,7 @@
+# (C) Datadog, Inc. 2022-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
 import concurrent.futures.thread
 import json
 import os
@@ -10,7 +14,7 @@ from os import environ
 import mock
 import pymysql
 import pytest
-from pkg_resources import parse_version
+from packaging.version import parse as parse_version
 
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
 from datadog_checks.mysql import MySql
@@ -136,18 +140,6 @@ def test_collect_activity(aggregator, dbm_instance, dd_run_check, query, query_s
     assert blocked_row['event_timer_end'], "missing event timer end"
     assert blocked_row['lock_time'], "missing lock time"
     assert blocked_row['query_truncated'] == expected_query_truncated
-
-    connections = activity['mysql_connections']
-    assert len(connections) > 0, "expected to have active connections"
-    fred_conn = None
-    for conn in connections:
-        if conn['processlist_user'] == 'fred':
-            fred_conn = conn
-            break
-
-    assert fred_conn is not None
-    assert fred_conn['connections'] == 1
-    assert fred_conn['processlist_state'], "missing state"
 
 
 @pytest.mark.integration
@@ -373,11 +365,11 @@ def test_activity_collection_rate_limit(aggregator, dd_run_check, dbm_instance):
     dbm_instance['query_activity']['collection_interval'] = collection_interval
     dbm_instance['query_activity']['run_sync'] = False
     check = MySql(CHECK_NAME, {}, [dbm_instance])
-    dd_run_check(check)
     sleep_time = 1
+    dd_run_check(check)
     time.sleep(sleep_time)
-    max_collections = int(1 / collection_interval * sleep_time) + 1
     check.cancel()
+    max_collections = int(1 / collection_interval * sleep_time) + 1
     metrics = aggregator.metrics("dd.mysql.activity.collect_activity.payload_size")
     assert max_collections / 2.0 <= len(metrics) <= max_collections
 

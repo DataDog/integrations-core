@@ -1,0 +1,15 @@
+version: '3'
+
+services:
+  standalone-tls:
+    image: mongo:$MONGO_VERSION
+    networks:
+      - mongo-tls
+    command: mongod --tlsMode requireTLS --tlsAllowInvalidCertificates --tlsCertificateKeyFile /certs/server.pem  --tlsCAFile /certs/ca.pem --port 27017 --bind_ip=0.0.0.0
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./certs:/certs
+
+networks:
+  mongo-tls: {}

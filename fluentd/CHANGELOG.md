@@ -1,5 +1,9 @@
 # CHANGELOG - fluentd
 
+## 2.2.0 / 2022-09-16 / Agent 7.40.0
+
+* [Added] Update HTTP config spec templates. See [#12890](https://github.com/DataDog/integrations-core/pull/12890).
+
 ## 2.1.0 / 2022-04-05 / Agent 7.36.0
 
 * [Added] Add metric_patterns options to filter all metric submission by a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).

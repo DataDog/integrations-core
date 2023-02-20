@@ -1,36 +1,50 @@
 {
-  "display_name": "Kubernetes API server metrics",
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "name": "kube_apiserver_metrics",
-  "metric_prefix": "kube_apiserver.",
-  "metric_to_check": "kube_apiserver.go_goroutines",
-  "creates_events": false,
-  "short_description": "Collect metrics from the Kubernetes APIserver",
-  "guid": "406b274b-c44d-4499-a329-efd053b3f538",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "public_title": "Datadog-Kubernetes API server metrics Integration",
-  "categories": [
-    "containers"
-  ],
-  "type": "check",
-  "integration_id": "kube-apiserver-metrics",
+  "manifest_version": "2.0.0",
+  "app_uuid": "c5caf884-25c1-4a35-a72e-fa75e7cc10fc",
+  "app_id": "kube-apiserver-metrics",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Collect metrics from the Kubernetes APIserver",
+    "title": "Kubernetes API server metrics",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Containers"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "Kubernetes API server metrics",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "kube_apiserver.",
+        "check": "kube_apiserver.go_goroutines",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
     },
-    "monitors": {},
     "dashboards": {
       "Kubernetes API Server - Overview": "assets/dashboards/overview.json"
-    },
-    "service_checks": "assets/service_checks.json",
-    "logs": {},
-    "metrics_metadata": "metadata.csv"
-  },
-  "is_public": true
+    }
+  }
 }

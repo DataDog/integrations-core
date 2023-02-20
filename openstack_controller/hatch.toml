@@ -1,0 +1,10 @@
+[env.collectors.datadog-checks]
+
+[[envs.default.matrix]]
+python = ["2.7", "3.8"]
+
+[envs.default]
+e2e-env = false
+
+[envs.default.overrides]
+env.TF_VAR_account_json.e2e-env = { value = true }

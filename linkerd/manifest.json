@@ -1,38 +1,54 @@
 {
-  "categories": [
-    "web",
-    "autodiscovery",
-    "log collection"
-  ],
-  "creates_events": false,
-  "display_name": "Linkerd",
-  "guid": "9aa60dff-4baf-4112-9177-f9c3814dd513",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "linkerd.",
-  "metric_to_check": "linkerd.prometheus.health",
-  "name": "linkerd",
-  "public_title": "Datadog-Linkerd Integration",
-  "short_description": "Monitor your services health with metrics from linkerd.",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "type": "check",
-  "integration_id": "linkerd",
+  "manifest_version": "2.0.0",
+  "app_uuid": "971384a8-4745-4b31-89b5-b112507543e6",
+  "app_id": "linkerd",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor your services health with metrics from linkerd.",
+    "title": "Linkerd",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Web",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "Linkerd",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "linkerd.",
+        "check": "linkerd.prometheus.health",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      },
+      "process_signatures": [
+        "linkerd"
+      ]
     },
-    "monitors": {},
     "dashboards": {
       "Linkerd - Overview": "assets/dashboards/overview.json"
-    },
-    "service_checks": "assets/service_checks.json",
-    "logs": {},
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

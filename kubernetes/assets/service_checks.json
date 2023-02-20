@@ -5,7 +5,7 @@
         "check": "kubernetes_state.node.ready",
         "statuses": [
             "ok",
-            "unknown",
+            "warning",
             "critical"
         ],
         "groups": [
@@ -13,7 +13,7 @@
             "node"
         ],
         "name": "Node Ready",
-        "description": "Returns `CRITICAL` if a cluster node is not ready. Returns `UNKNOWN` if status is unknown. Returns `OK` otherwise."
+        "description": "Returns `CRITICAL` if a cluster node is not ready. Returns `WARNING` if status is unknown. Returns `OK` otherwise."
     },
     {
         "agent_version": "5.6.0",
@@ -85,7 +85,6 @@
         "check": "kubernetes_state.cronjob.on_schedule_check",
         "statuses": [
             "ok",
-            "unknown",
             "critical"
         ],
         "groups": [
@@ -94,7 +93,7 @@
            "kube_cronjob"
         ],
         "name": "CronJob next schedule",
-        "description": "Returns `CRITICAL` if a cron job scheduled time is in the past. Returns `UNKNOWN` if the scheduled time is unknown. Returns `OK` otherwise."
+        "description": "Returns `CRITICAL` if a cron job scheduled time is unknown or in the past. Returns `OK` otherwise."
     },
     {
         "agent_version": "7.22.0",

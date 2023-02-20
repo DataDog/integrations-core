@@ -1,39 +1,52 @@
 {
-  "categories": [
-    "data store",
-    "autodiscovery"
-  ],
-  "creates_events": true,
-  "display_name": "TokuMX",
-  "guid": "7785939b-bfb6-4d3e-acc2-94c1f5fb33e7",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "tokumx.",
-  "metric_to_check": "tokumx.uptime",
-  "name": "tokumx",
-  "process_signatures": [],
-  "public_title": "Datadog-TokuMX Integration",
-  "short_description": "Track metrics for opcounters, replication lag, cache table size, and more.",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "type": "check",
-  "integration_id": "tokumx",
+  "manifest_version": "2.0.0",
+  "app_uuid": "8169c714-555c-4e00-9be0-c6604cf1e858",
+  "app_id": "tokumx",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Track metrics for opcounters, replication lag, cache table size, and more.",
+    "title": "TokuMX",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Data Store"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "TokuMX",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": true
+      },
+      "metrics": {
+        "prefix": "tokumx.",
+        "check": "tokumx.uptime",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      },
+      "process_signatures": []
     },
-    "monitors": {},
     "dashboards": {
       "tokumx": "assets/dashboards/tokumx_dashboard.json"
     },
-    "service_checks": "assets/service_checks.json",
-    "logs": {},
-    "metrics_metadata": "metadata.csv",
     "saved_views": {
       "tokumx_processes": "assets/saved_views/tokumx_processes.json"
     }

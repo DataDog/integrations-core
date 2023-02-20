@@ -24,6 +24,13 @@ from . import common
 log = logging.getLogger('test_openstack_controller')
 
 
+def test_get_roles():
+    authenticator = Authenticator()
+    roles_response = authenticator._get_roles(common.EXAMPLE_AUTH_RESPONSE)
+    expected_roles = ['datadog_monitoring', '_member_']
+    assert expected_roles == roles_response
+
+
 def test_get_endpoint():
     authenticator = Authenticator()
     assert (
@@ -179,6 +186,31 @@ def test_from_config(requests_wrapper):
             assert cred.name == "name 2"
             assert cred.domain_id == "3333"
             assert cred.tenant_id == "2222"
+            assert cred.nova_endpoint == "http://10.0.2.15:8774/v2.1/0850707581fe4d738221a72db0182876"
+            assert cred.neutron_endpoint == "http://10.0.2.15:9292"
+
+
+def test_from_config_with_admin(requests_wrapper):
+    mock_http_response = copy.deepcopy(common.EXAMPLE_AUTH_RESPONSE)
+    del mock_http_response['token']['roles']
+    mock_http_response['token']['roles'] = [
+        {u'id': u'9fe2ff9ee4384b1894a90878d3e92bab', u'name': u'admin'},
+        {u'id': u'f20c215f5a4d47b7a6e510bc65485ced', u'name': u'datadog_monitoring'},
+    ]
+    mock_response = MockHTTPResponse(response_dict=mock_http_response, headers={'X-Subject-Token': 'fake_token'})
+
+    with mock.patch(
+        'datadog_checks.openstack_controller.api.Authenticator._post_auth_token', return_value=mock_response
+    ):
+        with mock.patch(
+            'datadog_checks.openstack_controller.api.Authenticator._get_auth_projects', return_value=PROJECTS_RESPONSE
+        ):
+            cred = Authenticator.from_config(log, 'http://10.0.2.15:5000', GOOD_USERS[0]['user'], requests_wrapper)
+            assert isinstance(cred, Credential)
+            assert cred.auth_token == "fake_token"
+            assert cred.name == "name 1"
+            assert cred.domain_id == "2222"
+            assert cred.tenant_id == "1111"
             assert cred.nova_endpoint == "http://10.0.2.15:8774/v2.1/0850707581fe4d738221a72db0182876"
             assert cred.neutron_endpoint == "http://10.0.2.15:9292"
 

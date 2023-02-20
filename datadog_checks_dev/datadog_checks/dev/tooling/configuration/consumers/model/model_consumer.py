@@ -14,8 +14,7 @@ from datadog_checks.dev.tooling.configuration.consumers.openapi_document import 
 
 PYTHON_VERSION = PythonVersion.PY_38
 
-VALIDATORS_DOCUMENTATION = '''
-# Here you can include additional config validators or transformers
+VALIDATORS_DOCUMENTATION = '''# Here you can include additional config validators or transformers
 #
 # def initialize_instance(values, **kwargs):
 #     if 'my_option' not in values and 'my_legacy_option' in values:

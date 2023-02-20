@@ -1,48 +1,64 @@
 {
-  "categories": [
-    "security",
-    "configuration & deployment",
-    "log collection",
-    "autodiscovery"
-  ],
-  "creates_events": true,
-  "display_name": "Vault",
-  "guid": "d65af827-c818-44ce-9ec3-cd7ead3ac4ce",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "vault.",
-  "metric_to_check": "vault.is_leader",
-  "name": "vault",
-  "public_title": "Datadog-Vault Integration",
-  "short_description": "Vault is a secrets management service application",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "type": "check",
-  "integration_id": "vault",
+  "manifest_version": "2.0.0",
+  "app_uuid": "450e17a2-3ca0-4dc5-800c-99c5db736073",
+  "app_id": "vault",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Vault is a secrets management service application",
+    "title": "Vault",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Security",
+      "Category::Configuration & Deployment",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "Vault",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": true
+      },
+      "metrics": {
+        "prefix": "vault.",
+        "check": "vault.is_leader",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {
+      "Vault - Overview": "assets/dashboards/vault_overview_legacy.json",
+      "Vault - Overview (OpenMetricsV2)": "assets/dashboards/vault_overview.json"
     },
     "monitors": {
       "[Vault] S3 time to access secrets is high": "assets/monitors/vault_S3_time_high.json"
-    },
-    "dashboards": {
-      "Vault - Overview": "assets/dashboards/vault_overview.json"
     },
     "saved_views": {
       "error_warning_status": "assets/saved_views/error_warning_status.json",
       "service_name_overview": "assets/saved_views/service_name_overview.json",
       "vault_patern": "assets/saved_views/vault_patern.json"
     },
-    "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "vault"
-    },
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

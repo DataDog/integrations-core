@@ -1,6 +1,22 @@
 # CHANGELOG - gitlab_runner
 
-## 3.2.0 / 2022-05-15
+## 3.3.2 / 2022-12-09 / Agent 7.42.0
+
+* [Fixed] Update protobuf. See [#13262](https://github.com/DataDog/integrations-core/pull/13262).
+
+## 3.3.1 / 2022-11-07 / Agent 7.40.1
+
+* [Fixed] Bump protobuf version to 3.20.2. See [#13269](https://github.com/DataDog/integrations-core/pull/13269).
+
+## 3.3.0 / 2022-09-16 / Agent 7.40.0
+
+* [Added] Update HTTP config spec templates. See [#12890](https://github.com/DataDog/integrations-core/pull/12890).
+
+## 3.2.1 / 2022-08-05 / Agent 7.39.0
+
+* [Fixed] Dependency updates. See [#12653](https://github.com/DataDog/integrations-core/pull/12653).
+
+## 3.2.0 / 2022-05-15 / Agent 7.37.0
 
 * [Added] Support dynamic bearer tokens (Bound Service Account Token Volume). See [#11915](https://github.com/DataDog/integrations-core/pull/11915).
 * [Fixed] Upgrade dependencies. See [#11958](https://github.com/DataDog/integrations-core/pull/11958).

@@ -1,3 +1,7 @@
+# (C) Datadog, Inc. 2021-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
 VIRTUAL_SERVICE_METRICS = {
     # The following commented metrics are documented but don't seem to be available.
     # "dns_client.avg_avi_errors": {

@@ -12,21 +12,34 @@ site_dir: site
 theme:
   name: material
   language: en
-  features:
-    - navigation.tabs
-    # https://github.com/facelessuser/pymdown-extensions/issues/876#issuecomment-610164436
-    # - navigation.instant
-  palette:
-    scheme: slate
-    primary: deep purple
-    accent: deep purple
+  favicon: assets/images/favicon.ico
+  logo: assets/images/logo.svg
+  icon:
+    repo: fontawesome/brands/github-alt
   font:
     text: Roboto
     code: Roboto Mono
-  icon:
-    repo: fontawesome/brands/github-alt
-  favicon: assets/images/favicon.ico
-  logo: assets/images/logo.svg
+  palette:
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: deep purple
+      accent: deep purple
+      toggle:
+        icon: material/weather-night
+        name: Switch to light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: deep purple
+      accent: deep purple
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to dark mode
+  features:
+    - navigation.sections
+    - navigation.expand
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.instant
 
 nav:
   - Home:
@@ -107,11 +120,12 @@ markdown_extensions:
   # Built-in
   - markdown.extensions.abbr:
   - markdown.extensions.admonition:
+  - markdown.extensions.attr_list:
   - markdown.extensions.footnotes:
+  - markdown.extensions.meta:
   - markdown.extensions.tables:
   - markdown.extensions.toc:
       permalink: true
-  - markdown.extensions.attr_list:  # https://github.com/DataDog/mkdocs-click#full-command-path-headers
   # Extra
   - mkdocs-click:
   - mkpatcher:
@@ -138,14 +152,21 @@ markdown_extensions:
       repo_url_shorthand: true
       social_url_shortener: true
       social_url_shorthand: true
+      normalize_issue_symbols: true
       provider: github
       user: DataDog
       repo: integrations-core
   - pymdownx.mark:
   - pymdownx.progressbar:
+  - pymdownx.saneheaders:
   - pymdownx.smartsymbols:
   - pymdownx.snippets:
-      base_path: docs/developer/.snippets
+      check_paths: true
+      base_path:
+        - docs/developer/.snippets
+      auto_append:
+        - links.txt
+        - abbrs.txt
   - pymdownx.superfences:
       custom_fences:
         - name: mermaid
@@ -155,6 +176,7 @@ markdown_extensions:
           class: arithmatex
           format: !!python/name:pymdownx.arithmatex.fence_mathjax_format
   - pymdownx.tabbed:
+      alternate_style: true
   - pymdownx.tasklist:
       custom_checkbox: true
   - pymdownx.tilde:
@@ -171,6 +193,4 @@ extra:
       link: https://www.instagram.com/datadoghq
 extra_css:
   - assets/css/custom.css
-  - https://cdn.jsdelivr.net/gh/tonsky/FiraCode@4/distr/fira_code.css
-extra_javascript:
-  - assets/js/custom.js
+  - https://cdn.jsdelivr.net/gh/tonsky/FiraCode@5.2/distr/fira_code.css

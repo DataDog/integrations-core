@@ -1,0 +1,47 @@
+[
+  {
+    "agent_version": "7.40.0",
+    "integration": "Impala",
+    "check": "impala.daemon.openmetrics.health",
+    "statuses": [
+      "ok",
+      "critical"
+    ],
+    "groups": [
+      "host",
+      "endpoint"
+    ],
+    "name": "Impala daemon prometheus endpoint up",
+    "description": "Returns `CRITICAL` if the check cannot access the Prometheus metrics endpoint of the Impala daemon instance."
+  },
+  {
+    "agent_version": "7.40.0",
+    "integration": "Impala",
+    "check": "impala.statestore.openmetrics.health",
+    "statuses": [
+      "ok",
+      "critical"
+    ],
+    "groups": [
+      "host",
+      "endpoint"
+    ],
+    "name": "Impala statestore prometheus endpoint up",
+    "description": "Returns `CRITICAL` if the check cannot access the Prometheus metrics endpoint of the Impala statestore instance."
+  },
+  {
+    "agent_version": "7.40.0",
+    "integration": "Impala",
+    "check": "impala.catalog.openmetrics.health",
+    "statuses": [
+      "ok",
+      "critical"
+    ],
+    "groups": [
+      "host",
+      "endpoint"
+    ],
+    "name": "Impala catalog prometheus endpoint up",
+    "description": "Returns `CRITICAL` if the check cannot access the Prometheus metrics endpoint of the Impala catalog instance."
+  }
+]

@@ -14,9 +14,27 @@ from ....utils import ON_WINDOWS
 from ...e2e import E2E_SUPPORTED_TYPES, derive_interface, start_environment, stop_environment
 from ...e2e.agent import DEFAULT_PYTHON_VERSION, DEFAULT_SAMPLING_COLLECTION_INTERVAL
 from ...git import get_current_branch
-from ...testing import complete_envs, get_available_envs, get_tox_env_python_version
+from ...testing import complete_envs, get_active_env_python_version, get_available_envs
 from ...utils import complete_testable_checks, is_testable_check
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_waiting, echo_warning
+
+dev_option = click.option(
+    '--dev/--prod',
+    default=None,
+    help=(
+        'By default we use the local version of the check. Pass --prod to use the one shipped with the agent. '
+        'Pass --dev to explicitly enforce the local version. Also see the `--base` option.'
+    ),
+)
+base_option = click.option(
+    '--base',
+    is_flag=True,
+    help=(
+        'Pass this flag to mount the local version of the base package. By default we use the version shipped '
+        'with the agent. Note that passing the flag also mounts the local version of the check.\n\n'
+        'More about the base package: https://datadoghq.dev/integrations-core/base/about/'
+    ),
+)
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Start an environment')
@@ -36,8 +54,8 @@ from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_suc
     type=click.INT,
     help=f'The version of Python to use. Defaults to {DEFAULT_PYTHON_VERSION} if no tox Python is specified.',
 )
-@click.option('--dev/--prod', help='Whether to use the latest version of a check or what is shipped')
-@click.option('--base', is_flag=True, help='Whether to use the latest version of the base check or what is shipped')
+@dev_option
+@base_option
 @click.option(
     '--env-vars',
     '-e',
@@ -99,6 +117,9 @@ def start(ctx, check, env, agent, python, dev, base, env_vars, org_name, profile
 
     echo_success(config_message, nl=False)
     echo_info(environment.config_file)
+
+    echo_success('To reload the config file, do: ', nl=False)
+    echo_info(f'ddev env reload {check} {env}')
 
     echo_success('To run this check, do: ', nl=False)
     echo_info(f'ddev env check {check} {env}')
@@ -199,8 +220,8 @@ def _run_start_commands(metadata, environment, check, env):
             result = environment.exec_command(command, capture=True)
             if result.code:
                 click.echo()
-                echo_info(result.stdout + result.stderr)
-                echo_failure('An error occurred.')
+                echo_failure('An error occurred running "{}". Exit code: {}'.format(str(command), result.code))
+                echo_failure(result.stdout + result.stderr, indent=True)
                 echo_waiting('Stopping the environment...')
                 stop_environment(check, env, metadata=metadata)
                 echo_waiting('Stopping the Agent...')
@@ -319,9 +340,9 @@ def _check_env(check, env):
 
 
 def _get_python_version(env, python):
-    env_python_version = get_tox_env_python_version(env)
+    env_python_version = get_active_env_python_version(env)
     if not python:
-        # Make the tox environment Python specifier influence the Agent
+        # Make the environment Python specifier influence the Agent
         python = env_python_version or DEFAULT_PYTHON_VERSION
     elif env_python_version and env_python_version != int(python):
         echo_warning(

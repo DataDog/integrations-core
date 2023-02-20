@@ -49,6 +49,8 @@ def get_package_name(folder_name):
         return 'datadog-checks-downloader'
     elif folder_name == 'datadog_checks_dependency_provider':
         return 'datadog-checks-dependency-provider'
+    elif folder_name == 'ddev':
+        return 'ddev'
 
     return f"{DATADOG_PACKAGE_PREFIX}{folder_name.replace('_', '-')}"
 
@@ -64,6 +66,8 @@ def get_folder_name(package_name):
         return 'datadog_checks_downloader'
     elif package_name == 'datadog-checks-dependency-provider':
         return 'datadog_checks_dependency_provider'
+    elif package_name == 'ddev':
+        return 'ddev'
 
     return package_name.replace('-', '_')[len(DATADOG_PACKAGE_PREFIX) :]
 
@@ -76,11 +80,22 @@ def get_agent_requirement_line(check, version):
     package_name = get_package_name(check)
 
     # no manifest
-    if check in ('datadog_checks_base', 'datadog_checks_downloader', 'datadog_checks_dependency_provider'):
+    if check in ('datadog_checks_base', 'datadog_checks_downloader', 'datadog_checks_dependency_provider', 'ddev'):
         return f'{package_name}=={version}'
 
     m = load_manifest(check)
-    platforms = sorted(m.get('supported_os', []))
+    if 'tile' in m:
+        platforms = []
+        for classifier_tag in m['tile']['classifier_tags']:
+            key, value = classifier_tag.split('::', 1)
+            if key != 'Supported OS':
+                continue
+            elif value == 'macOS':
+                value = 'mac_os'
+            platforms.append(value.lower())
+        platforms.sort()
+    else:
+        platforms = sorted(m.get('supported_os', []))
 
     # all platforms
     if platforms == ALL_PLATFORMS:
@@ -96,24 +111,20 @@ def get_agent_requirement_line(check, version):
         elif 'linux' not in platforms:
             return f"{package_name}=={version}; sys_platform != 'linux2'"
 
-    raise ManifestError(f"Can't parse the `supported_os` list for the check {check}: {platforms}")
+    raise ManifestError(f"Can't parse the supported OS list for the check {check}: {platforms}")
 
 
 def update_agent_requirements(req_file, check, newline):
     """
-    Replace the requirements line for the given check
+    Update the requirements lines for the given check
     """
     package_name = get_package_name(check)
     lines = read_file_lines(req_file)
 
-    for i, line in enumerate(lines):
-        current_package_name = line.split('==')[0]
+    pkg_lines = {line.split('==')[0]: line for line in lines}
+    pkg_lines[package_name] = f'{newline}\n'
 
-        if current_package_name == package_name:
-            lines[i] = f'{newline}\n'
-            break
-
-    write_file_lines(req_file, sorted(lines))
+    write_file_lines(req_file, sorted(pkg_lines.values()))
 
 
 def build_package(package_path, sdist):

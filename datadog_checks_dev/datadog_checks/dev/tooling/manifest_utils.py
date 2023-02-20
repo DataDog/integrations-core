@@ -15,6 +15,7 @@ NON_INTEGRATION_PATHS = [
     "datadog_checks_dependency_provider",
     "datadog_checks_dev",
     "datadog_checks_downloader",
+    "ddev",
 ]
 
 

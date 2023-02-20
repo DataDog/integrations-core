@@ -1,6 +1,27 @@
 # CHANGELOG - Amazon MSK
 
-## 3.1.2 / 2022-05-18
+## 3.2.3 / 2023-01-20
+
+* [Fixed] Update dependencies. See [#13726](https://github.com/DataDog/integrations-core/pull/13726).
+
+## 3.2.2 / 2022-12-09 / Agent 7.42.0
+
+* [Fixed] Update dependencies. See [#13478](https://github.com/DataDog/integrations-core/pull/13478).
+
+## 3.2.1 / 2022-10-28 / Agent 7.41.0
+
+* [Fixed] Update dependencies. See [#13205](https://github.com/DataDog/integrations-core/pull/13205).
+
+## 3.2.0 / 2022-09-16 / Agent 7.40.0
+
+* [Added] Update HTTP config spec templates. See [#12890](https://github.com/DataDog/integrations-core/pull/12890).
+* [Fixed] Bump dependencies for 7.40. See [#12896](https://github.com/DataDog/integrations-core/pull/12896).
+
+## 3.1.3 / 2022-08-05 / Agent 7.39.0
+
+* [Fixed] Dependency updates. See [#12653](https://github.com/DataDog/integrations-core/pull/12653).
+
+## 3.1.2 / 2022-05-18 / Agent 7.37.0
 
 * [Fixed] Fix extra metrics description example. See [#12043](https://github.com/DataDog/integrations-core/pull/12043).
 

@@ -172,7 +172,7 @@ files:
             description: |
               Define custom queries to collect custom metrics from your MySQL database.
 
-              See https://docs.datadoghq.com/integrations/faq/how-to-collect-metrics-from-custom-mysql-queries to learn more.
+              See https://docs.datadoghq.com/integrations/guide/mysql-custom-queries to learn more.
 
               WARNING: This option is deprecated and will be removed in a future release.
               Use the `custom_queries` option instead.
@@ -260,6 +260,7 @@ files:
                   Note that this runs a heavy query against your database to compute the relevant metrics
                   for all your existing schemas. Due to the nature of these calls, if you have a
                   high number of tables and schemas, this may have a negative impact on your database performance.
+                  Only tables and schemas for which the user has been granted SELECT privileges are collected. 
 
                   See also the MySQL metrics listing: https://docs.datadoghq.com/integrations/mysql/#metrics
                 value:
@@ -283,6 +284,21 @@ files:
                   Set to `true` to collect system table size metrics from performance_schema, information_schema and mysql.
                   Note that only tables and schemas for which the user has been granted SELECT privileges are collected.
                   This runs a heavy query against your database to compute the relevant metrics
+                  for all your existing tables. Due to the nature of these calls, if you have a
+                  high number of tables and schemas, this may have a negative impact on your database performance.
+                  See also the MySQL metrics listing: https://docs.datadoghq.com/integrations/mysql/#metrics
+                value:
+                  type: boolean
+                  example: false
+
+              - name: table_rows_stats_metrics
+                description: |
+                  These metrics are reported if you have a Percona MySQL instance with `userstat` enabled
+                  Set to `true` to collect table stats metrics.
+                  Metrics provided by the options:
+                    - mysql.info.table.rows.read (total per table)
+                    - mysql.info.table.rows.changed (total per table)
+                  Note that this runs a heavy query against your database to compute the relevant metrics
                   for all your existing tables. Due to the nature of these calls, if you have a
                   high number of tables and schemas, this may have a negative impact on your database performance.
                   See also the MySQL metrics listing: https://docs.datadoghq.com/integrations/mysql/#metrics
@@ -389,15 +405,6 @@ files:
                 value:
                   type: integer
                   example: 5000
-              - name: events_statements_table
-                description: |
-                  Forces a specific events statements table. Must be one of events_statements_current,
-                  events_statements_history, events_statements_history_long. If not set then the agent will choose
-                  the best available table that is enabled and not empty.
-                value:
-                  type: string
-                  example: events_statements_history_long
-                  display_default: null
               - name: explain_procedure
                 description: |
                   Overrides the default procedure used for collecting execution plans. The agent will use this
@@ -587,6 +594,26 @@ files:
                   type: boolean
                   example: true
                   display_default: true
+          - name: log_unobfuscated_queries
+            hidden: true
+            description: |
+              Set to `true` to enable logging of original unobfuscated SQL queries when obfuscation errors occur.
+              For security purposes, it is recommended to use this option for debugging only when requested by Datadog Support.
+              Note: This option only applies when `dbm` is enabled.
+            value:
+              type: boolean
+              example: false
+              display_default: false
+          - name: log_unobfuscated_plans
+            hidden: true
+            description: |
+              Set to `true` to enable logging of original unobfuscated SQL plans when obfuscation errors occur.
+              For security purposes, it is recommended to use this option for debugging only when requested by Datadog Support.
+              Note: This option only applies when `dbm` is enabled.
+            value:
+              type: boolean
+              example: false
+              display_default: false
           - template: instances/default
             overrides:
               disable_generic_tags.hidden: false

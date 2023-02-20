@@ -1,40 +1,51 @@
 {
-  "aliases": [
-    "/integrations/vmware/",
-    "/integrations/faq/can-i-limit-the-number-of-vms-that-are-pulled-in-via-the-vmware-integration/"
-  ],
-  "categories": [
-    "cloud"
-  ],
-  "creates_events": true,
-  "display_name": "vSphere",
-  "guid": "930b1839-cc1f-4e7a-b706-0e8cf3218464",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "vsphere.",
-  "metric_to_check": "vsphere.vm.count",
-  "name": "vsphere",
-  "public_title": "Datadog-vSphere Integration",
-  "short_description": "Understand how vSphere resource usage affects your application.",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "type": "check",
-  "integration_id": "vsphere",
+  "manifest_version": "2.0.0",
+  "app_uuid": "d9b9104f-ffd1-42be-8e18-d8a3aa289b98",
+  "app_id": "vsphere",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Understand how vSphere resource usage affects your application.",
+    "title": "vSphere",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Cloud"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "vSphere",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": true
+      },
+      "metrics": {
+        "prefix": "vsphere.",
+        "check": "vsphere.vm.count",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
     },
-    "monitors": {},
     "dashboards": {
-      "vsphere-overview": "assets/dashboards/vsphere_overview.json"
-    },
-    "service_checks": "assets/service_checks.json",
-    "logs": {},
-    "metrics_metadata": "metadata.csv"
+      "vsphere-overview": "assets/dashboards/vsphere_overview.json",
+      "VMware vSphere TKG - Overview": "assets/dashboards/vmware_vsphere_tkg_-_overview.json"
+    }
   }
 }

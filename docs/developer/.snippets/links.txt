@@ -112,7 +112,6 @@
 [pytest-usage]: https://docs.pytest.org/en/latest/usage.html
 [python-bpo-af-unix-win]: https://bugs.python.org/issue33408
 [python-cprofile]: https://docs.python.org/3/library/profile.html#module-cProfile
-[python-downloads-windows]: https://www.python.org/downloads/windows
 [python-home]: https://www.python.org
 [python-markdown-extensions]: https://github.com/Python-Markdown/markdown/wiki/Third-Party-Extensions
 [python-pdb]: https://docs.python.org/3/library/pdb.html

@@ -3,7 +3,6 @@ module envoy-e2e
 go 1.13
 
 require (
-	github.com/census-instrumentation/opencensus-proto v0.2.1
 	github.com/envoyproxy/go-control-plane v0.9.9
 	github.com/golang/protobuf v1.4.3
 	google.golang.org/grpc v1.36.0

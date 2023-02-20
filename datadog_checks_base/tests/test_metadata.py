@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import json
 import logging
 import re
 from collections import OrderedDict
@@ -13,10 +12,7 @@ from six import PY3
 
 from datadog_checks.base import AgentCheck, ensure_bytes, ensure_unicode
 
-pytestmark = pytest.mark.metadata
-
 SET_CHECK_METADATA_METHOD = 'datadog_checks.base.stubs.datadog_agent.set_check_metadata'
-GET_CONFIG_METHOD = 'datadog_checks.base.stubs.datadog_agent.get_config'
 
 # The order is used to derive the display name for the regex tests
 NON_STANDARD_VERSIONS = OrderedDict()
@@ -353,159 +349,10 @@ class TestVersion:
                 raise AssertionError('Expected ERROR log with message: {}'.format(expected_message))
 
 
-class TestConfig:
-    def test_no_section(self, caplog):
-        check = AgentCheck('test', {}, [{}])
-        check.check_id = 'test:123'
-
-        with caplog.at_level(logging.DEBUG), mock.patch(SET_CHECK_METADATA_METHOD) as m:
-            check.set_metadata('config', {})
-
-            assert m.call_count == 0
-
-            expected_message = 'Unable to transform `config` metadata: The `section` option is required'
-            for _, level, message in caplog.record_tuples:
-                if level == logging.DEBUG and message == expected_message:
-                    break
-            else:
-                raise AssertionError('Expected ERROR log with message: {}'.format(expected_message))
-
-    def test_non_primitive(self, caplog):
-        check = AgentCheck('test', {}, [{'foo': ['bar']}])
-        check.check_id = 'test:123'
-
-        with caplog.at_level(logging.DEBUG), mock.patch(SET_CHECK_METADATA_METHOD) as m:
-            check.set_metadata('config', check.instance, section='instance', whitelist=['foo'])
-
-            assert m.call_count == 1
-
-            args, _ = m.call_args
-            assert args[0] == 'test:123'
-            assert args[1] == 'config.instance'
-
-            expected_message = (
-                'Skipping metadata submission of non-primitive type `list` for field `foo` in section `instance`'
-            )
-            for _, level, message in caplog.record_tuples:
-                if level == logging.DEBUG and message == expected_message:
-                    break
-            else:
-                raise AssertionError('Expected ERROR log with message: {}'.format(expected_message))
-
-    def test_no_whitelist(self):
-        check = AgentCheck('test', {}, [{'foo': 'bar'}])
-        check.check_id = 'test:123'
-
-        with mock.patch(SET_CHECK_METADATA_METHOD) as m:
-            check.set_metadata('config', check.instance, section='instance')
-
-            assert m.call_count == 0
-
-    def test_whitelist(self):
-        check = AgentCheck('test', {}, [{'foo': 'bar'}])
-        check.check_id = 'test:123'
-
-        with mock.patch(SET_CHECK_METADATA_METHOD) as m:
-            check.set_metadata('config', check.instance, section='instance', whitelist=['foo'])
-
-            assert m.call_count == 1
-
-            args, _ = m.call_args
-            assert args[0] == 'test:123'
-            assert args[1] == 'config.instance'
-
-            data = json.loads(args[2])[0]
-
-            assert data.pop('is_set', None) is True
-            assert data.pop('value', None) == 'bar'
-            assert not data
-
-    def test_whitelist_no_field(self):
-        check = AgentCheck('test', {}, [{}])
-        check.check_id = 'test:123'
-
-        with mock.patch(SET_CHECK_METADATA_METHOD) as m:
-            check.set_metadata('config', check.instance, section='instance', whitelist=['foo'])
-
-            assert m.call_count == 1
-
-            args, _ = m.call_args
-            assert args[0] == 'test:123'
-            assert args[1] == 'config.instance'
-
-            data = json.loads(args[2])[0]
-
-            assert data.pop('is_set', None) is False
-            assert not data
-
-    def test_blacklist(self):
-        check = AgentCheck('test', {}, [{'product_pw': 'foo'}])
-        check.check_id = 'test:123'
-
-        with mock.patch(SET_CHECK_METADATA_METHOD) as m:
-            check.set_metadata('config', check.instance, section='instance', whitelist=['product_pw'], blacklist=['pw'])
-
-            assert m.call_count == 0
-
-    def test_blacklist_default(self):
-        check = AgentCheck('test', {}, [{'product_password': 'foo'}])
-        check.check_id = 'test:123'
-
-        with mock.patch(SET_CHECK_METADATA_METHOD) as m:
-            check.set_metadata('config', check.instance, section='instance', whitelist=['product_password'])
-
-            assert m.call_count == 0
-
-    def test_whitelist_user_override(self):
-        check = AgentCheck('test', {}, [{'foo': 'bar', 'bar': 'foo', 'metadata_whitelist': ['bar']}])
-        check.check_id = 'test:123'
-
-        with mock.patch(SET_CHECK_METADATA_METHOD) as m:
-            check.set_metadata('config', check.instance, section='instance', whitelist=['foo', 'bar'])
-
-            assert m.call_count == 1
-
-            args, _ = m.call_args
-            assert args[0] == 'test:123'
-            assert args[1] == 'config.instance'
-
-            data = json.loads(args[2])
-
-            assert len(data) == 1
-            data = data[0]
-
-            assert data.pop('is_set', None) is True
-            assert data.pop('value', None) == 'foo'
-            assert not data
-
-    def test_blacklist_user_override(self):
-        check = AgentCheck('test', {}, [{'foo': 'bar', 'bar': 'foo', 'metadata_blacklist': ['bar']}])
-        check.check_id = 'test:123'
-
-        with mock.patch(SET_CHECK_METADATA_METHOD) as m:
-            check.set_metadata(
-                'config', check.instance, section='instance', whitelist=['foo', 'bar'], blacklist=['foo']
-            )
-
-            assert m.call_count == 1
-
-            args, _ = m.call_args
-            assert args[0] == 'test:123'
-            assert args[1] == 'config.instance'
-
-            data = json.loads(args[2])
-
-            assert len(data) == 1
-            data = data[0]
-
-            assert data.pop('is_set', None) is True
-            assert data.pop('value', None) == 'bar'
-            assert not data
-
-
 class TestMetadataEntrypoint:
-    def test_no_op_if_collection_disabled(self):
+    def test_no_op_if_collection_disabled(self, datadog_agent):
         # type: () -> None
+        datadog_agent._config['enable_metadata_collection'] = False
 
         class MyCheck(AgentCheck):
             @AgentCheck.metadata_entrypoint
@@ -517,12 +364,12 @@ class TestMetadataEntrypoint:
                 # type: (Any) -> None
                 self.process_metadata(message='Hello, world')
 
-        with mock.patch(GET_CONFIG_METHOD, return_value=False):
-            check = MyCheck('test', {}, [{}])
+        check = MyCheck('test', {}, [{}])
 
-            with mock.patch(SET_CHECK_METADATA_METHOD) as m:
-                check.check({})
-                m.assert_not_called()
+        with mock.patch(SET_CHECK_METADATA_METHOD) as m:
+            check.check({})
+            datadog_agent.reset()
+            m.assert_not_called()
 
     def test_exceptions_pass_through(self):
         # type: (Any) -> None

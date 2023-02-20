@@ -1,6 +1,45 @@
 # CHANGELOG - Snowflake
 
-## 4.3.1 / 2022-05-15
+## 4.5.0 / 2023-01-20
+
+* [Added] Bump snowflake to 2.8.3. See [#13756](https://github.com/DataDog/integrations-core/pull/13756).
+* [Fixed] Bump the base check dependency. See [#13641](https://github.com/DataDog/integrations-core/pull/13641).
+
+## 4.4.6 / 2023-01-27 / Agent 7.42.1
+
+* [Fixed] Bump base check dependency. See [#13824](https://github.com/DataDog/integrations-core/pull/13824).
+* [Fixed] Backport snowflake-connector-python bump 2.8.3 to 7.42.x. See [#13794](https://github.com/DataDog/integrations-core/pull/13794).
+
+## 4.4.5 / 2022-11-28 / Agent 7.42.0
+
+* [Fixed] Update Snowflake connector and cryptography dependencies. See [#13367](https://github.com/DataDog/integrations-core/pull/13367).
+* [Fixed] Remove `default_backend` parameter from cryptography calls. See [#13333](https://github.com/DataDog/integrations-core/pull/13333).
+
+## 4.4.4 / 2022-09-19 / Agent 7.40.0
+
+* [Fixed] Bump dependencies for 7.40. See [#12896](https://github.com/DataDog/integrations-core/pull/12896).
+
+## 4.4.3 / 2022-08-05 / Agent 7.39.0
+
+* [Fixed] Dependency updates. See [#12653](https://github.com/DataDog/integrations-core/pull/12653).
+
+## 4.4.2 / 2022-07-05 / Agent 7.38.0
+
+* [Fixed] Properly read from `token_path` parameter. See [#12452](https://github.com/DataDog/integrations-core/pull/12452).
+
+## 4.4.1 / 2022-06-28
+
+* [Fixed] Fix organization data transfer query. See [#12420](https://github.com/DataDog/integrations-core/pull/12420).
+
+## 4.4.0 / 2022-06-27
+
+* [Added] Add support for organization level metrics. See [#12375](https://github.com/DataDog/integrations-core/pull/12375).
+
+## 4.3.2 / 2022-06-15
+
+* [Fixed] Fix reading of `token_path` option. See [#12366](https://github.com/DataDog/integrations-core/pull/12366).
+
+## 4.3.1 / 2022-05-15 / Agent 7.37.0
 
 * [Fixed] Properly validate `only_custom_queries`. See [#11992](https://github.com/DataDog/integrations-core/pull/11992).
 * [Fixed] Fix small typo in config option. See [#11990](https://github.com/DataDog/integrations-core/pull/11990).

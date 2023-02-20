@@ -66,6 +66,12 @@ def config(ctx, check, sync, verbose):
 
         spec_file_path = manifest.get_config_spec()
         if not file_exists(spec_file_path):
+            check_display_queue.append(
+                lambda spec_file_path=spec_file_path, check=check: echo_warning(
+                    f"Did not find spec file {spec_file_path} for check {check}"
+                )
+            )
+
             validate_config_legacy(check, check_display_queue, files_failed, files_warned, file_counter)
             if verbose:
                 check_display_queue.append(lambda: echo_warning('No spec found', indent=True))
@@ -94,7 +100,7 @@ def config(ctx, check, sync, verbose):
 
         if not default_temp:
             message = "Missing default template in init_config or instances section"
-            check_display_queue.append(lambda **kwargs: echo_failure(message))
+            check_display_queue.append(lambda message=message: echo_failure(message))
             annotate_error(spec_file_path, message)
 
         if spec.errors:
@@ -105,7 +111,7 @@ def config(ctx, check, sync, verbose):
             if spec.data['name'] != display_name:
                 files_failed[spec_file_path] = True
                 message = f"Spec  name `{spec.data['name']}` should be `{display_name}`"
-                check_display_queue.append(lambda **kwargs: echo_failure(message, **kwargs))
+                check_display_queue.append(lambda message=message, **kwargs: echo_failure(message, **kwargs))
                 annotate_error(spec_file_path, message)
 
             example_location = get_data_directory(check)
@@ -132,7 +138,7 @@ def config(ctx, check, sync, verbose):
                                 ):
                                     message += f'\n{diff_line}'
                             check_display_queue.append(
-                                lambda example_file=example_file, **kwargs: echo_failure(message, **kwargs)
+                                lambda message=message, **kwargs: echo_failure(message, **kwargs)
                             )
                             annotate_error(example_file_path, message)
 
@@ -199,9 +205,9 @@ def validate_config_legacy(check, check_display_queue, files_failed, files_warne
             # We must convert to text here to free Exception object before it goes out of scope
             error = str(e)
 
-            check_display_queue.append(lambda: echo_info(f'{file_name}:', indent=True))
+            check_display_queue.append(lambda file_name=file_name: echo_info(f'{file_name}:', indent=True))
             check_display_queue.append(lambda: echo_failure('Invalid YAML -', indent=FILE_INDENT))
-            check_display_queue.append(lambda: echo_info(error, indent=FILE_INDENT * 2))
+            check_display_queue.append(lambda error=error: echo_info(error, indent=FILE_INDENT * 2))
             continue
 
         file_display_queue = []
@@ -221,7 +227,7 @@ def validate_config_legacy(check, check_display_queue, files_failed, files_warne
         if 'instances' not in config_data:
             files_failed[config_file] = True
             message = 'Missing `instances` section'
-            file_display_queue.append(lambda: echo_failure(message, indent=FILE_INDENT))
+            file_display_queue.append(lambda message=message: echo_failure(message, indent=FILE_INDENT))
             annotate_error(file_name, message)
         # Verify there is a default instance
         else:
@@ -229,7 +235,7 @@ def validate_config_legacy(check, check_display_queue, files_failed, files_warne
             if check not in IGNORE_DEFAULT_INSTANCE and not isinstance(instances, list):
                 files_failed[config_file] = True
                 message = 'No default instance'
-                file_display_queue.append(lambda: echo_failure(message, indent=FILE_INDENT))
+                file_display_queue.append(lambda message=message: echo_failure(message, indent=FILE_INDENT))
                 annotate_error(file_name, message)
 
         if file_display_queue:

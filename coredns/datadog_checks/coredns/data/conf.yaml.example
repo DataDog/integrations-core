@@ -41,7 +41,7 @@ init_config:
     #
     # service: <SERVICE>
 
-## Every instance is scheduled independent of the others.
+## Every instance is scheduled independently of the others.
 #
 instances:
 
@@ -74,7 +74,7 @@ instances:
     #   - dns-pod:%%host%%
 
     ## @param raw_metric_prefix - string - optional
-    ## A prefix that will be removed from all exposed metric names, if present.
+    ## A prefix that is removed from all exposed metric names, if present.
     ## All configuration options will use the prefix-less name.
     #
     # raw_metric_prefix: <PREFIX>_
@@ -140,10 +140,10 @@ instances:
     # exclude_metrics: []
 
     ## @param exclude_metrics_by_labels - mapping - optional
-    ## A mapping of labels where metrics with matching label name and values are ignored. To match
+    ## A mapping of labels to exclude metrics with matching label name and their corresponding metric values. To match
     ## all values of a label, set it to `true`.
     ##
-    ## Note: Labels filtering happens before `rename_labels`.
+    ## Note: Label filtering happens before `rename_labels`.
     ##
     ## For example, the following configuration instructs the check to exclude all metrics with
     ## a label `worker` or a label `pid` with the value of either `23` or `42`.
@@ -159,22 +159,22 @@ instances:
     ## @param exclude_labels - list of strings - optional
     ## A list of labels to exclude, useful for high cardinality values like timestamps or UUIDs.
     ## May be used in conjunction with `include_labels`.
-    ## Labels defined in `excluded labels` will take precedence in case of overlap.
+    ## Labels defined in `exclude_labels` will take precedence in case of overlap.
     ##
-    ## Note: Labels filtering happens before `rename_labels`.
+    ## Note: Label filtering happens before `rename_labels`.
     #
     # exclude_labels: []
 
     ## @param include_labels - list of strings - optional
     ## A list of labels to include. May be used in conjunction with `exclude_labels`.
-    ## Labels defined in `excluded labels` will take precedence in case of overlap.
+    ## Labels defined in `exclude_labels` will take precedence in case of overlap.
     ##
-    ## Note: Labels filtering happens before `rename_labels`.
+    ## Note: Label filtering happens before `rename_labels`.
     #
     # include_labels: []
 
     ## @param rename_labels - mapping - optional
-    ## A mapping of label names to how they should be renamed.
+    ## A mapping of label names to their new names.
     #
     # rename_labels:
     #   <LABEL_NAME_1>: <NEW_LABEL_NAME_1>
@@ -193,7 +193,7 @@ instances:
 
     ## @param hostname_format - string - optional
     ## When `hostname_label` is set, this instructs the check how to format the values. The string
-    ## `<HOSTNAME>` will be replaced by the value of the label defined by `hostname_label`.
+    ## `<HOSTNAME>` is replaced by the value of the label defined by `hostname_label`.
     #
     # hostname_format: <HOSTNAME>
 
@@ -203,7 +203,7 @@ instances:
     # collect_histogram_buckets: true
 
     ## @param non_cumulative_histogram_buckets - boolean - optional - default: false
-    ## Whether or not histogram buckets should be non-cumulative and to come with a `lower_bound` tag.
+    ## Whether or not histogram buckets are non-cumulative and to come with a `lower_bound` tag.
     #
     # non_cumulative_histogram_buckets: false
 
@@ -245,7 +245,7 @@ instances:
     ## For example, the following configuration instructs the check to apply all labels from `metric_a`
     ## to all other metrics, the `node` label from `metric_b` to only those metrics that have a `pod`
     ## label value that matches the `pod` label value of `metric_b`, and all labels from `metric_c`
-    ## to all other metrics if its value is equal to `23` or `42`.
+    ## to all other metrics if their value is equal to `23` or `42`.
     ##
     ##   share_labels:
     ##     metric_a: true
@@ -263,7 +263,7 @@ instances:
 
     ## @param cache_shared_labels - boolean - optional - default: true
     ## When `share_labels` is set, it instructs the check to cache labels collected from the first payload
-    ## for increased performance.
+    ## for improved performance.
     ##
     ## Set this to `false` to compute label sharing for every payload at the risk of potentially increased memory usage.
     #
@@ -292,7 +292,7 @@ instances:
     # telemetry: false
 
     ## @param ignore_tags - list of strings - optional
-    ## A list of regular expressions used to ignore tags added by autodiscovery and entries in the `tags` option.
+    ## A list of regular expressions used to ignore tags added by Autodiscovery and entries in the `tags` option.
     #
     # ignore_tags:
     #   - <FULL:TAG>
@@ -447,13 +447,19 @@ instances:
     ##     path (required): The absolute path for the file to read from.
     ##     pattern: A regular expression pattern with a single capture group used to find the
     ##              token rather than using the entire file, for example: Your secret is (.+)
+    ##   - type: oauth
+    ##     url (required): The token endpoint.
+    ##     client_id (required): The client identifier.
+    ##     client_secret (required): The client secret.
+    ##     basic_auth: Whether the provider expects credentials to be transmitted in
+    ##                 an HTTP Basic Auth header. The default is: false
     ##
     ## The available writers are:
     ##
     ##   - type: header
     ##     name (required): The name of the field, for example: Authorization
     ##     value: The template value, for example `Bearer <TOKEN>`. The default is: <TOKEN>
-    ##     placeholder: The substring in `value` to replace by the token, defaults to: <TOKEN>
+    ##     placeholder: The substring in `value` to replace with the token, defaults to: <TOKEN>
     #
     # auth_token:
     #   reader:
@@ -590,7 +596,7 @@ instances:
     # log_requests: false
 
     ## @param persist_connections - boolean - optional - default: false
-    ## Whether or not to persist cookies and use connection pooling for increased performance.
+    ## Whether or not to persist cookies and use connection pooling for improved performance.
     #
     # persist_connections: false
 

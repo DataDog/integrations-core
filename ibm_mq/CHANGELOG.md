@@ -1,6 +1,29 @@
 # CHANGELOG - IBM MQ
 
-## 3.22.0 / 2022-05-15
+## 4.0.3 / 2023-01-25
+
+* [Fixed] Allow setting the try basic auth value from config in all cases. See [#13781](https://github.com/DataDog/integrations-core/pull/13781).
+
+## 4.0.2 / 2023-01-20
+
+* [Fixed] Prevent unnecessary non-SSL connection attempts. See [#13559](https://github.com/DataDog/integrations-core/pull/13559).
+
+## 4.0.1 / 2022-12-09 / Agent 7.42.0
+
+* [Fixed] Add messaging to service checks. See [#13355](https://github.com/DataDog/integrations-core/pull/13355).
+
+## 4.0.0 / 2022-10-28 / Agent 7.41.0
+
+* [Added] Add `queue_manager_process` option. See [#13107](https://github.com/DataDog/integrations-core/pull/13107).
+* [Fixed] Add back channels_to_skip for channel status metrics. See [#13113](https://github.com/DataDog/integrations-core/pull/13113).
+* [Fixed] Update SSL connection configs used for determining SSL auth. See [#12974](https://github.com/DataDog/integrations-core/pull/12974).
+* [Changed] Don't set any default algorithm for `ssl_cipher_spec`. See [#13013](https://github.com/DataDog/integrations-core/pull/13013).
+
+## 3.22.1 / 2022-08-05 / Agent 7.39.0
+
+* [Fixed] Dependency updates. See [#12653](https://github.com/DataDog/integrations-core/pull/12653).
+
+## 3.22.0 / 2022-05-15 / Agent 7.37.0
 
 * [Added] Add `collect_reset_queue_metrics` option. See [#11818](https://github.com/DataDog/integrations-core/pull/11818).
 

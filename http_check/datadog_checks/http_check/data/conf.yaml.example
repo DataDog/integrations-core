@@ -41,12 +41,14 @@ init_config:
     #
     # service: <SERVICE>
 
-## Every instance is scheduled independent of the others.
+## Every instance is scheduled independently of the others.
 #
 instances:
 
     ## @param name - string - required
-    ## Name of your Http check instance.
+    ## Name of your HTTP check instance.
+    ##
+    ## Note: The `instance` tag takes the value of this parameter and normalizes all `,+*-/()[]{}` characters into `_`.
     #
   - name: My first service
 
@@ -133,6 +135,13 @@ instances:
     ## hostname against the host of the provided url.
     #
     # check_certificate_expiration: true
+
+    ## @param tls_retrieve_non_validated_cert - boolean - optional - default: false
+    ## When set to true along with enabling `check_certificate_expiration`, this option allows certificates
+    ## to be retrieved from a peer whether or not `tls_verify` is set to true or false. This allows the
+    ## certificate to be examined for an expiration date in either case.
+    #
+    # tls_retrieve_non_validated_cert: false
 
     ## @param days_warning - integer - optional
     ## Express warning threshold for the HTTP check in days
@@ -363,13 +372,19 @@ instances:
     ##     path (required): The absolute path for the file to read from.
     ##     pattern: A regular expression pattern with a single capture group used to find the
     ##              token rather than using the entire file, for example: Your secret is (.+)
+    ##   - type: oauth
+    ##     url (required): The token endpoint.
+    ##     client_id (required): The client identifier.
+    ##     client_secret (required): The client secret.
+    ##     basic_auth: Whether the provider expects credentials to be transmitted in
+    ##                 an HTTP Basic Auth header. The default is: false
     ##
     ## The available writers are:
     ##
     ##   - type: header
     ##     name (required): The name of the field, for example: Authorization
     ##     value: The template value, for example `Bearer <TOKEN>`. The default is: <TOKEN>
-    ##     placeholder: The substring in `value` to replace by the token, defaults to: <TOKEN>
+    ##     placeholder: The substring in `value` to replace with the token, defaults to: <TOKEN>
     #
     # auth_token:
     #   reader:
@@ -506,7 +521,7 @@ instances:
     # log_requests: false
 
     ## @param persist_connections - boolean - optional - default: false
-    ## Whether or not to persist cookies and use connection pooling for increased performance.
+    ## Whether or not to persist cookies and use connection pooling for improved performance.
     #
     # persist_connections: false
 

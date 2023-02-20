@@ -15,7 +15,7 @@ from six import iteritems
 
 from datadog_checks.base import AgentCheck, is_affirmative, to_string
 from datadog_checks.base.checks.libs.timer import Timer
-from datadog_checks.base.utils.time import get_current_datetime
+from datadog_checks.base.utils.time import get_current_datetime, get_timestamp
 from datadog_checks.vsphere.api import APIConnectionError, VSphereAPI
 from datadog_checks.vsphere.api_rest import VSphereRestAPI
 from datadog_checks.vsphere.cache import InfrastructureCache, MetricsMetadataCache
@@ -90,6 +90,8 @@ class VSphereCheck(AgentCheck):
         self.thread_pool = ThreadPoolExecutor(max_workers=self._config.threads_count)
         self.check_initializations.append(self.initiate_api_connection)
 
+        self.last_connection_time = get_timestamp()
+
     def initiate_api_connection(self):
         # type: () -> None
         try:
@@ -99,6 +101,8 @@ class VSphereCheck(AgentCheck):
             self.api = VSphereAPI(self._config, self.log)
             self.log.debug("Connected")
         except APIConnectionError:
+            # Clear the API connection object if the authentication fails
+            self.api = cast(VSphereAPI, None)
             self.log.error("Cannot authenticate to vCenter API. The check will not run.")
             self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self._config.base_tags, hostname=None)
             raise
@@ -606,6 +610,13 @@ class VSphereCheck(AgentCheck):
         # type: (Any) -> None
         self._hostname = datadog_agent.get_hostname()
         # Assert the health of the vCenter API by getting the version, and submit the service_check accordingly
+
+        now = get_timestamp()
+        if self.last_connection_time + self._config.connection_reset_timeout <= now or self.api is None:
+            self.last_connection_time = now
+            self.log.debug("Refreshing vCenter connection")
+            self.initiate_api_connection()
+
         try:
             version_info = self.api.get_version()
             if self.is_metadata_collection_enabled():

@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import subprocess
+import sys
 import webbrowser
 
 import click
@@ -25,7 +26,7 @@ def serve(no_open, verbose, pdf, dirty):
     """Serve and view documentation in a web browser."""
     address = 'localhost:8000'
 
-    command = ['tox', '-e', 'docs', '--', 'serve', '--dev-addr', address]
+    command = [sys.executable, '-m', 'tox', '-e', 'docs', '--', 'serve', '--dev-addr', address]
 
     if dirty:
         echo_warning(

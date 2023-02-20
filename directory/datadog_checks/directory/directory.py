@@ -77,16 +77,10 @@ class DirectoryCheck(AgentCheck):
         max_foldergauge_balance = self._config.max_filegauge_count
         submit_histograms = self._config.submit_histograms
 
-        # If we do not want to recursively search sub-directories only get the root.
-        walker = walk(self._config.abs_directory, self._config.follow_symlinks)
-        if not self._config.recursive:
-            # Only visit the first directory.
-            walker = [next(walker)]
-
         # Avoid repeated global lookups.
         get_length = len
 
-        for root, dirs, files in walker:
+        for root, dirs, files in self._walk():
             matched_files = []  # type: List[os.DirEntry]
             adjust_max_filegauge = False
 
@@ -95,6 +89,7 @@ class DirectoryCheck(AgentCheck):
                     dirs[:] = [d for d in dirs if not self._config.exclude_dirs_pattern.search(d.path)]
                 else:
                     dirs[:] = [d for d in dirs if not self._config.exclude_dirs_pattern.search(d.name)]
+                self.log.debug('Directories: %s', str(dirs))
             directory_folders += get_length(dirs)
 
             if self._config.pattern is not None:
@@ -120,26 +115,35 @@ class DirectoryCheck(AgentCheck):
 
             for file_entry in matched_files:
                 try:
+                    self.log.debug('File entries in matched files: %s', str(file_entry))
                     file_stat = file_entry.stat(
                         follow_symlinks=self._config.stat_follow_symlinks
                     )  # type: os.stat_result
-
                 except OSError as ose:
                     self.warning('DirectoryCheck: could not stat file %s - %s', join(root, file_entry.name), ose)
                 else:
                     # file specific metrics
                     directory_bytes += file_stat.st_size
                     if self._config.filegauges and matched_files_length <= max_filegauge_balance:
+                        self.log.debug('Matched files length: %s', matched_files_length)
                         filetags = ['{}:{}'.format(self._config.filetagname, join(root, file_entry.name))]
                         filetags.extend(dirtags)
                         self.gauge('system.disk.directory.file.bytes', file_stat.st_size, tags=filetags)
                         self.gauge(
-                            'system.disk.directory.file.modified_sec_ago', time() - file_stat.st_mtime, tags=filetags
+                            'system.disk.directory.file.modified_sec_ago',
+                            time() - file_stat.st_mtime,
+                            tags=filetags,
                         )
                         self.gauge(
                             'system.disk.directory.file.created_sec_ago', time() - file_stat.st_ctime, tags=filetags
                         )
                         adjust_max_filegauge = True
+                        self.log.debug(
+                            'File stat output - size:%s mtime:%s ctime:%s',
+                            str(file_stat.st_size),
+                            str(file_stat.st_mtime),
+                            str(file_stat.st_ctime),
+                        )
                     elif submit_histograms:
                         self.histogram('system.disk.directory.file.bytes', file_stat.st_size, tags=dirtags)
                         self.histogram(
@@ -148,6 +152,13 @@ class DirectoryCheck(AgentCheck):
                         self.histogram(
                             'system.disk.directory.file.created_sec_ago', time() - file_stat.st_ctime, tags=dirtags
                         )
+                        self.log.debug(
+                            'File stat output histogram - size:%s mtime:%s ctime:%s',
+                            str(file_stat.st_size),
+                            str(file_stat.st_mtime),
+                            str(file_stat.st_ctime),
+                        )
+
             if adjust_max_filegauge:
                 max_filegauge_balance -= matched_files_length
 
@@ -176,3 +187,22 @@ class DirectoryCheck(AgentCheck):
         # total file size
         if not self._config.countonly:
             self.gauge('system.disk.directory.bytes', directory_bytes, tags=dirtags)
+            self.log.debug("`countonly` not enabled: Collecting system.disk.directory.bytes metric.")
+
+    def _walk(self):
+        """
+        Wraps walker iteration to handle errors and recursive option.
+        """
+        walker = walk(self._config.abs_directory, self._config.follow_symlinks)
+
+        while True:
+            try:
+                yield next(walker)
+            except StopIteration:
+                break
+            except OSError as e:
+                self.log.error("Error when traversing %s: %s", self._config.abs_directory, e)
+
+            # Only visit the first directory when we don't want recursive search
+            if not self._config.recursive:
+                break

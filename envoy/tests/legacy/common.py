@@ -1,10 +1,10 @@
+# (C) Datadog, Inc. 2021-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
 import os
 
-import pytest
-
 from datadog_checks.dev import get_docker_hostname
-
-from ..common import ENVOY_LEGACY
 
 FLAVOR = os.getenv('FLAVOR', 'api_v3')
 
@@ -31,6 +31,3 @@ INSTANCES = {
     },
 }
 ENVOY_VERSION = os.getenv('ENVOY_VERSION')
-requires_legacy_environment = pytest.mark.skipif(
-    ENVOY_LEGACY != 'true', reason='Requires legacy non-prometheus environment'
-)

@@ -1,40 +1,54 @@
 {
-  "display_name": "JBoss/WildFly",
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "name": "jboss_wildfly",
-  "metric_prefix": "jboss.",
-  "metric_to_check": "jboss.jdbc_connections.count",
-  "creates_events": false,
-  "short_description": "Gathers various JMX metrics from JBoss and WildFly Applications",
-  "guid": "ff99b3d2-9c14-4cdf-b869-7b8b1cbf0716",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "public_title": "Datadog-JBoss/WildFly Integration",
-  "categories": [
-    "web",
-    "log collection",
-    "autodiscovery"
-  ],
-  "type": "check",
-  "integration_id": "jboss-wildfly",
-  "is_public": true,
+  "manifest_version": "2.0.0",
+  "app_uuid": "4ad5a2e9-106b-43a2-820a-f146c7effffe",
+  "app_id": "jboss-wildfly",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gathers various JMX metrics from JBoss and WildFly Applications",
+    "title": "JBoss/WildFly",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Web",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "JBoss/WildFly",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "jboss.",
+        "check": "jboss.jdbc_connections.count",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
     },
-    "monitors": {},
     "dashboards": {
       "JBoss WildFly": "assets/dashboards/jboss_wildfly.json"
     },
-    "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "jboss_wildfly"
-    },
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

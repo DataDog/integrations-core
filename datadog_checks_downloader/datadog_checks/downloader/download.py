@@ -6,6 +6,7 @@ import glob
 import logging
 import logging.config
 import os
+import pathlib
 import re
 import shutil
 import sys
@@ -14,11 +15,9 @@ import tempfile
 from in_toto import verifylib
 from in_toto.exceptions import LinkNotFoundError
 from in_toto.models.metadata import Metablock
-from pkg_resources import parse_version
+from packaging.version import parse as parse_version
 from securesystemslib import interface
-from tuf import settings as tuf_settings
-from tuf.client.updater import Updater
-from tuf.exceptions import UnknownTargetError
+from tuf.ngclient import Updater
 
 from .exceptions import (
     DuplicatePackage,
@@ -31,11 +30,9 @@ from .exceptions import (
     NoSuchDatadogPackageVersion,
     PythonVersionMismatch,
     RevokedDeveloperOrMachine,
+    TargetNotFoundError,
 )
 from .parameters import substitute
-
-# Increase requests timeout.
-tuf_settings.SOCKET_TIMEOUT = 60
 
 # After we import everything we need, shut off all existing loggers.
 logging.config.dictConfig({'disable_existing_loggers': True, 'version': 1})
@@ -49,7 +46,7 @@ REPOSITORY_DIR = 'repo'
 REPOSITORY_URL_PREFIX = 'https://dd-integrations-core-wheels-build-stable.datadoghq.com'
 # Where to find our in-toto root layout.
 IN_TOTO_METADATA_DIR = 'in-toto-metadata'
-ROOT_LAYOUTS = {'core': '4.core.root.layout', 'extras': '1.extras.root.layout'}
+ROOT_LAYOUTS = {'core': '5.core.root.layout', 'extras': '1.extras.root.layout'}
 DEFAULT_ROOT_LAYOUT_TYPE = 'core'
 
 
@@ -67,13 +64,10 @@ class TUFDownloader:
         # 3 => 30 (WARNING)
         # 4 => 20 (INFO)
         # 5 => 10 (DEBUG)
-        # And so it repeats from here...
-        remainder = verbose % 6
+        remainder = min(verbose, 5) % 6
         level = (6 - remainder) * 10
         assert level in range(10, 70, 10), level
         logging.basicConfig(format='%(levelname)-8s: %(message)s', level=level)
-
-        tuf_settings.repositories_directory = REPOSITORIES_DIR
 
         self.__root_layout_type = root_layout_type
         self.__root_layout = ROOT_LAYOUTS[self.__root_layout_type]
@@ -86,43 +80,50 @@ class TUFDownloader:
         # NOTE: Build a TUF updater which stores metadata in (1) the given
         # directory, and (2) uses the following mirror configuration,
         # respectively.
-        # https://github.com/theupdateframework/tuf/blob/aa2ab218f22d8682e03c992ea98f88efd155cffd/tuf/client/updater.py#L628-L683
         # NOTE: This updater will store files under:
         # os.path.join(REPOSITORIES_DIR, REPOSITORY_DIR)
         self.__updater = Updater(
-            REPOSITORY_DIR,
-            {
-                'repo': {
-                    'url_prefix': repository_url_prefix,
-                    'metadata_path': 'metadata.staged',
-                    'targets_path': 'targets',
-                    'confined_target_dirs': [''],
-                }
-            },
+            metadata_dir=os.path.join(REPOSITORIES_DIR, REPOSITORY_DIR, 'metadata'),
+            metadata_base_url=f'{repository_url_prefix}/metadata.staged/',
+            target_base_url=f'{repository_url_prefix}/targets/',
+            target_dir=self.__targets_dir,
         )
+
+        # Increase requests timeout.
+        # There's no officially supported way to do this without either writing our own
+        # fetcher from scratch or relying on internals. We're choosing the latter for now.
+        # - https://github.com/theupdateframework/python-tuf/blob/v2.0.0/tuf/ngclient/updater.py#L99
+        # - https://github.com/theupdateframework/python-tuf/blob/v2.0.0/tuf/ngclient/_internal/requests_fetcher.py#L49
+        self.__updater._fetcher.socket_timeout = 60
 
         # NOTE: Update to the latest top-level role metadata only ONCE, so that
         # we use the same consistent snapshot to download targets.
         self.__updater.refresh()
 
     def __download_with_tuf(self, target_relpath):
-        target = self.__updater.get_one_valid_targetinfo(target_relpath)
-        updated_targets = self.__updater.updated_targets((target,), self.__targets_dir)
+        # The path used to query TUF needs to be a path-relative-URL string
+        # (https://url.spec.whatwg.org/#path-relative-url-string), which means the path
+        # separator *must* be `/` and only `/`.
+        # This is a defensive measure to make things work even if the provided `target_relpath`
+        # is a platform-specific filesystem path.
+        tuf_target_path = pathlib.PurePath(target_relpath).as_posix()
+        target = self.__updater.get_targetinfo(tuf_target_path)
+        if target is None:
+            raise TargetNotFoundError(f'Target at {tuf_target_path} not found')
+
+        target_abspath = os.path.join(self.__targets_dir, tuf_target_path)
+        local_relpath = self.__updater.find_cached_target(target, target_abspath)
 
         # Either the target has not been updated...
-        if not len(updated_targets):
-            logger.debug('%s has not been updated', target_relpath)
-        # or, it has been updated, in which case...
+        if local_relpath:
+            logger.debug('%s has not been updated', tuf_target_path)
+        # or, it has been updated, in which case we download the new version
         else:
-            # First, we use TUF to download and verify the target.
-            assert len(updated_targets) == 1
-            updated_target = updated_targets[0]
-            assert updated_target == target
-            self.__updater.download_target(updated_target, self.__targets_dir)
+            os.makedirs(os.path.dirname(target_abspath), exist_ok=True)
+            self.__updater.download_target(target, target_abspath)
 
-        logger.info('TUF verified %s', target_relpath)
+        logger.info('TUF verified %s', tuf_target_path)
 
-        target_abspath = os.path.join(self.__targets_dir, target_relpath)
         return target_abspath, target
 
     def __download_in_toto_root_layout(self):
@@ -131,15 +132,14 @@ class TUFDownloader:
         # expected version of the root layout. This is so that, for example, we
         # can introduce new parameters w/o breaking old downloaders that don't
         # know how to substitute them.
-        target_relpath = os.path.join(IN_TOTO_METADATA_DIR, self.__root_layout)
+        target_relpath = f'{IN_TOTO_METADATA_DIR}/{self.__root_layout}'
         return self.__download_with_tuf(target_relpath)
 
     def __download_custom(self, target, extension):
         # A set to collect where in-toto pubkeys / links live.
         target_abspaths = set()
 
-        fileinfo = target.get('fileinfo', {})
-        custom = fileinfo.get('custom', {})
+        custom = target.custom
 
         root_layout_type = custom.get('root-layout-type', DEFAULT_ROOT_LAYOUT_TYPE)
         if root_layout_type != self.__root_layout_type:
@@ -208,17 +208,17 @@ class TUFDownloader:
         # Make a temporary directory in a parent directory we control.
         tempdir = tempfile.mkdtemp(dir=REPOSITORIES_DIR)
 
-        # Copy files over into temp dir.
-        for abs_path in inspection_packet:
-            shutil.copy(abs_path, tempdir)
-
-        # Switch to the temp dir.
-        os.chdir(tempdir)
-
-        # Load the root layout and public keys in this temp dir.
-        root_layout, root_layout_pubkeys, root_layout_params = self.__load_root_layout(target_relpath)
-
         try:
+            # Copy files over into temp dir.
+            for abs_path in inspection_packet:
+                shutil.copy(abs_path, tempdir)
+
+            # Switch to the temp dir.
+            os.chdir(tempdir)
+
+            # Load the root layout and public keys in this temp dir.
+            root_layout, root_layout_pubkeys, root_layout_params = self.__load_root_layout(target_relpath)
+
             verifylib.in_toto_verify(root_layout, root_layout_pubkeys, substitution_parameters=root_layout_params)
         except Exception as e:
             self.__handle_in_toto_verification_exception(target_relpath, e)
@@ -270,7 +270,9 @@ class TUFDownloader:
             If download over TUF and in-toto is successful, this function will
             return the complete filepath to the desired target.
         """
-        return self.__download_with_tuf_in_toto(target_relpath)
+        target_abspath = self.__download_with_tuf_in_toto(target_relpath)
+        # Always return the posix version of the path for consistency across platforms
+        return pathlib.Path(target_abspath).as_posix()
 
     def __get_versions(self, standard_distribution_name):
         index_relpath = 'simple/{}/index.html'.format(standard_distribution_name)
@@ -283,7 +285,7 @@ class TUFDownloader:
         try:
             # NOTE: We do not perform in-toto inspection for simple indices; only for wheels.
             index_abspath, _ = self.__download_with_tuf(index_relpath)
-        except UnknownTargetError:
+        except TargetNotFoundError:
             raise NoSuchDatadogPackage(standard_distribution_name)
 
         with open(index_abspath) as simple_index:
@@ -315,8 +317,9 @@ class TUFDownloader:
             raise MissingVersions(standard_distribution_name)
 
         if not version:
-            # https://setuptools.readthedocs.io/en/latest/pkg_resources.html#parsing-utilities
-            version = str(max(parse_version(v) for v in wheels.keys()))
+            # Go through all wheels and remove alphas, betas and rcs and pick the latest version
+            # https://packaging.pypa.io/en/latest/version.html
+            version = str(max(parse_version(v) for v in wheels.keys() if not parse_version(v).is_prerelease))
 
         python_tags = wheels[version]
         if not python_tags:

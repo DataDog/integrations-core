@@ -1,39 +1,44 @@
 {
-  "aliases": [
-    "/integrations/event_viewer/",
-    "/integrations/eventviewer/",
-    "/integrations/faq/how-to-monitor-events-from-the-windows-event-logs/"
-  ],
-  "categories": [
-    "os & system",
-    "log collection"
-  ],
-  "creates_events": true,
-  "display_name": "Win32",
-  "guid": "b04d6f04-947c-4068-b73d-f861adc39959",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "win32_event_log.",
-  "name": "win32_event_log",
-  "public_title": "Datadog-Win 32 event log Integration",
-  "short_description": "Send Windows events to your Datadog event stream.",
-  "support": "core",
-  "supported_os": [
-    "windows"
-  ],
-  "type": "check",
-  "integration_id": "win32-event-log",
+  "manifest_version": "2.0.0",
+  "app_uuid": "8a0f4809-8470-4f7c-a7e8-350ba64123aa",
+  "app_id": "win32-event-log",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Send Windows events to your Datadog event stream.",
+    "title": "Win32 Event Log",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Windows",
+      "Category::OS & System",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "Win32",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": true
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
     },
-    "monitors": {},
-    "dashboards": {},
-    "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "windows.events"
-    },
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

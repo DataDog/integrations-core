@@ -40,6 +40,7 @@ DEFAULT_CONFIG = {
         'extras': os.path.join('~', 'dd', 'integrations-extras'),
         'agent': os.path.join('~', 'dd', 'datadog-agent'),
         'marketplace': os.path.join('~', 'dd', 'marketplace'),
+        'integrations-internal-core': os.path.join('~', 'dd', 'integrations-internal-core'),
     },
     'agents': {
         'master': {'docker': 'datadog/agent-dev:master', 'local': 'latest'},
@@ -51,7 +52,7 @@ DEFAULT_CONFIG = {
             'api_key': os.getenv('DD_API_KEY'),
             'app_key': os.getenv('DD_APP_KEY'),
             'site': os.getenv('DD_SITE'),
-            'dd_url': os.getenv('DD_DD_URL'),
+            'dd_url': os.getenv('DD_DD_URL', 'https://app.datadoghq.com'),
             'log_url': os.getenv('DD_LOGS_CONFIG_DD_URL'),
         }
     },

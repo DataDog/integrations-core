@@ -4,14 +4,13 @@
 
 ## Overview
 
-Get metrics from PostgreSQL in real time to:
+The Postgres integration provides health and performance metrics for your Postgres database in near real-time. Visualize these metrics with the provided dashboard and create monitors to alert your team on PostgreSQL states.
 
-- Visualize and monitor PostgreSQL states.
-- Received notifications about PostgreSQL failovers and events.
+Enable [Database Monitoring][28] (DBM) for enhanced insights into query performance and database health. In addition to the standard integration, Datadog DBM provides query-level metrics, live and historical query snapshots, wait event analysis, database load, query explain plans, and blocking query insights.
 
 ## Setup
 
-<div class="alert alert-info">This page describes the Postgres Agent integration. If you are looking for the Database Monitoring product for Postgres, see <a href="https://docs.datadoghq.com/database_monitoring" target="_blank">Datadog Database Monitoring</a>.</div>
+<div class="alert alert-info">This page describes the standard Postgres Agent integration. If you are looking for the Database Monitoring product for Postgres, see <a href="https://docs.datadoghq.com/database_monitoring" target="_blank">Datadog Database Monitoring</a>.</div>
 
 ### Installation
 
@@ -19,9 +18,13 @@ The PostgreSQL check is packaged with the Agent. To start gathering your Postgre
 
 ### Configuration
 
+**Note**: To install Database Monitoring for PostgreSQL, select your hosting solution in the [Database Monitoring documentation][29] for instructions.
+
+Proceed with the following steps in this guide only if you are installing the standard integration alone.
+
 #### Prepare Postgres
 
-To get started with the PostgreSQL integration, create a read-only `datadog` user with proper access to your PostgreSQL server. Start `psql` on your PostgreSQL database.
+To get started with the standard PostgreSQL integration, create a read-only `datadog` user with proper access to your PostgreSQL server. Start `psql` on your PostgreSQL database.
 
 For PostgreSQL version 10 and above, run:
 
@@ -234,6 +237,8 @@ To configure this check for an Agent running on Kubernetes:
 
 Set [Autodiscovery Integrations Templates][13] as pod annotations on your application container. Aside from this, templates can also be configured with [a file, a configmap, or a key-value store][14].
 
+**Annotations v1** (for Datadog Agent < v7.36)
+
 ```yaml
 apiVersion: v1
 kind: Pod
@@ -256,12 +261,41 @@ spec:
     - name: postgres
 ```
 
+**Annotations v2** (for Datadog Agent v7.36+)
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: postgres
+  annotations:
+    ad.datadoghq.com/postgres.checks: |
+      {
+        "postgres": {
+          "init_config": {},
+          "instances": [
+            {
+              "host": "%%host%%",
+              "port":"5432",
+              "username":"datadog",
+              "password":"<PASSWORD>"
+            }
+          ]
+        }
+      }
+spec:
+  containers:
+    - name: postgres
+```
+
 ##### Log collection
 
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][15].
 
 Then, set [Log Integrations][11] as pod annotations. This can also be configured with [a file, a configmap, or a key-value store][16].
+
+**Annotations v1/v2**
 
 ```yaml
 apiVersion: v1
@@ -422,3 +456,5 @@ Additional helpful documentation, links, and articles:
 [25]: https://www.datadoghq.com/blog/postgresql-monitoring-tools
 [26]: https://www.datadoghq.com/blog/collect-postgresql-data-with-datadog
 [27]: https://docs.datadoghq.com/agent/docker/apm/
+[28]: https://docs.datadoghq.com/database_monitoring/
+[29]: https://docs.datadoghq.com/database_monitoring/#postgres

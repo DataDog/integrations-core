@@ -1,39 +1,43 @@
 {
-  "display_name": "Cisco",
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "name": "snmp_cisco",
-  "metric_to_check": [
-    "snmp.cefcFRUPowerAdminStatus",
-    "snmp.devClientCount"
-  ],
-  "creates_events": false,
-  "short_description": "Collect SNMP metrics from your Cisco network devices.",
-  "guid": "4109f288-7460-4ed2-b0c3-04e708fbd5bd",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "public_title": "Datadog-Cisco Integration",
-  "categories": [ 
-    "monitoring", 
-    "notification", 
-    "network", 
-    "autodiscovery",
-    "snmp"
-  ],
-  "type": "check",
-  "is_public": true,
-  "integration_id": "snmp-cisco",
+  "manifest_version": "2.0.0",
+  "app_uuid": "91202d4a-1af4-4c64-88e4-5ba02b23c69f",
+  "app_id": "snmp-cisco",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Collect SNMP metrics from your Cisco network devices.",
+    "title": "Cisco",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Monitoring",
+      "Category::Notification",
+      "Category::Network",
+      "Category::SNMP"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {},
-    "dashboards": {},
-    "monitors": {},
-    "saved_views": {},
-    "service_checks": "assets/service_checks.json",
-    "logs": {},
-    "metrics_metadata": ""
+    "integration": {
+      "source_type_name": "Cisco",
+      "configuration": {},
+      "events": {
+        "creates_events": false
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    }
   }
 }

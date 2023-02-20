@@ -3210,7 +3210,7 @@
                                             "value": 24
                                         }
                                     ],
-                                    "q": "top(sum:kubernetes_state.pod.ready{*,$cluster,condition:true,$scope} by {kubernetes_cluster,host,nodepool}, 10, 'last', 'desc')"
+                                    "q": "top(sum:kubernetes_state.pod.ready{*,$cluster,condition:true,$scope} by {kube_cluster_name,host,nodepool}, 10, 'last', 'desc')"
                                 }
                             ],
                             "title": "Pods in ready state by node",
@@ -3790,11 +3790,11 @@
                                     "display_type": "line",
                                     "metadata": [
                                         {
-                                            "alias_name": "network writes per node",
-                                            "expression": "sum:kubernetes.io.write_bytes{$scope,$cluster} by {kube_replica_set,host}-avg:kubernetes_state.replicaset.replicas_ready{$scope,$cluster} by {host}"
+                                            "alias_name": "IO writes per node ",
+                                            "expression": "sum:kubernetes.io.write_bytes{$scope,$cluster} by {host}"
                                         }
                                     ],
-                                    "q": "sum:kubernetes.io.write_bytes{$scope,$cluster} by {kube_replica_set,host}-avg:kubernetes_state.replicaset.replicas_ready{$scope,$cluster} by {host}",
+                                    "q": "sum:kubernetes.io.write_bytes{$scope,$cluster} by {host}",
                                     "style": {
                                         "line_type": "solid",
                                         "line_width": "normal",
@@ -3940,11 +3940,11 @@
                                     "display_type": "line",
                                     "metadata": [
                                         {
-                                            "alias_name": "disk reads per node ",
-                                            "expression": "sum:kubernetes.io.read_bytes{$scope,$cluster} by {kube_replica_set,host}-avg:kubernetes_state.replicaset.replicas_ready{$scope,$cluster} by {host}"
+                                            "alias_name": "disk reads per node",
+                                            "expression": "sum:kubernetes.io.read_bytes{$scope,$cluster} by {host}"
                                         }
                                     ],
-                                    "q": "sum:kubernetes.io.read_bytes{$scope,$cluster} by {kube_replica_set,host}-avg:kubernetes_state.replicaset.replicas_ready{$scope,$cluster} by {host}",
+                                    "q": "sum:kubernetes.io.read_bytes{$scope,$cluster} by {host}",
                                     "style": {
                                         "line_type": "solid",
                                         "line_width": "normal",
@@ -4038,7 +4038,6 @@
                     {
                         "definition": {
                             "query": "source:kubernetes $scope $cluster",
-                            "tags_execution": "and",
                             "time": {
                                 "live_span": "1d"
                             },
@@ -4058,8 +4057,7 @@
                     {
                         "definition": {
                             "event_size": "s",
-                            "query": "sources:kubernetes $scope $cluster",
-                            "tags_execution": "and",
+                            "query": "source:kubernetes $scope $cluster",
                             "time": {
                                 "live_span": "1w"
                             },

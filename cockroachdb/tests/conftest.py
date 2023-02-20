@@ -4,7 +4,7 @@
 import os
 
 import pytest
-from pkg_resources import parse_version
+from packaging.version import parse as parse_version
 
 from datadog_checks.dev import docker_run
 
@@ -32,7 +32,11 @@ def instance_legacy():
 
 @pytest.fixture(scope='session')
 def instance():
-    return {'openmetrics_endpoint': 'http://{}:{}/_status/vars'.format(HOST, PORT)}
+    return {
+        'openmetrics_endpoint': 'http://{}:{}/_status/vars'.format(HOST, PORT),
+        'histogram_buckets_as_distributions': True,
+        'tags': ['cluster:cockroachdb-cluster', 'node:1'],
+    }
 
 
 def _get_start_command():

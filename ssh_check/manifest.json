@@ -1,44 +1,53 @@
 {
-  "aliases": [
-    "/integrations/ssh"
-  ],
-  "categories": [
-    "network",
-    "autodiscovery"
-  ],
-  "creates_events": false,
-  "display_name": "SSH",
-  "guid": "4eb195ef-554f-4cc2-80af-8f286c631fa8",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "ssh.",
-  "metric_to_check": "sftp.response_time",
-  "name": "ssh_check",
-  "process_signatures": [
-    "ssh",
-    "sftp",
-    "sshd",
-    "sshd:"
-  ],
-  "public_title": "SSH Integration",
-  "short_description": "Monitor SSH connectivity and SFTP latency.",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "type": "check",
-  "integration_id": "ssh",
+  "manifest_version": "2.0.0",
+  "app_uuid": "66833cbe-1bfc-4104-9d77-7b828219470b",
+  "app_id": "ssh",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor SSH connectivity and SFTP latency.",
+    "title": "SSH",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Network"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
-    },
-    "monitors": {},
-    "dashboards": {},
-    "service_checks": "assets/service_checks.json",
-    "logs": {},
-    "metrics_metadata": "metadata.csv"
+    "integration": {
+      "source_type_name": "SSH",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "sftp.",
+        "check": "sftp.response_time",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      },
+      "process_signatures": [
+        "ssh",
+        "sftp",
+        "sshd",
+        "sshd:"
+      ]
+    }
   }
 }

@@ -11,7 +11,7 @@ from datadog_checks.cilium import CiliumCheck
 from datadog_checks.dev import run_command
 from datadog_checks.dev.kind import kind_run
 from datadog_checks.dev.kube_port_forward import port_forward
-from datadog_checks.dev.utils import get_tox_env
+from datadog_checks.dev.utils import get_active_env
 
 from .common import CILIUM_VERSION
 
@@ -34,7 +34,7 @@ OPERATOR_URL = "http://{}:{}/metrics".format(HOST, OPERATOR_PORT)
 
 IMAGE_NAME = "quay.io/cilium/cilium:v{}".format(CILIUM_VERSION)
 PORTS = [AGENT_PORT, OPERATOR_PORT]
-CLUSTER_NAME = 'cluster-{}-{}'.format('cilium', get_tox_env())
+CLUSTER_NAME = 'cluster-{}-{}'.format('cilium', get_active_env())
 
 
 def setup_cilium():

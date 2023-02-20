@@ -145,7 +145,7 @@ def test_e2e_memory_cpu_f5_big_ip(dd_agent_check):
 def test_e2e_core_discovery(dd_agent_check):
     config = common.generate_container_profile_config_with_ad('apc_ups')
     config['init_config']['loader'] = 'core'
-    aggregator = common.dd_agent_check_wrapper(dd_agent_check, config, rate=False, times=5)
+    aggregator = common.dd_agent_check_wrapper(dd_agent_check, config, rate=False, times=3, pause=500)
 
     network = config['instances'][0]['network_address']
     ip_address = get_container_ip(SNMP_CONTAINER_NAME)
@@ -168,9 +168,9 @@ def test_e2e_core_discovery(dd_agent_check):
     # test that for a specific metric we are getting as many times as we are running the check
     # it might be off by 1 due to devices not being discovered yet at first check run
     aggregator.assert_metric(
-        'snmp.devices_monitored', metric_type=aggregator.GAUGE, tags=tags_with_loader, at_least=4, value=1
+        'snmp.devices_monitored', metric_type=aggregator.GAUGE, tags=tags_with_loader, at_least=2, value=1
     )
-    aggregator.assert_metric('snmp.upsAdvBatteryTemperature', metric_type=aggregator.GAUGE, tags=tags, at_least=4)
+    aggregator.assert_metric('snmp.upsAdvBatteryTemperature', metric_type=aggregator.GAUGE, tags=tags, at_least=2)
 
 
 def test_e2e_regex_match(dd_agent_check):
@@ -300,4 +300,66 @@ def test_e2e_meraki_cloud_controller(dd_agent_check):
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=if_tags, count=1)
 
     aggregator.assert_metric('snmp.sysUpTimeInstance', count=2, tags=common_tags)
+    aggregator.assert_metric(
+        'snmp.interface.status',
+        metric_type=aggregator.GAUGE,
+        tags=if_tags + ['interface_index:11', 'status:warning'],
+        value=1,
+    )
+    aggregator.assert_all_metrics_covered()
+
+
+def test_e2e_core_detect_metrics_using_apc_ups_metrics(dd_agent_check):
+    config = common.generate_container_instance_config([])
+    instance = config['instances'][0]
+    instance.update(
+        {
+            'snmp_version': 1,
+            'community_string': 'apc_ups_no_sysobjectid',
+            'experimental_detect_metrics_enabled': True,
+        }
+    )
+    config['init_config']['loader'] = 'core'
+    instance = config['instances'][0]
+    aggregator = common.dd_agent_check_wrapper(dd_agent_check, config, rate=True)
+
+    global_metric_tags = [
+        # metric_tags from apc_ups.yaml
+        'model:APC Smart-UPS 600',
+        'firmware_version:2.0.3-test',
+        'serial_num:test_serial',
+        'ups_name:testIdentName',
+        # metric_tags from _base.yaml
+        'snmp_host:APC_UPS_NAME',
+    ]
+
+    tags = global_metric_tags + ['device_namespace:default', "snmp_device:{}".format(instance['ip_address'])]
+
+    common.assert_common_metrics(aggregator, tags, is_e2e=True, loader='core')
+
+    for metric in metrics.APC_UPS_METRICS:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=2)
+    aggregator.assert_metric(
+        'snmp.upsOutletGroupStatusGroupState',
+        metric_type=aggregator.GAUGE,
+        tags=['outlet_group_name:test_outlet'] + tags,
+    )
+    for metric, value in metrics.APC_UPS_UPS_BASIC_STATE_OUTPUT_STATE_METRICS:
+        aggregator.assert_metric(metric, value=value, metric_type=aggregator.GAUGE, count=2, tags=tags)
+
+    interface_tags = ['interface:mgmt', 'interface_alias:desc1'] + tags
+    aggregator.assert_metric(
+        'snmp.ifInErrors',
+        metric_type=aggregator.COUNT,
+        tags=interface_tags,
+    )
+    aggregator.assert_metric(
+        'snmp.ifInErrors.rate',
+        metric_type=aggregator.GAUGE,
+        tags=interface_tags,
+    )
+    if_in_error_metrics = aggregator.metrics('snmp.ifInErrors.rate')
+    assert len(if_in_error_metrics) == 1
+    assert if_in_error_metrics[0].value > 0
+
     aggregator.assert_all_metrics_covered()

@@ -1,5 +1,30 @@
 # CHANGELOG - SonarQube
 
+## 2.2.3 / 2023-01-16
+
+* [Fixed] Support components from paginated endpoint. See [#13699](https://github.com/DataDog/integrations-core/pull/13699).
+
+## 2.2.2 / 2022-12-23 / Agent 7.42.0
+
+* [Fixed] Fix config spec to allow additionalProperties. See [#13512](https://github.com/DataDog/integrations-core/pull/13512).
+
+## 2.2.1 / 2022-12-16
+
+* [Fixed] Projects processed in `components` excluded from `components_discovery`. See [#13531](https://github.com/DataDog/integrations-core/pull/13531).
+* [Fixed] Fix configuration spec. See [#13504](https://github.com/DataDog/integrations-core/pull/13504).
+
+## 2.2.0 / 2022-12-09
+
+* [Added] Add autodiscovery feature for components. See [#13450](https://github.com/DataDog/integrations-core/pull/13450).
+
+## 2.1.0 / 2022-09-16 / Agent 7.40.0
+
+* [Added] Update HTTP config spec templates. See [#12890](https://github.com/DataDog/integrations-core/pull/12890).
+
+## 2.0.2 / 2022-08-05 / Agent 7.39.0
+
+* [Fixed] Dependency updates. See [#12653](https://github.com/DataDog/integrations-core/pull/12653).
+
 ## 2.0.1 / 2022-04-05 / Agent 7.36.0
 
 * [Fixed] Remove check options from jmx template. See [#11686](https://github.com/DataDog/integrations-core/pull/11686).

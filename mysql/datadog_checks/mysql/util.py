@@ -1,5 +1,7 @@
+# (C) Datadog, Inc. 2022-present
 # All rights reserved
-# Licensed under Simplified BSD License (see LICENSE)
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
 from enum import Enum
 
 
@@ -11,6 +13,8 @@ class DatabaseConfigurationError(Enum):
     explain_plan_procedure_missing = 'explain-plan-procedure-missing'
     explain_plan_fq_procedure_missing = 'explain-plan-fq-procedure-missing'
     performance_schema_not_enabled = 'performance-schema-not-enabled'
+    events_statements_consumer_missing = 'events-statements-consumer-missing'
+    events_waits_current_not_enabled = 'events-waits-current-not-enabled'
 
 
 def warning_with_tags(warning_message, *args, **kwargs):

@@ -36,6 +36,7 @@ class InstanceConfig(BaseModel):
     empty_default_hostname: Optional[bool]
     host: str
     ip_cache_duration: Optional[float]
+    ipv4_only: Optional[bool]
     metric_patterns: Optional[MetricPatterns]
     min_collection_interval: Optional[float]
     multiple_ips: Optional[bool]

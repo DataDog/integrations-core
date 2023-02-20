@@ -65,7 +65,7 @@ def dd_environment(e2e_instance):
     up = e2e_utils.IoTEdgeUp(compose_file, network_name=common.E2E_NETWORK)
     down = e2e_utils.IoTEdgeDown(compose_file, stop_extra_containers=common.E2E_EXTRA_SPAWNED_CONTAINERS)
 
-    with docker_run(conditions=conditions, env_vars=env_vars, up=up, down=down):
+    with docker_run(conditions=conditions, env_vars=env_vars, up=up, down=down, sleep=10):
         yield e2e_instance, common.E2E_METADATA
 
 
@@ -84,7 +84,14 @@ def mock_server():
     compose_file = os.path.join(common.HERE, 'compose', 'mock_server', 'docker-compose.yaml')
     env_vars = {"MOCK_SERVER_PORT": str(common.MOCK_SERVER_PORT)}
 
-    with docker_run(compose_file, env_vars=env_vars):
+    with docker_run(
+        compose_file,
+        endpoints=[
+            common.MOCK_EDGE_HUB_PROMETHEUS_URL,
+            common.MOCK_EDGE_AGENT_PROMETHEUS_URL,
+        ],
+        env_vars=env_vars,
+    ):
         yield
 
 

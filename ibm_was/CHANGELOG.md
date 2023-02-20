@@ -1,5 +1,22 @@
 # CHANGELOG - IBM WAS
 
+## 2.3.2 / 2023-01-20
+
+* [Fixed] Update dependencies. See [#13726](https://github.com/DataDog/integrations-core/pull/13726).
+
+## 2.3.1 / 2022-12-09 / Agent 7.42.0
+
+* [Fixed] Log that we collect stats only when we in fact do collect them. See [#13324](https://github.com/DataDog/integrations-core/pull/13324).
+
+## 2.3.0 / 2022-09-16 / Agent 7.40.0
+
+* [Added] Update HTTP config spec templates. See [#12890](https://github.com/DataDog/integrations-core/pull/12890).
+
+## 2.2.0 / 2022-08-05 / Agent 7.39.0
+
+* [Fixed] Dependency updates. See [#12653](https://github.com/DataDog/integrations-core/pull/12653).
+* [Security] Bump `lxml` package. See [#12663](https://github.com/DataDog/integrations-core/pull/12663).
+
 ## 2.1.0 / 2022-04-05 / Agent 7.36.0
 
 * [Added] Upgrade dependencies. See [#11726](https://github.com/DataDog/integrations-core/pull/11726).

@@ -1,37 +1,55 @@
 {
-  "aliases": [
-    "/integrations/elasticsearch"
-  ],
-  "categories": [
-    "data store",
-    "log collection",
-    "autodiscovery"
-  ],
-  "creates_events": true,
-  "display_name": "Elasticsearch",
-  "guid": "d91d91bd-4a8e-4489-bfb1-b119d4cc388a",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "elasticsearch.",
-  "metric_to_check": "elasticsearch.search.query.total",
-  "name": "elastic",
-  "process_signatures": [
-    "java org.elasticsearch.bootstrap.Elasticsearch"
-  ],
-  "public_title": "Datadog-ElasticSearch Integration",
-  "short_description": "Monitor overall cluster status down to JVM heap usage and everything in between.",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "type": "check",
-  "integration_id": "elasticsearch",
+  "manifest_version": "2.0.0",
+  "app_uuid": "fc23bf70-2992-4e07-96db-c65c167f25d6",
+  "app_id": "elasticsearch",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor overall cluster status down to JVM heap usage and everything in between.",
+    "title": "ElasticSearch",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Data Store",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "Elasticsearch",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": true
+      },
+      "metrics": {
+        "prefix": "elasticsearch.",
+        "check": "elasticsearch.search.query.total",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      },
+      "process_signatures": [
+        "java org.elasticsearch.bootstrap.Elasticsearch"
+      ]
+    },
+    "dashboards": {
+      "elasticsearch": "assets/dashboards/overview.json",
+      "elasticsearch_timeboard": "assets/dashboards/metrics.json"
     },
     "monitors": {
       "[ElasticSearch] Unsuccessful requests rate is high": "assets/monitors/elastic_requests.json",
@@ -39,17 +57,11 @@
       "[ElasticSearch] Time spent on queries is high": "assets/monitors/elastic_query_latency_high.json",
       "[ElasticSearch] Number of pending tasks is high": "assets/monitors/elastic_pending_tasks_high.json"
     },
-    "dashboards": {
-      "elasticsearch": "assets/dashboards/overview.json",
-      "elasticsearch_timeboard": "assets/dashboards/metrics.json"
-    },
-    "service_checks": "assets/service_checks.json",
-    "logs": {
-      "source": "elasticsearch"
-    },
-    "metrics_metadata": "metadata.csv",
     "saved_views": {
       "elasticsearch_processes": "assets/saved_views/elasticsearch_processes.json"
+    },
+    "logs": {
+      "source": "elasticsearch"
     }
   }
 }

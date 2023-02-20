@@ -1,36 +1,48 @@
 {
-  "categories": [
-    "processing",
-    "messaging",
-    "autodiscovery"
-  ],
-  "creates_events": true,
-  "display_name": "Kafka Consumer",
-  "guid": "74e1ce9c-dee9-4ad5-9b6a-05eeee7f5259",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "kafka.",
-  "metric_to_check": "kafka.consumer_lag",
-  "name": "kafka_consumer",
-  "public_title": "Datadog-Kafka Consumer Integration",
-  "short_description": "Collect metrics for Kafka consumers.",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "type": "check",
-  "integration_id": "kafka-consumer",
+  "manifest_version": "2.0.0",
+  "app_uuid": "8dfd58fe-b6de-4976-960b-14711d217efe",
+  "app_id": "kafka-consumer",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Collect metrics for Kafka consumers.",
+    "title": "Kafka Consumer",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Processing",
+      "Category::Messaging"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
-    },
-    "monitors": {},
-    "dashboards": {},
-    "service_checks": "assets/service_checks.json",
-    "logs": {},
-    "metrics_metadata": "metadata.csv"
+    "integration": {
+      "source_type_name": "Kafka Consumer",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": true
+      },
+      "metrics": {
+        "prefix": "kafka.",
+        "check": "kafka.consumer_lag",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    }
   }
 }

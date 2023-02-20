@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.mcache import Memcache
 
 from .common import HOST, PORT, SERVICE_CHECK, requires_socket_support, requires_unix_utils
@@ -39,6 +40,7 @@ def test_e2e(client, dd_agent_check, instance):
     aggregator = dd_agent_check(instance, rate=True)
 
     assert_check_coverage(aggregator)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 @pytest.mark.integration
@@ -72,6 +74,7 @@ def test_metrics(client, instance, aggregator, dd_run_check):
     dd_run_check(check)
 
     assert_check_coverage(aggregator)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 @pytest.mark.integration

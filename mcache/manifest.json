@@ -1,50 +1,61 @@
 {
-  "aliases": [
-    "/integrations/memcached"
-  ],
-  "categories": [
-    "web",
-    "caching",
-    "autodiscovery",
-    "log collection"
-  ],
-  "creates_events": false,
-  "display_name": "Memcached",
-  "guid": "b1c4033c-bf96-4456-be63-e74ff171f991",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "memcache.",
-  "metric_to_check": "memcache.uptime",
-  "name": "mcache",
-  "process_signatures": [
-    "memcached"
-  ],
-  "public_title": "Datadog-Memcache Integration",
-  "short_description": "Track memory use, hits, misses, evictions, fill percent, and more.",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os"
-  ],
-  "type": "check",
-  "integration_id": "memcached",
+  "manifest_version": "2.0.0",
+  "app_uuid": "711c00b1-c62c-4a50-867b-be1929950b2c",
+  "app_id": "memcached",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Track memory use, hits, misses, evictions, fill percent, and more.",
+    "title": "Memcache",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Category::Web",
+      "Category::Caching",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "Memcached",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "memcache.",
+        "check": "memcache.uptime",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      },
+      "process_signatures": [
+        "memcached"
+      ]
     },
-    "monitors": {},
     "dashboards": {
       "memcached": "assets/dashboards/memcached_dashboard.json",
       "memcached_screenboard": "assets/dashboards/memcached_screenboard.json"
     },
-    "service_checks": "assets/service_checks.json",
-    "logs": {
-      "source": "memcached"
-    },
-    "metrics_metadata": "metadata.csv",
     "saved_views": {
       "memcached_processes": "assets/saved_views/memcached_processes.json"
+    },
+    "logs": {
+      "source": "memcached"
     }
   }
 }

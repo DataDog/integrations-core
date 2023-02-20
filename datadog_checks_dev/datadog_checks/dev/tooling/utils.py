@@ -162,7 +162,7 @@ def check_root():
     return False
 
 
-def initialize_root(config, agent=False, core=False, extras=False, marketplace=False, here=False):
+def initialize_root(config, agent=False, core=False, extras=False, marketplace=False, here=False, **kwargs):
     """Initialize root directory based on config and options"""
     if check_root():
         return
@@ -237,7 +237,10 @@ def get_package_name(check_name):
 
 
 def get_version_file(check_name):
-    return os.path.join(get_root(), check_name, 'datadog_checks', get_package_name(check_name), '__about__.py')
+    if check_name == 'ddev':
+        return os.path.join(get_root(), check_name, 'src', 'ddev', '__about__.py')
+    else:
+        return os.path.join(get_root(), check_name, 'datadog_checks', get_package_name(check_name), '__about__.py')
 
 
 def is_agent_check(check_name):
@@ -252,7 +255,7 @@ def is_agent_check(check_name):
 
 
 def code_coverage_enabled(check_name):
-    if check_name in ('datadog_checks_base', 'datadog_checks_dev', 'datadog_checks_downloader'):
+    if check_name in ('datadog_checks_base', 'datadog_checks_dev', 'datadog_checks_downloader', 'ddev'):
         return True
 
     return is_agent_check(check_name)
@@ -637,7 +640,7 @@ def has_process_signature(check):
             manifest = json.loads(f.read())
     except JSONDecodeError as e:
         raise Exception("Cannot decode {}: {}".format(manifest_file, e))
-    return len(manifest.get('process_signatures', [])) > 0
+    return len(manifest.get('assets', {}).get('integration', {}).get('process_signatures', [])) > 0
 
 
 def has_agent_8_check_signature(check):
@@ -655,6 +658,23 @@ def has_saved_views(check):
 
 def has_recommended_monitor(check):
     return _has_asset_in_manifest(check, 'monitors')
+
+
+def is_manifest_v2(check):
+    """
+    Check if a manifest is version 2
+    Return True if the manifest exists AND its version is "2.0.0", False otherwise
+    """
+    manifest_file = get_manifest_file(check)
+    if not file_exists(manifest_file):
+        return False
+    try:
+        with open(manifest_file) as f:
+            manifest = json.loads(f.read())
+    except JSONDecodeError as e:
+        raise Exception("Cannot decode {}: {}".format(manifest_file, e))
+
+    return manifest.get("manifest_version") == "2.0.0"
 
 
 def _has_asset_in_manifest(check, asset):

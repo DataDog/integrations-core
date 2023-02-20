@@ -1,4 +1,4 @@
-# Gitlab Integration
+# GitLab Integration
 
 ## Overview
 
@@ -12,7 +12,7 @@ See [Monitoring GitLab with Prometheus][1] for more information.
 
 ### Installation
 
-The Gitlab check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your Gitlab servers.
+The GitLab check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your GitLab servers.
 
 ### Configuration
 
@@ -25,20 +25,20 @@ To configure this check for an Agent running on a host:
 
 ##### Metric collection
 
-1. Edit the `gitlab.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3], to point to the Gitlab's metrics [endpoint][4]. See the [sample gitlab.d/conf.yaml][5] for all available configuration options.
+1. Edit the `gitlab.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3], to point to the GitLab's metrics [endpoint][4]. See the [sample gitlab.d/conf.yaml][5] for all available configuration options.
 
-2. In the Gitlab settings page, ensure that the option `Enable Prometheus Metrics` is enabled (administrator access is required). For more information on how to enable metric collection, see [GitLab Prometheus metrics][6].
+2. In the GitLab settings page, ensure that the option `Enable Prometheus Metrics` is enabled (administrator access is required). For more information on how to enable metric collection, see [GitLab Prometheus metrics][6].
 
 3. Allow access to monitoring endpoints by updating your `/etc/gitlab/gitlab.rb` to include the following line:
 
     ```
     gitlab_rails['monitoring_whitelist'] = ['127.0.0.0/8', '192.168.0.1']
     ```
-    **Note** Save and restart Gitlab to see the changes.
+    **Note** Save and restart GitLab to see the changes.
 
 4. [Restart the Agent][7].
 
-**Note**: The metrics in [gitlab/metrics.py][8] are collected by default. The `allowed_metrics` configuration option in the `init_config` collects specific legacy metrics. Some metrics may not be collected depending on your Gitlab instance version and configuration. See [GitLab Prometheus metrics][6] for more information about metric collection.
+**Note**: The metrics in [gitlab/metrics.py][8] are collected by default. The `allowed_metrics` configuration option in the `init_config` collects specific legacy metrics. Some metrics may not be collected depending on your GitLab instance version and configuration. See [GitLab Prometheus metrics][6] for more information about metric collection.
 
 
 ##### Log collection
@@ -49,7 +49,7 @@ To configure this check for an Agent running on a host:
    logs_enabled: true
    ```
 
-2. Next, edit `gitlab.d/conf.yaml` by uncommenting the `logs` lines at the bottom. Update the logs `path` with the correct path to your Gitlab log files.
+2. Next, edit `gitlab.d/conf.yaml` by uncommenting the `logs` lines at the bottom. Update the logs `path` with the correct path to your GitLab log files.
 
    ```yaml
      logs:
@@ -107,7 +107,7 @@ See [metadata.csv][12] for a list of metrics provided by this integration.
 
 ### Events
 
-The Gitlab check does not include any events.
+The GitLab check does not include any events.
 
 ### Service Checks
 

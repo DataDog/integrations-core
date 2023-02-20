@@ -10,6 +10,14 @@
 from datadog_checks.base.utils.models.fields import get_default_field_value
 
 
+def shared_collect_apps_all_states(field, value):
+    return False
+
+
+def shared_collect_apps_states_list(field, value):
+    return ['RUNNING']
+
+
 def shared_proxy(field, value):
     return get_default_field_value(field, value)
 
@@ -64,6 +72,14 @@ def instance_cluster_name(field, value):
 
 def instance_collect_app_metrics(field, value):
     return True
+
+
+def instance_collect_apps_all_states(field, value):
+    return False
+
+
+def instance_collect_apps_states_list(field, value):
+    return ['RUNNING']
 
 
 def instance_collect_node_metrics(field, value):

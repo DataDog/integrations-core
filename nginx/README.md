@@ -278,6 +278,8 @@ To configure this check for an Agent running on Kubernetes:
 
 Set [Autodiscovery Integrations Templates][11] as pod annotations on your application container. Alternatively, you can configure templates with a [file, configmap, or key-value store][12].
 
+**Annotations v1** (for Datadog Agent < v7.36)
+
 ```yaml
 apiVersion: v1
 kind: Pod
@@ -296,6 +298,29 @@ metadata:
     name: nginx
 ```
 
+**Annotations v2** (for Datadog Agent v7.36+)
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+  annotations:
+    ad.datadoghq.com/nginx.checks: |
+      {
+        "nginx": {
+          "init_config": {},
+          "instances": [
+            {
+              "nginx_status_url":"http://%%host%%:81/nginx_status/"
+            }
+          ]
+        }
+      }
+  labels:
+    name: nginx
+```
+
 **Note**: This instance configuration works only with NGINX Open Source. If you are using NGINX Plus, inline the corresponding instance configuration.
 
 #### Log collection
@@ -304,6 +329,8 @@ metadata:
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][13].
 
 Then, set [Log Integrations][10] as pod annotations. Alternatively, you can configure this with a [file, configmap, or key-value store][14].
+
+**Annotations v1/v2**
 
 ```yaml
 apiVersion: v1

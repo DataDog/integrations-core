@@ -1,0 +1,5 @@
+[env.collectors.datadog-checks]
+
+[[envs.default.matrix]]
+python = ["3.8"]
+

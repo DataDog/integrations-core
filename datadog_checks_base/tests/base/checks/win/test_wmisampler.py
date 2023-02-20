@@ -3,8 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import collections
 
-import pytest
-
 from datadog_checks.dev.testing import requires_windows
 
 try:
@@ -20,7 +18,6 @@ except ImportError:
 
 
 @requires_windows
-@pytest.mark.unit
 def test_format_filter_value():
     filters = [{'a': 'b'}, {'c': 'd'}]
     sampler = WMISampler(logger=None, class_name='MyClass', property_names='my.prop', filters=filters)
@@ -29,7 +26,6 @@ def test_format_filter_value():
 
 
 @requires_windows
-@pytest.mark.unit
 def test_format_filter_like():
     filters = [{'a': '%foo'}]
     sampler = WMISampler(logger=None, class_name='MyClass', property_names='my.prop', filters=filters)
@@ -38,7 +34,6 @@ def test_format_filter_like():
 
 
 @requires_windows
-@pytest.mark.unit
 def test_format_filter_list_expected():
     filters = [{'a': ['<', 3]}]
     sampler = WMISampler(logger=None, class_name='MyClass', property_names='my.prop', filters=filters)
@@ -52,7 +47,6 @@ def test_format_filter_list_expected():
 
 
 @requires_windows
-@pytest.mark.unit
 def test_format_filter_tuple():
     # needed for backwards compatibility and hardcoded filters
     filters = [{'a': ('<', 3)}]
@@ -62,7 +56,6 @@ def test_format_filter_tuple():
 
 
 @requires_windows
-@pytest.mark.unit
 def test_format_filter_bool_op_alt():
     filters = [{'a': {'OR': [['>=', 10], ['<', 0]]}}]
     sampler = WMISampler(logger=None, class_name='MyClass', property_names='my.prop', filters=filters)
@@ -95,7 +88,6 @@ def test_format_filter_bool_op_alt():
 
 
 @requires_windows
-@pytest.mark.unit
 def test_format_filter_bool_op_not():
     filters = [{'my.prop': {'NOT': ['c', 'd']}}]
     sampler = WMISampler(logger=None, class_name='MyClass', property_names='my.prop', filters=filters)
@@ -110,7 +102,6 @@ def test_format_filter_bool_op_not():
 
 
 @requires_windows
-@pytest.mark.unit
 def test_format_filter_bool_op_invalid():
     # Falls back to default_bool_op
     filters = [{'my.prop': {'XXX': ['c', 'd']}}]
@@ -126,7 +117,6 @@ def test_format_filter_bool_op_invalid():
 
 
 @requires_windows
-@pytest.mark.unit
 def test_format_filter_wql_op_invalid():
     # Falls back to default_wql_op
     filters = [{'a': [['XXX', 3]]}]
@@ -136,7 +126,6 @@ def test_format_filter_wql_op_invalid():
 
 
 @requires_windows
-@pytest.mark.unit
 def test_format_filter_win32_log():
     query = collections.OrderedDict(
         (
@@ -155,7 +144,6 @@ def test_format_filter_win32_log():
 
 
 @requires_windows
-@pytest.mark.unit
 def test_caseinsensitivedict():
     test_dict = CaseInsensitiveDict({})
     key1 = "CAPS_KEY"

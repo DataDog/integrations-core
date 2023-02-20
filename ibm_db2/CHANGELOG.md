@@ -1,5 +1,13 @@
 # CHANGELOG - IBM Db2
 
+## 1.11.2 / 2022-09-22 / Agent 7.40.0
+
+* [Fixed] Emit critical service check when connection is lost. See [#12995](https://github.com/DataDog/integrations-core/pull/12995).
+
+## 1.11.1 / 2022-08-26
+
+* [Fixed] Get a connection every check run. See [#12736](https://github.com/DataDog/integrations-core/pull/12736).
+
 ## 1.11.0 / 2022-04-05 / Agent 7.36.0
 
 * [Added] Add metric_patterns options to filter all metric submission by a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).

@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import os
+
 import click
 
 from ..__about__ import __version__
@@ -31,6 +33,12 @@ from .utils import initialize_root
 @click.version_option(version=__version__, prog_name='ddev')
 @click.pass_context
 def ddev(ctx, core, extras, agent, marketplace, here, color, quiet, debug):
+    if color is None:
+        if os.environ.get('NO_COLOR') == '1':
+            color = False
+        elif os.environ.get('DDEV_COLOR') == '1':
+            color = True
+
     if not quiet and not config_file_exists():
         echo_waiting('No config file found, creating one with default settings now...')
 

@@ -7,7 +7,7 @@ from contextlib import contextmanager
 
 from ...errors import SubprocessError
 from ...subprocess import run_command
-from ...utils import ON_WINDOWS, file_exists, find_free_port, get_ip, path_join
+from ...utils import ON_WINDOWS, file_exists, find_free_port, get_hostname, get_ip, path_join
 from ..commands.console import echo_debug, echo_warning
 from ..constants import get_root
 from .agent import (
@@ -300,6 +300,8 @@ class DockerInterface(object):
         env_vars = {
             # Agent 6 will simply fail without an API key
             'DD_API_KEY': self.api_key,
+            # Set agent hostname for CI
+            'DD_HOSTNAME': get_hostname(),
             # Run expvar on a random port
             'DD_EXPVAR_PORT': 0,
             # Run API on a random port
@@ -355,6 +357,8 @@ class DockerInterface(object):
         command = [
             'docker',
             'run',
+            # Remove it when stopped
+            '--rm',
             # Keep it up
             '-d',
             # Ensure consistent naming
@@ -403,7 +407,6 @@ class DockerInterface(object):
     def stop_agent(self):
         # Only error for exit code if config actually exists
         run_command(['docker', 'stop', '-t', '0', self.container_name], capture=True, check=self.exists())
-        run_command(['docker', 'rm', self.container_name], capture=True, check=self.exists())
 
     def restart_agent(self):
         return run_command(['docker', 'restart', self.container_name], capture=True)

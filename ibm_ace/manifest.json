@@ -1,36 +1,51 @@
 {
-  "display_name": "IBM ACE",
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "name": "ibm_ace",
-  "metric_prefix": "ibm_ace.",
-  "metric_to_check": "ibm_ace.messages.current",
-  "creates_events": false,
-  "short_description": "Monitor IBM ACE resource statistics and message flows.",
-  "guid": "381ef23a-76c8-49d3-8a0a-7cddac6142f0",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "public_title": "IBM ACE",
-  "categories": [
-    "processing",
-    "log collection"
-  ],
-  "type": "check",
-  "is_public": true,
-  "integration_id": "ibm-ace",
+  "manifest_version": "2.0.0",
+  "app_uuid": "81e0df5f-8778-4558-88c3-884dcab5ce89",
+  "app_id": "ibm-ace",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor IBM ACE resource statistics and message flows.",
+    "title": "IBM ACE",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Processing",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "IBM ACE",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "ibm_ace.",
+        "check": "ibm_ace.messages.current",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
     },
-    "dashboards": {},
-    "monitors": {},
-    "saved_views": {},
-    "service_checks": "assets/service_checks.json",
-    "logs": {},
-    "metrics_metadata": "metadata.csv"
+    "dashboards": {
+      "IBM ACE Overview": "assets/dashboards/overview.json"
+    }
   }
 }

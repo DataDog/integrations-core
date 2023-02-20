@@ -22,7 +22,6 @@ DIR_METRICS = ["system.disk.directory.files", "system.disk.directory.folders", "
 
 EXPECTED_METRICS = FILE_METRICS + DIR_METRICS
 
-
 EXPECTED_TAGS = ['name:.', 'optional:tag1']
 
 

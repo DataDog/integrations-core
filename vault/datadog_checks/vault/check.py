@@ -16,7 +16,7 @@ class VaultCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
     __NAMESPACE__ = 'vault'
 
     DEFAULT_METRIC_LIMIT = 0
-
+    CHECK_NAME = 'vault'
     EVENT_LEADER_CHANGE = 'leader_change'
     SERVICE_CHECK_CONNECT = 'can_connect'
     SERVICE_CHECK_UNSEALED = 'unsealed'
@@ -35,11 +35,15 @@ class VaultCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
         # Keep track of the previous cluster leader to detect changes
         self._previous_leader = None
 
-        # Detect if Vault is in replication mode
-        self._replication_dr_secondary_mode = False
+        # we skip metric collection for DR if Vault is in replication mode
+        # and collect_secondary_dr is not enabled
+        self._skip_dr_metric_collection = False
 
         # Might not be configured for metric collection
         self.scraper_configs.clear()
+
+        # https://www.vaultproject.io/api-docs#the-x-vault-request-header
+        self.http.options['headers']['X-Vault-Request'] = 'true'
 
         # Before scrapers are configured
         self.check_initializations.insert(-1, self.parse_config)
@@ -65,7 +69,7 @@ class VaultCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
             for submit_function in submission_queue:
                 submit_function(tags=tags)
 
-        if self.metric_collection_enabled and not self._replication_dr_secondary_mode:
+        if self.metric_collection_enabled and not self._skip_dr_metric_collection:
             self.set_dynamic_tags(*dynamic_tags)
             super().check(_)
 
@@ -146,10 +150,19 @@ class VaultCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
 
         replication_mode = health_data.get('replication_dr_mode', '').lower()
         if replication_mode == 'secondary':
-            self._replication_dr_secondary_mode = True
-            self.log.debug('Detected vault in replication DR secondary mode, skipping Prometheus metric collection.')
+            if self.config.collect_secondary_dr:
+                self._skip_dr_metric_collection = False
+                self.log.debug(
+                    'Detected vault in replication DR secondary mode but also detected that '
+                    '`collect_secondary_dr` is enabled, OpenMetrics metric collection will still occur.'
+                )
+            else:
+                self._skip_dr_metric_collection = True
+                self.log.debug(
+                    'Detected vault in replication DR secondary mode, skipping Prometheus metric collection.'
+                )
         else:
-            self._replication_dr_secondary_mode = False
+            self._skip_dr_metric_collection = False
 
         vault_version = health_data.get('version')
         if vault_version:
@@ -210,6 +223,9 @@ class VaultCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
             config['openmetrics_endpoint'] = self._metrics_url
             config['tags'] = list(self._tags)
 
+            # https://www.vaultproject.io/api-docs#the-x-vault-request-header
+            config.setdefault('headers', {})['X-Vault-Request'] = 'true'
+
             if not self.config.no_token:
                 if self.config.client_token_path:
                     self.HTTP_CONFIG_REMAPPER = {
@@ -221,16 +237,11 @@ class VaultCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
                             },
                         }
                     }
-                else:
-                    self.http.options['headers']['X-Vault-Token'] = self.config.client_token
+                if self.config.client_token:
+                    config['headers']['X-Vault-Token'] = self.config.client_token
 
             self.scraper_configs.clear()
             self.scraper_configs.append(config)
-
-        # https://www.vaultproject.io/api/overview#the-x-vault-request-header
-        #
-        # Do this here so any HTTP_CONFIG_REMAPPER changes come first
-        self.http.options['headers']['X-Vault-Request'] = 'true'
 
         super().configure_scrapers()
 

@@ -77,6 +77,7 @@ class TestKubeAPIServerMetrics:
         NAMESPACE + '.authentication_duration_seconds.sum',
         NAMESPACE + '.authentication_duration_seconds.count',
         NAMESPACE + '.authentication_attempts',
+        NAMESPACE + '.requested_deprecated_apis',
     ]
     COUNT_METRICS = [
         NAMESPACE + '.audit_event.count',

@@ -206,14 +206,14 @@ class CouchDB2:
         for key, value in iteritems(data):
             if "type" in value:
                 if value["type"] == "histogram":
-                    for metric, value in iteritems(value["value"]):
+                    for metric, histo_value in iteritems(value["value"]):
                         if metric == "histogram":
                             continue
                         elif metric == "percentile":
-                            for pair in value:
+                            for pair in histo_value:
                                 self.gauge("{0}.{1}.percentile.{2}".format(prefix, key, pair[0]), pair[1], tags=tags)
                         else:
-                            self.gauge("{0}.{1}.{2}".format(prefix, key, metric), value, tags=tags)
+                            self.gauge("{0}.{1}.{2}".format(prefix, key, metric), histo_value, tags=tags)
                 else:
                     self.gauge("{0}.{1}".format(prefix, key), value["value"], tags=tags)
             elif isinstance(value, dict):

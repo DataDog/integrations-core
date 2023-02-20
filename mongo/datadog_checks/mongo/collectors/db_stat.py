@@ -1,3 +1,7 @@
+# (C) Datadog, Inc. 2020-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
 from datadog_checks.mongo.collectors.base import MongoCollector
 from datadog_checks.mongo.common import MongosDeployment, ReplicaSetDeployment
 

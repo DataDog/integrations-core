@@ -1,33 +1,51 @@
 {
-  "display_name": "SingleStore",
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "name": "singlestore",
-  "process_signatures": [
-    "memsqld"
-  ],
-  "metric_prefix": "singlestore.",
-  "metric_to_check": "singlestore.bytes_received",
-  "creates_events": false,
-  "short_description": "Collect SingleStore metrics from leaves and aggregators.",
-  "guid": "d40f153d-d02d-4bcc-9a7d-04bf5ba46e7a",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "public_title": "SingleStore",
-  "categories": [
-    "data store",
-    "log collection"
-  ],
-  "type": "check",
-  "is_public": true,
-  "integration_id": "singlestore",
+  "manifest_version": "2.0.0",
+  "app_uuid": "5e8c3b5f-278f-4423-90d9-969c06a478eb",
+  "app_id": "singlestore",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Collect SingleStore metrics from leaves and aggregators.",
+    "title": "SingleStore",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Data Store",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "SingleStore",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "singlestore.",
+        "check": "singlestore.bytes_received",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      },
+      "process_signatures": [
+        "memsqld"
+      ]
     },
     "dashboards": {
       "Singlestore Overview": "assets/dashboards/overview.json"
@@ -37,11 +55,8 @@
       "[SingleStore] Read failures rate": "assets/monitors/read_failures.json",
       "[SingleStore] Write failures rate": "assets/monitors/write_failures.json"
     },
-    "saved_views": {},
-    "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "singlestore"
-    },
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

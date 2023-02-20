@@ -9,7 +9,7 @@ init_config:
     #
     # service: <SERVICE>
 
-## Every instance is scheduled independent of the others.
+## Every instance is scheduled independently of the others.
 #
 instances:
 
@@ -47,6 +47,20 @@ instances:
     ## Cache and re-use PostgreSQL connection or create a new one at each check run.
     #
     # use_cached: true
+
+    ## @param collect_per_client_metrics - boolean - optional - default: false
+    ## Whether to collect detailed per-client metrics.
+    ##
+    ## This is useful for detailed analysis of client behavior (e.g., wait time).
+    #
+    # collect_per_client_metrics: false
+
+    ## @param collect_per_server_metrics - boolean - optional - default: false
+    ## Whether to collect detailed per-server metrics.
+    ##
+    ## This is useful for detailed analysis of server behavior (e.g., last request time).
+    #
+    # collect_per_server_metrics: false
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
@@ -90,12 +104,12 @@ instances:
 
 ## Log Section
 ##
-## type - required - Type of log input source (tcp / udp / file / windows_event)
+## type - required - Type of log input source (tcp / udp / file / windows_event).
 ## port / path / channel_path - required - Set port if type is tcp or udp.
 ##                                         Set path if type is file.
 ##                                         Set channel_path if type is windows_event.
 ## source  - required - Attribute that defines which integration sent the logs.
-## encoding - optional - For file specifies the file encoding, default is utf-8, other
+## encoding - optional - For file specifies the file encoding. Default is utf-8. Other
 ##                       possible values are utf-16-le and utf-16-be.
 ## service - optional - The name of the service that generates the log.
 ##                      Overrides any `service` defined in the `init_config` section.

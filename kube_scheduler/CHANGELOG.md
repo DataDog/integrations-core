@@ -1,6 +1,22 @@
 # CHANGELOG - Kube_scheduler
 
-## 4.2.0 / 2022-05-15
+## 4.5.0 / 2022-09-16 / Agent 7.40.0
+
+* [Added] Update HTTP config spec templates. See [#12890](https://github.com/DataDog/integrations-core/pull/12890).
+
+## 4.4.0 / 2022-08-05 / Agent 7.39.0
+
+* [Added] Add pending pods metrics for kube_scheduler. See [#12673](https://github.com/DataDog/integrations-core/pull/12673).
+* [Added] Add queue.incoming_pods metric. See [#12674](https://github.com/DataDog/integrations-core/pull/12674).
+* [Fixed] Re-add preemption victims metric as histogram. See [#12659](https://github.com/DataDog/integrations-core/pull/12659).
+* [Fixed] Re-add missing metric: pod_preemption.attempts. See [#12656](https://github.com/DataDog/integrations-core/pull/12656).
+* [Fixed] Re-add missing metric: rest_client_request_duration_seconds. See [#12636](https://github.com/DataDog/integrations-core/pull/12636).
+
+## 4.3.0 / 2022-06-27 / Agent 7.38.0
+
+* [Added] Add new scheduling metrics available in k8s v1.23+. See [#12111](https://github.com/DataDog/integrations-core/pull/12111).
+
+## 4.2.0 / 2022-05-15 / Agent 7.37.0
 
 * [Added] Support dynamic bearer tokens (Bound Service Account Token Volume). See [#11915](https://github.com/DataDog/integrations-core/pull/11915).
 

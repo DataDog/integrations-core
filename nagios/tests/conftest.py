@@ -8,13 +8,14 @@ from copy import deepcopy
 import pytest
 
 from datadog_checks.dev import TempDir, docker_run
+from datadog_checks.dev.fs import create_file
 
-from .common import HERE, INSTANCE_INTEGRATION
+from . import common
 
 
 @pytest.fixture(scope="session")
 def dd_environment():
-    nagios_conf = os.path.join(HERE, 'compose', 'nagios4', 'nagios.cfg')
+    nagios_conf = os.path.join(common.HERE, 'compose', 'nagios4', 'nagios.cfg')
     with TempDir("nagios_var_log") as nagios_var_log:
         e2e_metadata = {
             'docker_volumes': [
@@ -22,16 +23,22 @@ def dd_environment():
                 '{}:/opt/nagios/var/log/'.format(nagios_var_log),
             ]
         }
+        for perfdata_file in (
+            os.path.join(nagios_var_log, common.HOST_PERFDATA_FILE),
+            os.path.join(nagios_var_log, common.SERVICE_PERFDATA_FILE),
+        ):
+            if not os.path.isfile(perfdata_file):
+                create_file(perfdata_file)
 
         with docker_run(
-            os.path.join(HERE, 'compose', 'docker-compose.yaml'),
+            os.path.join(common.HERE, 'compose', 'docker-compose.yaml'),
             env_vars={'NAGIOS_LOGS_PATH': nagios_var_log},
             build=True,
             mount_logs=True,
         ):
-            yield INSTANCE_INTEGRATION, e2e_metadata
+            yield common.INSTANCE_INTEGRATION, e2e_metadata
 
 
 @pytest.fixture
 def instance():
-    return deepcopy(INSTANCE_INTEGRATION)
+    return deepcopy(common.INSTANCE_INTEGRATION)

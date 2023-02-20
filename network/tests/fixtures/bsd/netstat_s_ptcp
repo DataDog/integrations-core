@@ -1,0 +1,142 @@
+tcp:
+	0 packet sent
+		0 data packet (0 byte)
+		0 data packet (0 byte) retransmitted
+		0 resend initiated by MTU discovery
+		0 ack-only packet (0 delayed)
+		0 URG only packet
+		0 window probe packet
+		0 window update packet
+		0 control packet
+		0 data packet sent after flow control
+		0 challenge ACK sent due to unexpected SYN
+		0 challenge ACK sent due to unexpected RST
+		0 checksummed in software
+			0 segment (0 byte) over IPv4
+			0 segment (0 byte) over IPv6
+	0 packet received
+		0 ack (for 0 byte)
+		0 duplicate ack
+		0 ack for unsent data
+		0 packet (0 byte) received in-sequence
+		0 completely duplicate packet (0 byte)
+		0 old duplicate packet
+		0 received packet dropped due to low memory
+		0 packet with some dup. data (0 byte duped)
+		0 out-of-order packet (0 byte)
+		0 packet (0 byte) of data after window
+		0 window probe
+		0 window update packet
+		0 packet recovered after loss
+		0 packet received after close
+		0 bad reset
+		0 discarded for bad checksum
+		0 checksummed in software
+			0 segment (0 byte) over IPv4
+			0 segment (0 byte) over IPv6
+		0 discarded for bad header offset field
+		0 discarded because packet too short
+	0 connection request
+	0 connection accept
+	0 bad connection attempt
+	0 listen queue overflow
+	0 connection established (including accepts)
+	0 connection closed (including 0 drop)
+		0 connection updated cached RTT on close
+		0 connection updated cached RTT variance on close
+		0 connection updated cached ssthresh on close
+		0 connection initialized RTT from route cache
+		0 connection initialized RTT variance from route cache
+		0 connection initialized ssthresh from route cache
+	0 embryonic connection dropped
+	0 segment updated rtt (of 0 attempt)
+	0 retransmit timeout
+		0 connection dropped by rexmit timeout
+		0 connection dropped after retransmitting FIN
+		0 unnecessary packet retransmissions
+	0 persist timeout
+		0 connection dropped by persist timeout
+	0 keepalive timeout
+		0 keepalive probe sent
+		0 connection dropped by keepalive
+		0 connection dropped by keepalive offload
+	0 correct ACK header prediction
+	0 correct data packet header prediction
+	0 SACK recovery episode
+	0 segment rexmit in SACK recovery episodes
+	0 byte rexmit in SACK recovery episodes
+	0 SACK option (SACK blocks) received
+	0 SACK option (SACK blocks) sent
+	0 SACK scoreboard overflow
+	0 limited transmit done
+	0 early retransmit done
+	0 time cumulative ack advanced along with SACK
+	0 probe timeout
+		0 time retransmit timeout triggered after probe
+		0 time probe packets were sent for an interface
+		0 time couldn't send probe packets for an interface
+		0 time fast recovery after tail loss
+		0 time recovered last packet
+		0 SACK based rescue retransmit
+	0 client connection attempted to negotiate ECN
+		0 client connection successfully negotiated ECN
+		0 time graceful fallback to Non-ECN connection
+		0 time lost ECN negotiating SYN, followed by retransmission
+		0 server connection attempted to negotiate ECN
+		0 server connection successfully negotiated ECN
+		0 time lost ECN negotiating SYN-ACK, followed by retransmission
+		0 time received congestion experienced (CE) notification
+		0 time CWR was sent in response to ECE
+		0 time sent ECE notification
+		0 connection received CE atleast once
+		0 connection received ECE atleast once
+		0 connection using ECN have seen packet loss but no CE
+		0 connection using ECN have seen packet loss and CE
+		0 connection using ECN received CE but no packet loss
+		0 connection fell back to non-ECN due to SYN-loss
+		0 connection fell back to non-ECN due to reordering
+		0 connection fell back to non-ECN due to excessive CE-markings
+		0 connection fell back caused by connection drop due to RST
+		0 connection fell back due to drop after multiple retransmits
+		0 connection fell back due to RST after SYN
+	0 time packet reordering was detected on a connection
+		0 time transmitted packets were reordered
+		0 time fast recovery was delayed to handle reordering
+		0 time retransmission was avoided by delaying recovery
+		0 retransmission not needed
+	0 retransmission due to tail loss
+	0 time DSACK option was sent
+		0 time DSACK option was received
+		0 time DSACK was disabled on a connection
+		0 time recovered from bad retransmission using DSACK
+		0 time ignored DSACK due to ack loss
+		0 time ignored old DSACK options
+	0 time PMTU Blackhole detection, size reverted
+	0 connection were dropped after long sleep
+	0 connection had stretch ack algorithm disabled
+	0 time a TFO-cookie has been announced
+	0 SYN with data and a valid TFO-cookie have been received
+	0 SYN with TFO-cookie-request received
+	0 time an invalid TFO-cookie has been received
+	0 time we requested a TFO-cookie
+		0 time the peer announced a TFO-cookie
+	0 time we combined SYN with data and a TFO-cookie
+		0 time our SYN with data has been acknowledged
+	0 time a connection-attempt with TFO fell back to regular TCP
+	0 time a TFO-connection blackhole'd
+	0 time a TFO-cookie we sent was wrong
+	0 time did not received a TFO-cookie we asked for
+	0 time TFO got disabled due to heuristicsn
+	0 time TFO got blackholed in the sending direction
+	0 time maximum segment size was changed to default
+	0 time maximum segment size was changed to medium
+	0 time maximum segment size was changed to low
+	0 timer drift less or equal to 1 ms
+	0 timer drift less or equal to 10 ms
+	0 timer drift less or equal to 20 ms
+	0 timer drift less or equal to 50 ms
+	0 timer drift less or equal to 100 ms
+	0 timer drift less or equal to 200 ms
+	0 timer drift less or equal to 500 ms
+	0 timer drift less or equal to 1000 ms
+	0 timer drift greater than to 1000 ms

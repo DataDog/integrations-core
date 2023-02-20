@@ -29,6 +29,7 @@ files:
               `collect_connection_state` and `collect_connection_queues` to be true
               because it also requires the command `ss` from system package `iproute2` or
               the command `netstat` from the system package `net-tools` to be installed
+              Note: This option is only available on linux and will be ignored in other systems.
             value:
               example: false
               type: boolean
@@ -135,6 +136,26 @@ files:
               Note that when running this check in container, it will return metrics for the container
               network interfaces. To get host-level ENA metrics from a container, it needs to be executed
               with `CAP_NET_ADMIN` capability and use the `host` network mode.
+            value:
+              display_default: false
+              example: false
+              type: boolean
+          - name: collect_ethtool_metrics
+            description: |
+              Linux only.
+              Enable collection of ethtool statistics for network interfaces.
+              This will collect per queue and per cpu metrics depending on the driver.
+
+              The queue and cpu will be used as a tag when submitting metrics.
+              For example, 'queue_0_tx_cnt' will be submitted as 'system.net.ena.queue.tx_cnt' with tag 'queue:0'
+
+              Loopback interfaces 'lo' and 'lo0' are excluded as they don't support SIOCETHTOOL.
+
+              Currently supported drivers:
+              - ena
+              - virtio_net
+              - hv_netvsc
+              - gve
             value:
               display_default: false
               example: false

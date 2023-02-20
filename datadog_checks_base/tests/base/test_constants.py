@@ -1,10 +1,7 @@
-import pytest
-
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.constants import ServiceCheck
 
 
-@pytest.mark.unit
 def test_service_check_constants():
     # type: () -> None
     assert ServiceCheck.OK == AgentCheck.OK == 0

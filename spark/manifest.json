@@ -1,40 +1,54 @@
 {
-  "categories": [
-    "processing",
-    "log collection",
-    "autodiscovery"
-  ],
-  "creates_events": false,
-  "display_name": "Spark",
-  "guid": "f7a5a40f-f73c-465a-be8f-b2b371c706a2",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "spark.",
-  "metric_to_check": "spark.job.count",
-  "name": "spark",
-  "public_title": "Datadog-Spark Integration",
-  "short_description": "Track failed task rates, shuffled bytes, and much more.",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "type": "check",
-  "integration_id": "spark",
+  "manifest_version": "2.0.0",
+  "app_uuid": "5cb22455-9ae2-44ee-ae05-ec21c27b3292",
+  "app_id": "spark",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Track failed task rates, shuffled bytes, and much more.",
+    "title": "Spark",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Processing",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "Spark",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "spark.",
+        "check": "spark.job.count",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
     },
-    "monitors": {},
     "dashboards": {
       "spark": "assets/dashboards/spark_dashboard.json"
     },
-    "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "spark"
-    },
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

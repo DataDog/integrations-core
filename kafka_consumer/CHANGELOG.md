@@ -1,5 +1,41 @@
 # CHANGELOG - kafka_consumer
 
+## 2.16.3 / 2023-01-20
+
+* [Fixed] Add kafka consumer logs for more visibility. See [#13679](https://github.com/DataDog/integrations-core/pull/13679).
+* [Fixed] Disable socket wakeups for coordinate ID and consumer group offsets. See [#13505](https://github.com/DataDog/integrations-core/pull/13505).
+
+## 2.16.2 / 2022-11-22 / Agent 7.42.0
+
+* [Fixed] Disable socket wakeup when sending requests. See [#13221](https://github.com/DataDog/integrations-core/pull/13221).
+
+## 2.16.1 / 2022-10-28 / Agent 7.41.0
+
+* [Fixed] Update dependencies. See [#13205](https://github.com/DataDog/integrations-core/pull/13205).
+* [Fixed] Fix sensitive client_secret config specification. See [#12983](https://github.com/DataDog/integrations-core/pull/12983).
+
+## 2.16.0 / 2022-09-16 / Agent 7.40.0
+
+* [Added] Put lag in seconds behind a feature flag. See [#12942](https://github.com/DataDog/integrations-core/pull/12942).
+* [Fixed] Bump dependencies for 7.40. See [#12896](https://github.com/DataDog/integrations-core/pull/12896).
+
+## 2.15.4 / 2022-09-09
+
+* [Fixed] Fix support for OAUTHBEARER SASL mechanism. See [#12891](https://github.com/DataDog/integrations-core/pull/12891).
+
+## 2.15.3 / 2022-08-05 / Agent 7.39.0
+
+* [Fixed] Handle errors getting producer offset. See [#12648](https://github.com/DataDog/integrations-core/pull/12648).
+
+## 2.15.2 / 2022-06-27 / Agent 7.38.0
+
+* [Fixed] Fix failed reading and writing to cache when file is too long. See [#12109](https://github.com/DataDog/integrations-core/pull/12109).
+* [Fixed] Remove unnecessary agent cache implementation. See [#12083](https://github.com/DataDog/integrations-core/pull/12083).
+
+## 2.15.1 / 2022-05-31 / Agent 7.37.0
+
+* [Fixed] Does not fail reading and writing to cache when file is too long. See [#12109](https://github.com/DataDog/integrations-core/pull/12109).
+
 ## 2.15.0 / 2022-05-15
 
 * [Added] Add new lag in seconds metric. See [#11861](https://github.com/DataDog/integrations-core/pull/11861).
@@ -178,20 +214,20 @@
 
 ## 1.6.0 / 2019-01-04 / Agent 6.9.0
 
-* [Added] [kafka_consumer] Bump vendored kazoo to 2.6.0. See [#2729][1]. Thanks [jeffwidman][2].
-* [Added] [kafka_consumer] Bump kafka-python to 1.4.4. See [#2728][3]. Thanks [jeffwidman][2].
+* [Added] [kafka_consumer] Bump vendored kazoo to 2.6.0. See [#2729](https://github.com/DataDog/integrations-core/pull/2729). Thanks [jeffwidman](https://github.com/jeffwidman).
+* [Added] [kafka_consumer] Bump kafka-python to 1.4.4. See [#2728](https://github.com/DataDog/integrations-core/pull/2728). Thanks [jeffwidman](https://github.com/jeffwidman).
 
 ## 1.5.0 / 2018-11-30 / Agent 6.8.0
 
-* [Added] Support Python 3. See [#2648][4].
+* [Added] Support Python 3. See [#2648](https://github.com/DataDog/integrations-core/pull/2648).
 
 ## 1.4.1 / 2018-09-04 / Agent 6.5.0
 
-* [Fixed] Add data files to the wheel package. See [#1727][5].
+* [Fixed] Add data files to the wheel package. See [#1727](https://github.com/DataDog/integrations-core/pull/1727).
 
 ## 1.4.0 / 2018-06-04
 
-* [Changed] Bump to kafka-python 1.4.3. See [#1627][6]. Thanks [jeffwidman][2].
+* [Changed] Bump to kafka-python 1.4.3. See [#1627](https://github.com/DataDog/integrations-core/pull/1627). Thanks [jeffwidman](https://github.com/jeffwidman).
 
 ## 1.3.0 / 2018-03-23
 
@@ -200,51 +236,32 @@
 
 ## 1.2.2 / 2018-02-13
 
-* [BUGFIX] Check explicitly that node_id is None instead of 0. See [#1022][7]
+* [BUGFIX] Check explicitly that node_id is None instead of 0. See [#1022](https://github.com/DataDog/integrations-core/issues1022)
 
 ## 1.2.1 / 2017-11-29
 
-* [BUGFIX] Use instance key to retrieve cached kafka_client, See [#904][8]
+* [BUGFIX] Use instance key to retrieve cached kafka_client, See [#904](https://github.com/DataDog/integrations-core/issues/904)
 
 ## 1.2.0 / 2017-11-21
 
-* [FEATURE] Support collection of consumer offsets from Kafka, in addition to ZK. See [#654][9]
+* [FEATURE] Support collection of consumer offsets from Kafka, in addition to ZK. See [#654](https://github.com/DataDog/integrations-core/issues/654)
 
 ## 1.1.0 / 2017-10-10
 
-* [FEATURE] discovery of groups, topics and partitions. See [#633][10] (Thanks [@jeffwidman][11])
-* [SANITY] set upper bound on number of contexts. Submit "broker available" metrics. See [#753][12]
-* [SANITY] Remove usage of `AgentCheck.read_config` (deprecated method). See [#733][13]
+* [FEATURE] discovery of groups, topics and partitions. See [#633](https://github.com/DataDog/integrations-core/issues/633) (Thanks [@jeffwidman](https://github.com/jeffwidman))
+* [SANITY] set upper bound on number of contexts. Submit "broker available" metrics. See [#753](https://github.com/DataDog/integrations-core/issues/753)
+* [SANITY] Remove usage of `AgentCheck.read_config` (deprecated method). See [#733](https://github.com/DataDog/integrations-core/issues/733)
 
 ## 1.0.2 / 2017-08-28
 
-* [IMPROVEMENT] Bump Kazoo dependency to 2.4.0. See [#623][14], thanks [@jeffwidman][11]
-* [IMPROVEMENT] Bump kafka-python to 1.3.4. See [#684][15], thanks [@jeffwidman][11]
-* [IMPROVEMENT] Switch ZK example from string to list. See [#624][16], thanks [@jeffwidman][11]
+* [IMPROVEMENT] Bump Kazoo dependency to 2.4.0. See [#623](https://github.com/DataDog/integrations-core/issues/623), thanks [@jeffwidman](https://github.com/jeffwidman)
+* [IMPROVEMENT] Bump kafka-python to 1.3.4. See [#684](https://github.com/DataDog/integrations-core/issues/684), thanks [@jeffwidman](https://github.com/jeffwidman)
+* [IMPROVEMENT] Switch ZK example from string to list. See [#624](https://github.com/DataDog/integrations-core/issues/624), thanks [@jeffwidman](https://github.com/jeffwidman)
 
 ## 1.0.1 / 2017-04-24
 
-* [DEPENDENCY] bumping kafka-python to 0.3.3. See [#272][17] (Thanks [@jeffwidman][11])
+* [DEPENDENCY] bumping kafka-python to 0.3.3. See [#272](https://github.com/DataDog/integrations-core/issues/272) (Thanks [@jeffwidman](https://github.com/jeffwidman))
 
 ## 1.0.0 / 2017-03-22
 
 * [FEATURE] adds kafka_consumer integration.
-
-<!--- The following link definition list is generated by PimpMyChangelog --->
-[1]: https://github.com/DataDog/integrations-core/pull/2729
-[2]: https://github.com/jeffwidman
-[3]: https://github.com/DataDog/integrations-core/pull/2728
-[4]: https://github.com/DataDog/integrations-core/pull/2648
-[5]: https://github.com/DataDog/integrations-core/pull/1727
-[6]: https://github.com/DataDog/integrations-core/pull/1627
-[7]: https://github.com/DataDog/integrations-core/issues1022
-[8]: https://github.com/DataDog/integrations-core/issues/904
-[9]: https://github.com/DataDog/integrations-core/issues/654
-[10]: https://github.com/DataDog/integrations-core/issues/633
-[11]: https://github.com/jeffwidman
-[12]: https://github.com/DataDog/integrations-core/issues/753
-[13]: https://github.com/DataDog/integrations-core/issues/733
-[14]: https://github.com/DataDog/integrations-core/issues/623
-[15]: https://github.com/DataDog/integrations-core/issues/684
-[16]: https://github.com/DataDog/integrations-core/issues/624
-[17]: https://github.com/DataDog/integrations-core/issues/272

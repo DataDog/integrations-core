@@ -67,7 +67,7 @@ if datadog_agent.get_config('disable_unsafe_yaml'):
     monkey_patch_pyyaml()
 
 if not PY2:
-    from pydantic import ValidationError
+    from pydantic import BaseModel, ValidationError
 
 if TYPE_CHECKING:
     import ssl
@@ -130,10 +130,6 @@ class AgentCheck(object):
     # If the return type is a string, then it will be sent as the value for `name`. If the return type is
     # a mapping type, then each key will be considered a `name` and will be sent with its (str) value.
     METADATA_TRANSFORMERS = None
-
-    # Default fields to whitelist for metadata submission
-    METADATA_DEFAULT_CONFIG_INIT_CONFIG = None
-    METADATA_DEFAULT_CONFIG_INSTANCE = None
 
     FIRST_CAP_RE = re.compile(br'(.)([A-Z][a-z]+)')
     ALL_CAP_RE = re.compile(br'([a-z0-9])([A-Z])')
@@ -285,7 +281,7 @@ class AgentCheck(object):
         self._config_model_shared = None  # type: Any
 
         # Functions that will be called exactly once (if successful) before the first check run
-        self.check_initializations = deque([self.send_config_metadata])  # type: Deque[Callable[[], None]]
+        self.check_initializations = deque()  # type: Deque[Callable[[], None]]
 
         if not PY2:
             self.check_initializations.append(self.load_configuration_models)
@@ -443,7 +439,14 @@ class AgentCheck(object):
         models_config = models_config or {}
         typos = set()  # type: Set[str]
 
-        known_options = [k for k, _ in models_config]  # type: List[str]
+        known_options = set([k for k, _ in models_config])  # type: Set[str]
+
+        if not PY2:
+
+            if isinstance(models_config, BaseModel):
+                # Also add aliases, if any
+                known_options.update(set(models_config.dict(by_alias=True)))
+
         unknown_options = [option for option in user_configs.keys() if option not in known_options]  # type: List[str]
 
         for unknown_option in unknown_options:
@@ -881,13 +884,6 @@ class AgentCheck(object):
         """
         self.metadata_manager.submit(name, value, options)
 
-    def send_config_metadata(self):
-        # type: () -> None
-        self.set_metadata('config', self.instance, section='instance', whitelist=self.METADATA_DEFAULT_CONFIG_INSTANCE)
-        self.set_metadata(
-            'config', self.init_config, section='init_config', whitelist=self.METADATA_DEFAULT_CONFIG_INIT_CONFIG
-        )
-
     @staticmethod
     def is_metadata_collection_enabled():
         # type: () -> bool
@@ -977,7 +973,7 @@ class AgentCheck(object):
 
     def warning(self, warning_message, *args, **kwargs):
         # type: (str, *Any, **Any) -> None
-        """Log a warning message and display it in the Agent's status page.
+        """Log a warning message, display it in the Agent's status page and in-app.
 
         Using *args is intended to make warning work like log.warn/debug/info/etc
         and make it compliant with flake8 logging format linter.
@@ -1089,41 +1085,47 @@ class AgentCheck(object):
     def run(self):
         # type: () -> str
         try:
-            while self.check_initializations:
-                initialization = self.check_initializations.popleft()
-                try:
-                    initialization()
-                except Exception:
-                    self.check_initializations.appendleft(initialization)
-                    raise
+            # Ignore check initializations if running in a separate process
+            if is_affirmative(self.instance.get('process_isolation', self.init_config.get('process_isolation', False))):
+                from ..utils.replay.execute import run_with_isolation
 
-            instance = copy.deepcopy(self.instances[0])
-
-            if 'set_breakpoint' in self.init_config:
-                from ..utils.agent.debug import enter_pdb
-
-                enter_pdb(self.check, line=self.init_config['set_breakpoint'], args=(instance,))
-            elif 'profile_memory' in self.init_config or (
-                datadog_agent.tracemalloc_enabled() and should_profile_memory(datadog_agent, self.name)
-            ):
-                from ..utils.agent.memory import profile_memory
-
-                metrics = profile_memory(
-                    self.check, self.init_config, namespaces=self.check_id.split(':', 1), args=(instance,)
-                )
-
-                tags = self.get_debug_metric_tags()
-                tags.extend(instance.get('__memory_profiling_tags', []))
-                for m in metrics:
-                    self.gauge(m.name, m.value, tags=tags, raw=True)
+                run_with_isolation(self, aggregator, datadog_agent)
             else:
-                self.check(instance)
+                while self.check_initializations:
+                    initialization = self.check_initializations.popleft()
+                    try:
+                        initialization()
+                    except Exception:
+                        self.check_initializations.appendleft(initialization)
+                        raise
 
-            result = ''
+                instance = copy.deepcopy(self.instances[0])
+
+                if 'set_breakpoint' in self.init_config:
+                    from ..utils.agent.debug import enter_pdb
+
+                    enter_pdb(self.check, line=self.init_config['set_breakpoint'], args=(instance,))
+                elif 'profile_memory' in self.init_config or (
+                    datadog_agent.tracemalloc_enabled() and should_profile_memory(datadog_agent, self.name)
+                ):
+                    from ..utils.agent.memory import profile_memory
+
+                    metrics = profile_memory(
+                        self.check, self.init_config, namespaces=self.check_id.split(':', 1), args=(instance,)
+                    )
+
+                    tags = self.get_debug_metric_tags()
+                    tags.extend(instance.get('__memory_profiling_tags', []))
+                    for m in metrics:
+                        self.gauge(m.name, m.value, tags=tags, raw=True)
+                else:
+                    self.check(instance)
+
+            error_report = ''
         except Exception as e:
             message = self.sanitize(str(e))
             tb = self.sanitize(traceback.format_exc())
-            result = json.dumps([{'message': message, 'traceback': tb}])
+            error_report = json.dumps([{'message': message, 'traceback': tb}])
         finally:
             if self.metric_limiter:
                 if is_affirmative(self.debug_metrics.get('metric_contexts', False)):
@@ -1138,7 +1140,7 @@ class AgentCheck(object):
 
                 self.metric_limiter.reset()
 
-        return result
+        return error_report
 
     def event(self, event):
         # type: (Event) -> None

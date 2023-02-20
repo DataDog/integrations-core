@@ -1,37 +1,50 @@
 {
-  "categories": [
-    "network",
-    "autodiscovery"
-  ],
-  "creates_events": true,
-  "display_name": "Cisco ACI",
-  "guid": "8a20f56b-2e25-4a0b-a252-f5187dddeeef",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "cisco_aci.",
-  "metric_to_check": "cisco_aci.fabric.node.health.cur",
-  "name": "cisco_aci",
-  "public_title": "Datadog-CiscoACI Integration",
-  "short_description": "Track Cisco ACI performance and usage.",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "type": "check",
-  "integration_id": "cisco-aci",
+  "manifest_version": "2.0.0",
+  "app_uuid": "fab40264-45aa-434b-9f9f-dc0ab609dd49",
+  "app_id": "cisco-aci",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Track Cisco ACI performance and usage.",
+    "title": "CiscoACI",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Network"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "Cisco ACI",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": true
+      },
+      "metrics": {
+        "prefix": "cisco_aci.",
+        "check": "cisco_aci.fabric.node.health.cur",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
     },
-    "monitors": {},
     "dashboards": {
       "cisco_aci": "assets/dashboards/cisco_aci_dashboard.json"
-    },
-    "service_checks": "assets/service_checks.json",
-    "logs": {},
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

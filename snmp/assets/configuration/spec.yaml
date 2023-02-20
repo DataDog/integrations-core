@@ -138,16 +138,9 @@ files:
         value:
           type: boolean
           example: true
-      - name: namespace
-        description: |
-            Namespace can be used to disambiguate devices with same IPs.
-            Changing namespace will cause devices being recreated in NDM app.
-            Only available using corecheck SNMP integration with `loader: core` config.
-        value:
-          example: default
-          type: string
-          display_default: default
       - template: init_config/default
+        overrides:
+          service.hidden: true
     - template: instances
       options:
       - name: ip_address
@@ -410,13 +403,6 @@ files:
         value:
           type: boolean
           example: true
-      - name: namespace
-        description: |
-          Namespace can be used to disambiguate devices with same IPs.
-          Changing namespace will cause devices being recreated in NDM app.
-          Only available using corecheck SNMP integration with `loader: core` config.
-        value:
-          example: default
-          type: string
-          display_default: default
       - template: instances/default
+        overrides:
+          service.hidden: true

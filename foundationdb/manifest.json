@@ -1,33 +1,51 @@
 {
-  "display_name": "FoundationDB",
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "name": "foundationdb",
-  "metric_prefix": "foundationdb.",
-  "metric_to_check": [
-      "foundationdb.processes",
-      "foundationdb.instances"
-  ],
-  "creates_events": false,
-  "short_description": "FoundationDB integration",
-  "guid": "ed46c9de-3a62-46f0-98a6-19344746dd42",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "public_title": "FoundationDB",
-  "categories": [
-    "data store",
-    "log collection"
-  ],
-  "type": "check",
-  "is_public": true,
-  "integration_id": "foundationdb",
+  "manifest_version": "2.0.0",
+  "app_uuid": "0ab23627-c6f5-4ec5-b42c-43b85dc26445",
+  "app_id": "foundationdb",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "FoundationDB integration",
+    "title": "FoundationDB",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Data Store",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "FoundationDB",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "foundationdb.",
+        "check": [
+          "foundationdb.processes",
+          "foundationdb.instances"
+        ],
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
     },
     "dashboards": {
       "FoundationDB Latency Probe": "assets/dashboards/foundationdb_latency_probe.json",
@@ -50,9 +68,6 @@
       "errors": "assets/saved_views/errors.json",
       "errors_and_strong_warnings": "assets/saved_views/errors_and_strong_warnings.json",
       "all": "assets/saved_views/all.json"
-    },
-    "service_checks": "assets/service_checks.json",
-    "logs": {},
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

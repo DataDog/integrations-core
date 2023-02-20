@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import json
 import pprint
 
 import pytest
@@ -23,7 +24,8 @@ def get_events(aggregator):
 
 
 def assert_metadata_events(aggregator, events):
-    assert events == get_events(aggregator)
+    actual_events = get_events(aggregator)
+    assert events == actual_events, "ACTUAL EVENTS: " + json.dumps(actual_events, indent=4)
 
 
 def assert_device_metadata(aggregator, device_metadata):
@@ -144,6 +146,9 @@ def test_e2e_core_metadata_f5(dd_agent_check):
                     u'name': u'/Common/socks-tunnel',
                     u'oper_status': 4,
                 },
+            ],
+            "ip_addresses": [
+                {"interface_id": "default:{}:32".format(device_ip), "ip_address": "10.164.0.51", "prefixlen": 32}
             ],
             u'namespace': u'default',
             u'subnet': u'',
@@ -758,7 +763,7 @@ def test_e2e_core_metadata_checkpoint_firewall(dd_agent_check):
     device_ip = instance['ip_address']
 
     device = {
-        'description': 'Linux gw-af4bd9 3.10.0-957.21.3cpx86_64 #1 SMP Tue Jan 28 17:26:12 IST 2020 x86_64',
+        'description': 'Linux host1 3.10.0-957.21.3cpx86_64 #1 SMP Tue Jan 28 17:26:12 IST 2020 x86_64',
         'id': 'default:' + device_ip,
         'id_tags': [
             'device_namespace:default',
@@ -910,3 +915,53 @@ def test_e2e_core_metadata_isilon(dd_agent_check):
         'version': '8.2.0.0',
     }
     assert_device_metadata(aggregator, device)
+
+
+def test_e2e_core_metadata_aos_lldp(dd_agent_check):
+    config = common.generate_container_instance_config([])
+    instance = config['instances'][0]
+    instance.update(
+        {
+            'community_string': 'aos-lldp',
+            'loader': 'core',
+            'collect_topology': True,
+        }
+    )
+
+    aggregator = dd_agent_check(config, rate=False)
+
+    device_ip = instance['ip_address']
+    device_id = u'default:' + device_ip
+
+    # CHANGE
+    topology_link1 = {
+        'id': device_id + ':1.216',
+        'source_type': 'lldp',
+        "local": {
+            "device": {'dd_id': device_id},
+            'interface': {'dd_id': device_id + ':1', 'id': 'e1'},
+        },
+        "remote": {
+            "device": {"id": "00:80:9f:85:78:8e", "id_type": "mac_address"},
+            "interface": {"id": "00:80:9f:85:78:8e", "id_type": "mac_address"},
+        },
+    }
+    topology_link2 = {
+        'id': device_id + ':11.217',
+        'source_type': 'lldp',
+        "local": {
+            "device": {'dd_id': device_id},
+            'interface': {'dd_id': device_id + ':11', 'id': 'e11'},
+        },
+        "remote": {
+            "device": {"id": "00:80:9f:86:0d:d8", "id_type": "mac_address"},
+            "interface": {"id": "00:80:9f:86:0d:d8", "id_type": "mac_address"},
+        },
+    }
+    events = get_events(aggregator)
+
+    print("TOPOLOGY LINKS: " + json.dumps(events[0]['links'], indent=4))
+
+    assert events[0]['links'][0] == topology_link1
+    assert events[0]['links'][1] == topology_link2
+    assert len(events[0]['links']) == 13

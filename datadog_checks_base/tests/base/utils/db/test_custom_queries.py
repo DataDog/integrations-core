@@ -7,8 +7,6 @@ from datadog_checks.base import AgentCheck
 
 from .common import create_query_manager, mock_executor
 
-pytestmark = pytest.mark.db
-
 
 class TestCustomQueries:
     def test_instance(self, aggregator):

@@ -1,54 +1,69 @@
 {
-  "categories": [
-    "log collection",
-    "processing",
-    "messaging",
-    "autodiscovery"
-  ],
-  "creates_events": false,
-  "display_name": "ActiveMQ",
-  "guid": "496df16d-5ad0-438c-aa2a-b8ba8ee3ae05",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "activemq.",
-  "metric_to_check": [
-      "activemq.queue.size",
-      "activemq.artemis.queue.message_count"
-  ],
-  "name": "activemq",
-  "process_signatures": [
-    "activemq"
-  ],
-  "public_title": "Datadog-ActiveMQ Integration",
-  "short_description": "Collect metrics for brokers and queues, producers and consumers, and more.",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "type": "check",
-  "integration_id": "activemq",
+  "manifest_version": "2.0.0",
+  "app_uuid": "ab0b15e8-b7ae-4570-bde2-433a079cdb83",
+  "app_id": "activemq",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Collect metrics for brokers and queues, producers and consumers, and more.",
+    "title": "ActiveMQ",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Log Collection",
+      "Category::Processing",
+      "Category::Messaging"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
-    },
-    "monitors": {
-      "[ActiveMQ Artemis] High unrouted messages": "assets/recommended_monitors/activemq_artemis_unrouted_messages.json",
-      "[ActiveMQ Artemis] High disk store usage": "assets/recommended_monitors/activemq_artemis_high_disk_store.json"
+    "integration": {
+      "source_type_name": "ActiveMQ",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "activemq.",
+        "check": [
+          "activemq.queue.size",
+          "activemq.artemis.queue.message_count"
+        ],
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      },
+      "process_signatures": [
+        "activemq"
+      ]
     },
     "dashboards": {
       "activemq": "assets/dashboards/activemq_dashboard.json",
       "artemis": "assets/dashboards/artemis_dashboard.json"
     },
-    "service_checks": "assets/service_checks.json",
-    "logs": {
-      "source": "activemq"
+    "monitors": {
+      "[ActiveMQ Artemis] High unrouted messages": "assets/recommended_monitors/activemq_artemis_unrouted_messages.json",
+      "[ActiveMQ Artemis] High disk store usage": "assets/recommended_monitors/activemq_artemis_high_disk_store.json"
     },
-    "metrics_metadata": "metadata.csv",
     "saved_views": {
       "activemq_processes": "assets/saved_views/activemq_processes.json"
+    },
+    "logs": {
+      "source": "activemq"
     }
   }
 }

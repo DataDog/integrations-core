@@ -10,6 +10,7 @@ import mock
 import pytest
 
 from datadog_checks.kafka_consumer import KafkaCheck
+from datadog_checks.kafka_consumer.kafka_consumer import OAuthTokenProvider
 from datadog_checks.kafka_consumer.legacy_0_10_2 import LegacyKafkaCheck_0_10_2
 from datadog_checks.kafka_consumer.new_kafka_consumer import NewKafkaConsumerCheck
 
@@ -106,6 +107,29 @@ def test_tls_config_ok(kafka_instance_tls):
             assert kafka_consumer_check.create_kafka_client is not None
 
 
+@pytest.mark.unit
+def test_oauth_token_client_config(kafka_instance):
+    instance = copy.deepcopy(kafka_instance)
+    instance['kafka_client_api_version'] = "0.10.2"
+    instance['security_protocol'] = "SASL_PLAINTEXT"
+    instance['sasl_mechanism'] = "OAUTHBEARER"
+    instance['sasl_oauth_token_provider'] = {
+        "url": "http://fake.url",
+        "client_id": "id",
+        "client_secret": "secret",
+    }
+
+    kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [instance])
+    client = kafka_consumer_check.create_kafka_client()
+
+    assert client.config['security_protocol'] == 'SASL_PLAINTEXT'
+    assert client.config['sasl_mechanism'] == 'OAUTHBEARER'
+    assert isinstance(client.config['sasl_oauth_token_provider'], OAuthTokenProvider)
+    assert client.config['sasl_oauth_token_provider'].reader._client_id == "id"
+    assert client.config['sasl_oauth_token_provider'].reader._client_secret == "secret"
+    assert client.config['sasl_oauth_token_provider'].reader._url == "http://fake.url"
+
+
 @pytest.mark.parametrize(
     'extra_config, expected_http_kwargs',
     [
@@ -134,6 +158,19 @@ def test_tls_config_legacy(extra_config, expected_http_kwargs, kafka_instance):
     mocked_read_persistent_cache,
 )
 @mock.patch('datadog_checks.kafka_consumer.new_kafka_consumer.time', mocked_time)
+def test_data_streams_enabled(aggregator, kafka_instance, dd_run_check):
+    """
+    Testing Kafka_consumer check.
+    """
+    instance = copy.deepcopy(kafka_instance)
+    instance['data_streams_enabled'] = True
+    kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [instance])
+    dd_run_check(kafka_consumer_check)
+    assert_check_kafka(aggregator, instance['consumer_groups'], data_streams_enabled=True)
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
 def test_check_kafka(aggregator, kafka_instance, dd_run_check):
     """
     Testing Kafka_consumer check.
@@ -169,10 +206,10 @@ def test_check_kafka_metrics_limit(aggregator, kafka_instance, dd_run_check):
 @pytest.mark.e2e
 def test_e2e(dd_agent_check, kafka_instance):
     aggregator = dd_agent_check(kafka_instance)
-    assert_check_kafka(aggregator, kafka_instance['consumer_groups'], e2e=True)
+    assert_check_kafka(aggregator, kafka_instance['consumer_groups'])
 
 
-def assert_check_kafka(aggregator, consumer_groups, e2e=False):
+def assert_check_kafka(aggregator, consumer_groups, data_streams_enabled=False):
     for name, consumer_group in consumer_groups.items():
         for topic, partitions in consumer_group.items():
             for partition in partitions:
@@ -181,7 +218,7 @@ def assert_check_kafka(aggregator, consumer_groups, e2e=False):
                     aggregator.assert_metric(mname, tags=tags, at_least=1)
                 for mname in CONSUMER_METRICS:
                     aggregator.assert_metric(mname, tags=tags + ["consumer_group:{}".format(name)], at_least=1)
-    if not is_legacy_check() and not e2e:
+    if not is_legacy_check() and data_streams_enabled:
         # in the e2e test, Kafka is not actively receiving data. So we never populate the broker
         # timestamps with more than one timestamp. So we can't interpolate to get the consumer
         # timestamp.
@@ -206,11 +243,6 @@ def test_consumer_config_error(caplog, dd_run_check):
 @pytest.mark.skipif(is_legacy_check(), reason="This test does not apply to the legacy check.")
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-@mock.patch(
-    'datadog_checks.kafka_consumer.new_kafka_consumer.NewKafkaConsumerCheck._read_persistent_cache',
-    mocked_read_persistent_cache,
-)
-@mock.patch('datadog_checks.kafka_consumer.new_kafka_consumer.time', mocked_time)
 def test_no_topics(aggregator, kafka_instance, dd_run_check):
     kafka_instance['consumer_groups'] = {'my_consumer': {}}
     kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [kafka_instance])
@@ -221,11 +253,6 @@ def test_no_topics(aggregator, kafka_instance, dd_run_check):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-@mock.patch(
-    'datadog_checks.kafka_consumer.new_kafka_consumer.NewKafkaConsumerCheck._read_persistent_cache',
-    mocked_read_persistent_cache,
-)
-@mock.patch('datadog_checks.kafka_consumer.new_kafka_consumer.time', mocked_time)
 def test_no_partitions(aggregator, kafka_instance, dd_run_check):
     kafka_instance['consumer_groups'] = {'my_consumer': {'marvel': []}}
     kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [kafka_instance])

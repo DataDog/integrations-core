@@ -7,7 +7,7 @@ import yaml
 from ....fs import file_exists, path_join, read_file, write_file
 from ...constants import get_root
 from ...testing import coverage_sources
-from ...utils import code_coverage_enabled, get_display_name, get_testable_checks
+from ...utils import code_coverage_enabled, get_display_name, get_testable_checks, get_valid_integrations
 from ..console import (
     CONTEXT_SETTINGS,
     abort,
@@ -23,6 +23,7 @@ REPOS = {
     'core': {
         'jobs_definition_relative_path': '.azure-pipelines/templates/test-all-checks.yml',
         'codecov_config_relative_path': '.codecov.yml',
+        'pr_labels_config_relative_path': '.github/workflows/config/labeler.yml',
         'display_name_overrides': {
             'datadog_checks_base': 'Datadog Checks Base',
             'datadog_checks_dev': 'Datadog Checks Dev',
@@ -391,6 +392,109 @@ def validate_coverage_flags(fix, repo_data, testable_checks, cached_display_name
         echo_success(f'Successfully fixed {codecov_config_relative_path}')
 
 
+def validate_integration_pr_labels(fix, repo_data, valid_integrations):
+    pr_labels_config_relative_path = repo_data.get('pr_labels_config_relative_path')
+    if not pr_labels_config_relative_path:
+        echo_info("Skipping since PR Labels config path isn't defined")
+        return
+
+    pr_labels_config_path = path_join(get_root(), *pr_labels_config_relative_path.split('/'))
+    if not file_exists(pr_labels_config_path):
+        abort('Unable to find the PR Labels config file')
+
+    pr_labels_config = yaml.safe_load(read_file(pr_labels_config_path))
+
+    defined_checks = set()
+    success = True
+    fixed = False
+    display_queue = []
+
+    for label in pr_labels_config:
+        if label.startswith('integration'):
+            check_name = label[12:]
+            defined_checks.add(check_name)
+            if check_name not in valid_integrations:
+                success = False
+                message = 'Unknown check label `{}` found in PR labels config'.format(label)
+                annotate_error(pr_labels_config_path, message)
+                display_queue.append((echo_failure, message))
+
+    # Check if valid integration has a label
+    for check_name in valid_integrations:
+        integration_label = "integration/{}".format(check_name)
+        if integration_label not in pr_labels_config:
+            success = False
+            message = 'Check `{}` does not have an integration PR label'.format(check_name)
+            annotate_error(pr_labels_config_path, message)
+            display_queue.append((echo_failure, message))
+
+        # Check if label config is properly configured
+        integration_label_config = pr_labels_config.get(integration_label)
+        if integration_label_config != ['{}/**/*'.format(check_name)]:
+            success = False
+            message = 'Integration PR label `{}` is not properly configured: `{}`'.format(
+                integration_label, integration_label_config
+            )
+            annotate_error(pr_labels_config_path, message)
+            display_queue.append((echo_failure, message))
+            if fix:
+                fixed = True
+                success = True
+                echo_warning(message)
+                if check_name in defined_checks:
+                    defined_checks.remove(check_name)
+
+    # Check for any unknown integrations that may have been defined manually
+    unknown_checks = defined_checks - valid_integrations
+
+    if unknown_checks:
+        num_unknown_checks = len(unknown_checks)
+        message = 'PR labels config has {} unknown label{}'.format(
+            num_unknown_checks, 's' if num_unknown_checks > 1 else ''
+        )
+        if fix:
+            fixed = True
+            success = True
+            echo_warning(message)
+            for unknown_check in unknown_checks:
+                pr_labels_config.pop('integration/{}'.format(unknown_check))
+
+    # Check for any integrations that are missing a label
+    missing_checks = valid_integrations - defined_checks
+
+    if missing_checks:
+        num_missing_checks = len(missing_checks)
+        message = 'PR labels config has {} missing or misconfigured label{}'.format(
+            num_missing_checks, 's' if num_missing_checks > 1 else ''
+        )
+        if fix:
+            fixed = True
+            success = True
+            echo_warning(message)
+            for check in missing_checks:
+                integration_label = 'integration/{}'.format(check)
+                integration_label_config = {integration_label: ['{}/**/*'.format(check)]}
+                pr_labels_config.update(integration_label_config)
+                echo_success(
+                    'Set integration `{}` PR label to `{}` with configuration: `{}`'.format(
+                        check, integration_label, integration_label_config[integration_label]
+                    )
+                )
+
+    if not success:
+        message = 'Try running `ddev validate ci --fix`'
+        echo_info(message)
+        display_queue.append((echo_failure, message))
+        for func, message in display_queue:
+            func(message)
+        annotate_display_queue(pr_labels_config_path, display_queue)
+        abort()
+    elif fixed:
+        output = yaml.safe_dump(pr_labels_config, default_flow_style=False, sort_keys=True)
+        write_file(pr_labels_config_path, output)
+        echo_success('Successfully fixed {}'.format(pr_labels_config_relative_path))
+
+
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate CI infrastructure configuration')
 @click.option('--fix', is_flag=True, help='Attempt to fix errors')
 @click.pass_context
@@ -404,10 +508,18 @@ def ci(ctx, fix):
     testable_checks = get_testable_checks()
     cached_display_names = {}
 
+    valid_integrations = get_valid_integrations()
+    # Remove this when we remove the `datadog_checks_tests_helper` package
+    valid_integrations.add('datadog_checks_tests_helper')
+
     echo_info("Validating CI Configuration...")
     validate_master_jobs(fix, repo_data, testable_checks, cached_display_names)
     echo_success("Success", nl=True)
 
     echo_info("Validating Code Coverage Configuration...")
     validate_coverage_flags(fix, repo_data, testable_checks, cached_display_names)
+    echo_success("Success", nl=True)
+
+    echo_info("Validating Integration PR Labels Configuration...")
+    validate_integration_pr_labels(fix, repo_data, valid_integrations)
     echo_success("Success", nl=True)

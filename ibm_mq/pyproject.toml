@@ -1,7 +1,8 @@
 [build-system]
 requires = [
     "hatchling>=0.11.2",
-    "setuptools<61",
+    "setuptools>=66; python_version > '3.0'",
+    "setuptools; python_version < '3.0'",
 ]
 build-backend = "hatchling.build"
 
@@ -9,7 +10,6 @@ build-backend = "hatchling.build"
 name = "datadog-ibm-mq"
 description = "The IBM MQ check"
 readme = "README.md"
-license = {text = "BSD-3-Clause"}
 keywords = [
     "datadog",
     "datadog agent",
@@ -27,17 +27,22 @@ classifiers = [
     "Programming Language :: Python :: 2.7",
     "Programming Language :: Python :: 3.8",
     "Topic :: System :: Monitoring",
+    "Private :: Do Not Upload",
 ]
 dependencies = [
-    "datadog-checks-base>=25.1.0",
+    "datadog-checks-base>=27.4.0",
 ]
 dynamic = [
     "version",
 ]
 
+[project.license]
+text = "BSD-3-Clause"
+
 [project.optional-dependencies]
 deps = [
-    "pymqi==1.12.0",
+    "psutil==5.9.0",
+    "pymqi==1.12.8; sys_platform != 'darwin' or platform_machine != 'arm64'",
 ]
 
 [project.urls]
@@ -51,8 +56,6 @@ include = [
     "/datadog_checks",
     "/tests",
     "/manifest.json",
-    "/requirements-dev.txt",
-    "/tox.ini",
 ]
 
 [tool.hatch.build.targets.wheel]

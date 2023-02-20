@@ -1,9 +1,9 @@
+# (C) Datadog, Inc. 2021-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
 from datadog_checks.envoy.metrics import METRIC_PREFIX, METRIC_TREE, METRICS
 from datadog_checks.envoy.utils import make_metric_tree
-
-from .common import requires_legacy_environment
-
-pytestmark = [requires_legacy_environment]
 
 
 def test_metric_prefix():

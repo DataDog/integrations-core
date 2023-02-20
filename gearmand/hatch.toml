@@ -1,0 +1,17 @@
+[env.collectors.datadog-checks]
+
+[[envs.default.matrix]]
+python = ["2.7", "3.8"]
+version = ["1.0", "1.1"]
+
+[envs.default.overrides]
+matrix.version.env-vars = [
+  { key = "GEARMAND_VERSION", value = "1.0.6", if = ["1.0"] },
+  { key = "DOCKER_IMAGE", value = "kendu/gearman", if = ["1.0"] },
+  # TODO `latest` is the only tag available and is 6 years old. Find another image and pin it.
+  { key = "DOCKER_TAG", value = "latest", if = ["1.0"] },
+
+  { key = "GEARMAND_VERSION", value = "1.1.18", if = ["1.1"] },
+  { key = "DOCKER_IMAGE", value = "artefactual/gearmand", if = ["1.1"] },
+  { key = "DOCKER_TAG", value = "1.1.18-alpine", if = ["1.1"] },
+]

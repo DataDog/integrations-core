@@ -5,6 +5,7 @@ import pytest
 import requests
 
 from datadog_checks.dev import docker_run
+from datadog_checks.dev.conditions import CheckDockerLogs
 from datadog_checks.twemproxy import Twemproxy
 
 from . import common
@@ -19,14 +20,14 @@ def setup_post_data():
 
 @pytest.fixture(scope="session")
 def dd_environment():
-    """
-    Start a cluster with one master, one replica and one unhealthy replica and
-    stop it after the tests are done.
-    If there's any problem executing `docker compose`, let the exception bubble
-    up.
-    """
-    with docker_run(common.COMPOSE_FILE, service_name="etcd0", conditions=[setup_post_data]):
-        with docker_run(common.COMPOSE_FILE, log_patterns="twemproxy entered RUNNING state", mount_logs=True):
+    with docker_run(
+        common.COMPOSE_FILE,
+        service_name="etcd0",
+        conditions=[CheckDockerLogs(common.COMPOSE_FILE, 'Ready to accept connections'), setup_post_data],
+        mount_logs=True,
+        attempts=2,
+    ):
+        with docker_run(common.COMPOSE_FILE, log_patterns="listening on stats server", attempts=2):
             yield common.INSTANCE
 
 

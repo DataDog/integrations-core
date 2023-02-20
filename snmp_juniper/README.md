@@ -35,7 +35,12 @@ Additional helpful documentation, links, and articles:
 - [Monitor SNMP with Datadog][3]
 - [Monitor Juniper network devices with Datadog][4]
 
+## Troubleshooting
+
+Need help? Contact [Datadog support][5].
+
 [1]: https://docs.datadoghq.com/network_monitoring/devices/data/
 [2]: https://docs.datadoghq.com/network_monitoring/devices/setup/
 [3]: https://www.datadoghq.com/blog/monitor-snmp-with-datadog/
 [4]: https://www.datadoghq.com/blog/monitor-juniper-network-devices-with-datadog/
+[5]: https://docs.datadoghq.com/help/

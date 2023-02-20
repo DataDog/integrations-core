@@ -11,7 +11,7 @@ from os import environ
 
 import mock
 import pytest
-from pkg_resources import parse_version
+from packaging.version import parse as parse_version
 
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
@@ -149,7 +149,7 @@ def test_statement_metrics(
 
     assert row['digest']
     assert row['schema_name'] == default_schema
-    assert row['digest_text'].strip() == query.strip()[0:200]
+    assert row['digest_text'].strip() == query.strip()
 
     for col in statements.METRICS_COLUMNS:
         assert type(row[col]) in (float, int)
@@ -287,10 +287,6 @@ def test_statement_metrics_cloud_metadata(aggregator, dd_run_check, dbm_instance
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-@pytest.mark.parametrize(
-    "events_statements_table",
-    ["events_statements_history_long"],
-)
 @pytest.mark.parametrize("explain_strategy", ['PROCEDURE', 'FQ_PROCEDURE', 'STATEMENT', None])
 @pytest.mark.parametrize(
     "schema,statement,expected_collection_errors,expected_statement_truncated",
@@ -347,7 +343,6 @@ def test_statement_samples_collect(
     dd_run_check,
     dbm_instance,
     bob_conn,
-    events_statements_table,
     explain_strategy,
     schema,
     statement,
@@ -361,8 +356,6 @@ def test_statement_samples_collect(
     caplog.set_level(logging.DEBUG, logger="datadog_checks")
     caplog.set_level(logging.DEBUG, logger="tests.test_mysql")
 
-    # try to collect a sample from all supported events_statements tables using all possible strategies
-    dbm_instance['query_samples']['events_statements_table'] = events_statements_table
     mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
     if explain_strategy:
         mysql_check._statement_samples._preferred_explain_strategies = [explain_strategy]
@@ -476,6 +469,9 @@ def test_statement_samples_collect(
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_missing_explain_procedure(dbm_instance, dd_run_check, aggregator, statement, schema, expected_warnings):
+    # This feature is being deprecated, it's disabled here because otherwise this warning gets surfaced before the
+    # explain procedure warning.
+    dbm_instance['options']['extra_performance_metrics'] = False
     # Disable query samples to avoid interference from query samples getting picked up from db and triggering
     # explain plans
     dbm_instance['query_samples']['enabled'] = False
@@ -540,7 +536,9 @@ def test_performance_schema_disabled(dbm_instance, dd_run_check):
         ),
     ],
 )
-def test_statement_metadata(aggregator, dd_run_check, dbm_instance, datadog_agent, metadata, expected_metadata_payload):
+def test_statement_metadata(
+    aggregator, dd_run_check, dbm_instance, datadog_agent, metadata, expected_metadata_payload, root_conn
+):
     mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
 
     test_query = '''
@@ -556,9 +554,8 @@ def test_statement_metadata(aggregator, dd_run_check, dbm_instance, datadog_agen
         return json.dumps({'query': query, 'metadata': metadata})
 
     def run_query(q):
-        with mysql_check._connect() as db:
-            with closing(db.cursor()) as cursor:
-                cursor.execute(q)
+        with closing(root_conn.cursor()) as cursor:
+            cursor.execute(q)
 
     # Execute the query with the mocked obfuscate_sql. The result should produce an event payload with the metadata.
     with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
@@ -652,8 +649,6 @@ def test_statement_samples_failed_explain_handling(
     total_error_count,
     db_error_count,
 ):
-    # pin the table we use for consistency
-    dbm_instance['query_samples']['events_statements_table'] = "events_statements_history_long"
     mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
 
     dd_run_check(mysql_check)
@@ -707,8 +702,6 @@ def test_statement_samples_unique_plans_rate_limits(aggregator, dd_run_check, bo
     # test unique sample ingestion rate limiting
     cache_max_size = 20
     dbm_instance['query_samples']['run_sync'] = True
-    # fix the table to 'events_statements_current' to ensure we don't pull in historical queries from other tests
-    dbm_instance['query_samples']['events_statements_table'] = 'events_statements_current'
     dbm_instance['query_samples']['seen_samples_cache_maxsize'] = cache_max_size
     # samples_per_hour_per_query set very low so that within this test we will have at most one sample per
     # (query, plan)
@@ -813,22 +806,7 @@ def test_async_job_enabled(dd_run_check, dbm_instance, statement_samples_enabled
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 @mock.patch.dict('os.environ', {'DDEV_SKIP_GENERIC_TAGS_CHECK': 'true'})
-def test_statement_samples_max_per_digest(dd_run_check, dbm_instance):
-    # clear out any events from previous test runs
-    dbm_instance['query_samples']['events_statements_table'] = 'events_statements_history_long'
-    mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
-    for _ in range(3):
-        dd_run_check(mysql_check)
-    rows = mysql_check._statement_samples._get_new_events_statements('events_statements_history_long', 1000)
-    count_by_digest = Counter(r['digest'] for r in rows)
-    for _, count in count_by_digest.items():
-        assert count == 1, "we should be reading exactly one row per digest out of the database"
-
-
-@pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
-@mock.patch.dict('os.environ', {'DDEV_SKIP_GENERIC_TAGS_CHECK': 'true'})
-def test_statement_samples_invalid_explain_procedure(aggregator, dd_run_check, dbm_instance):
+def test_statement_samples_invalid_explain_procedure(aggregator, dd_run_check, dbm_instance, bob_conn):
     dbm_instance['query_samples']['explain_procedure'] = 'hello'
     mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
     dd_run_check(mysql_check)

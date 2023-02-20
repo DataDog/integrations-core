@@ -23,7 +23,7 @@ def test_default_options():
     assert check._use_mount is False
     assert check._all_partitions is False
     assert check._file_system_include is None
-    assert check._file_system_exclude == re.compile('iso9660$', re.I)
+    assert check._file_system_exclude == re.compile('iso9660$|tracefs$', re.I)
     assert check._device_include is None
     assert check._device_exclude is None
     assert check._mount_point_include is None
@@ -153,20 +153,11 @@ def test_device_tagging(aggregator, gauge_metrics, rate_metrics, count_metrics, 
         'device_label:mylab',
     ]
 
-    for name, value in iteritems(gauge_metrics):
-        aggregator.assert_metric(name, value=value, tags=tags)
-
-    for name, value in chain(iteritems(rate_metrics), iteritems(count_metrics)):
+    for name, value in chain(iteritems(gauge_metrics), iteritems(rate_metrics), iteritems(count_metrics)):
         aggregator.assert_metric(
             name,
             value=value,
-            tags=[
-                'device:{}'.format(DEFAULT_DEVICE_NAME),
-                'device_name:{}'.format(DEFAULT_DEVICE_BASE_NAME),
-                'optional:tags1',
-                'label:mylab',
-                'device_label:mylab',
-            ],
+            tags=tags,
         )
 
     aggregator.assert_all_metrics_covered()

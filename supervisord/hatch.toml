@@ -1,0 +1,10 @@
+[env.collectors.datadog-checks]
+
+[[envs.default.matrix]]
+python = ["2.7", "3.8"]
+version = ["3.3"]
+
+[envs.default.overrides]
+matrix.version.env-vars = [
+  { key = "SUPERVISOR_VERSION", value = "3_3_3", if = ["3.3"] },
+]

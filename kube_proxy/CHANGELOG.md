@@ -1,6 +1,18 @@
 # CHANGELOG - Kube_proxy
 
-## 5.2.0 / 2022-05-15
+## 6.0.1 / 2023-01-20
+
+* [Fixed] Fix setting of default health URL for kube_dns, kube_proxy, kube_metrics_server health checks. See [#13571](https://github.com/DataDog/integrations-core/pull/13571).
+
+## 6.0.0 / 2022-12-09 / Agent 7.42.0
+
+* [Changed] Add health check to kube_* integrations. See [#10668](https://github.com/DataDog/integrations-core/pull/10668).
+
+## 5.3.0 / 2022-09-16 / Agent 7.40.0
+
+* [Added] Update HTTP config spec templates. See [#12890](https://github.com/DataDog/integrations-core/pull/12890).
+
+## 5.2.0 / 2022-05-15 / Agent 7.37.0
 
 * [Added] Support dynamic bearer tokens (Bound Service Account Token Volume). See [#11915](https://github.com/DataDog/integrations-core/pull/11915).
 

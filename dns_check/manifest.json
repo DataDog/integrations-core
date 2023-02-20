@@ -1,38 +1,48 @@
 {
-  "aliases": [
-    "/integrations/dnscheck"
-  ],
-  "categories": [
-    "network",
-    "web"
-  ],
-  "creates_events": false,
-  "display_name": "DNS",
-  "guid": "31e4c84c-fc4b-4cd4-97ed-0331bf4e2023",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "dns.",
-  "metric_to_check": "dns.response_time",
-  "name": "dns_check",
-  "public_title": "Datadog-DNS Check Integration",
-  "short_description": "Monitor the resolvablity of and lookup times for any DNS record.",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "type": "check",
-  "integration_id": "dns",
+  "manifest_version": "2.0.0",
+  "app_uuid": "a21dc4ff-8b3f-427e-a5cc-17790a36b147",
+  "app_id": "dns",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor the resolvablity of and lookup times for any DNS record.",
+    "title": "DNS Check",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Network",
+      "Category::Web"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
-    },
-    "monitors": {},
-    "dashboards": {},
-    "service_checks": "assets/service_checks.json",
-    "logs": {},
-    "metrics_metadata": "metadata.csv"
+    "integration": {
+      "source_type_name": "DNS",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "dns.",
+        "check": "dns.response_time",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    }
   }
 }

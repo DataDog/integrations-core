@@ -1,0 +1,45 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "13a88901-3d20-43b3-9a3c-3b20b2adf1cc",
+  "app_id": "iam-access-analyzer",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "AWS IAM Access Analyzer identifies publicly accessible resources",
+    "title": "AWS IAM Access Analyzer",
+    "media": [],
+    "classifier_tags": [
+      "Category::Log Collection",
+      "Category::Security",
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "source_type_name": "AWS IAM Access Analyzer",
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "iam_access_analyzer.",
+        "check": [],
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {}
+}

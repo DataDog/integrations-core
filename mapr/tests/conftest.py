@@ -46,7 +46,7 @@ def mock_getconnection():
     def messages_iter():
         with open(os.path.join(common.HERE, 'fixtures', 'metrics.txt'), 'r') as f:
             for line in f:
-                msg = mock.MagicMock(error=lambda: None, value=lambda: line)
+                msg = mock.MagicMock(error=lambda: None, value=lambda line=line: line)
                 yield msg
             yield None
 

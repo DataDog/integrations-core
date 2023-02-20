@@ -1,6 +1,6 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
 system.disk.free,gauge,,byte,,The amount of disk space that is free.,1,system,disk free,
-system.disk.in_use,gauge,,fraction,,The amount of disk space in use as a fraction of the total.,-1,system,disk in use,
+system.disk.in_use,gauge,,percent,,The amount of disk space in use as a percent of the total.,-1,system,disk in use,
 system.disk.read_time,count,,millisecond,,The time in ms spent reading per device,0,system,disk read time,
 system.disk.read_time_pct,gauge,,percent,,Percent of time spent reading from disk.,0,system,disk read time pct,
 system.disk.total,gauge,,byte,,The total amount of disk space.,0,system,disk total,

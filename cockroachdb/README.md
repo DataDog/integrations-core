@@ -22,7 +22,7 @@ To configure this check for an Agent running on a host:
 
 ##### Metric collection
 
-1. Edit the `cockroachdb.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3] to start collecting your CockroachDB performance data. See the [sample cockroachdb.d/conf.yaml][4] for all available configuration options.
+1. Edit the `cockroachdb.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3] to start collecting your CockroachDB performance data. For a multi-node cluster, configure a separate check instance for each node. See the [sample cockroachdb.d/conf.yaml][4] for all available configuration options.
 
    ```yaml
    init_config:
@@ -77,7 +77,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][6]
 | -------------------- | -------------------------------------------------------- |
 | `<INTEGRATION_NAME>` | `cockroachdb`                                            |
 | `<INIT_CONFIG>`      | blank or `{}`                                            |
-| `<INSTANCE_CONFIG>`  | `{"prometheus_url":"http://%%host%%:8080/_status/vars"}` |
+| `<INSTANCE_CONFIG>`  | `{"openmetrics_endpoint":"http://%%host%%:8080/_status/vars"}` |
 
 ##### Log collection
 

@@ -1,35 +1,49 @@
 {
-  "categories": [
-    "monitoring",
-    "log collection"
-  ],
-  "creates_events": false,
-  "display_name": "Cacti",
-  "guid": "566466b0-1422-44ef-b14f-493a64e7b58a",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "cacti.",
-  "metric_to_check": "cacti.rrd.count",
-  "name": "cacti",
-  "public_title": "Datadog-Cacti Integration",
-  "short_description": "Forward your Cacti RRDs to Datadog for richer alerting and beautiful graphing.",
-  "support": "core",
-  "supported_os": [
-    "linux"
-  ],
-  "type": "check",
-  "integration_id": "cacti",
+  "manifest_version": "2.0.0",
+  "app_uuid": "b18f92f2-2aa5-435e-b04e-84ce3538fa2d",
+  "app_id": "cacti",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Forward your Cacti RRDs to Datadog for richer alerting and beautiful graphing.",
+    "title": "Cacti",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Category::Monitoring",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "Cacti",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "cacti.",
+        "check": "cacti.rrd.count",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
     },
-    "monitors": {},
-    "dashboards": {},
-    "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "cacti"
-    },
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

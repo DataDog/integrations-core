@@ -757,7 +757,7 @@
                 "title": "Connected Hosts",
                 "title_size": "16",
                 "title_align": "center",
-                "check": "confluentplatform.can_connect",
+                "check": "confluent.can_connect",
                 "grouping": "cluster",
                 "group_by": [],
                 "tags": [

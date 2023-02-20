@@ -58,6 +58,9 @@ METRICS = {
     # For Kubernetes >= 1.21
     # https://github.com/kubernetes/kubernetes/pull/100082
     'apiserver_storage_objects': 'storage_objects',
+    # For Kubernetes >= 1.22
+    # https://kubernetes.io/docs/reference/using-api/deprecation-policy/#rest-resources-aka-api-objects
+    'apiserver_requested_deprecated_apis': 'requested_deprecated_apis',
     # For Kubernetes >= 1.23
     # https://github.com/kubernetes/kubernetes/pull/104983
     'apiserver_storage_list_total': 'storage_list_total',
@@ -92,6 +95,9 @@ class KubeAPIServerMetricsCheck(OpenMetricsBaseCheck):
             'authenticated_user_requests': self.authenticated_user_requests,
             # metric added in kubernetes 1.15
             'apiserver_request_total': self.apiserver_request_total,
+            # For Kubernetes >= 1.24
+            # https://github.com/kubernetes/kubernetes/pull/107171
+            'apiserver_admission_webhook_fail_open_count': self.apiserver_admission_webhook_fail_open_count,
         }
         self.kube_apiserver_config = None
 
@@ -182,3 +188,6 @@ class KubeAPIServerMetricsCheck(OpenMetricsBaseCheck):
 
     def apiserver_request_terminations_total(self, metric, scraper_config):
         self.submit_as_gauge_and_monotonic_count('.apiserver_request_terminations_total', metric, scraper_config)
+
+    def apiserver_admission_webhook_fail_open_count(self, metric, scraper_config):
+        self.submit_as_gauge_and_monotonic_count('.apiserver_admission_webhook_fail_open_count', metric, scraper_config)

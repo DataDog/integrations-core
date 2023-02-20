@@ -1,41 +1,58 @@
 {
-  "categories": [
-    "cloud",
-    "web",
-    "log collection",
-    "autodiscovery"
-  ],
-  "creates_events": false,
-  "display_name": "Envoy",
-  "guid": "007f4e6c-ac88-411e-ad81-f0272539b5ff",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "envoy.",
-  "metric_to_check": "envoy.server.uptime",
-  "name": "envoy",
-  "public_title": "Datadog-Envoy Integration",
-  "short_description": "Envoy is an open source edge and service proxy",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "type": "check",
-  "integration_id": "envoy",
+  "manifest_version": "2.0.0",
+  "app_uuid": "49dc62d7-7e0c-4c46-b90f-dfd4d5c35d53",
+  "app_id": "envoy",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Envoy is an open source edge and service proxy",
+    "title": "Envoy",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Cloud",
+      "Category::Web",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "Envoy",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "envoy.",
+        "check": "envoy.server.uptime",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      },
+      "process_signatures": [
+        "envoy"
+      ]
     },
-    "monitors": {},
     "dashboards": {
       "Envoy - Overview": "assets/dashboards/envoy_overview.json"
     },
-    "service_checks": "assets/service_checks.json",
     "logs": {
       "source": "envoy"
-    },
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

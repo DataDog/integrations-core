@@ -1,36 +1,52 @@
 {
-  "categories": [
-    "data store",
-    "log collection",
-    "autodiscovery"
-  ],
-  "creates_events": false,
-  "display_name": "Cassandra",
-  "guid": "03ba454d-425c-4f61-9e9c-54682c3ebce5",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "cassandra.",
-  "metric_to_check": "cassandra.load.count",
-  "name": "cassandra",
-  "process_signatures": [
-    "java org.apache.cassandra.service.CassandraDaemon"
-  ],
-  "public_title": "Datadog-Cassandra Integration",
-  "short_description": "Track cluster performance, capacity, overall health, and much more.",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "type": "check",
-  "integration_id": "cassandra",
+  "manifest_version": "2.0.0",
+  "app_uuid": "a930364f-ac97-4483-92d6-5a982da7b1c0",
+  "app_id": "cassandra",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Track cluster performance, capacity, overall health, and much more.",
+    "title": "Cassandra",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Data Store",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "Cassandra",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "cassandra.",
+        "check": "cassandra.load.count",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      },
+      "process_signatures": [
+        "java org.apache.cassandra.service.CassandraDaemon"
+      ]
     },
-    "monitors": {},
     "dashboards": {
       "cassandra-overview": "assets/dashboards/cassandra_overview.json",
       "cassandra-read": "assets/dashboards/cassandra_read.json",
@@ -38,13 +54,11 @@
       "cassandra-write": "assets/dashboards/cassandra_write.json",
       "cassandra-overview-screenboard": "assets/dashboards/cassandra_overview_screenboard.json"
     },
-    "service_checks": "assets/service_checks.json",
-    "logs": {
-      "source": "cassandra"
-    },
-    "metrics_metadata": "metadata.csv",
     "saved_views": {
       "cassandra_processes": "assets/saved_views/cassandra_processes.json"
+    },
+    "logs": {
+      "source": "cassandra"
     }
   }
 }

@@ -7,14 +7,13 @@ import mock
 import pytest
 import requests
 
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.envoy import Envoy
 from datadog_checks.envoy.metrics import METRIC_PREFIX, METRICS
 
-from .common import ENVOY_VERSION, FLAVOR, HOST, INSTANCES, requires_legacy_environment
+from .common import ENVOY_VERSION, FLAVOR, HOST, INSTANCES
 
 CHECK_NAME = 'envoy'
-
-pytestmark = [requires_legacy_environment]
 
 
 @pytest.mark.integration
@@ -35,6 +34,12 @@ def test_success(aggregator, check, dd_run_check):
                 ), ('tags ' + str(expected_tags) + ' not found in ' + metric)
         metrics_collected += len(collected_metrics)
     assert metrics_collected >= 445
+
+    metadata_metrics = get_metadata_metrics()
+    # Metric that has a different type in legacy
+    metadata_metrics['envoy.cluster.upstream_cx_tx_bytes_total']['metric_type'] = 'count'
+
+    aggregator.assert_metrics_using_metadata(metadata_metrics)
 
 
 @pytest.mark.unit
@@ -128,15 +133,17 @@ def test_unknown(fixture_path, mock_http_response, dd_run_check, check):
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
-    'test_case, extra_config, expected_http_kwargs',
+    'extra_config, expected_http_kwargs',
     [
-        ("new auth config", {'username': 'new_foo', 'password': 'new_bar'}, {'auth': ('new_foo', 'new_bar')}),
-        ("legacy ssl config True", {'verify_ssl': True}, {'verify': True}),
-        ("legacy ssl config False", {'verify_ssl': False}, {'verify': False}),
-        ("legacy ssl config unset", {}, {'verify': True}),
+        pytest.param(
+            {'username': 'new_foo', 'password': 'new_bar'}, {'auth': ('new_foo', 'new_bar')}, id="new auth config"
+        ),
+        pytest.param({'verify_ssl': True}, {'verify': True}, id="legacy ssl config True"),
+        pytest.param({'verify_ssl': False}, {'verify': False}, id="legacy ssl config False"),
+        pytest.param({}, {'verify': True}, id="legacy ssl config unset"),
     ],
 )
-def test_config(test_case, extra_config, expected_http_kwargs, check, dd_run_check):
+def test_config(extra_config, expected_http_kwargs, check, dd_run_check):
     instance = deepcopy(INSTANCES['main'])
     instance.update(extra_config)
     check = check(instance)
@@ -247,7 +254,7 @@ def test_metadata_not_collected(datadog_agent, check):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_metadata_integration(aggregator, datadog_agent, check):
+def test_metadata_integration(datadog_agent, check):
     instance = INSTANCES['main']
     c = check(instance)
     c.check_id = 'test:123'

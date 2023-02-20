@@ -3,8 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import ssl
 from hashlib import sha256
+from struct import pack
 
-from cryptography.hazmat.backends import default_backend
 from cryptography.x509.base import load_der_x509_certificate
 from cryptography.x509.extensions import ExtensionNotFound
 from cryptography.x509.oid import AuthorityInformationAccessOID, ExtensionOID
@@ -92,7 +92,7 @@ class TLSRemoteCheck(object):
         # Load https://cryptography.io/en/latest/x509/reference/#cryptography.x509.Certificate
         try:
             self.log.debug('Deserializing peer certificate')
-            cert = load_der_x509_certificate(der_cert, default_backend())
+            cert = load_der_x509_certificate(der_cert)
             self.log.debug('Deserialized peer certificate: %s', cert)
             return cert, protocol_version
         except Exception as e:
@@ -109,6 +109,8 @@ class TLSRemoteCheck(object):
         try:
             self.log.debug('Checking that TLS service check can connect')
             sock = self.agent_check.create_connection()
+            if self.agent_check._start_tls:
+                self._switch_starttls(sock)
         except Exception as e:
             self.log.debug('Error occurred while connecting to socket: %s', str(e))
             self.agent_check.service_check(
@@ -120,10 +122,36 @@ class TLSRemoteCheck(object):
             self.agent_check.service_check(SERVICE_CHECK_CAN_CONNECT, self.agent_check.OK, tags=self.agent_check._tags)
         return sock
 
+    def _switch_starttls(self, sock):
+        protocol = self.agent_check._start_tls
+        if protocol == "postgres":
+            self.log.debug('Switching connection to encrypted for %s protocol', protocol)
+            version_ssl = pack('!I', 1234 << 16 | 5679)
+            length = pack('!I', 8)
+            packet = length + version_ssl
+
+            sock.sendall(packet)
+            data = self._read_n_bytes_from_socket(sock, 1)
+            if data != b'S':
+                raise Exception('Postgres endpoint does not support TLS')
+        else:
+            raise Exception('Unsupported starttls protocol: ' + protocol)
+
+    def _read_n_bytes_from_socket(self, sock, n):
+        buf = bytearray(n)
+        view = memoryview(buf)
+        while n:
+            nbytes = sock.recv_into(view, n)
+            view = view[nbytes:]  # slicing views is cheap
+            n -= nbytes
+        return buf
+
     def fetch_intermediate_certs(self):
         # TODO: prefer stdlib implementation when available, see https://bugs.python.org/issue18617
         try:
             sock = self.agent_check.create_connection()
+            if self.agent_check._start_tls:
+                self._switch_starttls(sock)
         except Exception as e:
             self.log.error('Error occurred while connecting to socket to discover intermediate certificates: %s', e)
             return
@@ -152,7 +180,7 @@ class TLSRemoteCheck(object):
         # https://tools.ietf.org/html/rfc3280#section-4.2.2.1
         # https://tools.ietf.org/html/rfc5280#section-5.2.7
         try:
-            cert = load_der_x509_certificate(der_cert, default_backend())
+            cert = load_der_x509_certificate(der_cert)
         except Exception as e:
             self.log.error('Error while deserializing peer certificate to discover intermediate certificates: %s', e)
             return

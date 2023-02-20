@@ -69,6 +69,9 @@ jobs:
     - checkName: arangodb
       displayName: ArangoDB
       os: linux
+    - checkName: argocd
+      displayName: ArgoCD
+      os: linux
     - checkName: aspdotnet
       displayName: ASP.NET
       os: windows
@@ -77,6 +80,9 @@ jobs:
       os: linux
     - checkName: azure_iot_edge
       displayName: Azure IoT Edge
+      os: linux
+    - checkName: boundary
+      displayName: Boundary
       os: linux
     - checkName: btrfs
       displayName: Btrfs
@@ -96,6 +102,9 @@ jobs:
     - checkName: ceph
       displayName: Ceph
       os: linux
+    - checkName: cert_manager
+      displayName: cert-manager
+      os: linux
     - checkName: cilium
       displayName: Cilium
       os: linux
@@ -110,6 +119,9 @@ jobs:
       os: linux
     - checkName: cloud_foundry_api
       displayName: Cloud Foundry API
+      os: linux
+    - checkName: cloudera
+      displayName: Cloudera
       os: linux
     - checkName: cockroachdb
       displayName: CockroachDB
@@ -134,6 +146,9 @@ jobs:
       os: linux
     - checkName: datadog_cluster_agent
       displayName: Datadog Cluster Agent
+      os: linux
+    - checkName: ddev
+      displayName: ddev
       os: linux
     - checkName: directory
       displayName: Directory
@@ -196,7 +211,7 @@ jobs:
       displayName: GlusterFS
       os: linux
     - checkName: go_expvar
-      displayName: Go-Expvar
+      displayName: Go Expvar
       os: linux
     - checkName: gunicorn
       displayName: Gunicorn
@@ -252,6 +267,9 @@ jobs:
     - checkName: iis
       displayName: IIS
       os: windows
+    - checkName: impala
+      displayName: Impala
+      os: linux
     - checkName: istio
       displayName: Istio
       os: linux

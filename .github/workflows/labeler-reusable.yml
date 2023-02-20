@@ -1,0 +1,22 @@
+name: Reusable Labeler Workflow
+
+on:
+  workflow_call:
+    secrets:
+      repo-token:
+        required: true
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Add labels
+        uses: actions/labeler@v4
+        with:
+          configuration-path: .github/workflows/config/labeler.yml
+          repo-token: "${{ secrets.repo-token }}"
+          sync-labels: ""   # workaround for sync-labels bug:
+                            # https://github.com/actions/labeler/issues/112#issuecomment-1000491676

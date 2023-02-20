@@ -1,3 +1,7 @@
+# (C) Datadog, Inc. 2022-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
 from codecs import open  # To use a consistent encoding
 from os import path
 
@@ -50,7 +54,7 @@ setup(
     long_description_content_type='text/markdown',
     keywords='datadog agent calico check',
     # The project's main homepage.
-    url='https://github.com/DataDog/integrations-extras',
+    url='https://github.com/DataDog/integrations-core',
     # Author details
     author='Max',
     author_email='max@galadrim.fr',

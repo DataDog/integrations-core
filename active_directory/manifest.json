@@ -1,42 +1,57 @@
 {
-  "categories": [
-    "os & system",
-    "log collection"
-  ],
-  "creates_events": false,
-  "description": "Collect and graph Microsoft Active Directory metrics",
-  "display_name": "Active Directory",
-  "guid": "ba667ff3-cf6a-458c-aa4b-1172f33de562",
-  "is_public": true,
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "metric_prefix": "active_directory.",
-  "metric_to_check": "active_directory.dra.inbound.objects.persec",
-  "name": "active_directory",
-  "public_title": "Datadog-Active Directory Integration",
-  "short_description": "Collect and graph Microsoft Active Directory metrics",
-  "support": "core",
-  "supported_os": [
-    "windows"
-  ],
-  "type": "check",
-  "integration_id": "active-directory",
+  "manifest_version": "2.0.0",
+  "app_uuid": "e03a0916-8708-4417-82e4-1f0c7bbee655",
+  "app_id": "active-directory",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Collect and graph Microsoft Active Directory metrics",
+    "title": "Active Directory",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Windows",
+      "Category::OS & System",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
-    },
-    "monitors": {
-      "[Active Directory] Elevated LDAP binding duration for host {{host.name}}":"assets/monitors/ldap_binding.json",
-      "[Active Directory] Anomalous number of sessions for connected LDAP clients for host: {{host.name}}":"assets/monitors/ldap_client_sessions.json",
-      "[Active Directory] Anomalous number of successful LDAP bindings for host: {{host.name}}":"assets/monitors/ldap_binding_successful.json"
+    "integration": {
+      "source_type_name": "Active Directory",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "active_directory.",
+        "check": "active_directory.dra.inbound.objects.persec",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
     },
     "dashboards": {
       "Active Directory": "assets/dashboards/active_directory.json"
     },
-    "service_checks": "assets/service_checks.json",
+    "monitors": {
+      "[Active Directory] Elevated LDAP binding duration for host {{host.name}}": "assets/monitors/ldap_binding.json",
+      "[Active Directory] Anomalous number of sessions for connected LDAP clients for host: {{host.name}}": "assets/monitors/ldap_client_sessions.json",
+      "[Active Directory] Anomalous number of successful LDAP bindings for host: {{host.name}}": "assets/monitors/ldap_binding_successful.json"
+    },
     "logs": {
       "source": "ruby"
-    },
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

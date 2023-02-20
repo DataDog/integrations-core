@@ -1,0 +1,14 @@
+# https://github.com/actions/labeler
+
+name: Community PR Labels
+on:
+  pull_request_target:
+    branches:
+      - master
+
+jobs:
+  labeler:
+    if: ${{ github.event.pull_request.head.repo.full_name != github.repository }} # only PRs from other repos
+    uses: ./.github/workflows/labeler-reusable.yml
+    secrets:
+      repo-token: "${{ secrets.DD_CHANGELOG_CHECK_TOKEN }}"

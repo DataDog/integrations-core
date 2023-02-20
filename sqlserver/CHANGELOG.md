@@ -1,6 +1,65 @@
 # CHANGELOG - sqlserver
 
-## 8.0.0 / 2022-05-15
+## 10.1.3 / 2023-02-01
+
+* [Fixed] Fix sqlserver.database.state not being sent for all databases. See [#13735](https://github.com/DataDog/integrations-core/pull/13735).
+
+## 10.1.2 / 2023-01-26
+
+* [Fixed] Bug Fix: Azure SQL DB database name tags properly applied on perf metrics. See [#13757](https://github.com/DataDog/integrations-core/pull/13757).
+
+## 10.1.1 / 2023-01-20
+
+* [Fixed] Update dependencies. See [#13726](https://github.com/DataDog/integrations-core/pull/13726).
+
+## 10.1.0 / 2022-12-09 / Agent 7.42.0
+
+* [Added] Add well formatted agent errors on common connection issues for SQL Server. See [#13436](https://github.com/DataDog/integrations-core/pull/13436).
+* [Added] Add procedure name on query metrics/events. See [#13484](https://github.com/DataDog/integrations-core/pull/13484).
+* [Fixed] Fix Query Metrics collection bug where long running queries were missed. See [#13335](https://github.com/DataDog/integrations-core/pull/13335).
+
+## 10.0.1 / 2022-12-02 / Agent 7.41.0
+
+* [Fixed] Revert "Fix exception thrown when database is null in config" as it was found to introduce a regression. See [#13446](https://github.com/DataDog/integrations-core/pull/13446).
+
+## 10.0.0 / 2022-10-28
+
+* [Added] Allow port signal value 0. See [#13135](https://github.com/DataDog/integrations-core/pull/13135).
+* [Added] Add Agent settings to log original unobfuscated strings. See [#12958](https://github.com/DataDog/integrations-core/pull/12958).
+* [Fixed] Fix exception thrown when database is null in config. See [#12882](https://github.com/DataDog/integrations-core/pull/12882).
+* [Fixed] Fix Query Metrics query to correct for over-inflated / incorrect SQL Server metrics . See [#13089](https://github.com/DataDog/integrations-core/pull/13089).
+* [Fixed] Always cast provided port to str. See [#13055](https://github.com/DataDog/integrations-core/pull/13055).
+* [Removed] Remove sqlserver tag truncation for metrics. See [#13211](https://github.com/DataDog/integrations-core/pull/13211).
+
+## 9.0.2 / 2022-10-14 / Agent 7.40.0
+
+* [Fixed] Fix Query Metrics query to correct for over-inflated / incorrect SQL Server metrics. See [#13123](https://github.com/DataDog/integrations-core/pull/13123).
+
+## 9.0.1 / 2022-10-10
+
+* [Fixed] Allow users to configure the port as a int or as a string. See [#13061](https://github.com/DataDog/integrations-core/pull/13061).
+
+## 9.0.0 / 2022-09-16
+
+* [Changed] Use statement_start_offset to extract SQL text being run from Procedure text. See [#12613](https://github.com/DataDog/integrations-core/pull/12613).
+
+## 8.1.0 / 2022-08-05 / Agent 7.39.0
+
+* [Added] Add AlwaysOn Availability Group replica status metric. See [#12494](https://github.com/DataDog/integrations-core/pull/12494).
+* [Fixed] Dependency updates. See [#12653](https://github.com/DataDog/integrations-core/pull/12653).
+* [Fixed] Check for port provided in config. See [#12610](https://github.com/DataDog/integrations-core/pull/12610).
+* [Fixed] Improve failed connection error messages. See [#12533](https://github.com/DataDog/integrations-core/pull/12533).
+* [Fixed] Fix documentation for GA DBM support. See [#12512](https://github.com/DataDog/integrations-core/pull/12512).
+* [Fixed] Support version specific AlwaysOn metrics. See [#12424](https://github.com/DataDog/integrations-core/pull/12424).
+* [Security] Bump `lxml` package. See [#12663](https://github.com/DataDog/integrations-core/pull/12663).
+
+## 8.0.1 / 2022-06-27 / Agent 7.38.0
+
+* [Fixed] Fix engine edition logic bug and simplify configuration for Azure SQL Database . See [#12397](https://github.com/DataDog/integrations-core/pull/12397).
+* [Fixed] Support virtual file stats on SQL Server 2012. See [#12094](https://github.com/DataDog/integrations-core/pull/12094).
+* [Fixed] Improve handling of encrypted stored procedures. See [#12060](https://github.com/DataDog/integrations-core/pull/12060).
+
+## 8.0.0 / 2022-05-15 / Agent 7.37.0
 
 * [Added] Add AlwaysOn metrics. See [#11979](https://github.com/DataDog/integrations-core/pull/11979).
 * [Added] sqlserver: Add option to keep aliases in sql server (`keep_sql_alias`). See [#12020](https://github.com/DataDog/integrations-core/pull/12020).
@@ -302,30 +361,30 @@
 
 ## 1.8.1 / 2019-01-04 / Agent 6.9.0
 
-* [Fixed] Bump pyodbc for python3.7 compatibility. See [#2801][1].
+* [Fixed] Bump pyodbc for python3.7 compatibility. See [#2801](https://github.com/DataDog/integrations-core/pull/2801).
 
 ## 1.8.0 / 2018-11-30 / Agent 6.8.0
 
-* [Added] Add linux as supported OS. See [#2614][2].
-* [Fixed] Additional debug logging when calling a stored procedure. See [#2151][3].
-* [Fixed] Use raw string literals when \ is present. See [#2465][4].
+* [Added] Add linux as supported OS. See [#2614](https://github.com/DataDog/integrations-core/pull/2614).
+* [Fixed] Additional debug logging when calling a stored procedure. See [#2151](https://github.com/DataDog/integrations-core/pull/2151).
+* [Fixed] Use raw string literals when \ is present. See [#2465](https://github.com/DataDog/integrations-core/pull/2465).
 
 ## 1.7.0 / 2018-10-12 / Agent 6.6.0
 
-* [Added] Pin pywin32 dependency. See [#2322][5].
+* [Added] Pin pywin32 dependency. See [#2322](https://github.com/DataDog/integrations-core/pull/2322).
 
 ## 1.6.0 / 2018-09-04 / Agent 6.5.0
 
-* [Added] Support higher query granularity. See [#2017][6].
-* [Added] Add ability to support (via configuration flag) the newer ADO provider. See [#1673][7].
-* [Fixed] Stop leaking db password when a connection is not in the pool. See [#2031][8].
-* [Fixed] Bump pyro4 and serpent dependencies. See [#2007][9].
-* [Fixed] Fix for case sensitivity in the `proc_type_mapping` dict.. See [#1860][10].
-* [Fixed] Add data files to the wheel package. See [#1727][11].
+* [Added] Support higher query granularity. See [#2017](https://github.com/DataDog/integrations-core/pull/2017).
+* [Added] Add ability to support (via configuration flag) the newer ADO provider. See [#1673](https://github.com/DataDog/integrations-core/pull/1673).
+* [Fixed] Stop leaking db password when a connection is not in the pool. See [#2031](https://github.com/DataDog/integrations-core/pull/2031).
+* [Fixed] Bump pyro4 and serpent dependencies. See [#2007](https://github.com/DataDog/integrations-core/pull/2007).
+* [Fixed] Fix for case sensitivity in the `proc_type_mapping` dict.. See [#1860](https://github.com/DataDog/integrations-core/pull/1860).
+* [Fixed] Add data files to the wheel package. See [#1727](https://github.com/DataDog/integrations-core/pull/1727).
 
 ## 1.5.0 / 2018-06-20 / Agent 6.4.0
 
-* [Added] support object_name metric identifiers. See [#1679][12].
+* [Added] support object_name metric identifiers. See [#1679](https://github.com/DataDog/integrations-core/pull/1679).
 
 ## 1.4.0 / 2018-05-11
 
@@ -333,45 +392,22 @@
 
 ## 1.3.0 / 2018-02-13
 
-* [IMPROVEMENT] Allow custom connection string to connect. See [#1068][13].
+* [IMPROVEMENT] Allow custom connection string to connect. See [#1068](https://github.com/DataDog/integrations-core/pull/1065).
 
 ## 1.2.1 / 2018-01-10
 
-* [BUGFIX] Allows metric collection from all instances in custom query. See [#959][14].
-* [BUGFIX] Repair reporting of stats from sys.dm_os_wait_stats. See [#975][15].
+* [BUGFIX] Allows metric collection from all instances in custom query. See [#959](https://github.com/DataDog/integrations-core/issues/959).
+* [BUGFIX] Repair reporting of stats from sys.dm_os_wait_stats. See [#975](https://github.com/DataDog/integrations-core/pull/975).
 
 ## 1.2.0 / 2017-10-10
 
-* [FEATURE] single bulk query of all of metrics, then filter locally. See [#573][16].
+* [FEATURE] single bulk query of all of metrics, then filter locally. See [#573](https://github.com/DataDog/integrations-core/issues/573).
 
 ## 1.1.0 / 2017-07-18
 
-* [FEATURE] Allow calling custom proc to return metrics, and improve transaction handling. See [#357][17] and [#456][18], thanks [@rlaveycal][19]
-* [SANITY] Fix yaml example file spacing. See [#342][20], thanks [@themsquared][21]
+* [FEATURE] Allow calling custom proc to return metrics, and improve transaction handling. See [#357](https://github.com/DataDog/integrations-core/issues/357) and [#456](https://github.com/DataDog/integrations-core/issues/456), thanks [@rlaveycal](https://github.com/rlaveycal)
+* [SANITY] Fix yaml example file spacing. See [#342](https://github.com/DataDog/integrations-core/issues/342), thanks [@themsquared](https://github.com/themsquared)
 
 ## 1.0.0 / 2017-03-22
 
 * [FEATURE] adds sqlserver integration.
-
-<!--- The following link definition list is generated by PimpMyChangelog --->
-[1]: https://github.com/DataDog/integrations-core/pull/2801
-[2]: https://github.com/DataDog/integrations-core/pull/2614
-[3]: https://github.com/DataDog/integrations-core/pull/2151
-[4]: https://github.com/DataDog/integrations-core/pull/2465
-[5]: https://github.com/DataDog/integrations-core/pull/2322
-[6]: https://github.com/DataDog/integrations-core/pull/2017
-[7]: https://github.com/DataDog/integrations-core/pull/1673
-[8]: https://github.com/DataDog/integrations-core/pull/2031
-[9]: https://github.com/DataDog/integrations-core/pull/2007
-[10]: https://github.com/DataDog/integrations-core/pull/1860
-[11]: https://github.com/DataDog/integrations-core/pull/1727
-[12]: https://github.com/DataDog/integrations-core/pull/1679
-[13]: https://github.com/DataDog/integrations-core/pull/1065
-[14]: https://github.com/DataDog/integrations-core/issues/959
-[15]: https://github.com/DataDog/integrations-core/pull/975
-[16]: https://github.com/DataDog/integrations-core/issues/573
-[17]: https://github.com/DataDog/integrations-core/issues/357
-[18]: https://github.com/DataDog/integrations-core/issues/456
-[19]: https://github.com/rlaveycal
-[20]: https://github.com/DataDog/integrations-core/issues/342
-[21]: https://github.com/themsquared

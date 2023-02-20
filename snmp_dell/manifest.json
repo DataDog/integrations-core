@@ -1,38 +1,43 @@
 {
-  "display_name": "Dell",
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "name": "snmp_dell",
-  "metric_to_check": [
-    "snmp.fanSpeed",
-    "snmp.systemStateChassisStatus",
-    "snmp.cacheDeviceStatus"
-  ],
-  "creates_events": false,
-  "short_description": "Collect metrics from Dell devices.",
-  "guid": "67aa0ef7-7c1d-4c03-8723-6beb4f531f6b",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "public_title": "Datadog-Dell Inc.",
-  "categories": [ 
-    "monitoring", 
-    "notification", 
-    "network", 
-    "autodiscovery",
-    "snmp"
-  ],
-  "type": "check",
-  "is_public": true,
-  "integration_id": "snmp-dell",
+  "manifest_version": "2.0.0",
+  "app_uuid": "2d90389f-0e85-49a8-8fd9-715ff1836a23",
+  "app_id": "snmp-dell",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Collect metrics from Dell devices.",
+    "title": "Dell Inc.",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Monitoring",
+      "Category::Notification",
+      "Category::Network",
+      "Category::SNMP"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "dashboards": {},
-    "saved_views": {},
-    "monitors": {},
-    "service_checks": "assets/service_checks.json",
-    "logs": {}
+    "integration": {
+      "source_type_name": "Dell",
+      "configuration": {},
+      "events": {
+        "creates_events": false
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    }
   }
 }

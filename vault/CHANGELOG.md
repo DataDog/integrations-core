@@ -1,6 +1,24 @@
 # CHANGELOG - Vault
 
-## 3.2.1 / 2022-05-18
+## 3.3.3 / 2022-10-28 / Agent 7.41.0
+
+* [Fixed] Ensure X-Vault-Request header is set to `true` on all requests. See [#13006](https://github.com/DataDog/integrations-core/pull/13006).
+
+## 3.3.2 / 2022-09-16 / Agent 7.40.0
+
+* [Fixed] Do not use the `client_token` if `no_token` is true with the openmetrics v1 implementation. See [#12776](https://github.com/DataDog/integrations-core/pull/12776).
+* [Fixed] Use the `client_token` option with the openmetrics v2 implementation. See [#12764](https://github.com/DataDog/integrations-core/pull/12764).
+
+## 3.3.1 / 2022-08-05 / Agent 7.39.0
+
+* [Fixed] Properly read `collect_secondary_dr` and improve code readability. See [#12435](https://github.com/DataDog/integrations-core/pull/12435).
+
+## 3.3.0 / 2022-06-01 / Agent 7.38.0
+
+* [Added] Add config option to collect from secondary replication mode. See [#12099](https://github.com/DataDog/integrations-core/pull/12099).
+* [Fixed] Ensure vault_wal_gc_total is collected as gauge. See [#12036](https://github.com/DataDog/integrations-core/pull/12036).
+
+## 3.2.1 / 2022-05-18 / Agent 7.37.0
 
 * [Fixed] Fix extra metrics description example. See [#12043](https://github.com/DataDog/integrations-core/pull/12043).
 

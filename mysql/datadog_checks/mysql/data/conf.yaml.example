@@ -20,7 +20,7 @@ init_config:
     #
     # service: <SERVICE>
 
-## Every instance is scheduled independent of the others.
+## Every instance is scheduled independently of the others.
 #
 instances:
 
@@ -178,7 +178,7 @@ instances:
     ## @param queries - list of mappings - optional
     ## Define custom queries to collect custom metrics from your MySQL database.
     ##
-    ## See https://docs.datadoghq.com/integrations/faq/how-to-collect-metrics-from-custom-mysql-queries to learn more.
+    ## See https://docs.datadoghq.com/integrations/guide/mysql-custom-queries to learn more.
     ##
     ## WARNING: This option is deprecated and will be removed in a future release.
     ## Use the `custom_queries` option instead.
@@ -248,6 +248,7 @@ instances:
         ## Note that this runs a heavy query against your database to compute the relevant metrics
         ## for all your existing schemas. Due to the nature of these calls, if you have a
         ## high number of tables and schemas, this may have a negative impact on your database performance.
+        ## Only tables and schemas for which the user has been granted SELECT privileges are collected. 
         ##
         ## See also the MySQL metrics listing: https://docs.datadoghq.com/integrations/mysql/#metrics
         #
@@ -272,6 +273,19 @@ instances:
         ## See also the MySQL metrics listing: https://docs.datadoghq.com/integrations/mysql/#metrics
         #
         # system_table_size_metrics: false
+
+        ## @param table_rows_stats_metrics - boolean - optional - default: false
+        ## These metrics are reported if you have a Percona MySQL instance with `userstat` enabled
+        ## Set to `true` to collect table stats metrics.
+        ## Metrics provided by the options:
+        ##   - mysql.info.table.rows.read (total per table)
+        ##   - mysql.info.table.rows.changed (total per table)
+        ## Note that this runs a heavy query against your database to compute the relevant metrics
+        ## for all your existing tables. Due to the nature of these calls, if you have a
+        ## high number of tables and schemas, this may have a negative impact on your database performance.
+        ## See also the MySQL metrics listing: https://docs.datadoghq.com/integrations/mysql/#metrics
+        #
+        # table_rows_stats_metrics: false
 
         ## @param extra_performance_metrics - boolean - optional - default: false
         ## These metrics are reported if `performance_schema` is enabled in the MySQL instance
@@ -359,13 +373,6 @@ instances:
         ## a single collection.
         #
         # events_statements_row_limit: 5000
-
-        ## @param events_statements_table - string - optional
-        ## Forces a specific events statements table. Must be one of events_statements_current,
-        ## events_statements_history, events_statements_history_long. If not set then the agent will choose
-        ## the best available table that is enabled and not empty.
-        #
-        # events_statements_table: events_statements_history_long
 
         ## @param explain_procedure - string - optional - default: explain_statement
         ## Overrides the default procedure used for collecting execution plans. The agent will use this
@@ -582,12 +589,12 @@ instances:
 
 ## Log Section
 ##
-## type - required - Type of log input source (tcp / udp / file / windows_event)
+## type - required - Type of log input source (tcp / udp / file / windows_event).
 ## port / path / channel_path - required - Set port if type is tcp or udp.
 ##                                         Set path if type is file.
 ##                                         Set channel_path if type is windows_event.
 ## source  - required - Attribute that defines which integration sent the logs.
-## encoding - optional - For file specifies the file encoding, default is utf-8, other
+## encoding - optional - For file specifies the file encoding. Default is utf-8. Other
 ##                       possible values are utf-16-le and utf-16-be.
 ## service - optional - The name of the service that generates the log.
 ##                      Overrides any `service` defined in the `init_config` section.

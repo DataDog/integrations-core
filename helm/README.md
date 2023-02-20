@@ -15,7 +15,11 @@ No additional installation is needed on your server.
 
 ### Configuration
 
-This is a cluster check. For more information, see the [Cluster checks documentation][2].
+This is a cluster check. You can enable this check by adding `datadog.helmCheck.enabled` to your Helm chart.
+
+**Note**: If no configuration is required, an empty `conf.d` can be passed.
+
+For more information, see the [Cluster Check documentation][2].
 
 ### Validation
 
@@ -49,6 +53,12 @@ See [service_checks.json][5] for a list of service checks provided by this integ
 
 Need help? Contact [Datadog support][6].
 
+## Further Reading
+
+Additional helpful documentation, links, and articles:
+
+- [Blog: Monitor your Helm-managed Kubernetes applications with Datadog][7]
+
 
 [1]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [2]: https://docs.datadoghq.com/agent/cluster_agent/clusterchecks/
@@ -56,3 +66,4 @@ Need help? Contact [Datadog support][6].
 [4]: https://github.com/DataDog/integrations-core/blob/master/helm/metadata.csv
 [5]: https://github.com/DataDog/integrations-core/blob/master/helm/assets/service_checks.json
 [6]: https://docs.datadoghq.com/help/
+[7]: https://www.datadoghq.com/blog/monitor-helm-kubernetes-with-datadog/

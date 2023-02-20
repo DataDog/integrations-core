@@ -44,8 +44,9 @@ except ImportError:
 requests_aws = None
 requests_kerberos = None
 requests_ntlm = None
+requests_oauthlib = None
+oauth2 = None
 jwt = None
-default_backend = None
 serialization = None
 
 LOGGER = logging.getLogger(__file__)
@@ -212,7 +213,7 @@ class RequestsWrapper(object):
 
             config[field] = value
 
-        # http://docs.python-requests.org/en/master/user/advanced/#timeouts
+        # https://requests.readthedocs.io/en/latest/user/advanced/#timeouts
         connect_timeout = read_timeout = float(config['timeout'])
         if config['connect_timeout'] is not None:
             connect_timeout = float(config['connect_timeout'])
@@ -220,8 +221,8 @@ class RequestsWrapper(object):
         if config['read_timeout'] is not None:
             read_timeout = float(config['read_timeout'])
 
-        # http://docs.python-requests.org/en/master/user/quickstart/#custom-headers
-        # http://docs.python-requests.org/en/master/user/advanced/#header-ordering
+        # https://requests.readthedocs.io/en/latest/user/quickstart/#custom-headers
+        # https://requests.readthedocs.io/en/latest/user/advanced/#header-ordering
         headers = get_default_headers()
         if config['headers']:
             headers.clear()
@@ -233,7 +234,7 @@ class RequestsWrapper(object):
         # https://toolbelt.readthedocs.io/en/latest/adapters.html#hostheaderssladapter
         self.tls_use_host_header = is_affirmative(config['tls_use_host_header']) and 'Host' in headers
 
-        # http://docs.python-requests.org/en/master/user/authentication/
+        # https://requests.readthedocs.io/en/latest/user/authentication/
         auth_type = config['auth_type'].lower()
         if auth_type not in AUTH_TYPES:
             self.logger.warning('auth_type %s is not supported, defaulting to basic', auth_type)
@@ -257,14 +258,14 @@ class RequestsWrapper(object):
 
         allow_redirects = is_affirmative(config['allow_redirects'])
 
-        # http://docs.python-requests.org/en/master/user/advanced/#ssl-cert-verification
+        # https://requests.readthedocs.io/en/latest/user/advanced/#ssl-cert-verification
         verify = True
         if isinstance(config['tls_ca_cert'], string_types):
             verify = config['tls_ca_cert']
         elif not is_affirmative(config['tls_verify']):
             verify = False
 
-        # http://docs.python-requests.org/en/master/user/advanced/#client-side-certificates
+        # https://requests.readthedocs.io/en/latest/user/advanced/#client-side-certificates
         cert = None
         if isinstance(config['tls_cert'], string_types):
             if isinstance(config['tls_private_key'], string_types):
@@ -272,7 +273,7 @@ class RequestsWrapper(object):
             else:
                 cert = config['tls_cert']
 
-        # http://docs.python-requests.org/en/master/user/advanced/#proxies
+        # https://requests.readthedocs.io/en/latest/user/advanced/#proxies
         no_proxy_uris = None
         if is_affirmative(config['skip_proxy']):
             proxies = PROXY_SETTINGS_DISABLED.copy()
@@ -291,7 +292,7 @@ class RequestsWrapper(object):
                 proxies = proxies.copy()
 
                 # TODO: Pass `no_proxy` directly to `requests` once this issue is fixed:
-                # https://github.com/kennethreitz/requests/issues/5000
+                # https://github.com/psf/requests/issues/5000
                 if 'no_proxy' in proxies:
                     no_proxy_uris = proxies.pop('no_proxy')
 
@@ -328,8 +329,8 @@ class RequestsWrapper(object):
 
         # For connection and cookie persistence, if desired. See:
         # https://en.wikipedia.org/wiki/HTTP_persistent_connection#Advantages
-        # http://docs.python-requests.org/en/master/user/advanced/#session-objects
-        # http://docs.python-requests.org/en/master/user/advanced/#keep-alive
+        # https://requests.readthedocs.io/en/latest/user/advanced/#session-objects
+        # https://requests.readthedocs.io/en/latest/user/advanced/#keep-alive
         self.persist_connections = self.tls_use_host_header or is_affirmative(config['persist_connections'])
         self._session = None
 
@@ -627,7 +628,7 @@ def should_bypass_proxy(url, no_proxy_uris):
 
 def create_basic_auth(config):
     # Since this is the default case, only activate when all fields are explicitly set
-    if config['username'] and config['password']:
+    if config['username'] is not None and config['password'] is not None:
         if config['use_legacy_auth_encoding']:
             return config['username'], config['password']
         else:
@@ -794,6 +795,65 @@ class AuthTokenFileReader(object):
             return self._token
 
 
+class AuthTokenOAuthReader(object):
+    def __init__(self, config):
+        self._url = config.get('url', '')
+        if not isinstance(self._url, str):
+            raise ConfigurationError('The `url` setting of `auth_token` reader must be a string')
+        elif not self._url:
+            raise ConfigurationError('The `url` setting of `auth_token` reader is required')
+
+        self._client_id = config.get('client_id', '')
+        if not isinstance(self._client_id, str):
+            raise ConfigurationError('The `client_id` setting of `auth_token` reader must be a string')
+        elif not self._client_id:
+            raise ConfigurationError('The `client_id` setting of `auth_token` reader is required')
+
+        self._client_secret = config.get('client_secret', '')
+        if not isinstance(self._client_secret, str):
+            raise ConfigurationError('The `client_secret` setting of `auth_token` reader must be a string')
+        elif not self._client_secret:
+            raise ConfigurationError('The `client_secret` setting of `auth_token` reader is required')
+
+        self._basic_auth = config.get('basic_auth', False)
+        if not isinstance(self._basic_auth, bool):
+            raise ConfigurationError('The `basic_auth` setting of `auth_token` reader must be a boolean')
+
+        self._fetch_options = {'token_url': self._url}
+        if self._basic_auth:
+            self._fetch_options['auth'] = requests_auth.HTTPBasicAuth(self._client_id, self._client_secret)
+        else:
+            self._fetch_options['client_id'] = self._client_id
+            self._fetch_options['client_secret'] = self._client_secret
+
+        self._token = None
+        self._expiration = None
+
+    def read(self, **request):
+        if self._token is None or get_timestamp() >= self._expiration or 'error' in request:
+            global oauth2
+            if oauth2 is None:
+                from oauthlib import oauth2
+
+            global requests_oauthlib
+            if requests_oauthlib is None:
+                import requests_oauthlib
+
+            client = oauth2.BackendApplicationClient(client_id=self._client_id)
+            oauth = requests_oauthlib.OAuth2Session(client=client)
+            response = oauth.fetch_token(**self._fetch_options)
+
+            # https://www.rfc-editor.org/rfc/rfc6749#section-5.2
+            if 'error' in response:
+                raise Exception('OAuth2 client credentials grant error: {}'.format(response['error']))
+
+            # https://www.rfc-editor.org/rfc/rfc6749#section-4.4.3
+            self._token = response['access_token']
+            self._expiration = get_timestamp() + response['expires_in']
+
+            return self._token
+
+
 class DCOSAuthTokenReader(object):
     def __init__(self, config):
         self._login_url = config.get('login_url', '')
@@ -823,10 +883,6 @@ class DCOSAuthTokenReader(object):
     def read(self, **request):
         if self._token is None or 'error' in request:
             with open(self._private_key_path, 'rb') as f:
-                global default_backend
-                if default_backend is None:
-                    from cryptography.hazmat.backends import default_backend
-
                 global serialization
                 if serialization is None:
                     from cryptography.hazmat.primitives import serialization
@@ -835,7 +891,7 @@ class DCOSAuthTokenReader(object):
                 if jwt is None:
                     import jwt
 
-                private_key = serialization.load_pem_private_key(f.read(), password=None, backend=default_backend())
+                private_key = serialization.load_pem_private_key(f.read(), password=None)
 
                 serialized_private = private_key.private_bytes(
                     encoding=serialization.Encoding.PEM,
@@ -893,6 +949,7 @@ class AuthTokenHeaderWriter(object):
 
 AUTH_TOKEN_READERS = {
     'file': AuthTokenFileReader,
+    'oauth': AuthTokenOAuthReader,
     'dcos_auth': DCOSAuthTokenReader,
 }
 AUTH_TOKEN_WRITERS = {'header': AuthTokenHeaderWriter}

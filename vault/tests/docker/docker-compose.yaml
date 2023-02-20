@@ -44,7 +44,7 @@ services:
       - ${SERVER_CONFIG_FILE}:/vault/config/config.json
 
   consul:
-    image: 'consul'
+    image: consul:1.14.3
     ports:
       - 8500:8500
     command: agent -server -bind 0.0.0.0 -client 0.0.0.0 -bootstrap-expect 1 -config-file=/consul/config/config.json
@@ -54,7 +54,7 @@ services:
       test: ['CMD', '/bin/sh', '-c', 'curl -sfLo /dev/null http://127.0.0.1:8500/v1/health/node/$$HOSTNAME']
 
   consul-worker:
-    image: 'consul'
+    image: consul:1.14.3
     command: agent -server -join consul -config-file=/consul/config/config.json
     volumes:
       - ./consul_config.json:/consul/config/config.json

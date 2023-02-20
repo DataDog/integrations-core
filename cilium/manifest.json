@@ -1,39 +1,53 @@
 {
-  "display_name": "Cilium",
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "name": "cilium",
-  "metric_prefix": "cilium.",
-  "metric_to_check": "cilium.endpoint.state",
-  "creates_events": false,
-  "short_description": "Collect per pod agent metrics and cluster-wide operator metrics",
-  "guid": "1d9db288-4678-4ede-9ba0-8b04a8ae31c2",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "public_title": "Datadog-Cilium Integration",
-  "categories": [
-    "containers",
-    "network",
-    "security",
-    "log collection"
-  ],
-  "type": "check",
-  "is_public": true,
-  "integration_id": "cilium",
+  "manifest_version": "2.0.0",
+  "app_uuid": "791bc8e8-1a70-465a-b423-709b6af4e6e5",
+  "app_id": "cilium",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Collect per pod agent metrics and cluster-wide operator metrics",
+    "title": "Cilium",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Category::Containers",
+      "Category::Network",
+      "Category::Security",
+      "Category::Log Collection"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {},
   "assets": {
-    "configuration": {
-      "spec": "assets/configuration/spec.yaml"
+    "integration": {
+      "source_type_name": "Cilium",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "cilium.",
+        "check": "cilium.endpoint.state",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
     },
     "dashboards": {
       "Cilium Overview": "assets/dashboards/overview.json"
-    },
-    "monitors": {},
-    "service_checks": "assets/service_checks.json",
-    "logs": {},
-    "metrics_metadata": "metadata.csv"
+    }
   }
 }

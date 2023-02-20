@@ -1,5 +1,13 @@
 # CHANGELOG - ECS Fargate
 
+## 3.3.0 / 2023-01-20
+
+* [Added] Add task CPU Limit to ECS Fargate integration and use nanocore as CPU unit. See [#13551](https://github.com/DataDog/integrations-core/pull/13551).
+
+## 3.2.0 / 2022-09-16 / Agent 7.40.0
+
+* [Added] Update HTTP config spec templates. See [#12890](https://github.com/DataDog/integrations-core/pull/12890).
+
 ## 3.1.1 / 2022-04-11 / Agent 7.36.0
 
 * [Fixed] Remove outdated warning in the description for the `tls_ignore_warning` option. See [#11800](https://github.com/DataDog/integrations-core/pull/11800).

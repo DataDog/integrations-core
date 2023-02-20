@@ -370,7 +370,7 @@ class SnmpCheck(AgentCheck):
         self._thread.start()
         self._executor = futures.ThreadPoolExecutor(max_workers=self._config.workers)
 
-    def check(self, instance):
+    def check(self, _):
         # type: (Dict[str, Any]) -> None
         start_time = time.time()
         self._submitted_metrics = 0
@@ -395,7 +395,8 @@ class SnmpCheck(AgentCheck):
             tags.extend(config.tags)
             self.gauge('snmp.discovered_devices_count', len(config.discovered_instances), tags=tags)
         else:
-            _, tags = self._check_device(config)
+            error, tags = self._check_device(config)
+            # no need to handle error here since it's already handled inside `self._check_device`
 
         self.submit_telemetry_metrics(start_time, tags)
 

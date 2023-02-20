@@ -5,8 +5,10 @@ from __future__ import division
 
 from copy import deepcopy
 
+from kubeutil import get_connection_info
 from six import iteritems
 
+from datadog_checks.base.checks.kubelet_base.base import urljoin
 from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.base.utils.tagging import tagger
 
@@ -17,6 +19,11 @@ METRIC_TYPES = ['counter', 'gauge', 'summary']
 # container-specific metrics should have all these labels
 PRE_1_16_CONTAINER_LABELS = set(['namespace', 'name', 'image', 'id', 'container_name', 'pod_name'])
 POST_1_16_CONTAINER_LABELS = set(['namespace', 'name', 'image', 'id', 'container', 'pod'])
+
+# Value above which the figure can be discarded because it's an aberrant transient value
+MAX_MEMORY_RSS = 2**63
+
+CADVISOR_METRICS_PATH = '/metrics/cadvisor'
 
 
 class CadvisorPrometheusScraperMixin(object):
@@ -66,14 +73,14 @@ class CadvisorPrometheusScraperMixin(object):
         Create a copy of the instance and set default values.
         This is so the base class can create a scraper_config with the proper values.
         """
+        kubelet_conn_info = get_connection_info()
+        endpoint = kubelet_conn_info.get('url')
+
         cadvisor_instance = deepcopy(instance)
         cadvisor_instance.update(
             {
                 'namespace': self.NAMESPACE,
-                # We need to specify a prometheus_url so the base class can use it as the key for our config_map,
-                # we specify a dummy url that will be replaced in the `check()` function. We append it with "cadvisor"
-                # so the key is different than the kubelet scraper.
-                'prometheus_url': instance.get('cadvisor_metrics_endpoint', 'dummy_url/cadvisor'),
+                'prometheus_url': instance.get('cadvisor_metrics_endpoint', urljoin(endpoint, CADVISOR_METRICS_PATH)),
                 'ignore_metrics': [
                     'container_fs_inodes_free',
                     'container_fs_inodes_total',
@@ -553,6 +560,8 @@ class CadvisorPrometheusScraperMixin(object):
 
     def container_memory_rss(self, metric, scraper_config):
         metric_name = scraper_config['namespace'] + '.memory.rss'
+        # Filter out aberrant values
+        metric.samples = [sample for sample in metric.samples if sample[self.SAMPLE_VALUE] < MAX_MEMORY_RSS]
         self._process_container_metric('gauge', metric_name, metric, scraper_config)
 
     def container_memory_swap(self, metric, scraper_config):

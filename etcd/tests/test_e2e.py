@@ -23,7 +23,7 @@ def test_new(dd_agent_check, instance, openmetrics_metrics):
     for metric in REMAPED_DEBUGGING_METRICS:
         aggregator.assert_metric('etcd.{}'.format(metric), at_least=1)
 
-    assert aggregator.metrics_asserted_pct > 79, 'Missing metrics {}'.format(aggregator.not_asserted())
+    aggregator.assert_all_metrics_covered()
 
     service_check_tags = ['endpoint:{}'.format(instance['prometheus_url'])]
 

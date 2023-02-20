@@ -15,11 +15,11 @@ from datadog_checks.dev import TempDir, WaitFor, docker_run, run_command
 from datadog_checks.dev.docker import get_container_ip
 
 from .common import (
+    ACTIVE_ENV_NAME,
     COMPOSE_DIR,
     PORT,
     SNMP_CONTAINER_NAME,
     SNMP_LISTENER_ENV,
-    TOX_ENV_NAME,
     generate_container_instance_config,
 )
 
@@ -33,6 +33,8 @@ E2E_METADATA = {
         'cp -r /home/snmp/datadog_checks/snmp/data/profiles /etc/datadog-agent/conf.d/snmp.d/',
     ],
 }
+
+EXPECTED_AUTODISCOVERY_CHECKS = 6
 
 
 @pytest.fixture(scope='session')
@@ -74,7 +76,7 @@ def autodiscovery_ready():
 
 def _autodiscovery_ready():
     result = run_command(
-        ['docker', 'exec', 'dd_snmp_{}'.format(TOX_ENV_NAME), 'agent', 'configcheck'], capture=True, check=True
+        ['docker', 'exec', 'dd_snmp_{}'.format(ACTIVE_ENV_NAME), 'agent', 'configcheck'], capture=True, check=True
     )
 
     autodiscovery_checks = []
@@ -83,8 +85,7 @@ def _autodiscovery_ready():
             autodiscovery_checks.append(result_line)
 
     # assert subnets discovered by `snmp_listener` config from datadog.yaml
-    expected_autodiscovery_checks = 5
-    assert len(autodiscovery_checks) == expected_autodiscovery_checks
+    assert len(autodiscovery_checks) == EXPECTED_AUTODISCOVERY_CHECKS
 
 
 def create_datadog_conf_file(tmp_dir):
@@ -123,6 +124,7 @@ def create_datadog_conf_file(tmp_dir):
                 },
                 {
                     'network': '{}.0/27'.format(prefix),
+                    'namespace': 'test-auth-proto-sha',
                     'port': PORT,
                     'version': 3,
                     'timeout': 1,
@@ -132,6 +134,22 @@ def create_datadog_conf_file(tmp_dir):
                     'authentication_protocol': 'sha',
                     'privacy_key': 'doggiePRIVkey',
                     'privacy_protocol': 'des',
+                    'context_name': 'public',
+                    'ignored_ip_addresses': {'{}.2'.format(prefix): True},
+                    'loader': 'core',
+                },
+                {
+                    'network': '{}.0/27'.format(prefix),
+                    'namespace': 'test-auth-proto-sha256',
+                    'port': PORT,
+                    'version': 3,
+                    'timeout': 1,
+                    'retries': 2,
+                    'user': 'datadogSHA256AES',
+                    'authentication_key': 'doggiepass',
+                    'authentication_protocol': 'SHA256',
+                    'privacy_key': 'doggiePRIVkey',
+                    'privacy_protocol': 'AES',
                     'context_name': 'public',
                     'ignored_ip_addresses': {'{}.2'.format(prefix): True},
                     'loader': 'core',
