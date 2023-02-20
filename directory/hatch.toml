@@ -1,4 +1,13 @@
 [env.collectors.datadog-checks]
+check-types = true
+mypy-args = [
+  "--py2",
+  "--install-types",
+  "--non-interactive",
+  "--follow-imports=silent",
+  "datadog_checks/directory",
+  "--exclude '.*/config_models/.*\\.py$'",
+]
 
 [[envs.default.matrix]]
 python = ["2.7", "3.8"]
