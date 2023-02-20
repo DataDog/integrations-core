@@ -2780,3 +2780,82 @@ def _check_bgp4(aggregator, common_tags):
 
     for metric in PEER_RATES:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=tags)
+
+@pytest.mark.usefixtures("dd_environment")
+def test_cisco_asr_1001x(aggregator):
+    run_profile_check(recording_name='cisco-asr-1001x', profile_name='cisco-asr')
+    common_tags = common.CHECK_TAGS + [
+        'snmp_profile:cisco-asr',
+        'device_vendor:cisco',
+    ]
+    common.assert_common_metrics(aggregator, common_tags)
+    _check_common_asr(aggregator, common_tags)
+
+    for metric in TCP_COUNTS + ['udpInErrors', 'udpNoPorts']:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags)
+    aggregator.assert_metric('snmp.tcpCurrEstab', metric_type=aggregator.GAUGE, tags=common_tags)
+
+    for metric in IP_COUNTS + IPX_COUNTS:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags + ['ipversion:ipv6'])
+
+    for metric in IP_IF_COUNTS:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags + ['ipversion:ipv6', 'interface:1'])
+
+    aggregator.assert_all_metrics_covered()
+
+
+def test_cisco_asr_9001(aggregator):
+    run_profile_check(recording_name='cisco-asr-9001', profile_name='cisco-asr')
+    common_tags = common.CHECK_TAGS + [
+        'snmp_profile:cisco-asr',
+        'device_vendor:cisco',
+    ]
+    common.assert_common_metrics(aggregator, common_tags)
+    _check_common_asr(aggregator, common_tags)
+
+    for metric in TCP_COUNTS + ['udpInErrors', 'udpNoPorts']:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags)
+    aggregator.assert_metric('snmp.tcpCurrEstab', metric_type=aggregator.GAUGE, tags=common_tags)
+
+    IP_SYS_METRICS = [ 'ipSystemStatsInAddrErrors', 'ipSystemStatsInDiscards', 'ipSystemStatsInHdrErrors', 'ipSystemStatsInNoRoutes',
+                       'ipSystemStatsInTruncatedPkts', 'ipSystemStatsInUnknownProtos', 'ipSystemStatsOutDiscards', 'ipSystemStatsOutFragCreates',
+                       'ipSystemStatsOutFragFails', 'ipSystemStatsOutFragOKs', 'ipSystemStatsOutFragReqds', 'ipSystemStatsOutNoRoutes',
+                       'ipSystemStatsReasmFails', 'ipSystemStatsReasmOKs', 'ipSystemStatsReasmReqds']
+    for metric in IP_SYS_METRICS:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags + ['ipversion:ipv6'])
+
+    IP_IF_METRICS = ['ipIfStatsHCInMcastOctets', 'ipIfStatsHCInMcastPkts', 'ipIfStatsHCInOctets', 'ipIfStatsHCOutMcastOctets', 'ipIfStatsHCOutMcastPkts',
+                     'ipIfStatsHCOutOctets', 'ipIfStatsHCOutTransmits']
+    for metric in IP_IF_METRICS:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags + ['ipversion:ipv6', 'interface:45'])
+    
+    aggregator.assert_all_metrics_covered()
+    
+
+
+def test_cisco_asr_9901(aggregator):
+    run_profile_check(recording_name='cisco-asr-9901',profile_name='cisco-asr')
+    common_tags = common.CHECK_TAGS + [
+        'snmp_profile:cisco-asr',
+        'device_vendor:cisco',
+    ]
+    common.assert_common_metrics(aggregator, common_tags)
+    _check_common_asr(aggregator, common_tags)
+    aggregator.assert_all_metrics_covered()
+
+def _check_common_asr(aggregator, tags):
+    """
+    Shared testing function for cisco ASR profiles.
+    """
+    GAUGE_METRICS = ['ifAdminStatus', 'ifNumber', 'ifOperStatus', 'ifSpeed', 'sysUpTimeInstance']
+    COUNTS_METRICS = ['ifInErrors', 'ifInDiscards', 'ifOutErrors', 'ifOutDiscards',]
+    RATE_METRICS = [ 'ifInErrors.rate', 'ifInDiscards.rate', 'ifOutErrors.rate', 'ifOutDiscards.rate']
+
+    for metric in GAUGE_METRICS:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags)
+
+    for metric in COUNTS_METRICS:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags)
+
+    for metric in RATE_METRICS:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=tags)
