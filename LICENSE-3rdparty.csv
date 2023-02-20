@@ -22,6 +22,7 @@ cm-client,PyPI,Apache-2.0,
 contextlib2,PyPI,PSF,Copyright (c) 2016 Nick Coghlan
 cryptography,PyPI,Apache-2.0,Copyright (c) Individual contributors.
 cryptography,PyPI,BSD-3-Clause,Copyright (c) Individual contributors.
+cryptography,PyPI,PSF,Copyright (c) Individual contributors.
 ddtrace,PyPI,BSD-3-Clause,"Copyright 2016 Datadog, Inc."
 dnspython,PyPI,ISC,Copyright (C) Dnspython Contributors
 enum34,PyPI,BSD-3-Clause,Copyright Ethan Furman
