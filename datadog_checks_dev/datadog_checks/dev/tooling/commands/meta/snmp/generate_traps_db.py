@@ -249,8 +249,7 @@ def write_compact_trap_db(trap_db_per_mib, output_file, use_json=False):
                     )
                 )
                 conflict_oids.add(trap_oid)
-            compact_db["traps"][trap_oid] = {"mib": mib}
-            compact_db["traps"][trap_oid].update(trap)
+            compact_db["traps"][trap_oid] = trap
         for var_oid, var in trap_db["vars"].items():
             if var_oid in compact_db["vars"] and var["name"] != compact_db["vars"][var_oid]["name"]:
                 echo_warning(
@@ -294,8 +293,9 @@ def generate_trap_db(compiled_mibs, compiled_mibs_sources, no_descr):
         for trap in traps.values():
             trap_name = trap['name']
             trap_oid = trap['oid']
+            trap_mib_name = file_content['meta']['module']
             trap_descr = trap.get('description', '')
-            trap_db["traps"][trap_oid] = {"name": trap_name}
+            trap_db["traps"][trap_oid] = {"name": trap_name, "mib": trap_mib_name}
             if not no_descr:
                 trap_db["traps"][trap_oid]["descr"] = trap_descr
             for trap_var in trap.get('objects', []):
@@ -329,8 +329,7 @@ def generate_trap_db(compiled_mibs, compiled_mibs_sources, no_descr):
                     trap_db["vars"][var_metadata.oid]["bits"] = var_metadata.bits
 
         if trap_db['traps']:
-            mib_name = file_content['meta']['module']
-            trap_db_per_mib[mib_name] = trap_db
+            trap_db_per_mib[trap_mib_name] = trap_db
 
     return trap_db_per_mib
 
