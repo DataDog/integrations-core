@@ -287,15 +287,15 @@ def generate_trap_db(compiled_mibs, compiled_mibs_sources, no_descr):
         with open(compiled_mib_file, 'r') as f:
             file_content = json.load(f)
 
+        file_mib_name = file_content['meta']['module']
         trap_db = {"traps": {}, "vars": {}}
 
         traps = {k: v for k, v in file_content.items() if v.get('class') == NOTIFICATION_TYPE}
         for trap in traps.values():
             trap_name = trap['name']
             trap_oid = trap['oid']
-            trap_mib_name = file_content['meta']['module']
             trap_descr = trap.get('description', '')
-            trap_db["traps"][trap_oid] = {"name": trap_name, "mib": trap_mib_name}
+            trap_db["traps"][trap_oid] = {"name": trap_name, "mib": file_mib_name}
             if not no_descr:
                 trap_db["traps"][trap_oid]["descr"] = trap_descr
             for trap_var in trap.get('objects', []):
@@ -329,7 +329,7 @@ def generate_trap_db(compiled_mibs, compiled_mibs_sources, no_descr):
                     trap_db["vars"][var_metadata.oid]["bits"] = var_metadata.bits
 
         if trap_db['traps']:
-            trap_db_per_mib[trap_mib_name] = trap_db
+            trap_db_per_mib[file_mib_name] = trap_db
 
     return trap_db_per_mib
 
