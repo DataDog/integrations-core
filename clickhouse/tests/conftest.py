@@ -21,7 +21,7 @@ def dd_environment():
                 'clickhouse-0{}'.format(i + 1), 'Logging errors to /var/log/clickhouse-server/clickhouse-server.err.log'
             )
         )
-    with docker_run(common.COMPOSE_FILE, conditions=conditions, sleep=10, attempts=2):
+    with docker_run(common.COMPOSE_FILE, conditions=conditions, sleep=10, attempts=10):
         yield common.CONFIG
 
 
