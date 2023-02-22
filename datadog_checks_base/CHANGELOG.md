@@ -1,6 +1,6 @@
 # CHANGELOG - datadog_checks_base
 
-## 30.0.0 / 2023-01-20
+## 30.0.0 / 2023-01-20 / Agent 7.43.0
 
 * [Added] Bump snowflake to 2.8.3. See [#13756](https://github.com/DataDog/integrations-core/pull/13756).
 * [Fixed] Update dependencies. See [#13726](https://github.com/DataDog/integrations-core/pull/13726).

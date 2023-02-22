@@ -1,6 +1,6 @@
 # CHANGELOG - postgres
 
-## 13.3.0 / 2023-01-20
+## 13.3.0 / 2023-01-20 / Agent 7.43.0
 
 * [Added] Add `application_name` to activity metrics and report oldest `backend_xmin`, `backend_xid` and `xact_start`. See [#13523](https://github.com/DataDog/integrations-core/pull/13523).
 * [Added] Add SLRU cache metrics for Postgres. See [#13476](https://github.com/DataDog/integrations-core/pull/13476).
