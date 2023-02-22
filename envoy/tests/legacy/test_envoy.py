@@ -26,7 +26,8 @@ def test_success(aggregator, check, dd_run_check):
     metrics_collected = 0
     for metric in METRICS:
         collected_metrics = aggregator.metrics(METRIC_PREFIX + metric)
-        # The ext_auth metrics are excluded because the stats_prefix is not always present. They're tested in a different test.
+        # The ext_auth metrics are excluded because the stats_prefix is not always present.
+        # They're tested in a different test.
         if collected_metrics and collected_metrics[0].name not in EXT_METRICS:
             expected_tags = [t for t in METRICS[metric]['tags'] if t]
             for tag_set in expected_tags:
