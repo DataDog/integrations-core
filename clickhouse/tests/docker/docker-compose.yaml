@@ -129,7 +129,6 @@ services:
     #   Connection request from old client /172.30.0.7:51646; will be dropped if server is in r-o mode
     # For now, we use zookeeper `3.5.7` instead
     # Similar case: https://stackoverflow.com/a/22884698
-    platform: linux/x86_64
     image: zookeeper:3.5.7
     hostname: clickhouse-zookeeper
     container_name: clickhouse-zookeeper
