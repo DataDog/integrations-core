@@ -210,3 +210,14 @@ def test_config(check, instance, aggregator, expected_exception, metric_count):
         aggregator.assert_metric(m, count=metric_count)
 
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+
+# if consumer lag is less than 0, then there should be a event emitted
+
+# if partition is none, then a warning log should be emitted
+
+# if partition is not in partitions, then a warning log should be emitted
+
+# if highwater metric count hits the context limit, then no metrics more than context limit should be reported
+
+# if consumer metric count hits the context limit, then no metrics more than context limit should be reported
