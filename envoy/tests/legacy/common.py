@@ -33,9 +33,9 @@ INSTANCES = {
 ENVOY_VERSION = os.getenv('ENVOY_VERSION')
 
 EXT_METRICS = [
-        "envoy.cluster.ext_authz.denied",
-        "envoy.cluster.ext_authz.disabled",
-        "envoy.cluster.ext_authz.error",
-        "envoy.cluster.ext_authz.failure_mode_allowed",
-        "envoy.cluster.ext_authz.ok",
+    "envoy.cluster.ext_authz.denied",
+    "envoy.cluster.ext_authz.disabled",
+    "envoy.cluster.ext_authz.error",
+    "envoy.cluster.ext_authz.failure_mode_allowed",
+    "envoy.cluster.ext_authz.ok",
 ]
