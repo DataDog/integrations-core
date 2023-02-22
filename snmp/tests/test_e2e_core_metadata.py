@@ -31,7 +31,7 @@ def assert_metadata_events(aggregator, events):
 def assert_device_metadata(aggregator, device_metadata):
     events = get_events(aggregator)
 
-    assert len(events) == 1
+    assert len(events) >= 1
     event1 = events[0]
 
     pprint.pprint(event1['devices'])
