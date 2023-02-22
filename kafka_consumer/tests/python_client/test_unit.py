@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
+import logging
 from contextlib import nullcontext as does_not_raise
 
 import mock
@@ -9,7 +10,7 @@ import pytest
 
 from datadog_checks.base import ConfigurationError
 from datadog_checks.dev.utils import get_metadata_metrics
-from datadog_checks.kafka_consumer.client.kafka_python_client import OAuthTokenProvider
+from datadog_checks.kafka_consumer.client.kafka_python_client import KafkaPythonClient, OAuthTokenProvider
 
 from ..common import KAFKA_CONNECT_STR, metrics
 
@@ -24,7 +25,7 @@ def test_gssapi(kafka_instance, dd_run_check, check):
     # assert the check doesn't fail with:
     # Exception: Could not find main GSSAPI shared library.
     with pytest.raises(Exception, match='check_version'):
-        dd_run_check(check(instance))
+        dd_run_check(check(instance, client=KafkaPythonClient))
 
 
 def test_tls_config_ok(check, kafka_instance_tls):
@@ -38,7 +39,7 @@ def test_tls_config_ok(check, kafka_instance_tls):
             tls_context = mock.MagicMock()
             ssl.SSLContext.return_value = tls_context
 
-            kafka_consumer_check = check(kafka_instance_tls)
+            kafka_consumer_check = check(kafka_instance_tls, client=KafkaPythonClient)
             kafka_consumer_check.client._create_kafka_client(clazz=kafka_admin_client)
 
             assert tls_context.check_hostname is True
@@ -87,7 +88,7 @@ def test_oauth_config(sasl_oauth_token_provider, check, expected_exception):
     instance.update(sasl_oauth_token_provider)
 
     with expected_exception:
-        check(instance).check(instance)
+        check(instance, client=KafkaPythonClient).check(instance)
 
 
 def test_oauth_token_client_config(check, kafka_instance):
@@ -101,7 +102,7 @@ def test_oauth_token_client_config(check, kafka_instance):
     }
 
     with mock.patch('kafka.KafkaAdminClient') as kafka_admin_client:
-        kafka_consumer_check = check(kafka_instance)
+        kafka_consumer_check = check(kafka_instance, client=KafkaPythonClient)
         kafka_consumer_check.client._create_kafka_client(clazz=kafka_admin_client)
         params = kafka_admin_client.call_args_list[0].kwargs
 
@@ -125,7 +126,7 @@ def test_tls_config_legacy(extra_config, expected_http_kwargs, check, kafka_inst
     instance = kafka_instance
     instance.update(extra_config)
 
-    kafka_consumer_check = check(instance)
+    kafka_consumer_check = check(instance, client=KafkaPythonClient)
     kafka_consumer_check.get_tls_context()
     actual_options = {
         k: v for k, v in kafka_consumer_check._tls_context_wrapper.config.items() if k in expected_http_kwargs
@@ -134,79 +135,99 @@ def test_tls_config_legacy(extra_config, expected_http_kwargs, check, kafka_inst
 
 
 @pytest.mark.parametrize(
-    'instance, expected_exception, metric_count',
+    'instance, expected_exception, exception_msg, metric_count',
     [
-        pytest.param({}, pytest.raises(Exception), 0, id="Empty instance"),
         pytest.param(
             {'kafka_connect_str': 12},
-            pytest.raises(ConfigurationError, match='kafka_connect_str should be string or list of strings'),
+            pytest.raises(
+                Exception, match='ConfigurationError: `kafka_connect_str` should be string or list of strings'
+            ),
+            '',
             0,
             id="Invalid Non-string kafka_connect_str",
         ),
-        # TODO fix this: This should raise ConfigurationError
         pytest.param(
             {'kafka_connect_str': [KAFKA_CONNECT_STR, '127.0.0.1:9093']},
             does_not_raise(),
+            'ConfigurationError: Cannot fetch consumer offsets because no consumer_groups are specified and '
+            'monitor_unlisted_consumer_groups is False',
             0,
             id="monitor_unlisted_consumer_groups is False",
         ),
-        # TODO fix this: This should raise ConfigurationError
         pytest.param(
             {'kafka_connect_str': KAFKA_CONNECT_STR, 'consumer_groups': {}},
             does_not_raise(),
+            'ConfigurationError: Cannot fetch consumer offsets because no consumer_groups are specified and '
+            'monitor_unlisted_consumer_groups is False',
             0,
             id="Empty consumer_groups",
         ),
         pytest.param(
             {'kafka_connect_str': None},
-            pytest.raises(ConfigurationError, match='kafka_connect_str should be string or list of strings'),
+            pytest.raises(Exception, match='kafka_connect_str\n  none is not an allowed value'),
+            '',
             0,
             id="Invalid Nonetype kafka_connect_str",
         ),
         pytest.param(
             {'kafka_connect_str': [KAFKA_CONNECT_STR, '127.0.0.1:9093'], 'monitor_unlisted_consumer_groups': True},
             does_not_raise(),
+            '',
             4,
             id="Valid list kafka_connect_str",
         ),
         pytest.param(
             {'kafka_connect_str': KAFKA_CONNECT_STR, 'monitor_unlisted_consumer_groups': True},
             does_not_raise(),
+            '',
             4,
             id="Valid str kafka_connect_str",
         ),
-        pytest.param({'kafka_connect_str': 'invalid'}, pytest.raises(Exception), 0, id="Invalid str kafka_connect_str"),
+        pytest.param(
+            {'kafka_connect_str': 'invalid'},
+            pytest.raises(Exception),
+            'ConfigurationError: Cannot fetch consumer offsets because no consumer_groups are specified and '
+            'monitor_unlisted_consumer_groups is False',
+            0,
+            id="Invalid str kafka_connect_str",
+        ),
         pytest.param(
             {'kafka_connect_str': KAFKA_CONNECT_STR, 'consumer_groups': {}, 'monitor_unlisted_consumer_groups': True},
             does_not_raise(),
+            '',
             4,
             id="Empty consumer_groups and monitor_unlisted_consumer_groups true",
         ),
         pytest.param(
             {'kafka_connect_str': KAFKA_CONNECT_STR, 'consumer_groups': {'my_consumer': None}},
             does_not_raise(),
+            '',
             4,
             id="One consumer group, all topics and partitions",
         ),
         pytest.param(
             {'kafka_connect_str': KAFKA_CONNECT_STR, 'consumer_groups': {'my_consumer': {'marvel': None}}},
             does_not_raise(),
+            '',
             2,
             id="One consumer group, one topic, all partitions",
         ),
         pytest.param(
             {'kafka_connect_str': KAFKA_CONNECT_STR, 'consumer_groups': {'my_consumer': {'marvel': [1]}}},
             does_not_raise(),
+            '',
             1,
             id="One consumer group, one topic, one partition",
         ),
     ],
 )
-def test_config(check, instance, aggregator, expected_exception, metric_count):
+def test_config(dd_run_check, check, instance, aggregator, expected_exception, exception_msg, metric_count, caplog):
+    caplog.set_level(logging.DEBUG)
     with expected_exception:
-        check(instance).check(instance)
+        dd_run_check(check(instance, client=KafkaPythonClient))
 
     for m in metrics:
         aggregator.assert_metric(m, count=metric_count)
 
+    assert exception_msg in caplog.text
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())

@@ -12,6 +12,7 @@ from packaging.version import parse as parse_version
 
 from datadog_checks.dev import WaitFor, docker_run
 from datadog_checks.kafka_consumer import KafkaCheck
+from datadog_checks.kafka_consumer.client.confluent_kafka_client import ConfluentKafkaClient
 
 from .common import DOCKER_IMAGE_PATH, HOST_IP, KAFKA_CONNECT_STR, KAFKA_VERSION, TOPICS
 from .runners import KConsumer, Producer
@@ -61,7 +62,9 @@ def dd_environment(mock_local_kafka_hosts_dns):
 
 @pytest.fixture
 def check():
-    return lambda instance, init_config=None: KafkaCheck('kafka_consumer', init_config or {}, [instance])
+    return lambda instance, init_config=None, client=None: KafkaCheck(
+        'kafka_consumer', init_config or {}, [instance], client or ConfluentKafkaClient
+    )
 
 
 @pytest.fixture
