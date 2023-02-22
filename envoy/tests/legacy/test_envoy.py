@@ -22,12 +22,13 @@ def test_success(aggregator, check, dd_run_check):
     instance = INSTANCES['main']
     c = check(instance)
     dd_run_check(c)
+    metrics = METRICS - EXT_METRICS
 
     metrics_collected = 0
-    for metric in METRICS:
+    for metric in metrics:
         collected_metrics = aggregator.metrics(METRIC_PREFIX + metric)
         if collected_metrics:
-            expected_tags = [t for t in METRICS[metric]['tags'] if t]
+            expected_tags = [t for t in metrics[metric]['tags'] if t]
             for tag_set in expected_tags:
                 assert all(
                     all(any(tag in mt for mt in m.tags) for tag in tag_set) for m in collected_metrics if m.tags
