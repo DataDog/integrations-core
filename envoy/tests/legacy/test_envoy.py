@@ -22,13 +22,12 @@ def test_success(aggregator, check, dd_run_check):
     instance = INSTANCES['main']
     c = check(instance)
     dd_run_check(c)
-    metrics = METRICS - EXT_METRICS
 
     metrics_collected = 0
-    for metric in metrics:
+    for metric in METRICS:
         collected_metrics = aggregator.metrics(METRIC_PREFIX + metric)
-        if collected_metrics:
-            expected_tags = [t for t in metrics[metric]['tags'] if t]
+        if collected_metrics and collected_metrics[0].name not in EXT_METRICS:
+            expected_tags = [t for t in METRICS[metric]['tags'] if t]
             for tag_set in expected_tags:
                 assert all(
                     all(any(tag in mt for mt in m.tags) for tag in tag_set) for m in collected_metrics if m.tags
@@ -280,7 +279,6 @@ def test_stats_prefix_ext_auth(aggregator, fixture_path, mock_http_response, che
     tags = ['cluster_name:foo', 'envoy_cluster:foo']
     tags_prefix = tags + ['stat_prefix:bar']
     c = check(instance)
-
     mock_http_response(file_path=fixture_path('stat_prefix')).return_value
     dd_run_check(c)
 
