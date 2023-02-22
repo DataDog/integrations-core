@@ -11,7 +11,7 @@ from datadog_checks.base.utils.discovery import Discovery
 from datadog_checks.base.utils.time import get_timestamp
 from datadog_checks.cloudera.api.api import Api
 from datadog_checks.cloudera.common import CLUSTER_HEALTH, HOST_HEALTH
-from datadog_checks.cloudera.config import normalize_config_clusters_include
+from datadog_checks.cloudera.config import normalize_discover_config_include
 from datadog_checks.cloudera.entity_status import ENTITY_STATUS
 from datadog_checks.cloudera.metrics import NATIVE_METRICS, TIMESERIES_METRICS
 
@@ -20,11 +20,11 @@ class ApiV7(Api):
     def __init__(self, check, api_client):
         super(ApiV7, self).__init__(check, api_client)
         self._log.debug("clusters config: %s", self._check.config.clusters)
-        config_clusters_include = normalize_config_clusters_include(self._log, self._check.config.clusters)
+        config_clusters_include = normalize_discover_config_include(self._log, self._check.config.clusters)
         self._log.debug("config_clusters_include: %s", config_clusters_include)
         if config_clusters_include:
             self._clusters_discovery = Discovery(
-                self._api_client.read_clusters,
+                lambda: self._api_client.read_clusters(),
                 limit=self._check.config.clusters.limit,
                 include=config_clusters_include,
                 exclude=self._check.config.clusters.exclude,
@@ -33,6 +33,7 @@ class ApiV7(Api):
             )
         else:
             self._clusters_discovery = None
+        self._hosts_discovery = {}
 
     def collect_data(self):
         self._collect_clusters()
@@ -54,21 +55,23 @@ class ApiV7(Api):
             with ThreadPoolExecutor(max_workers=len(discovered_clusters) * 3) as executor, raising_submitter(
                 executor
             ) as submit:
-                for pattern, key, item, config in discovered_clusters:
+                for pattern, cluster_name, item, cluster_config in discovered_clusters:
                     self._log.debug(
-                        "Discovered cluster: [pattern:%s, cluster_name:%s, config:%s]", pattern, key, config
+                        "Discovered cluster: [pattern:%s, cluster_name:%s, config:%s]",
+                        pattern,
+                        cluster_name,
+                        cluster_config,
                     )
                     self._log.trace(
                         "Discovered cluster raw response: [pattern:%s, key:%s, item:%s, config:%s]",
                         pattern,
-                        key,
+                        cluster_name,
                         item,
-                        config,
+                        cluster_config,
                     )
-                    cluster_name = key
                     tags = self._collect_cluster_tags(item)
                     submit(self._collect_cluster_metrics, cluster_name, tags)
-                    submit(self._collect_hosts, cluster_name)
+                    submit(self._collect_hosts, cluster_name, cluster_config)
                     submit(self._collect_cluster_service_check, item, tags)
 
     def _collect_events(self):
@@ -105,9 +108,30 @@ class ApiV7(Api):
         query = f'SELECT {metric_names} WHERE clusterName="{cluster_name}" AND category=CLUSTER'
         self._query_time_series('cluster', cluster_name, query, tags)
 
-    def _collect_hosts(self, cluster_name):
-        discovered_hosts = [(None, host.get('name'), host, None) for host in self._api_client.list_hosts(cluster_name)]
-        self._log.trace("Cloudera full hosts raw response:\n%s", discovered_hosts)
+    def _collect_hosts(self, cluster_name, config):
+        self._log.debug("self._hosts_discovery: %s", self._hosts_discovery)
+        if cluster_name not in self._hosts_discovery:
+            self._log.debug("Collecting hosts from '%s' cluster with config: %s", cluster_name, config)
+            config_hosts_include = normalize_discover_config_include(self._log, config.get('hosts') if config else None)
+            self._log.trace("config_hosts_include: %s", config_hosts_include)
+            if config_hosts_include:
+                self._hosts_discovery[cluster_name] = Discovery(
+                    lambda: self._api_client.list_hosts(cluster_name),
+                    limit=config.get('hosts').get('limit') if config else None,
+                    include=config_hosts_include,
+                    exclude=config.get('hosts').get('exclude') if config else None,
+                    interval=config.get('hosts').get('interval') if config else None,
+                    key=lambda host: host.get('name'),
+                )
+            else:
+                self._hosts_discovery[cluster_name] = None
+        if self._hosts_discovery[cluster_name]:
+            discovered_hosts = list(self._hosts_discovery[cluster_name].get_items())
+        else:
+            discovered_hosts = [
+                (None, host.get('name'), host, None) for host in self._api_client.list_hosts(cluster_name)
+            ]
+        self._log.debug("Discovered hosts: %s", discovered_hosts)
         # Use len(discovered_hosts) * 4 workers since
         # for each host, we are executing 4 tasks in parallel.
         if len(discovered_hosts) > 0:

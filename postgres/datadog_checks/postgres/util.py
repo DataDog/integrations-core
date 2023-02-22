@@ -216,6 +216,30 @@ FROM pg_stat_replication
 """,
 }
 
+
+QUERY_PG_STAT_WAL_RECEIVER = {
+    'name': 'pg_stat_wal_receiver',
+    'query': """
+        WITH connected(c) AS (VALUES (1))
+        SELECT CASE WHEN status IS NULL THEN 'disconnected' ELSE status END AS connected,
+               c,
+               received_tli,
+               EXTRACT(EPOCH FROM (clock_timestamp() - last_msg_send_time)),
+               EXTRACT(EPOCH FROM (clock_timestamp() - last_msg_receipt_time)),
+               EXTRACT(EPOCH FROM (clock_timestamp() - latest_end_time))
+        FROM pg_stat_wal_receiver
+        RIGHT JOIN connected ON (true);
+    """.strip(),
+    'columns': [
+        {'name': 'status', 'type': 'tag'},
+        {'name': 'postgresql.wal_receiver.connected', 'type': 'gauge'},
+        {'name': 'postgresql.wal_receiver.received_timeline', 'type': 'gauge'},
+        {'name': 'postgresql.wal_receiver.last_msg_send_age', 'type': 'gauge'},
+        {'name': 'postgresql.wal_receiver.last_msg_receipt_age', 'type': 'gauge'},
+        {'name': 'postgresql.wal_receiver.latest_end_age', 'type': 'gauge'},
+    ],
+}
+
 CONNECTION_METRICS = {
     'descriptors': [],
     'metrics': {

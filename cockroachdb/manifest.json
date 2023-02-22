@@ -17,7 +17,6 @@
       "Supported OS::Windows",
       "Category::Cloud",
       "Category::Data Store",
-      "Category::Autodiscovery",
       "Category::Log Collection"
     ]
   },

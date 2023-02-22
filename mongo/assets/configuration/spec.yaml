@@ -15,7 +15,9 @@ files:
         socket. Specify as many hosts as appropriate for your deployment topology:
 
           - For a standalone, specify the hostname of the standalone mongod instance.
-          - For a replica set, specify the hostname of the mongod instance on that replica.
+          - For a replica set, specify the hostname of a mongod instance as listed in
+            the replica set configuration. You need one check instance per mongod instance
+            in order to collect replication metrics and events.
           - For a sharded cluster, you need one check instance for each mongod instance in
             each shard (including the configsvr shard) as well as one additional check instance
             that connects to one (or more) mongos node.
@@ -96,39 +98,6 @@ files:
       value:
         type: integer
         example: 30
-    - name: ssl
-      description: If `True`, create the connection to the server using SSL.
-      value:
-        type: boolean
-        example: false
-    - name: ssl_keyfile
-      description: Path to the private key file used to identify the local connection against Mongodb.
-      value:
-        type: string
-    - name: ssl_certfile
-      required: false
-      description: Path to the certificate file used to identify the local connection against Mongodb.
-      value:
-        type: string
-    - name: ssl_cert_reqs
-      description: |
-        Specifies whether a certificate is required from the other side of the connection, and whether it will be
-        validated if provided.
-        Possible values:
-          * 0 for ssl.CERT_NONE (certificates ignored)
-          * 1 for ssl.CERT_OPTIONAL (not required, but validated if provided)
-          * 2 for ssl.CERT_REQUIRED (required and validated)
-      value:
-        type: integer
-    - name: ssl_ca_certs
-      description: Path to the ca_certs file.
-      value:
-        type: string
-    - name: ssl_match_hostname
-      description: If `False`, disables SSL hostname verification.
-      value:
-        type: boolean
-        example: true
     - name: tls
       description: If `True`, create the connection to the server using transport layer security.
       value:

@@ -16,7 +16,6 @@
       "Supported OS::macOS",
       "Supported OS::Windows",
       "Category::Data Store",
-      "Category::Autodiscovery",
       "Category::Log Collection"
     ]
   },

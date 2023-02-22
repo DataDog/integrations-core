@@ -23,3 +23,8 @@ container.io.write,rate,,byte,,The number of bytes written to disks by this cont
 container.io.write.operations,rate,,,,The number of write operations done by this continer,0,container,io_write_ops,
 container.pid.thread_count,rate,,,,The number of threads running inside this container,0,container,thread_count,
 container.pid.thread_limit,rate,,,,The maximum number of threads for this container,0,container,thread_limit,
+container.pid.open_files,gauge,,,,The number of open file descriptors (Linux only),0,container,open_files,
+container.net.sent,rate,,byte,,The number of network bytes sent (per interface),0,container,net_sent,
+container.net.rcvd,rate,,byte,,The number of network bytes received (per interface),0,container,net_sent,
+container.net.sent.packets,rate,,,,The number of network packets sent (per interface),0,container,net_p_sent,
+container.net.rcvd.packets,rate,,,,The number of network packets received (per interface),0,container,net_p_rcvd,

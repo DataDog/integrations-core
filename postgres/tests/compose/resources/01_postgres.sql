@@ -3,6 +3,7 @@ CREATE USER datadog_no_catalog WITH PASSWORD 'datadog';
 CREATE USER bob WITH PASSWORD 'bob';
 CREATE USER blocking_bob WITH PASSWORD 'bob';
 CREATE USER dd_admin WITH PASSWORD 'dd_admin';
+CREATE USER replicator WITH REPLICATION;
 ALTER USER dd_admin WITH SUPERUSER;
 REVOKE SELECT ON ALL tables IN SCHEMA pg_catalog from public;
 GRANT SELECT ON pg_stat_database TO datadog;

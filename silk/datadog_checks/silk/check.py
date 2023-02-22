@@ -81,7 +81,6 @@ class SilkCheck(AgentCheck):
         except Exception as e:
             self.warning("Encountered error getting Silk system state: %s", str(e))
             self.service_check(self.CONNECT_SERVICE_CHECK, AgentCheck.CRITICAL, message=str(e), tags=self._tags)
-            self.service_check(self.STATE_SERVICE_CHECK, AgentCheck.UNKNOWN, message=str(e), tags=self._tags)
             raise
         else:
             if response_hits:
@@ -93,8 +92,9 @@ class SilkCheck(AgentCheck):
                     'system_name:{}'.format(data.get('system_name')),
                     'system_id:{}'.format(data.get('system_id')),
                 ]
+
                 self._submit_version_metadata(data.get('system_version'))
-                self.service_check(self.STATE_SERVICE_CHECK, STATE_MAP[state], tags=self._tags)
+                self.service_check(self.STATE_SERVICE_CHECK, STATE_MAP[state], tags=system_tags[0:] + self._tags[0:])
             else:
                 msg = (
                     "Could not access system state and version info, got response code `{}` from endpoint `{}`".format(
@@ -172,6 +172,7 @@ class SilkCheck(AgentCheck):
                 metric_part = None
                 raw_metric_name, method = metric
 
+                # read/write metrics have field_to_name
                 if metrics_mapping.field_to_name:
                     for field, name_map in metrics_mapping.field_to_name.items():
                         metric_part = name_map.get(item.get(field))
@@ -193,7 +194,7 @@ class SilkCheck(AgentCheck):
             code = response.status_code
             if response_json:
                 if 'error_msg' in response_json:
-                    msg = "Received error message: %s", response_json.get('error_msg')
+                    msg = "Received error message: " + response_json.get('error_msg')
                     self.log.warning(msg)
                     self.service_check(self.CONNECT_SERVICE_CHECK, AgentCheck.WARNING, message=msg, tags=self._tags)
                     return None, code

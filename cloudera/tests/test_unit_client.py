@@ -99,7 +99,6 @@ pytestmark = [pytest.mark.unit]
         'cloudera_client cm_client',
         'cloudera_client cm_client with custom tags',
     ],
-    indirect=[],
 )
 def test_client(
     aggregator,

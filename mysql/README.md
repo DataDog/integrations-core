@@ -4,26 +4,25 @@
 
 ## Overview
 
-The Datadog Agent can collect many metrics from MySQL databases, including (but not limited to):
+The MySQL integration tracks the performance of your MySQL instances. It collects metrics related to throughput, connections, errors, and InnoDB metrics.
 
-- Query throughput
-- Query performance, such as average query runtime, or slow queries
-- Connections, such as currently open connections, aborted connections, or errors
-- InnoDB, such as buffer pool metrics
-
-You can also create your own metrics using custom SQL queries.
+Enable [Database Monitoring][32] (DBM) for enhanced insights into query performance and database health. In addition to the standard integration, Datadog DBM provides query-level metrics, live and historical query snapshots, wait event analysis, database load, and query explain plans.
 
 **Note:** This integration is also compatible with [MariaDB][2], as it serves as a ["drop-in replacement"][3] for MySQL.
 
 ## Setup
 
-<div class="alert alert-info">This page describes the MySQL Agent integration. If you are looking for the Database Monitoring product for MySQL, see <a href="https://docs.datadoghq.com/database_monitoring" target="_blank">Datadog Database Monitoring</a>.</div>
+<div class="alert alert-info">This page describes the MySQL Agent standard integration. If you are looking for the Database Monitoring product for MySQL, see <a href="https://docs.datadoghq.com/database_monitoring" target="_blank">Datadog Database Monitoring</a>.</div>
 
 ### Installation
 
 The MySQL check is included in the [Datadog Agent][4] package. No additional installation is needed on your MySQL server.
 
 #### Prepare MySQL
+
+**Note**: To install Database Monitoring for MySQL, select your hosting solution in the [Database Monitoring documentation][33] for instructions.
+
+Proceed with the following steps in this guide only if you are installing the standard integration alone.
 
 On each MySQL server, create a database user for the Datadog Agent.
 
@@ -310,7 +309,6 @@ metadata:
     ad.datadoghq.com/mysql.checks: |
       {
         "mysql": {
-          "init_config": {},
           "instances": [
             {
               "server": "%%host%%", 
@@ -608,3 +606,5 @@ Additional helpful documentation, links, and articles:
 [29]: https://docs.datadoghq.com/integrations/faq/database-user-lacks-privileges/
 [30]: https://docs.datadoghq.com/integrations/guide/collect-sql-server-custom-metrics/#collecting-metrics-from-a-custom-procedure
 [31]: https://www.datadoghq.com/blog/monitoring-mysql-performance-metrics
+[32]: https://docs.datadoghq.com/database_monitoring/
+[33]: https://docs.datadoghq.com/database_monitoring/#mysql
