@@ -320,6 +320,7 @@ class VSphereCheck(AgentCheck):
                 if result.id.instance:
                     have_instance_value[resource_type].add(metadata[result.id.counterId])
 
+        self.log.warning("Iterating through %s query results", len(query_results))
         for results_per_mor in query_results:
             mor_props = self.infrastructure_cache.get_mor_props(results_per_mor.entity)
             if mor_props is None:
@@ -714,4 +715,4 @@ class VSphereCheck(AgentCheck):
         # Creating a thread pool and starting metric collection
         self.log.warning("Starting metric collection in %d threads.", self._config.threads_count)
         self.collect_metrics_async()
-        self.log.debug("Metric collection completed.")
+        self.log.warning("Metric collection completed.")
