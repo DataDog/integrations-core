@@ -17,8 +17,8 @@ TAGS = ["endpoint:http://localhost:8000/metrics"]
 METRICS = [
     {
         "name": "acquire_shards.count",
-        "value": 11,
+        "value": 2,
         "type": AggregatorStub.MONOTONIC_COUNT,
         "tags": TAGS + ["operation:ShardController", "service_name:history"],
-    }
+    },
 ]

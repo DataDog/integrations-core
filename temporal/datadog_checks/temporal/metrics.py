@@ -2,7 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-
+# E501: line too long (XXX > 120 characters)
+# flake8: noqa: E501
 # Source for metric names: https://github.com/temporalio/temporal/blob/master/common/metrics/metric_defs.go
 METRIC_MAP = {
     # General
@@ -56,7 +57,6 @@ METRIC_MAP = {
     'wf_too_many_pending_activities': 'wf.too_many_pending.activities',
     'wf_too_many_pending_cancel_requests': 'wf.too_many_pending.cancel_requests',
     'wf_too_many_pending_external_workflow_signals': 'wf.too_many_pending.external_workflow_signals',
-
     # Frontend
     'add_search_attributes_workflow_success': 'add_search_attributes.workflow_success',
     'add_search_attributes_workflow_failure': 'add_search_attributes.workflow_failure',
@@ -66,7 +66,6 @@ METRIC_MAP = {
     'version_check_failed': 'version_check.failed',
     'version_check_request_failed': 'version_check.request_failed',
     'version_check_latency': 'version_check.latency',
-
     # History
     'cache_requests': 'cache.requests',
     'cache_errors': 'cache.errors',
@@ -263,7 +262,6 @@ METRIC_MAP = {
     'namespace_registry_lock_latency': 'namespace_registry.lock_latency',
     'closed_workflow_buffer_event_counter': 'closed_workflow_buffer_event_counter',
     'inordered_buffered_events': 'inordered_buffered_events',
-
     # Matching
     'forwarded': 'forwarded',
     'invalid_task_queue_name': 'invalid_task_queue_name',
@@ -300,7 +298,6 @@ METRIC_MAP = {
     'task_write_latency': 'task_write.latency',
     'task_lag_per_tl': 'task_lag_per_tl',
     'no_poller_tasks': 'no_poller_tasks',
-
     # Worker
     'executor_done': 'executor.done',
     'executor_err': 'executor.err',
@@ -408,12 +405,10 @@ METRIC_MAP = {
     'schedule_action_errors': 'schedule.action_errors',
     'schedule_cancel_workflow_errors': 'schedule.cancel_workflow.errors',
     'schedule_terminate_workflow_errors': 'schedule.terminate_workflow.errors',
-
     # Replication
     'namespace_replication_task_ack_level': 'namespace_replication.task_ack_level',
     'namespace_dlq_ack_level': 'namespace_dlq.ack_level',
     'namespace_dlq_max_level': 'namespace_dlq.max_level',
-
     # Persistence
     'persistence_requests': 'persistence.requests',
     'persistence_errors': 'persistence.errors',

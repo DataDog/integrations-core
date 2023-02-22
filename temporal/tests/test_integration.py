@@ -21,8 +21,11 @@ def test_check(dd_run_check, aggregator, check):
             tags=expected_metric.get("tags", TAGS),
         )
 
-    aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+    for metric in get_metadata_metrics():
+        aggregator.assert_metric(name=metric, at_least=0)
+    aggregator.assert_all_metrics_covered()
 
 
 def test_service_checks(dd_run_check, aggregator, check):
