@@ -505,6 +505,11 @@ def test_e2e_profile_cisco_asr_1001x(dd_agent_check):
     assert_python_vs_core(dd_agent_check, config)
 
 
+def test_e2e_profile_cisco_asr_9001(dd_agent_check):
+    config = common.generate_container_profile_config('cisco-asr-9001')
+    assert_python_vs_core(dd_agent_check, config)
+
+
 def test_e2e_discovery(dd_agent_check):
     config = common.generate_container_profile_config_with_ad('apc_ups')
     # skip telemetry metrics since they are implemented different for python and corecheck
