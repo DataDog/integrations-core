@@ -25,8 +25,9 @@ def test_check(dd_run_check, aggregator, check, mock_metrics):
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
     for metric in get_metadata_metrics():
-        aggregator.assert_metric(name=metric, at_least=0)
+        aggregator.assert_metric(name=metric, tags=TAGS, at_least=0)
 
+    assert len(aggregator.metric_names) > 100
     aggregator.assert_all_metrics_covered()
     aggregator.assert_no_duplicate_all()
 

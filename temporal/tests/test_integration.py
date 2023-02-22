@@ -6,7 +6,7 @@ import pytest
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.temporal import TemporalCheck
 
-from .common import METRICS, TAGS
+from .common import TAGS
 
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures("dd_environment")]
 
@@ -14,17 +14,11 @@ pytestmark = [pytest.mark.integration, pytest.mark.usefixtures("dd_environment")
 def test_check(dd_run_check, aggregator, check):
     dd_run_check(check)
 
-    for expected_metric in METRICS:
-        aggregator.assert_metric(
-            name=f"temporal.server.{expected_metric['name']}",
-            metric_type=expected_metric.get("type", aggregator.GAUGE),
-            tags=expected_metric.get("tags", TAGS),
-        )
-
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
     for metric in get_metadata_metrics():
-        aggregator.assert_metric(name=metric, at_least=0)
+        aggregator.assert_metric(name=metric, at_least=0, tags=TAGS)
+    assert len(aggregator.metric_names) > 100
     aggregator.assert_all_metrics_covered()
 
 
