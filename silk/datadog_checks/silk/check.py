@@ -205,7 +205,6 @@ class SilkCheck(AgentCheck):
 
     def collect_events(self, system_tags):
         self.log.debug("Starting events collection (query start time: %s).", self.latest_event_query)
-        last_event_time = None
         collect_events_start_time = get_timestamp()
         try:
             # Use latest event query as starting time
@@ -221,20 +220,10 @@ class SilkCheck(AgentCheck):
                 except ValueError as e:
                     self.log.warning(str(e))
 
-                # If this is the first valid event or this event timestamp is newer, update last event time checked
-                if (last_event_time is None and event_payload is not None) or event_payload.get(
-                    "timestamp"
-                ) > last_event_time:
-                    last_event_time = event_payload.get("timestamp")
-
         except Exception as e:
             # Don't get stuck on a failure to fetch an event
             # Ignore them for next pass
             self.log.warning("Unable to fetch events: %s", str(e))
 
         # Update latest event query to last event time
-        if last_event_time is not None:
-            self.latest_event_query = int(last_event_time)
-        else:
-            # In case no events were collected
-            self.latest_event_query = int(collect_events_start_time)
+        self.latest_event_query = int(collect_events_start_time)

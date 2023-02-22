@@ -2,3 +2,8 @@
 
 [[envs.default.matrix]]
 python = ["2.7", "3.8"]
+
+[envs.default]
+dependencies = [
+  "freezegun==1.2.2",
+]
