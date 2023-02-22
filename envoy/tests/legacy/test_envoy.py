@@ -276,16 +276,20 @@ def test_metadata_integration(datadog_agent, check):
 @pytest.mark.unit
 def test_stats_prefix_ext_auth(aggregator, fixture_path, mock_http_response, check, dd_run_check):
     instance = INSTANCES['main']
+    tags = ['cluster_name:foo', 'envoy_cluster:foo']
+    tags_prefix = tags + ['stat_prefix:bar']
     c = check(instance)
 
     mock_http_response(file_path=fixture_path('stat_prefix')).return_value
     dd_run_check(c)
+
+    # To ensure that this change didn't break the old behavior, both the value and the tags are asserted.
+    # The fixture is created with a specific value and the EXT_METRICS list is done in alphabetical order
+    # allowing for value to also be asserted
     for metric in EXT_METRICS:
         aggregator.assert_metric(
             metric,
             value=EXT_METRICS.index(metric) + 5,
-            tags=['cluster_name:foo', 'envoy_cluster:foo', 'stat_prefix:bar'],
+            tags=tags_prefix,
         )
-        aggregator.assert_metric(
-            metric, value=EXT_METRICS.index(metric), tags=['cluster_name:foo', 'envoy_cluster:foo']
-        )
+        aggregator.assert_metric(metric, value=EXT_METRICS.index(metric), tags=tags)
