@@ -7,9 +7,6 @@ class ConfluentKafkaClient:
     def __init__(self, config, tls_context, log) -> None:
         self.config = config
         self.log = log
-        self._kafka_client = None
-        self._highwater_offsets = {}
-        self._consumer_offsets = {}
         self._tls_context = tls_context
 
     def get_consumer_offsets(self):
